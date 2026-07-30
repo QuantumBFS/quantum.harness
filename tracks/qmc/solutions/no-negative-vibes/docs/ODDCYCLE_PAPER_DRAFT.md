@@ -1,5 +1,12 @@
 # Sign-free fermion determinants from coherently oriented Lorentz path metrics
 
+> **Document status (2026-07-30):** research-paper draft accompanying the
+> ready-for-review challenge submission. The exact claims and replay are
+> submission-ready; bibliography normalization and collaborator editing remain
+> before a separate external arXiv/journal submission. See the
+> [complete challenge report](../CHALLENGE_REPORT.md) for all team results,
+> including routes outside this paper's oddcycle scope.
+
 ## Abstract
 
 We derive a determinant-QMC criterion from path-complete
@@ -686,7 +693,7 @@ The exact Nambu reduction and replay are given in
 collaborator review, clean-commit archival replay, reference completion,
 and conversion of this draft to a submission-ready manuscript.
 
-## References to complete before submission
+## References to complete before external paper submission
 
 1. Wang et al., split-orthogonal-group sign-problem-free QMC.
 2. Wei, *Semigroup approach to the sign problem in quantum Monte Carlo

@@ -236,6 +236,11 @@ were merged with their history intact before this report was finalized.
 
 ## Detailed ledgers
 
+This report is the authoritative submission-level summary. The supporting
+ledgers below retain chronological detail and negative research history; files
+that originated as earlier snapshots now carry a submission-status banner
+pointing back here.
+
 - [Exhaustive project master summary (Chinese)](docs/PROJECT_MASTER_SUMMARY.zh-CN.md)
 - [Compact results ledger](docs/RESULTS_LEDGER.md)
 - [Organizer-direction audit](docs/ORGANIZER_DIRECTION_AUDIT.md)

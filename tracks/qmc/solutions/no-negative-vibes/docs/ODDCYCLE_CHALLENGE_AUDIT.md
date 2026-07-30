@@ -6,7 +6,12 @@ hunter”](https://github.com/QuantumBFS/quantum.harness/issues/121).
 ## Executive verdict
 
 **Exact mathematical and fixed-\(J_1,J_2\) Majorana/Wei certificates:
-complete.  Public submission: in progress.**
+complete. Public submission: PR #178 is ready for review.**
+
+The cross-branch submission report and reproduction entry point are
+[CHALLENGE_REPORT.md](../CHALLENGE_REPORT.md) and
+[REPRODUCE.md](../REPRODUCE.md). This document remains the focused audit of
+the oddcycle publication claim rather than the complete team ledger.
 
 The final four-letter oddcycle candidate now has:
 

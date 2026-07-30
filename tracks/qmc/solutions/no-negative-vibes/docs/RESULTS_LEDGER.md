@@ -1,8 +1,15 @@
 # 无符号 QMC 项目成果总账
 
+> **正式提交更新（2026-07-30）：**最终跨分支口径见
+> [完整挑战报告](../CHALLENGE_REPORT.md)。本账本中的严格正/负结论仍有效；
+> 后续 shared 提交把 local orthogonal-contraction plaquette 升级为
+> `active-qnc-candidate`，但尚缺一般复杂性定理和热力学相图，所以它是活跃候选，
+> 不是已经确认的新无符号物理类。
+
 更新时间：2026-07-29
 用途：这是项目结论和计数口径的简明账本，不再承担全部构造细节。
-完整自包含叙述见[项目完整总结](PROJECT_MASTER_SUMMARY.zh-CN.md)。
+正式提交级叙述见[完整挑战报告](../CHALLENGE_REPORT.md)；更细的历史叙述见
+[项目完整总结](PROJECT_MASTER_SUMMARY.zh-CN.md)。
 
 ## 当前总分
 
@@ -14,7 +21,8 @@
 | 后期非常规模型试制品 | 8 | 与早期模型有重叠，不能相加成 13 个独立模型 |
 | 协作者相互作用 transfer | 1 | ZiboJin 的五模 symmetric-oddcycle transfer；正性属于已知 Wei 不定度量收缩半群 |
 | 已确认的新无符号物理类 | 0 | 所有成功物理映射均已知或可约化 |
-| 当前开放的研究程序 | 6 | typed exterior；Pfaffian/Spin；tensor-square 相图；oddcycle finite-depth seeds；non-Klein Fock–CP；Majorana 工具 |
+| 活跃 QNC 模型候选 | 1 | local orthogonal-contraction plaquettes；正性为 doubled-Majorana square，但完整扇区代数和非 Gaussian 低能态已排除最直接的传统模拟路线 |
+| 当前开放的研究程序 | 7 | orthogonal-contraction 相图/复杂性；typed exterior；Pfaffian/Spin；tensor-square 相图；oddcycle finite-depth seeds；non-Klein Fock–CP；Majorana 工具 |
 
 “按文档名字”会看到 TN、odd monomial、block-TN、graded monomial、tensor-square 和
 symmetric-oddcycle 六项；但 odd monomial 与 block-TN 是同一个循环机制的标量版和

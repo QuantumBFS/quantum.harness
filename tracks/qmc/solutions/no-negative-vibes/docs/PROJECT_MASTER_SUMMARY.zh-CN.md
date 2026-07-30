@@ -1,15 +1,24 @@
 # 无符号 QMC 挑战项目完整总结
 
+> **正式提交状态（2026-07-30）：**本文是从籼至研究分支形成的详细历史快照，
+> 保留候选演化、失败路线和当时计数。跨分支合并后的权威结论请以
+> [完整挑战报告](../CHALLENGE_REPORT.md) 为准。其后 shared 分支新增的局域
+> orthogonal-contraction 结果已升级为 `active-qnc-candidate`：具有完整
+> `so(6)`/扇区代数、Hodge 手征、4/6/8 模 ED 和非 Gaussian 低能态证据；
+> 复杂性定理和热力学相图仍开放，因此“已确认的新无符号物理类”为零的严格计数
+> 尚未改变。最新聚焦回归为 `114 passed, 1 skipped, 2 xfailed`。
+
 - 更新时间：2026-07-29
 - 本次汇总起点（籼至）：`34f4da1`
 - ZiboJin exterior 方向结果基线：`838f428`
 - ZiboJin tensor-square phase 方向结果基线：`efb2e18`
-- 当前分支：`work/xianzhi/bottom-up-positive-cones`
+- 历史来源分支：`work/xianzhi/bottom-up-positive-cones`；正式集成分支见
+  [完整挑战报告](../CHALLENGE_REPORT.md)
 
 ## 这份文档解决什么问题
 
-这是项目目前唯一一份**自包含总报告**。读完本文，不需要再打开其他专题文档，也应该能
-回答：
+这是籼至分支形成时的**自包含历史总报告**。它仍可独立回答当时的研究覆盖与候选演化；
+正式提交后的跨分支权威更新由顶部链接的完整挑战报告承担。本文主要回答：
 
 1. 我们到底在寻找什么；
 2. 尝试过哪些矩阵结构；
@@ -37,7 +46,7 @@ w = det(I + B_L ... B_1)
 - 另检查了 640 条 Majorana 历史，每条分别计算 even、odd 和完整 Fock 迹；
 - 建立了 59 个 determinant 结构生成器和 19 组机器可读精确证书；
 - 保存了精确符号反例、80 位高精度重放和一般解析证明；
-- 当前总集成分支完整自动回归为 `370 passed`；
+- 该历史集成分支在当时的完整自动回归为 `370 passed`；
 - ZiboJin 的独立 exterior-cone 分支除一个旧的尚未实现 R01 classifier 测试模块外，
   其余 `499 passed, 2 skipped`；explicit common metric 和 joint words 又被独立重放；
 - ZiboJin 的 tensor-square phase 分支完整回归为 `13 passed`；
@@ -733,7 +742,10 @@ positive character、物理受限锥交集等想法。它们没有全部进入�
 - `protocols/`：扫描参数、种子和可恢复运行协议；
 - `tracks/qmc/results/no-negative-vibes/`：不提交 Git 的大体积逐格结果。
 
-### 当前质量状态
+### 历史质量状态
+
+下列数字保留各分支形成本文时的验证记录。正式跨分支提交的最新聚焦回归为
+`114 passed, 1 skipped, 2 xfailed`，tensor-square phase 独立回归为 `73 passed`。
 
 ```text
 python -m pytest -q
