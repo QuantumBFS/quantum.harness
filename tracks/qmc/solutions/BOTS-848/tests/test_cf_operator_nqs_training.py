@@ -5,6 +5,11 @@ from collections.abc import Callable
 import numpy as np
 
 from scalable_v1.routes.cf_operator_nqs.model import CFOperatorNQS
+from scalable_v1.routes.cf_operator_nqs.sampler import SU2TangentMetropolis
+from scalable_v1.routes.cf_operator_nqs.train import (
+    coulomb_local_energy,
+    real_energy_gradient,
+)
 
 
 def _configs(seed: int = 848, *, batch: int = 3) -> np.ndarray:
@@ -94,3 +99,86 @@ def test_model_flat_parameters_are_copy_safe() -> None:
     mutated = model.flat_parameters()
     mutated[:] = 123.0
     np.testing.assert_array_equal(model.flat_parameters(), expected)
+
+
+class _ConstantAmplitudeModel:
+    n_electrons = 2
+
+    def amplitudes(self, configs: object) -> np.ndarray:
+        batch = np.asarray(configs).shape[0]
+        return np.ones((batch, 6), dtype=np.complex128)
+
+
+def test_sampler_is_deterministic_normalized_and_uses_eight_chains() -> None:
+    first = SU2TangentMetropolis(
+        model=_ConstantAmplitudeModel(),
+        sector_index=3,
+        seed=848,
+        chains=8,
+        burn_in_sweeps=4,
+        proposal_scale=0.2,
+    )
+    second = SU2TangentMetropolis(
+        model=_ConstantAmplitudeModel(),
+        sector_index=3,
+        seed=848,
+        chains=8,
+        burn_in_sweeps=4,
+        proposal_scale=0.2,
+    )
+
+    first_batch = first.sample(batch_size=16)
+    second_batch = second.sample(batch_size=16)
+
+    assert first.chains == 8
+    assert first_batch.configurations.shape == (16, 2, 2)
+    np.testing.assert_allclose(
+        np.linalg.norm(first_batch.configurations, axis=-1), 1.0, atol=1e-14
+    )
+    np.testing.assert_array_equal(
+        first_batch.configurations, second_batch.configurations
+    )
+    assert first_batch.proposals == second_batch.proposals == 48
+    assert first_batch.accepted == second_batch.accepted == 48
+
+
+def test_sampler_production_defaults_bind_frozen_burn_in() -> None:
+    sampler = SU2TangentMetropolis(
+        model=_ConstantAmplitudeModel(), sector_index=0, seed=1848
+    )
+
+    assert sampler.chains == 8
+    assert sampler.burn_in_sweeps == 1024
+
+
+def test_coulomb_uses_frozen_sphere_chord_interaction() -> None:
+    configs = np.asarray(
+        [[[[1.0 + 0.0j, 0.0j], [0.0j, 1.0 + 0.0j]]]],
+        dtype=np.complex128,
+    ).reshape(1, 2, 2)
+
+    energy = coulomb_local_energy(configs, two_q=3)
+
+    np.testing.assert_allclose(energy, [1.0 / (2.0 * np.sqrt(1.5))])
+
+
+def test_real_energy_gradient_matches_complex_covariance_fixture() -> None:
+    scores = np.asarray(
+        [
+            [1.0 + 2.0j, -0.5 + 0.25j],
+            [0.2 - 0.3j, 1.5 + 0.75j],
+            [-0.7 + 0.4j, 0.1 - 1.25j],
+        ]
+    )
+    local_energies = np.asarray([0.5, 1.75, -0.25])
+    expected = 2.0 * np.real(
+        np.mean(
+            np.conjugate(scores - np.mean(scores, axis=0))
+            * (local_energies - np.mean(local_energies))[:, None],
+            axis=0,
+        )
+    )
+
+    np.testing.assert_allclose(
+        real_energy_gradient(scores, local_energies), expected
+    )
