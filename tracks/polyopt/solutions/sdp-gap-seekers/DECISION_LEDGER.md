@@ -1518,3 +1518,17 @@ this signature or raise memory. Next changed action: prove or disprove exact
 post-SO(3)-projection congruence among the four equal-dimensional `l=2` cones
 for each family/parity. Matching dimensions alone is insufficient; every
 coefficient must be mapped exactly before any cone is removed.
+
+Commit `81a1875` implements that next gate without deleting cones. A
+spin-blind signature retains sites, state-symbol grouping, operator support,
+spatial parity, and primitive integer spatial-row coefficients while erasing
+only spin-axis labels. Every nontrivial stabilizer-plus row must map
+bijectively to one S3-standard multiplicity row. The coefficient pass then
+applies the exact SO(3) rank-four projection and counts entrywise equal,
+sign-opposite, and unmatched polynomials separately. Only all-equal is
+accepted; truth-only mode returns before MOSEK construction. The L=2 workload
+is 12 target blocks / 940,050 triangle entries and would reduce the packed
+inventory to 1,600,017 only if it passes. SCNet L=1 control job `118194879`
+was submitted from immutable commit `81a1875` on 8 CPUs / 16000 MiB / 30
+minutes after Slurm test-only accepted it. It is a code/identity control, not
+physics evidence and not authorization for the L=2 deletion.

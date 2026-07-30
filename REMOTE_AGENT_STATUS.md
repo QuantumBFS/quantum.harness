@@ -1,6 +1,6 @@
 # Quantum Harness Issue #88 — remote research agent status
 
-Updated: 2026-07-30T00:13:08Z
+Updated: 2026-07-30T00:32:10Z
 
 - Objective: obtain a new reproducible numerical certificate for an
   unrestricted frustrated spin-1/2 model, prioritizing the Shastry--Sutherland
@@ -310,5 +310,10 @@ Updated: 2026-07-30T00:13:08Z
   congruence audit of the equal-dimensional SO(3) `l=2` cones; a cone may be
   removed only if the post-projection coefficient maps are proved identical
   under an exact row-basis congruence.
+- Commit `81a1875` implements the fail-closed 12-block SO(3) `l=2` row map and
+  exact coefficient diagnostic. L=1 truth-only control job `118194879` was
+  submitted from that immutable commit on 8 CPUs / 16000 MiB / 30 minutes.
+  It cannot invoke an optimizer or remove cones. Keep the checkout unchanged;
+  correct any mapping failure before launching the separate L=2 truth gate.
 
 No user input or new credential is currently required.

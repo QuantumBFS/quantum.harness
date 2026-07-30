@@ -880,3 +880,11 @@ Updated: 2026-07-29 UTC.
   coefficient-level congruence test between the equal-dimensional continuous-
   spin `l=2` cones after the SO(3) rank-four projection; only a proved
   congruence may authorize removal of duplicate PSD constraints.
+- Commit `81a1875` adds the fail-closed SO(3) `l=2` congruence route. It first
+  requires 12 bijective spin-blind multiplicity maps, then compares 940,050
+  mapped L=2 triangle entries exactly after the rank-four projection. Equal,
+  opposite-sign, and unmatched entries are recorded separately; truth-only
+  mode has no optimizer and cone deduplication remains disabled. L=1 control
+  job `118194879` was submitted on SCNet from this immutable commit using 8
+  CPUs / 16000 MiB / 30 minutes. Preserve the checkout until it closes; use
+  its result to correct the mapping or authorize the separate L=2 truth job.
