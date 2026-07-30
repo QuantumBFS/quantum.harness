@@ -1,5 +1,10 @@
 # Oddcycle local-H first-batch portfolio
 
+> **Submission status:** this is the final first-batch result and claim
+> boundary. Later nonterminal portfolio checkpoints are disclosed in the
+> [complete challenge report](../CHALLENGE_REPORT.md) but are not used as
+> theorem evidence.
+
 Date: 2026-07-30
 
 Source commit:

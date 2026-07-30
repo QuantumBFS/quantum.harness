@@ -5,12 +5,15 @@
 > excluded from the submission Git tree. Paths beginning with `results/`
 > refer to that archived result root.
 
-更新日期：2026-07-29  
-状态：`STAGE 3 COMPLETE — FIRST ROUGH MAP AND SURVIVORS READY`
+更新日期：2026-07-30
+
+状态：`STAGE 4 COMPLETE — STATISTICAL EARLY STOP; NO STAGE 5 PHASE CLAIM`
 
 ## 当前目标
 
-冻结 tensor-square 模型约定与恒正 oracle，完成 `m=3,4` ED 侦察和 DQMC 小尺寸交叉验证，然后启动双机粗相图扫描。
+模型约定、恒正 oracle、`m=3,4` ED、DQMC/ED 交叉验证、双机粗图和
+Stage 4 统计审计均已冻结。当前不释放 Stage 5 相声明；只有新的预注册采样器或
+显著更高 ESS 的独立验证才能重新开启热力学扩展。
 
 ## 阶段
 
