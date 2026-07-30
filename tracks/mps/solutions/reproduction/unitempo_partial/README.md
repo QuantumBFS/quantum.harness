@@ -14,6 +14,26 @@ The scripts regenerate the deposited-data comparisons for Figures 2, 3, and 4, a
 | Fig. 4 lower map | RMSE 1.75e-3; Pearson r = 0.999954 |
 | L=3 heat-current pilot | mean current = 0.0858600; mean dE/dt = -2.08e-17 |
 
+The deposited-curve comparisons reproduce the sampled dynamics, spectra, concurrence traces, and lower-panel heat-current map closely. The boundary-bath pilot also closes the period-averaged energy balance: the injected drive power equals the heat current into the bath within the finite-difference derivative error. This is a partial reproduction: the fixed-point shortcut remains unresolved and is not used for the reported agreement.
+
+## Figures
+
+### Deposited-data comparisons
+
+![Figure 2 comparison](validation/20260730-fig2-fig4/fig2_author_comparison.png)
+
+![Figure 3 comparison](validation/20260730-fig2-fig4/fig3_author_comparison.png)
+
+![Figure 4 top comparison](validation/20260730-fig2-fig4/fig4_top_author_comparison.png)
+
+![Figure 4 lower comparison](validation/20260730-fig2-fig4/fig4_lower_author_comparison.png)
+
+### Boundary-bath Ising-chain pilot
+
+![Heat current over one Floquet period](validation/20260730-boundary-ising-floquet-heat-L3/heat_current_cycle.png)
+
+![Post-warm-up periodicity check](validation/20260730-boundary-ising-floquet-heat-L3/periodicity_benchmark.png)
+
 ## Run
 
 Install `UniformTEMPO`, `OrdinaryDiffEq`, and `Plots` in a Julia project, then run scripts from the repository root. For example:
@@ -28,6 +48,6 @@ julia --project=.external/fig2-unitempo-env \
 
 ## Contents
 
-- `scripts/`: independently runnable Figure 2–4 and boundary-current calculations.
-- `validation/20260730-fig2-fig4/`: deposited-curve comparison metrics.
-- `validation/20260730-boundary-ising-floquet-heat-L3/`: energy-balance and periodicity summaries.
+- `scripts/`: independently runnable Figure 2-4 and boundary-current calculations.
+- `validation/20260730-fig2-fig4/`: deposited-curve comparison metrics and figures.
+- `validation/20260730-boundary-ising-floquet-heat-L3/`: energy-balance, periodicity, and plot evidence.
