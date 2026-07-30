@@ -35,7 +35,7 @@
 我们用自主开发的 **OmniEvolve 进化框架**（LLM 驱动代码变异 + 沙箱评估 + MCTS 搜索）
 尝试求解五道 benchmark 清晰的科研问题，验证了 #133 求解器组件的能力边界。
 
-**最成功的成果**：#232 非对易多项式优化——获得 **25 个精确闭合常数**（AI+人类协同模式）。
+**最成功的成果**：#232 非对易多项式优化——获得 **31 个精确闭合常数**（含 6 个 Table 4 开放问题，论文未解决）。
 
 ---
 
@@ -43,7 +43,7 @@
 
 | Issue | 赛题 | 赛道 | 结果 | 一句话 |
 |-------|------|------|------|--------|
-| [#232](https://github.com/QuantumBFS/quantum.harness/issues/232) | 非对易多项式优化 | polyopt | ✅ **25 精确闭合 + 45 数值闭合** | 最成功：AI 搜索 + 人工精确化 |
+| [#232](https://github.com/QuantumBFS/quantum.harness/issues/232) | 非对易多项式优化 | polyopt | ✅ **31 精确闭合**（25 + 6 Table 4） | 最成功：AI 搜索 + 人工精确化 |
 | [#71](https://github.com/QuantumBFS/quantum.harness/issues/71) | Occam's Circuit | qcs | score=0.9960 | 接近满分，score 悬崖效应 |
 | [#117](https://github.com/QuantumBFS/quantum.harness/issues/117) | Lennard-Jones 团簇 | globalopt | E=−173.13 | 困在同一能量盆地 |
 | [#34](https://github.com/QuantumBFS/quantum.harness/issues/34) | N-Queens 计数 | peps | max_n=14 | N=16 壁垒，42 候选无突破 |
