@@ -27,7 +27,7 @@ VENV_BIN       := $(if $(filter Windows_NT,$(OS)),Scripts,bin)
 VENV_PY        := .venv/$(VENV_BIN)/python$(if $(filter Windows_NT,$(OS)),.exe,)
 VENV_TENPY_PY  := .venv-tenpy/$(VENV_BIN)/python$(if $(filter Windows_NT,$(OS)),.exe,)
 
-.PHONY: skills clean help install test site serve $(addprefix install-,$(INSTALLABLE))
+.PHONY: skills clean help install test site serve julia-daemon $(addprefix install-,$(INSTALLABLE))
 .PHONY: zulip-whoami zulip-pull zulip-send zulip-topics zulip-messages zulip-config
 
 help: ## Show available targets and installable tools
@@ -52,6 +52,9 @@ skills: ## Install or sync Ion-managed skills
 	  export PATH="$$HOME/.local/bin:$$PATH"; \
 	fi; \
 	ion add
+
+julia-daemon: ## Install opt-in persistent Julia runner (SHIM=1); may retain memory/state
+	@scripts/julia-daemon.sh $(if $(SHIM),install-shim,install)
 
 # Stable KEY=VALUE contract for the zlp-harness plugin's zlp-onboard skill.
 # Adding new keys is additive; older skill versions ignore unknown lines.

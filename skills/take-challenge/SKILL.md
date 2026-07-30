@@ -85,9 +85,10 @@ unnecessary.
 3. **Ambiguous or spanning** (`MPS / QMC / VMC-NQS`, `Other`) — ask which track folder to file
    under. Don't pick for them.
 
-**Already have a PR?** One pull request per team. If `gh pr list` shows the team already
-registered, update that PR — new branch commits, edited body — rather than opening a second.
-Two open PRs from one team is the failure mode this check exists to prevent.
+**Already registered this challenge?** One pull request per team per challenge. A team may
+register multiple challenges, each in its own PR. If `gh pr list` shows that the same team
+already registered the same challenge, update that PR rather than opening a duplicate. An
+existing PR for a different challenge does not block a new registration.
 
 Then:
 
@@ -95,7 +96,8 @@ Then:
    itself there is no fork yet — create one (`gh repo fork --remote-name <team>`) and push
    there. Branch `challenge/<track>-<brief>`. Never register from `main`.
 2. **Seed the solution folder.** Write the filled-in PR body to
-   `tracks/<track>/solutions/<team-name>/README.md`; it doubles as the team's README. Commit
+   `tracks/<track>/solutions/<team-name>-<issue-number>/README.md`; it doubles as the team's
+   challenge README and keeps multiple registrations from the same team separate. Commit
    nothing outside that folder — `tracks/**/results/` and the root `results/` stay out of git.
 3. **Fill the template.** `.github/PULL_REQUEST_TEMPLATE.md` is the single source for what a
    registration PR must say (team, members, challenge, catalog issue, track).
@@ -127,7 +129,8 @@ consultation, not ratification: offer it as a sanity check, never block registra
   is exact.
 - **Don't dump 40 rows** unasked — index by method group, expand on request.
 - **Don't leave the PR as a draft** and call it registered; don't push without confirming;
-  don't register from `main`; don't commit outside the team's solution folder.
+  don't register from `main`; don't commit outside the challenge-specific solution folder;
+  don't open a duplicate PR for the same team and challenge.
 
 ## Done — hand off
 
