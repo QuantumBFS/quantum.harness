@@ -536,11 +536,13 @@ def _configure_selector_rows(
 def _combined_selector_document(
     *,
     unresolved_sigma: float | None = None,
-) -> tuple[dict[str, object], dict[str, object]]:
+    blocked_interval_offset: int = 0,
+) -> tuple[dict[str, object], dict[str, object], dict[str, object]]:
     p0, extension_analysis, _ = _combined_source_documents()
-    combined = extension.combine_p0_evidence(p0, extension_analysis)
     p0_rows = p0["estimates"]
+    extension_rows = extension_analysis["estimates"]
     assert isinstance(p0_rows, list)
+    assert isinstance(extension_rows, list)
     for sigma, interval in ((0.8, 4), (1.1, 8)):
         _configure_selector_rows(
             p0_rows,
@@ -550,27 +552,40 @@ def _combined_selector_document(
             interval,
         )
 
-    entries = combined["sigma_entries"]
-    assert isinstance(entries, list)
-    selected_intervals = {0.8: 4, 0.9: 9, 1.0: 19, 1.1: 8}
-    for entry in entries:
-        sigma = float.fromhex(entry["sigma_hex"])
+    for sigma, combined_interval in (
+        (0.9, 9 + blocked_interval_offset),
+        (1.0, 19 + blocked_interval_offset),
+    ):
         if sigma == unresolved_sigma:
             continue
-        kappas = tuple(float.fromhex(value) for value in entry["kappas"])
-        lengths = tuple(entry["lengths"])
-        rows = entry["estimates"]
-        assert isinstance(rows, list)
-        _configure_selector_rows(
-            rows,
-            sigma,
-            lengths,
-            kappas,
-            selected_intervals[sigma],
+        extension_kappas = tuple(
+            float.fromhex(row["kappa_hex"])
+            for row in extension_rows
+            if row["sigma_hex"] == sigma.hex()
+            and row["length"] == pilot.PILOT_LENGTHS[0]
         )
+        combined_kappas = tuple(
+            sorted(set(pilot.PILOT_KAPPAS) | set(extension_kappas))
+        )
+        threshold = combined_kappas[combined_interval]
+        for rows, kappas in (
+            (p0_rows, tuple(pilot.PILOT_KAPPAS)),
+            (extension_rows, extension_kappas),
+        ):
+            selected_interval = max(
+                index for index, kappa in enumerate(kappas) if kappa <= threshold
+            )
+            _configure_selector_rows(
+                rows,
+                sigma,
+                tuple(pilot.PILOT_LENGTHS),
+                kappas,
+                selected_interval,
+            )
     _sign(p0)
-    _sign(combined)
-    return p0, combined
+    _sign(extension_analysis)
+    combined = extension.combine_p0_evidence(p0, extension_analysis)
+    return p0, extension_analysis, combined
 
 
 def _tiny_complete_pilot(
@@ -1659,11 +1674,19 @@ def test_select_p1_brackets_uses_maximum_control_slope():
 
 
 def test_combined_selector_uses_per_sigma_axes_and_preserves_control_windows():
-    p0, combined = _combined_selector_document()
+    p0, extension_analysis, combined = _combined_selector_document()
 
     original = analysis.select_p1_brackets(p0)
-    first = analysis.select_p1_brackets(combined)
-    second = analysis.select_p1_brackets(combined)
+    first = analysis.select_p1_brackets(
+        combined,
+        p0_analysis=p0,
+        extension_analysis=extension_analysis,
+    )
+    second = analysis.select_p1_brackets(
+        combined,
+        p0_analysis=p0,
+        extension_analysis=extension_analysis,
+    )
 
     assert first["schema_version"] == analysis.COMBINED_BRACKET_SCHEMA
     assert (
@@ -1702,22 +1725,42 @@ def test_combined_selector_uses_per_sigma_axes_and_preserves_control_windows():
 
 
 def test_combined_selector_fails_closed_when_one_sigma_remains_unresolved():
-    _p0, combined = _combined_selector_document(unresolved_sigma=1.0)
+    p0, extension_analysis, combined = _combined_selector_document(
+        unresolved_sigma=1.0
+    )
 
-    brackets = analysis.select_p1_brackets(combined)
+    brackets = analysis.select_p1_brackets(
+        combined,
+        p0_analysis=p0,
+        extension_analysis=extension_analysis,
+    )
 
     assert brackets["schema_version"] == analysis.COMBINED_BRACKET_SCHEMA
     assert brackets["requires_p0_extension"] is True
     assert brackets["brackets"][2]["status"] == "requires_p0_extension"
     with pytest.raises(RuntimeError, match="P0 extension required.*1\\.0"):
-        analysis.build_p1_protocol(combined, brackets)
+        analysis.build_p1_protocol(
+            combined,
+            brackets,
+            p0_analysis=p0,
+            extension_analysis=extension_analysis,
+        )
 
 
 def test_p1_accepts_combined_only_with_selected_v2_brackets():
-    _p0, combined = _combined_selector_document()
-    brackets = analysis.select_p1_brackets(combined)
+    p0, extension_analysis, combined = _combined_selector_document()
+    brackets = analysis.select_p1_brackets(
+        combined,
+        p0_analysis=p0,
+        extension_analysis=extension_analysis,
+    )
 
-    protocol = analysis.build_p1_protocol(combined, brackets)
+    protocol = analysis.build_p1_protocol(
+        combined,
+        brackets,
+        p0_analysis=p0,
+        extension_analysis=extension_analysis,
+    )
 
     assert protocol["source_analysis_document_sha256"] == combined[
         "analysis_document_sha256"
@@ -1739,7 +1782,12 @@ def test_p1_accepts_combined_only_with_selected_v2_brackets():
         _canonical_bytes(unsigned)
     ).hexdigest()
     with pytest.raises(RuntimeError, match="schema version"):
-        analysis.build_p1_protocol(combined, legacy)
+        analysis.build_p1_protocol(
+            combined,
+            legacy,
+            p0_analysis=p0,
+            extension_analysis=extension_analysis,
+        )
 
     forged = json.loads(json.dumps(brackets))
     forged["brackets"][0]["lower_kappa_hex"] = (0.5).hex()
@@ -1748,8 +1796,127 @@ def test_p1_accepts_combined_only_with_selected_v2_brackets():
     forged["bracket_document_sha256"] = hashlib.sha256(
         _canonical_bytes(unsigned)
     ).hexdigest()
-    with pytest.raises(RuntimeError, match="preserved"):
-        analysis.build_p1_protocol(combined, forged)
+    with pytest.raises(RuntimeError, match="selector output"):
+        analysis.build_p1_protocol(
+            combined,
+            forged,
+            p0_analysis=p0,
+            extension_analysis=extension_analysis,
+        )
+
+
+def test_combined_v2_requires_sources_for_selection_and_direct_build():
+    _p0, _extension_analysis, combined = _combined_selector_document()
+
+    with pytest.raises(RuntimeError, match="source validation"):
+        analysis.select_p1_brackets(combined)
+    with pytest.raises(RuntimeError, match="source validation"):
+        analysis.build_p1_protocol(combined)
+
+
+@pytest.mark.parametrize("defect", ("missing-nine-fields", "zeroed-source-hash"))
+def test_combined_selector_rejects_resigned_provenance_bypass(defect: str):
+    p0, extension_analysis, combined = _combined_selector_document()
+    forged = json.loads(json.dumps(combined))
+    if defect == "missing-nine-fields":
+        for field in (
+            "source_p0_analysis_document_sha256",
+            "source_extension_analysis_document_sha256",
+            "p0_run_spec_sha256",
+            "p0_progress_sha256",
+            "extension_run_spec_sha256",
+            "extension_progress_sha256",
+            "p0_source_revision",
+            "extension_source_revision",
+            "observable_columns",
+        ):
+            forged.pop(field)
+    else:
+        forged["source_p0_analysis_document_sha256"] = "0" * 64
+    _sign(forged)
+
+    with pytest.raises(RuntimeError, match="fields|recomputation"):
+        analysis.select_p1_brackets(
+            forged,
+            p0_analysis=p0,
+            extension_analysis=extension_analysis,
+        )
+
+
+@pytest.mark.parametrize("source_defect", ("swapped-types", "cross-generation"))
+def test_combined_selector_rejects_wrong_source_documents(source_defect: str):
+    p0, extension_analysis, combined = _combined_selector_document()
+    alternate_p0, alternate_extension, _alternate = _combined_selector_document(
+        blocked_interval_offset=1
+    )
+    supplied_p0, supplied_extension = (
+        (extension_analysis, p0)
+        if source_defect == "swapped-types"
+        else (alternate_p0, alternate_extension)
+    )
+
+    with pytest.raises(RuntimeError):
+        analysis.select_p1_brackets(
+            combined,
+            p0_analysis=supplied_p0,
+            extension_analysis=supplied_extension,
+        )
+
+
+def test_combined_build_rejects_rebound_cross_generation_brackets():
+    p0, extension_analysis, combined = _combined_selector_document()
+    alternate_p0, alternate_extension, alternate = _combined_selector_document(
+        blocked_interval_offset=1
+    )
+    alternate_brackets = analysis.select_p1_brackets(
+        alternate,
+        p0_analysis=alternate_p0,
+        extension_analysis=alternate_extension,
+    )
+    rebound = json.loads(json.dumps(alternate_brackets))
+    rebound["source_analysis_document_sha256"] = combined[
+        "analysis_document_sha256"
+    ]
+    unsigned = dict(rebound)
+    unsigned.pop("bracket_document_sha256")
+    rebound["bracket_document_sha256"] = hashlib.sha256(
+        _canonical_bytes(unsigned)
+    ).hexdigest()
+
+    with pytest.raises(RuntimeError, match="selector output"):
+        analysis.build_p1_protocol(
+            combined,
+            rebound,
+            p0_analysis=p0,
+            extension_analysis=extension_analysis,
+        )
+
+
+def test_combined_direct_build_rejects_resigned_forged_brackets():
+    p0, extension_analysis, combined = _combined_selector_document()
+    brackets = analysis.select_p1_brackets(
+        combined,
+        p0_analysis=p0,
+        extension_analysis=extension_analysis,
+    )
+    forged = json.loads(json.dumps(brackets))
+    target = forged["brackets"][1]
+    lower = float.fromhex(target["lower_kappa_hex"])
+    upper = float.fromhex(target["upper_kappa_hex"])
+    target["lower_kappa_hex"] = (lower + (upper - lower) / 4.0).hex()
+    unsigned = dict(forged)
+    unsigned.pop("bracket_document_sha256")
+    forged["bracket_document_sha256"] = hashlib.sha256(
+        _canonical_bytes(unsigned)
+    ).hexdigest()
+
+    with pytest.raises(RuntimeError, match="selector output"):
+        analysis.build_p1_protocol(
+            combined,
+            forged,
+            p0_analysis=p0,
+            extension_analysis=extension_analysis,
+        )
 
 
 @pytest.mark.parametrize(

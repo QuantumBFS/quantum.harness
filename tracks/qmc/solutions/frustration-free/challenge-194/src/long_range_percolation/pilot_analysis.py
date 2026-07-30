@@ -799,6 +799,30 @@ def _selector_sigma_evidence(
     raise RuntimeError("analysis schema version is not supported")
 
 
+def _validated_selector_sigma_evidence(
+    analysis: Mapping[str, object],
+    *,
+    p0_analysis: Mapping[str, object] | None,
+    extension_analysis: Mapping[str, object] | None,
+) -> tuple[SelectorSigmaEvidence, ...]:
+    if analysis.get("schema_version") == COMBINED_ANALYSIS_SCHEMA:
+        if not isinstance(p0_analysis, Mapping) or not isinstance(
+            extension_analysis, Mapping
+        ):
+            raise RuntimeError(
+                "combined analysis source validation requires exact P0 and "
+                "extension analyses"
+            )
+        from . import pilot_extension
+
+        pilot_extension.validate_combined_p0_evidence(
+            p0_analysis,
+            extension_analysis,
+            analysis,
+        )
+    return _selector_sigma_evidence(analysis)
+
+
 def _sign_change(left: float, right: float) -> bool:
     return (left <= 0.0 <= right) or (right <= 0.0 <= left)
 
@@ -939,10 +963,10 @@ def _select_crossover_bracket(
     }
 
 
-def select_p1_brackets(analysis: Mapping[str, object]) -> dict[str, object]:
-    if not isinstance(analysis, Mapping):
-        _malformed("analysis document is malformed")
-    sigma_evidence = _selector_sigma_evidence(analysis)
+def _select_p1_brackets_from_evidence(
+    analysis: Mapping[str, object],
+    sigma_evidence: tuple[SelectorSigmaEvidence, ...],
+) -> dict[str, object]:
     brackets: list[dict[str, object]] = []
     for evidence in sigma_evidence:
         lengths = (evidence.lengths[-2], evidence.lengths[-1])
@@ -975,6 +999,22 @@ def select_p1_brackets(analysis: Mapping[str, object]) -> dict[str, object]:
     }
     document["bracket_document_sha256"] = _sha256(_canonical_bytes(document))
     return document
+
+
+def select_p1_brackets(
+    analysis: Mapping[str, object],
+    *,
+    p0_analysis: Mapping[str, object] | None = None,
+    extension_analysis: Mapping[str, object] | None = None,
+) -> dict[str, object]:
+    if not isinstance(analysis, Mapping):
+        _malformed("analysis document is malformed")
+    sigma_evidence = _validated_selector_sigma_evidence(
+        analysis,
+        p0_analysis=p0_analysis,
+        extension_analysis=extension_analysis,
+    )
+    return _select_p1_brackets_from_evidence(analysis, sigma_evidence)
 
 
 def _validate_bracket_document(
@@ -1064,8 +1104,15 @@ def _p1_stream_hashes(
 def build_p1_protocol(
     analysis: Mapping[str, object],
     brackets: Mapping[str, object] | None = None,
+    *,
+    p0_analysis: Mapping[str, object] | None = None,
+    extension_analysis: Mapping[str, object] | None = None,
 ) -> dict[str, object]:
-    sigma_evidence = _selector_sigma_evidence(analysis)
+    sigma_evidence = _validated_selector_sigma_evidence(
+        analysis,
+        p0_analysis=p0_analysis,
+        extension_analysis=extension_analysis,
+    )
     sigmas = tuple(evidence.sigma for evidence in sigma_evidence)
     lengths = sigma_evidence[0].lengths
     if (
@@ -1078,11 +1125,16 @@ def build_p1_protocol(
         )
     ):
         raise RuntimeError("P1 requires exactly four sigmas and three lengths")
-    bracket_document = select_p1_brackets(analysis) if brackets is None else brackets
+    selected_brackets = _select_p1_brackets_from_evidence(analysis, sigma_evidence)
+    bracket_document = selected_brackets if brackets is None else brackets
     raw_brackets = _validate_bracket_document(analysis, bracket_document)
     if len(raw_brackets) != len(sigmas):
         raise RuntimeError("P1 requires one bracket per sigma")
     if analysis.get("schema_version") == COMBINED_ANALYSIS_SCHEMA:
+        if _canonical_bytes(bracket_document) != _canonical_bytes(selected_brackets):
+            raise RuntimeError(
+                "combined bracket document does not match frozen selector output"
+            )
         for index, sigma in ((0, 0.8), (3, 1.1)):
             raw = raw_brackets[index]
             if not isinstance(raw, Mapping):
