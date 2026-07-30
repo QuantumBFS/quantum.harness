@@ -130,3 +130,52 @@ Verify that the JSON reports source commit
 `protocols/oddcycle-robust-candidate-v1/result.json`, record its SHA-256 in
 the experiment log, and commit and push that archival artifact.  Then move
 to the next research decision without repeating any completed scan.
+
+## Later theory continuation
+
+While the WSL distribution remained invisible, the publication-critical
+Majorana/Wei audit advanced without local scientific computation or a new
+scan.
+
+Primary-source review and an exact proof design are committed in:
+
+```text
+3ac8509bd4f3c07588c1e926e5af7eaa26e54197
+4f60575c7356426e216092a26330d6980afa268e
+```
+
+The second commit corrects the Nambu adjoint convention after a manual
+pressure audit.  For \(\Psi=(c,c^\dagger)\), use
+
+\[
+G(B)=\operatorname{diag}(B^{-1},B^{\mathsf T}),
+\]
+
+not \(\operatorname{diag}(B,B^{-\mathsf T})\).
+
+The exact no-go design and TDD execution plan are:
+
+```text
+docs/superpowers/specs/2026-07-30-oddcycle-majorana-wei-no-go-design.md
+docs/superpowers/plans/2026-07-30-oddcycle-majorana-wei-no-go.md
+```
+
+The proposed proof pulls any fixed-complex-basis Wei metric into Nambu
+space, uses the frozen positive-definite dual to force all nonstrict gaps to
+the group boundary, proves the four-letter commutant is scalar, and obtains
+the only possible boundary form
+
+\[
+\eta=\begin{pmatrix}0&kI_5\\\bar kI_5&0\end{pmatrix}.
+\]
+
+That form gives
+\(\eta\Omega^{-1}\eta^{\mathsf T}=|k|^2\Omega\), whereas a pulled-back
+orthogonal skew Majorana structure requires
+\(\eta\Omega^{-1}\eta^{\mathsf T}=-\Omega\).
+
+This remains a theorem draft until the no-solver exact replay in the plan
+passes on WSL.  Do not upgrade the paper abstract before that GREEN gate.
+The replay is now the first research task when WSL returns, followed by the
+previously pending robust `result.json`.  It supersedes any nonconvex search
+over \(O,J_1,J_2\), but does not authorize or repeat a frontier scan.
