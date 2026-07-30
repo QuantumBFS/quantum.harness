@@ -86,7 +86,7 @@ export NUMBA_CACHE_DIR="${NUMBA_CACHE_BASE%/}/challenge-194-numba-${NUMBA_CACHE_
 mkdir -p -- "${NUMBA_CACHE_DIR}"
 
 cd "${SOLUTION_ROOT}"
-echo "validation array cell=${SLURM_ARRAY_TASK_ID} host=$(hostname)" 
+echo "validation array cell=${SLURM_ARRAY_TASK_ID} host=$(hostname)"
 echo "run_spec=${HARNESS_RUN_SPEC}"
 if [[ -n "${OFFLINE_PYTHON}" ]]; then
     export PYTHONPATH="${SOLUTION_ROOT}/src"
