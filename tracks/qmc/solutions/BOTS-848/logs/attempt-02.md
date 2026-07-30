@@ -44,7 +44,9 @@ attempts_remaining: 3
 | 2026-07-27 23:58 +08 | attempt worktree | machine-readable JSON structural check | 0 | schema valid; all frozen gates true; M=`-2..2`; benchmark passed |
 
 - Raw-log directory: `tracks/qmc/results/BOTS-848-benchmark-v0-attempt-02/`
-- Implementation commit: `e04bc5d` (`feat(qmc): add projected NQS benchmark candidate`).
+- Original isolated-attempt commit: `e04bc5d` (`feat(qmc): add projected NQS
+  benchmark candidate`). The same implementation is reachable in this
+  integrated repository as `25582f94364957165916a62265a9755cc72b7add`.
 - Journal-only commit: this closure commit; resolve with `git log -1` after creation.
 - Slurm job IDs: none.
 

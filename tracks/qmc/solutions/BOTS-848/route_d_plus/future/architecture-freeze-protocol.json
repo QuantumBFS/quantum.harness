@@ -1,0 +1,30 @@
+{
+  "dplus0": {
+    "H": 1,
+    "K": 1,
+    "capacity": "D+0",
+    "checkpoint_selection": "final-update-no-ed",
+    "generator_ranks": [
+      2,
+      3,
+      4
+    ],
+    "shared_architecture": true
+  },
+  "phase6_freeze_requires": [
+    "phase6a-passed",
+    "three-seed-training-passed",
+    "blind-measurement-passed",
+    "checkpoint-symmetry-passed",
+    "independent-hash-readback-passed"
+  ],
+  "phase7_may_modify_capacity": false,
+  "phase8_freeze_rule": "use-only-preregistered-capacity-protocol",
+  "postfreeze_rules": {
+    "beyond_ed_read_only_for_structure": true,
+    "chirality_read_only_for_structure": true,
+    "heldout_read_only": true
+  },
+  "protocol_id": "route-d-plus-architecture-freeze-20260730-v1",
+  "schema_version": "challenge-15-route-d-plus-architecture-freeze-protocol-v1"
+}

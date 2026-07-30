@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "challenge-15-route-d-plus-phase7-authorization-v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "authorized_at_utc",
+    "instruction",
+    "scope",
+    "phase6_frozen",
+    "checkpoint_modified",
+    "capacity_protocol_modified",
+    "heldout_accessed",
+    "beyond_ed_accessed"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "challenge-15-route-d-plus-phase7-authorization-v1"
+    },
+    "authorized_at_utc": {"type": "string", "format": "date-time"},
+    "instruction": {"const": "phase7 ed不需要禁止，直接跑"},
+    "scope": {
+      "const": "run N=6 Phase 7 ED concurrently with unfinished Phase 6 measurement"
+    },
+    "phase6_frozen": {"const": false},
+    "checkpoint_modified": {"const": false},
+    "capacity_protocol_modified": {"const": false},
+    "heldout_accessed": {"const": false},
+    "beyond_ed_accessed": {"const": false}
+  }
+}

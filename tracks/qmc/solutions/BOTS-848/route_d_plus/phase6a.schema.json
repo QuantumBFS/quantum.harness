@@ -1,0 +1,307 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "challenge-15-route-d-plus-phase6a-v1",
+  "title": "Route D+ Phase 6A coordinate backend and performance certificate",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "created_at_utc",
+    "n_electrons",
+    "two_q",
+    "generator_ranks",
+    "random_seed",
+    "continuous_configurations",
+    "quadrature",
+    "backend_cross_validation",
+    "amplitude_cost",
+    "cache_profile",
+    "delayed_acceptance",
+    "runtime",
+    "gates",
+    "passed",
+    "forbidden_modules_loaded",
+    "git_commit",
+    "git_tree",
+    "git_dirty",
+    "source_sha256",
+    "jax_device",
+    "jax_platform",
+    "jax_x64_enabled",
+    "cuda_visible_devices",
+    "hostname",
+    "slurm_job_id",
+    "slurm_cluster_name",
+    "evidence"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "challenge-15-route-d-plus-phase6a-v1"
+    },
+    "created_at_utc": {"type": "string", "format": "date-time"},
+    "n_electrons": {"const": 6},
+    "two_q": {"const": 15},
+    "generator_ranks": {
+      "type": "array",
+      "prefixItems": [{"const": 2}, {"const": 3}, {"const": 4}],
+      "items": false
+    },
+    "random_seed": {"type": "integer"},
+    "continuous_configurations": {"const": 2},
+    "quadrature": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "n_theta",
+        "n_phi",
+        "size",
+        "reconstruction_error",
+        "tolerance"
+      ],
+      "properties": {
+        "kind": {"const": "compact-LLL-reproducing"},
+        "n_theta": {"const": 8},
+        "n_phi": {"const": 16},
+        "size": {"const": 128},
+        "reconstruction_error": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMaximum": 1e-12
+        },
+        "tolerance": {"const": 1e-12}
+      }
+    },
+    "backend_cross_validation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["metric", "tolerance", "records"],
+      "properties": {
+        "metric": {"const": "abs(prod-kernel)/max(1,abs(kernel))"},
+        "tolerance": {"const": 1e-10},
+        "records": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "configuration",
+              "maximum_relative_error",
+              "proof_wall_seconds",
+              "production_wall_seconds"
+            ],
+            "properties": {
+              "configuration": {"type": "integer", "minimum": 0, "maximum": 1},
+              "maximum_relative_error": {
+                "type": "number",
+                "minimum": 0,
+                "exclusiveMaximum": 1e-10
+              },
+              "proof_wall_seconds": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "production_wall_seconds": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              }
+            }
+          }
+        }
+      }
+    },
+    "amplitude_cost": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ground_mean_wall_seconds",
+        "tower_wall_seconds",
+        "tower_mean_wall_seconds"
+      ],
+      "properties": {
+        "ground_mean_wall_seconds": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "tower_wall_seconds": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {"type": "number", "exclusiveMinimum": 0}
+        },
+        "tower_mean_wall_seconds": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
+      }
+    },
+    "cache_profile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "key_fields",
+        "cold_wall_seconds",
+        "hit_wall_seconds",
+        "batch_wall_seconds",
+        "maximum_value_error",
+        "entries",
+        "hits",
+        "misses"
+      ],
+      "properties": {
+        "key_fields": {
+          "type": "array",
+          "prefixItems": [
+            {"const": "N"},
+            {"const": "two_q"},
+            {"const": "L"},
+            {"const": "M"},
+            {"const": "word_id"},
+            {"const": "configuration_digest"}
+          ],
+          "items": false
+        },
+        "cold_wall_seconds": {"type": "number", "exclusiveMinimum": 0},
+        "hit_wall_seconds": {"type": "number", "exclusiveMinimum": 0},
+        "batch_wall_seconds": {"type": "number", "exclusiveMinimum": 0},
+        "maximum_value_error": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMaximum": 1e-14
+        },
+        "entries": {"type": "integer", "minimum": 8},
+        "hits": {"type": "integer", "minimum": 8},
+        "misses": {"type": "integer", "minimum": 2}
+      }
+    },
+    "delayed_acceptance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "chains",
+        "samples_per_chain",
+        "proposal_sweeps",
+        "wall_seconds",
+        "correction_acceptance",
+        "mother_acceptance",
+        "maximum_channel_readback_error",
+        "effective_sample_size",
+        "integrated_autocorrelation_time",
+        "r_hat",
+        "ess_per_second"
+      ],
+      "properties": {
+        "chains": {"const": 2},
+        "samples_per_chain": {"const": 32},
+        "proposal_sweeps": {"const": 1},
+        "wall_seconds": {"type": "number", "exclusiveMinimum": 0},
+        "correction_acceptance": {"const": 1.0},
+        "mother_acceptance": {"type": "number", "minimum": 0, "maximum": 1},
+        "maximum_channel_readback_error": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMaximum": 1e-14
+        },
+        "effective_sample_size": {"type": "number", "exclusiveMinimum": 0},
+        "integrated_autocorrelation_time": {"type": "number", "minimum": 1},
+        "r_hat": {"type": "number", "minimum": 0},
+        "ess_per_second": {"type": "number", "exclusiveMinimum": 0}
+      }
+    },
+    "runtime": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["profile_wall_seconds", "maximum_rss_kib"],
+      "properties": {
+        "profile_wall_seconds": {"type": "number", "exclusiveMinimum": 0},
+        "maximum_rss_kib": {"type": "integer", "minimum": 1}
+      }
+    },
+    "gates": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "strict_lll_quadrature",
+        "continuous_backend_agreement",
+        "cache_exact",
+        "delayed_acceptance_equivalence",
+        "finite_performance",
+        "gpu_allocation",
+        "clean_source",
+        "blind_boundary"
+      ],
+      "properties": {
+        "strict_lll_quadrature": {"const": true},
+        "continuous_backend_agreement": {"const": true},
+        "cache_exact": {"const": true},
+        "delayed_acceptance_equivalence": {"const": true},
+        "finite_performance": {"const": true},
+        "gpu_allocation": {"const": true},
+        "clean_source": {"const": true},
+        "blind_boundary": {"const": true}
+      }
+    },
+    "passed": {"const": true},
+    "forbidden_modules_loaded": {"type": "array", "maxItems": 0},
+    "git_commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "git_tree": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "git_dirty": {"const": false},
+    "source_sha256": {
+      "type": "object",
+      "minProperties": 4,
+      "additionalProperties": {
+        "type": "string",
+        "pattern": "^[0-9a-f]{64}$"
+      }
+    },
+    "jax_device": {"type": "string", "minLength": 1},
+    "jax_platform": {"const": "gpu"},
+    "jax_x64_enabled": {"const": true},
+    "cuda_visible_devices": {"type": ["string", "null"]},
+    "hostname": {"type": "string", "minLength": 1},
+    "slurm_job_id": {"type": "string", "minLength": 1},
+    "slurm_cluster_name": {"type": ["string", "null"]},
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "raw_result_path",
+        "raw_result_sha256",
+        "stdout_path",
+        "stdout_sha256",
+        "stderr_path",
+        "stderr_sha256",
+        "slurm_evidence_path",
+        "slurm_evidence_sha256",
+        "slurm_state",
+        "slurm_exit_code"
+      ],
+      "properties": {
+        "raw_result_path": {"type": "string", "minLength": 1},
+        "raw_result_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "stdout_path": {"type": "string", "minLength": 1},
+        "stdout_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "stderr_path": {"type": "string", "minLength": 1},
+        "stderr_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "slurm_evidence_path": {"type": "string", "minLength": 1},
+        "slurm_evidence_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "slurm_state": {"const": "COMPLETED"},
+        "slurm_exit_code": {"const": "0:0"}
+      }
+    }
+  }
+}

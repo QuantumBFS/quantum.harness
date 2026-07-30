@@ -1,0 +1,289 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "challenge-15-route-d-plus-phase6-measurement-v1",
+  "title": "Route D+ Phase 6 immutable-checkpoint measurement extension",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "created_at_utc",
+    "producer_source_revision",
+    "measurement_source_revision",
+    "measurement_source_tree",
+    "measurement_source_clean",
+    "input_attempt",
+    "architecture",
+    "checkpoints",
+    "protocol",
+    "tasks",
+    "seed_results",
+    "gates",
+    "task_wall_seconds",
+    "runtime_seconds",
+    "jax_device",
+    "jax_platform",
+    "jax_x64_enabled",
+    "hostname",
+    "slurm_job_id",
+    "slurm_cluster_name",
+    "ed_accessed",
+    "passed"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "challenge-15-route-d-plus-phase6-measurement-v1"
+    },
+    "created_at_utc": {"type": "string", "format": "date-time"},
+    "producer_source_revision": {"$ref": "#/$defs/revision"},
+    "measurement_source_revision": {"$ref": "#/$defs/revision"},
+    "measurement_source_tree": {"$ref": "#/$defs/revision"},
+    "measurement_source_clean": {"const": true},
+    "input_attempt": {"$ref": "#/$defs/artifact"},
+    "architecture": {"$ref": "#/$defs/schema_artifact"},
+    "checkpoints": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {
+        "allOf": [
+          {"$ref": "#/$defs/schema_artifact"},
+          {
+            "type": "object",
+            "required": ["seed"],
+            "properties": {"seed": {"enum": [848, 1848, 2848]}}
+          }
+        ]
+      }
+    },
+    "protocol": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "seeds",
+        "sectors",
+        "chains_per_sector",
+        "samples_per_chain",
+        "measurement_chunk",
+        "warmup_steps",
+        "proposal_sweeps",
+        "selection_rule"
+      ],
+      "properties": {
+        "seeds": {
+          "type": "array",
+          "prefixItems": [
+            {"const": 848},
+            {"const": 1848},
+            {"const": 2848}
+          ],
+          "items": false
+        },
+        "sectors": {
+          "type": "array",
+          "prefixItems": [{"const": "ground"}, {"const": "tower"}],
+          "items": false
+        },
+        "chains_per_sector": {"const": 4},
+        "samples_per_chain": {"const": 2048},
+        "measurement_chunk": {"const": 128},
+        "warmup_steps": {"const": 64},
+        "proposal_sweeps": {"const": 2},
+        "selection_rule": {
+          "const": "extend-sole-gap-precision-failure-without-ed-or-retraining"
+        }
+      }
+    },
+    "tasks": {
+      "type": "array",
+      "minItems": 24,
+      "maxItems": 24,
+      "items": {"$ref": "#/$defs/task_reference"}
+    },
+    "seed_results": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {"$ref": "#/$defs/seed_result"}
+    },
+    "gates": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sole_input_failure_gap_precision",
+        "immutable_input_hashes",
+        "exact_task_set",
+        "task_schemas_valid",
+        "blind_measurement",
+        "finite_statistics",
+        "sampling_acceptance",
+        "effective_samples",
+        "gap_precision",
+        "three_seed_consistency",
+        "rotation_invariance",
+        "checkpoint_coefficients_unchanged",
+        "clean_measurement_source"
+      ],
+      "properties": {
+        "sole_input_failure_gap_precision": {"const": true},
+        "immutable_input_hashes": {"const": true},
+        "exact_task_set": {"const": true},
+        "task_schemas_valid": {"const": true},
+        "blind_measurement": {"const": true},
+        "finite_statistics": {"const": true},
+        "sampling_acceptance": {"const": true},
+        "effective_samples": {"const": true},
+        "gap_precision": {"const": true},
+        "three_seed_consistency": {"const": true},
+        "rotation_invariance": {"const": true},
+        "checkpoint_coefficients_unchanged": {"const": true},
+        "clean_measurement_source": {"const": true}
+      }
+    },
+    "task_wall_seconds": {"type": "number", "exclusiveMinimum": 0},
+    "runtime_seconds": {"type": "number", "exclusiveMinimum": 0},
+    "jax_device": {"type": "string", "minLength": 1},
+    "jax_platform": {"const": "gpu"},
+    "jax_x64_enabled": {"const": true},
+    "hostname": {"type": "string", "minLength": 1},
+    "slurm_job_id": {"type": "string", "minLength": 1},
+    "slurm_cluster_name": {"type": "string", "minLength": 1},
+    "ed_accessed": {"const": false},
+    "passed": {"const": true}
+  },
+  "$defs": {
+    "revision": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256"],
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "schema_artifact": {
+      "type": "object",
+      "required": ["path", "sha256", "schema_path", "schema_sha256"],
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "sha256": {"$ref": "#/$defs/sha256"},
+        "schema_path": {"type": "string", "minLength": 1},
+        "schema_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "task_reference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "seed",
+        "sector",
+        "chain",
+        "certificate",
+        "stdout",
+        "stderr"
+      ],
+      "properties": {
+        "seed": {"enum": [848, 1848, 2848]},
+        "sector": {"enum": ["ground", "tower"]},
+        "chain": {"type": "integer", "minimum": 0, "maximum": 3},
+        "certificate": {"$ref": "#/$defs/artifact"},
+        "stdout": {"$ref": "#/$defs/artifact"},
+        "stderr": {"$ref": "#/$defs/artifact"}
+      }
+    },
+    "sector_statistics": {
+      "type": "object",
+      "required": [
+        "mean",
+        "standard_error",
+        "effective_sample_size",
+        "r_hat",
+        "correction_acceptance",
+        "mother_acceptance",
+        "per_chain_correction_acceptance",
+        "per_chain_mother_acceptance",
+        "global_rotation_residual",
+        "block_size",
+        "block_means",
+        "wall_seconds",
+        "ess_per_second"
+      ],
+      "properties": {
+        "mean": {"type": "number"},
+        "standard_error": {"type": "number", "minimum": 0},
+        "effective_sample_size": {"type": "number", "minimum": 32},
+        "r_hat": {"type": "number", "minimum": 0, "exclusiveMaximum": 1.2},
+        "correction_acceptance": {
+          "type": "number",
+          "minimum": 0.05,
+          "maximum": 1
+        },
+        "mother_acceptance": {
+          "type": "number",
+          "minimum": 0.25,
+          "maximum": 0.70
+        },
+        "per_chain_correction_acceptance": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "items": {"type": "number", "minimum": 0.05, "maximum": 1}
+        },
+        "per_chain_mother_acceptance": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "items": {"type": "number", "minimum": 0.25, "maximum": 0.70}
+        },
+        "global_rotation_residual": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMaximum": 1e-7
+        },
+        "block_size": {"const": 2},
+        "block_means": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "items": {
+            "type": "array",
+            "minItems": 1024,
+            "maxItems": 1024,
+            "items": {"type": "number"}
+          }
+        },
+        "wall_seconds": {"type": "number", "exclusiveMinimum": 0},
+        "ess_per_second": {"type": "number", "exclusiveMinimum": 0}
+      }
+    },
+    "seed_result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "seed",
+        "ground",
+        "tower",
+        "gap",
+        "gap_standard_error"
+      ],
+      "properties": {
+        "seed": {"enum": [848, 1848, 2848]},
+        "ground": {"$ref": "#/$defs/sector_statistics"},
+        "tower": {"$ref": "#/$defs/sector_statistics"},
+        "gap": {"type": "number"},
+        "gap_standard_error": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 0.005
+        }
+      }
+    }
+  }
+}

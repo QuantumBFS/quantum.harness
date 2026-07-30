@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "challenge-15-route-d-plus-phase7-registration-v1",
+  "title": "Route D+ Phase 7 registration certificate",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "phase6_dependency",
+    "phase7_dispatch",
+    "source_revision",
+    "exact_task_count",
+    "ed_accessed",
+    "passed"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "challenge-15-route-d-plus-phase7-registration-v1"
+    },
+    "phase6_dependency": {"$ref": "#/$defs/artifact"},
+    "phase7_dispatch": {"$ref": "#/$defs/artifact"},
+    "source_revision": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "exact_task_count": {"const": 7},
+    "ed_accessed": {"const": false},
+    "passed": {"const": true}
+  },
+  "$defs": {
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256"],
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      }
+    }
+  }
+}

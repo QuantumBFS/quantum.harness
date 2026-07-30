@@ -19,6 +19,11 @@ The Challenge #15 minimum acceptance criteria are the project benchmark. Benchma
 
 Larger systems, thermodynamic extrapolation, chiral-metric response, and Landau-level-mixing scans are research extensions. They do not block Benchmark v0.
 
+> **Submission entry point:** [SUBMISSION.md](SUBMISSION.md) contains the
+> evaluator-facing result, acceptance checklist, reproduction command, and an
+> honest separation between the passing Benchmark v0 and the scalable Route D+
+> research candidate.
+
 ## Working documents
 
 | Document | Purpose |
@@ -36,13 +41,18 @@ Larger systems, thermodynamic extrapolation, chiral-metric response, and Landau-
 | [Route B plan](../../../../docs/superpowers/plans/2026-07-28-challenge-15-route-b-continuous-holomorphic.md) | Continuous fixed-degree holomorphic NQS in five bounded attempts. |
 | [Route C plan](../../../../docs/superpowers/plans/2026-07-28-challenge-15-route-c-cf-flow-l2.md) | CG-coupled CF-Flow `L=2` prototype and explicit LLL-leakage decision. |
 | [Route D plan](../../../../docs/superpowers/plans/2026-07-28-challenge-15-route-d-analytic-seed-neural-correlator.md) | Analytic `L=2` projected-density mother dressed by a scalar neural correlator. |
+| [Route D+ Phase 1](docs/route-d-plus-phase1.md) | Final physics-first workflow: fixed conventions, remote JAX x64/GPU gate, and reproducible environment manifest. |
+| [AITP import source](docs/aitp-2-migration-handoff.md) | Pinned source imported into the current AITP Research Memory Entries and working Note. |
 
 ## Status
 
 - Challenge registration metadata is present.
 - Benchmark scope and paper-gap analysis are archived.
 - Benchmark implementation is capped at five short, worktree-isolated attempts. Attempt 01 closed as an ED-oracle `slice-pass`; Attempt 02 closed as `benchmark-pass`, so Attempts 03-05 were not started.
-- The projected random-feature NQS candidate gives raw `E0=3.871634914021247`, `E2=4.003323325986339`, and `Delta2=0.1316884119650923`, with a gap discrepancy of `4.44e-16` from ED and a reported total uncertainty of `1.414e-12`.
+- The final clean GPU reproduction of the projected random-feature NQS gives
+  raw `E0=3.871634914021250`, `E2=4.003323325986342`, and
+  `Delta2=0.13168841196509184`, with a gap discrepancy of `7.11e-15` from ED
+  and a reported total uncertainty of `1.4142135649e-12`.
 - Every frozen Benchmark v0 gate passes. The candidate uses ED-sized exact `L^2` projection and Ritz optimization, so larger-N scalability and the final challenge research contribution remain future work rather than part of the v0 claim.
 - Scalable v1 Step 1 is complete: the audit-first evaluator is available through [run_scalable_evaluator.py](run_scalable_evaluator.py).
 - Route C now has an exact one-layer strict-LLL Operator-NQS implementation
@@ -50,3 +60,15 @@ Larger systems, thermodynamic extrapolation, chiral-metric response, and Landau-
   optimizer-update admission, but the user-directed cutoff stopped all three
   seeds at updates `46/25/19`, before the first checkpoint.  These partial
   traces are diagnostics only and are not a scalable-v1 or Challenge result.
+- The scalable Route D+ candidate is implemented through continuous-coordinate
+  VMC/SR, certificate schemas, isolated Slurm workflows, Phase 7 ED comparison,
+  and optimizer remediation.
+- Route D+ Phases 1–5 and Phase 6A passed remote GPU certificate gates.
+  Phase 7 completed on jobs `23029855` and `23030080`; the first frozen D+0
+  family has mean ground/tower fidelities `0.99741`/`0.87731` and gap error
+  `0.009995`. The span ceiling (`0.99996`/`0.97806`) identifies an optimization
+  failure rather than a capacity failure, so no final scalable-accuracy claim
+  is made.
+- The current AITP Research Memory runtime is active at
+  `/home/bhjia/physics/vmc_nqs`; the Phase 1 result is pinned by a canonical
+  Entry and closeout Note. No project code or tests have run on the local host.

@@ -1,0 +1,144 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "challenge-15-route-d-plus-phase6-final-v1",
+  "title": "Route D+ Phase 6 frozen checkpoint aggregate gate",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "created_at_utc",
+    "source_revision",
+    "source_tree",
+    "source_clean",
+    "phase6_certificate",
+    "phase6a_certificate",
+    "architecture",
+    "seed_artifacts",
+    "blind_access_audit",
+    "training_job",
+    "readback_job",
+    "gates",
+    "architecture_frozen",
+    "checkpoints_frozen",
+    "ed_accessed",
+    "passed"
+  ],
+  "properties": {
+    "schema_version": {"const": "challenge-15-route-d-plus-phase6-final-v1"},
+    "created_at_utc": {"type": "string", "format": "date-time"},
+    "source_revision": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "source_tree": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "source_clean": {"const": true},
+    "phase6_certificate": {"$ref": "#/$defs/artifact"},
+    "phase6a_certificate": {"$ref": "#/$defs/artifact"},
+    "architecture": {"$ref": "#/$defs/schema_artifact"},
+    "seed_artifacts": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["seed", "checkpoint", "symmetry"],
+        "properties": {
+          "seed": {"enum": [848, 1848, 2848]},
+          "checkpoint": {"$ref": "#/$defs/schema_artifact"},
+          "symmetry": {"$ref": "#/$defs/schema_artifact"}
+        }
+      }
+    },
+    "blind_access_audit": {"$ref": "#/$defs/artifact"},
+    "training_job": {"$ref": "#/$defs/job"},
+    "readback_job": {"$ref": "#/$defs/readback_job"},
+    "gates": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "phase6_schema_valid",
+        "phase6a_hash_valid",
+        "architecture_schema_hash_valid",
+        "three_checkpoint_schema_hashes_valid",
+        "three_symmetry_schema_hashes_valid",
+        "blind_access_audit_valid",
+        "training_logs_hash_valid",
+        "training_slurm_completed",
+        "clean_consistent_source_revision",
+        "gpu_readback_allocation"
+      ],
+      "properties": {
+        "phase6_schema_valid": {"const": true},
+        "phase6a_hash_valid": {"const": true},
+        "architecture_schema_hash_valid": {"const": true},
+        "three_checkpoint_schema_hashes_valid": {"const": true},
+        "three_symmetry_schema_hashes_valid": {"const": true},
+        "blind_access_audit_valid": {"const": true},
+        "training_logs_hash_valid": {"const": true},
+        "training_slurm_completed": {"const": true},
+        "clean_consistent_source_revision": {"const": true},
+        "gpu_readback_allocation": {"const": true}
+      }
+    },
+    "architecture_frozen": {"const": true},
+    "checkpoints_frozen": {"const": true},
+    "ed_accessed": {"const": false},
+    "passed": {"const": true}
+  },
+  "$defs": {
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256"],
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+      }
+    },
+    "schema_artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256", "schema_path", "schema_sha256"],
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "schema_path": {"type": "string", "minLength": 1},
+        "schema_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      }
+    },
+    "job": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "job_id",
+        "cluster_name",
+        "state",
+        "exit_code",
+        "stdout",
+        "stderr",
+        "sacct"
+      ],
+      "properties": {
+        "job_id": {"type": "string", "minLength": 1},
+        "cluster_name": {"type": "string", "minLength": 1},
+        "state": {"const": "COMPLETED"},
+        "exit_code": {"const": "0:0"},
+        "stdout": {"$ref": "#/$defs/artifact"},
+        "stderr": {"$ref": "#/$defs/artifact"},
+        "sacct": {"$ref": "#/$defs/artifact"}
+      }
+    },
+    "readback_job": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["job_id", "cluster_name", "hostname", "gpu_visible"],
+      "properties": {
+        "job_id": {"type": "string", "minLength": 1},
+        "cluster_name": {"type": "string", "minLength": 1},
+        "hostname": {"type": "string", "minLength": 1},
+        "gpu_visible": {"type": "string", "minLength": 1}
+      }
+    }
+  }
+}

@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "challenge-15-route-d-plus-phase6-final-v2-readback",
+  "title": "Route D+ Phase 6 v2 independent readback",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "created_at_utc",
+    "final_certificate",
+    "source_revisions",
+    "checks",
+    "passed"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "challenge-15-route-d-plus-phase6-final-v2-readback"
+    },
+    "created_at_utc": {"type": "string", "format": "date-time"},
+    "final_certificate": {"$ref": "#/$defs/artifact"},
+    "source_revisions": {"type": "object"},
+    "checks": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "final_schema_valid",
+        "finalizer_revision_available",
+        "producer_revision_available",
+        "measurement_revision_available",
+        "source_clean",
+        "all_artifact_hashes",
+        "all_artifact_schemas",
+        "exact_seed_set",
+        "exact_task_set"
+      ],
+      "properties": {
+        "final_schema_valid": {"const": true},
+        "finalizer_revision_available": {"const": true},
+        "producer_revision_available": {"const": true},
+        "measurement_revision_available": {"const": true},
+        "source_clean": {"const": true},
+        "all_artifact_hashes": {"const": true},
+        "all_artifact_schemas": {"const": true},
+        "exact_seed_set": {"const": true},
+        "exact_task_set": {"const": true}
+      }
+    },
+    "passed": {"const": true}
+  },
+  "$defs": {
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256"],
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      }
+    }
+  }
+}

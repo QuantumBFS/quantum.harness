@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "challenge-15-route-d-plus-optimization-remediation-protocol-v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "protocol_id",
+    "trigger",
+    "capacity",
+    "architecture_modified",
+    "generator_ranks",
+    "initialization",
+    "seeds",
+    "additional_updates",
+    "chains",
+    "samples_per_update_per_chain",
+    "proposal_sweeps",
+    "learning_rate",
+    "diagonal_shift",
+    "trust_radius",
+    "final_samples_per_chain",
+    "checkpoint_selection",
+    "run_seeds_concurrently",
+    "ed_used_for_gradient",
+    "ed_used_for_checkpoint_selection",
+    "phase7_use",
+    "capacity_action_if_internal_run_fails",
+    "evaluation",
+    "heldout_accessed",
+    "beyond_ed_accessed"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "challenge-15-route-d-plus-optimization-remediation-protocol-v1"
+    },
+    "protocol_id": {"const": "route-d-plus-dplus0-remediation-20260730-v1"},
+    "trigger": {"const": "phase7-classification-optimization-failure"},
+    "capacity": {"const": "D+0"},
+    "architecture_modified": {"const": false},
+    "generator_ranks": {
+      "type": "array",
+      "prefixItems": [{"const": 2}, {"const": 3}, {"const": 4}],
+      "items": false
+    },
+    "initialization": {
+      "const": "continue-each-corresponding-pre-reveal-final-update-checkpoint"
+    },
+    "seeds": {
+      "type": "array",
+      "prefixItems": [{"const": 848}, {"const": 1848}, {"const": 2848}],
+      "items": false
+    },
+    "additional_updates": {"const": 48},
+    "chains": {"const": 4},
+    "samples_per_update_per_chain": {"const": 16},
+    "proposal_sweeps": {"const": 2},
+    "learning_rate": {"const": 0.03},
+    "diagonal_shift": {"const": 0.03},
+    "trust_radius": {"const": 0.02},
+    "final_samples_per_chain": {"const": 512},
+    "checkpoint_selection": {
+      "const": "final-additional-update-fixed-before-remediation"
+    },
+    "run_seeds_concurrently": {"const": true},
+    "ed_used_for_gradient": {"const": false},
+    "ed_used_for_checkpoint_selection": {"const": false},
+    "phase7_use": {
+      "const": "classification-only-no-numerical-target-in-training"
+    },
+    "capacity_action_if_internal_run_fails": {
+      "const": "diagnose-D+0-optimizer-without-capacity-change"
+    },
+    "evaluation": {
+      "const": "rerun-existing-phase7-read-only-evaluator-after-all-three-checkpoints-freeze"
+    },
+    "heldout_accessed": {"const": false},
+    "beyond_ed_accessed": {"const": false}
+  }
+}
