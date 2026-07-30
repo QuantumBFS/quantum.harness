@@ -1,5 +1,7 @@
 use anyhow::{bail, Result};
 use clap::{Parser, Subcommand};
+use learning_mit::config::RunConfig;
+use learning_mit::oracles::write_oracle_artifact;
 use std::path::PathBuf;
 
 #[derive(Debug, Parser)]
@@ -41,9 +43,13 @@ enum Commands {
 
 fn main() -> Result<()> {
     match Cli::parse().command {
-        Commands::Oracles { config, run_dir }
-        | Commands::Benchmark { config, run_dir }
-        | Commands::NegativeControl { config, run_dir } => {
+        Commands::Oracles { config, run_dir } => {
+            let config = RunConfig::load(&config)?;
+            let artifact = write_oracle_artifact(&config, &run_dir)?;
+            println!("scientific oracles passed: {}", artifact.display());
+            Ok(())
+        }
+        Commands::Benchmark { config, run_dir } | Commands::NegativeControl { config, run_dir } => {
             let _ = (config, run_dir);
             bail!("runner is unavailable before the Gaussian core is validated")
         }

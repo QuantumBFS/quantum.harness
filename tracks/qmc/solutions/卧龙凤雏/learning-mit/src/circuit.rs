@@ -175,26 +175,17 @@ impl GenericCircuit {
         ] {
             for &gate in gates {
                 let plus_probability = state.outcome_probability(gate.measurement, 1)?;
-                let gate_entropy = binary_entropy(plus_probability)?;
                 let outcome = draw_outcome(rng, plus_probability, mode);
-                let stats = state.apply_measurement(gate.measurement, outcome)?;
-                let rotation = gate.rotation_for(outcome)?;
-                state.apply_rotation(gate.measurement.a, gate.measurement.b, rotation)?;
+                let applied = apply_forced_gate(state, gate, outcome)?;
 
                 outcomes.push(outcome);
-                conditional_entropy += gate_entropy;
-                min_probability = min_probability.min(stats.probability);
+                conditional_entropy += applied.conditional_entropy;
+                min_probability = min_probability.min(applied.probability);
                 let errors = state.invariant_errors();
                 invariant_errors.antisymmetry =
                     invariant_errors.antisymmetry.max(errors.antisymmetry);
                 invariant_errors.purity = invariant_errors.purity.max(errors.purity);
-                applied_gates.push(AppliedGate {
-                    measurement: gate.measurement,
-                    outcome,
-                    probability: stats.probability,
-                    conditional_entropy: gate_entropy,
-                    rotation,
-                });
+                applied_gates.push(applied);
             }
         }
 
@@ -208,6 +199,25 @@ impl GenericCircuit {
             invariant_errors,
         })
     }
+}
+
+pub fn apply_forced_gate(
+    state: &mut MajoranaState,
+    gate: ConditionalGate,
+    outcome: i8,
+) -> Result<AppliedGate> {
+    let plus_probability = state.outcome_probability(gate.measurement, 1)?;
+    let conditional_entropy = binary_entropy(plus_probability)?;
+    let stats = state.apply_measurement(gate.measurement, outcome)?;
+    let rotation = gate.rotation_for(outcome)?;
+    state.apply_rotation(gate.measurement.a, gate.measurement.b, rotation)?;
+    Ok(AppliedGate {
+        measurement: gate.measurement,
+        outcome,
+        probability: stats.probability,
+        conditional_entropy,
+        rotation,
+    })
 }
 
 fn conditional_gate(
@@ -229,7 +239,7 @@ fn conditional_gate(
             strength,
         },
         positive_rotation: sign * phase,
-        negative_rotation: sign * (phase - std::f64::consts::PI),
+        negative_rotation: sign * phase,
     })
 }
 
