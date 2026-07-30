@@ -21,6 +21,7 @@
 #   precheck                 resolve profile, test ssh, capture git dirty status
 #   probe-partitions         ssh sinfo and print a parsed candidate table
 #   submit ...               build+run sbatch, or validate with --test-only
+#                            (repeat --env KEY=VALUE for explicit job metadata)
 #   status <jobid>           squeue the job, parse state + pending-reason category
 #   fetch <run>              rsync results/<run>/ back from the cluster
 #   classify <run> <jobid>   sacct + per-cell manifests -> cell outcome table
@@ -208,6 +209,7 @@ cmd_probe_partitions() {
 cmd_submit() {
   local array="" run_spec="" command="" entrypoint="" partition="" walltime="" cpus="" \
         script="scripts/harness_array_sbatch.sh" extra="" test_only="false"
+  local -a job_env=()
   while [[ $# -gt 0 ]]; do
     case "$1" in
       --array) array="$2"; shift 2 ;;
@@ -218,6 +220,7 @@ cmd_submit() {
       --time) walltime="$2"; shift 2 ;;
       --cpus) cpus="$2"; shift 2 ;;
       --script) script="$2"; shift 2 ;;
+      --env) job_env+=("$2"); shift 2 ;;
       --extra) extra="$2"; shift 2 ;;
       --test-only) test_only="true"; shift ;;
       *) die "submit: unknown flag $1" ;;
@@ -237,6 +240,12 @@ cmd_submit() {
   elif [[ -n "$array" ]]; then
     die "submit: --array requires --run-spec; use a plain --script for single jobs"
   fi
+  local assignment
+  for assignment in "${job_env[@]}"; do
+    [[ "$assignment" =~ ^[A-Za-z_][A-Za-z0-9_]*=[^,[:space:]]+$ ]] || \
+      die "submit: --env must be KEY=VALUE without commas or whitespace"
+    exports="${exports},${assignment}"
+  done
 
   local extra_partition="" extra_gres="" extra_status=0 \
         extra_partition_set="false" extra_gres_set="false"

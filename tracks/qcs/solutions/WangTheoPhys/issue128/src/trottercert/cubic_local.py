@@ -210,3 +210,93 @@ def exact_d5_density(
         for pauli, coefficient in image.items():
             _add_term(result, pauli, 2 * coefficient)
     return canonicalize_cubic_density(registry, result)
+
+
+def exact_matching_density(
+    color: int,
+) -> tuple[CoordinateRegistry, CubicTerms]:
+    """Return one exact two-by-two-cell matching Hamiltonian density."""
+
+    if color not in range(4):
+        raise ValueError("matching color must be 0, 1, 2 or 3")
+    evaluator = SymplecticDyadicLocalDensityEvaluator(shared_coordinates=True)
+    registry = evaluator.registries[0]
+    key = (color,)
+    denominator = 1 << evaluator.denominator_exponent(key)
+    return registry, canonicalize_cubic_density(
+        registry,
+        {
+            pauli: Cubic(Fraction(numerator, denominator), 0, 0)
+            for pauli, numerator in evaluator.evaluate(key).items()
+        },
+    )
+
+
+def _add_cubic_operator(
+    target: CubicTerms,
+    source: Mapping[SymplecticPauli, Cubic],
+    scalar: Cubic | int | Fraction = 1,
+) -> None:
+    for pauli, coefficient in source.items():
+        _add_term(target, pauli, coefficient * scalar)
+
+
+def conjugate_cubic_series_by_stage(
+    registry: CoordinateRegistry,
+    series: Sequence[Mapping[SymplecticPauli, Cubic]],
+    color: int,
+    coefficient: Cubic,
+) -> list[CubicTerms]:
+    """Conjugate an exact local series by one matching exponential."""
+
+    order = len(series) - 1
+    result: list[CubicTerms] = [{} for _ in range(order + 1)]
+    for degree, operator in enumerate(series):
+        power = dict(operator)
+        for nested_degree in range(order - degree + 1):
+            _add_cubic_operator(
+                result[degree + nested_degree],
+                power,
+                coefficient**nested_degree / factorial(nested_degree),
+            )
+            if nested_degree < order - degree:
+                power = canonicalize_cubic_density(
+                    registry,
+                    cubic_fragment_adjoint(registry, color, power),
+                )
+    return result
+
+
+def exact_right_generator_stage_contribution(
+    stages: Sequence[CubicStage],
+    stage_index: int,
+    order: int,
+) -> tuple[CoordinateRegistry, list[CubicTerms]]:
+    """Return one stage's exact contribution to ``i S' S^dagger``.
+
+    The full right generator is the exact sum of this function over every
+    stage.  Keeping stage contributions independent makes the expensive local
+    recurrence safe to distribute across Slurm array cells.
+    """
+
+    if order < 0:
+        raise ValueError("series order must be nonnegative")
+    if stage_index < 0 or stage_index >= len(stages):
+        raise IndexError("stage index is out of range")
+    stage = stages[stage_index]
+    registry, base = exact_matching_density(stage.fragment_index)
+    series: list[CubicTerms] = [{} for _ in range(order + 1)]
+    series[0] = {
+        pauli: stage.coefficient * coefficient
+        for pauli, coefficient in base.items()
+    }
+    for later in stages[stage_index + 1 :]:
+        series = conjugate_cubic_series_by_stage(
+            registry,
+            series,
+            later.fragment_index,
+            later.coefficient,
+        )
+    return registry, [
+        canonicalize_cubic_density(registry, degree) for degree in series
+    ]
