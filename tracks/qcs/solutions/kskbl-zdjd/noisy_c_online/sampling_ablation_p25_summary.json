@@ -1,0 +1,427 @@
+{
+  "kind": "quadratic-discovery-input-sampling-ablation",
+  "protocol": {
+    "seeds": [
+      87100,
+      97100,
+      107100,
+      117100
+    ],
+    "steps": 3200,
+    "batch_size": 100,
+    "noise_rate": 0.25,
+    "weight_mode": "observation",
+    "fresh_noise_each_sample": true,
+    "clean_domain_used_for_updates": false
+  },
+  "uniform": {
+    "aggregate": {
+      "run_count": 4,
+      "mean_first_full_recovery_step": 2600,
+      "minimum_first_full_recovery_step": 2400,
+      "maximum_first_full_recovery_step": 2800,
+      "mean_final_maximum_rounding_residual": 0.024445429113449508,
+      "median_final_maximum_rounding_residual": 0.008191323133087309,
+      "minimum_final_input_observations": 43,
+      "maximum_final_input_observations": 51
+    },
+    "runs": [
+      {
+        "path": "tracks/qcs/results/20260730-184500-noisy-c-uniform-cycle-control/seed87100-s3200",
+        "run_sha256": "c9e43db5a507c25c8c62678dea30673bd8ecd28395835d88af478a856195e31f",
+        "metrics_sha256": "00f2196bc962f9556542ef0d3638688d011589be11d638c0ba16217ab50081d7",
+        "config": {
+          "steps": 3200,
+          "batch_size": 100,
+          "noise_rate": 0.25,
+          "eval_every": 200,
+          "base_seed": 87100,
+          "prior_jitter": 1e-06,
+          "coefficient_prior_std": 1.0,
+          "projection_ridge": 0.001,
+          "weight_mode": "observation",
+          "input_sampling": "uniform",
+          "device": "cpu"
+        },
+        "first_full_recovery_step": 2800,
+        "final": {
+          "step": 3200,
+          "examples_seen": 320000,
+          "elapsed_seconds": 0.6168534000025829,
+          "train_loss_ema": 0.5631444045082464,
+          "teacher_mean_observations": 78.125,
+          "teacher_min_observations": 49,
+          "effective_projection_inputs": 4096,
+          "active_integer_coefficients": 36,
+          "maximum_rounding_residual": 0.014359663883754415,
+          "bit_accuracy": 1.0,
+          "word_accuracy": 1.0,
+          "normalized_mae": 0.0,
+          "per_bit_accuracy": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        }
+      },
+      {
+        "path": "tracks/qcs/results/20260730-184500-noisy-c-uniform-cycle-control/seed97100-s3200",
+        "run_sha256": "61dd3f5749a8d8df3e64b6273ffa0868f0e41e2a45722842e8561df5bfafd80a",
+        "metrics_sha256": "f72c55362d6fa3aa62b400d5650fbcb288cfc51cc1a3b80b49547264617c3233",
+        "config": {
+          "steps": 3200,
+          "batch_size": 100,
+          "noise_rate": 0.25,
+          "eval_every": 200,
+          "base_seed": 97100,
+          "prior_jitter": 1e-06,
+          "coefficient_prior_std": 1.0,
+          "projection_ridge": 0.001,
+          "weight_mode": "observation",
+          "input_sampling": "uniform",
+          "device": "cpu"
+        },
+        "first_full_recovery_step": 2400,
+        "final": {
+          "step": 3200,
+          "examples_seen": 320000,
+          "elapsed_seconds": 0.585889900001348,
+          "train_loss_ema": 0.5634038005022781,
+          "teacher_mean_observations": 78.125,
+          "teacher_min_observations": 43,
+          "effective_projection_inputs": 4096,
+          "active_integer_coefficients": 36,
+          "maximum_rounding_residual": 0.0020229823824202044,
+          "bit_accuracy": 1.0,
+          "word_accuracy": 1.0,
+          "normalized_mae": 0.0,
+          "per_bit_accuracy": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        }
+      },
+      {
+        "path": "tracks/qcs/results/20260730-184500-noisy-c-uniform-cycle-control/seed107100-s3200",
+        "run_sha256": "24d09ad7599a879a110127ad20c1c99d93d48ac6605253857d538b204691aab5",
+        "metrics_sha256": "2fb8a6918c0f4506fa12d9371ed6153703b2776fbc723769ad64ae2112f0c6c1",
+        "config": {
+          "steps": 3200,
+          "batch_size": 100,
+          "noise_rate": 0.25,
+          "eval_every": 200,
+          "base_seed": 107100,
+          "prior_jitter": 1e-06,
+          "coefficient_prior_std": 1.0,
+          "projection_ridge": 0.001,
+          "weight_mode": "observation",
+          "input_sampling": "uniform",
+          "device": "cpu"
+        },
+        "first_full_recovery_step": 2600,
+        "final": {
+          "step": 3200,
+          "examples_seen": 320000,
+          "elapsed_seconds": 0.6217933000007179,
+          "train_loss_ema": 0.5599756435942437,
+          "teacher_mean_observations": 78.125,
+          "teacher_min_observations": 47,
+          "effective_projection_inputs": 4096,
+          "active_integer_coefficients": 36,
+          "maximum_rounding_residual": 0.08008108049309595,
+          "bit_accuracy": 1.0,
+          "word_accuracy": 1.0,
+          "normalized_mae": 0.0,
+          "per_bit_accuracy": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        }
+      },
+      {
+        "path": "tracks/qcs/results/20260730-184500-noisy-c-uniform-cycle-control/seed117100-s3200",
+        "run_sha256": "1e3a01cfbdf245d357e9b4ed87cfcbe89a663bbe755f9c8414bd02d5e38b406a",
+        "metrics_sha256": "c00a8bfb2f65561380a42d4fe0c7c19d31f599617775857031484fdaaf85233f",
+        "config": {
+          "steps": 3200,
+          "batch_size": 100,
+          "noise_rate": 0.25,
+          "eval_every": 200,
+          "base_seed": 117100,
+          "prior_jitter": 1e-06,
+          "coefficient_prior_std": 1.0,
+          "projection_ridge": 0.001,
+          "weight_mode": "observation",
+          "input_sampling": "uniform",
+          "device": "cpu"
+        },
+        "first_full_recovery_step": 2600,
+        "final": {
+          "step": 3200,
+          "examples_seen": 320000,
+          "elapsed_seconds": 0.5829386999976123,
+          "train_loss_ema": 0.5588370728436529,
+          "teacher_mean_observations": 78.125,
+          "teacher_min_observations": 51,
+          "effective_projection_inputs": 4096,
+          "active_integer_coefficients": 36,
+          "maximum_rounding_residual": 0.001317989694527455,
+          "bit_accuracy": 1.0,
+          "word_accuracy": 1.0,
+          "normalized_mae": 0.0,
+          "per_bit_accuracy": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        }
+      }
+    ]
+  },
+  "shuffled_cycle": {
+    "aggregate": {
+      "run_count": 4,
+      "mean_first_full_recovery_step": 2750,
+      "minimum_first_full_recovery_step": 2600,
+      "maximum_first_full_recovery_step": 2800,
+      "mean_final_maximum_rounding_residual": 0.0028575923442673424,
+      "median_final_maximum_rounding_residual": 0.002305493781622656,
+      "minimum_final_input_observations": 78,
+      "maximum_final_input_observations": 78
+    },
+    "runs": [
+      {
+        "path": "tracks/qcs/results/20260730-184000-noisy-c-shuffled-cycle/seed87100-s3200",
+        "run_sha256": "dff7b2566ec33b87bd328919c52768ece9539b0567f7438ad221f79b9063cb01",
+        "metrics_sha256": "1262ca7530d96f01b6cc08f3cf301252df82fd1ad3ea691a972ff228741a7373",
+        "config": {
+          "steps": 3200,
+          "batch_size": 100,
+          "noise_rate": 0.25,
+          "eval_every": 200,
+          "base_seed": 87100,
+          "prior_jitter": 1e-06,
+          "coefficient_prior_std": 1.0,
+          "projection_ridge": 0.001,
+          "weight_mode": "observation",
+          "input_sampling": "shuffled-cycle",
+          "device": "cpu"
+        },
+        "first_full_recovery_step": 2800,
+        "final": {
+          "step": 3200,
+          "examples_seen": 320000,
+          "elapsed_seconds": 0.6563323000009404,
+          "train_loss_ema": 0.5630065393367771,
+          "teacher_mean_observations": 78.125,
+          "teacher_min_observations": 78,
+          "effective_projection_inputs": 4096,
+          "active_integer_coefficients": 36,
+          "maximum_rounding_residual": 0.006059705434597052,
+          "bit_accuracy": 1.0,
+          "word_accuracy": 1.0,
+          "normalized_mae": 0.0,
+          "per_bit_accuracy": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        }
+      },
+      {
+        "path": "tracks/qcs/results/20260730-184000-noisy-c-shuffled-cycle/seed97100-s3200",
+        "run_sha256": "acc5eb9f81dbf2db9705fa8a865a927b9f581a8891173432a41eeda075fcedf3",
+        "metrics_sha256": "6c85c6aff1a7a558c0cb0a177baaedfaff120cf1e024759825f7770aa376805a",
+        "config": {
+          "steps": 3200,
+          "batch_size": 100,
+          "noise_rate": 0.25,
+          "eval_every": 200,
+          "base_seed": 97100,
+          "prior_jitter": 1e-06,
+          "coefficient_prior_std": 1.0,
+          "projection_ridge": 0.001,
+          "weight_mode": "observation",
+          "input_sampling": "shuffled-cycle",
+          "device": "cpu"
+        },
+        "first_full_recovery_step": 2800,
+        "final": {
+          "step": 3200,
+          "examples_seen": 320000,
+          "elapsed_seconds": 0.6315143999963766,
+          "train_loss_ema": 0.5619220304963723,
+          "teacher_mean_observations": 78.125,
+          "teacher_min_observations": 78,
+          "effective_projection_inputs": 4096,
+          "active_integer_coefficients": 36,
+          "maximum_rounding_residual": 0.0010937453902125946,
+          "bit_accuracy": 1.0,
+          "word_accuracy": 1.0,
+          "normalized_mae": 0.0,
+          "per_bit_accuracy": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        }
+      },
+      {
+        "path": "tracks/qcs/results/20260730-184000-noisy-c-shuffled-cycle/seed107100-s3200",
+        "run_sha256": "b0ddf89f4d18bcd23742c8be9c921cade741070061c2ca13427a1c8787299cfd",
+        "metrics_sha256": "8c8c688f4fcb1f21ecf7a11c95a5833ac40c77e0f1017d3a08fb90833f31e8d1",
+        "config": {
+          "steps": 3200,
+          "batch_size": 100,
+          "noise_rate": 0.25,
+          "eval_every": 200,
+          "base_seed": 107100,
+          "prior_jitter": 1e-06,
+          "coefficient_prior_std": 1.0,
+          "projection_ridge": 0.001,
+          "weight_mode": "observation",
+          "input_sampling": "shuffled-cycle",
+          "device": "cpu"
+        },
+        "first_full_recovery_step": 2800,
+        "final": {
+          "step": 3200,
+          "examples_seen": 320000,
+          "elapsed_seconds": 0.6501943999974173,
+          "train_loss_ema": 0.5598658680504506,
+          "teacher_mean_observations": 78.125,
+          "teacher_min_observations": 78,
+          "effective_projection_inputs": 4096,
+          "active_integer_coefficients": 36,
+          "maximum_rounding_residual": 0.0007596763792270044,
+          "bit_accuracy": 1.0,
+          "word_accuracy": 1.0,
+          "normalized_mae": 0.0,
+          "per_bit_accuracy": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        }
+      },
+      {
+        "path": "tracks/qcs/results/20260730-184000-noisy-c-shuffled-cycle/seed117100-s3200",
+        "run_sha256": "ac928ff4bd288014a963c83be2198a1c8f89dbd2495e52e6db030ee85eb00c19",
+        "metrics_sha256": "9d69b9167bb216697099d0d4f03d0de7bb7c688006dbd90da7badff439f75ac7",
+        "config": {
+          "steps": 3200,
+          "batch_size": 100,
+          "noise_rate": 0.25,
+          "eval_every": 200,
+          "base_seed": 117100,
+          "prior_jitter": 1e-06,
+          "coefficient_prior_std": 1.0,
+          "projection_ridge": 0.001,
+          "weight_mode": "observation",
+          "input_sampling": "shuffled-cycle",
+          "device": "cpu"
+        },
+        "first_full_recovery_step": 2600,
+        "final": {
+          "step": 3200,
+          "examples_seen": 320000,
+          "elapsed_seconds": 0.6415846000018064,
+          "train_loss_ema": 0.5575532007767264,
+          "teacher_mean_observations": 78.125,
+          "teacher_min_observations": 78,
+          "effective_projection_inputs": 4096,
+          "active_integer_coefficients": 36,
+          "maximum_rounding_residual": 0.0035172421730327178,
+          "bit_accuracy": 1.0,
+          "word_accuracy": 1.0,
+          "normalized_mae": 0.0,
+          "per_bit_accuracy": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        }
+      }
+    ]
+  },
+  "claims": {
+    "uniform_is_faster_on_mean_first_recovery": true,
+    "shuffled_cycle_has_lower_median_rounding_residual": true,
+    "mean_first_recovery_step_difference": 150,
+    "median_residual_reduction_factor": 3.5529582419094967
+  }
+}

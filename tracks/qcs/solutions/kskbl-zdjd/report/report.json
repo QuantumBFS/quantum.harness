@@ -514,6 +514,32 @@
           "text": "⟦zh⟧浮点集成使用逐位分歧；离散规则改用“距离最近整数系数还有多远”。若最大取整残差接近 0.5，任一候选项都可能因少量新数据而改变整数值；若接近 0，规则具有大取整裕量。主实验和复跑最终残差分别为 0.000226 与 0.000041，同时非零项集合、整数系数和 158 门拓扑完全一致。这比只看 100% 准确率更严格地说明结构已经稳定。⟦en⟧The floating ensemble uses bitwise disagreement; the discrete rule instead measures distance to the nearest integer coefficient. A maximum rounding residual near 0.5 means that a small amount of new data can change at least one integer term, whereas a value near zero provides a large rounding margin. Final residuals are 0.000226 and 0.000041, while the nonzero set, integer coefficients and 158-gate topology agree exactly. This is stronger structural evidence than 100% accuracy alone."
         },
         {
+          "kind": "heading",
+          "level": 3,
+          "text": "⟦zh⟧输入采样消融：速度与结构置信度并不相同⟦en⟧Input-sampling ablation: speed and structural confidence differ"
+        },
+        {
+          "kind": "table",
+          "columns": [
+            "⟦zh⟧输入采样⟦en⟧Input sampling",
+            "⟦zh⟧种子数⟦en⟧Seeds",
+            "⟦zh⟧平均首次全对步数⟦en⟧Mean first exact step",
+            "⟦zh⟧首次全对范围⟦en⟧First-exact range",
+            "⟦zh⟧第 3,200 步取整残差中位数⟦en⟧Median rounding residual at step 3,200",
+            "⟦zh⟧每个输入的最少观察数⟦en⟧Minimum observations per input"
+          ],
+          "rows": [
+            ["⟦zh⟧均匀有放回⟦en⟧Uniform with replacement", "4", "2,600", "2,400–2,800", "0.008191", "43–51"],
+            ["⟦zh⟧随机打乱周期内无重复⟦en⟧Random shuffled cycle without replacement", "4", "2,750", "2,600–2,800", "0.002305", "78"]
+          ],
+          "numeric": [false, true, true, false, true, false]
+        },
+        {
+          "kind": "note",
+          "label": "⟦zh⟧覆盖均衡更稳，但没有更快⟦en⟧Balanced coverage is more stable, not faster",
+          "text": "⟦zh⟧两种模式都在每次出现样本时重新生成独立 25% 位噪声，没有固定噪声数据集。四种子配对实验显示：随机周期把每个输入的最少观察数固定到 78，并把最终取整残差中位数降低 3.55 倍，但平均首次全对反而晚 150 步。可能原因是有放回采样偶尔会给关键输入更多重复证据，从而更早越过整数边界；均衡覆盖则减少了最差输入和系数尾部风险。因此当前默认仍选更快的均匀采样，但在强调规则置信度时保留随机周期。完整哈希证据见 sampling_ablation_p25_summary.json。⟦en⟧Both modes regenerate independent 25% bit noise whenever an example appears; neither uses a fixed noisy dataset. Across four paired seeds, shuffled cycles fix the minimum observations per input at 78 and reduce the median final rounding residual by 3.55 times, yet delay mean first recovery by 150 steps. With-replacement sampling may occasionally give critical inputs extra repeated evidence and cross integer boundaries earlier, while balanced coverage reduces worst-input and coefficient-tail risk. Uniform sampling remains the speed default, with shuffled cycles retained when rule confidence matters. Complete hashed evidence is in sampling_ablation_p25_summary.json."
+        },
+        {
           "kind": "note",
           "label": "⟦zh⟧这 2 门如何在盲搜索中消失⟦en⟧How blind search removes the final two gates",
           "text": "⟦zh⟧搜索器先从图结构计算十二个输出的最大无外部扇出锥；只有最高输出出现 4 门候选锥。它删除该锥后，把所有锥外输入线和内部线转换成 4,096 位语义指纹，枚举零门、一门和二门 AND、OR、XOR 表达式，自动找到“先 OR、后 AND”的二门替代。替换前后十二个输出的全域指纹完全相同，随后独立逐门模拟再次得到 4,096 / 4,096。156 仍是构造性上界，不是最优性证明。⟦en⟧The search first computes the maximum fanout-free cone of each output from graph structure; only the highest output has a four-gate candidate cone. After removing it, all external input and internal wires are converted into 4,096-bit semantic fingerprints. Zero-, one- and two-gate AND, OR and XOR expressions are enumerated, automatically finding an OR-then-AND replacement. All twelve full-domain output fingerprints remain identical, and independent gate simulation again gives 4,096 / 4,096. The 156 figure remains a constructive upper bound, not an optimality proof."

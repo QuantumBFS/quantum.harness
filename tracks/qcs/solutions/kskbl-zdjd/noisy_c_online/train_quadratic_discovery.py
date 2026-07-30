@@ -25,6 +25,7 @@ from hidden_oracle import (
     DOMAIN_SIZE,
     FreshNoiseStream,
     OUTPUT_BITS,
+    ShuffledCycleFreshNoiseStream,
 )
 from train_tabular_bayes import BayesianTruthTable
 
@@ -43,6 +44,7 @@ class Config:
     coefficient_prior_std: float
     projection_ridge: float
     weight_mode: str
+    input_sampling: str
     device: str
 
 
@@ -60,6 +62,11 @@ def parse_args() -> argparse.Namespace:
         "--weight-mode",
         choices=("confidence", "observation", "hybrid"),
         default="hybrid",
+    )
+    parser.add_argument(
+        "--input-sampling",
+        choices=("uniform", "shuffled-cycle"),
+        default="uniform",
     )
     parser.add_argument("--device", choices=("cpu",), default="cpu")
     parser.add_argument("--output-dir", type=Path, required=True)
@@ -374,9 +381,15 @@ def main() -> None:
         coefficient_prior_std=args.coefficient_prior_std,
         projection_ridge=args.projection_ridge,
         weight_mode=args.weight_mode,
+        input_sampling=args.input_sampling,
         device=str(device),
     )
-    stream = FreshNoiseStream(
+    stream_class = (
+        FreshNoiseStream
+        if args.input_sampling == "uniform"
+        else ShuffledCycleFreshNoiseStream
+    )
+    stream = stream_class(
         batch_size=args.batch_size,
         noise_rate=args.noise_rate,
         seed=args.base_seed,
@@ -540,6 +553,7 @@ def main() -> None:
             "clean_labels_used_for_updates": False,
             "teacher_uses_only_fresh_noisy_stream": True,
             "fresh_noise_each_sample": True,
+            "input_sampling": args.input_sampling,
             "target_formula_seeded": False,
             "existing_circuit_seeded": False,
             "generic_quadratic_basis_size": features.shape[1],

@@ -68,6 +68,57 @@ class FreshNoiseStream:
         return inputs, noisy
 
 
+@dataclass
+class ShuffledCycleFreshNoiseStream:
+    """Randomly permute the domain each cycle while regenerating every flip."""
+
+    batch_size: int
+    noise_rate: float
+    seed: int
+    device: torch.device
+
+    def __post_init__(self) -> None:
+        if not 0.0 <= self.noise_rate < 0.5:
+            raise ValueError("noise_rate must satisfy 0 <= p < 0.5")
+        self.generator = torch.Generator(device=self.device)
+        self.generator.manual_seed(self.seed)
+        self.permutation = torch.empty(
+            0,
+            dtype=torch.int64,
+            device=self.device,
+        )
+        self.offset = 0
+
+    def _sample_ids(self) -> torch.Tensor:
+        chunks: list[torch.Tensor] = []
+        remaining = self.batch_size
+        while remaining:
+            if self.offset >= len(self.permutation):
+                self.permutation = torch.randperm(
+                    DOMAIN_SIZE,
+                    generator=self.generator,
+                    device=self.device,
+                )
+                self.offset = 0
+            take = min(remaining, len(self.permutation) - self.offset)
+            chunks.append(self.permutation[self.offset : self.offset + take])
+            self.offset += take
+            remaining -= take
+        return torch.cat(chunks)
+
+    def sample(self) -> tuple[torch.Tensor, torch.Tensor]:
+        ids = self._sample_ids()
+        inputs = _ids_to_inputs(ids)
+        clean = _hidden_clean_bits(ids)
+        flips = torch.rand(
+            clean.shape,
+            generator=self.generator,
+            device=self.device,
+        ) < self.noise_rate
+        noisy = torch.logical_xor(clean.bool(), flips).to(torch.float32)
+        return inputs, noisy
+
+
 class CleanDomainEvaluator:
     """Own the complete clean domain without exposing it to optimization."""
 
