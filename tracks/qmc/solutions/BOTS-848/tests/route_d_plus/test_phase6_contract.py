@@ -21,6 +21,10 @@ def test_phase6_schema_enforces_blind_three_seed_dplus0_gate() -> None:
     assert properties["forbidden_modules_loaded"]["maxItems"] == 0
     assert properties["forbidden_source_references"]["maxItems"] == 0
     assert properties["gates"]["properties"]["blind_training"]["const"] is True
+    assert (
+        properties["gates"]["properties"]["three_seed_consistency"]["const"]
+        is True
+    )
     assert properties["passed"]["const"] is True
 
 
@@ -58,6 +62,7 @@ def test_phase6_batch_requires_phase5_and_gpu_certificate() -> None:
     assert "delta_max=ground_delta_maxima[chain]" in training
     assert "delta_max=tower_delta_maxima[chain]" in training
     assert "0.25 <= acceptance <= 0.70" in certificate
+    assert "itertools.combinations(seed_results, 2)" in certificate
     assert "validate_certificate(collected)" in certificate
     assert "phase6-attempt.json" in certificate
     assert "validate_attempt(attempt)" in certificate

@@ -9,6 +9,7 @@ import contextlib
 import datetime as dt
 import hashlib
 import io
+import itertools
 import json
 import math
 import multiprocessing
@@ -384,6 +385,15 @@ def collect_certificate(
         "gap_precision": all(
             result["final_gap_standard_error"] <= 5.0e-3
             for result in seed_results
+        ),
+        "three_seed_consistency": all(
+            abs(left["final_gap"] - right["final_gap"])
+            <= 3.0
+            * math.hypot(
+                left["final_gap_standard_error"],
+                right["final_gap_standard_error"],
+            )
+            for left, right in itertools.combinations(seed_results, 2)
         ),
         "rotation_invariance": all(
             result[sector]["global_rotation_residual"] < 1.0e-7
