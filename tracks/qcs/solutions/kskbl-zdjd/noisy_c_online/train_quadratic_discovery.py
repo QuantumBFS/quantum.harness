@@ -29,7 +29,10 @@ from hidden_oracle import (
     OUTPUT_BITS,
     ShuffledCycleFreshNoiseStream,
 )
-from train_tabular_bayes import BayesianTruthTable
+from train_tabular_bayes import (
+    BayesianTruthTable,
+    PairwiseNoiseBayesianTruthTable,
+)
 
 
 INPUT_BITS = 12
@@ -50,6 +53,9 @@ class Config:
     design_size: int | None
     design_rank: int | None
     design_condition_number: float | None
+    learner_noise_mode: str
+    initial_noise_rate: float | None
+    noise_prior_pairs: float | None
     device: str
 
 
@@ -83,6 +89,23 @@ def parse_args() -> argparse.Namespace:
         type=int,
         default=79,
         help="Number of label-blind design points for d-optimal-cycle.",
+    )
+    parser.add_argument(
+        "--learner-noise-mode",
+        choices=("known", "pairwise-estimated"),
+        default="known",
+    )
+    parser.add_argument(
+        "--initial-noise-rate",
+        type=float,
+        default=0.10,
+        help="Learner-only initial guess when the oracle noise rate is hidden.",
+    )
+    parser.add_argument(
+        "--noise-prior-pairs",
+        type=float,
+        default=1_000.0,
+        help="Pairwise-disagreement pseudocount for unknown-noise estimation.",
     )
     parser.add_argument("--device", choices=("cpu",), default="cpu")
     parser.add_argument("--quiet", action="store_true")
@@ -457,6 +480,10 @@ def main() -> None:
         raise ValueError("steps, batch-size and eval-every must be positive")
     if args.projection_ridge <= 0.0 or args.coefficient_prior_std < 0.0:
         raise ValueError("invalid coefficient prior settings")
+    if not 0.0 < args.initial_noise_rate < 0.5:
+        raise ValueError("initial-noise-rate must lie between zero and 0.5")
+    if args.noise_prior_pairs < 0.0:
+        raise ValueError("noise-prior-pairs must be nonnegative")
 
     device = torch.device(args.device)
     design_ids: np.ndarray | None = None
@@ -496,6 +523,17 @@ def main() -> None:
             if design_diagnostics is not None
             else None
         ),
+        learner_noise_mode=args.learner_noise_mode,
+        initial_noise_rate=(
+            args.initial_noise_rate
+            if args.learner_noise_mode == "pairwise-estimated"
+            else None
+        ),
+        noise_prior_pairs=(
+            args.noise_prior_pairs
+            if args.learner_noise_mode == "pairwise-estimated"
+            else None
+        ),
         device=str(device),
     )
     if args.input_sampling == "uniform":
@@ -522,12 +560,21 @@ def main() -> None:
             device=device,
             design_ids=torch.from_numpy(design_ids),
         )
-    learner = BayesianTruthTable(
-        noise_rate=args.noise_rate,
-        prior_jitter=args.prior_jitter,
-        seed=args.base_seed + 10_000,
-        device=device,
-    )
+    if args.learner_noise_mode == "known":
+        learner = BayesianTruthTable(
+            noise_rate=args.noise_rate,
+            prior_jitter=args.prior_jitter,
+            seed=args.base_seed + 10_000,
+            device=device,
+        )
+    else:
+        learner = PairwiseNoiseBayesianTruthTable(
+            initial_noise_rate=args.initial_noise_rate,
+            prior_jitter=args.prior_jitter,
+            noise_prior_pairs=args.noise_prior_pairs,
+            seed=args.base_seed + 10_000,
+            device=device,
+        )
     evaluator = CleanDomainEvaluator(device)
     features, metadata = quadratic_features()
     coefficient_generator = np.random.default_rng(args.base_seed + 20_000)
@@ -556,11 +603,7 @@ def main() -> None:
     for step in range(1, args.steps + 1):
         inputs, noisy_targets = stream.sample()
         ids = (inputs.to(torch.int64) * input_weights).sum(dim=1)
-        loss = learner.noisy_loss_before_update(
-            ids,
-            noisy_targets,
-            args.noise_rate,
-        )
+        loss = learner.noisy_loss_before_update(ids, noisy_targets)
         learner.update(ids, noisy_targets)
         loss_value = loss.item()
         loss_ema = (
@@ -599,6 +642,12 @@ def main() -> None:
                 "train_loss_ema": loss_ema,
                 "teacher_mean_observations": float(observations.mean()),
                 "teacher_min_observations": int(observations.min()),
+                "estimated_noise_rate": float(
+                    getattr(learner, "estimated_noise_rate", args.noise_rate)
+                ),
+                "effective_noise_pairs": float(
+                    getattr(learner, "effective_noise_pairs", 0.0)
+                ),
                 "effective_projection_inputs": int(
                     np.count_nonzero(weights > 1e-8)
                 ),
@@ -684,6 +733,14 @@ def main() -> None:
             "input_sampling": args.input_sampling,
             "input_design_uses_target_labels": False,
             "input_design_diagnostics": design_diagnostics,
+            "learner_receives_oracle_noise_rate": (
+                args.learner_noise_mode == "known"
+            ),
+            "noise_rate_estimation": (
+                "pairwise repeated-label disagreement"
+                if args.learner_noise_mode == "pairwise-estimated"
+                else "known oracle setting"
+            ),
             "target_formula_seeded": False,
             "existing_circuit_seeded": False,
             "generic_quadratic_basis_size": features.shape[1],

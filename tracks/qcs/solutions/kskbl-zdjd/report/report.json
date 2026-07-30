@@ -664,6 +664,101 @@
         {
           "kind": "heading",
           "level": 3,
+          "text": "⟦zh⟧进一步去先验：训练器不再知道噪声率⟦en⟧Removing another prior: the learner is no longer told the noise rate"
+        },
+        {
+          "kind": "verdict",
+          "status": "good",
+          "label": "⟦zh⟧同一个 10% 初值自动追踪 5%–45% 真实噪声；12 次训练全部精确⟦en⟧One 10% initial guess automatically tracks true noise from 5% to 45%; all 12 runs are exact",
+          "why": "⟦zh⟧学习器只看到重复输入的带噪输出，不读取 oracle 的噪声设置。与已知真实噪声率的十二次实验逐一配对后，11 对在完全相同的批次首次全对，剩下一对的未知噪声训练反而早 5 批。首次全对时，估计噪声率与真实值的平均绝对误差为 0.001239，即 0.124 个百分点；最大误差为 0.003765，即 0.376 个百分点。⟦en⟧The learner sees only corrupted outputs for repeated inputs and never reads the oracle's noise setting. Paired one-for-one against twelve runs supplied with the true rate, 11 pairs first become exact at the identical batch, while the remaining unknown-noise run is five batches earlier. At first exact recovery, mean absolute noise-rate error is 0.001239, or 0.124 percentage points; the maximum is 0.003765, or 0.376 percentage points."
+        },
+        {
+          "kind": "card",
+          "title": "⟦zh⟧为什么不用干净标签也能估计噪声⟦en⟧Why noise can be estimated without clean labels",
+          "blocks": [
+            {
+              "kind": "kv",
+              "pairs": [
+                [
+                  "⟦zh⟧可观测量⟦en⟧Observable",
+                  "⟦zh⟧对同一个输入、同一个输出位取两次独立带噪标签，只统计两次是否不同；隐藏的干净位无论是 0 还是 1 都会在这个比较中消掉。⟦en⟧Take two independently corrupted labels for the same input and output bit and record only whether they differ; the hidden clean bit cancels from this comparison whether it is zero or one."
+                ],
+                [
+                  "⟦zh⟧估计式⟦en⟧Estimator",
+                  "⟦zh⟧若单次翻转概率为 p，两次标签不同的概率 d 等于 2p(1−p)。累计 79 个设计点、12 个输出位上的所有异值对，先估计 d，再取小于 0.5 的解 p。⟦en⟧If the single-observation flip rate is p, the probability d that two labels disagree is 2p(1−p). Aggregate all disagreeing pairs over 79 design points and 12 output bits, estimate d, then choose the solution for p below 0.5."
+                ],
+                [
+                  "⟦zh⟧后验更新⟦en⟧Posterior update",
+                  "⟦zh⟧每批重新计算 p，并用新的对数似然比重建所有已观察输入的干净位后验；整数投影、D-optimal 设计和最终全域验证均不改变。⟦en⟧After every batch, recompute p and rebuild clean-bit posteriors for all observed inputs using the new log-likelihood ratio; integer projection, D-optimal design and final full-domain verification remain unchanged."
+                ]
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "table",
+          "columns": [
+            "⟦zh⟧真实逐位翻转率⟦en⟧True per-bit flip rate",
+            "⟦zh⟧未知噪声首次全对批次⟦en⟧Unknown-noise first-exact batches",
+            "⟦zh⟧首次全对时的两个估计⟦en⟧Two estimates at first exact",
+            "⟦zh⟧已知噪声基线批次⟦en⟧Known-noise baseline batches"
+          ],
+          "rows": [
+            [
+              "5%",
+              "10, 10",
+              "5.244%, 5.033%",
+              "10, 10"
+            ],
+            [
+              "15%",
+              "25, 20",
+              "15.011%, 15.015%",
+              "25, 20"
+            ],
+            [
+              "25%",
+              "40, 45",
+              "24.624%, 25.225%",
+              "45, 45"
+            ],
+            [
+              "35%",
+              "100, 145",
+              "34.803%, 35.184%",
+              "100, 145"
+            ],
+            [
+              "40%",
+              "230, 295",
+              "39.910%, 40.058%",
+              "230, 295"
+            ],
+            [
+              "45%",
+              "990, 1,210",
+              "44.949%, 44.997%",
+              "990, 1,210"
+            ]
+          ]
+        },
+        {
+          "kind": "figures",
+          "items": [
+            {
+              "src": "noisy-c-unknown-noise.png",
+              "caption": "⟦zh⟧左：所有训练器都从同一个 10% 初值出发，随重复标签累积分别稳定到六个真实噪声率。中：未知噪声与已知噪声的首次全对样本数几乎落在对角线上，没有可见样本效率惩罚。右：在模型首次达到 4,096 / 4,096 时，噪声估计已经紧贴真实值。额外压力测试让真实噪声固定为 25%，初值分别设为错误的 5% 和 45%，两次仍在第 60 和 35 批全对，最终估计分别为 25.000% 和 25.077%。⟦en⟧Left: every learner starts from the same 10% guess and stabilizes near one of six true rates as repeated labels accumulate. Middle: first-exact sample counts for unknown and known noise lie almost exactly on the diagonal, with no visible sample-efficiency penalty. Right: when the model first reaches 4,096 / 4,096, its noise estimate is already close to the truth. In an extra stress test with true noise fixed at 25% but initial guesses set to the incorrect extremes 5% and 45%, both runs still become exact at batches 60 and 35, ending with estimates 25.000% and 25.077%."
+            }
+          ]
+        },
+        {
+          "kind": "note",
+          "label": "⟦zh⟧当前边界与下一步：从单一 p 扩展到逐位 p⟦en⟧Current boundary and next step: from one p to per-bit p",
+          "text": "⟦zh⟧当前估计器假设 12 个输出位共享一个、对称且独立的翻转概率。真实硬件或数据流程可能让高位与低位噪声不同，也可能存在同一字内的相关翻转。下一轮先放宽为十二个逐位噪声率 p₀ 到 p₁₁，并用各位后验熵之和衡量一个输出字的不确定性；若逐位模型仍不足，再检验相关噪声。⟦en⟧The present estimator assumes that all 12 output bits share one symmetric, independent flip probability. Real hardware or data pipelines may give high and low bits different noise rates or introduce correlated flips within a word. The next round first relaxes this to twelve per-bit rates p₀ through p₁₁ and measures word uncertainty as the sum of per-bit posterior entropies; if that remains inadequate, correlated noise will be tested."
+        },
+        {
+          "kind": "heading",
+          "level": 3,
           "text": "⟦zh⟧输入采样消融：速度与结构置信度并不相同⟦en⟧Input-sampling ablation: speed and structural confidence differ"
         },
         {
