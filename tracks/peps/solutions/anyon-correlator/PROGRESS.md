@@ -3,9 +3,9 @@
 ## 1. Current status
 
 - **Branch:** `challenge/peps-anyon-correlator` (PR #185)
-- **Current milestone:** M2 — completed; report ready
-- **Last completed milestone:** M2 — passed 2026-07-30
-- **Boundary:** paused before M3; no further optimization or M3 work authorized
+- **Current milestone:** M3 — uncompleted; no accepted finite-field ground-state path
+- **Last passed milestone:** M2 — passed 2026-07-30
+- **Boundary:** current session closed with M3 unfinished; no further compute authorized
 - **Last updated:** 2026-07-30
 
 ## 2. Milestone overview
@@ -15,8 +15,8 @@
 | M0 stack setup | passed |
 | M1 Hamiltonian + 2×2 ED unit test | passed |
 | M2 h=0 random-init ground state | passed at χ=8 |
-| M3 adiabatic path (hₓ, 0) | not started |
-| M4 phase-line check | not started |
+| M3 adiabatic path (0, h_z) | uncompleted; attempted path rejected |
+| M4 phase-line check | blocked by M3 |
 | M5 anyon spectra/correlators | not started |
 | M6 handoff | not started |
 
@@ -45,21 +45,44 @@
 - **Exact benchmark (separate):** E_cell = −8, projected gradient norm 4.526e-16, maximum stabilizer error 1.665e-15. It was not used to initialize the random trajectory.
 - **Retained files:** `scripts/ad_tied_core.jl`, `scripts/ad_tied_gd.jl`, `tests/tied_ad_core_tests.jl`, `M2_REPORT.md`, `M2_SU_FINDINGS.md`, and `figures/m2_energy_convergence.svg`. Diagnostic scripts remain under `inspection/` and `scripts/ad_*.jl`; obsolete Slurm launchers were removed.
 
-## 4. Current milestone — M2 completed
+### M3 — dense continuation along `(0,h_z)` (first pass 2026-07-30)
 
-Ground state at h=0 by optimization (PLAN.md §6 M2):
+- **Approved diagnostic:** field polarization `m_z = Σ_i⟨Z_i⟩/N`; one main curve only.
+- **Route:** accepted M2 step-86 dense tied `D=2` tensor; sequential tensor/environment warm starts; fresh final CTMRG; at most four fixed-point-AD updates per field.
+- **Grid:** `0.00, 0.10, 0.20, 0.28, 0.30, 0.32, 0.33, 0.34, 0.36, 0.40, 0.50`.
+- **Numerics:** `χ=4` was branch-unstable and stopped at `h_z=0.28`; the allowed `χ=6` fallback completed with fresh-energy Armijo checks, CTMRG tolerance `1e-6`, and 80 CTMRG iterations maximum.
+- **Outcome:** continuation mechanics and AD updates worked below the transition, but five positive-field points accepted no update. `m_z` plateaued near `0.061`, so no transition interval is accepted; the mechanical largest slope `[0,0.1]` is an initialization artifact.
+- **Plaquette check:** maximum `|⟨B_p⟩-1| = 0.0240`; close in magnitude but values overshoot the exact operator bound, so this is a warning rather than production validation.
+- **Evidence:** `M3_REPORT.md`, `figures/m3_mz_vs_hz_invalid.svg`, `scripts/m3_hz_continuation.jl`, `tests/m3_hz_tests.jl`, and gitignored artifacts under `tracks/peps/results/20260730-m3-hz-*-fresh-armijo/`.
+- **Repair attempt:** same-branch Armijo with `alpha_0=0.05` gave four descending
+  updates at `h_z=0.10` and reduced the gradient norm from `0.1968` to `0.0645`.
+  The point still failed the final independent audit because `max|⟨B_p⟩|` exceeded
+  `1+1e-6`. Artifacts:
+  `tracks/peps/results/20260730-m3-repair-point-chi6/`. No chain or smoke followed.
 
-- **Completed:** random dense `D=2` initialization reached the energy and every site-resolved stabilizer within 1e-6.
-- **Evidence:** `M2_REPORT.md`, the tracked convergence figure, 38/38 focused tests, and the local step-86 checkpoint/CSV artifacts.
-- **Not part of M2:** the virtual-ℤ₂ production state begins in M3; transfer spectra and VUMPS sector cross-checks begin in M5. A fresh end-to-end rerun with the final warm-start code was not required for M2 acceptance.
-- **Not started:** M3.
+## 4. Current milestone — M3 uncompleted
 
-No further compute is scheduled.
+- **Attempted:** bounded dense `D=2` exploratory grids, incremental checkpoints/CSV,
+  one invalid `m_z(h_z)` curve, and fresh-environment stabilizer/convergence records.
+- **Infrastructure repaired:** same-branch Armijo objective, independent multi-seed
+  audits, site-resolved physical gates, staged execution, and provenance-bound stage
+  markers.
+- **Not accepted:** the ground-state path near `h_z≈0.33`; most near-transition points
+  ended in Armijo failure, and the repaired `h_z=0.10` point still exceeded the
+  physical plaquette bound.
+- **Consequence:** no critical interval or comparison claim is carried into M4/M5.
+
+The completed exploratory runs and code repairs do not mean that M3 is finished.
+
+No further compute is scheduled pending user review.
 
 ## 5. Open decisions and blockers
 
-- No blocker remains for the current M2 random-start optimization objective.
-- M3 requires a new setup confirmation and explicit authorization.
+- M3 production acceptance is blocked by CTMRG branch sensitivity and AD line-search
+  failure in the original dense `D=2`, `χ≤6` first-pass budget. The line-search
+  objective is now repaired, but finite-χ stabilizer estimates still violate the
+  approved site-resolved operator bound.
+- The current `m_z` curve must not be treated as transition evidence.
 
 ## 6. Reproduction commands (all verified)
 
@@ -67,14 +90,18 @@ No further compute is scheduled.
 export PATH="$HOME/.juliaup/bin:$PATH"
 julia --project=julia-env tracks/peps/solutions/anyon-correlator/tests/runtests.jl   # M1 7/7 + M2 T1–T7
 julia --project=julia-env tracks/peps/solutions/anyon-correlator/tests/tied_ad_core_tests.jl   # 38/38 tied-AD tests
+julia --project=julia-env tracks/peps/solutions/anyon-correlator/tests/m3_hz_tests.jl
 ```
 
 ## 7. Next actions
 
-1. Preserve the M2 report, code, tests, and checkpoint artifacts.
-2. Stop before M3 unless the user explicitly starts the next milestone.
-3. Treat virtual symmetry as an M3 design decision and transfer spectra/VUMPS as M5 validation, not unfinished M2 work.
+1. Preserve the M1/M2 accepted work and all bounded M3 failure evidence.
+2. Keep M3 marked uncompleted; do not begin M4/M5 from the rejected dense path.
+3. In a new session only, consider finite small `h_x,h_z` ground states that can be
+   checked against series expansion, and reconsider the phase diagnostic because
+   `m_z` did not expose the expected transition.
+4. Do not treat the next-session idea as work performed or approved in this session.
 
 ## 8. New-session handoff
 
-Read first, in order: `M2_REPORT.md` → `M2_SU_FINDINGS.md` → `PROGRESS.md` → `PLAN.md` (§6 milestones). M2 is complete at step 86 with E/N = −0.999999999384 and site-resolved stabilizer errors below 6.38e-10. The exact tensor is a separate stationary benchmark. Result checkpoints and CSVs are local/gitignored under `tracks/peps/results/20260730-m2-chi8-warm-continue-77-to100/`; the durable plot is `figures/m2_energy_convergence.svg`. No M3 work has started.
+Read first, in order: `M3_REPORT.md` → `M2_REPORT.md` → `PROGRESS.md` → `PLAN.md` (§6 milestones). M2 remains the last completed milestone and is accepted at step 86. M3 is uncompleted: the dense path is rejected, `m_z` did not diagnose the transition, and the repaired `h_z=0.10` point failed the site-resolved operator-bound audit. Repair artifacts are under `tracks/peps/results/20260730-m3-repair-point-chi6/`; the older invalid curve remains `figures/m3_mz_vs_hz_invalid.svg` only as failure evidence. A new session may investigate small finite `h_x,h_z` values against series expansion, but no such work has started.

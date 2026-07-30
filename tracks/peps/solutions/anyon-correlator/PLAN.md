@@ -46,24 +46,27 @@ Hamiltonian (issue convention):
 - **C6 Ground-state sector.** In the future symmetry-preserving M3/M5 workflow, iPEPS
   converges to one topological sector; we accept and record it (initialization, seed),
   we do not control it. The dense M2 calibration does not assign a virtual sector.
-- **C7 Virtual-ℤ₂ symmetry — exact throughout the production workflow.** See §4 for
+- **C7 Virtual-ℤ₂ symmetry — exact throughout the sector-resolved production workflow.** See §4 for
   the four required distinctions. The local PEPS tensors remain **exactly virtual-ℤ₂ symmetric
-  (intertwiners) throughout M3 and later production**: random initialization, simple
+  (intertwiners) throughout the sector-resolved M3 refinement and later production**:
+  random initialization, simple
   update (or full update), AD `fixedpoint` optimization, and adiabatic field
   continuation. This is an exact production ansatz constraint so that the ordinary and
   twisted transfer operators retain well-defined (g, α) sectors. The symmetry pattern
   of the transfer-matrix **boundary fixed points is never imposed** (§4.4). The
   completed M2 optimization is an explicit calibration stage: one
   dense/unconstrained ComplexF64 `D=2` tensor was tied across the `(2,2)` cell and
-  optimized from random values to validate the AD/environment pipeline. It is not a
-  sector-resolved M3 production state. Dense calculations remain limited validation
-  comparisons after this M2 calibration.
+  optimized from random values to validate the AD/environment pipeline. The explicit
+  2026-07-30 M3 feasibility instruction extended this dense tensor along `(0,h_z)` for
+  one bounded coarse pass; that pass is not a sector-resolved production state and did
+  not meet M3 production acceptance. Exact virtual symmetry remains required before M5.
 - **C8 Normalization.** Energies **per spin**, N = number of edge spins = 2 per unit
   cell. h=0 anchor: E₀/N = −(Jₑ+Jₘ)/2 = −1. Correlators normalized by the ⟨ψ|ψ⟩
   network value.
-- **C9 Field path.** MVP: the (hₓ, 0) axis, h ∈ [0, 0.6], dense near h_c ≈ 0.328.
-  The model is self-dual under stars ↔ plaquettes with hₓ ↔ h_z, so (0, h_z) is
-  identical physics. The diagonal hₓ = h_z (multicritical point 0.418(2), Wu–Deng–
+- **C9 Field path.** The first M3 feasibility pass uses the `(0,h_z)` axis,
+  `h_z ∈ [0,0.5]`, dense near `h_z,c ≈ 0.328`. The model is self-dual under
+  stars ↔ plaquettes with hₓ ↔ h_z, so the original `(hₓ,0)` MVP has identical
+  physics. The diagonal hₓ = h_z (multicritical point 0.418(2), Wu–Deng–
   Prokof'ev, PRB 85, 195104, Fig. 17) is a stretch goal, out of MVP scope.
 - **C10 Verification anchors.** h_c(hₓ,0) ≈ 0.3285 (3D-Ising; Trebst 2007, Dusuel 2011,
   Wu 2012); diagonal multicritical 0.418(2); Duivenvoorden 2017 (PRB 95, 235119) for
@@ -225,24 +228,32 @@ insertions at separation r where accessible.
   benchmark. See `M2_REPORT.md` for the result and `M2_SU_FINDINGS.md` for the
   superseded simple-update investigation.
 
-### M3 — Adiabatic ground states along (hₓ, 0) (workflow step 4)
-- **Purpose:** production ground states on the MVP path.
-- **Tasks:** adiabatic warm-start chain — each field point initialized from the
-  previous point's converged tensors; simple-update scans + AD polish at selected
-  points; D=2 → D=3 production (D=4 spot-check only if budget allows, cluster
-  candidate via `/using-slurm`); χ = 20 → 40/80 near the transition; record
-  initialization/route per point. Limited dense validation comparison per §5.
-- **Files/outputs:** `scripts/groundstate_path.jl`; `path_energies.csv` (h, E/N, ⟨X⟩,
-  residuals, χ, D); per-point tensor checkpoints (jld2).
-- **Acceptance:** E/N and ⟨X⟩ converged in D and χ within recorded tolerances; the
-  adiabatic chain is continuous (no energy-density jumps between neighboring points
-  beyond warm-start tolerance).
-- **Failure/fallback:** branch jump → refine h-grid locally; D=2 insufficient near
-  transition → D=3 required, D=4 spot on cluster; dense comparison flags large
-  ansatz-restriction error → record, and flag affected observables in the report.
-- **Depends/status:** M2 optimizer/environment machinery → **pending**. Before any
-  compute, ratify the symmetry-preserving ansatz and initialization required for M3;
-  the dense M2 tensor is not an M3 production state.
+### M3 — Adiabatic ground states along `(0,h_z)` (workflow step 4)
+- **Purpose:** establish whether the accepted M2 dense tensor can support a bounded
+  finite-field continuation and a qualitative transition diagnostic.
+- **Tasks:** warm-start the tensor and environment from each field to the next; use
+  fixed-point AD with bounded Armijo trials; report fresh-environment observables;
+  plot only `m_z = Σ_i⟨Z_i⟩/N`; retain energy, stabilizers, and convergence metadata.
+- **Files/outputs:** `scripts/m3_hz_continuation.jl`, `tests/m3_hz_tests.jl`,
+  `M3_REPORT.md`, `figures/m3_mz_vs_hz_invalid.svg`, incremental CSV/JLD2 artifacts under
+  `tracks/peps/results/20260730-m3-hz-*/`.
+- **Acceptance:** continuation accepts updates through the grid, fresh and warm
+  contractions agree within the declared tolerance, operator bounds are respected,
+  `<B_p>` remains close to one, and the single diagnostic supports a coarse transition
+  interval.
+- **Failure/fallback:** record bounded non-convergence and stop; do not increase beyond
+  the approved `χ=6` fallback or turn the first pass into open-ended optimization.
+- **Depends/status:** M2 optimizer/environment machinery → **M3 UNCOMPLETED;
+  production acceptance not met**. `χ=4` was branch-unstable. The guarded
+  `χ=6` grid completed, but AD accepted no update at five positive-field points,
+  stabilizers overshot
+  physical bounds, and `m_z` showed no feature near `h_z≈0.33`. See `M3_REPORT.md`;
+  no transition estimate is accepted. A branch-consistent repair then produced smooth
+  energy descent and a decreasing gradient at `h_z=0.10`, but the final independent
+  multi-seed audit failed the declared operator bound
+  (`max|⟨B_p⟩|=1.000171798 > 1+10⁻⁶`). The chain and later stages were not run.
+  Completed exploratory runs and optimizer repairs are failure evidence, not M3
+  completion.
 
 ### M4 — Phase-line check (workflow step 5, MVP scope)
 - **Purpose:** locate and honestly report the transition on the MVP path.
@@ -254,7 +265,8 @@ insertions at separation r where accessible.
 - **Acceptance:** window stated with D, χ provenance; literature comparison stated.
 - **Failure/fallback:** window too wide → report as-is with provenance; do not densify
   h beyond the budget.
-- **Depends/status:** M3 → **pending**.
+- **Depends/status:** accepted M3 ground-state path → **blocked by the inconclusive
+  M3 first pass**. Do not interpret the current `m_z` curve as a phase boundary.
 
 ### M5 — Anyon spectra and correlators (workflow step 6, the challenge content)
 - **Purpose:** deliver Cₑ(r), Cₘ(r), ξₑ(h), ξₘ(h) along the path.
@@ -301,7 +313,8 @@ production path.
 ## 8. Milestone state and compute policy
 
 - M0 completed 2026-07-27; M1 completed 2026-07-28; M2 completed 2026-07-30.
-- M3–M6 are pending. No M3 setup or compute has started.
+- M3 remains uncompleted after a bounded dense-tensor attempt and repair point failed
+  production acceptance; M4–M6 remain pending.
 - Before each future numerical milestone, confirm the Hamiltonian, lattice, boundary,
   ansatz/symmetry, target observable, system size, and local-versus-cluster cost.
 - Future scripts must flush progress and write results incrementally per field point.
