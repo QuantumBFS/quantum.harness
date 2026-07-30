@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "reload-qec"
+version = "0.1.0"
+description = "Challenge 66 dynamic atom-reload surface-code benchmark"
+requires-python = ">=3.11"
+dependencies = [
+    "numpy==2.1.3",
+    "pandas==2.2.3",
+    "pyarrow==18.1.0",
+    "pymatching==2.2.2",
+    "scipy==1.14.1",
+    "stim==1.15.0",
+]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

@@ -1,0 +1,35 @@
+{
+  "schema_version": "q66-benchmark-family-v1",
+  "code": "rotated_surface_code",
+  "distance": [3, 5],
+  "rounds": ["d", "2d"],
+  "basis": ["X", "Z"],
+  "pauli_measurement_pairs": [
+    [0.0001, 0.0001],
+    [0.001, 0.001],
+    [0.003, 0.003],
+    [0.001, 0.003],
+    [0.003, 0.001]
+  ],
+  "loss_probability": [0.0, 0.0001, 0.0003, 0.001, 0.003, 0.01, 0.03],
+  "policies": [
+    {"name": "none"},
+    {"name": "immediate"},
+    {"name": "periodic", "interval": 1},
+    {"name": "periodic", "interval": "d"},
+    {"name": "periodic", "interval": "2d"},
+    {"name": "threshold", "fraction": 0.02},
+    {"name": "threshold", "fraction": 0.05},
+    {"name": "threshold", "fraction": 0.10}
+  ],
+  "ideal_reload": {
+    "delay_rounds": 0,
+    "reset_error_probability": 0.0,
+    "failure_probability": 0.0
+  },
+  "provenance": {
+    "challenge": "https://github.com/QuantumBFS/quantum.harness/issues/66",
+    "contract": "WORKFLOW.md version 1.0",
+    "model": "MODEL.md version 1.0"
+  }
+}

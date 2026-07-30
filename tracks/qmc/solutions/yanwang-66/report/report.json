@@ -1,0 +1,229 @@
+{
+  "title": "Challenge 66：什么时候重装原子真正有帮助？",
+  "eyebrow": "QMC Track · Team yanwang",
+  "url": "https://github.com/QuantumBFS/quantum.harness/issues/66",
+  "lede": "在 1.92 亿次已验收 cell-shots 中，动态重装产生了 502 个暂定正面、0 个有害的 FDR 分类；独立种子确认的 32/32 个比较通过精度门，严格停止规则则保留了科学结论的边界。",
+  "sections": [
+    {
+      "title": "Challenge",
+      "note": "原子丢失不是普通 Pauli 错误：载体离开阵列后，空位会跨纠错轮累积。重装可以恢复硬件占用，却不能恢复原子丢失前的未知量子态。",
+      "blocks": [
+        {
+          "kind": "text",
+          "text": "本研究比较四类策略：不重装、检测后立即重装、每隔 R 轮周期重装，以及缺失比例超过阈值后集中重装。问题不是“能不能补原子”，而是重装带来的占用恢复能否在逻辑层面超过等待、复位错误和失败重试的代价。"
+        },
+        {
+          "kind": "card",
+          "title": "Significance",
+          "blocks": [
+            {
+              "kind": "text",
+              "text": "中性原子平台天然面对 loss，而表面码能够利用“已知在哪里丢失”的擦除信息。一个可复现的策略区域基准可以直接连接器件调度、容错架构和未来 learned decoder 的数据接口。"
+            }
+          ]
+        },
+        {
+          "kind": "kv",
+          "pairs": [
+            ["Challenge", "#66 · How much does atom reloading help loss-tolerant surface-code memory?"],
+            ["Track", "Quantum Monte Carlo / circuit simulation"],
+            ["Code family", "Rotated surface code, d = 3, 5"],
+            ["Memory tasks", "memory-X / memory-Z, T = d / 2d"],
+            ["Policies", "none · immediate · periodic(R) · threshold(theta)"],
+            ["Team", "yanwang · 王介人、何思成、赵志轩"]
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Approach",
+      "note": "所有策略在同一 shot 上共享逐轮、逐位置、逐事件类型的外生随机数；差值因此主要反映策略决策，而不是两批独立样本的运气。",
+      "blocks": [
+        {
+          "kind": "badge",
+          "text": "Finite-size paired Monte Carlo · deterministic replay",
+          "style": "warn"
+        },
+        {
+          "kind": "kv",
+          "pairs": [
+            ["Method", "Round-level circuit Monte Carlo + erasure-aware MWPM"],
+            ["Tools", "Stim 1.15 · PyMatching 2.2 · NumPy/SciPy · Slurm"],
+            ["Randomness", "Counter-addressed streams keyed by shot, round, site and event"],
+            ["Statistics", "Paired 95% CI · 20,000 bootstrap resamples · BH FDR q = 0.05"],
+            ["Isolation", "Future loss and logical labels excluded from policy/decoder input"],
+            ["Holdout", "Sealed, 0 / 1 queries used"]
+          ]
+        },
+        {
+          "kind": "text",
+          "text": "每个站点遵循 ACTIVE → LOST_UNDETECTED → LOST_DETECTED → RELOADING → ACTIVE 状态机。解码器读取已经揭示的 loss/reload history 来重建时变擦除图。独立穷举 oracle、标签投毒、负向控制、故障注入和不可变 checksum manifest 共同约束实现错误与信息泄漏。"
+        },
+        {
+          "kind": "figures",
+          "items": [
+            {
+              "src": "assets/causal-benchmark.svg",
+              "caption": "Causal paired benchmark. Four reload policies see the same addressed external noise; only revealed history enters the common erasure-aware decoder, and policy effects are measured with paired intervals."
+            }
+          ]
+        },
+        {
+          "kind": "table",
+          "columns": ["Run point", "Accepted work / wall time", "Allocation"],
+          "widths": ["34%", "36%", "30%"],
+          "rows": [
+            ["Discovery simulation", "179.2M cumulative cell-shots", "8 CPUs / 16 GiB per bundle"],
+            ["Discovery Phase-3 analysis", "00:59:43", "8 CPUs / 32 GiB"],
+            ["Independent confirmation through Phase 5", "12.8M cumulative cell-shots", "16 CPUs / 64 GiB cycle"]
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Results",
+      "note": "最强结果是“存在参数区域信号且独立精度已达标”；最严格的全网格停止门仍未完成，因此没有事后挑选一个普适赢家。",
+      "blocks": [
+        {
+          "kind": "heading",
+          "text": "1 · Discovery：正面信号覆盖四分之一的配对比较",
+          "level": 3
+        },
+        {
+          "kind": "figures",
+          "items": [
+            {
+              "src": "assets/discovery-signal.svg",
+              "caption": "Promising but provisional. Across all 1,960 public policy-versus-none comparisons, 502 are FDR-qualified as helpful, 1,458 show no significant difference, and none are classified harmful at Phase 3."
+            }
+          ]
+        },
+        {
+          "kind": "verdict",
+          "status": "warn",
+          "label": "Promising parameter-region signal",
+          "why": "502/1,960 comparisons favor active reload after paired FDR correction; 276/280 lockstep groups still require continuation."
+        },
+        {
+          "kind": "table",
+          "columns": ["Discovery Phase 3", "Value"],
+          "numeric": [false, true],
+          "rows": [
+            ["Cumulative cell-shots", "179,200,000"],
+            ["Physical groups / cells", "280 / 2,240"],
+            ["Helpful / no difference / harmful", "502 / 1,458 / 0"],
+            ["Cells reaching failure target", "81 / 2,240"],
+            ["Groups completing lockstep target", "4 / 280"]
+          ]
+        },
+        {
+          "kind": "heading",
+          "text": "2 · Independent confirmation：32/32 精度门通过",
+          "level": 3
+        },
+        {
+          "kind": "figures",
+          "items": [
+            {
+              "src": "assets/confirmation-precision.svg",
+              "caption": "Passed precision gate. Every independent-seed comparison reaches the registered confidence-interval width, exceeding the required 80% fraction; the separate logical-failure event-count gate remains incomplete."
+            }
+          ]
+        },
+        {
+          "kind": "verdict",
+          "status": "good",
+          "label": "Independent precision gate passed",
+          "why": "32/32 comparisons meet precision, for a fraction of 1.0 against the registered 0.8 requirement."
+        },
+        {
+          "kind": "table",
+          "columns": ["Confirmation Phase 5", "Value"],
+          "numeric": [false, true],
+          "rows": [
+            ["Cumulative cell-shots", "12,800,000"],
+            ["Shots per cell", "320,000"],
+            ["Comparisons meeting precision", "32 / 32"],
+            ["Cells reaching 1,000 failures", "4 / 40"],
+            ["Groups completing stop rule", "0 / 8"]
+          ]
+        },
+        {
+          "kind": "heading",
+          "text": "3 · Evidence：两条独立工作流均有可复核 artifact",
+          "level": 3
+        },
+        {
+          "kind": "figures",
+          "items": [
+            {
+              "src": "assets/evidence-volume.svg",
+              "caption": "Checksum-verified evidence. Discovery and independent confirmation contribute 179.2M and 12.8M accepted cell-shots respectively; the 192M total describes engineering volume and is not pooled as one statistical sample."
+            }
+          ]
+        },
+        {
+          "kind": "note",
+          "label": "Deadline disposition",
+          "style": "pending",
+          "text": "`inconclusive_at_deadline` is retained. Phase 3 strengthens the public evidence after the frozen deadline but does not retroactively authorize a headline winner. Cost sensitivity was not started and the sealed holdout remains 0/1."
+        }
+      ]
+    },
+    {
+      "title": "Highlight",
+      "note": "这项工作的价值不只是一组 Monte Carlo 数字，而是把动态硬件修复变成一个可因果比较、可恢复运行、可独立审计的量子纠错基准。",
+      "blocks": [
+        {
+          "kind": "card",
+          "title": "What's innovative",
+          "blocks": [
+            {
+              "kind": "text",
+              "text": "**策略与噪声解耦。** Counter-addressed common random numbers 让所有策略经历相同外生事件，避免“某策略碰巧抽到更容易样本”的伪改进。"
+            },
+            {
+              "kind": "text",
+              "text": "**动态擦除进入解码图。** 缺失掩码不是只保存到文件，而是按每轮已知 loss history 构造 super-stabilizer / erasure-aware matching graph。"
+            },
+            {
+              "kind": "text",
+              "text": "**失败也可审计。** Checkpoint、atomic publish、checksum manifest 和 fail-closed resume 保证超算超时不会把半成品混入科学结果。"
+            }
+          ]
+        },
+        {
+          "kind": "card",
+          "title": "Significance of output",
+          "blocks": [
+            {
+              "kind": "text",
+              "text": "502 个 helpful 与 0 个 harmful 暂定分类说明主动重装不是一个边缘效应，值得继续定位它的适用参数区间。独立 confirmation 的 32/32 精度成功又表明，当前主要缺口是保守事件计数，而不是估计完全不稳定。"
+            }
+          ]
+        },
+        {
+          "kind": "card",
+          "title": "Broader impact",
+          "blocks": [
+            {
+              "kind": "text",
+              "text": "版本化的 syndrome + missing/reload history + metadata 输入接口可以直接服务未来的 MWPM 改进或 learned decoder，同时保持 logical label 隔离。它也提供了连接中性原子 telemetry、部分可观测控制和相关 loss 模型的基础。"
+            }
+          ]
+        },
+        {
+          "kind": "note",
+          "label": "Claim boundary",
+          "style": "info",
+          "text": "本结果支持“动态重装在部分参数区间有潜在收益”，不支持“某一策略在所有噪声下普遍最优”，也不把 d=3,5 的有限尺寸现象称为渐近阈值。"
+        },
+        {
+          "kind": "code",
+          "title": "Compact verification entry",
+          "text": "python3 -m pytest tests/test_experiment_core.py tests/test_discovery_contract.py tests/test_confirmation_contract.py\n(cd results/discovery-phase-3 && sha256sum -c included-checksums.sha256)\n(cd results/confirmation-phase-5 && sha256sum -c included-checksums.sha256)"
+        }
+      ]
+    }
+  ]
+}

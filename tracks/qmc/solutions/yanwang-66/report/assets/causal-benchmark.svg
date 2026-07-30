@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="680" viewBox="0 0 1200 680" role="img" aria-labelledby="title desc">
+  <title id="title">Causal paired benchmark architecture</title>
+  <desc id="desc">A common addressed random stream feeds four reload policies, whose revealed histories are decoded with the same erasure-aware decoder and compared by paired statistics.</desc>
+  <rect width="1200" height="680" fill="#ffffff"/>
+  <style>
+    text { font-family: Inter, ui-sans-serif, system-ui, sans-serif; fill: #17202a; }
+    .muted { fill: #667085; }
+    .box { fill: #f8fafc; stroke: #cbd5e1; stroke-width: 2; }
+    .small { font-size: 21px; }
+  </style>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><path d="M0,0 L10,3 L0,6 Z" fill="#64748b"/></marker>
+  </defs>
+  <text x="70" y="82" font-size="38" font-weight="760">The comparison isolates the reload decision, not random luck</text>
+  <text x="70" y="126" class="muted small">Counter-addressed events preserve the same external noise for every policy and every shot.</text>
+
+  <rect x="70" y="250" width="235" height="150" rx="8" class="box"/>
+  <text x="187" y="300" text-anchor="middle" font-size="25" font-weight="700">Shared noise plan</text>
+  <text x="187" y="338" text-anchor="middle" class="small">Pauli · measurement</text>
+  <text x="187" y="370" text-anchor="middle" class="small">loss · reload outcome</text>
+
+  <line x1="305" y1="325" x2="390" y2="325" stroke="#64748b" stroke-width="3" marker-end="url(#arrow)"/>
+
+  <g transform="translate(410 185)">
+    <rect width="245" height="66" rx="8" fill="#eff8ff" stroke="#84caff"/>
+    <rect y="82" width="245" height="66" rx="8" fill="#f0faf7" stroke="#6ce9c4"/>
+    <rect y="164" width="245" height="66" rx="8" fill="#fff7ed" stroke="#fdba74"/>
+    <rect y="246" width="245" height="66" rx="8" fill="#faf5ff" stroke="#d8b4fe"/>
+    <text x="122" y="42" text-anchor="middle" font-size="23" font-weight="700">none</text>
+    <text x="122" y="124" text-anchor="middle" font-size="23" font-weight="700">immediate</text>
+    <text x="122" y="206" text-anchor="middle" font-size="23" font-weight="700">periodic(R)</text>
+    <text x="122" y="288" text-anchor="middle" font-size="23" font-weight="700">threshold(theta)</text>
+  </g>
+
+  <line x1="655" y1="325" x2="740" y2="325" stroke="#64748b" stroke-width="3" marker-end="url(#arrow)"/>
+
+  <rect x="760" y="225" width="360" height="200" rx="8" class="box"/>
+  <text x="940" y="278" text-anchor="middle" font-size="25" font-weight="700">Same erasure-aware decoder</text>
+  <text x="940" y="320" text-anchor="middle" class="small">revealed history only</text>
+  <text x="940" y="354" text-anchor="middle" class="small">label and future events isolated</text>
+  <text x="940" y="394" text-anchor="middle" font-size="23" font-weight="700" fill="#175cd3">paired confidence interval</text>
+
+  <rect x="70" y="570" width="1060" height="1" fill="#e4e7ec"/>
+  <text x="70" y="615" class="muted small">Independent oracle · deterministic replay · fail-closed artifacts · sealed holdout 0/1</text>
+</svg>

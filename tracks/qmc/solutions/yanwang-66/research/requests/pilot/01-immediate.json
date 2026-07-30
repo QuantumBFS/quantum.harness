@@ -1,0 +1,23 @@
+{
+  "schema_version": "q66-simulation-request-v1",
+  "run_id": "pilot-d3-t3-x-immediate",
+  "instance_file": "/work/home/hesicheng5/quantum-harness-ch66/research/database/surface_code_instances.jsonl",
+  "distance": 3,
+  "rounds": 3,
+  "basis": "X",
+  "shots": 256,
+  "shot_start": 0,
+  "shard_size": 256,
+  "master_seed": 1717963349,
+  "noise": {"p": 0.001, "p_m": 0.001, "p_loss": 0.01},
+  "reload": {
+    "delay_rounds": 0,
+    "reset_error_probability": 0.0,
+    "failure_probability": 0.0
+  },
+  "policy": {"name": "immediate"},
+  "provenance": {
+    "source_commit": "9460fe77c9d93b8149ef5fa015f2eb870da93e43",
+    "environment_lock_sha256": "f3449956d0a6674eb657a529a32122258953799692a38a666ef77250485f82a8"
+  }
+}

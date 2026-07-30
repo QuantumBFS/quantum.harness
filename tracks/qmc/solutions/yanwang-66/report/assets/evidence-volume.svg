@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="680" viewBox="0 0 1200 680" role="img" aria-labelledby="title desc">
+  <title id="title">Accepted Monte Carlo evidence volume</title>
+  <desc id="desc">Discovery contains 179.2 million accepted cell-shots and confirmation contains 12.8 million, for an engineering total of 192 million.</desc>
+  <rect width="1200" height="680" fill="#ffffff"/>
+  <style>
+    text { font-family: Inter, ui-sans-serif, system-ui, sans-serif; fill: #17202a; }
+    .muted { fill: #667085; }
+    .small { font-size: 22px; }
+  </style>
+  <text x="70" y="82" font-size="38" font-weight="760">192 million accepted cell-shots across two evidence streams</text>
+  <text x="70" y="126" class="muted small">Engineering volume only; discovery and confirmation remain statistically separate.</text>
+
+  <g transform="translate(100 170)">
+    <text x="0" y="32" font-size="26" font-weight="700">Discovery Phase 3</text>
+    <rect x="0" y="62" width="920" height="82" rx="10" fill="#159a78"/>
+    <text x="895" y="115" text-anchor="end" font-size="34" font-weight="760" fill="#ffffff">179.2M</text>
+    <text x="0" y="182" class="muted small">280 physical groups · 2,240 cells · 1,960 paired comparisons</text>
+
+    <text x="0" y="265" font-size="26" font-weight="700">Independent confirmation Phase 5</text>
+    <rect x="0" y="295" width="920" height="82" rx="10" fill="#e8eefc"/>
+    <rect x="0" y="295" width="66" height="82" rx="10" fill="#2563eb"/>
+    <text x="86" y="348" font-size="34" font-weight="760" fill="#175cd3">12.8M</text>
+    <text x="0" y="415" class="muted small">8 headline groups · 40 cells · independent seed</text>
+  </g>
+
+  <rect x="70" y="610" width="1060" height="1" fill="#e4e7ec"/>
+  <text x="70" y="650" class="small" font-weight="700">Every reported aggregate is bound to an immutable manifest and independently recomputed SHA-256 list.</text>
+</svg>

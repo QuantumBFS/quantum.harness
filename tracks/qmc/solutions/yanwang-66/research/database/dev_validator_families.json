@@ -1,0 +1,53 @@
+{
+  "schema_version": "q66-dev-validator-family-v1",
+  "shots_per_cell": 2048,
+  "shard_size": 2048,
+  "warmup_runs": 1,
+  "timed_runs": 3,
+  "seed_derivation": "first 8 little-endian bytes of SHA256(q66-dev-validator-seed-v1\\0 || canonical workload JSON)",
+  "reload": {
+    "delay_rounds": 0,
+    "reset_error_probability": 0.0,
+    "failure_probability": 0.0
+  },
+  "policies": [
+    {"name": "none"},
+    {"name": "immediate"},
+    {"name": "periodic", "interval": "d"},
+    {"name": "threshold", "fraction": 0.05}
+  ],
+  "workloads": [
+    {
+      "workload_id": "dev-d3-t3-x",
+      "distance": 3,
+      "rounds": 3,
+      "basis": "X",
+      "noise": {"p": 0.001, "p_m": 0.001, "p_loss": 0.003}
+    },
+    {
+      "workload_id": "dev-d3-t6-z",
+      "distance": 3,
+      "rounds": 6,
+      "basis": "Z",
+      "noise": {"p": 0.003, "p_m": 0.001, "p_loss": 0.01}
+    },
+    {
+      "workload_id": "dev-d5-t5-x",
+      "distance": 5,
+      "rounds": 5,
+      "basis": "X",
+      "noise": {"p": 0.001, "p_m": 0.003, "p_loss": 0.003}
+    },
+    {
+      "workload_id": "dev-d5-t10-z",
+      "distance": 5,
+      "rounds": 10,
+      "basis": "Z",
+      "noise": {"p": 0.003, "p_m": 0.003, "p_loss": 0.01}
+    }
+  ],
+  "provenance": {
+    "contract": "research/references/validator-design.md",
+    "purpose": "public correctness and validated-throughput development workload"
+  }
+}

@@ -1,0 +1,81 @@
+{
+  "schema_version": "challenge-run-v1",
+  "title": "Dynamic atom reloading for loss-tolerant surface-code memory",
+  "date": "2026-07-30",
+  "status": "inconclusive_at_deadline",
+  "scope": "Rotated surface-code memory at d=3,5; memory-X/Z; T=d,2d",
+  "challenge": {
+    "issue": 66,
+    "url": "https://github.com/QuantumBFS/quantum.harness/issues/66",
+    "released_by": "Zhongyi Ni, HKUST(GZ)"
+  },
+  "method": {
+    "name": "Paired round-level circuit Monte Carlo with erasure-aware MWPM",
+    "tool": "Stim 1.15.0, PyMatching 2.2.2, NumPy/SciPy, Slurm",
+    "exact": false,
+    "settings": "20,000 paired bootstrap resamples; Benjamini-Hochberg q=0.05; counter-addressed random streams",
+    "note": "The simulator is deterministic for a frozen event stream, while finite-shot Monte Carlo estimates and the graph decoder remain statistical/baseline approximations."
+  },
+  "estimate": [
+    {
+      "point": "Discovery simulation",
+      "wall_time": "multi-phase Slurm arrays",
+      "memory": "16 GiB per 8-CPU bundle"
+    },
+    {
+      "point": "Discovery Phase-3 analysis",
+      "wall_time": "00:59:43",
+      "memory": "32 GiB / 8 CPUs"
+    },
+    {
+      "point": "Confirmation through Phase 5",
+      "wall_time": "within one 12 h cycle",
+      "memory": "64 GiB / 16 CPUs"
+    }
+  ],
+  "figures": [
+    {
+      "id": "discovery-signal",
+      "plots": "FDR-qualified provisional classifications over the full public discovery grid",
+      "results": {
+        "figure": "assets/discovery-signal.svg",
+        "match": "warn",
+        "why": "502 of 1,960 comparisons favor active reload and none are classified harmful, but registered stopping remains incomplete.",
+        "numbers": {
+          "helpful": 502,
+          "no_significant_difference": 1458,
+          "harmful": 0
+        }
+      }
+    },
+    {
+      "id": "confirmation-precision",
+      "plots": "Independent-seed paired precision and cell-level stopping",
+      "results": {
+        "figure": "assets/confirmation-precision.svg",
+        "match": "pass",
+        "why": "All 32 paired comparisons pass the pre-registered precision requirement.",
+        "numbers": {
+          "precision_met": "32/32",
+          "precision_fraction": 1.0,
+          "required_fraction": 0.8,
+          "cell_target_met": "4/40"
+        }
+      }
+    },
+    {
+      "id": "accepted-evidence",
+      "plots": "Checksum-verified Monte Carlo evidence volume",
+      "results": {
+        "figure": "assets/evidence-volume.svg",
+        "match": "pass",
+        "why": "Discovery and confirmation artifacts were atomically published and independently hash-verified.",
+        "numbers": {
+          "discovery_cell_shots": 179200000,
+          "confirmation_cell_shots": 12800000,
+          "engineering_total": 192000000
+        }
+      }
+    }
+  ]
+}
