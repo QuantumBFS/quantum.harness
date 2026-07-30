@@ -26,7 +26,7 @@ git diff --quiet
 git diff --cached --quiet
 test -z "$(git status --porcelain --untracked-files=no)"
 git rev-parse HEAD | tee "${run_root}/source-revision.txt"
-git status --porcelain=v1 --untracked-files=no >"${run_root}/git-status.txt"
+git status --porcelain --untracked-files=no >"${run_root}/git-status.txt"
 
 nvidia-smi \
   --query-gpu=index,name,uuid,driver_version \
