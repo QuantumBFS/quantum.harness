@@ -45,7 +45,7 @@ class TransferPortfolioRecord:
     body_order_norms: Mapping[int, float]
     forbidden_support_norms: Mapping[str, float]
     gaussian_grade_distance: float | None
-    interaction_norm: float
+    interaction_norm: float | None
 
 
 def _validate_inputs(
@@ -218,7 +218,7 @@ def _inconclusive_record(
         body_order_norms={},
         forbidden_support_norms={},
         gaussian_grade_distance=None,
-        interaction_norm=0.0,
+        interaction_norm=None,
     )
 
 
@@ -255,6 +255,8 @@ def _analyze_sample(
     minimum_normalized_eigenvalue = float(np.min(transfer_eigenvalues))
     minimum_eigenvalue = (
         minimum_normalized_eigenvalue * float(vacuum_value)
+        if math.isfinite(minimum_normalized_eigenvalue)
+        else None
     )
     if (
         not np.all(np.isfinite(transfer_eigenvalues))
@@ -316,7 +318,9 @@ def _analyze_sample(
             vacuum_value=vacuum_value,
             minimum_margin=minimum_margin,
             minimum_eigenvalue=minimum_eigenvalue,
-            reconstruction_residual=log_residual,
+            reconstruction_residual=(
+                log_residual if math.isfinite(log_residual) else None
+            ),
         )
 
     modes = transfer.rows.bit_length() - 1
@@ -395,8 +399,13 @@ def _analyze_sample(
 
 
 def _ranking_key(record: TransferPortfolioRecord) -> tuple[object, ...]:
-    if record.status == "numerical-log-inconclusive":
+    if record.status != "numerical-log-conclusive":
         return (1, record.sample_index)
+    if (
+        record.interaction_norm is None
+        or record.gaussian_grade_distance is None
+    ):
+        raise ArithmeticError("conclusive record lacks ranking diagnostics")
     forbidden = record.forbidden_support_norms
     return (
         0,
