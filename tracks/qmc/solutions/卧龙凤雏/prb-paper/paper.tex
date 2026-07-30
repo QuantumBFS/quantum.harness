@@ -1,0 +1,289 @@
+\documentclass[aps,prb,reprint,superscriptaddress,longbibliography]{revtex4-2}
+
+\usepackage{amsmath,amssymb,bm}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{xcolor}
+
+\input{generated/headline_values.tex}
+
+\begin{document}
+
+\title{Effective Central Charges across Clean, Disordered, and Monitored
+Criticality: Benchmarks and an Exploratory Learning-Induced
+Metal--Insulator Transition}
+
+\author{Xu Tian}
+\email{tianxu@westlake.edu.cn}
+\affiliation{Department of Physics, School of Science, Westlake University,
+Hangzhou 310030, China}
+\author{Huidan Tan}
+\affiliation{Department of Physics, School of Science, Westlake University,
+Hangzhou 310030, China}
+
+\date{\today}
+
+\begin{abstract}
+Universal finite-size terms provide stringent tests of numerical calculations at
+two-dimensional critical points, but disorder and monitored dynamics complicate
+both their interpretation and their uncertainty.  We establish a reproducible
+validation hierarchy using three benchmarks and then apply it to an exploratory
+learning-induced metal--insulator transition.  For the clean Ising model we
+obtain $c=\CleanMCCharge$ from Monte Carlo data and
+$c=\CleanExactCharge$ from the exact transfer matrix.  For the random-bond
+Ising model on the Nishimori line and a weakly self-dual disordered model we
+find effective central charges $c_{\rm eff}=\NishimoriCharge$ and
+$\WeakCharge$, respectively.  At the candidate monitored transition
+$\phi/\pi=\LearningCandidate$, entanglement and Casimir fits instead yield
+$\LearningEntanglementCharge$ and $\LearningCasimirCharge$.  Their strong
+disagreement, together with an unbracketed transition and unstable anisotropy
+calibration, makes the monitored central-charge inference inconclusive.  The
+comparison shows how validated benchmarks, resampling at the correct
+independence level, and explicit claim gates prevent precise-looking fits from
+being mistaken for universal results.
+\end{abstract}
+
+\maketitle
+
+\section{Introduction}
+\label{sec:introduction}
+
+The coefficient of a universal finite-size correction is one of the most
+economical fingerprints of a two-dimensional critical point.  Conformal
+invariance relates the free-energy density on a periodic cylinder to the
+central charge \cite{BloeteCardyNightingale1986,Affleck1986}, while interval
+entanglement carries the same coefficient in a quantum ground state
+\cite{CalabreseCardy2004}.  These relations are especially useful
+computationally: a single dimensionless number tests the microscopic
+implementation, the approach to scaling, and the analysis pipeline at once.
+
+That economy can also be deceptive.  A subleading $L^{-2}$ term is small,
+correlated data do not supply as many independent observations as their row
+count suggests, and quenched disorder changes the object whose logarithm is
+averaged.  In monitored or decohering systems an additional space--time
+anisotropy converts fitted amplitudes into a central charge only after a
+velocity calibration.  A fit may therefore have a small regression error
+while its physical interpretation remains uncontrolled.
+
+Here we organize four existing calculations into a common validation
+framework.  The clean square-lattice Ising model \cite{Onsager1944} tests the
+entire Monte Carlo and fitting chain against both $c=1/2$ and an exact
+finite-width calculation.  The Nishimori random-bond Ising model
+\cite{Nishimori1981,HoneckerJacobsenPiccoPujol2001} tests quenched averaging
+and disorder-level resampling.  A weakly self-dual disordered model tests
+whether those controls survive a less strongly constrained critical
+manifold.  Only after these benchmarks do we analyze the learning-induced
+metal--insulator-transition candidate in a monitored class-DIII network
+\cite{WangVasseurTrebstLudwigZhu2025}.  Figure~\ref{fig:01-workflow}
+summarizes this hierarchy.
+
+\begin{figure*}[t]
+  \includegraphics[width=\textwidth]{generated/fig01-workflow.pdf}
+  \caption{Validation hierarchy used throughout this work.  Exact and clean
+  benchmarks validate normalization and scaling; disordered benchmarks add
+  quenched averaging and common-disorder controls; the monitored calculation
+  adds transition localization, anisotropy calibration, and agreement between
+  independent universal estimators.}
+  \label{fig:01-workflow}
+\end{figure*}
+
+Our main methodological result is deliberately conservative.  The three
+benchmarks reproduce their reference values within their bootstrap
+uncertainties.  The monitored calculation does not pass the same gates: the
+putative DIII transition is not bracketed by the available scan, the
+anisotropy estimate is unstable, and two nominal central-charge estimators
+disagree.  We report the amplitudes and their conditional conversions, but not
+a universal central charge for that model.
+
+\section{Models and universal observables}
+\label{sec:models}
+
+\subsection{Clean and random-bond Ising models}
+
+For Ising spins $s_i=\pm1$ on a square lattice, the reduced Hamiltonian is
+\begin{equation}
+  -\beta H=\sum_{\langle ij\rangle}K_{ij}s_i s_j .
+  \label{eq:ising-hamiltonian}
+\end{equation}
+The clean benchmark uses $K_{ij}=K_c=\tfrac12\ln(1+\sqrt2)$, whereas the
+quenched benchmarks draw bond variables once per disorder realization and
+hold them fixed during thermal sampling.  On the $\pm J$ Nishimori line, the
+bond distribution and inverse temperature obey the Nishimori condition
+\cite{Nishimori1981}.  The weakly self-dual ensemble uses the self-dual
+parameter specified by the frozen production data.
+
+For an infinitely long cylinder of circumference $L$, conformal invariance
+gives
+\begin{equation}
+  f(L)=f_\infty-\frac{\pi c_{\mathrm{eff}}}{6L^2}
+  +a_4L^{-4}+\cdots ,
+  \label{eq:casimir}
+\end{equation}
+where $f$ is the dimensionless free-energy density.  In a unitary clean model
+$c_{\rm eff}=c$; for a quenched random system it denotes the effective central
+charge extracted from the disorder-averaged free energy.  The averaging order
+is essential: the quenched observable is proportional to
+$[\ln Z]_{\rm dis}$, not $\ln[Z]_{\rm dis}$.
+
+\subsection{Monitored network model}
+
+The learning-induced problem is represented by a disordered free-fermion
+network in symmetry class DIII, with a measurement or decoherence angle
+$\phi$ controlling the trajectory ensemble.  Its topological phases and
+possible intervening metallic regime are diagnosed by transfer-matrix
+localization observables and by the scale dependence of entanglement
+\cite{AltlandZirnbauer1997,ChoFisher1997,
+WangVasseurTrebstLudwigZhu2025}.  We analyze the frozen scan near
+$\phi/\pi=\LearningCandidate$ rather than retuning the candidate after
+inspecting its central-charge fits.
+
+Two scaling relations are used.  A periodic one-dimensional cut of length
+$L$ has
+\begin{equation}
+ S(\ell,L)=\frac{c_{\rm eff}}{3}
+ \ln\!\left[\frac{L}{\pi}\sin\!\left(\frac{\pi\ell}{L}\right)\right]
+ +s_0+\delta S ,
+ \label{eq:entanglement}
+\end{equation}
+while the cylinder free energy follows Eq.~\eqref{eq:casimir} after converting
+the lattice aspect ratio with an anisotropy factor $\alpha$.  Agreement of
+these two estimates is a necessary internal consistency test; it is not
+imposed as a fitting constraint.
+
+\begin{table}[b]
+\caption{The four calculations and the additional controls required as model
+complexity increases.}
+\label{tab:01-models}
+\begin{ruledtabular}
+\begin{tabular}{lll}
+Model & Universal probe & Principal control\\
+\hline
+Clean Ising & Casimir term & Exact transfer matrix\\
+Nishimori RBIM & Quenched Casimir term & Disorder bootstrap\\
+Weak self-dual & Quenched Casimir term & Common disorder\\
+Monitored DIII & Entanglement/Casimir & Claim gates\\
+\end{tabular}
+\end{ruledtabular}
+\end{table}
+
+\section{Numerical methods and validation hierarchy}
+\label{sec:methods}
+
+\subsection{Monte Carlo implementation}
+
+The Ising simulations are implemented in Rust.  Every pseudorandom stream uses
+Xoshiro256++ \cite{BlackmanVigna2021}, with seeds assigned before parallel
+execution so that scheduling cannot alter a realization.  Thermal updates use
+the Wolff single-cluster algorithm \cite{Wolff1989}; measurements are separated
+by completed cluster updates, and warmup samples are discarded before
+accumulation.  Energy-like observables are formed with a Rao--Blackwell
+estimator whenever the conditional bond expectation is available.  This
+reduces thermal variance without changing the quenched sampling unit.
+
+The simulation executable writes plain numerical records and metadata.  Python
+is used only for validation, data reduction, nonlinear fits, bootstrap
+resampling, and publication graphics.  This separation keeps the
+high-throughput stochastic kernel in a compiled language while making the
+statistical transformations directly inspectable.
+
+\subsection{Paired fitting and resampling}
+
+For each bootstrap replicate we resample independent units and repeat the full
+fit, rather than perturbing the final parameter covariance matrix.  Clean
+thermal streams are the independent units.  For random models a whole disorder
+realization---including every width measured from it---is resampled as a
+block.  This paired bootstrap \cite{EfronTibshirani1993} preserves
+cross-width correlations.  When two nearby parameter values are compared, the
+same bond realization and random labels are reused: this common-disorder
+construction reduces the variance of their difference without pretending that
+the pair is independent.
+
+The reported standard error is the standard deviation of the bootstrap
+parameter distribution, and the interval is its central 95\% percentile
+interval.  Fit-window variation, truncation of small sizes, and correction
+terms are treated as systematic checks rather than folded into a single
+regression error.  For the exact clean calculation no stochastic error is
+assigned.
+
+\subsection{Predeclared claim gates}
+
+We distinguish a numerical fit from a physical claim.  Benchmark values must
+be stable to the prescribed size cuts and statistically compatible with their
+reference targets.  A monitored universal-central-charge claim additionally
+requires (i) a transition bracketed by independent phase diagnostics,
+(ii) a stable space--time anisotropy calibration, and (iii) mutually
+compatible entanglement and Casimir estimates.  Failing a gate does not erase
+the computed result; it changes the allowed statement from a universal
+estimate to a diagnostic conditional on the assumed candidate point.
+
+\section{Benchmark central charges}
+\label{sec:benchmarks}
+
+The three benchmark calculations and their finite-size trends are presented
+in Sec.~\ref{sec:discussion}; here we state the central comparison.  The clean
+Monte Carlo and exact transfer-matrix estimates agree with $1/2$, while the
+two quenched estimates agree with the established ordinary-replica benchmark
+values at their current precision.  Full fit windows and error decompositions
+are given below and in Appendix~\ref{app:bootstrap}.
+
+\section{Exploratory learning-induced metal--insulator transition}
+\label{sec:learning}
+
+The monitored-model fits are evaluated at the preselected candidate
+$\phi/\pi=\LearningCandidate$.  They remain exploratory because phase,
+anisotropy, and estimator-consistency gates are not all satisfied.  The
+conditional amplitudes are retained to make the origin of the failure
+auditable.
+
+\section{Cross-model discussion}
+\label{sec:discussion}
+
+The common analysis separates three questions: whether a numerical observable
+is stable, whether its statistical error is correctly estimated, and whether
+the observable supports the intended universal interpretation.  The
+benchmarks answer all three affirmatively; the monitored calculation presently
+answers only the first in selected fit windows.
+
+\section{Conclusion}
+\label{sec:conclusion}
+
+Validated clean and disordered benchmarks establish a reproducible route from
+simulation records to effective central charges.  Applying the same standard
+to the learning-induced transition exposes, rather than hides, the additional
+data required for a universal claim.
+
+\appendix
+
+\section{Observable mappings}
+\label{app:mappings}
+
+The normalization of the Casimir term follows Eq.~\eqref{eq:casimir}.  For the
+clean square lattice, the exact strip free energy supplies an independent
+mapping from microscopic couplings to the same coefficient.  In random
+ensembles, the mapping is applied after averaging $\ln Z$ over disorder.
+
+\section{Bootstrap construction}
+\label{app:bootstrap}
+
+Bootstrap indices are generated at the stream level for the clean model and at
+the realization level for quenched models.  All widths belonging to one
+realization share an index, and every replicate repeats the finite-size fit.
+
+\section{Claim-gate audit}
+\label{app:gates}
+
+The monitored result is withheld from publication as a central charge because
+the phase scan does not bracket the DIII transition, the fitted anisotropy is
+not stable under the prescribed checks, and the two central-charge estimators
+are incompatible.
+
+\begin{acknowledgments}
+The authors thank the Quantum Harness challenge organizers for providing the
+computational framework in which the numerical validation pipeline was
+developed.
+\end{acknowledgments}
+
+\bibliography{references}
+
+\end{document}
