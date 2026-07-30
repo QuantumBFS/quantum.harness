@@ -254,6 +254,24 @@ insertions at separation r where accessible.
   (`max|⟨B_p⟩|=1.000171798 > 1+10⁻⁶`). The chain and later stages were not run.
   Completed exploratory runs and optimizer repairs are failure evidence, not M3
   completion.
+- **2026-07-30 amendment (series-validation protocol).** A second session ratified
+  a small-field validation against the hₓ=0 series expansion
+  (e_series(h_z) = −1 − h_z²/4 − 15h_z⁴/64 − 147h_z⁶/256 − 18003h_z⁸/8192 per edge
+  spin; arXiv:0807.0487 Eq. 8 with e_ours(h) = 2 e_paper(h/2)): tensor-only
+  continuation from the M2 step-86 anchor, no optimizer state across fields,
+  frozen-tensor multi-initialization CTMRG audit (warm + fresh deterministic +
+  ≥2 fresh random, same χ/tol) plus a χ-increase stability check, acceptance only
+  on stationary optimizer + branch consistency + χ stability. The h_z=0 anchor was
+  accepted (δ = −1.95e-10 vs series); h_z=0.05/0.10 were flagged
+  contraction-ambiguous after the warm CTMRG branch drifted to a trivial
+  factorizing fixed point (artifact descent to −8−8h_z, stabilizers > 1) while
+  fresh branches stayed physical — the same disease as the χ=4/6 pass, now caught
+  quantitatively (`M3_REPORT.md` §Series-Validation Pilot). Ratified optimizer
+  amendments: **A1** α₀=0.005 with fresh-verified acceptance (ran; warm-trial
+  fragility found); **A2** from-scratch deterministic trial objective + fresh
+  random-seed veto (implemented and unit-tested; unexecuted at the deadline).
+  h_z=0.10 deferred until 0.05 passes. Next-session commands:
+  `CHALLENGE_SUMMARY.md` §6.
 
 ### M4 — Phase-line check (workflow step 5, MVP scope)
 - **Purpose:** locate and honestly report the transition on the MVP path.
@@ -314,7 +332,11 @@ production path.
 
 - M0 completed 2026-07-27; M1 completed 2026-07-28; M2 completed 2026-07-30.
 - M3 remains uncompleted after a bounded dense-tensor attempt and repair point failed
-  production acceptance; M4–M6 remain pending.
+  production acceptance; M4–M6 remain pending. A second-session series-validation
+  pilot (2026-07-30) accepted the h_z=0 anchor but flagged h_z=0.05/0.10 as
+  contraction-ambiguous; the diagnosed optimizer amendments A1/A2 and the prepared
+  relaunch are recorded in `M3_REPORT.md` and `CHALLENGE_SUMMARY.md` §6.
+  **Challenge closed at the deadline with status M3/6 uncompleted.**
 - Before each future numerical milestone, confirm the Hamiltonian, lattice, boundary,
   ansatz/symmetry, target observable, system size, and local-versus-cluster cost.
 - Future scripts must flush progress and write results incrementally per field point.

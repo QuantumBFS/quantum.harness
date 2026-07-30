@@ -230,3 +230,64 @@ A separate future session may calculate finite-field ground states at small nonz
 also reconsider the transition diagnostic because `m_z` was not effective here. No
 such calculation, source audit, implementation, or numerical run belongs to this
 session.
+
+## Series-Validation Pilot (second session, 2026-07-30)
+
+The deferred direction was executed as a ratified protocol: continue the accepted M2
+step-86 tensor to small `h_z` (h_x = 0) and compare with the series expansion
+(arXiv:0807.0487 Eq. 8, converted from the paper's J = 1/2 by e_ours(h) = 2 e_paper(h/2)):
+
+    e_series(h_z) = -1 - h_z^2/4 - 15 h_z^4/64 - 147 h_z^6/256 - 18003 h_z^8/8192
+
+per edge spin (`e(0.05) = -1.0006264739`, `e(0.10) = -1.0025240337`). Driver:
+`scripts/m3_series_validation.jl`; tests: `tests/m3_series_tests.jl` (69/69). Tensor-only continuation; no optimizer state across fields; every
+frozen tensor audited with warm + fresh deterministic (seed 424242) + two fresh
+random (seeds 1, 2) CTMRG initializations at the same chi/tolerance, plus a chi=16
+stability check. Acceptance requires a stationary optimizer (budget exhaustion is not
+convergence), all contractions converged, inter-initialization E/N spread <= 1e-6,
+observable spread <= 1e-5, and chi-increase |dE/N| <= 1e-6.
+
+Results (chi = 8, ctm_tol = 1e-8, artifacts
+`tracks/peps/results/20260730-m3-series-pilot-chi8*/`):
+
+- **h_z = 0 anchor: ACCEPTED.** E/N = -1.0000000002, delta vs series -1.95e-10,
+  4/4 initializations consistent (spread 8.1e-10), chi 8->16 stable (8.1e-10).
+  fresh_det reproduces the M2 repeat contraction (-8.000000001560) exactly.
+- **h_z = 0.05 and 0.10: NOT ACCEPTED (contraction-ambiguous).** The warm CTMRG
+  branch drifted to a trivial factorizing fixed point during optimization, claiming
+  E/N -> -1 - h_z with unphysical <A_s>, <B_p> > 1, while fresh contractions of the
+  same frozen tensors agree among themselves (~1e-13) at -0.9558197 and -0.9224684
+  per spin. Inter-branch spreads: 9.4e-2 and 1.8e-1 per spin -> `energy_disagreement`.
+
+**Diagnosed causes** (per-step re-contraction of every h_z=0.05 checkpoint,
+`inspection/series_branch_divergence.jl` -> `branch_divergence_0p05.csv`):
+
+- **Problem A — warm-branch artifact descent.** At alpha0 = 0.05, steps 1-2 are
+  branch-consistent and variational; from step 3 the warm branch claims descent
+  toward the algebraic floor -8-8*h_z while the fresh-contracted (true) energy rises
+  monotonically to -7.65/cell. Large normalized steps let the continuously tracked
+  environment fall into a trivial CTMRG basin; the fixed-point-AD gradient through
+  that branch then points downhill on the artifact surface. Branch-consistent
+  optimization makes the objective self-consistent but cannot detect the branch
+  itself going non-variational; only independent contractions can. The same
+  mechanism plausibly explains the chi = 4/6 first-pass and repair-point failures.
+- **Problem B — warm-trial fragility at small steps.** With alpha0 = 0.005 and
+  fresh-verified acceptance (amendment A1), accepted steps were branch-consistent
+  (~1e-7), but the warm-carried trial environment failed to converge for alpha >=
+  0.005, collapsing Armijo to alpha ~ 1e-4 (~7e-6 per step vs the required 5e-3):
+  guaranteed budget exhaustion. Fresh from-scratch contractions of the same trial
+  tensors converge robustly.
+- **Underlying hypothesis.** The dense D=2 tied ansatz has no virtual-Z2
+  constraint; in the deformed-tensor region its transfer matrix is near-defective,
+  so CTMRG has multiple basins and even fresh seeds sometimes fail (residual ~0.4).
+
+**Amendments (ratified):** A1 — alpha0 = 0.005 with fresh-verified step acceptance
+(implemented, run, Problem B found). A2 — every Armijo trial is a from-scratch
+deterministic (seed 424242) contraction with an independent fresh random-seed
+(seed 1) veto per accepted step; the frozen-tensor multi-initialization + chi=16
+audit is unchanged (**implemented and unit-tested; not executed by the deadline**).
+h_z = 0.10 remains deferred until h_z = 0.05 passes (`SERIES_PILOT_GRID =
+[0.0, 0.05]`). Launch commands are recorded in `CHALLENGE_SUMMARY.md` §6.
+
+M3 remains **uncompleted**; the series pilot produced no accepted finite-field
+energy. See `CHALLENGE_SUMMARY.md` for the full challenge record.

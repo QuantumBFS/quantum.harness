@@ -3,9 +3,11 @@
 ## 1. Current status
 
 - **Branch:** `challenge/peps-anyon-correlator` (PR #185)
-- **Current milestone:** M3 — uncompleted; no accepted finite-field ground-state path
+- **Current milestone:** M3 — uncompleted; series-validation pilot diagnosed, A2
+  optimizer amendment implemented and unit-tested but unexecuted
 - **Last passed milestone:** M2 — passed 2026-07-30
-- **Boundary:** current session closed with M3 unfinished; no further compute authorized
+- **Boundary:** challenge closed at the deadline with status **M3/6 uncompleted**;
+  the full record is `CHALLENGE_SUMMARY.md`
 - **Last updated:** 2026-07-30
 
 ## 2. Milestone overview
@@ -15,10 +17,10 @@
 | M0 stack setup | passed |
 | M1 Hamiltonian + 2×2 ED unit test | passed |
 | M2 h=0 random-init ground state | passed at χ=8 |
-| M3 adiabatic path (0, h_z) | uncompleted; attempted path rejected |
+| M3 adiabatic path (0, h_z) | uncompleted; series pilot: anchor accepted, h_z=0.05/0.10 contraction-ambiguous |
 | M4 phase-line check | blocked by M3 |
 | M5 anyon spectra/correlators | not started |
-| M6 handoff | not started |
+| M6 handoff | `CHALLENGE_SUMMARY.md` (this attempt closed, time limit) |
 
 ## 3. Completed work
 
@@ -60,29 +62,74 @@
   `1+1e-6`. Artifacts:
   `tracks/peps/results/20260730-m3-repair-point-chi6/`. No chain or smoke followed.
 
+### M3 series-validation pilot (second session, 2026-07-30)
+
+- **Protocol (ratified):** tensor-only continuation from the M2 step-86 anchor to
+  small `h_z` (h_x = 0), compared against the series
+  `e_series(h_z) = -1 - h_z^2/4 - 15h_z^4/64 - 147h_z^6/256 - 18003h_z^8/8192` per
+  edge spin (arXiv:0807.0487 Eq. 8, `e_ours(h) = 2 e_paper(h/2)`). No optimizer
+  state across fields; frozen-tensor audit = warm + fresh deterministic + two fresh
+  random CTMRG inits at the same χ/tol + χ=16 stability check; acceptance =
+  stationary optimizer + branch consistency (E/N spread ≤ 1e-6, observables ≤ 1e-5)
+  + χ stability (≤ 1e-6).
+- **h_z = 0 anchor: ACCEPTED.** E/N = −1.0000000002, δ vs series −1.95e-10,
+  4/4 inits consistent, χ-stable. Audit machinery validated.
+- **h_z = 0.05, 0.10: NOT ACCEPTED (contraction-ambiguous).** Warm CTMRG branch
+  drifted to a trivial factorizing fixed point mid-optimization (claimed
+  E/N → −1−h_z, ⟨A_s⟩, ⟨B_p⟩ > 1); fresh branches of the same frozen tensors agree
+  among themselves at −0.9558197 / −0.9224684 per spin. Spreads 9.4e-2 / 1.8e-1 per
+  spin → `energy_disagreement`.
+- **Diagnosis** (`inspection/series_branch_divergence.jl` →
+  `branch_divergence_0p05.csv`): steps 1–2 at h_z=0.05 are branch-consistent and
+  variational; from step 3 the warm branch claims descent to −8−8h_z while the true
+  (fresh) energy rises to −7.65/cell. Cause: large normalized steps (α₀=0.05) let
+  the tracked environment fall into the trivial basin; the AD gradient through that
+  branch descends the artifact. With α₀=0.005 + fresh-verified acceptance (A1), the
+  warm-carried *trial* env instead failed to converge at α ≥ 0.005 → Armijo
+  collapse to ~1e-4 → budget exhaustion (warm-trial fragility).
+- **Amendments:** A1 (α₀=0.005, fresh-verified steps) ran and exposed Problem B;
+  **A2 (from-scratch deterministic trial objective + fresh random-seed veto) is
+  implemented and unit-tested, unexecuted at the deadline.** h_z=0.10 deferred
+  (`SERIES_PILOT_GRID = [0.0, 0.05]`).
+- **Files:** `scripts/m3_series_validation.jl`, `tests/m3_series_tests.jl` (69/69),
+  `inspection/series_branch_divergence.jl`; artifacts
+  `tracks/peps/results/20260730-m3-series-pilot-chi8/` and `...-chi8-a005/`
+  (gitignored). Launch commands: `CHALLENGE_SUMMARY.md` §6.
+
 ## 4. Current milestone — M3 uncompleted
 
 - **Attempted:** bounded dense `D=2` exploratory grids, incremental checkpoints/CSV,
-  one invalid `m_z(h_z)` curve, and fresh-environment stabilizer/convergence records.
+  one invalid `m_z(h_z)` curve, fresh-environment stabilizer/convergence records,
+  and a ratified small-field series-validation pilot at `h_z = 0.05, 0.10`.
 - **Infrastructure repaired:** same-branch Armijo objective, independent multi-seed
-  audits, site-resolved physical gates, staged execution, and provenance-bound stage
-  markers.
-- **Not accepted:** the ground-state path near `h_z≈0.33`; most near-transition points
-  ended in Armijo failure, and the repaired `h_z=0.10` point still exceeded the
-  physical plaquette bound.
+  audits, site-resolved physical gates, staged execution, provenance-bound stage
+  markers, and a frozen-tensor multi-initialization + χ-increase audit with a
+  perturbative-series benchmark.
+- **Not accepted:** the ground-state path near `h_z≈0.33`; the repaired `h_z=0.10`
+  point exceeded the physical plaquette bound; the series pilot accepted only the
+  `h_z=0` anchor (δ = −1.95e-10 vs series) and flagged both field points as
+  contraction-ambiguous (warm-branch artifact descent).
 - **Consequence:** no critical interval or comparison claim is carried into M4/M5.
+  The blocker is diagnosed (warm CTMRG branch pathology, `M3_REPORT.md` §Pilot) and
+  the A2 optimizer amendment is implemented, unit-tested, and unexecuted.
 
 The completed exploratory runs and code repairs do not mean that M3 is finished.
 
-No further compute is scheduled pending user review.
+No further compute was scheduled: the challenge deadline was reached with M3/6
+uncompleted.
 
 ## 5. Open decisions and blockers
 
-- M3 production acceptance is blocked by CTMRG branch sensitivity and AD line-search
-  failure in the original dense `D=2`, `χ≤6` first-pass budget. The line-search
-  objective is now repaired, but finite-χ stabilizer estimates still violate the
-  approved site-resolved operator bound.
-- The current `m_z` curve must not be treated as transition evidence.
+- M3 production acceptance is blocked by CTMRG branch pathology in the
+  deformed-tensor region: warm-carried environments either drift to the trivial
+  factorizing fixed point (large steps) or fail to converge (small steps); even
+  fresh seeds occasionally fail there. The dense D=2 tied ansatz has no virtual-Z2
+  constraint and its transfer matrix is near-defective in that region
+  (hypothesis recorded in `M3_REPORT.md`).
+- The A2 amendment (fresh-det trial objective + random-seed veto) is the ratified
+  next run; if it fails, escalate χ (16/32) or move to the virtual-Z2-symmetric
+  ansatz (PLAN C7, required for M5 anyway).
+- The invalid `m_z` curve must not be treated as transition evidence.
 
 ## 6. Reproduction commands (all verified)
 
@@ -91,17 +138,21 @@ export PATH="$HOME/.juliaup/bin:$PATH"
 julia --project=julia-env tracks/peps/solutions/anyon-correlator/tests/runtests.jl   # M1 7/7 + M2 T1–T7
 julia --project=julia-env tracks/peps/solutions/anyon-correlator/tests/tied_ad_core_tests.jl   # 38/38 tied-AD tests
 julia --project=julia-env tracks/peps/solutions/anyon-correlator/tests/m3_hz_tests.jl
+julia --project=julia-env tracks/peps/solutions/anyon-correlator/tests/m3_series_tests.jl   # 65/65 series-protocol tests
 ```
 
 ## 7. Next actions
 
 1. Preserve the M1/M2 accepted work and all bounded M3 failure evidence.
-2. Keep M3 marked uncompleted; do not begin M4/M5 from the rejected dense path.
-3. In a new session only, consider finite small `h_x,h_z` ground states that can be
-   checked against series expansion, and reconsider the phase diagnostic because
-   `m_z` did not expose the expected transition.
-4. Do not treat the next-session idea as work performed or approved in this session.
+2. Run the A2 pilot at h_z=0.05 (commands in `CHALLENGE_SUMMARY.md` §6); on
+   acceptance, re-enable h_z=0.10 and extend the scan per the ratified protocol.
+3. Keep M3 marked uncompleted; do not begin M4/M5 from any rejected path.
 
 ## 8. New-session handoff
 
-Read first, in order: `M3_REPORT.md` → `M2_REPORT.md` → `PROGRESS.md` → `PLAN.md` (§6 milestones). M2 remains the last completed milestone and is accepted at step 86. M3 is uncompleted: the dense path is rejected, `m_z` did not diagnose the transition, and the repaired `h_z=0.10` point failed the site-resolved operator-bound audit. Repair artifacts are under `tracks/peps/results/20260730-m3-repair-point-chi6/`; the older invalid curve remains `figures/m3_mz_vs_hz_invalid.svg` only as failure evidence. A new session may investigate small finite `h_x,h_z` values against series expansion, but no such work has started.
+Read first: `CHALLENGE_SUMMARY.md` (full record), then `M3_REPORT.md` →
+`M2_REPORT.md` → `PROGRESS.md` → `PLAN.md` (§6 milestones). M2 remains the last
+completed milestone and is accepted at step 86. M3 is uncompleted: the dense path
+is rejected, the series pilot accepted only the h_z=0 anchor, and the A2 optimizer
+amendment awaits execution. The challenge was closed at the deadline with status
+M3/6 uncompleted (time limit).
