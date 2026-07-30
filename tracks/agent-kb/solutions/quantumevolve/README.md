@@ -20,6 +20,7 @@
 
 | 您想了解 | 读这个 | 时间 |
 |----------|--------|------|
+| **核心成果（最硬的结果）** | [**highlight_232_exact_certificates.md**](highlight_232_exact_certificates.md) | 10 分钟 |
 | **我们做了什么、结果如何** | 本文件下方 §1-§3 | 5 分钟 |
 | **OmniEvolve 框架技术细节** | [omnievolve_technical_intro.md](omnievolve_technical_intro.md) | 10 分钟 |
 | **五题逐题深入分析** | [final_competition_report.md](final_competition_report.md)（691 行） | 30 分钟 |
