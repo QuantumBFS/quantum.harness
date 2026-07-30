@@ -245,7 +245,8 @@ def test_assemble_complete_h3_evidence(complete_fixture, tmp_path):
     }
     assert expected.issubset({path.name for path in output.iterdir()})
     assert all((output / name).stat().st_size > 0 for name in expected)
-    rows = list(csv.DictReader((output / "thermodynamics.csv").open(encoding="utf-8")))
+    with (output / "thermodynamics.csv").open(encoding="utf-8") as handle:
+        rows = list(csv.DictReader(handle))
     assert {row["method"] for row in rows} == {"QMC", "PEPO", "ED 4x4"}
     assert {row["mode"] for row in rows if row["method"] == "PEPO"} == set(MODES)
     assert {row["status"] for row in rows if row["method"] == "PEPO"} == {
