@@ -289,7 +289,7 @@ def runner_manifest(meta_hash: str, stage: str, L: int, beta_index: int,
 def _task_table(path: Path, entries: Sequence[Mapping[str,Any]]) -> None:
     write_bytes(path,_task_table_bytes(entries))
 
-def _array_script(table: str, count: int, python_bin: str) -> str:
+def _array_script(table: str, count: int, python_bin: str, result_root: str) -> str:
     return f"""#!/bin/bash
 #SBATCH --job-name=i121-{table.replace("_tasks.tsv","")}
 #SBATCH --array=0-{count-1}%8
@@ -297,7 +297,7 @@ def _array_script(table: str, count: int, python_bin: str) -> str:
 #SBATCH --mem=8G
 #SBATCH --time=04:00:00
 set -euo pipefail
-ROOT=$(cd "$(dirname "$0")/.." && pwd -P)
+ROOT={shlex.quote(result_root)}
 SOLUTION_DIR={shlex.quote(str(SOLUTION_DIR))}
 PYTHON_BIN={shlex.quote(python_bin)}
 preflight=$("$PYTHON_BIN" "$SOLUTION_DIR/large_lattice_protocol.py" validate --root "$ROOT")
@@ -317,7 +317,7 @@ if [[ -f "$output/checkpoint.json" ]]; then resume=(--resume); fi
  --manifest "$ROOT/$manifest_rel" --output "$output" "${{resume[@]}}" \\
  >>"$output/runner.stdout" 2>>"$output/runner.stderr"
 """.replace("$","$")
-def _audit_script(stage: str, python_bin: str) -> str:
+def _audit_script(stage: str, python_bin: str, result_root: str) -> str:
     ed=""
     if stage=="g1":
         ed="""while IFS=$'\\t' read -r cell manifest_rel exact_rel; do
@@ -333,7 +333,7 @@ done < "$ROOT/ed_tasks.tsv"
 #SBATCH --mem=8G
 #SBATCH --time=04:00:00
 set -euo pipefail
-ROOT=$(cd "$(dirname "$0")/.." && pwd -P)
+ROOT={shlex.quote(result_root)}
 SOLUTION_DIR={shlex.quote(str(SOLUTION_DIR))}
 PYTHON_BIN={shlex.quote(python_bin)}
 preflight=$("$PYTHON_BIN" "$SOLUTION_DIR/large_lattice_protocol.py" validate --root "$ROOT")
@@ -370,14 +370,14 @@ def kernel_benchmark_manifest(sources: Mapping[str,Any]) -> Mapping[str,Any]:
       "resource_output":"benchmark/resource.tsv",
       "stdout":"benchmark/runner.stdout","stderr":"benchmark/runner.stderr"}
 
-def _benchmark_script(python_bin: str) -> str:
+def _benchmark_script(python_bin: str, result_root: str) -> str:
     return f"""#!/bin/bash
 #SBATCH --job-name=i121-kernel
 #SBATCH --cpus-per-task=1
 #SBATCH --mem=8G
 #SBATCH --time=04:00:00
 set -euo pipefail
-ROOT=$(cd "$(dirname "$0")/.." && pwd -P)
+ROOT={shlex.quote(result_root)}
 SOLUTION_DIR={shlex.quote(str(SOLUTION_DIR))}
 PYTHON_BIN={shlex.quote(python_bin)}
 preflight=$("$PYTHON_BIN" "$SOLUTION_DIR/large_lattice_protocol.py" validate --root "$ROOT")
@@ -392,15 +392,15 @@ if [[ -f "$ROOT/benchmark/kernel_benchmark.json" ]]; then exit 0; fi
  >>"$ROOT/benchmark/runner.stdout" 2>>"$ROOT/benchmark/runner.stderr"
 """.replace("$","$")
 
-def _generated_scripts(python_bin: str) -> Mapping[str,str]:
-    return {"run_g1_array.sbatch":_array_script("g1_tasks.tsv",32,python_bin),
-      "run_pilot_array.sbatch":_array_script("pilot_tasks.tsv",12,python_bin),
-      "run_full_array.sbatch":_array_script("full_tasks.tsv",68,python_bin),
-      "audit_g1.sbatch":_audit_script("g1",python_bin),
-      "audit_pilot.sbatch":_audit_script("pilot",python_bin),
-      "audit_full.sbatch":_audit_script("full",python_bin),
-      "audit_g4.sbatch":_audit_script("provenance",python_bin),
-      "run_kernel_benchmark.sbatch":_benchmark_script(python_bin),
+def _generated_scripts(python_bin: str, result_root: str) -> Mapping[str,str]:
+    return {"run_g1_array.sbatch":_array_script("g1_tasks.tsv",32,python_bin,result_root),
+      "run_pilot_array.sbatch":_array_script("pilot_tasks.tsv",12,python_bin,result_root),
+      "run_full_array.sbatch":_array_script("full_tasks.tsv",68,python_bin,result_root),
+      "audit_g1.sbatch":_audit_script("g1",python_bin,result_root),
+      "audit_pilot.sbatch":_audit_script("pilot",python_bin,result_root),
+      "audit_full.sbatch":_audit_script("full",python_bin,result_root),
+      "audit_g4.sbatch":_audit_script("provenance",python_bin,result_root),
+      "run_kernel_benchmark.sbatch":_benchmark_script(python_bin,result_root),
       "submit_after_live_cluster_check.sh":_submit_script(),
       "run_g0.sbatch":f"""#!/bin/bash
 #SBATCH --job-name=i121-g0
@@ -408,7 +408,7 @@ def _generated_scripts(python_bin: str) -> Mapping[str,str]:
 #SBATCH --mem=4G
 #SBATCH --time=00:30:00
 set -euo pipefail
-ROOT=$(cd "$(dirname "$0")/.." && pwd -P)
+ROOT={shlex.quote(result_root)}
 SOLUTION_DIR={shlex.quote(str(SOLUTION_DIR))}
 PYTHON_BIN={shlex.quote(python_bin)}
 "$PYTHON_BIN" "$SOLUTION_DIR/large_lattice_protocol.py" validate --root "$ROOT"
@@ -462,7 +462,7 @@ def materialize(meta_path: Path, root: Path,
         if x["chain_id"]==0:
             ed.append(f'{x["cell_id"]}\t{x["manifest"]}\texact/g1/{x["cell_id"]}.json')
     write_bytes(root/"ed_tasks.tsv",("\n".join(ed)+"\n").encode())
-    scripts=_generated_scripts(python_bin)
+    scripts=_generated_scripts(python_bin,str(root.resolve()))
     for name,text in scripts.items():
         write_bytes(root/"slurm"/name,text.encode(),True)
         os.chmod(root/"slurm"/name,0o755)
@@ -635,7 +635,7 @@ def verify_materialization(root: Path,
     expected_artifacts["kernel_benchmark_manifest.json"]=canonical_bytes(
         expected_benchmark)
     for name,text in _generated_scripts(
-            index["environment"]["python_executable"]).items():
+            index["environment"]["python_executable"],str(root.resolve())).items():
         expected_artifacts[f"slurm/{name}"]=text.encode()
     _need(set(artifacts)==set(expected_artifacts),
           "generated artifact key set drift")

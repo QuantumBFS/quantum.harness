@@ -381,6 +381,7 @@ def test_materialization_freezes_environment_and_restart_wrapper(
         encoding="utf-8"
     )
     assert environment["python_executable"] in script
+    assert str(root.resolve()) in script
     assert "CHAIN_COMPLETE" in script
     assert "--resume" in script
     assert '>>"$output/runner.stdout"' in script
