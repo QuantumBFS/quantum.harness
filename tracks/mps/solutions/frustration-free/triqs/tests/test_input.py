@@ -1,6 +1,7 @@
 import copy
 from hashlib import sha256
 import json
+import os
 from pathlib import Path
 import sys
 import tempfile
@@ -229,6 +230,19 @@ def test_atomic_publication_reuses_identical_and_rejects_different(tmp_path):
     output.write_text("{}\n", encoding="utf-8")
     with _ASSERTIONS.assertRaisesRegex(FileExistsError, "different"):
         write_production_input(output, solution_dir)
+
+
+def test_hashing_traverses_execute_only_cluster_parent(tmp_path):
+    parent = tmp_path / "execute-only"
+    child = parent / "owned"
+    child.mkdir(parents=True)
+    target = child / "value.bin"
+    target.write_bytes(b"cluster")
+    os.chmod(parent, 0o111)
+    try:
+        assert sha256_file(target) == sha256(b"cluster").hexdigest()
+    finally:
+        os.chmod(parent, 0o700)
 
 
 def test_real_tree_has_complete_transitive_sources_and_still_requires_calibration():

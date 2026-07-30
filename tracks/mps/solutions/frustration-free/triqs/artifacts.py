@@ -85,6 +85,18 @@ def _directory_descriptor(path: Path, *, create: bool = False) -> int:
                     | os.O_NOFOLLOW,
                     dir_fd=descriptor,
                 )
+            except PermissionError:
+                path_flag = getattr(os, "O_PATH", 0)
+                if path_flag == 0:
+                    raise
+                child = os.open(
+                    component,
+                    path_flag
+                    | os.O_DIRECTORY
+                    | os.O_CLOEXEC
+                    | os.O_NOFOLLOW,
+                    dir_fd=descriptor,
+                )
             except FileNotFoundError:
                 if not create:
                     raise
