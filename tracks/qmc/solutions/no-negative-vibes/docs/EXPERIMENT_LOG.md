@@ -2922,3 +2922,11 @@ The earlier JSON records with `source_commit=unavailable` remain rejected
 and unversioned.  All diagnostic and archive worktrees, bundles, scripts,
 and raw files were retained.  No search was repeated and no local Windows
 scientific calculation ran.
+
+The raw artifact and this archival record were committed as
+`bf8f32681a5eacae0e7130fa334a80c6b42f2d13`
+(`docs(qmc): archive Majorana Wei exact replay`).  GitHub connectivity then
+recovered.  The five-commit range from `f2b7fc2` through `bf8f326` was
+pushed to `shared/work/zibo/representation-cones`; an independent
+`git ls-remote` returned the same full `bf8f326...` SHA as local HEAD, and
+the local branch was clean and no longer ahead.
