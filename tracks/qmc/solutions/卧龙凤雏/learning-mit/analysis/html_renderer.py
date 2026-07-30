@@ -67,6 +67,7 @@ def render_html(document: ReportDocument, destination: Path) -> Path:
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="learning-mit-status" content="{html.escape(document.status)}">
 <meta name="numeric-facts-sha256" content="{facts_hash}">
+<meta name="summary-sha256" content="{document.summary_sha256}">
 <title>{html.escape(_safe(document.title))}</title>
 <style>{_css()}</style>
 </head>

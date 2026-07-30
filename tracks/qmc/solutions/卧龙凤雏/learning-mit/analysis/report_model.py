@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import hashlib
+import json
 from typing import Any
 
 from .locale import get_locale
@@ -64,6 +66,7 @@ class ReportDocument:
     sections: tuple[Section, ...]
     numeric_facts: dict[str, Any]
     figure_data_hashes: tuple[str, ...]
+    summary_sha256: str
 
 
 def build_report(summary: dict, locale: str) -> ReportDocument:
@@ -105,6 +108,11 @@ def build_report(summary: dict, locale: str) -> ReportDocument:
         sections=sections,
         numeric_facts=facts,
         figure_data_hashes=plot_data_hashes(summary),
+        summary_sha256=hashlib.sha256(
+            (json.dumps(summary, indent=2, sort_keys=True, allow_nan=False) + "\n").encode(
+                "utf-8"
+            )
+        ).hexdigest(),
     )
 
 

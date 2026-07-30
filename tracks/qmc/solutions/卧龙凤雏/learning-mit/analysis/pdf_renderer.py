@@ -47,7 +47,10 @@ def render_pdf(document: ReportDocument, destination: Path) -> Path:
         bottomMargin=17 * mm,
         title=_safe(document.title),
         author=_safe(document.author),
-        subject=f"{document.status}; numeric-facts-sha256={facts_hash}",
+        subject=(
+            f"{document.status}; numeric-facts-sha256={facts_hash}; "
+            f"summary-sha256={document.summary_sha256}"
+        ),
         creator="learning-mit deterministic report renderer",
         invariant=1,
         pageCompression=1,

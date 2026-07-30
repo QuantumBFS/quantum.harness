@@ -417,6 +417,13 @@ def _register_stable_artifacts(run_dir: Path, status: str) -> None:
         run_dir / "report-zh.pdf",
         *sorted((run_dir / "plots/en").glob("*.png")),
         *sorted((run_dir / "plots/zh").glob("*.png")),
+        *(path for path in (
+            run_dir / "config.toml",
+            run_dir / "raw/oracles.json",
+            run_dir / "raw/benchmark.json",
+            run_dir / "raw/negative-control.json",
+            run_dir / "processed/refinement_request.json",
+        ) if path.is_file()),
     ]
     for path in stable:
         relative = path.relative_to(run_dir).as_posix()

@@ -23,3 +23,6 @@
 - [Weak self-dual central-charge verification](weak-self-dual/README.md) —
   Rust Born-correlated Gaussian Majorana trajectories with Xoshiro256++, plus
   Python bootstrap analysis, plots, and an offline report.
+- [Learning-induced metal-insulator transition](learning-mit/README.md) —
+  exploratory Rust Born-Gaussian study of the XY validation line and a generic
+  DIII cut, with hash-gated Python analysis and bilingual offline reports.
