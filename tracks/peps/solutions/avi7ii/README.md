@@ -9,10 +9,12 @@ model.
 
 The report leads with the challenge checklist, embeds all four evidence figures,
 and links every headline number to CSV data or immutable checkpoint metadata.
-For offline reading, download the self-contained
-[HTML report](../../results/issue147-four-figure-deadline/report.html). The
-validated result is a promising thermodynamic-aware PEPO prototype, not a claim
-that the complete beta-range and bond-dimension benchmark has been finished.
+Open the [interactive HTML preview](https://htmlpreview.github.io/?https://github.com/Avi7ii/quantum.harness/blob/challenge/peps-2d-finite-temperature/tracks/peps/results/issue147-four-figure-deadline/report.html)
+directly in a browser, or download the self-contained
+[HTML source](../../results/issue147-four-figure-deadline/report.html) for
+offline reading. The validated result is a promising thermodynamic-aware PEPO
+prototype, not a claim that the complete beta-range and bond-dimension
+benchmark has been finished.
 
 ## Smoke test
 

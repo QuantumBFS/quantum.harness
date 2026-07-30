@@ -5,7 +5,8 @@
 > 4×4 ED 与独立 10×10 QMC 的证据链已经跑通；完整 β 区间、ordinary PEPO
 > 对照和键维收敛 benchmark 尚未完成。
 
-[下载完整离线 HTML 报告](report.html) ·
+[▶ 直接预览完整 HTML 报告](https://htmlpreview.github.io/?https://github.com/Avi7ii/quantum.harness/blob/challenge/peps-2d-finite-temperature/tracks/peps/results/issue147-four-figure-deadline/report.html) ·
+[HTML 源文件 / 离线下载](report.html) ·
 [报告结构化源数据](report.json) ·
 [Challenge #147](https://github.com/QuantumBFS/quantum.harness/issues/147)
 
