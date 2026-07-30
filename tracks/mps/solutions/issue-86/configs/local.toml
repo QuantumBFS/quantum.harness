@@ -1,0 +1,33 @@
+[[sweeps]]
+model = "nn"
+lengths = [8, 12, 16]
+gammas = [0.96, 0.98, 1.0, 1.02, 1.04]
+chis = [32]
+tolerance = 1.0e-8
+maxiter = 20
+excited = true
+seed = 86
+
+[[sweeps]]
+model = "long_range"
+sigmas = [1.75]
+lengths = [8, 16]
+gammas = [1.52, 1.54, 1.56, 1.58, 1.60]
+chis = [32]
+poles = [8, 12, 16]
+tolerance = 1.0e-8
+maxiter = 20
+excited = false
+seed = 86
+
+[[sweeps]]
+model = "long_range"
+sigmas = [2.0]
+lengths = [8, 16]
+gammas = [1.38, 1.40, 1.42, 1.44, 1.46]
+chis = [32]
+poles = [8, 12, 16]
+tolerance = 1.0e-8
+maxiter = 20
+excited = false
+seed = 86
