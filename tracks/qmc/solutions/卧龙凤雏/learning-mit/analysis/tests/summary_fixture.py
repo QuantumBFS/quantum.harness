@@ -92,6 +92,13 @@ def summary_fixture():
                 "log_log2": 0.05,
                 "page_log_log2": 0.04,
             },
+            "chord_fit": {
+                "width": 32,
+                "chord_log": [1.2, 1.8, 2.1, 1.8, 1.2],
+                "entropy": [0.72, 0.80, 0.84, 0.80, 0.72],
+                "uncertainty": [0.02, 0.02, 0.02, 0.02, 0.02],
+                "fitted": [0.71, 0.81, 0.84, 0.81, 0.71],
+            },
             "stable_without_smallest": True,
             "reason": None,
         },

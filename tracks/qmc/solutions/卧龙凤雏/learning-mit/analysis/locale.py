@@ -47,6 +47,12 @@ EN = Locale(
         "ess": "effective sample size",
         "data": "data",
         "fit": "fit",
+        "unavailable": "not available for this frozen data set",
+        "chord_log": "log chord length",
+        "inverse_width_squared": "inverse width squared 1/L²",
+        "central_charge": "effective central charge c_eff",
+        "entropy_estimator": "entanglement",
+        "casimir_estimator": "Casimir / anisotropy",
     },
 )
 
@@ -85,6 +91,12 @@ ZH = Locale(
         "ess": "有效样本量",
         "data": "数据",
         "fit": "拟合",
+        "unavailable": "该冻结数据集无法得到此估计",
+        "chord_log": "弦长对数",
+        "inverse_width_squared": "宽度平方倒数 1/L²",
+        "central_charge": "有效中心荷 c_eff",
+        "entropy_estimator": "纠缠熵",
+        "casimir_estimator": "Casimir / 各向异性",
     },
 )
 

@@ -27,6 +27,11 @@ PLOT_NAMES = (
     "alpha-sensitivity.png",
     "negative-control.png",
     "runtime-ess.png",
+    "entropy-chord-fit.png",
+    "entropy-ceff-extrapolation.png",
+    "casimir-residuals.png",
+    "anisotropy-stability.png",
+    "ceff-comparison.png",
 )
 
 
@@ -46,6 +51,11 @@ def make_plots(summary: dict, locale: str, output_dir: Path) -> list[Path]:
         _alpha_sensitivity,
         _negative_control,
         _runtime,
+        _entropy_chord_fit,
+        _entropy_ceff_extrapolation,
+        _casimir_residuals,
+        _anisotropy_stability,
+        _ceff_comparison,
     )
     paths = []
     for name, renderer in zip(PLOT_NAMES, renderers, strict=True):
@@ -79,6 +89,15 @@ def plot_data_hashes(summary: dict, locale: str | None = None) -> tuple[str, ...
         {
             "runtime": summary.get("runtime", {}),
             "ess": summary.get("bootstrap", {}).get("effective_sample_size"),
+        },
+        summary.get("entanglement_c_eff", {}).get("chord_fit", {}),
+        summary.get("entanglement_c_eff", {}),
+        summary.get("casimir", {}).get("residuals", []),
+        summary.get("anisotropy", {}).get("window_estimates", []),
+        {
+            "entanglement": summary.get("entanglement_c_eff", {}),
+            "casimir": summary.get("casimir_c_eff", {}),
+            "comparison": summary.get("estimator_comparison", {}),
         },
     )
     return tuple(
@@ -245,6 +264,107 @@ def _runtime(summary: dict, locale: Locale):
             ha="right",
             color="#324b5a",
         )
+    return figure, axis
+
+
+def _unavailable(axis: plt.Axes, locale: Locale) -> None:
+    axis.text(
+        0.5,
+        0.5,
+        locale.labels["unavailable"],
+        ha="center",
+        va="center",
+        transform=axis.transAxes,
+        color="#697780",
+    )
+
+
+def _entropy_chord_fit(summary: dict, locale: Locale):
+    figure, axis = _figure()
+    data = summary.get("entanglement_c_eff", {}).get("chord_fit", {})
+    x = data.get("chord_log", [])
+    if x:
+        axis.errorbar(
+            x,
+            data.get("entropy", []),
+            yerr=data.get("uncertainty", []),
+            fmt="o",
+            color="#175a7a",
+            capsize=3,
+            label=locale.labels["data"],
+        )
+        axis.plot(x, data.get("fitted", []), "-", color="#b95c23", label=locale.labels["fit"])
+        axis.legend(frameon=False)
+    else:
+        _unavailable(axis, locale)
+    axis.set(xlabel=locale.labels["chord_log"], ylabel=locale.labels["entropy"])
+    return figure, axis
+
+
+def _entropy_ceff_extrapolation(summary: dict, locale: Locale):
+    figure, axis = _figure()
+    data = summary.get("entanglement_c_eff", {})
+    rows = np.asarray(data.get("per_width", []), dtype=float)
+    if rows.size:
+        axis.errorbar(
+            rows[:, 0] ** -2,
+            rows[:, 1],
+            yerr=rows[:, 2],
+            fmt="o",
+            color="#175a7a",
+            capsize=3,
+            label=locale.labels["data"],
+        )
+        axis.plot(rows[:, 0] ** -2, data.get("fitted", []), "-", color="#b95c23", label=locale.labels["fit"])
+        axis.legend(frameon=False)
+    else:
+        _unavailable(axis, locale)
+    axis.set(xlabel=locale.labels["inverse_width_squared"], ylabel=locale.labels["central_charge"])
+    return figure, axis
+
+
+def _casimir_residuals(summary: dict, locale: Locale):
+    figure, axis = _figure()
+    data = summary.get("casimir", {})
+    widths = data.get("widths", [])
+    if widths:
+        axis.axhline(0, color="#7b8790", linewidth=1)
+        axis.plot(widths, data.get("residuals", []), "o-", color="#175a7a")
+    else:
+        _unavailable(axis, locale)
+    axis.set(xlabel=locale.labels["width"], ylabel=locale.labels["residual"])
+    return figure, axis
+
+
+def _anisotropy_stability(summary: dict, locale: Locale):
+    return _alpha_sensitivity(summary, locale)
+
+
+def _ceff_comparison(summary: dict, locale: Locale):
+    figure, axis = _figure()
+    entropy = summary.get("entanglement_c_eff", {})
+    casimir = summary.get("casimir_c_eff", {})
+    rows = [
+        (locale.labels["entropy_estimator"], entropy),
+        (locale.labels["casimir_estimator"], casimir),
+    ]
+    available = [(label, data) for label, data in rows if data.get("value") is not None]
+    if available:
+        for index, (label, data) in enumerate(available):
+            interval = data.get("interval") or [data["value"], data["value"]]
+            value = float(data["value"])
+            axis.errorbar(
+                index,
+                value,
+                yerr=[[value - interval[0]], [interval[1] - value]],
+                fmt="o",
+                capsize=5,
+                color=("#175a7a", "#b95c23")[index % 2],
+            )
+        axis.set_xticks(range(len(available)), [label for label, _ in available])
+    else:
+        _unavailable(axis, locale)
+    axis.set_ylabel(locale.labels["central_charge"])
     return figure, axis
 
 

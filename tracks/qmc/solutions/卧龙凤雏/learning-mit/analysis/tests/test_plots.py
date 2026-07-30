@@ -10,8 +10,16 @@ def test_all_bilingual_plots_are_generated_from_identical_data(tmp_path: Path):
     english = make_plots(summary, "en", tmp_path / "en")
     chinese = make_plots(summary, "zh", tmp_path / "zh")
 
-    assert len(english) == len(chinese) == 10
+    assert len(english) == len(chinese) == 15
     assert {path.name for path in english} == {path.name for path in chinese}
+    assert {
+        "entropy-chord-fit.png",
+        "entropy-ceff-extrapolation.png",
+        "casimir-fit.png",
+        "casimir-residuals.png",
+        "anisotropy-stability.png",
+        "ceff-comparison.png",
+    }.issubset({path.name for path in english})
     assert all(path.read_bytes().startswith(b"\x89PNG") for path in english + chinese)
     assert plot_data_hashes(summary, "en") == plot_data_hashes(summary, "zh")
 

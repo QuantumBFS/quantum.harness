@@ -27,6 +27,11 @@ def test_bilingual_models_share_numeric_facts_but_localize_all_reader_text(tmp_p
     assert english.figure_data_hashes == chinese.figure_data_hashes
     assert english.title != chinese.title
     assert english.sections[0].title != chinese.sections[0].title
+    assert english.numeric_facts["entanglement_c_eff"] == 0.34
+    assert english.numeric_facts["casimir_c_eff"] == 0.328
+    assert english.numeric_facts["claim_status"] == "candidate"
+    assert any(section.slug == "effective-central-charge" for section in english.sections)
+    assert any(section.slug == "effective-central-charge" for section in chinese.sections)
 
     make_plots(summary, "en", tmp_path / "plots/en")
     make_plots(summary, "zh", tmp_path / "plots/zh")
@@ -85,8 +90,9 @@ def test_inconclusive_report_describes_null_estimates_without_python_none():
     chinese = build_report(summary, "zh").sections[0].blocks[0].text
 
     assert "None" not in english
-    assert "not fitted" in english
-    assert "不发布" in chinese
+    assert "unavailable" in english
+    assert "not a universal-constant claim" in english
+    assert "不能作为普适常数结论" in chinese
     assert "None" not in chinese
 
 

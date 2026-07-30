@@ -16,7 +16,7 @@ from .anisotropy import calibrate_alpha, fit_spatial_dimension
 from .bootstrap import bootstrap_candidate, summarize_bootstrap
 from .casimir import fit_casimir
 from .data_io import LoadedRun, LoadedStream, load_run
-from .effective_central_charge import extrapolate_c_eff, fit_width_c_eff
+from .effective_central_charge import chord_log, extrapolate_c_eff, fit_width_c_eff
 from .entanglement import fit_entropy_arc
 from .gates import evaluate_claim_gates
 from .html_renderer import render_html
@@ -423,6 +423,7 @@ def _empty_entanglement_c_eff(reason: str) -> dict[str, Any]:
         "chi2_per_dof": None,
         "covariance_condition": None,
         "model_weights": {},
+        "chord_fit": {},
         "stable_without_smallest": False,
         "reason": reason,
     }
@@ -443,14 +444,24 @@ def _entanglement_c_eff(
     fits_by_width: dict[int, tuple[float, float]] = {}
     model_weights: dict[str, float] = {model: 0.0 for model in MODELS}
     used_weight_sets = 0
+    chord_fit: dict[str, Any] = {}
     try:
         for width, streams in sorted(selected.items()):
             rows = _mean_arc(streams, width)
             if len(rows) < 6:
                 continue
-            estimate, covariance, _ = fit_width_c_eff(rows)
+            estimate, covariance, residuals = fit_width_c_eff(rows)
             error = max(float(np.sqrt(max(covariance[1, 1], 0.0))), 1e-8)
             fits_by_width[width] = (estimate, error)
+            fraction = rows[:, 0] / width
+            central = rows[(fraction >= 0.25) & (fraction <= 0.75)]
+            chord_fit = {
+                "width": width,
+                "chord_log": chord_log(central[:, 0], width).tolist(),
+                "entropy": central[:, 2].tolist(),
+                "uncertainty": central[:, 3].tolist(),
+                "fitted": (central[:, 2] - residuals).tolist(),
+            }
             fit_set = fit_entropy_arc(rows, MODELS)
             for model in MODELS:
                 model_weights[model] += fit_set.by_name(model).weight
@@ -479,6 +490,7 @@ def _entanglement_c_eff(
         "chi2_per_dof": fit.chi2_per_dof,
         "covariance_condition": fit.covariance_condition,
         "model_weights": fit.model_weights,
+        "chord_fit": chord_fit,
         "stable_without_smallest": fit.stable_without_smallest,
         "reason": None,
     }
