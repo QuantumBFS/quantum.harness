@@ -1349,6 +1349,13 @@ def _authenticate_combined_sources(
         extension_run_spec,
         extension_protocol,
     )
+    if (
+        recomputed_extension.get("extension_run_spec_sha256")
+        != EXTENSION_RUN_SPEC_SHA256
+        or recomputed_extension.get("extension_progress_sha256")
+        != EXTENSION_PROGRESS_SHA256
+    ):
+        raise RuntimeError("post-aggregation extension source hash mismatch")
     if _canonical_bytes(extension_analysis) != _canonical_bytes(recomputed_extension):
         raise RuntimeError(
             "supplied extension analysis does not match authenticated recomputation"

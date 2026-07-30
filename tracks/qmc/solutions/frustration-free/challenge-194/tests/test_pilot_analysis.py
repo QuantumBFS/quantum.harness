@@ -5,6 +5,7 @@ import json
 import multiprocessing
 import shutil
 import weakref
+from collections.abc import Mapping
 from dataclasses import FrozenInstanceError
 from itertools import pairwise
 from pathlib import Path
@@ -374,6 +375,133 @@ def test_fully_synthetic_resigned_282_row_sources_fail_with_real_trust_inputs(
                 extension_analysis=extension_analysis,
                 **trusted,
             )
+
+
+@pytest.mark.parametrize("operation", ("combine", "select", "build-p1"))
+def test_combined_paths_reject_valid_root_swapped_between_verify_and_aggregate(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    operation: str,
+):
+    p0, alternate_analysis, combined = _combined_selector_document()
+    brackets = analysis._select_p1_brackets_from_evidence(
+        combined,
+        analysis._selector_v2_evidence(combined),
+    )
+    initial_root = tmp_path / "extension"
+    alternate_root = tmp_path / "alternate"
+    saved_root = tmp_path / "verified-original"
+    initial_root.mkdir()
+    alternate_root.mkdir()
+    initial_run_payload = b'{"root":"initial-run"}\n'
+    initial_progress_payload = b'{"root":"initial-progress"}\n'
+    alternate_run_payload = b'{"root":"alternate-run"}\n'
+    alternate_progress_payload = b'{"root":"alternate-progress"}\n'
+    (initial_root / "run_spec.json").write_bytes(initial_run_payload)
+    (initial_root / "progress.json").write_bytes(initial_progress_payload)
+    (alternate_root / "run_spec.json").write_bytes(alternate_run_payload)
+    (alternate_root / "progress.json").write_bytes(alternate_progress_payload)
+    run_spec = (initial_root / "run_spec.json").resolve()
+    protocol = {"protocol_sha256": "a" * 64}
+
+    monkeypatch.setattr(extension, "_validate_source", lambda _source: None)
+    monkeypatch.setattr(extension, "_load_p0_evidence", lambda _root: ({}, {}))
+    monkeypatch.setattr(
+        extension,
+        "_validate_p0_extension_protocol_for_revision",
+        lambda *_args, **_kwargs: None,
+    )
+    monkeypatch.setattr(
+        extension,
+        "EXTENSION_PROTOCOL_SHA256",
+        protocol["protocol_sha256"],
+    )
+    monkeypatch.setattr(
+        extension,
+        "EXTENSION_PROTOCOL_FILE_SHA256",
+        hashlib.sha256(_canonical_bytes(protocol)).hexdigest(),
+    )
+    monkeypatch.setattr(
+        extension,
+        "EXTENSION_RUN_SPEC_SHA256",
+        hashlib.sha256(initial_run_payload).hexdigest(),
+    )
+    monkeypatch.setattr(
+        extension,
+        "EXTENSION_PROGRESS_SHA256",
+        hashlib.sha256(initial_progress_payload).hexdigest(),
+    )
+    monkeypatch.setattr(
+        pilot,
+        "verify_frozen_challenge_194_p0_download",
+        lambda _path: {},
+    )
+
+    def initial_read(
+        _path: Path,
+        description: str,
+        *,
+        maximum_size: int,
+        **_kwargs,
+    ):
+        del maximum_size
+        if "run spec" in description:
+            return {}, initial_run_payload
+        return {}, initial_progress_payload
+
+    monkeypatch.setattr(pilot, "_read_canonical", initial_read)
+
+    def verify_then_swap(_path: Path) -> dict[str, object]:
+        initial_root.rename(saved_root)
+        alternate_root.rename(initial_root)
+        return {}
+
+    monkeypatch.setattr(pilot, "verify_p0_extension_download", verify_then_swap)
+
+    def aggregate_swapped_root(
+        supplied_run_spec: Path,
+        _protocol: Mapping[str, object],
+    ) -> dict[str, object]:
+        assert supplied_run_spec.read_bytes() == alternate_run_payload
+        assert (supplied_run_spec.parent / "progress.json").read_bytes() == (
+            alternate_progress_payload
+        )
+        return alternate_analysis
+
+    monkeypatch.setattr(
+        analysis,
+        "aggregate_p0_extension",
+        aggregate_swapped_root,
+    )
+    trusted = {
+        "p0_evidence_root": tmp_path.resolve(),
+        "extension_run_spec": run_spec,
+        "extension_protocol": protocol,
+    }
+
+    with pytest.raises(RuntimeError, match="post-aggregation.*hash"):
+        if operation == "combine":
+            extension.combine_p0_evidence(
+                p0,
+                alternate_analysis,
+                **trusted,
+            )
+        elif operation == "select":
+            analysis.select_p1_brackets(
+                combined,
+                p0_analysis=p0,
+                extension_analysis=alternate_analysis,
+                **trusted,
+            )
+        else:
+            analysis.build_p1_protocol(
+                combined,
+                brackets,
+                p0_analysis=p0,
+                extension_analysis=alternate_analysis,
+                **trusted,
+            )
+    assert not (tmp_path / "p1_protocol.json").exists()
 
 
 def test_authenticated_combination_rejects_modified_extension_means():

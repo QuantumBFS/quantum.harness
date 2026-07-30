@@ -271,6 +271,7 @@ def test_readme_documents_exact_p0_p1_collaborator_boundary():
         "--extension-analysis",
         "--extension-run-spec",
         "--extension-protocol",
+        "same\nfive trusted inputs",
         "results/challenge-194/p0_combined_brackets_v2.json",
         "143d35ac52923cff2d24c43d304a75c2d04d3c66",
         "P0 analysis is authenticated by the exact dual root hashes",

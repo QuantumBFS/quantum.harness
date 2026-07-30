@@ -264,7 +264,7 @@ uv run python scripts/analyze_pilot.py select --analysis \
 The combined-v2 selector and builder never trust combined JSON alone. Both
 commands require the exact P0 and extension analyses and recompute full source
 validation. If every combined bracket is selected, build P1 with the same
-three inputs:
+five trusted inputs:
 
 ```bash
 uv run python scripts/analyze_pilot.py build-p1 --analysis \
