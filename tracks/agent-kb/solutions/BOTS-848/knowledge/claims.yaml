@@ -98,6 +98,15 @@
       "limitations": "It must be rejected if channel weights fail to predict correction size or if per-matrix-element kernels are required."
     },
     {
+      "claim_id": "low-dimensional-response-matrix",
+      "statement": "Inside a fixed localized operator basis and calibration domain, beyond-DFPT coefficient corrections may be compressible into a small channel-response matrix fitted from sparse anchors.",
+      "status": "working-hypothesis",
+      "source_ids": ["Abramovitch2025", "Cai2025", "Li2019", "Nomura2015"],
+      "source_traceable": true,
+      "scope": "Static convention-matched channel coefficients after separating analytic long-range fields from localized short-range operators.",
+      "limitations": "The bundled held-out case is synthetic. The executable model still needs DFPT coefficients at every prediction point, so no real-material transfer accuracy or speedup over DFPT has been established."
+    },
+    {
       "claim_id": "universal-dfpt-validity",
       "statement": "A universal accuracy bound for ordinary DFPT across all correlated materials and phonon modes is not established.",
       "status": "open-question",

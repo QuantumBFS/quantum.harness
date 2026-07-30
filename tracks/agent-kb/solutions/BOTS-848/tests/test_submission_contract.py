@@ -20,9 +20,15 @@ class SubmissionContractTests(unittest.TestCase):
             "python3 -m unittest discover -s tests -v",
             "python3 eval/evaluate.py",
             "python3 examples/run_example.py",
+            "python3 examples/run_sparse_anchor.py",
             "make report-check",
-            "Ran 29 tests",
+            "Ran 48 tests",
             "14/14 cases passed",
+            "held-out synthetic",
+            "dense_high_level=600.000",
+            "is_faster_than_dfpt=False",
+            "measured_runtime=False",
+            "physical_accuracy_established=False",
         )
         for fragment in required_fragments:
             self.assertIn(fragment, text)
@@ -45,6 +51,10 @@ class SubmissionContractTests(unittest.TestCase):
         for evidence in ("44 -> 87 meV", "58 -> 50 meV", "70 -> 76 meV", "53 -> 45 meV"):
             self.assertIn(evidence, text)
 
+        self.assertIn("## When It Can Be Faster", text)
+        self.assertIn("not faster than a single DFPT calculation", text)
+        self.assertIn("synthetic held-out", text)
+
     def test_documented_pdf_hash_matches_distributed_artifact(self):
         text = (SOLUTION_ROOT / "REPRODUCE.md").read_text(encoding="utf-8")
         documented = re.search(r"\b[0-9a-f]{64}\b", text)
@@ -58,6 +68,8 @@ class SubmissionContractTests(unittest.TestCase):
         text = (SOLUTION_ROOT / "README.md").read_text(encoding="utf-8")
         self.assertIn("[Reproduce the submission](REPRODUCE.md)", text)
         self.assertIn("[Read the result argument](RESULTS.md)", text)
+        self.assertIn("sparse-anchor", text)
+        self.assertIn("not a measured runtime speedup", text)
 
 
 if __name__ == "__main__":

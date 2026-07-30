@@ -47,6 +47,18 @@ better candidate for inexpensive static treatment, whereas appreciable
 internal, nonlocal, interaction-parameter, or dynamic content signals the need
 for a targeted correction or an abstention.
 
+The quantitative MVP assumes that a fixed localized, symmetry-adapted operator
+basis has already been declared. If `c_DFPT` and `c_reference` are coefficient
+vectors in that same basis, it fits a small response matrix `K`:
+
+```text
+c_reference = K c_DFPT + residual.
+```
+
+This is a coefficient-space hypothesis, not a claim that the complete
+electron-phonon matrix is low rank. Diagonal entries rescale a channel;
+off-diagonal entries allow channel mixing.
+
 ## Why This Is Useful
 
 The result turns a vague question—"is this material too correlated for
@@ -70,6 +82,28 @@ The repository supplies more than a narrative: a reusable agent workflow, a
 typed claim ledger, machine-readable material cases, a dependency-free
 reference implementation, transparent examples, and an executable evaluation.
 
+## When It Can Be Faster
+
+The present correction layer is **not faster than a single DFPT calculation**.
+It needs `c_DFPT` at every prediction point and adds fitting and reconstruction.
+Its immediate computational target is instead to replace a dense set of
+beyond-DFPT vertices with a small number of higher-level anchors:
+
+```text
+DFPT only       = campaigns * full grid * DFPT cost
+dense reference = campaigns * full grid * (DFPT + high-level cost)
+corrected path  = training + high-level anchors
+                + campaigns * full grid * (DFPT + inference cost).
+```
+
+For the bundled normalized assumptions these costs are `100.000`, `600.000`,
+and `122.000`. Thus the dense higher-level path costs `4.918` times as much as the
+corrected path, while the corrected path costs `22.000` more than DFPT alone.
+This is an accounting example, not a measured runtime result. Beating DFPT itself
+would require a separate surrogate that predicts the missing DFPT coefficient
+vectors and must be tested against symmetry-reduced DFPT plus Wannier/EPW
+interpolation.
+
 ## Why the Result Is Credible
 
 Credibility has three separate levels. Passing one level does not prove the
@@ -84,10 +118,19 @@ The tests verify that the implemented decomposition:
 - preserves Hermiticity;
 - gives channel weights invariant under local unitary basis rotations;
 - returns the original DFPT operator when all channel kernels equal one;
+- recovers identity and off-diagonal response matrices from sufficient anchors;
+- predicts the bundled synthetic held-out coefficient vectors to floating-point
+  precision;
+- reports whether a sparse higher-level correction beats a dense higher-level
+  reference and separately reports its overhead relative to DFPT alone;
 - rejects malformed blocks, matrices, kernels, weights, and missing evidence.
 
 These properties establish that the code implements its stated finite-matrix
 model correctly. They do not establish that the model predicts every material.
+
+The synthetic held-out example gives relative RMSE `2.711e-16` because its
+targets were generated exactly from a declared three-channel matrix. It verifies
+the fit-predict-score path and nothing about physical transferability.
 
 ### 2. Primary-source numerical evidence
 
@@ -128,12 +171,13 @@ physical-accuracy measurement.
 
 The submission does not yet provide:
 
-- fitted charge, internal, or nonlocal kernels with a held-out accuracy bound;
+- a response matrix fitted to convention-matched real-material DFPT and
+  beyond-DFPT anchors;
 - an explicit interaction-modulation channel such as `dU/du` or `dJ/du`;
-- coupling between operator channels;
 - a production parser for DFPT or Wannier outputs;
 - a universal value for the current decision thresholds;
-- a held-out material benchmark demonstrating no significant loss of accuracy.
+- a held-out material benchmark demonstrating no significant loss of accuracy;
+- a measured speed comparison with a converged DFPT plus interpolation baseline.
 
 Therefore `dfpt-safe` means a **calibration candidate under the supplied
 evidence**, not a guarantee that ordinary DFPT is quantitatively exact.
@@ -160,8 +204,8 @@ sufficient proof for real materials.
 
 ## Bottom Line
 
-The present result is useful as a transparent research triage and hypothesis-
-testing framework. Its implementation and evidence bookkeeping are directly
-reproducible; its physical organizing hypothesis is source-motivated and
-falsifiable. Quantitative predictive accuracy remains the next experiment, and
-the submission states exactly what result would count against it.
+The present result is a transparent research triage framework plus a quantitative
+software MVP: it can fit, predict, score, and account for cost in a declared
+channel basis. Its implementation and evidence bookkeeping are reproducible;
+real-material predictive accuracy and measured acceleration remain the next
+experiments, and the submission states exactly what would count against them.

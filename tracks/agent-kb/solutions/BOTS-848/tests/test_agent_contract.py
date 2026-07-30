@@ -34,6 +34,11 @@ class AgentSkillContractTests(unittest.TestCase):
             self.assertIn(decision, combined)
         self.assertIn("source_traceable", combined)
         self.assertIn("falsification", combined.lower())
+        self.assertIn("fit_response_matrix", combined)
+        self.assertIn("compare_corrected_to_baselines", combined)
+        self.assertIn("measured_runtime", combined)
+        self.assertIn("physical_accuracy_established", combined)
+        self.assertIn("operator basis", combined.lower())
 
 
 if __name__ == "__main__":

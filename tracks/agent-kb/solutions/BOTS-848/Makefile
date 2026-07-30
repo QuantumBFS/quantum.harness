@@ -10,6 +10,7 @@ eval:
 
 examples:
 	$(PYTHON) examples/run_example.py
+	$(PYTHON) examples/run_sparse_anchor.py
 
 knowledge-check:
 	$(PYTHON) -m json.tool knowledge/schema.yaml >/dev/null
@@ -18,6 +19,7 @@ knowledge-check:
 	$(PYTHON) -m json.tool eval/cases.yaml >/dev/null
 	$(PYTHON) -m json.tool examples/toy_common_shift.yaml >/dev/null
 	$(PYTHON) -m json.tool examples/toy_orbital_splitting.yaml >/dev/null
+	$(PYTHON) -m json.tool examples/sparse_anchor_response.yaml >/dev/null
 
 check: test eval examples knowledge-check
 

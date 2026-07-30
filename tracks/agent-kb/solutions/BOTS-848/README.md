@@ -23,13 +23,13 @@ We do not claim that charge conservation or a numerical cancellation proves DFPT
 
 The submission turns that hypothesis into an AI-for-science artifact:
 
-`literature -> typed claim ledger -> operator decomposition -> evidence gate -> correction level -> falsifying calculation`
+`literature -> typed claim ledger -> operator decomposition -> sparse anchors -> held-out error and cost gate -> falsifying calculation`
 
 - `agent/` contains a reusable Agent Skill with explicit inputs, claim statuses, stop rules, and output contract.
 - `knowledge/` contains source-traceable claims and material-mode cases in JSON-compatible YAML.
-- `src/` contains a dependency-free prototype that decomposes a Hermitian DFPT perturbation into local common-charge, local traceless-internal, and inter-site nonlocal parts.
+- `src/` contains a dependency-free prototype that decomposes a Hermitian DFPT perturbation, fits a small channel-response matrix from supplied anchors, scores held-out coefficient vectors, and compares DFPT-only, dense higher-level, and sparse-correction workflow costs.
 - `eval/` measures decision accuracy, claim-status accuracy, citation coverage, and unsupported claims.
-- `report/` contains the 22-page physics derivation, evidence matrix, two-day exploration protocol, source ledger, source LaTeX, and final PDF.
+- `report/` contains the physics derivation, evidence matrix, two-day exploration protocol, source ledger, source LaTeX, and final PDF.
 
 Reviewer entry points:
 
@@ -52,7 +52,29 @@ It can project these channels into a chosen low-energy basis, measure their norm
 - `dynamic-correction`: phonon and electronic relaxation scales are not well separated;
 - `abstain`: sources, reference state, energy scale, or signal are insufficient.
 
-The thresholds are declared calibration parameters, not universal accuracy bounds. Interaction-parameter derivatives such as dU/du and channel mixing are described in the report but are not yet implemented in the three-channel prototype.
+The thresholds are declared calibration parameters, not universal accuracy bounds. Interaction-parameter derivatives such as dU/du remain outside the executable prototype.
+
+## What the Sparse-Anchor MVP Adds
+
+For coefficient vectors in a fixed, declared operator basis, the new response
+model fits
+
+```text
+c_reference = K c_DFPT + residual
+```
+
+from supplied anchors. Diagonal entries of `K` rescale channels and off-diagonal
+entries represent channel mixing. The bundled case trains on four transparent
+synthetic anchors and predicts two synthetic held-out vectors. It verifies the
+fitting and scoring software; it is not evidence of accuracy for a real material.
+
+The current response model still consumes `c_DFPT` at every predicted point. Its
+cost module therefore compares DFPT alone, DFPT plus a higher-level calculation
+at every point, and DFPT plus four higher-level anchors and inexpensive inference.
+Under the declared normalized inputs those costs are `100`, `600`, and `122`, so
+the dense higher-level path costs `4.918` times as much as the corrected path, but
+more expensive than DFPT alone. This is not a measured runtime speedup and it is
+not evidence that the executable model is faster than DFPT.
 
 ## Quick Start
 
@@ -66,17 +88,22 @@ make check
 Expected summary:
 
 ```text
-Ran 29 tests ... OK
+Ran 48 tests ... OK
 BOTS:848 evaluation: 14/14 cases passed
 decision_accuracy: 1.000
 citation_coverage: 1.000
 unsupported_claim_rate: 0.000
+held-out synthetic: relative_rmse=2.711e-16
+declared cost model: dfpt_only=100.000, dense_high_level=600.000, corrected=122.000, speedup_vs_dense_high_level=4.918, is_faster_than_dense_high_level=True, is_faster_than_dfpt=False, measured_runtime=False
+physical_accuracy_established=False
 ```
 
-Run the two transparent toy cases:
+Run the two channel-classification toys and the separate sparse-anchor software
+contract:
 
 ```bash
 python3 examples/run_example.py
+python3 examples/run_sparse_anchor.py
 ```
 
 Rebuild and inspect the research report when XeLaTeX, latexmk, BibTeX, and Poppler are installed:
@@ -100,7 +127,13 @@ These numbers are not compared across papers without checking basis, phonon eige
 
 ## Verification and Limits
 
-The unit suite checks exact reconstruction, traceless on-site internal blocks, Hermiticity, local-unitary invariance of channel weights, identity-kernel recovery, invalid inputs, toy classifications, and evidence-driven abstention. The current evaluation is a deterministic contract test of the included reference implementation; it is not an end-to-end benchmark of an external language model and does not establish physical accuracy.
+The unit suite checks exact reconstruction, traceless on-site internal blocks,
+Hermiticity, local-unitary invariance, identity-kernel recovery, response-matrix
+fitting and channel mixing, held-out scoring, cost break-even behavior, invalid
+inputs, toy classifications, and evidence-driven abstention. The current
+evaluation is a deterministic contract test of the included reference
+implementation; it is not an end-to-end benchmark of an external language model,
+a measured DFPT runtime comparison, or a real-material physical-accuracy result.
 
 The first final physical test remains a held-out finite-momentum uniform-electron-gas benchmark. The hypothesis must be revised if channel weights fail to correlate with beyond-DFPT corrections, charge-dominated modes show large unexplained errors, every matrix element needs its own kernel, or dynamic effects eliminate a useful static regime.
 
@@ -115,9 +148,9 @@ The first final physical test remains a held-out finite-momentum uniform-electro
 | `knowledge/schema.yaml` | Machine-readable record schema |
 | `knowledge/claims.yaml` | Typed claim ledger |
 | `knowledge/material_cases.yaml` | Source-routed benchmark cases |
-| `src/` | Channel decomposition, correction model, and decision gate |
+| `src/` | Channel decomposition, correction and response models, cost accounting, and decision gate |
 | `tests/` | Numerical invariants and grounding contracts |
 | `eval/` | Evaluation cases, runner, and recorded result |
-| `examples/` | Common-shift and orbital-splitting toy inputs |
+| `examples/` | Common-shift and orbital-splitting toys plus a sparse-anchor synthetic contract |
 | `report/main.pdf` | Full scientific report |
 | `docs/superpowers/` | Approved design and executable implementation plan |

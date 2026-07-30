@@ -1,9 +1,11 @@
 # Reproduce the BOTS:848 Submission
 
-This guide reproduces the executable result, the recorded evaluation, the two
-toy predictions, and the human-readable report. The software path uses only the
-Python standard library. It does **not** rerun the external DFPT, DFT+DMFT,
-DFPT+U, GWPT, or diagrammatic Monte Carlo calculations cited by the report.
+This guide reproduces the executable result, the recorded evaluation, two
+channel-classification toys, one sparse-anchor synthetic held-out prediction,
+the declared cost comparison, and the human-readable report. The software path
+uses only the Python standard library. It does **not** rerun the external DFPT,
+DFT+DMFT, DFPT+U, GWPT, or diagrammatic Monte Carlo calculations cited by the
+report.
 
 ## 1. Requirements
 
@@ -24,13 +26,13 @@ and Poppler (`pdfinfo`).
 
 ```bash
 git clone --branch challenge/agent-kb-electron-phonon --single-branch \
-  https://github.com/TensorSpicyJ/quantum.harness.git
+  https://github.com/AroundPeking/quantum.harness.git
 cd quantum.harness/tracks/agent-kb/solutions/BOTS-848
 git rev-parse HEAD
 ```
 
-Record the printed commit SHA with any reproduced result. The pull request is
-[QuantumBFS/quantum.harness#256](https://github.com/QuantumBFS/quantum.harness/pull/256).
+Record the printed commit SHA with any reproduced result. When reviewing a pull
+request, use its exact head commit rather than assuming the branch has not moved.
 
 ## 3. One-Command Software Reproduction
 
@@ -43,14 +45,15 @@ make check
 The important success lines are:
 
 ```text
-Ran 29 tests ... OK
+Ran 48 tests ... OK
 BOTS:848 evaluation: 14/14 cases passed
 decision_accuracy: 1.000
 claim_status_accuracy: 1.000
 citation_coverage: 1.000
 unsupported_claim_rate: 0.000
-PASS toy_common_shift.yaml
-PASS toy_orbital_splitting.yaml
+held-out synthetic: rmse=3.116e-16, relative_rmse=2.711e-16, max_abs_error=6.661e-16
+declared cost model: dfpt_only=100.000, dense_high_level=600.000, corrected=122.000, speedup_vs_dense_high_level=4.918, is_faster_than_dense_high_level=True, is_faster_than_dfpt=False, measured_runtime=False
+physical_accuracy_established=False
 ```
 
 The exact ordering of unit-test lines and elapsed time may differ. A nonzero
@@ -62,6 +65,7 @@ The same checks can be run separately:
 python3 -m unittest discover -s tests -v
 python3 eval/evaluate.py
 python3 examples/run_example.py
+python3 examples/run_sparse_anchor.py
 make knowledge-check
 ```
 
@@ -71,13 +75,24 @@ The inputs and expected role of each command are:
 |---|---|---|
 | unit tests | `tests/`, `src/`, `knowledge/`, reviewer documents | algebraic invariants, decisions, grounding, and submission contract |
 | evaluation | `eval/cases.yaml` | 14 declared decision and claim-grounding cases |
-| examples | `examples/toy_common_shift.yaml`, `examples/toy_orbital_splitting.yaml` | charge-dominated and internal-channel toy classifications |
+| channel examples | `examples/toy_common_shift.yaml`, `examples/toy_orbital_splitting.yaml` | charge-dominated and internal-channel toy classifications |
+| sparse-anchor example | `examples/sparse_anchor_response.yaml` | response-matrix fit, synthetic held-out error, and conditional cost accounting |
 | knowledge check | `knowledge/*.yaml`, `eval/cases.yaml`, `examples/*.yaml` | all machine-readable records parse as JSON-compatible YAML |
 
 `eval/EVALUATION.md` records the expected evaluation and its scope. This is a
 deterministic contract test of the supplied reference implementation, not a
 held-out physical-accuracy benchmark or an evaluation of an external language
 model.
+
+The line labeled `held-out synthetic` is a software contract. Its targets were
+generated from the audit matrix stored in the example file, while the fitting
+routine reads only the four training inputs and four reference targets. The cost
+record charges those four higher-level anchors and retains full-grid DFPT because
+the executable model needs `c_DFPT` at every prediction point. Its normalized
+ratio is only relative to a dense higher-level correction.
+`is_faster_than_dfpt=False`, `measured_runtime=False`, and
+`physical_accuracy_established=False` are required outputs: the example neither
+measures a DFPT implementation nor validates a material prediction.
 
 ## 4. Rebuild and Check the Report
 
@@ -89,7 +104,7 @@ make report-check
 
 The command builds `report/main.pdf`, rejects unresolved citations or
 references and overfull boxes, and prints PDF metadata. The supplied report has
-22 A4 pages. To run every executable and document check together:
+23 A4 pages. To run every executable and document check together:
 
 ```bash
 make check-all
@@ -101,7 +116,7 @@ Open the report with `open report/main.pdf` on macOS or
 The SHA-256 digest of the PDF distributed with this submission is:
 
 ```text
-c826098ea0e0a9ad6b9400c6a810099cf9716c0ac6781cd82fa810f983bbeebe
+b421bea67d8b72cebac7f4a1bd00547cac47ef9022299ba5ae744741ccc6b870
 ```
 
 Verify it on macOS with:
@@ -118,7 +133,7 @@ sha256sum report/main.pdf
 
 A locally rebuilt PDF can have a different byte hash because TeX versions or
 embedded metadata differ. In that case, use `make report-check`, confirm the
-22-page structure, and compare the rendered content rather than requiring
+23-page structure, and compare the rendered content rather than requiring
 byte-for-byte identity.
 
 ## 5. Reproduce the Evidence Audit

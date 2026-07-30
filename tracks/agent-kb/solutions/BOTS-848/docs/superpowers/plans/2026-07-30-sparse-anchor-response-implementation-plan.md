@@ -2,9 +2,9 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Add a tested sparse-anchor channel-response fitter, held-out scorer, and conditional DFPT cost model without overstating physical validation or speed.
+**Goal:** Add a tested sparse-anchor channel-response fitter, held-out scorer, and cost comparison against DFPT-only and dense higher-level baselines without overstating physical validation or speed.
 
-**Architecture:** A standard-library coefficient-space response module fits a small multi-output ridge map, while an independent cost module decides whether declared sparse sampling assumptions beat a dense baseline.  A synthetic held-out example exercises the full path; reviewer documents and the TeX report separate software reproduction from real-material validation.
+**Architecture:** A standard-library coefficient-space response module fits a column-normalized multi-output ridge map, while an independent cost module compares the executable full-grid DFPT plus sparse higher-level correction with DFPT-only and dense higher-level baselines.  A synthetic held-out example exercises the full path; reviewer documents and the TeX report separate software reproduction from real-material validation.
 
 **Tech Stack:** Python 3 standard library, JSON-compatible YAML, `unittest`, XeLaTeX/latexmk, Poppler.
 
@@ -16,13 +16,13 @@
 - Create: `docs/superpowers/specs/2026-07-30-sparse-anchor-response-design.md`
 - Create: `docs/superpowers/plans/2026-07-30-sparse-anchor-response-implementation-plan.md`
 
-- [ ] **Step 1: Record the approved scope**
+- [x] **Step 1: Record the approved scope**
 
 State that the existing correction is not faster than a single DFPT calculation,
 that the new cost claim is conditional on amortization, and that the bundled
 held-out example is synthetic rather than a physical benchmark.
 
-- [ ] **Step 2: Check the design for placeholders and scope drift**
+- [x] **Step 2: Check the design for placeholders and scope drift**
 
 Run:
 
@@ -32,7 +32,7 @@ rg -n "T[B]D|TO[D]O|implement lat[e]r|universal speed[u]p" docs/superpowers
 
 Expected: no matches in the two new documents.
 
-- [ ] **Step 3: Commit the approved design**
+- [x] **Step 3: Commit the approved design**
 
 ```bash
 git add docs/superpowers/specs/2026-07-30-sparse-anchor-response-design.md \
@@ -46,7 +46,7 @@ git commit -m "docs: design sparse-anchor response MVP"
 - Create: `tests/test_response_model.py`
 - Create: `src/response_model.py`
 
-- [ ] **Step 1: Write tests for identity and channel mixing**
+- [x] **Step 1: Write tests for identity and channel mixing**
 
 Add tests equivalent to:
 
@@ -66,9 +66,10 @@ def test_off_diagonal_response_predicts_held_out_vector(self):
 
 Also require rejection of empty, ragged, nonnumeric, mismatched, and singular
 unregularized inputs, and require a positive ridge value to make a rank-deficient
-case solvable.
+case solvable. Require recovery under both a common coefficient rescaling and
+different scales for different channels.
 
-- [ ] **Step 2: Run the tests and verify the expected failure**
+- [x] **Step 2: Run the tests and verify the expected failure**
 
 Run:
 
@@ -78,10 +79,10 @@ python3 -m unittest tests.test_response_model -v
 
 Expected: FAIL because `src.response_model` does not exist.
 
-- [ ] **Step 3: Implement the minimum response model**
+- [x] **Step 3: Implement the minimum response model**
 
-Implement numeric validation, conjugate-transpose normal equations,
-partial-pivoting Gaussian elimination, prediction, and error metrics.  Encode a
+Implement numeric validation, column normalization, conjugate-transpose normal
+equations, partial-pivoting Gaussian elimination, prediction, and error metrics. Encode a
 numerically real coefficient as a JSON number and a genuinely complex coefficient
 as `{"real": value, "imag": value}` so the model remains JSON serializable.  The
 model dictionary must contain:
@@ -100,7 +101,7 @@ model dictionary must contain:
 }
 ```
 
-- [ ] **Step 4: Re-run response-model tests**
+- [x] **Step 4: Re-run response-model tests**
 
 Run:
 
@@ -116,26 +117,32 @@ Expected: all response-model tests pass.
 - Create: `tests/test_cost_model.py`
 - Create: `src/cost_model.py`
 
-- [ ] **Step 1: Write faster and slower workflow tests**
+- [x] **Step 1: Write faster and slower workflow tests**
 
-Require this sparse case to be faster:
+Require the executable sparse higher-level correction to beat a dense
+higher-level baseline while remaining more expensive than DFPT alone:
 
 ```python
-result = compare_sparse_to_dense(
+result = compare_corrected_to_baselines(
     full_points=100,
-    anchor_points=10,
     dfpt_cost_per_point=1.0,
+    high_level_anchors=4,
+    high_level_cost_per_point=5.0,
     inference_cost_per_point=0.01,
+    training_cost=1.0,
 )
-self.assertTrue(result["is_faster"])
-self.assertAlmostEqual(result["dense_cost"], 100.0)
-self.assertAlmostEqual(result["sparse_cost"], 10.9)
+self.assertEqual(result["dfpt_only_cost"], 100.0)
+self.assertEqual(result["dense_high_level_cost"], 600.0)
+self.assertEqual(result["corrected_cost"], 122.0)
+self.assertTrue(result["is_faster_than_dense_high_level"])
+self.assertFalse(result["is_faster_than_dfpt"])
 ```
 
-Require a case with expensive high-level anchors to be slower, and reject negative
-costs, zero campaigns, nonintegral counts, and more anchors than full points.
+Require a case with excessive fitting/inference cost to be slower than both
+baselines, and reject negative costs, zero campaigns, nonintegral counts, and more
+higher-level anchors than full points.
 
-- [ ] **Step 2: Verify the tests fail because the module is absent**
+- [x] **Step 2: Verify the tests fail because the module is absent**
 
 Run:
 
@@ -145,21 +152,23 @@ python3 -m unittest tests.test_cost_model -v
 
 Expected: FAIL because `src.cost_model` does not exist.
 
-- [ ] **Step 3: Implement the explicit cost equations**
+- [x] **Step 3: Implement the explicit cost equations**
 
 Return:
 
 ```python
 {
-    "dense_cost": dense_cost,
-    "sparse_cost": sparse_cost,
-    "speedup": dense_cost / sparse_cost,
-    "is_faster": sparse_cost < dense_cost,
-    "saved_cost": dense_cost - sparse_cost,
+    "dfpt_only_cost": dfpt_only_cost,
+    "dense_high_level_cost": dense_high_level_cost,
+    "corrected_cost": corrected_cost,
+    "speedup_vs_dense_high_level": dense_high_level_cost / corrected_cost,
+    "is_faster_than_dense_high_level": corrected_cost < dense_high_level_cost,
+    "is_faster_than_dfpt": corrected_cost < dfpt_only_cost,
+    "overhead_vs_dfpt": corrected_cost - dfpt_only_cost,
 }
 ```
 
-- [ ] **Step 4: Re-run cost-model tests**
+- [x] **Step 4: Re-run cost-model tests**
 
 Run:
 
@@ -177,13 +186,14 @@ Expected: all cost-model tests pass.
 - Modify: `Makefile`
 - Test: `tests/test_sparse_anchor_example.py`
 
-- [ ] **Step 1: Write the failing end-to-end test**
+- [x] **Step 1: Write the failing end-to-end test**
 
 Require `run_case()` to return a held-out relative RMSE below `1e-10`, a fitted
-matrix containing a nonzero off-diagonal entry, and a cost record with
-`is_faster=True`.  Run the test and verify failure because the example is absent.
+matrix containing a nonzero off-diagonal entry, four charged reference anchors,
+`is_faster_than_dense_high_level=True`, and `is_faster_than_dfpt=False`. Run the
+test and verify failure because the example is absent.
 
-- [ ] **Step 2: Add the transparent synthetic dataset**
+- [x] **Step 2: Add the transparent synthetic dataset**
 
 Use three channels named `charge`, `internal`, and `nonlocal`, at least four
 linearly independent training anchors, two held-out vectors, and targets generated
@@ -198,7 +208,7 @@ from the declared matrix:
 The runner must not read this matrix during fitting; it is metadata for auditing
 the synthetic case only.
 
-- [ ] **Step 3: Add the example to `make examples` and `knowledge-check`**
+- [x] **Step 3: Add the example to `make examples` and `knowledge-check`**
 
 Run:
 
@@ -219,20 +229,21 @@ and conditional cost results.
 - Modify: `eval/EVALUATION.md`
 - Modify: `tests/test_submission_contract.py`
 
-- [ ] **Step 1: Update the contract test before the documents**
+- [x] **Step 1: Update the contract test before the documents**
 
 Require the reviewer documents to contain `sparse-anchor`, `held-out synthetic`,
 `not faster than a single DFPT`, `python3 examples/run_sparse_anchor.py`, and the
 actual fresh test count.  Run the test and confirm it fails on the old documents.
 
-- [ ] **Step 2: Rewrite the claims consistently**
+- [x] **Step 2: Rewrite the claims consistently**
 
 Explain that the new fitter predicts coefficient vectors only after a fixed
 operator basis has been declared, that the synthetic example verifies software
-behavior, and that a real speed claim requires measured comparison with converged
-DFPT plus interpolation at matched accuracy.
+behavior, and that the executable path can save higher-level reference work but
+cannot beat DFPT because it still needs DFPT coefficients at every point. A future
+DFPT surrogate requires separate implementation and validation.
 
-- [ ] **Step 3: Re-run submission and full software checks**
+- [x] **Step 3: Re-run submission and full software checks**
 
 Run:
 
@@ -253,12 +264,13 @@ YAML parsing checks pass.
 - Modify: `REPRODUCE.md`
 - Replace: `report/main.pdf`
 
-- [ ] **Step 1: Add the response-matrix and cost equations**
+- [x] **Step 1: Add the response-matrix and cost equations**
 
 State `c_ref = K c_DFPT + residual`, define every coefficient and matrix, add the
-dense and sparse cost equations, and state the necessary break-even inequality.
+DFPT-only, dense higher-level, and corrected-workflow cost equations, and state
+both cost comparisons.
 
-- [ ] **Step 2: Remove unconditional speed claims**
+- [x] **Step 2: Remove unconditional speed claims**
 
 Search:
 
@@ -269,7 +281,7 @@ rg -n "faster than DFPT|speedup" README.md RESULTS.md REPRODUCE.md report
 Every match must either refer to a supplied cost record or explicitly state a
 condition and an unproven physical benchmark.
 
-- [ ] **Step 3: Build and check the PDF**
+- [x] **Step 3: Build and check the PDF**
 
 Run:
 
@@ -280,7 +292,7 @@ make report-check
 Expected: XeLaTeX succeeds, references resolve, there are no overfull boxes, and
 `pdfinfo` reports the rebuilt document.
 
-- [ ] **Step 4: Render and inspect every page**
+- [x] **Step 4: Render and inspect every page**
 
 Run:
 
@@ -298,7 +310,7 @@ inspection and update the documented PDF SHA-256 digest.
 **Files:**
 - Verify all changes below `tracks/agent-kb/solutions/BOTS-848/`.
 
-- [ ] **Step 1: Run fresh complete verification**
+- [x] **Step 1: Run fresh complete verification**
 
 ```bash
 make check-all
@@ -308,7 +320,7 @@ git status --short
 
 Expected: zero command failures and no changes outside the solution directory.
 
-- [ ] **Step 2: Commit with the requested attribution**
+- [x] **Step 2: Commit with the requested attribution**
 
 ```bash
 git add tracks/agent-kb/solutions/BOTS-848
@@ -318,7 +330,7 @@ GIT_COMMITTER_EMAIL='gonghuanjing@iphy.ac.cn' \
 git commit -m 'feat: add sparse-anchor DFPT response MVP'
 ```
 
-- [ ] **Step 3: Verify the local commit and do not push**
+- [x] **Step 3: Verify the local commit and do not push**
 
 ```bash
 git log -1 --format='%h%nAuthor: %an <%ae>%nCommitter: %cn <%ce>%n%s'

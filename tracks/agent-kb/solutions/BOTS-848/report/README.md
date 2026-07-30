@@ -46,3 +46,12 @@ identity are established theory. The finite-momentum electron-gas relation and t
 channel-resolved correction architecture are working hypotheses that must be
 tested against the benchmark matrix before they are presented as a predictive
 theory.
+
+The repository now includes a coefficient-space response-matrix fitter, a
+synthetic held-out software contract, and explicit comparisons with DFPT-only and
+dense higher-level costs. These make the proposed interface executable but do not
+establish real-material accuracy or a measured speedup. The correction layer
+still needs DFPT coefficients at every target point, so it is not cheaper than
+DFPT alone; its possible saving is relative to evaluating the higher-level vertex
+everywhere. Beating DFPT would require an additional surrogate and a separate
+test against a modern DFPT interpolation baseline.

@@ -25,6 +25,8 @@ class KnowledgeBaseTests(unittest.TestCase):
     def test_claims_are_typed_and_traceable(self):
         payload = load_json_yaml("claims.yaml")
         self.assertGreaterEqual(len(payload["claims"]), 8)
+        claim_ids = {claim["claim_id"] for claim in payload["claims"]}
+        self.assertIn("low-dimensional-response-matrix", claim_ids)
         for claim in payload["claims"]:
             self.assertIn(claim["status"], ALLOWED_STATUSES)
             self.assertTrue(claim["claim_id"])

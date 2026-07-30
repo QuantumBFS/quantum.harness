@@ -40,6 +40,37 @@ Because the correction acts on operators before Bloch-state matrix elements are
 taken, it preserves the band, momentum, and phase dependence already present in
 DFPT.
 
+The executable quantitative prototype generalizes the diagonal rescaling in a
+fixed operator basis.  Let $O_a$ be localized, symmetry-adapted operators and
+write the short-range perturbation as
+
+\begin{equation}
+  D^{\mathrm{SR}}_{s}=\sum_a c^{\dfpt}_{s a} O_a,
+\end{equation}
+
+where $s$ labels a material--mode--momentum--frequency sample and
+$c^{\dfpt}_{s a}$ is its DFPT coefficient.  For convention-matched reference
+coefficients, the static sparse-anchor hypothesis is
+
+\begin{equation}
+  c^{\mathrm{ref}}_{s a}
+  =\sum_b K_{ab} c^{\dfpt}_{s b}+r_{s a}.
+  \label{eq:responsematrix}
+\end{equation}
+
+Here $K_{ab}$ is a small response matrix and $r_{s a}$ is the residual.  Diagonal
+elements rescale one channel; off-diagonal elements represent channel mixing.
+$K=I$ recovers the DFPT coefficient vector.  Equation~\eqref{eq:responsematrix}
+is a falsifiable low-dimensional hypothesis, not a statement that the complete
+band- and momentum-resolved electron--phonon matrix is low rank.
+
+The current standard-library implementation fits $K$ from supplied coefficient
+vectors, predicts held-out vectors, and reports their error.  It does not yet
+construct the $O_a$ from a production DFPT or Wannier output.  A real application
+must declare the basis and gauge, keep all phonon and matrix-element normalization
+conventions fixed, and separate analytic long-range polar fields from the
+localized short-range operator before fitting.
+
 \subsection{How each channel is corrected}
 
 \paragraph{Charge channel.}
@@ -131,3 +162,11 @@ kernel, and (iv) explicit uncertainty and abstention.  Its success criterion is
 not that it matches a full many-body calculation by construction, but that it
 predicts which parts of the DFPT matrix element need correction and reaches a
 defined accuracy with far fewer high-level calculations.
+
+This correction layer is not cheaper than performing the one DFPT calculation
+that supplies its input.  Its immediate cost advantage, if validated, is relative
+to evaluating a beyond-DFPT vertex for every mode and momentum.  Beating DFPT
+itself would require an additional surrogate that predicts the DFPT channel
+coefficients without evaluating DFPT at every requested point.  That surrogate
+is neither implied by the channel decomposition nor implemented in the present
+software.

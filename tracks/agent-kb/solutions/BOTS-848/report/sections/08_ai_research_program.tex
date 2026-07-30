@@ -82,15 +82,48 @@ The target should be evaluated against three independent axes.
 \paragraph{Accuracy.}
 Report the error of complex matrix elements where phases are comparable, squared
 couplings averaged on the relevant energy shell, and final observables.  A
-practical initial threshold is to reduce the high-level-versus-DFPT error by at
-least a factor of two while keeping the median corrected $|g|$ error below
-10--15\% on held-out modes.  This threshold is a project criterion and may be
-revised after the evidence matrix is complete.
+real-material benchmark must predeclare separate acceptance bounds for the
+projected operator, the gauge-invariant coupling measure, and the target
+observable.  The present synthetic held-out example cannot determine those
+bounds and is not counted as a physical-accuracy result.
 
 \paragraph{Cost.}
-Count the number of high-level displaced/response calculations, total core or GPU
-hours, memory, and wall time relative to a dense many-body calculation of every
-mode and $\vq$.  Speedup is meaningful only at comparable numerical convergence.
+Let $N_{\mathrm{full}}$ be the number of mode--momentum points in each
+campaign, $N_{\mathrm{hi}}$ the number of convention-matched higher-level
+calibration anchors used once to fit the response matrix, and
+$N_{\mathrm{camp}}$ the number of campaigns that reuse that fit.  With
+per-point costs $c_{\dfpt}$, $c_{\mathrm{hi}}$, and $c_{\mathrm{inf}}$, and
+one-time training cost $C_{\mathrm{train}}$, the accounting model is
+
+\begin{align}
+ C_{\mathrm{DFPT}}
+ &=N_{\mathrm{camp}}N_{\mathrm{full}}c_{\dfpt},\\
+ C_{\mathrm{dense-hi}}
+ &=N_{\mathrm{camp}}N_{\mathrm{full}}
+   \left(c_{\dfpt}+c_{\mathrm{hi}}\right),\\
+ C_{\mathrm{corrected}}
+ &=C_{\mathrm{train}}
+ +N_{\mathrm{hi}}c_{\mathrm{hi}}
+ +N_{\mathrm{camp}}N_{\mathrm{full}}
+   \left(c_{\dfpt}+c_{\mathrm{inf}}\right).
+ \label{eq:costmodel}
+\end{align}
+
+The current correction model still requires DFPT coefficients at every predicted
+point, so it cannot be cheaper than DFPT alone:
+$C_{\mathrm{corrected}}\ge C_{\mathrm{DFPT}}$.  It is useful only when the
+alternative is a higher-level correction at every point and
+$C_{\mathrm{corrected}}<C_{\mathrm{dense-hi}}$.  The bundled software contract
+uses normalized declared costs and gives $C_{\mathrm{DFPT}}=100$,
+$C_{\mathrm{dense-hi}}=600$, and $C_{\mathrm{corrected}}=122$; the dense
+higher-level baseline therefore costs $4.918$ times as much as the corrected
+path, while the corrected path has a cost overhead of $22$ relative to DFPT
+alone.  This verifies the accounting code, not a measured runtime.  Beating DFPT
+itself would require a separate surrogate for the DFPT coefficients.  A
+publishable speed claim must count actual core or GPU hours, memory, and wall
+time at matched accuracy and compare against a converged, symmetry-reduced DFPT
+plus Wannier/EPW interpolation workflow rather than a naive dense-point
+construction.
 
 \paragraph{Transparency.}
 For every prediction, output the operator decomposition, selected correction
@@ -116,3 +149,9 @@ The initial software can be separated into small testable modules:
 No production implementation should begin before the two-day literature sprint
 freezes the first hypothesis, the exact comparison quantities, and the first two
 material-mode contrasts.
+
+The repository implementation is intentionally one layer below such production
+use.  It fits and applies \cref{eq:responsematrix}, scores synthetic held-out
+coefficient vectors, and evaluates \cref{eq:costmodel}.  The supplied exact
+synthetic result tests the software path only; real-material fitting, measured
+timing, uncertainty calibration, and transfer across modes remain open gates.

@@ -58,6 +58,11 @@ Use the target low-energy states as `basis_vectors` when available. The resultin
 
 The three-channel prototype does not yet represent derivatives of U, J, or other interaction parameters. Record such a contribution as missing evidence rather than folding it into an unrelated channel.
 
+Before fitting, separate any analytic long-range polar field from the localized
+short-range operator. Declare the operator basis explicitly; coefficient vectors
+from different projectors, gauges, momenta, frequencies, or phonon normalizations
+are not interchangeable anchors.
+
 ## 6. Select the Correction Level
 
 Supply all of:
@@ -81,13 +86,52 @@ Supply all of:
 
 These rules triage research effort. They are not accuracy bounds.
 
-## 7. Design One Discriminating Calculation
+## 7. Fit and Test a Static Response Matrix
+
+Only enter this step when the decision and evidence support a static correction.
+Represent every anchor in the same declared operator basis and split anchors into
+training and held-out sets before fitting. Use
+`src.response_model.fit_response_matrix` for the training coefficient vectors and
+`predict_coefficients` plus `error_metrics` for the held-out vectors.
+
+Interpret the model as
+
+`c_reference = K c_DFPT + residual`.
+
+Diagonal entries of `K` rescale channels; off-diagonal entries mix them. This is a
+low-dimensional working hypothesis, not a Ward-identity consequence and not a
+claim that the full band-momentum vertex is low rank. Reject the static model if
+held-out errors violate the predeclared tolerance or vary systematically with
+momentum, frequency, or basis choice.
+
+Use `src.cost_model.compare_corrected_to_baselines` to compare three explicitly
+declared costs: DFPT alone at every target point, DFPT plus a higher-level
+calculation at every point, and DFPT at every point plus sparse higher-level
+anchors, fitting, and inference. The current response model still needs
+`c_DFPT` at every predicted point, so it cannot be reported as faster than DFPT
+alone. Its possible saving is relative to a dense higher-level correction.
+Low channel dimension alone is not evidence of speed.
+Unless actual matched-accuracy timing data were supplied, output:
+
+```json
+{
+  "measured_runtime": false,
+  "physical_accuracy_established": false
+}
+```
+
+A synthetic held-out case validates software behavior only. A future surrogate
+that also predicts the DFPT coefficients would need a separate implementation
+and a measured comparison with converged, symmetry-reduced DFPT plus its normal
+interpolation workflow.
+
+## 8. Design One Discriminating Calculation
 
 Hold material, geometry, q, phonon normalization, basis, and observable fixed. Change only the theoretical ingredient that represents the suspected missing channel. Examples include DFPT versus DFPT+U for occupation response, static versus frequency-dependent DMFT vertices, or DFPT versus GW perturbation theory for nonlocal self-energy response.
 
 State both predictions before running the calculation. For example: if channel-selective protection is correct, a charge-dominated breathing mode should change less than a traceless orbital-splitting mode under the same many-body treatment.
 
-## 8. Report a Falsification Criterion
+## 9. Report a Falsification Criterion
 
 Every result must include a `falsification` field. Reject or revise the hypothesis if held-out tests show that:
 

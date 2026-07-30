@@ -6,7 +6,8 @@ Extend the BOTS:848 channel-resolved DFPT prototype into an honest quantitative
 software MVP.  The extension must learn a small response matrix from supplied
 channel-coefficient anchors, predict held-out coefficients, report numerical
 error, and state explicitly whether a sparse workflow is cheaper than its
-declared dense-DFPT baseline.
+declared dense higher-level baseline while exposing its overhead relative to
+DFPT alone.
 
 The extension does not claim validated accuracy for a real material.  Its bundled
 dataset is a transparent synthetic contract case that verifies the fitting,
@@ -43,8 +44,8 @@ normalization convention.
 Create `src/response_model.py` with three public functions:
 
 - `fit_response_matrix(inputs, targets, ridge=0.0)` validates rectangular numeric
-  samples and solves the multi-output ridge problem using standard-library complex
-  arithmetic and Gaussian elimination;
+  samples, normalizes each input channel scale, and solves the multi-output ridge
+  problem using standard-library complex arithmetic and Gaussian elimination;
 - `predict_coefficients(model, inputs)` applies the fitted matrix to one or more
   coefficient vectors;
 - `error_metrics(predicted, reference)` returns root-mean-square error, relative
@@ -57,32 +58,38 @@ solution.
 
 ### Cost accounting
 
-Create `src/cost_model.py` with `compare_sparse_to_dense(...)`.  It compares:
+Create `src/cost_model.py` with `compare_corrected_to_baselines(...)`.  The
+executable response model needs DFPT coefficients at every prediction point, so
+it compares three costs:
 
 ```text
-dense_cost = campaigns * full_points * dfpt_cost_per_point
+dfpt_only = campaigns * full_points * dfpt_cost_per_point
 
-sparse_cost = training_cost
-            + campaigns * (
-                anchor_points * dfpt_cost_per_point
-                + high_level_anchors * high_level_cost_per_anchor
-                + (full_points - anchor_points) * inference_cost_per_point
-              ).
+dense_high_level = campaigns * full_points
+                   * (dfpt_cost_per_point + high_level_cost_per_point)
+
+corrected = training_cost
+          + high_level_anchors * high_level_cost_per_point
+          + campaigns * full_points
+            * (dfpt_cost_per_point + inference_cost_per_point).
 ```
 
-The output reports both totals, `speedup = dense_cost / sparse_cost`, and a boolean
-`is_faster`.  No documentation may claim a speedup unless the supplied parameters
-make `is_faster` true.  The comparison is an accounting model, not a measured
-runtime benchmark; a future physical benchmark must compare against a converged,
-symmetry-reduced DFPT plus interpolation workflow.
+The fit and its high-level calibration anchors are reused across the declared
+campaigns, so their costs are one-time.  The output reports whether the corrected
+path is cheaper than the dense higher-level path and separately whether it is
+cheaper than DFPT alone.  The latter must be false for this nonnegative-cost model.
+The comparison is an accounting model, not a measured runtime benchmark.  A
+future surrogate that predicts DFPT coefficients without computing them requires
+a separate implementation and comparison against converged, symmetry-reduced
+DFPT plus interpolation.
 
 ### Reproducible example
 
 Add one JSON-compatible YAML case with a known three-channel response matrix,
 separate training and held-out coefficient vectors, and explicit cost assumptions.
 The example runner must fit without reading the hidden matrix, predict the held-out
-targets, print error metrics, print the dense and sparse costs, and print whether
-the declared case is faster.
+targets, print error metrics, charge exactly the four supplied reference anchors,
+and print all three cost comparisons.
 
 ## Documentation Contract
 
@@ -94,17 +101,17 @@ The reviewer-facing documents and report must distinguish three claims:
 3. physical accuracy and real speedup over modern DFPT plus interpolation remain
    unproven until measured on convention-matched material data.
 
-The report must replace any blanket statement that the method is faster than DFPT
-with a conditional amortization statement.  It may say that the correction layer
-can be much cheaper than evaluating a beyond-DFPT vertex everywhere, and that a
-sparse surrogate can beat dense DFPT only when the number of anchors is small
-enough to overcome fitting and inference overhead.
+The report must replace any blanket statement that the executable method is faster
+than DFPT.  It may say that the correction layer can be much cheaper than
+evaluating a beyond-DFPT vertex everywhere.  Any future claim about beating DFPT
+requires a separate surrogate for the DFPT coefficients.
 
 ## Verification
 
 - Unit tests must demonstrate response-matrix identity recovery, off-diagonal
-  mixing recovery, held-out prediction, shape/type validation, singular-fit
-  failure, cost break-even behavior, and rejection of invalid costs.
+  mixing recovery, invariance to global and channel-dependent coefficient scales,
+  held-out prediction, shape/type validation, singular-fit failure, cost
+  break-even behavior, and rejection of invalid costs.
 - `make check` must run the new example in addition to all existing tests,
   evaluation cases, and knowledge parsing.
 - `make report-check` must rebuild the PDF with no unresolved references or
@@ -118,4 +125,5 @@ enough to overcome fitting and inference overhead.
 - No claim that synthetic held-out accuracy transfers to a material.
 - No learned frequency dependence, uncertainty calibration, active learning, or
   interaction-modulation channel in this minimum extension.
+- No surrogate that predicts missing DFPT coefficients at non-anchor points.
 - No replacement of the mature DFPT phonon calculation in a one-off small job.

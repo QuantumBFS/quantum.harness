@@ -9,7 +9,9 @@ all: $(MAIN).pdf
 $(MAIN).pdf: $(MAIN).tex references.bib $(TEX_SOURCES)
 	$(LATEXMK) -xelatex -interaction=nonstopmode -halt-on-error $(MAIN).tex
 
-check: $(MAIN).pdf
+check:
+	$(LATEXMK) -xelatex -interaction=nonstopmode -halt-on-error $(MAIN).tex
+	@test -f $(MAIN).log
 	@! grep -E "undefined references|Citation .* undefined|There were undefined|Overfull \\\\hbox|Overfull \\\\vbox" $(MAIN).log
 	@pdfinfo $(MAIN).pdf | grep -E "^(Pages|Page size|File size):"
 

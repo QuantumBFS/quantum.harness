@@ -26,8 +26,22 @@ the many-body amplification and dynamical variation of that channel.
 
 The proposed next-generation calculation therefore retains DFPT, decomposes its
 perturbation, and applies a channel kernel only where diagnostics demand it.  This
-can be simpler and faster than computing a complete many-body vertex while being
-more physically transparent than a black-box correction to every matrix element.
+can be simpler and cheaper than computing a complete many-body vertex at every
+mode and momentum while being more physically transparent than a black-box
+correction to every matrix element.  It is not faster than the single DFPT
+calculation used as its baseline.  Its current computational claim is narrower:
+sparse higher-level anchors plus cheap inference can cost less than evaluating a
+higher-level correction at every point.  A future speed claim against DFPT would
+require a separately implemented surrogate for the DFPT coefficients and a
+matched comparison with modern DFPT interpolation.
+
+The accompanying software now fits a small channel-response matrix, predicts
+held-out coefficient vectors, reports error, and compares DFPT-only, dense
+higher-level, and sparsely corrected cost baselines.  It explicitly reports that
+the present corrected path is not faster than DFPT.  Its bundled held-out vectors
+are synthetic and its costs are normalized assumptions.  These results establish
+reproducible software behavior, not material accuracy or a measured runtime
+speedup.
 
 \begin{keypoint}[First decision after submission]
 The first research milestone should test one sharp statement: in SrVO$_3$, does a
