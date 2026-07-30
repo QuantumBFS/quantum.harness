@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import os
 import re
 import subprocess
@@ -17,6 +18,17 @@ def parse_confirmation_token(output: str) -> str:
     if len(matches) != 1:
         raise ValueError(f"expected one confirmation token, found {len(matches)}")
     return matches[0]
+
+
+def parse_result_path(output: str, ole_root: Path) -> Path:
+    matches = re.findall(r"^result_path=(.+)$", output, re.MULTILINE)
+    if len(matches) != 1:
+        raise ValueError(f"expected one result path, found {len(matches)}")
+    path = Path(matches[0]).resolve()
+    runs_root = (ole_root / "runs").resolve()
+    if not path.is_relative_to(runs_root):
+        raise ValueError(f"runner result path is outside {runs_root}: {path}")
+    return path
 
 
 def result_path(root: Path, params: dict) -> Path:
@@ -41,6 +53,22 @@ def success_manifest(payload: dict, document: dict, source_result: Path) -> dict
     if int(result["maxdim"]) != int(payload["params"]["chi"]):
         raise ValueError("result chi does not match the declared cell")
     layers = result["layers"]
+    layer_wall_seconds = [
+        float(layer["wall_seconds"])
+        for layer in layers
+        if "wall_seconds" in layer
+    ]
+    virtual_bond_dimensions = [
+        int(layer["max_bond_dimension"])
+        for layer in layers
+        if "max_bond_dimension" in layer
+    ]
+    norm_defects = [
+        float(layer["norm_defect"])
+        for layer in layers
+        if layer.get("norm_defect_available", False)
+        and math.isfinite(float(layer["norm_defect"]))
+    ]
     return {
         "status": "success",
         "cell_id": payload["cell_id"],
@@ -58,6 +86,19 @@ def success_manifest(payload: dict, document: dict, source_result: Path) -> dict
             "bp_nonconverged_layers": sum(
                 not layer["bp_converged"] for layer in layers
             ),
+            "max_layer_wall_seconds": (
+                max(layer_wall_seconds) if layer_wall_seconds else None
+            ),
+            "mean_layer_wall_seconds": (
+                sum(layer_wall_seconds) / len(layer_wall_seconds)
+                if layer_wall_seconds
+                else None
+            ),
+            "max_virtual_bond_dimension": (
+                max(virtual_bond_dimensions) if virtual_bond_dimensions else None
+            ),
+            "norm_defect_available_layers": len(norm_defects),
+            "max_norm_defect": max(norm_defects) if norm_defects else None,
         },
     }
 
@@ -70,10 +111,22 @@ def run_cell(
 ) -> Path:
     params = payload["params"]
     runner = ole_root / "scripts" / "run_bp.jl"
+    config_path = (
+        ole_root
+        / payload.get("settings", {}).get(
+            "config_path",
+            "configs/baseline-49x648.toml",
+        )
+    ).resolve()
+    configs_root = (ole_root / "configs").resolve()
+    if not config_path.is_relative_to(configs_root) or not config_path.is_file():
+        raise ValueError(f"invalid BP-TN config path: {config_path}")
     command = [
         str(julia_bin),
         f"--project={ole_root}",
         str(runner),
+        "--config",
+        str(config_path),
         "--seed",
         str(params["seed"]),
         "--chi",
@@ -89,12 +142,12 @@ def run_cell(
     )
     print(dry_run.stdout, end="", flush=True)
     token = parse_confirmation_token(dry_run.stdout)
+    source_result = parse_result_path(dry_run.stdout, ole_root)
     subprocess.run(
         [*command, "--execute", "--confirm", token],
         check=True,
     )
 
-    source_result = result_path(ole_root, params)
     with source_result.open("rb") as handle:
         document = tomllib.load(handle)
     manifest = success_manifest(payload, document, source_result)

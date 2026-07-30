@@ -29,6 +29,41 @@ end
 
 const _NUMBER_PATTERN = raw"(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?"
 
+function _normalize_tracker_qasm(text::AbstractString)
+    startswith(text, "OPENQASM 2.0;") && return String(text)
+    startswith(text, "OPENQASM 3.0;") ||
+        throw(ArgumentError("unsupported OpenQASM header"))
+
+    lines = split(String(text), '\n'; keepempty = true)
+    length(lines) >= 8 ||
+        throw(ArgumentError("truncated Tracker OpenQASM 3 header"))
+    lines[1:7] == [
+        "OPENQASM 3.0;",
+        "include \"stdgates.inc\";",
+        "gate sxdg _gate_q_0 {",
+        "  s _gate_q_0;",
+        "  h _gate_q_0;",
+        "  s _gate_q_0;",
+        "}",
+    ] || throw(ArgumentError("unsupported Tracker OpenQASM 3 prelude"))
+    qubit_match = match(r"^qubit\[(\d+)\] q;$", lines[8])
+    qubit_match === nothing &&
+        throw(ArgumentError("unsupported Tracker OpenQASM 3 qubit declaration"))
+    register_size = only(qubit_match.captures)
+    normalized = join(
+        vcat(
+            [
+                "OPENQASM 2.0;",
+                "include \"qelib1.inc\";",
+                "qreg q[$register_size];",
+            ],
+            lines[9:end],
+        ),
+        '\n',
+    )
+    return replace(normalized, ", " => ",")
+end
+
 function _parse_angle(expression::AbstractString)
     compact = replace(strip(expression), r"\s+" => "")
     if occursin(Regex("^[-+]?" * _NUMBER_PATTERN * "\$"), compact)
@@ -65,11 +100,13 @@ end
 """
     parse_qasm(text)
 
-Parse the strict OpenQASM 2 subset used by the official OLE input. Barriers
+Parse the strict OpenQASM 2 subset used by the original OLE attachments, or
+the exact OpenQASM 3 prelude used by the Tracker repository export. Barriers
 become layer boundaries. Only `rx`, `rz`, `cz`, `s`, `sdg`, `sx`, and `sxdg`
-are accepted, so an upstream protocol change fails loudly.
+are accepted after normalization, so an upstream protocol change fails loudly.
 """
 function parse_qasm(text::AbstractString)
+    text = _normalize_tracker_qasm(text)
     register_size = nothing
     layers = Vector{Vector{QASMGate}}()
     current_layer = QASMGate[]

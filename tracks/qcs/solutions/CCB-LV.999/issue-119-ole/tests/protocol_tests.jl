@@ -16,6 +16,26 @@ rz(-3*pi/8) q[5];
 barrier q[0],q[1],q[2],q[3],q[4],q[5],q[6],q[7];
 """
 
+const TINY_TRACKER_QASM3 = """
+OPENQASM 3.0;
+include "stdgates.inc";
+gate sxdg _gate_q_0 {
+  s _gate_q_0;
+  h _gate_q_0;
+  s _gate_q_0;
+}
+qubit[8] q;
+rx(pi/2) q[2];
+s q[5];
+barrier q[0], q[1], q[2], q[3], q[4], q[5], q[6], q[7];
+cz q[2], q[5];
+sdg q[2];
+sx q[5];
+sxdg q[2];
+rz(-3*pi/8) q[5];
+barrier q[0], q[1], q[2], q[3], q[4], q[5], q[6], q[7];
+"""
+
 @testset "strict OpenQASM subset and physical-label mapping" begin
     protocol = parse_qasm(TINY_QASM)
 
@@ -44,6 +64,22 @@ barrier q[0],q[1],q[2],q[3],q[4],q[5],q[6],q[7];
     @test tnqs[5] == ("Rx", [5], π / 2)
     @test tnqs[6] == ("Rx", [2], -π / 2)
     @test tnqs[7] == ("Rz", [5], -3π / 8)
+end
+
+@testset "Tracker OpenQASM 3 export preserves the canonical TNQS circuit" begin
+    qasm3_protocol = try
+        parse_qasm(TINY_TRACKER_QASM3)
+    catch
+        nothing
+    end
+    @test !isnothing(qasm3_protocol)
+    if !isnothing(qasm3_protocol)
+        qasm2_protocol = parse_qasm(TINY_QASM)
+        @test qasm3_protocol.register_size == qasm2_protocol.register_size
+        @test qasm3_protocol.barrier_count == qasm2_protocol.barrier_count
+        @test qasm3_protocol.physical_labels == qasm2_protocol.physical_labels
+        @test tnqs_layers(qasm3_protocol) == tnqs_layers(qasm2_protocol)
+    end
 end
 
 @testset "parser rejects silent protocol changes" begin

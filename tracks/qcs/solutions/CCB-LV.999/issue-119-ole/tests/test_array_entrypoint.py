@@ -107,8 +107,22 @@ class ArrayEntrypointTests(unittest.TestCase):
                 "max_truncation_error": 1.0e-9,
                 "sum_truncation_error": 2.0e-9,
                 "layers": [
-                    {"bp_residual": 1.0e-10, "bp_converged": True},
-                    {"bp_residual": 2.0e-10, "bp_converged": False},
+                    {
+                        "bp_residual": 1.0e-10,
+                        "bp_converged": True,
+                        "wall_seconds": 0.25,
+                        "max_bond_dimension": 64,
+                        "norm_defect_available": False,
+                        "norm_defect": float("nan"),
+                    },
+                    {
+                        "bp_residual": 2.0e-10,
+                        "bp_converged": False,
+                        "wall_seconds": 0.75,
+                        "max_bond_dimension": 128,
+                        "norm_defect_available": False,
+                        "norm_defect": float("nan"),
+                    },
                 ],
             },
         }
@@ -131,6 +145,11 @@ class ArrayEntrypointTests(unittest.TestCase):
                 "sum_truncation_error": 2.0e-9,
                 "max_bp_residual": 2.0e-10,
                 "bp_nonconverged_layers": 1,
+                "max_layer_wall_seconds": 0.75,
+                "mean_layer_wall_seconds": 0.5,
+                "max_virtual_bond_dimension": 128,
+                "norm_defect_available_layers": 0,
+                "max_norm_defect": None,
             },
         )
 
@@ -146,7 +165,12 @@ class ArrayEntrypointTests(unittest.TestCase):
             workspace = Path(tmp)
             ole_root = workspace / "ole"
             (ole_root / "scripts").mkdir(parents=True)
+            (ole_root / "configs").mkdir()
             (ole_root / "scripts" / "run_bp.jl").write_text("", encoding="utf-8")
+            (ole_root / "configs" / "baseline-49x648.toml").write_text(
+                '[problem]\nname = "operator_loschmidt_echo_49x648"\n',
+                encoding="utf-8",
+            )
             fake_julia = workspace / "fake_julia.py"
             fake_julia.write_text(
                 """#!/usr/bin/env python3
@@ -155,16 +179,17 @@ import sys
 
 args = sys.argv[1:]
 root = pathlib.Path(next(x.split("=", 1)[1] for x in args if x.startswith("--project=")))
-if "--execute" not in args:
-    print("confirmation_token=0123456789abcdef")
-    print("dry_run=true; no tensor-network computation was started")
-    raise SystemExit(0)
 seed = int(args[args.index("--seed") + 1])
 chi = int(args[args.index("--chi") + 1])
+result = root / "runs" / "baseline-49x648" / "delta-0p15" / f"chi-{chi}" / f"seed-{seed:04d}.toml"
+if "--execute" not in args:
+    print("confirmation_token=0123456789abcdef")
+    print(f"result_path={result}")
+    print("dry_run=true; no tensor-network computation was started")
+    raise SystemExit(0)
 token = args[args.index("--confirm") + 1]
 if token != "0123456789abcdef":
     raise SystemExit(3)
-result = root / "runs" / "baseline-49x648" / "delta-0p15" / f"chi-{chi}" / f"seed-{seed:04d}.toml"
 result.parent.mkdir(parents=True, exist_ok=True)
 result.write_text('''[run]
 status = "complete"
@@ -201,6 +226,89 @@ bp_converged = true
             manifest = json.loads(expected_path.read_text(encoding="utf-8"))
             self.assertEqual(manifest["status"], "success")
             self.assertEqual(manifest["result"]["sample_value"], 0.82)
+
+    def test_run_cell_passes_active_config_and_uses_runner_declared_result_path(self):
+        payload = {
+            "cell_id": "cell-0001",
+            "params": {"seed": 2, "chi": 192, "delta": "0.15"},
+            "settings": {
+                "config_path": "configs/active-49x1296.toml",
+                "dtype": "ComplexF64",
+            },
+            "provenance": {"qasm_sha256": "active-qasm"},
+            "run_dir": "results/test-active",
+        }
+        with tempfile.TemporaryDirectory() as tmp:
+            workspace = Path(tmp)
+            ole_root = workspace / "ole"
+            (ole_root / "scripts").mkdir(parents=True)
+            (ole_root / "configs").mkdir()
+            (ole_root / "scripts" / "run_bp.jl").write_text("", encoding="utf-8")
+            active_config = ole_root / "configs" / "active-49x1296.toml"
+            active_config.write_text(
+                '[problem]\nname = "operator_loschmidt_echo_49x1296"\n',
+                encoding="utf-8",
+            )
+            fake_julia = workspace / "fake_julia_active.py"
+            fake_julia.write_text(
+                """#!/usr/bin/env python3
+import pathlib
+import sys
+
+args = sys.argv[1:]
+root = pathlib.Path(next(x.split("=", 1)[1] for x in args if x.startswith("--project=")))
+expected_config = root / "configs" / "active-49x1296.toml"
+passed_config = (
+    "--config" in args
+    and pathlib.Path(args[args.index("--config") + 1]) == expected_config
+)
+seed = int(args[args.index("--seed") + 1])
+chi = int(args[args.index("--chi") + 1])
+run_directory = "active-49x1296" if passed_config else "baseline-49x648"
+result = root / "runs" / run_directory / "delta-0p15" / f"chi-{chi}" / f"seed-{seed:04d}.toml"
+if "--execute" not in args:
+    print("confirmation_token=0123456789abcdef")
+    print(f"result_path={result}")
+    print("dry_run=true; no tensor-network computation was started")
+    raise SystemExit(0)
+if args[args.index("--confirm") + 1] != "0123456789abcdef":
+    raise SystemExit(3)
+result.parent.mkdir(parents=True, exist_ok=True)
+sample_value = 0.88 if passed_config else 0.82
+result.write_text(f'''[run]
+status = "complete"
+[result]
+seed_id = 2
+maxdim = 192
+sample_value = {sample_value}
+wall_seconds = 240.0
+peak_rss_bytes = 8192
+max_truncation_error = 1.0e-8
+sum_truncation_error = 2.0e-8
+[[result.layers]]
+bp_residual = 2.0e-10
+bp_converged = true
+''')
+""",
+                encoding="utf-8",
+            )
+            os.chmod(fake_julia, 0o755)
+
+            with redirect_stdout(io.StringIO()):
+                manifest_path = ARRAY_ENTRYPOINT.run_cell(
+                    payload,
+                    ole_root,
+                    workspace,
+                    fake_julia,
+                )
+
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            self.assertEqual(manifest["status"], "success")
+            self.assertEqual(manifest["result"]["sample_value"], 0.88)
+            self.assertIn(
+                "/runs/active-49x1296/",
+                manifest["source_result"],
+            )
 
 
 if __name__ == "__main__":

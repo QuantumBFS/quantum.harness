@@ -1,10 +1,10 @@
 # 49-qubit Operator Loschmidt Echo：PEPO/Heisenberg-picture 方法报告
 
-更新日期：2026-07-29
+更新日期：2026-07-30
 
 对应任务：Quantum Harness issue #119
 
-状态：方法实现与 49-qubit 执行链验证通过；`Dop=512` 的经验误差已达标，最大角点仍缺直接 `χenv` 截面
+状态：方法实现与 49-qubit 执行链验证通过；`Dop=512` 双参数经验误差已达标，但 `χenv` 趋势尚未稳定
 
 ## 1. 摘要
 
@@ -31,10 +31,14 @@ FPEPO = 0.8225508376024053
 该值与本次 BP-TN 均值 `0.8183229131612796` 相差 `0.0042279244`，与公开
 BP-TN `χ=512` 中心值 `0.8216584890` 相差 `0.0008923486`。`Dop=384→512`
 的变化已经降到 `0.0001970707`，只有前一步的约 19.50%；加上继承自
-`Dop=128` 的环境变化 proxy 后，`εPEPO=0.0002108962<10⁻³`。但最大角点
-没有直接的 `χenv` 截面，因此当前结论是：
+同一最大角点的直接环境截面为
+`F(χenv=16,32,64)=0.822454680,0.822367519,0.822550838`，因此
+`Δχenv=0.0001833183`，经验误差和
+`εPEPO=ΔDop+Δχenv=0.0003803891<10⁻³`。但环境结果非单调，且最新变化
+绝对值比前一步更大，因此当前结论是：
 
-> PEPO 的 `Dop` 方向已经通过经验精度目标，但尚未完成最大角点的双参数内部收敛；
+> PEPO 的最大角点双参数经验误差和已经通过精度目标，但 `χenv` 方向尚未形成
+> 稳定趋势；
 > 不能因为有限 `Dop` 接近某个 BP-TN 中心值就宣称 baseline benchmark 已通过。
 
 ## 2. 问题定义
@@ -502,10 +506,10 @@ insert every Oᵢ and close all physical legs
 - `Dop` 作用于 `C†OC` 的构造；
 - `χenv` 作用于构造完成后的 scalar contraction。
 
-当前误差明显由 `Dop` 主导。在 `Dop=128` 的完整环境截面上，
-`χenv=32→64` 只改变 `1.38×10⁻⁵`；最新 `Dop=384→512` 改变
-`1.97×10⁻⁴`。两项之和已低于目标，但环境数值仍只是低 `Dop` proxy，
-不能代替最大角点的直接扫描。
+当前最大角点的两类经验变化都已直接测量：`Dop=384→512` 改变
+`1.97×10⁻⁴`，`χenv=32→64` 改变 `1.83×10⁻⁴`。两项之和已低于目标；
+但环境序列非单调，且最新变化绝对值增大，所以当前限制来自 `χenv` 趋势
+尚未稳定，而不是缺少扫描点。
 
 ### 4.3 验证参数和 provenance
 
@@ -701,7 +705,8 @@ uv run --project "$OLE_ROOT/pepo" \
   --run-dir results/issue119-pepo-49q-dop256 \
   --run-dir results/issue119-pepo-49q-dop384 \
   --run-dir results/issue119-pepo-49q-dop512 \
-  --output-dir results/issue119-pepo-49q-dop512-analysis
+  --run-dir results/issue119-pepo-49q-dop512-chi16-32 \
+  --output-dir results/issue119-pepo-49q-dop512-full-chi-analysis
 ```
 
 ## 7. 验证策略
@@ -727,12 +732,12 @@ O = Z52
 
 ### 7.2 49Q 执行证据
 
-- 25/25 个 `δ=0.15` 执行记录成功；
+- 27/27 个 `δ=0.15` 执行记录成功；
 - 无 failed、missing 或 pending cell；
 - 重复的 `(Dop=8,χenv=64)` 两次结果相差 `3.04×10⁻¹⁸`；
 - 每个最大-D cell 均处理 3,937 个 causal gates；
 - final support 覆盖全部 49 active sites；
-- `Dop=512` 的结果虚部为 `−1.61×10⁻¹⁵`；
+- `Dop=512` 三个环境点的虚部绝对值均不超过 `1.61×10⁻¹⁵`；
 - 当前 PEPO 测试为 131 passed。
 
 这些证据证明代码与 49Q 执行链有效，但不等价于 `Dop→∞` 已收敛。
@@ -764,18 +769,19 @@ O = Z52
 `ΔDop=1.97×10⁻⁴` 已低于 `10⁻³` 目标；但单个 successive difference
 仍不是严格误差界，也没有提供受控的 `Dop→∞` 外推。
 
-### 8.2 最近的完整 `χenv` 截面
+### 8.2 最大 `Dop` 的完整 `χenv` 截面
 
-`Dop=512` 只计算了 `χenv=64`。最近的完整环境截面仍位于 `Dop=128`：
+`Dop=512` 的直接环境截面已经补齐：
 
-| `χenv` | `FPEPO(Dop=128)` | 相邻变化 |
+| `χenv` | `FPEPO(Dop=512)` | 有符号相邻变化 |
 | ---: | ---: | ---: |
-| 16 | `0.7982962803124029` | — |
-| 32 | `0.7987662065070368` | `0.000469926195` |
-| 64 | `0.7987800319758508` | `0.000013825469` |
+| 16 | `0.8224546798218048` | — |
+| 32 | `0.8223675192526760` | `−0.000087160569` |
+| 64 | `0.8225508376024053` | `+0.000183318350` |
 
-环境方向的最新变化已经低于 `10⁻³`，但它是从 `Dop=128` 继承到当前分析的
-proxy。没有额外的 `Dop=512` 环境点，就不能直接认证最大角点的 `χenv` 收敛。
+环境方向的两步变化绝对值均低于 `10⁻³`，但序列非单调，且最新一步变化
+绝对值约为前一步的 2.10 倍。它已经替代早先来自 `Dop=128` 的 proxy，
+却尚未满足“最新变化不再增大”的稳定趋势条件。
 
 ### 8.3 经验误差判据
 
@@ -783,7 +789,7 @@ proxy。没有额外的 `Dop=512` 环境点，就不能直接认证最大角点�
 
 ```text
 ΔDop  = |F(Dmax,χmax) − F(Dprev,χmax)|
-Δχenv = 最近完整 χ 截面的最后两个 χenv 之差
+Δχenv = 最大 Dop 截面的最后两个 χenv 之差
 εPEPO = ΔDop + Δχenv
 ```
 
@@ -791,8 +797,8 @@ proxy。没有额外的 `Dop=512` 环境点，就不能直接认证最大角点�
 
 ```text
 ΔDop  = 0.00019707073422559063
-Δχenv = 0.00001382546881401048  [Dop=128 proxy]
-εPEPO = 0.0002108962030396011
+Δχenv = 0.00018331834972928895  [Dop=512 direct slice]
+εPEPO = 0.0003803890839548796
 target = 0.001
 ```
 
@@ -802,8 +808,9 @@ target = 0.001
 2. 最新 `Dop` 和 `χenv` 变化不再增大；
 3. `χenv` 截面必须直接位于最大 `Dop` 角点。
 
-当前满足第 1、2 条；第 3 条仍未满足。因此 `internally_converged=false`：
-可以说 `Dop` 精度与代理误差和已达标，但不能写成最大角点双轴“已经收敛”。
+当前满足第 1、3 条；`χenv` 最新变化增大，因此第 2 条未满足。
+`internally_converged=false`：可以说双参数经验误差和已达标，但不能写成
+双轴“已经收敛”。
 
 ## 9. 与 BP-TN 和公开结果比较
 
@@ -834,6 +841,8 @@ agreement/disagreement；当前状态保持为 `diagnostic`。
 | `Dop=256,χenv=64` | 64 | 807.07 s | 11.402 GiB |
 | `Dop=384,χenv=64` | 96 | 2315.21 s | 21.508 GiB |
 | `Dop=512,χenv=64` | 128 | 1755.86 s | 43.411 GiB |
+| `Dop=512,χenv=16` | 128 | 2017.58 s | 43.421 GiB |
+| `Dop=512,χenv=32` | 128 | 1941.52 s | 43.424 GiB |
 
 `Dop=64/128` 的六个 cell 同时运行，每个进程实测使用约 29–30 核，总利用率约
 176–180 核。`Dop=512` 对应 Slurm Job `412377`，请求 128 CPU、192 GiB、6 h，
@@ -841,7 +850,9 @@ agreement/disagreement；当前状态保持为 `diagnostic`。
 反而缩短约 24.2%，但 peak RSS 增长约 2.02 倍；资源缩放同时依赖 `Dop` 与
 并行度，不能仅按 `Dop` 线性外推。
 
-集群关闭了 Slurm accounting，因此 wall time 和 peak RSS 来自 Python manifest，
+新增截面使用 Slurm Jobs `415462` 和 `415466`。数组 `415462` 的
+`χenv=16` cell 因两个并发进程竞争 `uv` interpreter cache 的原子重命名而在
+求解器启动前失败；单独重试后成功。集群关闭了 Slurm accounting，因此 wall time 和 peak RSS 来自 Python manifest，
 而不是 `sacct`。
 
 ## 11. 当前结论和局限
@@ -852,24 +863,24 @@ agreement/disagreement；当前状态保持为 `diagnostic`。
 - 完整 49Q causal evolution、PEPO contraction 和 manifest 链路可执行；
 - `Dop=32→64→128→256→384→512` 的变化连续减小，最新变化约为前一步的
   19.50%；
-- `Dop=512` 的 `ΔDop=1.97×10⁻⁴`，代理误差和
-  `εPEPO=2.11×10⁻⁴<10⁻³`；
+- `Dop=512` 的 `ΔDop=1.97×10⁻⁴`、直接
+  `Δχenv=1.83×10⁻⁴`，经验误差和 `εPEPO=3.80×10⁻⁴<10⁻³`；
 - 当前 PEPO 与 BP-TN/公开 BP 中心值数值接近；
-- `Dop≤128` 时 `χenv=64` 的收缩误差已经较小。
+- `Dop=512` 的 `χenv=16/32/64` 直接截面已完成，且相邻变化绝对值都小于
+  `10⁻³`。
 
 ### 11.2 当前证据不能支持
 
-- `Dop=512` 角点的直接 `χenv` 收敛；
+- `Dop=512` 环境序列的稳定、单调收敛趋势；
 - 受控的 `Dop→∞` 外推；
 - PEPO 与 BP-TN 已正式 agreement；
 - PEPO baseline benchmark 已完成。
 
 ### 11.3 后续最有信息量的计算
 
-最有信息量的下一步是在同一 `Dop=512` 角点补充 `χenv=32`。当前
-operator-bond 方向已经跨过 `10⁻³` 阈值；直接比较
-`F(512,64)−F(512,32)` 才能替换来自 `Dop=128` 的环境 proxy，并判断
-三项内部收敛条件是否同时满足。
+若继续 PEPO 路线，最有信息量的下一步是在同一 `Dop=512` 角点补充
+`χenv=128`，判断 `χenv=32→64` 的反向变化是小幅收缩波动还是尚未进入稳定区间。
+当前主路线已转向 BP-TN active G5/G6，因此这不是 G5 的前置条件。
 
 ## 12. 结果与源码索引
 
@@ -879,18 +890,19 @@ operator-bond 方向已经跨过 `10⁻³` 阈值；直接比较
 - 49Q 验证记录：[`PEPO_49Q_VALIDATION.md`](PEPO_49Q_VALIDATION.md)
 - 小系统验证：[`PEPO_SMALL_VALIDATION.md`](PEPO_SMALL_VALIDATION.md)
 - 最新 assessment：
-  `results/issue119-pepo-49q-dop512-analysis/assessment.json`
+  `results/issue119-pepo-49q-dop512-full-chi-analysis/assessment.json`
 - 最新收敛图：
-  `results/issue119-pepo-49q-dop512-analysis/pepo-convergence.png`
+  `results/issue119-pepo-49q-dop512-full-chi-analysis/pepo-convergence.png`
 
-![PEPO convergence through Dop=512](../../../../../results/issue119-pepo-49q-dop512-analysis/pepo-convergence.png)
+![PEPO convergence through Dop=512](../../../../../results/issue119-pepo-49q-dop512-full-chi-analysis/pepo-convergence.png)
 
-图 A 是固定 `χenv=64` 的 `Dop` 序列；图 B 是最近的完整环境截面，
-对应 `Dop=128`，不是 `Dop=512`。
+图 A 是固定 `χenv=64` 的 `Dop` 序列；图 B 是最大角点
+`Dop=512` 的完整环境截面。
 
 ### 12.2 运行结果
 
 - `results/issue119-pepo-49q-dop512/`
+- `results/issue119-pepo-49q-dop512-chi16-32/`
 - `results/issue119-pepo-49q-dop384/`
 - `results/issue119-pepo-49q-dop256/`
 - `results/issue119-pepo-49q-dop64-128/`

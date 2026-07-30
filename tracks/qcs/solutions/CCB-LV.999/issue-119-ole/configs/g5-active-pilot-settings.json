@@ -1,0 +1,15 @@
+{
+  "config_path": "configs/active-49x1296.toml",
+  "observable_labels": [
+    52,
+    59,
+    72
+  ],
+  "dtype": "ComplexF64",
+  "cutoff": 1e-12,
+  "normalize_tensors": true,
+  "bp_maxiter": 25,
+  "bp_tolerance": 1e-8,
+  "julia_threads": 1,
+  "blas_threads": 16
+}

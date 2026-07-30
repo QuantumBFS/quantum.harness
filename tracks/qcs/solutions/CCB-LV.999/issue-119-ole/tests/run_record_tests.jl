@@ -35,3 +35,23 @@ using TOML
         @test loaded["run"]["chi"] == 64
     end
 end
+
+@testset "result paths keep active runs separate from baseline runs" begin
+    builder = isdefined(RunRecords, :run_result_path) ?
+              RunRecords.run_result_path :
+              (_args...; _kwargs...) -> nothing
+    @test builder(
+        "/work/ole",
+        "active-49x1296",
+        0.15,
+        192,
+        7,
+    ) == joinpath(
+        "/work/ole",
+        "runs",
+        "active-49x1296",
+        "delta-0p15",
+        "chi-192",
+        "seed-0007.toml",
+    )
+end

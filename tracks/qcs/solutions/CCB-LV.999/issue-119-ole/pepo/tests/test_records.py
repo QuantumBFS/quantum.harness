@@ -27,7 +27,14 @@ def test_core_source_digest_changes_with_core_file(tmp_path):
     """Breaks if the oracle certificate ignores a numerical-core source edit."""
     core = tmp_path / "pepo/src/ole_pepo"
     core.mkdir(parents=True)
-    for name in ("qasm.py", "gates.py", "exact.py", "engine.py", "contraction.py"):
+    for name in (
+        "circuits.py",
+        "qasm.py",
+        "gates.py",
+        "exact.py",
+        "engine.py",
+        "contraction.py",
+    ):
         (core / name).write_text(name, encoding="utf-8")
     (tmp_path / "pepo/uv.lock").write_text("lock", encoding="utf-8")
 

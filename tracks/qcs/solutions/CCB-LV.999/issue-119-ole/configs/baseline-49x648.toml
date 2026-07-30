@@ -1,5 +1,6 @@
 [problem]
 name = "operator_loschmidt_echo_49x648"
+run_directory = "baseline-49x648"
 tracker_issue = "https://github.com/quantum-advantage-tracker/quantum-advantage-tracker.github.io/issues/10"
 qasm_path = "inputs/49Q_OLE_circuit_L_3_b_0.25_delta0.15.qasm"
 qasm_url = "https://github.com/user-attachments/files/23483330/49Q_OLE_circuit_L_3_b_0.25_delta0.15.txt"

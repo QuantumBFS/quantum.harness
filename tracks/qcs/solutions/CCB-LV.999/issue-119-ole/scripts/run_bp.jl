@@ -92,6 +92,13 @@ function main()
     else
         throw(ArgumentError("--delta must be 0.15 or 0"))
     end
+    output_path = run_result_path(
+        ROOT,
+        problem["run_directory"],
+        effective_delta,
+        maxdim,
+        seed_id,
+    )
 
     fingerprint_material = join(
         [
@@ -106,6 +113,7 @@ function main()
             "dtype=$(simulation["dtype"])",
             "cutoff=$(simulation["cutoff"])",
             "bp=$(simulation["bp_maxiter"]):$(simulation["bp_tolerance"])",
+            "run_directory=$(problem["run_directory"])",
             "julia_threads=$(Threads.nthreads())",
             "blas_threads=$(BLAS.get_num_threads())",
         ],
@@ -120,6 +128,7 @@ function main()
     println("seed=$seed_id namespace=$(simulation["seed_namespace"]) chi=$maxdim dtype=$(simulation["dtype"]) cutoff=$(simulation["cutoff"])")
     println("bp_maxiter=$(simulation["bp_maxiter"]) bp_tolerance=$(simulation["bp_tolerance"]) normalize=$(simulation["normalize_tensors"])")
     println("resource_cpu=$(Sys.CPU_NAME) julia_threads=$(Threads.nthreads()) blas_threads=$(BLAS.get_num_threads()) total_memory_bytes=$(Sys.total_memory())")
+    println("result_path=$output_path")
     println("confirmation_token=$confirmation_token")
     flush(stdout)
 
@@ -136,15 +145,6 @@ function main()
     dtype = simulation["dtype"] == "ComplexF64" ? ComplexF64 :
             simulation["dtype"] == "ComplexF32" ? ComplexF32 :
             throw(ArgumentError("unsupported dtype $(simulation["dtype"])"))
-    delta_directory = effective_delta == 0 ? "delta-0" : "delta-0p15"
-    output_directory = joinpath(
-        ROOT,
-        "runs",
-        "baseline-49x648",
-        delta_directory,
-        "chi-$maxdim",
-    )
-    output_path = joinpath(output_directory, "seed-$(lpad(seed_id, 4, '0')).toml")
     partial_path = output_path * ".partial"
     checkpointed_layers = NamedTuple[]
     metadata = Dict(
