@@ -68,6 +68,41 @@ finite-shot central differences, those directions consume queries and inject
 noise into the trust-region step. The wider method therefore performs worse
 despite containing the successful subspace.
 
+## Exploratory derivative-free optimizer comparison
+
+After the Attempt-49 confirmation was frozen, we ran a separate development
+comparison to test the suggestion that Bayesian optimization might replace
+one-direction-at-a-time scanning or provide a cheaper warm start. The
+comparison used 12 new synthetic CNOT truth cells, two finite-shot replicates,
+and method-specific frozen budgets of 34, 50, or 66 total queries. Only the
+single online-selected terminal pulse was scored; BO received no post-hoc
+credit for other queried points.
+
+| Method | Queries | Total shots | Terminal success |
+|---|---:|---:|---:|
+| principal-global, one cycle | 34 | 1,050,624 | 62.50% |
+| principal-global, two cycles | 66 | 2,099,200 | **95.83%** |
+| sequential quadratic proxy | 66 | 2,099,200 | 50.00% |
+| BO-32 | 34 | 1,050,624 | 0.00% |
+| BO-64 | 66 | 2,099,200 | 4.17% |
+| BO16 then one local cycle | 50 | 1,574,912 | 45.83% |
+| BO32 then one local cycle | 66 | 2,099,200 | 83.33% |
+
+The reduced hybrid cut queries by 24.2% and shots by 25.0% but lost 50
+percentage points of success relative to the full local baseline. The
+full-budget hybrid reached 83.33%, with paired success difference
+`-12.50 pp [-25.00, 0.00]`. Pure BO was strongly data-limited in the
+15-dimensional active space. The local Hessian-preconditioned refinement, not
+the current Gaussian-process search alone, produced the useful corrections.
+
+All 168 runs completed and their method-specific query/shot ledgers closed.
+Code, protocol, raw JSON, plot, independent audit findings, and the
+Gaussian-plugin-noise and process-isolation limitations are preserved at
+[commit `d2d06ff`](https://github.com/thy10817/quantum.harness/tree/d2d06ff13710c3a1f9c6b872296ee69b1bf218e7/tracks/qcs/solutions/gpt-5.6/core-sim-to-real).
+This is exploratory development evidence and does not alter the preregistered
+Attempt-49 result or establish a universal conclusion about Bayesian
+optimization.
+
 ## Queries-to-target deliverable
 
 The development panel sweeps model-informed dimensions

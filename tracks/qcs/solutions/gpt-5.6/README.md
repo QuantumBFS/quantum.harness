@@ -68,6 +68,34 @@ families. The post-hoc restricted-mean queries-to-target values are 48.76,
 160.63, and 166; they are benchmark scores, not an online stopping
 certificate.
 
+## Exploratory optimizer comparison
+
+After freezing the confirmation result, we also tested whether noisy Bayesian
+optimization (BO), or BO followed by one Hessian-preconditioned local update,
+could reduce measurements. This separate development comparison used 12 new
+synthetic CNOT truth cells, two finite-shot replicates per cell, one
+online-selected terminal pulse per run, and seven frozen methods:
+
+| Method | Queries | Shots | Terminal success |
+|---|---:|---:|---:|
+| one-cycle principal-global | 34 | 1,050,624 | 62.50% |
+| two-cycle principal-global | 66 | 2,099,200 | **95.83%** |
+| sequential quadratic scan proxy | 66 | 2,099,200 | 50.00% |
+| BO-32 | 34 | 1,050,624 | 0.00% |
+| BO-64 | 66 | 2,099,200 | 4.17% |
+| BO16 then one local cycle | 50 | 1,574,912 | 45.83% |
+| BO32 then one local cycle | 66 | 2,099,200 | 83.33% |
+
+Thus this BO implementation did not retain performance at reduced query/shot
+budgets and does not replace the headline method. The full-budget hybrid was
+12.50 percentage points below the two-cycle local baseline (paired
+truth-cell bootstrap 95% interval `[-25.00, 0.00]`). Complete exploratory
+code, raw results, plot, audit notes, and claim boundaries are preserved at
+[commit `d2d06ff`](https://github.com/thy10817/quantum.harness/tree/d2d06ff13710c3a1f9c6b872296ee69b1bf218e7/tracks/qcs/solutions/gpt-5.6/core-sim-to-real).
+This is a 15-dimensional synthetic-CNOT method screen, not a direct test of
+the paper's ten-dimensional ytterbium experiment and not confirmation
+evidence.
+
 ## Verify before believing
 
 From this solution directory, the standard-library closure audit checks the
