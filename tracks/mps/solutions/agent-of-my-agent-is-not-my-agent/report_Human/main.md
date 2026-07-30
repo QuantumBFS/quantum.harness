@@ -29,7 +29,7 @@ are computationally plausible.
 We study a ferromagnetic transverse-field Ising chain,
 
 $$
-H=-\sum_{i \lt j}J_L(j-i;\sigma)Z_iZ_j-\Gamma\sum_iX_i .
+H=-\sum_{i \lt j}J_{L}(j-i;\sigma)Z_{i} Z_{j} -\Gamma\sum_{i} X_{i} .
 $$
 
 where X and Z are Pauli operators. The finite periodic ring is defined by the
