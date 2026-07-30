@@ -1,0 +1,42 @@
+Issue #230 certified-delivery data manifest
+===========================================
+
+Model: spin-1/2 XXZ chain, h_Delta=(XX+YY+Delta ZZ)/4
+Trust boundary: Bethe data is used only by independent verification.
+Selected certificate payloads: 28
+
+SHA256  BYTES  ROLE  PATH
+f83e717f7b75c429ebfa68accb664e5fc8b2f780a58523245fae7100913268bf  718  xxz-grid  outputs/final/grid/delta_m2/level_3_block_4.json
+113b4e2e12310ef4223e608c5fa5b1710748c3a54bd4f8aa77ebfbe68e83223f  718  xxz-grid  outputs/final/grid/delta_m2/level_5_block_6.json
+e5d900326f95d4adbbaf11124fe36bd8b86a442ec0098a53efd1814528d36a6b  718  xxz-grid  outputs/final/grid/delta_m2/level_7_block_8.json
+5cf822674e34de8f44c6137666a60aa9baa6e2dcb2f55a98b248a5b361015917  739  xxz-grid  outputs/final/grid/delta_m1/level_3_block_4.json
+b7339096855cd1b0f6001e735ecc023ca2f03a654018ea49c92f92b513a3ecac  739  xxz-grid  outputs/final/grid/delta_m1/level_5_block_6.json
+dbdc6721597ec14dbf620edffe4e1ab1aaf3c62529979165ac80b35ff54c8e28  739  xxz-grid  outputs/final/grid/delta_m1/level_7_block_8.json
+eabdba1e91a8df7e0d1916a2d170b7a0e3ebc5255d1df149fac6b8ee5212f8c9  1228  xxz-grid  outputs/final/grid/delta_m0p5/level_3_block_4.json
+2828f47bd71e11cf6a690b8068d4e0f3297e836d9648c1c9f2284a8b3174c940  4471  xxz-grid  outputs/final/grid/delta_m0p5/level_5_block_6.json
+f1ff60421ba706810443cd465356496b7c736593296c86a289f9c2e2f405f1fb  3878  xxz-grid  outputs/final/grid/delta_m0p5/level_7_block_8.json
+785af9047148b043b7ee15a699fde10805c1601233b9424b4c0ee95b6ae9a676  1227  xxz-grid  outputs/final/grid/delta_0/level_3_block_4.json
+ebcbdc3397d254de3909af863584ff1dde1cf3ce70c945b95ea80410508da1de  4419  xxz-grid  outputs/final/grid/delta_0/level_5_block_6.json
+7ee7d6e2819d24d0f15e37190d3519be86518e8bce39ec0895d7c4da16299545  6477  xxz-grid  outputs/final/grid/delta_0/level_7_block_8.json
+158cecebc3b895e6599afb1ee8e507c675c97b236054bc59f380224a27175e8f  1125  xxz-grid  outputs/final/grid/delta_0p5/level_3_block_4.json
+8157acf18d7a5d0800e86cbc87f985d4589ee51721ef0681e007d3cd006cbcce  4328  xxz-grid  outputs/final/grid/delta_0p5/level_5_block_6.json
+d84d02e6275e819e9cc864b3644adad9aa509a68f772de57a0b2d77ac7328821  6374  xxz-grid  outputs/final/grid/delta_0p5/level_7_block_8.json
+58caffdbde890af8ff27cebf71eebca1acaac963abf47f117b9a07733ac2e0a6  1230  xxz-grid  outputs/final/grid/delta_0p9/level_3_block_4.json
+a2c1b12470a4314349c0e9a861ac16c1ae18fe8c947b5cf10b6a0cf81d14c963  4464  xxz-grid  outputs/final/grid/delta_0p9/level_5_block_6.json
+3000ae25ebbcf8f89ace65e2c8f2e91a2d2c9c9091a3872cd573197f3749060d  6517  xxz-grid  outputs/final/grid/delta_0p9/level_7_block_8.json
+cbb839a0149e5d67d90326273e4b09ab4efaada555ac74760d09a2c68aa4d549  1229  xxz-grid  outputs/final/grid/delta_1/level_3_block_4.json
+6261be00a7f6f9883d90d55e461275dd263868826ed3502ff13d8adf528f8ced  4463  xxz-grid  outputs/final/grid/delta_1/level_5_block_6.json
+8ad3067d598b1256e2deb1b30045f4fb293d719e155292478bbbdd0ab5154e39  6506  xxz-grid  outputs/final/grid/delta_1/level_7_block_8.json
+1f7c684b3c2f62506f9b30f11e80197045f26a3cfcf464b608f1d2cab998e0c7  5410891  xxx-strongest  outputs/final/xxx_best/level_47_rg_d6_mps_d32_block_1000.json
+2f0920c719a862c1adff70f851dbd466eca094e6749507b7f47acbef2d94213d  1228  xxz-grid  outputs/final/grid/delta_1p1/level_3_block_4.json
+68a61bcd496efee8aae4d5f16e9ee18e7109fc8b06304b3b669f4e90533c2560  4473  xxz-grid  outputs/final/grid/delta_1p1/level_5_block_6.json
+af6b2849564795ed43448660ed1fee06a9b496e1c8ef88be64b21d9d9c368e58  6517  xxz-grid  outputs/final/grid/delta_1p1/level_7_block_8.json
+2864ac13d50ca18d35917fe2583b926ad0887d90758add883fa1d05c14e68a22  1221  xxz-grid  outputs/final/grid/delta_2/level_3_block_4.json
+f54d69ba7433747d09be9f9ae1daf883e63c9c46011d45e57af3bf3c5c7ecac7  4450  xxz-grid  outputs/final/grid/delta_2/level_5_block_6.json
+584a77f65209ffb2d863efb552134e43dbf6161dd59fb6992ca7ad24beb88650  6488  xxz-grid  outputs/final/grid/delta_2/level_7_block_8.json
+6d6d33fb6ef784eff0940f8d3360549dfb5b37f2d1cae6eeb3e5b821624123d6  12700  delivery-summary  outputs/final/certificate-summary.csv
+9107f1361cadb293b6cd42ff6c241bb9ddc46a642ef41be4f4113965197b31c0  591  record-gate  outputs/final/record-gate.json
+
+Reproduce:
+  .venv/bin/python scripts/build_delivery_data.py
+  .venv/bin/pytest tests/test_delivery.py -q
