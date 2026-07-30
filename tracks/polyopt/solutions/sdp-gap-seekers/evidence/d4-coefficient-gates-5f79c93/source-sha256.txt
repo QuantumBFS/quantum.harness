@@ -1,0 +1,4 @@
+e5e0dab957b57254bc9897480f6bafcac07b4234fc86ba24f3f9e0734141a9ad  tracks/polyopt/solutions/sdp-gap-seekers/src/SquareGapConic.jl
+d6bee585fa032fcc76f0b7e7456c38cd1ace3a0a5b7a985c83c9b3f17565c5ac  tracks/polyopt/solutions/sdp-gap-seekers/src/SquareSymmetryD4.jl
+7fd156b8a9dfbd28cb6fba821ac53cfbba76b35952c9db8a2c722846db2415cc  tracks/polyopt/solutions/sdp-gap-seekers/src/SquareSymmetryBlock.jl
+88f684947fd15bb4fdf1ddf919f440a435b78c5d7062dd8f9b039df360a70ca7  tracks/polyopt/solutions/sdp-gap-seekers/scripts/check_d4_coefficient_gates.jl

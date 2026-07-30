@@ -1,0 +1,14 @@
+JobID|State|ExitCode|Elapsed|TotalCPU|MaxRSS|MaxVMSize|AllocCPUS|NodeList
+118170937|FAILED|1:0|00:00:28|unavailable|unavailable|unavailable|16|a17r4n01
+118170937.batch|FAILED|1:0|00:00:28|unavailable|535536K|unavailable|16|a17r4n01
+118171007|COMPLETED|0:0|00:03:47|04:22.998|||16|a17r4n01
+118171007.batch|COMPLETED|0:0|00:03:47|04:22.997|953396K|6052064K|16|a17r4n01
+118171150|COMPLETED|0:0|00:04:20|04:29.151|||16|a07r3n19
+118171150.batch|COMPLETED|0:0|00:04:20|04:29.150|940088K|6051764K|16|a07r3n19
+118171424|COMPLETED|0:0|00:01:36|01:29.128|||4|k18r4n09
+118171424.batch|COMPLETED|0:0|00:01:36|01:29.127|638524K|3651100K|4|k18r4n09
+
+Job `118170937` failed before assembly because the generated Mosek `deps.jl`
+still pointed to the scnet1 `/work/home/...` library path. The single path was
+corrected to the existing scnet2 `/public/home/...` library; the distinct r2
+job `118171007` then passed. The failed job has no scientific interpretation.

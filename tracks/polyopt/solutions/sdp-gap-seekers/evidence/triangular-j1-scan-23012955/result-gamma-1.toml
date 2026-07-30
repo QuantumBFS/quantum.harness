@@ -1,0 +1,241 @@
+audit_tolerance = 1.0e-7
+checksums_path = "/work/home/iint_sjds/triangular.harness/tracks/polyopt/solutions/sdp-gap-seekers/results/triangular-j1-scan-20260729/points/gamma-1/input/SHA256SUMS"
+classification = "feasible_residual_checked_float"
+completed = true
+expected_gamma = "1//1"
+finished_at_utc = "2026-07-29T15:34:21.981Z"
+model_path = "/work/home/iint_sjds/triangular.harness/tracks/polyopt/solutions/sdp-gap-seekers/results/triangular-j1-scan-20260729/points/gamma-1/input/model.mof.json"
+mof_reload_wall_seconds = 12.717398881912231
+peak_process_rss_kib = 1216676
+representation = "exact-v4-conjugation-full-spin-isotypic-real-symmetric"
+runmeta_path = "/work/home/iint_sjds/triangular.harness/tracks/polyopt/solutions/sdp-gap-seekers/results/triangular-j1-scan-20260729/points/gamma-1/input/runmeta.toml"
+runner_commit = "d73545da39b0bb12884dc707d29dbfa380e91146"
+runner_source_sha256 = "8e0165c561d5a678662a1f34a51673891214eaf7af6507a481980ba3a3eedd7e"
+runner_tree = "e0aa31213012baab101aeb40a32592138578bbc5"
+schema_version = "triangular-heisenberg-full-spin-isotypic-real-solve-result-v1"
+source_commit = "d73545da39b0bb12884dc707d29dbfa380e91146"
+started_at_utc = "2026-07-29T15:33:51.711Z"
+threads = 16
+time_limit_seconds = 1200
+total_wall_seconds = 30.270134210586548
+
+[input_hashes]
+checksums_sha256 = "e1e68f8b7f71485cb232b499929067abfcc4109f4c151c0882dc59846afc56b7"
+model_mof_sha256 = "f50dab2127aad67a2b81a893d3cd7f40e2135cdc141e4f4142e2c303dd37aeeb"
+runmeta_sha256 = "2d579d9bc1c6a54c21140b617dc04d74879f740653972e4b1668fb5d4c685c46"
+
+[model_validation]
+constraint_count_excluding_variable_sets = 10
+max_psd_side_dimension = 45
+passed = true
+psd_constraint_count = 9
+real_psd_triangle_entries = 6104
+variable_count = 3250
+
+    [model_validation.jump_value_shapes]
+    isotypic_full_spin_gap_gap_active_rx1_ry0_eigen_minus_real_psd = "VectorShape"
+    isotypic_full_spin_positive_centered_rx0_ry0_s3_standard_representative_real_psd = "VectorShape"
+    isotypic_full_spin_positive_centered_rx0_ry0_s3_trivial_real_psd = "VectorShape"
+    isotypic_full_spin_positive_centered_rx1_ry0_eigen_minus_real_psd = "VectorShape"
+    isotypic_full_spin_positive_centered_rx1_ry0_eigen_plus_real_psd = "VectorShape"
+    isotypic_full_spin_positive_scalar_rx0_ry0_s3_standard_representative_real_psd = "VectorShape"
+    isotypic_full_spin_positive_scalar_rx0_ry0_s3_trivial_real_psd = "VectorShape"
+    isotypic_full_spin_positive_scalar_rx1_ry0_eigen_minus_real_psd = "VectorShape"
+    isotypic_full_spin_positive_scalar_rx1_ry0_eigen_plus_real_psd = "VectorShape"
+
+    [model_validation.psd_block_dimensions]
+    isotypic_full_spin_gap_gap_active_rx1_ry0_eigen_minus_real_psd = 1
+    isotypic_full_spin_positive_centered_rx0_ry0_s3_standard_representative_real_psd = 36
+    isotypic_full_spin_positive_centered_rx0_ry0_s3_trivial_real_psd = 36
+    isotypic_full_spin_positive_centered_rx1_ry0_eigen_minus_real_psd = 45
+    isotypic_full_spin_positive_centered_rx1_ry0_eigen_plus_real_psd = 36
+    isotypic_full_spin_positive_scalar_rx0_ry0_s3_standard_representative_real_psd = 36
+    isotypic_full_spin_positive_scalar_rx0_ry0_s3_trivial_real_psd = 37
+    isotypic_full_spin_positive_scalar_rx1_ry0_eigen_minus_real_psd = 45
+    isotypic_full_spin_positive_scalar_rx1_ry0_eigen_plus_real_psd = 36
+
+[primal_values]
+bytes = 362043
+encoding = "index-tab-name-tab-ieee754-binary64-bits"
+filename = "primal-values.tsv"
+schema_version = "triangular-heisenberg-full-spin-isotypic-primal-values-v1"
+sha256 = "8ccb169ef80d10a683368c8d0b9cf3b4e09a1cd30b606857c6f632b2704180e1"
+variable_count = 3250
+
+[runmeta_validation]
+conjugation_assembly_sha256 = "89725d33a3d304bf396ac5251e41376651eac804b70dc8ff26459f14d7c32d8c"
+conjugation_coefficient_map_sha256 = "e8298c8a1860a8a604d4fbc438403ce476704b6f4c41c117d1dd5b651ba38eed"
+full_spin_assembly_sha256 = "24a75c2765b07c79954004a65eafbcae9ccc0ae14d560360b194416c383360b6"
+full_spin_coefficient_map_sha256 = "6890c1267be1a918323897efcf4fbac9e1fe63415ad686956a0e9a8ffeb9e639"
+full_spin_cone_assembly_sha256 = "95921c505e685447fce9efc3bf7b2c6a9598c209145cf135533fd1ed193cd457"
+full_spin_cone_coefficient_map_sha256 = "4a4ad8d0463f139aced886d239dd9bd84229a100eafd1103ab1ae71cbcaab010"
+full_spin_isotypic_assembly_sha256 = "5bd48ce5236cad52b3c966f765292b8fa646d5ac50fc53435611c41e31a4ee82"
+full_spin_isotypic_coefficient_map_sha256 = "9d97d8e924c404909d5faf98861b8dc19631a9b74703672e847343c2e9225bf8"
+passed = true
+schema = "triangular-heisenberg-full-spin-isotypic-real-mof-runmeta-v1"
+source_assembly_sha256 = "8fa976015bc1c39c3ee430102d15b616b981104512ee2f6c7c763e43fd59861d"
+source_commit = "d73545da39b0bb12884dc707d29dbfa380e91146"
+source_problem_sha256 = "42f310b1c9bf3ca9760486984ae62091c74dd2cc2fa7b63dab0c21d091477359"
+source_tree = "e0aa31213012baab101aeb40a32592138578bbc5"
+spin_axis_assembly_sha256 = "f2d5d1a3dfaaee179cb9494759edd0b1ff31baa360543eb0c1e8784260f044a5"
+spin_axis_coefficient_map_sha256 = "41d0129efcbb4bfccfea11d9844813386f507f0dec486fc3576845f3d5c13ad5"
+v4_assembly_sha256 = "aaf553bb797503f2751b263d5dbaca086a7f7edfa6bb93bf3a6c7f83d148ddeb"
+v4_coefficient_map_sha256 = "2d520784324105a04393ac08b31fbfadbb77dc098dc064cac09c9a34533e16b7"
+
+    [runmeta_validation.source_file_sha256]
+    "tracks/polyopt/solutions/sdp-gap-seekers/scripts/build_triangular_full_spin_isotypic_reduced_mof.jl" = "f0c166ed274c93cee6a4526e8306917479df6b80b3690cb318ea1bf8d1a871bb"
+    "tracks/polyopt/solutions/sdp-gap-seekers/src/ConjugationSymmetryReduction.jl" = "7c1a00658b9c645136565a4e3a891b530d922d0a40433a03498d610d74fc8fe2"
+    "tracks/polyopt/solutions/sdp-gap-seekers/src/ExactSymmetryReduction.jl" = "e04a1e545db567fd4bae8f65fdbe34b5d5490a3abb7cf03f4b5ad346bc04a496"
+    "tracks/polyopt/solutions/sdp-gap-seekers/src/FullSpinConeReducedPrimalGapJuMP.jl" = "64dfc4eacfb5f2553dd81ca113f52f1e19ceefd11981cfbe9e2c7c343efd9a88"
+    "tracks/polyopt/solutions/sdp-gap-seekers/src/FullSpinConeReduction.jl" = "0cbb398d60625333b6124ecc8d0be50778538f1ede02bab9203f293840e239d0"
+    "tracks/polyopt/solutions/sdp-gap-seekers/src/FullSpinIsotypicPrimalGapJuMP.jl" = "0e3d1531304dc1746d0a5b8e43a59a2c79654b8399e826f67db952497de62bff"
+    "tracks/polyopt/solutions/sdp-gap-seekers/src/FullSpinIsotypicReduction.jl" = "dcbe4467b25fabc6f80efe6cf062308f6e23f677c46a9ea5a7af73e3806cd4d3"
+    "tracks/polyopt/solutions/sdp-gap-seekers/src/FullSpinPermutationPrimalGapJuMP.jl" = "59780a4b93f06455be5a7b0e9ea2e9596a7664456274a229c9ed3c4da8d4a44b"
+    "tracks/polyopt/solutions/sdp-gap-seekers/src/FullSpinPermutationReduction.jl" = "837f1b42e94a09348d7cd26bae3c6f5f4161e09af6dc665ed830b498323d01ae"
+    "tracks/polyopt/solutions/sdp-gap-seekers/src/GenericGapModel.jl" = "28b803cadd49c1b4ee4b64c444ad5a501ad329d1142bbd1ee16859b7d9072786"
+    "tracks/polyopt/solutions/sdp-gap-seekers/src/PrimalGapAssembly.jl" = "f6939cb9ed825752cf59dbbc12b931396fd5951136633100a00d746d79ec9dde"
+    "tracks/polyopt/solutions/sdp-gap-seekers/src/PrimalGapJuMP.jl" = "bbf044ce8269cd15da7f31301a47bce3e845a9685d5200f007c1a5af30ea9f29"
+    "tracks/polyopt/solutions/sdp-gap-seekers/src/PrimalGapSymbolics.jl" = "8490772806bff5136fe4985ffddd7253ec2dc4bbe3c98afa88fa3970a50f5f45"
+    "tracks/polyopt/solutions/sdp-gap-seekers/src/ReducedPrimalGapAssembly.jl" = "3977939f1e5072d7f87c488338138b6f80ba0ed66fb7572f369172913e038b10"
+    "tracks/polyopt/solutions/sdp-gap-seekers/src/SpinAxisInvolutionPrimalGapJuMP.jl" = "a6d5feff6d5efe22f384201be83381ce4628d9e758a6120e11e9870659c7f610"
+    "tracks/polyopt/solutions/sdp-gap-seekers/src/SpinAxisInvolutionReduction.jl" = "eac3ead9b9a30542df31b68e1f0c1da85861bb05d7fe125f6c54f30e287deb42"
+    "tracks/polyopt/solutions/sdp-gap-seekers/src/SquareJ1J2Prototype.jl" = "df0664547c9de0b2a79406f3dce6c46a0ed07dca157562c166a8592fae83e829"
+
+[runtime]
+hostname = "g05r06"
+julia_executable = "/work/home/iint_sjds/julia-1.11.5/bin/julia"
+julia_version = "1.11.5"
+jump_version = "1.31.1"
+mathoptinterface_version = "1.51.2"
+mosek_version = "11.2.0"
+mosektools_version = "0.15.10"
+slurm_cpus_per_task = "16"
+slurm_job_id = "23012955"
+slurm_mem_per_node = "24576"
+
+[solution_diagnostics]
+audit_tolerance = 1.0e-7
+available = true
+maximum_absolute_affine_equality_residual = 0.0
+maximum_normalized_affine_equality_residual = 0.0
+passed = true
+worst_normalized_psd_violation = 0.0
+worst_psd_violation = 0.0
+
+    [solution_diagnostics.affine_equalities]
+
+    [solution_diagnostics.normalization]
+    absolute_residual = 0.0
+    normalized_residual = 0.0
+    scale = 1.0
+    target = 1.0
+    value = 1.0
+
+    [solution_diagnostics.psd_blocks.isotypic_full_spin_gap_gap_active_rx1_ry0_eigen_minus_real_psd]
+    dimension = 1
+    maximum_absolute_eigenvalue = 0.09903374989186109
+    minimum_eigenvalue = 0.09903374989186109
+    normalized_psd_violation = 0.0
+    psd_violation = 0.0
+    spectral_scale = 1.0
+    symmetry_residual = 0.0
+
+    [solution_diagnostics.psd_blocks.isotypic_full_spin_positive_centered_rx0_ry0_s3_standard_representative_real_psd]
+    dimension = 36
+    maximum_absolute_eigenvalue = 1.2872021622563374
+    minimum_eigenvalue = 0.937584873274408
+    normalized_psd_violation = 0.0
+    psd_violation = 0.0
+    spectral_scale = 1.2872021622563374
+    symmetry_residual = 0.0
+
+    [solution_diagnostics.psd_blocks.isotypic_full_spin_positive_centered_rx0_ry0_s3_trivial_real_psd]
+    dimension = 36
+    maximum_absolute_eigenvalue = 1.8579074597756495
+    minimum_eigenvalue = 1.3902579128034491
+    normalized_psd_violation = 0.0
+    psd_violation = 0.0
+    spectral_scale = 1.8579074597756495
+    symmetry_residual = 0.0
+
+    [solution_diagnostics.psd_blocks.isotypic_full_spin_positive_centered_rx1_ry0_eigen_minus_real_psd]
+    dimension = 45
+    maximum_absolute_eigenvalue = 1.303224776086295
+    minimum_eigenvalue = 0.08784895062193887
+    normalized_psd_violation = 0.0
+    psd_violation = 0.0
+    spectral_scale = 1.303224776086295
+    symmetry_residual = 0.0
+
+    [solution_diagnostics.psd_blocks.isotypic_full_spin_positive_centered_rx1_ry0_eigen_plus_real_psd]
+    dimension = 36
+    maximum_absolute_eigenvalue = 1.2731879754617377
+    minimum_eigenvalue = 0.9299611886531909
+    normalized_psd_violation = 0.0
+    psd_violation = 0.0
+    spectral_scale = 1.2731879754617377
+    symmetry_residual = 0.0
+
+    [solution_diagnostics.psd_blocks.isotypic_full_spin_positive_scalar_rx0_ry0_s3_standard_representative_real_psd]
+    dimension = 36
+    maximum_absolute_eigenvalue = 1.196286274909789
+    minimum_eigenvalue = 0.8815020080744793
+    normalized_psd_violation = 0.0
+    psd_violation = 0.0
+    spectral_scale = 1.196286274909789
+    symmetry_residual = 0.0
+
+    [solution_diagnostics.psd_blocks.isotypic_full_spin_positive_scalar_rx0_ry0_s3_trivial_real_psd]
+    dimension = 37
+    maximum_absolute_eigenvalue = 2.0303951952121655
+    minimum_eigenvalue = 0.8823695358556115
+    normalized_psd_violation = 0.0
+    psd_violation = 0.0
+    spectral_scale = 2.0303951952121655
+    symmetry_residual = 0.0
+
+    [solution_diagnostics.psd_blocks.isotypic_full_spin_positive_scalar_rx1_ry0_eigen_minus_real_psd]
+    dimension = 45
+    maximum_absolute_eigenvalue = 1.1139480974495712
+    minimum_eigenvalue = 0.4881718917170137
+    normalized_psd_violation = 0.0
+    psd_violation = 0.0
+    spectral_scale = 1.1139480974495712
+    symmetry_residual = 0.0
+
+    [solution_diagnostics.psd_blocks.isotypic_full_spin_positive_scalar_rx1_ry0_eigen_plus_real_psd]
+    dimension = 36
+    maximum_absolute_eigenvalue = 1.204483290330185
+    minimum_eigenvalue = 0.8875964351297138
+    normalized_psd_violation = 0.0
+    psd_violation = 0.0
+    spectral_scale = 1.204483290330185
+    symmetry_residual = 0.0
+
+[solver]
+solve_wall_seconds = 9.511128902435303
+
+    [solver.dual_objective_value]
+    available = true
+    value = -2.638151964566374e-14
+
+    [solver.objective_value]
+    available = true
+    value = 0.0
+
+    [solver.relative_gap]
+    available = true
+    value = 0.0002638151964566374
+
+    [solver.solver_reported_solve_time_seconds]
+    available = true
+    value = 3.197633773088455
+
+[statuses]
+dual = "FEASIBLE_POINT"
+has_duals = true
+has_values = true
+primal = "FEASIBLE_POINT"
+raw = "Mosek.MSK_SOL_STA_OPTIMAL"
+result_count = 1
+termination = "OPTIMAL"
