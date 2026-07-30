@@ -1,0 +1,108 @@
+{
+  "casimir_coefficients": {
+    "2": 0.22360679774997902,
+    "3": 0.2645751311064591,
+    "4": 0.29999999999999993
+  },
+  "certification_n_electrons": 4,
+  "certification_two_q": 9,
+  "coupled_pair_eigenvalues": {
+    "2": {
+      "0": 0.44721359549995776,
+      "2": 0.2913664334317908,
+      "4": 0.00677596356818118,
+      "6": -0.21683083418179774,
+      "8": -0.08131156281817416
+    },
+    "3": {
+      "0": -0.5291502622129178,
+      "2": -0.18440084895298667,
+      "4": 0.214003660825038,
+      "6": 0.09867603957350454,
+      "8": -0.25902460388044934
+    },
+    "4": {
+      "0": 0.5999999999999995,
+      "2": 0.009090909090909097,
+      "4": -0.24498834498834496,
+      "6": 0.22937062937062927,
+      "8": -0.26013986013986
+    }
+  },
+  "covariance": {
+    "covariance": [
+      [
+        0.020947556019366764,
+        -0.06977705620317733,
+        0.0957612412047557
+      ],
+      [
+        -0.06977705620317733,
+        0.23468925687836345,
+        -0.3245349192192498
+      ],
+      [
+        0.0957612412047557,
+        -0.3245349192192498,
+        0.4514072343976474
+      ]
+    ],
+    "covariance_eigenvalues": [
+      6.0702652861802176e-18,
+      0.0013469041260756216,
+      0.7056971431693019
+    ],
+    "covariance_scale": 0.7056971431693019,
+    "mean": [
+      -0.3511308174241486,
+      0.12479008553924985,
+      0.4236890341253063
+    ],
+    "mixture_weights": [
+      0.5,
+      0.5
+    ],
+    "mother_reconstruction_error": 1.882053704053365e-15,
+    "relative_cutoff": 1e-12,
+    "retained_directions": 2,
+    "sample_count": 4096,
+    "whitening_error": 1.9177992527374954e-12
+  },
+  "created_at_utc": "2026-07-30T03:39:39.239616+00:00",
+  "fock_dimension": 210,
+  "generator_ranks": [
+    2,
+    3,
+    4
+  ],
+  "git_commit": "7ed0b3f450cef23cfd8393d3b1f65e03eeaf20b9",
+  "git_dirty": false,
+  "hostname": "e09r03",
+  "max_errors": {
+    "casimir_residual": 5.551115123125783e-17,
+    "coupled_channel_spread": 4.440892098500626e-16,
+    "hermiticity": 5.551115123125783e-17,
+    "mother_reconstruction": 1.882053704053365e-15,
+    "proof_production": 4.440892098500626e-16,
+    "scalarity": 7.771561172376096e-16,
+    "whitening": 1.9177992527374954e-12
+  },
+  "passed": true,
+  "phase4_certificate_path": "/work/home/jiabohan5/quantum.harness-collab/tracks/qmc/results/route-d-plus-phase4-20260730-01/phase4-certificate.json",
+  "phase4_certificate_sha256": "6c62aa76cbb2fc683df1807d583f3c121f34164c3b5ebe8fb6d780fe3108b0a6",
+  "phase4_git_commit": "ccd21ee97cf4de9a0c6d55b5351921b7c5fab23b",
+  "schema_version": "challenge-15-route-d-plus-phase5-v1",
+  "slurm_cluster_name": "xhcs3",
+  "slurm_job_id": "23018923",
+  "target_n_electrons": 6,
+  "target_two_q": 15,
+  "tolerances": {
+    "casimir_residual": 1e-13,
+    "coupled_channel_spread": 1e-11,
+    "hermiticity": 1e-12,
+    "mother_reconstruction": 1e-10,
+    "proof_production": 1e-10,
+    "scalarity": 1e-11,
+    "whitening": 1e-08
+  }
+}
