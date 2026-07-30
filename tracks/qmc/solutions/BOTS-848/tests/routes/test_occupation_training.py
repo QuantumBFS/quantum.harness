@@ -32,6 +32,8 @@ from scalable_v1.routes.occupation_autoregressive.train import (
     _sector_estimators,
 )
 from scalable_v1.routes.occupation_autoregressive.tower import (
+    LadderComponent,
+    LadderTower,
     MetropolisSampleBatch,
 )
 import train_occupation_autoregressive as training_cli
@@ -1193,6 +1195,52 @@ def test_full_objective_uses_arithmetic_tower_means_and_component_scores() -> No
     for m in (-2, -1, 0, 1, 2):
         assert metrics[f"energy_excited_m{m:+d}"] == pytest.approx(
             energy_means[m]
+        )
+
+
+def test_tower_estimators_pair_each_component_with_its_analytic_log_score(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    model = _tiny_model(width=3)
+    tower = LadderTower.from_m0(
+        logpsi=lambda state: model.logpsi(state, "excited"),
+        log_score=lambda state: model.log_derivative(state, "excited"),
+        n_electrons=model.n_electrons,
+        two_q=model.two_q,
+        l=2,
+    )
+    selected: dict[int, int] = {}
+    for m in (-2, -1, 0, 1, 2):
+        support = FeasibilityTable.build(
+            n_electrons=model.n_electrons,
+            two_q=model.two_q,
+            target_m2=2 * m,
+        ).enumerate_support()
+        selected[m] = next(
+            state for state in support if tower[m].logpsi(state).real != -np.inf
+        )
+    original_log_score = LadderComponent.log_score
+    calls: list[tuple[int, int]] = []
+
+    def recording_log_score(self: LadderComponent, state: int) -> np.ndarray:
+        calls.append((self.m, state))
+        return original_log_score(self, state)
+
+    monkeypatch.setattr(LadderComponent, "log_score", recording_log_score)
+    observed: dict[int, np.ndarray] = {}
+    for m in (-2, -1, 0, 1, 2):
+        _energy, _l2, _l4, scores = train._tower_component_estimators(
+            tower[m],
+            _zero_pair_operator(model.two_q),
+            np.asarray([selected[m]], dtype=object),
+        )
+        observed[m] = scores[0]
+
+    assert calls == [(m, selected[m]) for m in (-2, -1, 0, 1, 2)]
+    for m in (-2, -1, 0, 1, 2):
+        np.testing.assert_allclose(
+            observed[m],
+            original_log_score(tower[m], selected[m]),
         )
 
 
