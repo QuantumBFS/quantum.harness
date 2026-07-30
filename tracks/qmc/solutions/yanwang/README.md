@@ -1,3 +1,11 @@
+## 🏆 评委入口（Start here）
+
+> ### [▶ 直接打开自包含 HTML 技术报告](https://raw.githack.com/Avi7ii/quantum.harness/a963de5358949443cb860f6878dedd135f9d7854/tracks/qmc/solutions/yanwang/report/report.html)
+>
+> 核心结论、5 张矢量图、有限尺寸标度、独立 QMC 验证、误差预算与复现命令均集中在此。
+
+[GitHub 内报告文件（备用）](https://github.com/Avi7ii/quantum.harness/blob/a963de5358949443cb860f6878dedd135f9d7854/tracks/qmc/solutions/yanwang/report/report.html) · [Challenge #148](https://github.com/QuantumBFS/quantum.harness/issues/148)
+
 ## Team
 
 | | |
