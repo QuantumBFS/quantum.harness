@@ -127,6 +127,9 @@ function spin_l2_congruence_truth_dict(truth)
         "unit_equal_count" => truth.unit_equal_count,
         "scaled_count" => truth.scaled_count,
         "zero_irrational_count" => truth.zero_irrational_count,
+        "direct_opposite_count" => truth.direct_opposite_count,
+        "direct_unmatched_count" => truth.direct_unmatched_count,
+        "resolved_count" => truth.resolved_count,
         "opposite_count" => truth.opposite_count,
         "unmatched_count" => truth.unmatched_count,
         "records" => [

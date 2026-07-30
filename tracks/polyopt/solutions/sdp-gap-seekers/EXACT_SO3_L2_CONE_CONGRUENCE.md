@@ -57,6 +57,19 @@ opposite matches. The centered blocks still pass exactly. Therefore the L=2
 gate is not authorized: the exceptional scalar rows require a different
 multiplicity-basis map or their cones must be retained.
 
+## Exceptional-row search
+
+The next fail-closed gate retains the proved ratio-1 row map and searches the
+small exceptional sets only. A target/reference exceptional pair is a
+candidate when one nonzero rational signed scale reproduces every mixed entry
+against the fixed ordinary rows and squares correctly on the diagonal. An
+incrementally pruned bijection search then replays every entry of the
+exceptional submatrix. A complete solution proves the exact congruence
+`T = D P R Pᵀ D`, where `P` is a permutation and `D` is an invertible real
+diagonal matrix. This changes basis inside the SDP cone; it does not constrain
+the state. If no solution exists, expanded spin-aware signatures and the full
+candidate graph are written before the gate fails.
+
 If the gate passes, removing the three duplicate `l=2` copies per group would
 change the retained inventory from 2,540,067 to 1,600,017 packed entries while
 keeping the maximum side 490. This is an exact formulation hypothesis until

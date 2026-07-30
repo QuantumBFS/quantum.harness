@@ -1568,3 +1568,14 @@ or producing physics evidence. No cone is removed and no L=2 truth job is
 authorized. Next changed action: expose the exceptional scalar row signatures
 and exact entry relations at L=1, then derive a correct multiplicity-basis map
 or retain those cones.
+
+The next implementation does not retry the disproved norm map. It fixes all
+ordinary rows whose entire submatrix already passed and searches only the
+3-row or 6-row exceptional set. For each possible exceptional target/reference
+pair it requires one exact rational signed scale to reproduce every mixed
+entry and the target diagonal. A pruned bijection search then requires every
+exceptional/exceptional polynomial to satisfy the same congruence. One such
+bijection is a complete invertible PSD-cone congruence and is safe without
+state invariance; no solution produces row signatures and a candidate graph
+for the next derivation. This added computation and evidence make the next
+L=1 control a changed signature. L=2 remains unauthorized.

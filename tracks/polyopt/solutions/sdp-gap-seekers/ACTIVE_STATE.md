@@ -911,3 +911,11 @@ Updated: 2026-07-29 UTC.
   the diagonal row-normalization repair. No cone was removed and L=2 remains
   forbidden; identify the exceptional scalar rows and their correct SO(3)
   map next.
+- The changed L=1 route is an exact exceptional-row congruence search. It
+  fixes the already-proved ordinary rows, infers a rational signed scale for
+  each exceptional target/reference candidate from every mixed entry, checks
+  its diagonal, and uses an incrementally pruned exact bijection search over
+  the exceptional submatrix. Any complete solution proves `T = D P R Pᵀ D`;
+  otherwise the gate records expanded spin-aware row signatures and fails.
+  This is not a repeated signature: job `118195346` had no candidate search
+  or row-level diagnostics. L=2 and cone deletion stay disabled pending L=1.

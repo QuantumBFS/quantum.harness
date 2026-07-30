@@ -1,6 +1,6 @@
 # Quantum Harness Issue #88 — remote research agent status
 
-Updated: 2026-07-30T01:09:31Z
+Updated: 2026-07-30T01:17:26Z
 
 - Objective: obtain a new reproducible numerical certificate for an
   unrestricted frustrated spin-1/2 model, prioritizing the Shastry--Sutherland
@@ -336,5 +336,13 @@ Updated: 2026-07-30T01:09:31Z
   does not repair the scalar subspace, no cone is removed, and no L=2 job is
   authorized. The next changed action is to identify the exceptional scalar
   rows and derive their correct SO(3) multiplicity map at L=1.
+- The local branch now implements that changed action. It keeps every ratio-1
+  row fixed, tries every exact signed permutation and rational scale between
+  the small exceptional target/reference sets, checks all exceptional-to-
+  ordinary entries, and backtracks with incremental exact checks over every
+  exceptional/exceptional entry. A solution is a full invertible PSD
+  congruence, not a symmetry restriction. Expanded spin-aware signatures and
+  the candidate graph are checkpointed on failure. The code is being compiled
+  and reviewed before one changed-signature L=1 control; L=2 remains blocked.
 
 No user input or new credential is currently required.

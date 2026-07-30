@@ -585,6 +585,305 @@ function exact_positive_rational_square_root(value::ExactRational)
     return ExactRational(numerator_root, denominator_root)
 end
 
+spin_aware_word_signature(word) =
+    Tuple((site, Int(axis)) for (site, axis) in word.ops)
+
+function spin_aware_full_row_signature(row)
+    state_symbols = sort!(
+        spin_aware_word_signature.(row.source.state_symbols);
+        by=string,
+    )
+    return (
+        family=row.family,
+        state_symbols=Tuple(state_symbols),
+        operator_word=spin_aware_word_signature(row.source.operator_word),
+    )
+end
+
+function spin_isotypic_expanded_signature(
+    block::ShastrySpinIsotypicPSDBlock,
+    row::ShastrySpinIsotypicRow,
+)
+    expanded = Dict{Any,Int}()
+    full_rows = block.source_block.source_block.rows
+    for (spatial_index, spin_coefficient) in
+        zip(row.source_indices, row.coefficients)
+        spatial_row = block.source_block.rows[spatial_index]
+        for (source_index, spatial_coefficient) in
+            zip(spatial_row.source_indices, spatial_row.coefficients)
+            signature = spin_aware_full_row_signature(full_rows[source_index])
+            expanded[signature] =
+                get(expanded, signature, 0) +
+                spin_coefficient * spatial_coefficient
+        end
+    end
+    filter!(pair -> !iszero(last(pair)), expanded)
+    records = sort!(collect(expanded); by=pair -> string(first(pair)))
+    return join(
+        (string(last(record), "*", first(record)) for record in records),
+        ";",
+    )
+end
+
+
+function exact_polynomial_ratio(
+    target::ExactLinearPolynomial,
+    reference::ExactLinearPolynomial,
+)
+    if iszero(target) && iszero(reference)
+        return (compatible=true, informative=false, scale=nothing)
+    end
+    (iszero(target) || iszero(reference)) &&
+        return (compatible=false, informative=true, scale=nothing)
+    key = first(sort!(collect(keys(reference.terms))))
+    haskey(target.terms, key) ||
+        return (compatible=false, informative=true, scale=nothing)
+    quotient = target.terms[key] / reference.terms[key]
+    iszero(imag(quotient)) ||
+        return (compatible=false, informative=true, scale=nothing)
+    scale = real(quotient)
+    target == scale * reference ||
+        return (compatible=false, informative=true, scale=nothing)
+    return (compatible=true, informative=true, scale=scale)
+end
+
+
+"""
+Try an exact signed permutation and rational rescaling of only the rows whose
+naive norm ratios are nonunit. Ordinary rows remain fixed. This is a complete
+PSD congruence proof when it succeeds: ordinary/ordinary entries have already
+passed, candidate construction checks every exceptional/ordinary entry, and
+the final backtracking check replays every exceptional/exceptional entry.
+"""
+function exceptional_spin_l2_permutation_congruence(
+    assembly,
+    group,
+    norm_ratios::Vector{ExactRational};
+    project::Function=identity,
+)
+    exceptional_targets = findall(!=(one(ExactRational)), norm_ratios)
+    isempty(exceptional_targets) && return (
+        exact=false,
+        solution_count=0,
+        exceptional_target_rows="",
+        exceptional_reference_rows="",
+        candidate_inventory="",
+        solution_inventory="",
+        target_signatures="",
+        reference_signatures="",
+    )
+    ordinary_targets = setdiff(eachindex(norm_ratios), exceptional_targets)
+    exceptional_references = sort!(group.mapping[exceptional_targets])
+
+    target_cross = Dict{Tuple{Int,Int},ExactLinearPolynomial}()
+    reference_cross = Dict{Tuple{Int,Int},ExactLinearPolynomial}()
+    for target_row in exceptional_targets, ordinary_row in ordinary_targets
+        target_cross[(target_row, ordinary_row)] = project(
+            shastry_spin_isotypic_block_entry(
+                assembly,
+                group.target,
+                group.target.rows[target_row],
+                group.target.rows[ordinary_row],
+            ),
+        )
+    end
+    for reference_row in exceptional_references,
+        ordinary_row in ordinary_targets
+        reference_cross[(reference_row, ordinary_row)] = project(
+            shastry_spin_isotypic_block_entry(
+                assembly,
+                group.reference,
+                group.reference.rows[reference_row],
+                group.reference.rows[group.mapping[ordinary_row]],
+            ),
+        )
+    end
+
+    target_special = Dict{Tuple{Int,Int},ExactLinearPolynomial}()
+    reference_special = Dict{Tuple{Int,Int},ExactLinearPolynomial}()
+    for (position, left) in enumerate(exceptional_targets),
+        right in exceptional_targets[position:end]
+        target_special[(min(left, right), max(left, right))] = project(
+            shastry_spin_isotypic_block_entry(
+                assembly,
+                group.target,
+                group.target.rows[left],
+                group.target.rows[right],
+            ),
+        )
+    end
+    for (position, left) in enumerate(exceptional_references),
+        right in exceptional_references[position:end]
+        reference_special[(min(left, right), max(left, right))] = project(
+            shastry_spin_isotypic_block_entry(
+                assembly,
+                group.reference,
+                group.reference.rows[left],
+                group.reference.rows[right],
+            ),
+        )
+    end
+
+    candidates = Dict{Int,Vector{NamedTuple{(:reference, :scale),Tuple{Int,ExactRational}}}}()
+    for target_row in exceptional_targets
+        row_candidates = NamedTuple{(:reference, :scale),Tuple{Int,ExactRational}}[]
+        for reference_row in exceptional_references
+            candidate_scale = nothing
+            compatible = true
+            for ordinary_row in ordinary_targets
+                relation = exact_polynomial_ratio(
+                    target_cross[(target_row, ordinary_row)],
+                    reference_cross[(reference_row, ordinary_row)],
+                )
+                if !relation.compatible
+                    compatible = false
+                    break
+                elseif relation.informative
+                    if isnothing(candidate_scale)
+                        candidate_scale = relation.scale
+                    elseif candidate_scale != relation.scale
+                        compatible = false
+                        break
+                    end
+                end
+            end
+            compatible && !isnothing(candidate_scale) &&
+                !iszero(something(candidate_scale)) || continue
+            target_diagonal = target_special[(target_row, target_row)]
+            reference_diagonal =
+                reference_special[(reference_row, reference_row)]
+            target_diagonal ==
+                something(candidate_scale)^2 * reference_diagonal || continue
+            push!(
+                row_candidates,
+                (reference=reference_row, scale=something(candidate_scale)),
+            )
+        end
+        candidates[target_row] = row_candidates
+    end
+
+    ordered_targets = sort!(copy(exceptional_targets))
+    selected_references = Dict{Int,Int}()
+    selected_scales = Dict{Int,ExactRational}()
+    used_references = Set{Int}()
+    solutions = String[]
+    function search(position::Int)
+        length(solutions) >= 2 && return
+        if position > length(ordered_targets)
+            for (left_position, left) in enumerate(ordered_targets),
+                right in ordered_targets[left_position:end]
+                reference_left = selected_references[left]
+                reference_right = selected_references[right]
+                target_entry = target_special[(min(left, right), max(left, right))]
+                reference_entry = reference_special[
+                    (min(reference_left, reference_right),
+                     max(reference_left, reference_right))
+                ]
+                target_entry ==
+                    selected_scales[left] * selected_scales[right] *
+                    reference_entry || return
+            end
+            push!(
+                solutions,
+                join(
+                    (
+                        string(
+                            target,
+                            "=>",
+                            selected_references[target],
+                            "@",
+                            selected_scales[target],
+                        )
+                        for target in ordered_targets
+                    ),
+                    ",",
+                ),
+            )
+            return
+        end
+        target = ordered_targets[position]
+        for candidate in candidates[target]
+            candidate.reference in used_references && continue
+            pair_compatible = all(
+                target_special[(min(target, previous), max(target, previous))] ==
+                candidate.scale * selected_scales[previous] *
+                reference_special[
+                    (
+                        min(candidate.reference, selected_references[previous]),
+                        max(candidate.reference, selected_references[previous]),
+                    )
+                ]
+                for previous in keys(selected_references)
+            )
+            pair_compatible || continue
+            selected_references[target] = candidate.reference
+            selected_scales[target] = candidate.scale
+            push!(used_references, candidate.reference)
+            search(position + 1)
+            delete!(used_references, candidate.reference)
+            delete!(selected_references, target)
+            delete!(selected_scales, target)
+        end
+    end
+    search(1)
+
+    candidate_inventory = join(
+        (
+            string(
+                target,
+                "=>",
+                join(
+                    (
+                        string(candidate.reference, "@", candidate.scale)
+                        for candidate in candidates[target]
+                    ),
+                    "|",
+                ),
+            )
+            for target in ordered_targets
+        ),
+        ",",
+    )
+    target_signatures = join(
+        (
+            string(
+                target,
+                "=",
+                spin_isotypic_expanded_signature(
+                    group.target,
+                    group.target.rows[target],
+                ),
+            )
+            for target in ordered_targets
+        ),
+        "\n",
+    )
+    reference_signatures = join(
+        (
+            string(
+                reference,
+                "=",
+                spin_isotypic_expanded_signature(
+                    group.reference,
+                    group.reference.rows[reference],
+                ),
+            )
+            for reference in exceptional_references
+        ),
+        "\n",
+    )
+    return (
+        exact=!isempty(solutions),
+        solution_count=length(solutions),
+        exceptional_target_rows=join(ordered_targets, ","),
+        exceptional_reference_rows=join(exceptional_references, ","),
+        candidate_inventory=candidate_inventory,
+        solution_inventory=join(solutions, ";"),
+        target_signatures=target_signatures,
+        reference_signatures=reference_signatures,
+    )
+end
+
 function spin_l2_congruence_groups(assembly)
     blocks = [assembly.positive_blocks; assembly.gap_blocks]
     references = Dict{Tuple{Symbol,Symbol,Symbol},Any}()
@@ -724,8 +1023,15 @@ function shastry_spin_l2_congruence_truth(
             ",",
         )
         row_results = Vector{NamedTuple{
-            (:unit_equal, :scaled, :zero_irrational, :opposite, :unmatched),
-            Tuple{Int,Int,Int,Int,Int},
+            (
+                :unit_equal,
+                :scaled,
+                :zero_irrational,
+                :opposite,
+                :unmatched,
+                :ordinary_failure,
+            ),
+            Tuple{Int,Int,Int,Int,Int,Int},
         }}(undef, dimension)
         Threads.@threads :dynamic for row in 1:dimension
             unit_equal = 0
@@ -733,6 +1039,7 @@ function shastry_spin_l2_congruence_truth(
             zero_irrational = 0
             opposite = 0
             unmatched = 0
+            ordinary_failure = 0
             reference_row = group.mapping[row]
             for column in row:dimension
                 target_entry = project(
@@ -759,6 +1066,9 @@ function shastry_spin_l2_congruence_truth(
                         zero_irrational += 1
                     else
                         unmatched += 1
+                        ordinary_failure +=
+                            norm_ratios[row] == 1 &&
+                            norm_ratios[column] == 1
                     end
                 else
                     expected = something(factor) * reference_entry
@@ -770,8 +1080,14 @@ function shastry_spin_l2_congruence_truth(
                         end
                     elseif target_entry == -1 * expected
                         opposite += 1
+                        ordinary_failure +=
+                            norm_ratios[row] == 1 &&
+                            norm_ratios[column] == 1
                     else
                         unmatched += 1
+                        ordinary_failure +=
+                            norm_ratios[row] == 1 &&
+                            norm_ratios[column] == 1
                     end
                 end
             end
@@ -781,6 +1097,7 @@ function shastry_spin_l2_congruence_truth(
                 zero_irrational=zero_irrational,
                 opposite=opposite,
                 unmatched=unmatched,
+                ordinary_failure=ordinary_failure,
             )
         end
         unit_equal_count =
@@ -790,10 +1107,35 @@ function shastry_spin_l2_congruence_truth(
             sum(result.zero_irrational for result in row_results)
         opposite_count = sum(result.opposite for result in row_results)
         unmatched_count = sum(result.unmatched for result in row_results)
+        ordinary_failure_count =
+            sum(result.ordinary_failure for result in row_results)
         entry_count = unit_equal_count + scaled_count +
                       zero_irrational_count + opposite_count +
                       unmatched_count
-        block_exact = opposite_count == 0 && unmatched_count == 0
+        direct_exact = opposite_count == 0 && unmatched_count == 0
+        repair = (
+            exact=false,
+            solution_count=0,
+            exceptional_target_rows="",
+            exceptional_reference_rows="",
+            candidate_inventory="",
+            solution_inventory="",
+            target_signatures="",
+            reference_signatures="",
+        )
+        if !direct_exact && ordinary_failure_count == 0 &&
+           any(!=(one(ExactRational)), norm_ratios)
+            repair = exceptional_spin_l2_permutation_congruence(
+                assembly,
+                group,
+                norm_ratios;
+                project=project,
+            )
+        end
+        block_exact = direct_exact || repair.exact
+        resolved_count = repair.exact ? opposite_count + unmatched_count : 0
+        final_opposite_count = repair.exact ? 0 : opposite_count
+        final_unmatched_count = repair.exact ? 0 : unmatched_count
         exact &= block_exact
         push!(records, (
             role=group.role,
@@ -804,18 +1146,34 @@ function shastry_spin_l2_congruence_truth(
             dimension=dimension,
             row_norm_ratio_inventory=ratio_inventory,
             exact=block_exact,
+            direct_exact=direct_exact,
             entry_count=entry_count,
             unit_equal_count=unit_equal_count,
             scaled_count=scaled_count,
             zero_irrational_count=zero_irrational_count,
-            opposite_count=opposite_count,
-            unmatched_count=unmatched_count,
+            direct_opposite_count=opposite_count,
+            direct_unmatched_count=unmatched_count,
+            ordinary_failure_count=ordinary_failure_count,
+            exceptional_permutation_exact=repair.exact,
+            exceptional_solution_count=repair.solution_count,
+            exceptional_target_rows=repair.exceptional_target_rows,
+            exceptional_reference_rows=repair.exceptional_reference_rows,
+            exceptional_candidate_inventory=repair.candidate_inventory,
+            exceptional_solution_inventory=repair.solution_inventory,
+            exceptional_target_signatures=repair.target_signatures,
+            exceptional_reference_signatures=repair.reference_signatures,
+            resolved_count=resolved_count,
+            opposite_count=final_opposite_count,
+            unmatched_count=final_unmatched_count,
         ))
         progress_callback(
             "SO(3) l2 congruence block $(length(records))/$(length(groups)); " *
             "dimension=$dimension, unit_equal=$unit_equal_count, " *
             "scaled=$scaled_count, zero_irrational=$zero_irrational_count, " *
-            "opposite=$opposite_count, unmatched=$unmatched_count",
+            "direct_opposite=$opposite_count, " *
+            "direct_unmatched=$unmatched_count, " *
+            "exceptional_permutation=$(repair.exact), " *
+            "final_unmatched=$final_unmatched_count",
         )
     end
     return (
@@ -827,6 +1185,11 @@ function shastry_spin_l2_congruence_truth(
         scaled_count=sum(record.scaled_count for record in records),
         zero_irrational_count=
             sum(record.zero_irrational_count for record in records),
+        direct_opposite_count=
+            sum(record.direct_opposite_count for record in records),
+        direct_unmatched_count=
+            sum(record.direct_unmatched_count for record in records),
+        resolved_count=sum(record.resolved_count for record in records),
         opposite_count=sum(record.opposite_count for record in records),
         unmatched_count=sum(record.unmatched_count for record in records),
         records=records,
