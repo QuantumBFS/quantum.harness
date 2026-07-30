@@ -11,6 +11,7 @@ import platform
 import socket
 import tempfile
 import time
+from dataclasses import replace
 from numbers import Integral
 from pathlib import Path
 from typing import Any, Callable, Mapping, Sequence
@@ -51,6 +52,11 @@ N8_DERIVED_ADAPTER_BATCH_SIZE = 16
 ROUTE = "occupation_autoregressive"
 ATTEMPT = "s02a-a05"
 SOLUTION_ROOT = Path(__file__).resolve().parent
+N8_SMOKE_ARTIFACT_ENV = "BOTS848_N8_SMOKE_ARTIFACT"
+N8_SMOKE_SCHEMA = "bots848-occupation-n8-smoke-v1"
+REVIEWED_N8_SMOKE_SHA256 = (
+    "47b918ede8ed236535707039a9b3bb16a78d31101f0aec3ba4e424369edceaf7"
+)
 
 
 def _route_source_files() -> list[Path]:
@@ -149,6 +155,185 @@ def _terminal_training_records(path: Path) -> list[dict[str, Any]]:
         _validate_json_finite(record)
         records.append(record)
     return records
+
+
+def _reviewed_n8_smoke_path(explicit: Path | None) -> Path:
+    if explicit is not None:
+        path = Path(explicit).expanduser().resolve()
+    else:
+        raw = os.environ.get(N8_SMOKE_ARTIFACT_ENV)
+        if raw is None or not raw.strip():
+            raise ValueError(
+                "reviewed N=8 smoke artifact is required for full training"
+            )
+        parts = raw.split(os.pathsep)
+        if len(parts) != 1 or not parts[0].strip():
+            raise ValueError(
+                f"{N8_SMOKE_ARTIFACT_ENV} must name exactly one reviewed artifact"
+            )
+        path = Path(parts[0]).expanduser().resolve()
+    if not path.is_file():
+        raise ValueError("reviewed N=8 smoke artifact is not an existing file")
+    return path
+
+
+def _positive_json_ratio(payload: Mapping[str, Any], name: str, label: str) -> float:
+    value = payload.get(name)
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        raise ValueError(f"reviewed N=8 smoke {label} must be finite and positive")
+    try:
+        ratio = float(value)
+    except (OverflowError, ValueError) as error:
+        raise ValueError(
+            f"reviewed N=8 smoke {label} must be finite and positive"
+        ) from error
+    if not math.isfinite(ratio) or ratio <= 0.0:
+        raise ValueError(f"reviewed N=8 smoke {label} must be finite and positive")
+    return ratio
+
+
+def _load_reviewed_n8_smoke(path: Path, *, protocol_sha256: str) -> dict[str, Any]:
+    if sha256_file(path) != REVIEWED_N8_SMOKE_SHA256:
+        raise ValueError("reviewed N=8 smoke SHA-256 mismatch")
+    try:
+        payload = json.loads(
+            path.read_text(encoding="utf-8"),
+            object_pairs_hook=_unique_json_object,
+            parse_constant=_reject_json_constant,
+        )
+    except (OSError, UnicodeError, json.JSONDecodeError, ValueError) as error:
+        raise ValueError("invalid reviewed N=8 smoke artifact") from error
+    if not isinstance(payload, dict):
+        raise ValueError("reviewed N=8 smoke artifact must be a JSON object")
+    _validate_json_finite(payload)
+    if payload.get("schema") != N8_SMOKE_SCHEMA:
+        raise ValueError("reviewed N=8 smoke schema mismatch")
+    if payload.get("status") != "ok":
+        raise ValueError("reviewed N=8 smoke status must be ok")
+    optimizer_updates = payload.get("optimizer_updates")
+    if (
+        isinstance(optimizer_updates, bool)
+        or not isinstance(optimizer_updates, int)
+        or optimizer_updates != 0
+    ):
+        raise ValueError("reviewed N=8 smoke optimizer_updates must be zero")
+    if payload.get("protocol_sha256") != protocol_sha256:
+        raise ValueError("reviewed N=8 smoke protocol SHA-256 mismatch")
+    seed = payload.get("seed")
+    if isinstance(seed, bool) or not isinstance(seed, int) or seed != 4848:
+        raise ValueError("reviewed N=8 smoke seed must be 4848")
+    fingerprint = payload.get("device_environment_fingerprint")
+    if not isinstance(fingerprint, Mapping):
+        raise ValueError("reviewed N=8 smoke device fingerprint is missing")
+    time_ratio = _positive_json_ratio(
+        payload,
+        "n8_to_n6_time_ratio",
+        "time ratio",
+    )
+    memory_ratio = _positive_json_ratio(
+        payload,
+        "n8_to_n6_memory_ratio",
+        "memory ratio",
+    )
+    counters = payload.get("finite_counters")
+    if not isinstance(counters, Mapping) or set(counters) != {"finite", "nan", "inf"}:
+        raise ValueError("reviewed N=8 smoke finite counter schema mismatch")
+    for name in ("finite", "nan", "inf"):
+        value = counters[name]
+        if isinstance(value, bool) or not isinstance(value, int) or value < 0:
+            raise ValueError("reviewed N=8 smoke finite counters must be integers")
+    if counters["finite"] <= 0 or counters["nan"] != 0 or counters["inf"] != 0:
+        raise ValueError("reviewed N=8 smoke finite counters are not clean")
+    return {
+        "n8_to_n6_time_ratio": time_ratio,
+        "n8_to_n6_memory_ratio": memory_ratio,
+    }
+
+
+def _full_run_device_fingerprint() -> str:
+    return json.dumps(
+        {
+            "executable": os.path.realpath(os.sys.executable),
+            "hostname": socket.gethostname(),
+            "numpy": importlib.metadata.version("numpy"),
+            "platform": platform.platform(),
+            "python": platform.python_version(),
+            "scipy": importlib.metadata.version("scipy"),
+            "slurm_job_id": os.environ.get("SLURM_JOB_ID"),
+            "slurm_node": os.environ.get("SLURMD_NODENAME"),
+            "slurm_partition": os.environ.get("SLURM_JOB_PARTITION"),
+        },
+        sort_keys=True,
+        separators=(",", ":"),
+        allow_nan=False,
+    )
+
+
+def _atomic_training_lines(path: Path, lines: list[str]) -> None:
+    descriptor, temporary_name = tempfile.mkstemp(
+        dir=path.parent,
+        prefix=f".{path.name}.",
+        suffix=".tmp",
+    )
+    temporary = Path(temporary_name)
+    try:
+        handle = os.fdopen(descriptor, "w", encoding="utf-8", newline="\n")
+        descriptor = -1
+        with handle:
+            handle.write("\n".join(lines) + "\n")
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(temporary, path)
+    finally:
+        if descriptor != -1:
+            os.close(descriptor)
+        temporary.unlink(missing_ok=True)
+
+
+def _attach_resource_metrics(
+    *,
+    artifacts: TrainingArtifacts,
+    config: FullTrainingConfig,
+    resource_metrics: Mapping[str, Any],
+) -> TrainingArtifacts:
+    training_log = Path(artifacts.training_log)
+    if sha256_file(training_log) != artifacts.training_log_sha256:
+        raise ValueError("training log SHA-256 mismatch before resource update")
+    try:
+        raw = training_log.read_text(encoding="utf-8")
+    except (OSError, UnicodeError) as error:
+        raise ValueError("invalid training log artifact") from error
+    lines = raw.splitlines()
+    if not lines or raw != "\n".join(lines) + "\n":
+        raise ValueError("training log must use canonical non-empty JSONL")
+    records = _terminal_training_records(training_log)
+    selected_indices = [
+        index for index, record in enumerate(records) if record.get("selected") is True
+    ]
+    if selected_indices != [len(records) - 1]:
+        raise ValueError("training log selected final record mismatch")
+    selected = records[-1]
+    if (
+        selected.get("update") != config.updates
+        or selected.get("selection_rule") != "final_update"
+        or selected.get("training_seed") != config.training_seed
+    ):
+        raise ValueError("training log final selection mismatch")
+    if "resource_metrics" in selected:
+        raise ValueError("selected training record already has resource metrics")
+    updated = dict(selected)
+    updated["resource_metrics"] = dict(resource_metrics)
+    lines[-1] = json.dumps(
+        updated,
+        sort_keys=True,
+        separators=(",", ":"),
+        allow_nan=False,
+    )
+    _atomic_training_lines(training_log, lines)
+    return replace(
+        artifacts,
+        training_log_sha256=sha256_file(training_log),
+    )
 
 
 def _validate_terminal_training_artifacts(
@@ -604,6 +789,7 @@ def _parser() -> argparse.ArgumentParser:
     modes.add_argument("--n8-smoke", action="store_true")
     parser.add_argument("--training-seed", type=int, required=True)
     parser.add_argument("--run-dir", type=Path, required=True)
+    parser.add_argument("--n8-smoke-artifact", type=Path)
     return parser
 
 
@@ -663,6 +849,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         protocol = load_protocol()
         if protocol.sha256 != PROTOCOL_SHA256:
             raise ValueError("scalable-v1 protocol SHA-256 mismatch")
+        n8_smoke_path = _reviewed_n8_smoke_path(arguments.n8_smoke_artifact)
+        n8_smoke = _load_reviewed_n8_smoke(
+            n8_smoke_path,
+            protocol_sha256=protocol.sha256,
+        )
         physics = protocol.physics
         training = protocol.training
         capacity = protocol.capacity["routes"]["occupation_autoregressive"]
@@ -703,12 +894,47 @@ def main(argv: Sequence[str] | None = None) -> int:
                 "max_trainable_parameters"
             ],
         )
+        training_started = time.perf_counter()
         artifacts = run_full_training(
             model=model,
             operator=_prepared_operator(physics["two_q"]),
             config=config,
             run_dir=arguments.run_dir,
             progress_callback=_emit_full_training_progress,
+        )
+        wall_seconds = time.perf_counter() - training_started
+        if not math.isfinite(wall_seconds) or wall_seconds <= 0.0:
+            raise ValueError("full training wall time must be finite and positive")
+        measured_peak_rss_bytes = peak_rss_bytes()
+        if (
+            isinstance(measured_peak_rss_bytes, bool)
+            or not isinstance(measured_peak_rss_bytes, Integral)
+            or int(measured_peak_rss_bytes) <= 0
+        ):
+            raise ValueError("full training peak RSS must be a positive integer")
+        placement = (
+            "remote"
+            if isinstance(os.environ.get("SLURM_JOB_ID"), str)
+            and bool(os.environ["SLURM_JOB_ID"].strip())
+            else "local"
+        )
+        artifacts = _attach_resource_metrics(
+            artifacts=artifacts,
+            config=config,
+            resource_metrics={
+                "placement": placement,
+                "wall_seconds": wall_seconds,
+                "peak_rss_bytes": int(measured_peak_rss_bytes),
+                "peak_vram_bytes": None,
+                "estimator_evaluations": (
+                    config.updates * 6 * config.batch_size_per_sector
+                ),
+                "effective_sample_size": 0.0,
+                "n8_smoke_complete": True,
+                "n8_to_n6_time_ratio": n8_smoke["n8_to_n6_time_ratio"],
+                "n8_to_n6_memory_ratio": n8_smoke["n8_to_n6_memory_ratio"],
+                "device_fingerprint": _full_run_device_fingerprint(),
+            },
         )
         manifest_path = freeze_training_run(
             run_dir=arguments.run_dir,
@@ -735,6 +961,8 @@ def main(argv: Sequence[str] | None = None) -> int:
                     "training_log_sha256": artifacts.training_log_sha256,
                     "training_manifest_path": str(manifest_path),
                     "training_manifest_sha256": sha256_file(manifest_path),
+                    "n8_smoke_artifact_path": str(n8_smoke_path),
+                    "n8_smoke_artifact_sha256": sha256_file(n8_smoke_path),
                     "protocol_sha256": protocol.sha256,
                     "comparison_sha": COMPARISON_SHA,
                 },
