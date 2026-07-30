@@ -419,7 +419,8 @@ def calibration_cluster_commands(
     export = (
         "ALL,OMP_NUM_THREADS=1,OPENBLAS_NUM_THREADS=1,MKL_NUM_THREADS=1,"
         f"CTHYB_MICROMAMBA={micromamba},CTHYB_ENV={prefix},"
-        f"CTHYB_CAL_PLAN={plan},CTHYB_CAL_RUN={run_directory}"
+        f"CTHYB_CAL_PLAN={plan},CTHYB_CAL_RUN={run_directory},"
+        f"CTHYB_SOURCE={Path(__file__).resolve().parent}"
     )
     return {
         "validate": f"{base} validate-plan --plan {shlex.quote(str(plan))}",

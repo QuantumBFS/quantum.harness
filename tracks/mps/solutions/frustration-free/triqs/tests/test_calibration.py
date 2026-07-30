@@ -244,6 +244,7 @@ def test_calibration_cluster_commands_and_wrapper_are_serial_offline(tmp_path):
         "CTHYB_ENV": "/opt/triqs",
         "CTHYB_CAL_PLAN": "/data/plan.json",
         "CTHYB_CAL_RUN": "/data/run",
+        "CTHYB_SOURCE": "/src",
         "SLURM_ARRAY_TASK_ID": "7",
         "SLURM_NTASKS": "1",
         "SLURM_CPUS_PER_TASK": "1",
@@ -256,6 +257,7 @@ def test_calibration_cluster_commands_and_wrapper_are_serial_offline(tmp_path):
     subprocess.run([str(wrapper)], env=env, check=True)
     args = log.read_text().splitlines()
     assert args[:5] == ["--offline", "run", "--prefix", "/opt/triqs", "python"]
+    assert args[5] == "/src/calibrate.py"
     assert args[-2:] == ["--cell-index", "7"]
     for name, value in (
         ("SLURM_ARRAY_TASK_ID", "60"),
