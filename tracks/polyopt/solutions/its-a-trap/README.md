@@ -15,7 +15,7 @@
 
 ## Targets from the issue
 
-Certified **lower** bounds on ground-state energies:
+The issue asks for **lower** bounds on ground-state energies:
 
 | Model | Size | Accuracy |
 |---|---|---|

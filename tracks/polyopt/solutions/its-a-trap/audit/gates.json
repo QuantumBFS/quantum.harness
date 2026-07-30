@@ -1,0 +1,229 @@
+{
+ "joint_gates": [
+  {
+   "gate": "G0",
+   "status": "PASS",
+   "value": "pool_hash=8c3f5572",
+   "threshold": "immutable",
+   "evidence": "commit 599ec8d"
+  },
+  {
+   "gate": "G1_identity_N10",
+   "status": "PASS",
+   "value": "dE=0.0",
+   "threshold": "1e-8",
+   "evidence": "g1_report"
+  },
+  {
+   "gate": "G1b_neutrality_N10",
+   "status": "PASS",
+   "value": "dE=0.0",
+   "threshold": "1e-8",
+   "evidence": "g1_report"
+  },
+  {
+   "gate": "G1b_neutrality_N12",
+   "status": "PASS",
+   "value": "dE=0.0",
+   "threshold": "1e-8",
+   "evidence": "g1_report"
+  },
+  {
+   "gate": "G1c_orbit_scaling",
+   "status": "PASS",
+   "value": "rows=r(N)+6 exact",
+   "threshold": "formula",
+   "evidence": "g1_report"
+  },
+  {
+   "gate": "G2a_oracle",
+   "status": "PASS",
+   "value": "2.78e-10",
+   "threshold": "1e-8",
+   "evidence": "g2_report"
+  },
+  {
+   "gate": "G2b_compat",
+   "status": "PASS",
+   "value": "1.14e-16",
+   "threshold": "1e-12",
+   "evidence": "g2_report"
+  },
+  {
+   "gate": "G2c_sandwich",
+   "status": "PASS",
+   "value": "eps=6.7e-8",
+   "threshold": "ordering",
+   "evidence": "g2_report"
+  },
+  {
+   "gate": "G3_orderings",
+   "status": "PASS",
+   "value": "28/28 ok",
+   "threshold": "eps_cmp",
+   "evidence": "training.csv"
+  },
+  {
+   "gate": "G3_nesting",
+   "status": "PASS",
+   "value": "all pairs",
+   "threshold": "eps_cmp",
+   "evidence": "training.csv"
+  },
+  {
+   "gate": "G3_freeze",
+   "status": "PASS",
+   "value": "S*=B_bond_edge+B_half",
+   "threshold": "tiebreak(b)",
+   "evidence": "FROZEN_SELECTION.json sha=e13ed241"
+  },
+  {
+   "gate": "G4_orderings",
+   "status": "PASS",
+   "value": "joint>=max(rg;sel)-eps",
+   "threshold": "eps_cmp",
+   "evidence": "g4_arms.csv"
+  },
+  {
+   "gate": "G4_classification",
+   "status": "UNRESOLVED_NULL",
+   "value": "D_joint=+5.5e-9",
+   "threshold": "eps~1.5e-7",
+   "evidence": "preregistered branch"
+  },
+  {
+   "gate": "G4_alpha_time",
+   "status": "RECORDED",
+   "value": "alpha_t_max~15",
+   "threshold": "n/a",
+   "evidence": "g4_arms.csv joint 368s/build~23s"
+  },
+  {
+   "gate": "G4b_space_equiv",
+   "status": "PASS",
+   "value": "dE=0.0 sig_equal",
+   "threshold": "1e-8",
+   "evidence": "g4b_report"
+  }
+ ],
+ "vcheck": [
+  {
+   "check": "V1_gamma_sym",
+   "status": "PASS",
+   "value": "0.0",
+   "threshold": "1e-10"
+  },
+  {
+   "check": "V1_gamma_eigmin",
+   "status": "PASS",
+   "value": "+3.53e-01",
+   "threshold": "-1e-10"
+  },
+  {
+   "check": "V1_omega_herm_worst",
+   "status": "PASS",
+   "value": "2.1e-17",
+   "threshold": "1e-12"
+  },
+  {
+   "check": "V1_omega_eigmin_worst",
+   "status": "PASS",
+   "value": "-1.92e-16",
+   "threshold": "-1e-12"
+  },
+  {
+   "check": "V1_link_rows",
+   "status": "PASS",
+   "value": "1.7e-15 over 768",
+   "threshold": "1e-10"
+  },
+  {
+   "check": "V2_psd_blocks_N14",
+   "status": "PASS",
+   "value": "28 blocks eigmin -3.89e-10",
+   "threshold": "-1e-7"
+  },
+  {
+   "check": "V2_coeff_identity_N14",
+   "status": "PASS",
+   "value": "1174 eq worst 4.17e-7",
+   "threshold": "1e-6"
+  },
+  {
+   "check": "V2_psd_blocks_N10",
+   "status": "PASS",
+   "value": "24 blocks eigmin -2.51e-09",
+   "threshold": "-1e-7"
+  },
+  {
+   "check": "V2_coeff_identity_N10",
+   "status": "PASS",
+   "value": "641 eq worst 2.07e-8",
+   "threshold": "1e-6"
+  },
+  {
+   "check": "V3_newwords_N14",
+   "status": "PASS",
+   "value": "1",
+   "threshold": ">0"
+  },
+  {
+   "check": "V3_new_rows",
+   "status": "PASS",
+   "value": "4",
+   "threshold": ">0"
+  },
+  {
+   "check": "V3_rank",
+   "status": "PASS",
+   "value": "1",
+   "threshold": ">0"
+  },
+  {
+   "check": "V3_onoff_hash_differ",
+   "status": "PASS",
+   "value": "true",
+   "threshold": "true"
+  },
+  {
+   "check": "V3_ed_feasible",
+   "status": "PASS",
+   "value": "+7.09e-01",
+   "threshold": "-1e-10"
+  },
+  {
+   "check": "V3_mutation_red",
+   "status": "PASS",
+   "value": "mutated E=+0.4689 (>E_ED)",
+   "threshold": "must_go_red"
+  },
+  {
+   "check": "V4a_link_sign_mutation",
+   "status": "PASS",
+   "value": "pre-strengthening run: ordering red",
+   "threshold": "must_go_red"
+  }
+ ],
+ "a200_release_gates": [
+  {
+   "gate": "R1",
+   "verdict": "PASS",
+   "detail": "Core(rdm=false,lso=false) N=10 E=-0.451549606105 <= E0/N=-0.451544635449 pfeas=5.6e-09 dfeas=7.7e-09"
+  },
+  {
+   "gate": "R2",
+   "verdict": "PASS",
+   "detail": "V1 ED substitution: Gamma + omega blocks + link rows @ N=10 (chassis-independent)"
+  },
+  {
+   "gate": "R3",
+   "verdict": "PASS",
+   "detail": "link-sign mutation on rdm=false chassis -> mutated-E=0.0101621497 (core -0.4515496061, E0/N -0.4515446354)"
+  },
+  {
+   "gate": "R4b",
+   "verdict": "PASS",
+   "detail": "auto=-0.451549597105 pool=-0.451549597105 |dE|=0.0e+00<=eps_cmp=5.0e-07 blockhash_eq=true counts(auto<=pool)=true(nw 0<=0, scal 19431<=19431) eigmin=+3.5e-01"
+  }
+ ]
+}
