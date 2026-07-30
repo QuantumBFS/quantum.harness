@@ -1,0 +1,4 @@
+# metric_direction: higher_is_better
+iteration	timestamp	commit	metric	delta	guard	guard-metric	status	description
+0	2026-07-30T14:32:39+08:00	a40cb99	0	0.0	pytest	35 passed	baseline	before review.md graviton remediation
+1	2026-07-30T15:23:13+08:00	a974109	8	8.0	pytest+legacy gates	67 passed; 8/8; 6/6	keep	fail-closed CLI, provenance lock, independent oracle, NQS chirality, truthful scope

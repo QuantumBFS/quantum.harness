@@ -1,0 +1,22 @@
+{
+  "version": "2.1.0",
+  "source": "loop",
+  "timestamp": "2026-07-29T15:06:58+08:00",
+  "status": "COMPLETE",
+  "results_tsv": "autoresearch/loop-260728-1757/results.tsv",
+  "findings": [
+    "Pinned verification metric improved from 0 to 8; the final full suite has 23 passing tests.",
+    "ED neutral gaps were computed for N=3..8 and exactly projected NQS gaps for N=3..7.",
+    "At N=7, the NQS gap differs from ED by 4.96e-13 and its 100000-sample standard error is 1.85e-9.",
+    "The N=7 L=2 multiplet has <L^2>=6, energy spread 4.44e-15, and generic-rotation equivariance error 9.43e-12.",
+    "A bounded N=4..8 linear 1/N fit gives Delta_infinity=0.1274+/-0.0048; the regression error excludes fit-model systematics.",
+    "Base challenge acceptance is complete. Bright/dark metric response and beyond-ED NQS scaling are explicitly not claimed."
+  ],
+  "config": {
+    "goal": "Complete Challenge #15: compute the nu=1/3 chiral-graviton neutral gap on the Haldane sphere with ED validation and a symmetry-preserving neural variational state.",
+    "scope": "tracks/qmc/solutions/Plasma-Team/**",
+    "metric": "Count of passed documentation, physics, ED, symmetry, NQS, and reproducibility gates",
+    "direction": "higher_is_better",
+    "verify": "if (Test-Path 'tracks/qmc/solutions/Plasma-Team/scripts/verify.ps1') { & powershell -NoProfile -ExecutionPolicy Bypass -File 'tracks/qmc/solutions/Plasma-Team/scripts/verify.ps1' } else { Write-Output 0 }"
+  }
+}

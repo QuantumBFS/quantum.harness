@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "paper": {
+    "id": "arXiv:1407.7967",
+    "title": "CPMC-Lab: A Matlab Package for Constrained Path Monte Carlo Calculations",
+    "figure": "Figure 4",
+    "page_in_pdf": 15
+  },
+  "source_artifact": {
+    "kind": "cropped raster rendered from the paper PDF",
+    "relative_path_in_completed_run": "figs/paper_fig4.png",
+    "sha256": "1f02e5eeb46275132535b1e2b5a5eefb7f5d982f7046e561e321cf89c1790c"
+  },
+  "extraction": {
+    "method": "manual readback from vector paths in the source PDF",
+    "potential_and_kinetic_uncertainty_t": 0.01,
+    "total_energy_construction": "potential_energy + kinetic_energy",
+    "total_uncertainty_t": 0.0141421356237,
+    "total_uncertainty_rule": "quadrature of two independent 0.01 t digitization uncertainties",
+    "note": "The CSV is a digitized comparison reference, not a fresh local ED calculation."
+  }
+}

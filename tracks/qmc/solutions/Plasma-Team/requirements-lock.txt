@@ -1,0 +1,12 @@
+# Exact runtime and test environment used for the reviewed minimal reproduction.
+# Interpreter: CPython 3.12.12 (recorded at run time by provenance.py).
+colorama==0.4.6
+iniconfig==2.3.0
+mpmath==1.3.0
+numpy==2.5.1
+packaging==26.2
+pluggy==1.6.0
+Pygments==2.20.0
+pytest==9.1.1
+scipy==1.18.0
+sympy==1.14.0

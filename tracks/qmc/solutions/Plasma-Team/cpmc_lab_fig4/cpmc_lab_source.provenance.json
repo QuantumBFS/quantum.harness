@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "package": {
+    "archive_label": "CPMC_Lab2.0.tar.gz",
+    "source_banner": "Package CPMC-Lab version 1.0 (2014)",
+    "local_directory_label": "CPMC_Lab_20160129",
+    "archive_sha256": null,
+    "archive_sha256_note": "The original downloaded archive was not retained locally; no archive hash is claimed."
+  },
+  "source_tree": {
+    "file_count": 15,
+    "manifest": "cpmc_lab_source_manifest.sha256",
+    "canonical_manifest_sha256": "af374d506f4539757779cd4136c83b56db68d8335285e240d3f3aa3279469ca7",
+    "canonicalization": "Sort by case-sensitive filename; each UTF-8 line is filename, TAB, lowercase SHA-256, LF; include a final LF. This tree hash is independent of the sha256sum-formatted manifest file.",
+    "manifest_canonical_lf_sha256": "45f95cdd5af228c747400bc3dc7bf0e1adbcb1a8e48b04b4816be63b983fe2af",
+    "cpmc_lab_m_sha256": "f3df4c5b5b9e40c32a636feaae9396dd2a94c74c7803e3743e9ca1aea4837b3a"
+  },
+  "runtime": {
+    "matlab_release": "R2025a",
+    "matlab_version": "25.1.0.2943329",
+    "operating_system": "Windows"
+  },
+  "local_modification_policy": "Official source files are not modified. The path-precedence initialization.m shim restores the configured RNG seed after official initialization."
+}

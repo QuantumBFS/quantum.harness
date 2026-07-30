@@ -1,70 +1,16 @@
-# quantum.harness
+# QMC Track + Challenge #15 — Plasma-Team
 
-> **Note**
-> This harness system is in an early stage and evolving fast. Harnessing
-> Quantum 2026 participants: this is the repository you work in and send your
-> pull request to — start with [Start Here](#start-here) below. A formal release is planned for
-> August 2026.
+**Two workstreams, one repo.**
 
-A computational quantum research harness. It helps an AI agent to run the simulation of quantum systems.
-Each method is curated by world-leading experts in that computational approach, so the guidance reflects real research practice: what to compute, which checks matter, and where common failures happen.
-
-The Harness provides:
-- **Model cards** with Hamiltonians, symmetries, etc
-- **Numeric methods and tool-usage skills** with parameters setup guidance, computational resource estimation, and verification checks.
-- **Supporting skills** for research survey, report writing, paper reproduction.
-- **Cluster support** for calculations too large for a laptop.
-
-<img alt="harness-c" src="https://github.com/user-attachments/assets/5b624046-099b-4743-8fee-ca39aa68b09b" />
-
-## Start Here
-
-If you do not yet have Claude Code, Codex CLI, or OpenCode installed, follow the [summer-school agent setup guide](https://giggleliu.github.io/summer-school-2026/guide#setup) first.
-
-Paste this into Claude Code, Codex, or OpenCode:
-
-```text
-Clone https://github.com/QuantumBFS/quantum.harness.
-Run `/onboard` and `make skills` to install necessary dependencies.
-Then run `/beginner-training` skill to start the guided training.
-```
-
-## Numeric Methods for Quantum Systems
-
-Each method is curated by world-leading experts in that computational approach.
-
-| Method | Expert contributor | Skill |
+| | Workstream A | Workstream B |
 |---|---|---|
-| Exact diagonalization | [Chen Cheng (程晨)](https://scholar.google.com/citations?user=LZpS-T0AAAAJ) | `/method-ed` |
-| MPS / LTRG / DMRG / TEBD | [Wei Li (李伟)](https://scholar.google.com/citations?user=5hKtgtAAAAAJ) | `/method-mps` · `/method-ltrg` |
-| PEPS / CTMRG | [Hai-Jun Liao (廖海军)](https://scholar.google.com/citations?user=_8KbQtEAAAAJ), [Shenghan Jiang (姜胜寒)](https://kits.ucas.edu.cn/index.php/people/faculty/44-faculty/202-shenghan-jiang) | `/method-peps` |
-| Quantum Monte Carlo | [Ming-Pu Qin (秦明普)](https://scholar.google.com/citations?user=ikqa-0IAAAAJ), [Zi Hong Liu (刘子宏)](https://scholar.google.com/citations?user=TVCMMzAAAAAJ) | `/method-qmc` |
-| Quantum circuit simulation | [Shi-Xin Zhang (张士欣)](https://scholar.google.com/citations?user=Ut8nVqIAAAAJ) | `/method-qcs` |
-| Semidefinite programming | [Jie Wang (王杰)](https://wangjie212.github.io/jiewang/) | `/method-polyopt` |
-| AI agent and knowledge base | [Kun Chen (陈锟)](https://scholar.google.com/citations?user=YItDGoIAAAAJ), [Jin-Guo Liu (刘金国)](https://scholar.google.com/citations?user=4edw228AAAAJ) | [`tracks/agent-kb`](tracks/agent-kb/) |
+| **What** | QMC track reproduction | Challenge #15 |
+| **Target** | CPMC-Lab: Hubbard model constrained-path QMC | Chiral graviton gap Δ = E(L=2)−E(L=0) at ν=1/3 |
+| **Paper** | [Nguyen et al., CPC 185, 3344 (2014)](https://arxiv.org/abs/1407.7967) | [Liou et al., PRL 123, 146801 (2019)](https://arxiv.org/abs/1904.12231) |
+| **Method** | Constrained Path Monte Carlo (MATLAB) | SO(3)-projected NQS (Python: NumPy/SciPy/SymPy) |
+| **Verification** | Energy vs U/t vs ED; sign problem stability | ⟨L²⟩=6, 5-fold degeneracy, ED cross-check |
 
-## Example Prompts
+- **Team:** Plasma-Team (Chenzhuo Xue)
+- **PR:** [#208](https://github.com/QuantumBFS/quantum.harness/pull/208) · **Solution dir:** `tracks/qmc/solutions/Plasma-Team/`
 
-```text
-I want to reproduce Figure 2 of arXiv:1711.03528,
-the PXP quantum many-body scars paper.
-Use /reproduce-paper to guide me.
-```
-
-```text
-/solve ground state of the J1-J2 Heisenberg model
-on a 6x6 square lattice at J2/J1=0.5
-```
-
-```text
-Survey recent work on neural quantum states
-for frustrated magnets.
-Use /survey to build a reference library.
-```
-
-## More
-
-- [`.knowledge/`](.knowledge/) - model, physics, method, benchmark, and literature cards.
-- [`skills/`](skills/) - agent workflows invoked as `/name`.
-- Harnessing Quantum 2026 submission guide - for summer-school participants: [English](https://giggleliu.github.io/summer-school-2026/guide) · [中文](https://giggleliu.github.io/summer-school-2026/zh/guide).
-- [`AGENTS.md`](AGENTS.md) - full harness operating instructions.
+See [`AGENTS.md`](AGENTS.md) for the full project brief, environment details, and subagent coordination rules.
