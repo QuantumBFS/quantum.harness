@@ -661,8 +661,78 @@
         },
         {
           "kind": "note",
-          "label": "⟦zh⟧当前边界：阶数先验已移除，但留出审计仍偏昂贵⟦en⟧Current boundary: the degree prior is removed, but holdout auditing is still expensive",
-          "text": "⟦zh⟧平均 90,771 个带噪 oracle 词中，89% 花在固定 4,096 词的重复留出检查，而不是参数训练。这个实验优先证明“无需干净标签也能选对模型族”；下一步的直接优化方向是把固定留出改成置信序贯检验，在证据很强时用更小留出提前结束，同时保持相同误选风险上界。可复核记录为 adaptive_degree_summary.json。⟦en⟧Of the mean 90,771 noisy oracle words, 89% are spent on repeated fixed 4,096-word holdout checks rather than parameter training. This experiment prioritizes demonstrating that the correct model family can be selected without clean labels. The direct next optimization is a confidence-sequential holdout that stops with fewer words when evidence is strong while preserving the same upper bound on misselection risk. The auditable record is adaptive_degree_summary.json."
+          "label": "⟦zh⟧上一版的主要成本：固定大小留出反复消耗 80,896 个噪声词⟦en⟧Main cost in the previous version: fixed-size checks repeatedly consume 80,896 noisy words",
+          "text": "⟦zh⟧这个成本问题由下面的置信序贯版本直接解决。上一版仍作为对照保留，因为它清楚展示了阶数发现本身；新版则把“每次都读满 4,096 个词”替换为按证据强弱动态分配 128 到 8,192 个词。上一版可复核记录为 adaptive_degree_summary.json。⟦en⟧The confidence-sequential version below directly addresses this cost. The previous version remains as a clear demonstration of degree discovery; the new version replaces always reading 4,096 words with evidence-dependent allocation from 128 to 8,192 words. The previous auditable record is adaptive_degree_summary.json."
+        },
+        {
+          "kind": "heading",
+          "level": 3,
+          "text": "⟦zh⟧继续加速：置信序贯留出把选模审计成本再降 10.71 倍⟦en⟧Further acceleration: confidence-sequential holdout cuts model-selection audit cost another 10.71x"
+        },
+        {
+          "kind": "verdict",
+          "status": "good",
+          "label": "⟦zh⟧匹配四种子的总噪声 oracle 调用从 90,771 降到 17,177；扩展到八种子仍全部精确⟦en⟧Total noisy-oracle use falls from 90,771 to 17,177 on four matched seeds; all eight extended replications remain exact",
+          "why": "⟦zh⟧把固定 4,096 词留出改成 128、256、512、1,024、2,048、4,096、8,192 的几何序贯检查，并预先把 5% 全局区间失败预算分配给所有可能查询。四个匹配种子的留出词均值从 80,896 降到 7,552，即少 10.71 倍；训练加留出的总词数少 5.28 倍。再加入四个新种子后，八次都在第 40 批拒绝一次模型，在第 50 至 65 批接受二次模型，最后都恢复同一条 36 项规则和 156 门网络。⟦en⟧Fixed 4,096-word holdouts are replaced by geometric sequential looks of 128, 256, 512, 1,024, 2,048, 4,096 and 8,192 words, with a precommitted 5% global interval-failure budget split over every possible query. Mean holdout use on four matched seeds falls from 80,896 to 7,552 words, a 10.71x reduction; training plus holdout falls 5.28x. With four additional seeds, all eight reject the linear model at batch 40, accept the quadratic model between batches 50 and 65, and finally recover the same 36-term rule and 156-gate network."
+        },
+        {
+          "kind": "card",
+          "title": "⟦zh⟧方法创新：把每个噪声标签花在“仍然不确定”的地方⟦en⟧Method innovation: spend each noisy label only where uncertainty remains",
+          "blocks": [
+            {
+              "kind": "kv",
+              "pairs": [
+                [
+                  "⟦zh⟧自适应留出分配⟦en⟧Adaptive holdout allocation",
+                  "⟦zh⟧每个新整数系数签名先只取 128 个独立带噪词；若点估计已远离拒绝区且签名尚未稳定，立即延后而不继续花样本。只有接近决策边界时才按二倍序列扩大留出。⟦en⟧Each new integer-coefficient signature first receives only 128 independent noisy words. If its point estimate is already away from the rejection region and the signature is not yet stable, testing is deferred without spending more samples. The holdout doubles only near a decision boundary."
+                ],
+                [
+                  "⟦zh⟧两个置信区间⟦en⟧Two confidence intervals",
+                  "⟦zh⟧预测与噪声标签的分歧按“每个输入词的十二位平均”形成有界样本；噪声率则由训练流中互不重叠的重复标签对估计。两者都使用经验 Bernstein 区间，再相减得到“超出噪声底多少”的区间。⟦en⟧Prediction-versus-label disagreement is represented by a bounded twelve-bit average for each input word. The noise rate is estimated from non-overlapping repeated-label pairs in the training stream. Empirical-Bernstein intervals are built for both and subtracted to bound excess over the noise floor."
+                ],
+                [
+                  "⟦zh⟧防止把欠训练误当成欠表达⟦en⟧Avoid confusing undertraining with undercapacity",
+                  "⟦zh⟧一次统计检查只能拒绝当前候选，不能拒绝整个模型族；因此阶数拒绝还必须跨三个训练检查点持续成立。实验中种子 327100 的二次候选在第 30 批明显失配，但随后完成结构跃迁并在第 65 批被正确接受。⟦en⟧One statistical check can reject only the current candidate, not an entire model family, so degree rejection must persist across three training checkpoints. For seed 327100 the quadratic candidate is clearly poor at batch 30, then undergoes a structural transition and is correctly accepted at batch 65."
+                ],
+                [
+                  "⟦zh⟧接受条件⟦en⟧Acceptance condition",
+                  "⟦zh⟧同一个整数系数签名连续出现三次、最大取整残差小于 0.10，并且留出差值的整个置信区间落在正负 3.5 个百分点内。八次接受中六次只需 4,096 个最终签名留出词，另两次扩大到 8,192。⟦en⟧The same integer-coefficient signature must appear at three consecutive checks, maximum rounding residual must be below 0.10, and the entire excess-disagreement interval must lie within plus or minus 3.5 percentage points. Six of eight acceptances use only 4,096 final-signature holdout words; two expand to 8,192."
+                ]
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "table",
+          "columns": [
+            "⟦zh⟧方法⟦en⟧Method",
+            "⟦zh⟧运行数⟦en⟧Runs",
+            "⟦zh⟧平均训练词⟦en⟧Mean training words",
+            "⟦zh⟧平均留出词⟦en⟧Mean holdout words",
+            "⟦zh⟧平均总噪声词⟦en⟧Mean total noisy words",
+            "⟦zh⟧最终精确⟦en⟧Final exact"
+          ],
+          "rows": [
+            ["⟦zh⟧固定 4,096 词阶数检查⟦en⟧Fixed 4,096-word degree checks", "4", "9,875", "80,896", "90,771", "4 / 4"],
+            ["⟦zh⟧置信序贯，匹配四种子⟦en⟧Confidence-sequential, four matched seeds", "4", "9,625", "7,552", "17,177", "4 / 4"],
+            ["⟦zh⟧置信序贯，全部八种子⟦en⟧Confidence-sequential, all eight seeds", "8", "9,500", "6,912", "16,412", "8 / 8"],
+            ["⟦zh⟧直接指定二次空间的 D-optimal⟦en⟧D-optimal with quadratic space specified", "4", "4,125", "0", "4,125", "4 / 4"]
+          ],
+          "numeric": [false, true, true, true, true, true]
+        },
+        {
+          "kind": "figures",
+          "items": [
+            {
+              "src": "noisy-c-sequential-degree.png",
+              "caption": "⟦zh⟧左：四个完全匹配种子的总带噪 oracle 词，置信序贯版本均显著低于固定留出。中：八次实验逐一列出训练与自适应留出成本；虚线是旧版固定检查的 90,771 词均值。右：每次一次模型拒绝的超额分歧区间都完整位于 15 个百分点拒绝线右侧，每次二次模型接受区间都完整落入正负 3.5 个百分点区域；图中区间在预先分配的全局 5% 预算下计算。⟦en⟧Left: total noisy-oracle words on four exactly matched seeds; the confidence-sequential version is substantially lower in every case. Middle: training and adaptive-holdout costs for all eight runs; the dashed line is the previous fixed-check mean of 90,771 words. Right: every linear rejection interval lies wholly to the right of the 15-percentage-point rejection line, while every quadratic acceptance interval lies wholly inside the plus-or-minus 3.5-point region; intervals use the preallocated global 5% budget."
+            }
+          ]
+        },
+        {
+          "kind": "note",
+          "label": "⟦zh⟧统计边界：这是置信控制的模型族选择，不是无需验证的精确性证明⟦en⟧Statistical boundary: this is confidence-controlled family selection, not an exactness proof without verification",
+          "text": "⟦zh⟧5% 预算控制的是已查询经验 Bernstein 区间同时覆盖失败的上界；接受带宽仍允许非常稀疏、很小的未建模项，因此不能仅凭该停止条件声称全域零错误。这里八次 100% 结果来自所有选择锁定后的独立干净全域审计，不参与训练或选模。当前方法依赖新鲜独立位翻转、均匀留出输入和互不重叠的噪声估计标签对；相关噪声需要另行实验。可复核记录为 sequential_degree_summary.json。⟦en⟧The 5% budget bounds simultaneous coverage failure across the queried empirical-Bernstein intervals. The acceptance band can still admit a very sparse, small unmodeled term, so the stopping rule alone cannot claim zero error over the domain. The eight 100% results come from an independent clean-domain audit after every choice is locked and do not participate in training or model selection. The method assumes fresh independent bit flips, uniform holdout inputs and non-overlapping label pairs for noise estimation; correlated noise requires a separate experiment. The auditable record is sequential_degree_summary.json."
         },
         {
           "kind": "heading",

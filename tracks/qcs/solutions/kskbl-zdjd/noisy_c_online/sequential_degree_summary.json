@@ -1,0 +1,321 @@
+{
+  "kind": "confidence-sequential-noisy-holdout-ablation",
+  "protocol": {
+    "paired_fixed_seeds": [
+      277100,
+      287100,
+      297100,
+      307100
+    ],
+    "additional_sequential_seeds": [
+      317100,
+      327100,
+      337100,
+      347100
+    ],
+    "holdout_look_sizes": [
+      128,
+      256,
+      512,
+      1024,
+      2048,
+      4096,
+      8192
+    ],
+    "precommitted_global_interval_failure_probability": 0.05,
+    "empirical_bernstein_per_interval_probability": 3.968253968253968e-05,
+    "acceptance_excess_band": 0.035,
+    "rejection_excess_threshold": 0.15,
+    "coefficient_signature_checks_for_acceptance": 3,
+    "persistent_training_checks_for_degree_rejection": 3,
+    "clean_labels_used_for_updates_or_selection": false
+  },
+  "claims": {
+    "all_eight_runs_reject_linear_and_accept_quadratic": true,
+    "all_eight_final_models_exact": true,
+    "all_eight_recover_verified_36_term_156_gate_rule": true,
+    "linear_rejection_steps": [
+      40,
+      40,
+      40,
+      40,
+      40,
+      40,
+      40,
+      40
+    ],
+    "quadratic_acceptance_steps": [
+      55,
+      50,
+      60,
+      60,
+      50,
+      65,
+      50,
+      50
+    ],
+    "quadratic_final_signature_4096_word_runs": 6,
+    "quadratic_final_signature_8192_word_runs": 2,
+    "mean_sequential_training_examples_all_eight": 9500.0,
+    "mean_sequential_holdout_words_all_eight": 6912.0,
+    "mean_sequential_total_noisy_words_all_eight": 16412.0,
+    "paired_fixed_mean_holdout_words": 80896.0,
+    "paired_sequential_mean_holdout_words": 7552.0,
+    "paired_holdout_reduction_factor": 10.711864406779661,
+    "paired_fixed_mean_total_noisy_words": 90771.0,
+    "paired_sequential_mean_total_noisy_words": 17177.0,
+    "paired_total_noisy_word_reduction_factor": 5.284450136810852
+  },
+  "sequential_runs": [
+    {
+      "path": "tracks/qcs/results/20260731-001000-noisy-c-sequential-degree/seed277100/run.json",
+      "run_sha256": "4fc2f7d6e8e8f6d19566a5876526c514d5e81cc06f3bfdb2899315511cde9c82",
+      "base_seed": 277100,
+      "linear_reject_step": 40,
+      "linear_holdout_words_for_final_signature": 1024,
+      "linear_excess_interval_at_rejection": [
+        0.1618675853267061,
+        0.30586720640075044
+      ],
+      "quadratic_accept_step": 55,
+      "quadratic_holdout_words_for_final_signature": 8192,
+      "quadratic_excess_interval_at_acceptance": [
+        -0.028187858452980274,
+        0.021125423329049375
+      ],
+      "training_examples": 9500,
+      "holdout_words_across_all_signatures": 9600,
+      "total_noisy_oracle_words": 19100,
+      "final_clean_word_accuracy": 1.0,
+      "active_integer_coefficients": 36
+    },
+    {
+      "path": "tracks/qcs/results/20260731-001000-noisy-c-sequential-degree/seed287100/run.json",
+      "run_sha256": "613798cc09ddbfa9c8f7b87dd14e47a7f39beb212f4aeda94c1bc9c95d1e58d5",
+      "base_seed": 287100,
+      "linear_reject_step": 40,
+      "linear_holdout_words_for_final_signature": 1024,
+      "linear_excess_interval_at_rejection": [
+        0.1640469092623026,
+        0.30559463709283674
+      ],
+      "quadratic_accept_step": 50,
+      "quadratic_holdout_words_for_final_signature": 4096,
+      "quadratic_excess_interval_at_acceptance": [
+        -0.02871058660484721,
+        0.03450795915047111
+      ],
+      "training_examples": 9000,
+      "holdout_words_across_all_signatures": 5376,
+      "total_noisy_oracle_words": 14376,
+      "final_clean_word_accuracy": 1.0,
+      "active_integer_coefficients": 36
+    },
+    {
+      "path": "tracks/qcs/results/20260731-001000-noisy-c-sequential-degree/seed297100/run.json",
+      "run_sha256": "84f2689146cf12562ce68b97f876a6bdc9fdd14a10fccf0b85983c23f9661b40",
+      "base_seed": 297100,
+      "linear_reject_step": 40,
+      "linear_holdout_words_for_final_signature": 1024,
+      "linear_excess_interval_at_rejection": [
+        0.15560948804857955,
+        0.29682236253824346
+      ],
+      "quadratic_accept_step": 60,
+      "quadratic_holdout_words_for_final_signature": 8192,
+      "quadratic_excess_interval_at_acceptance": [
+        -0.028590547824639462,
+        0.01904640905623206
+      ],
+      "training_examples": 10000,
+      "holdout_words_across_all_signatures": 9728,
+      "total_noisy_oracle_words": 19728,
+      "final_clean_word_accuracy": 1.0,
+      "active_integer_coefficients": 36
+    },
+    {
+      "path": "tracks/qcs/results/20260731-001000-noisy-c-sequential-degree/seed307100/run.json",
+      "run_sha256": "4eb2d49ab7c4bae1f3f2468e838433501fb3704a01a1fd25dbf578228d3ebab9",
+      "base_seed": 307100,
+      "linear_reject_step": 40,
+      "linear_holdout_words_for_final_signature": 1024,
+      "linear_excess_interval_at_rejection": [
+        0.15593621167448551,
+        0.29907761498569235
+      ],
+      "quadratic_accept_step": 60,
+      "quadratic_holdout_words_for_final_signature": 4096,
+      "quadratic_excess_interval_at_acceptance": [
+        -0.02998289730542511,
+        0.03134168937033588
+      ],
+      "training_examples": 10000,
+      "holdout_words_across_all_signatures": 5504,
+      "total_noisy_oracle_words": 15504,
+      "final_clean_word_accuracy": 1.0,
+      "active_integer_coefficients": 36
+    },
+    {
+      "path": "tracks/qcs/results/20260731-001000-noisy-c-sequential-degree/seed317100/run.json",
+      "run_sha256": "e968ecc475e8192ba6bb1f77ff2a65d3e3cba2d5c844deaf36156353fab11a93",
+      "base_seed": 317100,
+      "linear_reject_step": 40,
+      "linear_holdout_words_for_final_signature": 2048,
+      "linear_excess_interval_at_rejection": [
+        0.176068626124898,
+        0.27349013553945367
+      ],
+      "quadratic_accept_step": 50,
+      "quadratic_holdout_words_for_final_signature": 4096,
+      "quadratic_excess_interval_at_acceptance": [
+        -0.0308574631732893,
+        0.03268498801456515
+      ],
+      "training_examples": 9000,
+      "holdout_words_across_all_signatures": 6400,
+      "total_noisy_oracle_words": 15400,
+      "final_clean_word_accuracy": 1.0,
+      "active_integer_coefficients": 36
+    },
+    {
+      "path": "tracks/qcs/results/20260731-001000-noisy-c-sequential-degree/seed327100/run.json",
+      "run_sha256": "701cb5e1eaf52916a9fc1cf283f030b23c177ee2c5bc655c07688bb6b70a9ebb",
+      "base_seed": 327100,
+      "linear_reject_step": 40,
+      "linear_holdout_words_for_final_signature": 1024,
+      "linear_excess_interval_at_rejection": [
+        0.15652238633703525,
+        0.2993080485947748
+      ],
+      "quadratic_accept_step": 65,
+      "quadratic_holdout_words_for_final_signature": 4096,
+      "quadratic_excess_interval_at_acceptance": [
+        -0.028583057418150898,
+        0.03145504119106107
+      ],
+      "training_examples": 10500,
+      "holdout_words_across_all_signatures": 7936,
+      "total_noisy_oracle_words": 18436,
+      "final_clean_word_accuracy": 1.0,
+      "active_integer_coefficients": 36
+    },
+    {
+      "path": "tracks/qcs/results/20260731-001000-noisy-c-sequential-degree/seed337100/run.json",
+      "run_sha256": "88da025236282b5b20b4f151d93bf3b373d62564ee752b53138114974ec6456e",
+      "base_seed": 337100,
+      "linear_reject_step": 40,
+      "linear_holdout_words_for_final_signature": 1024,
+      "linear_excess_interval_at_rejection": [
+        0.15787448553793126,
+        0.300882862961464
+      ],
+      "quadratic_accept_step": 50,
+      "quadratic_holdout_words_for_final_signature": 4096,
+      "quadratic_excess_interval_at_acceptance": [
+        -0.030859272529561638,
+        0.032903497213402244
+      ],
+      "training_examples": 9000,
+      "holdout_words_across_all_signatures": 5376,
+      "total_noisy_oracle_words": 14376,
+      "final_clean_word_accuracy": 1.0,
+      "active_integer_coefficients": 36
+    },
+    {
+      "path": "tracks/qcs/results/20260731-001000-noisy-c-sequential-degree/seed347100/run.json",
+      "run_sha256": "c50d4e5af1bbe457ac6bc6ad47590ac6519ad7527fa41630e65c657f06d5feb3",
+      "base_seed": 347100,
+      "linear_reject_step": 40,
+      "linear_holdout_words_for_final_signature": 1024,
+      "linear_excess_interval_at_rejection": [
+        0.15383274365712285,
+        0.2969782441673754
+      ],
+      "quadratic_accept_step": 50,
+      "quadratic_holdout_words_for_final_signature": 4096,
+      "quadratic_excess_interval_at_acceptance": [
+        -0.034860134715147956,
+        0.029181710452234944
+      ],
+      "training_examples": 9000,
+      "holdout_words_across_all_signatures": 5376,
+      "total_noisy_oracle_words": 14376,
+      "final_clean_word_accuracy": 1.0,
+      "active_integer_coefficients": 36
+    }
+  ],
+  "paired_fixed_runs": [
+    {
+      "path": "tracks/qcs/results/20260730-230000-noisy-c-adaptive-degree/seed277100/run.json",
+      "run_sha256": "a7afee11bae15ec0b77399f012692ba1eb36b51e49055980d238e2677e8bfd22",
+      "base_seed": 277100,
+      "linear_decision": "reject-and-expand",
+      "linear_decision_step": 40,
+      "linear_holdout_gap_at_decision": 0.23783693611702927,
+      "quadratic_decision": "accept",
+      "quadratic_decision_step": 55,
+      "quadratic_holdout_gap_at_decision": -0.0037121097524030755,
+      "quadratic_rounding_residual_at_decision": 0.011166778892477228,
+      "estimated_noise_rate_at_acceptance": 0.25204381548156973,
+      "training_examples": 9500,
+      "independent_noisy_holdout_words": 77824,
+      "total_noisy_oracle_words": 87324,
+      "final_clean_word_accuracy": 1.0,
+      "active_integer_coefficients": 36
+    },
+    {
+      "path": "tracks/qcs/results/20260730-230000-noisy-c-adaptive-degree/seed287100/run.json",
+      "run_sha256": "7e9afcd2efcfbeacfe1197d9cec64d0d1144886c9c3e6fb358a710c0af7174a3",
+      "base_seed": 287100,
+      "linear_decision": "reject-and-expand",
+      "linear_decision_step": 40,
+      "linear_holdout_gap_at_decision": 0.23244668313374373,
+      "quadratic_decision": "accept",
+      "quadratic_decision_step": 60,
+      "quadratic_holdout_gap_at_decision": 0.0022626685617826436,
+      "quadratic_rounding_residual_at_decision": 0.010337245838587618,
+      "estimated_noise_rate_at_acceptance": 0.24875458404238404,
+      "training_examples": 10000,
+      "independent_noisy_holdout_words": 81920,
+      "total_noisy_oracle_words": 91920,
+      "final_clean_word_accuracy": 1.0,
+      "active_integer_coefficients": 36
+    },
+    {
+      "path": "tracks/qcs/results/20260730-230000-noisy-c-adaptive-degree/seed297100/run.json",
+      "run_sha256": "a25696a256ae3e42699a455cc366fc025c4453504a91ad794d936c98682ea753",
+      "base_seed": 297100,
+      "linear_decision": "reject-and-expand",
+      "linear_decision_step": 40,
+      "linear_holdout_gap_at_decision": 0.2354097095723076,
+      "quadratic_decision": "accept",
+      "quadratic_decision_step": 60,
+      "quadratic_holdout_gap_at_decision": -0.0016972723409035828,
+      "quadratic_rounding_residual_at_decision": 0.00969750657667964,
+      "estimated_noise_rate_at_acceptance": 0.2509851955179869,
+      "training_examples": 10000,
+      "independent_noisy_holdout_words": 81920,
+      "total_noisy_oracle_words": 91920,
+      "final_clean_word_accuracy": 1.0,
+      "active_integer_coefficients": 36
+    },
+    {
+      "path": "tracks/qcs/results/20260730-230000-noisy-c-adaptive-degree/seed307100/run.json",
+      "run_sha256": "76a8c624675f858529c01fccbf2934901aa864e3ea89a790d91f77bd91ba1008",
+      "base_seed": 307100,
+      "linear_decision": "reject-and-expand",
+      "linear_decision_step": 40,
+      "linear_holdout_gap_at_decision": 0.23375887713439236,
+      "quadratic_decision": "accept",
+      "quadratic_decision_step": 60,
+      "quadratic_holdout_gap_at_decision": -0.002146061026339935,
+      "quadratic_rounding_residual_at_decision": 0.010268543861157352,
+      "estimated_noise_rate_at_acceptance": 0.2507015623284233,
+      "training_examples": 10000,
+      "independent_noisy_holdout_words": 81920,
+      "total_noisy_oracle_words": 91920,
+      "final_clean_word_accuracy": 1.0,
+      "active_integer_coefficients": 36
+    }
+  ]
+}
