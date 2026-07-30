@@ -320,6 +320,50 @@ def test_extension_wrapper_creates_unique_private_empty_cache(tmp_path: Path):
     assert "ARGS=" not in second.stdout
 
 
+def test_extension_build_wrapper_dispatches_approved_validation_package(
+    tmp_path: Path,
+):
+    repository = tmp_path / "repo"
+    scripts = repository / "tracks/qmc/solutions/frustration-free/challenge-194/scripts"
+    scripts.mkdir(parents=True)
+    (scripts / "analyze_pilot.py").write_text("# controlled\n", encoding="utf-8")
+    (scripts / "run_pilot.py").write_text("# controlled\n", encoding="utf-8")
+    results = tmp_path / "results"
+    results.mkdir()
+    analysis = results / "p0_analysis.json"
+    analysis.write_bytes(P0_ANALYSIS.read_bytes())
+    validation_report = results / "validation-prod-877ab93/report/report.json"
+    validation_report.parent.mkdir(parents=True)
+    validation_report.write_text("{}\n", encoding="utf-8")
+    fake_python = tmp_path / "fake-python"
+    fake_python.write_text(
+        "#!/bin/bash\nprintf 'CALL='\nprintf '<%s>' \"$@\"\nprintf '\\n'\n",
+        encoding="utf-8",
+    )
+    fake_python.chmod(0o755)
+    cache_root = tmp_path / "node"
+    cache_root.mkdir()
+    result = subprocess.run(
+        ["bash", str(ROOT / "scripts/pilot_extension_build_slurm.sh")],
+        cwd=tmp_path,
+        env={
+            **os.environ,
+            "HARNESS_RUN_SPEC": str(analysis),
+            "HARNESS_ENTRYPOINT": str(repository),
+            "HARNESS_COMMAND": str(fake_python),
+            "SLURM_JOB_ID": "992",
+            "SLURM_CPUS_PER_TASK": "1",
+            "SLURM_TMPDIR": str(cache_root),
+        },
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0, result.stderr
+    assert f"<--validation-report><{validation_report}>" in result.stdout
+    assert "validation-prod-fd0aa31-compute" not in result.stdout
+
+
 def test_extension_run_spec_is_bound_and_p0_loader_stays_strict(tmp_path: Path):
     protocol = _extension_protocol_fixture()
     run_spec = pilot._write_test_extension_run_spec(

@@ -58,7 +58,7 @@ fi
 
 RESULTS_ROOT="$(dirname "${P0_ANALYSIS_PATH}")"
 EXTENSION_PROTOCOL_PATH="${RESULTS_ROOT}/p0_extension_v1_protocol.json"
-VALIDATION_REPORT_PATH="${RESULTS_ROOT}/validation-prod-fd0aa31-compute/report/report.json"
+VALIDATION_REPORT_PATH="${RESULTS_ROOT}/validation-prod-877ab93/report/report.json"
 EXTENSION_ROOT="${RESULTS_ROOT}/pilot-p0-extension-v1"
 require_canonical_path VALIDATION_REPORT_PATH "${VALIDATION_REPORT_PATH}" file
 

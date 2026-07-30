@@ -757,7 +757,7 @@ CHALLENGE_194_REPO_ROOT="${HARNESS_ENTRYPOINT}"
 CHALLENGE_194_PYTHON="${HARNESS_COMMAND}"
 RESULTS_ROOT="$(dirname "${P0_ANALYSIS_PATH}")"
 EXTENSION_PROTOCOL_PATH="${RESULTS_ROOT}/p0_extension_v1_protocol.json"
-VALIDATION_REPORT_PATH="${RESULTS_ROOT}/validation-prod-fd0aa31-compute/report/report.json"
+VALIDATION_REPORT_PATH="${RESULTS_ROOT}/validation-prod-877ab93/report/report.json"
 EXTENSION_ROOT="${RESULTS_ROOT}/pilot-p0-extension-v1"
 "${CHALLENGE_194_PYTHON}" scripts/analyze_pilot.py build-p0-extension \
   --analysis "${P0_ANALYSIS_PATH}" \
@@ -830,18 +830,24 @@ Run from repository root:
 export HARNESS_CLUSTER_PROFILE=wuzh02-jiangweiqi
 export SUBMIT_SHA="$(git rev-parse HEAD)"
 export PROFILE="skills/using-slurm/profiles/wuzh02-jiangweiqi.toml"
-export REMOTE_REPO="/work/share/giggleliu/jiangweiqi/quantum.harness-p0-extension-v1"
-export REMOTE_BUNDLE="/work/share/giggleliu/jiangweiqi/challenge-194-p0-extension-v1.bundle"
+export REMOTE_REPO="/work/share/giggleliu/jiangweiqi/quantum.harness-p0-extension-v2"
+export REMOTE_BUNDLE="/work/share/giggleliu/jiangweiqi/challenge-194-p0-extension-v2.bundle"
 export REMOTE_RESULTS="/work/share/giggleliu/jiangweiqi/results/challenge-194"
 export REMOTE_ROOT="${REMOTE_RESULTS}/pilot-p0-extension-v1"
 export REMOTE_ANALYSIS="${REMOTE_RESULTS}/p0_analysis.json"
 export REMOTE_PROTOCOL="${REMOTE_RESULTS}/p0_extension_v1_protocol.json"
-export REMOTE_VALIDATION="${REMOTE_RESULTS}/validation-prod-fd0aa31-compute/report/report.json"
-export REMOTE_PYTHON="/work/share/giggleliu/jiangweiqi/quantum.harness-challenge-194/tracks/qmc/solutions/frustration-free/challenge-194/.venv/bin/python"
-export LOCAL_BUNDLE="/tmp/challenge-194-p0-extension-v1.bundle"
+export REMOTE_VALIDATION="${REMOTE_RESULTS}/validation-prod-877ab93/report/report.json"
+export REMOTE_PYTHON="/work/share/giggleliu/jiangweiqi/quantum.harness-challenge-194/.venv/bin/python"
+export LOCAL_BUNDLE="/tmp/challenge-194-p0-extension-v2.bundle"
 scripts/harness_slurm.sh precheck
 scripts/harness_slurm.sh probe-partitions
 ```
+
+The `v2` deployment and bundle names are fresh immutable namespaces for this
+submission. Preserve the failed `v1` deployment, bundle, job logs, and all
+other diagnostics without deletion or overwrite. The absent shared
+`REMOTE_PROTOCOL` and `REMOTE_ROOT` result paths remain the preregistered
+version-1 scientific artifact paths.
 
 Expected: profile resolves to Wuzh02, SSH is `true`, the only dirty path is the
 pre-existing `.superpowers/sdd/task-1-report.md`, and `wzacnormal03` is
@@ -1340,12 +1346,12 @@ Run:
 ```bash
 ssh wuzh02-jiangweiqi "
   set -euo pipefail
-  export PYTHONPATH='/work/share/giggleliu/jiangweiqi/quantum.harness-p0-extension-v1/tracks/qmc/solutions/frustration-free/challenge-194/src'
-  '/work/share/giggleliu/jiangweiqi/quantum.harness-challenge-194/tracks/qmc/solutions/frustration-free/challenge-194/.venv/bin/python' \
-    '/work/share/giggleliu/jiangweiqi/quantum.harness-p0-extension-v1/tracks/qmc/solutions/frustration-free/challenge-194/scripts/run_pilot.py' merge \
+  export PYTHONPATH='/work/share/giggleliu/jiangweiqi/quantum.harness-p0-extension-v2/tracks/qmc/solutions/frustration-free/challenge-194/src'
+  '/work/share/giggleliu/jiangweiqi/quantum.harness-challenge-194/.venv/bin/python' \
+    '/work/share/giggleliu/jiangweiqi/quantum.harness-p0-extension-v2/tracks/qmc/solutions/frustration-free/challenge-194/scripts/run_pilot.py' merge \
     --run-spec '/work/share/giggleliu/jiangweiqi/results/challenge-194/pilot-p0-extension-v1/run_spec.json'
-  '/work/share/giggleliu/jiangweiqi/quantum.harness-challenge-194/tracks/qmc/solutions/frustration-free/challenge-194/.venv/bin/python' \
-    '/work/share/giggleliu/jiangweiqi/quantum.harness-p0-extension-v1/tracks/qmc/solutions/frustration-free/challenge-194/scripts/run_pilot.py' verify \
+  '/work/share/giggleliu/jiangweiqi/quantum.harness-challenge-194/.venv/bin/python' \
+    '/work/share/giggleliu/jiangweiqi/quantum.harness-p0-extension-v2/tracks/qmc/solutions/frustration-free/challenge-194/scripts/run_pilot.py' verify \
     --run-spec '/work/share/giggleliu/jiangweiqi/results/challenge-194/pilot-p0-extension-v1/run_spec.json'
 "
 ```
@@ -1362,7 +1368,7 @@ scripts/download_pilot.sh \
   wuzh02-jiangweiqi \
   /work/share/giggleliu/jiangweiqi/results/challenge-194/pilot-p0-extension-v1 \
   /home/footman/code/quantum.harness-challenge-194/results/challenge-194/pilot-p0-extension-v1 \
-  /home/footman/code/quantum.harness-challenge-194/tracks/qmc/solutions/frustration-free/challenge-194/.venv/bin/python
+  /home/footman/code/quantum.harness-challenge-194/.venv/bin/python
 ```
 
 Expected: checksummed transfer followed by exact 96/96 verifier JSON.

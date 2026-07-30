@@ -301,7 +301,7 @@ def test_extension_build_wrapper_freezes_resources_paths_and_environment():
         'P0_ANALYSIS_PATH="${HARNESS_RUN_SPEC}"',
         'RESULTS_ROOT="$(dirname "${P0_ANALYSIS_PATH}")"',
         'EXTENSION_PROTOCOL_PATH="${RESULTS_ROOT}/p0_extension_v1_protocol.json"',
-        'VALIDATION_REPORT_PATH="${RESULTS_ROOT}/validation-prod-fd0aa31-compute/report/report.json"',
+        'VALIDATION_REPORT_PATH="${RESULTS_ROOT}/validation-prod-877ab93/report/report.json"',
         'EXTENSION_ROOT="${RESULTS_ROOT}/pilot-p0-extension-v1"',
         "44083701db692304cd3aa054c8a9488b75674cead7cd6bf479c0a203cc1fa10b",
         "unset PYTHONHOME PYTHONUSERBASE PYTHONPATH",
@@ -310,6 +310,56 @@ def test_extension_build_wrapper_freezes_resources_paths_and_environment():
     )
     for text in required:
         assert text in wrapper
+
+
+def test_extension_operational_contract_matches_approval_registry():
+    approval = json.loads(
+        Path("pilot_correctness_approval.json").read_text(encoding="utf-8")
+    )
+    package = f"validation-prod-{approval['approval_revision'][:7]}"
+    validation_path = f"{package}/report/report.json"
+    wrapper = Path("scripts/pilot_extension_build_slurm.sh").read_text(encoding="utf-8")
+    pilot_plan = Path("PILOT_PLAN.md").read_text(encoding="utf-8")
+    readme = Path("README.md").read_text(encoding="utf-8")
+    implementation_plan = (
+        Path(__file__).resolve().parents[6]
+        / "docs/superpowers/plans/2026-07-30-challenge-194-p0-extension.md"
+    ).read_text(encoding="utf-8")
+
+    for document in (wrapper, pilot_plan, readme, implementation_plan):
+        assert validation_path in document
+        assert "validation-prod-fd0aa31-compute" not in document
+    for field in (
+        "approval_revision",
+        "report_sha256",
+        "run_spec_sha256",
+        "protocol_sha256",
+        "check_registry_sha256",
+        "scientific_engine_sha256",
+    ):
+        assert approval[field] in pilot_plan
+        assert approval[field] in readme
+
+    remote_root_python = (
+        "/work/share/giggleliu/jiangweiqi/"
+        "quantum.harness-challenge-194/.venv/bin/python"
+    )
+    for document in (pilot_plan, readme, implementation_plan):
+        assert remote_root_python in document
+    assert approval["report_sha256"] in implementation_plan
+    assert (
+        "quantum.harness-challenge-194/tracks/qmc/solutions/"
+        "frustration-free/challenge-194/.venv/bin/python" not in implementation_plan
+    )
+    assert "quantum.harness-p0-extension-v2" in implementation_plan
+    assert "challenge-194-p0-extension-v2.bundle" in implementation_plan
+    assert (
+        'REMOTE_ROOT="${REMOTE_RESULTS}/pilot-p0-extension-v1"' in implementation_plan
+    )
+    assert (
+        'REMOTE_PROTOCOL="${REMOTE_RESULTS}/p0_extension_v1_protocol.json"'
+        in implementation_plan
+    )
 
 
 @pytest.mark.parametrize(

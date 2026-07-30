@@ -31,7 +31,7 @@ file.
 
 Pilot construction requires the passing immutable production-v1 correctness
 package approved at orchestration revision
-`fd0aa314f324dc357918926e80f93f4356083fc0`: its report, exact 120-cell
+`877ab9393f320bfe31ff74a26c3db1fb205d7ef3`: its report, exact 120-cell
 validation run spec and check registry, embedded historical validation-source
 revision, runtime evidence, and lock hash. The report source must exactly match
 the validation run spec; it is not falsely rewritten to the approval revision.
@@ -40,18 +40,19 @@ changing scientific semantics.
 
 The checked-in canonical approval registry is
 `pilot_correctness_approval.json`. It authenticates the Wuzh02
-`validation-prod-fd0aa31-compute` package with report SHA256
-`22b5e87d8fcf48461c0e42d0fbdc403fe70d09337989316a5aa283e36c825ce9`,
+`validation-prod-877ab93` package at
+`validation-prod-877ab93/report/report.json`, with report SHA256
+`036b4b8a06164716aff5f40cc38ac4855a212026a556e1c5fe33ce32ce0babb8`,
 validation run-spec SHA256
-`a6e4ff45cef7d9e331179665dc492cc3ed6624566ccda2ad3cf4591aebb10f7e`,
+`5b3eea4c460e14a57aec9df606447137d787a5c66dd7e98e1dffdcf566f430e2`,
 protocol SHA256
 `c7e980eeadaf8ed75e4d20cebb1e2c5d5f57a1cfc329afa7678ae586f5b7f488`,
 check-registry SHA256
 `6e25ea41899544f2a9de3589beb1ee94b1f3dc505638b8f8e5164a4322b56a1d`,
 and scientific-module aggregate
-`a5fe99d23de9003eda565a4de71aaabf1393b909fc9feb57b5b7dff92ff95dab`.
+`457fa669da897e59b03681039db6121fde4d7be9295bb46a743c8448875b3ee9`.
 The registry's canonical bytes are independently pinned in code to SHA256
-`8ef77104299bdf8e0355cf23d3215f560e1773332a5face9c79ea7a261ac33e8`;
+`29dc5d04fd18728ee46fffe90c70d98caa61032005974f354e2b4e0e6018a7ab`;
 the registry cannot redefine its own trusted digest. No merely structurally
 valid alternate report can authorize Pilot.
 
@@ -83,6 +84,11 @@ a pass. Its record is:
 Runtime capability is generated when the run spec is built and rechecked by
 each worker on its compute node. Login-node capability is not presumed portable
 to a compute kernel.
+
+The approved Wuzh02 offline runtime is the repository-root interpreter used by
+successful P0 job `41506576`:
+`/work/share/giggleliu/jiangweiqi/quantum.harness-challenge-194/.venv/bin/python`.
+No nested solution-local `.venv` is part of the deployment contract.
 
 Heavy trajectories run only on clusters. The original P0 campaign used one
 single-core Slurm array with tasks `1-96` and 1800 MiB per task. The versioned

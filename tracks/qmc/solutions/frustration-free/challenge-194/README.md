@@ -139,6 +139,22 @@ The versioned P0 extension is fully preregistered, but no P0 extension data
 exist yet. The extension samples only sigma `0.9` and `1.0`; it does not alter
 the scientific engine, relax the selector, or authorize a claim.
 
+The checked-in `pilot_correctness_approval.json` authenticates approval/source
+revision `877ab9393f320bfe31ff74a26c3db1fb205d7ef3` and package
+`validation-prod-877ab93`: report SHA256
+`036b4b8a06164716aff5f40cc38ac4855a212026a556e1c5fe33ce32ce0babb8`,
+run-spec SHA256
+`5b3eea4c460e14a57aec9df606447137d787a5c66dd7e98e1dffdcf566f430e2`,
+protocol SHA256
+`c7e980eeadaf8ed75e4d20cebb1e2c5d5f57a1cfc329afa7678ae586f5b7f488`,
+check-registry SHA256
+`6e25ea41899544f2a9de3589beb1ee94b1f3dc505638b8f8e5164a4322b56a1d`,
+and scientific-engine SHA256
+`457fa669da897e59b03681039db6121fde4d7be9295bb46a743c8448875b3ee9`.
+Wuzh02 execution uses the repository-root interpreter proven by successful P0
+job `41506576`:
+`/work/share/giggleliu/jiangweiqi/quantum.harness-challenge-194/.venv/bin/python`.
+
 From the exact clean deployed repository, the compute-node build wrapper uses
 `HARNESS_RUN_SPEC` as the canonical P0 analysis path and derives the protocol,
 approved validation report, and output root from its parent:
@@ -160,7 +176,7 @@ and runs these implemented commands:
 
 /absolute/offline/python scripts/run_pilot.py build-extension-spec \
   --protocol /absolute/results/challenge-194/p0_extension_v1_protocol.json \
-  --validation-report /absolute/results/challenge-194/validation-prod-fd0aa31-compute/report/report.json \
+  --validation-report /absolute/results/challenge-194/validation-prod-877ab93/report/report.json \
   --output-root /absolute/results/challenge-194/pilot-p0-extension-v1 \
   --run-spec /absolute/results/challenge-194/pilot-p0-extension-v1/run_spec.json
 ```
