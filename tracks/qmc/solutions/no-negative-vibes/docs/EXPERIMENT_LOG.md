@@ -3253,3 +3253,31 @@ env OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 \
 Next wake-up must first count completed cells and inspect the terminal
 manifest/results. It must not recreate the settings, change seeds, or repeat
 completed cells.
+
+### Immediate pause/resume correction
+
+A delegated pause message was initially interpreted as stopping remote
+compute. SIGTERM was sent once to the exact WSL process group `115` and CPU
+process group `2360014`; both stopped, with zero completed cell files on
+either host. A correction immediately clarified that only the controller
+task should pause while remote compute continues.
+
+Both batches were therefore resumed immediately with the unchanged settings,
+seeds, output directories, worker counts, and `--resume`. No completed cell
+was repeated because none had reached its atomic final file before the brief
+stop.
+
+Recovered live state:
+
+- WSL tmux session `nnv-survivor-hportfolio-wsl-20260730`, controller PID
+  `201`, workers `203..216`;
+- CPU tmux session `nnv-survivor-hportfolio-20260730`, controller PID
+  `2360446`, 62 workers `2360448..2360509`;
+- exact settings SHA-256 values and recovery commands remain those recorded
+  above.
+
+The runner is silent while a cell is in progress and publishes each cell
+atomically, so an empty stdout log is not a liveness failure. Process
+inspection showed every worker in a running state after resume. The
+controller now pauses without further monitoring; the next wake-up must
+inspect these same sessions and output directories before taking any action.
