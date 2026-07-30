@@ -1,0 +1,33 @@
+# B 角色 METTS 首轮 ED 对照配置 (task spec §4): 2x2, h/J=3.0, >=2 beta points.
+# Dense spectral backend = exact e^{-beta H/2}; this is the machine-precision
+# reference that validates the conventions vs ED. The Trotter config
+# (2x2_h3.0_trotter.yaml) validates the production evolution scheme.
+Lx: 2
+Ly: 2
+h: 3.0
+J: 1.0
+boundary: OBC
+
+# dense beta grid (>=2 points required; use enough to also resolve f via
+# thermodynamic integration, which needs small-beta coverage near the anchor)
+betas: [0.05, 0.1, 0.2, 0.3, 0.5, 0.8, 1.0]
+
+n_warmup: 50
+n_production: 2000
+n_chains: 4
+seed: 20260729
+basis: Z
+antithetic_z2: false
+
+evolve_mode: spectral
+dtau: 0.05
+trotter_order: 2
+max_bond_dim: 64
+trunc_tol: 1.0e-10
+
+backend: dense
+out_dir: metts_runs/2x2_h3.0_spectral
+write_traces: true
+label: 2x2_h3.0_spectral
+prob_tol: 1.0e-9
+mem_guard: true

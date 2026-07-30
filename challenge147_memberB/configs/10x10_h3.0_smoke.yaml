@@ -1,0 +1,44 @@
+# B 角色 METTS 10x10 SMOKE TEST (task spec §5 阶段5 / DoD).
+#
+# Goal (per spec): NOT high accuracy, but confirm the program:
+#   - starts;
+#   - completes at least one sample;
+#   - no immediate NaN;
+#   - memory does not blow up;
+#   - wall time recordable;
+#   - trace fully output;
+#   - known failure modes identifiable.
+#
+# The 10x10 snake-MPS near h/J=3.0 is the genuine 2D-METTS hardness point:
+# evolved typical states are highly entangled, so a modest chi is lossy
+# (discarded weight is recorded per sample). This config therefore runs FEW
+# samples at a single mid beta, large enough chi that at least one sample
+# completes cleanly, with the memory guard active (degrades on OOM). Accuracy
+# at 10x10 is a Phase-3 / production concern (more samples, larger chi, longer
+# wall-time); this run is the crash-safety / feasibility gate only.
+Lx: 10
+Ly: 10
+h: 3.0
+J: 1.0
+boundary: OBC
+betas: [0.3, 0.5]
+
+n_warmup: 2
+n_production: 3
+n_chains: 1
+seed: 20260801
+basis: Z
+antithetic_z2: false
+
+evolve_mode: trotter
+dtau: 0.05
+trotter_order: 2
+max_bond_dim: 64
+trunc_tol: 1.0e-8
+
+backend: mps
+out_dir: metts_runs/10x10_h3.0_smoke
+write_traces: true
+label: 10x10_h3.0_smoke
+prob_tol: 1.0e-9
+mem_guard: true

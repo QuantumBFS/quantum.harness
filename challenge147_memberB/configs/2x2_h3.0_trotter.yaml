@@ -1,0 +1,30 @@
+# B 角色 METTS Trotter validation: same 2x2 h/J=3.0 system, production
+# evolution scheme (2nd-order Suzuki-Trotter). Must match the spectral/ED
+# reference within Trotter error + statistics. dtau=0.05 is the production
+# step; the delta-beta convergence script scans dtau to confirm 2nd-order.
+Lx: 2
+Ly: 2
+h: 3.0
+J: 1.0
+boundary: OBC
+betas: [0.1, 0.3, 0.5, 0.8, 1.0]
+
+n_warmup: 50
+n_production: 3000
+n_chains: 1
+seed: 20260730
+basis: Z
+antithetic_z2: false
+
+evolve_mode: trotter
+dtau: 0.05
+trotter_order: 2
+max_bond_dim: 64
+trunc_tol: 1.0e-10
+
+backend: dense
+out_dir: metts_runs/2x2_h3.0_trotter
+write_traces: true
+label: 2x2_h3.0_trotter
+prob_tol: 1.0e-9
+mem_guard: true
