@@ -202,14 +202,15 @@ def blind_training_audit() -> Any:
 
 
 def _train_seed_worker(
-    request: tuple[int, dict[str, Any], str],
+    request: tuple[int, dict[str, Any], str, dict[str, int]],
 ) -> tuple[int, dict[str, Any], dict[str, Any], list[dict[str, str]]]:
-    seed, architecture, architecture_sha256 = request
+    seed, architecture, architecture_sha256, training_overrides = request
     with blind_training_audit() as events:
         checkpoint, result = train_seed(
             seed,
             architecture=architecture,
             architecture_sha256=architecture_sha256,
+            **training_overrides,
         )
     loaded = sorted(
         name
@@ -277,7 +278,7 @@ def collect_certificate(
         architecture_sha256 = sha256_file(architecture_path)
     print("phase6 shared architecture frozen", flush=True)
     requests = [
-        (seed, architecture, architecture_sha256) for seed in SEEDS
+        (seed, architecture, architecture_sha256, {}) for seed in SEEDS
     ]
     with concurrent.futures.ProcessPoolExecutor(
         max_workers=len(SEEDS),
