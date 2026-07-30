@@ -23,26 +23,42 @@ function _balanced_u1_space(D::Int, offset::Rational{Int})
         throw(ArgumentError("U(1) bond offset must be integer or half-integer"))
     multiplicities = Dict{Rational{Int},Int}()
     if denominator(offset) == 1
-        # Integer bonds can contain q=0.  For even D, duplicate q=0 rather
-        # than retaining an unpaired outer charge.
+        # Keep several copies of the low-|q| sectors. Giving every available
+        # dimension to a distinct charge leaves almost no variational freedom
+        # in the sectors dominating the zero-magnetization ground state.
+        pair_shells = min((D - 1) ÷ 2, max(0, floor(Int, sqrt(D) / 2)))
         multiplicities[0//1] = iseven(D) ? 2 : 1
-        remaining = D - multiplicities[0//1]
-        shell = 1
-        while remaining > 0
+        for shell in 1:pair_shells
             multiplicities[-shell//1] = 1
             multiplicities[shell//1] = 1
-            remaining -= 2
-            shell += 1
+        end
+        remaining = D - sum(values(multiplicities))
+        while remaining > 0
+            for shell in 1:pair_shells
+                remaining < 2 && break
+                multiplicities[-shell//1] += 1
+                multiplicities[shell//1] += 1
+                remaining -= 2
+            end
+            remaining == 0 && break
+            added = min(2, remaining)
+            multiplicities[0//1] += added
+            remaining -= added
         end
     else
         iseven(D) || throw(ArgumentError(
             "a charge-conjugation-balanced half-integer U(1) bond requires even D"))
-        shell = 1
-        while 2shell <= D
+        pair_shells = min(D ÷ 2, max(1, ceil(Int, sqrt(D / 2))))
+        for shell in 1:pair_shells
             charge = (2shell - 1) // 2
             multiplicities[-charge] = 1
             multiplicities[charge] = 1
-            shell += 1
+        end
+        remaining = D - sum(values(multiplicities))
+        while remaining > 0
+            multiplicities[-1//2] += 1
+            multiplicities[1//2] += 1
+            remaining -= 2
         end
     end
     sum(values(multiplicities)) == D || error("internal U(1) multiplicity error")

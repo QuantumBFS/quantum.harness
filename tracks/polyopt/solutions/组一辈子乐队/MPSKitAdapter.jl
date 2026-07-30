@@ -38,9 +38,10 @@ function _blocked_two_site_tensor(first_tensor, second_tensor)
     B = dense_left_physical_right(second_tensor)
     size(A, 3) == size(B, 1) || throw(DimensionMismatch("two-site virtual bond does not contract"))
     blocked = zeros(promote_type(eltype(A), eltype(B)), size(A, 1), size(A, 2) * size(B, 2), size(B, 3))
-    combined = LinearIndices((size(A, 2), size(B, 2)))
+    # Match Julia's kron convention: the second physical factor is fastest.
+    combined = LinearIndices((size(B, 2), size(A, 2)))
     for second_physical in axes(B, 2), first_physical in axes(A, 2)
-        blocked[:, combined[first_physical, second_physical], :] =
+        blocked[:, combined[second_physical, first_physical], :] =
             A[:, first_physical, :] * B[:, second_physical, :]
     end
     blocked

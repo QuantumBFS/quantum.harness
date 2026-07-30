@@ -242,8 +242,11 @@ const QUIET = Dict("MSK_IPAR_LOG" => 0)
         settings = VUMPSSettings(D=2, unitcell=2, delta=0.5, symmetry=:u1,
             maxiter=5, tol=1e-5, seed=812, verbosity=0)
         spaces = u1_bond_spaces(8, 8)
-        @test sort(dense_u1_charges(spaces.coarse)) == [-6, -4, -2, 0, 0, 2, 4, 6]
-        @test sort(dense_u1_charges(spaces.internal)) == [-7, -5, -3, -1, 1, 3, 5, 7]
+        @test sort(dense_u1_charges(spaces.coarse)) == [-2, -2, 0, 0, 0, 0, 2, 2]
+        @test sort(dense_u1_charges(spaces.internal)) == [-3, -1, -1, -1, 1, 1, 1, 3]
+        d6_spaces = u1_bond_spaces(6, 6)
+        @test sort(dense_u1_charges(d6_spaces.coarse)) == [-2, -2, 0, 0, 2, 2]
+        @test sort(dense_u1_charges(d6_spaces.internal)) == [-3, -1, -1, 1, 1, 3]
         produced = run_u1_vumps(D=2, internal_D=2, delta=0.5,
             maxiter=5, tol=1e-5, seed=812, verbosity=0)
         blocked = freeze_u1_blocked_mpskit(produced.state, produced.record)
