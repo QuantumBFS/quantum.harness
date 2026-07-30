@@ -4,12 +4,14 @@ from __future__ import annotations
 
 import argparse
 import builtins
+import concurrent.futures
 import contextlib
 import datetime as dt
 import hashlib
 import io
 import json
 import math
+import multiprocessing
 import os
 import platform
 import subprocess
@@ -175,6 +177,28 @@ def blind_training_audit() -> Any:
         io.open = original_io_open
 
 
+def _train_seed_worker(
+    request: tuple[int, dict[str, Any], str],
+) -> tuple[int, dict[str, Any], dict[str, Any], list[dict[str, str]]]:
+    seed, architecture, architecture_sha256 = request
+    with blind_training_audit() as events:
+        checkpoint, result = train_seed(
+            seed,
+            architecture=architecture,
+            architecture_sha256=architecture_sha256,
+        )
+    loaded = sorted(
+        name
+        for name in sys.modules
+        if name.startswith(FORBIDDEN_MODULE_PREFIXES)
+    )
+    events.extend(
+        {"operation": "loaded-module", "target": name}
+        for name in loaded
+    )
+    return seed, checkpoint, result, events
+
+
 def collect_certificate(
     *,
     repo_root: Path,
@@ -207,7 +231,7 @@ def collect_certificate(
     started = time.perf_counter()
     checkpoints = []
     seed_results = []
-    with blind_training_audit() as audit_events:
+    with blind_training_audit() as calibration_events:
         architecture = calibrate_architecture(60_860)
         architecture_schema_path = Path(__file__).with_name(
             "architecture.schema.json"
@@ -225,13 +249,20 @@ def collect_certificate(
         architecture_path = output_path.parent / "architecture.json"
         write_checkpoint(architecture_path, architecture)
         architecture_sha256 = sha256_file(architecture_path)
-        for seed in SEEDS:
-            print(f"phase6 seed {seed}: training start", flush=True)
-            checkpoint, result = train_seed(
-                seed,
-                architecture=architecture,
-                architecture_sha256=architecture_sha256,
-            )
+    print("phase6 shared architecture frozen", flush=True)
+    requests = [
+        (seed, architecture, architecture_sha256) for seed in SEEDS
+    ]
+    with concurrent.futures.ProcessPoolExecutor(
+        max_workers=len(SEEDS),
+        mp_context=multiprocessing.get_context("spawn"),
+    ) as executor:
+        worker_outputs = list(executor.map(_train_seed_worker, requests))
+    audit_events = list(calibration_events)
+    for seed, checkpoint, result, worker_events in sorted(worker_outputs):
+        audit_events.extend(worker_events)
+        print(f"phase6 seed {seed}: training complete", flush=True)
+        with blind_training_audit() as finalization_events:
             validate_against_schema(
                 checkpoint,
                 checkpoint_schema_path,
@@ -246,30 +277,29 @@ def collect_certificate(
             validate_against_schema(symmetry, symmetry_schema_path)
             symmetry_path = seed_dir / "symmetry-certificate.json"
             write_json_atomic(symmetry_path, symmetry)
-            checkpoints.append(
-                {
-                    "seed": seed,
-                    "path": str(checkpoint_path.resolve()),
-                    "sha256": sha256_file(checkpoint_path),
-                    "selection": "final_update",
-                    "architecture_sha256": architecture_sha256,
-                    "schema_path": str(checkpoint_schema_path.resolve()),
-                    "schema_sha256": sha256_file(
-                        checkpoint_schema_path
-                    ),
-                    "symmetry_path": str(symmetry_path.resolve()),
-                    "symmetry_sha256": sha256_file(symmetry_path),
-                    "symmetry_schema_sha256": sha256_file(
-                        symmetry_schema_path
-                    ),
-                }
-            )
-            seed_results.append(result)
-            print(
-                "phase6 seed "
-                f"{seed}: checkpoint {checkpoints[-1]['sha256']}",
-                flush=True,
-            )
+        audit_events.extend(finalization_events)
+        checkpoints.append(
+            {
+                "seed": seed,
+                "path": str(checkpoint_path.resolve()),
+                "sha256": sha256_file(checkpoint_path),
+                "selection": "final_update",
+                "architecture_sha256": architecture_sha256,
+                "schema_path": str(checkpoint_schema_path.resolve()),
+                "schema_sha256": sha256_file(checkpoint_schema_path),
+                "symmetry_path": str(symmetry_path.resolve()),
+                "symmetry_sha256": sha256_file(symmetry_path),
+                "symmetry_schema_sha256": sha256_file(
+                    symmetry_schema_path
+                ),
+            }
+        )
+        seed_results.append(result)
+        print(
+            f"phase6 seed {seed}: checkpoint "
+            f"{checkpoints[-1]['sha256']}",
+            flush=True,
+        )
     loaded_forbidden_after = sorted(
         name
         for name in sys.modules

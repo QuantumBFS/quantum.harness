@@ -44,6 +44,9 @@ do
 done
 export LD_LIBRARY_PATH="${cuda_library_path}${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
 export JAX_ENABLE_X64=true
+export OMP_NUM_THREADS=1
+export OPENBLAS_NUM_THREADS=1
+export MKL_NUM_THREADS=1
 
 mkdir -p "${run_dir}"
 cd "${repo_root}/tracks/qmc/solutions/BOTS-848"

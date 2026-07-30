@@ -40,6 +40,8 @@ def test_phase6_batch_requires_phase5_and_gpu_certificate() -> None:
     assert "blind_training_audit" in certificate
     assert "calibrate_architecture" in certificate
     assert "combined_state_averaged_sr" in certificate
+    assert "ProcessPoolExecutor" in certificate
+    assert 'multiprocessing.get_context("spawn")' in certificate
     assert "validate_certificate(payload)" in certificate
     assert "runtime_library_sha256=" in batch
     assert "LD_LIBRARY_PATH=" in batch
