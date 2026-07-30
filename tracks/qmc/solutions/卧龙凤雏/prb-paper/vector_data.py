@@ -142,6 +142,9 @@ class WeakVectorData:
     primary_charge: float
     self_duality_log_ratio: float
     effective_sample_size: float
+    electric_density: float
+    magnetic_density: float
+    sampling_diagnostics: tuple[tuple[int, float, float], ...]
 
 
 @dataclass(frozen=True)
@@ -282,6 +285,23 @@ def load_vector_plot_data(repo_root: Path) -> VectorPlotData:
             effective_sample_size=_number(
                 weak_summary["gates"]["by_name"]["effective_sample_size"]["value"],
                 "effective sample size",
+            ),
+            electric_density=_number(
+                weak_summary["self_duality"]["electric_density"], "electric density"
+            ),
+            magnetic_density=_number(
+                weak_summary["self_duality"]["magnetic_density"], "magnetic density"
+            ),
+            sampling_diagnostics=tuple(
+                (
+                    _integer(width, "sampling width"),
+                    _number(row["effective_sample_size"], "effective sample size"),
+                    _number(row["maximum_absolute_lag_one"], "lag-one correlation"),
+                )
+                for width, row in sorted(
+                    weak_summary["sampling_diagnostics"].items(),
+                    key=lambda item: int(item[0]),
+                )
             ),
         ),
         learning=LearningVectorData(
