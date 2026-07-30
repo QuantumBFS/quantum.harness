@@ -1,0 +1,69 @@
+{
+  "challenge": "148",
+  "sources": {
+    "blote-deng-2002": {
+      "kind": "paper",
+      "license": "publisher PDF (license not stated in cached file)",
+      "local_relative_path": "papers/blote-deng-2002-ustc.pdf",
+      "name": "blote-deng-2002",
+      "sha256": "aae5ff7690b1d6f0922254c492fa78fce3854c7e7cfc029d9571f1a00a73cd17",
+      "url": "https://doi.org/10.1103/PhysRevE.66.066110"
+    },
+    "carlo-jl-codebase": {
+      "kind": "paper",
+      "license": "CC-BY 4.0",
+      "local_relative_path": "papers/carlo-jl-codebase.pdf",
+      "name": "carlo-jl-codebase",
+      "sha256": "ba9015cc4cecf34edd60071e09ebf0c4adc4ce76a8e07c9ebc9f9fc88363bf6a",
+      "url": "https://doi.org/10.21468/SciPostPhysCodeb.49"
+    },
+    "Carlo.jl": {
+      "kind": "repository",
+      "license": "MIT",
+      "local_relative_path": "code/Carlo.jl",
+      "name": "Carlo.jl",
+      "revision": "4ce0a96650163ded76cab716ab28051813fd27a2",
+      "url": "https://github.com/lukas-weber/Carlo.jl.git"
+    },
+    "QMC_SSE": {
+      "kind": "repository",
+      "license": "GPL-3.0-only",
+      "local_relative_path": "code/QMC_SSE",
+      "name": "QMC_SSE",
+      "revision": "35f100af856f3273cc67d31962f3e67f801b0c37",
+      "url": "https://github.com/Renmusxd/QMC_SSE.git"
+    },
+    "QMC_LTFIM": {
+      "kind": "repository",
+      "license": "Apache-2.0",
+      "local_relative_path": "code/QMC_LTFIM",
+      "name": "QMC_LTFIM",
+      "revision": "524860b9c0e212ac630b0d9754075bb24198da3b",
+      "url": "https://github.com/PIQuIL/QMC_LTFIM.git"
+    },
+    "rieger-kawashima-1999": {
+      "kind": "paper",
+      "license": "publisher PDF (license not stated in cached file)",
+      "local_relative_path": "papers/rieger-kawashima-1999.pdf",
+      "name": "rieger-kawashima-1999",
+      "sha256": "5f554ed84b9ffded1bd0910a5691ea5d7f14085a8066c9f4a67d95f4351dec5d",
+      "url": "https://doi.org/10.1007/s100510050761"
+    },
+    "sandvik-2003-sse": {
+      "kind": "paper",
+      "license": "publisher PDF (license not stated in cached file)",
+      "local_relative_path": "papers/sandvik-2003-sse.pdf",
+      "name": "sandvik-2003-sse",
+      "sha256": "e6e2efcccaa4e5ba68024c4e68ac9d01909e5d23c079d2aae1da616d2f944dab",
+      "url": "https://doi.org/10.1103/PhysRevE.68.056701"
+    },
+    "StochasticSeriesExpansion.jl": {
+      "kind": "repository",
+      "license": "MIT",
+      "local_relative_path": "code/StochasticSeriesExpansion.jl",
+      "name": "StochasticSeriesExpansion.jl",
+      "revision": "0ee4bb3e78ad90306d594978e0ad405edebe8961",
+      "url": "https://github.com/lukas-weber/StochasticSeriesExpansion.jl.git"
+    }
+  }
+}

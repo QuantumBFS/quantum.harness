@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "adapter": {"const": "QMC_SSE"},
+    "bin_index": {"minimum": 0, "type": "integer"},
+    "cluster_accepted_count": {"minimum": 0, "type": "integer"},
+    "cluster_attempt_count": {"minimum": 0, "type": "integer"},
+    "cluster_attempts_per_sweep": {"minimum": 1, "type": "integer"},
+    "energy_sum": {"type": "number"},
+    "energy_sum_squares": {"minimum": 0, "type": "number"},
+    "m2_sum": {"minimum": 0, "type": "number"},
+    "m2_sum_squares": {"minimum": 0, "type": "number"},
+    "m4_sum": {"minimum": 0, "type": "number"},
+    "m4_sum_squares": {"minimum": 0, "type": "number"},
+    "operator_count_sum": {"minimum": 0, "type": "integer"},
+    "rng": {"const": "rand-0.9.5-SmallRng-Xoshiro256PlusPlus"},
+    "sample_count": {"minimum": 1, "type": "integer"},
+    "serial_measurement_stride_samples": {"const": 1},
+    "serial_observations": {"$ref": "#/$defs/serial"},
+    "schema_version": {"const": "qmc-sse-bin-v1"},
+    "seed_derivation": {"const": "sha256:qmc-sse-seed-v1||u64be"},
+    "seed_namespace": {"const": "QMC_SSE:qmc-sse-seed-v1"},
+    "sweep_count": {"minimum": 1, "type": "integer"},
+    "time_slice_count_sum": {"minimum": 0, "type": "integer"},
+    "transverse_magnetization_sum": {"type": "number"},
+    "transverse_magnetization_sum_squares": {"minimum": 0, "type": "number"}
+  },
+  "required": [
+    "schema_version",
+    "adapter",
+    "bin_index",
+    "sample_count",
+    "serial_measurement_stride_samples",
+    "serial_observations",
+    "energy_sum",
+    "energy_sum_squares",
+    "transverse_magnetization_sum",
+    "transverse_magnetization_sum_squares",
+    "m2_sum",
+    "m2_sum_squares",
+    "m4_sum",
+    "m4_sum_squares",
+    "operator_count_sum",
+    "time_slice_count_sum",
+    "cluster_attempt_count",
+    "cluster_accepted_count",
+    "cluster_attempts_per_sweep",
+    "sweep_count",
+    "rng",
+    "seed_derivation",
+    "seed_namespace"
+  ],
+  "title": "Challenge 148 QMC_SSE primitive bin",
+  "type": "object",
+  "$defs": {
+    "serial": {
+      "additionalProperties": false,
+      "properties": {
+        "energy": {"items": {"type": "number"}, "minItems": 1, "type": "array"},
+        "m2": {"items": {"minimum": 0, "type": "number"}, "minItems": 1, "type": "array"},
+        "m4": {"items": {"minimum": 0, "type": "number"}, "minItems": 1, "type": "array"},
+        "transverse_magnetization": {"items": {"type": "number"}, "minItems": 1, "type": "array"}
+      },
+      "required": ["energy", "transverse_magnetization", "m2", "m4"],
+      "type": "object"
+    }
+  }
+}

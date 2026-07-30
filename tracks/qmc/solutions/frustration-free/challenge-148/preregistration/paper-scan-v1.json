@@ -1,0 +1,64 @@
+{
+  "allocation": {
+    "adapter_timeout_seconds": 3600,
+    "cores_per_cell": 2,
+    "max_concurrency": 16,
+    "memory_mb_per_cell": 6000
+  },
+  "chain_count": 2,
+  "field_factors_decimal": [
+    "0.995",
+    "0.9975",
+    "1.0",
+    "1.0025",
+    "1.005"
+  ],
+  "lattices": [
+    {
+      "field_center_decimal": "4.76811",
+      "lengths": [
+        6,
+        8,
+        10,
+        12,
+        14,
+        16,
+        18,
+        20
+      ],
+      "name": "triangular"
+    },
+    {
+      "field_center_decimal": "2.13250",
+      "lengths": [
+        10,
+        12,
+        14,
+        16,
+        18,
+        20
+      ],
+      "name": "honeycomb"
+    }
+  ],
+  "model": {
+    "boundary": "periodic",
+    "coupling": 1.0,
+    "hamiltonian": "H=-sum_<ij> sigma_i^z sigma_j^z-t sum_i sigma_i^x",
+    "pauli_eigenvalues": [
+      -1,
+      1
+    ]
+  },
+  "sampling": {
+    "analysis_bin_length_samples": 100,
+    "checkpoint_analysis_bins": 8,
+    "retained_samples": 1600,
+    "serial_measurement_stride_samples": 1,
+    "thermalization_sweeps": 500,
+    "thinning": 2
+  },
+  "schema_version": "challenge148-paper-scan-preregistration-v1",
+  "seed_derivation": "sha256:challenge148-paper-scan-seed-v1||u64be",
+  "stage": "paper-aligned QMC_SSE finite-size reproduction"
+}

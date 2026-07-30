@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "adapter": {"enum": ["QMC_SSE", "QMC_LTFIM"], "type": "string"},
+    "anchor_sha256": {"pattern": "^[0-9a-f]{64}$", "type": "string"},
+    "bin_object_hashes": {
+      "items": {"pattern": "^[0-9a-f]{64}$", "type": "string"},
+      "type": "array"
+    },
+    "build_hash": {"pattern": "^[0-9a-f]{64}$", "type": "string"},
+    "completed_bin_count": {"minimum": 1, "type": "integer"},
+    "previous_generation_sha256": {
+      "anyOf": [
+        {"pattern": "^[0-9a-f]{64}$", "type": "string"},
+        {"type": "null"}
+      ]
+    },
+    "replay_update_count": {"minimum": 0, "type": "integer"},
+    "request_sha256": {"pattern": "^[0-9a-f]{64}$", "type": "string"},
+    "schema_version": {"const": "qmc-checkpoint-generation-v2"},
+    "seed": {"minimum": 0, "type": "integer"},
+    "source_hash": {"pattern": "^[0-9a-f]{64}$", "type": "string"}
+  },
+  "required": [
+    "schema_version",
+    "anchor_sha256",
+    "request_sha256",
+    "adapter",
+    "source_hash",
+    "build_hash",
+    "seed",
+    "completed_bin_count",
+    "bin_object_hashes",
+    "previous_generation_sha256",
+    "replay_update_count"
+  ],
+  "title": "Challenge 148 QMC checkpoint generation v2",
+  "type": "object"
+}

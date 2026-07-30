@@ -1,0 +1,345 @@
+{
+  "$defs": {
+    "allocation": {
+      "additionalProperties": false,
+      "properties": {
+        "cores_per_cell": {"const": 2},
+        "max_concurrency": {"const": 16},
+        "memory_mb_per_cell": {"const": 6000}
+      },
+      "required": ["cores_per_cell", "memory_mb_per_cell", "max_concurrency"],
+      "type": "object"
+    },
+    "build_info": {
+      "additionalProperties": false,
+      "properties": {
+        "adapter": {"const": "QMC_SSE"},
+        "build_hash": {"pattern": "^[0-9a-f]{64}$", "type": "string"},
+        "codegen_units": {"minLength": 1, "type": "string"},
+        "compiler": {"minLength": 1, "type": "string"},
+        "encoded_rustflags": {"type": "string"},
+        "features": {"type": "string"},
+        "lto": {"minLength": 1, "type": "string"},
+        "panic": {"minLength": 1, "type": "string"},
+        "profile": {"minLength": 1, "type": "string"},
+        "qmc_revision": {"minLength": 1, "type": "string"},
+        "rng": {"minLength": 1, "type": "string"},
+        "seed_derivation": {"minLength": 1, "type": "string"},
+        "source_hash": {"pattern": "^[0-9a-f]{64}$", "type": "string"},
+        "sweep_semantics": {"minLength": 1, "type": "string"},
+        "target": {"minLength": 1, "type": "string"}
+      },
+      "required": ["adapter", "build_hash", "source_hash"],
+      "type": "object"
+    },
+    "graph_content": {
+      "additionalProperties": false,
+      "properties": {
+        "bonds": {
+          "items": {
+            "items": {"minimum": 0, "type": "integer"},
+            "maxItems": 2,
+            "minItems": 2,
+            "type": "array"
+          },
+          "type": "array",
+          "uniqueItems": true
+        },
+        "lattice": {"enum": ["honeycomb", "triangular"], "type": "string"},
+        "length": {"enum": [4, 6, 8], "type": "integer"},
+        "sha256": {"pattern": "^[0-9a-f]{64}$", "type": "string"},
+        "site_count": {"minimum": 1, "type": "integer"}
+      },
+      "required": ["bonds", "lattice", "length", "sha256", "site_count"],
+      "type": "object"
+    },
+    "graph": {
+      "additionalProperties": false,
+      "properties": {
+        "content": {"$ref": "#/$defs/graph_content"},
+        "lattice": {"enum": ["honeycomb", "triangular"], "type": "string"},
+        "length": {"enum": [4, 6, 8], "type": "integer"},
+        "path": {
+          "pattern": "^graphs/[0-9a-f]{64}\\.json$",
+          "type": "string"
+        },
+        "sha256": {"pattern": "^[0-9a-f]{64}$", "type": "string"}
+      },
+      "required": ["lattice", "length", "path", "sha256", "content"],
+      "type": "object"
+    },
+    "preregistration": {
+      "additionalProperties": false,
+      "properties": {
+        "allocation": {"$ref": "#/$defs/allocation"},
+        "chain_count": {"const": 2},
+        "lattices": {
+          "items": false,
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "additionalProperties": false,
+              "properties": {
+                "field_center": {"const": 4.76811},
+                "name": {"const": "triangular"}
+              },
+              "required": ["name", "field_center"],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "field_center": {"const": 2.1325},
+                "name": {"const": "honeycomb"}
+              },
+              "required": ["name", "field_center"],
+              "type": "object"
+            }
+          ],
+          "type": "array"
+        },
+        "model": {
+          "additionalProperties": false,
+          "properties": {
+            "boundary": {"const": "periodic"},
+            "coupling": {"const": 1.0},
+            "name": {"const": "transverse-field-ising"},
+            "pauli_eigenvalues": {
+              "items": false,
+              "maxItems": 2,
+              "minItems": 2,
+              "prefixItems": [{"const": -1}, {"const": 1}],
+              "type": "array"
+            }
+          },
+          "required": ["name", "boundary", "pauli_eigenvalues", "coupling"],
+          "type": "object"
+        },
+        "sampling": {
+          "additionalProperties": false,
+          "properties": {
+            "analysis_bin_length_samples": {"const": 100},
+            "checkpoint_analysis_bins": {"const": 8},
+            "retained_samples": {"const": 1600},
+            "serial_measurement_stride_samples": {"const": 1},
+            "thermalization_sweeps": {"const": 500},
+            "thinning": {"const": 2}
+          },
+          "required": [
+            "thermalization_sweeps",
+            "retained_samples",
+            "thinning",
+            "serial_measurement_stride_samples",
+            "analysis_bin_length_samples",
+            "checkpoint_analysis_bins"
+          ],
+          "type": "object"
+        },
+        "scan": {
+          "additionalProperties": false,
+          "properties": {
+            "beta_ratios": {
+              "items": false,
+              "maxItems": 2,
+              "minItems": 2,
+              "prefixItems": [{"const": 1}, {"const": 2}],
+              "type": "array"
+            },
+            "field_factors": {
+              "items": false,
+              "maxItems": 3,
+              "minItems": 3,
+              "prefixItems": [
+                {"const": 0.99},
+                {"const": 1.0},
+                {"const": 1.01}
+              ],
+              "type": "array"
+            },
+            "lengths": {
+              "items": false,
+              "maxItems": 3,
+              "minItems": 3,
+              "prefixItems": [{"const": 4}, {"const": 6}, {"const": 8}],
+              "type": "array"
+            }
+          },
+          "required": ["lengths", "field_factors", "beta_ratios"],
+          "type": "object"
+        },
+        "schema_version": {
+          "const": "challenge148-coarse-crossing-preregistration-v1"
+        },
+        "seed_derivation": {
+          "const": "sha256:challenge148-coarse-qmc-sse-seed-v1||u64be"
+        },
+        "stage": {"const": "QMC_SSE coarse localization"}
+      },
+      "required": [
+        "schema_version",
+        "stage",
+        "model",
+        "lattices",
+        "scan",
+        "chain_count",
+        "sampling",
+        "seed_derivation",
+        "allocation"
+      ],
+      "type": "object"
+    },
+    "request": {
+      "additionalProperties": false,
+      "properties": {
+        "adapter": {"const": "QMC_SSE"},
+        "beta": {"exclusiveMinimum": 0, "type": "number"},
+        "bin_length": {"const": 100},
+        "checkpoint_bins": {"const": 8},
+        "coupling": {"const": 1.0},
+        "expected_build_hash": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "expected_source_hash": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "field": {"exclusiveMinimum": 0, "type": "number"},
+        "graph_path": {
+          "pattern": "^graphs/[0-9a-f]{64}\\.json$",
+          "type": "string"
+        },
+        "graph_sha256": {"pattern": "^[0-9a-f]{64}$", "type": "string"},
+        "retained_samples": {"const": 1600},
+        "schema_version": {"const": "qmc-request-v1"},
+        "seed": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "serial_measurement_stride_samples": {"const": 1},
+        "thermalization_sweeps": {"const": 500},
+        "thinning": {"const": 2}
+      },
+      "required": [
+        "schema_version",
+        "adapter",
+        "graph_path",
+        "graph_sha256",
+        "beta",
+        "coupling",
+        "field",
+        "seed",
+        "thermalization_sweeps",
+        "retained_samples",
+        "thinning",
+        "serial_measurement_stride_samples",
+        "bin_length",
+        "checkpoint_bins",
+        "expected_source_hash",
+        "expected_build_hash"
+      ],
+      "type": "object"
+    },
+    "cell": {
+      "additionalProperties": false,
+      "properties": {
+        "beta": {"exclusiveMinimum": 0, "type": "number"},
+        "beta_ratio": {"enum": [1, 2], "type": "integer"},
+        "cell_id": {
+          "pattern": "^(honeycomb|triangular)-l(04|06|08)-f[0-2]-b[12]-c[01]$",
+          "type": "string"
+        },
+        "chain_index": {"maximum": 1, "minimum": 0, "type": "integer"},
+        "field": {"exclusiveMinimum": 0, "type": "number"},
+        "field_factor": {"enum": [0.99, 1.0, 1.01], "type": "number"},
+        "field_index": {"maximum": 2, "minimum": 0, "type": "integer"},
+        "graph_path": {
+          "pattern": "^graphs/[0-9a-f]{64}\\.json$",
+          "type": "string"
+        },
+        "graph_sha256": {"pattern": "^[0-9a-f]{64}$", "type": "string"},
+        "lattice": {"enum": ["honeycomb", "triangular"], "type": "string"},
+        "length": {"enum": [4, 6, 8], "type": "integer"},
+        "request": {"$ref": "#/$defs/request"},
+        "request_path": {
+          "pattern": "^requests/[a-z0-9-]+\\.json$",
+          "type": "string"
+        },
+        "request_sha256": {"pattern": "^[0-9a-f]{64}$", "type": "string"},
+        "seed": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "cell_id",
+        "lattice",
+        "length",
+        "field_index",
+        "field_factor",
+        "field",
+        "beta_ratio",
+        "beta",
+        "chain_index",
+        "seed",
+        "graph_path",
+        "graph_sha256",
+        "request_path",
+        "request_sha256",
+        "request"
+      ],
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "allocation": {"$ref": "#/$defs/allocation"},
+    "build_info": {"$ref": "#/$defs/build_info"},
+    "cells": {
+      "items": {"$ref": "#/$defs/cell"},
+      "maxItems": 72,
+      "minItems": 72,
+      "type": "array"
+    },
+    "graphs": {
+      "items": {"$ref": "#/$defs/graph"},
+      "maxItems": 6,
+      "minItems": 6,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "plan_sha256": {
+      "description": "Canonical SHA-256 of the complete plan object with this plan_sha256 member omitted.",
+      "pattern": "^[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "preregistration": {"$ref": "#/$defs/preregistration"},
+    "preregistration_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "schema_version": {"const": "challenge148-coarse-plan-v1"},
+    "seed_derivation": {
+      "const": "sha256:challenge148-coarse-qmc-sse-seed-v1||u64be"
+    },
+    "stage": {"const": "QMC_SSE coarse localization"}
+  },
+  "required": [
+    "schema_version",
+    "stage",
+    "preregistration",
+    "preregistration_sha256",
+    "seed_derivation",
+    "allocation",
+    "build_info",
+    "graphs",
+    "cells",
+    "plan_sha256"
+  ],
+  "title": "Challenge 148 QMC_SSE coarse crossing plan",
+  "type": "object"
+}

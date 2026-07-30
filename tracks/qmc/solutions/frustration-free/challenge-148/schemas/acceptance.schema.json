@@ -1,0 +1,168 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "allOf": [{"if": {"properties": {"mode": {"const": "scientific"}}}, "then": {
+    "properties": {
+      "analysis": {"properties": {
+        "analysis_bin_length_samples": {"const": 100},
+        "minimum_analysis_bin_tau_ratio": {"const": 10},
+        "serial_measurement_stride_samples": {"const": 1}
+      }},
+      "ed_oracle": {"const": "full-thermal-dense-eigensystem-v1"},
+      "launch_timeout_seconds": {"const": 600},
+      "observables": {"const": ["energy", "transverse_magnetization", "m2", "m4", "binder_ratio"]},
+      "preregistration_sha256": {"const": "4a28d43824fa162eba639f32d820e5ba0500585c297858f50fbcddfa8bc76cc5"},
+      "thresholds": {"properties": {
+        "agreement_sigma": {"const": 3},
+        "max_normalized_residual": {"const": 4},
+        "median_normalized_residual": {"const": 1.5}
+      }}
+    }
+  }}],
+  "properties": {
+    "analysis": {
+      "additionalProperties": false,
+      "properties": {
+        "analysis_bin_length_samples": {"minimum": 1, "type": "integer"},
+        "autocorrelation_estimator": {"const": "geyer-ips-rho0-pairs-sokal-window-c5-unbiased-autocovariance-v2"},
+        "binder_estimator": {"const": "delete-one-analysis-bin-jackknife-pseudovalue-v1"},
+        "minimum_analysis_bin_tau_ratio": {"minimum": 1, "type": "number"},
+        "serial_measurement_stride_samples": {"minimum": 1, "type": "integer"}
+      },
+      "required": ["analysis_bin_length_samples", "serial_measurement_stride_samples", "minimum_analysis_bin_tau_ratio", "autocorrelation_estimator", "binder_estimator"],
+      "type": "object"
+    },
+    "build_closure": {
+      "additionalProperties": false,
+      "properties": {
+        "qmc_ltfim": {"$ref": "#/$defs/build"},
+        "qmc_sse": {"$ref": "#/$defs/build"}
+      },
+      "required": ["qmc_sse", "qmc_ltfim"],
+      "type": "object"
+    },
+    "cells": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "adapters": {
+            "additionalProperties": false,
+            "properties": {
+              "qmc_ltfim": {"$ref": "#/$defs/adapter"},
+              "qmc_sse": {"$ref": "#/$defs/adapter"}
+            },
+            "required": ["qmc_sse", "qmc_ltfim"],
+            "type": "object"
+          },
+          "beta": {"exclusiveMinimum": 0, "type": "number"},
+          "cell_id": {"minLength": 1, "pattern": "^[a-z0-9][a-z0-9._-]*$", "type": "string"},
+          "coupling": {"minimum": 0, "type": "number"},
+          "field": {"exclusiveMinimum": 0, "type": "number"},
+          "graph_path": {"minLength": 1, "type": "string"},
+          "graph_sha256": {"pattern": "^[0-9a-f]{64}$", "type": "string"},
+          "lattice": {"enum": ["honeycomb", "triangular"], "type": "string"},
+          "length": {"minimum": 2, "type": "integer"}
+        },
+        "required": [
+          "cell_id",
+          "lattice",
+          "length",
+          "graph_path",
+          "graph_sha256",
+          "beta",
+          "coupling",
+          "field",
+          "adapters"
+        ],
+        "type": "object"
+      },
+      "minItems": 4,
+      "type": "array"
+    },
+    "launch_timeout_seconds": {"maximum": 3600, "minimum": 1, "type": "integer"},
+    "mode": {"enum": ["characterization", "scientific"], "type": "string"},
+    "ed_oracle": {"minLength": 1, "type": "string"},
+    "observables": {
+      "items": {"enum": ["energy", "transverse_magnetization", "m2", "m4", "binder_ratio"]},
+      "minItems": 1,
+      "uniqueItems": true,
+      "type": "array"
+    },
+    "preregistration_sha256": {"pattern": "^[0-9a-f]{64}$", "type": "string"},
+    "schema_version": {"const": "acceptance-request-v1"},
+    "thresholds": {
+      "additionalProperties": false,
+      "properties": {
+        "agreement_sigma": {"exclusiveMinimum": 0, "type": "number"},
+        "max_normalized_residual": {"exclusiveMinimum": 0, "type": "number"},
+        "median_normalized_residual": {"exclusiveMinimum": 0, "type": "number"}
+      },
+      "required": [
+        "max_normalized_residual",
+        "median_normalized_residual",
+        "agreement_sigma"
+      ],
+      "type": "object"
+    }
+  },
+  "required": [
+    "schema_version",
+    "mode",
+    "preregistration_sha256",
+    "launch_timeout_seconds",
+    "observables",
+    "ed_oracle",
+    "thresholds",
+    "analysis",
+    "build_closure",
+    "cells"
+  ],
+  "title": "Challenge 148 ED-QMC acceptance request",
+  "type": "object",
+  "$defs": {
+    "adapter": {
+      "additionalProperties": false,
+      "properties": {
+        "chains": {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "analysis_bin_length_samples": {"minimum": 1, "type": "integer"},
+              "checkpoint_analysis_bins": {"minimum": 1, "type": "integer"},
+              "retained_samples": {"minimum": 1, "type": "integer"},
+              "seed": {"minimum": 0, "type": "integer"},
+              "serial_measurement_stride_samples": {"minimum": 1, "type": "integer"},
+              "thermalization_sweeps": {"minimum": 0, "type": "integer"},
+              "thinning": {"minimum": 1, "type": "integer"}
+            },
+            "required": [
+              "seed",
+              "thermalization_sweeps",
+              "retained_samples",
+              "thinning",
+              "serial_measurement_stride_samples",
+              "analysis_bin_length_samples",
+              "checkpoint_analysis_bins"
+            ],
+            "type": "object"
+          },
+          "minItems": 2,
+          "type": "array"
+        },
+        "seed_derivation": {"minLength": 1, "type": "string"},
+        "seed_domain": {"minLength": 1, "type": "string"}
+      },
+      "required": ["seed_domain", "seed_derivation", "chains"],
+      "type": "object"
+    },
+    "build": {
+      "additionalProperties": false,
+      "properties": {
+        "expected_build_hash": {"pattern": "^[0-9a-f]{64}$", "type": "string"},
+        "expected_source_hash": {"pattern": "^[0-9a-f]{64}$", "type": "string"}
+      },
+      "required": ["expected_source_hash", "expected_build_hash"],
+      "type": "object"
+    }
+  }
+}
