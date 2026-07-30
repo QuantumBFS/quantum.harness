@@ -1,0 +1,80 @@
+{
+  "run_id": "issue147-qmc-pilot-equilibrated",
+  "run_dir": "tracks/peps/results/issue147-qmc-pilot-equilibrated",
+  "settings": {
+    "lx": 10,
+    "ly": 10,
+    "J": 1.0,
+    "boundary": "open",
+    "operator": "pauli",
+    "thermal_sweeps": 1000,
+    "measure_sweeps": 8000,
+    "bins": 80
+  },
+  "provenance": {
+    "protocol": "issue147-h3-v2-equilibrated",
+    "design": "docs/superpowers/specs/2026-07-30-qmc-equilibration-retry-design.md"
+  },
+  "cells": [
+    {
+      "cell_id": "cell-0001",
+      "params": {"h": 3.0, "beta": 0.5, "M": 32, "chain": 0},
+      "settings": {"thermal_sweeps": 1000}
+    },
+    {
+      "cell_id": "cell-0002",
+      "params": {"h": 3.0, "beta": 0.5, "M": 32, "chain": 1},
+      "settings": {"thermal_sweeps": 1000}
+    },
+    {
+      "cell_id": "cell-0003",
+      "params": {"h": 3.0, "beta": 0.5, "M": 32, "chain": 2},
+      "settings": {"thermal_sweeps": 1000}
+    },
+    {
+      "cell_id": "cell-0004",
+      "params": {"h": 3.0, "beta": 0.5, "M": 32, "chain": 3},
+      "settings": {"thermal_sweeps": 1000}
+    },
+    {
+      "cell_id": "cell-0005",
+      "params": {"h": 3.0, "beta": 0.5, "M": 64, "chain": 0},
+      "settings": {"thermal_sweeps": 4000}
+    },
+    {
+      "cell_id": "cell-0006",
+      "params": {"h": 3.0, "beta": 0.5, "M": 64, "chain": 1},
+      "settings": {"thermal_sweeps": 4000}
+    },
+    {
+      "cell_id": "cell-0007",
+      "params": {"h": 3.0, "beta": 0.5, "M": 64, "chain": 2},
+      "settings": {"thermal_sweeps": 4000}
+    },
+    {
+      "cell_id": "cell-0008",
+      "params": {"h": 3.0, "beta": 0.5, "M": 64, "chain": 3},
+      "settings": {"thermal_sweeps": 4000}
+    },
+    {
+      "cell_id": "cell-0009",
+      "params": {"h": 3.0, "beta": 0.5, "M": 128, "chain": 0},
+      "settings": {"thermal_sweeps": 16000}
+    },
+    {
+      "cell_id": "cell-0010",
+      "params": {"h": 3.0, "beta": 0.5, "M": 128, "chain": 1},
+      "settings": {"thermal_sweeps": 16000}
+    },
+    {
+      "cell_id": "cell-0011",
+      "params": {"h": 3.0, "beta": 0.5, "M": 128, "chain": 2},
+      "settings": {"thermal_sweeps": 16000}
+    },
+    {
+      "cell_id": "cell-0012",
+      "params": {"h": 3.0, "beta": 0.5, "M": 128, "chain": 3},
+      "settings": {"thermal_sweeps": 16000}
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "qh147"
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = [
+  "numpy>=2.0",
+  "numba>=0.60",
+  "scipy>=1.13",
+  "quimb>=1.11",
+  "cotengra>=0.7",
+  "jax>=0.4",
+  "matplotlib>=3.9",
+  "psutil>=6.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["qh147*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

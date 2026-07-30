@@ -1,0 +1,390 @@
+{
+  "title": "面向热力学的二维有限温 PEPO",
+  "eyebrow": "Harnessing Quantum 2026 · Challenge #147 · 截止版技术报告",
+  "url": "https://github.com/QuantumBFS/quantum.harness/issues/147",
+  "lede": "我们实现了一条可恢复、可审计的 10×10 有限温 PEPO 原型链，并提出在固定张量容量下直接保护热力学信息的压缩目标。现有证据证明表示、目标函数、检查点以及独立 ED/QMC 验证链已经跑通；完整 β 区间与键维收敛 benchmark 尚未完成。",
+  "sections": [
+    {
+      "title": "结论先行",
+      "note": "先区分已经验证的事实、尚待验证的研究假设，以及 challenge 的最终完成度。",
+      "blocks": [
+        {
+          "kind": "verdict",
+          "status": "warn",
+          "label": "原型已验证",
+          "why": "端到端 PEPO、ED 与 QMC 证据链成立，但 10×10 PEPO 只有 β=0.025、0.05 两个探针点，尚未覆盖 challenge 要求的 βJ∈[0.1,1.0]。"
+        },
+        {
+          "kind": "kv",
+          "pairs": [
+            ["模型", "10×10 开边界二维横场 Ising，J=1，h/J=3"],
+            ["PEPO 证据", "D=4、χ=16、Δβ=0.025；两个可加载检查点"],
+            ["QMC 结果", "βJ=0.5：u∞/J=−2.90970±0.00299（bootstrap SE）"],
+            ["QMC 95% CI", "[−2.91541, −2.90377]"],
+            ["ED 证据", "4×4 全谱 65536 个态，作为有限尺寸诊断"],
+            ["当前最重要限制", "两个 PEPO 点均为 0 次接受的优化更新；无 ordinary 生产对照"]
+          ]
+        },
+        {
+          "kind": "note",
+          "label": "一句话贡献",
+          "style": "info",
+          "text": "项目的价值不在于已经赢过基准，而在于建立了一个==热力学量感知、可恢复、可被 QMC 证伪==的二维有限温 PEPO 研究框架。"
+        }
+      ]
+    },
+    {
+      "title": "Challenge 对照",
+      "note": "完成度直接按 issue #147 的 mandatory deliverables 判断。",
+      "blocks": [
+        {
+          "kind": "table",
+          "columns": ["要求", "状态", "现有证据", "仍缺什么"],
+          "rows": [
+            ["10×10 的 f、u、C，βJ∈[0.1,1.0]", "未完成", "PEPO 仅 β=0.025、0.05；QMC 仅 β=0.5 的 u", "完整温区三条热力学曲线"],
+            ["至少三个 D 的 u、C 收敛", "未完成", "当前只有 D=4", "D=4、6、8 或更高的代表温度扫描"],
+            ["同一 10×10 系统的 QMC 验证", "部分完成", "β=0.5 的 M=32、64、128 外推已验收", "全 β 区间的 u、C 及相对误差"],
+            ["源码、技术文档、一键测试", "部分完成", "实现、测试、SCNet 脚本和本报告均存在", "完整 benchmark 的单命令复现"],
+            ["tanTRG 精度—成本比较", "未做（bonus）", "已记录 PEPO 时间与内存", "同参数 tanTRG/LTRG 参考"],
+            ["均匀磁化率", "未做（bonus）", "无", "χ(T) 测量与 QMC 验证"]
+          ],
+          "widths": ["28%", "13%", "29%", "30%"]
+        },
+        {
+          "kind": "verdict",
+          "status": "bad",
+          "label": "最终要求未完成",
+          "why": "当前成果应作为高可信原型提交；任何“热力学压缩已优于 ordinary”的结论都超出现有证据。"
+        }
+      ]
+    },
+    {
+      "title": "物理问题",
+      "note": "临界场附近，低温热态的关联增长使二维张量网络压缩成为真正困难的问题。",
+      "blocks": [
+        {
+          "kind": "equation",
+          "tex": "H=-J\\sum_{\\langle i,j\\rangle}\\sigma_i^z\\sigma_j^z-h\\sum_i\\sigma_i^x,\\qquad J=1,\\quad h/J=3"
+        },
+        {
+          "kind": "text",
+          "text": "目标热算符为 $R(\\beta)=e^{-\\beta H}$。有限温 PEPO 用二维张量网络表示这个指数维算符；虚时间演化不断产生新的关联，而固定虚拟键维 D 迫使算法选择保留哪些信息。"
+        },
+        {
+          "kind": "table",
+          "columns": ["量", "定义", "物理含义", "当前覆盖"],
+          "rows": [
+            ["z", "ln Z/N", "自由能信息的局域密度", "PEPO 两点"],
+            ["f", "−ln Z/(βN)", "自由能密度", "仅 4×4 ED 曲线"],
+            ["u", "⟨H⟩/N", "平均能量密度", "PEPO 两点、QMC 一点、ED 曲线"],
+            ["C", "β²(⟨H²⟩−⟨H⟩²)/N", "能量涨落与热响应", "仅 4×4 ED 曲线"]
+          ]
+        },
+        {
+          "kind": "kv",
+          "pairs": [
+            ["晶格", "10×10 方格，开放边界"],
+            ["算符约定", "Pauli σ，J=1"],
+            ["研究场强", "h/J=3，靠近 h_c/J≈3.044"],
+            ["challenge 目标温区", "βJ∈[0.1,1.0]"],
+            ["当前 PEPO 温区", "βJ=0.025、0.05（仅高温可行性探针）"]
+          ]
+        }
+      ]
+    },
+    {
+      "title": "创新假设",
+      "note": "创新是改变有限 D 的信息分配原则，而不是简单增加算力或键维。",
+      "blocks": [
+        {
+          "kind": "heading",
+          "level": 3,
+          "text": "从“逼近整个算符”到“优先保存热力学”"
+        },
+        {
+          "kind": "equation",
+          "tex": "\\mathcal{L}_F=\\frac{\\left\\|S-T\\right\\|_F^2}{\\left\\|T\\right\\|_F^2}"
+        },
+        {
+          "kind": "equation",
+          "tex": "\\mathcal{L}_{\\mathrm{thermo}}=\\mathcal{L}_F+\\lambda_z\\left(\\frac{z_S-z_T}{\\epsilon_z}\\right)^2+\\lambda_u\\left(\\frac{u_S-u_T}{\\epsilon_u}\\right)^2+\\lambda_H r_H^2"
+        },
+        {
+          "kind": "text",
+          "text": "普通 Frobenius 压缩问“student 作为巨大矩阵是否接近 teacher”；热力学目标则进一步问“有限容量是否保住了统计权重、平均能量和物理厄米性”。物理图像类似面向观测量的粗粒化：对宏观热力学不重要的方向可以牺牲，把有限 D 留给真正改变 f、u 与热响应的关联通道。"
+        },
+        {
+          "kind": "card",
+          "title": "最有研究潜力的检验",
+          "blocks": [
+            {
+              "kind": "text",
+              "text": "损失函数保护 z 与 u，却不直接保护 C。未来若在相同 D、χ、Δβ 和优化预算下，thermodynamic PEPO 不仅降低 u 的 QMC 误差，还改善未训练的 C(β)，这将说明方法保存了沿虚时间演化的一致热力学结构，而不是只拟合两个数字。"
+            },
+            {
+              "kind": "verdict",
+              "status": "warn",
+              "label": "待验证预测",
+              "why": "需要 matched ordinary 链、完整 β 曲线和 QMC 的 C(β) 才能检验。"
+            }
+          ]
+        },
+        {
+          "kind": "table",
+          "columns": ["创新层次", "当前实现", "如何证伪"],
+          "rows": [
+            ["热力学定向压缩", "Frobenius + z + u + 厄米性目标", "固定预算下若 QMC 误差不优于 ordinary，则假设失败"],
+            ["比热作为未训练指标", "C 未进入单步损失", "若 u 改善但 C 变差，说明只保护了局部目标"],
+            ["严格匹配的双链消融", "代码支持 ordinary/thermodynamic 共用预算", "必须完成两条生产链；当前尚无数据"],
+            ["科学状态检查点", "张量、配置、来源均带 SHA-256", "损坏或配置漂移必须拒绝恢复"]
+          ]
+        }
+      ]
+    },
+    {
+      "title": "算法与数据流",
+      "note": "每一步都留下可恢复、不可静默覆盖的科学状态。",
+      "blocks": [
+        {
+          "kind": "list",
+          "title": "PEPO 主链",
+          "items": [
+            "从 β=0 的恒等 PEPO 开始。",
+            "使用二阶对称 Trotter 步生成临时 teacher；目标生产上限 D²=16。",
+            "在相同初始化、χ、cutoff 和优化预算下压缩回 student D=4。",
+            "验证有限性、最大键维、正配分函数和厄米性后，原子写入 NPZ+JSON 检查点。",
+            "测量与演化分离，使 χ 可以独立变化而无需重新优化 PEPO。"
+          ]
+        },
+        {
+          "kind": "table",
+          "columns": ["组件", "职责", "可审计证据"],
+          "rows": [
+            ["FinitePEPO / Trotter", "二维热算符表示与虚时间门序", "张量索引、标签和最大键维写入 checkpoint"],
+            ["ThermodynamicLoss", "比较 teacher/student 的整体与热力学误差", "逐项记录 Frobenius、Δz、Δu、惩罚项"],
+            ["Boundary-MPS", "以环境维数 χ 收缩二维网络", "χ=16、cutoff=10⁻¹⁰ 写入预算"],
+            ["Checkpoint codec", "无 pickle 的 NPZ+JSON 原子状态", "配置 SHA 与张量 SHA"],
+            ["QMC", "同一 10×10 模型的独立参考", "四链、三组 M、block bootstrap、R̂"],
+            ["ED", "4×4 全谱小系统校准", "十个 D₄×Z₂ 扇区恢复 65536 个态"]
+          ]
+        },
+        {
+          "kind": "note",
+          "label": "当前探针预算",
+          "style": "pending",
+          "text": "为了在超算时间限制内得到可验证输出，本次 PEPO 探针把 max_iterations 限为 1；实际两个检查点均保留有限初始 PEPO，未接受优化更新。因此它验证了表示与诊断链，而没有验证优化带来的精度提升。"
+        }
+      ]
+    },
+    {
+      "title": "结果与解读",
+      "note": "每张图都同时给出支持结论与禁止外推的边界。",
+      "blocks": [
+        {
+          "kind": "heading",
+          "level": 3,
+          "text": "图 1 · 现有热力学证据"
+        },
+        {
+          "kind": "figures",
+          "items": [
+            {
+              "src": "figure-1-available-thermodynamics.png",
+              "caption": "部分成立。左图叠加 4×4 ED 有限尺寸曲线、10×10 thermodynamic PEPO 两个探针点和 10×10 QMC 的 β=0.5 外推点；右图只有 4×4 ED 比热。它证明独立方法的输出可汇合，但不是同尺寸、同温区的完整精度比较。PEPO 点 β=0.025、0.05 位于 challenge 目标区间之外。"
+            }
+          ]
+        },
+        {
+          "kind": "heading",
+          "level": 3,
+          "text": "图 2 · 热力学目标保持"
+        },
+        {
+          "kind": "figures",
+          "items": [
+            {
+              "src": "figure-2-target-preservation.png",
+              "caption": "内部一致性通过。β=0.05 时 |Δu|=3.58×10⁻⁸、|Δz|=6.09×10⁻¹⁰，目标分量均有限；β=0.025 接近机器精度。由于没有 ordinary 生产对照且接受更新数为零，这张图不能证明方法优势，只证明目标函数与诊断量能够稳定求值。"
+            }
+          ]
+        },
+        {
+          "kind": "heading",
+          "level": 3,
+          "text": "图 3 · QMC Trotter 外推与链诊断"
+        },
+        {
+          "kind": "figures",
+          "items": [
+            {
+              "src": "figure-3-qmc-convergence.png",
+              "caption": "验收通过。βJ=0.5 的 M=32、64、128 数据按 (β/M)² 线性外推，得到 u∞/J=−2.90970±0.00299；误差棒为 8-bin block-bootstrap SE，绿色区间为零步长 95% bootstrap CI。最大 R̂=1.0211<1.05，最大分半 |z|=1.7907<3。"
+            }
+          ]
+        },
+        {
+          "kind": "heading",
+          "level": 3,
+          "text": "图 4 · PEPO 成本与稳定性"
+        },
+        {
+          "kind": "figures",
+          "items": [
+            {
+              "src": "figure-4-cost-and-stability.png",
+              "caption": "资源瓶颈已暴露。第二个虚时间步约耗时 59 分钟、峰值内存约 9.7 GiB，明显高于第一步；两个检查点厄米性残差为零、最大键维为 4，但均没有接受优化器更新。这支持工程可行性与物理约束，不支持低温稳定性或收敛结论。"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "验证与自证",
+      "note": "报告中的每个核心数字都能回到机器可读输出。",
+      "blocks": [
+        {
+          "kind": "heading",
+          "level": 3,
+          "text": "QMC 验收门"
+        },
+        {
+          "kind": "table",
+          "columns": ["检查", "观测值", "门槛", "状态"],
+          "rows": [
+            ["最大 R̂", "1.021082", "≤1.05", "通过"],
+            ["最大分半 |z|", "1.790720", "≤3.0", "通过"],
+            ["reduced χ²", "0.036893", "<4.0", "通过"],
+            ["轨迹前缀最大差", "8.88×10⁻¹⁶", "≤10⁻¹²", "通过"]
+          ]
+        },
+        {
+          "kind": "heading",
+          "level": 3,
+          "text": "来源与完整性"
+        },
+        {
+          "kind": "table",
+          "columns": ["对象", "验证事实", "哈希/来源"],
+          "rows": [
+            ["PEPO β=0.025", "10×10、D=4、χ=16；checkpoint 可加载", "tensor SHA 8bc5b982…e71d4"],
+            ["PEPO β=0.05", "10×10、D=4、χ=16；checkpoint 可加载", "tensor SHA eee97271…39de"],
+            ["PEPO 配置", "两个点共享同一配置", "config SHA 13635e5a…b8ce"],
+            ["ED 热力学表", "4×4 全谱恢复 65536 个态", "SHA 913af33c…e8b2"],
+            ["QMC", "12/12 单元成功，分析 accepted=true", "issue147-qmc-reproducible-production/analysis.json"],
+            ["截止版报告测试", "输入校验、ED hash、QMC loader", "7 focused tests passed"]
+          ]
+        },
+        {
+          "kind": "list",
+          "title": "自证原则",
+          "items": [
+            "只使用 success/complete manifest 和 accepted analysis。",
+            "PEPO checkpoint 同时校验路径 β、模式、晶格、D、χ 与配置 SHA。",
+            "ED 表必须通过 manifest 中的 SHA-256 且 state_count=65536。",
+            "不从两个 PEPO 点计算 C，不插值缺失 β，不把 4×4 ED 当作 10×10 ground truth。",
+            "PNG 为 300 DPI；PDF 不含嵌入栅格图像对象，保持矢量输出。"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "限制与风险",
+      "note": "最重要的科学风险公开展示，因为它们决定下一轮计算是否值得。",
+      "blocks": [
+        {
+          "kind": "table",
+          "columns": ["风险", "为什么重要", "最低成本的判定实验"],
+          "rows": [
+            ["零次接受的优化更新", "当前热力学目标没有实际改变 student", "先在小系统完成 nonzero-update ordinary/thermodynamic 消融"],
+            ["没有 ordinary 生产链", "无法把误差差异归因于新目标", "严格匹配所有预算，仅改变损失函数"],
+            ["没有目标 β 区间", "无法评价量子临界扇区低温稳定性", "逐点检查点推进到 β≥0.1，再按预算延伸"],
+            ["没有 D 收敛", "D=4 结果可能由表示偏差主导", "β=0.1、0.5 上比较 D=4、6、8"],
+            ["没有 χ/Δβ 收敛", "收缩误差和 Trotter 误差可能伪装成方法改善", "分别改变 χ 与 Δβ，禁止合并误差来源"],
+            ["C 需要求导或涨落估计", "微分会放大点间噪声", "稠密 β 网格与 QMC C 双重核对"]
+          ]
+        },
+        {
+          "kind": "verdict",
+          "status": "warn",
+          "label": "关键风险",
+          "why": "小的 teacher–student Δu/Δz 并不自动意味着相对 QMC 更准确；只有 matched ordinary 消融和独立 QMC 曲线能验证创新。"
+        }
+      ]
+    },
+    {
+      "title": "为什么值得继续",
+      "note": "研究前景来自明确、可证伪且可逐步扩展的假设。",
+      "blocks": [
+        {
+          "kind": "list",
+          "title": "近期：证明目标真的改变了表示",
+          "items": [
+            "在 2×2/4×4 上获得 nonzero optimizer update，并与精确 exp(−βH) 比较。",
+            "固定 D、χ、Δβ、初始化和迭代预算，完成 ordinary/thermodynamic 双链。",
+            "先检查 u 与 z，再把 C 留作未训练的泛化指标。"
+          ]
+        },
+        {
+          "kind": "list",
+          "title": "中期：完成 challenge 核心证据",
+          "items": [
+            "在 βJ∈[0.1,1.0] 生成 10×10 的 f、u、C。",
+            "以 QMC 给出逐点相对误差和最大稳定 β。",
+            "完成 D=4、6、8 以及 χ、Δβ 的独立收敛图。"
+          ]
+        },
+        {
+          "kind": "list",
+          "title": "长期：形成方法学贡献",
+          "items": [
+            "研究 observable-aware、free-energy-aware 与 environment-aware 压缩的文献定位。",
+            "探索保证正定性的纯化或正定 PEPO 参数化，而不只约束厄米性。",
+            "与 tanTRG 在相同准确度下比较 wall time、内存和低温可达性。",
+            "迁移到存在符号问题、QMC 不再可用的受挫磁体与关联电子模型。"
+          ]
+        },
+        {
+          "kind": "note",
+          "label": "前途所在",
+          "style": "info",
+          "text": "如果 thermodynamic objective 能在相同计算预算下稳定改善未直接训练的 C(β)，它将不只是工程修补，而是“有限张量容量应该保留什么物理信息”的可推广方法。"
+        }
+      ]
+    },
+    {
+      "title": "复现入口",
+      "note": "以下命令只重画经过校验的截止版证据，不会启动新的长计算。",
+      "blocks": [
+        {
+          "kind": "code",
+          "title": "从仓库根目录重建四图与证据表",
+          "text": "$env:PYTHONPATH='tracks/peps/solutions/avi7ii'; python -m qh147.deadline_figures --pepo tracks/peps/results/issue147-pepo-lazy-nojit-capped-two-step-probe --qmc tracks/peps/results/issue147-qmc-reproducible-production --ed tracks/peps/results/issue147-ed/assembled --output tracks/peps/results/issue147-four-figure-deadline"
+        },
+        {
+          "kind": "table",
+          "columns": ["产物", "路径", "用途"],
+          "rows": [
+            ["报告输入", "report.json", "所有文字、数值、图注的结构化来源"],
+            ["热力学表", "available-thermodynamics.csv", "ED、PEPO、QMC 的可用热力学证据"],
+            ["目标保持表", "target-preservation.csv", "Δu、Δz 与损失分量"],
+            ["QMC 收敛表", "qmc-convergence.csv", "有限 M、误差和链诊断"],
+            ["资源表", "resources.csv", "每步耗时、内存、厄米性和迭代数"],
+            ["绘图入口", "qh147/deadline_figures.py", "输入校验、作图和 CSV 导出"],
+            ["PEPO 核心", "qh147/compress.py / evolve.py / checkpoint.py", "压缩目标、演化状态机与检查点"]
+          ]
+        },
+        {
+          "kind": "code",
+          "title": "重新渲染本报告",
+          "text": "python skills/report/render_report.py tracks/peps/results/issue147-four-figure-deadline"
+        },
+        {
+          "kind": "verdict",
+          "status": "good",
+          "label": "离线可追溯",
+          "why": "report.html 内嵌样式与四张图片；结构化正文保留在 report.json，数值表保留在 CSV。"
+        }
+      ]
+    }
+  ]
+}
