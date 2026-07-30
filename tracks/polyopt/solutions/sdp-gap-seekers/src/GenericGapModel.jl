@@ -24,6 +24,8 @@ export PauliInteractionTemplate,
        square_patch_geometry,
        square_j1j2_model,
        shastry_sutherland_model,
+       triangular_patch_geometry,
+       triangular_heisenberg_model,
        anchor_allowed,
        instantiate_terms,
        validate_model_buffer,
@@ -387,6 +389,64 @@ function shastry_sutherland_model(g::T) where {T<:Real}
     end
 
     return TranslationInvariantPauliModel("shastry-sutherland", templates)
+end
+
+"""
+Triangular-lattice local-consistency window.
+
+The triangular lattice is realized on the same integer coordinate grid as the
+square lattice (a square lattice plus one diagonal), so its local-consistency
+window is the same L∞ ball `{-L..L}^2` with inner sites `{max(|x|,|y|) <= L-1}`.
+Only the lattice connectivity (the model bonds) differs from the square case;
+the patch itself is geometry-only and carries no coupling values.
+"""
+function triangular_patch_geometry(L::Int)
+    L >= 1 || throw(ArgumentError("L must be at least 1"))
+    sites = sort([Site(x, y) for x in -L:L for y in -L:L])
+    site_to_id = Dict(site => i for (i, site) in enumerate(sites))
+    inner_ids = [
+        site_to_id[site]
+        for site in sites
+        if max(abs(site.x), abs(site.y)) <= L - 1
+    ]
+    return LocalPatch("linf-triangular", L, sites, site_to_id, inner_ids)
+end
+
+"""
+Spin-1/2 triangular-lattice Heisenberg antiferromagnet in the Challenge 88
+normalization
+
+    H = J1 sum_<ij> S_i*S_j,   S_i*S_j = (X_i X_j + Y_i Y_j + Z_i Z_j) / 4,
+
+with antiferromagnetic `J1 = 1`. The three positive nearest-neighbor directions
+of the triangular lattice on the integer grid are `(1,0)`, `(0,1)`, `(1,-1)`;
+translation invariance generates the remaining three, counting each bond once.
+This is the canonical geometrically-frustrated (120 deg order) case. The
+Hamiltonian is globally spin-rotation invariant, so the full-spin isotypic
+reduction transfers exactly.
+"""
+function triangular_heisenberg_model(j1::Rational=1//1)
+    C = Rational{BigInt}
+    converted_j1 = convert(C, j1)
+    templates = PauliInteractionTemplate{C}[]
+    for (tag, displacement, coupling) in (
+        (:J1, Site(1, 0), converted_j1),
+        (:J1, Site(0, 1), converted_j1),
+        (:J1, Site(1, -1), converted_j1),
+    )
+        for axis in (:X, :Y, :Z)
+            push!(
+                templates,
+                PauliInteractionTemplate(
+                    [Site(0, 0), displacement],
+                    [axis, axis],
+                    coupling / convert(C, 4),
+                    tag,
+                ),
+            )
+        end
+    end
+    return TranslationInvariantPauliModel("triangular-heisenberg", templates)
 end
 
 translate(anchor::Site, offset::Site) =
