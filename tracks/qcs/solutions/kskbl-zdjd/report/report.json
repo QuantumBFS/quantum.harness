@@ -881,7 +881,50 @@
         {
           "kind": "note",
           "label": "⟦zh⟧自动诊断的边界：当前两类噪声分离很强，阈值附近还需置信化⟦en⟧Boundary of automatic diagnosis: the tested families are well separated; the threshold region still needs confidence control",
-          "text": "⟦zh⟧这十六次实验中的设计效应簇相距很远，因此固定阈值 2 没有出现含糊选择；它尚不是一个对阈值附近弱相关噪声具有形式错误率保证的检验。更保守的后续版本应为设计效应本身建立区间：只有其上界低于 2 才切换到逐位，否则继续用整词。可复核记录为 auto_correlation_summary.json。⟦en⟧The design-effect clusters are widely separated in these sixteen runs, so fixed threshold 2 creates no ambiguous choices. This is not yet a formal error-controlled test for weak correlation near the threshold. A more conservative extension should build a confidence interval for the design effect itself and switch to bitwise only when its upper bound is below 2; otherwise it should remain word-cluster. The auditable record is auto_correlation_summary.json."
+          "text": "⟦zh⟧这十六次实验中的设计效应簇相距很远，因此固定阈值 2 没有出现含糊选择；它尚不是一个对阈值附近弱相关噪声具有形式错误率保证的检验。下一项实验真的为设计效应建立上界，并展示这种形式安全目前带来的保守性。点阈值版本记录为 auto_correlation_summary.json。⟦en⟧The design-effect clusters are widely separated in these sixteen runs, so fixed threshold 2 creates no ambiguous choices. This is not yet a formal error-controlled test for weak correlation near the threshold. The next experiment actually constructs an upper bound for the design effect and exposes the conservatism currently imposed by that formal safety. The point-threshold version is recorded in auto_correlation_summary.json."
+        },
+        {
+          "kind": "heading",
+          "level": 3,
+          "text": "⟦zh⟧置信上界尝试：安全规则正确，但暂时过于保守⟦en⟧Confidence-upper-bound attempt: the safe rule is correct but currently too conservative"
+        },
+        {
+          "kind": "verdict",
+          "status": "warn",
+          "label": "⟦zh⟧十二次都精确且没有错误切换，但独立噪声 6 / 6 也无法获准使用逐位区间⟦en⟧All twelve runs are exact with no unsafe switch, but even independent noise is denied bitwise intervals in 6 / 6 runs",
+          "why": "⟦zh⟧对整词分歧比例及其平方分别建立预分配经验 Bernstein 区间，从而得到设计效应上界；只有上界低于 2 才切换。六个独立噪声种子的点估计均约为 1，但接受时上界仍为 2.566–2.775，因此全部保留整词区间；六个相关噪声种子的上界为 10.015–10.719，也全部保留整词。十二次都选择二次并最终精确，但独立噪声平均总成本由点阈值版 17,909 增到 24,129，即增加 34.7%。⟦en⟧Preallocated empirical-Bernstein intervals are built for both the word-disagreement fraction and its square, yielding an upper bound on the design effect; switching is allowed only below 2. Point estimates for six independent-noise seeds are all near 1, but their acceptance-time upper bounds remain 2.566–2.775, so all retain word-cluster intervals. Upper bounds for six correlated seeds are 10.015–10.719 and likewise remain word-cluster. All twelve select quadratic and finish exact, but mean independent-noise cost rises 34.7%, from 17,909 words with the point rule to 24,129."
+        },
+        {
+          "kind": "table",
+          "columns": [
+            "⟦zh⟧方法与噪声⟦en⟧Method and noise",
+            "⟦zh⟧设计效应点估计⟦en⟧Design-effect point estimate",
+            "⟦zh⟧置信上界范围⟦en⟧Confidence-upper-bound range",
+            "⟦zh⟧选择逐位⟦en⟧Choose bitwise",
+            "⟦zh⟧平均总噪声词⟦en⟧Mean total noisy words",
+            "⟦zh⟧最终精确⟦en⟧Final exact"
+          ],
+          "rows": [
+            ["⟦zh⟧点阈值 · 独立⟦en⟧Point threshold · independent", "1.006", "⟦zh⟧未使用⟦en⟧Not used", "8 / 8", "17,909", "8 / 8"],
+            ["⟦zh⟧置信上界 · 独立⟦en⟧Confidence upper bound · independent", "0.994", "2.566–2.775", "0 / 6", "24,129", "6 / 6"],
+            ["⟦zh⟧点阈值 · 相关⟦en⟧Point threshold · correlated", "7.976", "⟦zh⟧未使用⟦en⟧Not used", "0 / 8", "92,991", "8 / 8"],
+            ["⟦zh⟧置信上界 · 相关⟦en⟧Confidence upper bound · correlated", "7.979", "10.015–10.719", "0 / 6", "91,535", "6 / 6"]
+          ],
+          "numeric": [false, true, true, true, true, true]
+        },
+        {
+          "kind": "figures",
+          "items": [
+            {
+              "src": "noisy-c-safe-auto-correlation.png",
+              "caption": "⟦zh⟧左：独立噪声点估计约为 1，但有效上界仍高于阈值 2；相关噪声的点估计和上界都远高于阈值。中：点阈值能在独立噪声下切换，置信上界规则则对两类噪声都保留整词区间。右：该保守性主要增加独立噪声成本；相关噪声本来就应该使用整词区间，两批不同种子的成本差异不应解释为上界方法带来加速。⟦en⟧Left: independent-noise point estimates are near 1, but valid upper bounds remain above threshold 2; both point estimates and upper bounds are far above threshold under correlation. Middle: the point rule switches under independent noise, whereas the confidence-upper-bound rule retains word-cluster intervals for both families. Right: this conservatism mainly raises independent-noise cost. Correlated noise should use word-cluster intervals anyway, and the cost difference between the two seed groups must not be interpreted as an acceleration from the upper-bound method."
+            }
+          ]
+        },
+        {
+          "kind": "note",
+          "label": "⟦zh⟧方法选择：保留为安全护栏，不提升为当前最佳训练器⟦en⟧Method choice: retain as a safety guardrail, not the current best trainer",
+          "text": "⟦zh⟧这个负结果说明“形式安全”和“快速切换”目前还没有同时实现。报告的主方法仍是经过模拟校准、在两类强分离噪声上 16 / 16 选择正确的点阈值自动版本；置信上界版用于风险敏感场景或作为后续开发基线。改进方向是为聚类方差构造更紧的经验界，而不是放松覆盖预算。可复核记录为 safe_auto_correlation_summary.json。⟦en⟧This negative result shows that formal safety and rapid switching are not yet achieved simultaneously. The report's primary method remains the simulation-calibrated point-threshold automatic version, which selects correctly in 16 / 16 strongly separated runs. The upper-bound version is retained for risk-sensitive settings and as a development baseline. The next improvement should tighten empirical cluster-variance bounds rather than relax the coverage budget. The auditable record is safe_auto_correlation_summary.json."
         },
         {
           "kind": "heading",

@@ -1,0 +1,189 @@
+{
+  "kind": "confidence-upper-bound-auto-correlation-guardrail",
+  "protocol": {
+    "design_effect_switch_threshold": 2.0,
+    "safe_switch_rule": "use bitwise uncertainty only if a bounded empirical-Bernstein design-effect upper bound is below threshold",
+    "clean_labels_used_for_updates_or_selection": false,
+    "interpretation": "negative efficiency result retained as a guardrail"
+  },
+  "claims": {
+    "all_12_runs_remain_word_cluster": true,
+    "all_12_runs_select_quadratic": true,
+    "all_12_final_models_exact": true,
+    "all_12_recover_verified_36_term_156_gate_rule": true,
+    "independent_mean_point_design_effect": 0.9939021278298471,
+    "independent_upper_bound_range": [
+      2.5657128676203014,
+      2.775231877004998
+    ],
+    "correlated_mean_point_design_effect": 7.978694630845008,
+    "correlated_upper_bound_range": [
+      10.0151949421205,
+      10.718529587281
+    ],
+    "point_auto_independent_mean_total_noisy_words": 17908.5,
+    "safe_auto_independent_mean_total_noisy_words": 24129.333333333332,
+    "safe_auto_independent_cost_factor": 1.3473676373416719,
+    "safe_auto_correlated_mean_total_noisy_words": 91534.66666666667
+  },
+  "independent_runs": [
+    {
+      "path": "tracks/qcs/results/20260731-031500-noisy-c-safe-auto/independent-seed557100/run.json",
+      "run_sha256": "15bf27c0bfb8a8c7b445438a7142eac052380f55bed9932b3cc358350f9f0063",
+      "base_seed": 557100,
+      "selected_unit_at_acceptance": "word",
+      "design_effect_point_at_acceptance": 1.0163861663048128,
+      "design_effect_upper_bound_at_acceptance": 2.734275783049627,
+      "accept_step": 75,
+      "training_examples": 11500,
+      "holdout_words": 12544,
+      "total_noisy_oracle_words": 24044,
+      "final_clean_word_accuracy": 1.0
+    },
+    {
+      "path": "tracks/qcs/results/20260731-031500-noisy-c-safe-auto/independent-seed567100/run.json",
+      "run_sha256": "15bc88b2ef36dce50bf1f04bbc778da27a3ea8cdea85fd5b6eea5004aaa3a800",
+      "base_seed": 567100,
+      "selected_unit_at_acceptance": "word",
+      "design_effect_point_at_acceptance": 1.0170035641616986,
+      "design_effect_upper_bound_at_acceptance": 2.7455998286228,
+      "accept_step": 75,
+      "training_examples": 11500,
+      "holdout_words": 12544,
+      "total_noisy_oracle_words": 24044,
+      "final_clean_word_accuracy": 1.0
+    },
+    {
+      "path": "tracks/qcs/results/20260731-031500-noisy-c-safe-auto/independent-seed577100/run.json",
+      "run_sha256": "01411169c3ee9138431f9d106990d04dc570c20e660791267b58d5eb9f20b462",
+      "base_seed": 577100,
+      "selected_unit_at_acceptance": "word",
+      "design_effect_point_at_acceptance": 0.9589899448180116,
+      "design_effect_upper_bound_at_acceptance": 2.5657128676203014,
+      "accept_step": 80,
+      "training_examples": 12000,
+      "holdout_words": 10880,
+      "total_noisy_oracle_words": 22880,
+      "final_clean_word_accuracy": 1.0
+    },
+    {
+      "path": "tracks/qcs/results/20260731-031500-noisy-c-safe-auto/independent-seed587100/run.json",
+      "run_sha256": "822a209365266400ef2a0ccfb30baca707425b880fd196b5c847d82369952a9e",
+      "base_seed": 587100,
+      "selected_unit_at_acceptance": "word",
+      "design_effect_point_at_acceptance": 1.0116261100831179,
+      "design_effect_upper_bound_at_acceptance": 2.730099613167318,
+      "accept_step": 75,
+      "training_examples": 11500,
+      "holdout_words": 10624,
+      "total_noisy_oracle_words": 22124,
+      "final_clean_word_accuracy": 1.0
+    },
+    {
+      "path": "tracks/qcs/results/20260731-031500-noisy-c-safe-auto/independent-seed597100/run.json",
+      "run_sha256": "e81759483402304354a6eb80bb3db702923c8e2d4808973c2ceec7d4ee7b52cc",
+      "base_seed": 597100,
+      "selected_unit_at_acceptance": "word",
+      "design_effect_point_at_acceptance": 0.9855029790407338,
+      "design_effect_upper_bound_at_acceptance": 2.775231877004998,
+      "accept_step": 70,
+      "training_examples": 11000,
+      "holdout_words": 18688,
+      "total_noisy_oracle_words": 29688,
+      "final_clean_word_accuracy": 1.0
+    },
+    {
+      "path": "tracks/qcs/results/20260731-031500-noisy-c-safe-auto/independent-seed607100/run.json",
+      "run_sha256": "92b452d7f9ace43712e7dbe13acb5a9ff8f5a0cf5e8c0c374b9f6fd33fcc33f7",
+      "base_seed": 607100,
+      "selected_unit_at_acceptance": "word",
+      "design_effect_point_at_acceptance": 0.9739040025707081,
+      "design_effect_upper_bound_at_acceptance": 2.674861272685528,
+      "accept_step": 75,
+      "training_examples": 11500,
+      "holdout_words": 10496,
+      "total_noisy_oracle_words": 21996,
+      "final_clean_word_accuracy": 1.0
+    }
+  ],
+  "correlated_runs": [
+    {
+      "path": "tracks/qcs/results/20260731-031500-noisy-c-safe-auto/correlated-seed557100/run.json",
+      "run_sha256": "79c2b5c2eb634bb0a706ee6d66d96a930fbcc545d0398175033cb097a1cbb6a4",
+      "base_seed": 557100,
+      "selected_unit_at_acceptance": "word",
+      "design_effect_point_at_acceptance": 8.004650388902483,
+      "design_effect_upper_bound_at_acceptance": 10.190988766980352,
+      "accept_step": 145,
+      "training_examples": 23000,
+      "holdout_words": 75264,
+      "total_noisy_oracle_words": 98264,
+      "final_clean_word_accuracy": 1.0
+    },
+    {
+      "path": "tracks/qcs/results/20260731-031500-noisy-c-safe-auto/correlated-seed567100/run.json",
+      "run_sha256": "bbe9e14b823c7f6b9ce8bde13c7e06b33ba2dfc06469485b3343cb679898d4b1",
+      "base_seed": 567100,
+      "selected_unit_at_acceptance": "word",
+      "design_effect_point_at_acceptance": 7.95382207048681,
+      "design_effect_upper_bound_at_acceptance": 10.472114143676997,
+      "accept_step": 120,
+      "training_examples": 18000,
+      "holdout_words": 70912,
+      "total_noisy_oracle_words": 88912,
+      "final_clean_word_accuracy": 1.0
+    },
+    {
+      "path": "tracks/qcs/results/20260731-031500-noisy-c-safe-auto/correlated-seed577100/run.json",
+      "run_sha256": "9fffef8c61afdb9dd16d2c4ee962355cb3a5854f73c817be118bd942fa026f8a",
+      "base_seed": 577100,
+      "selected_unit_at_acceptance": "word",
+      "design_effect_point_at_acceptance": 8.042207560064814,
+      "design_effect_upper_bound_at_acceptance": 10.626271539862167,
+      "accept_step": 110,
+      "training_examples": 17500,
+      "holdout_words": 71936,
+      "total_noisy_oracle_words": 89436,
+      "final_clean_word_accuracy": 1.0
+    },
+    {
+      "path": "tracks/qcs/results/20260731-031500-noisy-c-safe-auto/correlated-seed587100/run.json",
+      "run_sha256": "8e0b79474b7b2aab979ef2019435e878064f9384fcb004adae098d44ee68676d",
+      "base_seed": 587100,
+      "selected_unit_at_acceptance": "word",
+      "design_effect_point_at_acceptance": 7.949647787383011,
+      "design_effect_upper_bound_at_acceptance": 10.320291355388626,
+      "accept_step": 140,
+      "training_examples": 20000,
+      "holdout_words": 70016,
+      "total_noisy_oracle_words": 90016,
+      "final_clean_word_accuracy": 1.0
+    },
+    {
+      "path": "tracks/qcs/results/20260731-031500-noisy-c-safe-auto/correlated-seed597100/run.json",
+      "run_sha256": "6903fe13f9a4a2bfc832fa02ff3cae5aa0096ef540edb03c9e4563f44124c722",
+      "base_seed": 597100,
+      "selected_unit_at_acceptance": "word",
+      "design_effect_point_at_acceptance": 7.998968943957102,
+      "design_effect_upper_bound_at_acceptance": 10.718529587281,
+      "accept_step": 90,
+      "training_examples": 16000,
+      "holdout_words": 71808,
+      "total_noisy_oracle_words": 87808,
+      "final_clean_word_accuracy": 1.0
+    },
+    {
+      "path": "tracks/qcs/results/20260731-031500-noisy-c-safe-auto/correlated-seed607100/run.json",
+      "run_sha256": "e4106cb70045ca60aabd20838178a433fc358595fd04b2cf0e5b5afd4f861c77",
+      "base_seed": 607100,
+      "selected_unit_at_acceptance": "word",
+      "design_effect_point_at_acceptance": 7.922871034275833,
+      "design_effect_upper_bound_at_acceptance": 10.0151949421205,
+      "accept_step": 190,
+      "training_examples": 24500,
+      "holdout_words": 70272,
+      "total_noisy_oracle_words": 94772,
+      "final_clean_word_accuracy": 1.0
+    }
+  ]
+}
