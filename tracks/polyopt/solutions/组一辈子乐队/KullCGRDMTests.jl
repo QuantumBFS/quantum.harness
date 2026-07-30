@@ -196,6 +196,14 @@ const QUIET = Dict("MSK_IPAR_LOG" => 0)
         end
     end
 
+    @testset "accepted solver terminations" begin
+        @test KullCGRDM._accepted_termination(JuMP.MOI.OPTIMAL)
+        @test KullCGRDM._accepted_termination(JuMP.MOI.SLOW_PROGRESS)
+        @test !KullCGRDM._accepted_termination(JuMP.MOI.TIME_LIMIT)
+        @test !KullCGRDM._accepted_termination(JuMP.MOI.MEMORY_LIMIT)
+        @test !KullCGRDM._accepted_termination(JuMP.MOI.NUMERICAL_ERROR)
+    end
+
     @testset "primal monotonicity and dual correction" begin
         optimizer = MosekTools.Optimizer
         base = build_kull_primal(HEISENBERG_H; depth=3, k0=2, optimizer,

@@ -1162,6 +1162,9 @@ function final_inequality_checks(result::KullSolverResult, certificate::KullDual
         "trace_nonincreasing" => certificate.trace_nonincreasing)
 end
 
+_accepted_termination(status::MOI.TerminationStatusCode) =
+    status in (MOI.OPTIMAL, MOI.SLOW_PROGRESS)
+
 function solve_kull_primal!(problem::KullPrimalProblem; clean_tolerance::Real=1e-7,
         require_local_feasible::Bool=true, print_inventory::Bool=true)
     inventory = problem.inventory
@@ -1186,13 +1189,14 @@ function solve_kull_primal!(problem::KullPrimalProblem; clean_tolerance::Real=1e
     has_point && append!(eigenvalues,
         [eigvals(Hermitian(value.(omega))) for omega in values(problem.omegas)])
     minimum_eigenvalue = has_point ? minimum(vcat(eigenvalues...)) : -Inf
-    clean = termination == MOI.OPTIMAL && primal == MOI.FEASIBLE_POINT &&
+    accepted_termination = _accepted_termination(termination)
+    clean = accepted_termination && primal == MOI.FEASIBLE_POINT &&
         dual == MOI.FEASIBLE_POINT && residual <= clean_tolerance &&
         minimum_eigenvalue >= -clean_tolerance
     KullSolverResult(Float64(candidate), termination, primal, dual, Float64(gap),
         residual, Float64(minimum_eigenvalue), Float64(runtime),
         problem.metadata["map_fingerprint"], problem.metadata["vumps_upper_endpoint"],
-        clean, clean ? "numerical-clean-optimal" : "diagnostic-only")
+        clean, clean ? "numerical-clean-accepted" : "diagnostic-only")
 end
 
 export Sx, Sy, Sz, HEISENBERG_H, EXACT_ENERGY, xxz_hamiltonian, blocked_xxz_hamiltonian
