@@ -110,18 +110,18 @@ affordable). Evidence: `evidence/square-spin-rungc-isotypic-20260729/`.
 
 ---
 
-## SS-L2 — Shastry-Sutherland, L=2, d=2  *(IN FLIGHT — Sihan)*
+## SS-L2 — Shastry-Sutherland, L=2, d=2  *(terminal — no feasibility status)*
 
 | Field | Content |
 |---|---|
 | **Model** | Shastry-Sutherland, g_square/dimer = 4/5. |
-| **Restrictions** | *(pending)* full-spin isotypic + on-demand moment quotient. |
+| **Restrictions** | full-spin isotypic + on-demand SO(3) moment quotient + stabilizer split. |
 | **Relaxation** | **L=2**, d=2 (stronger than the L=1 scan above). |
-| **Size** | Preflight (job 118169520): positive basis **14,026**, gap **55**, stationarity **1,080**; moments after V4+conjugation pre-projection = **4,802,176** (51.75 s, 2.9 GiB). |
-| **Solver** | *(pending)* Mosek 11.2.0. |
-| **Cost** | *(pending)* |
-| **Gap result** | *(pending)* |
-| **Observable result** | *(pending)* |
+| **Size** | Preflight (job 118169520): positive basis **14,026**, gap **55**, stationarity **1,080**; moments after V4+conjugation pre-projection = **4,802,176**. After an exact SO(3) l=2 cone-congruence proof: **38 → 26 PSD blocks**, packed cone entries **2,540,067 → 1,600,017** (−37%), **max side 490**. |
+| **Solver** | Mosek 11.2.0 — **exhausted memory during factor fill before iteration zero**. |
+| **Cost** | factor-fill OOM; no solve completed. |
+| **Gap result** | **Not produced / inconclusive** — model built, no feasibility status (resource failure). |
+| **Observable result** | Not produced. |
 
 ---
 
@@ -138,8 +138,11 @@ requires an **infeasible** `F(γ)` (excluding that γ). "Feasible at all tested 
 | SS-L1 (SS, L=1, spin) | ½, 1, 2, 4 | all OPTIMAL-feasible | No — too weak |
 | TRI-L1 (Triangular J1, spin) | 0, 1, 2 | all OPTIMAL-feasible | No — too weak |
 | S-RC-spin (Square Rung C, spin) | 0, 2 | all OPTIMAL-feasible | No — too weak |
-| Square L=1/d=3 *(in flight)* | *(pending)* | *(pending)* | *(pending)* |
-| SS-L2 (SS, L=2) *(in flight)* | *(pending)* | *(pending)* | *(pending)* |
+
+**Stronger-level attempts — terminal (no feasibility status, not pending).**
+- *Square L=1/d=3* — exact cone-reduced MOF build completed (job `118201670`); **no solve was run**.
+- *SS L=2/d=2* — see the SS-L2 section above: built, **Mosek factor-fill OOM before iteration zero**.
+- *Square L=2/d=2* — **failed closed at an exact cone-redundancy gate**; no MOF or solve.
 
 **Note on certification.** Every "feasible" above is a numerical OPTIMAL with a
 Mosek `FEASIBLE_POINT`. Per the source method (arXiv:2606.03836) a solver
