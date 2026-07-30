@@ -279,11 +279,33 @@ The legacy P0-analysis-v1 `build-p1 --analysis ... --output ...` form remains
 available only without either combined-source option. Mixed or extraneous
 source arguments fail closed.
 
-No P0 extension data exist yet, so there is no extension analysis or combined
-analysis to select from. `p1_protocol.json` does not exist and P1 remains
-blocked until the extension is executed, downloaded, verified, analyzed, and
-all six frozen acceptance checks pass. Brackets must never be fabricated or
-relaxed.
+The prior preregistered state was: `No P0 extension data exist yet`. The
+completed extension root now verifies 96 cells and 96 trajectories. Task 11
+observed the following immutable analysis identities:
+
+- extension analysis: document SHA256
+  `79232574d314348c29a40cd2fbb7690e96f3cae5f26843bd4f1cf07cb6a1f45b`,
+  file SHA256
+  `d8fdd60a6de83cf3818349d4440f49f4a38bb5acd7fff1dab9b56ded4da913e5`,
+  with 102 estimate rows;
+- combined analysis: document SHA256
+  `36f85c40e9159ef2e69742672c261769fb28d2f3c947780ba63e4ef5fe5975c3`,
+  file SHA256
+  `6c38e3e18a4577da41bc70c5610b5449e0316b1588291cb178e437099fb78929`,
+  with 282 estimate rows;
+- combined brackets: document SHA256
+  `098f19d8883097d5f1f274ce759416328c086958fa5301c034a0b46dcbd562df`,
+  file SHA256
+  `7a84d545b4526d94aa6f93ca4f0d264dcf01e518f2f9b04383921634786c9962`.
+
+The exact selected sigma `0.8` window remains
+`[0x1.f400000000000p-2, 0x1.3880000000000p-1]`, and the sigma `1.1`
+crossover window remains
+`[0x1.312d000000000p+0, 0x1.7d78400000000p+0]`. Sigma `0.9` and `1.0`
+both remain `requires_p0_extension` with reason
+`no_nonzero_interval_marked_by_both_estimators`. Therefore acceptance checks
+4 and 6 fail, `requires_p0_extension` is true, `p1_protocol.json` remains
+absent, and P1 is unresolved. No sampling or selection rule was changed.
 
 Publication is no-clobber. Repeating `analyze` or a future successful
 `build-p1` against byte-identical output returns `verified-existing`.
