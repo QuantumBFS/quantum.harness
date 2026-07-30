@@ -328,6 +328,14 @@ def _finite_scalar(value: object, name: str) -> float:
     return converted
 
 
+def _normal_solve_status(value: object) -> str:
+    if isinstance(value, bool):
+        raise ValueError(f"solver status is not normal: {value!r}")
+    if value == "normal" or value == 0:
+        return "normal"
+    raise ValueError(f"solver status is not normal: {value!r}")
+
+
 def _real_green_values(
     blocks: dict[str, np.ndarray],
     indices: list[int],
@@ -370,9 +378,7 @@ def extract_chain_observables(
     indices = reported_tau_indices(model["beta"], meshes["n_tau"], tau)
     g_up, g_down = _real_green_values(_green_blocks(solver.G_tau), indices)
 
-    status = str(getattr(solver, "solve_status", ""))
-    if status != "normal":
-        raise ValueError(f"solver status is not normal: {status!r}")
+    status = _normal_solve_status(getattr(solver, "solve_status", None))
     average_sign = _finite_scalar(
         getattr(solver, "average_sign", None),
         "average_sign",
@@ -500,7 +506,7 @@ def _raw_solver_state(
         "auto_corr_time": solver.auto_corr_time,
         "auto_corr_time_converged": solver.auto_corr_time_converged,
         "solve_parameters": _normalized_solve_parameters(solver.solve_parameters),
-        "solve_status": str(solver.solve_status),
+        "solve_status": _normal_solve_status(solver.solve_status),
         "last_configuration": solver.last_configuration,
         "runtime": runtime,
     }

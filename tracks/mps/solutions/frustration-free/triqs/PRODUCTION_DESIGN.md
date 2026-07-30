@@ -111,7 +111,7 @@ and one final newline. Its top-level shape is:
       }
     },
     "meshes": {
-      "n_tau": 4101,
+      "n_tau": 12297,
       "reported_tau": [0.0, 4.0, 8.0, 12.0, 16.0]
     },
     "chains": {
@@ -221,8 +221,8 @@ the MPS schema-2 bath artifact's `frequency_grid` and
 requires the same digest. A future denser common grid is a schema/input change,
 not an unbound plotting choice.
 
-The reported tau points are exact nodes of the 4101-point uniform TRIQS
-imaginary-time mesh: indices 0, 1025, 2050, 3075, and 4100. The reducer selects
+The reported tau points are exact nodes of the 12297-point uniform TRIQS
+imaginary-time mesh: indices 0, 3074, 6148, 9222, and 12296. The reducer selects
 those indices; it does not interpolate production values.
 
 ### 3.2 Continuous hybridization
@@ -264,7 +264,7 @@ counting the impurity one-body term twice.
 ## 4. Chain execution and raw retention
 
 Each chain constructs a fresh `Solver(beta=16, gf_struct=[("up", 1),
-("down", 1)], n_iw=2049, n_tau=4101)`, installs the input above, and invokes
+("down", 1)], n_iw=2049, n_tau=12297)`, installs the input above, and invokes
 `solve` with:
 
 * the chain's unique `random_seed`;

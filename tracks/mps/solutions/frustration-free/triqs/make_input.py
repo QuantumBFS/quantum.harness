@@ -21,7 +21,7 @@ from source_manifest import build_source_manifest, verify_source_manifest
 
 SCHEMA_VERSION = 2
 N_IW = 2049
-N_TAU = 4101
+N_TAU = 12297
 BETA = 16.0
 COMMON_REAL_FREQUENCY = {
     "omega": [-1.0, 0.0, 1.0],

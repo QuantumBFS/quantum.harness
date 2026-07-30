@@ -137,7 +137,7 @@ def test_two_clean_generations_are_identical_and_fully_bound(tmp_path):
     assert [
         round(tau * (payload["meshes"]["n_tau"] - 1) / payload["model"]["beta"])
         for tau in payload["meshes"]["reported_tau"]
-    ] == [0, 1025, 2050, 3075, 4100]
+    ] == [0, 3074, 6148, 9222, 12296]
     assert payload["hybridization"]["common_real_frequency"] == {
         **COMMON_REAL_FREQUENCY,
         "sha256": COMMON_REAL_FREQUENCY_SHA256,
@@ -261,7 +261,7 @@ def test_real_tree_has_complete_transitive_sources_and_still_requires_calibratio
 def test_solver_mesh_satisfies_real_triqs_constructor_and_reported_nodes():
     import make_input
 
-    assert make_input.N_TAU >= 2 * make_input.N_IW
+    assert make_input.N_TAU >= 6 * make_input.N_IW
     assert (make_input.N_TAU - 1) % 4 == 0
 
 

@@ -237,7 +237,7 @@ def test_run_chain_binds_solver_controls_raw_evidence_and_reload(
         "beta": 16.0,
         "gf_struct": [("up", 1), ("down", 1)],
         "n_iw": 2049,
-        "n_tau": 4101,
+        "n_tau": 12297,
     }
     parameters = solver.solve_calls[0]
     assert parameters["random_seed"] == 810001
@@ -520,3 +520,11 @@ def test_source_bound_pilot_requires_no_accepted_calibration():
     )
     with pytest.raises(ValueError):
         verify_input(artifact, TRIQS_DIR)
+
+
+def test_real_solver_zero_status_is_normalized_without_accepting_failures():
+    assert runner._normal_solve_status("normal") == "normal"
+    assert runner._normal_solve_status(0) == "normal"
+    for status in (1, "failed", None, True):
+        with pytest.raises(ValueError):
+            runner._normal_solve_status(status)
