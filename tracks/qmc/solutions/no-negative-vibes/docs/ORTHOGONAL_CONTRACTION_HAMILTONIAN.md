@@ -1,7 +1,7 @@
 # R3b：局域正交收缩 Hamiltonian
 
 日期：2026-07-30
-状态：`active-survivor / conventional-exclusion-and-literature-open`
+状态：`active-qnc-candidate / phase-scaling-open`
 
 ## 一句话结果
 
@@ -257,3 +257,129 @@ known positivity mechanism
 
 它仍需排查专门的 Pfaffian/group-algebra solver，并完成物理 observable 与模型级文献
 检索；在此之前保持 `active-model-survivor-known-square`，不升级为最终 QNC。
+
+## 第四轮：群代数排除与低能物理收口
+
+### 群代数没有形成小维闭包
+
+对六模双 plaquette 锚点，把四个 Gaussian atoms 限制到每个固定粒子数 sector，并求解
+
+```text
+X Gamma(O_a) = Gamma(O_a) X.
+```
+
+单粒子 generators 的 Lie closure 维数为
+
+```text
+15 = dim so(6).
+```
+
+Fock sectors 的维数和共同 commutant nullity 分别为
+
+```text
+N:          0  1   2   3   4  5  6
+dimension:  1  6  15  20  15  6  1
+nullity:    1  1   1   2   1  1  1.
+```
+
+唯一额外对称性是六模半填充 exterior power 的 Hodge star。它满足 `star^2=-I`，
+把 20 维 sector 分成两个 10 维手征块；两个块内部的 commutant nullity 又都为 `1`。
+因此根据 Burnside 定理，atoms 生成的复 *-algebra 在非中间 sectors 是完整
+`M_binomial(6,N)`，在半填充是 `M_10 direct-sum M_10`。这排除了把动力学压缩到固定小维
+fermionic-linear-optics group algebra 的路线；接近半填充时相关表示块本身随系统大小指数增长。
+
+这不是一般复杂性下界，但它给出了比“单个 vertex 是 Gaussian”更精确的算法障碍：
+乘积可以继续用一粒子矩阵表示，**线性组合及其反复叠加**却会占满指数维的 irreducible blocks。
+
+### 最新 S-LCU 结果给出直接的算法边界
+
+Khatri、Zohren、Matos 的 Free-Fermion stacked-LCU 工作研究的正是逐层线性组合
+fermionic Gaussian unitaries。其摘要报告当前最佳经典算法代价
+
+```text
+O(k^(2l) n^3),
+```
+
+其中 `k` 是每层 Gaussian branches 数、`l` 是叠加层数；即随层数指数增长。本模型的
+Trotter/series evolution 正是反复叠加局域 Gaussian branches，而 determinant QMC 不展开
+全部 `k^l` 项，只采样非负 histories。该论文没有研究本 Hamiltonian，因而不是 hardness
+定理，但它关闭了“现成 Gaussian-LCU 算法会给出多项式模拟”这一最直接疑虑。
+
+### 4/6/8 模 ED：低能态已经非 Gaussian
+
+对开放重叠链
+
+```text
+p_j=(2j,2j+1,2j+2,2j+3)
+```
+
+在半填充进行精确对角化，得到：
+
+| modes | sector dim | E0 | ground multiplicity | first distinct gap |
+|---:|---:|---:|---:|---:|
+| 4 | 6 | -3.2506712298 | 1 | 0.4977941627 |
+| 6 | 20 | -5.8558079887 | 2 | 0.3981253559 |
+| 8 | 70 | -9.5455726568 | 1 | 0.0119001625 |
+
+六模严格二重简并来自两个 Hodge 手征块的相同基态能；八模两个手征基态能相差
+`0.0119001625`，但各块内部能隙分别为 `0.4684` 和 `0.7242`。这提示值得研究的
+低能手征竞争，而不能从三个尺寸宣称热力学相。
+
+对每个尺寸的两个手征基态计算 density Wick residual
+
+```text
+max_(i<j) |<n_i n_j> - <n_i><n_j> + |<c_i^dag c_j>|^2|.
+```
+
+结果分别为
+
+```text
+L=4: 0.2500, 0.1248
+L=6: 0.1676, 0.1676
+L=8: 0.2431, 0.2477.
+```
+
+全部严格非零，所以实际低能纯态不是 Slater/Gaussian states；相互作用性并非只存在于
+Hamiltonian 展开中。基态空间平均后每个 site 仍恰为半填充，避免把简并子空间中任意
+本征矢造成的密度不均匀误判成自发序。
+
+### 模型级文献判定
+
+截至本轮定向检索：
+
+- Braccia 等对 particle-preserving Gaussian unitaries 的 commutant 给出了完整表示论结构，
+  与这里的固定粒子数/Hodge 分块一致，但不提供相互作用 Gaussian-unitary **和** 的热演化
+  solver；
+- stacked-LCU 工作给出的最佳已知经典代价随 Gaussian 线性组合层数指数增长；
+- Hebenstreit 等证明所有纯 fermionic non-Gaussian states 都是 matchgate resource states；
+  Coffman 等把 Wick 定理违背作为 fermionic non-Gaussian magic 的直接诊断；
+- 没有检索到与式 (1) 相同的“重叠局域 Gaussian-unitary cosine Hamiltonian”及其相图研究。
+
+新文献锚点：
+
+- Braccia et al., *The commutant of fermionic Gaussian unitaries*,
+  <https://arxiv.org/abs/2603.19210>
+- Khatri, Zohren, Matos, *Stacking the Deck: Tunable Trainability in Stacked LCUs*,
+  <https://arxiv.org/abs/2607.24686>
+- Hebenstreit et al., *All pure fermionic non-Gaussian states are magic states for
+  matchgate computations*, <https://arxiv.org/abs/1905.08584>
+- Coffman, Smith, Gao, *Measuring Non-Gaussian Magic in Fermions*,
+  <https://arxiv.org/abs/2501.06179>
+
+## 限时收口判定
+
+R3b 现升级为 `active-qnc-candidate`：
+
+```text
+sign-free determinant QMC at arbitrary history depth
++ local extensive interacting Hamiltonian
++ no diagonal stoquastic gauge
++ outside quadratic, common-orbital, and claw-free JW solvers
++ full sector algebra modulo exact Hodge chirality
++ best known stacked-Gaussian-LCU simulation exponential in depth
++ explicitly non-Gaussian low-energy states
++ preliminary model-level literature gap
+```
+
+这已经达到“对已知传统方法有逐项排除证据”的工作标准；尚未完成的是一般复杂性证明和
+热力学相图。下一步只应扩大格点/QMC 物理，不再回到正性矩阵候选搜索。
