@@ -307,12 +307,22 @@ attempt to its immutable chain destination.
 
 ### 5.1 Warmup and production calibration
 
-The fixed production values above are admitted only after a calibration
+The Green-function estimator is qualified before calibration. Run eight
+independent seeds with 50,000 warmup cycles, 1,000,000 measurement cycles,
+cycle length 50, and `measure_G_l=true` at `n_l=100`. Retain the raw Legendre
+coefficients and reconstruct the six interior spin values at truncations 60,
+80, and 100. For every point, the simultaneous family-wise 99% interval for
+the eight independent 80-minus-100 differences, with seven degrees of
+freedom, must lie wholly inside `[-2.5e-4,+2.5e-4]`. If it fails, repeat with
+`n_l=160` and truncations 100, 130, and 160. Calibration is hash-bound to the
+first accepted qualification artifact.
+
+The fixed production values above are admitted only after a fresh calibration
 artifact passes:
 
-1. Run four chains with 100,000 measurement cycles at warmups 12,500, 25,000,
-   and 50,000 cycles. Each warmup level uses a distinct independent seed set;
-   no chain is paired across levels.
+1. Run sixteen independent chains with 100,000 measurement cycles at warmups
+   25,000 and 50,000 cycles. Each warmup level uses a distinct independent
+   seed set; no chain is paired across levels.
 2. For each static scalar and genuine-interior spin Green-function point, let
    \(\Delta=\bar x_{50k}-\bar x_{25k}\). If
    \(\mathrm{SE}_{25k}\) and \(\mathrm{SE}_{50k}\) are the standard errors of
@@ -323,7 +333,7 @@ artifact passes:
    \]
    With \(a=\mathrm{SE}_{25k}^2\) and
    \(b=\mathrm{SE}_{50k}^2\), use Welch degrees of freedom
-   \(\nu=(a+b)^2/(a^2/3+b^2/3)\). A simultaneous two-sided family-wise 99%
+   \(\nu=(a+b)^2/(a^2/15+b^2/15)\). A simultaneous two-sided family-wise 99%
    Bonferroni interval
    \[
    \Delta\ \pm\ t_{1-0.01/(2m),\nu}\,\mathrm{SE}_{\Delta}
@@ -333,38 +343,38 @@ artifact passes:
    \(m=8\): two static scalars plus three interior tau points for each of two
    spins. Zero-variance identical means pass only when their degenerate
    interval lies inside the bound.
-3. Run four 100,000-cycle pilots at cycle lengths 10, 25, 50, and 100. Select
+3. Run four 100,000-cycle pilots at cycle lengths 10, 25, 50, and 100. Record
    the smallest candidate for which every chain reports converged
-   autocorrelation time no larger than 5 cycles. The production artifact is
-   intentionally fixed to 50, so calibration fails if 50 is insufficient; it
-   does not silently rewrite the production input.
-4. For each of four calibration groups, run eight independent fixed-size
+   autocorrelation time no larger than 5 cycles. Acceptance separately
+   requires locked production cycle length 50 itself to pass; a smaller
+   empirical minimum is informative and is not a failure or an input rewrite.
+4. For each of eight calibration groups, run eight independent fixed-size
    increments of 62,500 measurement cycles. Every increment performs the full
    selected warmup and uses a unique deterministic sub-seed outside the
    production namespace. Its directly measured mean is \(B_{c,k}\);
    increment means are never reconstructed by subtracting normalized
    cumulative estimators.
-5. Use the 32 direct increment means for batch-means uncertainty. For each
-   scalar, compare each group's first-half and second-half means as four paired
+5. Use the 64 direct increment means for batch-means uncertainty. For each
+   scalar, compare each group's first-half and second-half means as eight paired
    differences \(d_c\). With
-   \(\bar d=\sum_c d_c/4\),
-   \(\mathrm{SE}_{d}=s_d/\sqrt{4}\), and three degrees of freedom, construct
+   \(\bar d=\sum_c d_c/8\),
+   \(\mathrm{SE}_{d}=s_d/\sqrt{8}\), and seven degrees of freedom, construct
    the simultaneous two-sided family-wise 99% Bonferroni interval
    \[
-   \bar d\ \pm\ t_{1-0.01/(2m),3}\,\mathrm{SE}_{d}.
+   \bar d\ \pm\ t_{1-0.01/(2m),7}\,\mathrm{SE}_{d}.
    \]
    The complete interval must lie wholly inside `[-5e-4,+5e-4]` for `n_d` and
    double occupancy and `[-1e-3,+1e-3]` for every genuine-interior spin Green
    value, again with \(m=8\). Merely containing zero is insufficient. This is
    an equivalence gate, not a failure-to-reject-drift gate.
 6. Estimate the variance of a 62,500-cycle batch separately within each group,
-   pool those four variances without pooling chain means, and project the
+   pool those eight variances without pooling chain means, and project the
    standard error of the final four-chain mean at 1,000,000 cycles per chain.
-   With eight batches in each of four groups, the pooled within-group variance
-   has \(\nu=4(8-1)=28\) degrees of freedom and the production mean has 64
+   With eight batches in each of eight groups, the pooled within-group variance
+   has \(\nu=8(8-1)=56\) degrees of freedom and the production mean has 32
    batch-equivalents. Its one-sided 99% upper error bound is
    \[
-   \sqrt{\frac{\nu s_p^2}{\chi^2_{0.01,\nu}\,64}}.
+   \sqrt{\frac{\nu s_p^2}{\chi^2_{0.01,\nu}\,32}}.
    \]
    This bound must be at most `5e-4` for `n_d` and double occupancy and `1e-3`
    for each genuine-interior spin Green-function value. The artifact stores
@@ -676,42 +686,58 @@ export CTHYB_ENV="$SCRATCH/challenge81-cthyb/triqs-4.0.0"
   python tracks/mps/solutions/frustration-free/triqs/smoke_test.py
 ```
 
-After implementation, generate the exact 60-cell calibration plan (12 warmup,
-16 cycle-length, and 32 fixed-increment cells), submit it, and reduce it:
+First generate and run the exact eight-cell `n_l=100` estimator qualification:
 
 ```bash
 export CAL_ROOT="$SCRATCH/challenge81-cthyb/calibration-beta16"
 ./micromamba --offline run --prefix "$CTHYB_ENV" \
   python tracks/mps/solutions/frustration-free/triqs/calibrate.py plan \
-  --output-root "$CAL_ROOT"
+  --profile estimator --n-l 100 --output-root "$CAL_ROOT"
 export CAL_RUN="$(python3 -c \
   'import json,os,sys; p=json.load(open(sys.argv[1])); print(os.path.join(sys.argv[2],p["relative_path"]))' \
   "$CAL_ROOT/current.json" "$CAL_ROOT")"
 ./micromamba --offline run --prefix "$CTHYB_ENV" \
   python tracks/mps/solutions/frustration-free/triqs/calibrate.py \
-  validate-plan --plan "$CAL_RUN/calibration-plan.json"
-sbatch --array=0-59 --ntasks=1 --cpus-per-task=1 --mem=4G --time=04:00:00 \
-  --export=ALL,OMP_NUM_THREADS=1,OPENBLAS_NUM_THREADS=1,MKL_NUM_THREADS=1,CTHYB_ENV="$CTHYB_ENV",CTHYB_CAL_PLAN="$CAL_RUN/calibration-plan.json",CTHYB_CAL_RUN="$CAL_RUN" \
+  validate-plan --plan "$CAL_RUN/plan.json"
+sbatch --array=0-7 --ntasks=1 --cpus-per-task=1 --mem=4G --time=04:00:00 \
+  --export=ALL,OMP_NUM_THREADS=1,OPENBLAS_NUM_THREADS=1,MKL_NUM_THREADS=1,CTHYB_ENV="$CTHYB_ENV",CTHYB_CAL_PLAN="$CAL_RUN/plan.json",CTHYB_CAL_RUN="$CAL_RUN" \
   tracks/mps/solutions/frustration-free/triqs/cthyb_calibration_slurm_array.sh
-```
-
-After all 60 array cells finish, reduction is exactly:
-
-```bash
 ./micromamba --offline run --prefix "$CTHYB_ENV" \
   python tracks/mps/solutions/frustration-free/triqs/calibrate.py analyze \
-  --plan "$CAL_RUN/calibration-plan.json" --run-directory "$CAL_RUN"
+  --plan "$CAL_RUN/plan.json" --run-directory "$CAL_RUN"
 ./micromamba --offline run --prefix "$CTHYB_ENV" \
   python tracks/mps/solutions/frustration-free/triqs/calibrate.py \
-  validate-existing --plan "$CAL_RUN/calibration-plan.json" \
-  --run-directory "$CAL_RUN" \
+  validate-existing --plan "$CAL_RUN/plan.json" --run-directory "$CAL_RUN" \
+  --calibration "$CAL_RUN/qualification.json"
+```
+
+If qualification fails, repeat with `--n-l 160`; failed runs remain immutable
+and are never reused. After one qualification passes, generate the fresh
+112-cell calibration plan (32 warmup, 16 cycle-length, and 64 fixed-increment
+cells), submit `--array=0-111`, and reduce it:
+
+```bash
+export QUALIFICATION="$CAL_RUN/qualification.json"
+./micromamba --offline run --prefix "$CTHYB_ENV" \
+  python tracks/mps/solutions/frustration-free/triqs/calibrate.py plan \
+  --profile calibration --qualification "$QUALIFICATION" --output-root "$CAL_ROOT"
+export CAL_RUN="$(python3 -c \
+  'import json,os,sys; p=json.load(open(sys.argv[1])); print(os.path.join(sys.argv[2],p["relative_path"]))' \
+  "$CAL_ROOT/current.json" "$CAL_ROOT")"
+# validate plan, submit array 0-111, wait for all cells, then:
+./micromamba --offline run --prefix "$CTHYB_ENV" \
+  python tracks/mps/solutions/frustration-free/triqs/calibrate.py analyze \
+  --plan "$CAL_RUN/plan.json" --run-directory "$CAL_RUN"
+./micromamba --offline run --prefix "$CTHYB_ENV" \
+  python tracks/mps/solutions/frustration-free/triqs/calibrate.py \
+  validate-existing --plan "$CAL_RUN/plan.json" --run-directory "$CAL_RUN" \
   --calibration "$CAL_RUN/calibration.json"
 export CALIBRATION_SHA256="$(python3 -c \
   'import json,sys; print(json.load(open(sys.argv[1]))["sha256"])' \
   "$CAL_RUN/calibration.json")"
 ```
 
-`calibrate.py plan` fixes zero-based cell ordering in its schema; the Slurm
+`calibrate.py plan` fixes zero-based cell ordering in each plan; the Slurm
 wrapper verifies that `SLURM_ARRAY_TASK_ID` identifies the same hash-bound cell
 before running it. `analyze` refuses missing, duplicate, or extra cells and
 publishes `calibration.json` atomically. Site account and partition flags may

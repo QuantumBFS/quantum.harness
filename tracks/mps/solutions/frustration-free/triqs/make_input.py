@@ -154,6 +154,10 @@ def _validate_calibration(
         "conda_lock_sha256",
         "environment_yml_sha256",
         "model_json_sha256",
+        "qualification_sha256",
+        "plan",
+        "cell_results",
+        "analysis",
     }
     if set(payload) != required:
         raise ValueError("calibration payload has unexpected keys")
@@ -168,6 +172,9 @@ def _validate_calibration(
         != sha256_bytes(canonical_json(source_manifest))
     ):
         raise ValueError("calibration is not accepted for this production input")
+    from calibrate import validate_calibration
+
+    validate_calibration(calibration, payload["plan"])
     expected_hashes = _provenance_hashes(source_manifest)
     for key, expected in expected_hashes.items():
         if key != "source_manifest" and key != "source_manifest_sha256":

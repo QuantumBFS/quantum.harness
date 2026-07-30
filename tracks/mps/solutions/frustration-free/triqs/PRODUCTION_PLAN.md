@@ -74,8 +74,8 @@ Create:
 * `triqs/validate_existing.py` — independent full-tree validator.
 * `triqs/compare_mps.py` — MPS–CTHYB comparator and separated error budget.
 * `triqs/cthyb_slurm_array.sh` — profile-neutral one-chain Slurm entry point.
-* `triqs/cthyb_calibration_slurm_array.sh` — exact zero-based 60-cell
-  calibration entry point.
+* `triqs/cthyb_calibration_slurm_array.sh` — exact zero-based estimator and
+  112-cell calibration entry point.
 * `triqs/tests/` — focused unit, corruption, recovery, and integration tests.
 
 Modify:
@@ -448,9 +448,13 @@ estimate of SE to decrease.
 
 - [ ] **Step 2: Implement canonical calibration plans and analysis**
 
-Generate exactly 60 cells with a separate deterministic seed namespace: 12
-warmup cells, 16 cycle-length cells, and 32 independent 62,500-cycle increment
-cells arranged as eight increments in each of four paired groups. Every
+First generate eight `n_l=100` estimator-qualification cells and gate the
+simultaneous 80-minus-100 truncation intervals; retry `n_l=160` only after a
+failed immutable qualification. Bind calibration to the accepted qualification.
+Then generate exactly 112 fresh cells with a separate deterministic seed
+namespace: 32 warmup cells, 16 cycle-length cells, and 64 independent
+62,500-cycle increment cells arranged as eight increments in each of eight
+paired groups. Every
 increment performs full warmup and has a unique sub-seed. The plan schema fixes
 zero-based ordering and binds source manifest, environment, model, formulas,
 meshes, seeds, pairing, and each cell input. Hash-bind every result.
@@ -460,7 +464,7 @@ Calibration may pass or fail; it cannot edit the production input.
 
 Implement `plan`, `validate-plan`, array-cell execution, `analyze`, and
 `validate-existing` exactly as invoked in `PRODUCTION_DESIGN.md` section 9.
-The wrapper accepts only indices 0–59, one task, one CPU, one thread, absolute
+The wrapper accepts only indices 0–111, one task, one CPU, one thread, absolute
 paths, and `--offline`; it validates the selected plan cell before execution.
 Test fake-Slurm generation/submission/reduction command lines byte for byte.
 
@@ -738,10 +742,11 @@ task. That statement requires Task 9 evidence.
 
 - [ ] **Step 1: Create and validate calibration plans**
 
-Run the exact `calibrate.py plan`, `validate-plan`,
-`sbatch --array=0-59`, `analyze`, and `validate-existing` commands from
-`PRODUCTION_DESIGN.md` section 9. Submit the 60 hash-bound cells as independent
-one-rank jobs. Re-run full validation before analysis.
+Run the exact estimator `plan`, `validate-plan`, `sbatch --array=0-7`,
+`analyze`, and `validate-existing` commands from `PRODUCTION_DESIGN.md`
+section 9. Only after qualification passes, submit the 112 fresh calibration
+cells with `sbatch --array=0-111` as independent one-rank jobs. Re-run full
+validation before each analysis.
 
 - [ ] **Step 2: Apply the calibration stopping gate**
 
@@ -753,7 +758,7 @@ Proceed only if:
   equivalence bounds;
 * cycle length 50 has converged autocorrelation no larger than 5 for all four
   chains;
-* all 32 fixed-size increments use unique nonproduction seeds, full warmup,
+* all 64 fixed-size increments use unique nonproduction seeds, full warmup,
   exact pairing, and directly measured means;
 * every family-wise 99% Bonferroni paired first-half/second-half drift interval
   lies wholly inside `[-5e-4,+5e-4]` for static values or

@@ -12,7 +12,7 @@ done
 case "${SLURM_ARRAY_TASK_ID:-}" in
   ''|*[!0-9]*) exit 2 ;;
 esac
-if ((SLURM_ARRAY_TASK_ID > 59)); then exit 2; fi
+if ((SLURM_ARRAY_TASK_ID > 111)); then exit 2; fi
 for name in SLURM_NTASKS SLURM_CPUS_PER_TASK OMP_NUM_THREADS OPENBLAS_NUM_THREADS MKL_NUM_THREADS; do
   if [[ "${!name:-}" != 1 ]]; then
     printf '%s must equal 1\n' "$name" >&2

@@ -10,10 +10,10 @@ from pathlib import Path
 import shlex
 from statistics import mean, stdev
 import time
-from types import SimpleNamespace
 from typing import Sequence
 import uuid
 
+import numpy as np
 from scipy.stats import chi2, t
 
 from artifacts import (
@@ -42,9 +42,13 @@ OBSERVABLES = (
     "G_down_8",
     "G_down_12",
 )
+GREEN_OBSERVABLES = OBSERVABLES[2:]
 PRODUCTION_SEEDS = {810001, 810002, 810003, 810004}
-_WARMUPS = (12500, 25000, 50000)
+_WARMUPS = (25000, 50000)
 _CYCLES = (10, 25, 50, 100)
+_WARMUP_REPLICAS = 16
+_BATCH_GROUPS = 8
+_ESTIMATOR_REPLICAS = 8
 
 
 def _artifact(payload: dict[str, object]) -> dict[str, object]:
@@ -79,10 +83,14 @@ def _values(cell):
 
 
 def analyze_warmup(cells: Sequence[dict[str, object]]) -> dict[str, object]:
-    expected = {(level, replica) for level in _WARMUPS for replica in range(4)}
+    expected = {
+        (level, replica)
+        for level in _WARMUPS
+        for replica in range(_WARMUP_REPLICAS)
+    }
     _inventory(cells, expected, "warmup_cycles", "warmup")
     if any(
-        cell.get("cell_kind") != "warmup" or cell.get("estimator") != "direct"
+        cell.get("cell_kind") != "warmup" or cell.get("estimator") != "legendre"
         for cell in cells
     ):
         raise ValueError("warmup estimators must be direct independent means")
@@ -93,10 +101,11 @@ def analyze_warmup(cells: Sequence[dict[str, object]]) -> dict[str, object]:
             for level in _WARMUPS
         }
         mean25, mean50 = mean(groups[25000]), mean(groups[50000])
-        se25, se50 = stdev(groups[25000]) / 2, stdev(groups[50000]) / 2
+        se25 = stdev(groups[25000]) / math.sqrt(_WARMUP_REPLICAS)
+        se50 = stdev(groups[50000]) / math.sqrt(_WARMUP_REPLICAS)
         a, b = se25**2, se50**2
         delta, se_delta = mean50 - mean25, math.sqrt(a + b)
-        denominator = a**2 / 3 + b**2 / 3
+        denominator = a**2 / 15 + b**2 / 15
         if denominator == 0:
             degrees, quantile, interval = "infinite", 0.0, [delta, delta]
         else:
@@ -140,20 +149,30 @@ def select_cycle_length(cells: Sequence[dict[str, object]]) -> dict[str, object]
         ):
             passing.append(length)
     selected = min(passing) if passing else None
+    locked_group = [cell for cell in cells if cell["cycle_length"] == 50]
+    locked_passed = all(
+        cell.get("auto_corr_time_converged") is True
+        and float(cell["auto_corr_time"]) <= 5.0
+        for cell in locked_group
+    )
     return {
         "candidate_lengths": list(_CYCLES),
-        "selected_cycle_length": selected,
+        "empirical_minimum_cycle_length": selected,
+        "locked_production_cycle_length": 50,
+        "locked_production_cycle_passed": locked_passed,
         "maximum_allowed_autocorrelation": 5.0,
-        "passed": selected == 50,
+        "passed": locked_passed,
     }
 
 
 def analyze_batch_means(cells: Sequence[dict[str, object]]) -> dict[str, object]:
-    if len(cells) != 32:
+    if len(cells) != 64:
         raise ValueError("increment cell count mismatch")
     identities = {cell.get("input_identity") for cell in cells}
     seeds = [cell.get("seed") for cell in cells]
-    expected = {(group, increment) for group in range(4) for increment in range(8)}
+    expected = {
+        (group, increment) for group in range(_BATCH_GROUPS) for increment in range(8)
+    }
     actual = {(cell.get("group"), cell.get("increment")) for cell in cells}
     if (
         len(identities) != 1
@@ -162,7 +181,7 @@ def analyze_batch_means(cells: Sequence[dict[str, object]]) -> dict[str, object]
         or actual != expected
         or any(
             cell.get("cell_kind") != "increment"
-            or cell.get("estimator") != "direct_increment"
+            or cell.get("estimator") != "legendre_direct_increment"
             or cell.get("warmup_cycles") != 50000
             or cell.get("measurement_cycles") != 62500
             for cell in cells
@@ -174,34 +193,38 @@ def analyze_batch_means(cells: Sequence[dict[str, object]]) -> dict[str, object]
             (cell for cell in cells if cell["group"] == group),
             key=lambda cell: cell["increment"],
         )
-        for group in range(4)
+        for group in range(_BATCH_GROUPS)
     }
     result = {}
-    drift_quantile = float(t.ppf(1 - 0.01 / 16, 3))
-    variance_quantile = float(chi2.ppf(0.01, 28))
+    drift_quantile = float(t.ppf(1 - 0.01 / 16, 7))
+    variance_quantile = float(chi2.ppf(0.01, 56))
     for name in OBSERVABLES:
-        groups = [[_values(cell)[name] for cell in ordered[group]] for group in range(4)]
+        groups = [
+            [_values(cell)[name] for cell in ordered[group]]
+            for group in range(_BATCH_GROUPS)
+        ]
         differences = [mean(group[4:]) - mean(group[:4]) for group in groups]
-        drift, drift_se = mean(differences), stdev(differences) / 2
+        drift = mean(differences)
+        drift_se = stdev(differences) / math.sqrt(_BATCH_GROUPS)
         interval = [
             drift - drift_quantile * drift_se,
             drift + drift_quantile * drift_se,
         ]
         variances = [stdev(group) ** 2 for group in groups]
-        pooled = sum(7 * value for value in variances) / 28
-        upper = math.sqrt(28 * pooled / (variance_quantile * 64))
+        pooled = sum(7 * value for value in variances) / 56
+        upper = math.sqrt(56 * pooled / (variance_quantile * 32))
         bound = _bound(name)
         result[name] = {
             "batch_means": groups,
             "paired_differences": differences,
             "mean_drift": drift,
             "drift_standard_error": drift_se,
-            "drift_degrees_of_freedom": 3,
+            "drift_degrees_of_freedom": 7,
             "drift_quantile": drift_quantile,
             "drift_interval": interval,
             "pooled_within_group_variance": pooled,
-            "variance_degrees_of_freedom": 28,
-            "production_batch_equivalents": 64,
+            "variance_degrees_of_freedom": 56,
+            "production_batch_equivalents": 32,
             "chi_square_lower_quantile": variance_quantile,
             "projected_error_upper_99": upper,
             "equivalence_bound": bound,
@@ -215,6 +238,189 @@ def analyze_batch_means(cells: Sequence[dict[str, object]]) -> dict[str, object]
         "observables": result,
         "passed": all(item["passed"] for item in result.values()),
     }
+
+
+def legendre_reported_values(
+    coefficients: Sequence[complex],
+    *,
+    beta: float,
+    tau: Sequence[float],
+    truncation: int,
+) -> list[float]:
+    data = np.asarray(coefficients, dtype=np.complex128)
+    if (
+        isinstance(truncation, bool)
+        or truncation <= 0
+        or truncation > len(data)
+        or not math.isfinite(float(beta))
+        or beta <= 0
+    ):
+        raise ValueError("invalid Legendre reconstruction controls")
+    indices = np.arange(truncation, dtype=np.float64)
+    weighted = np.sqrt(2 * indices + 1) * data[:truncation] / beta
+    result = []
+    for point in tau:
+        if not math.isfinite(float(point)) or point < 0 or point > beta:
+            raise ValueError("reported tau lies outside [0,beta]")
+        value = np.polynomial.legendre.legval(2 * float(point) / beta - 1, weighted)
+        if abs(value.imag) > 1e-10:
+            raise ValueError("Legendre reconstruction is not real within tolerance")
+        result.append(float(value.real))
+    return result
+
+
+def _qualification_truncations(n_l: int) -> list[int]:
+    if n_l == 100:
+        return [60, 80, 100]
+    if n_l == 160:
+        return [100, 130, 160]
+    raise ValueError("estimator n_l must be 100 or 160")
+
+
+def build_estimator_plan(
+    bindings: dict[str, object],
+    *,
+    n_l: int,
+) -> dict[str, object]:
+    required = {
+        "model",
+        "meshes",
+        "formulas",
+        "source_manifest",
+        "source_manifest_sha256",
+        "conda_lock_sha256",
+        "environment_yml_sha256",
+        "model_json_sha256",
+    }
+    if set(bindings) != required:
+        raise ValueError("estimator bindings are incomplete")
+    truncations = _qualification_truncations(n_l)
+    identity = sha256_bytes(
+        canonical_json(
+            {
+                "bindings": bindings,
+                "profile": "legendre_estimator_qualification",
+                "n_l": n_l,
+                "truncations": truncations,
+            }
+        )
+    )
+    cells = [
+        _cell(
+            replica,
+            "estimator_qualification",
+            823000 + (60 if n_l == 160 else 0) + replica,
+            identity,
+            {
+                "warmup_cycles": 50000,
+                "measurement_cycles": 1_000_000,
+                "cycle_length": 50,
+                "replica": replica,
+                "estimator": "legendre",
+                "n_l": n_l,
+                "truncations": truncations,
+            },
+        )
+        for replica in range(_ESTIMATOR_REPLICAS)
+    ]
+    return _artifact(
+        {
+            "artifact_type": "cthyb_estimator_plan",
+            "schema_version": 2,
+            "bindings": copy.deepcopy(bindings),
+            "input_identity": identity,
+            "cell_count": _ESTIMATOR_REPLICAS,
+            "n_l": n_l,
+            "truncations": truncations,
+            "cells": cells,
+        }
+    )
+
+
+def validate_estimator_plan(plan: object) -> None:
+    if not isinstance(plan, dict) or set(plan) != {"payload", "sha256"}:
+        raise ValueError("estimator plan artifact is malformed")
+    payload = plan["payload"]
+    if (
+        not isinstance(payload, dict)
+        or plan["sha256"] != sha256_bytes(canonical_json(payload))
+        or payload.get("artifact_type") != "cthyb_estimator_plan"
+    ):
+        raise ValueError("estimator plan hash or type mismatch")
+    expected = build_estimator_plan(payload.get("bindings"), n_l=payload.get("n_l"))
+    if canonical_json(plan) != canonical_json(expected):
+        raise ValueError("estimator plan differs from canonical plan")
+
+
+def analyze_estimator_qualification(
+    cell_results: Sequence[dict[str, object]],
+    plan: dict[str, object],
+) -> dict[str, object]:
+    validate_estimator_plan(plan)
+    if len(cell_results) != _ESTIMATOR_REPLICAS:
+        raise ValueError("estimator qualification requires exactly eight results")
+    cells = []
+    for result in cell_results:
+        if (
+            not isinstance(result, dict)
+            or result.get("sha256") != sha256_bytes(canonical_json(result.get("payload")))
+        ):
+            raise ValueError("estimator result hash mismatch")
+        cells.append(result["payload"])
+    expected_inventory = set(range(_ESTIMATOR_REPLICAS))
+    if (
+        {cell.get("replica") for cell in cells} != expected_inventory
+        or len({cell.get("seed") for cell in cells}) != _ESTIMATOR_REPLICAS
+        or {cell.get("input_identity") for cell in cells}
+        != {plan["payload"]["input_identity"]}
+        or {cell.get("n_l") for cell in cells} != {plan["payload"]["n_l"]}
+        or {tuple(cell.get("truncations", [])) for cell in cells}
+        != {tuple(plan["payload"]["truncations"])}
+    ):
+        raise ValueError("estimator result inventory mismatch")
+    truncations = plan["payload"]["truncations"]
+    lower, upper = str(truncations[-2]), str(truncations[-1])
+    quantile = float(t.ppf(1 - 0.01 / (2 * len(GREEN_OBSERVABLES)), 7))
+    observables = {}
+    for name in GREEN_OBSERVABLES:
+        differences = [
+            float(cell["truncated_values"][lower][name])
+            - float(cell["truncated_values"][upper][name])
+            for cell in cells
+        ]
+        center = mean(differences)
+        standard_error = stdev(differences) / math.sqrt(_ESTIMATOR_REPLICAS)
+        interval = [
+            center - quantile * standard_error,
+            center + quantile * standard_error,
+        ]
+        observables[name] = {
+            "differences": differences,
+            "mean_difference": center,
+            "standard_error": standard_error,
+            "degrees_of_freedom": 7,
+            "quantile": quantile,
+            "interval": interval,
+            "equivalence_bound": 2.5e-4,
+            "passed": interval[0] >= -2.5e-4 and interval[1] <= 2.5e-4,
+        }
+    passed = all(gate["passed"] for gate in observables.values())
+    payload = {
+        "artifact_type": "cthyb_estimator_qualification",
+        "schema_version": 2,
+        "status": "accepted" if passed else "failed",
+        "qualified_n_l": plan["payload"]["n_l"],
+        "truncations": truncations,
+        "plan": plan,
+        "cell_results": list(cell_results),
+        "analysis": {
+            "family_wise_confidence": 0.99,
+            "multiplicity": len(GREEN_OBSERVABLES),
+            "observables": observables,
+            "passed": passed,
+        },
+    }
+    return _artifact(payload)
 
 
 def _cell(index, kind, seed, identity, controls):
@@ -231,7 +437,44 @@ def _cell(index, kind, seed, identity, controls):
     )
 
 
-def build_calibration_plan(bindings: dict[str, object]) -> dict[str, object]:
+def _validate_qualification(
+    qualification: object,
+    bindings: dict[str, object],
+) -> dict[str, object]:
+    if (
+        not isinstance(qualification, dict)
+        or set(qualification) != {"payload", "sha256"}
+        or qualification["sha256"]
+        != sha256_bytes(canonical_json(qualification["payload"]))
+    ):
+        raise ValueError("estimator qualification artifact is hash-invalid")
+    payload = qualification["payload"]
+    if (
+        payload.get("artifact_type") != "cthyb_estimator_qualification"
+        or payload.get("status") != "accepted"
+        or payload.get("qualified_n_l") not in (100, 160)
+        or payload.get("truncations")
+        != _qualification_truncations(payload.get("qualified_n_l"))
+        or payload.get("analysis", {}).get("passed") is not True
+    ):
+        raise ValueError("accepted estimator qualification is required")
+    plan = payload.get("plan")
+    if (
+        not isinstance(plan, dict)
+        or plan.get("payload", {}).get("bindings") != bindings
+        or not isinstance(payload.get("cell_results"), list)
+    ):
+        raise ValueError("estimator qualification provenance mismatch")
+    expected = analyze_estimator_qualification(payload["cell_results"], plan)
+    if canonical_json(qualification) != canonical_json(expected):
+        raise ValueError("estimator qualification does not reproduce")
+    return payload
+
+
+def build_calibration_plan(
+    bindings: dict[str, object],
+    qualification: dict[str, object],
+) -> dict[str, object]:
     required = {
         "model",
         "meshes",
@@ -244,22 +487,33 @@ def build_calibration_plan(bindings: dict[str, object]) -> dict[str, object]:
     }
     if set(bindings) != required:
         raise ValueError("calibration bindings are incomplete")
-    identity = sha256_bytes(canonical_json(bindings))
+    qualification_payload = _validate_qualification(qualification, bindings)
+    n_l = qualification_payload["qualified_n_l"]
+    identity = sha256_bytes(
+        canonical_json(
+            {
+                "bindings": bindings,
+                "qualification_sha256": qualification["sha256"],
+            }
+        )
+    )
     cells, index = [], 0
     for level, warmup in enumerate(_WARMUPS):
-        for replica in range(4):
+        for replica in range(_WARMUP_REPLICAS):
             cells.append(
                 _cell(
                     index,
                     "warmup",
-                    820000 + level * 10 + replica,
+                    824000 + level * 100 + replica,
                     identity,
                     {
                         "warmup_cycles": warmup,
                         "measurement_cycles": 100000,
                         "cycle_length": 50,
                         "replica": replica,
-                        "estimator": "direct",
+                        "estimator": "legendre",
+                        "n_l": n_l,
+                        "truncation": n_l,
                     },
                 )
             )
@@ -270,24 +524,27 @@ def build_calibration_plan(bindings: dict[str, object]) -> dict[str, object]:
                 _cell(
                     index,
                     "cycle",
-                    821000 + level * 10 + replica,
+                    825000 + level * 10 + replica,
                     identity,
                     {
                         "warmup_cycles": 50000,
                         "measurement_cycles": 100000,
                         "cycle_length": cycle,
                         "replica": replica,
+                        "estimator": "legendre",
+                        "n_l": n_l,
+                        "truncation": n_l,
                     },
                 )
             )
             index += 1
-    for group in range(4):
+    for group in range(_BATCH_GROUPS):
         for increment in range(8):
             cells.append(
                 _cell(
                     index,
                     "increment",
-                    822000 + group * 10 + increment,
+                    826000 + group * 10 + increment,
                     identity,
                     {
                         "warmup_cycles": 50000,
@@ -295,7 +552,9 @@ def build_calibration_plan(bindings: dict[str, object]) -> dict[str, object]:
                         "cycle_length": 50,
                         "group": group,
                         "increment": increment,
-                        "estimator": "direct_increment",
+                        "estimator": "legendre_direct_increment",
+                        "n_l": n_l,
+                        "truncation": n_l,
                     },
                 )
             )
@@ -305,8 +564,11 @@ def build_calibration_plan(bindings: dict[str, object]) -> dict[str, object]:
             "artifact_type": "cthyb_calibration_plan",
             "schema_version": 2,
             "bindings": copy.deepcopy(bindings),
+            "qualification": copy.deepcopy(qualification),
+            "qualification_sha256": qualification["sha256"],
             "input_identity": identity,
-            "cell_count": 60,
+            "cell_count": 112,
+            "n_l": n_l,
             "cells": cells,
         }
     )
@@ -318,7 +580,10 @@ def validate_calibration_plan(plan: object) -> None:
     payload = plan["payload"]
     if not isinstance(payload, dict) or plan["sha256"] != sha256_bytes(canonical_json(payload)):
         raise ValueError("calibration plan hash mismatch")
-    expected = build_calibration_plan(payload.get("bindings"))
+    expected = build_calibration_plan(
+        payload.get("bindings"),
+        payload.get("qualification"),
+    )
     if canonical_json(plan) != canonical_json(expected):
         raise ValueError("calibration plan differs from canonical plan")
 
@@ -330,7 +595,10 @@ def validate_calibration(artifact: object, calibration_plan: object) -> None:
     payload = artifact["payload"]
     if artifact["sha256"] != sha256_bytes(canonical_json(payload)):
         raise ValueError("calibration hash mismatch")
-    if payload.get("plan") != calibration_plan or len(payload.get("cell_results", [])) != 60:
+    if (
+        payload.get("plan") != calibration_plan
+        or len(payload.get("cell_results", [])) != 112
+    ):
         raise ValueError("calibration plan or result inventory mismatch")
     results = payload["cell_results"]
     if any(
@@ -339,10 +607,14 @@ def validate_calibration(artifact: object, calibration_plan: object) -> None:
     ):
         raise ValueError("calibration result hash mismatch")
     cells = [result["payload"] for result in results]
+    if {cell.get("input_identity") for cell in cells} != {
+        calibration_plan["payload"]["input_identity"]
+    }:
+        raise ValueError("calibration result input identity mismatch")
     expected_analysis = {
-        "warmup": analyze_warmup(cells[:12]),
-        "cycle": select_cycle_length(cells[12:28]),
-        "batch": analyze_batch_means(cells[28:]),
+        "warmup": analyze_warmup(cells[:32]),
+        "cycle": select_cycle_length(cells[32:48]),
+        "batch": analyze_batch_means(cells[48:]),
     }
     if canonical_json(payload.get("analysis")) != canonical_json(expected_analysis):
         raise ValueError("calibration analysis does not reproduce cell results")
@@ -357,6 +629,10 @@ def validate_calibration(artifact: object, calibration_plan: object) -> None:
     ):
         if payload.get(key) != bindings[key]:
             raise ValueError(f"calibration binding mismatch: {key}")
+    if payload.get("qualification_sha256") != calibration_plan["payload"][
+        "qualification_sha256"
+    ]:
+        raise ValueError("calibration qualification binding mismatch")
     accepted = all(value["passed"] for value in expected_analysis.values())
     if payload.get("status") != ("accepted" if accepted else "failed"):
         raise ValueError("calibration status disagrees with gates")
@@ -367,8 +643,8 @@ def build_calibration_artifact(
     cell_results: Sequence[dict[str, object]],
 ) -> dict[str, object]:
     validate_calibration_plan(calibration_plan)
-    if len(cell_results) != 60:
-        raise ValueError("calibration requires exactly 60 cell results")
+    if len(cell_results) != 112:
+        raise ValueError("calibration requires exactly 112 cell results")
     cells = []
     for result in cell_results:
         if (
@@ -378,10 +654,14 @@ def build_calibration_artifact(
         ):
             raise ValueError("calibration cell result hash mismatch")
         cells.append(result["payload"])
+    if {cell.get("input_identity") for cell in cells} != {
+        calibration_plan["payload"]["input_identity"]
+    }:
+        raise ValueError("calibration result input identity mismatch")
     analysis = {
-        "warmup": analyze_warmup(cells[:12]),
-        "cycle": select_cycle_length(cells[12:28]),
-        "batch": analyze_batch_means(cells[28:]),
+        "warmup": analyze_warmup(cells[:32]),
+        "cycle": select_cycle_length(cells[32:48]),
+        "batch": analyze_batch_means(cells[48:]),
     }
     bindings = calibration_plan["payload"]["bindings"]
     payload = {
@@ -396,6 +676,9 @@ def build_calibration_artifact(
         "conda_lock_sha256": bindings["conda_lock_sha256"],
         "environment_yml_sha256": bindings["environment_yml_sha256"],
         "model_json_sha256": bindings["model_json_sha256"],
+        "qualification_sha256": calibration_plan["payload"][
+            "qualification_sha256"
+        ],
         "plan": calibration_plan,
         "cell_results": list(cell_results),
         "analysis": analysis,
@@ -425,7 +708,7 @@ def calibration_cluster_commands(
     return {
         "validate": f"{base} validate-plan --plan {shlex.quote(str(plan))}",
         "array": (
-            "sbatch --array=0-59 --ntasks=1 --cpus-per-task=1 --mem=4G "
+            "sbatch --array=0-111 --ntasks=1 --cpus-per-task=1 --mem=4G "
             f"--time=04:00:00 --export={export} {wrapper}"
         ),
         "analyze": (
@@ -472,6 +755,8 @@ def _solver_payload(cell: dict[str, object]) -> dict[str, object]:
             "warmup_cycles": cell["warmup_cycles"],
             "measurement_cycles": cell["measurement_cycles"],
             "cycle_length": cell["cycle_length"],
+            "measure_G_tau": False,
+            "measure_G_l": True,
         }
     )
     payload["gates"].update(
@@ -484,34 +769,104 @@ def _solver_payload(cell: dict[str, object]) -> dict[str, object]:
     return payload
 
 
-def _result_values(solver, payload, parameters):
-    proxy = SimpleNamespace(
-        G_tau=solver.G_tau,
-        density_matrix=solver.density_matrix,
-        h_loc_diagonalization=solver.h_loc_diagonalization,
-        average_sign=solver.average_sign,
-        auto_corr_time=solver.auto_corr_time,
-        auto_corr_time_converged=True,
-        solve_status=solver.solve_status,
-    )
-    extracted = run_chain.extract_chain_observables(proxy, payload, parameters)
-    observables = extracted["observables"]
+def _calibration_solve_parameters(
+    payload: dict[str, object],
+    seed: int,
+) -> dict[str, object]:
+    parameters = run_chain._solve_parameters(payload, seed)
+    parameters["measure_G_l"] = True
+    parameters["measure_G_tau"] = False
+    return parameters
+
+
+def _legendre_coefficients(solver) -> dict[str, np.ndarray]:
+    result = {}
+    for spin in ("up", "down"):
+        data = np.asarray(solver.G_l[spin].data, dtype=np.complex128)
+        if data.ndim != 3 or data.shape[1:] != (1, 1):
+            raise ValueError(f"unexpected G_l target shape for {spin}: {data.shape}")
+        result[spin] = data[:, 0, 0].copy()
+    return result
+
+
+def _serialized_coefficients(
+    coefficients: dict[str, np.ndarray],
+) -> dict[str, dict[str, list[float]]]:
     return {
-        "n_d": observables["n_d"],
-        "double_occupancy": observables["double_occupancy"],
-        "G_up_4": observables["G_up"][1],
-        "G_up_8": observables["G_up"][2],
-        "G_up_12": observables["G_up"][3],
-        "G_down_4": observables["G_down"][1],
-        "G_down_8": observables["G_down"][2],
-        "G_down_12": observables["G_down"][3],
+        spin: {
+            "real": values.real.astype(np.float64).tolist(),
+            "imag": values.imag.astype(np.float64).tolist(),
+        }
+        for spin, values in coefficients.items()
     }
 
 
+def _result_values(
+    solver,
+    payload: dict[str, object],
+    truncations: Sequence[int],
+) -> dict[str, object]:
+    up = run_chain._number_operator("up", 0)
+    down = run_chain._number_operator("down", 0)
+    n_up = float(
+        run_chain._trace_rho_op(
+            solver.density_matrix, up, solver.h_loc_diagonalization
+        )
+    )
+    n_down = float(
+        run_chain._trace_rho_op(
+            solver.density_matrix, down, solver.h_loc_diagonalization
+        )
+    )
+    double = float(
+        run_chain._trace_rho_op(
+            solver.density_matrix,
+            up * down,
+            solver.h_loc_diagonalization,
+        )
+    )
+    coefficients = _legendre_coefficients(solver)
+    tau = payload["meshes"]["reported_tau"][1:-1]
+    truncated_values = {}
+    for truncation in truncations:
+        values = {"n_d": n_up + n_down, "double_occupancy": double}
+        for spin in ("up", "down"):
+            reconstructed = legendre_reported_values(
+                coefficients[spin],
+                beta=payload["model"]["beta"],
+                tau=tau,
+                truncation=truncation,
+            )
+            for point, value in zip((4, 8, 12), reconstructed, strict=True):
+                values[f"G_{spin}_{point}"] = value
+        truncated_values[str(truncation)] = values
+    return {
+        "values": truncated_values[str(truncations[-1])],
+        "truncated_values": truncated_values,
+        "legendre_coefficients": _serialized_coefficients(coefficients),
+        "auto_corr_time_converged": solver.auto_corr_time_converged is True,
+    }
+
+
+def _write_calibration_raw(path: Path, state: dict[str, object], g_l) -> None:
+    archive_type = run_chain._archive_class()
+    with archive_type(str(path), "w") as archive:
+        for name, value in state.items():
+            archive[name] = value
+        archive["G_l"] = g_l
+
+
 def run_cell(plan: dict[str, object], cell_index: int, run_directory: Path) -> Path:
-    validate_calibration_plan(plan)
-    if isinstance(cell_index, bool) or cell_index not in range(60):
-        raise ValueError("calibration cell index must be 0 through 59")
+    plan_type = plan.get("payload", {}).get("artifact_type")
+    if plan_type == "cthyb_estimator_plan":
+        validate_estimator_plan(plan)
+    elif plan_type == "cthyb_calibration_plan":
+        validate_calibration_plan(plan)
+    else:
+        raise ValueError("unsupported calibration plan type")
+    cell_count = plan["payload"]["cell_count"]
+    if isinstance(cell_index, bool) or cell_index not in range(cell_count):
+        raise ValueError(f"cell index must be 0 through {cell_count - 1}")
     cell_artifact = plan["payload"]["cells"][cell_index]
     cell = cell_artifact["payload"]
     destination = run_directory / "cells" / f"cell-{cell_index:03d}"
@@ -532,9 +887,10 @@ def run_cell(plan: dict[str, object], cell_index: int, run_directory: Path) -> P
         gf_struct=[("up", 1), ("down", 1)],
         n_iw=payload["hybridization"]["n_iw"],
         n_tau=payload["meshes"]["n_tau"],
+        n_l=cell["n_l"],
     )
     install_g0(solver, payload)
-    parameters = run_chain._solve_parameters(payload, cell["seed"])
+    parameters = _calibration_solve_parameters(payload, cell["seed"])
     started_utc = run_chain._utc_now()
     started = time.monotonic()
     solver.solve(**parameters)
@@ -548,18 +904,18 @@ def run_cell(plan: dict[str, object], cell_index: int, run_directory: Path) -> P
     }
     input_artifact = _artifact(payload)
     raw_path = attempt / "raw.h5"
-    run_chain._write_raw(
-        raw_path,
-        run_chain._raw_solver_state(
-            solver,
-            canonical_json(input_artifact) + b"\n",
-            input_artifact,
-            cell_index,
-            cell["seed"],
-            runtime,
-            parameters,
-        ),
+    raw_state = run_chain._raw_solver_state(
+        solver,
+        canonical_json(input_artifact) + b"\n",
+        input_artifact,
+        cell_index,
+        cell["seed"],
+        runtime,
+        parameters,
     )
+    _write_calibration_raw(raw_path, raw_state, solver.G_l)
+    truncations = cell.get("truncations", [cell["truncation"]])
+    extracted = _result_values(solver, payload, truncations)
     result_payload = {
         **{
             key: value
@@ -569,10 +925,9 @@ def run_cell(plan: dict[str, object], cell_index: int, run_directory: Path) -> P
         "plan_sha256": plan["sha256"],
         "cell_input_sha256": cell_artifact["sha256"],
         "raw_h5_sha256": sha256_file(raw_path),
-        "values": _result_values(solver, payload, parameters),
+        **extracted,
         "average_sign": float(solver.average_sign),
         "auto_corr_time": float(solver.auto_corr_time),
-        "auto_corr_time_converged": solver.auto_corr_time_converged is True,
     }
     result = _artifact(result_payload)
     atomic_write_bytes(attempt / "result.json", canonical_json(result) + b"\n")
@@ -585,6 +940,13 @@ def main() -> None:
     commands = parser.add_subparsers(dest="command", required=True)
     plan_command = commands.add_parser("plan")
     plan_command.add_argument("--output-root", type=Path, required=True)
+    plan_command.add_argument(
+        "--profile",
+        choices=("estimator", "calibration"),
+        required=True,
+    )
+    plan_command.add_argument("--n-l", type=int)
+    plan_command.add_argument("--qualification", type=Path)
     validate = commands.add_parser("validate-plan")
     validate.add_argument("--plan", type=Path, required=True)
     cell = commands.add_parser("run-cell")
@@ -600,18 +962,32 @@ def main() -> None:
     existing.add_argument("--calibration", type=Path, required=True)
     arguments = parser.parse_args()
     if arguments.command == "plan":
-        plan = build_calibration_plan(_default_bindings())
-        run_id = f"calibration-{plan['sha256'][:16]}"
+        if arguments.profile == "estimator":
+            if arguments.n_l not in (100, 160) or arguments.qualification is not None:
+                raise ValueError("estimator plan requires --n-l 100 or 160 only")
+            plan = build_estimator_plan(_default_bindings(), n_l=arguments.n_l)
+            prefix = "estimator"
+        else:
+            if arguments.n_l is not None or arguments.qualification is None:
+                raise ValueError("calibration plan requires --qualification only")
+            qualification = strict_json_load(arguments.qualification)
+            plan = build_calibration_plan(_default_bindings(), qualification)
+            prefix = "calibration"
+        run_id = f"{prefix}-{plan['sha256'][:16]}"
         run_directory = arguments.output_root / "runs" / run_id
         atomic_write_bytes(
-            run_directory / "calibration-plan.json", canonical_json(plan) + b"\n"
+            run_directory / "plan.json", canonical_json(plan) + b"\n"
         )
         atomic_write_bytes(
             arguments.output_root / "current.json",
             canonical_json({"relative_path": f"runs/{run_id}"}) + b"\n",
         )
     elif arguments.command == "validate-plan":
-        validate_calibration_plan(strict_json_load(arguments.plan))
+        plan = strict_json_load(arguments.plan)
+        if plan.get("payload", {}).get("artifact_type") == "cthyb_estimator_plan":
+            validate_estimator_plan(plan)
+        else:
+            validate_calibration_plan(plan)
     elif arguments.command == "run-cell":
         run_cell(
             strict_json_load(arguments.plan),
@@ -620,20 +996,32 @@ def main() -> None:
         )
     elif arguments.command == "analyze":
         plan = strict_json_load(arguments.plan)
+        cell_count = plan["payload"]["cell_count"]
         results = [
             strict_json_load(arguments.run_directory / "cells" / f"cell-{index:03d}" / "result.json")
-            for index in range(60)
+            for index in range(cell_count)
         ]
-        artifact = build_calibration_artifact(plan, results)
+        if plan["payload"]["artifact_type"] == "cthyb_estimator_plan":
+            artifact = analyze_estimator_qualification(results, plan)
+            output_name = "qualification.json"
+        else:
+            artifact = build_calibration_artifact(plan, results)
+            output_name = "calibration.json"
         atomic_write_bytes(
-            arguments.run_directory / "calibration.json",
+            arguments.run_directory / output_name,
             canonical_json(artifact) + b"\n",
         )
     else:
-        validate_calibration(
-            strict_json_load(arguments.calibration),
-            strict_json_load(arguments.plan),
-        )
+        artifact = strict_json_load(arguments.calibration)
+        plan = strict_json_load(arguments.plan)
+        if artifact.get("payload", {}).get("artifact_type") == "cthyb_estimator_qualification":
+            expected = analyze_estimator_qualification(
+                artifact["payload"]["cell_results"], plan
+            )
+            if canonical_json(artifact) != canonical_json(expected):
+                raise ValueError("estimator qualification does not reproduce")
+        else:
+            validate_calibration(artifact, plan)
 
 
 if __name__ == "__main__":

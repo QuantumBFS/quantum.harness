@@ -17,6 +17,13 @@ sys.path.insert(0, str(TRIQS_DIR))
 from artifacts import canonical_json, sha256_bytes, strict_json_load
 from make_input import make_production_input, verify_input
 from source_manifest import REQUIRED_SOURCE_PATHS, build_source_manifest
+from calibrate import (
+    OBSERVABLES,
+    analyze_estimator_qualification,
+    build_calibration_artifact,
+    build_calibration_plan,
+    build_estimator_plan,
+)
 import run_chain as runner
 
 
@@ -35,11 +42,7 @@ def _complete_repository(tmp_path: Path) -> Path:
     _write(root / "tracks/mps/solutions/frustration-free/model.json", model_source.read_bytes())
 
     manifest = build_source_manifest(root)
-    calibration_payload = {
-        "artifact_type": "cthyb_calibration",
-        "schema_version": 2,
-        "status": "accepted",
-        "model": {
+    model = {
             "model_id": "challenge-81-spinful-anderson-semicircular",
             "D": 1.0,
             "U": 0.8,
@@ -47,7 +50,11 @@ def _complete_repository(tmp_path: Path) -> Path:
             "epsilon_d": -0.4,
             "mu": 0.0,
             "beta": 16.0,
-        },
+        }
+    bindings = {
+        "model": model,
+        "meshes": {"n_iw": 2049, "n_tau": 12297},
+        "formulas": {"delta": "analytic_semicircle"},
         "source_manifest": manifest,
         "source_manifest_sha256": sha256_bytes(canonical_json(manifest)),
         "conda_lock_sha256": manifest[
@@ -60,10 +67,31 @@ def _complete_repository(tmp_path: Path) -> Path:
             "tracks/mps/solutions/frustration-free/model.json"
         ],
     }
-    calibration = {
-        "payload": calibration_payload,
-        "sha256": sha256_bytes(canonical_json(calibration_payload)),
-    }
+    estimator_plan = build_estimator_plan(bindings, n_l=100)
+    estimator_results = []
+    for cell_artifact in estimator_plan["payload"]["cells"]:
+        cell = dict(cell_artifact["payload"])
+        cell["truncated_values"] = {
+            str(truncation): {name: 0.0 for name in OBSERVABLES}
+            for truncation in cell["truncations"]
+        }
+        estimator_results.append(
+            {"payload": cell, "sha256": sha256_bytes(canonical_json(cell))}
+        )
+    qualification = analyze_estimator_qualification(
+        estimator_results, estimator_plan
+    )
+    plan = build_calibration_plan(bindings, qualification)
+    results = []
+    for cell_artifact in plan["payload"]["cells"]:
+        cell = dict(cell_artifact["payload"])
+        if cell["cell_kind"] in {"warmup", "increment"}:
+            cell["values"] = {name: 0.0 for name in OBSERVABLES}
+        else:
+            cell["auto_corr_time"] = 1.0
+            cell["auto_corr_time_converged"] = True
+        results.append({"payload": cell, "sha256": sha256_bytes(canonical_json(cell))})
+    calibration = build_calibration_artifact(plan, results)
     _write(
         solution_dir / "calibration.json",
         canonical_json(calibration) + b"\n",
