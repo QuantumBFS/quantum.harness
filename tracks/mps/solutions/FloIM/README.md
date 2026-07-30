@@ -1,6 +1,6 @@
 # FloIM: non-Markovian many-body Floquet heat transport
 
-> **Status: ✅ Complete — final challenge submission** (2026-07-30). Comprehensive report: `docs/2026-07-30-comprehensive-report.html`.
+> **Status: ✅ Complete — final challenge submission** (2026-07-30). Comprehensive report: `docs/reports/challenge-123-final-report.html`.
 
 ## Team
 
