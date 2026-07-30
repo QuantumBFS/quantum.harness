@@ -40,9 +40,11 @@ printed digits on the compute nodes.
 **N=200 campaign (status, not results).** Three formulations were taken to
 measured frontiers: CONFIG A construction alone exceeded 11.7 h wall with
 no solve started; the V_{S*}(200) joint space on 64 cores hit the 6 h
-build TIMEOUT at 182 GB; a 128-core construction probe (job 23009659) and
-one matched base/joint pair (job 23009660) were still RUNNING at report
-time (5 h 18 m and 2 h 25 m elapsed at 11:00). A replacement-chassis
+build TIMEOUT at 182 GB; the 128-core construction probe (job 23009659)
+likewise ended TIMEOUT at its 6 h template limit with MaxRSS 174 GB, still
+inside model construction (revision datum, 11:42). One matched base/joint
+pair (job 23009660, 24 h wall) was still RUNNING at revision time (base
+arm in build/solve since 08:36). A replacement-chassis
 adaptive deployment (rdm=false) passed its N=10 release gates
 (R1/R2/R3/R4b, `rg_selection/results/a200_release_gates.csv`) and was then
 cancelled by decision before any job was submitted; no N=200 adaptive

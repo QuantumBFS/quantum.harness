@@ -71,3 +71,15 @@ findings of record for the selection-arm memory observation. Fresh
 replacement-chassis selection ended with NO accepted row; the pilot label
 {B_bond_edge, B_half} = A200_FIXED_BUNDLE_PILOT remains the frozen wording
 for any retrospective description of the cancelled deployment.
+
+## Post-cancellation passive harvest (revision data)
+
+- 11:42 job 23009659 (128c V_{S*}(200) construction probe) ended TIMEOUT at
+  its 6 h sbatch template limit (requested wall in template, not a partition
+  cap — 23009660 holds 1-00:00:00). sacct: State TIMEOUT, Elapsed 06:00:03,
+  MaxRSS 174040728K (~166 GiB). n200_probe.json absent; state file stage
+  stopped at spec-built → the whole 6 h was inside build_rg_selection_model.
+  Frontier pair of record: 64c TIMEOUT 6 h @ 182 GB; 128c TIMEOUT 6 h @
+  174 GB, both pre-solve.
+- 23009660 (base/joint pair, 24 h wall) at 11:45: RUNNING 3 h 19 m, stage
+  arm:base since 08:36.
