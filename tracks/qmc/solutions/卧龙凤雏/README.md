@@ -13,6 +13,10 @@
 | **Catalog issue** | Addresses #122 — *Criticality in open quantum matter*, released by Guo-Yi Zhu, Hong Kong University of Science and Technology (Guangzhou). |
 | **Track** | `qmc/` — selected by the team because the issue’s `Method` field spans Monte Carlo sampling and tensor-network contraction. |
 
+## Paper
+
+- [PRB-format paper (PDF)](effective-central-charges-prb-paper.pdf)
+
 ## Benchmark
 
 - [Clean Ising central-charge verification](clean-ising/README.md) — Rust
