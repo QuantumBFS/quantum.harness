@@ -554,3 +554,21 @@ def test_runtime_versions_come_from_locked_conda_records(tmp_path):
     assert runner._conda_package_version(tmp_path, "triqs") == "4.0.0"
     with pytest.raises(ValueError):
         runner._conda_package_version(tmp_path, "hdf5")
+
+
+def test_opaque_last_configuration_is_retained_without_deserialization(
+    tmp_path, monkeypatch, fake_runtime
+):
+    class OpaqueArchive(FakeArchive):
+        def __getitem__(self, key):
+            if key == "last_configuration":
+                raise RuntimeError("opaque TRIQS checkpoint")
+            return super().__getitem__(key)
+
+    monkeypatch.setattr(runner, "_archive_class", lambda: OpaqueArchive)
+    input_path, _, _ = _input_fixture(tmp_path, monkeypatch)
+    bundle = runner.run_chain(input_path, 0, tmp_path / "opaque")
+    assert (bundle / "raw.h5").is_file()
+    assert runner.validate_chain_bundle(
+        bundle, strict_json_load(input_path), 0
+    )["chain_index"] == 0

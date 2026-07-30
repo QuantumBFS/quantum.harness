@@ -549,7 +549,13 @@ def _load_raw(path: Path) -> dict[str, object]:
                 f"missing={sorted(set(RAW_ARCHIVE_MEMBERS) - keys)}, "
                 f"extra={sorted(keys - set(RAW_ARCHIVE_MEMBERS))}"
             )
-        return {name: archive[name] for name in RAW_ARCHIVE_MEMBERS}
+        loaded = {
+            name: archive[name]
+            for name in RAW_ARCHIVE_MEMBERS
+            if name != "last_configuration"
+        }
+        loaded["last_configuration"] = "<retained-opaque-hdf5-member>"
+        return loaded
 
 
 def _solver_from_raw(raw: dict[str, object]) -> SimpleNamespace:
