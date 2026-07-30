@@ -13,6 +13,7 @@ set -euo pipefail
 : "${ROUTE_D_PLUS_RUN_ROOT:?set the isolated Phase 7 run root}"
 : "${ROUTE_D_PLUS_RUN_ID:?set the Phase 7 run ID}"
 : "${ROUTE_D_PLUS_PHASE6_RUN:?set the Phase 6 source run}"
+: "${ROUTE_D_PLUS_AUTHORIZATION_MODE:=initial}"
 
 repo_root="$(cd -- "${ROUTE_D_PLUS_REPO_ROOT}" && pwd)"
 solution_root="${repo_root}/tracks/qmc/solutions/BOTS-848"
@@ -33,15 +34,35 @@ nvidia-smi \
   --format=csv,noheader
 test -n "${CUDA_VISIBLE_DEVICES:-}"
 
-"${python}" -m route_d_plus.phase7 authorize \
-  --repo-root "${repo_root}" \
-  --run-root "${run_root}" \
-  --run-id "${ROUTE_D_PLUS_RUN_ID}" \
-  --architecture "${architecture}" \
-  --checkpoint "${ROUTE_D_PLUS_PHASE6_RUN}/seeds/seed-848/checkpoint.json" \
-  --checkpoint "${ROUTE_D_PLUS_PHASE6_RUN}/seeds/seed-1848/checkpoint.json" \
-  --checkpoint "${ROUTE_D_PLUS_PHASE6_RUN}/seeds/seed-2848/checkpoint.json" \
-  --capacity-protocol "${capacity_protocol}"
+if [[ "${ROUTE_D_PLUS_AUTHORIZATION_MODE}" == "initial" ]]; then
+  "${python}" -m route_d_plus.phase7 authorize \
+    --repo-root "${repo_root}" \
+    --run-root "${run_root}" \
+    --run-id "${ROUTE_D_PLUS_RUN_ID}" \
+    --architecture "${architecture}" \
+    --checkpoint "${ROUTE_D_PLUS_PHASE6_RUN}/seeds/seed-848/checkpoint.json" \
+    --checkpoint "${ROUTE_D_PLUS_PHASE6_RUN}/seeds/seed-1848/checkpoint.json" \
+    --checkpoint "${ROUTE_D_PLUS_PHASE6_RUN}/seeds/seed-2848/checkpoint.json" \
+    --capacity-protocol "${capacity_protocol}"
+elif [[ "${ROUTE_D_PLUS_AUTHORIZATION_MODE}" == "remediation" ]]; then
+  : "${ROUTE_D_PLUS_REMEDIATION_RUN:?set the remediation run root}"
+  : "${ROUTE_D_PLUS_BASELINE_PHASE7_AGGREGATE:?set baseline aggregate}"
+  "${python}" -m route_d_plus.phase7 authorize-remediation \
+    --repo-root "${repo_root}" \
+    --run-root "${run_root}" \
+    --run-id "${ROUTE_D_PLUS_RUN_ID}" \
+    --baseline-phase7-aggregate "${ROUTE_D_PLUS_BASELINE_PHASE7_AGGREGATE}" \
+    --remediation-certificate "${ROUTE_D_PLUS_REMEDIATION_RUN}/optimization-remediation.json" \
+    --remediation-readback "${ROUTE_D_PLUS_REMEDIATION_RUN}/optimization-remediation-readback.json" \
+    --architecture "${architecture}" \
+    --checkpoint "${ROUTE_D_PLUS_REMEDIATION_RUN}/seeds/seed-848/checkpoint.json" \
+    --checkpoint "${ROUTE_D_PLUS_REMEDIATION_RUN}/seeds/seed-1848/checkpoint.json" \
+    --checkpoint "${ROUTE_D_PLUS_REMEDIATION_RUN}/seeds/seed-2848/checkpoint.json" \
+    --capacity-protocol "${capacity_protocol}"
+else
+  echo "unknown ROUTE_D_PLUS_AUTHORIZATION_MODE" >&2
+  exit 2
+fi
 
 "${python}" -m route_d_plus.phase7 prepare-integrals \
   --output "${integrals}"

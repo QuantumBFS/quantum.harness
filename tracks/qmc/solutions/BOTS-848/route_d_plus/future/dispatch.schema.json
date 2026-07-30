@@ -53,7 +53,8 @@
                 "kind": {
                   "enum": [
                     "phase6-frozen-checkpoint-gate",
-                    "user-authorized-phase7-reveal"
+                    "user-authorized-phase7-reveal",
+                    "dplus0-remediation-gate"
                   ]
                 }
               },
@@ -114,6 +115,7 @@
           "enum": [
             "phase6-frozen-checkpoint-gate",
             "user-authorized-phase7-reveal",
+            "dplus0-remediation-gate",
             "phase7-capacity-gate",
             "architecture-freeze",
             "protocol-registration"

@@ -5,6 +5,7 @@
   "oneOf": [
     {"$ref": "#/$defs/phase6_freeze"},
     {"$ref": "#/$defs/user_authorized_phase7"},
+    {"$ref": "#/$defs/dplus0_remediation"},
     {"$ref": "#/$defs/phase7_gate"},
     {"$ref": "#/$defs/architecture_freeze"},
     {"$ref": "#/$defs/protocol_registration"}
@@ -111,6 +112,58 @@
         "passed": {"const": true}
       }
     },
+    "dplus0_remediation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "kind",
+        "created_at_utc",
+        "source_revision",
+        "baseline_phase7_aggregate",
+        "remediation_certificate",
+        "remediation_readback",
+        "architecture",
+        "checkpoints",
+        "capacity_protocol",
+        "capacity",
+        "architecture_modified",
+        "ed_used_for_gradient",
+        "ed_used_for_checkpoint_selection",
+        "heldout_accessed",
+        "beyond_ed_accessed",
+        "passed"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "challenge-15-route-d-plus-future-dependency-v1"
+        },
+        "kind": {"const": "dplus0-remediation-gate"},
+        "created_at_utc": {"type": "string", "format": "date-time"},
+        "source_revision": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "baseline_phase7_aggregate": {"$ref": "#/$defs/artifact"},
+        "remediation_certificate": {"$ref": "#/$defs/artifact"},
+        "remediation_readback": {"$ref": "#/$defs/artifact"},
+        "architecture": {"$ref": "#/$defs/artifact"},
+        "checkpoints": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": {"$ref": "#/$defs/artifact"}
+        },
+        "capacity_protocol": {"$ref": "#/$defs/artifact"},
+        "capacity": {"const": "D+0"},
+        "architecture_modified": {"const": false},
+        "ed_used_for_gradient": {"const": false},
+        "ed_used_for_checkpoint_selection": {"const": false},
+        "heldout_accessed": {"const": false},
+        "beyond_ed_accessed": {"const": false},
+        "passed": {"const": true}
+      }
+    },
     "phase7_gate": {
       "type": "object",
       "additionalProperties": false,
@@ -175,6 +228,11 @@
           "pattern": "^[0-9a-f]{40}$"
         },
         "selection_aggregate": {"$ref": "#/$defs/artifact"},
+        "phase6_final": {"$ref": "#/$defs/artifact"},
+        "phase6_readback": {"$ref": "#/$defs/artifact"},
+        "phase7_stage_gate": {"$ref": "#/$defs/artifact"},
+        "remediation_certificate": {"$ref": "#/$defs/artifact"},
+        "remediation_readback": {"$ref": "#/$defs/artifact"},
         "selection_stage": {"enum": ["phase7", "phase8"]},
         "selection_protocol": {"$ref": "#/$defs/artifact"},
         "selected_capacity": {"enum": ["D+0", "D+1", "D+2"]},

@@ -221,6 +221,100 @@ def prepare_integrals(output_path: Path) -> None:
     np.savez_compressed(output_path, integrals=integrals)
 
 
+def authorize_remediation(
+    *,
+    repo_root: Path,
+    run_root: Path,
+    run_id: str,
+    baseline_phase7_aggregate_path: Path,
+    remediation_certificate_path: Path,
+    remediation_readback_path: Path,
+    architecture_path: Path,
+    checkpoint_paths: list[Path],
+    capacity_protocol_path: Path,
+) -> dict[str, Any]:
+    revision = require_clean_revision(repo_root)
+    if len(checkpoint_paths) != 3:
+        raise ValueError("reevaluation must bind exactly three checkpoints")
+    baseline = load_json(baseline_phase7_aggregate_path)
+    validate_payload(baseline, "aggregate-certificate.schema.json")
+    if not baseline["passed"] or baseline["stage"] != "phase7":
+        raise RuntimeError("baseline Phase 7 aggregate did not pass")
+    remediation = load_json(remediation_certificate_path)
+    schema = load_json(MODULE_ROOT / "optimization-remediation.schema.json")
+    jsonschema.Draft202012Validator(
+        schema, format_checker=jsonschema.FormatChecker()
+    ).validate(remediation)
+    readback = load_json(remediation_readback_path)
+    readback_schema = load_json(
+        MODULE_ROOT / "optimization-remediation-readback.schema.json"
+    )
+    jsonschema.Draft202012Validator(
+        readback_schema, format_checker=jsonschema.FormatChecker()
+    ).validate(readback)
+    if (
+        not remediation["passed"]
+        or not readback["passed"]
+        or readback["remediation_certificate"]["sha256"]
+        != sha256_file(remediation_certificate_path)
+    ):
+        raise RuntimeError("optimizer remediation/readback gate did not pass")
+    expected_checkpoint_hashes = {
+        item["seed"]: item["checkpoint"]["sha256"]
+        for item in remediation["seed_results"]
+    }
+    observed = {}
+    for path in checkpoint_paths:
+        checkpoint = load_json(path)
+        validate(checkpoint, MODULE_ROOT / "remediated-checkpoint.schema.json")
+        observed[checkpoint["seed"]] = sha256_file(path)
+    if observed != expected_checkpoint_hashes:
+        raise RuntimeError("remediated checkpoint set/hash mismatch")
+
+    dependency_path = run_root / "dplus0-remediation-dependency.json"
+    dependency = {
+        "schema_version": DEPENDENCY_VERSION,
+        "kind": "dplus0-remediation-gate",
+        "created_at_utc": dt.datetime.now(dt.timezone.utc).isoformat(),
+        "source_revision": revision,
+        "baseline_phase7_aggregate": artifact(
+            baseline_phase7_aggregate_path
+        ),
+        "remediation_certificate": artifact(
+            remediation_certificate_path
+        ),
+        "remediation_readback": artifact(remediation_readback_path),
+        "architecture": artifact(architecture_path),
+        "checkpoints": [artifact(path) for path in checkpoint_paths],
+        "capacity_protocol": artifact(capacity_protocol_path),
+        "capacity": "D+0",
+        "architecture_modified": False,
+        "ed_used_for_gradient": False,
+        "ed_used_for_checkpoint_selection": False,
+        "heldout_accessed": False,
+        "beyond_ed_accessed": False,
+        "passed": True,
+    }
+    validate_payload(dependency, "dependency.schema.json")
+    write_json(dependency_path, dependency)
+    dispatch_path = run_root / "phase7-dispatch.json"
+    dispatch = {
+        "schema_version": DISPATCH_VERSION,
+        "stage": "phase7",
+        "run_id": run_id,
+        "run_root": str(run_root.resolve()),
+        "source_revision": revision,
+        "created_at_utc": dt.datetime.now(dt.timezone.utc).isoformat(),
+        "prerequisites": [
+            {"kind": dependency["kind"], **artifact(dependency_path)}
+        ],
+        "tasks": _phase7_tasks(),
+    }
+    validate_dispatch(dispatch)
+    write_json(dispatch_path, dispatch)
+    return dispatch
+
+
 def _route_gauge_phases(basis: tuple[int, ...]) -> np.ndarray:
     phases = []
     for state in basis:
@@ -899,6 +993,34 @@ def main() -> int:
     )
     prepare_parser = subparsers.add_parser("prepare-integrals")
     prepare_parser.add_argument("--output", required=True, type=Path)
+    remediation_parser = subparsers.add_parser(
+        "authorize-remediation"
+    )
+    remediation_parser.add_argument(
+        "--repo-root", required=True, type=Path
+    )
+    remediation_parser.add_argument(
+        "--run-root", required=True, type=Path
+    )
+    remediation_parser.add_argument("--run-id", required=True)
+    remediation_parser.add_argument(
+        "--baseline-phase7-aggregate", required=True, type=Path
+    )
+    remediation_parser.add_argument(
+        "--remediation-certificate", required=True, type=Path
+    )
+    remediation_parser.add_argument(
+        "--remediation-readback", required=True, type=Path
+    )
+    remediation_parser.add_argument(
+        "--architecture", required=True, type=Path
+    )
+    remediation_parser.add_argument(
+        "--checkpoint", required=True, action="append", type=Path
+    )
+    remediation_parser.add_argument(
+        "--capacity-protocol", required=True, type=Path
+    )
     worker_parser = subparsers.add_parser("worker")
     worker_parser.add_argument("--repo-root", required=True, type=Path)
     worker_parser.add_argument("--dispatch", required=True, type=Path)
@@ -923,6 +1045,29 @@ def main() -> int:
         print(json.dumps(payload, indent=2, sort_keys=True))
     elif arguments.command == "prepare-integrals":
         prepare_integrals(arguments.output.resolve())
+    elif arguments.command == "authorize-remediation":
+        payload = authorize_remediation(
+            repo_root=arguments.repo_root.resolve(),
+            run_root=arguments.run_root.resolve(),
+            run_id=arguments.run_id,
+            baseline_phase7_aggregate_path=(
+                arguments.baseline_phase7_aggregate.resolve()
+            ),
+            remediation_certificate_path=(
+                arguments.remediation_certificate.resolve()
+            ),
+            remediation_readback_path=(
+                arguments.remediation_readback.resolve()
+            ),
+            architecture_path=arguments.architecture.resolve(),
+            checkpoint_paths=[
+                path.resolve() for path in arguments.checkpoint
+            ],
+            capacity_protocol_path=(
+                arguments.capacity_protocol.resolve()
+            ),
+        )
+        print(json.dumps(payload, indent=2, sort_keys=True))
     elif arguments.command == "worker":
         run_task(
             repo_root=arguments.repo_root.resolve(),

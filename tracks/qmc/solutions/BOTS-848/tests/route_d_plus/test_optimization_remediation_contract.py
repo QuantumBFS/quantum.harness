@@ -79,3 +79,16 @@ def test_original_training_defaults_remain_unchanged() -> None:
     assert "diagonal_shift: float = 1.0e-2" in source
     assert "trust_radius: float = 0.05" in source
     assert 'checkpoint_selection: str = "final_update"' in source
+
+
+def test_dplus0_freeze_requires_phase6_and_remediated_phase7() -> None:
+    source = (ROUTE_ROOT / "freeze_architecture.py").read_text(
+        encoding="utf-8"
+    )
+    assert "phase6-final-v2.schema.json" in source
+    assert "phase6-final-v2-readback.schema.json" in source
+    assert '"dplus0-remediation-gate"' in source
+    assert '"dplus0-sufficient"' in source
+    assert '"selected_capacity": "D+0"' in source
+    assert '"heldout_accessed": False' in source
+    assert '"beyond_ed_accessed": False' in source

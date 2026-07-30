@@ -62,3 +62,20 @@ def test_user_override_preserves_causal_boundaries() -> None:
     assert properties["capacity_protocol_modified"]["const"] is False
     assert properties["heldout_accessed"]["const"] is False
     assert properties["beyond_ed_accessed"]["const"] is False
+
+
+def test_remediation_reevaluation_binds_frozen_outputs() -> None:
+    source = (ROUTE_ROOT / "phase7.py").read_text(encoding="utf-8")
+    dependency_schema = json.loads(
+        (
+            ROUTE_ROOT / "future/dependency.schema.json"
+        ).read_text(encoding="utf-8")
+    )
+    jsonschema.Draft202012Validator.check_schema(dependency_schema)
+    assert '"kind": "dplus0-remediation-gate"' in source
+    assert "baseline_phase7_aggregate" in source
+    assert "remediation_certificate" in source
+    assert "remediation_readback" in source
+    assert "expected_checkpoint_hashes" in source
+    assert '"ed_used_for_gradient": False' in source
+    assert '"ed_used_for_checkpoint_selection": False' in source

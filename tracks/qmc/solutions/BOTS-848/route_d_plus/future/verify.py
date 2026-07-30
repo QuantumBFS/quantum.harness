@@ -37,6 +37,7 @@ STAGE_PREREQUISITES = {
     "phase7": {
         "phase6-frozen-checkpoint-gate",
         "user-authorized-phase7-reveal",
+        "dplus0-remediation-gate",
     },
     "phase8": "phase7-capacity-gate",
     "phase9": "architecture-freeze",
