@@ -5,7 +5,7 @@
 | 1 | common protocol and evaluator | a03 | step-pass |
 | 2A | occupation autoregressive NQS | not started | pending |
 | 2B | continuous holomorphic NQS | not started | pending |
-| 2C | strict-LLL CF operator NQS | a01 | attempt-failed; route open |
+| 2C | strict-LLL CF operator NQS | a02 | attempt-failed; route open |
 | 2D | analytic L=2 seed times neural correlator | not started | pending |
 | 3 | synchronized audit, ED reveal, and route selection | not started | pending |
 | 4 | winner N=8 | not started | pending |
@@ -32,11 +32,16 @@ each has its own `a01` through `a05` implementation-attempt counter.
   projected-density/scalar primitives, and the JK-projected `L=0/2` seed
   family. It failed at the frozen two-layer exact coordinate-action boundary;
   no trainer, checkpoint, freeze receipt, or ED reveal was produced.
+- [Attempt a02](s02c-a02.md) froze one exact operator layer and implemented
+  pair-Casimir/PairJet coordinate action. Small analytic and independent
+  symbolic checks passed, but the N=6 batch-8 `L=2` correctness branch still
+  exceeded the `600 s` local wall ceiling after vectorization. No full frozen
+  action microbenchmark, trainer, checkpoint, freeze receipt, or ED reveal was
+  produced.
 
-Attempts a02 through a05 remain available. Route C is not `route-stopped` or
-`route-frozen`; resumption requires either a common protocol amendment or an
-exact depth-two backend that first passes the frozen batch/resource
-microbenchmark.
+Attempts a03 through a05 remain available. Route C is not `route-stopped` or
+`route-frozen`; resumption requires a fundamentally faster exact one-layer
+backend that first passes the unchanged frozen batch/resource microbenchmark.
 
 ## Trusted-pipeline boundary
 
