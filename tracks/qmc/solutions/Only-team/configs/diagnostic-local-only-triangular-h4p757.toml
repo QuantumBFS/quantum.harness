@@ -1,0 +1,30 @@
+lattice = "triangular"
+
+NumL1 = 6
+NumL2 = 6
+
+J1 = -1.0
+J2 = 0.0
+hTrfd = 4.757
+
+BetaT = 6.0
+IfSetDltau = true
+FixedDltau = 0.01
+LTrot = 400
+
+nLocal = 1
+nWolff = 0
+
+nWarm = 6000
+NmBin = 20
+NSwep = 2000
+NmMeaConfg = 10
+
+discard_initial_bins = 1
+trim_extrema = true
+statistics_mode = "bin_sem"
+
+seed = 20260728
+initial_state = "random"
+
+output_dir = "tracks/qmc/results/Only-team/diagnostic-local-only-triangular-h4p757"
