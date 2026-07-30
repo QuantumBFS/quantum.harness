@@ -3,27 +3,27 @@
   <desc id="desc">Paired horizontal bars compare the original and current gate counts for tasks A through D.</desc>
   <defs>
     <linearGradient id="current" x1="0" x2="1">
-      <stop offset="0" stop-color="#66e3ff"/>
-      <stop offset="1" stop-color="#8b7bff"/>
+      <stop offset="0" stop-color="#0891b2"/>
+      <stop offset="1" stop-color="#7c3aed"/>
     </linearGradient>
     <linearGradient id="original" x1="0" x2="1">
-      <stop offset="0" stop-color="#31405f"/>
-      <stop offset="1" stop-color="#3e4d6c"/>
+      <stop offset="0" stop-color="#cbd5e1"/>
+      <stop offset="1" stop-color="#94a3b8"/>
     </linearGradient>
     <filter id="glow" x="-20%" y="-50%" width="140%" height="200%">
       <feGaussianBlur stdDeviation="7" result="blur"/>
       <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
     </filter>
   </defs>
-  <rect width="1120" height="560" rx="28" fill="#0d1324"/>
-  <path d="M0 84H1120M0 196H1120M0 308H1120M0 420H1120" stroke="#1e2941" stroke-width="1"/>
-  <g fill="#dbe8ff" font-family="Inter,Segoe UI,sans-serif">
+  <rect width="1120" height="560" rx="28" fill="#ffffff"/>
+  <path d="M0 84H1120M0 196H1120M0 308H1120M0 420H1120" stroke="#e2e8f0" stroke-width="1"/>
+  <g fill="#0f172a" font-family="Inter,Segoe UI,sans-serif">
     <text x="54" y="64" font-size="24" font-weight="700">A</text>
     <text x="54" y="176" font-size="24" font-weight="700">B</text>
     <text x="54" y="288" font-size="24" font-weight="700">C</text>
     <text x="54" y="400" font-size="24" font-weight="700">D</text>
   </g>
-  <g fill="#7f91b4" font-family="Inter,Segoe UI,sans-serif" font-size="14">
+  <g fill="#475569" font-family="Inter,Segoe UI,sans-serif" font-size="14">
     <text x="54" y="86">x + y</text>
     <text x="54" y="198">abs(x − y)</text>
     <text x="54" y="310">x × y</text>
@@ -40,20 +40,20 @@
     <rect x="210" y="406" width="565" height="18" rx="9" fill="url(#current)" filter="url(#glow)"/>
   </g>
   <g font-family="JetBrains Mono,Consolas,monospace" font-size="15" font-weight="700">
-    <g fill="#91a2c2">
+    <g fill="#64748b">
       <text x="405" y="60">37</text><text x="485" y="172">53</text>
       <text x="1060" y="284">168</text><text x="855" y="396">127</text>
     </g>
-    <g fill="#aef1ff">
+    <g fill="#0369a1">
       <text x="405" y="85">37</text><text x="465" y="197">49</text>
       <text x="1000" y="309">156</text><text x="785" y="421">113</text>
     </g>
   </g>
   <g font-family="Inter,Segoe UI,sans-serif" font-size="14">
     <rect x="210" y="482" width="34" height="10" rx="5" fill="url(#original)"/>
-    <text x="256" y="492" fill="#91a2c2">START</text>
+    <text x="256" y="492" fill="#64748b">START</text>
     <rect x="350" y="482" width="34" height="10" rx="5" fill="url(#current)"/>
-    <text x="396" y="492" fill="#aef1ff">NOW</text>
-    <text x="1038" y="492" fill="#667896" text-anchor="end">unit-cost two-input gates</text>
+    <text x="396" y="492" fill="#0369a1">NOW</text>
+    <text x="1038" y="492" fill="#64748b" text-anchor="end">unit-cost two-input gates</text>
   </g>
 </svg>

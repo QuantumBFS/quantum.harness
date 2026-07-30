@@ -42,10 +42,18 @@ def values(
 def main() -> None:
     args = parse_args()
     series = [load_series(specification) for specification in args.series]
-    plt.style.use("dark_background")
+    plt.rcParams.update(
+        {
+            "text.color": "#0f172a",
+            "axes.labelcolor": "#334155",
+            "axes.edgecolor": "#94a3b8",
+            "xtick.color": "#475569",
+            "ytick.color": "#475569",
+        }
+    )
     figure, axes = plt.subplots(2, 2, figsize=(13.5, 8.2), constrained_layout=True)
-    figure.patch.set_facecolor("#0b1322")
-    colors = ("#70e6ff", "#ffad78", "#88efb8", "#c3a6ff", "#f5dd78")
+    figure.patch.set_facecolor("#ffffff")
+    colors = ("#0284c7", "#ea580c", "#059669", "#7c3aed", "#ca8a04")
 
     for index, (label, records) in enumerate(series):
         color = colors[index % len(colors)]
@@ -82,12 +90,12 @@ def main() -> None:
     for axis in axes.flat:
         axis.set_xscale("symlog", linthresh=100)
         axis.set_xlabel("Training steps (100 fresh examples per step)")
-        axis.grid(alpha=0.22)
-        axis.set_facecolor("#111c30")
+        axis.grid(color="#cbd5e1", alpha=0.7)
+        axis.set_facecolor("#f8fafc")
     axes[0, 0].set_title("Exact 12-bit word recovery")
     axes[0, 0].set_ylabel("Clean exact-word accuracy")
     axes[0, 0].set_ylim(-0.02, 1.02)
-    axes[0, 0].axhline(0.98, color="#ffffff", alpha=0.3, linestyle="--")
+    axes[0, 0].axhline(0.98, color="#64748b", alpha=0.55, linestyle="--")
     axes[0, 0].legend(loc="lower right", framealpha=0.85)
     axes[0, 1].set_title("Clean full-domain loss")
     axes[0, 1].set_ylabel("Binary cross-entropy")
