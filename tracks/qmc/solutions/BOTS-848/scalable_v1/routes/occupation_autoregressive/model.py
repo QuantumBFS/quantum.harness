@@ -245,6 +245,12 @@ class AutoregressiveNQS:
 
         return self._parameter_revision
 
+    def clear_evaluation_cache(self) -> None:
+        """Discard cached log-wavefunctions and log-derivatives."""
+
+        self._logpsi_cache.clear()
+        self._log_derivative_cache.clear()
+
     def set_flat_parameters(self, values: np.ndarray) -> None:
         """Update parameter values in place without replacing shared arrays."""
 

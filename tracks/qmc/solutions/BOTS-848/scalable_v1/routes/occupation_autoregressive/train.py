@@ -1212,6 +1212,7 @@ def run_full_training(
         descriptor = -1
         with progress:
             for update in range(1, config.updates + 1):
+                model.clear_evaluation_cache()
                 tower.clear_evaluation_cache()
                 seed_base = config.training_seed * 1_000_003 + 6 * (update - 1)
                 ground_seed = seed_base

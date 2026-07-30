@@ -102,7 +102,7 @@ def _tiny_model(*, seed: int = 848, width: int = 4) -> AutoregressiveNQS:
     )
 
 
-def test_model_evaluation_cache_is_copy_safe_and_parameter_bound(
+def test_model_evaluation_cache_is_copy_safe_explicitly_clearable_and_parameter_bound(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     model = _tiny_model(width=3)
@@ -120,7 +120,8 @@ def test_model_evaluation_cache_is_copy_safe_and_parameter_bound(
         return original(raw_state, sector, keep_cache=keep_cache)
 
     monkeypatch.setattr(model, "_evaluate", recording_evaluate)
-    assert model.logpsi(state, "excited") == model.logpsi(state, "excited")
+    expected_logpsi = model.logpsi(state, "excited")
+    assert expected_logpsi == model.logpsi(state, "excited")
     first_score = model.log_derivative(state, "excited")
     expected_score = first_score.copy()
     first_score[:] = 0.0
@@ -130,10 +131,23 @@ def test_model_evaluation_cache_is_copy_safe_and_parameter_bound(
     )
     assert calls == [False, True]
 
+    revision = model.parameter_revision
+    model.clear_evaluation_cache()
+    assert model.parameter_revision == revision
+    assert model.logpsi(state, "excited") == expected_logpsi
+    refreshed_score = model.log_derivative(state, "excited")
+    refreshed_expected_score = refreshed_score.copy()
+    refreshed_score[:] = 0.0
+    np.testing.assert_array_equal(
+        model.log_derivative(state, "excited"),
+        refreshed_expected_score,
+    )
+    assert calls == [False, True, False, True]
+
     model.set_flat_parameters(model.flat_parameters())
     model.logpsi(state, "excited")
     model.log_derivative(state, "excited")
-    assert calls == [False, True, False, True]
+    assert calls == [False, True, False, True, False, True]
 
 
 def test_tower_evaluation_cache_is_shared_and_explicitly_invalidated() -> None:
@@ -1541,12 +1555,24 @@ def test_full_training_runs_frozen_2048_update_six_batch_tower_contract(
     valid_state = model.feasibility.enumerate_support()[0]
     ground_calls: list[tuple[int, str, int]] = []
     tower_calls: list[tuple[int, int, int, int]] = []
+    model_cache_clear_count = 0
 
     def fake_ground_sample(size: int, sector: str, *, seed: int) -> np.ndarray:
         ground_calls.append((size, sector, seed))
         return np.full(size, valid_state, dtype=object)
 
     monkeypatch.setattr(model, "sample", fake_ground_sample)
+
+    def record_model_cache_clear() -> None:
+        nonlocal model_cache_clear_count
+        model_cache_clear_count += 1
+
+    monkeypatch.setattr(
+        model,
+        "clear_evaluation_cache",
+        record_model_cache_clear,
+        raising=False,
+    )
 
     class FakeComponent:
         def __init__(self, m: int) -> None:
@@ -1567,10 +1593,16 @@ def test_full_training_runs_frozen_2048_update_six_batch_tower_contract(
             self.cache_clear_count += 1
 
     fake_tower = FakeTower()
+    tower_factory_calls: list[dict[str, object]] = []
+
+    def fake_tower_factory(**kwargs: object) -> FakeTower:
+        tower_factory_calls.append(kwargs)
+        return fake_tower
+
     monkeypatch.setattr(
         train.LadderTower,
         "from_m0",
-        lambda **_kwargs: fake_tower,
+        fake_tower_factory,
     )
 
     class FakeSampler:
@@ -1656,6 +1688,13 @@ def test_full_training_runs_frozen_2048_update_six_batch_tower_contract(
     assert config.batch_size_per_sector == 512
     assert config.checkpoint_interval == 128
     assert artifacts.selected_update == 2048
+    assert len(tower_factory_calls) == 1
+    tower_factory_kwargs = tower_factory_calls[0]
+    assert "cache_token" in tower_factory_kwargs
+    cache_token = tower_factory_kwargs["cache_token"]
+    assert callable(cache_token)
+    assert cache_token() == model.parameter_revision
+    assert model_cache_clear_count == 2048
     assert fake_tower.cache_clear_count == 2048
     assert len(ground_calls) == 2048
     assert {(size, sector) for size, sector, _seed in ground_calls} == {
