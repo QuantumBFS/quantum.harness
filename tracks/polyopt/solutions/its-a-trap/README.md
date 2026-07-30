@@ -1,3 +1,8 @@
+> **Main work & results: see [`SYNTHESIS_REPORT.md`](SYNTHESIS_REPORT.md)**
+> (中文版 [`SYNTHESIS_REPORT_ZH.md`](SYNTHESIS_REPORT_ZH.md)) ·
+> PR deliverable: [`FINAL_REPORT.md`](FINAL_REPORT.md) ·
+> reproduction: [`REPRODUCE.md`](REPRODUCE.md)
+
 ## Team
 
 | | |
