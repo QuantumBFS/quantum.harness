@@ -30,7 +30,7 @@ def _source_commit() -> str:
             check=False,
             capture_output=True,
             text=True,
-            timeout=5,
+            timeout=30,
         )
         status_process = subprocess.run(
             ["git", "status", "--porcelain", "--untracked-files=no"],
@@ -38,7 +38,7 @@ def _source_commit() -> str:
             check=False,
             capture_output=True,
             text=True,
-            timeout=5,
+            timeout=30,
         )
     except (OSError, subprocess.SubprocessError):
         return "unavailable"

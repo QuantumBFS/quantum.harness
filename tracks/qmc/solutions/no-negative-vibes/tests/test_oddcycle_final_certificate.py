@@ -1,4 +1,7 @@
+import os
+
 from oracle.oddcycle_final_certificate import final_certificate_summary
+from oracle.oddcycle_final_certificate import _source_commit
 
 
 def test_final_certificate_replays_every_exact_publication_gate():
@@ -32,3 +35,24 @@ def test_final_certificate_replays_every_exact_publication_gate():
         "1/41",
         "1/41",
     )
+
+
+def test_source_commit_waits_for_a_cold_git_index(tmp_path, monkeypatch):
+    expected_commit = "0123456789abcdef0123456789abcdef01234567"
+    fake_git = tmp_path / "git"
+    fake_git.write_text(
+        "#!/bin/sh\n"
+        'if [ "$1" = "rev-parse" ]; then\n'
+        f"  echo {expected_commit}\n"
+        "else\n"
+        "  sleep 6\n"
+        "fi\n",
+        encoding="utf-8",
+    )
+    fake_git.chmod(0o755)
+    monkeypatch.setenv(
+        "PATH",
+        f"{tmp_path}{os.pathsep}{os.environ['PATH']}",
+    )
+
+    assert _source_commit() == expected_commit

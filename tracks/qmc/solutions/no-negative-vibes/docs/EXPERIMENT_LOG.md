@@ -2811,3 +2811,61 @@ Reusable lessons:
   irreducibility/determinant contradiction; and
 - keep development JSON separate from the final clean-commit provenance
   artifact.
+
+### 2026-07-30 — Cold-worktree provenance timeout
+
+The first archival CLI replay at clean source
+`2c94654280a89a69def772aea107b72d728c90db` reproduced every exact
+mathematical gate and the same payload digest, but returned
+`source_commit: unavailable`.  The JSON was rejected and was not archived.
+
+Direct WSL checks showed the correct full HEAD and an empty tracked status.
+A diagnostic replay then found the module root, PATH, `/usr/bin/git`, both
+Git subprocesses, and `_source_commit()` all correct after the worktree was
+warm.  A second newly created detached worktree reproduced the cold failure:
+the CLI took 5.66 seconds and again returned `unavailable`.  The fixed
+five-second timeout in `_source_commit()` was therefore expiring during the
+first Git index refresh; subsequent calls used the warm index and passed.
+
+The regression uses a real executable `git` shim that sleeps six seconds,
+not a mocked Python call.  Before the fix:
+
+```text
+FAILED test_source_commit_waits_for_a_cold_git_index
+expected 0123456789abcdef0123456789abcdef01234567
+observed unavailable
+1 failed in 5.93s
+```
+
+The exact RED command was:
+
+```bash
+env OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 \
+  NUMEXPR_NUM_THREADS=1 PYTHONHASHSEED=0 \
+  /home/zibojin/miniforge3/envs/quantum_harness/bin/python -m pytest -q \
+  tests/test_oddcycle_final_certificate.py::test_source_commit_waits_for_a_cold_git_index
+```
+
+Increasing only the two provenance subprocess timeouts from five to thirty
+seconds produced:
+
+```text
+1 passed in 12.90s
+```
+
+Both cold probe worktrees were retained.  No result, environment, queue
+script, old worktree, or search output was deleted, and no scientific scan
+ran.  Reusable lesson: a provenance helper must tolerate a cold Git index;
+never archive a mathematically valid JSON whose source field failed, and
+test latency boundaries with a real subprocess rather than by asserting a
+timeout constant.
+
+Independent review found no Critical or Important issue and suggested
+sleeping only in the fake `git status` branch, which matches the observed
+index-refresh boundary and halves recurring test cost.  After that
+refinement the fresh six-file WSL regression, now containing seven tests,
+returned:
+
+```text
+7 passed in 8.18s
+```
