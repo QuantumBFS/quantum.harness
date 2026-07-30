@@ -1,6 +1,6 @@
 # Experiment log
 
-Updated: 2026-07-29
+Updated: 2026-07-30
 
 Every completed scientific experiment is appended here whether it succeeds,
 fails, or only exposes an infrastructure defect. Large outputs live under the
@@ -2570,3 +2570,51 @@ should package the robust candidate into a production one-command
 certificate and compare it with the simpler frozen theorem before deciding
 whether to retry inconclusive dual cells or begin the adaptive TP boundary
 scan.
+
+### 2026-07-30 — Cell-4321 production certificate
+
+Continuation began with the frozen checkpoint rather than a new search.
+The saved WSL and CPU SHA-256 values all matched the checkpoint, no remote
+search process was live, the WSL branch was fast-forwarded to `5330d6a`,
+and the two pending remote runner regressions passed (`85 passed`).  No
+scientific calculation ran on local Windows.
+
+The exact path matrices, time vectors, and four normalized dual multipliers
+for `cell-4321` were versioned in
+`protocols/oddcycle-robust-candidate-v1/frozen-certificate.json`.  The new
+module `oracle.oddcycle_robust_certificate` reconstructs all derived
+quantities and checks, in one command:
+
+- four exact inertia gates and 16 exact Stein gaps;
+- coherent time orientation and arbitrary-word determinant positivity;
+- exact dual cancellation, trace-one normalization, and four positive
+  multipliers;
+- the 32-dimensional positive-field Hermitian transfer;
+- real logarithms for all four nonidentity letters; and
+- the 58-entry non-Gaussian grade-two mismatch.
+
+Test-driven packaging first failed as intended because the module did not
+exist.  The first implementation exposed two verifier mistakes rather than
+scientific failures: the real-log summary counted only the two base
+matrices, and the reported normalized Gaussian mismatch divided the raw
+identity by \(41\) instead of \(41^2\).  Recording each transpose explicitly
+and using the transfer normalization on both grade-two factors fixed the
+causes.  The focused test then passed, followed by a six-file WSL regression
+with `47 passed`.
+
+The candidate comparison resolves the promotion decision.  The original
+alphabet has larger path margin
+(`4.827288e-5` versus `2.217335e-5`), larger time-orientation margin
+(`0.229974` versus `0.220931`), unit physical row margin rather than
+`7949/10000`, and simpler \(q=r=1\) constants.  `cell-4321` has the much
+stronger floating dual interior (`1.31178e-4` versus `1.2435e-7`).
+Therefore the original remains the main theorem and `cell-4321` becomes an
+independent exact robustness result.  This does not expand the claim to a
+full Wei/Majorana exclusion.
+
+Reusable lesson: production certificates should store only exact inputs and
+reconstruct summaries; grade-\(k\) normalized Gaussian identities carry the
+corresponding power of the vacuum normalization; and transpose-generated
+letters must be enumerated explicitly in audit counts even when their
+characteristic polynomials coincide.  The completed frontier and dual scans
+remain frozen and were not repeated.
