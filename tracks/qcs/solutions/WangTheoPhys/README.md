@@ -133,8 +133,8 @@ The baseline instantiates the higher-order commutator theorem of:
 
 - A. M. Childs, Y. Su, M. C. Tran, N. Wiebe, and S. Zhu,
   [*A Theory of Trotter Error*](https://arxiv.org/abs/1912.08854);
-- E. Schubert and C. B. Mendl,
-  [*Trotter error bounds for the Fermi-Hubbard model*](https://arxiv.org/abs/2306.10603).
+- A. Schubert and C. B. Mendl,
+  [*Trotter error with commutator scaling for the Fermi-Hubbard model*](https://arxiv.org/abs/2306.10603).
 
 The verifier expands partial sums before applying local Pauli-l1 bounds and
 checks all coefficients with rational intervals. All 31 allowed theorem
@@ -175,6 +175,26 @@ their empirical constants cannot replace the pinned rigorous baseline.
   requires tighter D5-D10/tail certificates, while 10× requires an effective
   order lift such as a certified processor or shorter sixth-order kernel.
 
+## Final delivery package
+
+The reviewer-facing package freezes the certified `4.050498110614909×`
+result and binds the human-readable report to the exact proof artifacts:
+
+- [technical report PDF](issue128/docs/report/output/issue128-technical-report.pdf)
+  and [LaTeX source](issue128/docs/report/issue128-technical-report.tex);
+- [machine-readable JSON summary](issue128/artifacts/issue128-summary.json) and
+  [plain-text result summary](issue128/artifacts/issue128-summary.txt);
+- [verification transcript](issue128/artifacts/verification-transcript.txt);
+- [SHA-256 manifest](issue128/artifacts/SHA256SUMS) covering the report,
+  summaries, transcript, certificates, and exact sidecars.
+
+The fivefold follow-up includes an independently checked degree-five sidecar:
+605,832 canonical Pauli terms, 123,106 same-support pairwise-anticommuting
+groups, and site-density upper bound `11.23706750025696`. Conditional resource
+arithmetic at `r=78` would be `11791/2341 = 5.036736437419906...`, but the D4
+budget and D8-plus global tail gates are not closed. **No 78-step global error
+certificate is claimed or supplied.**
+
 ## Reproduce
 
 From this directory:
@@ -184,6 +204,9 @@ python -m pip install -e '.[test]'
 pytest -q
 PYTHONPATH=src python scripts/verify.py \
   certificates/issue128-certificate.json
+PYTHONPATH=src python scripts/build_d5_certificate.py --verify-only
+PYTHONPATH=src python scripts/package_delivery.py --check
+shasum -a 256 -c artifacts/SHA256SUMS
 ```
 
 The fast verifier checks the submitted exact-rational certificate. The deep
