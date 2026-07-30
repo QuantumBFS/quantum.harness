@@ -105,7 +105,7 @@ make run-production
 
 `run.sh` stops immediately if an oracle, simulation, analysis, or report
 verification step fails. A successful result contains `manifest.json`,
-stream JSON files, `raw/blocks.csv`, `summary.json`, ten plots per language,
+stream JSON files, `raw/blocks.csv`, `summary.json`, fifteen plots per language,
 and coexisting English/Chinese HTML and PDF reports.
 
 ## Output inventory
@@ -118,18 +118,26 @@ fact model.
 
 ## Frozen production result
 
-The frozen production run used all approved coarse points and completed
-224/224 physical Born streams in 344.982 seconds without scientific reserve.
-The XY validation transition bracket was \(\phi/\pi\in[0.24,0.25]\), which
-overlaps the predeclared reference window \([0.20,0.28]\). The generic DIII
-scan did not produce a defensible adjacent phase bracket: its evidence score
-rose from -0.0113 at \(\phi/\pi=0.06\) to 1.6280 at 0.34, but the strict
-opposite-phase persistence gate was not met. Therefore the frozen state is
-`xy_reproduced_diii_inconclusive`; no DIII central charge or anisotropy is
-published.
+The frozen production-v2 run completed all 516/516 physical Born streams in
+4583.689 seconds, using the declared `largest_width_incomplete` reserve after
+3300 seconds and remaining below the 5100-second scientific hard stop. The
+independent XY validation bracket is
+\(\phi/\pi\in[0.24,0.25]\), overlapping the predeclared reference window
+\([0.20,0.28]\).
 
-The nonphysical IID control differs from the Born estimator by
-\(z=21.80\), confirming that unconditional random signs cannot replace
-conditional Born sampling. `FROZEN_RESULT` records the selected result
-directory and the exact `summary.json` SHA-256. This is an exploratory
-finite-size result, not evidence that a DIII transition is absent.
+The DIII evidence did not form a defensible adjacent metal/insulator bracket,
+so the deterministic fallback selected the exploratory candidate
+\(\phi/\pi=0.28\). The entanglement estimator gives
+\(c_{\mathrm{eff}}=3.260\) with a 95% interval \([0.086,6.434]\); the
+Casimir–anisotropy estimator gives \(c_{\mathrm{eff}}=11.252\) with a 95%
+interval \([6.480,15.866]\). These estimates disagree, and the anisotropy
+window test is unstable. The frozen state therefore remains
+`xy_reproduced_diii_inconclusive`; neither estimate is published as a
+universal central charge.
+
+The nonphysical IID control differs from the Born estimator by \(z=21.80\),
+confirming that unconditional random signs cannot replace conditional Born
+sampling. All 557 manifest-registered artifact hashes were recomputed without
+mismatch. `FROZEN_RESULT` records the selected v2 directory and exact
+`summary.json` SHA-256. This is an exploratory finite-size result, not evidence
+that a DIII transition is absent.

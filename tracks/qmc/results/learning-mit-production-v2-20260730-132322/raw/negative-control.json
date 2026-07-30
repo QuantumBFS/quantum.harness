@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "is_physical": false,
+  "control": {
+    "born_mean": 2.3742609789394926,
+    "iid_mean": 2.5253913226117555,
+    "difference": 0.15113034367226286,
+    "z_score": 21.798482632393533,
+    "required_z_score": 3.0,
+    "streams_per_mode": 32,
+    "passed": true
+  }
+}

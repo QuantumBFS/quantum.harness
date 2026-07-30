@@ -1,0 +1,24 @@
+{
+  "block_layers_per_width": 8,
+  "burn_in_layers_per_width": 16,
+  "measurement_layers_per_width": 96,
+  "phi_pi": [
+    0.3,
+    0.31,
+    0.32
+  ],
+  "schema_version": 1,
+  "stage": "diii-refine",
+  "status": "exploratory",
+  "streams": 8,
+  "theta_pi": 0.45,
+  "widths": [
+    8,
+    12,
+    16,
+    20,
+    24,
+    28,
+    32
+  ]
+}
