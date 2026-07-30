@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "challenge-15-route-d-plus-optimization-remediation-seed-v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "seed",
+    "source_revision",
+    "started_at_utc",
+    "finished_at_utc",
+    "base_checkpoint",
+    "checkpoint",
+    "initial_objective",
+    "final_training_objective",
+    "final_ground",
+    "final_tower",
+    "final_gap",
+    "final_gap_standard_error",
+    "trace",
+    "gates",
+    "passed"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "challenge-15-route-d-plus-optimization-remediation-seed-v1"
+    },
+    "seed": {"enum": [848, 1848, 2848]},
+    "source_revision": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "started_at_utc": {"type": "string", "format": "date-time"},
+    "finished_at_utc": {"type": "string", "format": "date-time"},
+    "base_checkpoint": {"$ref": "#/$defs/artifact"},
+    "checkpoint": {"$ref": "#/$defs/artifact"},
+    "initial_objective": {"type": "number"},
+    "final_training_objective": {"type": "number"},
+    "final_ground": {"type": "object", "minProperties": 1},
+    "final_tower": {"type": "object", "minProperties": 1},
+    "final_gap": {"type": "number"},
+    "final_gap_standard_error": {"type": "number", "exclusiveMinimum": 0},
+    "trace": {"type": "array", "minItems": 48, "maxItems": 48},
+    "gates": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "finite_trace",
+        "fixed_update_count",
+        "checkpoint_schema_valid",
+        "no_ed_gradient",
+        "no_ed_checkpoint_selection"
+      ],
+      "properties": {
+        "finite_trace": {"const": true},
+        "fixed_update_count": {"const": true},
+        "checkpoint_schema_valid": {"const": true},
+        "no_ed_gradient": {"const": true},
+        "no_ed_checkpoint_selection": {"const": true}
+      }
+    },
+    "passed": {"const": true}
+  },
+  "$defs": {
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256"],
+      "properties": {
+        "path": {"type": "string", "minLength": 2},
+        "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+      }
+    }
+  }
+}

@@ -259,6 +259,9 @@ def _run_combined_update(
     seed: int,
     sample_steps: int,
     proposal_sweeps: int,
+    learning_rate: float = 0.1,
+    diagonal_shift: float = 1.0e-2,
+    trust_radius: float = 0.05,
 ) -> tuple[
     np.ndarray,
     np.ndarray,
@@ -315,9 +318,9 @@ def _run_combined_update(
     combined_step = sr_update(
         combined_metric,
         combined_gradient,
-        learning_rate=0.1,
-        diagonal_shift=1.0e-2,
-        trust_radius=0.05,
+        learning_rate=learning_rate,
+        diagonal_shift=diagonal_shift,
+        trust_radius=trust_radius,
     )
     ground_step = combined_step[:ground_dimension]
     tower_step = combined_step[ground_dimension:]
@@ -597,6 +600,11 @@ def train_seed(
     samples_per_update: int = 8,
     proposal_sweeps: int = 2,
     final_samples_per_chain: int = 128,
+    initial_checkpoint: dict[str, Any] | None = None,
+    learning_rate: float = 0.1,
+    diagonal_shift: float = 1.0e-2,
+    trust_radius: float = 0.05,
+    checkpoint_selection: str = "final_update",
 ) -> tuple[dict[str, Any], dict[str, Any]]:
     expected_architecture = {
         "schema_version": "challenge-15-route-d-plus-architecture-v1",
@@ -626,15 +634,33 @@ def train_seed(
     tower_evaluator = _make_whitened_evaluator(
         tower_raw_channels, mean, whitening
     )
-    rng = np.random.default_rng(seed + 10_000)
-    ground_coefficients = 1.0e-3 * (
-        rng.normal(size=whitening.shape[0])
-        + 1.0j * rng.normal(size=whitening.shape[0])
-    )
-    tower_coefficients = 1.0e-3 * (
-        rng.normal(size=whitening.shape[0])
-        + 1.0j * rng.normal(size=whitening.shape[0])
-    )
+    if initial_checkpoint is None:
+        rng = np.random.default_rng(seed + 10_000)
+        ground_coefficients = 1.0e-3 * (
+            rng.normal(size=whitening.shape[0])
+            + 1.0j * rng.normal(size=whitening.shape[0])
+        )
+        tower_coefficients = 1.0e-3 * (
+            rng.normal(size=whitening.shape[0])
+            + 1.0j * rng.normal(size=whitening.shape[0])
+        )
+    else:
+        if (
+            initial_checkpoint["seed"] != seed
+            or initial_checkpoint["architecture_sha256"]
+            != architecture_sha256
+        ):
+            raise ValueError("initial checkpoint lineage mismatch")
+        ground_coefficients = np.asarray(
+            initial_checkpoint["ground_coefficients"]["real"]
+        ) + 1.0j * np.asarray(
+            initial_checkpoint["ground_coefficients"]["imag"]
+        )
+        tower_coefficients = np.asarray(
+            initial_checkpoint["tower_coefficients"]["real"]
+        ) + 1.0j * np.asarray(
+            initial_checkpoint["tower_coefficients"]["imag"]
+        )
     initialization_norm = float(
         np.sqrt(
             np.vdot(ground_coefficients, ground_coefficients).real
@@ -661,6 +687,9 @@ def train_seed(
             seed=seed + 1_000 * update,
             sample_steps=samples_per_update,
             proposal_sweeps=proposal_sweeps,
+            learning_rate=learning_rate,
+            diagonal_shift=diagonal_shift,
+            trust_radius=trust_radius,
         )
         trace.append(
             {
@@ -737,7 +766,7 @@ def train_seed(
         "samples_per_update": samples_per_update,
         "proposal_sweeps": proposal_sweeps,
         "final_samples_per_chain": final_samples_per_chain,
-        "checkpoint_selection": "final_update",
+        "checkpoint_selection": checkpoint_selection,
     }
     result = {
         "seed": seed,

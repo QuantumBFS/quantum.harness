@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "challenge-15-route-d-plus-optimization-remediation-v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "created_at_utc",
+    "source_revision",
+    "git_dirty",
+    "phase7_stage_gate",
+    "protocol",
+    "architecture",
+    "seed_results",
+    "slurm",
+    "gates",
+    "passed"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "challenge-15-route-d-plus-optimization-remediation-v1"
+    },
+    "created_at_utc": {"type": "string", "format": "date-time"},
+    "source_revision": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "git_dirty": {"const": false},
+    "phase7_stage_gate": {"$ref": "#/$defs/artifact"},
+    "protocol": {"$ref": "#/$defs/artifact"},
+    "architecture": {"$ref": "#/$defs/artifact"},
+    "seed_results": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["seed", "result", "checkpoint"],
+        "properties": {
+          "seed": {"enum": [848, 1848, 2848]},
+          "result": {"$ref": "#/$defs/artifact"},
+          "checkpoint": {"$ref": "#/$defs/artifact"}
+        }
+      }
+    },
+    "slurm": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "job_id",
+        "cluster_name",
+        "node_list",
+        "partition",
+        "gpu_devices",
+        "cpus_per_task",
+        "memory_mb"
+      ],
+      "properties": {
+        "job_id": {"type": "string", "minLength": 1},
+        "cluster_name": {"type": "string", "minLength": 1},
+        "node_list": {"type": "string", "minLength": 1},
+        "partition": {"type": "string", "minLength": 1},
+        "gpu_devices": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+        "cpus_per_task": {"const": 16},
+        "memory_mb": {"const": 49152}
+      }
+    },
+    "gates": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "phase7_optimization_failure",
+        "protocol_schema_valid",
+        "architecture_unchanged",
+        "three_seed_concurrent_execution",
+        "all_seed_schemas_valid",
+        "clean_source_revision",
+        "gpu_slurm_evidence",
+        "capacity_unchanged",
+        "no_ed_gradient",
+        "no_ed_checkpoint_selection"
+      ],
+      "properties": {
+        "phase7_optimization_failure": {"const": true},
+        "protocol_schema_valid": {"const": true},
+        "architecture_unchanged": {"const": true},
+        "three_seed_concurrent_execution": {"const": true},
+        "all_seed_schemas_valid": {"const": true},
+        "clean_source_revision": {"const": true},
+        "gpu_slurm_evidence": {"const": true},
+        "capacity_unchanged": {"const": true},
+        "no_ed_gradient": {"const": true},
+        "no_ed_checkpoint_selection": {"const": true}
+      }
+    },
+    "passed": {"const": true}
+  },
+  "$defs": {
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256"],
+      "properties": {
+        "path": {"type": "string", "minLength": 2},
+        "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+      }
+    }
+  }
+}
