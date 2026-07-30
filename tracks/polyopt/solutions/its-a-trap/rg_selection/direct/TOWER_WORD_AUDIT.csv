@@ -1,0 +1,10 @@
+check,word,in_retained_closure,note
+tower_link_word,"Int64[]",true,n=6 ycoef word
+tower_link_word,"[1, 4]",true,n=6 ycoef word
+tower_link_word,"[1, 7]",true,n=6 ycoef word
+bundle_closure,"[1, 10]",true,B_pair_edge (deleted-region anchor expected: false)
+bundle_closure,"[1, 22]",true,B_half (deleted-region anchor expected: false)
+bundle_closure,"[1, 4, 10, 13]",true,B_bond_edge (deleted-region anchor expected: false)
+bundle_closure,"[1, 4, 11, 14]",true,B_bond_edge (deleted-region anchor expected: false)
+bundle_closure,"[1, 4, 22, 25]",true,B_bond_half (deleted-region anchor expected: false)
+bundle_closure,"[1, 4, 23, 26]",true,B_bond_half (deleted-region anchor expected: false)
