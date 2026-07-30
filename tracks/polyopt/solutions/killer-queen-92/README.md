@@ -38,10 +38,10 @@ Read in this order:
    professor-facing challenge report. Its curated tables, structured source,
    run summary, and data-provenance manifest live beside it in
    [`submission/`](submission/README.md).
-2. [`results/deadline_analysis/CURRENT_HPC_REPORT.html`](results/deadline_analysis/CURRENT_HPC_REPORT.html):
-   current SCNet snapshot, including exact-projected thermodynamic gap upper
-   statements, accepted observable endpoints, explicitly labeled floating
-   calculations, unresolved refinement points, level sizes, and resource failures.
+2. [`submission/report.json`](submission/report.json) and
+   [`submission/run.json`](submission/run.json): the committed structured
+   report source and run/acceptance summary. The provenance manifest maps these
+   curated artifacts to the intentionally uncommitted raw SCNet payloads.
 3. [`PHYSICS_TALK.html`](PHYSICS_TALK.html): a professor-style
    many-body physics talk explaining exactly what finite ED, the atomic SDP,
    and the root-local thermodynamic outer test calculate—and what the results mean.
