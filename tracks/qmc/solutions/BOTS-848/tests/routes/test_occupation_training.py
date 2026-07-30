@@ -19,7 +19,7 @@ from scalable_v1.routes.occupation_autoregressive.operators import (
     PreparedPairOperator,
     compose_ladders,
 )
-from scalable_v1.routes.occupation_autoregressive import train
+from scalable_v1.routes.occupation_autoregressive import factory, train
 from scalable_v1.routes.occupation_autoregressive.train import (
     AdamState,
     FeatureStateError,
@@ -38,6 +38,42 @@ from scalable_v1.routes.occupation_autoregressive.tower import (
 )
 import train_occupation_autoregressive as training_cli
 from train_occupation_autoregressive import main as training_main
+
+
+N8_SMOKE_ARTIFACT_ENV = "BOTS848_N8_SMOKE_ARTIFACT"
+PROTOCOL_SHA256 = (
+    "2435cd2e72ffae88117ee194f45b15451c8653dafa755b732005b6a199251d38"
+)
+
+
+def _write_synthetic_reviewed_n8_smoke(path: Path) -> Path:
+    """Write only the reviewed A05.1 fields consumed at the production boundary."""
+
+    path.write_text(
+        json.dumps(
+            {
+                "schema": "bots848-occupation-n8-smoke-v1",
+                "status": "ok",
+                "optimizer_updates": 0,
+                "seed": 4848,
+                "protocol_sha256": PROTOCOL_SHA256,
+                "device_environment_fingerprint": {
+                    "hostname": "synthetic-test-n8",
+                    "slurm_job_id": "reviewed-fixture",
+                },
+                "n8_to_n6_time_ratio": 4.229112834613484,
+                "n8_to_n6_memory_ratio": 2.3707141015725703,
+                "finite_counters": {"finite": 20_800, "nan": 0, "inf": 0},
+            },
+            indent=2,
+            sort_keys=True,
+            allow_nan=False,
+        )
+        + "\n",
+        encoding="utf-8",
+        newline="\n",
+    )
+    return path
 
 
 def _tiny_model(*, seed: int = 848, width: int = 4) -> AutoregressiveNQS:
@@ -456,6 +492,143 @@ def _zero_pair_operator(two_q: int) -> PreparedPairOperator:
         np.zeros((0, 0), dtype=np.complex128),
         two_q,
     )
+
+
+def _install_fast_full_training_compute(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Keep the production artifact path real while replacing expensive estimators."""
+
+    def fake_ground_sample(
+        self: AutoregressiveNQS,
+        size: int,
+        sector: str,
+        *,
+        seed: int,
+    ) -> np.ndarray:
+        assert sector == "ground"
+        assert seed >= 0
+        return np.zeros(size, dtype=object)
+
+    monkeypatch.setattr(AutoregressiveNQS, "sample", fake_ground_sample)
+
+    class FakeComponent:
+        def __init__(self, m: int) -> None:
+            self.m = m
+
+    class FakeTower:
+        def __init__(self) -> None:
+            self.components = {
+                m: FakeComponent(m) for m in (-2, -1, 0, 1, 2)
+            }
+
+        def __getitem__(self, m: int) -> FakeComponent:
+            return self.components[m]
+
+    fake_tower = FakeTower()
+    monkeypatch.setattr(
+        train.LadderTower,
+        "from_m0",
+        lambda **_kwargs: fake_tower,
+    )
+
+    class FakeSampler:
+        def __init__(self, tower: object, *, target_m: int) -> None:
+            assert tower is fake_tower
+            self.target_m = target_m
+
+        def sample(
+            self,
+            *,
+            n_samples: int,
+            burn_in_steps: int,
+            seed: int,
+        ) -> MetropolisSampleBatch:
+            return MetropolisSampleBatch(
+                configs=np.zeros(n_samples, dtype=object),
+                n_samples=n_samples,
+                burn_in_steps=burn_in_steps,
+                seed=seed,
+                burn_in_proposals=burn_in_steps,
+                burn_in_accepted_moves=0,
+                sampling_proposals=n_samples,
+                sampling_accepted_moves=0,
+            )
+
+    monkeypatch.setattr(train, "FixedMMetropolisSampler", FakeSampler)
+
+    def zero_sector_estimators(
+        model: AutoregressiveNQS,
+        _operator: object,
+        _states: np.ndarray,
+        _sector: str,
+        *,
+        include_l4: bool = True,
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray | None, np.ndarray]:
+        train_model_parameter_count[0] = model.parameter_count
+        return (
+            np.zeros(1, dtype=np.complex128),
+            np.zeros(1, dtype=np.complex128),
+            np.zeros(1, dtype=np.complex128) if include_l4 else None,
+            np.zeros((1, model.parameter_count), dtype=np.complex128),
+        )
+
+    def zero_tower_estimators(
+        _component: object,
+        _operator: object,
+        _states: np.ndarray,
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+        parameter_count = train_model_parameter_count[0]
+        return (
+            np.zeros(1, dtype=np.complex128),
+            np.zeros(1, dtype=np.complex128),
+            np.zeros(1, dtype=np.complex128),
+            np.zeros((1, parameter_count), dtype=np.complex128),
+        )
+
+    train_model_parameter_count = [0]
+    monkeypatch.setattr(train, "_sector_estimators", zero_sector_estimators)
+    monkeypatch.setattr(
+        train,
+        "_tower_component_estimators",
+        zero_tower_estimators,
+    )
+
+    def zero_objective(
+        **_kwargs: object,
+    ) -> tuple[float, np.ndarray, dict[str, float]]:
+        metrics = {
+            "energy_ground": 0.0,
+            "energy_excited": 0.0,
+            "mean_l2_ground": 0.0,
+            "mean_l2_excited": 6.0,
+            "mean_l4_excited": 36.0,
+            "variance_l2_excited": 0.0,
+            **{f"energy_excited_m{m:+d}": 0.0 for m in (-2, -1, 0, 1, 2)},
+        }
+        return (
+            0.0,
+            np.zeros(train_model_parameter_count[0], dtype=np.float64),
+            metrics,
+        )
+
+    def zero_adam_update(
+        parameters: object,
+        _gradient: object,
+        state: AdamState,
+        **_kwargs: object,
+    ) -> tuple[np.ndarray, AdamState, float, float]:
+        return (
+            np.asarray(parameters, dtype=np.float64),
+            AdamState(
+                update=state.update + 1,
+                first_moment=state.first_moment,
+                second_moment=state.second_moment,
+            ),
+            0.0,
+            0.0,
+        )
+
+    monkeypatch.setattr(train, "full_objective_and_gradient", zero_objective)
+    monkeypatch.setattr(train, "adam_update", zero_adam_update)
 
 
 def _tiny_l2_matrix(
@@ -1371,6 +1544,39 @@ def test_full_training_runs_frozen_2048_update_six_batch_tower_contract(
     assert {
         (m, count, burn_in) for m, count, burn_in, _seed in tower_calls
     } == {(m, 512, 1024) for m in (-2, -1, 0, 1, 2)}
+    seed_tuples = [
+        (
+            ground_calls[index][2],
+            *(call[3] for call in tower_calls[5 * index : 5 * index + 5]),
+        )
+        for index in range(2048)
+    ]
+    assert seed_tuples[0] == (
+        848_002_544,
+        848_002_545,
+        848_002_546,
+        848_002_547,
+        848_002_548,
+        848_002_549,
+    )
+    assert seed_tuples[1] == (
+        848_002_550,
+        848_002_551,
+        848_002_552,
+        848_002_553,
+        848_002_554,
+        848_002_555,
+    )
+    assert seed_tuples[2047] == (
+        848_014_826,
+        848_014_827,
+        848_014_828,
+        848_014_829,
+        848_014_830,
+        848_014_831,
+    )
+    all_seeds = [seed for seeds in seed_tuples for seed in seeds]
+    assert len(all_seeds) == len(set(all_seeds)) == 12_288
     records = _jsonl_records(run_dir / "training.jsonl")
     assert [record["update"] for record in records] == list(range(1, 2049))
     assert [record["selected"] for record in records] == [False] * 2047 + [True]
@@ -1403,6 +1609,17 @@ def test_full_cli_has_only_frozen_seed_schedule_and_freezes_terminal_run(
     model = _tiny_model(width=3)
     operator = _zero_pair_operator(model.two_q)
     run_dir = tmp_path / "production"
+    reviewed_n8 = _write_synthetic_reviewed_n8_smoke(tmp_path / "n8-smoke.json")
+    monkeypatch.setenv(N8_SMOKE_ARTIFACT_ENV, str(reviewed_n8))
+    clock = iter((10.0, 12.5))
+    monkeypatch.setattr(training_cli.time, "perf_counter", lambda: next(clock))
+    monkeypatch.setattr(training_cli, "peak_rss_bytes", lambda: 123_456)
+    monkeypatch.setattr(
+        training_cli,
+        "_full_run_device_fingerprint",
+        lambda: "pytest-full-runtime",
+        raising=False,
+    )
 
     monkeypatch.setattr(
         training_cli.AutoregressiveNQS,
@@ -1421,15 +1638,31 @@ def test_full_cli_has_only_frozen_seed_schedule_and_freezes_terminal_run(
             output / "optimizer-state.npz",
             output / "training.jsonl",
         ]
-        for path in paths:
-            path.write_bytes(b"fixture")
+        paths[0].write_bytes(b"checkpoint-fixture")
+        paths[1].write_bytes(b"optimizer-fixture")
+        paths[2].write_text(
+            json.dumps(
+                {
+                    "update": 2048,
+                    "selected": True,
+                    "selection_rule": "final_update",
+                    "training_seed": 1848,
+                },
+                sort_keys=True,
+                separators=(",", ":"),
+                allow_nan=False,
+            )
+            + "\n",
+            encoding="utf-8",
+            newline="\n",
+        )
         return train.TrainingArtifacts(
             checkpoint=paths[0],
             optimizer_state=paths[1],
             training_log=paths[2],
             checkpoint_sha256="1" * 64,
             optimizer_state_sha256="2" * 64,
-            training_log_sha256="3" * 64,
+            training_log_sha256=hashlib.sha256(paths[2].read_bytes()).hexdigest(),
             selected_update=2048,
         )
 
@@ -1464,6 +1697,159 @@ def test_full_cli_has_only_frozen_seed_schedule_and_freezes_terminal_run(
     assert emitted["selected_update"] == 2048
 
 
+def test_real_full_training_freeze_is_loadable_by_factory(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    reviewed_n8 = _write_synthetic_reviewed_n8_smoke(tmp_path / "n8-smoke.json")
+    run_dir = tmp_path / "production"
+    monkeypatch.setenv(N8_SMOKE_ARTIFACT_ENV, str(reviewed_n8))
+    _install_fast_full_training_compute(monkeypatch)
+    monkeypatch.setattr(
+        training_cli,
+        "_prepared_operator",
+        lambda two_q: _zero_pair_operator(two_q),
+    )
+    clock = iter((100.0, 102.5))
+    monkeypatch.setattr(training_cli.time, "perf_counter", lambda: next(clock))
+    monkeypatch.setattr(training_cli, "peak_rss_bytes", lambda: 123_456)
+    monkeypatch.setattr(
+        training_cli,
+        "_full_run_device_fingerprint",
+        lambda: "pytest-full-runtime",
+        raising=False,
+    )
+
+    assert training_cli.main(
+        ["--training-seed", "848", "--run-dir", str(run_dir)]
+    ) == 0
+
+    emitted = [json.loads(line) for line in capsys.readouterr().out.splitlines()]
+    assert len(emitted) == 17
+    summary = emitted[-1]
+    training_log = run_dir / "training.jsonl"
+    training_bytes = training_log.read_bytes()
+    training_sha256 = hashlib.sha256(training_bytes).hexdigest()
+    assert summary["training_log_sha256"] == training_sha256
+    records = _jsonl_records(training_log)
+    assert len(records) == 2048
+    assert all("resource_metrics" not in record for record in records[:-1])
+    assert [record["selected"] for record in records] == [False] * 2047 + [True]
+    assert records[-1]["resource_metrics"] == {
+        "placement": "remote",
+        "wall_seconds": 2.5,
+        "peak_rss_bytes": 123_456,
+        "peak_vram_bytes": None,
+        "estimator_evaluations": 6_291_456,
+        "effective_sample_size": 0.0,
+        "n8_smoke_complete": True,
+        "n8_to_n6_time_ratio": 4.229112834613484,
+        "n8_to_n6_memory_ratio": 2.3707141015725703,
+        "device_fingerprint": "pytest-full-runtime",
+    }
+    manifest = json.loads(
+        (run_dir / "training-manifest.json").read_text(encoding="utf-8")
+    )
+    training_item = next(
+        item for item in manifest["artifacts"] if item["role"] == "training_log"
+    )
+    assert training_item["sha256"] == training_sha256
+
+    monkeypatch.setenv(factory.RUN_DIR_ENV, str(run_dir))
+    monkeypatch.setattr(factory, "coulomb_integrals", lambda _two_q: None)
+    monkeypatch.setattr(
+        factory,
+        "antisymmetrized_pair_matrix",
+        lambda _integrals: ((), np.zeros((0, 0), dtype=np.complex128)),
+    )
+    candidate = factory.load_candidate()
+    resources = candidate.resource_metrics()
+    assert resources.placement == "remote"
+    assert resources.wall_seconds == 2.5
+    assert resources.estimator_evaluations == 6_291_456
+    assert resources.effective_sample_size == 0.0
+    assert resources.n8_smoke_complete is True
+    assert resources.n8_to_n6_time_ratio == 4.229112834613484
+    assert resources.n8_to_n6_memory_ratio == 2.3707141015725703
+
+
+def test_full_cli_parser_accepts_explicit_reviewed_n8_smoke_path(
+    tmp_path: Path,
+) -> None:
+    reviewed_n8 = tmp_path / "n8-smoke.json"
+    arguments = training_cli._parser().parse_args(
+        [
+            "--training-seed",
+            "848",
+            "--run-dir",
+            str(tmp_path / "run"),
+            "--n8-smoke-artifact",
+            str(reviewed_n8),
+        ]
+    )
+
+    assert arguments.n8_smoke_artifact == reviewed_n8
+
+
+def test_full_cli_requires_reviewed_n8_smoke_before_training(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.delenv(N8_SMOKE_ARTIFACT_ENV, raising=False)
+    monkeypatch.setattr(
+        training_cli.AutoregressiveNQS,
+        "initialize",
+        lambda **_kwargs: pytest.fail("training started before N=8 input validation"),
+    )
+
+    with pytest.raises(ValueError, match="reviewed N=8 smoke artifact is required"):
+        training_cli.main(
+            ["--training-seed", "848", "--run-dir", str(tmp_path / "run")]
+        )
+
+
+@pytest.mark.parametrize(
+    ("field", "value", "message"),
+    [
+        ("schema", "wrong-schema", "schema"),
+        ("status", "failed", "status"),
+        ("optimizer_updates", 1, "optimizer_updates"),
+        ("protocol_sha256", "0" * 64, "protocol"),
+        ("seed", 848, "seed"),
+        ("n8_to_n6_time_ratio", -1.0, "time ratio"),
+        ("n8_to_n6_memory_ratio", None, "memory ratio"),
+        ("finite_counters", {"finite": 20_800, "nan": 1, "inf": 0}, "finite"),
+    ],
+)
+def test_full_cli_rejects_unreviewed_n8_smoke_before_training(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    field: str,
+    value: object,
+    message: str,
+) -> None:
+    reviewed_n8 = _write_synthetic_reviewed_n8_smoke(tmp_path / "n8-smoke.json")
+    payload = json.loads(reviewed_n8.read_text(encoding="utf-8"))
+    payload[field] = value
+    reviewed_n8.write_text(
+        json.dumps(payload, sort_keys=True, allow_nan=False) + "\n",
+        encoding="utf-8",
+        newline="\n",
+    )
+    monkeypatch.setenv(N8_SMOKE_ARTIFACT_ENV, str(reviewed_n8))
+    monkeypatch.setattr(
+        training_cli.AutoregressiveNQS,
+        "initialize",
+        lambda **_kwargs: pytest.fail("training started before N=8 input validation"),
+    )
+
+    with pytest.raises(ValueError, match=message):
+        training_cli.main(
+            ["--training-seed", "848", "--run-dir", str(tmp_path / "run")]
+        )
+
+
 def test_full_cli_rejects_existing_manifest_before_training_starts(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -1471,6 +1857,8 @@ def test_full_cli_rejects_existing_manifest_before_training_starts(
     model = _tiny_model(width=3)
     run_dir = tmp_path / "protected-run"
     run_dir.mkdir()
+    reviewed_n8 = _write_synthetic_reviewed_n8_smoke(tmp_path / "n8-smoke.json")
+    monkeypatch.setenv(N8_SMOKE_ARTIFACT_ENV, str(reviewed_n8))
     manifest = run_dir / "training-manifest.json"
     sentinel = b"preexisting-provenance\n"
     manifest.write_bytes(sentinel)
