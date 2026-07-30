@@ -1,0 +1,75 @@
+{
+  "schema_version": 1,
+  "run": "sim-to-real-calibration-v1",
+  "setup": {
+    "dim": 4,
+    "target": "CNOT",
+    "t_final": 1.0,
+    "n_ctrl": 4,
+    "n_basis": 10,
+    "n_params": 40,
+    "seed": 42,
+    "integrator": "midpoint product of exponentials",
+    "n_steps": 256,
+    "dtype": "complex128"
+  },
+  "environment": {
+    "python": "3.13.3 (v3.13.3:6280bb54784, Apr  8 2025, 10:47:54) [Clang 15.0.0 (clang-1500.3.9.4)]",
+    "platform": "macOS-26.5-arm64-arm-64bit-Mach-O",
+    "jax": "0.7.1",
+    "numpy": "2.2.5",
+    "scipy": "1.15.3",
+    "devices": [
+      "TFRT_CPU_0"
+    ]
+  },
+  "optimization": {
+    "expm": {
+      "loss": 6.7390537594747e-14,
+      "success": true,
+      "iterations": 57,
+      "evaluations": 58,
+      "message": "Optimization terminated successfully.",
+      "wall_seconds": 0.45866275002481416
+    },
+    "odeint": {
+      "loss": 2.9281074231946036e-09,
+      "success": true,
+      "iterations": 57,
+      "evaluations": 58,
+      "message": "Optimization terminated successfully.",
+      "wall_seconds": 0.47018833400215954
+    }
+  },
+  "timing": {
+    "jit_compile_and_first_seconds": 0.12145654199412093,
+    "jit_warm_seconds": 0.0005779580096714199,
+    "hessian_seconds": 1.0884157089749351,
+    "jacobian_seconds": 0.681984165974427,
+    "hvp_krylov_seconds": 0.5367607500520535
+  },
+  "verification": {
+    "unitarity_defect_fro": 8.672887086680466e-15,
+    "loss_at_n_steps": 6.727951529228449e-14,
+    "loss_at_2n_steps": 9.238016351886813e-09,
+    "loss_at_odeint": 1.6700493543631012e-08,
+    "step_refinement_difference_fro": 0.0002715635642649108,
+    "ode_vs_expm_difference_fro": 9.051942501584885e-05,
+    "lambda15": 0.010259772773211119,
+    "lambda16": 4.460035682805477e-08,
+    "lambda15_to_lambda16_magnitude_ratio": 230037.90783031267,
+    "hessian_jacobian_mean_overlap": 0.9999999999997932,
+    "hessian_jacobian_minimum_overlap": 0.9999999999981699,
+    "hessian_jacobian_largest_angle_degrees": 7.751023439854259e-05,
+    "explicit_krylov_mean_overlap": 0.9999999999999998,
+    "explicit_krylov_minimum_overlap": 0.9999999999999984,
+    "explicit_krylov_largest_angle_degrees": 2.2588727439225506e-06
+  },
+  "artifacts": [
+    "control_fields.png",
+    "hessian_spectrum.png",
+    "endpoint_jacobian_spectrum.png",
+    "calibration_data.npz"
+  ],
+  "rerun": "python3 tracks/qcs/solutions/Fermichen99/run_calibration.py --n-steps 256"
+}

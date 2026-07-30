@@ -1,0 +1,91 @@
+{
+  "schema_version": 1,
+  "run": "sim-to-real-invariant-v1",
+  "setup": {
+    "n_steps": 256,
+    "relative_rank_threshold": 1e-06,
+    "dtype": "complex128"
+  },
+  "environment": {
+    "python": "3.13.3 (v3.13.3:6280bb54784, Apr  8 2025, 10:47:54) [Clang 15.0.0 (clang-1500.3.9.4)]",
+    "platform": "macOS-26.5-arm64-arm-64bit-Mach-O",
+    "jax": "0.7.1",
+    "numpy": "2.2.5",
+    "scipy": "1.15.3",
+    "devices": [
+      "TFRT_CPU_0"
+    ]
+  },
+  "wall_seconds": 4.634744415991008,
+  "records": [
+    {
+      "name": "single-qubit X",
+      "dim": 2,
+      "n_params": 20,
+      "expected_rank_d2_minus_1": 3,
+      "observed_hessian_rank": 3,
+      "observed_endpoint_jacobian_rank": 3,
+      "relative_rank_threshold": 1e-06,
+      "optimization": {
+        "loss": 2.220446049250313e-15,
+        "success": true,
+        "iterations": 12,
+        "evaluations": 13,
+        "wall_seconds": 0.32114645797992125
+      },
+      "hessian_seconds": 1.1351183750084601,
+      "jacobian_seconds": 0.6333818749990314,
+      "lambda_at_expected_rank": 0.08448909388736377,
+      "lambda_after_expected_rank": 4.360800669685581e-09,
+      "spectral_gap": 19374674.58090799,
+      "endpoint_singular_values": [
+        1.7102059450106815,
+        0.8368279415069267,
+        0.41106955938142725
+      ]
+    },
+    {
+      "name": "two-qubit CNOT",
+      "dim": 4,
+      "n_params": 40,
+      "expected_rank_d2_minus_1": 15,
+      "observed_hessian_rank": 15,
+      "observed_endpoint_jacobian_rank": 15,
+      "relative_rank_threshold": 1e-06,
+      "optimization": {
+        "loss": 6.7390537594747e-14,
+        "success": true,
+        "iterations": 57,
+        "evaluations": 58,
+        "wall_seconds": 0.45045445900177583
+      },
+      "hessian_seconds": 1.2232605000026524,
+      "jacobian_seconds": 0.6848055420559831,
+      "lambda_at_expected_rank": 0.010259772773211119,
+      "lambda_after_expected_rank": 4.460035682805477e-08,
+      "spectral_gap": 230037.90783031267,
+      "endpoint_singular_values": [
+        2.0963120702278726,
+        1.7917531847984491,
+        1.4635647910660348,
+        1.31253835185028,
+        1.208622836017496,
+        1.1277775246517885,
+        0.9486700302139501,
+        0.866791911634263,
+        0.7514961812997853,
+        0.6877382430060175,
+        0.6269286593634886,
+        0.4892100478661543,
+        0.346905252816978,
+        0.28367412640342493,
+        0.20258099512944955
+      ]
+    }
+  ],
+  "artifacts": [
+    "hessian_rank_invariant.png",
+    "invariant_spectra.npz"
+  ],
+  "rerun": "python3 tracks/qcs/solutions/Fermichen99/run_invariant_check.py"
+}

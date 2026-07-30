@@ -1,0 +1,365 @@
+{
+  "title": "Challenge #113: Query-Efficient Sim-to-Real Quantum-Gate Calibration",
+  "eyebrow": "Quantum Control · Final Challenge Report",
+  "url": "https://github.com/QuantumBFS/quantum.harness/issues/113",
+  "lede": "The local control landscape has d²−1 curved directions, but model mismatch rotates their pulse-space orientation; model-informed search is therefore efficient when the basis is valid, while device-triggered relinearization is needed to retain the advantage at larger drift mismatch.",
+  "sections": [
+    {
+      "title": "Challenge",
+      "note": "What issue #113 asks, and the precise claim tested here.",
+      "blocks": [
+        {
+          "kind": "text",
+          "text": "A differentiable device model can produce a high-fidelity gate and exact pulse derivatives cheaply, but the physical device differs from that model and exposes only expensive, noisy measurements. Issue #113 asks whether the model Hessian identifies a low-dimensional pulse subspace that reduces closed-loop calibration cost, where that transfer fails as the model-device gap grows, and whether modest adaptation can recover the saving."
+        },
+        {
+          "kind": "card",
+          "title": "Physical statement under test",
+          "blocks": [
+            {
+              "kind": "text",
+              "text": "Near a model optimum, write $U_{\\mathrm{target}}^\\dagger U(\\theta)=e^{iA}$. Gate fidelity is insensitive to the identity part of the Hermitian generator $A$, so only the traceless generators contribute curvature. Their dimension is $d^2-1$: three for one qubit and fifteen for two qubits. This fixes the maximum local curvature rank, but it does **not** guarantee that a basis computed from an imperfect model keeps the correct orientation in pulse-parameter space."
+            },
+            {
+              "kind": "equation",
+              "tex": "\\mathcal{L}(\\theta)=1-\\frac{1}{d}\\left|\\operatorname{Tr}\\left(U_{\\mathrm{target}}^\\dagger U(\\theta)\\right)\\right|,\\qquad \\operatorname{rank}(\\nabla_\\theta^2\\mathcal{L})\\le d^2-1"
+            }
+          ]
+        },
+        {
+          "kind": "card",
+          "title": "Why this matters",
+          "blocks": [
+            {
+              "kind": "text",
+              "text": "Closed-loop evaluations consume real experiments and measurement shots, and derivative-free optimization becomes expensive as the number of pulse controls grows. A reliable reduced coordinate system can move most computation into the simulator while preserving the device's ability to correct model error."
+            }
+          ]
+        },
+        {
+          "kind": "kv",
+          "pairs": [
+            [
+              "Challenge",
+              "Quantum Harness issue #113 — Sim-to-Real for Quantum Gates"
+            ],
+            [
+              "Systems",
+              "Single-qubit X gate (d=2, P=20) and two-qubit CNOT (d=4, P=40)"
+            ],
+            [
+              "Target",
+              "Certified infidelity 1−F ≤ 10⁻³"
+            ],
+            [
+              "Evidence",
+              "Two completed figures; 15 held-out finite-shot runs per condition"
+            ],
+            [
+              "Scope",
+              "Simulated drift-Hamiltonian mismatch; no real-hardware claim"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Approach",
+      "note": "A strict model/device split and an honest count of every black-box query.",
+      "blocks": [
+        {
+          "kind": "badge",
+          "text": "Finite-shot numerical experiment",
+          "style": "neutral"
+        },
+        {
+          "kind": "text",
+          "text": "The model dynamics are $H(t;\\theta)=H_0+\\sum_a u_a(t;\\theta)H_a$. We first optimize $\\theta^*$ with model gradients, compute the Hessian or endpoint Jacobian at that pulse, and form an orthonormal basis $V_k$. Closed-loop candidates are restricted to $\\theta=\\theta^*+V_kc$. The simulated device uses $H_{0,\\mathrm{true}}=H_0+\\varepsilon\\Delta H$, with $\\|\\Delta H\\|_F=\\|H_0\\|_F$, and returns only a binomial finite-shot estimate of scalar fidelity. The loop never sees the held-out Hamiltonian, its Jacobian, $\\varepsilon$, a gradient, or exact fidelity."
+        },
+        {
+          "kind": "kv",
+          "pairs": [
+            [
+              "Nominal basis",
+              "Leading eigenvectors of the Hessian at the nominal model optimum"
+            ],
+            [
+              "Fixed ensemble basis",
+              "One precomputed basis from stacked, block-normalized endpoint Jacobians of the nominal model plus 15 declared perturbation models"
+            ],
+            [
+              "Triggered adaptive",
+              "Start with nominal k=15; after a failed device-only certificate, recompute a k=20 ensemble-Jacobian basis at the device-selected pulse and continue"
+            ],
+            [
+              "Held-out protocol",
+              "Five unseen drift seeds × three independent shot-noise seeds per ε; training and test seeds are disjoint"
+            ],
+            [
+              "Measurement",
+              "65,536 shots per query; every query and shot counted"
+            ]
+          ]
+        },
+        {
+          "kind": "card",
+          "title": "Derivative-free closed-loop optimizers",
+          "blocks": [
+            {
+              "kind": "text",
+              "text": "**Five-point coordinate scan.** For each reduced coordinate, the device is queried at offsets $\\{-h,-h/2,0,h/2,h\\}$ with $h=0.3$. A one-dimensional quadratic is fitted; if its minimum lies inside the interval and is convex, that vertex is also queried, and the best measured point is retained. This transparent, fixed-cost pass is used for the single-qubit study and as the initial nominal k=15 stage of the adaptive two-qubit loop."
+            },
+            {
+              "kind": "text",
+              "text": "**COBYQA.** For the two-qubit fixed-space comparison and adaptive recovery stages, COBYQA constructs and updates a local quadratic model of the scalar loss inside a trust region, without device gradients. It is used after the coordinate scan because coupled motion among 20–30 reduced coordinates is better represented by a multivariate trust-region model than by another independent-axis pass."
+            }
+          ]
+        },
+        {
+          "kind": "card",
+          "title": "Success criterion and statistics",
+          "blocks": [
+            {
+              "kind": "text",
+              "text": "A single favorable noisy observation is not accepted. The selected pulse is queried seven more times and succeeds only if the Wilson upper bound on infidelity, implemented with $z=1.96$, is at most $10^{-3}$. This is conservative relative to a nominal one-sided 95% bound. Failed runs are right-censored at budget+1: 501 queries in Figure 1 and 701 in Figure 2. Curves report the median and interquartile range across 15 runs; percentages are certified success rates."
+            }
+          ]
+        },
+        {
+          "kind": "table",
+          "columns": [
+            "Experiment",
+            "System",
+            "Search",
+            "Budget",
+            "Runs/condition"
+          ],
+          "numeric": [
+            false,
+            false,
+            false,
+            true,
+            true
+          ],
+          "rows": [
+            [
+              "Intrinsic rank",
+              "X and CNOT",
+              "Model derivatives",
+              "—",
+              "1"
+            ],
+            [
+              "Reduced-space saving",
+              "X, P=20",
+              "Five-point scan",
+              "500",
+              "15"
+            ],
+            [
+              "Fixed-space failure",
+              "CNOT, P=40",
+              "COBYQA",
+              "700",
+              "15"
+            ],
+            [
+              "Adaptive recovery",
+              "CNOT, P=40",
+              "Scan → COBYQA",
+              "700",
+              "15"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Results",
+      "note": "Two figures answer the intrinsic-dimension, query-saving, and mismatch-failure questions.",
+      "blocks": [
+        {
+          "kind": "heading",
+          "level": 3,
+          "text": "Figure 1 — The d²−1 geometry is real and useful"
+        },
+        {
+          "kind": "figures",
+          "items": [
+            {
+              "src": "figure1_intrinsic_dimension.png",
+              "caption": "Passed. (a) The differentiable model supplies a warm-start pulse and reduced basis; only finite-shot scalar loss crosses the device boundary. (b) Normalized Hessian spectra at model optima have numerical rank 3 for the single-qubit X gate and 15 for the two-qubit CNOT, using a relative 10⁻⁶ threshold, exactly matching d²−1. (c) At ε=0.3, single-qubit nominal spaces with k<3 never certify, while the informed k=3 space certifies 15/15 runs in a median 25 queries. A random k=3 space certifies 0/15; the raw 20-dimensional space certifies 15/15 but requires a median 126 queries. Error bars are interquartile ranges; 501 denotes right-censored failures."
+            }
+          ]
+        },
+        {
+          "kind": "table",
+          "columns": [
+            "Single-qubit search at ε=0.3",
+            "Dimension",
+            "Certified success",
+            "Median queries"
+          ],
+          "numeric": [
+            false,
+            true,
+            true,
+            true
+          ],
+          "rows": [
+            [
+              "Nominal Hessian",
+              "1",
+              "0/15",
+              "501 (censored)"
+            ],
+            [
+              "Nominal Hessian",
+              "2",
+              "0/15",
+              "501 (censored)"
+            ],
+            [
+              "Nominal Hessian",
+              "3",
+              "15/15",
+              "25"
+            ],
+            [
+              "Random",
+              "3",
+              "0/15",
+              "501 (censored)"
+            ],
+            [
+              "Raw parameters",
+              "20",
+              "15/15",
+              "126"
+            ]
+          ]
+        },
+        {
+          "kind": "verdict",
+          "status": "good",
+          "label": "Issue claim confirmed in the valid-transfer regime",
+          "why": "The curvature rank tracks d²−1 across d=2 and d=4, and the correctly oriented model subspace cuts the single-qubit median query count by about 5× relative to the raw search."
+        },
+        {
+          "kind": "heading",
+          "level": 3,
+          "text": "Figure 2 — Fixed directions fail under mismatch; triggered relinearization recovers"
+        },
+        {
+          "kind": "figures",
+          "items": [
+            {
+              "src": "figure2_closed_loop_answer.png",
+              "caption": "Passed within the declared drift benchmark. (a) For the CNOT, fixed nominal Hessian spaces show the dimension-cost trade-off: at ε=0.1, k=15 already gives 15/15 success with median 238 queries, whereas k=20 and 30 cost 313 and 461. At ε=0.5, the same fixed k=15 space falls to 3/15 success; k=20 reaches 9/15 and k=30 reaches 14/15, but at median censored costs 414 and 599. (b) Fixed nominal k=15 is cheapest only when transfer is good; fixed ensemble k=30 is robust but expensive. The device-triggered k=15→20 protocol certifies all 45 held-out runs, with median queries 97, 330, and 330 at ε=0.1, 0.3, and 0.5. Percentages label certified success; error bars are interquartile ranges; 701 denotes right-censored failures."
+            }
+          ]
+        },
+        {
+          "kind": "table",
+          "columns": [
+            "CNOT strategy",
+            "ε=0.1",
+            "ε=0.3",
+            "ε=0.5"
+          ],
+          "numeric": [
+            false,
+            false,
+            false,
+            false
+          ],
+          "rows": [
+            [
+              "Fixed nominal k=15",
+              "100%; 238 queries",
+              "80%; 259 queries",
+              "20%; 701 censored"
+            ],
+            [
+              "Fixed ensemble k=30",
+              "100%; 506 queries",
+              "100%; 572 queries",
+              "100%; 579 queries"
+            ],
+            [
+              "Triggered adaptive k≤20",
+              "100%; 97 queries",
+              "100%; 330 queries",
+              "100%; 330 queries"
+            ]
+          ]
+        },
+        {
+          "kind": "verdict",
+          "status": "good",
+          "label": "Failure mode identified and recovered",
+          "why": "A fixed top-d²−1 basis is not uniformly robust because mismatch rotates its pulse-space orientation. Blindly carrying more fixed directions improves reachability but spends more queries; a certificate-triggered basis update attains 100% success here with at most 20 active directions."
+        }
+      ]
+    },
+    {
+      "title": "Highlight",
+      "note": "What is established, what is new, and what is not claimed.",
+      "blocks": [
+        {
+          "kind": "card",
+          "title": "Direct answer to issue #113",
+          "blocks": [
+            {
+              "kind": "text",
+              "text": "Yes: the model Hessian exposes the predicted $d^2-1$ local geometry and, when its orientation transfers, it reduces black-box calibration cost substantially. The sweet spot is not a universal fixed $k=d^2-1$ under arbitrary mismatch. The observed failure is a rotation of useful pulse directions, so the practical solution is to test transfer with device data and update the basis only when needed."
+            }
+          ]
+        },
+        {
+          "kind": "card",
+          "title": "What is innovative",
+          "blocks": [
+            {
+              "kind": "text",
+              "text": "The key distinction is between **intrinsic physical dimension** and **model-dependent pulse-space orientation**. The method retains a strict black-box boundary and uses a statistically defined device certificate to decide when the inexpensive nominal search is sufficient and when model-side relinearization is warranted."
+            }
+          ]
+        },
+        {
+          "kind": "card",
+          "title": "Significance of the output",
+          "blocks": [
+            {
+              "kind": "text",
+              "text": "The result turns the issue's qualitative warning about the sim-to-real gap into a measured design rule. Use the smallest physically motivated basis first; do not enlarge it merely because mismatch exists; trigger a new local basis when the observed device certificate says the current coordinates are inadequate."
+            }
+          ]
+        },
+        {
+          "kind": "card",
+          "title": "Broader impact and limitation",
+          "blocks": [
+            {
+              "kind": "text",
+              "text": "This pattern can reduce experimental calibration effort whenever a differentiable surrogate is available but imperfect. The evidence here is deliberately limited to simulated drift-Hamiltonian mismatch, two gate sizes, and the declared finite-shot protocol. It does not establish performance on real hardware or under every form of device error."
+            }
+          ]
+        },
+        {
+          "kind": "kv",
+          "pairs": [
+            [
+              "Primary references",
+              "Shen, Hsieh & Rabitz (2006); Roslund & Rabitz (2014); Egger & Wilhelm (2014)"
+            ],
+            [
+              "Reproducibility",
+              "Source runs, compact CSVs, figure provenance, and minimal code list are recorded in this report bundle"
+            ]
+          ]
+        }
+      ]
+    }
+  ]
+}
