@@ -21,7 +21,7 @@ The project is not a literal reproduction of the paper's torus/disk spectral plo
 
 ## 2. Success criteria
 
-1. An exact-diagonalization (ED) oracle resolves the lowest `L=0` and `L=2` energies for small `N`.
+1. Exact diagonalization resolves the lowest `L=0` and `L=2` energies. Production ED shares the Hamiltonian kernel with NQS; a separate first-quantized implementation provides an independent `N=3,4` oracle.
 2. The model `V1` Hamiltonian has the Laughlin state as a zero-energy `L=0` ground state.
 3. The Coulomb Hamiltonian is Hermitian and rotationally invariant.
 4. The variational state is fermionic and belongs to a definite SO(3) irrep.
@@ -36,9 +36,11 @@ The project is not a literal reproduction of the paper's torus/disk spectral plo
 flowchart LR
     C[Configuration] --> B[LLL Fock basis]
     B --> H[Sphere Hamiltonian]
-    H --> ED[Lanczos ED oracle]
+    H --> ED[Lanczos ED shared-kernel cross-check]
+    C --> O[Independent first-quantized N<=4 oracle]
     B --> NQS[Symmetry-projected NQS]
     ED --> V[Validation]
+    O --> V
     NQS --> V
     V --> G[Gap and multiplet report]
 ```
@@ -55,7 +57,7 @@ The pair-projector form is
 
 Clebsch-Gordan coefficients transform pair states between the orbital and total-pair-angular-momentum bases. This construction makes total `L` a good quantum number up to floating-point error.
 
-### 3.2 ED oracle
+### 3.2 ED cross-check
 
 The ED path uses fixed `(N, 2Lz)` sectors and sparse Lanczos diagonalization. States are labeled by applying `L^2` or by highest-weight constraints. The initial supported range is `N=4..8`; larger sizes are optional and depend on memory.
 
@@ -73,15 +75,16 @@ The conservative implementation works entirely in the LLL occupation basis:
 
 - the Fock basis enforces fermionic antisymmetry;
 - a shared neural amplitude model supplies configuration amplitudes;
-- angular-momentum projection or a highest-weight null-space map restricts each head to exact `L=0` or `L=2`;
+- angular-momentum projection or a highest-weight null-space map restricts each output to numerical `L=0` or `L=2`, with a checked residual;
 - the two heads share parameters so common correlation-energy errors cancel in the gap.
 
 The implemented ansatz is a shared one-hidden-layer MLP with separate scalar
 heads. It is optimized by L-BFGS against the state-averaged `L=0`/`L=2` energy.
 For validation, exact independent samples are drawn from the enumerated
-`|psi|^2` distribution and used to report energy standard errors.
+`|psi|^2` distribution and used to report posterior energy-estimator standard
+errors. They do not quantify ansatz, optimizer/restart, or extrapolation error.
 
-For `N=8,9`, the exact projector is applied without a dense null-space basis:
+For `N=8,9`, the target highest-weight projector is applied numerically without a dense null-space basis:
 `P=I-L_+^dagger(L_+L_+^dagger)^(-1)L_+`. Sparse conjugate gradients provide a
 direct highest-weight residual certificate. This removes the dense projection
 bottleneck but retains full fixed-`M` enumeration and a sparse Hamiltonian.
@@ -93,7 +96,9 @@ operators follow Liou et al.: `O_+` maps pair `m=1` to `m=3`, while its adjoint
 `O_-` maps `m=3` to `m=1`. Their rank-two commutators and adjoint relation are
 tested. The `V1` Laughlin state has a numerically zero dark channel; Coulomb
 results report both integrated and lowest-`L=2` pole weights. This is not the
-full metric derivative of the finite-sphere Coulomb Hamiltonian.
+full metric derivative of the finite-sphere Coulomb Hamiltonian. The proxy can
+be evaluated from either ED states or trained projected NQS states; the source
+is explicit in each JSON artifact.
 
 ## 4. Data flow
 
@@ -123,14 +128,19 @@ Plasma-Team/
     interactions.py
     hamiltonian.py
     ed.py
+    independent_oracle.py
     nqs.py
+    nqs_chirality.py
     observables.py
     chirality.py
+    provenance.py
     scalable_nqs.py
     cli.py
   tests/
   scripts/
+    bootstrap.ps1
     verify.ps1
+    verify_review.ps1
     reproduce_small.py
     summarize_results.py
     run_acceptance.ps1
@@ -140,6 +150,7 @@ Plasma-Team/
   CHIRAL_GRAVITON_API.md
   CHIRAL_GRAVITON_STYLE.md
   REPORT.md
+  requirements-lock.txt
 ```
 
 ## 6. Development nodes
@@ -152,8 +163,8 @@ Plasma-Team/
 | 3 | `V1` and Coulomb Hamiltonians | Hermiticity and rotational invariance | complete |
 | 4 | ED energies by `L` | Laughlin zero mode and multiplet | complete, `N<=8` |
 | 5 | projected shared NQS | ED agreement and sparse certificate | complete, `N<=9` |
-| 6 | uncertainty and scaling | direct-sampling errors and fit stability | complete, bounded |
-| 7 | chirality | bright/dark matrix elements and lowest pole | complete, parent channel |
+| 6 | uncertainty and scaling | posterior-sampling SEM and fit sensitivity | partial, exploratory |
+| 7 | chirality | ED/NQS bright-dark matrix elements and lowest pole | partial, parent channel |
 | 8 | final report | one-command reproduction | complete |
 
 ## 7. Environment
@@ -169,6 +180,8 @@ Required packages:
 
 Accepted environment versions: NumPy 2.5.1, SciPy 1.18.0, SymPy 1.14.0,
 pytest 9.1.1. SciPy supplies L-BFGS, so no PyTorch/JAX dependency is required.
+`requirements-lock.txt` freezes the reviewed direct and transitive packages;
+`scripts/bootstrap.ps1` creates/checks the local environment and runs tests.
 
 No secrets or external services are required. Optional environment variables:
 
@@ -187,10 +200,11 @@ No secrets or external services are required. Optional environment variables:
 | `CG002` | empty symmetry sector | stop and inspect `2Lz` parity |
 | `CG003` | non-Hermitian Hamiltonian | reject iteration |
 | `CG004` | SU(2) commutator failure | reject iteration |
-| `CG005` | Lanczos non-convergence | increase Krylov budget or reduce size |
-| `CG006` | NQS symmetry failure | reject checkpoint |
-| `CG007` | insufficient effective samples | extend chain before reporting |
-| `CG008` | ED/NQS mismatch | do not scale to larger `N` |
+| `CG005` | eigensolver/projection solver non-convergence | increase solver budget or reduce size |
+| `CG006` | schema, consistency, or projected-irrep failure | reject artifact |
+| `CG007` | optimizer non-convergence | reject checkpoint and return nonzero |
+| `CG008` | NaN or infinity | do not serialize invalid JSON; return nonzero |
+| `CG009` | scientific-quality threshold failure | retain failed diagnostics and return nonzero |
 
 ## 9. Performance expectations
 
@@ -203,7 +217,8 @@ Every Monte Carlo report includes sample count, mean, standard error, variance,
 and seed. The implemented sampler draws independent samples directly from the
 enumerated distribution, so burn-in is zero, integrated autocorrelation is one,
 and effective sample size equals raw sample count. The two sectors use separate
-seeds and their gap error is propagated in quadrature.
+seeds and their estimator error is propagated in quadrature. This posterior
+diagnostic is not a scalable VMC training loop and not a total uncertainty bar.
 
 ## 10. Safety and reproducibility checklist
 
@@ -221,7 +236,7 @@ seeds and their gap error is propagated in quadrature.
 2. `M=+/-2` labels are not by themselves chirality labels. Chirality requires `O_+/-` response.
 3. A constant neutralizing background changes total energies but cancels in a same-`N` gap; it must still be documented.
 4. Independent `L=0` and `L=2` optimizations can create a noisy difference. Shared features/state averaging are preferred.
-5. The paper did not publish raw data or code, so agreement is judged against its stated bounds and independently generated ED values.
+5. The paper did not publish raw data or code. `N=3,4` have an independent first-quantized oracle; larger ED comparisons share the production Hamiltonian kernel and are labeled accordingly.
 
 ## 12. Node log
 
@@ -246,3 +261,10 @@ seeds and their gap error is propagated in quadrature.
   `616`; the lowest `L=2` pole carries `77.4%` of the bright weight.
 - 2026-07-29: `N=4..9` fit comparison gives primary `Delta_infinity=0.1289`
   with a `0.0134` small-size model envelope.
+- 2026-07-30: review remediation added fail-closed CLI/result validation,
+  dependency and run provenance, a locked bootstrap, and an 8/8 review gate.
+- 2026-07-30: an independent first-quantized/determinant oracle checks `N=3,4`
+  within `2e-5` without importing the production physics kernel.
+- 2026-07-30: trained sparse NQS states now feed the parent-channel response at
+  `N=7`; 67 tests pass. Scalable VMC, input equivariance, the full Coulomb
+  metric derivative, and controlled thermodynamic extrapolation remain open.

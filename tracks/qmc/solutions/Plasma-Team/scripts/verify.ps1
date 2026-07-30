@@ -1,4 +1,4 @@
-$ErrorActionPreference = 'SilentlyContinue'
+$ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
 $python = Join-Path $root '.venv\Scripts\python.exe'
 $env:PYTHONPATH = Join-Path $root 'src'
@@ -26,3 +26,7 @@ if (Test-Path $python) {
 }
 
 Write-Output $score
+if ($score -ne 8) {
+    Write-Error "Base verification failed: score $score/8"
+    exit 1
+}

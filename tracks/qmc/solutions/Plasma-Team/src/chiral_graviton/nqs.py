@@ -1,4 +1,4 @@
-"""Exactly symmetry-projected neural quantum states for small sphere systems."""
+"""Symmetry-projected neural quantum states for small sphere systems."""
 
 from __future__ import annotations
 
@@ -70,7 +70,7 @@ class MonteCarloEstimate:
 
 
 class SharedProjectedMLP:
-    """One-hidden-layer real NQS with exact angular-momentum projection.
+    """One-hidden-layer real NQS with explicit angular-momentum projection.
 
     Occupation features feed a shared nonlinear trunk. Separate scalar heads
     produce raw amplitudes in the Lz=0 and Lz=2 Fock sectors. Projection onto
@@ -241,14 +241,23 @@ class SharedProjectedMLP:
             parameters=np.asarray(result.x),
         )
 
-    def equivariance_error(self, parameters: np.ndarray) -> float:
-        """Return max |<L^2>-L(L+1)| for the two projected states."""
+    def irrep_error(self, parameters: np.ndarray) -> float:
+        """Return max |<L^2>-L(L+1)| for the projected output states.
+
+        This certifies the irrep of the output state vector. It does not claim
+        that the raw occupation-to-amplitude network is input-equivariant.
+        """
 
         errors = []
         for total_l in self.labels:
             estimate = self.estimate(parameters, total_l)
             errors.append(abs(estimate.l2_expectation - total_l * (total_l + 1)))
         return max(errors)
+
+    def equivariance_error(self, parameters: np.ndarray) -> float:
+        """Compatibility alias for the historically named irrep diagnostic."""
+
+        return self.irrep_error(parameters)
 
     def sample_energy(
         self,
@@ -260,10 +269,11 @@ class SharedProjectedMLP:
     ) -> MonteCarloEstimate:
         """Estimate energy by independent sampling from the enumerated NQS.
 
-        This is a small-system VMC validation path. It draws exact independent
-        samples from |psi|^2, so no burn-in or autocorrelation correction is
-        needed. Larger, non-enumerated systems require an autoregressive or
-        Markov-chain sampler.
+        This is a posterior energy-estimator diagnostic at fixed optimized
+        parameters. It draws independent samples from enumerated |psi|^2, so
+        no burn-in or autocorrelation correction is needed. It is not a
+        scalable VMC training loop and does not include optimizer or ansatz
+        uncertainty.
         """
 
         if n_samples < 2:

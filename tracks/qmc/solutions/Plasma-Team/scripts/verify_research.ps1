@@ -1,7 +1,15 @@
-$ErrorActionPreference = 'SilentlyContinue'
+param(
+    [string]$ResultsDirectory = ""
+)
+
+$ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
 $python = Join-Path $root '.venv\Scripts\python.exe'
-$results = Join-Path $root '..\..\results\20260729-chiral-graviton-strong'
+if ($ResultsDirectory) {
+    $results = $ResultsDirectory
+} else {
+    $results = Join-Path $root '..\..\results\20260729-chiral-graviton-strong'
+}
 $env:PYTHONPATH = Join-Path $root 'src'
 $score = 0
 
@@ -21,8 +29,9 @@ if (Test-Path $python) {
     }
 
     $chirality = Join-Path $results 'chirality-coulomb-n7.json'
-    if (Test-Path $chirality) {
-        & $python -c "import json,sys; p=json.load(open(sys.argv[1])); assert p['bright_to_dark_ratio']>100 and p['bright_lowest_l2_fraction']>0.5 and p['lowest_l2_bright_to_dark_ratio']>100" $chirality *> $null
+    $nqsChirality = Join-Path $results 'nqs-chirality-coulomb-n7.json'
+    if ((Test-Path $chirality) -and (Test-Path $nqsChirality)) {
+        & $python -c "import json,sys; ed=json.load(open(sys.argv[1])); nqs=json.load(open(sys.argv[2])); assert ed['bright_to_dark_ratio']>100 and ed['bright_lowest_l2_fraction']>0.5; assert nqs['state_source']=='trained_projected_nqs' and nqs['status']=='complete' and nqs['bright_lowest_l2_fraction']>0.5" $chirality $nqsChirality *> $null
         if ($LASTEXITCODE -eq 0) { $score += 1 }
     }
 
@@ -34,3 +43,7 @@ if (Test-Path $python) {
 }
 
 Write-Output $score
+if ($score -ne 6) {
+    Write-Error "Research verification failed: score $score/6"
+    exit 1
+}

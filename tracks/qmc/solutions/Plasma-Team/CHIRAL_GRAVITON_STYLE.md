@@ -29,7 +29,7 @@
 ## 4. Symmetry rules
 
 - Fermionic signs come from explicit creation/annihilation ordering; do not patch signs empirically.
-- SO(3) constraints are hard constraints or exact projections in the accepted model.
+- SO(3) constraints are hard constraints or numerical projections with recorded residuals.
 - Penalty-only symmetry training is diagnostic and cannot be the final acceptance path.
 - Build the `L=2` multiplet from one highest-weight state with lowering operators when possible.
 - Rotation tests must include random axes and angles, not just z-axis phases.
@@ -52,6 +52,10 @@ variance. The current enumerated sampler produces independent draws: burn-in is
 zero, integrated autocorrelation is one, and effective sample size equals raw
 sample count. If a future Markov-chain sampler is added, it must additionally
 record chain count, burn-in, autocorrelation, and effective sample size.
+
+Label this quantity as a posterior estimator diagnostic. It does not include
+ansatz bias, optimizer/restart variation, or finite-size extrapolation error and
+must not be presented as a total VMC uncertainty.
 
 Do not call correlated samples independent. Separate-sector samples use separate
 seeds and independent-error propagation; a future paired estimator must retain

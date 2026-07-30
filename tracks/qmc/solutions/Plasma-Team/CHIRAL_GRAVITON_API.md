@@ -89,6 +89,13 @@ neutral_gap(system: SphereSystem, interaction: str = "coulomb") -> GapResult
 
 `GapResult` fields include `e_l0`, `e_l2`, `gap`, sector sizes, residuals, and conventions.
 
+The independent acceptance kernel is intentionally limited to `N<=4` and does
+not import the production basis, CG/Wigner, Hamiltonian, or ED modules:
+
+```python
+oracle_neutral_gap(n_electrons, x_order=64, phi_points=256) -> IndependentOracleResult
+```
+
 ### NQS
 
 ```python
@@ -107,11 +114,16 @@ model.fit(max_iterations=400) -> NQSTrainingResult
 model.vector(parameters, total_l) -> numpy.ndarray
 model.estimate(parameters, total_l) -> NQSEstimate
 model.sample_energy(parameters, total_l, n_samples=50000, seed=1729) -> MonteCarloEstimate
-model.equivariance_error(parameters) -> float
+model.irrep_error(parameters) -> float
 ```
 
-Allowed `total_l` values are `0` and `2`. The final vectors are exact
-highest-weight projections, not penalty-constrained approximations.
+`equivariance_error` remains a compatibility alias for old callers; both names
+measure only the projected output state's irrep error, not input equivariance.
+
+Allowed `total_l` values are `0` and `2`. The final vectors are numerical
+highest-weight projections with checked residuals, not penalty-only approximations. This is an
+output-state SO(3) projection; the bit-string input MLP is not itself a
+coordinate-space equivariant architecture.
 
 For larger enumerated sectors:
 
@@ -132,11 +144,14 @@ transition_weight(initial, final, operator) -> float
 chirality_ratio(bright_weight, dark_weight) -> float
 chiral_weights(basis, state) -> ChiralWeights
 chiral_graviton_response(ground_basis, ground, graviton_basis, graviton) -> ChiralGravitonResponse
+train_nqs_chirality(system, interaction="coulomb", projection="dense") -> NQSChiralityResult
 ```
 
 `multiplet_report` returns all `M` values, their energies and `<L^2>`, the energy
 spread, and a generic-axis rotation-equivariance error. The chiral response uses
-the rank-two `m=1<->3` Laughlin parent-channel metric probe.
+the rank-two `m=1<->3` Laughlin parent-channel proxy. `train_nqs_chirality`
+evaluates that proxy with trained projected NQS states; it is still not the full
+finite-sphere Coulomb metric derivative.
 
 ## Command-line API
 
@@ -145,6 +160,16 @@ the rank-two `m=1<->3` Laughlin parent-channel metric probe.
 ```text
 python -m chiral_graviton ed --n 6 --interaction coulomb --output RESULT.json
 ```
+
+### Run the independent small-system oracle
+
+```text
+python -m chiral_graviton oracle --n 4 --output ORACLE.json
+```
+
+This route is intentionally limited to `N=2..4` and uses its own
+first-quantized Coulomb quadrature, pair projectors, determinant basis, and
+diagonalizer rather than the production ED/NQS Hamiltonian kernel.
 
 ### Train/solve projected NQS
 
@@ -165,7 +190,12 @@ python -m chiral_graviton multiplet --n 7 --output MULTIPLET.json
 ```text
 python -m chiral_graviton nqs-multiplet --n 7 --projection sparse --output NQS_MULTIPLET.json
 python -m chiral_graviton chirality --n 7 --interaction coulomb --output CHIRALITY.json
+python -m chiral_graviton nqs-chirality --n 7 --projection sparse --output NQS_CHIRALITY.json
+python -m chiral_graviton nqs-chirality --n 4 --interaction coulomb --output NQS_CHIRALITY.json
 ```
+
+`chirality` uses ED states; `nqs-chirality` trains projected NQS states and
+evaluates the same parent-channel proxy.
 
 ### Validate a result
 
@@ -179,14 +209,15 @@ python -m chiral_graviton validate RESULT.json
 python scripts/reproduce_small.py --n 4 5 6 7 8 --output-dir OUTPUT_DIR
 ```
 
-The complete acceptance suite is available as
+The finite-size regression/reproduction suite is available as
 `powershell -File scripts/run_acceptance.ps1`.
 
 ## JSON result schema
 
 ```json
 {
-  "schema_version": 1,
+  "schema_version": 2,
+  "status": "complete",
   "method": "ed",
   "n_electrons": 6,
   "two_q": 15,
@@ -199,11 +230,17 @@ The complete acceptance suite is available as
   "residual_norms": [],
   "seed": 1729,
   "software": {},
+  "provenance": {
+    "timestamps": {}, "software": {}, "platform": {}, "git": {},
+    "run_config": {}, "tolerances": {}
+  },
   "conventions": {}
 }
 ```
 
-Numeric placeholders above are replaced by computed values. JSON never stores NaN or infinity.
+Numeric placeholders above are replaced by computed values. JSON never stores
+NaN or infinity. A numerically finite but rejected calculation is written with
+`status: failed` and `quality_errors`; `validate` accepts only complete results.
 
 ## Exit codes
 
@@ -211,7 +248,6 @@ Numeric placeholders above are replaced by computed values. JSON never stores Na
 |---:|---|
 | 0 | success |
 | 2 | invalid configuration |
-| 3 | physics invariant failure |
-| 4 | solver non-convergence |
-| 5 | insufficient Monte Carlo statistics |
+| 3 | optimizer or scientific-quality gate failure |
+| 4 | non-finite numerical result |
 | 6 | result-schema failure |

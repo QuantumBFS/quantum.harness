@@ -25,6 +25,12 @@ if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
 $edFiles = @()
 $nqsFiles = @()
+foreach ($n in 3..4) {
+    $oracle = Join-Path $OutputDirectory "oracle-n$n.json"
+    & $python -m chiral_graviton oracle --n $n --output $oracle
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+}
+
 foreach ($n in 3..8) {
     $ed = Join-Path $OutputDirectory "ed-n$n.json"
     & $python -m chiral_graviton ed --n $n --output $ed
@@ -59,6 +65,11 @@ if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
 $chiralityCoulomb = Join-Path $OutputDirectory 'chirality-coulomb-n7.json'
 & $python -m chiral_graviton chirality --n 7 --interaction coulomb --output $chiralityCoulomb
+if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+$nqsChiralityCoulomb = Join-Path $OutputDirectory 'nqs-chirality-coulomb-n7.json'
+& $python -m chiral_graviton nqs-chirality --n 7 --interaction coulomb `
+    --projection sparse --output $nqsChiralityCoulomb
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
 & $python (Join-Path $PSScriptRoot 'summarize_results.py') `
