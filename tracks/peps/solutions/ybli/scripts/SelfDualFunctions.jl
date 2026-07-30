@@ -148,7 +148,7 @@ function sample_row_born(L::Int, M_mat::Matrix{Float64}, psi::Vector{Float64},
     end
     weights_h ./= total_h
     hidx = _sample_categorical(rng, weights_h)
-    mh_row = [(hidx - 1 >> (x-1)) & 1 for x in 1:L]
+    mh_row = [((hidx - 1) >> (x-1)) & 1 for x in 1:L]
 
     # Get the sampled core and apply it
     phi = cores[hidx] * psi
