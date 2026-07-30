@@ -296,6 +296,12 @@ fn run_coordinates(
             .artifact_sha256
             .insert("raw/oracles.json".to_owned(), sha256_file(&oracle_path)?);
     }
+    let prior_elapsed_s = manifest
+        .tasks
+        .iter()
+        .filter(|task| task.state == TaskState::Completed)
+        .map(|task| task.elapsed_s)
+        .fold(manifest.elapsed_s, f64::max);
     let started = Instant::now();
     let policy = RuntimePolicy::from_budget(&config.runtime);
 
@@ -306,12 +312,14 @@ fn run_coordinates(
             continue;
         }
 
-        let decision = policy.decision(started.elapsed().as_secs(), reserve_reason);
+        let cumulative_elapsed_s = prior_elapsed_s + started.elapsed().as_secs_f64();
+        let decision = policy.decision(cumulative_elapsed_s as u64, reserve_reason);
         let task_reserve_reason = match decision {
             RuntimeDecision::Continue => ReserveReason::None,
             RuntimeDecision::ReserveAllowed => reserve_reason,
             RuntimeDecision::OrdinaryStop | RuntimeDecision::HardStop => break,
         };
+        let task_started = Instant::now();
         set_task_state(&mut manifest, &key, TaskState::Running);
         manifest.updated_at = timestamp();
         atomic_json(&manifest_path, &manifest)?;
@@ -358,11 +366,11 @@ fn run_coordinates(
         complete_task(
             &mut manifest,
             &key,
-            started.elapsed().as_secs_f64(),
+            task_started.elapsed().as_secs_f64(),
             task_reserve_reason,
             &relative,
         );
-        manifest.elapsed_s = started.elapsed().as_secs_f64();
+        manifest.elapsed_s = prior_elapsed_s + started.elapsed().as_secs_f64();
         manifest.updated_at = timestamp();
         atomic_json(&manifest_path, &manifest)?;
     }
@@ -372,7 +380,7 @@ fn run_coordinates(
     manifest
         .artifact_sha256
         .insert("raw/blocks.csv".to_owned(), sha256_file(&csv_path)?);
-    manifest.elapsed_s = started.elapsed().as_secs_f64();
+    manifest.elapsed_s = prior_elapsed_s + started.elapsed().as_secs_f64();
     manifest.updated_at = timestamp();
     atomic_json(&manifest_path, &manifest)?;
     Ok(manifest)

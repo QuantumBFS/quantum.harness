@@ -66,6 +66,47 @@ fn simulation_resume_reuses_streams_and_rebuilds_identical_csv() {
 }
 
 #[test]
+fn simulation_resume_accumulates_runtime_across_invocations() {
+    let run_dir = tempfile::tempdir().unwrap();
+    let config = Path::new("configs/test.toml");
+    run_simulation(config, run_dir.path(), SamplingMode::Born).unwrap();
+
+    let manifest_path = run_dir.path().join("manifest.json");
+    let mut manifest: serde_json::Value =
+        serde_json::from_slice(&fs::read(&manifest_path).unwrap()).unwrap();
+    manifest["elapsed_s"] = serde_json::json!(42.0);
+    fs::write(
+        &manifest_path,
+        serde_json::to_vec_pretty(&manifest).unwrap(),
+    )
+    .unwrap();
+
+    let resumed = run_simulation(config, run_dir.path(), SamplingMode::Born).unwrap();
+    assert!(resumed.elapsed_s >= 42.0);
+}
+
+#[test]
+fn simulation_resume_recovers_legacy_runtime_from_completed_task_ledger() {
+    let run_dir = tempfile::tempdir().unwrap();
+    let config = Path::new("configs/test.toml");
+    run_simulation(config, run_dir.path(), SamplingMode::Born).unwrap();
+
+    let manifest_path = run_dir.path().join("manifest.json");
+    let mut manifest: serde_json::Value =
+        serde_json::from_slice(&fs::read(&manifest_path).unwrap()).unwrap();
+    manifest["elapsed_s"] = serde_json::json!(1.0);
+    manifest["tasks"][0]["elapsed_s"] = serde_json::json!(42.0);
+    fs::write(
+        &manifest_path,
+        serde_json::to_vec_pretty(&manifest).unwrap(),
+    )
+    .unwrap();
+
+    let resumed = run_simulation(config, run_dir.path(), SamplingMode::Born).unwrap();
+    assert!(resumed.elapsed_s >= 42.0);
+}
+
+#[test]
 fn resume_rejects_a_corrupt_completed_stream() {
     let run_dir = tempfile::tempdir().unwrap();
     let config = Path::new("configs/test.toml");
