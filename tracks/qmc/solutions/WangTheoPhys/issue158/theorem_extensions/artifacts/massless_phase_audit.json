@@ -1,0 +1,108 @@
+{
+  "decision_record": {
+    "blocking_obligations": [],
+    "claim_status": "proved",
+    "does_not_imply": [
+      "uniform finite-L correlation bound",
+      "exact power-law asymptotics",
+      "BKT universal jump",
+      "log-vs-BKT decision"
+    ],
+    "evidence_class": "rigorous_theorem",
+    "question_id": "sigma2_infrared_fate_v1",
+    "source_hashes": {
+      "PROOF_AUDIT.md": "adba9765e13d67db9a696de8c576e98826521bb8ea7d6c12c1b0afb45d6fb714"
+    },
+    "track": "massless",
+    "updates": {
+      "eventual_bkt": "unresolved",
+      "ferromagnetic_lro": "unchanged",
+      "non_bkt_massless": "unresolved",
+      "ordinary_gapped_phase": "excluded"
+    }
+  },
+  "model": "size-normalized minimum-image 2D classical XY torus with pair coupling proportional to 1/r^4",
+  "numerical_certificates_are_proof_premises": false,
+  "obligations": [
+    {
+      "evidence": "unordered nearest-neighbor pair",
+      "name": "pair_counting",
+      "status": "verified"
+    },
+    {
+      "evidence": "c_L\\ge c_\\infty",
+      "name": "coupling_dominance",
+      "status": "verified"
+    },
+    {
+      "evidence": "original and comparison couplings are all nonnegative",
+      "name": "ferromagnetic_comparison",
+      "status": "verified"
+    },
+    {
+      "evidence": "free nearest-neighbor box",
+      "name": "embedded_box",
+      "status": "verified"
+    },
+    {
+      "evidence": "First take the torus limit",
+      "name": "limit_order",
+      "status": "verified"
+    },
+    {
+      "evidence": "No nearest-neighbor periodic-boundary thermodynamic-limit theorem",
+      "name": "free_boundary_limit",
+      "status": "verified"
+    },
+    {
+      "evidence": "local weak subsequential limit",
+      "name": "local_weak_limits",
+      "status": "verified"
+    },
+    {
+      "evidence": "precise restricted meaning that the infinite-volume two-point function does not decay exponentially",
+      "name": "massless_definition",
+      "status": "verified"
+    },
+    {
+      "evidence": "Ginibre",
+      "name": "ginibre",
+      "status": "verified"
+    },
+    {
+      "evidence": "van Engelenburg--Lis",
+      "name": "nearest_neighbor_theorem",
+      "status": "verified"
+    },
+    {
+      "evidence": "does not determine",
+      "name": "claim_boundary",
+      "status": "verified"
+    }
+  ],
+  "primary_sources": [
+    {
+      "doi": "10.1007/BF01646537",
+      "theorem": "Ginibre coupling monotonicity"
+    },
+    {
+      "doi": "10.1007/s00220-022-04550-3",
+      "theorem": "van Engelenburg--Lis Theorem 1(ii)"
+    }
+  ],
+  "schema": "issue158-massless-phase-audit-v1",
+  "theorem": {
+    "c_infinity": 0.6637008046138535,
+    "comparison": "liminf_L C_L(x) >= C_NN_Z2(beta*c_infinity; 0,x)",
+    "effective_inverse_temperature": "beta*c_infinity",
+    "lower_bound": "1/(8*|x|)",
+    "massless_definition": "two-point function is not exponential",
+    "quantifier_order": [
+      "fix nonzero lattice displacement x",
+      "embed a fixed free box Lambda_n containing 0 and x",
+      "take torus L to infinity at fixed n",
+      "take n to infinity"
+    ],
+    "threshold": "beta >= beta_c_NN/c_infinity"
+  }
+}

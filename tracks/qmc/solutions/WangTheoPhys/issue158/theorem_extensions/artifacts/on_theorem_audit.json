@@ -1,0 +1,242 @@
+{
+  "algebra_certificates": [
+    {
+      "budget_bound_satisfied": true,
+      "hard_spin_budget_upper_bound": 400,
+      "maximum_antisymmetry_residual": 0.0,
+      "maximum_sampled_plane_projection": 0.9608174975483035,
+      "maximum_second_variation_residual": 2.6645352591003757e-15,
+      "maximum_tangency_residual": 0.0,
+      "minimum_sampled_plane_projection": -0.9999038876759078,
+      "n": 2,
+      "pair_checks": 32,
+      "parseval_residual": 0.0,
+      "seed": 158002,
+      "transverse_budget": 152.39556301652777,
+      "transverse_channels": 1,
+      "xy_reduction": "one transverse channel and factor n-1=1"
+    },
+    {
+      "budget_bound_satisfied": true,
+      "hard_spin_budget_upper_bound": 400,
+      "maximum_antisymmetry_residual": 0.0,
+      "maximum_sampled_plane_projection": 0.9297510403111137,
+      "maximum_second_variation_residual": 2.6645352591003757e-15,
+      "maximum_tangency_residual": 0.0,
+      "minimum_sampled_plane_projection": -0.9543687601302906,
+      "n": 3,
+      "pair_checks": 64,
+      "parseval_residual": 0.0,
+      "seed": 158003,
+      "transverse_budget": 247.43077499301796,
+      "transverse_channels": 2,
+      "xy_reduction": null
+    },
+    {
+      "budget_bound_satisfied": true,
+      "hard_spin_budget_upper_bound": 400,
+      "maximum_antisymmetry_residual": 0.0,
+      "maximum_sampled_plane_projection": 0.9551657595728025,
+      "maximum_second_variation_residual": 1.7763568394002505e-15,
+      "maximum_tangency_residual": 0.0,
+      "minimum_sampled_plane_projection": -0.7693397221055303,
+      "n": 4,
+      "pair_checks": 96,
+      "parseval_residual": 1.1368683772161603e-13,
+      "seed": 158004,
+      "transverse_budget": 280.3483904665893,
+      "transverse_channels": 3,
+      "xy_reduction": null
+    },
+    {
+      "budget_bound_satisfied": true,
+      "hard_spin_budget_upper_bound": 400,
+      "maximum_antisymmetry_residual": 0.0,
+      "maximum_sampled_plane_projection": 0.6482725265932522,
+      "maximum_second_variation_residual": 8.881784197001252e-16,
+      "maximum_tangency_residual": 1.0564193885312038e-17,
+      "minimum_sampled_plane_projection": -0.7187970225992081,
+      "n": 8,
+      "pair_checks": 224,
+      "parseval_residual": 0.0,
+      "seed": 158008,
+      "transverse_budget": 359.64429538454215,
+      "transverse_channels": 7,
+      "xy_reduction": null
+    }
+  ],
+  "dependency_edges": [
+    [
+      "SO(n)_surface_measure",
+      "sphere_integration_by_parts"
+    ],
+    [
+      "sphere_integration_by_parts",
+      "classical_bogoliubov"
+    ],
+    [
+      "hard_spin_and_J_nonnegative",
+      "denominator_upper_bound"
+    ],
+    [
+      "projected_pair_identity",
+      "denominator_upper_bound"
+    ],
+    [
+      "transverse_parseval",
+      "factor_n_minus_one"
+    ],
+    [
+      "classical_bogoliubov",
+      "finite_volume_bound"
+    ],
+    [
+      "uniform_kernel_limit",
+      "fixed_field_limit"
+    ],
+    [
+      "infrared_divergence",
+      "field_magnetization_zero"
+    ],
+    [
+      "SO(n)_moment_identity",
+      "zero_field_bridge"
+    ],
+    [
+      "bounded_tilt_lemma",
+      "zero_field_bridge"
+    ],
+    [
+      "field_magnetization_zero",
+      "zero_field_M2_zero"
+    ]
+  ],
+  "excluded_scope": [
+    "n=1 discrete symmetry",
+    "unbounded soft-spin fields",
+    "arbitrary continuous field theories",
+    "generic target manifolds",
+    "frustrated sign-changing pair couplings",
+    "multibody interactions",
+    "quantum systems"
+  ],
+  "finite_volume_bound": "1 >= (n-1) T m_(L,h)^2 V^(-1) sum_q [h+E_L(q)]^(-1)",
+  "not_claimed": [
+    "exact logarithmic quasi-long-range-order exponent",
+    "a common finite-temperature phase for all n",
+    "absence of order when the infrared integral is finite"
+  ],
+  "numerical_certificates_are_proof_premises": false,
+  "obligations": [
+    {
+      "name": "hard_spin_sphere_defined",
+      "status": "verified"
+    },
+    {
+      "name": "finite_component_count_n_at_least_two",
+      "status": "verified"
+    },
+    {
+      "name": "bilinear_translation_invariant_pair_energy",
+      "status": "verified"
+    },
+    {
+      "name": "ferromagnetic_nonnegative_coupling",
+      "status": "verified"
+    },
+    {
+      "name": "sphere_rotation_generator_defined",
+      "status": "verified"
+    },
+    {
+      "name": "invariant_surface_measure_integration_by_parts",
+      "status": "verified"
+    },
+    {
+      "name": "classical_bogoliubov_inequality_derived",
+      "status": "verified"
+    },
+    {
+      "name": "exact_projected_pair_second_variation_derived",
+      "status": "verified"
+    },
+    {
+      "name": "averaged_denominator_nonnegative",
+      "status": "verified"
+    },
+    {
+      "name": "pointwise_projected_pair_upper_bound",
+      "status": "verified"
+    },
+    {
+      "name": "all_transverse_channels_summed",
+      "status": "verified"
+    },
+    {
+      "name": "factor_n_minus_one_derived",
+      "status": "verified"
+    },
+    {
+      "name": "xy_reduction_checked",
+      "status": "verified"
+    },
+    {
+      "name": "uniform_kernel_limit_used_at_fixed_field",
+      "status": "verified"
+    },
+    {
+      "name": "regulated_infrared_integral_diverges",
+      "status": "verified"
+    },
+    {
+      "name": "so_n_zero_field_second_moment_identity",
+      "status": "verified"
+    },
+    {
+      "name": "bounded_exponential_tilt_bridge",
+      "status": "verified"
+    },
+    {
+      "name": "physical_order_of_limits_preserved",
+      "status": "verified"
+    },
+    {
+      "name": "zero_field_vector_second_moment_vanishes",
+      "status": "verified"
+    },
+    {
+      "name": "two_dimensional_marginal_corollary",
+      "status": "verified"
+    },
+    {
+      "name": "soft_spin_extension_not_claimed",
+      "status": "verified"
+    },
+    {
+      "name": "frustrated_extension_not_claimed",
+      "status": "verified"
+    },
+    {
+      "name": "exact_correlation_law_not_claimed",
+      "status": "verified"
+    }
+  ],
+  "proof_document": {
+    "path": "ON_PROOF_AUDIT.md",
+    "sha256": "00dd52127c9346aec26ec023c42e10110aa6b1eba1e539f4a9919d8e8e573c54"
+  },
+  "schema": "issue158.on_theorem_audit.v1",
+  "theorem_scope": {
+    "component_count": "finite integer n>=2",
+    "conclusions": [
+      "field-selected longitudinal magnetization vanishes when the regulated infrared integral diverges",
+      "lim_L <|M_L|^2>_(L,0)=0"
+    ],
+    "interaction": "bilinear translation-invariant ferromagnetic pair coupling",
+    "limit_order": "L->infinity at fixed h>0, followed by h->0",
+    "spatial_dimension": "arbitrary d in the abstract criterion",
+    "spin_space": "unit sphere S^(n-1)",
+    "temperature": "0<T<infinity"
+  },
+  "zero_field_bridge": "m_(L,h) >= tanh(beta h V) <|M_L|^2>_(L,0)/n"
+}

@@ -1,0 +1,1035 @@
+\documentclass[aps,prb,preprint,notitlepage,groupedaddress,amsmath,amssymb,
+               superscriptaddress,nofootinbib,floatfix]{revtex4-2}
+
+\usepackage{bm}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{amsthm}
+
+\hypersetup{colorlinks=true,citecolor=blue!55!black,
+            linkcolor=blue!55!black,urlcolor=blue!55!black,
+            pdftitle={Supplemental Material for A Finite-Volume Infrared
+                      Criterion for XY Models}}
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+\theoremstyle{plain}
+\newtheorem{lemma}{Lemma}
+\newtheorem{theorem}{Theorem}
+\newtheorem{corollary}{Corollary}
+\newcommand{\dd}{\mathrm{d}}
+\newcommand{\BZ}{\mathrm{BZ}}
+
+\begin{document}
+
+\begin{center}
+{\large\bfseries Supplemental Material for\\[0.35em]
+``A Finite-Volume Infrared Criterion for the Absence of Ferromagnetic
+Long-Range Order in XY Models''}\\[1.0em]
+Authors withheld for internal draft\\[0.3em]
+\textit{Affiliations to be finalized}\\[1.0em]
+\today
+\end{center}
+
+\vspace{1em}
+
+\section{Purpose and exact model}
+
+The accompanying article proves a dimension-independent finite-volume
+infrared criterion for ferromagnetic classical XY torus sequences.  This
+supplement specializes every hypothesis to the precise minimum-image,
+size-normalized $1/r^4$ sequence used in the simulations and records the
+model constants, conservative estimates, numerical certification, and
+finite-window diagnostics.  For auditability, we also retain a
+self-contained specialization of the finite-volume proof.  Nothing here
+uses a formal quantum $S\to\infty$ limit or assumes that an
+infinite-volume correlation theorem applies uniformly to a
+size-dependent interaction.
+
+\begin{definition}[Minimum-image torus model]
+Let $L\ge8$ be even, $N=L^2$, and
+\begin{equation}
+ T_L=(\mathbb Z/L\mathbb Z)^2.
+\end{equation}
+Choose the centered representatives
+\begin{equation}
+ D_L=\{-L/2,-L/2+1,\ldots,L/2-1\}^2.
+\end{equation}
+For $R\in T_L\setminus\{0\}$, the same symbol denotes its representative
+in $D_L$.  Define
+\begin{align}
+ J_L(R)&=\frac{c_L}{|R|^4},&
+ c_L&=\frac{\kappa}{S_L},&
+ S_L&=\sum_{R\in D_L\setminus\{0\}}\frac1{|R|^4},&
+ \kappa&=4.
+ \label{eq:supp-coupling}
+\end{align}
+The Hamiltonian is
+\begin{equation}
+ H_{L,h}(\theta)=
+ -\frac12\sum_{x\in T_L}\sum_{R\ne0}
+ J_L(R)\cos(\theta_x-\theta_{x+R})
+ -h\sum_x\cos\theta_x .
+ \label{eq:supp-H}
+\end{equation}
+The factor $1/2$ fixes the pair-counting convention, including
+self-inverse torus displacements.  At temperature $T=\beta^{-1}$,
+\begin{equation}
+ \langle F\rangle_{L,h}
+ =
+ \frac{\int F(\theta)e^{-\beta H_{L,h}(\theta)}
+ \prod_x\dd\theta_x/(2\pi)}
+ {\int e^{-\beta H_{L,h}(\theta)}
+ \prod_x\dd\theta_x/(2\pi)}.
+ \label{eq:supp-gibbs}
+\end{equation}
+Finally,
+\begin{equation}
+ \bm M_L=\frac1N\sum_x(\cos\theta_x,\sin\theta_x),\qquad
+ m_{L,h}=\langle M_L^{(1)}\rangle_{L,h}.
+\end{equation}
+\end{definition}
+
+\begin{definition}[Fixed interaction and Fourier kernels]
+Let
+\begin{align}
+ S_\infty&=\sum_{R\in\mathbb Z^2\setminus\{0\}}|R|^{-4},&
+ c_\infty&=\frac{\kappa}{S_\infty},&
+ J_\infty(R)&=\frac{c_\infty}{|R|^4}.
+\end{align}
+For the square lattice,
+\begin{equation}
+ S_\infty=4\zeta(2)\beta_{\rm Dir}(2),\qquad
+ c_\infty=\frac6{\pi^2G},
+\end{equation}
+where $G$ is Catalan's constant.  Extend $J_L$ by zero from
+$D_L\setminus\{0\}$ to $\mathbb Z^2$ and call the result $J_L^0$.
+For $q\in[-\pi,\pi]^2$ define
+\begin{align}
+ E_L(q)&=\sum_RJ_L^0(R)[1-\cos(q\cdot R)],\\
+ E_\infty(q)&=\sum_RJ_\infty(R)[1-\cos(q\cdot R)].
+ \label{eq:supp-kernels}
+\end{align}
+For torus momenta, $E_L$ is exactly the excitation kernel of
+Eq.~\eqref{eq:supp-H}; the zero extension is only a comparison device.
+\end{definition}
+
+\begin{table}[h]
+\caption{Hypotheses and their use in the proof.}
+\label{tab:hypotheses}
+\begin{ruledtabular}
+\begin{tabular}{p{0.19\linewidth}p{0.43\linewidth}p{0.29\linewidth}}
+Item & Exact assumption & Use\\
+\hline
+Geometry & even square tori $T_L$ & momentum sums and Parseval\\
+Spins & $\theta_x\in\mathbb R/2\pi\mathbb Z$ & periodic integration by parts\\
+Couplings & $J_L(R)=c_L|R|^{-4}\ge0$ & denominator upper bound\\
+Normalization & $\sum_{R\ne0}J_L(R)=4$ & interaction comparison\\
+Temperature & $0<T<\infty$ & Gibbs measure and tilt\\
+Field & $h>0$ along the first component & regulator and tilt parameter\\
+Limit order & $L\to\infty$ at fixed $h$, then $h\downarrow0$ & infrared conclusion\\
+\end{tabular}
+\end{ruledtabular}
+\end{table}
+
+\section{Interaction and kernel estimates}
+
+\begin{lemma}[Explicit lattice tail]
+For every $r\ge2$,
+\begin{equation}
+ \sum_{\substack{R\in\mathbb Z^2\\|R|>r}}\frac1{|R|^4}
+ \le\frac{8\pi}{(r-1)^2}.
+ \label{eq:tail}
+\end{equation}
+\end{lemma}
+
+\begin{proof}
+Let $m=\lfloor r/\sqrt2\rfloor+1$.  If $|R|>r$, then
+$\|R\|_\infty>r/\sqrt2$.  The square shell $\|R\|_\infty=n$ has $8n$
+points and $|R|\ge n$, so
+\begin{equation}
+ \sum_{|R|>r}|R|^{-4}
+ \le8\sum_{n=m}^{\infty}n^{-3}
+ \le8\left(m^{-3}+\int_m^\infty x^{-3}\dd x\right)
+ \le\frac{12}{m^2}<\frac{24}{r^2}.
+\end{equation}
+For $r\ge2$, $24/r^2\le8\pi/(r-1)^2$.
+\end{proof}
+
+\begin{lemma}[Minimum-image convergence]
+The normalization and centered interaction satisfy
+\begin{equation}
+ 0<c_L-c_\infty=O(L^{-2})
+ \label{eq:c-convergence}
+\end{equation}
+and
+\begin{equation}
+ \boxed{\displaystyle
+ \|J_L^0-J_\infty\|_{\ell^1(\mathbb Z^2)}
+ =2c_\infty(S_\infty-S_L)=O(L^{-2}).}
+ \label{eq:J-convergence}
+\end{equation}
+\end{lemma}
+
+\begin{proof}
+Since $D_L\subset\mathbb Z^2$, $S_L<S_\infty$ and $c_L>c_\infty$.
+Every omitted point has $|R|>L/2-1$, so Eq.~\eqref{eq:tail} gives
+$S_\infty-S_L=O(L^{-2})$.  Since the four nearest neighbors imply
+$S_L\ge4$,
+\begin{equation}
+ c_L-c_\infty
+ =\frac{\kappa(S_\infty-S_L)}{S_LS_\infty}
+ =O(L^{-2}).
+\end{equation}
+On $D_L$, $J_L^0-J_\infty\ge0$, while outside $D_L$ it equals
+$-J_\infty$.  Using $c_LS_L=c_\infty S_\infty=\kappa$,
+\begin{align}
+ \|J_L^0-J_\infty\|_1
+ &=(c_L-c_\infty)S_L+c_\infty(S_\infty-S_L)\nonumber\\
+ &=2c_\infty(S_\infty-S_L).
+\end{align}
+\end{proof}
+
+\begin{lemma}[Uniform kernel convergence]
+\begin{equation}
+ \boxed{\displaystyle
+ \sup_{q\in[-\pi,\pi]^2}|E_L(q)-E_\infty(q)|
+ \le2\|J_L^0-J_\infty\|_1=O(L^{-2}).}
+ \label{eq:uniform-kernel}
+\end{equation}
+\end{lemma}
+
+\begin{proof}
+Apply $|1-\cos(q\cdot R)|\le2$ term by term to
+Eq.~\eqref{eq:supp-kernels}.
+\end{proof}
+
+\begin{lemma}[Marginal kernel upper bound]
+Let $J_\infty(R)=A|R|^{-4}$ with $A>0$.  For $0<|q|\le1/2$,
+\begin{equation}
+ \boxed{\displaystyle
+ E_\infty(q)\le
+ 4A|q|^2\left[1+\log\frac2{|q|}+16\pi\right].}
+ \label{eq:kernel-upper}
+\end{equation}
+Equivalently, for $C=4A$ and $K=2e^{1+16\pi}$,
+\begin{equation}
+ E_\infty(q)\le C|q|^2\log(K/|q|).
+\end{equation}
+\end{lemma}
+
+\begin{proof}
+Split the lattice into $|R|\le|q|^{-1}$ and its complement.  In the near
+region,
+\begin{equation}
+ 1-\cos(q\cdot R)\le\frac12|q|^2|R|^2.
+\end{equation}
+Square-shell counting gives, for $M\ge1$,
+\begin{equation}
+ \sum_{0<|R|\le M}|R|^{-2}
+ \le8\sum_{n=1}^{\lceil M\rceil}n^{-1}
+ \le8[1+\log(2M)].
+\end{equation}
+Thus
+\begin{equation}
+ E_{<}(q)
+ \le4A|q|^2\left[1+\log\frac2{|q|}\right].
+\end{equation}
+In the far region, Eq.~\eqref{eq:tail} and $1-\cos u\le2$ imply
+\begin{equation}
+ E_{>}(q)
+ \le\frac{16\pi A}{(|q|^{-1}-1)^2}
+ \le64\pi A|q|^2.
+\end{equation}
+Adding the estimates proves Eq.~\eqref{eq:kernel-upper}.
+\end{proof}
+
+The proof below requires only this upper bound.  The main article proves the
+sharper lattice asymptotic
+\begin{equation}
+ E_\infty(q)=\frac{\pi A}{2}|q|^2\log(1/|q|)+O(|q|^2).
+\end{equation}
+
+\subsection{Independent numerical certification}
+
+The deterministic kernel audit evaluates the exact finite-torus sums with
+the stable identity $1-\cos u=2\sin^2(u/2)$.  It uses the dyadic sizes
+$32\le L\le8192$ and the four fixed momentum-index paths
+$(n_x,n_y)=(1,0),(2,0),(1,1),(2,1)$.  With
+$Y_L=E_L(\bm q_L)/|\bm q_L|^2$, the intercept-free estimator is
+\begin{equation}
+ \rho_{\rm eff}(L)=\frac{Y_{2L}-Y_L}{\log2}.
+\end{equation}
+Table~\ref{tab:kernel-certification} reports the terminal registered
+diagnostics.  These values certify the implementation and conventions; the
+analytic theorem does not depend on them.
+
+\begin{table}[h]
+\caption{Terminal deterministic kernel diagnostics.}
+\label{tab:kernel-certification}
+\begin{ruledtabular}
+\begin{tabular}{p{0.55\linewidth}r}
+Quantity & Value\\
+\hline
+$L_{\max}$ & $8192$\\
+$\rho_{\log}=\pi c_\infty/2$ & $1.042538785978$\\
+largest pathwise relative error in $\rho_{\rm eff}$ &
+$9.051\times10^{-7}$\\
+stable--legacy relative difference in $E_L$ &
+$2.376\times10^{-12}$\\
+$L^2(c_L-c_\infty)$ at $L_{\max}$ & $1.132432878$\\
+\end{tabular}
+\end{ruledtabular}
+\end{table}
+
+\section{Model-specific specialization of the finite-volume criterion}
+
+\begin{lemma}[Classical Bogoliubov inequality]
+For each torus momentum $q$, define
+\begin{equation}
+ D_q=\sum_xe^{iq\cdot x}\frac{\partial}{\partial\theta_x},
+ \qquad
+ A_q=\sum_xe^{-iq\cdot x}\sin\theta_x.
+\end{equation}
+For $h>0$ and $T>0$,
+\begin{equation}
+ \langle|A_q|^2\rangle_{L,h}
+ \langle D_{-q}D_qH_{L,h}\rangle_{L,h}
+ \ge T|\langle D_qA_q\rangle_{L,h}|^2,
+ \label{eq:classical-bog}
+\end{equation}
+and consequently
+\begin{equation}
+ \boxed{\displaystyle
+ 1\ge Tm_{L,h}^2\,
+ \frac1N\sum_q\frac1{h+E_L(q)}.}
+ \label{eq:momentum-bound}
+\end{equation}
+\end{lemma}
+
+\begin{proof}
+Periodic integration by parts gives
+\begin{align}
+ \langle D_qA_q\rangle
+ &=\beta\langle A_qD_qH\rangle,\\
+ \langle D_{-q}D_qH\rangle
+ &=\beta\langle D_{-q}H\,D_qH\rangle
+ =\beta\langle|D_qH|^2\rangle.
+\end{align}
+Cauchy--Schwarz proves Eq.~\eqref{eq:classical-bog}.  Direct
+differentiation yields
+\begin{equation}
+ D_qA_q=\sum_x\cos\theta_x,\qquad
+ \langle D_qA_q\rangle=Nm_{L,h},
+\end{equation}
+and, with the pair convention in Eq.~\eqref{eq:supp-H},
+\begin{align}
+ D_{-q}D_qH_{L,h}
+ ={}&h\sum_x\cos\theta_x\nonumber\\
+ &+\sum_{x,R}J_L(R)[1-\cos(q\cdot R)]
+ \cos(\theta_x-\theta_{x+R}).
+\end{align}
+Since $m_{L,h}\le1$ and $\cos u\le1$,
+\begin{equation}
+ \langle D_{-q}D_qH_{L,h}\rangle
+ \le N[h+E_L(q)].
+\end{equation}
+It follows that
+\begin{equation}
+ \langle|A_q|^2\rangle
+ \ge\frac{TNm_{L,h}^2}{h+E_L(q)}.
+\end{equation}
+Finally, discrete Parseval gives
+\begin{equation}
+ \sum_q|A_q|^2=N\sum_x\sin^2\theta_x\le N^2.
+\end{equation}
+Summing the lower bound over the $N$ momenta proves
+Eq.~\eqref{eq:momentum-bound}.
+\end{proof}
+
+\begin{lemma}[Fixed-field thermodynamic bound]
+Set
+\begin{equation}
+ I(h)=
+ \int_{[-\pi,\pi]^2}\frac{\dd^2q}{(2\pi)^2}
+ \frac1{h+E_\infty(q)}.
+\end{equation}
+For fixed $h>0$,
+\begin{equation}
+ \boxed{\displaystyle
+ \limsup_{L\to\infty}m_{L,h}^2\le\frac1{TI(h)}.}
+ \label{eq:fixed-field}
+\end{equation}
+\end{lemma}
+
+\begin{proof}
+Uniform convergence in Eq.~\eqref{eq:uniform-kernel} makes
+$[h+E_L(q)]^{-1}$ converge uniformly to the continuous periodic function
+$[h+E_\infty(q)]^{-1}$.  The torus sums are Riemann sums:
+\begin{equation}
+ \frac1N\sum_q\frac1{h+E_L(q)}\longrightarrow I(h).
+\end{equation}
+Apply Eq.~\eqref{eq:momentum-bound} and take the $\limsup$.
+\end{proof}
+
+\begin{lemma}[Infrared divergence]
+For the $A|R|^{-4}$ interaction,
+\begin{equation}
+ \boxed{\displaystyle\lim_{h\downarrow0}I(h)=\infty.}
+ \label{eq:IR}
+\end{equation}
+More explicitly, for fixed $0<q_0\le1/2$ and sufficiently small $h$,
+\begin{equation}
+ I(h)\ge\frac1{4\pi C}
+ \log\left[
+ \frac{\log(K/\sqrt h)}{\log(K/q_0)}
+ \right].
+ \label{eq:IR-explicit}
+\end{equation}
+\end{lemma}
+
+\begin{proof}
+Let $r_h=\sqrt h$.  For small $h$, $r_h<q_0$ and
+$C\log(K/r_h)\ge1$.  On $r_h\le|q|\le q_0$,
+\begin{equation}
+ h\le C|q|^2\log(K/|q|)
+\end{equation}
+and hence
+\begin{equation}
+ h+E_\infty(q)\le2C|q|^2\log(K/|q|).
+\end{equation}
+Integrating on the annulus gives Eq.~\eqref{eq:IR-explicit}, which diverges
+as $h\downarrow0$.
+\end{proof}
+
+\begin{lemma}[Exponential-tilt bridge]
+Let $X\in[-1,1]$ have a law symmetric under $X\mapsto-X$.  For $t\ge0$,
+define
+\begin{equation}
+ \mathbb E_t[f(X)]
+ =\frac{\mathbb E[f(X)e^{tX}]}{\mathbb E[e^{tX}]}.
+\end{equation}
+Then
+\begin{equation}
+ \boxed{\displaystyle
+ \mathbb E_tX\ge\tanh(t)\,\mathbb EX^2.}
+ \label{eq:tilt-bound}
+\end{equation}
+\end{lemma}
+
+\begin{proof}
+Let $Q=|X|$.  Symmetry gives
+\begin{equation}
+ \mathbb E_tX
+ =\frac{\mathbb E[Q\sinh(tQ)]}{\mathbb E[\cosh(tQ)]}
+ =\mathbb E_w[Q\tanh(tQ)],
+\end{equation}
+where $\dd\mathbb P_w$ is proportional to
+$\cosh(tQ)\dd\mathbb P$.  Both $Q\tanh(tQ)$ and $\cosh(tQ)$ are
+nondecreasing.  For independent $Q,Q'$,
+\begin{equation}
+ 2\operatorname{Cov}(f(Q),w(Q))
+ =\mathbb E[(f(Q)-f(Q'))(w(Q)-w(Q'))]\ge0,
+\end{equation}
+so
+\begin{equation}
+ \mathbb E_w[Q\tanh(tQ)]\ge\mathbb E[Q\tanh(tQ)].
+\end{equation}
+Concavity of $\tanh$ on $[0,\infty)$ and $\tanh(0)=0$ imply
+\begin{equation}
+ \tanh(tQ)\ge Q\tanh(t),\qquad0\le Q\le1.
+\end{equation}
+Equation~\eqref{eq:tilt-bound} follows.
+\end{proof}
+
+\begin{theorem}[Zero-field minimum-image no-LRO]
+For Eqs.~\eqref{eq:supp-coupling}--\eqref{eq:supp-H} and every
+$0<T<\infty$,
+\begin{equation}
+ \boxed{\displaystyle
+ \lim_{L\to\infty}
+ \langle|\bm M_L|^2\rangle_{L,0}=0,}
+ \label{eq:main-result}
+\end{equation}
+and
+\begin{equation}
+ \boxed{\displaystyle
+ \lim_{h\downarrow0}
+ \limsup_{L\to\infty}m_{L,h}=0.}
+\end{equation}
+\end{theorem}
+
+\begin{proof}
+At $h=0$, $O(2)$ invariance makes the law of
+$X=M_L^{(1)}$ symmetric and gives
+\begin{equation}
+ \langle X^2\rangle_{L,0}
+ =\frac12\langle|\bm M_L|^2\rangle_{L,0}.
+\end{equation}
+The field measure is exactly the exponential tilt of the zero-field measure
+with $t=\beta hN$.  Equation~\eqref{eq:tilt-bound} therefore yields
+\begin{equation}
+ m_{L,h}\ge
+ \frac12\tanh(\beta hN)
+ \langle|\bm M_L|^2\rangle_{L,0}.
+ \label{eq:finite-bridge}
+\end{equation}
+Fix $h>0$.  Since $\tanh(\beta hN)\to1$,
+\begin{equation}
+ \limsup_{L\to\infty}
+ \langle|\bm M_L|^2\rangle_{L,0}
+ \le2\limsup_{L\to\infty}m_{L,h}.
+\end{equation}
+Equations~\eqref{eq:fixed-field} and \eqref{eq:IR} give
+\begin{equation}
+ \limsup_{L\to\infty}m_{L,h}
+ \le[TI(h)]^{-1/2}\longrightarrow0
+ \qquad(h\downarrow0).
+\end{equation}
+The left side of the preceding second-moment inequality is nonnegative and
+independent of $h$, so it is zero.  The same two estimates prove the
+field-selected statement.
+\end{proof}
+
+\begin{corollary}[Simulated correlation average]
+Let
+\begin{equation}
+ C_L(R)=\langle\bm S_0\cdot\bm S_R\rangle_{L,0}.
+\end{equation}
+Translation invariance gives
+\begin{equation}
+ \langle|\bm M_L|^2\rangle_{L,0}
+ =\frac1N\sum_{R\in T_L}C_L(R),
+\end{equation}
+and therefore
+\begin{equation}
+ \frac1N\sum_{R\in T_L}C_L(R)\longrightarrow0.
+\end{equation}
+\end{corollary}
+
+This is exactly the zero-momentum observable used in the numerical
+extrapolation.  It does not assert a particular pointwise decay law.
+
+\section{Low-temperature massless comparison}
+
+For a nonzero lattice displacement $x$, write
+\begin{equation}
+ C_L(x)=
+ \left\langle\cos(\theta_0-\theta_x)\right\rangle_{L,0}.
+\end{equation}
+Here and below $x$ is fixed before the torus limit.
+
+\begin{lemma}[Embedded free nearest-neighbor box]
+\label{lem:embedded-nn}
+Let $\Lambda_n=[-n,n]^2\cap\mathbb Z^2$ contain $0$ and $x$.
+For every sufficiently large torus,
+\begin{equation}
+ C_L(x)\ge
+ C_{\Lambda_n,\beta c_\infty}^{\rm NN,free}(0,x).
+\label{eq:embedded-nn}
+\end{equation}
+\end{lemma}
+
+\begin{proof}
+The factor $1/2$ in Eq.~\eqref{eq:supp-H} compensates for the two directed
+terms associated with each unordered pair.  Hence an unordered
+nearest-neighbor pair has coefficient $c_L$, not $c_L/2$.  The
+normalization comparison already proved above gives
+$c_L\ge c_\infty$.
+
+On the same torus vertex set, retain only nearest-neighbor edges with both
+endpoints in $\Lambda_n$, lower their coefficients to $c_\infty$, delete
+all other nonnegative couplings, and leave the vertices outside
+$\Lambda_n$ isolated.  Classical Ginibre coupling monotonicity
+\cite{Ginibre1970,VanEngelenburgLis2023} gives
+Eq.~\eqref{eq:embedded-nn}.  The isolated-spin integrals factor from the
+partition function and numerator, leaving the free-boundary
+nearest-neighbor box correlation.
+\end{proof}
+
+\begin{corollary}[Non-exponential low-temperature correlations]
+\label{cor:supp-massless}
+Let $\beta_c^{\rm NN}$ denote the critical inverse temperature of the
+unit-coupling nearest-neighbor square-lattice XY model.  For every fixed
+$x\ne0$,
+\begin{equation}
+ \beta\ge\frac{\beta_c^{\rm NN}}{c_\infty}
+ \quad\Longrightarrow\quad
+ \liminf_{L\to\infty}C_L(x)
+ \ge\frac{1}{8|x|},
+\label{eq:supp-massless}
+\end{equation}
+where the norm is the convention used in the cited nearest-neighbor
+theorem.
+\end{corollary}
+
+\begin{proof}
+Fix $\Lambda_n$ first and take $L\to\infty$ in
+Eq.~\eqref{eq:embedded-nn}.  Then increase $n$.  Ginibre monotonicity makes
+the free-boundary nearest-neighbor correlation nondecreasing with the box,
+so
+\begin{equation}
+ \liminf_{L\to\infty}C_L(x)
+ \ge
+ C_{\mathbb Z^2,\beta c_\infty}^{\rm NN}(0,x).
+\end{equation}
+No nearest-neighbor periodic-boundary thermodynamic-limit statement is
+used.  Theorem 1(ii) of van Engelenburg and Lis
+\cite{VanEngelenburgLis2023} gives
+$C_{\mathbb Z^2,\beta'}^{\rm NN}(0,x)\ge1/(8|x|)$ for
+$\beta'\ge\beta_c^{\rm NN}$.  Substitution of
+$\beta'=\beta c_\infty$ proves Eq.~\eqref{eq:supp-massless}.
+
+Every local weak subsequential torus limit inherits this fixed-$x$ bound.
+It is incompatible with exponential clustering as $|x|\to\infty$.
+Together with the zero-field no-LRO theorem, it proves a low-temperature
+regime that is massless in this precise correlation sense and has no
+ferromagnetic order.
+\end{proof}
+
+The result does not give a uniform finite-$L$ bound at separations that
+grow with $L$, exact power-law asymptotics, a universal stiffness jump, or
+either endpoint of the eventual-BKT versus logarithmic-QLRO question.
+The original multiscale proof of a low-temperature power-law lower bound
+\cite{FrohlichSpencer1981} is historical context rather than a premise of
+the comparison above.
+
+\section{Independent infinite-volume routes and their scope}
+
+\subsection{Recurrence and the ISV theorem}
+
+Define a symmetric step law
+\begin{equation}
+ p(R)=\frac{J_\infty(R)}{\kappa},\qquad\sum_Rp(R)=1.
+\end{equation}
+Its characteristic function satisfies
+\begin{equation}
+ 1-\widehat p(q)=\frac{E_\infty(q)}{\kappa}.
+\end{equation}
+The marginal upper bound implies
+\begin{equation}
+ \int_{[-\pi,\pi]^2}
+ \frac{\dd^2q}{1-\widehat p(q)}
+ \ge c\int_0^{q_0}\frac{\dd q}{q\log(K/q)}
+ =\infty.
+\end{equation}
+Thus the associated irreducible walk is recurrent.  Theorem 2 of
+Ioffe, Shlosman, and Velenik \cite{Ioffe2002} applies with compact spin
+space $S^1$, group $SO(2)$, invariant Haar measure, continuous invariant
+pair energy $-\cos(\theta-\phi)$, and the recurrent normalized walk.
+Every infinite-volume Gibbs state of the fixed $J_\infty$ interaction is
+therefore $SO(2)$ invariant.
+
+This is an independent infinite-volume result.  It is not needed in the
+direct torus proof, and it does not replace the explicit convergence check
+for the simulated finite-volume sequence.
+
+\subsection{The MMR pointwise bound}
+
+Theorem 1(c) of Messager, Miracle-Sol{\'e}, and Ruiz
+\cite{Messager1984} considers the thermodynamic-limit correlation in its
+published finite-box convention.  In $d=2$, the hypothesis
+\begin{equation}
+ |J(R)|\le A|R|^{-4}
+\end{equation}
+implies, at every finite inverse temperature,
+\begin{equation}
+ |C(R)|\le B_2(\beta)[\log|R|]^{-\lambda_2(\beta)},
+ \qquad\lambda_2(\beta)>0.
+ \label{eq:MMR}
+\end{equation}
+Equation~\eqref{eq:MMR} is a pointwise upper bound, not an exact asymptotic
+equality.  A BKT power law is also eventually below a sufficiently slow
+logarithmic upper bound.  We therefore do not use MMR to claim exact
+logarithmic QLRO, nor do we attribute its statement verbatim to every
+size-dependent torus.
+
+\begin{table}[h]
+\caption{Exact conclusion boundaries.}
+\begin{ruledtabular}
+\begin{tabular}{p{0.58\linewidth}p{0.26\linewidth}}
+Claim & Status\\
+\hline
+field-selected spontaneous magnetization & excluded\\
+zero-field minimum-image $M^2$ plateau & excluded\\
+positive infinite-volume correlation plateau & excluded\\
+non-$SO(2)$-invariant fixed-model Gibbs state & excluded by ISV\\
+MMR logarithmic-power upper bound & cited in published scope\\
+low-temperature exponential clustering & excluded by
+Corollary~\ref{cor:supp-massless}\\
+exact $C(R)\sim[\log R]^{-p}$ & not proved\\
+eventual BKT versus logarithmic QLRO & unresolved\\
+\end{tabular}
+\end{ruledtabular}
+\end{table}
+
+\section{Finite-size candidate models}
+
+Let $\ell=\log(L/L_0)$.  The public-data audit compares three candidates
+with the same nominal parameter count:
+\begin{align}
+ H_{\rm ordered}:\quad&
+ M^2(L)=g_0+a_1\ell^{-1}+a_2\ell^{-2},\\
+ H_{\log}:\quad&
+ M^2(L)=A\ell^{-p}+B\ell^{-p-1},\qquad p>0,\\
+ H_{\rm BKT}:\quad&
+ M^2(L)=AL^{-\eta}(1+b\ell^{-1}),\qquad\eta>0.
+ \label{eq:supp-models}
+\end{align}
+For size pairs $(L,2L)$, two useful diagnostics are
+\begin{align}
+ \eta_{\rm eff}(L)
+ &=-\frac{\log[M^2(2L)/M^2(L)]}{\log2},\\
+ p_{\rm eff}(L)
+ &=-\frac{\log[M^2(2L)/M^2(L)]}
+ {\log[\log(2L)/\log L]}.
+\end{align}
+Their idealized limits are
+\begin{center}
+\begin{tabular}{lcc}
+\toprule
+candidate & $\eta_{\rm eff}$ & $p_{\rm eff}$\\
+\midrule
+ordered & $0$ & $0$\\
+logarithmic & $p/\log L\to0$ & $p>0$\\
+BKT & $\eta>0$ & $\eta\log L\to\infty$\\
+\bottomrule
+\end{tabular}
+\end{center}
+At accessible sizes these trends can be nearly collinear.  AICc, held-out
+prediction, and synthetic recovery therefore measure identifiability; they
+do not replace the theorem.
+
+\subsection{Registered public-data windows}
+
+The public record \cite{YaoData2025} was analyzed at
+\begin{equation}
+ \beta\in\{1,2,4,8\},
+\end{equation}
+with
+\begin{equation}
+ L_{\min}\in\{32,64,96,128,192,256,384,512\}
+\end{equation}
+and $L_{\max}=8192$.  Each candidate in Eq.~\eqref{eq:supp-models} was
+fitted to the same data in each window.  The information criteria use
+\begin{align}
+ \mathrm{AICc}
+ &=\chi^2+2k+\frac{2k(k+1)}{n-k-1},\\
+ \mathrm{BIC}
+ &=\chi^2+k\log n.
+\end{align}
+The largest size was also held out and reported as a standardized
+prediction error.
+
+The headline AICc counts are 29 logarithmic winners, two BKT winners, and
+one ordered winner.  This is a finite-window result.  The asymptotic ordered
+candidate is excluded by Eq.~\eqref{eq:main-result}, not by these counts.
+
+\begin{figure}[t]
+ \includegraphics[width=\textwidth]{paper/figures/window_comparison.pdf}
+ \caption{\label{fig:supp-window-comparison}
+ Registered finite-window comparison using the public summary data.
+ The model-selection counts and effective exponents describe the
+ information present in the simulated size range.  They are not used in
+ the proof of the zero-field theorem.}
+\end{figure}
+
+\section{Exact Gaussian false-intercept benchmark}
+
+The Gaussian audit uses the exact finite-torus marginal kernel and removes
+the zero mode.  For each nonzero Fourier mode,
+\begin{equation}
+ \langle|\theta_q|^2\rangle=\frac{T}{E_L(q)}.
+\end{equation}
+The phase-difference variance and compact-phase correlation are
+\begin{align}
+ V_L(r)
+ &=\frac{2T}{N}\sum_{q\ne0}
+ \frac{1-\cos(q\cdot r)}{E_L(q)},\\
+ C_L(r)&=\exp[-V_L(r)/2].
+\end{align}
+The finite-torus $M^2$ is the spatial average of $C_L(r)$.  The benchmark
+has a known zero thermodynamic asymptote, while on the registered grid it
+decreases only slowly.  At
+\begin{equation}
+ T\in\{0.125,0.25,0.5,1.0\}
+\end{equation}
+and $L_{\min}\in\{32,64,128\}$, all 12 ordered fits return
+$\widehat g_0>0$.  The test contains no sampling noise.  It proves that a
+positive intercept from a finite logarithmic window is not, by itself, an
+identifiable order parameter.
+
+\begin{figure}[t]
+ \includegraphics[width=\textwidth]{paper/figures/gaussian_false_intercept.pdf}
+ \caption{\label{fig:supp-gaussian-false-intercept}
+ Exact Gaussian false-intercept benchmark.  The generating model has zero
+ thermodynamic magnetization, yet the ordered finite-window ansatz returns
+ a positive fitted intercept in all 12 registered noiseless fits.  This
+ identifies the intercept as a potentially non-identifiable finite-size
+ statistic rather than evidence against the theorem.}
+\end{figure}
+
+\section{Covariance sensitivity}
+
+The Zenodo summary supplies observable means and individual errors, but not
+synchronized bin means, jackknife replicas, or the empirical covariance
+between $M^2$ and $M^2_{k_{\min}}$.  The covariance audit therefore uses an
+explicit uncertainty set rather than claiming to estimate missing data.
+
+For each size, let
+\begin{equation}
+ \Sigma_L(\rho)=
+ \begin{pmatrix}
+ s_{M,L}^2 & \rho s_{M,L}s_{k,L}\\
+ \rho s_{M,L}s_{k,L} & s_{k,L}^2
+ \end{pmatrix},
+\end{equation}
+with a single registered $\rho$ shared across sizes and
+\begin{equation}
+ \rho\in\{-0.95,-0.925,\ldots,0.95\}.
+\end{equation}
+Every matrix in this open interval is positive definite.  Generalized
+least squares is repeated throughout the grid for all 32 windows.  Thirty
+windows have an invariant winner; two change between logarithmic and
+ordered descriptions.  The resulting winner sets are 29 log-only, two
+log/ordered, and one ordered-only.  These profiles show sensitivity to a
+specific missing ingredient; they are not a reconstruction of the empirical
+covariance.
+
+\section{Synthetic identifiability protocol}
+
+The identifiability audit generates deterministic synthetic summary datasets
+from each calibrated candidate in Eq.~\eqref{eq:supp-models}.  It uses the
+published sizes and standard errors, 2000 replicates per design point, and a
+fixed master seed.  Each synthetic dataset is refitted by all three
+candidates, and the AICc winner is recorded.
+
+The registered grid contains:
+\begin{align}
+ \beta&\in\{1,2,4,8\},\\
+ L_{\min}&\in\{32,128,256\},\\
+ L_{\max}&\in\{512,768,1024,2048,4096,8192\},\\
+ s_{\rm err}&\in\{0.25,0.5,0.75,1,2\},
+\end{align}
+where only valid nested windows are retained.  The preregistered recovery
+target is $90\%$.
+
+At the representative low-temperature design
+$L_{\min}=256$, $L_{\max}=4096$, and $s_{\rm err}=1$, the correct recovery
+probabilities are
+\begin{center}
+\begin{tabular}{lccc}
+\toprule
+ & ordered truth & log truth & BKT truth\\
+\midrule
+$\beta=4$ & $0.970$ & $0.7975$ & $0.8290$\\
+$\beta=8$ & $0.935$ & $0.7380$ & $0.7835$\\
+\bottomrule
+\end{tabular}
+\end{center}
+The logarithmic and BKT columns fail the registered target.  This does not
+mean that the data contain no information; it means that the available
+finite window and precision do not reliably discriminate those two
+no-order asymptotics under the registered candidate family.
+
+\begin{figure}[t]
+ \includegraphics[width=\textwidth]{paper/figures/identifiability_covariance.pdf}
+ \caption{\label{fig:supp-identifiability-covariance}
+ Diagnostics for missing covariance and finite-window identifiability.
+ The covariance profile records which AICc winner is stable over the
+ registered positive-definite covariance family.  The synthetic recovery
+ rates quantify discrimination under the published size and error grids.
+ Neither calculation enters the proof; both delimit what can be inferred
+ from the public summary data alone.}
+\end{figure}
+
+\section{Perturbative RG boundary and remaining calculation}
+
+About a finite-temperature short-range BKT fixed line, a long-range
+perturbation has linear eigenvalue
+\begin{equation}
+ \Delta_g=2-\sigma-\eta_{\rm sr}.
+\end{equation}
+At $\sigma=2$ and $\eta_{\rm sr}>0$, $\Delta_g<0$, favoring local flow back
+toward the BKT line \cite{Giachetti2021}.  A renormalized marginal basis is
+required at equality.  With $\epsilon=2-\sigma$,
+\begin{equation}
+ \frac{g}{\epsilon}k^{2-\epsilon}
+ =
+ \frac{g}{\epsilon}k^2-gk^2\log k+O(\epsilon).
+\end{equation}
+After absorbing the pole into the local stiffness, the finite operator is
+$gk^2\log(\Lambda/k)$.
+
+The local conclusion does not determine the global compact-field flow from
+the physical finite coupling.  In a fixed subtraction scheme, the quadratic
+long-range coefficient, its feedback into the stiffness, mixed
+$g$--vortex terms, and higher operators generated by the compact nonlocal
+cosine remain uncalculated.  Recent coupled spin-wave--vortex work supports
+persistence of BKT behavior \cite{Walther2026}, but the present manuscript
+does not promote that evidence to a theorem.
+
+\subsection{Registered finite-momentum physical scheme}
+
+To state the remaining endpoint as a measurable step-scaling problem,
+couple the compact model to an external antisymmetric bond gauge field,
+\begin{equation}
+ H_L[\theta;A]
+ =
+ -\frac12\sum_{x,R}J_L(R)
+ \cos\left(\theta_{x+R}-\theta_x-a_{x,R}[A]\right).
+\end{equation}
+For $q_n=(2\pi n/L,0)$ and
+$\widehat q_n=2\sin(q_n/2)$, fix the transverse probe
+\begin{equation}
+ {\bf A}^{(n)}_\epsilon(s)
+ =
+ \sqrt2\,\epsilon\,\widehat q_n\,{\bf e}_y\cos(q_ns_1),
+ \qquad
+ a_{x,R}[A]
+ =
+ \int_0^1R\cdot{\bf A}(x+tR)\,dt .
+\end{equation}
+The minimum-image displacement and straight Wilson path are part of the
+registered scheme, and $\operatorname{sinc}u=\sin(u)/u$.  Explicitly,
+\begin{equation}
+ a_{x,R}[A^{(n)}_\epsilon]
+ =
+ \sqrt2\,\epsilon\,\widehat q_nR_y
+ \operatorname{sinc}\left(\frac{q_nR_x}{2}\right)
+ \cos\left(q_n\left(x_1+\frac{R_x}{2}\right)\right).
+\end{equation}
+With $F_{T,L}(\epsilon,q)=-\beta^{-1}\log Z_L[A_\epsilon]$, define
+\begin{equation}
+ \Gamma^T_L(q)
+ =
+ \frac1{L^2}
+ \left.
+ \frac{\partial^2F_{T,L}(\epsilon,q)}{\partial\epsilon^2}
+ \right|_{\epsilon=0},
+ \qquad
+ {\cal F}^T_L(q)=\frac{\Gamma^T_L(q)}{\widehat q^2}.
+\end{equation}
+For $q_1=2\pi/L$ and $q_2=4\pi/L$, the registered subtraction is
+\begin{align}
+ K_{\rm step}(L)&={\cal F}^T_L(q_2),\\
+ g_{\rm step}(L)&=
+ \frac{{\cal F}^T_L(q_1)-{\cal F}^T_L(q_2)}{\log2},\\
+ \beta_g^{\rm step}(L)&=
+ \frac{g_{\rm step}(2L)-g_{\rm step}(L)}{\log2}.
+\end{align}
+An eventual ordinary BKT endpoint requires $g_{\rm step}(L)\to0$;
+a non-BKT logarithmic endpoint permits $g_{\rm step}(L)\to g_\ast>0$.
+A finite-size plateau is only a candidate tendency.
+
+A periodic longitudinal deformation
+$\theta_x\mapsto\theta_x+\epsilon\cos(q\cdot x)$ is not a physical
+alternative: in the full partition function it is an exact change of
+variables, so every free-energy derivative vanishes.  The transverse
+probe above has nonzero curl and cannot be gauged away.  It is directly
+measurable from
+\begin{equation}
+ \Gamma^T_L(q)
+ =
+ \frac1{L^2}
+ \left(\langle H''\rangle-\beta\,\operatorname{Var}(H')\right),
+\end{equation}
+where the derivatives use the registered Wilson phase.
+
+For the exact minimum-image Gaussian kernel,
+${\cal E}_L(q)/\widehat q^2$ is instead a longitudinal zero-vortex
+spin-wave proxy, not the integrated transverse physical response.
+Its same-$L$ mode subtraction is not the infinite-volume coefficient
+$\rho_{\log}$: at fixed $qL$, a mode-dependent minimum-image shape term
+survives.  The separate cross-$L$, fixed-mode dyadic slope calibrates
+$\rho_{\log}$ but is not the physical step coupling.
+
+\begin{table}[htbp]
+\caption{Closure obligations for the physical finite-$g$ flow.}
+\begin{ruledtabular}
+\begin{tabular}{p{0.24\linewidth}p{0.44\linewidth}p{0.18\linewidth}}
+Sector & Physical definition or calculation & Status\\
+\hline
+compact, zero vortex &
+transverse bond-gauge subtraction scheme & verified\\
+compact, zero vortex &
+connected $g^2$ second cumulant & unresolved\\
+one vortex &
+transverse response with fixed core convention & unresolved\\
+vortex pair &
+neutral fixed-position pair free energy & unresolved\\
+mixed &
+$gy$ and $gy^2$ feedback & unresolved\\
+global flow &
+physical $g=1$ basin certificate & unresolved\\
+\end{tabular}
+\end{ruledtabular}
+\end{table}
+
+A compatible vortex coordinate is
+\begin{equation}
+ y_{\rm pair}(R)
+ =
+ \exp\left\{
+ -\frac{F_{\rm pair}(R)-F_0}{2}
+ \right\},
+\end{equation}
+with fixed pair positions, core regularization, boundary condition, and
+gauge-probe convention.  Until the unresolved rows of the table are closed, the
+finite-temperature eigenvalue $-\eta(K)$ supports a local tendency but
+does not certify the infrared fate of microscopic $g=1$.
+
+\section{Reproducibility manifest}
+
+All reported numerical values are generated from committed code and
+machine-readable artifacts:
+
+\begin{table}[htbp]
+\caption{Machine-readable sources for the reported results.}
+\begin{ruledtabular}
+\begin{tabular}{p{0.35\linewidth}p{0.56\linewidth}}
+\toprule
+Result & Source\\
+\midrule
+Marginal kernel and normalization &
+\nolinkurl{scripts/kernel_audit.py},
+\nolinkurl{artifacts/kernel_audit.json}\\
+Three-model window fits &
+\nolinkurl{scripts/window_audit.py},
+\nolinkurl{artifacts/window_audit.json}\\
+Gaussian false-intercept benchmark &
+\nolinkurl{scripts/gaussian_audit.py},
+\nolinkurl{artifacts/gaussian_audit.json}\\
+Covariance uncertainty profile &
+\nolinkurl{scripts/covariance_audit.py},
+\nolinkurl{artifacts/covariance_audit.json}\\
+Synthetic recovery boundaries &
+\nolinkurl{scripts/identifiability_audit.py},
+\nolinkurl{artifacts/identifiability_audit.json}\\
+Theorem dependency certificates &
+\nolinkurl{scripts/no_lro_theorem_audit.py},
+\nolinkurl{artifacts/no_lro_theorem_audit.json}\\
+Five-track completion gates &
+\nolinkurl{scripts/five_track_audit.py},
+\nolinkurl{artifacts/five_track_summary.json}\\
+Publication figures &
+\nolinkurl{paper/scripts/make_figures.py}\\
+\bottomrule
+\end{tabular}
+\end{ruledtabular}
+\end{table}
+
+From the repository root, reproduce the figure and manuscript outputs with
+\begin{verbatim}
+python3 paper/scripts/make_figures.py
+mkdir -p paper/output
+latexmk -pdf -interaction=nonstopmode -halt-on-error \
+  -output-directory=paper/output paper/main.tex
+latexmk -pdf -interaction=nonstopmode -halt-on-error \
+  -output-directory=paper/output paper/supplement.tex
+\end{verbatim}
+
+\bibliography{paper/references}
+
+\end{document}
