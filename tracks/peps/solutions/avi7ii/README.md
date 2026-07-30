@@ -3,6 +3,17 @@
 Finite-temperature PEPO for the 10x10 open-boundary transverse-field Ising
 model.
 
+## Judge quick start
+
+> **Start with the [GitHub-readable technical report](../../results/issue147-four-figure-deadline/README.md).**
+
+The report leads with the challenge checklist, embeds all four evidence figures,
+and links every headline number to CSV data or immutable checkpoint metadata.
+For offline reading, download the self-contained
+[HTML report](../../results/issue147-four-figure-deadline/report.html). The
+validated result is a promising thermodynamic-aware PEPO prototype, not a claim
+that the complete beta-range and bond-dimension benchmark has been finished.
+
 ## Smoke test
 
 From the repository root after installing the editable package:
@@ -103,3 +114,16 @@ rejects rehearsed, failed, missing, or convention-mismatched cells. It writes
 PNG/PDF comparison and convergence figures. Because the current production
 scope fixes `D=4` and `delta_beta=0.025`, those two convergence errors remain
 explicitly unassessed rather than being reported as passed.
+
+## Current validated evidence figures
+
+When only the completed two-step PEPO probe and the accepted beta=0.5 QMC run
+are available, render the deadline-safe diagnostic figures without inventing a
+full thermodynamic comparison:
+
+```text
+.venv\Scripts\python.exe -m qh147.current_evidence --pepo tracks/peps/results/issue147-pepo-lazy-nojit-capped-two-step-probe --qmc tracks/peps/results/issue147-qmc-reproducible-production --output tracks/peps/results/issue147-current-evidence
+```
+
+The output summary explicitly records that ordinary PEPO, specific heat, the
+full beta curve, and PEPO chi, D, and delta-beta convergence were not assessed.
