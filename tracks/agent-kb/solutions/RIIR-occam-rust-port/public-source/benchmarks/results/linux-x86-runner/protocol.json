@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "profile": "github-actions-linux-x86-64",
+  "platform": "Linux-6.17.0-1020-azure-x86_64-with-glibc2.39",
+  "architecture": "x86_64",
+  "processor": "AMD EPYC 7763 64-Core Processor",
+  "logical_cores": 2,
+  "memory_bytes": 8323981312,
+  "rust": "rustc 1.97.1 (8bab26f4f 2026-07-14)",
+  "julia": "julia version 1.12.6"
+}
