@@ -351,6 +351,53 @@ def test_result_values_preserve_actual_convergence_and_raw_coefficients(monkeypa
     assert result["values"]["G_up_4"] == pytest.approx(-0.5)
 
 
+def test_legendre_raw_state_does_not_require_unmeasured_g_tau(monkeypatch):
+    monkeypatch.setattr(
+        calibrate.run_chain, "_green_blocks", lambda value: {"retained": value}
+    )
+    monkeypatch.setattr(
+        calibrate.run_chain,
+        "_normalized_solve_parameters",
+        lambda value: {"measure_G_l": True, "measure_G_tau": False},
+    )
+    solver = type(
+        "Solver",
+        (),
+        {
+            "G0_iw": object(),
+            "G_l": object(),
+            "G_tau": None,
+            "G_iw": None,
+            "density_matrix": object(),
+            "h_loc_diagonalization": object(),
+            "perturbation_order": object(),
+            "average_sign": 1.0,
+            "auto_corr_time": 1.0,
+            "auto_corr_time_converged": True,
+        },
+    )()
+    input_artifact = {
+        "payload": {
+            "hybridization": {
+                "delta_iw": {"real": [0.0], "imag": [0.0]}
+            }
+        },
+        "sha256": "1" * 64,
+    }
+    state = calibrate._calibration_raw_state(
+        solver,
+        b"{}\n",
+        input_artifact,
+        0,
+        823000,
+        {"versions": {}},
+        {},
+    )
+    assert "G_l" in state
+    assert "G_tau" not in state
+    assert "G_iw" not in state
+
+
 def test_calibration_cluster_commands_and_wrapper_are_serial_offline(tmp_path):
     commands = calibration_cluster_commands(
         Path("/opt/micromamba"),

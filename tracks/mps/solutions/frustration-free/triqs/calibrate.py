@@ -848,12 +848,47 @@ def _result_values(
     }
 
 
-def _write_calibration_raw(path: Path, state: dict[str, object], g_l) -> None:
+def _calibration_raw_state(
+    solver,
+    input_bytes: bytes,
+    input_artifact: dict[str, object],
+    cell_index: int,
+    seed: int,
+    runtime: dict[str, object],
+    solve_parameters: dict[str, object],
+) -> dict[str, object]:
+    payload = input_artifact["payload"]
+    split_delta = payload["hybridization"]["delta_iw"]
+    delta = np.asarray(split_delta["real"], dtype=np.float64) + 1j * np.asarray(
+        split_delta["imag"], dtype=np.float64
+    )
+    return {
+        "input_bytes": np.frombuffer(input_bytes, dtype=np.uint8).copy(),
+        "input_sha256": input_artifact["sha256"],
+        "input_payload_sha256": sha256_bytes(canonical_json(payload)),
+        "cell_index": cell_index,
+        "seed": seed,
+        "G0_iw": run_chain._green_blocks(solver.G0_iw),
+        "Delta_iw": {"up": delta.copy(), "down": delta.copy()},
+        "G_l": solver.G_l,
+        "density_matrix": solver.density_matrix,
+        "h_loc_diagonalization": solver.h_loc_diagonalization,
+        "perturbation_order": solver.perturbation_order,
+        "average_sign": solver.average_sign,
+        "auto_corr_time": solver.auto_corr_time,
+        "auto_corr_time_converged": solver.auto_corr_time_converged,
+        "solve_parameters": run_chain._normalized_solve_parameters(
+            solve_parameters
+        ),
+        "runtime": runtime,
+    }
+
+
+def _write_calibration_raw(path: Path, state: dict[str, object]) -> None:
     archive_type = run_chain._archive_class()
     with archive_type(str(path), "w") as archive:
         for name, value in state.items():
             archive[name] = value
-        archive["G_l"] = g_l
 
 
 def run_cell(plan: dict[str, object], cell_index: int, run_directory: Path) -> Path:
@@ -904,7 +939,7 @@ def run_cell(plan: dict[str, object], cell_index: int, run_directory: Path) -> P
     }
     input_artifact = _artifact(payload)
     raw_path = attempt / "raw.h5"
-    raw_state = run_chain._raw_solver_state(
+    raw_state = _calibration_raw_state(
         solver,
         canonical_json(input_artifact) + b"\n",
         input_artifact,
@@ -913,7 +948,7 @@ def run_cell(plan: dict[str, object], cell_index: int, run_directory: Path) -> P
         runtime,
         parameters,
     )
-    _write_calibration_raw(raw_path, raw_state, solver.G_l)
+    _write_calibration_raw(raw_path, raw_state)
     truncations = cell.get("truncations", [cell["truncation"]])
     extracted = _result_values(solver, payload, truncations)
     result_payload = {
