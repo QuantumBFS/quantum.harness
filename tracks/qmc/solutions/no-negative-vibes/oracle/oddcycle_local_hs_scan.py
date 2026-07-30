@@ -4,11 +4,16 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 import numpy as np
+import sympy as sp
 from scipy import optimize
 
 from oracle.oddcycle_word_operator import NormalOrderedLabel, WordPairColumn
+
+if TYPE_CHECKING:
+    from oracle.oddcycle_local_targets import TargetPoint
 
 
 _ACTIVE_TOLERANCE = 1.0e-10
@@ -82,6 +87,22 @@ class NumericalConeResult:
     objective_sign: int | None = None
 
 
+@dataclass(frozen=True)
+class TargetConeResult:
+    """One numerical membership screen for an exact named target."""
+
+    status: str
+    target_id: str
+    target_parameters: tuple[tuple[str, sp.Rational], ...]
+    weights: np.ndarray | None
+    residual: float | None
+    minimum_retained_weight: float | None
+    active_indices: tuple[int, ...]
+    target_diagonal_gauge_frustrated: bool
+    solver_message: str
+    iteration_count: int | None
+
+
 def _solver_message(result: optimize.OptimizeResult | None) -> str:
     if result is None:
         return "linprog did not return a result"
@@ -128,6 +149,116 @@ def _has_finite_infeasibility_certificate(forbidden_columns: np.ndarray) -> bool
         getattr(certificate, "status", None) == 0
         and vector is not None
         and np.all(np.isfinite(vector))
+    )
+
+
+def _has_finite_target_infeasibility_certificate(
+    columns: np.ndarray,
+    target: np.ndarray,
+) -> bool:
+    """Find a finite Farkas separator for ``columns @ q = target, q >= 0``."""
+
+    constraints = np.vstack((-columns.T, target[np.newaxis, :]))
+    bounds = np.concatenate((np.zeros(columns.shape[1]), [-1.0]))
+    try:
+        certificate = optimize.linprog(
+            np.zeros(columns.shape[0]),
+            A_ub=constraints,
+            b_ub=bounds,
+            bounds=(None, None),
+            method="highs",
+        )
+    except (ArithmeticError, ValueError):
+        return False
+    vector = getattr(certificate, "x", None)
+    return bool(
+        getattr(certificate, "status", None) == 0
+        and vector is not None
+        and np.all(np.isfinite(vector))
+    )
+
+
+def _scan_positive_matrix_equality(
+    columns: np.ndarray,
+    target: np.ndarray,
+) -> NumericalConeResult:
+    """Screen one nonnegative matrix-cone equality."""
+
+    matrix = np.asarray(columns, dtype=np.float64)
+    right_hand_side = np.asarray(target, dtype=np.float64)
+    if (
+        matrix.ndim != 2
+        or right_hand_side.shape != (matrix.shape[0],)
+        or not np.all(np.isfinite(matrix))
+        or not np.all(np.isfinite(right_hand_side))
+    ):
+        return _inconclusive_result(None)
+
+    ray_count = matrix.shape[1]
+    try:
+        result = optimize.linprog(
+            np.zeros(ray_count),
+            A_eq=matrix,
+            b_eq=right_hand_side,
+            bounds=(0.0, None),
+            method="highs",
+        )
+    except (ArithmeticError, ValueError):
+        return _inconclusive_result(None)
+
+    if getattr(result, "status", None) == 2:
+        if _has_finite_target_infeasibility_certificate(
+            matrix,
+            right_hand_side,
+        ):
+            return NumericalConeResult(
+                status="numerically-infeasible",
+                weights=None,
+                residual=None,
+                minimum_retained_weight=None,
+                active_indices=(),
+                objective=None,
+                solver_message=_solver_message(result),
+                iteration_count=_iteration_count(result),
+            )
+        return _inconclusive_result(result)
+
+    weights = getattr(result, "x", None)
+    if getattr(result, "status", None) != 0 or weights is None:
+        return _inconclusive_result(result)
+    normalized_weights = np.asarray(weights, dtype=np.float64)
+    if (
+        normalized_weights.shape != (ray_count,)
+        or not np.all(np.isfinite(normalized_weights))
+    ):
+        return _inconclusive_result(result)
+
+    residual = float(
+        np.max(
+            np.abs(matrix @ normalized_weights - right_hand_side),
+            initial=0.0,
+        )
+    )
+    if not np.isfinite(residual) or residual > _RESIDUAL_TOLERANCE:
+        return _inconclusive_result(result)
+    active_indices = tuple(
+        int(index)
+        for index in np.flatnonzero(
+            normalized_weights > _ACTIVE_TOLERANCE
+        )
+    )
+    retained = normalized_weights[list(active_indices)]
+    return NumericalConeResult(
+        status="numerical-survivor",
+        weights=normalized_weights,
+        residual=residual,
+        minimum_retained_weight=(
+            float(np.min(retained)) if retained.size else None
+        ),
+        active_indices=active_indices,
+        objective=0.0,
+        solver_message=_solver_message(result),
+        iteration_count=_iteration_count(result),
     )
 
 
@@ -244,11 +375,103 @@ def scan_positive_local_kernel(
     return tuple(results)
 
 
+def scan_target_cone(
+    columns: Sequence[WordPairColumn],
+    target: TargetPoint,
+) -> TargetConeResult:
+    """Test whether ``-H_target`` is in the word cone modulo a scalar."""
+
+    from oracle.oddcycle_local_hs_exact import diagonal_sign_gauge_audit
+    from oracle.oddcycle_local_targets import TargetPoint
+    from oracle.oddcycle_word_operator import normal_ordered_coordinates
+
+    if not isinstance(target, TargetPoint):
+        raise TypeError("target must be a TargetPoint")
+    normalized_columns = tuple(columns)
+    if not normalized_columns:
+        numerical = _inconclusive_result(None)
+    else:
+        labels = tuple(normalized_columns[0].coordinates)
+        if any(
+            set(column.coordinates) != set(labels)
+            for column in normalized_columns
+        ):
+            raise ValueError("columns must use one common coordinate basis")
+        scalar_indices = tuple(
+            index
+            for index, label in enumerate(labels)
+            if label.body_order == 0
+        )
+        if len(scalar_indices) != 1:
+            raise ValueError("coordinate basis must contain one scalar label")
+        non_scalar = tuple(
+            index
+            for index in range(len(labels))
+            if index != scalar_indices[0]
+        )
+        target_coordinates = normal_ordered_coordinates(
+            -target.hamiltonian,
+            5,
+        )
+        if set(target_coordinates) != set(labels):
+            raise ValueError(
+                "target and columns must use one common coordinate basis"
+            )
+        coordinate_matrix = np.asarray(
+            [
+                [
+                    column.coordinates[labels[index]]
+                    for column in normalized_columns
+                ]
+                for index in non_scalar
+            ],
+            dtype=np.float64,
+        )
+        right_hand_side = np.asarray(
+            [target_coordinates[labels[index]] for index in non_scalar],
+            dtype=np.float64,
+        )
+        numerical = _scan_positive_matrix_equality(
+            coordinate_matrix,
+            right_hand_side,
+        )
+
+    dimension = target.hamiltonian.rows
+    particle_number_blocks = tuple(
+        tuple(
+            state
+            for state in range(dimension)
+            if state.bit_count() == particles
+        )
+        for particles in range(6)
+    )
+    gauge_audit = diagonal_sign_gauge_audit(
+        target.hamiltonian,
+        particle_number_blocks,
+    )
+    return TargetConeResult(
+        status=numerical.status,
+        target_id=target.target_id,
+        target_parameters=target.parameters,
+        weights=numerical.weights,
+        residual=numerical.residual,
+        minimum_retained_weight=numerical.minimum_retained_weight,
+        active_indices=numerical.active_indices,
+        target_diagonal_gauge_frustrated=(
+            gauge_audit["status"] == "exact-gauge-frustrated"
+        ),
+        solver_message=numerical.solver_message,
+        iteration_count=numerical.iteration_count,
+    )
+
+
 __all__ = [
     "LocalitySpec",
     "NumericalConeResult",
+    "TargetConeResult",
     "forbidden_label_indices",
     "locality_specs",
     "scan_positive_local_kernel",
     "scan_positive_matrix_kernel",
+    "scan_target_cone",
 ]
