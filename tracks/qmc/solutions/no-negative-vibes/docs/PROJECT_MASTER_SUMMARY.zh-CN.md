@@ -37,20 +37,24 @@ w = det(I + B_L ... B_1)
 - 另检查了 640 条 Majorana 历史，每条分别计算 even、odd 和完整 Fock 迹；
 - 建立了 59 个 determinant 结构生成器和 19 组机器可读精确证书；
 - 保存了精确符号反例、80 位高精度重放和一般解析证明；
-- 当前总集成分支完整自动回归为 `370 passed`；
+- 最终提交的主证书/跨项目 focused suite 为 `112 passed, 1 skipped, 2 xfailed`，
+  tensor-square phase suite 为 `73 passed`，新增 R3b focused suite 为 `17 passed`；
 - ZiboJin 的独立 exterior-cone 分支除一个旧的尚未实现 R01 classifier 测试模块外，
   其余 `499 passed, 2 skipped`；explicit common metric 和 joint words 又被独立重放；
-- ZiboJin 的 tensor-square phase 分支完整回归为 `13 passed`；
-- 得到四套直接 determinant 恒正具体构造族：
-  TN 路径、odd monomial/block-TN、tensor-square、symmetric-oddcycle 连续族；
+- ZiboJin 的 tensor-square phase 最终提交回归为 `73 passed`；
+- 得到五套直接 determinant 恒正具体构造族：
+  TN 路径、odd monomial/block-TN、tensor-square、symmetric-oddcycle 连续族和
+  局域 orthogonal-contraction plaquettes；
 - 得到一套额外的 graded 符号补偿机制；
 - 得到一个把已知正半群批量变成 Hermitian 相互作用模型的通用工厂；
 - 完成五组早期局域 Hamiltonian 映射和八种后续非常规模型试制品；两批有重叠，
   **不能简单相加成十三个独立模型**；
 - ZiboJin 另完成一个五模 symmetric-oddcycle 相互作用 transfer；它不并入前述籼至
   分支模型计数，并已归入已知 Wei 不定度量收缩半群；
-- 所有已完成物理映射目前都属于已知模型、已知正性类、静态扇区直和或基底/投影变换；
-- 因此**确认的新无符号物理类数量仍为零**；
+- 除 R3b 局域 orthogonal-contraction 模型外，已完成物理映射都已归入已知模型、
+  已知正性类、静态扇区直和或基底/投影变换；
+- R3b 已升级为 `active-qnc-candidate`，但尚无一般经典复杂性定理或热力学相结论；
+  因此**确认的新无符号热力学物理类数量仍为零，强候选数量为一**；
 - symmetric-oddcycle 连续族虽然完成任意深度定理和五模相互作用 transfer，最新共同
   signature `(1,4)` metric 已把它归入已知 Wei 不定度量收缩半群，不能算新机制；
 - tensor-square 的 `m=3,4` DQMC/ED 小尺寸验证已经完成，`m=3` 的 gap valley 是
@@ -64,8 +68,10 @@ w = det(I + B_L ... B_1)
 一句最诚实的话是：
 
 > 我们还没有交付一个新的无符号物理类，但已经建立了可靠的搜索、反例、证明、
-> Hamiltonian 反推和 DQMC/ED 交叉验证体系。最新 oddcycle 结果再次说明：严格正定理
-> 和相互作用模型仍可能属于已知机制，因此下一轮先排重，再做长词搜索。
+> Hamiltonian 反推和 DQMC/ED 交叉验证体系。oddcycle 结果说明严格正定理和相互作用
+> transfer 仍可能属于已知机制；R3b 则说明已知 doubled-Majorana 正性也能产生一个
+> 局域、相互作用、非 stoquastic、低能非 Gaussian 且避开已审计传统 solver 的模型。
+> 后者是强 QNC 候选，不在没有复杂性/热力学证据时冒充最终发现。
 
 ## 1. “找到新东西”其实有三关
 
@@ -255,10 +261,11 @@ oddcycle seeds `117/132/147` 的结果均来自 ZiboJin 分支。集成、复核
 | grade-charge full trace | 守恒 ancilla、局部三模式 vertex、full trace | 完整 Hamiltonian 是静态 ancilla-bit 扇区直和；降级为方法工具 |
 | 非诱导 exterior cone（ZiboJin） | 2,304 exact cards、深度 4/8/12/16 分层淘汰、高精度重放、结构 cone 与 inverse-HS | seed61 有长度 150 精确负例；oddcycle seeds `117/132/147` 严格通过全部 depth-27 words 和 448 个长度 60–1800 对抗 winners，但仍缺任意深度证明 |
 | symmetric-oddcycle continuum（ZiboJin） | exterior block/tail certificate、exact interval、五模相互作用 transfer、完整共同度量 | 任意深度严格正，但整个连续 alphabet 属已知 signature `(1,4)` Wei 不定度量收缩半群 |
+| local orthogonal contraction R3b | 重叠四模 `SO(4)` Gaussian vertices、stoquastic/JW/group-algebra 排重、4/6/8 模 ED | 正性是已知 doubled-Majorana square；模型局域、相互作用、低能非 Gaussian，并成为唯一 active QNC candidate |
 | oddcycle untyped joint pair（ZiboJin） | 两个远距离参数点及其转置，exact words + coupled exterior profile | depth<=12 全穷举和 depth<=40 随机词全正；联合无数值严格 base metric，但任意深度 theorem 开放 |
 | 复 Majorana/Pfaffian 完整矩阵定理 | 已有直接 Spin/Fock 迹 oracle 和部分规范表示 | 主办方要求的完整简洁定理尚未完成 |
 
-## 4. 四套 determinant 恒正构造
+## 4. 五套 determinant 恒正构造
 
 这里的“构造”表示我们有任意维数或任意历史深度的证明，不表示文献史首创。
 
@@ -395,6 +402,76 @@ contraction inequalities。因此它完整落入已知 Wei 不定度量收缩半
 仍是一项完整数学构造和物理实现，但不能增加“新无符号类”计数。
 
 ## 5. 一套 graded 正权机制
+### 4.5 Local orthogonal-contraction plaquettes
+
+取局域四模实反对称生成元 `K_a^T=-K_a` 和
+
+```text
+O_a=exp(K_a) in SO(4).
+```
+
+把 `O_a` 嵌入重叠 plaquettes，并定义
+
+```text
+H_L=-sum_(p,a) q_(p,a)
+    [Gamma(O_(p,a))+Gamma(O_(p,a))^dagger],  q_(p,a)>0.    (OC)
+```
+
+连续时间展开中的每个 oriented vertex 是 `O_a` 或 `O_a^T`。任意 history product
+`D` 仍为实正交矩阵，其本征值由 `+1`、`-1` 和单位圆共轭对组成，因此
+
+```text
+det(I+D)
+ = product_(lambda=+1) 2
+   product_(complex pairs) |1+lambda|^2
+   product_(lambda=-1) 0
+ >= 0.
+```
+
+这给出任意系统尺寸、任意 history 深度的 determinant-QMC 正性。每个 vertex 只支撑
+四个模式，常数个 atoms 重复在 `O(L)` 个 plaquettes 上，所以 Hamiltonian 局域且 extensive。
+
+四模和六模锚点进一步验证：
+
+- 非零四体 density coefficient `-1.06364126546...`，完整 Hamiltonian 不是 quadratic；
+- occupation graph 在每个粒子数 sector 内连通；
+- sign cycle `8 -> 1 -> 2 -> 4 -> 8` 的矩阵元符号为 `(-,-,+,-)`，
+  排除所有 occupation-basis 对角 `+/-1` stoquastic gauges；
+- 两个 atoms 的 common orbital commutant 只有标量，局域 Lie closure 是完整 `so(4)`；
+- JW 展开含 39 个非 identity Pauli strings 和一个 induced claw
+  `IIZZ : {IXIX,IYIY,XIXI}`，因此不属于 claw-free generalized-JW 充分可解类；
+- 六模双 plaquette 的单粒子 Lie closure 是完整 `so(6)`，固定粒子数 sector
+  维数/commutant nullity 为
+
+```text
+N:          0  1   2   3   4  5  6
+dimension:  1  6  15  20  15  6  1
+nullity:    1  1   1   2   1  1  1.
+```
+
+半填充唯一额外对称性是 Hodge `20=10+10` 手征分裂，两个 10 维块内部的 commutant
+仍只有标量。由 Burnside 定理，生成的复 *-algebra 在每个不可约块内是完整矩阵代数，
+所以不存在固定小维 group-algebra closure。
+
+半填充 4/6/8 模 ED 给出：
+
+| modes | sector dim | `E0` | ground multiplicity | first distinct gap |
+|---:|---:|---:|---:|---:|
+| 4 | 6 | -3.2506712298 | 1 | 0.4977941627 |
+| 6 | 20 | -5.8558079887 | 2 | 0.3981253559 |
+| 8 | 70 | -9.5455726568 | 1 | 0.0119001625 |
+
+两个手征基态的 density-Wick residual 在三个尺寸均为 `0.1248–0.2500`，所以低能纯态
+本身不是 Slater/Gaussian state。六模严格二重简并来自 Hodge 手征，八模两个手征基态
+相差 `0.0119001625`；这只是值得做热力学 scaling 的信号，不是新相声明。
+
+正性机制本身不是新定理：数守恒实 rotation 的 Majorana 表示是 `O direct-sum O`，
+Spin trace 是 doubled-copy square。新颖性问题在完整 Hamiltonian 是**重叠 Gaussian
+unitaries 的算符和**而不是 Gaussian circuit product。当前最佳相关 stacked-LCU
+经典算法随组合层数指数增长；结合完整 sector algebra、非 stoquastic、非 quadratic、
+induced claw 和非 Gaussian 低能态，R3b 升级为 `active-qnc-candidate`。它不是已证明
+经典困难的复杂性结果，也没有完成热力学相图。
+
 
 允许正 monomial 矩阵包含 transposition：
 
@@ -491,6 +568,7 @@ Tr Gamma(C_1...C_L)
 | 单向 Stark pseudo-Hermitian 链 | `h_NH=R_g^(-1) D R_g`，`eta=R_g^dagger R_g` | 局域非厄米链和对角/长程 Hermitian partners | partner 不唯一，只作 L2 校准 |
 | star-to-chain TN bath | 以 impurity 为首 Krylov vector 的正交 Lanczos | 稠密长程 bath 变成 endpoint-interacting 链 | 标准 Wilson/Lanczos mapping；L2 校准 |
 | symmetric-oddcycle transfer（ZiboJin） | `[19I+Gamma(B)+Gamma(B)^T]/21` | 五模、非局域、最高五体的 Hermitian 相互作用 transfer | 任意深度正，但属已知 Wei 不定度量收缩半群；L2 |
+| local orthogonal contraction R3b | 式 (OC) 的重叠四模 `SO(4)` vertices | 局域、extensive、四体、非 stoquastic、低能非 Gaussian | 已知 doubled-Majorana 正性；避开已审计 solver 的 active QNC candidate |
 
 ### 为什么 Stark 的长程 partner 不算发现
 
@@ -667,6 +745,18 @@ state-dependent/coupled positive-automaton theorem 搜索。本分支只用它�
 
 只做到足以可靠审计 tensor-square 和合作者候选，不把重写全部已知理论无限扩张为主任务。
 
+### 籼至模型主线：R3b thermodynamic physics
+
+R3b 的矩阵正性、局域 Hamiltonian、非 stoquastic cycle、JW induced claw、full sector
+algebra 和 4/6/8 模非 Gaussian 低能态已经完成。下一步不再搜索另一批正矩阵，而是：
+
+1. 在更长的重叠 plaquette ladder 上做 sign-free determinant QMC；
+2. 测量 Hodge/chiral susceptibility、density correlations、能量和有限温 crossover；
+3. 对 gap/chiral splitting 做尺寸 scaling；
+4. 继续审计专门 Pfaffian 或 tensor-network solver，但不把“未找到”写成复杂性证明。
+
+这条线与 tensor-square phase 和 oddcycle exterior alphabets 不重合。
+
 ### 低优先级开放项
 
 - 一般 non-Klein、非高斯 entangling circuit 的 Fock–CP/Choi 锥；
@@ -694,12 +784,16 @@ positive character、物理受限锥交集等想法。它们没有全部进入�
 
 - 我们建立了可复现的 determinant 与 Majorana Spin/Fock 权重 oracle；
 - 完成了 404.4 万主权重的结构化筛选和大量精确闭合；
-- 得到 TN、odd monomial/block-TN、tensor-square 和 symmetric-oddcycle continuum
-  四套严格 determinant 具体构造族；最后一套已归入已知 Wei 不定度量收缩半群；
+- 得到 TN、odd monomial/block-TN、tensor-square、symmetric-oddcycle continuum
+  和 local orthogonal contraction 五套严格 determinant 具体构造族；symmetric
+  continuum 已归入 Wei 半群，orthogonal positivity 已归入 doubled-Majorana square；
 - 得到一套 graded 逐历史符号抵消机制；
 - 得到通用 Hermitian semigroup model factory；
 - 构造并验证了多组局域、长程、多体、ancilla、gauge 和 pseudo-Hermitian 模型；
-- 已经知道这些模型为什么正，以及多数为什么不够新；
+- 已经知道这些模型为什么正，以及多数为什么不够新；R3b 是唯一保留的强 QNC 候选；
+- 六模 R3b 已排除小 group-algebra closure，4/6/8 模手征基态已验证违反 Wick 定理；
+- oddcycle 四字母 alphabet 是新的 exact path-metric transfer certificate，但其有限
+  五模 transfer 还不是可扩展局域热力学模型；
 - tensor-square `m=3,4` 已完成 DQMC/ED 小尺寸验收，值得继续做尺寸/温度扫描；
 - 下一轮 typed exterior 与 pairing Pfaffian/Spin 搜索已经完成预注册设计。
 
@@ -711,17 +805,22 @@ positive character、物理受限锥交集等想法。它们没有全部进入�
 - 找到一个长程 Hermitian partner 就发现了长程物理；
 - 主办方要求的完整复 Majorana/Pfaffian 问题已经解决；
 - 404.4 万随机样本穷尽了所有候选。
+- R3b 已有一般经典复杂性下界或已经发现热力学新相；
+- “正性机制已知”自动意味着相应 interacting Hamiltonian 已被传统方法模拟。
 
 ### 给合作者的一句话
 
 > 我们已经把经典群、AZ、旋转 Majorana/split 双锥、朴素图半群和多批激进候选做了
-> 系统筛选与精确闭合；得到四套严格 determinant 具体构造、一套 graded 正权机制和一个
-> 通用 Hermitian 模型工厂，但所有已完成物理映射目前仍可归入已知类或精确约化。
+> 系统筛选与精确闭合；得到五套严格 determinant 具体构造、一套 graded 正权机制和一个
+> 通用 Hermitian 模型工厂。多数物理映射已归入已知类或精确约化；R3b 的正性虽是已知
+> doubled-Majorana square，但完整局域相互作用模型已排除对角 stoquastic、quadratic、
+> common-orbital、claw-free JW 和小 group-algebra closure，并出现非 Gaussian 手征低能态，
+> 因而保留为唯一 active QNC candidate。
 > ZiboJin 的 symmetric-oddcycle continuum 已有任意深度定理和五模相互作用 transfer，
 > 但共同 metric 又证明它属于已知 Wei 不定度量收缩半群；tensor-square 则已通过
 > `m=3,4` 的 DQMC/ED 首轮验收，尚无新相。其最新 untyped joint pair 已通过全部
 > depth-12 words 但仍缺任意深度 theorem。籼至下一轮转向不重合的 typed exterior
-> category 与 pairing Pfaffian/Spin 搜索；确认的新无符号物理类仍为零。
+> category 与 pairing Pfaffian/Spin 搜索；确认的新无符号物理类为零，强 QNC 候选为一。
 
 ## 13. 复现与证据在哪里
 
@@ -732,20 +831,20 @@ positive character、物理受限锥交集等想法。它们没有全部进入�
 - `fixtures/`：机器可读精确证书；
 - `protocols/`：扫描参数、种子和可恢复运行协议；
 - `tracks/qmc/results/no-negative-vibes/`：不提交 Git 的大体积逐格结果。
+- `oracle/orthogonal_contraction_physics.py`：sector algebra、Hodge chirality、
+  ED observables 和 Wick residual 的统一审计。
 
 ### 当前质量状态
 
-```text
-python -m pytest -q
-370 passed
-```
+| 最终提交 gate | 结果 |
+|---|---|
+| oddcycle exact publication replay | `all-exact-gates-passed`；payload SHA-256 `176712dc90cd3483e31549aa177ecf418a0162515fe0ccdb89136a68c65aece1` |
+| 主定理、负控、双方机制与 Survivor A focused suite | `112 passed, 1 skipped, 2 xfailed` |
+| tensor-square phase suite | `73 passed` |
+| R3b orthogonal-contraction focused suite | `17 passed in 1.56s` |
 
-ZiboJin 的草稿 PR #3 在独立 worktree 中复核：忽略尚未实现
-`classify_r01_fixture` 的 `tests/test_overlap_klein.py` 后为
-`499 passed, 2 skipped`；两个 skip 都是当前环境未安装可选 `cvxpy`。完整收集仍会
-因旧接口缺失报错。显式共同 metric 已另用 SymPy 做 exact interval replay；
-22,369,620 个 joint words、十万条随机词和 coupled profile 也已独立复现，不依赖 skip。
-Tensor-square phase 分支完整回归为 `13 passed`，其中 DQMC 专项为 `5 passed`。
+两个 xfail 是尚未实现的 Survivor A high-precision `analyze_hamiltonian` 规格，不作为
+提交证据；Windows-only skip 已由 WSL 回归覆盖。
 
 最新三个候选额外有：
 
@@ -765,7 +864,59 @@ Tensor-square phase 分支完整回归为 `13 passed`，其中 DQMC 专项为 `5
 - [Tensor-square 结果](TENSOR_SQUARE_RESULTS.md)
 - [八种非常规模型](UNCONVENTIONAL_MODEL_BATCH1_RESULTS.md)
 - [最新三个候选审计](THREE_CANDIDATE_AUDIT_RESULTS.md)
+- [R3b 局域正交收缩 Hamiltonian](ORTHOGONAL_CONTRACTION_HAMILTONIAN.md)
 - [主办方方向完成度](ORGANIZER_DIRECTION_AUDIT.md)
 - [精确证书](EXACT_CERTIFICATES.md)
 
 历史计划和候选卡只作为审计记录。若它们与本文冲突，以本文、机器可读证书和当前测试为准。
+
+## 14. 最终成果分级：什么是新的，什么不是
+
+| 层级 | 成果 | 最准确的表述 |
+|---|---|---|
+| 新 exact transfer certificate | 四字母 oddcycle path-metric alphabet | 任意深度严格正，排除 common real quadratic metric 和 fixed-`J1,J2` 解释；这是主论文候选，但五模 transfer 的局域热力学推广开放 |
+| 强 QNC 模型候选 | R3b local orthogonal contraction | 局域、extensive、相互作用、非 stoquastic、低能非 Gaussian；正性机制是已知 Majorana square，但已审计传统 solver 不适用 |
+| 严格正但机制已知 | TN path、graded monomial、symmetric oddcycle、`m=2` tensor-square、reciprocal/commuting | 可用于 QMC 或作为模型工厂输入，不能宣称新正性机制 |
+| 严格正且物理仍开放 | `m>=3` tensor-square | square factorization 已知；无固定 metric、ED/DQMC 有价值，但独立物理新颖性和热力学 scaling 未完成 |
+| 新算法表达而非新模型 | 非对称 `t-V` bond HS、star-to-chain、pseudo-Hermitian partners、grade-charge | 变换、分解或基础设施有价值，底层物理可归约 |
+| 精确关闭 | classical/AZ failures、rotated Majorana/split、moving metric、crossed block-TN、seed61 等 | 有精确负权、Farkas/Gordan–Stiemke dual、一般 gauge/no-go 或已知类归约 |
+| 未完成 | exterior seeds `117/132/147`、untyped joint pair、Survivor A local-H、完整 complex Pfaffian theorem | 只保留明确 evidence grade，不进入最终发现计数 |
+
+因此，“确实新的可解模型”必须分两种含义：
+
+1. 如果指**新的任意深度精确正 transfer alphabet**，四字母 oddcycle 是最强结果；
+2. 如果指**新的可扩展局域热力学模型且已证明传统算法不能模拟**，当前仍没有完成证明；
+   R3b 是证据最强的候选，tensor-square `m>=3` 是第二类重要物理程序。
+
+## 15. 本项目发展的方法与基础设施
+
+### 15.1 证明和排重方法
+
+- determinant 任意深度证明：TN minors、odd-cycle factorization、tensor/exterior
+  factorization、path-complete Lorentz metrics；
+- exact no-go：有理重构、Gordan–Stiemke/Farkas dual、固定 metric 满秩证书、
+  最短负 word、80 位高精度回放；
+- Fock/Majorana：直接 Spin/Fock trace、parity 分辨、Hodge/star、BdG/Nambu convention；
+- Hamiltonian 新颖性：occupation sign-cycle gauge、JW Pauli frustration graph、
+  common orbital commutant、Lie closure、Burnside sector algebra、Wick residual；
+- 物理验证：固定粒子数 ED、DQMC/ED 交叉检查、低温 SVD 稳定化、预注册 stop/extend gates。
+
+### 15.2 模型生成方法
+
+- transpose-closed positive semigroup 到 Hermitian Fock Hamiltonian 的通用工厂；
+- inverse-HS 与 exact positive-field transfer；
+- exterior-cone 到 physical transfer 的反向构造；
+- Wilson-string/Gauss-law 局域化及其 locality no-go；
+- exact `-log` transfer、star-to-chain 和 pseudo-Hermitian partner 审计。
+
+### 15.3 可复现基础设施
+
+- 统一 determinant、exterior power、Spin/Fock trace、Fock minor 和 Pauli/JW oracles；
+- candidate cards、evidence grades、结果总账和 claim-boundary 文档；
+- 机器可读 exact fixtures、source SHA-256、确定性 seeds 和 replay CLI；
+- 原子化 cell 输出、可恢复 WSL/CPU 分布式 runners、进度 checkpoint 和防重复边界；
+- exact-first promotion、高精度复核、TDD regressions 与预注册早停；
+- 大体积生成结果 gitignored，紧凑证书、协议和摘要进入 Git。
+
+这些基础设施使失败也成为可复用成果：后续候选可以先经过 common-metric、known-class、
+stoquastic、group-algebra 和 locality gates，再消耗长词搜索或远程计算资源。

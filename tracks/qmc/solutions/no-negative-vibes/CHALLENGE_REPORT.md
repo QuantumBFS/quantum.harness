@@ -37,6 +37,15 @@ novelty audits are part of the result: several reduce to known
 split/Kramers/Wei, stoquastic, Majorana-square, triangular, or integrable
 mechanisms. We do not call those reductions new sign-free physics.
 
+The strongest local-model survivor is now the orthogonal-contraction
+plaquette Hamiltonian. Its positivity is the known doubled-Majorana square,
+but the interacting sum is local, extensive, nonstoquastic, nonquadratic,
+outside the audited claw-free generalized-JW class, and generates full
+fixed-number sector algebras modulo exact Hodge chirality. Its 4/6/8-mode
+chiral ground states violate Wick factorization. We therefore retain it as an
+active QNC model candidate, not as a new positivity theorem or a proved
+classical-hardness result.
+
 ## Evidence grades
 
 | Grade | Meaning |
@@ -59,7 +68,7 @@ mechanisms. We do not call those reductions new sign-free physics.
 | Odd positive-monomial / block-TN | Odd permutation cycles factor the determinant into positive factors; fixed global block partition also works | Model factory exists for a fixed global partition | Matrix result rigorous; elementary cycle factorization is known and natural local crossed partitions fail | [result](docs/SPECULATIVE_STRUCTURE_RESULTS.md), [locality audit](docs/ODD_BLOCK_TN_LOCALITY_AUDIT.md) |
 | Graded monomial | History grade cancels determinant parity exactly | Local odd-ring attractive spinless model | Rigorous but reducible to Majorana reflection positivity / fixed orbit gauges | [candidate](docs/GRADED_MONOMIAL_CANDIDATE.md), [audit](docs/GRADED_MONOMIAL_RESULTS.md) |
 | Tensor-square | For real `X`, `det(I+X tensor X)>=0`; the weight factorizes into modulus-square and real-square pieces | Four-mode plaquette, multi-channel models, and exact `-log` transfer | `m=2` is split; `m=3` has an exact no-fixed-metric result. Positivity is rigorous, while independent physical novelty and phase structure remain open | [result](docs/TENSOR_SQUARE_RESULTS.md), [effective model](docs/TENSOR_SQUARE_EFFECTIVE_MWE.md), [three-candidate audit](docs/THREE_CANDIDATE_AUDIT_RESULTS.md) |
-| Local orthogonal contraction | Products of real orthogonal local vertices give nonnegative determinant weights | Local, extensive, interacting overlapping-plaquette Hamiltonian | Positive and non-diagonally-stoquastic, but the weight is a known doubled-Majorana square; literature/solver novelty remains open | [audit](docs/ORTHOGONAL_CONTRACTION_HAMILTONIAN.md) |
+| Local orthogonal contraction | Products of real orthogonal local vertices give nonnegative determinant weights at arbitrary history depth | Local, extensive, four-body overlapping-plaquette Hamiltonian; non-Gaussian chiral low-energy states | Known doubled-Majorana positivity, but no diagonal stoquastic gauge, quadratic/common-orbital reduction, claw-free JW solver, or small sector algebra; active QNC candidate with complexity and thermodynamic scaling open | [audit](docs/ORTHOGONAL_CONTRACTION_HAMILTONIAN.md), [code](oracle/orthogonal_contraction_physics.py) |
 | Tensor-square phase program | Determinant factorization, Hermiticity, number conservation, ED, and stabilized DQMC gates passed | `m=3,4` pilots and an `m=4,6,8` finite-temperature map | 675/675 coarse cells completed; a robust response ridge was found, while Stage-4 sampler proposals were stopped by preregistered efficiency gates. This is a finite-size signal, not a new phase claim | [status](tensor-square-phase-diagram/STATUS.md), [model](tensor-square-phase-diagram/MODEL.md) |
 | Fixed weighted `l_infinity` contraction | Common norm contraction implies positivity | No successful Hamiltonianization | Rigorous common-contraction control, not a new mechanism | [screen](docs/SPECULATIVE_STRUCTURE_RESULTS.md), [reappraisal](docs/POSITIVE_HAMILTONIAN_REAPPRAISAL_LEDGER.md) |
 | Reciprocal-parabolic and commuting controls | Triangular reciprocal factorization and common commuting algebra give positive weights | No new model | Known triangular/integrable controls | [screen](docs/SPECULATIVE_STRUCTURE_RESULTS.md) |
@@ -106,6 +115,7 @@ mechanisms. We do not call those reductions new sign-free physics.
 | Tensor-square validation | 54 noncommuting histories; `m=3,4` ED; DQMC/ED cross-checks | Direct/factorized weights, Hermiticity, number conservation, eigensolvers, and low-temperature stabilization passed |
 | Tensor-square coarse map | `m=4,6,8` × `beta=2,4,8` × 5 coupling ratios × 5 hopping ratios × 3 chemical potentials = 675/675 cells | 14 SURVIVE, 27 EXTEND, 34 STOP regions; half-filled response ridge is a short-system candidate, not a phase statement |
 | Tensor-square Stage 4 | 90-cell pilot contract, production ranking, `m=10` sentinel, autocorrelation diagnosis, temporal-block and channel-reflection A/B tests | Sign/stability gates passed; temporal-block and channel-reflection proposals stopped on frozen efficiency/ESS gates. Stage 5 was not released; these are algorithm stops, not physics no-go results |
+| Orthogonal-contraction physics | 4/6/8-mode half-filled ED; six-mode `so(6)`/sector-commutant audit; Hodge-resolved Wick tests | Full irreducible sector algebras modulo chirality and non-Gaussian ground states; finite-size physics, not a thermodynamic phase claim |
 
 ### D. Physical constructions and final attribution
 
@@ -141,8 +151,9 @@ because those reductions and reusable oracles are useful research results.
   coarse map found a half-filled response ridge. Thermodynamic scaling and a
   new-phase claim remain open; two Stage-4 sampler proposals were correctly
   stopped rather than overinterpreted.
-- **Local orthogonal contraction:** local and interacting but already a
-  Majorana-square weight; specialized solver/literature novelty is open.
+- **Local orthogonal contraction:** positivity is a known Majorana-square
+  mechanism, while the local interacting Hamiltonian survives the audited
+  conventional solvers. General complexity and thermodynamic scaling remain open.
 - **Complex Majorana/Pfaffian formulation:** the full simple matrix theorem
   requested by the challenge remains open.
 - **Majorana parity pattern and non-Klein typed exterior cones:** hypotheses or
@@ -161,6 +172,9 @@ because those reductions and reusable oracles are useful research results.
    searches.
 5. It preserves failed routes and minimal counterexamples, which are directly
    useful when designing future sign-free QMC conditions.
+6. It adds sector-algebra, Hodge-chirality, JW-frustration, stoquastic-cycle,
+   and Wick-residual audits that distinguish a known positivity identity from
+   an actually conventionally solved interacting Hamiltonian.
 
 ## Correctness and claim boundaries
 
@@ -187,6 +201,7 @@ environment (Python 3.11.15):
 | `python -m oracle.oddcycle_final_certificate` | `all-exact-gates-passed`; exact payload SHA-256 `176712dc90cd3483e31549aa177ecf418a0162515fe0ccdb89136a68c65aece1` |
 | Main theorem, negative controls, teammate mechanisms, and Survivor A focused suite | `112 passed, 1 skipped, 2 xfailed` |
 | Tensor-square phase-diagram suite | `73 passed` |
+| Orthogonal-contraction focused suite | `17 passed in 1.56s` |
 | Challenge report renderer | Standard `skills/report/render_report.py` completed; self-contained HTML written under the ignored result root |
 
 The single Windows skip is a POSIX-shell fake-`git` timing test already

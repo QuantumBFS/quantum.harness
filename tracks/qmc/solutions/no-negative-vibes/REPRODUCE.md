@@ -63,6 +63,24 @@ pytest -q \
   tests/test_orthogonal_contraction_exclusion.py
 ```
 
+## Orthogonal-contraction QNC candidate
+
+```bash
+pytest -q \
+  tests/test_orthogonal_contraction_physics.py \
+  tests/test_orthogonal_contraction_lattice.py \
+  tests/test_orthogonal_contraction_exclusion.py \
+  tests/test_orthogonal_contraction_candidate.py \
+  tests/test_revival_no_go.py \
+  tests/test_odd_block_tn_stoquastic.py
+```
+
+This replays arbitrary-depth orthogonal-word positivity, overlapping-plaquette
+locality and sign frustration, common-orbital and generalized-JW exclusions,
+the doubled-Majorana identity, the six-mode `so(6)`/sector-algebra audit, and
+4/6/8-mode Hodge-resolved ED/Wick diagnostics. The result is a strong QNC
+candidate boundary, not a general classical-hardness proof.
+
 ## Tensor-square phase program
 
 ```bash
