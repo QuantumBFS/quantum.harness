@@ -52,18 +52,19 @@ class LocalPairJet:
     """Taylor coefficients ``c[a,b]`` for two local tangent variables."""
 
     coefficients: object
+    constant_only: bool = False
 
     @staticmethod
     def from_constant(value: object, template: object) -> "LocalPairJet":
         coefficients = jnp.zeros_like(template)
-        return LocalPairJet(coefficients.at[..., 0].set(value))
+        return LocalPairJet(coefficients.at[..., 0].set(value), constant_only=True)
 
     @property
     def constant_term(self) -> object:
         return self.coefficients[..., 0]
 
     def __getitem__(self, item: object) -> "LocalPairJet":
-        return LocalPairJet(self.coefficients[item])
+        return LocalPairJet(self.coefficients[item], constant_only=self.constant_only)
 
     def _coerce(self, other: object) -> "LocalPairJet":
         if isinstance(other, LocalPairJet):
@@ -72,12 +73,15 @@ class LocalPairJet:
 
     def __add__(self, other: object) -> "LocalPairJet":
         checked = self._coerce(other)
-        return LocalPairJet(self.coefficients + checked.coefficients)
+        return LocalPairJet(
+            self.coefficients + checked.coefficients,
+            constant_only=self.constant_only and checked.constant_only,
+        )
 
     __radd__ = __add__
 
     def __neg__(self) -> "LocalPairJet":
-        return LocalPairJet(-self.coefficients)
+        return LocalPairJet(-self.coefficients, constant_only=self.constant_only)
 
     def __sub__(self, other: object) -> "LocalPairJet":
         return self + (-self._coerce(other))
@@ -87,10 +91,23 @@ class LocalPairJet:
 
     def __mul__(self, other: object) -> "LocalPairJet":
         checked = self._coerce(other)
+        if self.constant_only:
+            return LocalPairJet(
+                checked.coefficients * self.constant_term[..., None],
+                constant_only=checked.constant_only,
+            )
+        if checked.constant_only:
+            return LocalPairJet(
+                self.coefficients * checked.constant_term[..., None],
+                constant_only=False,
+            )
         left, right = jnp.broadcast_arrays(self.coefficients, checked.coefficients)
         products = left[..., _LEFT] * right[..., _RIGHT]
         result = jnp.zeros_like(left)
-        return LocalPairJet(result.at[..., _TARGET].add(products))
+        return LocalPairJet(
+            result.at[..., _TARGET].add(products),
+            constant_only=False,
+        )
 
     __rmul__ = __mul__
 
@@ -118,8 +135,11 @@ class _LocalJetNamespace:
         return LocalPairJet.from_constant(value, self._template)
 
     def stack(self, values: Sequence[object]) -> LocalPairJet:
-        checked = [self.asarray(value).coefficients for value in values]
-        return LocalPairJet(jnp.stack(checked, axis=0))
+        checked = [self.asarray(value) for value in values]
+        return LocalPairJet(
+            jnp.stack([value.coefficients for value in checked], axis=0),
+            constant_only=all(value.constant_only for value in checked),
+        )
 
 
 def local_pair_seed_jets(
@@ -153,7 +173,7 @@ def local_pair_seed_jets(
             second_direction = tangent[component][:, None] * second_mask[None, :]
             coefficients = coefficients.at[..., _WIDTH].set(first_direction)
             coefficients = coefficients.at[..., 1].set(second_direction)
-            row.append(LocalPairJet(coefficients))
+            row.append(LocalPairJet(coefficients, constant_only=False))
         lifted.append(row)
     result = _cofactor_seed_family_amplitudes(
         family,
