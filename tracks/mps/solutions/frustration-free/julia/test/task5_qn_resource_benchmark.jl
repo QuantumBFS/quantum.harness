@@ -115,7 +115,7 @@ function _read_artifacts(config)
             throw(ArgumentError("N_b>6 requires explicit bath and mapping paths"))
         return validated_chain_fixture_artifacts(config.n_bath)
     end
-    isempty(config.bath_path) == isempty(config.mapping_path) &&
+    isempty(config.bath_path) != isempty(config.mapping_path) &&
         throw(ArgumentError("bath and mapping paths must be supplied together"))
     isfile(config.bath_path) || throw(ArgumentError("bath path is not a file"))
     isfile(config.mapping_path) || throw(ArgumentError("mapping path is not a file"))

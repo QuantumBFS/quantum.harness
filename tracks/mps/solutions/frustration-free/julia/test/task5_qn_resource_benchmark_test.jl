@@ -30,6 +30,34 @@ using .Task5QNResourceBenchmark:
     )
 end
 
+@testset "Task5 explicit benchmark artifacts are consumed together" begin
+    mktempdir() do directory
+        artifacts =
+            Task5QNResourceBenchmark.validated_chain_fixture_artifacts(1)
+        bath_path = joinpath(directory, "bath.json")
+        mapping_path = joinpath(directory, "mapping.json")
+        write(bath_path, artifacts.bath_json)
+        write(mapping_path, artifacts.mapping_json)
+        config = parse_benchmark_config(
+            Dict(
+                "N_BATH" => "1",
+                "EXPECTED_GIT_COMMIT" => repeat("c", 40),
+                "BATH_ARTIFACT_PATH" => bath_path,
+                "MAPPING_ARTIFACT_PATH" => mapping_path,
+                "EXPECTED_BATH_FILE_SHA256" =>
+                    Task5QNResourceBenchmark._file_sha256(bath_path),
+                "EXPECTED_MAPPING_FILE_SHA256" =>
+                    Task5QNResourceBenchmark._file_sha256(mapping_path),
+            ),
+        )
+
+        consumed = Task5QNResourceBenchmark._read_artifacts(config)
+
+        @test consumed.bath_artifact == artifacts.bath_artifact
+        @test consumed.mapping_artifact == artifacts.mapping_artifact
+    end
+end
+
 @testset "Task5 Slurm wrapper isolates benchmark writers" begin
     script = read(joinpath(@__DIR__, "task5_qn_resource_benchmark.sbatch"), String)
     @test occursin("#SBATCH --cpus-per-task=16", script)
