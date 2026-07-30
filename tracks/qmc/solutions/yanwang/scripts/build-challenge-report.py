@@ -867,7 +867,10 @@ def build_document(
                                 "Dedicated implementation",
                                 "Primary",
                                 "SSE with quantum-cluster updates",
-                                f'{triangle["cell_count"] + honeycomb["cell_count"]:,} scheduled cells',
+                                (
+                                    f'{triangle["cell_count"] + honeycomb["cell_count"]:,} cells × '
+                                    '600,000 sweeps = 5.76×10⁹ scheduled measurement sweeps'
+                                ),
                             ],
                             [
                                 "ALPS looper",
@@ -933,29 +936,44 @@ def build_document(
                     },
                     {
                         "kind": "table",
-                        "columns": ["Campaign", "Scheduled cells", "Bootstrap", "Purpose"],
+                        "columns": ["Campaign", "Parameter / seed cells", "QMC scale", "Analysis"],
                         "rows": [
                             [
                                 "Triangular dedicated SSE",
                                 f'{triangle["cell_count"]:,}',
-                                f'{triangle["bootstrap_resamples"]:,}',
-                                "Primary critical field",
+                                "600,000 sweeps/cell · 3.168×10⁹ scheduled",
+                                f'{triangle["bootstrap_resamples"]:,} bootstrap',
                             ],
                             [
                                 "Honeycomb dedicated SSE",
                                 f'{honeycomb["cell_count"]:,}',
-                                f'{honeycomb["bootstrap_resamples"]:,}',
-                                "Primary critical field",
+                                "600,000 sweeps/cell · 2.592×10⁹ scheduled",
+                                f'{honeycomb["bootstrap_resamples"]:,} bootstrap',
                             ],
                             [
                                 "Independent ALPS CT-QMC",
                                 f'{independent["cell_count"]:,}',
-                                f'{independent["bootstrap_resamples"]:,}',
-                                "Cross-method validation",
+                                "2,016 independent CT-QMC cells",
+                                f'{independent["bootstrap_resamples"]:,} bootstrap',
                             ],
-                            ["Total", f"{total_cells:,}", "—", "Two-route evidence base"],
+                            [
+                                "Final accepted evidence base",
+                                f"{total_cells:,}",
+                                "5.76×10⁹ dedicated-SSE measurement sweeps + independent CT-QMC",
+                                "Two-route result",
+                            ],
                         ],
-                        "numeric": [False, True, True, False],
+                        "numeric": [False, True, False, False],
+                    },
+                    {
+                        "kind": "text",
+                        "text": (
+                            "The 11,616 cells count only the final accepted evidence base. "
+                            "Pilot campaigns, failed scheduler launches, checkpoint "
+                            "continuations, repeated RNG/parallel bootstrap validations, "
+                            "and rejected exploratory runs are additional and are not "
+                            "inflated into this total."
+                        ),
                     },
                 ],
             },

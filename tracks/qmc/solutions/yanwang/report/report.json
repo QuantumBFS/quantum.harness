@@ -90,7 +90,7 @@
               "Dedicated implementation",
               "Primary",
               "SSE with quantum-cluster updates",
-              "9,600 scheduled cells"
+              "9,600 cells × 600,000 sweeps = 5.76×10⁹ scheduled measurement sweeps"
             ],
             [
               "ALPS looper",
@@ -140,42 +140,46 @@
           "kind": "table",
           "columns": [
             "Campaign",
-            "Scheduled cells",
-            "Bootstrap",
-            "Purpose"
+            "Parameter / seed cells",
+            "QMC scale",
+            "Analysis"
           ],
           "rows": [
             [
               "Triangular dedicated SSE",
               "5,280",
-              "100,000",
-              "Primary critical field"
+              "600,000 sweeps/cell · 3.168×10⁹ scheduled",
+              "100,000 bootstrap"
             ],
             [
               "Honeycomb dedicated SSE",
               "4,320",
-              "100,000",
-              "Primary critical field"
+              "600,000 sweeps/cell · 2.592×10⁹ scheduled",
+              "100,000 bootstrap"
             ],
             [
               "Independent ALPS CT-QMC",
               "2,016",
-              "100,000",
-              "Cross-method validation"
+              "2,016 independent CT-QMC cells",
+              "100,000 bootstrap"
             ],
             [
-              "Total",
+              "Final accepted evidence base",
               "11,616",
-              "—",
-              "Two-route evidence base"
+              "5.76×10⁹ dedicated-SSE measurement sweeps + independent CT-QMC",
+              "Two-route result"
             ]
           ],
           "numeric": [
             false,
             true,
-            true,
+            false,
             false
           ]
+        },
+        {
+          "kind": "text",
+          "text": "The 11,616 cells count only the final accepted evidence base. Pilot campaigns, failed scheduler launches, checkpoint continuations, repeated RNG/parallel bootstrap validations, and rejected exploratory runs are additional and are not inflated into this total."
         }
       ]
     },
