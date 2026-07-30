@@ -1,0 +1,63 @@
+\section{Conclusions and immediate decision}
+\label{sec:conclusions}
+
+The apparent broad usefulness of DFPT should not be described as a mysterious
+global cancellation.  DFPT computes a full, state-dependent static Kohn--Sham
+response.  The missing many-body object is the phonon derivative of the
+beyond-Kohn--Sham self-energy.  That derivative can be small for one perturbation
+and large for another even when the equilibrium self-energy and mass enhancement
+are large.
+
+The clearest physical anchor is an unprojected, full-space uniform common
+potential coupled to conserved total charge: it only changes the energy zero, so
+interactions cannot arbitrarily renormalize it.  A projected identity component
+alone is not sufficient.  The Ward identity states this constraint precisely, but its
+dynamic and static limits must not be confused.  The UEG extends the picture with
+strong numerical evidence that a static density kernel remains accurate over
+finite momenta up to $2k_F$ in the tested regime.  Because the UEG contains only
+the density channel, this result suggests a compression principle rather than a
+universal proof.
+
+Real crystals add relative \texttt{site\_charge}, block-internal
+\texttt{internal}, inter-block \texttt{nonlocal}, spin, and separate two-body
+interaction-modulation operators.  Existing DFT+DMFT, DFPT+$U$, and GWPT results
+show that their corrections can be strongly mode-selective.  This motivates the
+proposal's central hypothesis: the useful small parameter is not ``correlation
+strength'' by itself, but the weight of a phonon in each operator channel times
+the many-body amplification and dynamical variation of that channel.
+
+The proposed next-generation calculation therefore retains DFPT, decomposes its
+perturbation, and applies a channel kernel only where diagnostics demand it.  This
+can be simpler and cheaper than computing a complete many-body vertex at every
+mode and momentum while being more physically transparent than a black-box
+correction to every matrix element.  It is not faster than the single DFPT
+calculation used as its baseline.  Its current computational claim is narrower:
+sparse higher-level anchors plus cheap inference can cost less than evaluating a
+higher-level correction at every point.  A future speed claim against DFPT would
+require a separately implemented surrogate for the DFPT coefficients and a
+matched comparison with modern DFPT interpolation.
+
+The accompanying software now fits a small channel-response matrix, predicts
+held-out coefficient vectors, reports error, and compares DFPT-only, dense
+higher-level, and sparsely corrected cost baselines.  It explicitly reports that
+the present corrected path is not faster than DFPT.  Its bundled held-out vectors
+are synthetic and its costs are normalized assumptions.  These results establish
+reproducible software behavior, not material accuracy or a measured runtime
+speedup.
+
+The executable one-body decomposition is presently Hermitian and therefore
+limited to real-space derivatives, Gamma, or real $q/-q$ standing waves.  General
+fixed-$q$ pairs and a separate two-body interaction-vertex space remain future
+interfaces.  The fitted target is a fixed-basis inverse-Green-function vertex;
+external-leg $Z^{1/2}$ factors and quasiparticle-state rotations are separate.
+
+\begin{keypoint}[First decision after submission]
+The first research milestone should test one sharp statement: in SrVO$_3$, does a
+basis-robust measure of \texttt{internal} weight separate the strongly enhanced
+Jahn--Teller mode from the weakly corrected finite-$q$
+\texttt{site\_charge}-like breathing mode when both are represented in the
+phase-correct real supercell/standing-wave basis, while the complete UEG ratio supplies
+a scalar-density control?  A positive result justifies
+building the static prototype; a negative result forces the hypothesis to be
+revised before software expansion.
+\end{keypoint}

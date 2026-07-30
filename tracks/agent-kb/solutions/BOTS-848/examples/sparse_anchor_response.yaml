@@ -1,0 +1,46 @@
+{
+  "name": "three-coefficient sparse-anchor synthetic contract",
+  "validation_scope": "software-contract-only",
+  "channel_names": ["global_charge", "internal", "nonlocal"],
+  "omitted_channel": "site_charge is zero by construction; this is not a four-channel physical validation",
+  "known_response_matrix_for_audit_only": [
+    [1.0, 0.1, 0.0],
+    [0.2, 1.5, 0.1],
+    [0.0, 0.2, 0.8]
+  ],
+  "training_inputs": [
+    [1.0, 0.0, 0.0],
+    [0.0, 1.0, 0.0],
+    [0.0, 0.0, 1.0],
+    [1.0, 1.0, 1.0]
+  ],
+  "training_targets": [
+    [1.0, 0.2, 0.0],
+    [0.1, 1.5, 0.2],
+    [0.0, 0.1, 0.8],
+    [1.1, 1.8, 1.0]
+  ],
+  "held_out_inputs": [
+    [2.0, -1.0, 0.5],
+    [-0.5, 0.25, 2.0]
+  ],
+  "held_out_targets": [
+    [1.9, -1.05, 0.2],
+    [-0.475, 0.475, 1.65]
+  ],
+  "ridge": 0.0,
+  "software_relative_rmse_tolerance": 1e-10,
+  "cost_assumptions": {
+    "full_points": 100,
+    "dfpt_cost_per_point": 1.0,
+    "inference_cost_per_point": 0.01,
+    "high_level_anchors": 4,
+    "high_level_cost_per_point": 5.0,
+    "training_cost": 1.0,
+    "campaigns": 1
+  },
+  "expected_is_faster_than_dense_high_level": true,
+  "expected_is_faster_than_dfpt": false,
+  "measured_runtime": false,
+  "physical_accuracy_established": false
+}
