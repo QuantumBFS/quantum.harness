@@ -1464,6 +1464,48 @@ def test_full_cli_has_only_frozen_seed_schedule_and_freezes_terminal_run(
     assert emitted["selected_update"] == 2048
 
 
+def test_full_cli_rejects_existing_manifest_before_training_starts(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    model = _tiny_model(width=3)
+    run_dir = tmp_path / "protected-run"
+    run_dir.mkdir()
+    manifest = run_dir / "training-manifest.json"
+    sentinel = b"preexisting-provenance\n"
+    manifest.write_bytes(sentinel)
+
+    def forbidden_sample(
+        _size: int,
+        _sector: str,
+        *,
+        seed: int,
+    ) -> np.ndarray:
+        raise AssertionError(f"training started with seed {seed}")
+
+    monkeypatch.setattr(model, "sample", forbidden_sample)
+    monkeypatch.setattr(
+        training_cli.AutoregressiveNQS,
+        "initialize",
+        lambda **_kwargs: model,
+    )
+    monkeypatch.setattr(
+        training_cli,
+        "_prepared_operator",
+        lambda _two_q: _zero_pair_operator(model.two_q),
+    )
+
+    with pytest.raises(FileExistsError, match="training artifacts"):
+        training_cli.main(
+            ["--training-seed", "848", "--run-dir", str(run_dir)]
+        )
+
+    assert manifest.read_bytes() == sentinel
+    assert {path.name for path in run_dir.iterdir()} == {
+        "training-manifest.json"
+    }
+
+
 @pytest.mark.parametrize(
     ("arguments", "message"),
     [
