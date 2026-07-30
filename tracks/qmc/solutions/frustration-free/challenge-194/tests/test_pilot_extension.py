@@ -207,7 +207,10 @@ def test_public_extension_builder_binds_approved_evidence(
         )
 
 
-@pytest.mark.parametrize("stage", ("after-trajectory", "after-progress"))
+@pytest.mark.parametrize(
+    "stage",
+    ("after-trajectory", "after-batch", "after-progress", "after-manifest"),
+)
 def test_extension_cell_resumes_every_publication_boundary(
     tmp_path: Path, stage: str
 ):
@@ -221,8 +224,22 @@ def test_extension_cell_resumes_every_publication_boundary(
 
     with pytest.raises(RuntimeError, match="injected extension stop"):
         pilot._run_test_registered_pilot_cell(path, 0, crash_hook=stop)
+    run = path.parent / json.loads(path.read_text())["cells"][0]["run_path"]
+    published_path: Path | None = None
+    published_payload: bytes | None = None
+    if stage == "after-batch":
+        published_path = next((run / "batches").glob("batch-*.json"))
+        published_payload = published_path.read_bytes()
+        assert not (run / "progress.json").exists()
+    if stage == "after-manifest":
+        manifest_path = json.loads(path.read_text())["cells"][0]["manifest_path"]
+        published_path = path.parent / manifest_path
+        published_payload = published_path.read_bytes()
     result = pilot._run_test_registered_pilot_cell(path, 0)
     assert (path.parent / result["manifest_path"]).is_file()
+    if published_path is not None:
+        assert published_path.read_bytes() == published_payload
+    assert pilot._run_test_registered_pilot_cell(path, 0) == result
 
 
 @pytest.mark.parametrize("suffix", (".partial", ".intent"))
@@ -303,6 +320,93 @@ def test_production_extension_schema_cannot_be_downgraded_to_test(
     path.write_bytes(pilot._canonical_bytes(document))
     with pytest.raises(RuntimeError):
         pilot._run_test_registered_pilot_cell(path, 0)
+
+
+@pytest.mark.parametrize(
+    ("source_class", "maximum_size"),
+    (
+        ("design", extension.DESIGN_MAX_BYTES),
+        ("progress", extension.P0_PROGRESS_MAX_BYTES),
+        ("registry", extension.P0_RUN_SPEC_MAX_BYTES),
+        ("analysis", extension.P0_ANALYSIS_MAX_BYTES),
+    ),
+)
+def test_extension_sources_reject_oversize_before_read(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    source_class: str,
+    maximum_size: int,
+):
+    source = tmp_path / f"{source_class}.json"
+    with source.open("wb") as stream:
+        stream.truncate(maximum_size + 1)
+    if source_class == "design":
+        invoke = lambda: extension._file_sha256(source)
+    elif source_class == "progress":
+        monkeypatch.setattr(extension, "_p0_progress_path", lambda: source)
+        invoke = extension._validate_frozen_progress
+    elif source_class == "registry":
+        monkeypatch.setattr(extension, "_p0_run_spec_path", lambda: source)
+        invoke = extension._p0_identity_hashes
+    else:
+        monkeypatch.setattr(extension, "_p0_analysis_path", lambda: source)
+        invoke = extension.load_frozen_p0_analysis
+    with pytest.raises(RuntimeError, match="byte-size|bounded"):
+        invoke()
+
+
+@pytest.mark.parametrize(
+    "source_class",
+    ("design", "progress", "registry", "analysis"),
+)
+def test_extension_sources_reject_pathname_swap_after_descriptor_read(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    source_class: str,
+):
+    if source_class == "design":
+        source = tmp_path / "design.md"
+        source.write_bytes(b"original\n")
+        replacement = tmp_path / "replacement.md"
+        replacement.write_bytes(b"changed!\n")
+        invoke = lambda: extension._file_sha256(source)
+    else:
+        actual = {
+            "progress": extension._p0_progress_path(),
+            "registry": extension._p0_run_spec_path(),
+            "analysis": extension._p0_analysis_path(),
+        }[source_class]
+        source = tmp_path / actual.name
+        source.write_bytes(actual.read_bytes())
+        replacement = tmp_path / f"replacement-{actual.name}"
+        payload = bytearray(source.read_bytes())
+        payload[0] = ord("[") if payload[0] != ord("[") else ord("{")
+        replacement.write_bytes(payload)
+        if source_class == "progress":
+            monkeypatch.setattr(extension, "_p0_progress_path", lambda: source)
+            invoke = extension._validate_frozen_progress
+        elif source_class == "registry":
+            monkeypatch.setattr(extension, "_p0_run_spec_path", lambda: source)
+            invoke = extension._p0_identity_hashes
+        else:
+            monkeypatch.setattr(extension, "_p0_analysis_path", lambda: source)
+            invoke = extension.load_frozen_p0_analysis
+    real_read = pilot._read_descriptor_bounded
+    swapped = False
+
+    def swapping_read(
+        descriptor: int, maximum_size: int, description: str
+    ) -> bytes:
+        nonlocal swapped
+        result = real_read(descriptor, maximum_size, description)
+        if not swapped:
+            swapped = True
+            replacement.replace(source)
+        return result
+
+    monkeypatch.setattr(pilot, "_read_descriptor_bounded", swapping_read)
+    with pytest.raises(RuntimeError, match="identity|generation|changed"):
+        invoke()
 
 
 def test_extension_ranges_are_derived_from_exact_real_p0():

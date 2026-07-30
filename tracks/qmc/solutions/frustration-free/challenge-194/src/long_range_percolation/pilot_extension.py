@@ -3,7 +3,6 @@ from __future__ import annotations
 import hashlib
 import json
 import math
-import stat
 import subprocess
 from collections.abc import Mapping, Sequence
 from itertools import pairwise
@@ -15,7 +14,14 @@ import numpy as np
 
 from .counter_rng import STREAM_COUNT, StreamIdentity, derive_stream_material
 from .kernel import periodic_kernel
-from .pilot import PILOT_MASTER_SEED, PILOT_REPLICAS
+from .pilot import (
+    PILOT_MASTER_SEED,
+    PILOT_PROGRESS_MAX_BYTES,
+    PILOT_REPLICAS,
+    PILOT_RUN_SPEC_MAX_BYTES,
+    _file_hash,
+    _read_canonical,
+)
 from .pilot_analysis import (
     P1_MASTER_SEED,
     P1_REPLICAS,
@@ -44,6 +50,9 @@ EXTENSION_GRID_HASHES = MappingProxyType(
     }
 )
 P0_ANALYSIS_MAX_BYTES = 16 * 1024 * 1024
+DESIGN_MAX_BYTES = 1024 * 1024
+P0_PROGRESS_MAX_BYTES = PILOT_PROGRESS_MAX_BYTES
+P0_RUN_SPEC_MAX_BYTES = PILOT_RUN_SPEC_MAX_BYTES
 
 P0_RUN_SPEC_SHA256 = "d17d3df9528a09f0d834ebe9d5ce6f283e488d2326f6cb14873a90923c5d9840"
 P0_PROGRESS_SHA256 = "ea29a8163a5d3e85768842d64fac4c719f5aeadf965b3318b305fb7a2cc2d15f"
@@ -163,24 +172,19 @@ def _p0_analysis_path() -> Path:
 
 
 def _file_sha256(path: Path) -> str:
-    return _sha256(path.read_bytes())
+    return _file_hash(
+        path,
+        maximum_size=DESIGN_MAX_BYTES,
+        description="P0 extension design",
+    )
 
 
 def load_frozen_p0_analysis() -> dict[str, object]:
-    path = _p0_analysis_path()
-    try:
-        metadata = path.lstat()
-        if (
-            not stat.S_ISREG(metadata.st_mode)
-            or metadata.st_size > P0_ANALYSIS_MAX_BYTES
-        ):
-            raise RuntimeError("frozen P0 analysis artifact is not bounded")
-        payload = path.read_bytes()
-        document = json.loads(payload)
-    except (OSError, json.JSONDecodeError) as error:
-        raise RuntimeError("frozen P0 analysis artifact is unreadable") from error
-    if not isinstance(document, dict) or payload != _canonical_bytes(document):
-        raise RuntimeError("frozen P0 analysis artifact is not canonical")
+    document, _ = _read_canonical(
+        _p0_analysis_path(),
+        "frozen P0 analysis artifact",
+        maximum_size=P0_ANALYSIS_MAX_BYTES,
+    )
     _validate_source(document)
     return document
 
@@ -311,11 +315,11 @@ def _validate_source(p0_analysis: Mapping[str, object]) -> None:
 
 
 def _validate_frozen_progress() -> None:
-    try:
-        payload = _p0_progress_path().read_bytes()
-        document = json.loads(payload)
-    except (OSError, json.JSONDecodeError) as error:
-        raise RuntimeError("frozen P0 progress artifact is unreadable") from error
+    document, payload = _read_canonical(
+        _p0_progress_path(),
+        "frozen P0 progress artifact",
+        maximum_size=P0_PROGRESS_MAX_BYTES,
+    )
     if _sha256(payload) != P0_PROGRESS_SHA256 or payload != _canonical_bytes(document):
         raise RuntimeError("frozen P0 progress artifact hash or encoding mismatch")
 
@@ -370,12 +374,14 @@ def _stream_hashes(
 
 
 def _p0_identity_hashes() -> tuple[tuple[str, ...], tuple[str, ...]]:
-    path = _p0_run_spec_path()
-    payload = path.read_bytes()
+    document, payload = _read_canonical(
+        _p0_run_spec_path(),
+        "verified P0 run spec",
+        maximum_size=P0_RUN_SPEC_MAX_BYTES,
+    )
     if _sha256(payload) != P0_RUN_SPEC_SHA256:
         raise RuntimeError("verified P0 run spec hash mismatch")
     try:
-        document = json.loads(payload)
         cells = document["cells"]
         requests = tuple(str(cell["request_sha256"]) for cell in cells)
         streams = tuple(

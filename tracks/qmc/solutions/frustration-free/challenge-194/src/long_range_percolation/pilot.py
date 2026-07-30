@@ -585,14 +585,33 @@ def _publish_once(path: Path, document: Mapping[str, object]) -> None:
         _close_directory_chain(parent_chain)
 
 
-def _file_hash(path: Path) -> str:
+def _file_hash(
+    path: Path,
+    *,
+    maximum_size: int | None = None,
+    description: str | None = None,
+) -> str:
+    source_description = (
+        f"required source file {path}" if description is None else description
+    )
     parent_chain = _open_directory_chain(path.parent, create=False)
     parent_fd = parent_chain[-1][1]
     descriptor, original = _open_regular_at(
-        path.name, parent_fd, f"required source file {path}"
+        path.name,
+        parent_fd,
+        source_description,
+        maximum_size=maximum_size,
     )
     try:
-        digest, size = _hash_descriptor(descriptor, f"required source file {path}")
+        if maximum_size is None:
+            digest, size = _hash_descriptor(descriptor, source_description)
+        else:
+            payload = _read_descriptor_bounded(
+                descriptor,
+                maximum_size,
+                source_description,
+            )
+            digest, size = _sha256(payload), len(payload)
         if size != original.st_size:
             raise RuntimeError(f"required source file size changed: {path}")
         _require_regular_at_identity(
@@ -600,7 +619,7 @@ def _file_hash(path: Path) -> str:
             parent_fd,
             descriptor,
             original,
-            f"required source file {path}",
+            source_description,
         )
         _require_directory_chain(parent_chain, allow_final_mutation=False)
         return digest
@@ -1789,12 +1808,16 @@ def _run_cell(
             if (run / "batches").exists() and any((run / "batches").iterdir()):
                 raise RuntimeError("batch namespace is noncanonical")
             publish_batch_manifest(run, f"cell-{cell.cell_index:03d}", [trajectory])
+        if crash_hook is not None:
+            crash_hook("after-batch")
         reconstruct_progress(run, expected)
         if crash_hook is not None:
             crash_hook("after-progress")
         _require_directory_generation(cell_root, descriptor, generation)
         manifest = _cell_manifest_document(spec, cell, run)
         _publish_once(marker, manifest)
+        if crash_hook is not None:
+            crash_hook("after-manifest")
         generation = _directory_generation(cell_root, descriptor)
         verified = _verify_success_cell(root, spec, cell)
         _require_directory_generation(cell_root, descriptor, generation)
