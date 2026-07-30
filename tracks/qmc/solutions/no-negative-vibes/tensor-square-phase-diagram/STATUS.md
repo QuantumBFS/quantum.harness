@@ -1,5 +1,10 @@
 # Tensor-Square Phase Diagram — Status
 
+> Generated artifacts referenced below are preserved at
+> `tracks/qmc/results/no-negative-vibes/tensor-square-phase-diagram/` and are
+> excluded from the submission Git tree. Paths beginning with `results/`
+> refer to that archived result root.
+
 更新日期：2026-07-29  
 状态：`STAGE 3 COMPLETE — FIRST ROUGH MAP AND SURVIVORS READY`
 

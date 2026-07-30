@@ -1,5 +1,7 @@
 import os
 
+import pytest
+
 from oracle.oddcycle_final_certificate import final_certificate_summary
 from oracle.oddcycle_final_certificate import _source_commit
 
@@ -37,6 +39,10 @@ def test_final_certificate_replays_every_exact_publication_gate():
     )
 
 
+@pytest.mark.skipif(
+    os.name == "nt",
+    reason="the fake executable is a POSIX shell script; covered by WSL regression",
+)
 def test_source_commit_waits_for_a_cold_git_index(tmp_path, monkeypatch):
     expected_commit = "0123456789abcdef0123456789abcdef01234567"
     fake_git = tmp_path / "git"

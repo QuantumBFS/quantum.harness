@@ -105,9 +105,14 @@ def deterministic_seed(
 def portable_command(
     argv: Iterable[str], project_root: str | Path
 ) -> list[str]:
+    portable_root = str(project_root).replace("\\", "/").rstrip("/")
     root = Path(project_root).resolve()
     command = ["python"]
     for argument in argv:
+        portable_argument = str(argument).replace("\\", "/")
+        if portable_argument.startswith(f"{portable_root}/"):
+            command.append(portable_argument[len(portable_root) + 1 :])
+            continue
         path = Path(argument)
         if path.is_absolute():
             try:

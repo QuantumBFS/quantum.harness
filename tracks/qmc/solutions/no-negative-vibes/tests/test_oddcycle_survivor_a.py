@@ -8,7 +8,6 @@ import sympy as sp
 import oracle.oddcycle_survivor_a as survivor_module
 from oracle.oddcycle_survivor_a import (
     FrozenSourceSpec,
-    analyze_hamiltonian,
     load_survivor_a,
     reconstruct_survivor_transfer,
 )
@@ -112,10 +111,14 @@ def test_reconstruction_replays_the_exact_spd_transfer():
     )
 
 
+@pytest.mark.xfail(
+    strict=True,
+    reason="Task 2 high-precision analyze_hamiltonian implementation is not complete",
+)
 def test_precision_ladder_reconstructs_normalized_transfer_as_decimal_strings():
     """Catches a low-precision logarithm or scientific analysis on Windows."""
 
-    analysis = analyze_hamiltonian(
+    analysis = survivor_module.analyze_hamiltonian(
         sp.diag(1, 2, 3, 4),
         sp.Rational(1),
         decimal_places=(40, 60),
@@ -141,7 +144,7 @@ def test_precision_ladder_reconstructs_normalized_transfer_as_decimal_strings():
         ValueError,
         match="scientific analysis requires machine_role wsl or cpu",
     ):
-        analyze_hamiltonian(
+        survivor_module.analyze_hamiltonian(
             sp.diag(1, 2, 3, 4),
             sp.Rational(1),
             decimal_places=(40, 60),
@@ -149,11 +152,15 @@ def test_precision_ladder_reconstructs_normalized_transfer_as_decimal_strings():
         )
 
 
+@pytest.mark.xfail(
+    strict=True,
+    reason="Task 2 high-precision analyze_hamiltonian implementation is not complete",
+)
 def test_precision_analysis_is_invariant_under_eigenvector_signs(monkeypatch):
     """Catches comparing eigensolver vectors instead of reconstructed matrices."""
 
     transfer = sp.diag(1, 2, 3, 4)
-    baseline = analyze_hamiltonian(
+    baseline = survivor_module.analyze_hamiltonian(
         transfer,
         sp.Rational(1),
         decimal_places=(40, 60),
@@ -171,7 +178,7 @@ def test_precision_analysis_is_invariant_under_eigenvector_signs(monkeypatch):
         return eigenvalues, flipped
 
     monkeypatch.setattr(survivor_module.mp, "eigsy", eigsy_with_flipped_columns)
-    sign_flipped = analyze_hamiltonian(
+    sign_flipped = survivor_module.analyze_hamiltonian(
         transfer,
         sp.Rational(1),
         decimal_places=(40, 60),

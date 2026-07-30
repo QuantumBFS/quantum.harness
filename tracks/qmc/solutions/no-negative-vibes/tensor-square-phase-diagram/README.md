@@ -1,5 +1,10 @@
 # Tensor-Square Phase Diagram
 
+> Submission layout note: generated JSON/CSV/PNG/PDF artifacts are preserved
+> under `tracks/qmc/results/no-negative-vibes/tensor-square-phase-diagram/`,
+> which is intentionally ignored by Git. This directory contains the tracked
+> model, source, tests, notes, and reproduction interface.
+
 本目录是 `No Negative Vibes` 挑战中的独立科研子项目。目标不是继续枚举有限深度的正例，而是把 tensor-square（张量平方）行列式恒正机制落实为一个可扩展的、厄米且允许非局域相互作用的费米子模型，计算其相图，并判断是否产生有论文价值的量子相与临界行为。
 
 ## 给执行智能体的硬规则

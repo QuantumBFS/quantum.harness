@@ -1,5 +1,12 @@
 # No Negative Vibes
 
+> **Formal submission:** [complete challenge report](CHALLENGE_REPORT.md) ·
+> [exact reproduction guide](REPRODUCE.md) ·
+> [publication draft](docs/ODDCYCLE_PAPER_DRAFT.md).
+>
+> The report includes every positive, negative, reduced, numerical, and
+> unfinished result from both collaborators and the shared integration branch.
+
 这是“无符号问题量子蒙卡”挑战的队伍工作区。日常只需要从
 [START_HERE.md](START_HERE.md) 进入；`quantum.harness` 其余目录是主办方提供的基础设施，
 不属于本项目的阅读范围。
