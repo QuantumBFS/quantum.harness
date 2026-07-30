@@ -789,9 +789,11 @@ def build_document(
         "url": "https://github.com/QuantumBFS/quantum.harness/issues/148",
         "subtitle": "Contributor for #148: 赵志轩",
         "lede": (
-            "A large-scale, two-route QMC study finds the triangular-to-honeycomb "
-            "critical-field ratio only 0.55 total standard deviations from √5. "
-            "The conjecture survives every accepted pre-registered analysis variant."
+            "Across 9,600 dedicated-SSE parameter/seed cells at 600,000 measurement "
+            "sweeps each — 5.76×10⁹ scheduled measurement sweeps — plus 2,016 "
+            "independent CT-QMC cells, the triangular-to-honeycomb critical-field "
+            "ratio is only 0.55 total standard deviations from √5. The conjecture "
+            "survives every accepted pre-registered analysis variant."
         ),
         "sections": [
             {
@@ -869,7 +871,7 @@ def build_document(
                                 "SSE with quantum-cluster updates",
                                 (
                                     f'{triangle["cell_count"] + honeycomb["cell_count"]:,} cells × '
-                                    '600,000 sweeps = 5.76×10⁹ scheduled measurement sweeps'
+                                    '600,000 sweeps\n5.76×10⁹ scheduled measurement sweeps'
                                 ),
                             ],
                             [
