@@ -21,6 +21,7 @@ export MKL_NUM_THREADS=1
 
 REPOSITORY_ROOT="${SLURM_SUBMIT_DIR:?}"
 ISSUE_ROOT="$REPOSITORY_ROOT/tracks/qcs/solutions/WangTheoPhys/issue128"
+export PYTHONPATH="$ISSUE_ROOT/src${PYTHONPATH:+:$PYTHONPATH}"
 OUT="$REPOSITORY_ROOT/results/$ISSUE128_RUN_ID/verification"
 mkdir -p "$OUT"
 cd "$ISSUE_ROOT"
