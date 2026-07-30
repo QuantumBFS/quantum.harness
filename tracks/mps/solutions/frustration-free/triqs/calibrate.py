@@ -5,14 +5,31 @@ from __future__ import annotations
 import argparse
 import copy
 import math
+import os
 from pathlib import Path
 import shlex
 from statistics import mean, stdev
+import time
+from types import SimpleNamespace
 from typing import Sequence
+import uuid
 
 from scipy.stats import chi2, t
 
-from artifacts import atomic_write_bytes, canonical_json, sha256_bytes, strict_json_load
+from artifacts import (
+    atomic_write_bytes,
+    canonical_json,
+    sha256_bytes,
+    sha256_file,
+    strict_json_load,
+)
+import make_input
+from hybridization import install_g0
+import run_chain
+from source_manifest import build_source_manifest
+
+
+SOLUTION_DIR = Path(__file__).resolve().parent
 
 
 OBSERVABLES = (
@@ -345,6 +362,49 @@ def validate_calibration(artifact: object, calibration_plan: object) -> None:
         raise ValueError("calibration status disagrees with gates")
 
 
+def build_calibration_artifact(
+    calibration_plan: dict[str, object],
+    cell_results: Sequence[dict[str, object]],
+) -> dict[str, object]:
+    validate_calibration_plan(calibration_plan)
+    if len(cell_results) != 60:
+        raise ValueError("calibration requires exactly 60 cell results")
+    cells = []
+    for result in cell_results:
+        if (
+            not isinstance(result, dict)
+            or set(result) != {"payload", "sha256"}
+            or result["sha256"] != sha256_bytes(canonical_json(result["payload"]))
+        ):
+            raise ValueError("calibration cell result hash mismatch")
+        cells.append(result["payload"])
+    analysis = {
+        "warmup": analyze_warmup(cells[:12]),
+        "cycle": select_cycle_length(cells[12:28]),
+        "batch": analyze_batch_means(cells[28:]),
+    }
+    bindings = calibration_plan["payload"]["bindings"]
+    payload = {
+        "artifact_type": "cthyb_calibration",
+        "schema_version": 2,
+        "status": (
+            "accepted" if all(value["passed"] for value in analysis.values()) else "failed"
+        ),
+        "model": bindings["model"],
+        "source_manifest": bindings["source_manifest"],
+        "source_manifest_sha256": bindings["source_manifest_sha256"],
+        "conda_lock_sha256": bindings["conda_lock_sha256"],
+        "environment_yml_sha256": bindings["environment_yml_sha256"],
+        "model_json_sha256": bindings["model_json_sha256"],
+        "plan": calibration_plan,
+        "cell_results": list(cell_results),
+        "analysis": analysis,
+    }
+    artifact = _artifact(payload)
+    validate_calibration(artifact, calibration_plan)
+    return artifact
+
+
 def calibration_cluster_commands(
     micromamba: Path, prefix: Path, plan: Path, run_directory: Path
 ) -> dict[str, str]:
@@ -379,18 +439,195 @@ def calibration_cluster_commands(
     }
 
 
+def _default_bindings() -> dict[str, object]:
+    repository_root = SOLUTION_DIR.parents[4]
+    manifest = build_source_manifest(repository_root)
+    model, _ = make_input._load_model(SOLUTION_DIR)
+    hashes = make_input._provenance_hashes(manifest)
+    return {
+        "model": model,
+        "meshes": {
+            "n_iw": make_input.N_IW,
+            "n_tau": make_input.N_TAU,
+            "reported_tau": [0.0, 4.0, 8.0, 12.0, 16.0],
+        },
+        "formulas": {
+            "delta_iw": "Delta(iw) = i*(Gamma/D)*(w-sign(w)*sqrt(w*w+D*D))"
+        },
+        "source_manifest": manifest,
+        "source_manifest_sha256": hashes["source_manifest_sha256"],
+        "conda_lock_sha256": hashes["conda_lock_sha256"],
+        "environment_yml_sha256": hashes["environment_yml_sha256"],
+        "model_json_sha256": hashes["model_json_sha256"],
+    }
+
+
+def _solver_payload(cell: dict[str, object]) -> dict[str, object]:
+    payload = copy.deepcopy(
+        run_chain.make_source_bound_test_pilot_input(SOLUTION_DIR)["payload"]
+    )
+    payload["monte_carlo"].update(
+        {
+            "warmup_cycles": cell["warmup_cycles"],
+            "measurement_cycles": cell["measurement_cycles"],
+            "cycle_length": cell["cycle_length"],
+        }
+    )
+    payload["gates"].update(
+        {
+            "minimum_average_sign": 0.0,
+            "maximum_integrated_autocorrelation_cycles": 1.0e300,
+            "minimum_effective_samples_per_chain": 0,
+        }
+    )
+    return payload
+
+
+def _result_values(solver, payload, parameters):
+    proxy = SimpleNamespace(
+        G_tau=solver.G_tau,
+        density_matrix=solver.density_matrix,
+        h_loc_diagonalization=solver.h_loc_diagonalization,
+        average_sign=solver.average_sign,
+        auto_corr_time=solver.auto_corr_time,
+        auto_corr_time_converged=True,
+        solve_status=solver.solve_status,
+    )
+    extracted = run_chain.extract_chain_observables(proxy, payload, parameters)
+    observables = extracted["observables"]
+    return {
+        "n_d": observables["n_d"],
+        "double_occupancy": observables["double_occupancy"],
+        "G_up_4": observables["G_up"][1],
+        "G_up_8": observables["G_up"][2],
+        "G_up_12": observables["G_up"][3],
+        "G_down_4": observables["G_down"][1],
+        "G_down_8": observables["G_down"][2],
+        "G_down_12": observables["G_down"][3],
+    }
+
+
+def run_cell(plan: dict[str, object], cell_index: int, run_directory: Path) -> Path:
+    validate_calibration_plan(plan)
+    if isinstance(cell_index, bool) or cell_index not in range(60):
+        raise ValueError("calibration cell index must be 0 through 59")
+    cell_artifact = plan["payload"]["cells"][cell_index]
+    cell = cell_artifact["payload"]
+    destination = run_directory / "cells" / f"cell-{cell_index:03d}"
+    if destination.exists():
+        result = strict_json_load(destination / "result.json")
+        if result["payload"]["cell_input_sha256"] != cell_artifact["sha256"]:
+            raise ValueError("existing calibration cell input mismatch")
+        if result["payload"]["raw_h5_sha256"] != sha256_file(destination / "raw.h5"):
+            raise ValueError("existing calibration raw hash mismatch")
+        return destination
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    attempt = destination.parent / f".attempt-cell-{cell_index:03d}-{uuid.uuid4().hex}"
+    attempt.mkdir(mode=0o700)
+    payload = _solver_payload(cell)
+    threads = run_chain._require_runtime_shape()
+    solver = run_chain._solver_class()(
+        beta=payload["model"]["beta"],
+        gf_struct=[("up", 1), ("down", 1)],
+        n_iw=payload["hybridization"]["n_iw"],
+        n_tau=payload["meshes"]["n_tau"],
+    )
+    install_g0(solver, payload)
+    parameters = run_chain._solve_parameters(payload, cell["seed"])
+    started_utc = run_chain._utc_now()
+    started = time.monotonic()
+    solver.solve(**parameters)
+    wall = time.monotonic() - started
+    runtime = {
+        "versions": run_chain._runtime_identity(),
+        "threads": threads,
+        "resources": run_chain._resource_record(
+            started_utc, run_chain._utc_now(), wall
+        ),
+    }
+    input_artifact = _artifact(payload)
+    raw_path = attempt / "raw.h5"
+    run_chain._write_raw(
+        raw_path,
+        run_chain._raw_solver_state(
+            solver,
+            canonical_json(input_artifact) + b"\n",
+            input_artifact,
+            cell_index,
+            cell["seed"],
+            runtime,
+            parameters,
+        ),
+    )
+    result_payload = {
+        **{
+            key: value
+            for key, value in cell.items()
+            if key not in {"artifact_type", "schema_version"}
+        },
+        "plan_sha256": plan["sha256"],
+        "cell_input_sha256": cell_artifact["sha256"],
+        "raw_h5_sha256": sha256_file(raw_path),
+        "values": _result_values(solver, payload, parameters),
+        "average_sign": float(solver.average_sign),
+        "auto_corr_time": float(solver.auto_corr_time),
+        "auto_corr_time_converged": solver.auto_corr_time_converged is True,
+    }
+    result = _artifact(result_payload)
+    atomic_write_bytes(attempt / "result.json", canonical_json(result) + b"\n")
+    os.rename(attempt, destination)
+    return destination
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     commands = parser.add_subparsers(dest="command", required=True)
+    plan_command = commands.add_parser("plan")
+    plan_command.add_argument("--output-root", type=Path, required=True)
     validate = commands.add_parser("validate-plan")
     validate.add_argument("--plan", type=Path, required=True)
+    cell = commands.add_parser("run-cell")
+    cell.add_argument("--plan", type=Path, required=True)
+    cell.add_argument("--run-directory", type=Path, required=True)
+    cell.add_argument("--cell-index", type=int, required=True)
+    analyze = commands.add_parser("analyze")
+    analyze.add_argument("--plan", type=Path, required=True)
+    analyze.add_argument("--run-directory", type=Path, required=True)
     existing = commands.add_parser("validate-existing")
     existing.add_argument("--plan", type=Path, required=True)
     existing.add_argument("--run-directory", type=Path, required=True)
     existing.add_argument("--calibration", type=Path, required=True)
     arguments = parser.parse_args()
-    if arguments.command == "validate-plan":
+    if arguments.command == "plan":
+        plan = build_calibration_plan(_default_bindings())
+        run_id = f"calibration-{plan['sha256'][:16]}"
+        run_directory = arguments.output_root / "runs" / run_id
+        atomic_write_bytes(
+            run_directory / "calibration-plan.json", canonical_json(plan) + b"\n"
+        )
+        atomic_write_bytes(
+            arguments.output_root / "current.json",
+            canonical_json({"relative_path": f"runs/{run_id}"}) + b"\n",
+        )
+    elif arguments.command == "validate-plan":
         validate_calibration_plan(strict_json_load(arguments.plan))
+    elif arguments.command == "run-cell":
+        run_cell(
+            strict_json_load(arguments.plan),
+            arguments.cell_index,
+            arguments.run_directory,
+        )
+    elif arguments.command == "analyze":
+        plan = strict_json_load(arguments.plan)
+        results = [
+            strict_json_load(arguments.run_directory / "cells" / f"cell-{index:03d}" / "result.json")
+            for index in range(60)
+        ]
+        artifact = build_calibration_artifact(plan, results)
+        atomic_write_bytes(
+            arguments.run_directory / "calibration.json",
+            canonical_json(artifact) + b"\n",
+        )
     else:
         validate_calibration(
             strict_json_load(arguments.calibration),

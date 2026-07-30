@@ -20,6 +20,7 @@ from calibrate import (
     analyze_batch_means,
     analyze_warmup,
     build_calibration_plan,
+    build_calibration_artifact,
     calibration_cluster_commands,
     select_cycle_length,
     validate_calibration,
@@ -212,21 +213,9 @@ def test_calibration_embeds_and_revalidates_all_results():
         "cycle": select_cycle_length(cells[12:28]),
         "batch": analyze_batch_means(cells[28:]),
     }
-    payload = {
-        "artifact_type": "cthyb_calibration",
-        "schema_version": 2,
-        "status": "accepted",
-        "model": bindings()["model"],
-        "source_manifest": bindings()["source_manifest"],
-        "source_manifest_sha256": bindings()["source_manifest_sha256"],
-        "conda_lock_sha256": bindings()["conda_lock_sha256"],
-        "environment_yml_sha256": bindings()["environment_yml_sha256"],
-        "model_json_sha256": bindings()["model_json_sha256"],
-        "plan": plan,
-        "cell_results": results,
-        "analysis": analysis,
-    }
-    artifact = {"payload": payload, "sha256": sha256_bytes(canonical_json(payload))}
+    artifact = build_calibration_artifact(plan, results)
+    assert artifact["payload"]["analysis"] == analysis
+    assert artifact["payload"]["status"] == "accepted"
     validate_calibration(artifact, plan)
     artifact["payload"]["analysis"]["batch"]["passed"] = False
     artifact["sha256"] = sha256_bytes(canonical_json(artifact["payload"]))
