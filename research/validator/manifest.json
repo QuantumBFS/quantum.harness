@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "topic": "finite-abelian-invariant-hermitian-reduction",
+  "issue": 229,
+  "environment": {
+    "kind": "fallback",
+    "image_or_lock": "project .venv with numpy 2.5.1",
+    "reason": "lightweight self-contained NumPy prototype; subprocess timeout and Python-level file/network/process guards",
+    "security_scope": "practical negative-control isolation, not an OS security boundary"
+  },
+  "corpus": {
+    "generator": "research/database/generate_corpus.py",
+    "development_instances": 30,
+    "private_instances": 20,
+    "private_path": "research/benchmark/private/",
+    "labels": "independently regenerated from deterministic seed specifications",
+    "provenance": "synthetic random-unitary finite product-cyclic representations and invariant Hermitian sector blocks"
+  },
+  "holdout_query_budget": 1,
+  "holdout_queries": [
+    {
+      "date": "2026-07-28",
+      "result": "passed 20 private instances plus runtime probe",
+      "aggregate_score": 4.0
+    }
+  ],
+  "time_limit_seconds": 8,
+  "tolerances": {
+    "spectrum": "1e-7 * (1 + abs(reference))",
+    "residual": 1e-10
+  },
+  "self_test": {
+    "date": "2026-07-28",
+    "candidate": "passed: 30 development and 20 private instances plus one runtime probe per set",
+    "cheater": "rejected: supplied instance IDs/runtime probe missing",
+    "wrong-answer": "rejected: populated characters and shapes differ",
+    "timeout": "rejected: validator enforced 8.0 second subprocess timeout",
+    "env-escape": "rejected: out-of-scope read blocked",
+    "dense-passthrough": "rejected: character-projector method and sectors required"
+  }
+}

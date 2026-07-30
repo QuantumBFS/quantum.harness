@@ -1,0 +1,323 @@
+{
+  "schema_version": 1,
+  "instances": [
+    {
+      "id": "z2-000",
+      "family": "z2",
+      "seed": 229000,
+      "moduli": [
+        2
+      ],
+      "populated_characters": 2,
+      "multiplicity": 8
+    },
+    {
+      "id": "product-001",
+      "family": "product-cyclic",
+      "seed": 229001,
+      "moduli": [
+        2,
+        2
+      ],
+      "populated_characters": 4,
+      "multiplicity": 4
+    },
+    {
+      "id": "z2-002",
+      "family": "z2",
+      "seed": 229002,
+      "moduli": [
+        2
+      ],
+      "populated_characters": 2,
+      "multiplicity": 10
+    },
+    {
+      "id": "product-003",
+      "family": "product-cyclic",
+      "seed": 229003,
+      "moduli": [
+        2,
+        3
+      ],
+      "populated_characters": 6,
+      "multiplicity": 4
+    },
+    {
+      "id": "z2-004",
+      "family": "z2",
+      "seed": 229004,
+      "moduli": [
+        2
+      ],
+      "populated_characters": 2,
+      "multiplicity": 9
+    },
+    {
+      "id": "product-005",
+      "family": "product-cyclic",
+      "seed": 229005,
+      "moduli": [
+        3,
+        3
+      ],
+      "populated_characters": 9,
+      "multiplicity": 4
+    },
+    {
+      "id": "z2-006",
+      "family": "z2",
+      "seed": 229006,
+      "moduli": [
+        2
+      ],
+      "populated_characters": 2,
+      "multiplicity": 8
+    },
+    {
+      "id": "product-007",
+      "family": "product-cyclic",
+      "seed": 229007,
+      "moduli": [
+        2,
+        2,
+        2
+      ],
+      "populated_characters": 8,
+      "multiplicity": 4
+    },
+    {
+      "id": "z2-008",
+      "family": "z2",
+      "seed": 229008,
+      "moduli": [
+        2
+      ],
+      "populated_characters": 2,
+      "multiplicity": 10
+    },
+    {
+      "id": "product-009",
+      "family": "product-cyclic",
+      "seed": 229009,
+      "moduli": [
+        2,
+        2
+      ],
+      "populated_characters": 4,
+      "multiplicity": 4
+    },
+    {
+      "id": "z2-010",
+      "family": "z2",
+      "seed": 229010,
+      "moduli": [
+        2
+      ],
+      "populated_characters": 2,
+      "multiplicity": 9
+    },
+    {
+      "id": "product-011",
+      "family": "product-cyclic",
+      "seed": 229011,
+      "moduli": [
+        2,
+        3
+      ],
+      "populated_characters": 6,
+      "multiplicity": 4
+    },
+    {
+      "id": "z2-012",
+      "family": "z2",
+      "seed": 229012,
+      "moduli": [
+        2
+      ],
+      "populated_characters": 2,
+      "multiplicity": 8
+    },
+    {
+      "id": "product-013",
+      "family": "product-cyclic",
+      "seed": 229013,
+      "moduli": [
+        3,
+        3
+      ],
+      "populated_characters": 9,
+      "multiplicity": 4
+    },
+    {
+      "id": "z2-014",
+      "family": "z2",
+      "seed": 229014,
+      "moduli": [
+        2
+      ],
+      "populated_characters": 2,
+      "multiplicity": 10
+    },
+    {
+      "id": "product-015",
+      "family": "product-cyclic",
+      "seed": 229015,
+      "moduli": [
+        2,
+        2,
+        2
+      ],
+      "populated_characters": 8,
+      "multiplicity": 4
+    },
+    {
+      "id": "z2-016",
+      "family": "z2",
+      "seed": 229016,
+      "moduli": [
+        2
+      ],
+      "populated_characters": 2,
+      "multiplicity": 9
+    },
+    {
+      "id": "product-017",
+      "family": "product-cyclic",
+      "seed": 229017,
+      "moduli": [
+        2,
+        2
+      ],
+      "populated_characters": 4,
+      "multiplicity": 4
+    },
+    {
+      "id": "z2-018",
+      "family": "z2",
+      "seed": 229018,
+      "moduli": [
+        2
+      ],
+      "populated_characters": 2,
+      "multiplicity": 8
+    },
+    {
+      "id": "product-019",
+      "family": "product-cyclic",
+      "seed": 229019,
+      "moduli": [
+        2,
+        3
+      ],
+      "populated_characters": 6,
+      "multiplicity": 4
+    },
+    {
+      "id": "z2-020",
+      "family": "z2",
+      "seed": 229020,
+      "moduli": [
+        2
+      ],
+      "populated_characters": 2,
+      "multiplicity": 10
+    },
+    {
+      "id": "product-021",
+      "family": "product-cyclic",
+      "seed": 229021,
+      "moduli": [
+        3,
+        3
+      ],
+      "populated_characters": 9,
+      "multiplicity": 4
+    },
+    {
+      "id": "z2-022",
+      "family": "z2",
+      "seed": 229022,
+      "moduli": [
+        2
+      ],
+      "populated_characters": 2,
+      "multiplicity": 9
+    },
+    {
+      "id": "product-023",
+      "family": "product-cyclic",
+      "seed": 229023,
+      "moduli": [
+        2,
+        2,
+        2
+      ],
+      "populated_characters": 8,
+      "multiplicity": 4
+    },
+    {
+      "id": "z2-024",
+      "family": "z2",
+      "seed": 229024,
+      "moduli": [
+        2
+      ],
+      "populated_characters": 2,
+      "multiplicity": 8
+    },
+    {
+      "id": "product-025",
+      "family": "product-cyclic",
+      "seed": 229025,
+      "moduli": [
+        2,
+        2
+      ],
+      "populated_characters": 4,
+      "multiplicity": 4
+    },
+    {
+      "id": "z2-026",
+      "family": "z2",
+      "seed": 229026,
+      "moduli": [
+        2
+      ],
+      "populated_characters": 2,
+      "multiplicity": 10
+    },
+    {
+      "id": "product-027",
+      "family": "product-cyclic",
+      "seed": 229027,
+      "moduli": [
+        2,
+        3
+      ],
+      "populated_characters": 6,
+      "multiplicity": 4
+    },
+    {
+      "id": "z2-028",
+      "family": "z2",
+      "seed": 229028,
+      "moduli": [
+        2
+      ],
+      "populated_characters": 2,
+      "multiplicity": 9
+    },
+    {
+      "id": "product-029",
+      "family": "product-cyclic",
+      "seed": 229029,
+      "moduli": [
+        3,
+        3
+      ],
+      "populated_characters": 9,
+      "multiplicity": 4
+    }
+  ]
+}

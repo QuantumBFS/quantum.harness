@@ -13,6 +13,12 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - uses: astral-sh/setup-uv@v5
+      - uses: julia-actions/setup-julia@v2
+        with:
+          version: "1"
+      - uses: julia-actions/cache@v2
+      - run: julia --startup-file=no --project=julia-env -e 'using Pkg; Pkg.instantiate()'
       - run: pip install pytest pytest-cov numpy scipy matplotlib
       - run: make test
 
