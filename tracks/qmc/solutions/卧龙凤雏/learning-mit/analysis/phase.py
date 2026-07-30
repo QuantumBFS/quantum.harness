@@ -185,9 +185,11 @@ def propose_refinement(
 def write_refinement_request(
     loaded: LoadedRun, budget_forecast: dict[str, Any]
 ) -> Path:
-    request = propose_refinement(loaded, budget_forecast)
     relative = Path("processed/refinement_request.json")
     destination = loaded.run_dir / relative
+    request = _frozen_refinement_request(loaded, destination)
+    if request is None:
+        request = propose_refinement(loaded, budget_forecast)
     payload = (json.dumps(request, indent=2, sort_keys=True) + "\n").encode("utf-8")
     _atomic_write(destination, payload)
 
@@ -201,6 +203,36 @@ def write_refinement_request(
     ).encode("utf-8")
     _atomic_write(manifest_path, manifest_payload)
     return destination
+
+
+def _frozen_refinement_request(
+    loaded: LoadedRun, destination: Path
+) -> dict[str, Any] | None:
+    stages = loaded.manifest.get("config", {}).get("stages", [])
+    refinements = [stage for stage in stages if stage.get("name") == "diii-refine"]
+    if not refinements:
+        return None
+    if len(refinements) != 1:
+        raise ValueError("manifest must contain at most one frozen refinement stage")
+
+    status = "exploratory"
+    if destination.is_file():
+        existing = json.loads(destination.read_text(encoding="utf-8"))
+        if existing.get("status") in {"bracketed", "exploratory"}:
+            status = existing["status"]
+    stage = refinements[0]
+    return {
+        "schema_version": 1,
+        "status": status,
+        "stage": stage["name"],
+        "theta_pi": stage["theta_pi"],
+        "phi_pi": stage["phi_pi"],
+        "widths": stage["widths"],
+        "streams": stage["streams"],
+        "burn_in_layers_per_width": stage["burn_in_layers_per_width"],
+        "measurement_layers_per_width": stage["measurement_layers_per_width"],
+        "block_layers_per_width": stage["block_layers_per_width"],
+    }
 
 
 def _atomic_write(path: Path, payload: bytes) -> None:

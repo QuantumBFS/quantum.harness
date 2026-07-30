@@ -65,6 +65,56 @@ def test_refinement_request_is_atomically_written_and_hashed(tmp_path):
     )
 
 
+def test_refinement_resume_preserves_the_stage_already_frozen_in_manifest(tmp_path):
+    refinement = {
+        "name": "diii-refine",
+        "theta_pi": 0.45,
+        "phi_pi": [0.30, 0.31, 0.32],
+        "widths": [8, 12, 16, 20, 24, 28, 32],
+        "streams": 8,
+        "burn_in_layers_per_width": 16,
+        "measurement_layers_per_width": 96,
+        "block_layers_per_width": 8,
+    }
+    manifest = {
+        "schema_version": 1,
+        "config": {"stages": [{"name": "diii-locator"}, refinement]},
+        "artifact_sha256": {},
+    }
+    (tmp_path / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
+    processed = tmp_path / "processed"
+    processed.mkdir()
+    (processed / "refinement_request.json").write_text(
+        json.dumps(
+            {
+                "schema_version": 1,
+                "status": "exploratory",
+                "stage": "diii-refine",
+                "theta_pi": 0.45,
+                "phi_pi": [0.28, 0.29, 0.30],
+                "widths": [8, 12, 16, 20, 24, 28, 32],
+                "streams": 8,
+                "burn_in_layers_per_width": 16,
+                "measurement_layers_per_width": 96,
+                "block_layers_per_width": 8,
+            }
+        ),
+        encoding="utf-8",
+    )
+    loaded = LoadedRun(
+        run_dir=tmp_path,
+        manifest=MappingProxyType(manifest),
+        streams=MappingProxyType({}),
+    )
+
+    request_path = write_refinement_request(loaded, {})
+    request = json.loads(request_path.read_text(encoding="utf-8"))
+
+    assert request["status"] == "exploratory"
+    assert request["phi_pi"] == [0.30, 0.31, 0.32]
+    assert request["widths"] == refinement["widths"]
+
+
 def test_candidate_selection_prefers_a_strict_bracket_and_lower_tie_angle():
     selection = select_candidate(
         [
