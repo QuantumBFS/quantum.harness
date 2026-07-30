@@ -1,4 +1,5 @@
 import importlib.util
+import hashlib
 import json
 from pathlib import Path
 
@@ -18,6 +19,12 @@ LONG_RUN_SPEC = (
     / "configs"
     / "scans"
     / "qmc-production-long-run-spec.json"
+)
+REPRODUCIBLE_RUN_SPEC = (
+    Path(__file__).parents[1]
+    / "configs"
+    / "scans"
+    / "qmc-reproducible-production-run-spec.json"
 )
 
 
@@ -99,6 +106,40 @@ def test_long_run_spec_extends_the_same_complete_grid():
         cell["params"]["M"]: cell["settings"]["thermal_sweeps"]
         for cell in cells
     } == {32: 4000, 64: 4000, 128: 16000}
+
+
+def test_reproducible_run_spec_pins_sources_seeds_and_prefix():
+    spec = json.loads(REPRODUCIBLE_RUN_SPEC.read_text(encoding="utf-8"))
+    root = Path(__file__).parents[1]
+    expected_sources = {
+        "qh147/qmc.py": root / "qh147" / "qmc.py",
+        "qh147/qmc_mapping.py": root / "qh147" / "qmc_mapping.py",
+        "scripts/run_cell.py": root / "scripts" / "run_cell.py",
+        "configs/qmc-reference.json": root / "configs" / "qmc-reference.json",
+    }
+
+    assert spec["run_id"] == "issue147-qmc-reproducible-production"
+    assert spec["provenance"]["prefix_run_id"] == "issue147-qmc-production"
+    assert spec["provenance"]["source_sha256"] == {
+        name: hashlib.sha256(path.read_bytes()).hexdigest()
+        for name, path in expected_sources.items()
+    }
+    assert [
+        cell["settings"]["expected_seed"] for cell in spec["cells"]
+    ] == [
+        148900,
+        148901,
+        148902,
+        148903,
+        148910,
+        148911,
+        148912,
+        148913,
+        148920,
+        148921,
+        148922,
+        148923,
+    ]
 
 
 def test_qmc_dry_run_selects_one_based_cell_and_echoes_payload(tmp_path, monkeypatch):
@@ -202,7 +243,12 @@ def test_qmc_cell_records_effective_thermal_sweeps(tmp_path, monkeypatch):
         "measure_sweeps": 32000,
         "seed": 148910,
     }
-    assert manifest["runtime_provenance"] == {"git_commit": "runtime-commit"}
+    assert manifest["runtime_provenance"] == {
+        "git_commit": "runtime-commit",
+        "source_sha256": {
+            "scripts/run_cell.py": hashlib.sha256(SCRIPT.read_bytes()).hexdigest()
+        },
+    }
 
 
 def test_success_manifest_is_never_replaced(tmp_path, monkeypatch):

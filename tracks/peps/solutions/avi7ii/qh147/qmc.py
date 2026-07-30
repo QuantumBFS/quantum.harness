@@ -323,6 +323,23 @@ def _git_commit() -> str:
         return "unknown"
 
 
+def _git_dirty() -> bool | None:
+    try:
+        return bool(
+            subprocess.check_output(
+                ["git", "status", "--porcelain"],
+                text=True,
+                stderr=subprocess.DEVNULL,
+            ).strip()
+        )
+    except (OSError, subprocess.CalledProcessError):
+        return None
+
+
+def _sha256(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
 def main(argv=None) -> int:
     started = time.perf_counter()
     parser = argparse.ArgumentParser()
@@ -412,8 +429,16 @@ def main(argv=None) -> int:
         "resources": {"wall_seconds": time.perf_counter() - started},
         "provenance": {
             "git_commit": _git_commit(),
+            "git_dirty": _git_dirty(),
             "python": platform.python_version(),
             "numba": numba.__version__,
+            "source_sha256": {
+                "qh147/qmc.py": _sha256(Path(__file__)),
+                "qh147/qmc_mapping.py": _sha256(
+                    Path(__file__).with_name("qmc_mapping.py")
+                ),
+                "configs/qmc-reference.json": _sha256(Path(args.config)),
+            },
         },
     }
     _atomic_json(output / "manifest.json", manifest)

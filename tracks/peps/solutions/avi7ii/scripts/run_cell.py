@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -58,7 +59,12 @@ def _portable_path(raw: object) -> Path:
 def _echo_contract(
     manifest: dict, *, params: dict, settings: dict, provenance: dict
 ) -> dict:
-    runtime_provenance = manifest.get("provenance", {})
+    runtime_provenance = dict(manifest.get("provenance", {}))
+    runtime_sources = dict(runtime_provenance.get("source_sha256", {}))
+    runtime_sources["scripts/run_cell.py"] = hashlib.sha256(
+        Path(__file__).read_bytes()
+    ).hexdigest()
+    runtime_provenance["source_sha256"] = runtime_sources
     runtime_settings = manifest.get("settings", {})
     result = dict(manifest)
     if runtime_provenance:

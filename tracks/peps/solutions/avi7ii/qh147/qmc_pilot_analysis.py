@@ -72,7 +72,69 @@ def _rhat(chain_blocks: np.ndarray) -> float:
     return float(max(1.0, np.sqrt(variance / within)))
 
 
-def _load_run(run_dir: Path) -> tuple[float, np.ndarray, np.ndarray, dict[int, int]]:
+def _validate_prefix(
+    run_dir: Path,
+    spec: dict,
+    arrays: dict[tuple[int, int], np.ndarray],
+) -> dict:
+    prefix_run_id = spec["provenance"].get("prefix_run_id")
+    if not isinstance(prefix_run_id, str) or not prefix_run_id:
+        raise ValueError("run provenance must name a prefix_run_id")
+    prefix_root = run_dir.parent / prefix_run_id
+    prefix_spec = json.loads(
+        (prefix_root / "run_spec.json").read_text(encoding="utf-8")
+    )
+    prefix_cells = {
+        (int(cell["params"]["M"]), int(cell["params"]["chain"])): cell
+        for cell in prefix_spec.get("cells", [])
+    }
+    if set(prefix_cells) != set(arrays):
+        raise ValueError("prefix run does not contain the same M-by-chain grid")
+    prefix_sweeps = int(prefix_spec["settings"]["measure_sweeps"])
+    long_sweeps = int(spec["settings"]["measure_sweeps"])
+    if long_sweeps <= prefix_sweeps or long_sweeps % prefix_sweeps:
+        raise ValueError("long measurement budget must be a multiple of its prefix")
+    ratio = long_sweeps // prefix_sweeps
+    max_difference = 0.0
+    for key, cell in prefix_cells.items():
+        root = prefix_root / "cells" / cell["cell_id"]
+        manifest = json.loads((root / "manifest.json").read_text(encoding="utf-8"))
+        expected_seed = int(
+            {
+                **spec.get("settings", {}),
+                **next(
+                    item.get("settings", {})
+                    for item in spec["cells"]
+                    if (
+                        int(item["params"]["M"]),
+                        int(item["params"]["chain"]),
+                    )
+                    == key
+                ),
+            }["expected_seed"]
+        )
+        if int(manifest.get("runtime_settings", {}).get("seed", -1)) != expected_seed:
+            raise ValueError(f"prefix seed mismatch for M={key[0]}, chain={key[1]}")
+        with np.load(root / "bins.npz", allow_pickle=False) as payload:
+            prefix_bins = np.asarray(payload["energy"], dtype=float)
+        if len(prefix_bins) % ratio:
+            raise ValueError("prefix bins cannot be regrouped to the long-run width")
+        regrouped = prefix_bins.reshape(-1, ratio).mean(axis=1)
+        observed = arrays[key][: len(regrouped)]
+        difference = float(np.max(np.abs(regrouped - observed)))
+        max_difference = max(max_difference, difference)
+    if max_difference > 1e-12:
+        raise ValueError("long run does not preserve the declared trajectory prefix")
+    return {
+        "prefix_run_id": prefix_run_id,
+        "measurement_ratio": ratio,
+        "max_abs_prefix_difference": max_difference,
+    }
+
+
+def _load_run(
+    run_dir: Path,
+) -> tuple[float, np.ndarray, np.ndarray, dict[int, int], dict]:
     spec = json.loads((run_dir / "run_spec.json").read_text(encoding="utf-8"))
     cells = spec.get("cells", [])
     expected_pairs = {(m, chain) for m in M_VALUES for chain in CHAINS}
@@ -86,6 +148,9 @@ def _load_run(run_dir: Path) -> tuple[float, np.ndarray, np.ndarray, dict[int, i
     fields = {float(cell["params"]["h"]) for cell in cells}
     if betas != {0.5} or fields != {3.0}:
         raise ValueError("equilibrated pilot must use beta=0.5 and h=3")
+    expected_sources = spec.get("provenance", {}).get("source_sha256")
+    if not isinstance(expected_sources, dict) or not expected_sources:
+        raise ValueError("run provenance must contain authoritative source hashes")
 
     planned_ids = {cell["cell_id"] for cell in cells}
     observed_ids = {
@@ -112,14 +177,18 @@ def _load_run(run_dir: Path) -> tuple[float, np.ndarray, np.ndarray, dict[int, i
         if manifest.get("provenance") != spec.get("provenance", {}):
             raise ValueError(f"{cell['cell_id']} provenance mismatch")
         runtime = manifest.get("runtime_settings", {})
+        runtime_provenance = manifest.get("runtime_provenance", {})
+        if runtime_provenance.get("source_sha256") != expected_sources:
+            raise ValueError(f"{cell['cell_id']} runtime source hash mismatch")
         expected_thermal = int(expected_settings["thermal_sweeps"])
         if int(runtime.get("thermal_sweeps", -1)) != expected_thermal:
             raise ValueError(f"{cell['cell_id']} runtime thermalization mismatch")
         expected_measurement = int(expected_settings["measure_sweeps"])
         if int(runtime.get("measure_sweeps", -1)) != expected_measurement:
             raise ValueError(f"{cell['cell_id']} runtime measurement mismatch")
-        if int(runtime.get("seed", 0)) <= 0:
-            raise ValueError(f"{cell['cell_id']} runtime seed is missing")
+        expected_seed = int(expected_settings["expected_seed"])
+        if int(runtime.get("seed", -1)) != expected_seed:
+            raise ValueError(f"{cell['cell_id']} runtime seed mismatch")
         with np.load(root / "bins.npz", allow_pickle=False) as payload:
             values = np.asarray(payload["energy"], dtype=float)
         if values.shape != (80,) or not np.isfinite(values).all():
@@ -130,7 +199,8 @@ def _load_run(run_dir: Path) -> tuple[float, np.ndarray, np.ndarray, dict[int, i
     bins = np.stack(
         [np.stack([arrays[(m, chain)] for chain in CHAINS]) for m in M_VALUES]
     )
-    return 0.5, np.asarray(M_VALUES, dtype=float), bins, thermal
+    prefix_evidence = _validate_prefix(run_dir, spec, arrays)
+    return 0.5, np.asarray(M_VALUES, dtype=float), bins, thermal, prefix_evidence
 
 
 def analyze_bins(
@@ -331,7 +401,7 @@ def main(argv=None) -> int:
     parser.add_argument("--seed", type=int, default=147)
     args = parser.parse_args(argv)
 
-    beta, m_values, bins, thermal = _load_run(args.run_dir)
+    beta, m_values, bins, thermal, prefix_evidence = _load_run(args.run_dir)
     result = analyze_bins(
         beta,
         m_values,
@@ -339,6 +409,7 @@ def main(argv=None) -> int:
         bootstrap_samples=args.bootstrap_samples,
         seed=args.seed,
     )
+    result["execution_validation"] = prefix_evidence
     _atomic_text(
         args.run_dir / "analysis.json",
         json.dumps(result, indent=2, sort_keys=True, allow_nan=False) + "\n",

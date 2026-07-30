@@ -1,3 +1,4 @@
+import hashlib
 import json
 from pathlib import Path
 
@@ -204,6 +205,15 @@ def test_cli_measure_sweeps_override_is_recorded(tmp_path, monkeypatch):
     manifest = json.loads((tmp_path / "manifest.json").read_text(encoding="utf-8"))
     assert captured["cfg"].measure_sweeps == 32000
     assert manifest["settings"]["measure_sweeps"] == 32000
+    sources = manifest["provenance"]["source_sha256"]
+    assert sources == {
+        "qh147/qmc.py": hashlib.sha256(qmc_module.Path(qmc_module.__file__).read_bytes()).hexdigest(),
+        "qh147/qmc_mapping.py": hashlib.sha256(
+            qmc_module.Path(qmc_module.__file__).with_name("qmc_mapping.py").read_bytes()
+        ).hexdigest(),
+        "configs/qmc-reference.json": hashlib.sha256(CONFIG.read_bytes()).hexdigest(),
+    }
+    assert isinstance(manifest["provenance"]["git_dirty"], bool)
 
 
 @pytest.mark.parametrize("value", ("0", "-1", "32001"))

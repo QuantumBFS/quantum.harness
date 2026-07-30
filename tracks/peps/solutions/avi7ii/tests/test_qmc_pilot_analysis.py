@@ -83,14 +83,25 @@ def test_loader_rejects_a_runtime_measurement_mismatch(tmp_path):
         "measure_sweeps": 128000,
         "bins": 80,
     }
-    provenance = {"protocol": "fixture"}
+    source_hashes = {"qh147/qmc.py": "fixture-hash"}
+    provenance = {
+        "protocol": "fixture",
+        "source_sha256": source_hashes,
+        "prefix_run_id": "prefix",
+    }
     cells = []
+    prefix_cells = []
     for index, (m_value, chain) in enumerate(
         ((m, chain) for m in (32, 64, 128) for chain in range(4)), start=1
     ):
         cell_id = f"cell-{index:04d}"
         params = {"h": 3.0, "beta": 0.5, "M": m_value, "chain": chain}
-        cells.append({"cell_id": cell_id, "params": params})
+        expected_seed = 1000 + index
+        cell_settings = {"expected_seed": expected_seed}
+        cells.append(
+            {"cell_id": cell_id, "params": params, "settings": cell_settings}
+        )
+        prefix_cells.append({"cell_id": cell_id, "params": params})
         root = tmp_path / "cells" / cell_id
         root.mkdir(parents=True)
         (root / "manifest.json").write_text(
@@ -98,24 +109,50 @@ def test_loader_rejects_a_runtime_measurement_mismatch(tmp_path):
                 {
                     "status": "success",
                     "params": params,
-                    "settings": settings,
+                    "settings": {**settings, **cell_settings},
                     "provenance": provenance,
                     "runtime_settings": {
                         "thermal_sweeps": 4000,
                         "measure_sweeps": 128000,
-                        "seed": 1000 + index,
+                        "seed": expected_seed,
                     },
+                    "runtime_provenance": {"source_sha256": source_hashes},
                 }
             ),
             encoding="utf-8",
         )
-        np.savez(root / "bins.npz", energy=np.linspace(-3.1, -2.9, 80))
+        long_bins = np.linspace(-3.1, -2.9, 80)
+        np.savez(root / "bins.npz", energy=long_bins)
+        prefix_root = tmp_path.parent / "prefix" / "cells" / cell_id
+        prefix_root.mkdir(parents=True, exist_ok=True)
+        (prefix_root / "manifest.json").write_text(
+            json.dumps(
+                {
+                    "status": "success",
+                    "runtime_settings": {"seed": expected_seed},
+                }
+            ),
+            encoding="utf-8",
+        )
+        np.savez(
+            prefix_root / "bins.npz",
+            energy=np.repeat(long_bins[:20], 4),
+        )
     (tmp_path / "run_spec.json").write_text(
         json.dumps(
             {
                 "settings": settings,
                 "provenance": provenance,
                 "cells": cells,
+            }
+        ),
+        encoding="utf-8",
+    )
+    (tmp_path.parent / "prefix" / "run_spec.json").write_text(
+        json.dumps(
+            {
+                "settings": {"measure_sweeps": 32000},
+                "cells": prefix_cells,
             }
         ),
         encoding="utf-8",
@@ -128,4 +165,17 @@ def test_loader_rejects_a_runtime_measurement_mismatch(tmp_path):
     manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
 
     with pytest.raises(ValueError, match="runtime measurement"):
+        _load_run(tmp_path)
+
+    manifest["runtime_settings"]["measure_sweeps"] = 128000
+    manifest["runtime_settings"]["seed"] += 1
+    manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+    with pytest.raises(ValueError, match="runtime seed"):
+        _load_run(tmp_path)
+
+    manifest["runtime_settings"]["seed"] -= 1
+    manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+    prefix_bins = tmp_path.parent / "prefix" / "cells" / "cell-0001" / "bins.npz"
+    np.savez(prefix_bins, energy=np.zeros(80))
+    with pytest.raises(ValueError, match="trajectory prefix"):
         _load_run(tmp_path)
