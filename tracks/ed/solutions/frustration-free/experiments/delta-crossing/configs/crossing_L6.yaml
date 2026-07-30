@@ -1,0 +1,10 @@
+L: 6
+U: 12.0
+Delta: 2.0
+delta0: 0.5
+t: 1.0
+T_list: [1, 2, 5, 10, 20, 50, 100]
+dt_default: 0.02
+dt_convergence: [0.01, 0.005]
+dt_convergence_T: [10, 50]
+output_dir: "results/delta-crossing/L6"
