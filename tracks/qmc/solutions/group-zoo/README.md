@@ -79,8 +79,15 @@ route-a/analysis/fit_window_stability.png
 
 Dependencies are pinned in `route_a/Manifest.toml` and
 `route_b/Manifest.toml`; the production runtime was Julia 1.12.6. Plotting uses
-Python 3 plus matplotlib. With the repository's Python test dependencies
-installed, the root harness test suite is run with:
+Python 3 with pinned plotting dependencies:
+
+```bash
+python3 -m pip install -r \
+  tracks/qmc/solutions/group-zoo/route_a/requirements.txt
+```
+
+With the repository's Python test dependencies installed, the root harness
+test suite is run with:
 
 ```bash
 make test

@@ -34,13 +34,13 @@ fi
 "$julia_bin" --project="$route_a" "$route_a/scripts/analyze_available_results.jl" \
     --manifest "$manifest" --results "$raw" --output "$analysis"
 
-if "$python_bin" -c 'import matplotlib' >/dev/null 2>&1; then
-    "$python_bin" "$route_a/scripts/plot_available_analysis.py" \
-        "$analysis/route_a_available_analysis.json" \
-        "$analysis/fit_window_stability.png"
-else
-    printf 'reproduce: matplotlib unavailable; JSON analysis completed, plot skipped\n' >&2
-fi
+"$python_bin" -c 'import matplotlib' >/dev/null 2>&1 || {
+    printf 'reproduce: matplotlib is required; install route_a/requirements.txt\n' >&2
+    exit 1
+}
+"$python_bin" "$route_a/scripts/plot_available_analysis.py" \
+    "$analysis/route_a_available_analysis.json" \
+    "$analysis/fit_window_stability.png"
 
 printf 'reproduce: analysis=%s\n' "$analysis/route_a_available_analysis.json"
 printf 'reproduce: figure=%s\n' "$analysis/fit_window_stability.png"
