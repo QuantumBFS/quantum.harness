@@ -1,4 +1,5 @@
 import math
+import shutil
 
 
 def _load(repo_root):
@@ -44,3 +45,52 @@ def test_parameters_figures_tables_and_provenance_are_complete(repo_root):
         assert model.tables
         assert model.provenance
         assert all(len(digest) == 64 for digest in model.provenance.values())
+
+
+def test_learning_mit_loads_only_the_hash_selected_frozen_summary(repo_root):
+    from analysis.sources import load_learning_mit
+
+    result = load_learning_mit(repo_root)
+
+    assert result.summary_sha256 == (
+        "3fc6c4fbf584e3d278e003772988fab0c22b9574e79e9e4f8b94d50a5296103b"
+    )
+    assert result.status == "xy_reproduced_diii_inconclusive"
+    assert result.exploratory is True
+    assert result.xy_bracket == (0.24, 0.25)
+    assert result.diii_bracket is None
+    assert result.central_charge_published is False
+    assert set(result.figures) == {"en", "zh"}
+    assert all(path.is_file() for paths in result.figures.values() for path in paths)
+
+
+def test_learning_mit_rejects_a_summary_that_does_not_match_frozen_hash(
+    repo_root, tmp_path
+):
+    from analysis.sources import load_learning_mit
+
+    pointer_dir = (
+        tmp_path / "tracks/qmc/solutions/卧龙凤雏/learning-mit"
+    )
+    result_dir = tmp_path / "tracks/qmc/results/tampered"
+    pointer_dir.mkdir(parents=True)
+    (result_dir / "plots/en").mkdir(parents=True)
+    (result_dir / "plots/zh").mkdir(parents=True)
+    source = repo_root / "tracks/qmc/results/learning-mit-production-20260730-112758"
+    shutil.copy2(source / "summary.json", result_dir / "summary.json")
+    for language in ("en", "zh"):
+        for name in ("xy-phase-scan.png", "diii-phase-scan.png"):
+            shutil.copy2(source / f"plots/{language}/{name}", result_dir / f"plots/{language}/{name}")
+    pointer_dir.joinpath("FROZEN_RESULT").write_text(
+        "result_path=tracks/qmc/results/tampered\n"
+        f"summary_sha256={'0' * 64}\n"
+        "status=xy_reproduced_diii_inconclusive\n",
+        encoding="utf-8",
+    )
+
+    try:
+        load_learning_mit(tmp_path)
+    except ValueError as error:
+        assert "SHA-256" in str(error)
+    else:
+        raise AssertionError("tampered frozen summary was accepted")

@@ -46,6 +46,35 @@ class ModelResult:
     provenance: Mapping[str, str]
 
 
+@dataclass(frozen=True)
+class LearningMitResult:
+    status: str
+    exploratory: bool
+    result_dir: Path
+    summary_sha256: str
+    xy_theta_pi: float
+    xy_bracket: Tuple[float, float]
+    xy_reference_window: Tuple[float, float]
+    diii_theta_pi: float
+    diii_bracket: Optional[Tuple[float, float]]
+    diii_evidence: Tuple[Tuple[float, float], ...]
+    casimir_amplitude: Optional[float]
+    alpha: Optional[float]
+    alpha_stable: bool
+    central_charge_published: bool
+    elapsed_s: float
+    ordinary_stop_s: float
+    hard_stop_s: float
+    widths: Tuple[int, ...]
+    streams: int
+    born_mean: float
+    iid_mean: float
+    negative_control_z: float
+    oracle_passed: bool
+    figures: Mapping[str, Tuple[Path, ...]]
+    provenance: Mapping[str, str]
+
+
 def source_specs(repo_root: Path) -> Tuple[SourceSpec, ...]:
     del repo_root
     return (
@@ -73,6 +102,104 @@ def source_specs(repo_root: Path) -> Tuple[SourceSpec, ...]:
 def load_all_models(repo_root: Path) -> Tuple[ModelResult, ...]:
     root = Path(repo_root).resolve()
     return tuple(load_model(spec, root) for spec in source_specs(root))
+
+
+def load_learning_mit(repo_root: Path) -> LearningMitResult:
+    root = Path(repo_root).resolve()
+    pointer_path = (
+        root
+        / "tracks/qmc/solutions/卧龙凤雏/learning-mit/FROZEN_RESULT"
+    )
+    pointer = _read_pointer(pointer_path)
+    required = {"result_path", "summary_sha256", "status"}
+    if set(pointer) != required:
+        raise ValueError("learning-mit: malformed FROZEN_RESULT keys")
+    relative = Path(pointer["result_path"])
+    if relative.is_absolute() or ".." in relative.parts:
+        raise ValueError("learning-mit: frozen result path must remain inside the repository")
+    result_dir = (root / relative).resolve()
+    result_root = (root / "tracks/qmc/results").resolve()
+    if not result_dir.is_relative_to(result_root) or not result_dir.is_dir():
+        raise ValueError("learning-mit: frozen result directory is unavailable")
+
+    summary_path = result_dir / "summary.json"
+    actual_hash = _sha256(summary_path)
+    if actual_hash != pointer["summary_sha256"]:
+        raise ValueError("learning-mit: summary SHA-256 does not match FROZEN_RESULT")
+    summary = _read_json(summary_path, "learning-mit")
+    status = str(summary.get("status"))
+    if status != pointer["status"]:
+        raise ValueError("learning-mit: frozen status conflicts with summary")
+    if status not in {
+        "xy_reproduced_diii_candidate",
+        "xy_reproduced_diii_inconclusive",
+    }:
+        raise ValueError(f"learning-mit: unsupported frozen status {status}")
+    if summary.get("exploratory") is not True:
+        raise ValueError("learning-mit: open-research summary must be exploratory")
+
+    xy = summary["xy"]
+    diii = summary["diii"]
+    run = summary["run"]
+    central_charge = summary["central_charge"]
+    casimir = summary["casimir"]
+    anisotropy = summary["anisotropy"]
+    negative = summary["negative_control"]
+    oracles = summary["oracles"]
+    figures = {
+        language: tuple(
+            result_dir / f"plots/{language}/{name}"
+            for name in ("xy-phase-scan.png", "diii-phase-scan.png")
+        )
+        for language in ("en", "zh")
+    }
+    for paths in figures.values():
+        for path in paths:
+            if not path.is_file() or path.stat().st_size == 0:
+                raise ValueError(f"learning-mit: missing selected figure {path}")
+
+    result = LearningMitResult(
+        status=status,
+        exploratory=True,
+        result_dir=result_dir,
+        summary_sha256=actual_hash,
+        xy_theta_pi=float(xy["theta_pi"]),
+        xy_bracket=_optional_interval(xy["bracket"], "learning-mit") or _missing_interval(),
+        xy_reference_window=_optional_interval(
+            xy["reference_window"], "learning-mit"
+        )
+        or _missing_interval(),
+        diii_theta_pi=float(diii["theta_pi"]),
+        diii_bracket=_optional_interval(diii.get("bracket"), "learning-mit"),
+        diii_evidence=tuple(
+            (float(row["phi_pi"]), float(row["score"]))
+            for row in diii["evidence"]
+        ),
+        casimir_amplitude=_optional_float(casimir.get("amplitude")),
+        alpha=_optional_float(anisotropy.get("alpha")),
+        alpha_stable=bool(anisotropy["alpha_stable"]),
+        central_charge_published=bool(central_charge["published"]),
+        elapsed_s=float(run["elapsed_seconds"]),
+        ordinary_stop_s=float(run["ordinary_stop_seconds"]),
+        hard_stop_s=float(run["hard_stop_seconds"]),
+        widths=tuple(int(value) for value in run["widths"]),
+        streams=int(run["streams"]),
+        born_mean=float(negative["born_mean"]),
+        iid_mean=float(negative["iid_mean"]),
+        negative_control_z=float(negative["z_score"]),
+        oracle_passed=bool(oracles["passed"]),
+        figures=figures,
+        provenance=_provenance(
+            (
+                pointer_path,
+                summary_path,
+                *(path for paths in figures.values() for path in paths),
+            ),
+            root,
+        ),
+    )
+    _validate_learning_mit(result)
+    return result
 
 
 def load_model(spec: SourceSpec, repo_root: Path) -> ModelResult:
@@ -303,6 +430,65 @@ def _interval(value: Sequence[object], slug: str) -> Tuple[float, float]:
     if not interval[0] < interval[1]:
         raise ValueError(f"{slug}: confidence interval endpoints are unordered")
     return interval
+
+
+def _optional_interval(
+    value: Optional[Sequence[object]], slug: str
+) -> Optional[Tuple[float, float]]:
+    if value is None:
+        return None
+    return _interval(value, slug)
+
+
+def _missing_interval() -> Tuple[float, float]:
+    raise ValueError("learning-mit: required interval is absent")
+
+
+def _optional_float(value: object) -> Optional[float]:
+    return None if value is None else float(value)
+
+
+def _validate_learning_mit(result: LearningMitResult) -> None:
+    numbers = (
+        result.xy_theta_pi,
+        *result.xy_bracket,
+        *result.xy_reference_window,
+        result.diii_theta_pi,
+        result.elapsed_s,
+        result.ordinary_stop_s,
+        result.hard_stop_s,
+        result.born_mean,
+        result.iid_mean,
+        result.negative_control_z,
+        *(value for row in result.diii_evidence for value in row),
+    )
+    if not all(math.isfinite(value) for value in numbers):
+        raise ValueError("learning-mit: non-finite frozen value")
+    if not result.oracle_passed:
+        raise ValueError("learning-mit: scientific oracles did not pass")
+    if result.elapsed_s <= 0 or result.elapsed_s >= result.ordinary_stop_s:
+        raise ValueError("learning-mit: runtime did not satisfy the ordinary budget")
+    if not result.widths or result.streams <= 0 or not result.diii_evidence:
+        raise ValueError("learning-mit: incomplete frozen scan")
+    if result.status.endswith("inconclusive"):
+        if result.diii_bracket is not None or result.central_charge_published:
+            raise ValueError("learning-mit: inconclusive result publishes a DIII claim")
+
+
+def _read_pointer(path: Path) -> Dict[str, str]:
+    try:
+        rows = path.read_text(encoding="utf-8").splitlines()
+    except OSError as error:
+        raise ValueError(f"learning-mit: failed to read {path}") from error
+    pointer: Dict[str, str] = {}
+    for row in rows:
+        if not row or "=" not in row:
+            raise ValueError("learning-mit: malformed FROZEN_RESULT line")
+        key, value = row.split("=", 1)
+        if not key or not value or key in pointer:
+            raise ValueError("learning-mit: malformed FROZEN_RESULT entry")
+        pointer[key] = value
+    return pointer
 
 
 def _figures(run_dir: Path, minimum: int, slug: str) -> Tuple[Path, ...]:

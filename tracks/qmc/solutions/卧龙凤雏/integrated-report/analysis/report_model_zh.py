@@ -17,10 +17,12 @@ from analysis.report_model import (
     Section,
     Table,
 )
-from analysis.sources import Gate, ModelResult
+from analysis.sources import Gate, LearningMitResult, ModelResult
 
 
-def build_report_zh(models: Sequence[ModelResult]) -> ReportDocument:
+def build_report_zh(
+    models: Sequence[ModelResult], learning_mit: LearningMitResult
+) -> ReportDocument:
     indexed = {model.slug: model for model in models}
     required = {"clean-ising", "nishimori-ising", "weak-self-dual"}
     if set(indexed) != required:
@@ -55,6 +57,7 @@ def build_report_zh(models: Sequence[ModelResult]) -> ReportDocument:
             _comparison(clean, nishimori, weak),
             _errors(clean, nishimori, weak),
             _implementation(),
+            _open_research(learning_mit),
             _conclusions(clean, nishimori, weak),
             _appendices(clean, nishimori, weak),
         ),
@@ -744,11 +747,124 @@ def _implementation() -> Section:
     )
 
 
+def _open_research(result: LearningMitResult) -> Section:
+    evidence_rows = tuple(
+        (f"{phi:.2f}", f"{score:.6f}", "探索性")
+        for phi, score in result.diii_evidence
+    )
+    return Section(
+        ZH_SECTION_TITLES[9],
+        "learning-induced-mit",
+        (
+            PageBreak(),
+            Callout(
+                "探索性结果，不是第四张基准卡",
+                "本章与前三个已经验证的中心荷基准严格分开。冻结状态为 "
+                f"{result.status}：XY 复现门控通过，但一般 DIII 扫描没有满足预声明的"
+                "相证据持续性规则，因此结论不足。",
+                "warning",
+            ),
+            Paragraph(
+                "开放问题是：在受监测表面码的 Born 张量网络中，改变物理测量轴是否会驱动"
+                "扩展的、类金属 Majorana 关联与局域的、类绝缘体关联之间的转变。这里没有"
+                "预先给定的 DIII 中心荷目标。计算必须先在具有特殊分块结构的 XY 线上复现"
+                "已知转变，随后才允许扫描一般 DIII 截面；不能观察数据后再挑最有利的角点。"
+            ),
+            Equation(
+                "sigma(theta,phi) = sin(theta) cos(phi) X + sin(theta) sin(phi) Y + cos(theta) Z",
+                "XY 验证线固定 theta/pi=0.5；探索性一般截面固定 "
+                f"theta/pi={result.diii_theta_pi:.2f}。非零的极角和方位角分量破除特殊的 "
+                "D 类分块，进入本挑战关注的一般 DIII 情形。",
+                "25",
+            ),
+            Paragraph(
+                "Rust 使用 Xoshiro256++ 逐次抽取条件 Born 结果，并演化实反对称高斯协方差"
+                "矩阵。分式测量更新之后施加依赖结果的正交旋转；每个周期结束后用正交极分解"
+                "投影消除 Gamma^2=-I 的浮点漂移。Python 只读取冻结块数据、比较纠缠弧模型、"
+                "计算相证据并生成图表和报告，不执行任何蒙特卡洛演化。"
+            ),
+            CodeBlock(
+                "预声明的两阶段决策",
+                "run_xy_validation(theta_pi=0.50)\n"
+                "if xy_bracket overlaps reference_window:\n"
+                "    scan_generic_diii(theta_pi=0.45)\n"
+                "    publish_candidate_only_if_adjacent_phase_evidence_persists\n"
+                "else:\n"
+                "    status = validation_failed",
+                "这个分支阻止在 XY 已知转变未复现时发布一般 DIII 声明。若 DIII 括区缺失，"
+                "工作流保留“探索性且结论不足”的结果，而不是事后扩大或移动扫描来修补结论。",
+            ),
+            Table(
+                "冻结的开放研究决策",
+                ("量", "冻结值", "声明类别"),
+                (
+                    (
+                        "XY 括区 phi/pi",
+                        f"[{result.xy_bracket[0]:.2f}, {result.xy_bracket[1]:.2f}]",
+                        "验证",
+                    ),
+                    (
+                        "XY 参考窗口",
+                        f"[{result.xy_reference_window[0]:.2f}, "
+                        f"{result.xy_reference_window[1]:.2f}]",
+                        "预声明验证",
+                    ),
+                    ("DIII 括区", "无", "探索性 / 结论不足"),
+                    ("Casimir c_eff alpha", "未拟合", "探索性 / 不发布"),
+                    ("各向异性 alpha", "不稳定", "探索性 / 不发布"),
+                    ("DIII 中心荷", "不发布", "探索性 / 不发布"),
+                    (
+                        "运行时间",
+                        f"{result.elapsed_s:.3f} 秒",
+                        f"低于 {result.ordinary_stop_s:.0f} 秒普通上限",
+                    ),
+                ),
+                "所有 DIII 条目均为探索性。空估计是严格声明门控的科学结果，不是报告漏项。",
+            ),
+            Figure(
+                result.figures["zh"][0],
+                "批准角度网格上的 XY 线有限尺寸相证据。",
+                "验证扫描：冻结 XY 括区为 "
+                f"[{result.xy_bracket[0]:.2f}, {result.xy_bracket[1]:.2f}]，位于声明的"
+                "参考窗口内。",
+                "该图只验证特殊 D 类线上的实现，不能据此证明一般 DIII 转变。",
+            ),
+            Figure(
+                result.figures["zh"][1],
+                "八个方位角点上的探索性 DIII 相证据分数。",
+                "探索性一般 DIII 扫描。分数随网格平滑变化，但没有相邻点满足完整的"
+                "持续相反相证据规则。",
+                "该分数是复合有限尺寸诊断，不是中心荷，也不是零点具有普适意义的独立序参量。",
+            ),
+            Table(
+                "探索性 DIII 证据扫描",
+                ("phi/pi（探索性）", "证据分数（探索性）", "标签"),
+                evidence_rows,
+                "本表所有数值均为探索性诊断，不是已发布的转变坐标或普适量。",
+            ),
+            Paragraph(
+                "物理 Born 对照与故意设置的非物理 IID 符号对照显著不同：冻结均值分别为 "
+                f"{result.born_mean:.6f} 和 {result.iid_mean:.6f}，z={result.negative_control_z:.2f}。"
+                "这确认了无条件随机符号不能替代依赖当前态的 Born 抽样。科学 oracle 通过，"
+                f"{len(result.widths)} 个宽度 {result.widths}、每点 {result.streams} 条流全部"
+                "完成，且没有使用运行时冗余额度。"
+            ),
+            Callout(
+                "尚未解决的问题",
+                "当前数据不发布 DIII 转变、Casimir 振幅、各向异性或中心荷。后续研究应在"
+                "低 phi 交叉区增加独立流和宽度，预声明更细的精化网格，并检验相标签是否在"
+                "替代有限尺寸窗口下持续成立。“结论不足”不等于“转变不存在”。",
+                "principle",
+            ),
+        ),
+    )
+
+
 def _conclusions(
     clean: ModelResult, nishimori: ModelResult, weak: ModelResult
 ) -> Section:
     return Section(
-        ZH_SECTION_TITLES[9],
+        ZH_SECTION_TITLES[10],
         "conclusions",
         (
             PageBreak(),
@@ -800,7 +916,7 @@ def _appendices(
         for model in models
     )
     return Section(
-        ZH_SECTION_TITLES[10],
+        ZH_SECTION_TITLES[11],
         "appendices",
         (
             PageBreak(),

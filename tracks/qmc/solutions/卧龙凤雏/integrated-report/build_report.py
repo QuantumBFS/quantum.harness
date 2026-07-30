@@ -14,7 +14,12 @@ from analysis.locale import get_locale
 from analysis.pdf_renderer import render_pdf
 from analysis.report_model import build_report
 from analysis.report_model_zh import build_report_zh
-from analysis.sources import ModelResult, load_all_models
+from analysis.sources import (
+    LearningMitResult,
+    ModelResult,
+    load_all_models,
+    load_learning_mit,
+)
 from analysis.source_plots_zh import build_chinese_source_plots
 from analysis.verify_outputs import VerificationResult, verify_html, verify_pdf
 
@@ -39,15 +44,16 @@ def build(
     root = Path(repo_root).resolve()
     locale = get_locale(language)
     models = load_all_models(root)
-    source_fingerprint = _fingerprint(models)
+    learning_mit = load_learning_mit(root)
+    source_fingerprint = _fingerprint(models, learning_mit)
     if locale.code == "zh":
         plot_dir = PACKAGE_ROOT / "generated" / locale.plot_directory
         build_comparison_plots(models, plot_dir, locale)
         build_chinese_source_plots(root, plot_dir)
-        report = build_report_zh(models)
+        report = build_report_zh(models, learning_mit)
     else:
         build_comparison_plots(models, PACKAGE_ROOT / "generated", locale)
-        report = build_report(models)
+        report = build_report(models, learning_mit)
 
     stem = f"three-model-central-charge-report{locale.output_suffix}"
     html_output = root / f"output/html/{stem}.html"
@@ -62,7 +68,9 @@ def build(
         render_pdf(report, pdf_temporary, locale)
         html_result = verify_html(html_temporary, locale)
         pdf_result = verify_pdf(pdf_temporary, locale)
-        if _fingerprint(load_all_models(root)) != source_fingerprint:
+        if _fingerprint(
+            load_all_models(root), load_learning_mit(root)
+        ) != source_fingerprint:
             raise ValueError("frozen source artifacts changed during report generation")
         html_temporary.replace(html_output)
         pdf_temporary.replace(pdf_output)
@@ -89,11 +97,19 @@ def build_all(
 
 
 def _fingerprint(
-    models: Tuple[ModelResult, ...]
+    models: Tuple[ModelResult, ...],
+    learning_mit: LearningMitResult,
 ) -> Tuple[Tuple[str, Tuple[Tuple[str, str], ...]], ...]:
-    return tuple(
+    model_rows = tuple(
         (model.slug, tuple(sorted(model.provenance.items())))
         for model in models
+    )
+    return (
+        *model_rows,
+        (
+            "learning-induced-mit",
+            tuple(sorted(learning_mit.provenance.items())),
+        ),
     )
 
 
