@@ -1,0 +1,72 @@
+diff --git a/Prog/control_mod.F90 b/Prog/control_mod.F90
+index 0c5a24d7..3328ee5b 100644
+--- a/Prog/control_mod.F90
++++ b/Prog/control_mod.F90
+@@ -53,2 +53,5 @@ module Control
+     Integer          , private, save :: NCG, NCG_tau
++    Integer          , private, save :: XMAXG_bin, XMAXG_sweep
++    Integer          , private, save :: XMAXG_direction, XMAXG_slice
++    Integer          , private, save :: XMAXG_i, XMAXG_j, XMAXG_flavor
+     Integer (Kind=Kind(0.d0)) , private, save :: NC_up, ACC_up
+@@ -83,2 +86,9 @@ module Control
+         XMAXP      = 0.d0
++        XMAXG_bin = 0
++        XMAXG_sweep = 0
++        XMAXG_direction = 0
++        XMAXG_slice = 0
++        XMAXG_i = 0
++        XMAXG_j = 0
++        XMAXG_flavor = 0
+         XMEANP_Glob= 0.d0
+@@ -183,3 +193,3 @@ module Control
+
+-      Subroutine Control_PrecisionG(A,B,Ndim)
++      Subroutine Control_PrecisionG(A,B,Ndim,bin,sweep,direction,slice,flavor)
+ #ifdef MPI
+@@ -189,3 +199,4 @@ module Control
+
+-        Integer :: Ndim
++        Integer, INTENT(IN) :: Ndim, bin, sweep, direction, slice, flavor
++        Integer :: location(2)
+         Complex (Kind=Kind(0.d0)) :: A(Ndim,Ndim), B(Ndim,Ndim)
+@@ -231,3 +242,13 @@ module Control
+         endif
+-        IF (XMAX  >  XMAXG) XMAXG = XMAX
++        IF (XMAX  >  XMAXG) then
++          location = maxloc(abs(A - B))
++          XMAXG = XMAX
++          XMAXG_bin = bin
++          XMAXG_sweep = sweep
++          XMAXG_direction = direction
++          XMAXG_slice = slice
++          XMAXG_i = location(1)
++          XMAXG_j = location(2)
++          XMAXG_flavor = flavor
++        endif
+         XMEANG = XMEANG + XMEAN
+@@ -384,2 +405,5 @@ module Control
+               Write(50,*) ' Precision Green  Mean, Max : ', XMEANG, XMAXG
++              Write(50,*) ' Precision Green Max Location (bin,sweep,direction,slice,i,j,flavor) : ', &
++                   XMAXG_bin, XMAXG_sweep, XMAXG_direction, XMAXG_slice, &
++                   XMAXG_i, XMAXG_j, XMAXG_flavor
+               Write(50,*) ' Precision Phase, Max       : ', XMAXP
+--- a/Prog/main.F90
++++ b/Prog/main.F90
+@@ -712,3 +712,4 @@
+                           CALL CGR(Z1, NVAR, GR(:,:,nf), UDVR(nf_eff), UDVL(nf_eff))
+-                          Call Control_PrecisionG(GR(:,:,nf),Test,Ndim)
++                          Call Control_PrecisionG(GR(:,:,nf),Test,Ndim, &
++                               NBC,NSW,1,NTAU1,nf)
+                           call Op_phase(Z1,OP_V,Nsigma,nf)
+@@ -787,3 +788,4 @@
+                           CALL CGR(Z1, NVAR, GR(:,:,nf), UDVR(nf_eff), UDVL(nf_eff))
+-                          Call Control_PrecisionG(GR(:,:,nf),Test,Ndim)
++                          Call Control_PrecisionG(GR(:,:,nf),Test,Ndim, &
++                               NBC,NSW,-1,NTAU1,nf)
+                           call Op_phase(Z1,OP_V,Nsigma,nf)
+@@ -822,3 +824,4 @@
+                     CALL CGR(Z1, NVAR, GR(:,:,nf), UDVR(nf_eff), UDVL(nf_eff))
+-                    Call Control_PrecisionG(GR(:,:,nf),Test,Ndim)
++                    Call Control_PrecisionG(GR(:,:,nf),Test,Ndim, &
++                         NBC,NSW,0,0,nf)
+                     call Op_phase(Z1,OP_V,Nsigma,nf)

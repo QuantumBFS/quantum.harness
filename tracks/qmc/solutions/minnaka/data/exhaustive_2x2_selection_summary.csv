@@ -1,0 +1,4 @@
+trial,total_records,worst_count,below_half,near_average,important,strongly_important,important_cumulative,cutoff_score,cutoff_tie_count
+rhf_x,16777216,167773,159043,4590,1858,2282,4140,2.3497052197560575,2
+rhf_y,16777216,167773,158069,5086,2188,2430,4618,2.3073375557105757,2
+uhf,16777216,167773,166274,700,483,316,799,0.9757847551260859,1

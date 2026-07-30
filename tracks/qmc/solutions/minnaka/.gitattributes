@@ -1,0 +1,2 @@
+test/alf_hirsch_binary/patches/*.patch whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab
+test/pqmc_cp_bridge/assets/alf_start_parameters whitespace=-blank-at-eol

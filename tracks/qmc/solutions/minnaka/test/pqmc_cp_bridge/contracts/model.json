@@ -1,0 +1,15 @@
+{
+  "beta": 1.0,
+  "boundary_x": "PBC",
+  "boundary_y": "PBC",
+  "dt": 0.05,
+  "hamiltonian": "K + U sum_i n_i_up n_i_down",
+  "hopping": 1.0,
+  "hs_transform": "real_binary_hirsch_spin",
+  "interaction": 4.0,
+  "lx": 4,
+  "ly": 4,
+  "n_down": 8,
+  "n_up": 8,
+  "schema_version": 1
+}

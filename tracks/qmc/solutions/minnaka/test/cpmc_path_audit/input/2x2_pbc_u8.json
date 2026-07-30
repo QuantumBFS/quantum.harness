@@ -1,0 +1,19 @@
+{
+  "model": "repulsive Hubbard",
+  "hamiltonian": "-t sum_<ij>,sigma (c^dagger_i,sigma c_j,sigma + h.c.) + U sum_i n_i,up n_i,down",
+  "lx": 2,
+  "ly": 2,
+  "pbc_x": true,
+  "pbc_y": true,
+  "t": 1.0,
+  "u": 8.0,
+  "n_up": 2,
+  "n_down": 2,
+  "dt": 0.1,
+  "slices": [1, 2, 4, 6],
+  "hs": "real Hirsch spin",
+  "trials": ["rhf_x", "rhf_y", "uhf"],
+  "uhf_u": 8.0,
+  "site_orders": ["row", "reverse", "sublattice"],
+  "proposals": ["site", "joint"]
+}

@@ -1,0 +1,17 @@
+runs/
+archives/
+replay/bulk/
+replay/prefixes/
+replay/traces/
+replay/cluster_production_128/
+results/*.mat
+results/*.qhpa
+results/*.qhpfx
+results/cluster_*/
+results/local_*/
+results/archive_stride.json
+results/selected_projection.json
+results/production_grid.json
+results/matlab_direct_cp_population.*
+__pycache__/
+*.pyc

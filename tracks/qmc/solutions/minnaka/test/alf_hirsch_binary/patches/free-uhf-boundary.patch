@@ -1,0 +1,232 @@
+diff --git a/Prog/Hamiltonians/Hamiltonian_Hubbard_Plain_Vanilla_smod.F90 b/Prog/Hamiltonians/Hamiltonian_Hubbard_Plain_Vanilla_smod.F90
+index f6176600..e0b1d12d 100644
+--- a/Prog/Hamiltonians/Hamiltonian_Hubbard_Plain_Vanilla_smod.F90
++++ b/Prog/Hamiltonians/Hamiltonian_Hubbard_Plain_Vanilla_smod.F90
+@@ -166,12 +166,17 @@
+       !logical              :: Symm     = .true.    ! Whether symmetrization takes place
+       Integer               :: N_part   = -1        ! Number of particles in trial wave function. If N_part < 0 -> N_part = L1*L2/2
+       Logical               :: Hirsch_binary = .false. ! Use the exact two-valued Hirsch spin transformation
++      Integer               :: Trial_boundary_mode = 0 ! 0=free/free, 1=free right and file-loaded UHF left
++      Logical               :: Export_trial_orbitals = .false. ! Export the unscaled free determinant and site map
+       !#PARAMETERS END#
+ 
+       Type (Lattice),       target :: Latt
+       Type (Unit_cell),     target :: Latt_unit
+       INTEGER :: nf_calc, nf_reconst
+       real(Kind=Kind(0.d0)) :: Hirsch_lambda = 0.d0
++      real(Kind=Kind(0.d0)) :: Trial_overlap_before(2) = 0.d0
++      real(Kind=Kind(0.d0)) :: Trial_overlap_after(2) = 0.d0
++      real(Kind=Kind(0.d0)) :: Trial_orth_residual(2) = 0.d0
+ 
+     contains
+       
+@@ -219,6 +224,10 @@
+              Write(error_unit,*) 'Hirsch_binary requires repulsive Ham_U > 0'
+              error stop 1
+           endif
++          If (Trial_boundary_mode < 0 .or. Trial_boundary_mode > 1) then
++             Write(error_unit,*) 'Trial_boundary_mode must be 0 or 1'
++             error stop 1
++          endif
+ 
+           If (L1 == 1) then
+              Write(6,*) 'For  one-dimensional lattices set L2=1'
+@@ -287,6 +296,21 @@
+                 Write(unit_info,*) 'Assuming time  reversal  symmetry' 
+              endif
+              if (Projector) then
++                Write(unit_info,'(A,I0)') 'Trial boundary mode: ', Trial_boundary_mode
++                Write(unit_info,'(A)') 'WF_R: free'
++                If (Trial_boundary_mode == 0) then
++                   Write(unit_info,'(A)') 'WF_L: free'
++                   Write(unit_info,'(A)') 'Explicit flavor propagation: F'
++                Else
++                   Write(unit_info,'(A)') 'WF_L: UHF file'
++                   Write(unit_info,'(A)') 'Explicit flavor propagation: T'
++                   Write(unit_info,'(A,ES25.17E3)') 'Spin-up overlap before normalization: ', Trial_overlap_before(1)
++                   Write(unit_info,'(A,ES25.17E3)') 'Spin-down overlap before normalization: ', Trial_overlap_before(2)
++                   Write(unit_info,'(A,ES25.17E3)') 'Spin-up overlap after normalization: ', Trial_overlap_after(1)
++                   Write(unit_info,'(A,ES25.17E3)') 'Spin-down overlap after normalization: ', Trial_overlap_after(2)
++                   Write(unit_info,'(A,ES25.17E3)') 'Spin-up UHF orthonormality residual: ', Trial_orth_residual(1)
++                   Write(unit_info,'(A,ES25.17E3)') 'Spin-down UHF orthonormality residual: ', Trial_orth_residual(2)
++                Endif
+                 Do nf = 1,N_FL
+                    Write(unit_info,*) 'Degen of right trial wave function: ', WF_R(nf)%Degen
+                    Write(unit_info,*) 'Degen of left  trial wave function: ', WF_L(nf)%Degen
+@@ -299,7 +323,10 @@
+ 
+           ! Particle-hole  symmetry   for repulsive  U  only if  chemical potential vanishes
+           ! Time  reversal  symmetry  for  attractive U
+-          If ( (Ham_U >= 0.d0 .and.   Ham_chem  == 0.d0)  .or.  Ham_U < 0.d0  )    then
++          If (Trial_boundary_mode == 1) then
++             allocate(Calc_Fl(N_FL))
++             Calc_Fl = .True.
++          Else If ( (Ham_U >= 0.d0 .and.   Ham_chem  == 0.d0)  .or.  Ham_U < 0.d0  )    then
+              allocate(Calc_Fl(N_FL))
+              nf_calc=2
+              nf_reconst=1
+@@ -386,12 +413,14 @@
+         Subroutine Ham_Trial()
+ 
+           Use Predefined_Trial
++          Use, Intrinsic :: ieee_arithmetic
+ 
+           Implicit none
+ 
+           Integer                              :: nf, Ix, Iy, I, n
+           Real (Kind=Kind(0.d0)), allocatable  :: H0(:,:),  U0(:,:), E0(:)
+           Real (Kind=Kind(0.d0))               :: Pi = acos(-1.d0), Delta = 0.01d0
++          Complex (Kind=Kind(0.d0))            :: Z_norm
+ 
+           Allocate(WF_L(N_FL),WF_R(N_FL))
+           do nf=1,N_FL
+@@ -427,10 +456,149 @@
+              WF_R(nf)%Degen = E0(N_part+1) - E0(N_part)
+           enddo
+ 
++          If (Export_trial_orbitals) then
++             Call Write_trial_matrix('trial_I_up.dat', WF_R(1)%P)
++             Call Write_trial_matrix('trial_I_down.dat', WF_R(2)%P)
++             Call Write_trial_site_map('site_map.dat')
++          Endif
++
++          If (Trial_boundary_mode == 1) then
++             Call Read_trial_matrix('trial_T_up.dat', WF_L(1)%P, Trial_orth_residual(1))
++             Call Read_trial_matrix('trial_T_down.dat', WF_L(2)%P, Trial_orth_residual(2))
++             Do nf = 1,N_FL
++                Trial_overlap_before(nf) = Trial_overlap_determinant(WF_L(nf)%P, WF_R(nf)%P)
++                If (.not. ieee_is_finite(Trial_overlap_before(nf)) .or. &
++                    Trial_overlap_before(nf) <= 1.d-10) then
++                   Write(error_unit,*) 'trial_T orbital overlap must be positive and > 1e-10 for spin ', nf
++                   error stop 1
++                Endif
++                Call WF_overlap(WF_L(nf), WF_R(nf), Z_norm)
++                Trial_overlap_after(nf) = Trial_overlap_determinant(WF_L(nf)%P, WF_R(nf)%P)
++             Enddo
++          Endif
++
+           Deallocate(H0,  U0,  E0 )
+ 
+         end Subroutine Ham_Trial
+ 
++        Subroutine Write_trial_matrix(Filename, Orbitals)
++          Use, Intrinsic :: ieee_arithmetic
++          Implicit none
++          Character(len=*), Intent(in) :: Filename
++          Complex(Kind=Kind(0.d0)), Intent(in) :: Orbitals(:,:)
++          Integer :: unit_number, ios, row, col
++
++          Open(newunit=unit_number, file=Filename, status='replace', action='write', iostat=ios)
++          If (ios /= 0) then
++             Write(error_unit,*) 'Cannot write trial orbital file: ', Trim(Filename)
++             error stop 1
++          Endif
++          Write(unit_number,'(I0,1X,I0)') Size(Orbitals,1), Size(Orbitals,2)
++          Do row = 1,Size(Orbitals,1)
++             Do col = 1,Size(Orbitals,2)
++                If (.not. ieee_is_finite(Real(Orbitals(row,col),Kind(0.d0))) .or. &
++                    Abs(Aimag(Orbitals(row,col))) > 1.d-13) then
++                   Write(error_unit,*) 'Cannot export non-real trial orbital: ', Trim(Filename)
++                   error stop 1
++                Endif
++             Enddo
++             Write(unit_number,'(*(ES25.17E3,1X))') &
++                  (Real(Orbitals(row,col),Kind(0.d0)), col=1,Size(Orbitals,2))
++          Enddo
++          Close(unit_number)
++        End Subroutine Write_trial_matrix
++
++        Subroutine Write_trial_site_map(Filename)
++          Implicit none
++          Character(len=*), Intent(in) :: Filename
++          Integer :: unit_number, ios, site, x, y, cpp_site
++
++          Open(newunit=unit_number, file=Filename, status='replace', action='write', iostat=ios)
++          If (ios /= 0) then
++             Write(error_unit,*) 'Cannot write trial site map: ', Trim(Filename)
++             error stop 1
++          Endif
++          Do site = 1,Ndim
++             x = Modulo(Latt%list(site,1),L1)
++             y = Modulo(Latt%list(site,2),L2)
++             cpp_site = x + L1*y
++             Write(unit_number,'(I0,1X,I0,1X,I0,1X,I0)') site, cpp_site, x, y
++          Enddo
++          Close(unit_number)
++        End Subroutine Write_trial_site_map
++
++        Subroutine Read_trial_matrix(Filename, Orbitals, Residual)
++          Use, Intrinsic :: ieee_arithmetic
++          Implicit none
++          Character(len=*), Intent(in) :: Filename
++          Complex(Kind=Kind(0.d0)), Intent(out) :: Orbitals(:,:)
++          Real(Kind=Kind(0.d0)), Intent(out) :: Residual
++          Integer :: unit_number, ios, rows, cols, row, col, left, right
++          Real(Kind=Kind(0.d0)), Allocatable :: values(:,:)
++          Real(Kind=Kind(0.d0)) :: extra_value
++          Complex(Kind=Kind(0.d0)) :: gram_value
++
++          Open(newunit=unit_number, file=Filename, status='old', action='read', iostat=ios)
++          If (ios /= 0) then
++             Write(error_unit,*) 'Cannot open trial orbital file: ', Trim(Filename)
++             error stop 1
++          Endif
++          Read(unit_number,*,iostat=ios) rows, cols
++          If (ios /= 0 .or. rows /= Size(Orbitals,1) .or. cols /= Size(Orbitals,2)) then
++             Write(error_unit,*) 'Invalid trial_T orbital shape in ', Trim(Filename)
++             error stop 1
++          Endif
++          Allocate(values(rows,cols))
++          Do row = 1,rows
++             Read(unit_number,*,iostat=ios) (values(row,col),col=1,cols)
++             If (ios /= 0) then
++                Write(error_unit,*) 'Invalid trial_T orbital data in ', Trim(Filename)
++                error stop 1
++             Endif
++          Enddo
++          Read(unit_number,*,iostat=ios) extra_value
++          If (ios == 0) then
++             Write(error_unit,*) 'Extra trial_T orbital data in ', Trim(Filename)
++             error stop 1
++          Endif
++          Close(unit_number)
++          If (Any(.not. ieee_is_finite(values))) then
++             Write(error_unit,*) 'Nonfinite trial_T orbital in ', Trim(Filename)
++             error stop 1
++          Endif
++          Orbitals = Cmplx(values,0.d0,Kind(0.d0))
++          Residual = 0.d0
++          Do left = 1,cols
++             Do right = 1,cols
++                gram_value = Sum(Conjg(Orbitals(:,left))*Orbitals(:,right))
++                If (left == right) gram_value = gram_value - 1.d0
++                Residual = Max(Residual,Abs(gram_value))
++             Enddo
++          Enddo
++          If (Residual >= 1.d-11) then
++             Write(error_unit,*) 'Nonorthogonal trial_T orbital in ', Trim(Filename), Residual
++             error stop 1
++          Endif
++          Deallocate(values)
++        End Subroutine Read_trial_matrix
++
++        Real(Kind=Kind(0.d0)) Function Trial_overlap_determinant(Left,Right)
++          Implicit none
++          Complex(Kind=Kind(0.d0)), Intent(in) :: Left(:,:), Right(:,:)
++          Complex(Kind=Kind(0.d0)), Allocatable :: overlap_matrix(:,:)
++          Complex(Kind=Kind(0.d0)) :: overlap
++
++          Allocate(overlap_matrix(Size(Left,2),Size(Right,2)))
++          overlap_matrix = Matmul(Conjg(Transpose(Left)),Right)
++          overlap = Det(overlap_matrix,Size(Left,2))
++          If (Abs(Aimag(overlap)) > 1.d-12) then
++             Write(error_unit,*) 'Complex trial_T overlap is unsupported'
++             error stop 1
++          Endif
++          Trial_overlap_determinant = Real(overlap,Kind(0.d0))
++          Deallocate(overlap_matrix)
++        End Function Trial_overlap_determinant
++
+ !--------------------------------------------------------------------
+ !> @author
+ !> ALF Collaboration

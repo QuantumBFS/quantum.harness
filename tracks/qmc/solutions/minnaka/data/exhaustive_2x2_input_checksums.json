@@ -1,0 +1,17 @@
+{
+  "/home/minnaka/code/QuanHarness/test/cpmc_path_audit/results/m4-full-v2/paths_rhf_x_joint_na.bin": "707e06a34ab16696d72e6804394cd8cfbc87cd3db15f923ed457c6f2e70f463e",
+  "/home/minnaka/code/QuanHarness/test/cpmc_path_audit/results/m4-full-v2/paths_rhf_x_site_reverse.bin": "7af425f58a371cf6f7c0d1085c0a974a4d2f50aa56a411da989908b230c64d59",
+  "/home/minnaka/code/QuanHarness/test/cpmc_path_audit/results/m4-full-v2/paths_rhf_x_site_row.bin": "7ae5c8512e5f12b81b4954bd2a1ed306ce9bbc3fc659b3aee0e011b60d6f649f",
+  "/home/minnaka/code/QuanHarness/test/cpmc_path_audit/results/m4-full-v2/paths_rhf_x_site_sublattice.bin": "531826ff693655680f2c2bad16ef1bae67416b24c72840173c615df4a9392561",
+  "/home/minnaka/code/QuanHarness/test/cpmc_path_audit/results/m4-full-v2/paths_rhf_y_joint_na.bin": "bae20530f78cfda219d980b352b934c2eb4abd082005f80f52c639914e5c07c4",
+  "/home/minnaka/code/QuanHarness/test/cpmc_path_audit/results/m4-full-v2/paths_rhf_y_site_reverse.bin": "e3d62fc41f59869f5c5626ae4181296062509807414659b72aab7385cff356c0",
+  "/home/minnaka/code/QuanHarness/test/cpmc_path_audit/results/m4-full-v2/paths_rhf_y_site_row.bin": "c6f6832cb472f9fe8ded07ac30dff3412c6c466b34e285d6e82e7ebde77238eb",
+  "/home/minnaka/code/QuanHarness/test/cpmc_path_audit/results/m4-full-v2/paths_rhf_y_site_sublattice.bin": "21ab128b79dd98106a234fdae5da71678c2e0ec5f5e9658f8906bf5111b00f49",
+  "/home/minnaka/code/QuanHarness/test/cpmc_path_audit/results/m4-full-v2/paths_uhf_joint_na.bin": "7fc3b91ebd9164987e45635565bdddfba5f719d7427a35b2bc4e6d71eba22235",
+  "/home/minnaka/code/QuanHarness/test/cpmc_path_audit/results/m4-full-v2/paths_uhf_site_reverse.bin": "77966572f5618ba6612a5e263f1cfd309319a3e2ea8231aa8201079204c187e3",
+  "/home/minnaka/code/QuanHarness/test/cpmc_path_audit/results/m4-full-v2/paths_uhf_site_row.bin": "f33e5d5988b53ae24be70e8040f53f20e51e32874a3a2f6d53c0b907e9c39d6d",
+  "/home/minnaka/code/QuanHarness/test/cpmc_path_audit/results/m4-full-v2/paths_uhf_site_sublattice.bin": "3db455ca074148c311b82db14749a8e899103ef4407c171b681b2889030fbc79",
+  "/home/minnaka/code/QuanHarness/test/cpmc_path_audit/results/m6-primary-v2/paths_rhf_x_site_row.bin": "00e406721245c087ffabe947dfbd59adadff12f6f751a8bf1d1871bda3645901",
+  "/home/minnaka/code/QuanHarness/test/cpmc_path_audit/results/m6-primary-v2/paths_rhf_y_site_row.bin": "74ac204b96b8c8aa6413240be5b151811669d5b1e059de46ff144d2c4eb40876",
+  "/home/minnaka/code/QuanHarness/test/cpmc_path_audit/results/m6-primary-v2/paths_uhf_site_row.bin": "4f4e9ea4b9e98a2c96be6c335d46ede96fc0df9a6d21b51dce0f5d507f63025e"
+}

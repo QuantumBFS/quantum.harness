@@ -1,0 +1,25 @@
+{
+  "format_version": 1,
+  "uhf_u": 4,
+  "mixing": 0.20000000000000001,
+  "tolerance": 9.9999999999999998e-13,
+  "scf_converged": true,
+  "scf_iterations": 174,
+  "scf_residual": 9.6900265589283663e-13,
+  "scf_energy": -12.566554520604551,
+  "staggered_magnetization": 0.70449168709445464,
+  "orthonormality_residuals": {
+    "I_up": 1.5543122344752192e-15,
+    "I_down": 1.5543122344752192e-15,
+    "T_up": 1.7763568394002505e-15,
+    "T_down": 5.5511151231257827e-16
+  },
+  "particle_hole_residuals": {
+    "I": 1.5043521983670871e-14,
+    "T": 6.6613381477509392e-16
+  },
+  "spin_overlap_determinants": {
+    "up": 0.28779198101690284,
+    "down": 0.28779198101691361
+  }
+}
