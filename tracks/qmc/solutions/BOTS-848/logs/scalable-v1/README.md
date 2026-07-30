@@ -5,7 +5,7 @@
 | 1 | common protocol and evaluator | a03 | step-pass |
 | 2A | occupation autoregressive NQS | not started | pending |
 | 2B | continuous holomorphic NQS | not started | pending |
-| 2C | strict-LLL CF operator NQS | a02 | attempt-failed; route open |
+| 2C | strict-LLL CF operator NQS | a03 | attempt-incomplete; route open |
 | 2D | analytic L=2 seed times neural correlator | not started | pending |
 | 3 | synchronized audit, ED reveal, and route selection | not started | pending |
 | 4 | winner N=8 | not started | pending |
@@ -38,10 +38,17 @@ each has its own `a01` through `a05` implementation-attempt counter.
   exceeded the `600 s` local wall ceiling after vectorization. No full frozen
   action microbenchmark, trainer, checkpoint, freeze receipt, or ED reveal was
   produced.
+- [Attempt a03](s02c-a03.md) used the a02 fast exact JAX family action and
+  added the shared one-layer Operator-NQS model, eight-chain SU(2) Metropolis
+  sampler, and frozen 2048-update trainer. Canonical tests and production
+  startup passed,
+  but the user-directed cutoff stopped seeds `848/1848/2848` at updates
+  `46/25/19`, before checkpoint update `128`.  The partial JSONL traces are
+  diagnostics only and are not a Challenge result.
 
-Attempts a03 through a05 remain available. Route C is not `route-stopped` or
-`route-frozen`; resumption requires a fundamentally faster exact one-layer
-backend that first passes the unchanged frozen batch/resource microbenchmark.
+Attempts a04 and a05 remain available. Route C is not `route-stopped` or
+`route-frozen`; resumption must preserve the frozen contract and complete a
+final-update checkpoint before any result claim.
 
 ## Trusted-pipeline boundary
 
