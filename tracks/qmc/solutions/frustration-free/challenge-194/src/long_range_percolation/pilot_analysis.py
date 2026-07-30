@@ -38,6 +38,7 @@ _P0_PRESERVED_WINDOWS: Mapping[str, tuple[str, str]] = MappingProxyType(
         ),
     }
 )
+_MISSING_TRUSTED_INPUT = object()
 OBSERVABLE_COLUMNS: Mapping[str, int] = MappingProxyType(
     {
         "s1_fraction": 4,
@@ -796,6 +797,9 @@ def _validated_selector_sigma_evidence(
     *,
     p0_analysis: Mapping[str, object] | None,
     extension_analysis: Mapping[str, object] | None,
+    p0_evidence_root: Path | object,
+    extension_run_spec: Path | object,
+    extension_protocol: Mapping[str, object] | object,
 ) -> tuple[SelectorSigmaEvidence, ...]:
     if analysis.get("schema_version") == COMBINED_ANALYSIS_SCHEMA:
         if not isinstance(p0_analysis, Mapping) or not isinstance(
@@ -805,12 +809,24 @@ def _validated_selector_sigma_evidence(
                 "combined analysis source validation requires exact P0 and "
                 "extension analyses"
             )
+        if (
+            not isinstance(p0_evidence_root, Path)
+            or not isinstance(extension_run_spec, Path)
+            or not isinstance(extension_protocol, Mapping)
+        ):
+            raise TypeError(
+                "combined analysis requires p0_evidence_root, "
+                "extension_run_spec, and extension_protocol"
+            )
         from . import pilot_extension
 
         pilot_extension.validate_combined_p0_evidence(
             p0_analysis,
             extension_analysis,
             analysis,
+            p0_evidence_root=p0_evidence_root,
+            extension_run_spec=extension_run_spec,
+            extension_protocol=extension_protocol,
         )
     return _selector_sigma_evidence(analysis)
 
@@ -998,6 +1014,9 @@ def select_p1_brackets(
     *,
     p0_analysis: Mapping[str, object] | None = None,
     extension_analysis: Mapping[str, object] | None = None,
+    p0_evidence_root: Path | object = _MISSING_TRUSTED_INPUT,
+    extension_run_spec: Path | object = _MISSING_TRUSTED_INPUT,
+    extension_protocol: Mapping[str, object] | object = _MISSING_TRUSTED_INPUT,
 ) -> dict[str, object]:
     if not isinstance(analysis, Mapping):
         _malformed("analysis document is malformed")
@@ -1005,6 +1024,9 @@ def select_p1_brackets(
         analysis,
         p0_analysis=p0_analysis,
         extension_analysis=extension_analysis,
+        p0_evidence_root=p0_evidence_root,
+        extension_run_spec=extension_run_spec,
+        extension_protocol=extension_protocol,
     )
     return _select_p1_brackets_from_evidence(analysis, sigma_evidence)
 
@@ -1099,11 +1121,17 @@ def build_p1_protocol(
     *,
     p0_analysis: Mapping[str, object] | None = None,
     extension_analysis: Mapping[str, object] | None = None,
+    p0_evidence_root: Path | object = _MISSING_TRUSTED_INPUT,
+    extension_run_spec: Path | object = _MISSING_TRUSTED_INPUT,
+    extension_protocol: Mapping[str, object] | object = _MISSING_TRUSTED_INPUT,
 ) -> dict[str, object]:
     sigma_evidence = _validated_selector_sigma_evidence(
         analysis,
         p0_analysis=p0_analysis,
         extension_analysis=extension_analysis,
+        p0_evidence_root=p0_evidence_root,
+        extension_run_spec=extension_run_spec,
+        extension_protocol=extension_protocol,
     )
     sigmas = tuple(evidence.sigma for evidence in sigma_evidence)
     lengths = sigma_evidence[0].lengths

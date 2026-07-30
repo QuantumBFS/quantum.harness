@@ -223,7 +223,12 @@ def test_build_p0_extension_publishes_once_and_rejects_different_bytes(
         == 0
     )
     installed = output.read_bytes()
-    assert json.loads(capsys.readouterr().out)["publication"] == "published"
+    assert json.loads(capsys.readouterr().out) == {
+        "output": str(output.resolve()),
+        "protocol_sha256": protocol["protocol_sha256"],
+        "publication": "published",
+        "status": "ready",
+    }
 
     assert (
         CLI.main(
@@ -240,7 +245,12 @@ def test_build_p0_extension_publishes_once_and_rejects_different_bytes(
         == 0
     )
     assert output.read_bytes() == installed
-    assert json.loads(capsys.readouterr().out)["publication"] == "verified-existing"
+    assert json.loads(capsys.readouterr().out) == {
+        "output": str(output.resolve()),
+        "protocol_sha256": protocol["protocol_sha256"],
+        "publication": "verified-existing",
+        "status": "ready",
+    }
 
     monkeypatch.setattr(
         CLI,
@@ -264,6 +274,9 @@ def test_build_p0_extension_publishes_once_and_rejects_different_bytes(
         == 1
     )
     assert output.read_bytes() == installed
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert "installed bytes mismatch" in captured.err
     assert seen_roots == [evidence_root, evidence_root, evidence_root]
 
 
@@ -343,6 +356,11 @@ def _command_sources(tmp_path: Path, command: str) -> tuple[list[str], Path]:
             output,
         )
     if command == "combine":
+        evidence_root = tmp_path / "p0-root"
+        evidence_root.mkdir()
+        extension_run_spec = tmp_path / "extension-root/run_spec.json"
+        extension_run_spec.parent.mkdir()
+        extension_run_spec.write_text("{}\n", encoding="utf-8")
         return (
             [
                 command,
@@ -350,6 +368,12 @@ def _command_sources(tmp_path: Path, command: str) -> tuple[list[str], Path]:
                 str(paths["p0"]),
                 "--extension-analysis",
                 str(paths["extension"]),
+                "--p0-evidence-root",
+                str(evidence_root),
+                "--extension-run-spec",
+                str(extension_run_spec),
+                "--extension-protocol",
+                str(paths["protocol"]),
                 "--output",
                 str(output),
             ],
@@ -364,6 +388,12 @@ def _command_sources(tmp_path: Path, command: str) -> tuple[list[str], Path]:
             str(paths["p0"]),
             "--extension-analysis",
             str(paths["extension"]),
+            "--p0-evidence-root",
+            str(tmp_path / "p0-root"),
+            "--extension-run-spec",
+            str(tmp_path / "extension-root/run_spec.json"),
+            "--extension-protocol",
+            str(paths["protocol"]),
             "--output",
             str(output),
         ],
@@ -549,7 +579,11 @@ def test_combined_commands_fail_closed_without_both_explicit_sources(
     assert CLI.main(arguments) == 1
     captured = capsys.readouterr()
     assert captured.out == ""
-    assert "requires explicit --p0-analysis and --extension-analysis" in captured.err
+    assert (
+        "requires explicit --p0-analysis, --extension-analysis, "
+        "--p0-evidence-root, --extension-run-spec, and --extension-protocol"
+        in captured.err
+    )
     assert not output.exists()
 
 
@@ -600,7 +634,7 @@ def test_v1_build_compatibility_is_allowed_only_without_source_arguments(
         assert CLI.main(arguments) == 1
         captured = capsys.readouterr()
         assert captured.out == ""
-        assert "v1 build-p1 does not accept combined source arguments" in captured.err
+        assert "v1 build-p1 does not accept combined trusted inputs" in captured.err
         assert not other_output.exists()
 
 
@@ -634,8 +668,14 @@ def test_cli_rejects_resigned_combined_provenance_bypass(
         ("p0", p0),
         ("extension", extension_analysis),
         ("combined", combined),
+        ("protocol", {"schema_version": extension.EXTENSION_PROTOCOL_SCHEMA}),
     ):
         (tmp_path / f"{name}.json").write_bytes(_canonical_bytes(document))
+    p0_root = tmp_path / "p0-root"
+    p0_root.mkdir()
+    extension_run_spec = tmp_path / "extension-root/run_spec.json"
+    extension_run_spec.parent.mkdir()
+    extension_run_spec.write_text("{}\n", encoding="utf-8")
     output = tmp_path / f"{command}.json"
 
     assert (
@@ -648,6 +688,12 @@ def test_cli_rejects_resigned_combined_provenance_bypass(
                 str(tmp_path / "p0.json"),
                 "--extension-analysis",
                 str(tmp_path / "extension.json"),
+                "--p0-evidence-root",
+                str(p0_root),
+                "--extension-run-spec",
+                str(extension_run_spec),
+                "--extension-protocol",
+                str(tmp_path / "protocol.json"),
                 "--output",
                 str(output),
             ]
@@ -656,5 +702,5 @@ def test_cli_rejects_resigned_combined_provenance_bypass(
     )
     captured = capsys.readouterr()
     assert captured.out == ""
-    assert "combined analysis fields are invalid" in captured.err
+    assert "P0 source hashes or revision are not frozen" in captured.err
     assert not output.exists()

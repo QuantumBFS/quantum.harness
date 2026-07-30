@@ -256,7 +256,7 @@ def test_readme_documents_exact_p0_p1_collaborator_boundary():
         "never inferred from a checkout-local",
         "scripts/pilot_extension_build_slurm.sh",
         "scripts/pilot_extension_array_slurm.sh",
-        "No P0 extension data exist yet",
+        "The versioned P0 extension is complete and deeply verified",
         "p1_protocol.json does not exist",
         "P1 has not been published or executed",
         "verified-existing",
@@ -269,10 +269,12 @@ def test_readme_documents_exact_p0_p1_collaborator_boundary():
         "scripts/analyze_pilot.py select --analysis",
         "--p0-analysis",
         "--extension-analysis",
+        "--extension-run-spec",
+        "--extension-protocol",
         "results/challenge-194/p0_combined_brackets_v2.json",
-        "source analyses must first be recomputed",
-        "against their verified run roots",
-        "return `verified-existing` before `combine`",
+        "143d35ac52923cff2d24c43d304a75c2d04d3c66",
+        "P0 analysis is authenticated by the exact dual root hashes",
+        "byte-identical supplied extension analysis",
     )
     for text in required:
         assert text in readme

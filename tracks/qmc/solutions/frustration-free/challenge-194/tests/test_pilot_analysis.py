@@ -157,7 +157,7 @@ def _combined_source_documents() -> tuple[
 def test_combine_p0_evidence_unions_grids_and_pools_whole_replica_moments():
     p0, extension_analysis, samples = _combined_source_documents()
 
-    combined = extension.combine_p0_evidence(p0, extension_analysis)
+    combined = extension._build_combined_p0_evidence(p0, extension_analysis)
 
     entries = combined["sigma_entries"]
     assert [entry["sigma_hex"] for entry in entries] == [
@@ -225,7 +225,7 @@ def test_combine_p0_evidence_unions_grids_and_pools_whole_replica_moments():
 def test_combine_p0_evidence_binds_sources_and_hashes_unsigned_document():
     p0, extension_analysis, _ = _combined_source_documents()
 
-    combined = extension.combine_p0_evidence(p0, extension_analysis)
+    combined = extension._build_combined_p0_evidence(p0, extension_analysis)
     unsigned = dict(combined)
     digest = unsigned.pop("analysis_document_sha256")
 
@@ -253,6 +253,194 @@ def test_combine_p0_evidence_binds_sources_and_hashes_unsigned_document():
     )
     assert combined["observable_columns"] == OBSERVABLE_COLUMNS
     assert digest == hashlib.sha256(_canonical_bytes(unsigned)).hexdigest()
+
+
+@pytest.mark.parametrize(
+    "operation",
+    ("combine", "select", "build-p1"),
+)
+def test_combined_v2_has_no_self_signed_source_only_path(operation: str):
+    p0, extension_analysis, _ = _combined_source_documents()
+    combined = extension._build_combined_p0_evidence(p0, extension_analysis)
+
+    with pytest.raises(TypeError):
+        if operation == "combine":
+            extension.combine_p0_evidence(p0, extension_analysis)
+        elif operation == "select":
+            analysis.select_p1_brackets(
+                combined,
+                p0_analysis=p0,
+                extension_analysis=extension_analysis,
+            )
+        else:
+            brackets = analysis._select_p1_brackets_from_evidence(
+                combined,
+                analysis._selector_v2_evidence(combined),
+            )
+            analysis.build_p1_protocol(
+                combined,
+                brackets,
+                p0_analysis=p0,
+                extension_analysis=extension_analysis,
+            )
+
+
+def test_real_authenticated_artifacts_remain_unresolved_and_p1_absent():
+    results = Path(__file__).resolve().parents[6] / "results/challenge-194"
+    p0 = json.loads((results / "p0_analysis.json").read_bytes())
+    extension_analysis = json.loads(
+        (results / "p0_extension_v1_analysis.json").read_bytes()
+    )
+    protocol = json.loads((results / "p0_extension_v1_protocol.json").read_bytes())
+    p0_root = (results / "pilot-p0-739880d").resolve()
+    extension_run_spec = (results / "pilot-p0-extension-v1/run_spec.json").resolve()
+
+    combined = extension.combine_p0_evidence(
+        p0,
+        extension_analysis,
+        p0_evidence_root=p0_root,
+        extension_run_spec=extension_run_spec,
+        extension_protocol=protocol,
+    )
+    assert (
+        _canonical_bytes(combined)
+        == (results / "p0_combined_analysis_v2.json").read_bytes()
+    )
+    brackets = analysis.select_p1_brackets(
+        combined,
+        p0_analysis=p0,
+        extension_analysis=extension_analysis,
+        p0_evidence_root=p0_root,
+        extension_run_spec=extension_run_spec,
+        extension_protocol=protocol,
+    )
+    assert (
+        _canonical_bytes(brackets)
+        == (results / "p0_combined_brackets_v2.json").read_bytes()
+    )
+    assert brackets["requires_p0_extension"] is True
+    assert not (results / "p1_protocol.json").exists()
+    with pytest.raises(RuntimeError, match="P0 extension required"):
+        analysis.build_p1_protocol(
+            combined,
+            brackets,
+            p0_analysis=p0,
+            extension_analysis=extension_analysis,
+            p0_evidence_root=p0_root,
+            extension_run_spec=extension_run_spec,
+            extension_protocol=protocol,
+        )
+
+
+@pytest.mark.parametrize("operation", ("combine", "select", "build-p1"))
+def test_fully_synthetic_resigned_282_row_sources_fail_with_real_trust_inputs(
+    operation: str,
+):
+    results = Path(__file__).resolve().parents[6] / "results/challenge-194"
+    p0, extension_analysis, _ = _combined_source_documents()
+    combined = extension._build_combined_p0_evidence(p0, extension_analysis)
+    protocol = json.loads((results / "p0_extension_v1_protocol.json").read_bytes())
+    trusted = {
+        "p0_evidence_root": (results / "pilot-p0-739880d").resolve(),
+        "extension_run_spec": (
+            results / "pilot-p0-extension-v1/run_spec.json"
+        ).resolve(),
+        "extension_protocol": protocol,
+    }
+
+    with pytest.raises(RuntimeError, match="P0 source hashes or revision"):
+        if operation == "combine":
+            extension.combine_p0_evidence(
+                p0,
+                extension_analysis,
+                **trusted,
+            )
+        elif operation == "select":
+            analysis.select_p1_brackets(
+                combined,
+                p0_analysis=p0,
+                extension_analysis=extension_analysis,
+                **trusted,
+            )
+        else:
+            brackets = analysis._select_p1_brackets_from_evidence(
+                combined,
+                analysis._selector_v2_evidence(combined),
+            )
+            analysis.build_p1_protocol(
+                combined,
+                brackets,
+                p0_analysis=p0,
+                extension_analysis=extension_analysis,
+                **trusted,
+            )
+
+
+def test_authenticated_combination_rejects_modified_extension_means():
+    results = Path(__file__).resolve().parents[6] / "results/challenge-194"
+    p0 = json.loads((results / "p0_analysis.json").read_bytes())
+    extension_analysis = json.loads(
+        (results / "p0_extension_v1_analysis.json").read_bytes()
+    )
+    extension_analysis["estimates"][0]["means"]["q_g"] += 0.125
+    _sign(extension_analysis)
+    protocol = json.loads((results / "p0_extension_v1_protocol.json").read_bytes())
+
+    with pytest.raises(RuntimeError, match="authenticated recomputation"):
+        extension.combine_p0_evidence(
+            p0,
+            extension_analysis,
+            p0_evidence_root=(results / "pilot-p0-739880d").resolve(),
+            extension_run_spec=(
+                results / "pilot-p0-extension-v1/run_spec.json"
+            ).resolve(),
+            extension_protocol=protocol,
+        )
+
+
+@pytest.mark.parametrize("swap", ("p0-root", "extension-run-spec", "protocol"))
+def test_authenticated_combination_rejects_root_and_protocol_swaps(
+    tmp_path: Path,
+    swap: str,
+):
+    results = Path(__file__).resolve().parents[6] / "results/challenge-194"
+    p0 = json.loads((results / "p0_analysis.json").read_bytes())
+    extension_analysis = json.loads(
+        (results / "p0_extension_v1_analysis.json").read_bytes()
+    )
+    protocol = json.loads((results / "p0_extension_v1_protocol.json").read_bytes())
+    p0_root = (results / "pilot-p0-739880d").resolve()
+    extension_run_spec = (results / "pilot-p0-extension-v1/run_spec.json").resolve()
+    if swap == "p0-root":
+        replacement = tmp_path / "p0-root"
+        replacement.mkdir()
+        shutil.copyfile(p0_root / "run_spec.json", replacement / "run_spec.json")
+        shutil.copyfile(p0_root / "progress.json", replacement / "progress.json")
+        p0_root = replacement.resolve()
+    elif swap == "extension-run-spec":
+        replacement = tmp_path / "extension-root"
+        replacement.mkdir()
+        (replacement / "run_spec.json").write_bytes(extension_run_spec.read_bytes())
+        (replacement / "progress.json").write_bytes(
+            (extension_run_spec.parent / "progress.json").read_bytes()
+        )
+        extension_run_spec = (replacement / "run_spec.json").resolve()
+    else:
+        protocol["purpose"] = "forged"
+        unsigned = dict(protocol)
+        unsigned.pop("protocol_sha256")
+        protocol["protocol_sha256"] = hashlib.sha256(
+            _canonical_bytes(unsigned)
+        ).hexdigest()
+
+    with pytest.raises(RuntimeError):
+        extension.combine_p0_evidence(
+            p0,
+            extension_analysis,
+            p0_evidence_root=p0_root,
+            extension_run_spec=extension_run_spec,
+            extension_protocol=protocol,
+        )
 
 
 @pytest.mark.parametrize(
@@ -313,7 +501,7 @@ def test_combine_p0_evidence_rejects_adversarial_sources(defect: str, match: str
         _sign(target)
 
     with pytest.raises(RuntimeError, match=match):
-        extension.combine_p0_evidence(p0, extension_analysis)
+        extension._build_combined_p0_evidence(p0, extension_analysis)
 
 
 @pytest.mark.parametrize(
@@ -322,7 +510,7 @@ def test_combine_p0_evidence_rejects_adversarial_sources(defect: str, match: str
 )
 def test_combined_p0_evidence_validation_rejects_internal_mutation(defect: str):
     p0, extension_analysis, _ = _combined_source_documents()
-    combined = extension.combine_p0_evidence(p0, extension_analysis)
+    combined = extension._build_combined_p0_evidence(p0, extension_analysis)
     if defect == "source-binding":
         combined["source_extension_analysis_document_sha256"] = "0" * 64
     elif defect == "reordered-sigma-entries":
@@ -336,7 +524,7 @@ def test_combined_p0_evidence_validation_rejects_internal_mutation(defect: str):
     _sign(combined)
 
     with pytest.raises(RuntimeError, match="recomputation"):
-        extension.validate_combined_p0_evidence(
+        extension._validate_combined_p0_evidence(
             p0,
             extension_analysis,
             combined,
@@ -387,7 +575,7 @@ def test_combine_p0_evidence_requires_builtin_integer_source_fields(
         _sign(target)
 
     with pytest.raises(RuntimeError, match="built-in integer"):
-        extension.combine_p0_evidence(p0, extension_analysis)
+        extension._build_combined_p0_evidence(p0, extension_analysis)
 
 
 @pytest.mark.parametrize(
@@ -415,7 +603,7 @@ def test_combined_p0_evidence_requires_builtin_integer_output_fields(
     malformed: object,
 ):
     p0, extension_analysis, _ = _combined_source_documents()
-    combined = extension.combine_p0_evidence(p0, extension_analysis)
+    combined = extension._build_combined_p0_evidence(p0, extension_analysis)
     if field == "estimate_count":
         combined["estimate_count"] = malformed
     elif field == "length_axis":
@@ -430,7 +618,7 @@ def test_combined_p0_evidence_requires_builtin_integer_output_fields(
         _sign(combined)
 
     with pytest.raises(RuntimeError, match="built-in integer"):
-        extension.validate_combined_p0_evidence(
+        extension._validate_combined_p0_evidence(
             p0,
             extension_analysis,
             combined,
@@ -582,8 +770,58 @@ def _combined_selector_document(
             )
     _sign(p0)
     _sign(extension_analysis)
-    combined = extension.combine_p0_evidence(p0, extension_analysis)
+    combined = extension._build_combined_p0_evidence(p0, extension_analysis)
     return p0, extension_analysis, combined
+
+
+def _select_test_combined(
+    combined: dict[str, object],
+    p0: dict[str, object],
+    extension_analysis: dict[str, object],
+) -> dict[str, object]:
+    with pytest.MonkeyPatch.context() as monkeypatch:
+        monkeypatch.setattr(
+            extension,
+            "_authenticate_combined_sources",
+            lambda supplied_p0, supplied_extension, **_kwargs: (
+                supplied_p0,
+                supplied_extension,
+            ),
+        )
+        return analysis.select_p1_brackets(
+            combined,
+            p0_analysis=p0,
+            extension_analysis=extension_analysis,
+            p0_evidence_root=Path("/test/p0"),
+            extension_run_spec=Path("/test/extension/run_spec.json"),
+            extension_protocol={},
+        )
+
+
+def _build_test_combined_p1(
+    combined: dict[str, object],
+    brackets: dict[str, object] | None,
+    p0: dict[str, object],
+    extension_analysis: dict[str, object],
+) -> dict[str, object]:
+    with pytest.MonkeyPatch.context() as monkeypatch:
+        monkeypatch.setattr(
+            extension,
+            "_authenticate_combined_sources",
+            lambda supplied_p0, supplied_extension, **_kwargs: (
+                supplied_p0,
+                supplied_extension,
+            ),
+        )
+        return analysis.build_p1_protocol(
+            combined,
+            brackets,
+            p0_analysis=p0,
+            extension_analysis=extension_analysis,
+            p0_evidence_root=Path("/test/p0"),
+            extension_run_spec=Path("/test/extension/run_spec.json"),
+            extension_protocol={},
+        )
 
 
 def _tiny_complete_pilot(
@@ -1663,16 +1901,8 @@ def test_combined_selector_uses_per_sigma_axes_and_preserves_control_windows():
     p0, extension_analysis, combined = _combined_selector_document()
 
     original = analysis.select_p1_brackets(p0)
-    first = analysis.select_p1_brackets(
-        combined,
-        p0_analysis=p0,
-        extension_analysis=extension_analysis,
-    )
-    second = analysis.select_p1_brackets(
-        combined,
-        p0_analysis=p0,
-        extension_analysis=extension_analysis,
-    )
+    first = _select_test_combined(combined, p0, extension_analysis)
+    second = _select_test_combined(combined, p0, extension_analysis)
 
     assert first["schema_version"] == analysis.COMBINED_BRACKET_SCHEMA
     assert (
@@ -1712,38 +1942,20 @@ def test_combined_selector_uses_per_sigma_axes_and_preserves_control_windows():
 def test_combined_selector_fails_closed_when_one_sigma_remains_unresolved():
     p0, extension_analysis, combined = _combined_selector_document(unresolved_sigma=1.0)
 
-    brackets = analysis.select_p1_brackets(
-        combined,
-        p0_analysis=p0,
-        extension_analysis=extension_analysis,
-    )
+    brackets = _select_test_combined(combined, p0, extension_analysis)
 
     assert brackets["schema_version"] == analysis.COMBINED_BRACKET_SCHEMA
     assert brackets["requires_p0_extension"] is True
     assert brackets["brackets"][2]["status"] == "requires_p0_extension"
     with pytest.raises(RuntimeError, match="P0 extension required.*1\\.0"):
-        analysis.build_p1_protocol(
-            combined,
-            brackets,
-            p0_analysis=p0,
-            extension_analysis=extension_analysis,
-        )
+        _build_test_combined_p1(combined, brackets, p0, extension_analysis)
 
 
 def test_p1_accepts_combined_only_with_selected_v2_brackets():
     p0, extension_analysis, combined = _combined_selector_document()
-    brackets = analysis.select_p1_brackets(
-        combined,
-        p0_analysis=p0,
-        extension_analysis=extension_analysis,
-    )
+    brackets = _select_test_combined(combined, p0, extension_analysis)
 
-    protocol = analysis.build_p1_protocol(
-        combined,
-        brackets,
-        p0_analysis=p0,
-        extension_analysis=extension_analysis,
-    )
+    protocol = _build_test_combined_p1(combined, brackets, p0, extension_analysis)
 
     assert (
         protocol["source_analysis_document_sha256"]
@@ -1767,12 +1979,7 @@ def test_p1_accepts_combined_only_with_selected_v2_brackets():
         _canonical_bytes(unsigned)
     ).hexdigest()
     with pytest.raises(RuntimeError, match="schema version"):
-        analysis.build_p1_protocol(
-            combined,
-            legacy,
-            p0_analysis=p0,
-            extension_analysis=extension_analysis,
-        )
+        _build_test_combined_p1(combined, legacy, p0, extension_analysis)
 
     forged = json.loads(json.dumps(brackets))
     forged["brackets"][0]["lower_kappa_hex"] = (0.5).hex()
@@ -1782,12 +1989,7 @@ def test_p1_accepts_combined_only_with_selected_v2_brackets():
         _canonical_bytes(unsigned)
     ).hexdigest()
     with pytest.raises(RuntimeError, match="selector output"):
-        analysis.build_p1_protocol(
-            combined,
-            forged,
-            p0_analysis=p0,
-            extension_analysis=extension_analysis,
-        )
+        _build_test_combined_p1(combined, forged, p0, extension_analysis)
 
 
 def test_combined_v2_requires_sources_for_selection_and_direct_build():
@@ -1821,11 +2023,7 @@ def test_combined_selector_rejects_resigned_provenance_bypass(defect: str):
     _sign(forged)
 
     with pytest.raises(RuntimeError, match="fields|recomputation"):
-        analysis.select_p1_brackets(
-            forged,
-            p0_analysis=p0,
-            extension_analysis=extension_analysis,
-        )
+        _select_test_combined(forged, p0, extension_analysis)
 
 
 @pytest.mark.parametrize("source_defect", ("swapped-types", "cross-generation"))
@@ -1841,11 +2039,7 @@ def test_combined_selector_rejects_wrong_source_documents(source_defect: str):
     )
 
     with pytest.raises(RuntimeError):
-        analysis.select_p1_brackets(
-            combined,
-            p0_analysis=supplied_p0,
-            extension_analysis=supplied_extension,
-        )
+        _select_test_combined(combined, supplied_p0, supplied_extension)
 
 
 def test_combined_build_rejects_rebound_cross_generation_brackets():
@@ -1853,10 +2047,8 @@ def test_combined_build_rejects_rebound_cross_generation_brackets():
     alternate_p0, alternate_extension, alternate = _combined_selector_document(
         blocked_interval_offset=1
     )
-    alternate_brackets = analysis.select_p1_brackets(
-        alternate,
-        p0_analysis=alternate_p0,
-        extension_analysis=alternate_extension,
+    alternate_brackets = _select_test_combined(
+        alternate, alternate_p0, alternate_extension
     )
     rebound = json.loads(json.dumps(alternate_brackets))
     rebound["source_analysis_document_sha256"] = combined["analysis_document_sha256"]
@@ -1867,21 +2059,12 @@ def test_combined_build_rejects_rebound_cross_generation_brackets():
     ).hexdigest()
 
     with pytest.raises(RuntimeError, match="selector output"):
-        analysis.build_p1_protocol(
-            combined,
-            rebound,
-            p0_analysis=p0,
-            extension_analysis=extension_analysis,
-        )
+        _build_test_combined_p1(combined, rebound, p0, extension_analysis)
 
 
 def test_combined_direct_build_rejects_resigned_forged_brackets():
     p0, extension_analysis, combined = _combined_selector_document()
-    brackets = analysis.select_p1_brackets(
-        combined,
-        p0_analysis=p0,
-        extension_analysis=extension_analysis,
-    )
+    brackets = _select_test_combined(combined, p0, extension_analysis)
     forged = json.loads(json.dumps(brackets))
     target = forged["brackets"][1]
     lower = float.fromhex(target["lower_kappa_hex"])
@@ -1894,12 +2077,7 @@ def test_combined_direct_build_rejects_resigned_forged_brackets():
     ).hexdigest()
 
     with pytest.raises(RuntimeError, match="selector output"):
-        analysis.build_p1_protocol(
-            combined,
-            forged,
-            p0_analysis=p0,
-            extension_analysis=extension_analysis,
-        )
+        _build_test_combined_p1(combined, forged, p0, extension_analysis)
 
 
 @pytest.mark.parametrize(

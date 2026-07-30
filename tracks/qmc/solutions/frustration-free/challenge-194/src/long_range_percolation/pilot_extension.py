@@ -75,6 +75,19 @@ P0_ANALYSIS_DOCUMENT_SHA256 = (
 P0_ANALYSIS_FILE_SHA256 = (
     "44083701db692304cd3aa054c8a9488b75674cead7cd6bf479c0a203cc1fa10b"
 )
+EXTENSION_SOURCE_REVISION = "9308087c5c609519234da48136b88cdd60f79667"
+EXTENSION_PROTOCOL_SHA256 = (
+    "a37ab41f3224594e61f4eebbe292975aeec449b9ecb7893e3e54f18d82d53321"
+)
+EXTENSION_PROTOCOL_FILE_SHA256 = (
+    "e363a60f842b11b32972c7a68ec1c5f237741bc45bc79ab8bf93f51f6760d84d"
+)
+EXTENSION_RUN_SPEC_SHA256 = (
+    "c1ca9b6c8ba751919c6d9337fe1cd4c09a57ed9b99abbb9d3ebfed7f89c3d32e"
+)
+EXTENSION_PROGRESS_SHA256 = (
+    "c78d1fb03daf19297ef9e0617410c68a6a364bffc2f2888dfa9067e7e8d6b65f"
+)
 P0_BRACKET_DOCUMENT_SHA256 = (
     "fb3df666044bf9531443fc00c5c2c2d489512b4162864b3a92ffc2e756832403"
 )
@@ -1223,7 +1236,7 @@ def _build_combined_p0_evidence(
     return document
 
 
-def validate_combined_p0_evidence(
+def _validate_combined_p0_evidence(
     p0_analysis: Mapping[str, object],
     extension_analysis: Mapping[str, object],
     combined_analysis: Mapping[str, object],
@@ -1282,10 +1295,109 @@ def validate_combined_p0_evidence(
         raise RuntimeError("combined analysis semantic recomputation mismatch")
 
 
+def _authenticate_combined_sources(
+    p0_analysis: Mapping[str, object],
+    extension_analysis: Mapping[str, object],
+    *,
+    p0_evidence_root: Path,
+    extension_run_spec: Path,
+    extension_protocol: Mapping[str, object],
+) -> tuple[Mapping[str, object], Mapping[str, object]]:
+    from . import pilot
+    from .pilot_analysis import aggregate_p0_extension
+
+    _validate_source(p0_analysis)
+    _load_p0_evidence(p0_evidence_root)
+    pilot.verify_frozen_challenge_194_p0_download(
+        p0_evidence_root / pilot.RUN_SPEC_NAME
+    )
+
+    if (
+        not isinstance(extension_protocol, Mapping)
+        or extension_protocol.get("protocol_sha256") != EXTENSION_PROTOCOL_SHA256
+        or _sha256(_canonical_bytes(extension_protocol))
+        != EXTENSION_PROTOCOL_FILE_SHA256
+    ):
+        raise RuntimeError("immutable extension protocol identity mismatch")
+    _validate_p0_extension_protocol_for_revision(
+        p0_analysis,
+        extension_protocol,
+        p0_evidence_root,
+        expected_source_revision=EXTENSION_SOURCE_REVISION,
+    )
+
+    if not isinstance(extension_run_spec, Path) or not extension_run_spec.is_absolute():
+        raise RuntimeError("extension_run_spec must be an absolute canonical path")
+    if extension_run_spec.resolve(strict=True) != extension_run_spec:
+        raise RuntimeError("extension_run_spec must be an absolute canonical path")
+    _run_spec, run_spec_payload = pilot._read_canonical(
+        extension_run_spec,
+        "immutable extension run spec",
+        maximum_size=pilot.PILOT_RUN_SPEC_MAX_BYTES,
+    )
+    _progress, progress_payload = pilot._read_canonical(
+        extension_run_spec.parent / pilot.MERGED_NAME,
+        "immutable extension progress",
+        maximum_size=pilot.PILOT_PROGRESS_MAX_BYTES,
+    )
+    if _sha256(run_spec_payload) != EXTENSION_RUN_SPEC_SHA256:
+        raise RuntimeError("immutable extension run spec hash mismatch")
+    if _sha256(progress_payload) != EXTENSION_PROGRESS_SHA256:
+        raise RuntimeError("immutable extension progress hash mismatch")
+    pilot.verify_p0_extension_download(extension_run_spec)
+    recomputed_extension = aggregate_p0_extension(
+        extension_run_spec,
+        extension_protocol,
+    )
+    if _canonical_bytes(extension_analysis) != _canonical_bytes(recomputed_extension):
+        raise RuntimeError(
+            "supplied extension analysis does not match authenticated recomputation"
+        )
+    return p0_analysis, recomputed_extension
+
+
+def validate_combined_p0_evidence(
+    p0_analysis: Mapping[str, object],
+    extension_analysis: Mapping[str, object],
+    combined_analysis: Mapping[str, object],
+    *,
+    p0_evidence_root: Path,
+    extension_run_spec: Path,
+    extension_protocol: Mapping[str, object],
+) -> None:
+    authenticated_p0, authenticated_extension = _authenticate_combined_sources(
+        p0_analysis,
+        extension_analysis,
+        p0_evidence_root=p0_evidence_root,
+        extension_run_spec=extension_run_spec,
+        extension_protocol=extension_protocol,
+    )
+    _validate_combined_p0_evidence(
+        authenticated_p0,
+        authenticated_extension,
+        combined_analysis,
+    )
+
+
 def combine_p0_evidence(
     p0_analysis: Mapping[str, object],
     extension_analysis: Mapping[str, object],
+    *,
+    p0_evidence_root: Path,
+    extension_run_spec: Path,
+    extension_protocol: Mapping[str, object],
 ) -> dict[str, object]:
-    document = _build_combined_p0_evidence(p0_analysis, extension_analysis)
-    validate_combined_p0_evidence(p0_analysis, extension_analysis, document)
+    authenticated_p0, authenticated_extension = _authenticate_combined_sources(
+        p0_analysis,
+        extension_analysis,
+        p0_evidence_root=p0_evidence_root,
+        extension_run_spec=extension_run_spec,
+        extension_protocol=extension_protocol,
+    )
+    document = _build_combined_p0_evidence(authenticated_p0, authenticated_extension)
+    _validate_combined_p0_evidence(
+        authenticated_p0,
+        authenticated_extension,
+        document,
+    )
     return document

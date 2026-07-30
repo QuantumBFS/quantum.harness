@@ -86,21 +86,25 @@ directory; retries verify again without invoking `rsync`.
 
 ## P0 analysis and P1 publication boundary
 
-Run the following commands from the solution directory. The paths below are
-the current verified local evidence, not placeholders:
+The frozen P0 run spec binds historical `PILOT_PLAN.md` bytes, so current
+`HEAD` intentionally cannot republish its aggregation. Reproduce the installed
+analysis only from the exact historical publisher revision:
 
 ```bash
-cd /home/footman/code/quantum.harness-challenge-194/tracks/qmc/solutions/frustration-free/challenge-194
-
-uv run python scripts/run_pilot.py verify --run-spec \
-  /home/footman/code/quantum.harness-challenge-194/results/challenge-194/pilot-p0-739880d/run_spec.json
-
+git worktree add --detach /tmp/challenge-194-p0-analysis-143d35a \
+  143d35ac52923cff2d24c43d304a75c2d04d3c66
+cd /tmp/challenge-194-p0-analysis-143d35a/tracks/qmc/solutions/frustration-free/challenge-194
 uv run python scripts/analyze_pilot.py analyze --run-spec \
   /home/footman/code/quantum.harness-challenge-194/results/challenge-194/pilot-p0-739880d/run_spec.json \
   --output /home/footman/code/quantum.harness-challenge-194/results/challenge-194/p0_analysis.json
 ```
 
-The immutable analysis exists. Its embedded analysis-document SHA256 is
+That exact command returns `verified-existing` with analysis-document SHA256
+`e42ef6b9f82380305f80ceaba384bc29cb9fe2da0848d4c72a904f4cb4c8c7c8`.
+Current combined-v2 commands instead use the supported historical boundary:
+they deeply verify all frozen P0 cells and progress while requiring both exact
+P0 root hashes (`d17d3d...` run spec and `ea29a8...` progress) and the exact
+canonical P0 analysis file hash. The immutable analysis's embedded SHA256 is
 `e42ef6b9f82380305f80ceaba384bc29cb9fe2da0848d4c72a904f4cb4c8c7c8`;
 the SHA256 of the complete canonical file is
 `44083701db692304cd3aa054c8a9488b75674cead7cd6bf479c0a203cc1fa10b`.
@@ -135,8 +139,8 @@ uv run python scripts/analyze_pilot.py verify --analysis \
 
 ## Frozen P0 extension construction and execution
 
-The versioned P0 extension is fully preregistered, but no P0 extension data
-exist yet. The extension samples only sigma `0.9` and `1.0`; it does not alter
+The versioned P0 extension is complete and deeply verified: 96 cells and 96
+trajectories. It samples only sigma `0.9` and `1.0`; it does not alter
 the scientific engine, relax the selector, or authorize a claim.
 
 The checked-in `pilot_correctness_approval.json` authenticates approval/source
@@ -221,18 +225,11 @@ The same schema-dispatched CLI reports pending cells, runs cells, merges all
 
 After extension evidence exists and has been downloaded, run the immutable
 local analysis workflow below from this solution directory.
-Both source analyses must first be recomputed against their verified run roots.
-The two analysis commands must return `verified-existing` before `combine`; a
-newly `published` source analysis is not sufficient for that combine attempt.
+The extension analysis is recomputed from its verified run root. The historical
+P0 analysis is authenticated by the exact dual root hashes and exact canonical
+analysis bytes described above; it is not recomputed under current `HEAD`.
 
 ```bash
-uv run python scripts/run_pilot.py verify --run-spec \
-  /home/footman/code/quantum.harness-challenge-194/results/challenge-194/pilot-p0-739880d/run_spec.json
-
-uv run python scripts/analyze_pilot.py analyze --run-spec \
-  /home/footman/code/quantum.harness-challenge-194/results/challenge-194/pilot-p0-739880d/run_spec.json \
-  --output /home/footman/code/quantum.harness-challenge-194/results/challenge-194/p0_analysis.json
-
 uv run python scripts/run_pilot.py verify --run-spec \
   /home/footman/code/quantum.harness-challenge-194/results/challenge-194/pilot-p0-extension-v1/run_spec.json
 
@@ -242,19 +239,25 @@ uv run python scripts/analyze_pilot.py analyze-extension --run-spec \
   --output /home/footman/code/quantum.harness-challenge-194/results/challenge-194/p0_extension_v1_analysis.json
 ```
 
-Only after both recomputations return `verified-existing`, combine and select
-the fully source-validated evidence:
+After the extension recomputation returns `verified-existing`, combine and
+select the fully authenticated evidence:
 
 ```bash
 uv run python scripts/analyze_pilot.py combine --p0-analysis \
   /home/footman/code/quantum.harness-challenge-194/results/challenge-194/p0_analysis.json \
   --extension-analysis /home/footman/code/quantum.harness-challenge-194/results/challenge-194/p0_extension_v1_analysis.json \
+  --p0-evidence-root /home/footman/code/quantum.harness-challenge-194/results/challenge-194/pilot-p0-739880d \
+  --extension-run-spec /home/footman/code/quantum.harness-challenge-194/results/challenge-194/pilot-p0-extension-v1/run_spec.json \
+  --extension-protocol /home/footman/code/quantum.harness-challenge-194/results/challenge-194/p0_extension_v1_protocol.json \
   --output /home/footman/code/quantum.harness-challenge-194/results/challenge-194/p0_combined_analysis_v2.json
 
 uv run python scripts/analyze_pilot.py select --analysis \
   /home/footman/code/quantum.harness-challenge-194/results/challenge-194/p0_combined_analysis_v2.json \
   --p0-analysis /home/footman/code/quantum.harness-challenge-194/results/challenge-194/p0_analysis.json \
   --extension-analysis /home/footman/code/quantum.harness-challenge-194/results/challenge-194/p0_extension_v1_analysis.json \
+  --p0-evidence-root /home/footman/code/quantum.harness-challenge-194/results/challenge-194/pilot-p0-739880d \
+  --extension-run-spec /home/footman/code/quantum.harness-challenge-194/results/challenge-194/pilot-p0-extension-v1/run_spec.json \
+  --extension-protocol /home/footman/code/quantum.harness-challenge-194/results/challenge-194/p0_extension_v1_protocol.json \
   --output /home/footman/code/quantum.harness-challenge-194/results/challenge-194/p0_combined_brackets_v2.json
 ```
 
@@ -268,20 +271,34 @@ uv run python scripts/analyze_pilot.py build-p1 --analysis \
   /home/footman/code/quantum.harness-challenge-194/results/challenge-194/p0_combined_analysis_v2.json \
   --p0-analysis /home/footman/code/quantum.harness-challenge-194/results/challenge-194/p0_analysis.json \
   --extension-analysis /home/footman/code/quantum.harness-challenge-194/results/challenge-194/p0_extension_v1_analysis.json \
+  --p0-evidence-root /home/footman/code/quantum.harness-challenge-194/results/challenge-194/pilot-p0-739880d \
+  --extension-run-spec /home/footman/code/quantum.harness-challenge-194/results/challenge-194/pilot-p0-extension-v1/run_spec.json \
+  --extension-protocol /home/footman/code/quantum.harness-challenge-194/results/challenge-194/p0_extension_v1_protocol.json \
   --output /home/footman/code/quantum.harness-challenge-194/results/challenge-194/p1_protocol.json
 ```
 
-`analyze-extension`, `combine`, `select`, and `build-p1` use bounded canonical
-JSON reads and immutable no-clobber publication. A byte-identical retry returns
+`combine`, combined-v2 `select`, and combined-v2 `build-p1` require all five
+trusted inputs shown above. They deeply verify both roots, validate the exact
+immutable extension protocol, recompute extension analysis, and require
+byte-identical supplied extension analysis before validating combined evidence.
+All descriptor reads are bounded and canonical; publication is immutable and
+no-clobber. A byte-identical retry returns
 `verified-existing`; changed installed bytes, malformed canonical input, or a
 scientific refusal exits nonzero without replacing or newly creating output.
 The legacy P0-analysis-v1 `build-p1 --analysis ... --output ...` form remains
 available only without either combined-source option. Mixed or extraneous
 source arguments fail closed.
 
-The prior preregistered state was: `No P0 extension data exist yet`. The
-completed extension root now verifies 96 cells and 96 trajectories. Task 11
-observed the following immutable analysis identities:
+The completed extension root verifies 96 cells and 96 trajectories. Its
+protocol file SHA256 is
+`e363a60f842b11b32972c7a68ec1c5f237741bc45bc79ab8bf93f51f6760d84d`,
+embedded protocol SHA256 is
+`a37ab41f3224594e61f4eebbe292975aeec449b9ecb7893e3e54f18d82d53321`,
+run-spec SHA256 is
+`c1ca9b6c8ba751919c6d9337fe1cd4c09a57ed9b99abbb9d3ebfed7f89c3d32e`,
+and progress SHA256 is
+`c78d1fb03daf19297ef9e0617410c68a6a364bffc2f2888dfa9067e7e8d6b65f`.
+Task 11 observed the following immutable analysis identities:
 
 - extension analysis: document SHA256
   `79232574d314348c29a40cd2fbb7690e96f3cae5f26843bd4f1cf07cb6a1f45b`,

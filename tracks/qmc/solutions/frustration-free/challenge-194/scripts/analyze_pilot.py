@@ -51,18 +51,27 @@ def _parser() -> argparse.ArgumentParser:
     combine = commands.add_parser("combine")
     combine.add_argument("--p0-analysis", type=Path, required=True)
     combine.add_argument("--extension-analysis", type=Path, required=True)
+    combine.add_argument("--p0-evidence-root", type=Path, required=True)
+    combine.add_argument("--extension-run-spec", type=Path, required=True)
+    combine.add_argument("--extension-protocol", type=Path, required=True)
     combine.add_argument("--output", type=Path, required=True)
 
     select = commands.add_parser("select")
     select.add_argument("--analysis", type=Path, required=True)
     select.add_argument("--p0-analysis", type=Path)
     select.add_argument("--extension-analysis", type=Path)
+    select.add_argument("--p0-evidence-root", type=Path)
+    select.add_argument("--extension-run-spec", type=Path)
+    select.add_argument("--extension-protocol", type=Path)
     select.add_argument("--output", type=Path, required=True)
 
     build = commands.add_parser("build-p1")
     build.add_argument("--analysis", type=Path, required=True)
     build.add_argument("--p0-analysis", type=Path)
     build.add_argument("--extension-analysis", type=Path)
+    build.add_argument("--p0-evidence-root", type=Path)
+    build.add_argument("--extension-run-spec", type=Path)
+    build.add_argument("--extension-protocol", type=Path)
     build.add_argument("--output", type=Path, required=True)
 
     extension = commands.add_parser("build-p0-extension")
@@ -103,30 +112,70 @@ def _publish_or_verify(
 def _combined_command_sources(
     arguments: argparse.Namespace,
     source: Mapping[str, object],
-) -> tuple[Mapping[str, object] | None, Mapping[str, object] | None]:
+) -> tuple[
+    Mapping[str, object] | None,
+    Mapping[str, object] | None,
+    Path | None,
+    Path | None,
+    Mapping[str, object] | None,
+]:
     p0_path = arguments.p0_analysis
     extension_path = arguments.extension_analysis
+    p0_evidence_root = arguments.p0_evidence_root
+    extension_run_spec = arguments.extension_run_spec
+    extension_protocol_path = arguments.extension_protocol
     if source.get("schema_version") == COMBINED_ANALYSIS_SCHEMA:
-        if p0_path is None or extension_path is None:
+        if (
+            p0_path is None
+            or extension_path is None
+            or p0_evidence_root is None
+            or extension_run_spec is None
+            or extension_protocol_path is None
+        ):
             raise RuntimeError(
-                "combined-v2 command requires explicit --p0-analysis and "
-                "--extension-analysis"
+                "combined-v2 command requires explicit --p0-analysis, "
+                "--extension-analysis, --p0-evidence-root, "
+                "--extension-run-spec, and --extension-protocol"
             )
         return (
             _mapping_document(p0_path.resolve(), "P0 analysis document"),
             _mapping_document(
                 extension_path.resolve(), "P0 extension analysis document"
             ),
+            p0_evidence_root.resolve(),
+            extension_run_spec.resolve(),
+            _mapping_document(
+                extension_protocol_path.resolve(),
+                "immutable P0 extension protocol document",
+            ),
         )
     if source.get("schema_version") == ANALYSIS_SCHEMA:
-        if p0_path is not None or extension_path is not None:
-            raise RuntimeError(
-                f"v1 {arguments.command} does not accept combined source arguments"
+        if any(
+            value is not None
+            for value in (
+                p0_path,
+                extension_path,
+                p0_evidence_root,
+                extension_run_spec,
+                extension_protocol_path,
             )
-        return None, None
-    if p0_path is not None or extension_path is not None:
+        ):
+            raise RuntimeError(
+                f"v1 {arguments.command} does not accept combined trusted inputs"
+            )
+        return None, None, None, None, None
+    if any(
+        value is not None
+        for value in (
+            p0_path,
+            extension_path,
+            p0_evidence_root,
+            extension_run_spec,
+            extension_protocol_path,
+        )
+    ):
         raise RuntimeError("analysis schema and source arguments are incompatible")
-    return None, None
+    return None, None, None, None, None
 
 
 def _publication_schema(document: Mapping[str, object]) -> str:
@@ -179,7 +228,17 @@ def main(argv: list[str] | None = None) -> int:
                 arguments.extension_analysis.resolve(),
                 "P0 extension analysis document",
             )
-            document = combine_p0_evidence(p0_source, extension_source)
+            extension_protocol = _mapping_document(
+                arguments.extension_protocol.resolve(),
+                "immutable P0 extension protocol document",
+            )
+            document = combine_p0_evidence(
+                p0_source,
+                extension_source,
+                p0_evidence_root=arguments.p0_evidence_root.resolve(),
+                extension_run_spec=arguments.extension_run_spec.resolve(),
+                extension_protocol=extension_protocol,
+            )
             publication = _publish_or_verify(
                 arguments.output.resolve(),
                 document,
@@ -195,7 +254,13 @@ def main(argv: list[str] | None = None) -> int:
             source = _mapping_document(
                 arguments.analysis.resolve(), "P0 analysis document"
             )
-            p0_source, extension_source = _combined_command_sources(
+            (
+                p0_source,
+                extension_source,
+                p0_evidence_root,
+                extension_run_spec,
+                extension_protocol,
+            ) = _combined_command_sources(
                 arguments,
                 source,
             )
@@ -206,6 +271,9 @@ def main(argv: list[str] | None = None) -> int:
                     source,
                     p0_analysis=p0_source,
                     extension_analysis=extension_source,
+                    p0_evidence_root=p0_evidence_root,
+                    extension_run_spec=extension_run_spec,
+                    extension_protocol=extension_protocol,
                 )
             publication = _publish_or_verify(
                 arguments.output.resolve(),
@@ -241,7 +309,13 @@ def main(argv: list[str] | None = None) -> int:
             source = _mapping_document(
                 arguments.analysis.resolve(), "P0 analysis document"
             )
-            p0_source, extension_source = _combined_command_sources(
+            (
+                p0_source,
+                extension_source,
+                p0_evidence_root,
+                extension_run_spec,
+                extension_protocol,
+            ) = _combined_command_sources(
                 arguments,
                 source,
             )
@@ -253,12 +327,18 @@ def main(argv: list[str] | None = None) -> int:
                     source,
                     p0_analysis=p0_source,
                     extension_analysis=extension_source,
+                    p0_evidence_root=p0_evidence_root,
+                    extension_run_spec=extension_run_spec,
+                    extension_protocol=extension_protocol,
                 )
                 document = build_p1_protocol(
                     source,
                     brackets,
                     p0_analysis=p0_source,
                     extension_analysis=extension_source,
+                    p0_evidence_root=p0_evidence_root,
+                    extension_run_spec=extension_run_spec,
+                    extension_protocol=extension_protocol,
                 )
             publication = _publish_or_verify(
                 arguments.output.resolve(),

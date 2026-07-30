@@ -1294,15 +1294,20 @@ Register and implement:
 
 ```text
 analyze-extension --run-spec PATH --protocol PATH --output PATH
-combine --p0-analysis PATH --extension-analysis PATH --output PATH
-select --analysis PATH --output PATH
-build-p1 --analysis PATH --output PATH
+combine --p0-analysis PATH --extension-analysis PATH --p0-evidence-root DIR --extension-run-spec PATH --extension-protocol PATH --output PATH
+select --analysis PATH --p0-analysis PATH --extension-analysis PATH --p0-evidence-root DIR --extension-run-spec PATH --extension-protocol PATH --output PATH
+build-p1 --analysis PATH --p0-analysis PATH --extension-analysis PATH --p0-evidence-root DIR --extension-run-spec PATH --extension-protocol PATH --output PATH
 ```
 
 All reads use `_read_canonical_json`; all writes use `_publish_or_verify`.
 `select` publishes the schema returned by `select_p1_brackets`. `build-p1`
 reruns selection in memory and refuses unresolved evidence before opening its
-output target.
+output target. For combined-v2, all five source/root/protocol inputs are
+mandatory: the P0 root is deeply verified against its two frozen hashes and
+exact historical analysis bytes, while extension analysis is recomputed from
+the deeply verified exact extension root and immutable protocol and must be
+byte-identical to the supplied analysis. Source JSON document hashes alone
+never authenticate either path.
 
 - [ ] **Step 4: Document exact local artifact workflow**
 

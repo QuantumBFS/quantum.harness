@@ -1920,6 +1920,13 @@ def _merged_document(
         verify_current_environment=verify_current_environment,
         expected_schema=expected_schema,
     )
+    return _merged_document_from_spec(run_spec_path, spec)
+
+
+def _merged_document_from_spec(
+    run_spec_path: Path,
+    spec: Mapping[str, object],
+) -> dict[str, object]:
     contract = _contract_for_schema(spec["schema_version"])
     root = run_spec_path.parent
     cells_root = root / "cells"
@@ -1976,6 +1983,36 @@ def _merged_document(
         ),
         "physics_claims_authorized": False,
     }
+
+
+def verify_frozen_challenge_194_p0_download(run_spec_path: Path) -> dict[str, object]:
+    expected_run_spec_sha256 = (
+        "d17d3df9528a09f0d834ebe9d5ce6f283e488d2326f6cb14873a90923c5d9840"
+    )
+    expected_progress_sha256 = (
+        "ea29a8163a5d3e85768842d64fac4c719f5aeadf965b3318b305fb7a2cc2d15f"
+    )
+    spec, spec_payload = _read_canonical(
+        run_spec_path,
+        "historical frozen P0 run spec",
+        maximum_size=PILOT_RUN_SPEC_MAX_BYTES,
+        allow_parent_mutation=True,
+    )
+    if _sha256(spec_payload) != expected_run_spec_sha256:
+        raise RuntimeError("historical frozen P0 run spec hash mismatch")
+    _validate_pilot_spec(spec, contract=P0_CONTRACT)
+    progress_path = run_spec_path.parent / MERGED_NAME
+    existing, progress_payload = _read_canonical(
+        progress_path,
+        "historical frozen P0 progress",
+        maximum_size=PILOT_PROGRESS_MAX_BYTES,
+    )
+    if _sha256(progress_payload) != expected_progress_sha256:
+        raise RuntimeError("historical frozen P0 progress hash mismatch")
+    reconstructed = _merged_document_from_spec(run_spec_path, spec)
+    if existing != reconstructed:
+        raise RuntimeError("historical frozen P0 progress is stale or corrupt")
+    return reconstructed
 
 
 def merge_pilot_progress(
