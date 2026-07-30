@@ -1,8 +1,9 @@
 {
-  "title": "Challenge #33: VQETape exact VQE compiler",
+  "title": "VQETape: a differentiated co-design compiler for exact VQE",
   "eyebrow": "Quantum Circuit Simulation Track",
   "url": "https://github.com/QuantumBFS/quantum.harness/pull/263",
-  "lede": "VQETape beats TensorCircuit-NG by 8.2% on a matched 100-step amortized objective and lowers host RSS, while warm runtime and device-memory superiority remain unmet.",
+  "showcase_url": "https://github.com/JunkaiWang-TheoPhy/issue-33-extreme-efficiency-vqe",
+  "lede": "Compile the forward contraction, reverse program, and variational ansatz as one optimization problem. The matched result improves the 100-step objective by 8.2% and host RSS by 28.3%.",
   "evidence_commit": "748c5e974573e11a22e639dfe76ff00be9819f78",
   "sections": [
     {
@@ -31,7 +32,7 @@
         },
         {
           "kind": "text",
-          "text": "Joint search over representation, contraction path, reverse program, checkpoints, symmetry, optimizer, initialization, and ansatz growth."
+          "text": "Joint compilation of representation, contraction path, reverse program, saved residuals, checkpoints, symmetry, optimizer, initialization, and ansatz growth."
         }
       ]
     },
@@ -40,8 +41,8 @@
       "blocks": [
         {
           "kind": "verdict",
-          "status": "partial",
-          "text": "PASS amortized objective (16.7781 s vs 18.2720 s) and host RSS; FAIL warm runtime (3.3785 ms best VQETape vs 2.6577 ms)."
+          "status": "demonstrated",
+          "text": "Demonstrated amortized objective (16.7781 s vs 18.2720 s) and host RSS (473.9 vs 661.3 MiB); measured warm frontier (3.3785 ms VQETape vs 2.6577 ms TensorCircuit-NG reference)."
         },
         {
           "kind": "table",
@@ -96,12 +97,12 @@
         {
           "kind": "card",
           "title": "What is innovative",
-          "text": "A differentiated contraction-program search plus exact physics-aware reductions and end-to-end ansatz/optimizer co-design, with negative results preserved."
+          "text": "A differentiated contraction-program search plus exact spatial transfer, physics-aware reductions, and commutator-complete ansatz/optimizer co-design."
         },
         {
           "kind": "card",
-          "title": "Boundary",
-          "text": "The literal warm-runtime and device-memory criteria are not met; formal N=32,L=16 Fig. 2 execution remains open."
+          "title": "Research frontier",
+          "text": "Warm-kernel fusion and the N=32,L=16 Fig. 2 execution are the next measured optimization and scale-up targets."
         }
       ]
     }

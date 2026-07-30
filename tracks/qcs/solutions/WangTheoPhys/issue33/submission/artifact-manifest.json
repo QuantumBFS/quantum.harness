@@ -4,6 +4,7 @@
   "evidence_commit": "748c5e974573e11a22e639dfe76ff00be9819f78",
   "challenge_issue": "https://github.com/QuantumBFS/quantum.harness/issues/33",
   "pull_request": "https://github.com/QuantumBFS/quantum.harness/pull/263",
+  "public_showcase": "https://github.com/JunkaiWang-TheoPhy/issue-33-extreme-efficiency-vqe",
   "artifacts": [
     {
       "path": "submission/vqetape-matched-benchmark.tsv",
@@ -12,28 +13,28 @@
     },
     {
       "path": "submission/submission-status.txt",
-      "bytes": 1420,
-      "sha256": "8816421486ec5f862cd11444ea37a9da539fc907ade8e83a98401d884a8015f4"
+      "bytes": 1641,
+      "sha256": "a15f161fc2a3820e83c102dd70c0ab1f0f1562d0127e0e3672f9528c6b790f5b"
     },
     {
       "path": "submission/vqetape-technical-report.md",
-      "bytes": 7290,
-      "sha256": "83084441b1f5a1080745d8c296c10bb97f8e9de69283926c2438d94e2e047fb5"
+      "bytes": 7707,
+      "sha256": "81d4a324deec9c95ae41ed9927a220cd7cbb54ce48c806435c47ad9f464d6184"
     },
     {
       "path": "submission/report.json",
-      "bytes": 3163,
-      "sha256": "e1e8d493ee58a23756082412af334183237e63393bb3c8dd8bd0e12c192578a8"
+      "bytes": 3373,
+      "sha256": "336f346ea154b843d76e22e9628152e3b4bf114bc577e890c712f988000a0fc8"
     },
     {
       "path": "submission/report.html",
-      "bytes": 5277,
-      "sha256": "3f5bb4083141f16483270cb6aecb489be44af20654b079af45008b23daa8429c"
+      "bytes": 5497,
+      "sha256": "cb019be7698bc91eab054aa991b495f469ea6ae5a60247221e90a4fdb94adf47"
     },
     {
       "path": "submission/output/pdf/vqetape-technical-report.pdf",
-      "bytes": 78659,
-      "sha256": "c44adf0111b14e9ecfa381941744b2137f0eb5c7293af899d0ba727ee0b6caf1"
+      "bytes": 79020,
+      "sha256": "d6d076a03757c3626e927780e627a07eac46e4834585a4631a40e0a3a44955f2"
     }
   ],
   "canonical_evidence": [

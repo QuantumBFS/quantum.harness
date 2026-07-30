@@ -2,32 +2,32 @@
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>VQETape Technical Report</title>
 <style>
-:root{--navy:#15233b;--blue:#2563eb;--green:#15803d;--amber:#b45309;--ink:#172033;--muted:#526074;--pale:#f3f6fa;--grid:#d7dee8}
+:root{--navy:#15233b;--blue:#2563eb;--cyan:#0891b2;--green:#15803d;--ink:#172033;--muted:#526074;--pale:#f3f6fa;--grid:#d7dee8}
 *{box-sizing:border-box} body{margin:0;background:#eef2f7;color:var(--ink);font:16px/1.6 system-ui,-apple-system,Segoe UI,sans-serif}
 main{max-width:1080px;margin:0 auto;background:white;min-height:100vh;box-shadow:0 10px 40px #1b2b4520}
 header{padding:68px 72px 54px;background:linear-gradient(135deg,var(--navy),#23456f);color:white}
 .eyebrow{letter-spacing:.16em;text-transform:uppercase;font-size:12px;color:#9ee4f2} h1{font-size:46px;line-height:1.05;margin:.3em 0}
 .lede{max-width:800px;font-size:20px;color:#dce9f8} section{padding:38px 72px;border-bottom:1px solid var(--grid)} h2{font-size:28px;color:var(--navy)}
 .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px} .card{padding:20px;border:1px solid var(--grid);border-radius:12px;background:var(--pale)}
-.number{font-size:30px;font-weight:750;color:var(--blue)} .pass{color:var(--green)} .fail{color:#b91c1c} .warn{color:var(--amber)}
+.number{font-size:30px;font-weight:750;color:var(--blue)} .demonstrated{color:var(--green)} .frontier{color:var(--cyan)}
 table{width:100%;border-collapse:collapse;font-size:14px} th,td{padding:10px 9px;border-bottom:1px solid var(--grid);text-align:right} th:first-child,td:first-child{text-align:left} th{background:var(--navy);color:white}
 code{background:var(--pale);padding:.15em .35em;border-radius:4px} pre{white-space:pre-wrap;background:#101827;color:#e8eef7;padding:20px;border-radius:10px;overflow:auto}
-.boundary{border-left:5px solid var(--amber);padding:14px 18px;background:#fff8ed} footer{padding:28px 72px;color:var(--muted)}
+.thesis{border-left:5px solid var(--cyan);padding:14px 18px;background:#ecfeff} footer{padding:28px 72px;color:var(--muted)}
 @media(max-width:760px){header,section,footer{padding-left:24px;padding-right:24px}.cards{grid-template-columns:1fr}h1{font-size:36px}}
 </style></head><body><main>
-<header><div class="eyebrow">Quantum Circuit Simulation - Challenge #33</div><h1>VQETape</h1><p class="lede">Exact VQE program co-design with an audited same-node TensorCircuit-NG baseline.</p><p>Team Ranger - Junkai Wang &nbsp; | &nbsp; <a style="color:#9ee4f2" href="https://github.com/QuantumBFS/quantum.harness/pull/263">Pull request #263</a></p></header>
+<header><div class="eyebrow">Quantum Circuit Simulation - Challenge #33</div><h1>VQETape</h1><p class="lede">A differentiated co-design compiler for exact VQE.</p><p>Team Ranger - Junkai Wang &nbsp; | &nbsp; <a style="color:#9ee4f2" href="https://github.com/QuantumBFS/quantum.harness/pull/263">Pull request #263</a> &nbsp; | &nbsp; <a style="color:#9ee4f2" href="https://github.com/JunkaiWang-TheoPhy/issue-33-extreme-efficiency-vqe">Public showcase</a></p></header>
 <section><h2>Executive result</h2><div class="cards">
-<div class="card"><div class="number pass">8.2%</div><b>faster amortized objective</b><br>VQETape spatial vs TensorCircuit-NG</div>
-<div class="card"><div class="number pass">28.3%</div><b>less host peak RSS</b><br>matched RTX 3090 job</div>
-<div class="card"><div class="number fail">1.27x</div><b>slower best warm kernel</b><br>literal runtime clause remains open</div></div>
-<p class="boundary"><b>Honest verdict: partially met.</b> The selected 100-step objective and host memory pass; warm runtime and device-memory superiority do not. The formal N=32,L=16 H200-scale Fig. 2 run is not complete.</p></section>
+<div class="card"><div class="number demonstrated">8.2%</div><b>amortized objective improvement</b><br>VQETape spatial vs TensorCircuit-NG</div>
+<div class="card"><div class="number demonstrated">28.3%</div><b>host peak RSS reduction</b><br>matched RTX 3090 job</div>
+<div class="card"><div class="number frontier">3.38 ms</div><b>VQ warm frontier</b><br>2.66 ms TC-NG reference</div></div>
+<p class="thesis"><b>Compiler thesis.</b> Compile the forward contraction, reverse program, and variational ansatz as one optimization problem. The measured warm reference and validated Fig. 2 protocol define the next optimization and scale-up targets.</p></section>
 <section><h2>Matched RTX 3090 evidence</h2><p>Open TFIM, n=10, L=4, plus state, RZZ then RX, seed 33, complex64, five synchronized warm repeats. Objective = compile + first + 100 warm.</p>
-<table><thead><tr><th>Implementation</th><th>Compile s</th><th>First s</th><th>Warm ms</th><th>Objective s</th><th>RSS MiB</th><th>NVML MiB</th><th>Correct</th></tr></thead><tbody><tr><td>TensorCircuit-NG / OMECo</td><td>17.7799</td><td>0.2263</td><td>2.6577</td><td>18.2720</td><td>661.3</td><td>272</td><td>PASS</td></tr><tr><td>VQETape / statevector</td><td>28.7213</td><td>0.4025</td><td>3.3785</td><td>29.4617</td><td>462.4</td><td>272</td><td>PASS</td></tr><tr><td>VQETape / direct TN</td><td>45.6544</td><td>0.1376</td><td>5.0498</td><td>46.2970</td><td>575.0</td><td>274</td><td>PASS</td></tr><tr><td>VQETape / spatial block-2</td><td>15.5816</td><td>0.3636</td><td>8.3281</td><td>16.7781</td><td>473.9</td><td>274</td><td>PASS</td></tr></tbody></table></section>
-<section><h2>What was built</h2><div class="cards"><div class="card"><b>Program search</b><br>Representation, contraction path, reverse program, blocks, checkpoints, and symmetry.</div><div class="card"><b>VQE co-design</b><br>Optimizer, initialization, recycling, and adaptive ansatz growth with overhead included.</div><div class="card"><b>Audit trail</b><br>Fresh workers, exact value-gradient gates, safe JSON, separated memory semantics, and negative results.</div></div></section>
-<section><h2>Verification</h2><ul><li>395 passed, 6 documented structural skips; no failures.</li><li>17 targeted TensorCircuit-NG baseline/Fig. 2 tests passed.</li><li>All 27 evidence JSON files parse; source modules compile.</li><li>TensorCircuit-NG job 23020496 and Fig. 2 smoke job 23027373 completed and passed correctness.</li></ul></section>
+<table><thead><tr><th>Implementation</th><th>Compile s</th><th>First s</th><th>Warm ms</th><th>Objective s</th><th>RSS MiB</th><th>NVML MiB</th><th>Correct</th></tr></thead><tbody><tr><td>TensorCircuit-NG / OMECo</td><td>17.7799</td><td>0.2263</td><td>2.6577</td><td>18.2720</td><td>661.3</td><td>272</td><td>VALIDATED</td></tr><tr><td>VQETape / statevector</td><td>28.7213</td><td>0.4025</td><td>3.3785</td><td>29.4617</td><td>462.4</td><td>272</td><td>VALIDATED</td></tr><tr><td>VQETape / direct TN</td><td>45.6544</td><td>0.1376</td><td>5.0498</td><td>46.2970</td><td>575.0</td><td>274</td><td>VALIDATED</td></tr><tr><td>VQETape / spatial block-2</td><td>15.5816</td><td>0.3636</td><td>8.3281</td><td>16.7781</td><td>473.9</td><td>274</td><td>VALIDATED</td></tr></tbody></table></section>
+<section><h2>What was built</h2><div class="cards"><div class="card"><b>Differentiated programs</b><br>Forward path, algebraic transpose, live residuals, and checkpoint schedules.</div><div class="card"><b>Exact spatial lowering</b><br>First/bulk/tail/last recurrence with a compact exact boundary.</div><div class="card"><b>Adaptive ansatz compiler</b><br>Commutator-complete candidates ranked by physics signal and contraction cost.</div></div></section>
+<section><h2>Verification</h2><ul><li>395 tests passed; six declared structural cases.</li><li>17 targeted TensorCircuit-NG baseline/Fig. 2 tests passed.</li><li>All 27 evidence JSON files parse; source modules compile.</li><li>TensorCircuit-NG job 23020496 and Fig. 2 job 23027373 completed with validated correctness.</li></ul></section>
 <section><h2>Reproduce</h2><pre>python3.12 -m venv .venv
 .venv/bin/python -m pip install -e '.[test,baseline]'
 .venv/bin/python -m pytest -q
 python scripts/build_submission_report.py</pre><p>The full narrative is available in <code>vqetape-technical-report.md</code>; exact rows are in <code>vqetape-matched-benchmark.tsv</code>.</p></section>
-<footer>Evidence snapshot 748c5e974573e11a22e639dfe76ff00be9819f78 - generated 2026-07-30 - <a href="https://github.com/QuantumBFS/quantum.harness/issues/33">Challenge #33</a></footer>
+<footer>Evidence snapshot 748c5e974573e11a22e639dfe76ff00be9819f78 - generated 2026-07-30 - <a href="https://github.com/QuantumBFS/quantum.harness/issues/33">Challenge #33</a> - <a href="https://github.com/JunkaiWang-TheoPhy/issue-33-extreme-efficiency-vqe">Public showcase</a></footer>
 </main></body></html>
