@@ -82,3 +82,10 @@ Known limitation: the implementation and tests are complete through the
 validation workflow, but paper-precision Fig. 3/Fig. 5 numerical artifacts
 require a cluster run and convergence evidence. They must not be described as
 reproduced until those jobs finish and pass the physical diagnostics.
+
+## Recorded checkpoints
+
+- [`validation/20260729-fig3-longitudinal-wd5/`](validation/20260729-fig3-longitudinal-wd5/)
+  records the first strict Fig. 3 validation point. The longitudinal
+  `ωd=5Ω` spectrum passed all configured diagnostics and overlaps the Zenodo
+  reference; the remaining Fig. 3 points are intentionally marked pending.
