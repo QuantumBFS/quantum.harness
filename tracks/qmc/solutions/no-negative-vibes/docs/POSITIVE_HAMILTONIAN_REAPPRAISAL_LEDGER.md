@@ -21,9 +21,9 @@
 | ID | 旧成果 | 当前判定 | H/S/Q/E/P/L | 本轮动作 | 下一条可证伪问题 |
 |---|---|---|---|---|---|
 | R1 | fixed-partition `C3` odd block-TN | `sign-free-but-conventional` | pass/open/pass/fail/fail/open | **已完成首轮排重并停止** | 共同 count-sector `+/-1` gauge 把整个类化为 stoquastic |
-| R2 | odd positive-monomial / graded route | `math-known-model-open` | partial/open/pass/open/open/open | Hamiltonian 化后查静态 sector、JW 和 stoquastic | route Hamiltonian 是否只是可积置换/静态 grade 的直和？ |
-| R3 | fixed weighted `l_infinity` contraction | `sign-free-mechanism-known` | partial/open/pass/open/open/open | 构造有限密度模型 | 公共收缩是否强制低密度或可简单 uniformization？ |
-| R4 | reciprocal-parabolic `[[H,Q],[0,-H^T]]` | `math-only-pending-embedding` | fail/open/pass/open/open/open | 先 Hermitian embedding/no-go | `Q` 是否会从物理 trace/可观测量中完全消失？ |
+| R2 | odd positive-monomial / graded route | `sign-free-but-conventional` | pass/open/pass/fail/fail/open | **已完成并停止** | odd-group Fock action 有共同 orbit gauge；graded ancilla 为静态 sectors |
+| R3 | fixed weighted `l_infinity` contraction | `hamiltonianization-failed` | fail/fail/partial/fail/open/open | **原类停止** | adjoint word 深度 2 权重 `-3.313698...` |
+| R4 | reciprocal-parabolic `[[H,Q],[0,-H^T]]` | `hamiltonianization-failed` | fail/fail/partial/fail/open/open | **原类停止** | adjoint word 精确权 `4-s^2`，`s=3` 时 `-5` |
 | R5 | Majorana protected parity | `parked-ownership-risk` | partial/open/partial/open/open/open | 只保留既有证据，先不扩展 | 与 PR #3 的 Majorana/oddcycle 工作边界未同步前不运行 |
 | C1 | tensor-square `m>=3` multi-channel | `collaborator-owned` | pass/partial/pass/partial/pass/open | **只读** | ZiboJin phase-diagram 分支负责 ED/DQMC/低温相图 |
 | C2 | symmetric oddcycle / seeds `117,132,147` | `collaborator-owned` | partial/open/partial/open/open/open | **只读** | PR #3 负责 metric、transfer、joint pair 与 Hamiltonian portfolio |
