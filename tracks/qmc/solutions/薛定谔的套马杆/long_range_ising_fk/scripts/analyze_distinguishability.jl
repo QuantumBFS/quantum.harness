@@ -128,6 +128,24 @@ function main(args=ARGS)
     agg=aggregate(vcat(read_cells(base),read_cells(large)))
     mkpath(outdir)
     write_table(joinpath(outdir,"combined_critical.csv"),agg)
+    extensionfits=NamedTuple[]
+    for sigma in (1.875,2.0), obs in ("Rp","Qm")
+        all_data=sort([x for x in agg if x.sigma==sigma && x.observable==obs],by=x->x.L)
+        positives=[x.se for x in all_data if isfinite(x.se) && x.se>0]
+        floor=isempty(positives) ? 1e-4 : median(positives)/2
+        for maxL in (512,2048)
+            data=[x for x in all_data if x.L<=maxL]
+            L=Float64[x.L for x in data]; y=[x.value for x in data]
+            se=[isfinite(x.se) ? max(floor,x.se) : floor for x in data]
+            for model in ("power","marginal")
+                f=fit_stats(model,L,y,se)
+                push!(extensionfits,(;sigma,observable=obs,Lmin=Int(L[1]),
+                      Lmax=Int(L[end]),n=length(L),model,limit=f.p[1],
+                      p1=f.p[2],p2=f.p[3],chi2=f.chi2))
+            end
+        end
+    end
+    write_table(joinpath(outdir,"extension_comparison_fits.csv"),extensionfits)
     fits=NamedTuple[]; forecasts=NamedTuple[]
     for sigma in sort(unique(x.sigma for x in agg)), obs in ("Rp","Qm")
         data=sort([x for x in agg if x.sigma==sigma && x.observable==obs],by=x->x.L)
