@@ -31,8 +31,8 @@ from route_d_plus.tensor import angular_momentum_matrices, canonical_tensor
 
 SCHEMA_VERSION = "challenge-15-route-d-plus-phase5-v1"
 PHASE4_SCHEMA_VERSION = "challenge-15-route-d-plus-phase4-v1"
-CERTIFICATION_N = 3
-CERTIFICATION_TWO_Q = 6
+CERTIFICATION_N = 4
+CERTIFICATION_TWO_Q = 9
 GENERATOR_RANKS = (2, 3, 4)
 TOLERANCES = {
     "casimir_residual": 1.0e-13,
@@ -188,6 +188,7 @@ def covariance_certificate(
         "mean": mixture_mean.tolist(),
         "covariance": covariance.tolist(),
         "covariance_eigenvalues": np.linalg.eigvalsh(covariance).tolist(),
+        "covariance_scale": float(np.max(np.linalg.eigvalsh(covariance))),
         "retained_directions": int(retained.size),
         "relative_cutoff": 1.0e-12,
         "mother_reconstruction_error": reconstruction_error,
@@ -267,6 +268,7 @@ def collect_certificate(
     errors["whitening"] = covariance["whitening_error"]
     passed = (
         covariance["retained_directions"] == 3
+        and covariance["covariance_scale"] > 1.0e-8
         and all(
             errors[name] < tolerance
             for name, tolerance in TOLERANCES.items()

@@ -14,11 +14,18 @@ def test_phase5_schema_enforces_scalar_generator_gate() -> None:
     properties = schema["properties"]
     assert properties["target_n_electrons"]["const"] == 6
     assert properties["target_two_q"]["const"] == 15
-    assert properties["certification_n_electrons"]["const"] == 3
-    assert properties["fock_dimension"]["const"] == 35
+    assert properties["certification_n_electrons"]["const"] == 4
+    assert properties["certification_two_q"]["const"] == 9
+    assert properties["fock_dimension"]["const"] == 210
     assert properties["covariance"]["properties"]["retained_directions"][
         "const"
     ] == 3
+    assert (
+        properties["covariance"]["properties"]["covariance_scale"][
+            "exclusiveMinimum"
+        ]
+        == 1.0e-8
+    )
     errors = properties["max_errors"]["properties"]
     assert errors["proof_production"]["exclusiveMaximum"] == 1.0e-10
     assert errors["scalarity"]["exclusiveMaximum"] == 1.0e-11
