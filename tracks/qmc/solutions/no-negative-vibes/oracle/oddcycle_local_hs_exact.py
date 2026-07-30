@@ -284,6 +284,20 @@ def _inconclusive_payload(reason: str, nullity: int | None) -> dict[str, object]
     return payload
 
 
+def _no_positive_exact_kernel_payload(
+    reason: str,
+    nullity: int,
+) -> dict[str, object]:
+    payload: dict[str, object] = {
+        "schema": SCHEMA,
+        "status": "no-positive-exact-kernel",
+        "reason": reason,
+        "exact_forbidden_nullity": nullity,
+    }
+    payload["exact_certificate_sha256"] = _payload_sha256(payload)
+    return payload
+
+
 def exact_local_hs_certificate(
     columns: Sequence[WordPairColumn],
     weights: np.ndarray,
@@ -324,12 +338,26 @@ def exact_local_hs_certificate(
         forbidden_entries,
     )
     nullity = len(forbidden_matrix.nullspace())
+    if nullity == 0:
+        return _no_positive_exact_kernel_payload(
+            "exact forbidden matrix has a trivial nullspace",
+            nullity,
+        )
     try:
         exact_weights = exact_positive_null_vector(
             forbidden_matrix,
             approximate,
         )
-    except (ArithmeticError, ValueError) as error:
+    except ValueError as error:
+        if nullity == 1:
+            return _no_positive_exact_kernel_payload(
+                str(error),
+                nullity,
+            )
+        return _inconclusive_payload(str(error), nullity)
+    except ArithmeticError as error:
+        if nullity == 1:
+            raise
         return _inconclusive_payload(str(error), nullity)
 
     dimension = normalized_columns[0].fock_pair.rows
