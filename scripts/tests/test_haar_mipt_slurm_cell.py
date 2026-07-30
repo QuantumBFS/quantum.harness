@@ -7,6 +7,7 @@ import numpy as np
 
 
 _SCRIPT = Path(__file__).resolve().parents[1] / "haar_mipt_slurm_cell.py"
+_REPO = Path(__file__).resolve().parents[2]
 
 
 def _load_module():
@@ -91,3 +92,15 @@ def test_select_cell_rejects_zero_based_selector(tmp_path):
         assert "one-based" in str(error)
     else:
         raise AssertionError("zero selector was accepted")
+
+
+def test_declared_cluster_grids_have_expected_counts():
+    config = _REPO / "design" / "haar-mipt-slurm"
+    calibration = json.loads((config / "calibration-axes.json").read_text())
+    production = json.loads((config / "production-axes.json").read_text())
+    settings = json.loads((config / "production-settings.json").read_text())
+    calibration_cells = int(np.prod([len(values) for values in calibration.values()]))
+    production_cells = int(np.prod([len(values) for values in production.values()]))
+    assert calibration_cells == 12
+    assert production_cells == 300
+    assert production_cells * settings["samples_per_cell"] == 300_000

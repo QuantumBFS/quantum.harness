@@ -19,13 +19,24 @@ from typing import Mapping
 import numpy as np
 
 try:
-    from haar_mipt_analysis import trajectory_entropy_fit
     from haar_mipt_production import trajectory_seed
     from haar_mipt_transfer import run_trajectory
 except ImportError:
-    from scripts.haar_mipt_analysis import trajectory_entropy_fit
     from scripts.haar_mipt_production import trajectory_seed
     from scripts.haar_mipt_transfer import run_trajectory
+
+
+def trajectory_entropy_fit(record: Mapping) -> dict:
+    """Fit cumulative measurement-record entropy per site linearly in time."""
+    width = int(record["L"])
+    steps = int(record["record_steps"])
+    cumulative = np.asarray(record["cumulative_record_cost"], dtype=float)
+    times = np.arange(1, steps + 1, dtype=float)
+    design = np.column_stack((np.ones_like(times), times))
+    coefficients, _, _, _ = np.linalg.lstsq(
+        design, cumulative / width, rcond=None
+    )
+    return {"intercept": float(coefficients[0]), "slope": float(coefficients[1])}
 
 
 @dataclass(frozen=True)

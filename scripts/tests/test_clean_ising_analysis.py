@@ -153,8 +153,9 @@ class CleanLyapunovTests(unittest.TestCase):
             {"primary_L8_p13", "drop_L8_p13", "all_L_p135", "reported"},
         )
         reported = result["reported"]
-        self.assertLessEqual(reported["lower"], 0.5)
-        self.assertGreaterEqual(reported["upper"], 0.5)
+        roundoff_tolerance = 1e-12
+        self.assertLessEqual(reported["lower"], 0.5 + roundoff_tolerance)
+        self.assertGreaterEqual(reported["upper"], 0.5 - roundoff_tolerance)
         self.assertAlmostEqual(
             reported["midpoint"],
             0.5 * (reported["lower"] + reported["upper"]),
