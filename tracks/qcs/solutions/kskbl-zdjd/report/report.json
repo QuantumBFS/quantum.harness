@@ -732,7 +732,49 @@
         {
           "kind": "note",
           "label": "⟦zh⟧统计边界：这是置信控制的模型族选择，不是无需验证的精确性证明⟦en⟧Statistical boundary: this is confidence-controlled family selection, not an exactness proof without verification",
-          "text": "⟦zh⟧5% 预算控制的是已查询经验 Bernstein 区间同时覆盖失败的上界；接受带宽仍允许非常稀疏、很小的未建模项，因此不能仅凭该停止条件声称全域零错误。这里八次 100% 结果来自所有选择锁定后的独立干净全域审计，不参与训练或选模。上述结论适用于独立位翻转；下一节把同样的学习任务改成强词内相关噪声并重新校准区间。可复核记录为 sequential_degree_summary.json。⟦en⟧The 5% budget bounds simultaneous coverage failure across the queried empirical-Bernstein intervals. The acceptance band can still admit a very sparse, small unmodeled term, so the stopping rule alone cannot claim zero error over the domain. The eight 100% results come from an independent clean-domain audit after every choice is locked and do not participate in training or model selection. The result above assumes independent bit flips; the next section repeats the task under strong within-word correlation and recalibrates the intervals. The auditable record is sequential_degree_summary.json."
+          "text": "⟦zh⟧5% 预算控制的是已查询经验 Bernstein 区间同时覆盖失败的上界；接受带宽仍允许非常稀疏、很小的未建模项，因此不能仅凭该停止条件声称全域零错误。这里八次 100% 结果来自所有选择锁定后的独立干净全域审计，不参与训练或选模。下一项先在相同独立噪声种子上用自归一化区间继续加速，再转向强词内相关噪声。Bernstein 版本记录为 sequential_degree_summary.json。⟦en⟧The 5% budget bounds simultaneous coverage failure across the queried empirical-Bernstein intervals. The acceptance band can still admit a very sparse, small unmodeled term, so the stopping rule alone cannot claim zero error over the domain. The eight 100% results come from an independent clean-domain audit after every choice is locked and do not participate in training or model selection. The next experiment first accelerates the same independent-noise seeds with self-normalized intervals, then turns to strong within-word correlation. The Bernstein version is recorded in sequential_degree_summary.json."
+        },
+        {
+          "kind": "heading",
+          "level": 3,
+          "text": "⟦zh⟧当前最快未知阶数方法：自归一化区间把总成本降到 11,276 词⟦en⟧Fastest unknown-degree method: self-normalized intervals reduce total cost to 11,276 words"
+        },
+        {
+          "kind": "verdict",
+          "status": "good",
+          "label": "⟦zh⟧八个匹配种子全部精确，总噪声词比 Bernstein 再少 1.46 倍⟦en⟧All eight matched seeds remain exact with 1.46x fewer total noisy words than Bernstein",
+          "why": "⟦zh⟧在真实独立逐位噪声下，重复标签对中的位分歧确实是独立样本，因此用样本方差和预分配正态分位数形成自归一化区间。与前一节完全相同的八个种子逐一配对：两种方法都 8 / 8 拒绝一次、接受二次、恢复同一 36 项和 156 门网络，接受时 8 / 8 噪声率区间包含真实 25%。平均训练词都为 9,500；自归一化版本把留出词从 6,912 降到 1,776，总词从 16,412 降到 11,276，每一个配对种子都更省。⟦en⟧Under genuinely independent per-bit noise, bit disagreements from repeated-label pairs are independent samples, so a self-normalized interval uses the sample variance with a preallocated normal quantile. On the exact same eight seeds, both methods reject linear, accept quadratic and recover the same 36-term, 156-gate network in 8 / 8 runs; all eight acceptance-time noise intervals contain the true 25%. Mean training stays at 9,500 words, while self-normalization cuts holdout from 6,912 to 1,776 and total words from 16,412 to 11,276. Every paired seed is cheaper."
+        },
+        {
+          "kind": "table",
+          "columns": [
+            "⟦zh⟧独立噪声区间方法⟦en⟧Independent-noise interval method",
+            "⟦zh⟧平均训练词⟦en⟧Mean training words",
+            "⟦zh⟧平均留出词⟦en⟧Mean holdout words",
+            "⟦zh⟧平均总噪声词⟦en⟧Mean total noisy words",
+            "⟦zh⟧真实 p 被覆盖⟦en⟧True p covered",
+            "⟦zh⟧最终精确⟦en⟧Final exact"
+          ],
+          "rows": [
+            ["⟦zh⟧经验 Bernstein 安全护栏⟦en⟧Empirical-Bernstein guardrail", "9,500", "6,912", "16,412", "8 / 8", "8 / 8"],
+            ["⟦zh⟧自归一化正态实用版⟦en⟧Self-normalized normal practical version", "9,500", "1,776", "11,276", "8 / 8", "8 / 8"],
+            ["⟦zh⟧已知二次空间的 D-optimal⟦en⟧D-optimal with quadratic space known", "4,125", "0", "4,125", "⟦zh⟧不适用⟦en⟧N/A", "4 / 4"]
+          ],
+          "numeric": [false, true, true, true, true, true]
+        },
+        {
+          "kind": "figures",
+          "items": [
+            {
+              "src": "noisy-c-independent-normal.png",
+              "caption": "⟦zh⟧左：八个配对点全部在对角线下方。中：训练成本不变，验证开销大幅收缩。右：每档 50,000 次、99% 层级的独立位对模拟中，自归一化覆盖率为 98.964%–99.034%，接近名义 99%；Bernstein 为 99.96%–100%，但区间更宽。⟦en⟧Left: all eight paired points lie below the diagonal. Middle: training cost is unchanged while validation overhead contracts sharply. Right: across 50,000 independent-bit-pair trials per setting at the 99% level, self-normalized coverage is 98.964%–99.034%, close to nominal 99%, while Bernstein gives 99.96%–100% with wider intervals."
+            }
+          ]
+        },
+        {
+          "kind": "note",
+          "label": "⟦zh⟧方法定位：独立噪声的实用最快版；相关性出现时必须退回整词单位⟦en⟧Method position: fastest practical independent-noise variant; correlation requires falling back to word clusters",
+          "text": "⟦zh⟧部署时使用的单区间失败概率比 99% 模拟层级更小，50,000 次模拟仍无法直接验证极端尾部；因此它不替代 Bernstein 的有限样本护栏。更重要的是，若同一输出词的位相关，逐位自归一化也会过度自信；后续相关噪声实验始终改用整词方差。当前独立噪声下追求速度选择本方法，风险敏感选择 Bernstein。可复核记录为 independent_normal_summary.json。⟦en⟧The deployed per-interval failure probability is smaller than the 99% simulation level, and 50,000 trials still cannot verify its extreme tail directly, so this does not replace the finite-sample Bernstein guardrail. More importantly, bitwise self-normalization is also overconfident when bits within an output word are correlated; subsequent correlated-noise experiments always use variance across whole words. Choose this method for speed under independent noise and Bernstein for risk-sensitive use. The auditable record is independent_normal_summary.json."
         },
         {
           "kind": "heading",
