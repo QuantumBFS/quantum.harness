@@ -20,7 +20,7 @@
 
 | ID | 旧成果 | 当前判定 | H/S/Q/E/P/L | 本轮动作 | 下一条可证伪问题 |
 |---|---|---|---|---|---|
-| R1 | fixed-partition `C3` odd block-TN | `Hamiltonian-valid-physics-open` | pass/open/pass/open/open/open | **本分支首攻** | extensive normalization 是否必然退化为公共收缩/真空极限？ |
+| R1 | fixed-partition `C3` odd block-TN | `sign-free-but-conventional` | pass/open/pass/fail/fail/open | **已完成首轮排重并停止** | 共同 count-sector `+/-1` gauge 把整个类化为 stoquastic |
 | R2 | odd positive-monomial / graded route | `math-known-model-open` | partial/open/pass/open/open/open | Hamiltonian 化后查静态 sector、JW 和 stoquastic | route Hamiltonian 是否只是可积置换/静态 grade 的直和？ |
 | R3 | fixed weighted `l_infinity` contraction | `sign-free-mechanism-known` | partial/open/pass/open/open/open | 构造有限密度模型 | 公共收缩是否强制低密度或可简单 uniformization？ |
 | R4 | reciprocal-parabolic `[[H,Q],[0,-H^T]]` | `math-only-pending-embedding` | fail/open/pass/open/open/open | 先 Hermitian embedding/no-go | `Q` 是否会从物理 trace/可观测量中完全消失？ |
@@ -65,7 +65,12 @@ crossed-partition 局域化，不关闭固定全局 route 本身。它仍可能�
 - 可用单粒子 determinant 多项式代价采样的全局 many-body vertex；
 - 不能由局域 worldline/SSE、简单 JW 或固定符号规处理的 interacting ensemble。
 
-因此 R1 合理地从“存档”恢复到“有 Hamiltonian、物理和排重待审”。
+R1 的实际复活审计现已完成，并得到一般 no-go：
+`Gamma(P)` 的 fermionic sign 只依赖三条 route 的粒子数；`Gamma(P)^3=I` 允许逐
+count orbit 构造共同 `+/-1` gauge，而 block-diagonal TN lift 保持这些 count sectors
+且逐元非负。因此所有 atoms、两个 `C3` 方向及其转置共享同一个 gauge，完整 `H`
+被化为 stoquastic。详见
+[fixed-partition odd block-TN stoquastic no-go](ODD_BLOCK_TN_STOQUASTIC_NO_GO.md)。
 
 ## R1 立即执行的排除矩阵
 

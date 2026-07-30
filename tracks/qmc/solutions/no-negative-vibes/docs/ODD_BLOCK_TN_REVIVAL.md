@@ -1,7 +1,14 @@
 # R1：fixed-partition odd block-TN Hamiltonian 复活审计
 
 日期：2026-07-30
-状态：`hamiltonian-explicit / scalability-and-exclusion-open`
+状态：`closed-as-QNC / common-stoquastic-gauge-proved`
+
+## 0. 复活审计后的新结论
+
+本候选已被真正利用并完成第一项传统方法排除：整个 fixed-partition `C3` block-TN
+factory 存在共同的 count-sector `+/-1` gauge，变换后 Hamiltonian stoquastic。
+因此不再继续 scaling/相图投入；一般证明、发现扫描和回归见
+[stoquastic no-go](ODD_BLOCK_TN_STOQUASTIC_NO_GO.md)。
 
 ## 1. 研究对象
 
