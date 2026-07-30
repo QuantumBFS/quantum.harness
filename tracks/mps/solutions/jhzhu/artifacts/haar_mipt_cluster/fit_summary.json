@@ -1,0 +1,62 @@
+{
+  "alpha": 0.81,
+  "block_bootstrap_percentile_95": [
+    0.11918984426097873,
+    0.2913968382087839
+  ],
+  "block_bootstrap_samples": 2000,
+  "block_bootstrap_se": 0.04489142822910226,
+  "central_charge": 0.2018953866725305,
+  "endpoint_diagnostic_central_charge": 0.19597898725720447,
+  "l4_stability_central_charge": 0.22905332214966642,
+  "m0_inf": -0.0856268635811525,
+  "p": 0.17,
+  "planned_cells": 300,
+  "run_id": "haar-mipt-production-20260730",
+  "samples_per_family_width": 25000,
+  "samples_total": 300000,
+  "windows": [
+    {
+      "intercept": 0.11200305206758868,
+      "lmin": 8,
+      "slope": -0.09158170131994484,
+      "widths": [
+        8,
+        10,
+        12,
+        14,
+        16
+      ]
+    },
+    {
+      "intercept": 0.11203615488022743,
+      "lmin": 10,
+      "slope": -0.09781841677012722,
+      "widths": [
+        10,
+        12,
+        14,
+        16
+      ]
+    },
+    {
+      "intercept": 0.11200317535829124,
+      "lmin": 12,
+      "slope": -0.09086132939244641,
+      "widths": [
+        12,
+        14,
+        16
+      ]
+    },
+    {
+      "intercept": 0.11197477227762387,
+      "lmin": 14,
+      "slope": -0.0842331952280262,
+      "widths": [
+        14,
+        16
+      ]
+    }
+  ]
+}

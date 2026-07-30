@@ -23,9 +23,10 @@ stages:
    and extrapolate first in bond dimension and then in system size.
 
 The clean Ising calculation reproduces $c=1/2$. The finite-statistics RBIM run
-gives a central charge near 0.46, with visible finite-size systematics. The
-exact Haar-circuit calculation validates the end-to-end workflow but is too
-noisy to support a central-charge claim. The dual-unitary MPS pilot gives
+gives a central charge near 0.46, with visible finite-size systematics. A
+300,000-trajectory cluster calculation for the monitored Haar circuit gives
+$c_{\mathrm{eff}}=0.202\pm0.045$ and is statistically compatible with the
+expected order-$0.25$ value. The dual-unitary MPS pilot gives
 $c_{\mathrm{eff}}\approx0.22$; a larger paired-sample, high-$\chi$ calculation
 is running to reduce its statistical and truncation errors.
 
@@ -35,7 +36,7 @@ is running to reduce its statistical and truncation errors.
 |---|---|---|---|
 | Clean Ising | $L=8,10,12,16,20$ | $c=0.4999188$; fit-envelope half-width $9.94\times10^{-5}$ | Validation |
 | RBIM Nishimori | $L=4,5,6,8,9,10,12$ | $c=0.45846$; trajectory-bootstrap SE $0.00517$ | Completed preliminary finite-statistics run |
-| Haar circuit | 192 trajectories, $p=0.168$ | $c_{\mathrm{eff}}=1.559$; bootstrap SE $0.955$ | Inconclusive workflow pilot |
+| Haar circuit | 300,000 trajectories, $L=6,8,10,12,14,16$, $p=0.17$ | $c_{\mathrm{eff}}=0.20190$; block-bootstrap SE $0.04489$ | High-statistics cluster result; compatible with order $0.25$ |
 | Dual-unitary MPS | 350 trajectories, $p=0.14$, $\chi\le128$ | $c_{\mathrm{eff}}=0.21996$; bootstrap SE $0.04335$ | MPS pilot; high-statistics run pending |
 
 These uncertainties are not interchangeable. The clean-Ising number uses a
@@ -55,7 +56,7 @@ $$
 
 where $\alpha$ converts one numerical transfer step into the isotropic
 space-time convention. The clean Ising and dual-unitary calculations use
-$\alpha=1$; the Haar-circuit pilot uses the independently supplied
+$\alpha=1$; the Haar-circuit calculation uses the literature value
 $\alpha=0.81$.
 
 The meaning of $f(L)$ changes with the representation, but the finite-size fit
@@ -119,20 +120,39 @@ The [fit JSON](../../../../results/random_bond_ising_nishimori_two_hour/central_
 and [width summary](../../../../results/random_bond_ising_nishimori_two_hour/width_summary.csv)
 contain the numerical values used here.
 
-### Haar-circuit exact-state-vector pilot
+### Haar-circuit high-statistics cluster result
 
-The exact-state-vector checkpoint used periodic systems
-$L=8,10,12,14,16,18$, with 16 random product and 16 global-Haar initial states
-per size. The equal-family estimator was measured after $4L$ thermalization
-half-layers and over $24L$ recorded half-layers.
+The production exact-state-vector calculation used periodic systems
+$L=6,8,10,12,14,16$ at $p=0.17$. For every width it sampled 25,000 random
+product and 25,000 global-Haar initial states, giving 300,000 trajectories in
+total. Each trajectory was measured after a $4L$ burn-in and over $24L$
+recorded brickwork half-layers. All 300 resumable Slurm cells completed and
+passed their manifest checks.
 
-The resulting $c_{\mathrm{eff}}=1.559$ has bootstrap SE $0.955$ and a 95%
-bootstrap interval $[-0.314,3.432]$. This does **not** reproduce the expected
-order-$0.25$ value: the individual free-energy errors are comparable to the
-entire finite-size signal. What the checkpoint establishes is that trajectory
-generation, Born sampling, resumable storage, aggregation, fitting, and block
-bootstrap work together. See the
-[detailed Haar checkpoint](../../../../docs/reports/2026-07-30-haar-mipt-checkpoint.md).
+The primary analysis first fits each window $L\ge L_{\min}$ to
+$\widetilde f(L)=a+m/L^2$ and then extrapolates its slope as
+$m(L_{\min})=m_0+b/L_{\min}^2$. With $\alpha=0.81$, this double fit gives
+
+$$
+c_{\mathrm{eff}}=0.20190\pm0.04489,
+$$
+
+where the uncertainty is the block-bootstrap standard error from 2,000
+resamples; the percentile 95% interval is $[0.11919,0.29140]$. A direct
+$L^{-2}+L^{-4}$ stability fit gives $c_{\mathrm{eff}}=0.22905$, while replacing
+the long-time slope by the endpoint estimator gives $0.19598$. These shifts
+show that finite-size and estimator systematics remain visible, but unlike the
+192-trajectory checkpoint, the cluster result resolves an order-$0.2$ signal
+and is compatible with the expected order-$0.25$ value.
+
+![Monitored-Haar central-charge fit](artifacts/haar_mipt_cluster/central_charge_fit.png)
+
+The curated [fit summary](artifacts/haar_mipt_cluster/fit_summary.json),
+[width table](artifacts/haar_mipt_cluster/width_summary.csv), and
+[fit-window diagnostic](artifacts/haar_mipt_cluster/window_slope_extrapolation.png)
+contain the cluster values used here. The earlier
+[checkpoint report](../../../../docs/reports/2026-07-30-haar-mipt-checkpoint.md)
+is retained as a record of the workflow validation, not as the final estimate.
 
 ### Dual-unitary MPS pilot
 
@@ -190,6 +210,16 @@ python scripts/random_bond_ising_production.py \
   --output-dir results/random_bond_ising_nishimori_two_hour
 ```
 
+Analyse a completed high-statistics Haar Slurm result directory:
+
+```bash
+python scripts/haar_mipt_slurm_analysis.py \
+  results/haar-mipt-production-20260730 \
+  --alpha 0.81 \
+  --bootstrap 2000 \
+  --seed 122170
+```
+
 Generate the high-statistics dual-unitary run specification and analyse a
 completed result directory:
 
@@ -213,8 +243,9 @@ repository.
 
 - The Haar MIPT point and anisotropy are taken from the literature rather than
   re-estimated in this project.
-- Exact-state-vector Haar data are statistically insufficient for a useful
-  central-charge estimate.
+- The Haar block-bootstrap error quantifies trajectory sampling but not the
+  full uncertainty from the chosen critical point, anisotropy, fit window, or
+  omitted higher-order finite-size corrections.
 - The preliminary RBIM bootstrap error does not include the full fit-window
   systematic.
 - The dual-unitary MPS pilot is limited by ten samples per $(L,\chi)$ and by
@@ -234,6 +265,7 @@ repository.
 - [Haar trajectory kernel](../../../../scripts/haar_mipt_transfer.py),
   [resumable Slurm cell](../../../../scripts/haar_mipt_slurm_cell.py), and
   [Slurm analysis](../../../../scripts/haar_mipt_slurm_analysis.py)
+- [Curated high-statistics Haar fit artifacts](artifacts/haar_mipt_cluster/)
 - [Dual-unitary MPS kernel](../../../../scripts/dual_unitary_mps.py),
   [resumable cell/batch driver](../../../../scripts/dual_unitary_mps_slurm_cell.py),
   and [two-step analysis](../../../../scripts/dual_unitary_mps_analysis.py)
