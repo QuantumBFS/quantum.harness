@@ -199,6 +199,8 @@ tracks/polyopt/solutions/sdp-gap-seekers/
 ├── evidence/                  # harvested per-run result/runmeta/SHA256SUMS bundles
 ├── results/                   # generated MOFs, logs, plots (gitignored)
 └── notes/
+    ├── *(design notes)*       # d4-averaging-lemma, square-d4-symmetry-reduction-design,
+    │                          # legacy-inventory-spec, rung-a-gamma-scan-result, etc.
     ├── proofs/                # EXACT_*.md per-layer exact-reduction proof contracts
     │                          # + CHALLENGE88_RESULT.md (SS reduction-ladder result log)
     └── specs/                 # Square/SS basis & model specs (SQUARE_BASIS_SPEC,
