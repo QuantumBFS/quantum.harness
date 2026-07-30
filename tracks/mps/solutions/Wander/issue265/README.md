@@ -1,4 +1,4 @@
-# Issue #265 — Machine-discovered Burgers hydrodynamics
+# Issue #265 — Certifying Machine-Discovered Burgers Hydrodynamics
 
 ## Team
 
@@ -8,47 +8,209 @@
 | **Members** | Chenxi Wan, Yedi Shen, Junkai Wang |
 | **Contact email** | WangTheoPhys@outlook.com |
 
-## Challenge
+## Research question
 
-This submission addresses [Quantum Harness Issue #265](https://github.com/QuantumBFS/quantum.harness/issues/265): determine whether the constant-coefficient Burgers equation discovered from finite-time Heisenberg-chain data is an asymptotic hydrodynamic law or a finite-window closure.
+This submission addresses
+[Quantum Harness Issue #265](https://github.com/QuantumBFS/quantum.harness/issues/265):
+does the constant-coefficient viscous Burgers equation discovered from a
+finite-time Heisenberg-chain trajectory represent an asymptotic hydrodynamic
+law, or a highly accurate closure of a particular field, condition, and time
+window?
 
-## Current result
+Kharkov et al. learned
 
-The completed public-trajectory pilot validates Burgers as an accurate finite-window surrogate and establishes the starting point for the registered universality assessment:
+\[
+\partial_tU+aU\partial_xU=D_{\rm cl}\partial_x^2U,
+\qquad
+a\approx0.24,
+\quad
+D_{\rm cl}\approx1.90,
+\]
+
+for the normalized high-temperature weak-domain-wall magnetization
+\(U=\langle S^z\rangle/\mu\) of the isotropic Heisenberg chain.  The question
+is not whether this fit is useful—it is exceptionally accurate—but what level
+of hydrodynamic statement it supports.
+
+## Answer established so far
+
+The public-trajectory audit establishes Burgers as a quantitative
+finite-window benchmark:
+
+| Measurement | Result |
+|---|---:|
+| Fitted nonlinearity | \(a\simeq0.230\) |
+| Fitted classical viscosity | \(D_{\rm cl}\simeq1.97\) |
+| Integrated profile error | \(0.167\%\) |
+| Width exponent on \(t=80\ldots190\) | \(0.6802\) |
+| Moment-diffusivity exponent | \(0.3372\) |
+| Width-law amplitude | \(A_W=0.741842\) |
+| Burgers tangent ratio | \(A_B/A_W=0.999154\) |
+
+The near-unit tangent ratio supplies an analytical explanation for the fit:
+over the measured window, the constant-coefficient Burgers constitutive curve
+is almost exactly tangent to the scale-dependent moment diffusivity sampled by
+the wall.  The learned equation is therefore organizing real hydrodynamic
+structure, not merely interpolating pointwise noise.
+
+The field identity remains essential.  At zero magnetic field, physical
+magnetization and its current are odd under spin flip, so an autonomous local
+one-field current must be odd in \(m\).  The Burgers current \(am^2/2\) is
+even.  It can represent a chiral mode, an orientation-labelled sector, a
+nonzero-background expansion, or a trajectory-conditioned effective current;
+it is not automatically a universal current of physical \(m\).
+
+Likewise, an open fluctuating theory does not reduce to the deterministic
+equation by deleting zero-mean noise.  Nonlinear averaging retains variance or
+mode-covariance currents.  This motivates the registered competition among a
+scalar closure, opposite-chirality two-Burgers modes, a coupled two-mode open
+system, and a later memory/more-mode description.
+
+The complete derivation, literature context, public-data measurements, model
+hierarchy, and decision rules are in
+[`SCIENTIFIC_CASE.md`](SCIENTIFIC_CASE.md).
+
+## Evidence ladder
+
+The submission separates four levels of evidence:
+
+1. **Exact:** microscopic spin continuity; spin-flip field identification;
+   algebraic diagonalization of the equal-coupling two-mode flux.
+2. **Controlled:** weak-wall linear response; explicit two-field closure;
+   finite-window moment tangency; deterministic rarefaction continuation.
+3. **Measured:** public-profile fits, width and moment exponents, synthetic
+   coefficient-recovery controls, and numerical backend validation.
+4. **Registered:** convergence, cross-condition transfer, joint
+   profile/current/response/FCS selection, and blinded future-time prediction.
+
+This structure gives the original machine discovery its full empirical value
+without treating a single trajectory as the proof of a microscopic closure.
+
+## Confirmatory experiment
+
+### Frozen time windows
 
 ```text
-pilot_scope: finite_window_surrogate_supported
-confirmatory_stage: convergence_running
-next_selection: scalar_or_two_mode_or_memory
+train:       50 <= t <= 150
+validate:   150 <  t <= 200
+blind test: 200 <  t <= 400
 ```
 
-The twelve preregistered convergence jobs are running. Their accepted outputs advance the program through Production A, model selection, one-time human unblinding, and the conditional `200 <= t <= 400` Production B test.
+The JSON contracts store the interval endpoints as `[50,150]`, `[150,200]`,
+and `[200,400]`.  The executable masks assign each shared boundary to the
+earlier stage, as shown above, so no time slice is scored twice.
 
-## Contribution
+The blind interval is opened once, with explicit human confirmation, only
+after convergence, Production A, and frozen model selection have created an
+eligible scalar or two-mode forecast.
 
-- frozen fit (`50 <= t <= 150`), validation (`150 <= t <= 200`), and blinded test (`200 <= t <= 400`) windows;
-- amplitude, width, background, shape, anisotropy, integrability-breaking, response, equilibrium, current, correlation, and FCS tests;
-- scalar Burgers, independent two-Burgers, coupled two-mode, and memory/more-mode outcomes;
-- purified finite-temperature TeNPy TEBD backend with exact-diagonalization, FCS, resume, and grouped-equivalence checks;
-- evidence-gated convergence, Production-A, model-selection, unblinding, and Production-B controllers.
+### Registered conditions
 
-The authoritative scientific contract is [`docs/RESEARCH_PROTOCOL_BURGERS_UNIVERSALITY.md`](docs/RESEARCH_PROTOCOL_BURGERS_UNIVERSALITY.md). Completed evidence and the next registered stages are recorded in [`CURRENT_STATUS.md`](CURRENT_STATUS.md).
+The matrix includes:
 
-## Reproduce the lightweight checks
+- amplitudes \(\mu=0.02,0.05,0.10,0.20\), both wall orientations;
+- tanh widths \(1,2,4,8\);
+- erf, double-wall, Gaussian, and sinusoidal profiles;
+- backgrounds \(m_0=\pm0.05\);
+- equilibrium, local-pulse response, current, connected-correlation, and FCS
+  observations;
+- \(\Delta=0.8\), \(\Delta=1.2\), and integrability-breaking
+  \(\Delta=1,J_2=0.1\) environment controls.
+
+### Convergence ladder
+
+| Level | \(L\) | \(\Delta t\) | \(\chi_{\max}\) | cutoff |
+|---|---:|---:|---:|---:|
+| coarse | 256 | 0.05 | 256 | \(10^{-8}\) |
+| medium | 384 | 0.025 | 512 | \(10^{-10}\) |
+| fine | 512 | 0.0125 | 1024 | \(10^{-11}\) |
+
+The frozen medium-to-fine gates are \(<0.2\%\) for the profile relative
+\(L^2\) difference and \(<0.3\%\) for the maximum width difference.
+
+### Model hierarchy
+
+The same held-out folds compare:
+
+- shared and condition-specific scalar Burgers;
+- the symmetry-aware sector law \(a_i=2\sigma_i g\mu_i\);
+- independent opposite-chirality Burgers modes \(u_\pm=m\pm\phi\);
+- a coupled two-mode stochastic open system;
+- the registered `memory_or_more_modes_required` interpretation when the
+  Markov candidates do not organize the complete observable panel.
+
+Two-mode support requires at least \(30\%\) held-out improvement over the best
+scalar competitor, a positive paired-bootstrap \(95\%\) lower bound, exact
+symmetry checks, and one parameter set for profiles, currents, responses, and
+FCS.  The coupled model additionally requires \(10\%\) improvement over the
+independent two-mode manifold and \(\Delta\mathrm{BIC}\ge10\).
+
+## What this PR contributes
+
+- a frozen, machine-readable universality protocol and decision engine;
+- the analytical field-identification, nonlinear-averaging, moment-tangent,
+  and rarefaction arguments;
+- synthetic controls that distinguish effectively constant from
+  \(t^{1/3}\)-drifting diffusivity;
+- a TeNPy infinite-temperature purification-TEBD backend with magnetization,
+  complete current, connected \(C^{zz}\), and transfer FCS;
+- dense exact-evolution, spin-flip, continuity, grouped-\(J_2\), and actual
+  interruption/resume validation;
+- source-hash and dataset gates for convergence, Production A, selection,
+  unblinding, and Production B;
+- a 34-condition-per-stage Production-v2 panel and a frozen stochastic solver
+  budget of 1,024 screening and at least 2,048 final trajectories;
+- a reusable quantum-computing benchmark for certifying machine-discovered
+  hydrodynamic equations from profiles and higher-order observables.
+
+## Package map
+
+| Path | Role |
+|---|---|
+| [`SCIENTIFIC_CASE.md`](SCIENTIFIC_CASE.md) | Long-form scientific argument and literature synthesis |
+| [`CURRENT_STATUS.md`](CURRENT_STATUS.md) | Dated execution and evidence ledger |
+| [`docs/RESEARCH_PROTOCOL_BURGERS_UNIVERSALITY.md`](docs/RESEARCH_PROTOCOL_BURGERS_UNIVERSALITY.md) | Frozen scientific contract |
+| [`docs/CLOSED_LOOP_VERDICT.md`](docs/CLOSED_LOOP_VERDICT.md) | Detailed microscopic-to-hydrodynamic audit |
+| [`configs/burgers_research_matrix.json`](configs/burgers_research_matrix.json) | Conditions, splits, windows, and numerics |
+| [`configs/burgers_decision_rules.json`](configs/burgers_decision_rules.json) | Frozen quantitative thresholds |
+| [`results_research_program/manifest.json`](results_research_program/manifest.json) | 74-row base convergence/A/B manifest |
+| [`results_research_program/production_manifest_v2.json`](results_research_program/production_manifest_v2.json) | 34-condition-per-stage joint-observable manifest |
+| [`results_research_program/two_mode/solver_budget.json`](results_research_program/two_mode/solver_budget.json) | Frozen stochastic convergence and fidelity budget |
+| `src/` | Burgers, moment, scalar, two-mode, production, and evidence-gate implementations |
+| `scripts/` | Reproducible analysis, validation, bundling, and one-time unblinding entry points |
+| `hpc/scnet/` | Pinned Slurm submission and continuation controls |
+| `tests/` | Regression and synthetic-selection coverage |
+
+## Reproduce the public checks
 
 From this directory:
 
 ```bash
-python -m pytest -q
-python scripts/validate_tenpy_exact_diagonalization.py
-python scripts/validate_tenpy_fcs.py
-python scripts/validate_tenpy_resume.py
+python3 -m compileall -q src scripts hpc tests
+python3 -m pytest -q
+python3 scripts/validate_tenpy_exact_diagonalization.py
+python3 scripts/validate_tenpy_fcs.py
+python3 scripts/validate_tenpy_resume.py
 ```
 
-Tensor-network production runs through the Slurm entry points and pinned remote dependency set under `hpc/scnet/`.
+Tensor-network production uses the pinned remote environment and the Slurm
+entry points under `hpc/scnet/`.  Raw production arrays and checkpoints remain
+in the registered compute environment; this public package contains source,
+compact manifests, decision rules, and validation summaries without private
+credentials.
 
-## Research scope
+## Research status
 
-This PR registers a reproducible universality evaluation and an audited pilot. The current result establishes the finite-window benchmark; the frozen A/B protocol supplies the registered route to the asymptotic interpretation.
+```text
+public pilot:        finite-window Burgers benchmark established
+confirmatory stage:  convergence evidence collection
+next decision:       scalar / independent two-Burgers / coupled two-mode / memory
+future confirmation: one-time blinded 200 < t <= 400 test
+```
+
+The current evidence and archived SCNet records are detailed in
+[`CURRENT_STATUS.md`](CURRENT_STATUS.md).  The scientific protocol is frozen;
+future datasets fill its registered gates rather than changing its hypotheses
+after seeing the answers.
 
 Addresses #265.
