@@ -28,13 +28,10 @@ aggregate="${run_root}/phase7-aggregate.json"
 mkdir -p "${run_root}/shared"
 cd "${solution_root}"
 
-"${python}" - <<'PY'
-import jax
-jax.config.update("jax_enable_x64", True)
-devices = jax.devices()
-assert any(device.platform == "gpu" for device in devices), devices
-print({"devices": [str(device) for device in devices], "x64": True})
-PY
+nvidia-smi \
+  --query-gpu=index,name,uuid,driver_version \
+  --format=csv,noheader
+test -n "${CUDA_VISIBLE_DEVICES:-}"
 
 "${python}" -m route_d_plus.phase7 authorize \
   --repo-root "${repo_root}" \

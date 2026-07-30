@@ -42,6 +42,7 @@ def test_phase7_batch_runs_tasks_concurrently_and_aggregates() -> None:
     )
     assert "user-authorized" not in source
     assert "route_d_plus.phase7 authorize" in source
+    assert "nvidia-smi" in source
     assert "srun --exclusive" in source
     assert 'pids+=("$!")' in source
     assert "route_d_plus.phase7 finalize" in source
