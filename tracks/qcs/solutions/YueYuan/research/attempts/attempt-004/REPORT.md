@@ -74,8 +74,11 @@ separate scorer.
 
 ## Full Sweep
 
-The full CPU sweep ran as 144 independent Slurm array tasks with 4 CPU cores per
-task and 10 concurrent tasks. It produced:
+The full CPU sweep ran as 144 independent Slurm array tasks. It used the
+pre-adaptive baseline profile now exposed as `run_full_sweep.py
+--exclude-adaptive`; this profile distinction is why the reported total is
+1,656 rather than the larger count produced when the later adaptive baseline is
+included. It produced:
 
 - 1,656 run records;
 - 5,121 open-loop history rows;
@@ -332,6 +335,11 @@ rows, 48 Hessian spectra, 75 aggregate groups, and 48 adaptive-method rows with
 zero tracebacks in the checked logs. Generated data remains ignored under
 `tracks/qcs/results/YueYuan/attempt-004/focus_adaptive_pilot2/`.
 
+The exact committed reproduction profile is `run_full_sweep.py
+--adaptive-focus`; `slurm/adaptive_focus.sbatch` runs its 48 task shards with at
+most 32 CPU cores concurrently, and the combiner enforces the 600-record
+profile.
+
 At 2048 shots, the adaptive method preserved the good one-qubit behavior while
 improving the hard two-qubit failure story:
 
@@ -399,15 +407,16 @@ the useful resource for this attempt.
 
 ## Verification
 
-Latest verification after the black-box rigor pass:
+Latest verification in the pinned clean submission environment:
 
 - Focused red/green reachability test: passing.
 - Focused hardware adapter and dry-run tests: passing (`4 passed`).
 - Device-informed subspace tests: passing (`4 passed`).
 - Invariant probe tests: passing (`2 passed`).
 - Black-box rigor tests: passing (`7 passed`).
-- Attempt-004 tests: passing (`38 passed`).
-- Broader YueYuan attempt tests: passing (`52 passed`).
+- Submission reproducibility tests: passing (`10 passed`).
+- Attempt-004 tests: passing (`46 passed`).
+- Broader YueYuan attempt tests: passing (`60 passed`).
 - Validator self-test controls: passing (`"status": "passed"`).
 - Fast candidate export: passing (`schema_version=1`, 15 groups).
 - Hardware dry run: passing (7 candidates, 1,792 total shots,

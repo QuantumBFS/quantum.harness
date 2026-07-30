@@ -6,6 +6,9 @@ control subspace, and compares low-dimensional closed-loop calibration against
 fair noisy black-box baselines.
 
 The short scientific report is [`REPORT.md`](REPORT.md).
+The primary judging summary is
+[`../../../SUBMISSION.md`](../../../SUBMISSION.md), and the exact
+environment and run commands are in [`REPRODUCE.md`](REPRODUCE.md).
 
 ## What Is Included
 
@@ -73,6 +76,9 @@ Run from the repository root:
 python3 -m pip install -r tracks/qcs/solutions/YueYuan/research/attempts/attempt-004/requirements.txt
 ```
 
+For exact reproduction, use `requirements-lock.txt` and follow
+[`REPRODUCE.md`](REPRODUCE.md).
+
 ## Fast Verification
 
 These commands are the quickest way to confirm the committed implementation:
@@ -91,8 +97,9 @@ python3 tracks/qcs/solutions/YueYuan/research/attempts/attempt-004/run_black_box
 The latest verification and sweep evidence recorded in `REPORT.md` was:
 
 - black-box rigor tests: `7 passed`;
-- attempt-004 tests: `38 passed`;
-- broader YueYuan attempt tests: `52 passed`;
+- submission reproducibility tests: `10 passed`;
+- attempt-004 tests: `46 passed`;
+- broader YueYuan attempt tests: `60 passed` in the pinned clean environment;
 - validator self-test: `"status": "passed"`;
 - fast candidate export: schema version 1, 15 groups;
 - hardware dry run: 7 candidates, 1,792 total shots, `real_hardware: false`;

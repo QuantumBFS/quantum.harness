@@ -114,3 +114,20 @@ def default_full_sweep() -> SweepConfig:
         cpu_array_max_concurrent_tasks=25,
         gpu_array_max_concurrent_tasks=1,
     )
+
+
+def focused_adaptive_sweep() -> SweepConfig:
+    cfg = default_full_sweep()
+    return SweepConfig(
+        systems=cfg.systems,
+        gaps=cfg.gaps,
+        shots_per_query=(2048,),
+        seeds=cfg.seeds,
+        one_qubit_k=cfg.one_qubit_k,
+        two_qubit_k=cfg.two_qubit_k,
+        open_loop=cfg.open_loop,
+        closed_loop=cfg.closed_loop,
+        cpu_array_cores_per_task=cfg.cpu_array_cores_per_task,
+        cpu_array_max_concurrent_tasks=8,
+        gpu_array_max_concurrent_tasks=cfg.gpu_array_max_concurrent_tasks,
+    )

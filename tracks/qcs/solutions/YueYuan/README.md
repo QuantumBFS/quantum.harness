@@ -1,5 +1,9 @@
 # YueYuan: Hessian-guided sim-to-real quantum gate calibration
 
+**Submission entry points:** [judge-facing result](SUBMISSION.md) |
+[exact reproduction](research/attempts/attempt-004/REPRODUCE.md) |
+[detailed report](research/attempts/attempt-004/REPORT.md)
+
 ## Team
 
 | | |
