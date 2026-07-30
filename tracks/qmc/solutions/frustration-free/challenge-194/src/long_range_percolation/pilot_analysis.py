@@ -20,10 +20,24 @@ from .trajectory import TrajectoryRequest, request_digest
 
 ANALYSIS_SCHEMA = "challenge-194-p0-analysis-v1"
 EXTENSION_ANALYSIS_SCHEMA = "challenge-194-p0-extension-analysis-v1"
+COMBINED_ANALYSIS_SCHEMA = "challenge-194-p0-combined-analysis-v2"
 BRACKET_SCHEMA = "challenge-194-p1-brackets-v1"
+COMBINED_BRACKET_SCHEMA = "challenge-194-p1-brackets-v2"
 P1_PROTOCOL_SCHEMA = "challenge-194-p1-protocol-v1"
 P1_MASTER_SEED = 19_420_261_729
 P1_REPLICAS = tuple(range(8, 24))
+_P0_PRESERVED_WINDOWS: Mapping[str, tuple[str, str]] = MappingProxyType(
+    {
+        (0.8).hex(): (
+            "0x1.f400000000000p-2",
+            "0x1.3880000000000p-1",
+        ),
+        (1.1).hex(): (
+            "0x1.312d000000000p+0",
+            "0x1.7d78400000000p+0",
+        ),
+    }
+)
 OBSERVABLE_COLUMNS: Mapping[str, int] = MappingProxyType(
     {
         "s1_fraction": 4,
@@ -88,6 +102,19 @@ class PilotEstimate:
             "standard_errors": dict(self.standard_errors),
             "request_sha256": list(self.request_sha256),
         }
+
+
+@dataclass(frozen=True)
+class SelectorSigmaEvidence:
+    sigma: float
+    lengths: tuple[int, ...]
+    kappas: tuple[float, ...]
+    values: Mapping[tuple[float, int, float], tuple[float, float]]
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "lengths", tuple(self.lengths))
+        object.__setattr__(self, "kappas", tuple(self.kappas))
+        object.__setattr__(self, "values", MappingProxyType(dict(self.values)))
 
 
 def _protocol_axis(protocol: Mapping[str, object], name: str) -> Sequence[object]:
@@ -620,6 +647,158 @@ def _selector_estimates(
     return tuple(sigmas), tuple(lengths), tuple(kappas), values
 
 
+def _selector_v1_evidence(
+    analysis: Mapping[str, object],
+) -> tuple[SelectorSigmaEvidence, ...]:
+    sigmas, lengths, kappas, values = _selector_estimates(analysis)
+    return tuple(
+        SelectorSigmaEvidence(
+            sigma=sigma,
+            lengths=lengths,
+            kappas=kappas,
+            values=values,
+        )
+        for sigma in sigmas
+    )
+
+
+def _selector_v2_evidence(
+    analysis: Mapping[str, object],
+) -> tuple[SelectorSigmaEvidence, ...]:
+    raw_entries = analysis.get("sigma_entries")
+    if isinstance(raw_entries, (str, bytes)) or not isinstance(
+        raw_entries, Sequence
+    ):
+        _malformed("combined analysis sigma entries are malformed")
+    evidence: list[SelectorSigmaEvidence] = []
+    estimate_count = 0
+    for raw_entry in raw_entries:
+        if not isinstance(raw_entry, Mapping):
+            _malformed("combined analysis sigma entry is malformed")
+        sigma = _exact_hex_value(raw_entry.get("sigma_hex"), "sigma")
+        raw_lengths = raw_entry.get("lengths")
+        raw_kappas = raw_entry.get("kappas")
+        raw_estimates = raw_entry.get("estimates")
+        if (
+            isinstance(raw_lengths, (str, bytes))
+            or not isinstance(raw_lengths, Sequence)
+            or isinstance(raw_kappas, (str, bytes))
+            or not isinstance(raw_kappas, Sequence)
+            or isinstance(raw_estimates, (str, bytes))
+            or not isinstance(raw_estimates, Sequence)
+        ):
+            _malformed("combined analysis per-sigma evidence is malformed")
+        if any(
+            not isinstance(value, int) or isinstance(value, bool) or value <= 0
+            for value in raw_lengths
+        ):
+            _malformed("combined analysis length axis is malformed")
+        lengths = tuple(raw_lengths)
+        kappas = tuple(
+            _exact_hex_value(value, "coupling") for value in raw_kappas
+        )
+        if (
+            len(lengths) < 2
+            or len(set(lengths)) != len(lengths)
+            or any(right <= left for left, right in pairwise(lengths))
+            or not kappas
+            or kappas[0] != 0.0
+            or len(set(kappas)) != len(kappas)
+            or any(right <= left for left, right in pairwise(kappas))
+        ):
+            raise RuntimeError("combined analysis axes are not canonical")
+
+        identities: list[tuple[float, int, float]] = []
+        values: dict[tuple[float, int, float], tuple[float, float]] = {}
+        for raw in raw_estimates:
+            if not isinstance(raw, Mapping):
+                _malformed("combined analysis estimate is malformed")
+            row_sigma = _exact_hex_value(raw.get("sigma_hex"), "sigma")
+            kappa = _exact_hex_value(raw.get("kappa_hex"), "coupling")
+            length = raw.get("length")
+            if (
+                row_sigma != sigma
+                or not isinstance(length, int)
+                or isinstance(length, bool)
+                or length <= 0
+            ):
+                _malformed("combined analysis estimate identity is malformed")
+            means = raw.get("means")
+            if not isinstance(means, Mapping):
+                _malformed("combined analysis estimate means are malformed")
+            observables: list[float] = []
+            for name in ("q_g", "four_sector_crossing"):
+                value = means.get(name)
+                if not isinstance(value, (int, float)) or isinstance(value, bool):
+                    _malformed(f"combined analysis {name} mean is malformed")
+                finite_value = float(value)
+                if not math.isfinite(finite_value):
+                    raise RuntimeError(
+                        "combined analysis estimator means must be finite"
+                    )
+                observables.append(finite_value)
+            identity = (sigma, length, kappa)
+            if identity in values:
+                raise RuntimeError("combined analysis contains duplicate estimates")
+            identities.append(identity)
+            values[identity] = (observables[0], observables[1])
+        expected = [
+            (sigma, length, kappa)
+            for length in lengths
+            for kappa in kappas
+        ]
+        if identities != expected:
+            if len(identities) != len(expected):
+                raise RuntimeError(
+                    "combined analysis is missing largest-size estimates"
+                )
+            raise RuntimeError(
+                "combined analysis estimates are not in canonical coupling order"
+            )
+        evidence.append(
+            SelectorSigmaEvidence(
+                sigma=sigma,
+                lengths=lengths,
+                kappas=kappas,
+                values=values,
+            )
+        )
+        estimate_count += len(raw_estimates)
+
+    sigmas = tuple(item.sigma for item in evidence)
+    if (
+        not sigmas
+        or len(set(sigmas)) != len(sigmas)
+        or any(right <= left for left, right in pairwise(sigmas))
+    ):
+        raise RuntimeError("combined analysis sigma entries are not canonical")
+    raw_count = analysis.get("estimate_count")
+    if (
+        not isinstance(raw_count, int)
+        or isinstance(raw_count, bool)
+        or raw_count != estimate_count
+    ):
+        raise RuntimeError("combined analysis estimate cardinality is invalid")
+    digest = analysis.get("analysis_document_sha256")
+    if not isinstance(digest, str):
+        _malformed("combined analysis document digest is malformed")
+    unsigned = dict(analysis)
+    unsigned.pop("analysis_document_sha256", None)
+    if _sha256(_canonical_bytes(unsigned)) != digest:
+        raise RuntimeError("combined analysis document digest mismatch")
+    return tuple(evidence)
+
+
+def _selector_sigma_evidence(
+    analysis: Mapping[str, object],
+) -> tuple[SelectorSigmaEvidence, ...]:
+    if analysis.get("schema_version") == ANALYSIS_SCHEMA:
+        return _selector_v1_evidence(analysis)
+    if analysis.get("schema_version") == COMBINED_ANALYSIS_SCHEMA:
+        return _selector_v2_evidence(analysis)
+    raise RuntimeError("analysis schema version is not supported")
+
+
 def _sign_change(left: float, right: float) -> bool:
     return (left <= 0.0 <= right) or (right <= 0.0 <= left)
 
@@ -763,18 +942,31 @@ def _select_crossover_bracket(
 def select_p1_brackets(analysis: Mapping[str, object]) -> dict[str, object]:
     if not isinstance(analysis, Mapping):
         _malformed("analysis document is malformed")
-    sigmas, all_lengths, kappas, values = _selector_estimates(analysis)
-    lengths = (all_lengths[-2], all_lengths[-1])
-    brackets = [
-        (
-            _select_transition_bracket(sigma, lengths, kappas, values)
-            if sigma <= 1.0
-            else _select_crossover_bracket(sigma, lengths, kappas, values)
+    sigma_evidence = _selector_sigma_evidence(analysis)
+    brackets: list[dict[str, object]] = []
+    for evidence in sigma_evidence:
+        lengths = (evidence.lengths[-2], evidence.lengths[-1])
+        brackets.append(
+            _select_transition_bracket(
+                evidence.sigma,
+                lengths,
+                evidence.kappas,
+                evidence.values,
+            )
+            if evidence.sigma <= 1.0
+            else _select_crossover_bracket(
+                evidence.sigma,
+                lengths,
+                evidence.kappas,
+                evidence.values,
+            )
         )
-        for sigma in sigmas
-    ]
     document: dict[str, object] = {
-        "schema_version": BRACKET_SCHEMA,
+        "schema_version": (
+            BRACKET_SCHEMA
+            if analysis.get("schema_version") == ANALYSIS_SCHEMA
+            else COMBINED_BRACKET_SCHEMA
+        ),
         "source_analysis_document_sha256": analysis["analysis_document_sha256"],
         "requires_p0_extension": any(
             bracket["status"] == "requires_p0_extension" for bracket in brackets
@@ -789,7 +981,9 @@ def _validate_bracket_document(
     analysis: Mapping[str, object],
     brackets: Mapping[str, object],
 ) -> Sequence[object]:
-    if brackets.get("schema_version") != BRACKET_SCHEMA:
+    combined = analysis.get("schema_version") == COMBINED_ANALYSIS_SCHEMA
+    expected_schema = COMBINED_BRACKET_SCHEMA if combined else BRACKET_SCHEMA
+    if brackets.get("schema_version") != expected_schema:
         raise RuntimeError("bracket schema version is not supported")
     if brackets.get("source_analysis_document_sha256") != analysis.get(
         "analysis_document_sha256"
@@ -813,6 +1007,14 @@ def _validate_bracket_document(
     if brackets.get("requires_p0_extension") is True or extension_sigmas:
         labels = ", ".join(str(float.fromhex(value)) for value in extension_sigmas)
         raise RuntimeError(f"P0 extension required before P1 publication: {labels}")
+    if combined and (
+        brackets.get("requires_p0_extension") is not False
+        or any(
+            not isinstance(entry, Mapping) or entry.get("status") != "selected"
+            for entry in raw
+        )
+    ):
+        raise RuntimeError("P1 requires all four combined statuses selected")
     return raw
 
 
@@ -863,13 +1065,37 @@ def build_p1_protocol(
     analysis: Mapping[str, object],
     brackets: Mapping[str, object] | None = None,
 ) -> dict[str, object]:
-    sigmas, lengths, _p0_kappas, _values = _selector_estimates(analysis)
-    if len(sigmas) != 4 or len(lengths) != 3:
+    sigma_evidence = _selector_sigma_evidence(analysis)
+    sigmas = tuple(evidence.sigma for evidence in sigma_evidence)
+    lengths = sigma_evidence[0].lengths
+    if (
+        len(sigmas) != 4
+        or len(lengths) != 3
+        or any(evidence.lengths != lengths for evidence in sigma_evidence)
+        or (
+            analysis.get("schema_version") == COMBINED_ANALYSIS_SCHEMA
+            and sigmas != (0.8, 0.9, 1.0, 1.1)
+        )
+    ):
         raise RuntimeError("P1 requires exactly four sigmas and three lengths")
     bracket_document = select_p1_brackets(analysis) if brackets is None else brackets
     raw_brackets = _validate_bracket_document(analysis, bracket_document)
     if len(raw_brackets) != len(sigmas):
         raise RuntimeError("P1 requires one bracket per sigma")
+    if analysis.get("schema_version") == COMBINED_ANALYSIS_SCHEMA:
+        for index, sigma in ((0, 0.8), (3, 1.1)):
+            raw = raw_brackets[index]
+            if not isinstance(raw, Mapping):
+                _malformed("combined control bracket is malformed")
+            lower, upper = _P0_PRESERVED_WINDOWS[sigma.hex()]
+            if (
+                raw.get("sigma_hex") != sigma.hex()
+                or raw.get("lower_kappa_hex") != lower
+                or raw.get("upper_kappa_hex") != upper
+            ):
+                raise RuntimeError(
+                    "combined sigma 0.8 and 1.1 windows are not preserved"
+                )
 
     sigma_entries: list[dict[str, object]] = []
     grids: dict[float, tuple[float, ...]] = {}
@@ -986,7 +1212,7 @@ def validate_p1_protocol(
     analysis: Mapping[str, object],
     protocol: Mapping[str, object],
 ) -> None:
-    _selector_estimates(analysis)
+    _selector_sigma_evidence(analysis)
     if protocol.get("schema_version") != P1_PROTOCOL_SCHEMA:
         raise RuntimeError("P1 protocol schema version is not supported")
     if protocol.get("source_analysis_document_sha256") != analysis.get(

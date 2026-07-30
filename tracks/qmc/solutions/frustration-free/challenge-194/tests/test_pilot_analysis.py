@@ -502,6 +502,77 @@ def _set_selector_value(
         values[(sigma, length, kappa)] = (q_value, crossing_value)
 
 
+def _configure_selector_rows(
+    rows: list[dict[str, object]],
+    sigma: float,
+    lengths: tuple[int, ...],
+    kappas: tuple[float, ...],
+    selected_interval: int,
+) -> None:
+    for row in rows:
+        if row["sigma_hex"] != sigma.hex():
+            continue
+        length = row["length"]
+        kappa_index = kappas.index(float.fromhex(row["kappa_hex"]))
+        means = row["means"]
+        if sigma <= 1.0:
+            means["q_g"] = (
+                float(kappa_index <= selected_interval)
+                if length == lengths[-2]
+                else float(kappa_index > selected_interval)
+                if length == lengths[-1]
+                else 0.0
+            )
+            means["four_sector_crossing"] = (
+                0.1 if kappa_index <= selected_interval else 0.9
+            )
+        else:
+            means["q_g"] = 0.0
+            means["four_sector_crossing"] = (
+                0.1 if kappa_index <= selected_interval else 0.9
+            )
+
+
+def _combined_selector_document(
+    *,
+    unresolved_sigma: float | None = None,
+) -> tuple[dict[str, object], dict[str, object]]:
+    p0, extension_analysis, _ = _combined_source_documents()
+    combined = extension.combine_p0_evidence(p0, extension_analysis)
+    p0_rows = p0["estimates"]
+    assert isinstance(p0_rows, list)
+    for sigma, interval in ((0.8, 4), (1.1, 8)):
+        _configure_selector_rows(
+            p0_rows,
+            sigma,
+            tuple(pilot.PILOT_LENGTHS),
+            tuple(pilot.PILOT_KAPPAS),
+            interval,
+        )
+
+    entries = combined["sigma_entries"]
+    assert isinstance(entries, list)
+    selected_intervals = {0.8: 4, 0.9: 9, 1.0: 19, 1.1: 8}
+    for entry in entries:
+        sigma = float.fromhex(entry["sigma_hex"])
+        if sigma == unresolved_sigma:
+            continue
+        kappas = tuple(float.fromhex(value) for value in entry["kappas"])
+        lengths = tuple(entry["lengths"])
+        rows = entry["estimates"]
+        assert isinstance(rows, list)
+        _configure_selector_rows(
+            rows,
+            sigma,
+            lengths,
+            kappas,
+            selected_intervals[sigma],
+        )
+    _sign(p0)
+    _sign(combined)
+    return p0, combined
+
+
 def _tiny_complete_pilot(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -1587,6 +1658,100 @@ def test_select_p1_brackets_uses_maximum_control_slope():
     assert bracket["tie_break"]["rule"] == "maximum_absolute_slope_then_lower_coupling"
 
 
+def test_combined_selector_uses_per_sigma_axes_and_preserves_control_windows():
+    p0, combined = _combined_selector_document()
+
+    original = analysis.select_p1_brackets(p0)
+    first = analysis.select_p1_brackets(combined)
+    second = analysis.select_p1_brackets(combined)
+
+    assert first["schema_version"] == analysis.COMBINED_BRACKET_SCHEMA
+    assert (
+        first["source_analysis_document_sha256"]
+        == combined["analysis_document_sha256"]
+    )
+    assert _canonical_bytes(first) == _canonical_bytes(second)
+    assert first["requires_p0_extension"] is False
+    assert [entry["status"] for entry in first["brackets"]] == ["selected"] * 4
+    for index in (1, 2):
+        assert float.fromhex(first["brackets"][index]["lower_kappa_hex"]) > 0.0
+    for index in (0, 3):
+        assert (
+            first["brackets"][index]["lower_kappa_hex"],
+            first["brackets"][index]["upper_kappa_hex"],
+        ) == (
+            original["brackets"][index]["lower_kappa_hex"],
+            original["brackets"][index]["upper_kappa_hex"],
+        )
+    assert [
+        (
+            first["brackets"][index]["lower_kappa_hex"],
+            first["brackets"][index]["upper_kappa_hex"],
+        )
+        for index in (0, 3)
+    ] == [
+        ("0x1.f400000000000p-2", "0x1.3880000000000p-1"),
+        ("0x1.312d000000000p+0", "0x1.7d78400000000p+0"),
+    ]
+    assert [len(entry["kappas"]) for entry in combined["sigma_entries"]] == [
+        16,
+        31,
+        31,
+        16,
+    ]
+
+
+def test_combined_selector_fails_closed_when_one_sigma_remains_unresolved():
+    _p0, combined = _combined_selector_document(unresolved_sigma=1.0)
+
+    brackets = analysis.select_p1_brackets(combined)
+
+    assert brackets["schema_version"] == analysis.COMBINED_BRACKET_SCHEMA
+    assert brackets["requires_p0_extension"] is True
+    assert brackets["brackets"][2]["status"] == "requires_p0_extension"
+    with pytest.raises(RuntimeError, match="P0 extension required.*1\\.0"):
+        analysis.build_p1_protocol(combined, brackets)
+
+
+def test_p1_accepts_combined_only_with_selected_v2_brackets():
+    _p0, combined = _combined_selector_document()
+    brackets = analysis.select_p1_brackets(combined)
+
+    protocol = analysis.build_p1_protocol(combined, brackets)
+
+    assert protocol["source_analysis_document_sha256"] == combined[
+        "analysis_document_sha256"
+    ]
+    assert protocol["source_bracket_document_sha256"] == brackets[
+        "bracket_document_sha256"
+    ]
+    assert protocol["grid_namespace"] == "pilot-p1-v1"
+    assert protocol["master_seed"] == 19_420_261_729
+    assert protocol["replicas"] == list(range(8, 24))
+    assert len(protocol["cells"]) == 4 * 3 * 16
+    assert all(len(entry["kappas"]) == 9 for entry in protocol["sigma_entries"])
+
+    legacy = json.loads(json.dumps(brackets))
+    legacy["schema_version"] = analysis.BRACKET_SCHEMA
+    unsigned = dict(legacy)
+    unsigned.pop("bracket_document_sha256")
+    legacy["bracket_document_sha256"] = hashlib.sha256(
+        _canonical_bytes(unsigned)
+    ).hexdigest()
+    with pytest.raises(RuntimeError, match="schema version"):
+        analysis.build_p1_protocol(combined, legacy)
+
+    forged = json.loads(json.dumps(brackets))
+    forged["brackets"][0]["lower_kappa_hex"] = (0.5).hex()
+    unsigned = dict(forged)
+    unsigned.pop("bracket_document_sha256")
+    forged["bracket_document_sha256"] = hashlib.sha256(
+        _canonical_bytes(unsigned)
+    ).hexdigest()
+    with pytest.raises(RuntimeError, match="preserved"):
+        analysis.build_p1_protocol(combined, forged)
+
+
 @pytest.mark.parametrize(
     ("defect", "match"),
     (
@@ -1739,3 +1904,24 @@ def test_build_p1_protocol_rejects_required_p0_extension():
 
     with pytest.raises(RuntimeError, match="P0 extension required.*1\\.0"):
         analysis.build_p1_protocol(source, brackets)
+
+
+def test_original_real_p0_bracket_bytes_hash_and_refusal_are_unchanged():
+    source_path = (
+        Path(__file__).resolve().parents[6] / "results/challenge-194/p0_analysis.json"
+    )
+    source = extension.load_frozen_p0_analysis(source_path)
+
+    first = analysis.select_p1_brackets(source)
+    second = analysis.select_p1_brackets(source)
+
+    assert _canonical_bytes(first) == _canonical_bytes(second)
+    assert first["bracket_document_sha256"] == (
+        "fb3df666044bf9531443fc00c5c2c2d489512b4162864b3a92ffc2e756832403"
+    )
+    assert first["requires_p0_extension"] is True
+    assert [
+        float.fromhex(entry["sigma_hex"])
+        for entry in first["brackets"]
+        if entry["status"] == "requires_p0_extension"
+    ] == [0.9, 1.0]
