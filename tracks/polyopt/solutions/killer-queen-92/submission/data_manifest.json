@@ -6,9 +6,9 @@
   ],
   "aggregate_sources": [
     {
-      "bytes": 68068,
+      "bytes": 68193,
       "path": "results/deadline_analysis/gap_scan_trials.csv",
-      "sha256": "605cbe12cd9d02c45ef229d19e40b99e26fef0c8d4d93114947a00e3aff9b8ba"
+      "sha256": "c399a03033e486c7c1d672cbdf9780492299af3236b84bfdee706524947f536c"
     },
     {
       "bytes": 63137,
@@ -55,15 +55,15 @@
     "accepted_intervals": 2,
     "accepted_one_sided_objectives": 26,
     "certified_gap_upper_statements": 10,
-    "durable_fixed_gamma_rows": 162,
+    "durable_fixed_gamma_rows": 163,
     "exact_projected_observable_bounds": 3,
-    "feasible_fixed_gamma_rows": 72,
+    "feasible_fixed_gamma_rows": 73,
     "fixed_gamma_rows": 212,
     "floating_objectives": 100,
     "interval_rows": 69,
     "objective_errors": 8,
     "observable_rows": 138,
-    "unknown_fixed_gamma_rows": 89,
+    "unknown_fixed_gamma_rows": 88,
     "verified_excluded_fixed_gamma_rows": 51
   },
   "raw_campaign_directories": [
@@ -82,7 +82,7 @@
       "role": "diagnostic"
     },
     {
-      "bytes": 557274,
+      "bytes": 557851,
       "description": "Canonical merged tables, plots, and live calculation report.",
       "directory": "deadline_analysis",
       "files": 11,
@@ -159,7 +159,7 @@
       "role": "production"
     },
     {
-      "bytes": 152382719,
+      "bytes": 142526030,
       "description": "Extended Target-2 geometry grid; may be updated by SCNet.",
       "directory": "deadline_geometry_grid",
       "files": 24,
@@ -292,5 +292,5 @@
     "primary_encoding": "matrix",
     "primary_symmetry": "U1_INVARIANT_KMS_STATES"
   },
-  "snapshot_generated": "2026-07-30T18:44:28+08:00"
+  "snapshot_generated": "2026-07-30T18:47:01+08:00"
 }

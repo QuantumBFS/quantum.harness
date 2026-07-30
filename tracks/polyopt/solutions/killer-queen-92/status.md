@@ -1,6 +1,6 @@
 # Issue #92 central algorithm and calculation status
 
-Last updated: **2026-07-30 18:42 CST**
+Last updated: **2026-07-30 18:47 CST**
 Source of truth: [Quantum Harness issue #92](https://github.com/QuantumBFS/quantum.harness/issues/92)
 Primary method: Xu *et al.*, [*The bulk spectral gap is semi-decidable: a
 convergent family of certified upper bounds*](https://arxiv.org/abs/2606.03836)
@@ -1119,9 +1119,11 @@ maximum simultaneous issue-92 request at 448 GB.
   every trial checkpoints independently and remains `UNKNOWN` until checked.
 - Fetched the first durable refinement trials.  Exact-projected exclusions
   improve the line-graph P4 statement from `Gamma_(1,2)/U<=0.300` to `<=0.170`
-  and the `{12,4}` P5 statement from `<=1.000` to `<=0.800`; the lower trials
-  and line midpoint were still running and remain `UNKNOWN`.  The refreshed
-  aggregate has 162/212 durable rows: 72 FEASIBLE, 51 EXCLUDED, and 89 UNKNOWN.
+  and the `{12,4}` P5 statement from `<=1.000` to `<=0.800`.  The latter cell
+  then completed with a checked `FEASIBLE(0.750)` trial, giving a clean
+  checked search span `[0.750,0.800]`; the P4 lower trials and line midpoint
+  were still running.  The refreshed aggregate has 163/212 durable rows:
+  73 FEASIBLE, 51 EXCLUDED, and 88 UNKNOWN.
 - Replaced the presentation-style submission with a short academic Target 1/2
   report.  It now states the atomic ED conclusion explicitly, includes the
   complete radius-one Target-2 ED data at `nmax=3`, and keeps finite-patch

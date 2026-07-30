@@ -1,6 +1,6 @@
 # Agent handoff and decision log — issue #92
 
-Last updated: **2026-07-30 18:42 CST**
+Last updated: **2026-07-30 18:47 CST**
 Active workflow: [`status.md`](status.md) — **Gate 3 nested lattice levels**,
 with `W0.5` blocked on a Mosek license
 Issue: [certified bulk spectral-gap bounds for truncated Bose--Hubbard models
@@ -446,11 +446,12 @@ Detailed tables belong in `status.md` and `REPORT.md`, not here.
   and the serial 192-GiB TS2 lane total 448 GiB.  Preserve independent trial
   checkpoints and promote nothing before exact/primal checking.
 - First refinement checkpoints promote exact exclusions at line P4 `0.170`
-  and `{12,4}` P5 `0.800`; the later trials remain `UNKNOWN`.  The aggregate is
-  162/212 durable rows (72 FEASIBLE, 51 EXCLUDED, 89 UNKNOWN).  The submission
-  is now a plain four-section academic report centered on Target 1 and Target
-  2, with the atomic and finite-patch ED conclusions stated explicitly; its 21
-  Python tests pass.
+  and `{12,4}` P5 `0.800`; the P5 cell subsequently completed with checked
+  `FEASIBLE(0.750)`, so its search span is `[0.750,0.800]` with no interior
+  unknown.  The aggregate is 163/212 durable rows (73 FEASIBLE, 51 EXCLUDED,
+  88 UNKNOWN).  The submission is now a plain four-section academic report
+  centered on Target 1 and Target 2, with the atomic and finite-patch ED
+  conclusions stated explicitly; its 21 Python tests pass.
 
 ## 10. Handoff protocol
 

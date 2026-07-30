@@ -2,7 +2,7 @@
 
 - **Issue:** [Quantum Harness #92](https://github.com/QuantumBFS/quantum.harness/issues/92)
 - **Method:** [Xu et al., thermodynamic bulk-gap hierarchy](https://arxiv.org/abs/2606.03836)
-- **Snapshot:** 2026-07-30T18:44:28+08:00
+- **Snapshot:** 2026-07-30T18:47:01+08:00
 - **Status:** Target 1 completed; Target 2 partially completed.
 
 ## 1. Scope and status
@@ -66,7 +66,7 @@ At the complete matrix level `nmax=1`, `(L,d)=(1,2)`, we obtained 10 independent
 |---|---|---|---|---|---|
 | {12,4} | P2 | (0.05, 0.5) | 0.51 | 0.52 | 1 |
 | {12,4} | P4 | (0.03, 0.15) | 0 | 0.3 | 2 |
-| {12,4} | P5 | (0.03, 0.75) | 0 | 0.8 | 1 |
+| {12,4} | P5 | (0.03, 0.75) | 0.75 | 0.8 | 0 |
 | {8,3} | P1 | (0.03, 0.5) | 0.5 | 0.505 | 0 |
 | {8,3} | P2 | (0.05, 0.5) | 0.509 | 0.511 | 1 |
 | {8,3} | P3 | (0.06, 0.5) | 0.514 | 0.518 | 2 |
