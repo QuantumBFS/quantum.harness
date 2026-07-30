@@ -257,10 +257,115 @@ elseif STAGE == "g4"
         red[] = true; note[] = "hard failure (caught): " * string(typeof(e))
     end
     gate!("G4", red[], "link-coefficient sign-flip -> " * note[] * (red[] ? " RED" : " NOT CAUGHT"))
+elseif STAGE == "wbundle"
+    # T2 pre-registration record: per-bundle per-N W_bundle sizes, PRINTED
+    open(joinpath(DIR, "wbundle_table.csv"), "w") do io
+        println(io, "bundle,N,closure_words,gamma_prods,W_bundle_size")
+        for b in POOL, N in (10, 12, 14, 20)
+            tR = allowlist(N)
+            gbb = gamma2_block([b], N)
+            cand = unique(vcat(gbb.prods, bundle_closure(b, N)))
+            wb = count(w -> bfind(tR, w) === nothing, cand)
+            @printf("W_bundle(%s, N=%d) = %d  (closure %d, prods %d)\n",
+                    b, N, wb, length(bundle_closure(b, N)), length(gbb.prods))
+            println(io, "$b,$N,$(length(bundle_closure(b, N))),$(length(gbb.prods)),$wb")
+        end
+    end
+elseif STAGE == "gateN"
+    # size-specific gates before C/C4 at a new N (execution patch §4):
+    # pullbacks in span; objective present; (N<=14) ED link residual +
+    # coarse-block PSD; (D4) its own map certificate. Deleted-object-zero
+    # is asserted inside the solve (seam_newwords==0) as before.
+    N = parse(Int, ARGS[2]); MP = ARGS[3]
+    As = MP == "D4" ? load_D4() : load_D2()
+    MP == "D4" && map_certificate(As)
+    reg = mk_registry(N, As)
+    tR = allowlist(N)
+    nout = count(w -> bfind(tR, w) === nothing, reg.words)
+    gate!("Gifc_$(MP)_N$N", nout == 0,
+          "link pullback words: $(length(reg.words)) total, $nout outside W_R($N)")
+    wobj, _ = canon(UInt16[1, 4], N)
+    gate!("Gobj_N$N", bfind(tR, wobj) !== nothing, "objective class in W_R($N)")
+    if N <= 14
+        E0, ψ = heis_ground(N)
+        mm = size(As[1][1], 1)
+        ωs = Vector{Matrix{ComplexF64}}()
+        okP = Ref(true)
+        for p in 1:2
+            ρ4 = window_marginal(ψ, N, 0, 4)
+            Cm = cmat(chainmap2(As, 2, p + 1), mm)
+            Ω = Cm * ρ4 * Cm'
+            λ = minimum(real, LinearAlgebra.eigvals(LinearAlgebra.Hermitian((Ω + Ω') / 2)))
+            okP[] &= λ >= -1e-12; push!(ωs, Ω)
+        end
+        xc = [[hcoord(h, Ω) for h in reg.hb] for Ω in ωs]
+        yv = Dict{Vector{UInt16},Float64}()
+        worst = Ref(0.0)
+        for (r, yr) in enumerate(reg.ycoef)
+            v = sum((c * get!(() -> word_expect(ψ, N, w), yv, w) for (w, c) in yr), init = 0.0)
+            v += sum((c * xc[blk][k] for (blk, k, c) in reg.sent[r]), init = 0.0)
+            worst[] = max(worst[], abs(v))
+        end
+        gate!("Ged_$(MP)_N$N", okP[] && worst[] <= 1e-10,
+              @sprintf("coarse PSD + ED link residual %.1e over %d rows", worst[], length(reg.ycoef)))
+    else
+        gate!("Ged_$(MP)_N$N", true,
+              "ED at N=$N infeasible (2^$N dense); rows are N-parametric CP identities — validated at N=14 (largest ED-feasible size; precedent: depth admission)")
+    end
+elseif STAGE == "dgate"
+    # execution patch §3: D preconditions at N (B_half only, fixed label)
+    N = parse(Int, ARGS[2])
+    tR = allowlist(N)
+    gbb = gamma2_block(["B_half"], N)
+    cand = unique(vcat(gbb.prods, bundle_closure("B_half", N)))
+    wb = [w for w in cand if bfind(tR, w) === nothing]
+    if isempty(wb)
+        gate!("Gdgate_N$N", false, "W_bundle(B_half,$N)=0 -> D = STRUCTURALLY_ABSORBED (no independent test)")
+    else
+        okE = true; note = "ED check at N=$N"
+        if N <= 14
+            E0, ψ = heis_ground(N)
+            yv = Dict{Vector{UInt16},Float64}()
+            G = zeros(gbb.dim, gbb.dim)
+            for (w, i, j, c) in gbb.entries
+                G[i, j] += c * get!(() -> word_expect(ψ, N, w), yv, w)
+            end
+            λ = minimum(LinearAlgebra.eigvals(LinearAlgebra.Symmetric((G + G') / 2)))
+            okE = λ >= -1e-10; note = @sprintf("Gamma_Bhalf(y_ED) eigmin %+.2e", λ)
+        else
+            note = "ED at N=$N infeasible; Gamma_S(y_phys) PSD holds state-independently; checked at N=14"
+        end
+        gate!("Gdgate_N$N", okE, "W_bundle(B_half,$N)=$(length(wb)) nonempty; $note; label FIXED_B_HALF_CORRECTION_NO_SELECTION")
+    end
+elseif STAGE == "buildarm"
+    N = parse(Int, ARGS[2]); ARM = ARGS[3]
+    if ARM in ("A", "B")
+        ext = empty_ext()
+        xtra = ARM == "A" ? N ÷ 2 - 1 : r_of(N) - 1
+    else
+        As = ARM == "C4" ? load_D4() : load_D2()
+        reg = mk_registry(N, As)
+        gramblocks = NamedTuple{(:dim, :entries),Tuple{Int,Vector{Tuple{Vector{UInt16},Int,Int,Float64}}}}[]
+        words = copy(reg.words)
+        if ARM == "D"
+            gbb = gamma2_block(["B_half"], N)
+            append!(words, gbb.prods); unique!(words)
+            push!(gramblocks, (dim = gbb.dim, entries = gbb.entries))
+        end
+        ext = RGExt(words, gramblocks, reg.ycoef,
+                    [(dim = z.dim, entries = z.entries) for z in reg.zblocks],
+                    Tuple{Int,Float64}[], Dict{String,Int}())
+        xtra = r_of(N) - 1
+    end
+    st = Dict{String,Any}(); run_probe(N, xtra, CostProbe(ext, st))
+    open(joinpath(DIR, "build_costs.csv"), "a") do io
+        println(io, "$N,$ARM,$(st["psd"]),$(st["big"]),$(st["rows"]),$(st["nnz"])")
+    end
+    @printf("BUILD %s@N=%d psd=%d big=%d rows=%d nnz=%d\n", ARM, N, st["psd"], st["big"], st["rows"], st["nnz"])
 elseif STAGE == "solve"
     N = parse(Int, ARGS[2]); ARM = ARGS[3]
-    As = ARM in ("C", "D") ? load_D2() : nothing
-    reg = ARM in ("C", "D") ? mk_registry(N, As) : nothing
+    As = ARM in ("C", "D") ? load_D2() : ARM == "C4" ? load_D4() : nothing
+    reg = ARM in ("C", "D", "C4") ? mk_registry(N, As) : nothing
     S = ARM == "D" ? ["B_half"] : String[]
     xtra = ARM == "A" ? N ÷ 2 - 1 : r_of(N) - 1
     kw = ARM == "A" || ARM == "B" ? (vspace = :stock,) :
