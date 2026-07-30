@@ -597,6 +597,73 @@
         {
           "kind": "heading",
           "level": 3,
+          "text": "⟦zh⟧高噪声复核：59 倍加速不是低噪声特例⟦en⟧High-noise confirmation: the 59x acceleration is not a low-noise exception"
+        },
+        {
+          "kind": "verdict",
+          "status": "good",
+          "label": "⟦zh⟧从 5% 到 45%，每一档都减少 55–72 倍样本；24 次训练全部精确⟦en⟧From 5% to 45%, every level uses 55–72x fewer examples; all 24 runs are exact",
+          "why": "⟦zh⟧把原来的十二次均匀采样实验与十二次 D-optimal 实验按噪声率和随机种子逐一配对。两组都只用新鲜带噪标签更新，最终全部恢复同一条 36 项整数规则。六档噪声的平均样本减少倍数为 55.0、60.0、55.6、57.1、72.4、61.4，说明实验设计提供的是跨噪声区间的稳定约六十倍增益，而不是 25% 单点调参。⟦en⟧The original twelve uniform runs and twelve D-optimal runs are paired one-for-one by noise rate and seed. Both groups update only from freshly corrupted labels, and every run ultimately recovers the same 36-term integer rule. Mean example reductions across the six noise levels are 55.0x, 60.0x, 55.6x, 57.1x, 72.4x and 61.4x, showing a stable roughly sixty-fold gain across the noise range rather than tuning to the 25% point."
+        },
+        {
+          "kind": "table",
+          "columns": [
+            "⟦zh⟧逐位翻转率⟦en⟧Per-bit flip rate",
+            "⟦zh⟧均匀采样平均样本⟦en⟧Uniform mean examples",
+            "⟦zh⟧D-optimal 平均样本⟦en⟧D-optimal mean examples",
+            "⟦zh⟧样本减少倍数⟦en⟧Example reduction"
+          ],
+          "rows": [
+            [
+              "5%",
+              "55,000",
+              "1,000",
+              "55.0x"
+            ],
+            [
+              "15%",
+              "135,000",
+              "2,250",
+              "60.0x"
+            ],
+            [
+              "25%",
+              "250,000",
+              "4,500",
+              "55.6x"
+            ],
+            [
+              "35%",
+              "700,000",
+              "12,250",
+              "57.1x"
+            ],
+            [
+              "40%",
+              "1,900,000",
+              "26,250",
+              "72.4x"
+            ],
+            [
+              "45%",
+              "6,750,000",
+              "110,000",
+              "61.4x"
+            ]
+          ]
+        },
+        {
+          "kind": "figures",
+          "items": [
+            {
+              "src": "noisy-c-doptimal-noise-scaling.png",
+              "caption": "⟦zh⟧左：六档噪声的平均首次全对样本数，纵轴为对数尺度；两条曲线在整个区间内近似保持平行。中：每档的样本减少倍数均在 55 到 72 之间，六档平均为 60.24 倍。右：D-optimal 的平均首次全对批次与净标签信号强度平方的倒数近似线性，拟合 R² 为 0.99985；45% 噪声只剩 10% 净偏置，但两个种子仍分别在第 990 和 1,210 批恢复全域精确。⟦en⟧Left: mean examples to first exact recovery at six noise levels on a logarithmic axis; the two curves remain nearly parallel across the range. Middle: example reduction stays between 55x and 72x at every level, averaging 60.24x. Right: D-optimal mean recovery batches are nearly linear in inverse squared clean-label signal, with R² 0.99985; at 45% noise only a 10% net bias remains, yet the two seeds still recover the complete domain at batches 990 and 1,210."
+            }
+          ]
+        },
+        {
+          "kind": "heading",
+          "level": 3,
           "text": "⟦zh⟧输入采样消融：速度与结构置信度并不相同⟦en⟧Input-sampling ablation: speed and structural confidence differ"
         },
         {
