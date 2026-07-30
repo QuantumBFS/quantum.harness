@@ -1,10 +1,14 @@
 """Post-process the generic offline report into a bilingual research interface."""
 
+import re
 from pathlib import Path
+
+from bs4 import BeautifulSoup, NavigableString
 
 
 ROOT = Path(__file__).resolve().parent
 REPORT = ROOT / "report" / "report.html"
+LANGUAGE_MARKER = re.compile(r"⟦zh⟧([\s\S]*?)⟦en⟧([\s\S]*)")
 
 EXTRA_STYLE = r"""
 <style id="bilingual-research-theme">
@@ -79,6 +83,7 @@ pre code{border:0;background:transparent;color:#b8f3ff;line-height:1.7}
 .report-controls button{appearance:none;border:0;border-radius:9px;padding:8px 12px;background:transparent;color:#92a4c2;font:700 12px/1 var(--sans);cursor:pointer;transition:.18s ease}
 .report-controls button:hover{color:#eaf3ff;background:#17243b}
 .report-controls button.active{color:#07111e;background:linear-gradient(135deg,#70e6ff,#a69aff);box-shadow:0 4px 16px rgba(101,222,255,.25)}
+.lang-en{display:none}
 .print-btn{display:none}
 .lang-fade{animation:langFade .22s ease}
 @keyframes langFade{from{opacity:.35;transform:translateY(3px)}to{opacity:1;transform:none}}
@@ -107,29 +112,17 @@ EXTRA_UI = r"""
 </div>
 <script>
 (function(){
-  var marker=/⟦zh⟧([\s\S]*?)⟦en⟧([\s\S]*)/;
-  var entries=[];
-  var titleElement=document.querySelector('title');
-  var titleMatch=titleElement?titleElement.textContent.match(marker):null;
-  var pageTitles=titleMatch?{zh:titleMatch[1],en:titleMatch[2]}:null;
-  var walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);
-  var node;
-  while((node=walker.nextNode())){
-    var match=node.nodeValue.match(marker);
-    if(match) entries.push({node:node,zh:match[1],en:match[2]});
-  }
-  document.querySelectorAll('[alt],[title],[aria-label]').forEach(function(el){
-    ['alt','title','aria-label'].forEach(function(attr){
-      if(!el.hasAttribute(attr)) return;
-      var value=el.getAttribute(attr),match=value.match(marker);
-      if(match) entries.push({element:el,attr:attr,zh:match[1],en:match[2]});
-    });
-  });
   function setLanguage(lang){
-    entries.forEach(function(entry){
-      var value=lang==='zh'?entry.zh:entry.en;
-      if(entry.node) entry.node.nodeValue=value;
-      else entry.element.setAttribute(entry.attr,value);
+    document.querySelectorAll('.lang-zh').forEach(function(el){
+      el.style.display=lang==='zh'?'':'none';
+    });
+    document.querySelectorAll('.lang-en').forEach(function(el){
+      el.style.display=lang==='en'?'':'none';
+    });
+    ['alt','title','aria-label'].forEach(function(attr){
+      document.querySelectorAll('[data-lang-'+attr+'-zh]').forEach(function(el){
+        el.setAttribute(attr,el.getAttribute('data-lang-'+attr+'-'+lang));
+      });
     });
     document.documentElement.lang=lang==='zh'?'zh-CN':'en';
     document.querySelectorAll('[data-set-lang]').forEach(function(button){
@@ -141,12 +134,12 @@ EXTRA_UI = r"""
     if(tocLabel) tocLabel.textContent=lang==='zh'?'目录':'Contents';
     var footer=document.querySelector('.footer');
     if(footer) footer.textContent=lang==='zh'
-      ?'生成于 2026-07-28。单文件、无外部资源，可离线打开。'
-      :'Generated 2026-07-28. Single file, no external assets, opens offline.';
+      ?'更新于 2026-07-30。单文件、无外部资源，可离线打开。'
+      :'Updated 2026-07-30. Single file, no external assets, opens offline.';
     document.querySelector('main').classList.remove('lang-fade');
     void document.querySelector('main').offsetWidth;
     document.querySelector('main').classList.add('lang-fade');
-    if(pageTitles) document.title=lang==='zh'?pageTitles.zh:pageTitles.en;
+    document.title=document.documentElement.getAttribute('data-page-title-'+lang);
   }
   document.querySelectorAll('[data-set-lang]').forEach(function(button){
     button.addEventListener('click',function(){setLanguage(button.getAttribute('data-set-lang'));});
@@ -158,11 +151,61 @@ EXTRA_UI = r"""
 """
 
 
+def materialize_bilingual_markup(html: str) -> str:
+    """Turn raw language markers into stable spans before delivery."""
+
+    soup = BeautifulSoup(html, "html.parser")
+    title = soup.title
+    if title and title.string:
+        match = LANGUAGE_MARKER.fullmatch(str(title.string))
+        if match:
+            soup.html["data-page-title-zh"] = match.group(1)
+            soup.html["data-page-title-en"] = match.group(2)
+            title.string.replace_with(match.group(1))
+
+    marked_nodes = list(
+        soup.find_all(string=lambda value: value and "⟦zh⟧" in value)
+    )
+    for node in marked_nodes:
+        if node.parent and node.parent.name in {"script", "style", "title"}:
+            continue
+        text = str(node)
+        match = LANGUAGE_MARKER.search(text)
+        if not match:
+            continue
+        chinese = soup.new_tag("span")
+        chinese["class"] = "lang-zh"
+        chinese.string = match.group(1)
+        english = soup.new_tag("span")
+        english["class"] = "lang-en"
+        english.string = match.group(2)
+        prefix = text[: match.start()]
+        node.replace_with(chinese)
+        if prefix:
+            chinese.insert_before(NavigableString(prefix))
+        chinese.insert_after(english)
+
+    for element in soup.find_all(True):
+        for attribute in ("alt", "title", "aria-label"):
+            value = element.get(attribute)
+            if not isinstance(value, str):
+                continue
+            match = LANGUAGE_MARKER.fullmatch(value)
+            if not match:
+                continue
+            element[f"data-lang-{attribute}-zh"] = match.group(1)
+            element[f"data-lang-{attribute}-en"] = match.group(2)
+            element[attribute] = match.group(1)
+
+    return str(soup)
+
+
 def main() -> None:
     html = REPORT.read_text(encoding="utf-8")
     if 'id="bilingual-research-theme"' in html:
         print(f"already enhanced {REPORT}")
         return
+    html = materialize_bilingual_markup(html)
     html = html.replace("</head>", EXTRA_STYLE + "</head>")
     html = html.replace("</body>", EXTRA_UI + "</body>")
     REPORT.write_text(html, encoding="utf-8")

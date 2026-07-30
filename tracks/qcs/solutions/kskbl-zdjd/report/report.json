@@ -1,17 +1,38 @@
 {
-  "title": "⟦zh⟧Occam 电路：四个精确算术网络的门数优化⟦en⟧Occam’s Circuit: Gate-count Optimization of Four Exact Arithmetic Networks",
-  "eyebrow": "⟦zh⟧QuantumBFS 问题 71 · 研究报告⟦en⟧QuantumBFS Challenge 71 · Research Report",
-  "subtitle": "⟦zh⟧原始总计 385 门，当前总计 355 门；当前四份电路均通过完整定义域验证⟦en⟧Original total: 385 gates. Current total: 355 gates. All four current circuits pass full-domain verification",
-  "lede": "⟦zh⟧本研究在多个抽象层次上评估精确电路优化方法，包括算术单元重构、SAT 局部无关项、随机拓扑采样、多输出边界张量综合、公开构造复现，以及基于完整输入域的语义重代入。所有门数结果均对应通过完整定义域验证的电路。⟦en⟧This study evaluates exact-circuit optimization at several levels of abstraction: arithmetic-cell restructuring, SAT-derived local don’t-cares, randomized topology sampling, multi-output boundary-tensor synthesis, reproduction of a published construction, and full-domain semantic resubstitution. Every reported gate count corresponds to a circuit verified over its complete input domain.",
+  "title": "⟦zh⟧从精确电路到随机噪声学习⟦en⟧From Exact Circuits to Learning under Random Noise",
+  "eyebrow": "⟦zh⟧QuantumBFS 问题 71 · 电路优化与随机性实验⟦en⟧QuantumBFS Challenge 71 · Circuit Optimization and Noise Experiment",
+  "subtitle": "⟦zh⟧新增实验：每个输出位以 25% 概率独立翻转，并在每一步重新生成噪声⟦en⟧New experiment: every output bit flips independently with 25% probability, with fresh noise generated at every step",
+  "lede": "⟦zh⟧我们先把四个精确算术电路从 385 门压缩到 355 门；随后把六位乘法隐藏起来，只给随机初始化的学习器持续变化的带噪样本，比较哪种方法恢复规律最快。当前共享 MLP 已在完整干净定义域上达到 98.22% 整词准确率。⟦en⟧We first reduced four exact arithmetic circuits from 385 to 355 gates. We then hid six-bit multiplication and exposed randomly initialized learners only to continuously changing noisy samples, comparing which method recovers the rule fastest. The current shared MLP reaches 98.22% exact-word accuracy on the complete clean domain.",
   "sections": [
     {
-      "title": "⟦zh⟧结果总览⟦en⟧Results at a Glance",
-      "note": "⟦zh⟧计分基元为二输入 AND、OR、XOR、NAND、NOR、XNOR；输入与输出反相免费。所有当前电路均为完全精确电路。⟦en⟧The score counts two-input AND, OR, XOR, NAND, NOR and XNOR gates; input and output complementation is free. Every retained circuit is exact.",
+      "title": "⟦zh⟧结果总览：新增随机性实验⟦en⟧Results at a Glance: New Randomized Experiment",
+      "note": "⟦zh⟧第一页先给结论；第二页给出随机噪声实验的定义、概率和方法对比。⟦en⟧This first page leads with the results; the second page defines the random-noise experiment, its probabilities and the method comparison.",
       "blocks": [
         {
           "kind": "verdict",
           "status": "good",
-          "label": "⟦zh⟧总计 355 门⟦en⟧355 gates total",
+          "label": "⟦zh⟧25% 新鲜随机噪声下，整词准确率 98.22%⟦en⟧98.22% exact-word accuracy under fresh 25% random noise",
+          "why": "⟦zh⟧每次训练都重新抽取 100 个输入，并对十二个输出位分别独立翻转；模型从随机权重开始，不知道目标是乘法，也不读取现有乘法电路。⟦en⟧Every training step resamples 100 inputs and independently flips each of the twelve output bits. The model starts from random weights, does not know the target is multiplication and cannot read the existing multiplier circuit."
+        },
+        {
+          "kind": "card",
+          "title": "⟦zh⟧随机性一眼看清⟦en⟧Randomness at a glance",
+          "blocks": [
+            {
+              "kind": "kv",
+              "pairs": [
+                ["⟦zh⟧单个输出位翻转概率⟦en⟧Flip probability per output bit", "25%"],
+                ["⟦zh⟧同一输入再次出现⟦en⟧When the same input reappears", "⟦zh⟧重新独立生成噪声，不复用旧错误⟦en⟧Noise is regenerated independently; old errors are never reused"],
+                ["⟦zh⟧十二位输出至少一位出错的概率⟦en⟧Probability that at least one of twelve output bits is wrong", "96.83%"],
+                ["⟦zh⟧每个样本平均错误位数⟦en⟧Expected wrong bits per example", "3 / 12"]
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "verdict",
+          "status": "good",
+          "label": "⟦zh⟧原精确电路：总计 355 门⟦en⟧Original exact circuits: 355 gates total",
           "why": "⟦zh⟧原始总计 385 门，减少 30 门，降幅 7.79%。⟦en⟧Down from the original 385 gates: 30 gates saved, a 7.79% reduction."
         },
         {
@@ -31,135 +52,58 @@
             ["D", "x² + y²", "127", "113", "14", "27"]
           ],
           "numeric": [false, false, true, true, true, true]
-        },
-        {
-          "kind": "figures",
-          "items": [
-            {
-              "src": "gate-score-overview.svg",
-              "caption": "⟦zh⟧四个任务的原始与当前门数。A、B、C、D 分别减少 0、4、12、14 门；在所测试的脉动进位拓扑中，A 未出现低于 37 门的候选。⟦en⟧Original and current gate counts. Tasks A, B, C and D save 0, 4, 12 and 14 gates, respectively. No candidate below 37 gates was found for A among the tested ripple-carry topologies."
-            },
-            {
-              "src": "c-d-journeys.svg",
-              "caption": "⟦zh⟧C 与 D 的已接受精确解轨迹。C 的 165 到 158 是架构切换，不是同一网络中的七门局部删除。⟦en⟧Accepted exact trajectories for C and D. The C transition from 165 to 158 is an architecture replacement, not a seven-gate local deletion from the same network."
-            }
-          ]
-        },
-        {
-          "kind": "note",
-          "label": "⟦zh⟧验收条件⟦en⟧Acceptance criteria",
-          "text": "⟦zh⟧候选只有在成功解析、匹配完整输入域并匹配全部训练数据后，才会替换当前保留电路。近似结果以及失败或超时工具留下的文件不作为有效候选。⟦en⟧A candidate replaces the retained circuit only after successful parsing, complete-domain equivalence, and agreement with every training row. Approximate results and files left by failed or timed-out tools are not treated as valid candidates."
         }
       ]
     },
     {
       "title": "⟦zh⟧任务 C+：新鲜噪声流中的六位函数恢复⟦en⟧Task C+: Six-bit Function Recovery from a Fresh-Noise Stream",
-      "note": "⟦zh⟧本页把原任务 C 扩展为在线学习问题。学习器不知道隐藏函数的语义，不读取现有 156 门电路，每一步只接收 100 个重新随机生成的输入及当批独立污染的十二位输出。完整无噪定义域只由隔离评估器读取。⟦en⟧This page extends Task C into an online-learning problem. The learner does not know the hidden function’s semantics and cannot read the existing 156-gate circuit. At every step it receives only 100 newly sampled inputs and twelve-bit outputs independently corrupted for that batch. Only an isolated evaluator may read the complete clean domain.",
+      "note": "⟦zh⟧目标不是把一张固定的错误表背下来，而是从每次都变化的随机错误中恢复隐藏规律。学习器不知道目标函数是什么，也不能读取已有电路。⟦en⟧The goal is not to memorize one fixed corrupted table, but to recover the hidden rule from random errors that change every time. The learner does not know the target function and cannot read an existing circuit.",
       "blocks": [
         {
           "kind": "verdict",
-          "status": "warn",
-          "label": "⟦zh⟧进行中：随机初始化能否穿过持续变化的标签噪声？⟦en⟧In progress: can random initialization overcome continuously changing label noise?",
-          "why": "⟦zh⟧固定错误无法被记忆，因为同一个输入下次出现时会得到新的独立噪声。稳定下降的干净定义域损失因此对应对隐藏规律的恢复，而不是对某一份污染表的拟合。⟦en⟧Fixed errors cannot be memorized because the next occurrence of an input receives fresh independent noise. A sustained decrease in clean-domain loss therefore tracks recovery of hidden structure rather than memorization of one corrupted table."
-        },
-        {
-          "kind": "equation",
-          "tex": "\\widetilde z_{t,i,b}=f_b(x_{t,i})\\oplus\\varepsilon_{t,i,b},\\qquad \\varepsilon_{t,i,b}\\sim\\operatorname{Bernoulli}(p),\\qquad |B_t|=100"
-        },
-        {
-          "kind": "card",
-          "title": "⟦zh⟧首轮预注册设置⟦en⟧First pre-registered setup",
-          "blocks": [
-            {
-              "kind": "kv",
-              "pairs": [
-                ["⟦zh⟧输入域⟦en⟧Input domain", "⟦zh⟧12 位，共 4,096 个可能输入⟦en⟧Twelve bits, 4,096 possible inputs"],
-                ["⟦zh⟧输出⟦en⟧Output", "⟦zh⟧12 个二进制位⟦en⟧Twelve binary bits"],
-                ["⟦zh⟧每步训练批量⟦en⟧Training batch per step", "100"],
-                ["⟦zh⟧主噪声率⟦en⟧Primary noise rate", "p = 0.25"],
-                ["⟦zh⟧标准评估⟦en⟧Clean evaluation", "⟦zh⟧每隔固定步数穷举全部 4,096 个输入，仅记录、不反馈⟦en⟧Exhaust all 4,096 inputs at fixed intervals for logging only, without feedback"],
-                ["⟦zh⟧初始化⟦en⟧Initialization", "⟦zh⟧独立随机权重或随机门图；禁止乘法器种子⟦en⟧Independent random weights or random gate graphs; multiplier seeds prohibited"]
-              ]
-            }
-          ]
-        },
-        {
-          "kind": "text",
-          "text": "⟦zh⟧25% 位翻转使干净二进制信号缩小为 $1-2p=0.5$，理想化样本复杂度相对无噪声放大约 $1/(1-2p)^2=4$ 倍。它比 5% 更能显露收敛差异，同时仍远离不可辨认的 50% 极限。训练还将扫描 10%、20%、30% 和 40%，但主方法先在 25% 上冻结。⟦en⟧A 25% bit-flip rate attenuates the clean binary signal to $1-2p=0.5$ and inflates the idealized sample complexity by about $1/(1-2p)^2=4$ relative to clean data. It exposes convergence differences more clearly than 5% while remaining far from the unidentifiable 50% limit. Later runs will scan 10%, 20%, 30% and 40%, but the primary method is frozen first at 25%."
-        },
-        {
-          "kind": "heading",
-          "level": 3,
-          "text": "⟦zh⟧噪声感知训练目标⟦en⟧Noise-aware training objective"
-        },
-        {
-          "kind": "equation",
-          "tex": "r_{t,i,b}=p+(1-2p)s_{t,i,b},\\qquad \\mathcal L_{\\mathrm{noise}}=-\\sum_{i,b}\\left[\\widetilde z_{t,i,b}\\log r_{t,i,b}+(1-\\widetilde z_{t,i,b})\\log(1-r_{t,i,b})\\right]"
-        },
-        {
-          "kind": "text",
-          "text": "⟦zh⟧$s$ 表示模型对隐藏干净位为 1 的概率，$r$ 才是经过已知翻转通道后观测到 1 的概率。把通道放进似然可防止软模型把 25% 和 75% 当作最终干净输出。首个基线使用随机初始化的稠密神经网络验证在线数据流确实可恢复完整真值表；随后用可微布尔门网络和语义进化搜索把相同知识蒸馏为离散门图。⟦en⟧$s$ is the model probability that the hidden clean bit equals one, while $r$ is the probability of observing one after the known flip channel. Including the channel in the likelihood prevents a soft model from treating 25% and 75% as final clean outputs. The first baseline uses a randomly initialized dense neural network to test whether the online stream recovers the full truth table; differentiable Boolean gates and semantic evolutionary search then distill the same learned behavior into a discrete gate graph."
-        },
-        {
-          "kind": "heading",
-          "level": 3,
-          "text": "⟦zh⟧收敛与不确定性⟦en⟧Convergence and uncertainty"
-        },
-        {
-          "kind": "equation",
-          "tex": "q_b(x)=\\sum_j w_j C_{j,b}(x),\\qquad U_{\\mathrm{bit}}=\\frac{1}{4096}\\sum_x\\sum_{b=0}^{11}4q_b(x)(1-q_b(x))"
-        },
-        {
-          "kind": "equation",
-          "tex": "Z_j(x)=\\sum_{b=0}^{11}2^bC_{j,b}(x),\\qquad U_{\\mathrm{value}}=\\frac{1}{4095}\\sqrt{\\frac{1}{4096}\\sum_x\\operatorname{Var}_j[Z_j(x)]}"
-        },
-        {
-          "kind": "list",
-          "title": "⟦zh⟧固定检查点记录⟦en⟧Fixed-checkpoint record",
-          "items": [
-            "⟦zh⟧带噪训练损失的指数滑动平均，以及累计看过的随机样本数。⟦en⟧Exponentially smoothed noisy training loss and cumulative random examples seen.",
-            "⟦zh⟧无噪标准域上的逐位损失、逐位错误率、十二位整词准确率和归一化数值绝对误差。⟦en⟧Clean-domain bit loss, bit error, exact twelve-bit word accuracy and normalized numerical absolute error.",
-            "⟦zh⟧不同随机初始化之间的总位不确定性 $U_{\\mathrm{bit}}$。⟦en⟧Total bit uncertainty $U_{\\mathrm{bit}}$ across independent random initializations.",
-            "⟦zh⟧把不同二进制位按实际数值和相关性合并的 $U_{\\mathrm{value}}$；高位分歧会自然产生更大惩罚。⟦en⟧Value uncertainty $U_{\\mathrm{value}}$, which combines bit positions using their numerical significance and correlations so high-bit disagreement counts more.",
-            "⟦zh⟧每个近似电路的门数、深度、训练似然与完整定义域准确率；干净指标只用于报告。⟦en⟧Gate count, depth, training likelihood and full-domain accuracy for every approximate circuit; clean metrics are report-only."
-          ]
-        },
-        {
-          "kind": "code",
-          "title": "⟦zh⟧在线实验循环⟦en⟧Online experiment loop",
-          "text": "initialize_model_randomly()\nfor step in training_budget:\n    inputs = sample_100_fresh_inputs()\n    noisy_outputs = oracle_then_fresh_bit_flips(inputs, p=0.25)\n    update_only_from(inputs, noisy_outputs)\n    if step % evaluation_interval == 0:\n        record_without_feedback(evaluate_clean_full_domain())"
-        },
-        {
-          "kind": "heading",
-          "level": 3,
-          "text": "⟦zh⟧方法 1：共享稠密神经网络⟦en⟧Method 1: Shared dense neural network"
-        },
-        {
-          "kind": "verdict",
           "status": "good",
-          "label": "⟦zh⟧首个基线：98.22% 整词准确率⟦en⟧First baseline: 98.22% exact-word accuracy",
-          "why": "⟦zh⟧四个完全随机初始化、共享隐藏层的模型仅从 25% 新鲜翻转噪声流训练。30,000 步后，硬投票在全部 4,096 个干净输入上达到 99.8494% 逐位准确率和 98.2178% 十二位整词准确率。训练从未读取干净评估标签。⟦en⟧Four independently and randomly initialized models with shared hidden layers trained only on a fresh 25%-flip stream. After 30,000 steps, hard voting reached 99.8494% bit accuracy and 98.2178% exact twelve-bit word accuracy on all 4,096 clean inputs. Training never read clean evaluation labels."
+          "label": "⟦zh⟧当前最好：共享 MLP，98.22% 整词准确率⟦en⟧Current best: shared MLP, 98.22% exact-word accuracy",
+          "why": "⟦zh⟧30,000 步后，四模型硬投票在全部 4,096 个无噪输入上达到 99.8494% 逐位准确率和 98.2178% 整词准确率。⟦en⟧After 30,000 steps, hard voting across four models reaches 99.8494% bit accuracy and 98.2178% exact-word accuracy on all 4,096 clean inputs."
         },
         {
           "kind": "card",
-          "title": "⟦zh⟧基准结果与样本效率⟦en⟧Baseline result and sample efficiency",
+          "title": "⟦zh⟧实验协议与“25% 噪声”的准确含义⟦en⟧Protocol and the exact meaning of “25% noise”",
           "blocks": [
             {
               "kind": "kv",
               "pairs": [
-                ["⟦zh⟧模型⟦en⟧Model", "⟦zh⟧四成员共享 MLP；每个模型四层、隐藏宽度 192⟦en⟧Four-member shared MLP; four layers per model, hidden width 192"],
-                ["⟦zh⟧训练预算⟦en⟧Training budget", "⟦zh⟧30,000 步，共 3,000,000 个随机样本⟦en⟧30,000 steps, 3,000,000 random examples"],
-                ["⟦zh⟧本机墙钟时间⟦en⟧Local wall time", "233.2 s"],
-                ["⟦zh⟧最终干净逐位准确率⟦en⟧Final clean bit accuracy", "99.8494%"],
-                ["⟦zh⟧最终干净整词准确率⟦en⟧Final clean exact-word accuracy", "98.2178%"],
-                ["⟦zh⟧归一化数值 MAE⟦en⟧Normalized numeric MAE", "0.0001474"],
-                ["⟦zh⟧最终位不确定性⟦en⟧Final bit uncertainty", "U_bit = 0.1552"],
-                ["⟦zh⟧最终数值不确定性⟦en⟧Final value uncertainty", "U_value = 0.01031"],
-                ["⟦zh⟧首次达到 90% / 95% / 98% 整词准确率⟦en⟧First 90% / 95% / 98% exact-word accuracy", "7,500 / 8,500 / 15,000 steps"],
-                ["⟦zh⟧仅作事后报告的最佳检查点⟦en⟧Best post-hoc checkpoint, reporting only", "⟦zh⟧第 27,500 步，98.2666% 整词准确率⟦en⟧Step 27,500, 98.2666% exact-word accuracy"]
+                ["⟦zh⟧每一步⟦en⟧At every step", "⟦zh⟧重新随机抽取 100 个十二位输入⟦en⟧Resample 100 twelve-bit inputs"],
+                ["⟦zh⟧噪声概率⟦en⟧Noise probability", "⟦zh⟧每个输出位独立以 25% 概率翻转⟦en⟧Each output bit independently flips with 25% probability"],
+                ["⟦zh⟧噪声是否固定⟦en⟧Is noise fixed?", "⟦zh⟧不固定；每个批次、每次出现都重新生成⟦en⟧No; it is regenerated for every batch and every occurrence"],
+                ["⟦zh⟧一个十二位标签完全不变的概率⟦en⟧Probability a twelve-bit label is untouched", "3.17%"],
+                ["⟦zh⟧一个十二位标签至少一位出错的概率⟦en⟧Probability at least one output bit is wrong", "96.83%"],
+                ["⟦zh⟧每个样本平均错误位数⟦en⟧Expected wrong bits per example", "3"],
+                ["⟦zh⟧初始化⟦en⟧Initialization", "⟦zh⟧完全随机；不给目标公式或现有电路⟦en⟧Fully random; no target formula or existing circuit"],
+                ["⟦zh⟧干净评估⟦en⟧Clean evaluation", "⟦zh⟧每 500 步检查全部 4,096 个输入，只记录曲线，不反馈训练⟦en⟧Check all 4,096 inputs every 500 steps for plotting only, with no training feedback"]
               ]
             }
           ]
+        },
+        {
+          "kind": "heading",
+          "level": 3,
+          "text": "⟦zh⟧方法对比⟦en⟧Method comparison"
+        },
+        {
+          "kind": "table",
+          "columns": [
+            "⟦zh⟧方法⟦en⟧Method",
+            "⟦zh⟧逐位准确率⟦en⟧Bit accuracy",
+            "⟦zh⟧整词准确率⟦en⟧Exact-word accuracy",
+            "⟦zh⟧首次到 90%⟦en⟧First 90%",
+            "⟦zh⟧首次到 98%⟦en⟧First 98%",
+            "⟦zh⟧用时⟦en⟧Time"
+          ],
+          "rows": [
+            ["⟦zh⟧共享 MLP（当前最好）⟦en⟧Shared MLP (current best)", "99.8494%", "98.2178%", "7,500 步", "15,000 步", "233.2 s"],
+            ["⟦zh⟧十二位独立 MLP⟦en⟧Twelve independent MLPs", "99.0356%", "90.1855%", "28,000 步", "未达到", "280.3 s"]
+          ],
+          "numeric": [false, true, true, false, false, true]
         },
         {
           "kind": "figures",
@@ -172,8 +116,13 @@
         },
         {
           "kind": "note",
-          "label": "⟦zh⟧瓶颈与下一步⟦en⟧Bottleneck and next step",
-          "text": "⟦zh⟧第 0、1、2、9、10、11 位已经完全恢复，但第 3 位最终仍只有 98.8525% 准确率。共享表示已经证明随机噪声流足以恢复几乎全部规律，但它在少数进位型边界上形成平台。下一轮将保持数据、噪声和预算不变，比较十二个独立位网络、乘性交互/谱特征网络、可微布尔门网络、语义进化以及神经教师到符号学生的混合方法。⟦en⟧Bits 0, 1, 2, 9, 10 and 11 are fully recovered, but bit 3 ends at only 98.8525% accuracy. The shared representation establishes that the random noisy stream is sufficient to recover nearly all of the rule, yet it plateaus on a few carry-like boundaries. The next round keeps data, noise and budget fixed while comparing twelve independent bit networks, multiplicative-interaction/spectral features, differentiable Boolean gates, semantic evolution and a neural-teacher-to-symbolic-student hybrid."
+          "label": "⟦zh⟧怎么衡量不确定性⟦en⟧How uncertainty is measured",
+          "text": "⟦zh⟧同时训练四个随机初始化模型。位不确定性衡量四个模型在十二位输出上有多少分歧，0 表示完全一致，最大值为 12；数值不确定性把高位分歧赋予更大权重。共享 MLP 最终位不确定性为 0.1552，数值不确定性为 0.01031。⟦en⟧Four randomly initialized models are trained together. Bit uncertainty measures their disagreement across twelve output bits: zero means complete agreement and the maximum is twelve. Value uncertainty gives greater weight to disagreements in significant bits. The shared MLP ends at 0.1552 bit uncertainty and 0.01031 value uncertainty."
+        },
+        {
+          "kind": "note",
+          "label": "⟦zh⟧当前结论与下一步⟦en⟧Current conclusion and next step",
+          "text": "⟦zh⟧把十二位完全拆开训练明显更慢，说明不同输出位之间共享特征是有益的；但共享 MLP 仍在少数边界上停滞。下一轮优先测试通用的乘性交互与谱特征，不向模型写入乘法公式，然后再测试可微布尔门和进化搜索。⟦en⟧Training all twelve bits separately is clearly slower, showing that shared features across outputs are useful; the shared MLP still stalls on a few boundaries. The next priority is generic multiplicative-interaction and spectral features without encoding the multiplication formula, followed by differentiable Boolean gates and evolutionary search."
         }
       ]
     },
