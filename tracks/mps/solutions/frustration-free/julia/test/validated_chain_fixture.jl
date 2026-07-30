@@ -1,4 +1,4 @@
-isdefined(Main, :validate_chain_mapping_artifact) ||
+isdefined(@__MODULE__, :validate_chain_mapping_artifact) ||
     include(joinpath(@__DIR__, "..", "finite_bath_mps_runner.jl"))
 
 const VALIDATED_CHAIN_FIXTURE_BATH_SHA256 = (

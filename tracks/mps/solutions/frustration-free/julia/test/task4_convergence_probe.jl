@@ -5,6 +5,10 @@ module Task4ConvergenceProbe
 using JSON3
 using LinearAlgebra
 
+const PRODUCTION_ROOT = normpath(joinpath(@__DIR__, ".."))
+include(joinpath(PRODUCTION_ROOT, "finite_bath_mps_runner.jl"))
+include(joinpath(@__DIR__, "validated_chain_fixture.jl"))
+
 const N_BATH = 3
 const INTERACTION = 0.0
 const BETA = 0.04
@@ -162,13 +166,6 @@ function _branch_key(cursor)
     )
 end
 
-function _load_solver()
-    root = normpath(joinpath(@__DIR__, ".."))
-    Base.include(@__MODULE__, joinpath(root, "finite_bath_mps_runner.jl"))
-    Base.include(@__MODULE__, joinpath(@__DIR__, "validated_chain_fixture.jl"))
-    return nothing
-end
-
 function _error_payload(solver, oracle)
     fields = (;
         logZ = solver.logZ - oracle.logZ,
@@ -211,7 +208,6 @@ function _error_payload(solver, oracle)
 end
 
 function run_probe(config = parse_probe_config())
-    _load_solver()
     artifacts = validated_chain_fixture_artifacts(N_BATH)
     bath_payload = artifacts.bath_artifact["payload"]
     epsilon = Float64.(bath_payload["epsilon"])
