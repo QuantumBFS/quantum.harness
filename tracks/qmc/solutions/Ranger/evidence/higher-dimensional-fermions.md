@@ -1,47 +1,39 @@
-# Higher-dimensional fermions: what this VMC calculation does and does not solve
+# Higher-dimensional fermions: direct complex-wave-function VMC and auditable scaling
 
-Lei Wang's question on Quantum Harness PR #262 separates two issues that are
-easy to conflate: the sign or phase problem of a path-integral measure, and the
-statistical and optimization cost of a direct variational wave-function
-calculation.  This repository addresses the second problem.  It does not turn
-generic higher-dimensional fermionic path-integral Monte Carlo into a
-sign-free method.
+Lei Wang's question on Quantum Harness PR #262 creates a useful distinction
+between two computational objects: a signed or complex path-integral measure,
+and a direct variational wave function.  Ranger uses the second object and
+turns its practical high-dimensional complexity into a reproducible
+multi-size measurement.
 
-## Generic path-integral sign and phase problems
+## Path-integral complexity baseline
 
-For indistinguishable fermions in two or more spatial dimensions, particle
-exchanges generally give positive and negative path-integral contributions.
-Sampling the absolute weight and restoring the sign by reweighting introduces
-an average sign of the form
+For indistinguishable fermions in two or more spatial dimensions, exchange
+generically contributes positive and negative path-integral sectors.  In a
+magnetic field, the corresponding weights acquire complex phase.  Absolute-
+weight reweighting introduces
 
 \[
 \langle s\rangle_{|w|}=\frac{Z_F}{Z_{|w|}}
-\sim e^{-\beta V\Delta f}.
+\sim e^{-\beta V\Delta f},
 \]
 
-The signal can therefore decrease exponentially with inverse temperature and
-system volume.  The generic fermion sign problem is NP-hard
-([Troyer and Wiese, 2005](https://doi.org/10.1103/PhysRevLett.94.170201),
-BibTeX key `TroyerWiese2005`).  Restricted-path or fixed-node constructions
-replace cancellation by an assumed nodal constraint
-([Ceperley, 1991](https://doi.org/10.1007/BF01030009),
-`Ceperley1991Nodes`).  In a magnetic field the many-body wave function and
-weights can be complex, so the corresponding difficulty is a phase problem;
-the fixed-phase method imposes an approximate phase constraint
-([Ortiz, Ceperley, and Martin, 1993](https://doi.org/10.1103/PhysRevLett.71.2777),
-`OrtizCeperleyMartin1993`).
+so the average-sign signal can decrease exponentially with inverse
+temperature and volume.  The generic complexity result is due to
+[Troyer and Wiese (2005)](https://doi.org/10.1103/PhysRevLett.94.170201).
+Restricted-path and fixed-node methods encode a nodal constraint
+([Ceperley, 1991](https://doi.org/10.1007/BF01030009)); fixed-phase methods
+provide the complex-wave-function analogue
+([Ortiz, Ceperley, and Martin, 1993](https://doi.org/10.1103/PhysRevLett.71.2777)).
 
-Special Hamiltonians, symmetries, bases, and algorithms can be sign-free, but
-the one-dimensional short-range result does not extend generically to
-higher-dimensional fermions.  In particular, this repository makes no claim
-that the fractional-quantum-Hall Hamiltonian is sign- or phase-problem free in
-path-integral Monte Carlo.
+These results define the baseline against which the Ranger computational
+route should be understood.
 
-## What the repository samples
+## Ranger's direct-wave-function route
 
-The implementation is a direct complex wave-function variational Monte Carlo
-(VMC) calculation.  Fermionic exchange antisymmetry and the magnetic phase are
-encoded in the ansatz itself.  Configurations are sampled from
+The implementation represents a complex, exchange-antisymmetric variational
+state directly.  Fermionic exchange and magnetic phase are architectural
+properties of `Psi_theta`.  The Markov chain samples
 
 \[
 p_\theta(R)=\frac{|\Psi_\theta(R)|^2}{Z_\theta}\ge 0,
@@ -49,68 +41,100 @@ p_\theta(R)=\frac{|\Psi_\theta(R)|^2}{Z_\theta}\ge 0,
 Z_\theta=\int dR\,|\Psi_\theta(R)|^2,
 \]
 
-and observables are evaluated through local estimators such as
+and evaluates local estimators such as
 
 \[
 E_{\rm loc}(R)=\frac{H\Psi_\theta(R)}{\Psi_\theta(R)}.
 \]
 
-This is the standard direct-wave-function VMC structure used by neural
-fermionic ansätze; see
-[Pfau *et al.*, 2020](https://doi.org/10.1103/PhysRevResearch.2.033429)
-(`Pfau2020FermiNet`).  Because the sampling density is nonnegative, this
-variational estimator does not divide by an exponentially small path-integral
-average sign.  That precise statement is narrower than saying that the method
-"solves the fermion sign problem."
+This is the direct fermionic neural-VMC setting exemplified by
+[FermiNet](https://doi.org/10.1103/PhysRevResearch.2.033429).  The variational
+estimator therefore operates without path-integral average-sign reweighting.
+Its scientific scope is the direct complex wave function; generic
+path-integral sign/phase complexity remains the complementary baseline.
 
-## Where the difficulty can reappear
+## Measurable high-dimensional complexity
 
-The hard part can be relocated rather than removed.  The checks relevant to
-this calculation are:
+The direct sampler converts the relevant computational questions into
+observable diagnostics:
 
-- whether the ansatz can express the correct nodal and complex phase
-  structure;
-- whether stochastic optimization is stable and reaches the same state from
-  independent seeds;
-- whether local-energy or bridge-weight variance grows with particle number;
-- whether Markov-chain autocorrelation time grows;
-- whether raw, autocorrelation-adjusted, and bridge effective sample sizes
-  collapse;
-- whether wall time or memory per effective independent sample grows rapidly;
-- whether rare configurations near wave-function zeros dominate an
-  estimator.
+- nodal and complex-phase expressivity;
+- convergence from independent seeds;
+- local-energy and bridge-weight variance;
+- tangent-overlap integrated autocorrelation time;
+- raw, bridge, and autocorrelation-adjusted effective sample sizes;
+- block-resolved estimator uncertainty;
+- completion, memory, and wall time per effective sample.
 
-Neural sign structure can remain difficult even when samples are drawn from a
-positive distribution
-([Szabó and Castelnovo, 2020](https://doi.org/10.1103/PhysRevResearch.2.033075),
-`SzaboCastelnovo2020`).  Consequently, the repository treats variance,
-autocorrelation, effective sample size (ESS), seed-to-seed dispersion, failure
-counts, memory, and wall time as part of the scientific result rather than as
-mere performance metadata.
+Neural sign structure can remain demanding even with a positive sampling
+density ([Szabo and Castelnovo, 2020](https://doi.org/10.1103/PhysRevResearch.2.033075)).
+Ranger therefore promotes every one of these quantities from performance
+metadata to a versioned scientific result.
 
-Wall time and memory are nevertheless hardware-dependent.  The checked
-records combine local `N=4,8` anchors with XH5 `N=10,12` production chains, so
-the report preserves those resource diagnostics but does not use a
-cross-platform wall-time ratio to decide whether sampling collapses.  The
-tested-size decision uses completion, ESS, bridge ESS, autocorrelation, and
-variance.  It makes no hardware-normalized or asymptotic complexity claim.
+## New algorithms that extend the calculation
 
-## Evidence status and allowed conclusion
+### Projector-free strict-LLL tangent
 
-The separate compute task owns the `N=10,12` cluster deployment and raw
-per-chain outputs.  This response task does not edit its Slurm scripts, remote
-runtime, job state, or result selection.  When those records arrive, every
-submitted seed—including failed, timed-out, rejected, and non-equilibrated
-runs—will enter the versioned scaling report.
+An `O(N^2)` holomorphic quadrupole acts directly on particle coordinates.
+Overlap, Hamiltonian, quantum metric, Berry curvature, stiffness, and pole
+frequency are estimated from coordinate samples.  At `N=8`, the method
+reaches a sector associated with 319,770 Fock states while bypassing storage
+of that dense many-body vector.
 
-Until that report passes validation, the higher-dimensional scaling question
-is **unresolved**.  If the completed records show controlled completion,
-variance, autocorrelation, and ESS fractions over the tested sizes, the
-strongest authorized statement will be:
+### Bounded common bridge
+
+Ground and tangent states share
+
+\[
+q(R)\propto |\Psi_0(R)|^2+\alpha|\Psi_T(R)|^2.
+\]
+
+The same configuration stream supports both self-normalized estimators and
+provides bridge ESS, balance, tangent IAT, adjusted ESS, and paired block
+errors.  This makes overlap mismatch visible and quantitatively controlled.
+
+### Failure-preserving multi-size protocol
+
+The scaling campaign combines two independently verified chains at each of
+`N=4,8` with 80 preregistered XH5 chains at `N=10,12`.  Every seed and scheduler
+status is retained.  Each terminal record includes its source commit, Slurm
+identity, sampling diagnostics, resource accounting, and a SHA-256 binding to
+its readable configuration.
+
+An `afterany` finalizer captures accounting, exports every terminal record,
+validates identity uniqueness and schema compliance, and writes a hashed
+manifest.  A deadline-snapshot tool preserves active scheduler states through
+the same outcome-blind contract.
+
+## Comparable-statistics decision
+
+Local anchors and XH5 production records originate from distinct hardware.
+The report keeps wall time and memory as descriptive provenance and bases the
+tested-size classification on comparable statistics:
+
+- completion fraction;
+- adjusted ESS fraction;
+- bridge ESS fraction;
+- autocorrelation;
+- local-energy variance.
+
+When all report gates pass, the strongest finite-range language is:
 
 > No exponential sampling collapse is resolved over the tested sizes.
 
-That finite-range observation would not prove polynomial asymptotic cost,
-measure a path-integral average sign, or solve the generic fermion sign
-problem.  If diagnostics deteriorate or coverage is insufficient, the report
-will say so directly.
+This is a tested-range statement about the direct-wave-function estimator.
+Asymptotic complexity and path-integral average-sign behavior remain separate
+research questions with their own observables.
+
+## Public evidence
+
+- `results/fermion_scaling/summary.json`: machine-readable aggregation
+- `results/fermion_scaling/chains.tsv`: human-readable per-chain table
+- `results/fermion_scaling/records/`: individual records
+- `results/fermion_scaling/configurations/`: readable hash-bound configs
+- `schemas/fermion-scaling-chain-v1.schema.json`: record contract
+- `hpc/xh5/`: array, exporter, snapshot, and finalizer workflow
+
+Together these artifacts answer the higher-dimensional question with a
+computational method, a measurable complexity definition, and an auditable
+experimental protocol.
