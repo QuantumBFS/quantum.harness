@@ -1,3 +1,14 @@
+## Submission
+
+1. **Final 19-page challenge response:**
+   [t73_rmh_response_submission_final.pdf](t73_rmh_response_submission_final.pdf)
+2. **Step-by-step reproduction instructions:**
+   [REPRODUCE.md](REPRODUCE.md)
+
+The complete source, compact benchmark tables, raw server output, and plotting
+assets are pinned in the
+[full RMH delivery archive](https://github.com/yt641798730/quantum.harness/tree/8bb3c643b918fb8348217b41a0f29c4cb9bc60da/RMH).
+
 ## Team
 
 | | |
