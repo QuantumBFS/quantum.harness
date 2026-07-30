@@ -67,3 +67,24 @@ def test_pdf_keeps_each_figure_with_its_caption_and_interpretation(tmp_path: Pat
     )
 
     assert any(isinstance(flowable, KeepTogether) for flowable in flowables)
+
+
+def test_inconclusive_report_describes_null_estimates_without_python_none():
+    summary = summary_fixture()
+    summary["status"] = "xy_reproduced_diii_inconclusive"
+    summary["casimir"]["amplitude"] = None
+    summary["anisotropy"]["alpha"] = None
+    summary["anisotropy"]["alpha_stable"] = False
+    summary["central_charge"] = {
+        "published": False,
+        "value": None,
+        "interval": None,
+    }
+
+    english = build_report(summary, "en").sections[0].blocks[0].text
+    chinese = build_report(summary, "zh").sections[0].blocks[0].text
+
+    assert "None" not in english
+    assert "not fitted" in english
+    assert "不发布" in chinese
+    assert "None" not in chinese

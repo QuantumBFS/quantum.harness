@@ -184,6 +184,24 @@ def _scientific(value: object) -> str:
 def _english(summary: dict) -> dict[str, Any]:
     amplitude = summary.get("casimir", {}).get("amplitude")
     alpha = summary.get("anisotropy", {}).get("alpha")
+    alpha_stable = bool(summary.get("anisotropy", {}).get("alpha_stable"))
+    if amplitude is None:
+        summary_text = (
+            f"The frozen status is {summary['status']}. The Casimir product c_eff α "
+            "was not fitted; α is not stable, so no standalone c_eff is published."
+        )
+    elif alpha is None or not alpha_stable:
+        summary_text = (
+            f"The frozen status is {summary['status']}. The directly fitted universal "
+            f"candidate is c_eff α={float(amplitude):.6g}; α is not stable, so no "
+            "standalone c_eff is published."
+        )
+    else:
+        summary_text = (
+            f"The frozen status is {summary['status']}. The directly fitted universal "
+            f"candidate is c_eff α={float(amplitude):.6g}; the stable calibration is "
+            f"α={float(alpha):.6g}."
+        )
     return {
         "titles": (
             "Executive result and scope",
@@ -202,7 +220,7 @@ def _english(summary: dict) -> dict[str, Any]:
             "Reproducibility and code/data inventory",
         ),
         "status": "Exploratory status",
-        "summary": f"The frozen status is {summary['status']}. The directly fitted universal candidate is c_eff α={amplitude}; α={alpha} is reported only with its window-stability gate.",
+        "summary": summary_text,
         "concepts": "Repeated quantum measurements can either preserve extended Majorana correlations or localize them. The metal-insulator distinction is diagnosed from size trends, entanglement-arc model weights, correlations, and record free energy rather than from one smooth curve.",
         "measurement_axis": "The two angles define the physical single-qubit measurement axis.",
         "mapping": "The surface-code Born tensor network maps to alternating Gaussian measurements and rotations. The real coupling controls information gain; the complex phase controls norm-preserving Majorana rotation.",
@@ -241,6 +259,22 @@ def _english(summary: dict) -> dict[str, Any]:
 def _chinese(summary: dict) -> dict[str, Any]:
     amplitude = summary.get("casimir", {}).get("amplitude")
     alpha = summary.get("anisotropy", {}).get("alpha")
+    alpha_stable = bool(summary.get("anisotropy", {}).get("alpha_stable"))
+    if amplitude is None:
+        summary_text = (
+            f"冻结结果状态为 {summary['status']}。Casimir 乘积 c_eff α 未拟合；"
+            "α 不稳定，因此不发布独立的 c_eff。"
+        )
+    elif alpha is None or not alpha_stable:
+        summary_text = (
+            f"冻结结果状态为 {summary['status']}。直接拟合的普适候选量为 "
+            f"c_eff α={float(amplitude):.6g}；α 不稳定，因此不发布独立的 c_eff。"
+        )
+    else:
+        summary_text = (
+            f"冻结结果状态为 {summary['status']}。直接拟合的普适候选量为 "
+            f"c_eff α={float(amplitude):.6g}；稳定标定为 α={float(alpha):.6g}。"
+        )
     return {
         "titles": (
             "核心结果与适用范围",
@@ -259,7 +293,7 @@ def _chinese(summary: dict) -> dict[str, Any]:
             "可复现性及代码数据清单",
         ),
         "status": "探索性状态",
-        "summary": f"冻结结果状态为 {summary['status']}。直接拟合的普适候选量是 c_eff α={amplitude}；α={alpha} 只有通过窗口稳定性门槛后才用于推导中心荷。",
+        "summary": summary_text,
         "concepts": "重复量子测量既可能保留延展的 Majorana 关联，也可能使其局域化。金属—绝缘体判别同时依赖尺寸趋势、纠缠弧模型权重、空间关联和记录自由能，不能由一条平滑曲线单独决定。",
         "measurement_axis": "两个角度共同确定物理单比特测量轴。",
         "mapping": "表面码 Born 张量网络可映射成交替的高斯测量和旋转。实耦合控制信息获取强度，复相位控制保持范数的 Majorana 旋转。",
