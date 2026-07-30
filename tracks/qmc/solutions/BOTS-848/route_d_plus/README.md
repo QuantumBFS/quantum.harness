@@ -47,6 +47,18 @@ Phase 3 adds projected one-particle tensor algebra:
 - `phase3.sbatch` runs the Phase 3 gate only after a Phase 2 certificate is
   supplied.
 
+Phase 4 adds the analytic many-body mothers:
+
+- `mother.py` evaluates the Laughlin state without regularizing nodes and
+  applies the rank-two projected density through the calibrated quadrature
+  proof backend to produce all five `Phi_(2M)` components;
+- `phase4.schema.json` defines the analytic-mother certificate;
+- `certify_phase4.py` checks mother exchange, degree, and SU(2) invariance,
+  tower non-vanishing, exchange and degree, rank-two ladder identities,
+  finite rotations, and equal component norms;
+- `phase4.sbatch` runs the Phase 4 gate only after a Phase 3 certificate is
+  supplied.
+
 The generated virtual environment, dependency lock, and manifest are runtime
 artifacts. They must remain outside Git under `tracks/qmc/results/`.
 

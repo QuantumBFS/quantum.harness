@@ -1,0 +1,132 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "challenge-15-route-d-plus-phase4-v1",
+  "title": "Route D+ Phase 4 analytic mother certificate",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "created_at_utc",
+    "n_electrons",
+    "two_q",
+    "tower_components",
+    "minimum_component_magnitude",
+    "tolerances",
+    "max_errors",
+    "passed",
+    "git_commit",
+    "git_dirty",
+    "hostname",
+    "slurm_job_id",
+    "slurm_cluster_name",
+    "phase3_certificate_path",
+    "phase3_certificate_sha256",
+    "phase3_git_commit"
+  ],
+  "properties": {
+    "schema_version": {"const": "challenge-15-route-d-plus-phase4-v1"},
+    "created_at_utc": {"type": "string", "format": "date-time"},
+    "n_electrons": {"const": 6},
+    "two_q": {"const": 15},
+    "tower_components": {"const": 5},
+    "minimum_component_magnitude": {
+      "type": "number",
+      "exclusiveMinimum": 1e-14
+    },
+    "tolerances": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mother_exchange",
+        "mother_degree",
+        "mother_rotation",
+        "tower_exchange",
+        "tower_degree",
+        "ladder",
+        "finite_rotation",
+        "equal_norm"
+      ],
+      "properties": {
+        "mother_exchange": {"const": 1e-12},
+        "mother_degree": {"const": 1e-12},
+        "mother_rotation": {"const": 1e-12},
+        "tower_exchange": {"const": 1e-10},
+        "tower_degree": {"const": 1e-10},
+        "ladder": {"const": 1e-8},
+        "finite_rotation": {"const": 1e-6},
+        "equal_norm": {"const": 1e-12}
+      }
+    },
+    "max_errors": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mother_exchange",
+        "mother_degree",
+        "mother_rotation",
+        "tower_exchange",
+        "tower_degree",
+        "ladder",
+        "finite_rotation",
+        "equal_norm"
+      ],
+      "properties": {
+        "mother_exchange": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMaximum": 1e-12
+        },
+        "mother_degree": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMaximum": 1e-12
+        },
+        "mother_rotation": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMaximum": 1e-12
+        },
+        "tower_exchange": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMaximum": 1e-10
+        },
+        "tower_degree": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMaximum": 1e-10
+        },
+        "ladder": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMaximum": 1e-8
+        },
+        "finite_rotation": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMaximum": 1e-6
+        },
+        "equal_norm": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMaximum": 1e-12
+        }
+      }
+    },
+    "passed": {"const": true},
+    "git_commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "git_dirty": {"const": false},
+    "hostname": {"type": "string"},
+    "slurm_job_id": {"type": ["string", "null"]},
+    "slurm_cluster_name": {"type": ["string", "null"]},
+    "phase3_certificate_path": {"type": "string"},
+    "phase3_certificate_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "phase3_git_commit": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    }
+  }
+}
