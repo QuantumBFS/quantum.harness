@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Produce the Route D+ Phase 2 one-particle LLL certificate."""
 
 from __future__ import annotations
@@ -10,8 +9,9 @@ import json
 import os
 import platform
 import subprocess
+from collections.abc import Sequence
 from pathlib import Path
-from typing import Any, Sequence
+from typing import Any
 
 import jsonschema
 import numpy as np
@@ -42,10 +42,9 @@ def sha256_file(path: Path) -> str:
 def git_output(repo_root: Path, *args: str) -> str:
     completed = subprocess.run(
         ["git", *args],
+        capture_output=True,
         check=True,
         cwd=repo_root,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
         text=True,
     )
     return completed.stdout.strip()

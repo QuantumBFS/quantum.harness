@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Validate the Route D+ runtime and write its Phase 1 manifest.
 
 This program is an evidence-producing remote smoke test. It must be executed
@@ -16,8 +15,9 @@ import os
 import platform
 import subprocess
 import sys
+from collections.abc import Sequence
 from pathlib import Path
-from typing import Any, Sequence
+from typing import Any
 
 SCHEMA_VERSION = "challenge-15-route-d-plus-environment-v1"
 REQUIRED_PYTHON = (3, 11)
@@ -34,10 +34,9 @@ def sha256_file(path: Path) -> str:
 def git_output(repo_root: Path, *args: str) -> str:
     completed = subprocess.run(
         ["git", *args],
+        capture_output=True,
         check=True,
         cwd=repo_root,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
         text=True,
     )
     return completed.stdout.strip()

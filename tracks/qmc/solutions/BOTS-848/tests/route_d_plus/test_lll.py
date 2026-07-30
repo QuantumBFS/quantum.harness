@@ -3,7 +3,6 @@ from __future__ import annotations
 import math
 
 import numpy as np
-
 from route_d_plus.lll import (
     monopole_orbitals,
     orbital_overlap_matrix,
@@ -12,7 +11,6 @@ from route_d_plus.lll import (
     sphere_quadrature,
     spinor,
 )
-
 
 TWO_Q = 15
 PHASE2_TOLERANCE = 1.0e-12

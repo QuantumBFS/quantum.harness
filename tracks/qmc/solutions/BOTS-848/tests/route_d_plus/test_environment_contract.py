@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 import json
-import tomllib
 from pathlib import Path
+
+import tomllib
 
 SOLUTION_ROOT = Path(__file__).resolve().parents[2]
 ENVIRONMENT_ROOT = SOLUTION_ROOT / "route_d_plus" / "environment"
