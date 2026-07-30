@@ -115,6 +115,9 @@ def _load_run(run_dir: Path) -> tuple[float, np.ndarray, np.ndarray, dict[int, i
         expected_thermal = int(expected_settings["thermal_sweeps"])
         if int(runtime.get("thermal_sweeps", -1)) != expected_thermal:
             raise ValueError(f"{cell['cell_id']} runtime thermalization mismatch")
+        expected_measurement = int(expected_settings["measure_sweeps"])
+        if int(runtime.get("measure_sweeps", -1)) != expected_measurement:
+            raise ValueError(f"{cell['cell_id']} runtime measurement mismatch")
         if int(runtime.get("seed", 0)) <= 0:
             raise ValueError(f"{cell['cell_id']} runtime seed is missing")
         with np.load(root / "bins.npz", allow_pickle=False) as payload:

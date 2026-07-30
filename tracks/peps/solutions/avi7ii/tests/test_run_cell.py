@@ -13,6 +13,12 @@ EQUILIBRATED_RUN_SPEC = (
 PRODUCTION_RUN_SPEC = (
     Path(__file__).parents[1] / "configs" / "scans" / "qmc-production-run-spec.json"
 )
+LONG_RUN_SPEC = (
+    Path(__file__).parents[1]
+    / "configs"
+    / "scans"
+    / "qmc-production-long-run-spec.json"
+)
 
 
 def _load_module():
@@ -70,6 +76,22 @@ def test_production_run_spec_increases_independent_statistics():
     assert spec["settings"]["measure_sweeps"] == 32000
     assert spec["settings"]["bins"] == 80
     assert len(cells) == 12
+    assert {
+        (cell["params"]["M"], cell["params"]["chain"]) for cell in cells
+    } == {(m, chain) for m in (32, 64, 128) for chain in range(4)}
+    assert {
+        cell["params"]["M"]: cell["settings"]["thermal_sweeps"]
+        for cell in cells
+    } == {32: 4000, 64: 4000, 128: 16000}
+
+
+def test_long_run_spec_extends_the_same_complete_grid():
+    spec = json.loads(LONG_RUN_SPEC.read_text(encoding="utf-8"))
+    cells = spec["cells"]
+
+    assert spec["run_id"] == "issue147-qmc-production-long"
+    assert spec["settings"]["measure_sweeps"] == 128000
+    assert spec["settings"]["bins"] == 80
     assert {
         (cell["params"]["M"], cell["params"]["chain"]) for cell in cells
     } == {(m, chain) for m in (32, 64, 128) for chain in range(4)}

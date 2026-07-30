@@ -1,6 +1,9 @@
-import numpy as np
+import json
 
-from qh147.qmc_pilot_analysis import analyze_bins
+import numpy as np
+import pytest
+
+from qh147.qmc_pilot_analysis import _load_run, analyze_bins
 
 
 def _stable_bins(*, drift=0.0):
@@ -40,3 +43,57 @@ def test_split_half_drift_rejects_pilot():
 
     assert not result["accepted"]
     assert not result["gates"]["split_half"]
+
+
+def test_loader_rejects_a_runtime_measurement_mismatch(tmp_path):
+    settings = {
+        "thermal_sweeps": 4000,
+        "measure_sweeps": 128000,
+        "bins": 80,
+    }
+    provenance = {"protocol": "fixture"}
+    cells = []
+    for index, (m_value, chain) in enumerate(
+        ((m, chain) for m in (32, 64, 128) for chain in range(4)), start=1
+    ):
+        cell_id = f"cell-{index:04d}"
+        params = {"h": 3.0, "beta": 0.5, "M": m_value, "chain": chain}
+        cells.append({"cell_id": cell_id, "params": params})
+        root = tmp_path / "cells" / cell_id
+        root.mkdir(parents=True)
+        (root / "manifest.json").write_text(
+            json.dumps(
+                {
+                    "status": "success",
+                    "params": params,
+                    "settings": settings,
+                    "provenance": provenance,
+                    "runtime_settings": {
+                        "thermal_sweeps": 4000,
+                        "measure_sweeps": 128000,
+                        "seed": 1000 + index,
+                    },
+                }
+            ),
+            encoding="utf-8",
+        )
+        np.savez(root / "bins.npz", energy=np.linspace(-3.1, -2.9, 80))
+    (tmp_path / "run_spec.json").write_text(
+        json.dumps(
+            {
+                "settings": settings,
+                "provenance": provenance,
+                "cells": cells,
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    _load_run(tmp_path)
+    manifest_path = tmp_path / "cells" / "cell-0001" / "manifest.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    manifest["runtime_settings"]["measure_sweeps"] = 32000
+    manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="runtime measurement"):
+        _load_run(tmp_path)
