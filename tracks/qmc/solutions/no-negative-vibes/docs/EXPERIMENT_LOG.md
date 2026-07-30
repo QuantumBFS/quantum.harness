@@ -2618,3 +2618,72 @@ corresponding power of the vacuum normalization; and transpose-generated
 letters must be enumerated explicitly in audit counts even when their
 characteristic polynomials coincide.  The completed frontier and dual scans
 remain frozen and were not repeated.
+
+### 2026-07-30 — Nambu reduction of the full Majorana/Wei audit
+
+The publication-critical literature audit was refreshed from primary
+sources while WSL was unavailable.  Wei's 2024 semigroup paper states the
+fixed-\(J_1,J_2\) conditions
+
+\[
+J_1^{\mathsf T}AJ_1=\bar A,\qquad
+i(J_2A-\bar A J_2)\preceq0,
+\]
+
+with \(J_2\) real orthogonal and skew-symmetric, and explicitly permits a
+fixed complex orthogonal Majorana basis.  Its equality cases include the
+earlier Majorana reflection-positive and anticommuting-MTR sufficient
+classes.  Therefore a five-dimensional real common-metric no-go alone is
+not the correct full novelty test.
+
+A stronger exact route was derived in
+`docs/superpowers/specs/2026-07-30-oddcycle-majorana-wei-no-go-design.md`.
+In Nambu coordinates the four one-particle letters act as
+
+\[
+G(B)=\operatorname{diag}(B,B^{-\mathsf T})
+\]
+
+and preserve
+\(\Omega=\left(\begin{smallmatrix}0&I\\I&0\end{smallmatrix}\right)\).
+Any Wei certificate in any fixed complex orthogonal Majorana basis pulls
+back to a Hermitian metric \(\eta\) obeying both a common nonstrict
+contraction inequality and
+
+\[
+\eta\Omega^{-1}\eta^{\mathsf T}=-\Omega.
+\]
+
+The frozen positive-definite Gordan--Stiemke dual forces the diagonal
+one-particle blocks of every such nonstrict metric to the equality boundary.
+Positive-semidefinite block structure then forces the off-diagonal gaps to
+zero.  For the main pair, the difference of the two base matrices is a
+nonzero multiple of \(E_{34}\), and the transpose difference is a nonzero
+multiple of \(E_{43}\).  Commuting with those two units and one base matrix
+shows by hand that the four-letter complex commutant is only
+\(\mathbb C I_5\).  Irreducibility plus \(\det B=8\) kills both diagonal
+metric blocks, leaving only
+
+\[
+\eta=\begin{pmatrix}0&kI_5\\\bar kI_5&0\end{pmatrix}.
+\]
+
+This boundary form instead satisfies
+\(\eta\Omega^{-1}\eta^{\mathsf T}=|k|^2\Omega\), with the opposite sign.
+The resulting contradiction is a candidate exact exclusion of the full Wei
+sufficient class, including its MRP/MTR subcases and arbitrary fixed complex
+Majorana basis changes.
+
+This result is deliberately not yet promoted into the paper abstract.  The
+solver-independent replay and TDD gates are specified in
+`docs/superpowers/plans/2026-07-30-oddcycle-majorana-wei-no-go.md`.
+They require exact commutant rank 24, reuse of the frozen dual, and an exact
+symbolic compatibility-sign check on WSL.  If any gate fails, the existing
+narrow common-quadratic-metric claim remains authoritative.  No numerical
+scan or local Windows scientific calculation was run.
+
+Reusable lesson: arbitrary complex Majorana basis freedom is best handled
+by pulling its metric back to the canonical Nambu CAR form, not by searching
+directly over basis matrices.  The pulled metric carries an exact quadratic
+compatibility identity whose sign can rule out boundary forms that ordinary
+contraction LMIs alone cannot distinguish.
