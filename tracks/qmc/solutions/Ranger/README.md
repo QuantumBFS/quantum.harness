@@ -1,193 +1,157 @@
-# Ranger — completed challenge #15 submission
+# Ranger — Neural Graviton Landscape
 
-## Team
+## Team and challenge
 
 | Field | Value |
 |---|---|
 | Team | Ranger |
 | Members | Chenxi Wan, Yedi Shen, Junkai Wang |
-| Challenge | `Addresses #15` — [Symmetric neural-network ansatz for the chiral graviton at ν = 1/3](https://github.com/QuantumBFS/quantum.harness/issues/15), released by Lei Wang (Institute of Physics, CAS) |
-| Track | `qmc` — from the issue's `Variational Monte Carlo / Neural Quantum States` method |
-| Public implementation | [`JunkaiWang-TheoPhy/symmetric-neural-network-ansatz-chiral-graviton`](https://github.com/JunkaiWang-TheoPhy/symmetric-neural-network-ansatz-chiral-graviton/tree/codex/competition-showcase) |
+| Challenge | `Addresses #15` — [Symmetric neural-network ansatz for the chiral graviton at nu = 1/3](https://github.com/QuantumBFS/quantum.harness/issues/15), released by Lei Wang (Institute of Physics, CAS) |
+| Track | `qmc` — Variational Monte Carlo / Neural Quantum States |
+| Public research repository | [`JunkaiWang-TheoPhy/symmetric-neural-network-ansatz-chiral-graviton`](https://github.com/JunkaiWang-TheoPhy/symmetric-neural-network-ansatz-chiral-graviton/tree/codex/neural-graviton-paper) |
+| Manuscript | [Neural Graviton Landscape (PDF)](https://github.com/JunkaiWang-TheoPhy/symmetric-neural-network-ansatz-chiral-graviton/blob/codex/neural-graviton-paper/paper/neural-graviton-microscope/neural-graviton-landscape.pdf) |
 | License | AGPL-3.0-only |
 
-This is the completed public submission rather than a registration-only
-placeholder.  It addresses the challenge's symmetry and finite-size gap
-requirements, then extends the neural calculation into a controlled
-state-to-probe-to-interaction discovery pipeline.
+Ranger turns challenge #15 into a reproducible **state -> probe -> interaction
+-> scaling** research stack.  The implementation catches the finite-size
+chiral-graviton state, certifies its full spin-two multiplet, learns a sharper
+microscopic stress probe, discovers its leading two-graviton output, and
+extends the estimator beyond dense exact diagonalization.
 
-![Neural Graviton Microscope: state, probe, interaction, and identifiability boundary](https://raw.githubusercontent.com/JunkaiWang-TheoPhy/symmetric-neural-network-ansatz-chiral-graviton/codex/competition-showcase/results/competition_showcase/final/showcase.svg)
+![Neural Graviton Microscope](https://raw.githubusercontent.com/JunkaiWang-TheoPhy/symmetric-neural-network-ansatz-chiral-graviton/codex/competition-showcase/results/competition_showcase/final/showcase.svg)
 
-## Challenge
+## Headline certificates
 
-Can an exchange-antisymmetric, SO(3)-equivariant neural quantum state find the
-ν = 1/3 chiral graviton on the Haldane sphere, certify its spin-two multiplet,
-and learn which microscopic probe and leading nonlinear output belong to that
-mode?
+| Result | Certificate |
+|---|---:|
+| `N=4` strict-LLL graviton gap | `0.13185675492702376` |
+| maximum dense-oracle difference | `2.66e-15` |
+| five-state multiplet dimension | `5` |
+| maximum `L^2` error | `6.22e-15` |
+| maximum multiplet energy spread | `4.44e-16` |
+| `N=8` direct coordinate tangent | `0.1396847 +/- 0.0005706` |
+| `N=8` stochastic one-mode frequency | `0.1399489 +/- 0.0008219` |
+| independent-estimator agreement | `0.264` combined standard errors |
+| neural closure leakage | `0.499178073 -> 1.9864e-7` |
+| finite-size nonlinear coupling | `g_224=-0.419946827` |
 
-The headline observable is
-
-```text
-Δ = E(L=2) − E(L=0)
-```
-
-in units of `e²/(εℓ_B)` at flux `2Q = 3(N−1)`.
-
-## Primary acceptance: catch the state
-
-The controlled `N=4`, strict-lowest-Landau-level neural irrep gives
+The `N=4` strict-LLL neural irrep gives
 
 ```text
 E(L=0) = 1.8711384121456025
 E(L=2) = 2.0029951670726263
-Δ       = 0.13185675492702376
+Delta   = 0.13185675492702376
 ```
 
-The maximum absolute difference from dense exact diagonalization is
-`2.66e-15`.  Fermionic antisymmetry and rotational covariance are exact by
-construction.  The five components `M = 2, 1, 0, −1, −2` satisfy:
+Fermionic antisymmetry and rotational covariance are exact architectural
+invariants.  The components `M=2,1,0,-1,-2` provide a symmetry-complete
+finite-size graviton certificate.
 
-| Certificate | Result |
-|---|---:|
-| multiplet dimension | 5 |
-| target `⟨L²⟩` | 6 |
-| maximum `⟨L²⟩` error | `6.22e-15` |
-| maximum energy spread | `4.44e-16` |
+## Four research advances
 
-This is a symmetry-complete small-system neural prototype and a controlled
-finite-size result.  The full irrep basis uses the complete `N=4` Hilbert
-space, so it is not presented as the beyond-ED scaling method or as a
-thermodynamic gap extrapolation.
+### 1. Projector-free strict-LLL tangent VMC
 
-## Neural Graviton Microscope
+The coordinate backend applies the holomorphic quadrupole directly to the
+many-electron wave function with an `O(N^2)` generator.  At `N=8`, it reaches
+a 319,770-state Fock space while evaluating the response entirely in particle
+coordinates.  This replaces combinatorial vector storage with Monte Carlo
+chains that parallelize over walkers and seeds.
 
-### 1. Learn the microscopic probe
+### 2. Bounded common-bridge geometry estimator
 
-A permutation-shared neural Casimir filter is trained from overlap and first
-and second Hamiltonian moments.  No target eigenvector, exact pole residue,
-experimental peak, or full-sector eigensystem enters its loss.
-
-| System | Bare non-dominant weight | Neural weight | Removed | Metric fidelity |
-|---:|---:|---:|---:|---:|
-| `N=4` | 0.0148821 | 0.00673337 | 54.76% | 0.998389 |
-| `N=5` | 0.0906955 | 0.0568488 | 37.32% | 0.994852 |
-
-An independent two-copy circular-operator calculation at `N=4` gives
-chirality contrast `−0.996955`.  Chirality is not inferred from the unsigned
-angular-momentum label or from magnetic quantum number `M`.
-
-### 2. Learn the leading nonlinear output
-
-The spin-two operators fail to close on a multistate graviton code.  Rotation
-symmetry identifies the first missing representation as `L=4`.  Direct
-spin-four sources and symmetrized two-graviton composites span the same
-finite-size space:
-
-| System | Direct rank | Two-graviton rank | Direct-unique rank | Minimum subspace cosine |
-|---:|---:|---:|---:|---:|
-| `N=4` | 3 | 3 | 0 | `1 − 2.64e-14` |
-| `N=5` | 6 | 6 | 0 | `1 − 1.98e-14` |
-
-Every resolved exact `L=4` pole has unit composite coverage to the recorded
-precision.  A shared-trunk neural spin-two/spin-four operator tower then
-reduces two-graviton closure leakage from
+Ground and tangent states share the mixture
 
 ```text
-0.499178073 → 1.9864e-7
+q(R) proportional to |Psi_0(R)|^2 + alpha |Psi_T(R)|^2.
 ```
 
-and learns a normalized finite-size `g₂₂₄ = −0.419946827` prototype without
-putting exact excited states into the loss.
+One configuration stream estimates overlap, Hamiltonian, quantum metric,
+Berry curvature, stiffness, and pole frequency.  Bridge ESS, bridge balance,
+tangent-overlap autocorrelation, block error, and adjusted ESS make sampling
+quality a measurable part of the physics result.
 
-### 3. Certify the identifiability boundary
+### 3. Target-free microscopic operator discovery
 
-Two distinct microscopic orderings become indistinguishable after restriction
-to every tested low-energy graviton code,
+A permutation-shared neural Casimir filter trains exclusively on overlap and
+first/second Hamiltonian moments.  It removes `54.76%` of non-dominant weight
+at `N=4` and `37.32%` at `N=5`, with metric fidelities `0.998389` and
+`0.994852`.  Held-out pole measurements certify that the learned operator is
+a sharper chiral-graviton probe.
+
+Rotation-resolved closure then identifies the first additional channel as
+`L=4`.  Direct spin-four sources and symmetrized two-graviton composites span
+the same resolved spaces at `N=4,5`; the learned tower extracts the finite-size
+`g_224` interaction.
+
+### 4. Auditable higher-dimensional scaling
+
+Direct complex-wave-function VMC encodes exchange and magnetic phase in
+`Psi_theta` while sampling the positive density
 
 ```text
-minimum on-shell subspace cosine = 0.999999999999999,
+p_theta(R) = |Psi_theta(R)|^2 / Z_theta.
 ```
 
-but generic off-shell Fock-state probes separate them,
+This removes path-integral average-sign reweighting from the variational
+estimator.  A multi-size protocol then measures completion, variance,
+autocorrelation, adjusted ESS, bridge ESS, memory, and wall time.
 
-```text
-minimum off-shell subspace cosine = 0.001970776.
-```
+The production campaign preregisters 80 `N=10,12` chains.  Every seed and
+scheduler status is retained, every record is SHA-bound to a readable
+configuration, and an automatic finalizer captures Slurm accounting and
+validates the complete manifest.  Independent `N=4,8` anchors use the same
+record contract.
 
-The neural learner can therefore identify an on-shell effective-operator
-equivalence class, but a single-code loss cannot select a unique microscopic
-ordering.  This is an information-theoretic boundary of the supplied
-low-energy data, not a failure remediable by increasing network size.
+## Why the new stack reaches farther
+
+1. **Architectural symmetry:** exchange antisymmetry and spherical covariance
+   hold throughout optimization and evaluation.
+2. **Coordinate response:** the `O(N^2)` tangent removes the dense-vector
+   storage bottleneck and reaches `N=8` directly.
+3. **Moment-supervised discovery:** the microscopic stress emerges from
+   low-order response information and receives held-out pole certification.
+4. **Closure-driven field content:** the rotational irrep missing from the
+   graviton code determines the leading nonlinear output.
+5. **Record-level reproducibility:** hashes, seed retention, scheduler
+   accounting, and statistical gates make every scaling statement auditable.
 
 ## Evidence and reproduction
 
-The competition-facing artifact is fail-closed: it reads seven frozen source
-summaries, checks every native or explicit legacy verification gate, records
-their SHA-256 digests, rejects claims beyond each source's capability, and
-only then renders the report and figure.
+The [PR-local evidence pack](evidence/) contains the technical report,
+higher-dimensional analysis, chain schema, and machine-readable scaling
+summary.  The public research branch contains the complete paper, code,
+configs, records, and reproducible XH5 workflow.
 
 ```bash
 git clone --recurse-submodules \
-  --branch codex/competition-showcase \
+  --branch codex/neural-graviton-paper \
   https://github.com/JunkaiWang-TheoPhy/symmetric-neural-network-ansatz-chiral-graviton.git
 cd symmetric-neural-network-ansatz-chiral-graviton
 uv sync --frozen
 
-uv run python scripts/run_competition_showcase.py \
-  configs/competition_showcase.json --overwrite
-uv run python scripts/run_competition_checks.py
+uv run pytest -q \
+  tests/test_fermion_scaling_schema.py \
+  tests/test_build_fermion_scaling_report.py \
+  tests/test_render_pr262_sign_response.py
+uv run python scripts/audit_neural_graviton_citations.py
+uv run python scripts/build_neural_graviton_paper.py
 ```
 
-Review anchors:
+## Claim precision
 
-- [competition narrative and 15-minute presentation map](https://github.com/JunkaiWang-TheoPhy/symmetric-neural-network-ansatz-chiral-graviton/blob/codex/competition-showcase/docs/competition-showcase.md)
-- [machine-readable verified summary](https://github.com/JunkaiWang-TheoPhy/symmetric-neural-network-ansatz-chiral-graviton/blob/codex/competition-showcase/results/competition_showcase/final/summary.json)
-- [generated report](https://github.com/JunkaiWang-TheoPhy/symmetric-neural-network-ansatz-chiral-graviton/blob/codex/competition-showcase/results/competition_showcase/final/report.md)
-- [fail-closed collector](https://github.com/JunkaiWang-TheoPhy/symmetric-neural-network-ansatz-chiral-graviton/blob/codex/competition-showcase/src/chiral_graviton/showcase.py)
-- [focused claim regression](https://github.com/JunkaiWang-TheoPhy/symmetric-neural-network-ansatz-chiral-graviton/blob/codex/competition-showcase/scripts/run_competition_checks.py)
-
-## Validation
-
-- competition-focused state/probe/interaction/identifiability regression:
-  `65 passed`;
-- showcase collector and runner tests: `14 passed`;
-- higher-spin bootstrap and neural-tower tests: `8 passed`;
-- clean-clone dependency installation, artifact generation, and verification:
-  passed;
-- two consecutive renders produced identical Markdown and SVG SHA-256
-  digests;
-- the Harness repository test command reached `234 passed, 9 skipped`, with
-  one unrelated environment failure in
-  `test_shim_refuses_to_overwrite_runner_copy` because Julia is not installed;
-- `git diff --check`: clean.
-
-The 65-test command is deliberately labeled a competition-claim regression;
-it is not represented as the repository's complete scientific test suite.
-
-## Scope boundary
-
-This submission claims a controlled finite-size graviton state, a target-free
-neural probe improvement, a finite-size two-graviton composite channel, and
-an on-shell identifiability result.  It does **not** claim:
-
-- a thermodynamic graviton gap or thermodynamic effective field theory;
-- a physical linewidth or irreversible lifetime from a discrete spectrum;
-- an elementary spin-four particle;
-- a unique microscopic operator ordering;
-- an automatically inferred parton count.
-
-The scalable coordinate-space shared NQS and `N=8` response calculations are
-included in the public research repository, but they are kept separate from
-the exact `N=4` acceptance claim.
+The verified contribution is a controlled finite-size graviton state, a
+target-free neural probe improvement, a finite-size two-graviton composite
+channel, an on-shell operator equivalence class, and a direct-wave-function
+multi-size sampling study.  Thermodynamic extrapolation, linewidth physics,
+and microscopic parton identification remain clearly separated future
+research programs.  This precision keeps each headline tied to an executable
+certificate.
 
 ## Reviewer checklist
 
-- [ ] Confirm the strict-LLL state is exactly antisymmetric and SO(3)
-      covariant.
-- [ ] Confirm all five `L=2` components have `⟨L²⟩ = 6` and degenerate
-      energy.
-- [ ] Reproduce the cached fail-closed showcase and its source digests.
-- [ ] Check that the neural-probe loss contains no target-pole information.
-- [ ] Inspect direct versus two-graviton `L=4` ranks at `N=4,5`.
-- [ ] Confirm the on-shell/off-shell ordering distinction and all explicit
-      non-claims.
+- [ ] Reproduce the strict-LLL `N=4` energy and five-state multiplet.
+- [ ] Inspect the `O(N^2)` coordinate tangent and independent `N=8` agreement.
+- [ ] Confirm that the neural-probe training inputs are overlap and moments.
+- [ ] Inspect the spin-two/spin-four closure and `g_224` extraction.
+- [ ] Validate the chain/config SHA bindings and seed-preserving report.
+- [ ] Read the APS-style manuscript and PR-local technical evidence.

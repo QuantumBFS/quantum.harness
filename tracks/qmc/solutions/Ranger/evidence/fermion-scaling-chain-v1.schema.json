@@ -1,0 +1,259 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/JunkaiWang-TheoPhy/symmetric-neural-network-ansatz-chiral-graviton/schemas/fermion-scaling-chain-v1.schema.json",
+  "title": "Fermion scaling chain record v1",
+  "description": "One unscreened particle-number/seed record for higher-dimensional fermion VMC scaling.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "particle_number",
+    "flux",
+    "seed",
+    "configuration_sha256",
+    "project_commit",
+    "job_id",
+    "status",
+    "started_at",
+    "finished_at",
+    "wall_seconds",
+    "attempted_samples",
+    "accepted_samples",
+    "equilibrated_samples",
+    "retained_samples",
+    "acceptance_fraction",
+    "energy",
+    "local_energy_variance",
+    "integrated_autocorrelation_time",
+    "autocorrelation_method",
+    "effective_sample_size",
+    "bridge_effective_sample_size",
+    "bridge_ess_fraction",
+    "estimator_stderr",
+    "block_size",
+    "maximum_resident_memory_mb",
+    "diagnostic_missing_reasons",
+    "failure_reason"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "fermion-scaling-chain-v1"
+    },
+    "particle_number": {
+      "type": "integer",
+      "minimum": 2
+    },
+    "flux": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Laughlin 1/3 flux; the validator enforces 3(N-1)."
+    },
+    "seed": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "configuration_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "project_commit": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "job_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "status": {
+      "enum": [
+        "completed",
+        "failed",
+        "timed_out",
+        "rejected",
+        "non_equilibrated"
+      ]
+    },
+    "started_at": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "finished_at": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "wall_seconds": {
+      "type": ["number", "null"],
+      "minimum": 0
+    },
+    "attempted_samples": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "accepted_samples": {
+      "type": ["integer", "null"],
+      "minimum": 0
+    },
+    "equilibrated_samples": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "retained_samples": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "acceptance_fraction": {
+      "type": ["number", "null"],
+      "minimum": 0,
+      "maximum": 1
+    },
+    "energy": {
+      "type": ["number", "null"]
+    },
+    "local_energy_variance": {
+      "type": ["number", "null"],
+      "minimum": 0
+    },
+    "integrated_autocorrelation_time": {
+      "type": ["number", "null"],
+      "exclusiveMinimum": 0
+    },
+    "autocorrelation_method": {
+      "type": ["string", "null"],
+      "minLength": 1
+    },
+    "effective_sample_size": {
+      "type": ["number", "null"],
+      "minimum": 0
+    },
+    "bridge_effective_sample_size": {
+      "type": ["number", "null"],
+      "minimum": 0
+    },
+    "bridge_ess_fraction": {
+      "type": ["number", "null"],
+      "minimum": 0,
+      "maximum": 1
+    },
+    "estimator_stderr": {
+      "type": ["number", "null"],
+      "minimum": 0
+    },
+    "block_size": {
+      "type": ["integer", "null"],
+      "minimum": 1
+    },
+    "maximum_resident_memory_mb": {
+      "type": ["number", "null"],
+      "exclusiveMinimum": 0
+    },
+    "diagnostic_missing_reasons": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "accepted_samples": {"type": "string", "minLength": 1},
+        "maximum_resident_memory_mb": {"type": "string", "minLength": 1}
+      }
+    },
+    "failure_reason": {
+      "type": ["string", "null"],
+      "minLength": 1
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "completed"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "started_at": {"type": "string"},
+          "finished_at": {"type": "string"},
+          "wall_seconds": {"type": "number", "exclusiveMinimum": 0},
+          "acceptance_fraction": {"type": "number"},
+          "energy": {"type": "number"},
+          "local_energy_variance": {"type": "number"},
+          "integrated_autocorrelation_time": {"type": "number"},
+          "autocorrelation_method": {"type": "string"},
+          "effective_sample_size": {"type": "number", "exclusiveMinimum": 0},
+          "bridge_effective_sample_size": {"type": "number", "exclusiveMinimum": 0},
+          "bridge_ess_fraction": {"type": "number"},
+          "estimator_stderr": {"type": "number"},
+          "block_size": {"type": "integer"},
+          "diagnostic_missing_reasons": {"type": "object"},
+          "failure_reason": {"type": "null"}
+        }
+      },
+      "else": {
+        "properties": {
+          "failure_reason": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {"const": "completed"},
+          "accepted_samples": {"type": "null"}
+        },
+        "required": ["status", "accepted_samples"]
+      },
+      "then": {
+        "properties": {
+          "diagnostic_missing_reasons": {"required": ["accepted_samples"]}
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {"const": "completed"},
+          "accepted_samples": {"type": "integer"}
+        },
+        "required": ["status", "accepted_samples"]
+      },
+      "then": {
+        "properties": {
+          "diagnostic_missing_reasons": {
+            "not": {"required": ["accepted_samples"]}
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {"const": "completed"},
+          "maximum_resident_memory_mb": {"type": "null"}
+        },
+        "required": ["status", "maximum_resident_memory_mb"]
+      },
+      "then": {
+        "properties": {
+          "diagnostic_missing_reasons": {
+            "required": ["maximum_resident_memory_mb"]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {"const": "completed"},
+          "maximum_resident_memory_mb": {"type": "number"}
+        },
+        "required": ["status", "maximum_resident_memory_mb"]
+      },
+      "then": {
+        "properties": {
+          "diagnostic_missing_reasons": {
+            "not": {"required": ["maximum_resident_memory_mb"]}
+          }
+        }
+      }
+    }
+  ]
+}

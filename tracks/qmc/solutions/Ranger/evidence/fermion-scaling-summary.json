@@ -1,0 +1,644 @@
+{
+  "capability_boundary": {
+    "asymptotic_polynomial_cost_proved": false,
+    "avoids_path_integral_average_sign_reweighting": true,
+    "generic_path_integral_sign_free": false,
+    "generic_sign_problem_solved": false,
+    "sampling_measure": "|Psi_theta(R)|^2 / Z_theta"
+  },
+  "decision": {
+    "asymptotic_polynomial_scaling_claimed": false,
+    "authorized_language": "The tested-size scaling question remains unresolved because coverage or diagnostics are insufficient.",
+    "classification": "inconclusive",
+    "cross_platform_wall_time_used_for_classification": false,
+    "generic_sign_problem_solved": false,
+    "path_integral_average_sign_measured": false,
+    "reasons": [
+      "at least three particle numbers are required"
+    ],
+    "runtime_scope": "Wall time and memory are reported per chain but are not used for the tested-size classification because the records span local and cluster execution environments.",
+    "tested_particle_numbers": [
+      4,
+      8
+    ],
+    "thresholds": {
+      "controlled_minimum_ess_fraction": 0.1,
+      "deteriorating_ess_fraction": 0.05,
+      "maximum_iat_endpoint_ratio": 4.0,
+      "maximum_variance_endpoint_ratio": 4.0,
+      "minimum_completed_seeds_per_size": 2,
+      "minimum_completion_fraction": 0.5,
+      "minimum_particle_number_count": 3
+    }
+  },
+  "evidence_status": "partial_records",
+  "method": "complex-wavefunction-vmc",
+  "particle_numbers": {
+    "4": {
+      "completed_diagnostics": {
+        "acceptance_fraction": {
+          "count": 2,
+          "maximum": 0.5441015625,
+          "median": 0.54346484375,
+          "minimum": 0.542828125,
+          "values": [
+            0.5441015625,
+            0.542828125
+          ]
+        },
+        "block_size": {
+          "count": 2,
+          "maximum": 256.0,
+          "median": 192.0,
+          "minimum": 128.0,
+          "values": [
+            256,
+            128
+          ]
+        },
+        "bridge_effective_sample_size": {
+          "count": 2,
+          "maximum": 738953.5408396772,
+          "median": 554235.8222278958,
+          "minimum": 369518.1036161144,
+          "values": [
+            738953.5408396772,
+            369518.1036161144
+          ]
+        },
+        "bridge_ess_fraction": {
+          "count": 2,
+          "maximum": 0.7047998497316635,
+          "median": 0.7047604313239604,
+          "minimum": 0.7047210129162571,
+          "values": [
+            0.7047210129162571,
+            0.7047998497316635
+          ]
+        },
+        "cost_per_effective_sample": {
+          "count": 2,
+          "maximum": 0.004419078081278665,
+          "median": 0.0022999297187384143,
+          "minimum": 0.0001807813561981635,
+          "values": [
+            0.0001807813561981635,
+            0.004419078081278665
+          ]
+        },
+        "effective_sample_fraction": {
+          "count": 2,
+          "maximum": 0.2895532411163764,
+          "median": 0.258635963052021,
+          "minimum": 0.22771868498766562,
+          "values": [
+            0.2895532411163764,
+            0.22771868498766562
+          ]
+        },
+        "effective_sample_size": {
+          "count": 2,
+          "maximum": 303618.5793568455,
+          "median": 211504.3766358294,
+          "minimum": 119390.17391481323,
+          "values": [
+            303618.5793568455,
+            119390.17391481323
+          ]
+        },
+        "energy": {
+          "count": 2,
+          "maximum": 3.872129887119285,
+          "median": 3.872034291365522,
+          "minimum": 3.871938695611759,
+          "values": [
+            3.871938695611759,
+            3.872129887119285
+          ]
+        },
+        "estimator_stderr": {
+          "count": 2,
+          "maximum": 0.000632832863829931,
+          "median": 0.0005480381282618432,
+          "minimum": 0.0004632433926937554,
+          "values": [
+            0.000632832863829931,
+            0.0004632433926937554
+          ]
+        },
+        "integrated_autocorrelation_time": {
+          "count": 2,
+          "maximum": 1.5475230980054162,
+          "median": 1.3822170183657825,
+          "minimum": 1.2169109387261487,
+          "values": [
+            1.2169109387261487,
+            1.5475230980054162
+          ]
+        },
+        "local_energy_variance": {
+          "count": 2,
+          "maximum": 0.00867482797242948,
+          "median": 0.00864572568915269,
+          "minimum": 0.0086166234058759,
+          "values": [
+            0.0086166234058759,
+            0.00867482797242948
+          ]
+        },
+        "maximum_resident_memory_mb": {
+          "count": 0,
+          "maximum": null,
+          "median": null,
+          "minimum": null,
+          "values": []
+        },
+        "wall_seconds": {
+          "count": 2,
+          "maximum": 527.594500666999,
+          "median": 291.24153960504464,
+          "minimum": 54.88857854309026,
+          "values": [
+            54.88857854309026,
+            527.594500666999
+          ]
+        }
+      },
+      "completed_seed_count": 2,
+      "completed_seeds": [
+        20260791,
+        20260795
+      ],
+      "completion_fraction": 1.0,
+      "flux": 9,
+      "particle_number": 4,
+      "records": [
+        {
+          "acceptance_fraction": 0.5441015625,
+          "accepted_samples": null,
+          "attempted_samples": 11141120,
+          "autocorrelation_method": "blocking estimate of tangent-overlap step means; adjusted ESS is iid bridge ESS divided by 2*tau_int",
+          "block_size": 256,
+          "bridge_effective_sample_size": 738953.5408396772,
+          "bridge_ess_fraction": 0.7047210129162571,
+          "configuration_sha256": "35907bc383c0cbe0e132fab7ea159fd6f2928799f6fd463f5ad688df6dc7a02d",
+          "diagnostic_missing_reasons": {
+            "accepted_samples": "upstream artifact stores only a rolling mean acceptance, not an exact accumulated accepted-proposal count",
+            "maximum_resident_memory_mb": "upstream local acquisition did not record peak resident memory"
+          },
+          "effective_sample_size": 303618.5793568455,
+          "energy": 3.871938695611759,
+          "equilibrated_samples": 1048576,
+          "estimator_stderr": 0.000632832863829931,
+          "failure_reason": null,
+          "finished_at": "2026-07-27T10:25:28.527548+00:00",
+          "flux": 9,
+          "integrated_autocorrelation_time": 1.2169109387261487,
+          "job_id": "local-legacy-n4-seed-20260791",
+          "local_energy_variance": 0.0086166234058759,
+          "maximum_resident_memory_mb": null,
+          "particle_number": 4,
+          "project_commit": "8e21120f8ba4ef125a2be69c05f82893e9cff1c3",
+          "retained_samples": 1048576,
+          "schema_version": "fermion-scaling-chain-v1",
+          "seed": 20260791,
+          "started_at": "2026-07-27T07:22:14.318513+00:00",
+          "status": "completed",
+          "wall_seconds": 54.88857854309026
+        },
+        {
+          "acceptance_fraction": 0.542828125,
+          "accepted_samples": null,
+          "attempted_samples": 5898240,
+          "autocorrelation_method": "blocking estimate of tangent-overlap step means; adjusted ESS is iid bridge ESS divided by 2*tau_int",
+          "block_size": 128,
+          "bridge_effective_sample_size": 369518.1036161144,
+          "bridge_ess_fraction": 0.7047998497316635,
+          "configuration_sha256": "8c59f21c25d6f2ee03a185fe3dedccd10459c3af1bcf49cb22b39dcb3990683a",
+          "diagnostic_missing_reasons": {
+            "accepted_samples": "upstream artifact stores only a rolling mean acceptance, not an exact accumulated accepted-proposal count",
+            "maximum_resident_memory_mb": "upstream local acquisition did not record peak resident memory"
+          },
+          "effective_sample_size": 119390.17391481323,
+          "energy": 3.872129887119285,
+          "equilibrated_samples": 524288,
+          "estimator_stderr": 0.0004632433926937554,
+          "failure_reason": null,
+          "finished_at": "2026-07-30T06:07:08.893296+00:00",
+          "flux": 9,
+          "integrated_autocorrelation_time": 1.5475230980054162,
+          "job_id": "local-clean-b2b4a6c-n4-seed-20260795",
+          "local_energy_variance": 0.00867482797242948,
+          "maximum_resident_memory_mb": null,
+          "particle_number": 4,
+          "project_commit": "b2b4a6ce44f2ff414b12f77f9c131b8c0d82ae12",
+          "retained_samples": 524288,
+          "schema_version": "fermion-scaling-chain-v1",
+          "seed": 20260795,
+          "started_at": "2026-07-30T05:57:36.597319+00:00",
+          "status": "completed",
+          "wall_seconds": 527.594500666999
+        }
+      ],
+      "status_counts": {
+        "completed": 2
+      },
+      "submitted_seed_count": 2,
+      "submitted_seeds": [
+        20260791,
+        20260795
+      ]
+    },
+    "8": {
+      "completed_diagnostics": {
+        "acceptance_fraction": {
+          "count": 2,
+          "maximum": 0.53215234375,
+          "median": 0.532052734375,
+          "minimum": 0.531953125,
+          "values": [
+            0.531953125,
+            0.53215234375
+          ]
+        },
+        "block_size": {
+          "count": 2,
+          "maximum": 128.0,
+          "median": 128.0,
+          "minimum": 128.0,
+          "values": [
+            128,
+            128
+          ]
+        },
+        "bridge_effective_sample_size": {
+          "count": 2,
+          "maximum": 392303.2556986181,
+          "median": 391996.8173408541,
+          "minimum": 391690.37898309017,
+          "values": [
+            391690.37898309017,
+            392303.2556986181
+          ]
+        },
+        "bridge_ess_fraction": {
+          "count": 2,
+          "maximum": 0.7482590784046518,
+          "median": 0.7476745936219293,
+          "minimum": 0.747090108839207,
+          "values": [
+            0.747090108839207,
+            0.7482590784046518
+          ]
+        },
+        "cost_per_effective_sample": {
+          "count": 2,
+          "maximum": 0.010307335188029145,
+          "median": 0.005883512794637635,
+          "minimum": 0.0014596904012461242,
+          "values": [
+            0.0014596904012461242,
+            0.010307335188029145
+          ]
+        },
+        "effective_sample_fraction": {
+          "count": 2,
+          "maximum": 0.42535302040327955,
+          "median": 0.38150436447641667,
+          "minimum": 0.33765570854955373,
+          "values": [
+            0.33765570854955373,
+            0.42535302040327955
+          ]
+        },
+        "effective_sample_size": {
+          "count": 2,
+          "maximum": 223007.48436119463,
+          "median": 200018.16024261154,
+          "minimum": 177028.83612402843,
+          "values": [
+            177028.83612402843,
+            223007.48436119463
+          ]
+        },
+        "energy": {
+          "count": 2,
+          "maximum": 10.364876284647819,
+          "median": 10.364569392916469,
+          "minimum": 10.364262501185118,
+          "values": [
+            10.364876284647819,
+            10.364262501185118
+          ]
+        },
+        "estimator_stderr": {
+          "count": 2,
+          "maximum": 0.0008219067569381187,
+          "median": 0.000731759685720457,
+          "minimum": 0.0006416126145027952,
+          "values": [
+            0.0008219067569381187,
+            0.0006416126145027952
+          ]
+        },
+        "integrated_autocorrelation_time": {
+          "count": 2,
+          "maximum": 1.1062897648738632,
+          "median": 0.9929319783973782,
+          "minimum": 0.8795741919208934,
+          "values": [
+            1.1062897648738632,
+            0.8795741919208934
+          ]
+        },
+        "local_energy_variance": {
+          "count": 2,
+          "maximum": 0.017392792995135728,
+          "median": 0.017301761563065506,
+          "minimum": 0.017210730130995285,
+          "values": [
+            0.017392792995135728,
+            0.017210730130995285
+          ]
+        },
+        "maximum_resident_memory_mb": {
+          "count": 0,
+          "maximum": null,
+          "median": null,
+          "minimum": null,
+          "values": []
+        },
+        "wall_seconds": {
+          "count": 2,
+          "maximum": 2298.6128907500006,
+          "median": 1278.510091792009,
+          "minimum": 258.4072928340174,
+          "values": [
+            258.4072928340174,
+            2298.6128907500006
+          ]
+        }
+      },
+      "completed_seed_count": 2,
+      "completed_seeds": [
+        20260792,
+        20260797
+      ],
+      "completion_fraction": 1.0,
+      "flux": 21,
+      "particle_number": 8,
+      "records": [
+        {
+          "acceptance_fraction": 0.531953125,
+          "accepted_samples": null,
+          "attempted_samples": 5898240,
+          "autocorrelation_method": "blocking estimate of tangent-overlap step means; adjusted ESS is iid bridge ESS divided by 2*tau_int",
+          "block_size": 128,
+          "bridge_effective_sample_size": 391690.37898309017,
+          "bridge_ess_fraction": 0.747090108839207,
+          "configuration_sha256": "6c73cd87cd1097a8698471d48dcd4c72cc52d9b19624b892294d9ab0bf71a9de",
+          "diagnostic_missing_reasons": {
+            "accepted_samples": "upstream artifact stores only a rolling mean acceptance, not an exact accumulated accepted-proposal count",
+            "maximum_resident_memory_mb": "upstream local acquisition did not record peak resident memory"
+          },
+          "effective_sample_size": 177028.83612402843,
+          "energy": 10.364876284647819,
+          "equilibrated_samples": 524288,
+          "estimator_stderr": 0.0008219067569381187,
+          "failure_reason": null,
+          "finished_at": "2026-07-27T10:28:10.930010+00:00",
+          "flux": 21,
+          "integrated_autocorrelation_time": 1.1062897648738632,
+          "job_id": "local-legacy-n8-seed-20260792",
+          "local_energy_variance": 0.017392792995135728,
+          "maximum_resident_memory_mb": null,
+          "particle_number": 8,
+          "project_commit": "8e21120f8ba4ef125a2be69c05f82893e9cff1c3",
+          "retained_samples": 524288,
+          "schema_version": "fermion-scaling-chain-v1",
+          "seed": 20260792,
+          "started_at": "2026-07-27T09:55:50.555348+00:00",
+          "status": "completed",
+          "wall_seconds": 258.4072928340174
+        },
+        {
+          "acceptance_fraction": 0.53215234375,
+          "accepted_samples": null,
+          "attempted_samples": 5898240,
+          "autocorrelation_method": "blocking estimate of tangent-overlap step means; adjusted ESS is iid bridge ESS divided by 2*tau_int",
+          "block_size": 128,
+          "bridge_effective_sample_size": 392303.2556986181,
+          "bridge_ess_fraction": 0.7482590784046518,
+          "configuration_sha256": "c9e48f0c28b621fdf3ddc3d93c0bebdad52886e49f264f6c814e68fe01f36d10",
+          "diagnostic_missing_reasons": {
+            "accepted_samples": "upstream artifact stores only a rolling mean acceptance, not an exact accumulated accepted-proposal count",
+            "maximum_resident_memory_mb": "upstream local acquisition did not record peak resident memory"
+          },
+          "effective_sample_size": 223007.48436119463,
+          "energy": 10.364262501185118,
+          "equilibrated_samples": 524288,
+          "estimator_stderr": 0.0006416126145027952,
+          "failure_reason": null,
+          "finished_at": "2026-07-30T06:50:15.117303+00:00",
+          "flux": 21,
+          "integrated_autocorrelation_time": 0.8795741919208934,
+          "job_id": "local-clean-b2b4a6c-n8-seed-20260797",
+          "local_energy_variance": 0.017210730130995285,
+          "maximum_resident_memory_mb": null,
+          "particle_number": 8,
+          "project_commit": "b2b4a6ce44f2ff414b12f77f9c131b8c0d82ae12",
+          "retained_samples": 524288,
+          "schema_version": "fermion-scaling-chain-v1",
+          "seed": 20260797,
+          "started_at": "2026-07-30T06:10:21.513044+00:00",
+          "status": "completed",
+          "wall_seconds": 2298.6128907500006
+        }
+      ],
+      "status_counts": {
+        "completed": 2
+      },
+      "submitted_seed_count": 2,
+      "submitted_seeds": [
+        20260792,
+        20260797
+      ]
+    }
+  },
+  "provenance": {
+    "config_path": "configs/fermion_scaling_report.json",
+    "config_sha256": "b9e5dc40a7b08fd7cee752602837d8106431871c6dbe5200802984282019b95e",
+    "configuration_path_by_record_path": {
+      "../results/fermion_scaling/records/n4/seed_20260791.json": "../results/fermion_scaling/configurations/n4/seed_20260791.json",
+      "../results/fermion_scaling/records/n4/seed_20260795.json": "../results/fermion_scaling/configurations/n4/seed_20260795.json",
+      "../results/fermion_scaling/records/n8/seed_20260792.json": "../results/fermion_scaling/configurations/n8/seed_20260792.json",
+      "../results/fermion_scaling/records/n8/seed_20260797.json": "../results/fermion_scaling/configurations/n8/seed_20260797.json"
+    },
+    "configuration_sha256_by_path": {
+      "../results/fermion_scaling/configurations/n4/seed_20260791.json": "35907bc383c0cbe0e132fab7ea159fd6f2928799f6fd463f5ad688df6dc7a02d",
+      "../results/fermion_scaling/configurations/n4/seed_20260795.json": "8c59f21c25d6f2ee03a185fe3dedccd10459c3af1bcf49cb22b39dcb3990683a",
+      "../results/fermion_scaling/configurations/n8/seed_20260792.json": "6c73cd87cd1097a8698471d48dcd4c72cc52d9b19624b892294d9ab0bf71a9de",
+      "../results/fermion_scaling/configurations/n8/seed_20260797.json": "c9e48f0c28b621fdf3ddc3d93c0bebdad52886e49f264f6c814e68fe01f36d10"
+    },
+    "record_sha256_by_path": {
+      "../results/fermion_scaling/records/n4/seed_20260791.json": "8e07746c9a9d1512144e612903dcc40c2612a8a68d80d7d80358f4f7c2cb86e2",
+      "../results/fermion_scaling/records/n4/seed_20260795.json": "d146d6533b1fbc0ca68e8e043adc738ba1777801f86135a7f11a8aa774cbee19",
+      "../results/fermion_scaling/records/n8/seed_20260792.json": "cb45515b801d55f8648f1ac8476cbcefdb766c97e7e8f8ea15dae7a71e841293",
+      "../results/fermion_scaling/records/n8/seed_20260797.json": "cb2ea458ba3bce978fd232f86d7399ceac263154f155127ad3145d7716f53e8c"
+    },
+    "repository_commit": "15ba4d9634ce584244537cdc7d7bbaf13778e740",
+    "repository_dirty_before_build": true
+  },
+  "ready_to_post": false,
+  "record_count": 4,
+  "record_integrity": {
+    "all_submitted_records_preserved": true,
+    "outcome_filtering_applied": false
+  },
+  "records": [
+    {
+      "acceptance_fraction": 0.5441015625,
+      "accepted_samples": null,
+      "attempted_samples": 11141120,
+      "autocorrelation_method": "blocking estimate of tangent-overlap step means; adjusted ESS is iid bridge ESS divided by 2*tau_int",
+      "block_size": 256,
+      "bridge_effective_sample_size": 738953.5408396772,
+      "bridge_ess_fraction": 0.7047210129162571,
+      "configuration_sha256": "35907bc383c0cbe0e132fab7ea159fd6f2928799f6fd463f5ad688df6dc7a02d",
+      "diagnostic_missing_reasons": {
+        "accepted_samples": "upstream artifact stores only a rolling mean acceptance, not an exact accumulated accepted-proposal count",
+        "maximum_resident_memory_mb": "upstream local acquisition did not record peak resident memory"
+      },
+      "effective_sample_size": 303618.5793568455,
+      "energy": 3.871938695611759,
+      "equilibrated_samples": 1048576,
+      "estimator_stderr": 0.000632832863829931,
+      "failure_reason": null,
+      "finished_at": "2026-07-27T10:25:28.527548+00:00",
+      "flux": 9,
+      "integrated_autocorrelation_time": 1.2169109387261487,
+      "job_id": "local-legacy-n4-seed-20260791",
+      "local_energy_variance": 0.0086166234058759,
+      "maximum_resident_memory_mb": null,
+      "particle_number": 4,
+      "project_commit": "8e21120f8ba4ef125a2be69c05f82893e9cff1c3",
+      "retained_samples": 1048576,
+      "schema_version": "fermion-scaling-chain-v1",
+      "seed": 20260791,
+      "started_at": "2026-07-27T07:22:14.318513+00:00",
+      "status": "completed",
+      "wall_seconds": 54.88857854309026
+    },
+    {
+      "acceptance_fraction": 0.542828125,
+      "accepted_samples": null,
+      "attempted_samples": 5898240,
+      "autocorrelation_method": "blocking estimate of tangent-overlap step means; adjusted ESS is iid bridge ESS divided by 2*tau_int",
+      "block_size": 128,
+      "bridge_effective_sample_size": 369518.1036161144,
+      "bridge_ess_fraction": 0.7047998497316635,
+      "configuration_sha256": "8c59f21c25d6f2ee03a185fe3dedccd10459c3af1bcf49cb22b39dcb3990683a",
+      "diagnostic_missing_reasons": {
+        "accepted_samples": "upstream artifact stores only a rolling mean acceptance, not an exact accumulated accepted-proposal count",
+        "maximum_resident_memory_mb": "upstream local acquisition did not record peak resident memory"
+      },
+      "effective_sample_size": 119390.17391481323,
+      "energy": 3.872129887119285,
+      "equilibrated_samples": 524288,
+      "estimator_stderr": 0.0004632433926937554,
+      "failure_reason": null,
+      "finished_at": "2026-07-30T06:07:08.893296+00:00",
+      "flux": 9,
+      "integrated_autocorrelation_time": 1.5475230980054162,
+      "job_id": "local-clean-b2b4a6c-n4-seed-20260795",
+      "local_energy_variance": 0.00867482797242948,
+      "maximum_resident_memory_mb": null,
+      "particle_number": 4,
+      "project_commit": "b2b4a6ce44f2ff414b12f77f9c131b8c0d82ae12",
+      "retained_samples": 524288,
+      "schema_version": "fermion-scaling-chain-v1",
+      "seed": 20260795,
+      "started_at": "2026-07-30T05:57:36.597319+00:00",
+      "status": "completed",
+      "wall_seconds": 527.594500666999
+    },
+    {
+      "acceptance_fraction": 0.531953125,
+      "accepted_samples": null,
+      "attempted_samples": 5898240,
+      "autocorrelation_method": "blocking estimate of tangent-overlap step means; adjusted ESS is iid bridge ESS divided by 2*tau_int",
+      "block_size": 128,
+      "bridge_effective_sample_size": 391690.37898309017,
+      "bridge_ess_fraction": 0.747090108839207,
+      "configuration_sha256": "6c73cd87cd1097a8698471d48dcd4c72cc52d9b19624b892294d9ab0bf71a9de",
+      "diagnostic_missing_reasons": {
+        "accepted_samples": "upstream artifact stores only a rolling mean acceptance, not an exact accumulated accepted-proposal count",
+        "maximum_resident_memory_mb": "upstream local acquisition did not record peak resident memory"
+      },
+      "effective_sample_size": 177028.83612402843,
+      "energy": 10.364876284647819,
+      "equilibrated_samples": 524288,
+      "estimator_stderr": 0.0008219067569381187,
+      "failure_reason": null,
+      "finished_at": "2026-07-27T10:28:10.930010+00:00",
+      "flux": 21,
+      "integrated_autocorrelation_time": 1.1062897648738632,
+      "job_id": "local-legacy-n8-seed-20260792",
+      "local_energy_variance": 0.017392792995135728,
+      "maximum_resident_memory_mb": null,
+      "particle_number": 8,
+      "project_commit": "8e21120f8ba4ef125a2be69c05f82893e9cff1c3",
+      "retained_samples": 524288,
+      "schema_version": "fermion-scaling-chain-v1",
+      "seed": 20260792,
+      "started_at": "2026-07-27T09:55:50.555348+00:00",
+      "status": "completed",
+      "wall_seconds": 258.4072928340174
+    },
+    {
+      "acceptance_fraction": 0.53215234375,
+      "accepted_samples": null,
+      "attempted_samples": 5898240,
+      "autocorrelation_method": "blocking estimate of tangent-overlap step means; adjusted ESS is iid bridge ESS divided by 2*tau_int",
+      "block_size": 128,
+      "bridge_effective_sample_size": 392303.2556986181,
+      "bridge_ess_fraction": 0.7482590784046518,
+      "configuration_sha256": "c9e48f0c28b621fdf3ddc3d93c0bebdad52886e49f264f6c814e68fe01f36d10",
+      "diagnostic_missing_reasons": {
+        "accepted_samples": "upstream artifact stores only a rolling mean acceptance, not an exact accumulated accepted-proposal count",
+        "maximum_resident_memory_mb": "upstream local acquisition did not record peak resident memory"
+      },
+      "effective_sample_size": 223007.48436119463,
+      "energy": 10.364262501185118,
+      "equilibrated_samples": 524288,
+      "estimator_stderr": 0.0006416126145027952,
+      "failure_reason": null,
+      "finished_at": "2026-07-30T06:50:15.117303+00:00",
+      "flux": 21,
+      "integrated_autocorrelation_time": 0.8795741919208934,
+      "job_id": "local-clean-b2b4a6c-n8-seed-20260797",
+      "local_energy_variance": 0.017210730130995285,
+      "maximum_resident_memory_mb": null,
+      "particle_number": 8,
+      "project_commit": "b2b4a6ce44f2ff414b12f77f9c131b8c0d82ae12",
+      "retained_samples": 524288,
+      "schema_version": "fermion-scaling-chain-v1",
+      "seed": 20260797,
+      "started_at": "2026-07-30T06:10:21.513044+00:00",
+      "status": "completed",
+      "wall_seconds": 2298.6128907500006
+    }
+  ],
+  "schema_version": "fermion-scaling-report-v1",
+  "status_counts": {
+    "completed": 4
+  },
+  "verification": {
+    "all_configuration_hashes_verified": true,
+    "all_record_hashes_present": true,
+    "all_records_validated": true,
+    "all_submitted_records_preserved": true,
+    "evidence_complete": false,
+    "outcome_filtering_applied": false
+  }
+}
