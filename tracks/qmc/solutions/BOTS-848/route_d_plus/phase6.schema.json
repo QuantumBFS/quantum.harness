@@ -33,6 +33,9 @@
     "phase5_certificate_path",
     "phase5_certificate_sha256",
     "phase5_git_commit"
+    ,
+    "phase6a_certificate_path",
+    "phase6a_certificate_sha256"
   ],
   "properties": {
     "schema_version": {"const": "challenge-15-route-d-plus-phase6-v1"},
@@ -250,6 +253,11 @@
     "phase5_git_commit": {
       "type": "string",
       "pattern": "^[0-9a-f]{40}$"
+    },
+    "phase6a_certificate_path": {"type": "string", "minLength": 1},
+    "phase6a_certificate_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
     }
   },
   "$defs": {

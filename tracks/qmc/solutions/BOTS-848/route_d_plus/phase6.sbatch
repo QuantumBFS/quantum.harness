@@ -3,6 +3,7 @@ set -euo pipefail
 
 : "${ROUTE_D_PLUS_REPO_ROOT:?set the absolute remote repository root}"
 : "${ROUTE_D_PLUS_PHASE5_CERTIFICATE:?set the Phase 5 certificate path}"
+: "${ROUTE_D_PLUS_PHASE6A_CERTIFICATE:?set the Phase 6A certificate path}"
 : "${ROUTE_D_PLUS_RUN_ID:?set a unique Route D+ Phase 6 run id}"
 
 repo_root="$(cd -- "${ROUTE_D_PLUS_REPO_ROOT}" && pwd)"
@@ -68,4 +69,5 @@ cd "${repo_root}/tracks/qmc/solutions/BOTS-848"
   -m route_d_plus.certify_phase6 \
   --repo-root "${repo_root}" \
   --phase5-certificate "${ROUTE_D_PLUS_PHASE5_CERTIFICATE}" \
+  --phase6a-certificate "${ROUTE_D_PLUS_PHASE6A_CERTIFICATE}" \
   --output "${run_dir}/phase6-certificate.json"

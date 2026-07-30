@@ -33,6 +33,7 @@ from route_d_plus.train_dplus0 import (
 SCHEMA_VERSION = "challenge-15-route-d-plus-phase6-v1"
 ATTEMPT_SCHEMA_VERSION = "challenge-15-route-d-plus-phase6-attempt-v1"
 PHASE5_SCHEMA_VERSION = "challenge-15-route-d-plus-phase5-v1"
+PHASE6A_SCHEMA_VERSION = "challenge-15-route-d-plus-phase6a-v1"
 SEEDS = (848, 1848, 2848)
 FORBIDDEN_MODULE_PREFIXES = (
     "benchmark_v0.ed_oracle",
@@ -109,6 +110,27 @@ def require_phase5_certificate(path: Path) -> dict[str, Any]:
     }
     if mismatches:
         raise RuntimeError(f"Phase 5 certificate mismatch: {mismatches}")
+    return certificate
+
+
+def require_phase6a_certificate(path: Path) -> dict[str, Any]:
+    certificate = json.loads(path.read_text(encoding="utf-8"))
+    expected = {
+        "schema_version": PHASE6A_SCHEMA_VERSION,
+        "n_electrons": 6,
+        "two_q": 15,
+        "passed": True,
+        "git_dirty": False,
+        "jax_platform": "gpu",
+        "jax_x64_enabled": True,
+    }
+    mismatches = {
+        key: (certificate.get(key), value)
+        for key, value in expected.items()
+        if certificate.get(key) != value
+    }
+    if mismatches:
+        raise RuntimeError(f"Phase 6A certificate mismatch: {mismatches}")
     return certificate
 
 
@@ -204,9 +226,11 @@ def collect_certificate(
     *,
     repo_root: Path,
     phase5_certificate_path: Path,
+    phase6a_certificate_path: Path,
     output_path: Path,
 ) -> dict[str, Any]:
     phase5 = require_phase5_certificate(phase5_certificate_path)
+    require_phase6a_certificate(phase6a_certificate_path)
     commit = git_output(repo_root, "rev-parse", "HEAD")
     dirty = bool(git_output(repo_root, "status", "--porcelain"))
     if len(commit) != 40 or dirty:
@@ -428,6 +452,12 @@ def collect_certificate(
             phase5_certificate_path
         ),
         "phase5_git_commit": phase5["git_commit"],
+        "phase6a_certificate_path": str(
+            phase6a_certificate_path.resolve()
+        ),
+        "phase6a_certificate_sha256": sha256_file(
+            phase6a_certificate_path
+        ),
     }
 
 
@@ -460,12 +490,14 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--repo-root", required=True, type=Path)
     parser.add_argument("--phase5-certificate", required=True, type=Path)
+    parser.add_argument("--phase6a-certificate", required=True, type=Path)
     parser.add_argument("--output", required=True, type=Path)
     arguments = parser.parse_args()
     output = arguments.output.resolve()
     collected = collect_certificate(
         repo_root=arguments.repo_root.resolve(),
         phase5_certificate_path=arguments.phase5_certificate.resolve(),
+        phase6a_certificate_path=arguments.phase6a_certificate.resolve(),
         output_path=output,
     )
     attempt = {**collected, "schema_version": ATTEMPT_SCHEMA_VERSION}
