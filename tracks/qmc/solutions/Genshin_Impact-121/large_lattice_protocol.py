@@ -1399,7 +1399,8 @@ def main(argv: Optional[Sequence[str]]=None) -> int:
     return 2 if args.command=="audit" and result.get("status")!="PASS" else 0
 
 def environment_snapshot() -> Mapping[str,Any]:
-    executable=Path(sys.executable).resolve()
+    # Preserve the invoked venv entry point; resolving it drops venv site-packages.
+    executable=Path(os.path.abspath(sys.executable))
     _need(executable.is_absolute() and executable.is_file(),
           "validated Python executable is unavailable")
     versions={}

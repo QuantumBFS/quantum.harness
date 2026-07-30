@@ -369,9 +369,9 @@ def test_materialization_freezes_environment_and_restart_wrapper(
     index = protocol.materialize(meta_path, root, small_execution())
     environment = index["environment"]
     assert Path(environment["python_executable"]).is_absolute()
-    assert Path(environment["python_executable"]).resolve() == Path(
+    assert Path(environment["python_executable"]) == Path(
         sys.executable
-    ).resolve()
+    )
     assert environment["python_version"]
     assert environment["numpy_version"]
     assert environment["scipy_version"]
