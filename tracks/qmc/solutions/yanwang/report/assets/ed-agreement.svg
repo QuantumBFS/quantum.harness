@@ -1,0 +1,420 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="713.99952pt" height="339.59952pt" viewBox="0 0 713.99952 339.59952" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>yanwang148 challenge report</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="ed-agreement-figure_1">
+  <g id="ed-agreement-patch_1">
+   <path d="M 0 339.59952
+L 713.99952 339.59952
+L 713.99952 0
+L 0 0
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="ed-agreement-axes_1">
+   <g id="ed-agreement-patch_2">
+    <path d="M 100.848906 301.05202
+L 706.79952 301.05202
+L 706.79952 22.660937
+L 100.848906 22.660937
+z
+" style="fill: #ffffff"/>
+   </g>
+   <g id="ed-agreement-matplotlib.axis_1">
+    <g id="ed-agreement-xtick_1">
+     <g id="ed-agreement-line2d_1">
+      <path d="M 100.848906 301.05202
+L 100.848906 22.660937
+" clip-path="url(#ed-agreement-p263b57e55e)" style="fill: none; stroke: #e6e3da; stroke-opacity: 0.9; stroke-width: 0.75; stroke-linecap: square"/>
+     </g>
+     <g id="ed-agreement-line2d_2">
+      <defs>
+       <path id="ed-agreement-mf0816c0a75" d="M 0 0
+L 0 3.5
+" style="stroke: #000000; stroke-width: 0.8"/>
+      </defs>
+      <g>
+       <use xlink:href="#ed-agreement-mf0816c0a75" x="100.848906" y="301.05202" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="ed-agreement-text_1">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: middle" x="100.848906" y="315.223036" transform="rotate(-0 100.848906 315.223036)">0.0</text>
+     </g>
+    </g>
+    <g id="ed-agreement-xtick_2">
+     <g id="ed-agreement-line2d_3">
+      <path d="M 179.543791 301.05202
+L 179.543791 22.660937
+" clip-path="url(#ed-agreement-p263b57e55e)" style="fill: none; stroke: #e6e3da; stroke-opacity: 0.9; stroke-width: 0.75; stroke-linecap: square"/>
+     </g>
+     <g id="ed-agreement-line2d_4">
+      <g>
+       <use xlink:href="#ed-agreement-mf0816c0a75" x="179.543791" y="301.05202" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="ed-agreement-text_2">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: middle" x="179.543791" y="315.223036" transform="rotate(-0 179.543791 315.223036)">0.5</text>
+     </g>
+    </g>
+    <g id="ed-agreement-xtick_3">
+     <g id="ed-agreement-line2d_5">
+      <path d="M 258.238676 301.05202
+L 258.238676 22.660937
+" clip-path="url(#ed-agreement-p263b57e55e)" style="fill: none; stroke: #e6e3da; stroke-opacity: 0.9; stroke-width: 0.75; stroke-linecap: square"/>
+     </g>
+     <g id="ed-agreement-line2d_6">
+      <g>
+       <use xlink:href="#ed-agreement-mf0816c0a75" x="258.238676" y="301.05202" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="ed-agreement-text_3">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: middle" x="258.238676" y="315.223036" transform="rotate(-0 258.238676 315.223036)">1.0</text>
+     </g>
+    </g>
+    <g id="ed-agreement-xtick_4">
+     <g id="ed-agreement-line2d_7">
+      <path d="M 336.933561 301.05202
+L 336.933561 22.660937
+" clip-path="url(#ed-agreement-p263b57e55e)" style="fill: none; stroke: #e6e3da; stroke-opacity: 0.9; stroke-width: 0.75; stroke-linecap: square"/>
+     </g>
+     <g id="ed-agreement-line2d_8">
+      <g>
+       <use xlink:href="#ed-agreement-mf0816c0a75" x="336.933561" y="301.05202" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="ed-agreement-text_4">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: middle" x="336.933561" y="315.223036" transform="rotate(-0 336.933561 315.223036)">1.5</text>
+     </g>
+    </g>
+    <g id="ed-agreement-xtick_5">
+     <g id="ed-agreement-line2d_9">
+      <path d="M 415.628446 301.05202
+L 415.628446 22.660937
+" clip-path="url(#ed-agreement-p263b57e55e)" style="fill: none; stroke: #e6e3da; stroke-opacity: 0.9; stroke-width: 0.75; stroke-linecap: square"/>
+     </g>
+     <g id="ed-agreement-line2d_10">
+      <g>
+       <use xlink:href="#ed-agreement-mf0816c0a75" x="415.628446" y="301.05202" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="ed-agreement-text_5">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: middle" x="415.628446" y="315.223036" transform="rotate(-0 415.628446 315.223036)">2.0</text>
+     </g>
+    </g>
+    <g id="ed-agreement-xtick_6">
+     <g id="ed-agreement-line2d_11">
+      <path d="M 494.323331 301.05202
+L 494.323331 22.660937
+" clip-path="url(#ed-agreement-p263b57e55e)" style="fill: none; stroke: #e6e3da; stroke-opacity: 0.9; stroke-width: 0.75; stroke-linecap: square"/>
+     </g>
+     <g id="ed-agreement-line2d_12">
+      <g>
+       <use xlink:href="#ed-agreement-mf0816c0a75" x="494.323331" y="301.05202" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="ed-agreement-text_6">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: middle" x="494.323331" y="315.223036" transform="rotate(-0 494.323331 315.223036)">2.5</text>
+     </g>
+    </g>
+    <g id="ed-agreement-xtick_7">
+     <g id="ed-agreement-line2d_13">
+      <path d="M 573.018216 301.05202
+L 573.018216 22.660937
+" clip-path="url(#ed-agreement-p263b57e55e)" style="fill: none; stroke: #e6e3da; stroke-opacity: 0.9; stroke-width: 0.75; stroke-linecap: square"/>
+     </g>
+     <g id="ed-agreement-line2d_14">
+      <g>
+       <use xlink:href="#ed-agreement-mf0816c0a75" x="573.018216" y="301.05202" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="ed-agreement-text_7">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: middle" x="573.018216" y="315.223036" transform="rotate(-0 573.018216 315.223036)">3.0</text>
+     </g>
+    </g>
+    <g id="ed-agreement-xtick_8">
+     <g id="ed-agreement-line2d_15">
+      <path d="M 651.713101 301.05202
+L 651.713101 22.660937
+" clip-path="url(#ed-agreement-p263b57e55e)" style="fill: none; stroke: #e6e3da; stroke-opacity: 0.9; stroke-width: 0.75; stroke-linecap: square"/>
+     </g>
+     <g id="ed-agreement-line2d_16">
+      <g>
+       <use xlink:href="#ed-agreement-mf0816c0a75" x="651.713101" y="301.05202" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="ed-agreement-text_8">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: middle" x="651.713101" y="315.223036" transform="rotate(-0 651.713101 315.223036)">3.5</text>
+     </g>
+    </g>
+    <g id="ed-agreement-text_9">
+     <text style="font-size: 10.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: middle" x="403.824213" y="329.671161" transform="rotate(-0 403.824213 329.671161)">absolute QMC–ED discrepancy (conservative standard deviations)</text>
+    </g>
+   </g>
+   <g id="ed-agreement-matplotlib.axis_2">
+    <g id="ed-agreement-ytick_1">
+     <g id="ed-agreement-line2d_17">
+      <defs>
+       <path id="ed-agreement-m4245f22ea4" d="M 0 0
+L -3.5 0
+" style="stroke: #000000; stroke-width: 0.8"/>
+      </defs>
+      <g>
+       <use xlink:href="#ed-agreement-m4245f22ea4" x="100.848906" y="49.275161" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="ed-agreement-text_10">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: end" x="93.848906" y="52.870317" transform="rotate(-0 93.848906 52.870317)">Honeycomb · energy</text>
+     </g>
+    </g>
+    <g id="ed-agreement-ytick_2">
+     <g id="ed-agreement-line2d_18">
+      <g>
+       <use xlink:href="#ed-agreement-m4245f22ea4" x="100.848906" y="94.307688" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="ed-agreement-text_11">
+      <!-- Honeycomb · $\langle m^2\rangle$ -->
+      <g transform="translate(16.613906 98.250188)">
+       <text>
+        <tspan x="0" y="-0.739062" style="font-size: 9.5px; font-family: 'Iowan Old Style'">H</tspan>
+        <tspan x="7.54248" y="-0.739062" style="font-size: 9.5px; font-family: 'Iowan Old Style'">o</tspan>
+        <tspan x="12.774902" y="-0.739062" style="font-size: 9.5px; font-family: 'Iowan Old Style'">n</tspan>
+        <tspan x="18.322754" y="-0.739062" style="font-size: 9.5px; font-family: 'Iowan Old Style'">e</tspan>
+        <tspan x="22.956787" y="-0.739062" style="font-size: 9.5px; font-family: 'Iowan Old Style'">y</tspan>
+        <tspan x="27.572266" y="-0.739062" style="font-size: 9.5px; font-family: 'Iowan Old Style'">c</tspan>
+        <tspan x="31.56665" y="-0.739062" style="font-size: 9.5px; font-family: 'Iowan Old Style'">o</tspan>
+        <tspan x="36.799072" y="-0.739062" style="font-size: 9.5px; font-family: 'Iowan Old Style'">m</tspan>
+        <tspan x="45.157959" y="-0.739062" style="font-size: 9.5px; font-family: 'Iowan Old Style'">b</tspan>
+        <tspan x="50.441406" y="-0.739062" style="font-size: 9.5px; font-family: 'Iowan Old Style'"> </tspan>
+        <tspan x="53.080811" y="-0.739062" style="font-size: 9.5px; font-family: 'Iowan Old Style'">·</tspan>
+        <tspan x="55.720215" y="-0.739062" style="font-size: 9.5px; font-family: 'Iowan Old Style'"> </tspan>
+        <tspan x="58.359619" y="-0.739062" style="font-size: 9.5px; font-family: 'STIXGeneral'">⟨</tspan>
+        <tspan x="73.40109" y="-0.739062" style="font-size: 9.5px; font-family: 'STIXGeneral'">⟩</tspan>
+        <tspan x="62.159607" y="-0.739062" style="font-style: italic; font-size: 9.5px; font-family: 'STIXGeneral'">m</tspan>
+        <tspan x="69.635475" y="-4.264062" style="font-size: 6.65px; font-family: 'STIXGeneral'">2</tspan>
+       </text>
+      </g>
+     </g>
+    </g>
+    <g id="ed-agreement-ytick_3">
+     <g id="ed-agreement-line2d_19">
+      <g>
+       <use xlink:href="#ed-agreement-m4245f22ea4" x="100.848906" y="139.340215" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="ed-agreement-text_12">
+      <!-- Honeycomb · $\langle m^4\rangle$ -->
+      <g transform="translate(16.613906 143.282715)">
+       <text>
+        <tspan x="0" y="-0.739062" style="font-size: 9.5px; font-family: 'Iowan Old Style'">H</tspan>
+        <tspan x="7.54248" y="-0.739062" style="font-size: 9.5px; font-family: 'Iowan Old Style'">o</tspan>
+        <tspan x="12.774902" y="-0.739062" style="font-size: 9.5px; font-family: 'Iowan Old Style'">n</tspan>
+        <tspan x="18.322754" y="-0.739062" style="font-size: 9.5px; font-family: 'Iowan Old Style'">e</tspan>
+        <tspan x="22.956787" y="-0.739062" style="font-size: 9.5px; font-family: 'Iowan Old Style'">y</tspan>
+        <tspan x="27.572266" y="-0.739062" style="font-size: 9.5px; font-family: 'Iowan Old Style'">c</tspan>
+        <tspan x="31.56665" y="-0.739062" style="font-size: 9.5px; font-family: 'Iowan Old Style'">o</tspan>
+        <tspan x="36.799072" y="-0.739062" style="font-size: 9.5px; font-family: 'Iowan Old Style'">m</tspan>
+        <tspan x="45.157959" y="-0.739062" style="font-size: 9.5px; font-family: 'Iowan Old Style'">b</tspan>
+        <tspan x="50.441406" y="-0.739062" style="font-size: 9.5px; font-family: 'Iowan Old Style'"> </tspan>
+        <tspan x="53.080811" y="-0.739062" style="font-size: 9.5px; font-family: 'Iowan Old Style'">·</tspan>
+        <tspan x="55.720215" y="-0.739062" style="font-size: 9.5px; font-family: 'Iowan Old Style'"> </tspan>
+        <tspan x="58.359619" y="-0.739062" style="font-size: 9.5px; font-family: 'STIXGeneral'">⟨</tspan>
+        <tspan x="73.40109" y="-0.739062" style="font-size: 9.5px; font-family: 'STIXGeneral'">⟩</tspan>
+        <tspan x="62.159607" y="-0.739062" style="font-style: italic; font-size: 9.5px; font-family: 'STIXGeneral'">m</tspan>
+        <tspan x="69.635475" y="-4.264062" style="font-size: 6.65px; font-family: 'STIXGeneral'">4</tspan>
+       </text>
+      </g>
+     </g>
+    </g>
+    <g id="ed-agreement-ytick_4">
+     <g id="ed-agreement-line2d_20">
+      <g>
+       <use xlink:href="#ed-agreement-m4245f22ea4" x="100.848906" y="184.372742" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="ed-agreement-text_13">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: end" x="93.848906" y="187.95825" transform="rotate(-0 93.848906 187.95825)">Triangular · energy</text>
+     </g>
+    </g>
+    <g id="ed-agreement-ytick_5">
+     <g id="ed-agreement-line2d_21">
+      <g>
+       <use xlink:href="#ed-agreement-m4245f22ea4" x="100.848906" y="229.405269" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="ed-agreement-text_14">
+      <!-- Triangular · $\langle m^2\rangle$ -->
+      <g transform="translate(22.883906 233.347769)">
+       <text>
+        <tspan x="0" y="-0.739062" style="font-size: 9.5px; font-family: 'Iowan Old Style'">T</tspan>
+        <tspan x="5.993164" y="-0.739062" style="font-size: 9.5px; font-family: 'Iowan Old Style'">r</tspan>
+        <tspan x="9.699463" y="-0.739062" style="font-size: 9.5px; font-family: 'Iowan Old Style'">i</tspan>
+        <tspan x="12.519775" y="-0.739062" style="font-size: 9.5px; font-family: 'Iowan Old Style'">a</tspan>
+        <tspan x="17.088867" y="-0.739062" style="font-size: 9.5px; font-family: 'Iowan Old Style'">n</tspan>
+        <tspan x="22.636719" y="-0.739062" style="font-size: 9.5px; font-family: 'Iowan Old Style'">g</tspan>
+        <tspan x="27.539795" y="-0.739062" style="font-size: 9.5px; font-family: 'Iowan Old Style'">u</tspan>
+        <tspan x="33.124756" y="-0.739062" style="font-size: 9.5px; font-family: 'Iowan Old Style'">l</tspan>
+        <tspan x="35.898682" y="-0.739062" style="font-size: 9.5px; font-family: 'Iowan Old Style'">a</tspan>
+        <tspan x="40.467773" y="-0.739062" style="font-size: 9.5px; font-family: 'Iowan Old Style'">r</tspan>
+        <tspan x="44.174072" y="-0.739062" style="font-size: 9.5px; font-family: 'Iowan Old Style'"> </tspan>
+        <tspan x="46.813477" y="-0.739062" style="font-size: 9.5px; font-family: 'Iowan Old Style'">·</tspan>
+        <tspan x="49.452881" y="-0.739062" style="font-size: 9.5px; font-family: 'Iowan Old Style'"> </tspan>
+        <tspan x="52.092285" y="-0.739062" style="font-size: 9.5px; font-family: 'STIXGeneral'">⟨</tspan>
+        <tspan x="67.133756" y="-0.739062" style="font-size: 9.5px; font-family: 'STIXGeneral'">⟩</tspan>
+        <tspan x="55.892273" y="-0.739062" style="font-style: italic; font-size: 9.5px; font-family: 'STIXGeneral'">m</tspan>
+        <tspan x="63.368141" y="-4.264062" style="font-size: 6.65px; font-family: 'STIXGeneral'">2</tspan>
+       </text>
+      </g>
+     </g>
+    </g>
+    <g id="ed-agreement-ytick_6">
+     <g id="ed-agreement-line2d_22">
+      <g>
+       <use xlink:href="#ed-agreement-m4245f22ea4" x="100.848906" y="274.437796" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="ed-agreement-text_15">
+      <!-- Triangular · $\langle m^4\rangle$ -->
+      <g transform="translate(22.883906 278.380296)">
+       <text>
+        <tspan x="0" y="-0.739062" style="font-size: 9.5px; font-family: 'Iowan Old Style'">T</tspan>
+        <tspan x="5.993164" y="-0.739062" style="font-size: 9.5px; font-family: 'Iowan Old Style'">r</tspan>
+        <tspan x="9.699463" y="-0.739062" style="font-size: 9.5px; font-family: 'Iowan Old Style'">i</tspan>
+        <tspan x="12.519775" y="-0.739062" style="font-size: 9.5px; font-family: 'Iowan Old Style'">a</tspan>
+        <tspan x="17.088867" y="-0.739062" style="font-size: 9.5px; font-family: 'Iowan Old Style'">n</tspan>
+        <tspan x="22.636719" y="-0.739062" style="font-size: 9.5px; font-family: 'Iowan Old Style'">g</tspan>
+        <tspan x="27.539795" y="-0.739062" style="font-size: 9.5px; font-family: 'Iowan Old Style'">u</tspan>
+        <tspan x="33.124756" y="-0.739062" style="font-size: 9.5px; font-family: 'Iowan Old Style'">l</tspan>
+        <tspan x="35.898682" y="-0.739062" style="font-size: 9.5px; font-family: 'Iowan Old Style'">a</tspan>
+        <tspan x="40.467773" y="-0.739062" style="font-size: 9.5px; font-family: 'Iowan Old Style'">r</tspan>
+        <tspan x="44.174072" y="-0.739062" style="font-size: 9.5px; font-family: 'Iowan Old Style'"> </tspan>
+        <tspan x="46.813477" y="-0.739062" style="font-size: 9.5px; font-family: 'Iowan Old Style'">·</tspan>
+        <tspan x="49.452881" y="-0.739062" style="font-size: 9.5px; font-family: 'Iowan Old Style'"> </tspan>
+        <tspan x="52.092285" y="-0.739062" style="font-size: 9.5px; font-family: 'STIXGeneral'">⟨</tspan>
+        <tspan x="67.133756" y="-0.739062" style="font-size: 9.5px; font-family: 'STIXGeneral'">⟩</tspan>
+        <tspan x="55.892273" y="-0.739062" style="font-style: italic; font-size: 9.5px; font-family: 'STIXGeneral'">m</tspan>
+        <tspan x="63.368141" y="-4.264062" style="font-size: 6.65px; font-family: 'STIXGeneral'">4</tspan>
+       </text>
+      </g>
+     </g>
+    </g>
+   </g>
+   <g id="ed-agreement-patch_3">
+    <path d="M 100.848906 63.235244
+L 368.094721 63.235244
+L 368.094721 35.315078
+L 100.848906 35.315078
+z
+" clip-path="url(#ed-agreement-p263b57e55e)" style="fill: #1f5cd6; opacity: 0.88"/>
+   </g>
+   <g id="ed-agreement-patch_4">
+    <path d="M 100.848906 108.267772
+L 241.157845 108.267772
+L 241.157845 80.347605
+L 100.848906 80.347605
+z
+" clip-path="url(#ed-agreement-p263b57e55e)" style="fill: #1f5cd6; opacity: 0.88"/>
+   </g>
+   <g id="ed-agreement-patch_5">
+    <path d="M 100.848906 153.300299
+L 235.224668 153.300299
+L 235.224668 125.380132
+L 100.848906 125.380132
+z
+" clip-path="url(#ed-agreement-p263b57e55e)" style="fill: #1f5cd6; opacity: 0.88"/>
+   </g>
+   <g id="ed-agreement-patch_6">
+    <path d="M 100.848906 198.332826
+L 149.328479 198.332826
+L 149.328479 170.412659
+L 100.848906 170.412659
+z
+" clip-path="url(#ed-agreement-p263b57e55e)" style="fill: #b8651e; opacity: 0.88"/>
+   </g>
+   <g id="ed-agreement-patch_7">
+    <path d="M 100.848906 243.365353
+L 292.011914 243.365353
+L 292.011914 215.445186
+L 100.848906 215.445186
+z
+" clip-path="url(#ed-agreement-p263b57e55e)" style="fill: #b8651e; opacity: 0.88"/>
+   </g>
+   <g id="ed-agreement-patch_8">
+    <path d="M 100.848906 288.39788
+L 291.521848 288.39788
+L 291.521848 260.477713
+L 100.848906 260.477713
+z
+" clip-path="url(#ed-agreement-p263b57e55e)" style="fill: #b8651e; opacity: 0.88"/>
+   </g>
+   <g id="ed-agreement-patch_9">
+    <path d="M 100.848906 301.05202
+L 100.848906 22.660937
+" style="fill: none; stroke: #333333; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="ed-agreement-patch_10">
+    <path d="M 100.848906 301.05202
+L 706.79952 301.05202
+" style="fill: none; stroke: #333333; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="ed-agreement-line2d_23">
+    <path d="M 651.713101 301.05202
+L 651.713101 22.660937
+" clip-path="url(#ed-agreement-p263b57e55e)" style="fill: none; stroke-dasharray: 6.66,2.88; stroke-dashoffset: 0; stroke: #b3261e; stroke-width: 1.8"/>
+   </g>
+   <g id="ed-agreement-text_16">
+    <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: start; fill: #1a1a1a" x="375.964209" y="51.66352" transform="rotate(-0 375.964209 51.66352)">1.70σ</text>
+   </g>
+   <g id="ed-agreement-text_17">
+    <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: start; fill: #1a1a1a" x="249.027334" y="96.696047" transform="rotate(-0 249.027334 96.696047)">0.89σ</text>
+   </g>
+   <g id="ed-agreement-text_18">
+    <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: start; fill: #1a1a1a" x="243.094156" y="141.728575" transform="rotate(-0 243.094156 141.728575)">0.85σ</text>
+   </g>
+   <g id="ed-agreement-text_19">
+    <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: start; fill: #1a1a1a" x="157.197968" y="186.761102" transform="rotate(-0 157.197968 186.761102)">0.31σ</text>
+   </g>
+   <g id="ed-agreement-text_20">
+    <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: start; fill: #1a1a1a" x="299.881402" y="231.793629" transform="rotate(-0 299.881402 231.793629)">1.21σ</text>
+   </g>
+   <g id="ed-agreement-text_21">
+    <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: start; fill: #1a1a1a" x="299.391337" y="276.826156" transform="rotate(-0 299.391337 276.826156)">1.21σ</text>
+   </g>
+   <g id="ed-agreement-text_22">
+    <text style="font-weight: 700; font-size: 12.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: start" x="100.848906" y="16.660937" transform="rotate(-0 100.848906 16.660937)">Dedicated SSE reproduces interacting exact-diagonalization observables</text>
+   </g>
+   <g id="ed-agreement-legend_1">
+    <g id="ed-agreement-line2d_24">
+     <path d="M 561.905145 287.533739
+L 570.905145 287.533739
+L 579.905145 287.533739
+" style="fill: none; stroke-dasharray: 6.66,2.88; stroke-dashoffset: 0; stroke: #b3261e; stroke-width: 1.8"/>
+    </g>
+    <g id="ed-agreement-text_23">
+     <text style="font-size: 9px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: start" x="587.105145" y="290.683739" transform="rotate(-0 587.105145 290.683739)">frozen acceptance threshold</text>
+    </g>
+   </g>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="ed-agreement-p263b57e55e">
+   <rect x="100.848906" y="22.660937" width="605.950614" height="278.391083"/>
+  </clipPath>
+ </defs>
+</svg>

@@ -9,9 +9,11 @@ report.html using the harness's canonical report renderer.
 from __future__ import annotations
 
 import argparse
+import base64
 import csv
 import json
 import math
+import re
 import shutil
 import subprocess
 import sys
@@ -35,6 +37,69 @@ def load_json(path: Path) -> dict:
 def require(condition: bool, message: str) -> None:
     if not condition:
         raise ValueError(message)
+
+
+def normalize_vector_output(path: Path) -> None:
+    """Keep generated SVG text selectable and diffs free of trailing spaces."""
+    if path.suffix.lower() != ".svg":
+        return
+    text = path.read_text(encoding="utf-8")
+    prefix = re.sub(r"[^a-z0-9]+", "-", path.stem.lower()).strip("-")
+    identifiers = {}
+
+    def replace_id(match: re.Match[str]) -> str:
+        identifier = match.group(1)
+        identifiers[identifier] = f"{prefix}-{identifier}"
+        return f'id="{identifiers[identifier]}"'
+
+    text = re.sub(r'id="([^"]+)"', replace_id, text)
+    text = re.sub(
+        r"url\(#([^)]+)\)",
+        lambda match: f"url(#{identifiers.get(match.group(1), match.group(1))})",
+        text,
+    )
+    text = re.sub(
+        r'((?:xlink:)?href="#)([^"]+)(")',
+        lambda match: (
+            f'{match.group(1)}{identifiers.get(match.group(2), match.group(2))}'
+            f'{match.group(3)}'
+        ),
+        text,
+    )
+    normalized = "\n".join(line.rstrip() for line in text.splitlines()) + "\n"
+    path.write_text(normalized, encoding="utf-8")
+
+
+def inline_svg_figures(html: str) -> str:
+    """Replace SVG data-URI image tags with selectable inline SVG markup."""
+    pattern = re.compile(
+        r'<img src="data:image/svg\+xml;base64,([^"]+)" alt="([^"]*)">'
+    )
+
+    def replace_image(match: re.Match[str]) -> str:
+        svg = base64.b64decode(match.group(1)).decode("utf-8")
+        svg = re.sub(r"^\s*<\?xml.*?\?>\s*", "", svg, count=1, flags=re.DOTALL)
+        svg = re.sub(
+            r"^\s*<!DOCTYPE svg.*?>\s*",
+            "",
+            svg,
+            count=1,
+            flags=re.DOTALL,
+        )
+        svg = re.sub(
+            r"<svg\b",
+            (
+                '<svg class="vector-figure" role="img" '
+                f'aria-label="{match.group(2)}"'
+            ),
+            svg,
+            count=1,
+        )
+        return svg
+
+    html, count = pattern.subn(replace_image, html)
+    require(count == 5, f"expected 5 embedded SVG figures, found {count}")
+    return html
 
 
 def validate_inputs(
@@ -119,6 +184,8 @@ def configure_plot_style(plt) -> None:
             "grid.linewidth": 0.75,
             "grid.alpha": 0.9,
             "savefig.facecolor": "#ffffff",
+            "svg.hashsalt": "yanwang148",
+            "svg.fonttype": "none",
         }
     )
 
@@ -247,8 +314,9 @@ def make_ratio_figure(path: Path, ratio: dict) -> None:
         dpi=220,
         bbox_inches="tight",
         facecolor=fig.get_facecolor(),
-        metadata={"Software": "yanwang148 challenge report"},
+        metadata={"Creator": "yanwang148 challenge report", "Date": None},
     )
+    normalize_vector_output(path)
     plt.close(fig)
 
 
@@ -309,8 +377,9 @@ def make_ed_validation_figure(path: Path, ed_validation: dict) -> None:
         path,
         dpi=220,
         bbox_inches="tight",
-        metadata={"Software": "yanwang148 challenge report"},
+        metadata={"Creator": "yanwang148 challenge report", "Date": None},
     )
+    normalize_vector_output(path)
     plt.close(fig)
 
 
@@ -437,8 +506,9 @@ def make_robustness_figure(
         path,
         dpi=220,
         bbox_inches="tight",
-        metadata={"Software": "yanwang148 challenge report"},
+        metadata={"Creator": "yanwang148 challenge report", "Date": None},
     )
+    normalize_vector_output(path)
     plt.close(fig)
 
 
@@ -524,8 +594,9 @@ def make_critical_field_comparison(
         path,
         dpi=220,
         bbox_inches="tight",
-        metadata={"Software": "yanwang148 challenge report"},
+        metadata={"Creator": "yanwang148 challenge report", "Date": None},
     )
+    normalize_vector_output(path)
     plt.close(fig)
 
 
@@ -664,6 +735,8 @@ def make_triangular_fss_diagnostics(
         fraction=0.028,
         pad=0.02,
     )
+    if colorbar.solids is not None:
+        colorbar.solids.set_rasterized(False)
     colorbar.set_label("linear size $L$")
     colorbar.set_ticks(sizes[::2] + ([sizes[-1]] if sizes[-1] not in sizes[::2] else []))
 
@@ -676,8 +749,9 @@ def make_triangular_fss_diagnostics(
         path,
         dpi=220,
         bbox_inches="tight",
-        metadata={"Software": "yanwang148 challenge report"},
+        metadata={"Creator": "yanwang148 challenge report", "Date": None},
     )
+    normalize_vector_output(path)
     plt.close(fig)
 
 
@@ -846,7 +920,7 @@ def build_document(
                         "kind": "figures",
                         "items": [
                             {
-                                "src": "assets/ed-agreement.png",
+                                "src": "assets/ed-agreement.svg",
                                 "caption": (
                                     "Exact small-system validation. Absolute discrepancies "
                                     "between the dedicated SSE implementation and independently "
@@ -903,7 +977,7 @@ def build_document(
                         "kind": "figures",
                         "items": [
                             {
-                                "src": "assets/ratio-evidence.png",
+                                "src": "assets/ratio-evidence.svg",
                                 "caption": (
                                     "Primary result. Dark bars show statistical uncertainty; "
                                     "pale bars show total uncertainty. The orange line is exact "
@@ -974,7 +1048,7 @@ def build_document(
                         "kind": "figures",
                         "items": [
                             {
-                                "src": "assets/critical-field-comparison.png",
+                                "src": "assets/critical-field-comparison.svg",
                                 "caption": (
                                     "Critical-field concordance in a common Pauli/J convention. "
                                     "The dedicated SSE route, independent ALPS continuous-time "
@@ -994,12 +1068,12 @@ def build_document(
                         "kind": "figures",
                         "items": [
                             {
-                                "src": "assets/triangular-fss-diagnostics.png",
+                                "src": "assets/triangular-fss-diagnostics.svg",
                                 "caption": (
                                     "Triangular-lattice spacetime Binder-ratio finite-size "
                                     "scaling. Points with error bars are QMC data, solid curves "
                                     "are the registered fit, colors encode linear size through "
-                                    "the unobstructed side colorbar, and the right panel shows "
+                                    "the unobstructed side colorbar, and the lower panel shows "
                                     "normalized residuals. The fit has "
                                     f'χ²/dof = {tri_fit["chi2"]:.2f}/{tri_fit["degrees_of_freedom"]} '
                                     f'and p = {tri_fit["p_value"]:.3f}.'
@@ -1011,7 +1085,7 @@ def build_document(
                         "kind": "figures",
                         "items": [
                             {
-                                "src": "assets/fss-robustness.png",
+                                "src": "assets/fss-robustness.svg",
                                 "caption": (
                                     "Finite-size-scaling robustness forest plot. Each point is an "
                                     "accepted pre-registered size, field-window, omitted-size, or "
@@ -1190,6 +1264,12 @@ def apply_report_typography(html_path: Path) -> None:
         ),
         1,
     )
+    vector_css = (
+        ".figbox svg.vector-figure{max-width:100%;height:auto;display:block;"
+        "margin:0 auto;border-radius:3px}"
+    )
+    require("</style>" in html, "canonical report style terminator not found")
+    html = html.replace("</style>", vector_css + "</style>", 1)
     lede_before = (
         ".lede{font-size:15px;color:#2a2a2a;margin:14px 0 0;max-width:72ch}"
     )
@@ -1201,7 +1281,7 @@ def apply_report_typography(html_path: Path) -> None:
     result_after = (
         ".verdict .why{font-size:14.5px;font-weight:400;color:#222}"
         ".verdict .why strong{font-weight:700}"
-        ".verdict .why .key-result{color:#2f6f53;font-weight:700}"
+        ".verdict .why .key-result{color:#14532d;font-weight:800}"
     )
     figures_before = (
         ".figs{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));"
@@ -1232,6 +1312,8 @@ def apply_report_typography(html_path: Path) -> None:
     )
     require(verdict_before in html, "canonical report verdict text not found")
     html = html.replace(verdict_before, verdict_after, 1)
+    html = inline_svg_figures(html)
+    require("data:image/" not in html, "report still contains raster-style image data")
     html_path.write_text(html, encoding="utf-8")
 
 
@@ -1240,11 +1322,11 @@ def stage_report_assets(root: Path, report_dir: Path, generated: dict[str, Path]
     assets = report_dir / "assets"
     assets.mkdir(parents=True, exist_ok=True)
     sources = {
-        "ratio-evidence.png": generated["ratio"],
-        "ed-agreement.png": generated["ed"],
-        "critical-field-comparison.png": generated["critical_fields"],
-        "fss-robustness.png": generated["robustness"],
-        "triangular-fss-diagnostics.png": generated["triangular_fss"],
+        "ratio-evidence.svg": generated["ratio"],
+        "ed-agreement.svg": generated["ed"],
+        "critical-field-comparison.svg": generated["critical_fields"],
+        "fss-robustness.svg": generated["robustness"],
+        "triangular-fss-diagnostics.svg": generated["triangular_fss"],
     }
     for name, source in sources.items():
         require(source.is_file(), f"report figure not found: {source}")
@@ -1279,18 +1361,18 @@ def main() -> int:
     ed_validation = load_json(result_root / "validation" / "dedicated-ed.json")
     validate_inputs(ratio, triangle, honeycomb, independent, ed_validation)
 
-    ratio_figure = result_root / "ratio" / "ratio-evidence.png"
+    ratio_figure = result_root / "ratio" / "ratio-evidence.svg"
     make_ratio_figure(ratio_figure, ratio)
-    ed_figure = result_root / "validation" / "ed-agreement.png"
+    ed_figure = result_root / "validation" / "ed-agreement.svg"
     make_ed_validation_figure(ed_figure, ed_validation)
-    critical_field_figure = result_root / "ratio" / "critical-field-comparison.png"
+    critical_field_figure = result_root / "ratio" / "critical-field-comparison.svg"
     make_critical_field_comparison(
         critical_field_figure,
         triangle,
         honeycomb,
         independent,
     )
-    robustness_figure = result_root / "ratio" / "fss-robustness.png"
+    robustness_figure = result_root / "ratio" / "fss-robustness.svg"
     make_robustness_figure(
         robustness_figure,
         result_root / "triangular" / "robustness.csv",
@@ -1299,7 +1381,7 @@ def main() -> int:
         honeycomb,
     )
     triangular_fss_figure = (
-        result_root / "triangular" / "triangular-fss-diagnostics.png"
+        result_root / "triangular" / "triangular-fss-diagnostics.svg"
     )
     make_triangular_fss_diagnostics(
         triangular_fss_figure,
