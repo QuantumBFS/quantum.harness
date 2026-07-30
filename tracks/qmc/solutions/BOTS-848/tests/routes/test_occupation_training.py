@@ -164,19 +164,38 @@ def test_tower_evaluation_cache_is_shared_and_explicitly_invalidated() -> None:
     ).enumerate_support()
     state = next(raw for raw in support if tower[1].logpsi(raw).real != -np.inf)
     tower.clear_evaluation_cache()
-    tower[1].logpsi(state)
+    expected_logpsi = tower[1].logpsi(state)
     expected_score = tower[1].log_score(state)
     first_counts = (len(base_logpsi_calls), len(base_score_calls))
-    tower[1].logpsi(state)
+    second_logpsi = tower[1].logpsi(state)
     second_score = tower[1].log_score(state)
     assert (len(base_logpsi_calls), len(base_score_calls)) == first_counts
+    assert second_logpsi == expected_logpsi
     np.testing.assert_array_equal(second_score, expected_score)
 
     tower.clear_evaluation_cache()
-    tower[1].logpsi(state)
+    baseline_logpsi = tower[1].logpsi(state)
+    baseline_score = tower[1].log_score(state)
+    baseline_counts = (len(base_logpsi_calls), len(base_score_calls))
+    assert baseline_counts[0] > first_counts[0]
+    assert baseline_counts[1] > first_counts[1]
+    assert baseline_logpsi == expected_logpsi
+    np.testing.assert_array_equal(baseline_score, expected_score)
+
+    updated_parameters = model.flat_parameters()
+    phase_slice = model.parameter_slices["excited.phase_W"]
+    local_index = int(np.argmax(np.abs(baseline_score[phase_slice])))
+    assert abs(baseline_score[phase_slice][local_index]) > 1.0e-12
+    updated_parameters[phase_slice.start + local_index] += 1.0e-3
+    previous_revision = model.parameter_revision
+    model.set_flat_parameters(updated_parameters)
+    assert model.parameter_revision == previous_revision + 1
+
+    updated_logpsi = tower[1].logpsi(state)
     tower[1].log_score(state)
-    assert len(base_logpsi_calls) > first_counts[0]
-    assert len(base_score_calls) > first_counts[1]
+    assert len(base_logpsi_calls) > baseline_counts[0]
+    assert len(base_score_calls) > baseline_counts[1]
+    assert updated_logpsi != baseline_logpsi
 
 
 @pytest.mark.parametrize("sector", ["ground", "excited"])
