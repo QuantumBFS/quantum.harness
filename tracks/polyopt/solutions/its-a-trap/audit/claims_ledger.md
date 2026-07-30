@@ -28,3 +28,11 @@ hypothesis" phrase.
 | C13 | Structural crossover of the coarse representation vs fine-rich reach: PSD-scalar ratio C6/A = 1.447/0.848/0.610/0.530 at N=14/20/26/30 (build-only, code-generated counts) | rg_selection/results/replacement_build.csv | resolved (counts exact) |
 | C14 | Tower recovery of the truncated-reach gap is UNRESOLVED, stated as a one-sided bound: d(A−B) resolved-positive at both sizes (+4.679e-05, +1.566e-04); L_C6−L_B inside the comparison band, so eta_CG(6) < 0.557% (N=14) and < 0.139% (N=20) of d, at wall/RSS ratios 10.7x/11.8x and 9.0x/5.7x | rg_selection/results/replacement_solve.csv + replacement_summary.csv | unresolved (one-sided bound) |
 | C15 | Bundle/deeper-tower contributions (D, E, C10) are resource-frontier at N=14/20 under the 18 GiB single-process law (never numerical failure): frontier rows retained with status; C10 deeper-tower validity PASSED (ED substitution, 1792 rows ≤ 1.7e-15) | replacement_solve.csv OOM rows; depth_admit_n10.txt; journalctl record in replacement_driver.log | status/frontier, not result |
+
+## Second-revision additions (direct MVP, late afternoon)
+
+| # | claim | evidence | classification |
+|---|---|---|---|
+| C16 | DirectCG at N=10 deletes 55 of 527 fine classes with machine-proven non-creation (post-extension basis ≡ frozen allowlist, seam_newwords=0) and structural cost 0.697 of FullFine at realized wall/RSS parity; all soundness gates green (map certificate, ED, mutation red, exact objective) | rg_selection/direct/{soundness_gates.csv,build_costs.csv,solve_results.csv} | gate record + resolved structural ratio |
+| C17 | Recovery by the one-level D=2 coarse layer at N=10 is UNRESOLVED: one-sided bound eta < 0.525% (eta_total < 0.540%) of the resolved reach gap d=+4.9715e-06 | rg_selection/direct/solve_results.csv | unresolved (one-sided bound) |
+| C18 | Boundary findings: N=8 partition degenerate (closure refill, W_D=∅, A≡B; control row); declared B_half correction bundle absorbed by the retained closure at N=10 (W_bundle=∅ exactly) — W_D-anchored corrections identified as the required next step, not run today | rg_selection/direct/{BASIS_PARTITION_N8.json,BASIS_PARTITION_N10.json,soundness_gates.csv G6bundle} | measured boundary/finding |

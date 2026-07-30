@@ -164,6 +164,30 @@ No cost-at-matched-accuracy claim is made. This is an operational
 replacement prototype, not a completed coarse replacement and not an
 implementation of Sec. III-D-2.
 
+### Direct fine-to-coarse replacement MVP (second revision, late afternoon)
+
+A narrower, gate-first MVP in which deleted fine variables are provably
+never created: a Gram-induced partition (frozen hashed allowlist; N=10:
+|W_full| = 527, |W_R| = 472, |W_D| = 55) with a one-level D=2 dual-parity
+coarse registry entering through T2-type link identities whose pullbacks
+are enumerated inside the retained span. All gates passed — map
+certificate (isometry 5.1e-16, flow identity 0.0), deleted-object-zero
+assertions (post-extension basis ≡ allowlist, seam admits nothing), exact
+objective, ED feasibility (link residual ≤ 1e-10), mutation red. Result
+at N=10 (all arms OPTIMAL, every row ≤ E_Bethe + 5e-7): structural cost
+of DirectCG = **0.697 of FullFine (meets the pre-declared 0.7 preferred
+threshold) at realized wall/RSS parity** — unlike the additive D=4 tower,
+whose 0.85 structural ratio came with ~9x wall. The eliminated reach gap
+d = +4.97e-06 is resolved-positive; recovery by the single D=2 level is
+UNRESOLVED (one-sided bound < 0.53% of d, central value −0.02%). Two
+boundary findings of record: the N=8 partition is degenerate (closure
+refill ⇒ |W_D| = 0, A ≡ B — kept as control row), and the declared
+correction bundle (B_half) is absorbed by the retained closure at N=10
+(W_bundle = ∅ exactly, machine-asserted) — a correction registry that
+actually carries deleted-zone content must anchor on the 55 enumerated
+W_D classes. Evidence: `rg_selection/direct/` (contract, partitions,
+audits, gates, solves, SHA256SUMS).
+
 ## Reproducibility
 
 `RESULTS.md` documents the paper-reproduction protocol (CONFIG A knob
