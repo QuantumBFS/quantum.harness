@@ -7,6 +7,12 @@
 **Submission PR:** [QuantumBFS/quantum.harness#178](https://github.com/QuantumBFS/quantum.harness/pull/178)
 **Track:** `qmc`
 
+> **Authoritative final-status document (2026-07-30).** This report is the
+> human-readable source of truth for the merged cross-branch submission.
+> Detailed ledgers preserve earlier research snapshots and candidate evolution;
+> if an older status statement conflicts with this report, this report and its
+> linked exact certificates take precedence.
+
 ## Executive summary
 
 This submission is the complete research record, not only the strongest positive
@@ -28,6 +34,11 @@ fixed-`J1,J2` Majorana contraction explanation. The same alphabet gives a
 positive-field Hermitian, number-conserving, interacting five-mode transfer.
 This is the main publication candidate, with locality and thermodynamic scaling
 left open.
+
+This final alphabet must not be conflated with the earlier symmetric-oddcycle
+continuum near `p=1`: that continuum is the known-Wei positive control, whereas
+the four-letter alphabet above is the later path-metric result with exact
+common-metric and fixed-`J1,J2` Wei separation certificates.
 
 Other rigorous positive mechanisms were also found or reconstructed: the
 totally nonnegative path/TN semigroup, odd positive-monomial and fixed-partition
