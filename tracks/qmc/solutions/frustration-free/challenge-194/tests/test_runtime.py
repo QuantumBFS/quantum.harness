@@ -71,7 +71,7 @@ def _repository(tmp_path: Path) -> Path:
 
 
 def test_numba_is_exactly_pinned_and_imports_in_fresh_python():
-    declared = open("pyproject.toml", encoding="utf-8").read()
+    declared = Path("pyproject.toml").read_text(encoding="utf-8")
     version = importlib.metadata.version("numba")
     assert f'"numba=={version}"' in declared
     smoke = """
@@ -124,9 +124,10 @@ def test_runtime_provenance_is_deterministic_and_tracks_each_input(
     for key in ("uv_lock_sha256", "runtime_capability_sha256"):
         assert len(first[key]) == 64
         int(first[key], 16)
-    assert first["uv_lock_sha256"] == hashlib.sha256(
-        (repository / "uv.lock").read_bytes()
-    ).hexdigest()
+    assert (
+        first["uv_lock_sha256"]
+        == hashlib.sha256((repository / "uv.lock").read_bytes()).hexdigest()
+    )
     capability_bytes = json.dumps(
         runtime_capability(),
         sort_keys=True,
@@ -134,9 +135,10 @@ def test_runtime_provenance_is_deterministic_and_tracks_each_input(
         ensure_ascii=False,
         allow_nan=False,
     ).encode("utf-8")
-    assert first["runtime_capability_sha256"] == hashlib.sha256(
-        capability_bytes
-    ).hexdigest()
+    assert (
+        first["runtime_capability_sha256"]
+        == hashlib.sha256(capability_bytes).hexdigest()
+    )
 
     (repository / "revision-input").write_text("changed\n", encoding="utf-8")
     _git(repository, "add", "revision-input")
@@ -229,9 +231,7 @@ def test_runtime_provenance_reports_git_execution_failures(tmp_path, monkeypatch
         raise FileNotFoundError("git unavailable")
 
     monkeypatch.setattr(runtime.subprocess, "run", unavailable_git)
-    with pytest.raises(
-        RuntimeError, match="unable to execute git status --porcelain"
-    ):
+    with pytest.raises(RuntimeError, match="unable to execute git status --porcelain"):
         runtime_provenance(repository)
 
 
@@ -284,6 +284,7 @@ def test_pilot_plan_freezes_selector_and_exploratory_boundary():
         "76dc7e07639ed085873a8f291cc2aaee0e8942ddac8efce3982743dd67491071",
         "d40b4a2afac533d74965513513fff1870918831000b2e040063ca2a0e29ad091",
         "40-minute",
+        "canonical decimal IDs",
         "three submission batches",
         "six acceptance checks",
     )
@@ -292,9 +293,7 @@ def test_pilot_plan_freezes_selector_and_exploratory_boundary():
 
 
 def test_extension_build_wrapper_freezes_resources_paths_and_environment():
-    wrapper = Path("scripts/pilot_extension_build_slurm.sh").read_text(
-        encoding="utf-8"
-    )
+    wrapper = Path("scripts/pilot_extension_build_slurm.sh").read_text(encoding="utf-8")
     required = (
         "#SBATCH --cpus-per-task=1",
         "#SBATCH --mem=1800M",

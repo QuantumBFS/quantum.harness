@@ -121,9 +121,7 @@ def main(argv: list[str] | None = None) -> int:
             print(f"pilot cell {arguments.cell_index} started", flush=True)
             result = {
                 "status": "success",
-                **run_cell(
-                    arguments.run_spec.resolve(), arguments.cell_index
-                ),
+                **run_cell(arguments.run_spec.resolve(), arguments.cell_index),
             }
         elif arguments.command == "merge":
             _, _, merge_progress, _ = _registered_operations(
@@ -158,7 +156,7 @@ def main(argv: list[str] | None = None) -> int:
                 "count": len(cells),
                 "cell_indices": cells,
             }
-    except Exception as error:
+    except Exception as error:  # noqa: BLE001 - CLI converts infrastructure failures.
         print(
             f"pilot infrastructure failure: {type(error).__name__}: {error}",
             file=sys.stderr,

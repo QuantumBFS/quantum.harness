@@ -4,6 +4,8 @@ import copy
 import hashlib
 import importlib.util
 import json
+import os
+import subprocess
 from pathlib import Path
 
 import pytest
@@ -95,7 +97,7 @@ def test_extension_wrapper_has_exact_resources_and_task_map():
     assert "#SBATCH --cpus-per-task=1" in text
     assert "#SBATCH --mem=1800M" in text
     assert "#SBATCH --time=00:40:00" in text
-    assert "SLURM_ARRAY_TASK_ID < 1 || SLURM_ARRAY_TASK_ID > 96" in text
+    assert "^([1-9]|[1-8][0-9]|9[0-6])$" in text
     assert "CELL_INDEX=$((SLURM_ARRAY_TASK_ID - 1))" in text
     assert "scripts/run_pilot.py run-cell" in text
 
@@ -118,6 +120,206 @@ def test_build_extension_spec_requires_protocol_and_exact_output_path():
     assert args.command == "build-extension-spec"
 
 
+def test_build_extension_spec_rejects_mismatched_run_spec_path(
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+):
+    output_root = tmp_path / "extension"
+    result = run_pilot_cli.main(
+        [
+            "build-extension-spec",
+            "--protocol",
+            str(tmp_path / "protocol.json"),
+            "--validation-report",
+            str(tmp_path / "report.json"),
+            "--output-root",
+            str(output_root),
+            "--run-spec",
+            str(tmp_path / "wrong-run_spec.json"),
+        ]
+    )
+    assert result == 1
+    assert (
+        "--run-spec must equal <output-root>/run_spec.json" in capsys.readouterr().err
+    )
+    assert not output_root.exists()
+
+
+def _run_extension_wrapper(
+    tmp_path: Path,
+    task_id: str,
+    *,
+    extra_env: dict[str, str] | None = None,
+) -> tuple[subprocess.CompletedProcess[str], Path]:
+    repository = tmp_path / "repo"
+    runner = (
+        repository
+        / "tracks/qmc/solutions/frustration-free/challenge-194/scripts/run_pilot.py"
+    )
+    runner.parent.mkdir(parents=True)
+    runner.write_text("# controlled runner placeholder\n", encoding="utf-8")
+    run_spec = tmp_path / "run_spec.json"
+    run_spec.write_text("{}\n", encoding="utf-8")
+    fake_python = tmp_path / "fake-python"
+    fake_python.write_text(
+        "#!/bin/bash\n"
+        "printf 'ARGS='\n"
+        "printf '<%s>' \"$@\"\n"
+        "printf '\\nCACHE=%s\\n' \"${NUMBA_CACHE_DIR}\"\n"
+        "printf 'NUMBA_DISABLE_JIT=%s\\n' \"${NUMBA_DISABLE_JIT}\"\n"
+        "printf 'NUMBA_NUM_THREADS=%s\\n' \"${NUMBA_NUM_THREADS}\"\n"
+        "printf 'OMP_NUM_THREADS=%s\\n' \"${OMP_NUM_THREADS}\"\n"
+        "printf 'PYTHONPATH=%s\\n' \"${PYTHONPATH}\"\n"
+        "printf 'PYTHONHOME_SET=%s\\n' \"${PYTHONHOME+x}\"\n"
+        "printf 'NUMBA_CPU_NAME_SET=%s\\n' \"${NUMBA_CPU_NAME+x}\"\n"
+        "printf 'LD_LIBRARY_PATH_SET=%s\\n' \"${LD_LIBRARY_PATH+x}\"\n",
+        encoding="utf-8",
+    )
+    fake_python.chmod(0o755)
+    cache_root = tmp_path / "node"
+    cache_root.mkdir()
+    environment = {
+        **os.environ,
+        "HARNESS_RUN_SPEC": str(run_spec),
+        "HARNESS_ENTRYPOINT": str(repository),
+        "HARNESS_COMMAND": str(fake_python),
+        "SLURM_ARRAY_TASK_ID": task_id,
+        "SLURM_ARRAY_JOB_ID": "991",
+        "SLURM_CPUS_PER_TASK": "1",
+        "SLURM_TMPDIR": str(cache_root),
+        **(extra_env or {}),
+    }
+    wrapper = ROOT / "scripts/pilot_extension_array_slurm.sh"
+    result = subprocess.run(
+        ["bash", str(wrapper)],
+        cwd=tmp_path,
+        env=environment,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    return result, cache_root
+
+
+@pytest.mark.parametrize(("task_id", "cell_index"), (("1", "0"), ("96", "95")))
+def test_extension_wrapper_executes_exact_cell_index(
+    tmp_path: Path,
+    task_id: str,
+    cell_index: str,
+):
+    result, _ = _run_extension_wrapper(tmp_path, task_id)
+    assert result.returncode == 0, result.stderr
+    assert (
+        f"ARGS=<scripts/run_pilot.py><run-cell><--run-spec>"
+        f"<{tmp_path / 'run_spec.json'}><--cell-index><{cell_index}>"
+    ) in result.stdout
+
+
+@pytest.mark.parametrize(
+    "task_id",
+    (
+        "0",
+        "97",
+        "18446744073709551617",
+        "01",
+        "+1",
+        "-1",
+        " 1",
+        "1 ",
+        "1x",
+    ),
+)
+def test_extension_wrapper_rejects_noncanonical_or_out_of_range_task_ids(
+    tmp_path: Path,
+    task_id: str,
+):
+    result, _ = _run_extension_wrapper(tmp_path, task_id)
+    assert result.returncode == 64
+    assert "ARGS=" not in result.stdout
+
+
+def test_extension_wrapper_sanitizes_hostile_environment(tmp_path: Path):
+    result, _ = _run_extension_wrapper(
+        tmp_path,
+        "1",
+        extra_env={
+            "NUMBA_DISABLE_JIT": "1",
+            "NUMBA_NUM_THREADS": "99",
+            "NUMBA_CPU_NAME": "hostile",
+            "OMP_NUM_THREADS": "99",
+            "PYTHONHOME": "/hostile/home",
+            "PYTHONPATH": "/hostile/path",
+            "LD_LIBRARY_PATH": "/hostile/lib",
+        },
+    )
+    assert result.returncode == 0, result.stderr
+    assert "NUMBA_DISABLE_JIT=0" in result.stdout
+    assert "NUMBA_NUM_THREADS=1" in result.stdout
+    assert "OMP_NUM_THREADS=1" in result.stdout
+    assert (
+        f"PYTHONPATH={tmp_path / 'repo'}/tracks/qmc/solutions/frustration-free/challenge-194/src"
+        in result.stdout
+    )
+    lines = result.stdout.splitlines()
+    assert "PYTHONHOME_SET=" in lines
+    assert "NUMBA_CPU_NAME_SET=" in lines
+    assert "LD_LIBRARY_PATH_SET=" in lines
+
+
+@pytest.mark.parametrize(
+    ("name", "value"),
+    (
+        ("HARNESS_RUN_SPEC", "run_spec.json"),
+        ("HARNESS_ENTRYPOINT", "{repo}/./"),
+        ("HARNESS_COMMAND", "{python}/./fake-python"),
+    ),
+)
+def test_extension_wrapper_rejects_noncanonical_harness_paths(
+    tmp_path: Path,
+    name: str,
+    value: str,
+):
+    replacement = value.format(
+        repo=tmp_path / "repo",
+        python=tmp_path,
+    )
+    result, _ = _run_extension_wrapper(
+        tmp_path,
+        "1",
+        extra_env={name: replacement},
+    )
+    assert result.returncode == 66
+    assert "ARGS=" not in result.stdout
+
+
+def test_extension_wrapper_creates_unique_private_empty_cache(tmp_path: Path):
+    first, cache_root = _run_extension_wrapper(tmp_path, "1")
+    assert first.returncode == 0, first.stderr
+    cache = cache_root / "challenge-194-p0-extension-991-1"
+    assert cache.is_dir()
+    assert cache.stat().st_mode & 0o777 == 0o700
+    assert list(cache.iterdir()) == []
+    second = subprocess.run(
+        ["bash", str(ROOT / "scripts/pilot_extension_array_slurm.sh")],
+        cwd=tmp_path,
+        env={
+            **os.environ,
+            "HARNESS_RUN_SPEC": str(tmp_path / "run_spec.json"),
+            "HARNESS_ENTRYPOINT": str(tmp_path / "repo"),
+            "HARNESS_COMMAND": str(tmp_path / "fake-python"),
+            "SLURM_ARRAY_TASK_ID": "1",
+            "SLURM_ARRAY_JOB_ID": "991",
+            "SLURM_CPUS_PER_TASK": "1",
+            "SLURM_TMPDIR": str(cache_root),
+        },
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    assert second.returncode == 73
+    assert "ARGS=" not in second.stdout
+
+
 def test_extension_run_spec_is_bound_and_p0_loader_stays_strict(tmp_path: Path):
     protocol = _extension_protocol_fixture()
     run_spec = pilot._write_test_extension_run_spec(
@@ -127,10 +329,7 @@ def test_extension_run_spec_is_bound_and_p0_loader_stays_strict(tmp_path: Path):
         run_spec, verify_current_environment=False
     )
     assert loaded["schema_version"] == extension.EXTENSION_RUN_SPEC_SCHEMA
-    assert (
-        loaded["source_extension_protocol_sha256"]
-        == protocol["protocol_sha256"]
-    )
+    assert loaded["source_extension_protocol_sha256"] == protocol["protocol_sha256"]
     assert loaded["cells"] == protocol["cells"]
     with pytest.raises(RuntimeError, match="P0 run spec"):
         pilot.load_pilot_run_spec(run_spec, verify_current_environment=False)
@@ -139,9 +338,7 @@ def test_extension_run_spec_is_bound_and_p0_loader_stays_strict(tmp_path: Path):
 def test_extension_small_cell_restart_and_merge_use_extension_progress(
     tmp_path: Path,
 ):
-    run_spec = pilot._write_test_extension_run_spec(
-        tmp_path / "extension", tiny=True
-    )
+    run_spec = pilot._write_test_extension_run_spec(tmp_path / "extension", tiny=True)
     first = pilot._run_test_registered_pilot_cell(run_spec, 0)
     second = pilot._run_test_registered_pilot_cell(run_spec, 0)
     assert first == second
@@ -187,8 +384,7 @@ def test_extension_run_spec_has_only_bound_outer_fields(tmp_path: Path):
     assert document["protocol"]["protocol_sha256"] == protocol["protocol_sha256"]
     assert document["cell_count"] == len(document["cells"]) == 96
     assert all(
-        not Path(cell[field]).is_absolute()
-        and ".." not in Path(cell[field]).parts
+        not Path(cell[field]).is_absolute() and ".." not in Path(cell[field]).parts
         for cell in document["cells"]
         for field in ("cell_path", "run_path", "manifest_path")
     )
@@ -246,12 +442,8 @@ def test_public_extension_builder_binds_approved_evidence(
     "stage",
     ("after-trajectory", "after-batch", "after-progress", "after-manifest"),
 )
-def test_extension_cell_resumes_every_publication_boundary(
-    tmp_path: Path, stage: str
-):
-    path = pilot._write_test_extension_run_spec(
-        tmp_path / "extension", tiny=True
-    )
+def test_extension_cell_resumes_every_publication_boundary(tmp_path: Path, stage: str):
+    path = pilot._write_test_extension_run_spec(tmp_path / "extension", tiny=True)
 
     def stop(actual: str) -> None:
         if actual == stage:
@@ -281,9 +473,7 @@ def test_extension_cell_resumes_every_publication_boundary(
 def test_extension_cell_preserves_stale_publication_markers(
     tmp_path: Path, suffix: str
 ):
-    path = pilot._write_test_extension_run_spec(
-        tmp_path / "extension", tiny=True
-    )
+    path = pilot._write_test_extension_run_spec(tmp_path / "extension", tiny=True)
     pilot._run_test_registered_pilot_cell(path, 0)
     cell = next((path.parent / "cells").iterdir())
     marker = cell / f"stale{suffix}"
@@ -294,9 +484,7 @@ def test_extension_cell_preserves_stale_publication_markers(
 
 
 def test_extension_pending_merge_and_snapshot_share_exact_schema(tmp_path: Path):
-    path = pilot._write_test_extension_run_spec(
-        tmp_path / "extension", tiny=True
-    )
+    path = pilot._write_test_extension_run_spec(tmp_path / "extension", tiny=True)
     assert pilot._pending_test_registered_pilot_cells(path) == [0]
     result = pilot._run_test_registered_pilot_cell(path, 0)
     assert pilot._pending_test_registered_pilot_cells(path) == []
@@ -313,13 +501,13 @@ def test_extension_pending_merge_and_snapshot_share_exact_schema(tmp_path: Path)
     assert merged["cells"][0]["trajectory_sha256"] == result["trajectory_sha256"]
     with pilot._open_verified_registered_pilot_analysis_snapshot(path) as snapshot:
         assert snapshot.spec["schema_version"] == pilot.TEST_EXTENSION_RUN_SPEC_SCHEMA
-        assert snapshot.progress["schema_version"] == extension.EXTENSION_PROGRESS_SCHEMA
+        assert (
+            snapshot.progress["schema_version"] == extension.EXTENSION_PROGRESS_SCHEMA
+        )
 
 
 def test_extension_merge_rejects_extra_cell_directory(tmp_path: Path):
-    path = pilot._write_test_extension_run_spec(
-        tmp_path / "extension", tiny=True
-    )
+    path = pilot._write_test_extension_run_spec(tmp_path / "extension", tiny=True)
     pilot._run_test_registered_pilot_cell(path, 0)
     (path.parent / "cells" / "extra").mkdir()
     with pytest.raises(RuntimeError, match="extra"):
@@ -327,9 +515,7 @@ def test_extension_merge_rejects_extra_cell_directory(tmp_path: Path):
 
 
 def test_extension_cell_root_swap_fails_closed(tmp_path: Path):
-    path = pilot._write_test_extension_run_spec(
-        tmp_path / "extension", tiny=True
-    )
+    path = pilot._write_test_extension_run_spec(tmp_path / "extension", tiny=True)
     cell_root = path.parent / json.loads(path.read_text())["cells"][0]["cell_path"]
 
     def replace(stage: str) -> None:
@@ -344,14 +530,10 @@ def test_extension_cell_root_swap_fails_closed(tmp_path: Path):
 def test_production_extension_schema_cannot_be_downgraded_to_test(
     tmp_path: Path,
 ):
-    path = pilot._write_test_extension_run_spec(
-        tmp_path / "extension", tiny=True
-    )
+    path = pilot._write_test_extension_run_spec(tmp_path / "extension", tiny=True)
     document = json.loads(path.read_text())
     document["schema_version"] = extension.EXTENSION_RUN_SPEC_SCHEMA
-    document["run_spec_sha256"] = pilot._document_hash(
-        document, "run_spec_sha256"
-    )
+    document["run_spec_sha256"] = pilot._document_hash(document, "run_spec_sha256")
     path.write_bytes(pilot._canonical_bytes(document))
     with pytest.raises(RuntimeError):
         pilot._run_test_registered_pilot_cell(path, 0)
@@ -429,9 +611,7 @@ def test_extension_sources_reject_pathname_swap_after_descriptor_read(
     real_read = pilot._read_descriptor_bounded
     swapped = False
 
-    def swapping_read(
-        descriptor: int, maximum_size: int, description: str
-    ) -> bytes:
+    def swapping_read(descriptor: int, maximum_size: int, description: str) -> bytes:
         nonlocal swapped
         result = real_read(descriptor, maximum_size, description)
         if not swapped:

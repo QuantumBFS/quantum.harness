@@ -239,9 +239,11 @@ keys, compact separators, one trailing newline, atomic publication, and
 no-clobber verification.
 
 Wuzh02 execution uses `wzacnormal03`: one CPU, 1800 MiB, 40-minute wall time,
-no GPU, and a private node-local Numba cache per worker. Array IDs `1..96` map
-to cell indices `0..95`. The three submission batches are smoke `1-2%2`,
-light/medium `3-32,49-80%16`, and heavy `33-48,81-96%8`.
+no GPU, and a private node-local Numba cache per worker. Only canonical decimal IDs
+`1..96` are accepted, and they map exactly to cell indices `0..95`; signs,
+leading-zero aliases, whitespace, non-digits, overflow-sized values, and all
+out-of-range values fail before arithmetic. The three submission batches are
+smoke `1-2%2`, light/medium `3-32,49-80%16`, and heavy `33-48,81-96%8`.
 
 Restart requires the identical protocol, run spec, source, runtime, request,
 and RNG assignment. Completed cells are deeply verified. A published

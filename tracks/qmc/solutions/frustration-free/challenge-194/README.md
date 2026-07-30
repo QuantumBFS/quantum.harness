@@ -167,7 +167,8 @@ and runs these implemented commands:
 
 After the build succeeds, submit the immutable worker root with exact
 one-CPU, 1800-MiB, 40-minute resources. Slurm IDs `1..96` map to zero-based
-cell indices:
+cell indices. The wrapper accepts only canonical decimal IDs in that range
+before performing arithmetic:
 
 ```bash
 sbatch --array=1-2%2 \

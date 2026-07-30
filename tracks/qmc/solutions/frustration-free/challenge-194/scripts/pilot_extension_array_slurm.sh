@@ -10,8 +10,7 @@ set -euo pipefail
 : "${HARNESS_COMMAND:?Set the exact offline Python executable}"
 CHALLENGE_194_REPO_ROOT="${HARNESS_ENTRYPOINT}"
 CHALLENGE_194_PYTHON="${HARNESS_COMMAND}"
-if [[ ! "${SLURM_ARRAY_TASK_ID}" =~ ^[0-9]+$ ]] ||
-   (( SLURM_ARRAY_TASK_ID < 1 || SLURM_ARRAY_TASK_ID > 96 )); then
+if [[ ! "${SLURM_ARRAY_TASK_ID}" =~ ^([1-9]|[1-8][0-9]|9[0-6])$ ]]; then
     exit 64
 fi
 CELL_INDEX=$((SLURM_ARRAY_TASK_ID - 1))
