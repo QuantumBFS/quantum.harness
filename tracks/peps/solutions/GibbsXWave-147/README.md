@@ -64,7 +64,9 @@ h/J\in\{2.5,\,3.0,\,3.5\}.
 
 ## 阅读入口
 
-1. 二维 METTS 的整体说明：[`2DMETTS/2DMETTS.md`](2DMETTS/2DMETTS.md)；
-2. Born sampling 说明：[`Born_sampling_mps/README.md`](Born_sampling_mps/README.md)；
-3. SSE-QMC 验证包说明：
+1. 项目阶段性总结：
+   [`2d_finite_temperature_tensor_networks.pdf`](2d_finite_temperature_tensor_networks.pdf)；
+2. 二维 METTS 的整体说明：[`2DMETTS/2DMETTS.md`](2DMETTS/2DMETTS.md)；
+3. Born sampling 说明：[`Born_sampling_mps/README.md`](Born_sampling_mps/README.md)；
+4. SSE-QMC 验证包说明：
    [`sse-qmc-validation-package/README.md`](sse-qmc-validation-package/README.md)。
