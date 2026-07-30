@@ -15,8 +15,8 @@
   linkcolor=blue!55!black,
   urlcolor=blue!55!black,
   pdftitle={A Finite-Volume Infrared Theorem for Classical O(n) Spin
-            Systems: Absence of Continuous-Symmetry Long-Range Order
-            in Two Dimensions}
+            Systems: Quantitative Vanishing of Continuous-Symmetry
+            Long-Range Order in Two Dimensions}
 }
 
 \theoremstyle{plain}
@@ -39,8 +39,8 @@
 
 \title{A Finite-Volume Infrared Theorem for Classical
        \texorpdfstring{$O(n)$}{O(n)} Spin
-       Systems: Absence of Continuous-Symmetry Long-Range Order in
-       Two Dimensions}
+       Systems: Quantitative Vanishing of Continuous-Symmetry
+       Long-Range Order in Two Dimensions}
 
 \author{Authors withheld for internal draft}
 \affiliation{Affiliations to be finalized}
@@ -80,25 +80,25 @@ rigorous asymptotic finite-size envelope
  \langle|\bm M_L|^2\rangle_{L,0}
  =O_{n,T}\!\left((\log\log L)^{-1/2}\right),
 \]
-which applies directly to the zero-field Monte Carlo observable but is not
-claimed to be its exact decay rate.  A deterministic lattice audit through
+which applies directly to the zero-field Monte Carlo observable as a rigorous
+asymptotic envelope.  A deterministic lattice audit through
 $L=8192$ reproduces the exact logarithmic kernel coefficient to better than
 $9.1\times10^{-7}$ along four momentum paths.  Public-data diagnostics for
 the $n=2$ application explain why a zero asymptote can look ordered over
-accessible sizes.  The theorem does not apply to arbitrary continuous
-fields or to long-range kernels with a finite infrared integral, and it does
-not determine the correlation law of the remaining no-order phase.
+accessible sizes.  Its established domain is classical bounded hard spins
+with a divergent regulated infrared integral.  The resulting
+zero-magnetization phase supplies the starting point for correlation-law and
+topological-sector classification.
 \end{abstract}
 
 \maketitle
 
 \section{Introduction}
 
-The absence of continuous-symmetry breaking in low-dimensional systems is
+The vanishing of continuous-symmetry breaking in low-dimensional systems is
 usually associated with the Mermin--Wagner theorem
-\cite{MerminWagner1966}.  Its classical formulation is not merely a
-large-spin limit of a quantum commutator argument: a purely classical
-Bogoliubov inequality follows from integration by parts in the Gibbs
+\cite{MerminWagner1966}.  Its classical formulation follows directly from a
+Bogoliubov inequality obtained by integration by parts in the Gibbs
 measure \cite{Mermin1967}.  For long-range interactions, the decisive object
 is the excitation kernel
 \begin{equation}
@@ -654,7 +654,7 @@ $D_T<\infty$, Eq.~\eqref{eq:finite-L-kernel-upper} gives uniformly on these
 shells
 \begin{equation}
  h_L+E_L(q_k)
- \le\frac{D_T}{L^2},
+ \le\frac{D_T}{L^2}
  m^2\log\frac{K'L}{m}.
 \end{equation}
 Discarding the nonnegative zero mode and summing the remaining shells yields
@@ -717,8 +717,8 @@ For Eq.~\eqref{eq:power-law} with $0<\sigma<2$,
  E(q)\asymp |q|^\sigma,\qquad
  \int_0^\delta\frac{k\,\dd k}{k^\sigma}<\infty.        \label{eq:sigma-lt2}
 \end{equation}
-Theorem~\ref{thm:main} is silent in this regime, and continuous-symmetry LRO
-is not excluded.  For $\sigma=2$, the integral grows as $\log\log L$; for
+This is the complementary finite-integral regime.  For $\sigma=2$, the
+integral grows as $\log\log L$; for
 $\sigma>2$, the leading analytic kernel is $q^2$ and the growth is
 $\log L$.  Figure~\ref{fig:ir-regimes} displays these three cases using
 their continuum proxy kernels.
