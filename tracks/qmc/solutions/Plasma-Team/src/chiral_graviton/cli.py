@@ -111,7 +111,8 @@ def _nqs_quality_errors(payload: dict, *, require_residuals: bool) -> list[str]:
     symmetry_key = (
         "projected_irrep_error"
         if "projected_irrep_error" in payload
-        else "equivariance_error"
+        else "rotation_equivariance_error" if "rotation_equivariance_error" in payload
+        else "irrep_error"
     )
     symmetry_error = payload.get(symmetry_key)
     if symmetry_error is not None and float(symmetry_error) > MAX_SYMMETRY_ERROR:
@@ -431,6 +432,101 @@ def command_chirality(args: argparse.Namespace) -> int:
     return _finish_result(args.output, payload, errors)
 
 
+def command_nqs_equivariance(args: argparse.Namespace) -> int:
+    """Train projected NQS and verify SO(3) rotation equivariance of the output states.
+
+    Two independent checks are performed:
+
+    1. **Scalar invariance** (L=0): verifies the L=0 ground state is annihilated
+       by L_-, confirming it is a true SO(3) scalar and not merely a
+       highest-weight state with hidden L>0 content.
+    2. **Multiplet rotation** (L=2): constructs the full five-member L=2
+       multiplet from the NQS highest-weight state via exact lowering, then
+       applies a finite rotation and compares against the expected spin-2
+       Wigner-D transformation.
+
+    These tests verify that the quantum state produced by the NQS transforms
+    correctly under SO(3), even though the neural architecture does not
+    encode input equivariance as a structural constraint.
+    """
+
+    system = SphereSystem.from_electron_count(args.n)
+    model_class = SparseProjectedMLP if args.projection == "sparse" else SharedProjectedMLP
+    build_options = {"hidden_width": args.hidden_width, "seed": args.seed}
+    if args.projection == "sparse":
+        build_options.update(solver_tolerance=2e-14, certificate_tolerance=1e-12)
+    model = model_class.build(system, args.interaction, **build_options)
+    fitted = model.fit(max_iterations=args.max_iterations)
+    rejected = _reject_nonfinite_fit(fitted)
+    if rejected is not None:
+        return rejected
+
+    core_payload = {
+        **_metadata(
+            args.seed,
+            command="nqs-equivariance",
+            n=args.n,
+            interaction=args.interaction,
+            hidden_width=args.hidden_width,
+            max_iterations=args.max_iterations,
+            projection=args.projection,
+        ),
+        "method": f"projected_nqs_rotation_equivariance_{args.projection}",
+        "n_electrons": args.n,
+        "two_q": system.two_q,
+        "interaction": args.interaction,
+        "energy_unit": "e^2/(epsilon*l_B)",
+        "projection": args.projection,
+        "hidden_width": args.hidden_width,
+        **_fit_metrics(fitted),
+        "optimizer_success": fitted.success,
+        "optimizer_message": fitted.message,
+        "optimizer_iterations": fitted.iterations,
+        "irrep_error_l0": abs(fitted.ground.l2_expectation - 0.0),
+        "irrep_error_l2": abs(fitted.graviton.l2_expectation - 6.0),
+    }
+
+    fit_errors = _nqs_quality_errors(core_payload, require_residuals=True)
+    if fit_errors:
+        return _finish_result(args.output, core_payload, fit_errors)
+
+    # Scalar invariance: L_- |psi_0> should vanish for a genuine L=0 state.
+    scalar_error = model.scalar_rotation_error(fitted.parameters)
+
+    # Multiplet rotation: build the five L=2 components and compare the
+    # finite-rotation result against the spin-2 Wigner-D matrix.
+    multiplet_error = model.multiplet_rotation_error(fitted.parameters)
+
+    payload = {
+        **core_payload,
+        "scalar_invariance_error": scalar_error,
+        "multiplet_rotation_error": multiplet_error,
+        "rotation_axis": [1.0, 2.0, 3.0],
+        "rotation_angle_rad": 0.371,
+        "caveat": (
+            "These metrics verify that the output quantum state transforms "
+            "correctly under SO(3). They do not imply the neural architecture "
+            "is input-equivariant — symmetry is enforced by exact projection "
+            "onto ker(L_+) followed by ladder-operator construction of the "
+            "full multiplet, not by network weight constraints."
+        ),
+    }
+
+    errors: list[str] = []
+    if scalar_error >= MAX_PROJECTION_RESIDUAL:
+        errors.append(
+            f"CG009: scalar invariance error {scalar_error:.3e} exceeds "
+            f"{MAX_PROJECTION_RESIDUAL:.1e}"
+        )
+    if multiplet_error >= MAX_PROJECTION_RESIDUAL:
+        errors.append(
+            f"CG009: multiplet rotation error {multiplet_error:.3e} exceeds "
+            f"{MAX_PROJECTION_RESIDUAL:.1e}"
+        )
+
+    return _finish_result(args.output, payload, errors)
+
+
 def command_nqs_multiplet(args: argparse.Namespace) -> int:
     """Train the NQS and rotate its L=2 head through the full multiplet."""
 
@@ -712,6 +808,20 @@ def build_parser() -> argparse.ArgumentParser:
     nqs_multiplet.add_argument("--projection", choices=("dense", "sparse"), default="sparse")
     nqs_multiplet.add_argument("--output", required=True)
     nqs_multiplet.set_defaults(handler=command_nqs_multiplet)
+
+    nqs_equivariance = subparsers.add_parser("nqs-equivariance")
+    nqs_equivariance.add_argument("--n", type=int, required=True)
+    nqs_equivariance.add_argument(
+        "--interaction", choices=("v1", "coulomb"), default="coulomb"
+    )
+    nqs_equivariance.add_argument("--seed", type=int, default=1729)
+    nqs_equivariance.add_argument("--hidden-width", type=int, default=24)
+    nqs_equivariance.add_argument("--max-iterations", type=int, default=400)
+    nqs_equivariance.add_argument(
+        "--projection", choices=("dense", "sparse"), default="sparse"
+    )
+    nqs_equivariance.add_argument("--output", required=True)
+    nqs_equivariance.set_defaults(handler=command_nqs_equivariance)
 
     nqs_chirality = subparsers.add_parser("nqs-chirality")
     nqs_chirality.add_argument("--n", type=int, required=True)

@@ -95,6 +95,7 @@ $env:PYTHONPATH = 'src'
 & '.venv\Scripts\python.exe' -m chiral_graviton nqs --n 9 --projection sparse --samples 100000 --output nqs-n9.json
 & '.venv\Scripts\python.exe' -m chiral_graviton chirality --n 7 --output chirality-n7.json
 & '.venv\Scripts\python.exe' -m chiral_graviton nqs-chirality --n 4 --output nqs-chirality-n4.json
+& '.venv\Scripts\python.exe' -m chiral_graviton nqs-equivariance --n 4 --output nqs-equivariance-n4.json
 & powershell -NoProfile -ExecutionPolicy Bypass -File scripts\verify_review.ps1
 ```
 

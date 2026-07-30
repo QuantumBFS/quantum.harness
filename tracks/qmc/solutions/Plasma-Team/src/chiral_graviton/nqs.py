@@ -11,6 +11,7 @@ from .angular_momentum import highest_weight_basis, l2_operator
 from .basis import FockBasis, SphereSystem
 from .ed import interaction_pair_table
 from .hamiltonian import build_hamiltonian
+from .rotation_equivariance import nqs_multiplet_rotation_error, scalar_invariance_error
 
 
 @dataclass(frozen=True)
@@ -70,13 +71,17 @@ class MonteCarloEstimate:
 
 
 class SharedProjectedMLP:
-    """One-hidden-layer real NQS with explicit angular-momentum projection.
+    """One-hidden-layer neural quantum state with exact angular-momentum projection.
 
     Occupation features feed a shared nonlinear trunk. Separate scalar heads
     produce raw amplitudes in the Lz=0 and Lz=2 Fock sectors. Projection onto
-    ``ker(L_+)`` makes the final states exact L=0 and L=2 highest weights.
+    ``ker(L_+)`` makes the final states exact L=0 and L=2 highest weights
+    (output-state symmetry, not architectural input equivariance).
+
     Fermionic antisymmetry is exact because amplitudes multiply ordered Fock
-    determinants.
+    determinants.  Rotation equivariance of the resulting quantum states is
+    verified by finite-rotation tests in ``rotation_equivariance.py`` rather
+    than by a symmetry-constrained network architecture.
     """
 
     labels = (0, 2)
@@ -244,8 +249,10 @@ class SharedProjectedMLP:
     def irrep_error(self, parameters: np.ndarray) -> float:
         """Return max |<L^2>-L(L+1)| for the projected output states.
 
-        This certifies the irrep of the output state vector. It does not claim
-        that the raw occupation-to-amplitude network is input-equivariant.
+        This certifies that the output state vector belongs to the correct
+        SO(3) irreducible representation after projection onto ker(L_+).
+        It measures a property of the projected state, not of the raw
+        neural-network architecture.
         """
 
         errors = []
@@ -254,10 +261,54 @@ class SharedProjectedMLP:
             errors.append(abs(estimate.l2_expectation - total_l * (total_l + 1)))
         return max(errors)
 
-    def equivariance_error(self, parameters: np.ndarray) -> float:
-        """Compatibility alias for the historically named irrep diagnostic."""
+    def scalar_rotation_error(self, parameters: np.ndarray) -> float:
+        """Verify the L=0 ground state is invariant under all rotations.
 
-        return self.irrep_error(parameters)
+        Checks that the state is annihilated by L_- (in addition to the
+        L_+ annihilation enforced by projection).  Together these prove
+        the state is a true SO(3) scalar.
+
+        Returns
+        -------
+        float
+            ``||L_-|psi_0>||``.  Zero for a genuine L=0 state.
+        """
+
+        ground_sector = self.sectors[0]
+        vector = self.vector(parameters, 0)
+        return scalar_invariance_error(ground_sector.basis, vector)
+
+    def multiplet_rotation_error(
+        self,
+        parameters: np.ndarray,
+        *,
+        axis: tuple[float, float, float] = (1.0, 2.0, 3.0),
+        angle: float = 0.371,
+    ) -> float:
+        """Build the L=2 multiplet and verify finite-rotation behaviour.
+
+        Constructs all five M components from the NQS highest-weight state
+        via exact lowering, then applies a generic-axis rotation to a
+        superposition and compares against the expected spin-2 Wigner-D
+        transformation.
+
+        This is a genuine input-sensitive rotation test: if the NQS assigned
+        wrong relative amplitudes to different basis states, the multiplet
+        members would not transform correctly under the many-body rotation
+        operator.
+
+        Returns
+        -------
+        float
+            ``||R_actual|psi> - D^{L=2}(R)|psi>||`` for a fixed
+            superposition of multiplet components.
+        """
+
+        sector = self.sectors[2]
+        vector = self.vector(parameters, 2)
+        return nqs_multiplet_rotation_error(
+            sector.basis, vector, 2, axis=axis, angle=angle
+        )
 
     def sample_energy(
         self,

@@ -261,3 +261,47 @@ def test_independent_oracle_command_is_validatable(tmp_path):
     assert payload["status"] == "complete"
     assert abs(payload["gap"] - 0.1189915765) < 2e-5
     assert main(["validate", str(output)]) == 0
+
+
+def test_nqs_equivariance_command_verifies_scalar_and_multiplet(tmp_path):
+    output = tmp_path / "nqs-equivariance.json"
+    code = main(
+        [
+            "nqs-equivariance",
+            "--n",
+            "3",
+            "--interaction",
+            "v1",
+            "--hidden-width",
+            "6",
+            "--output",
+            str(output),
+        ]
+    )
+    payload = json.loads(output.read_text(encoding="utf-8"))
+    assert code == 0
+    assert payload["status"] == "complete"
+    assert payload["method"].startswith("projected_nqs_rotation_equivariance")
+    assert payload["scalar_invariance_error"] < 1e-10
+    assert payload["multiplet_rotation_error"] < 1e-10
+    assert "rotation_axis" in payload
+    assert "caveat" in payload
+
+
+def test_nqs_equivariance_fails_closed_when_optimizer_does_not_converge(tmp_path):
+    output = tmp_path / "nqs-equivariance-failed.json"
+    code = main(
+        [
+            "nqs-equivariance",
+            "--n",
+            "4",
+            "--max-iterations",
+            "0",
+            "--output",
+            str(output),
+        ]
+    )
+    assert code == 3
+    payload = json.loads(output.read_text(encoding="utf-8"))
+    assert payload["status"] == "failed"
+    assert payload["optimizer_success"] is False

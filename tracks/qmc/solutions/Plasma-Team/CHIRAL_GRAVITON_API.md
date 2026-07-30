@@ -115,10 +115,16 @@ model.vector(parameters, total_l) -> numpy.ndarray
 model.estimate(parameters, total_l) -> NQSEstimate
 model.sample_energy(parameters, total_l, n_samples=50000, seed=1729) -> MonteCarloEstimate
 model.irrep_error(parameters) -> float
+model.scalar_rotation_error(parameters) -> float
+model.multiplet_rotation_error(parameters) -> float
 ```
 
-`equivariance_error` remains a compatibility alias for old callers; both names
-measure only the projected output state's irrep error, not input equivariance.
+`irrep_error` measures the projected output state's L² deviation.  It does NOT
+test whether the raw neural network is input-equivariant.  For genuine
+rotation-equivariance verification, use `scalar_rotation_error` (checks
+L₋|ψ₀⟩≈0 for the L=0 ground state) and `multiplet_rotation_error`
+(constructs the full L=2 multiplet and compares finite-rotation behaviour
+against the spin-2 Wigner-D transformation).
 
 Allowed `total_l` values are `0` and `2`. The final vectors are numerical
 highest-weight projections with checked residuals, not penalty-only approximations. This is an
