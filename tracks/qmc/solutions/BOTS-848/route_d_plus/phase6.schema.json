@@ -1,0 +1,204 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "challenge-15-route-d-plus-phase6-v1",
+  "title": "Route D+ Phase 6 blind D+0 training certificate",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "created_at_utc",
+    "n_electrons",
+    "two_q",
+    "ansatz",
+    "seeds",
+    "seed_results",
+    "checkpoints",
+    "gates",
+    "passed",
+    "ed_accessed",
+    "forbidden_module_prefixes",
+    "forbidden_modules_loaded",
+    "forbidden_source_references",
+    "runtime_seconds",
+    "jax_device",
+    "jax_platform",
+    "git_commit",
+    "git_dirty",
+    "hostname",
+    "slurm_job_id",
+    "slurm_cluster_name",
+    "phase5_certificate_path",
+    "phase5_certificate_sha256",
+    "phase5_git_commit"
+  ],
+  "properties": {
+    "schema_version": {"const": "challenge-15-route-d-plus-phase6-v1"},
+    "created_at_utc": {"type": "string", "format": "date-time"},
+    "n_electrons": {"const": 6},
+    "two_q": {"const": 15},
+    "ansatz": {"const": "D+0-linear-scalar"},
+    "seeds": {
+      "type": "array",
+      "prefixItems": [{"const": 848}, {"const": 1848}, {"const": 2848}],
+      "items": false
+    },
+    "seed_results": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {
+        "type": "object",
+        "required": [
+          "seed",
+          "initialization_norm",
+          "retained_generators",
+          "covariance_eigenvalues",
+          "trace",
+          "initial_objective",
+          "final_training_objective",
+          "final_ground",
+          "final_tower",
+          "final_gap"
+        ],
+        "properties": {
+          "seed": {"enum": [848, 1848, 2848]},
+          "initialization_norm": {
+            "type": "number",
+            "exclusiveMinimum": 0,
+            "exclusiveMaximum": 0.02
+          },
+          "retained_generators": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3
+          },
+          "covariance_eigenvalues": {
+            "type": "array",
+            "minItems": 3,
+            "maxItems": 3,
+            "items": {"type": "number"}
+          },
+          "trace": {
+            "type": "array",
+            "minItems": 12,
+            "maxItems": 12
+          },
+          "initial_objective": {"type": "number"},
+          "final_training_objective": {"type": "number"},
+          "final_ground": {"$ref": "#/$defs/sector_statistics"},
+          "final_tower": {"$ref": "#/$defs/sector_statistics"},
+          "final_gap": {"type": "number"}
+        },
+        "additionalProperties": false
+      }
+    },
+    "checkpoints": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {
+        "type": "object",
+        "required": ["seed", "path", "sha256", "selection"],
+        "properties": {
+          "seed": {"enum": [848, 1848, 2848]},
+          "path": {"type": "string"},
+          "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+          "selection": {"const": "final_update"}
+        },
+        "additionalProperties": false
+      }
+    },
+    "gates": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "three_seed_training",
+        "identity_initialization",
+        "finite_statistics",
+        "sampling_acceptance",
+        "effective_samples",
+        "rotation_invariance",
+        "blind_training",
+        "final_checkpoint_selection"
+      ],
+      "properties": {
+        "three_seed_training": {"const": true},
+        "identity_initialization": {"const": true},
+        "finite_statistics": {"const": true},
+        "sampling_acceptance": {"const": true},
+        "effective_samples": {"const": true},
+        "rotation_invariance": {"const": true},
+        "blind_training": {"const": true},
+        "final_checkpoint_selection": {"const": true}
+      }
+    },
+    "passed": {"const": true},
+    "ed_accessed": {"const": false},
+    "forbidden_module_prefixes": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "items": {"type": "string"}
+    },
+    "forbidden_modules_loaded": {"type": "array", "maxItems": 0},
+    "forbidden_source_references": {"type": "array", "maxItems": 0},
+    "runtime_seconds": {"type": "number", "exclusiveMinimum": 0},
+    "jax_device": {"type": "string", "minLength": 1},
+    "jax_platform": {"const": "gpu"},
+    "git_commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "git_dirty": {"const": false},
+    "hostname": {"type": "string"},
+    "slurm_job_id": {"type": ["string", "null"]},
+    "slurm_cluster_name": {"type": ["string", "null"]},
+    "phase5_certificate_path": {"type": "string"},
+    "phase5_certificate_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "phase5_git_commit": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    }
+  },
+  "$defs": {
+    "sector_statistics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mean",
+        "standard_error",
+        "integrated_autocorrelation_time",
+        "effective_sample_size",
+        "r_hat",
+        "correction_acceptance",
+        "mother_acceptance",
+        "global_rotation_residual"
+      ],
+      "properties": {
+        "mean": {"type": "number"},
+        "standard_error": {"type": "number", "minimum": 0},
+        "integrated_autocorrelation_time": {
+          "type": "number",
+          "minimum": 1
+        },
+        "effective_sample_size": {"type": "number", "minimum": 2},
+        "r_hat": {"type": "number", "exclusiveMaximum": 2},
+        "correction_acceptance": {
+          "type": "number",
+          "minimum": 0.05,
+          "maximum": 1
+        },
+        "mother_acceptance": {
+          "type": "number",
+          "minimum": 0.2,
+          "maximum": 0.8
+        },
+        "global_rotation_residual": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMaximum": 1e-7
+        }
+      }
+    }
+  }
+}

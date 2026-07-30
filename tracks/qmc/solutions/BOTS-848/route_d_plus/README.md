@@ -72,6 +72,19 @@ Phase 5 adds normal-ordered scalar dressing:
 - `phase5.sbatch` runs the Phase 5 gate only after a Phase 4 certificate is
   supplied.
 
+Phase 6 adds blind `N=6` D+0 training:
+
+- `coordinate.py` evaluates continuous-coordinate scalar and five-component
+  tower channels without constructing an ED Hamiltonian;
+- `vmc.py` implements exact delayed-acceptance target chains, the pair-only
+  chord Coulomb estimator, real-parameter gradients, SR, and MCMC diagnostics;
+- `train_dplus0.py` advances both sectors on every SR update and freezes the
+  final checkpoint for each of three predetermined seeds;
+- `phase6.schema.json` rejects any run that loads or references the forbidden
+  ED modules before checkpoint freeze;
+- `phase6.sbatch` runs tests and training only after a Phase 5 certificate is
+  supplied and the certificate itself requires a JAX GPU device.
+
 The generated virtual environment, dependency lock, and manifest are runtime
 artifacts. They must remain outside Git under `tracks/qmc/results/`.
 
