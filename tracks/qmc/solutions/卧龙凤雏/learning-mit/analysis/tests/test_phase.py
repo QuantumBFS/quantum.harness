@@ -5,7 +5,13 @@ from types import MappingProxyType
 
 from analysis.data_io import LoadedRun
 from analysis.entanglement import fit_entropy_arc
-from analysis.phase import classify_angle, locate_bracket, write_refinement_request
+from analysis.phase import (
+    PhaseEvidence,
+    classify_angle,
+    locate_bracket,
+    select_candidate,
+    write_refinement_request,
+)
 from test_entanglement import arc_points
 
 
@@ -57,3 +63,41 @@ def test_refinement_request_is_atomically_written_and_hashed(tmp_path):
     assert updated["artifact_sha256"]["processed/refinement_request.json"] == (
         hashlib.sha256(payload).hexdigest()
     )
+
+
+def test_candidate_selection_prefers_a_strict_bracket_and_lower_tie_angle():
+    selection = select_candidate(
+        [
+            PhaseEvidence(0.18, "insulator", (8, 12, 16), 0.8),
+            PhaseEvidence(0.22, "metal", (8, 12, 16), 0.9),
+        ]
+    )
+    assert selection.status == "bracketed"
+    assert selection.lower_phi_pi == pytest.approx(0.18)
+    assert selection.upper_phi_pi == pytest.approx(0.22)
+    assert selection.candidate_phi_pi == pytest.approx(0.18)
+    assert selection.reasons == ()
+
+
+def test_candidate_selection_falls_back_to_largest_score_change_deterministically():
+    selection = select_candidate(
+        [
+            PhaseEvidence(0.16, "inconclusive", (8, 12, 16), 0.10),
+            PhaseEvidence(0.18, "inconclusive", (8, 12, 16), 0.15),
+            PhaseEvidence(0.20, "inconclusive", (8, 12, 16), 0.55),
+            PhaseEvidence(0.22, "inconclusive", (8, 12, 16), 0.60),
+        ]
+    )
+    assert selection.status == "exploratory"
+    assert (selection.lower_phi_pi, selection.upper_phi_pi) == pytest.approx((0.18, 0.20))
+    assert selection.candidate_phi_pi == pytest.approx(0.18)
+    assert selection.reasons == ("diii_transition_not_bracketed",)
+
+    tie = select_candidate(
+        [
+            PhaseEvidence(0.16, "inconclusive", (8, 12, 16), 0.10),
+            PhaseEvidence(0.18, "inconclusive", (8, 12, 16), 0.30),
+            PhaseEvidence(0.20, "inconclusive", (8, 12, 16), 0.10),
+        ]
+    )
+    assert (tie.lower_phi_pi, tie.upper_phi_pi) == pytest.approx((0.16, 0.18))

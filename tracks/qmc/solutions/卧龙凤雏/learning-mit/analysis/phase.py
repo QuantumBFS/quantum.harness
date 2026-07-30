@@ -31,6 +31,15 @@ class TransitionBracket:
     upper_phase: str
 
 
+@dataclass(frozen=True)
+class CandidateSelection:
+    status: str
+    lower_phi_pi: float
+    upper_phi_pi: float
+    candidate_phi_pi: float
+    reasons: tuple[str, ...]
+
+
 def classify_angle(
     phi_pi: float, fits_by_width: dict[int, EntropyFitSet]
 ) -> PhaseEvidence:
@@ -70,6 +79,42 @@ def locate_bracket(evidence: list[PhaseEvidence]) -> TransitionBracket:
     raise ValueError("phase change is not bracketed by adjacent angles")
 
 
+def select_candidate(evidence: list[PhaseEvidence]) -> CandidateSelection:
+    ordered = sorted(evidence, key=lambda item: item.phi_pi)
+    if (
+        len(ordered) < 2
+        or len({item.phi_pi for item in ordered}) != len(ordered)
+        or any(not np.isfinite(item.phi_pi) or not np.isfinite(item.score) for item in ordered)
+    ):
+        raise ValueError("candidate selection requires two distinct finite angles")
+    try:
+        bracket = locate_bracket(ordered)
+        status = "bracketed"
+        reasons: tuple[str, ...] = ()
+        lower, upper = bracket.lower_phi_pi, bracket.upper_phi_pi
+    except ValueError:
+        pairs = list(zip(ordered, ordered[1:], strict=False))
+        left, right = min(
+            pairs,
+            key=lambda pair: (
+                -abs(pair[1].score - pair[0].score),
+                0.5 * (pair[0].phi_pi + pair[1].phi_pi),
+            ),
+        )
+        status = "exploratory"
+        reasons = ("diii_transition_not_bracketed",)
+        lower, upper = left.phi_pi, right.phi_pi
+    midpoint = 0.5 * (lower + upper)
+    available = [item.phi_pi for item in ordered if lower <= item.phi_pi <= upper]
+    minimum_distance = min(abs(value - midpoint) for value in available)
+    candidate = min(
+        value
+        for value in available
+        if np.isclose(abs(value - midpoint), minimum_distance, atol=1e-12, rtol=0.0)
+    )
+    return CandidateSelection(status, lower, upper, candidate, reasons)
+
+
 def propose_refinement(
     loaded: LoadedRun, budget_forecast: dict[str, Any]
 ) -> dict[str, Any]:
@@ -106,9 +151,7 @@ def propose_refinement(
             fits[width] = fit_entropy_arc(np.asarray(rows), models)
         evidence.append(classify_angle(phi_pi, fits))
 
-    try:
-        bracket = locate_bracket(evidence)
-    except ValueError:
+    if len(evidence) < 2:
         return {
             "schema_version": 1,
             "status": "inconclusive",
@@ -121,18 +164,21 @@ def propose_refinement(
             "measurement_layers_per_width": 40,
             "block_layers_per_width": 5,
         }
-    midpoint = 0.5 * (bracket.lower_phi_pi + bracket.upper_phi_pi)
+    selection = select_candidate(evidence)
+    midpoint = 0.5 * (selection.lower_phi_pi + selection.upper_phi_pi)
     return {
         "schema_version": 1,
-        "status": "bracketed",
+        "status": selection.status,
         "stage": "diii-refine",
         "theta_pi": 0.45,
-        "phi_pi": [bracket.lower_phi_pi, midpoint, bracket.upper_phi_pi],
+        "phi_pi": sorted(
+            {selection.lower_phi_pi, midpoint, selection.upper_phi_pi}
+        ),
         "widths": [8, 12, 16, 20, 24, 28, 32],
         "streams": 8,
-        "burn_in_layers_per_width": 12,
-        "measurement_layers_per_width": 40,
-        "block_layers_per_width": 5,
+        "burn_in_layers_per_width": 16,
+        "measurement_layers_per_width": 96,
+        "block_layers_per_width": 8,
     }
 
 

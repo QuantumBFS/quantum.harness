@@ -23,6 +23,7 @@ fn repository_orchestration_files_declare_both_analysis_passes() {
     assert!(script.contains("--phase-only"));
     assert!(script.contains("--task-request"));
     assert!(script.contains("--final"));
+    assert!(script.contains("\"exploratory\""));
     assert!(script.contains("production-v2"));
     assert!(script.contains("forecast_seconds"));
     assert!(script.contains("5100"));

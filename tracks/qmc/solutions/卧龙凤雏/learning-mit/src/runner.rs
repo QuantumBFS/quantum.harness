@@ -184,8 +184,8 @@ pub fn run_requested_tasks(
         }
         return Ok(manifest);
     }
-    if request.status != "bracketed" {
-        bail!("refinement request status must be bracketed or inconclusive");
+    if !matches!(request.status.as_str(), "bracketed" | "exploratory") {
+        bail!("refinement request status must be bracketed, exploratory, or inconclusive");
     }
 
     let refinement = StageConfig {

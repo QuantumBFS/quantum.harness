@@ -94,7 +94,7 @@ fn refinement_request_requires_its_manifest_hash_and_runs_only_requested_tasks()
     let request_path = processed.join("refinement_request.json");
     let request = serde_json::json!({
         "schema_version": 1,
-        "status": "bracketed",
+        "status": "exploratory",
         "stage": "diii-refine",
         "theta_pi": 0.45,
         "phi_pi": [0.18, 0.20, 0.22],

@@ -75,7 +75,7 @@ echo "[4/8] phase-only analysis and refinement request"
 REQUEST="$RUN_DIR/processed/refinement_request.json"
 REQUEST_STATUS="$("$PYTHON_BIN" -c 'import json,sys; print(json.load(open(sys.argv[1], encoding="utf-8"))["status"])' "$REQUEST")"
 
-if [[ "$REQUEST_STATUS" == "bracketed" ]]; then
+if [[ "$REQUEST_STATUS" == "bracketed" || "$REQUEST_STATUS" == "exploratory" ]]; then
   echo "[5/8] hash-checked refinement simulation"
   run_rust simulate \
     --config "$RUN_DIR/config.toml" \
