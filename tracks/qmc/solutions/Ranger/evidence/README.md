@@ -11,6 +11,7 @@ workflow.
 | `higher-dimensional-fermions.md` | direct-wave-function VMC answer to Lei Wang's question |
 | `fermion-scaling-chain-v1.schema.json` | per-chain machine-readable contract |
 | `fermion-scaling-summary.json` | hash-verified multi-size aggregation |
+| `chains.tsv` | human-readable, one-row-per-chain data table |
 
 The current snapshot publishes the four verified `N=4,8` anchors.  The
 registered XH5 finalizer will refresh the same artifact contract with all 80

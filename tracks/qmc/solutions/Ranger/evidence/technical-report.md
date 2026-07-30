@@ -128,6 +128,11 @@ is bound to a readable configuration payload.  The XH5 records extend this
 same schema to `N=10,12`; `results/fermion_scaling/summary.json` is the
 machine-readable source of record after final aggregation.
 
+`results/fermion_scaling/chains.tsv` provides the same record set as a
+human-readable 16-column table.  The published snapshot contains the four
+verified local anchors; the terminal aggregation expands the table to all 84
+preserved local and XH5 records.
+
 ## Why this reaches beyond earlier workflows
 
 1. **Symmetry is built into the state.**  Antisymmetry and rotational
@@ -153,6 +158,7 @@ Primary artifacts:
 - `docs/higher-dimensional-fermion-vmc.md`
 - `docs/reviewer-response-pr262.md`
 - `results/fermion_scaling/summary.json`
+- `results/fermion_scaling/chains.tsv`
 - `results/fermion_scaling/records/`
 - `results/fermion_scaling/configurations/`
 - `schemas/fermion-scaling-chain-v1.schema.json`
