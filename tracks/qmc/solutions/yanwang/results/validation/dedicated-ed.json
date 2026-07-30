@@ -1,0 +1,232 @@
+{
+  "chain_checks": [
+    {
+      "field_flip_mean": 4.479897119341563,
+      "lattice": "honeycomb",
+      "min_rebin_count": 18.0,
+      "passed": true,
+      "seed": 42001,
+      "sign_mean": 1.0,
+      "string_fill_mean": 0.09386365097736626
+    },
+    {
+      "field_flip_mean": 4.4928806584362135,
+      "lattice": "honeycomb",
+      "min_rebin_count": 18.0,
+      "passed": true,
+      "seed": 42002,
+      "sign_mean": 1.0,
+      "string_fill_mean": 0.09379352334104937
+    },
+    {
+      "field_flip_mean": 4.503395061728394,
+      "lattice": "honeycomb",
+      "min_rebin_count": 18.0,
+      "passed": true,
+      "seed": 42003,
+      "sign_mean": 1.0,
+      "string_fill_mean": 0.09383708686985597
+    },
+    {
+      "field_flip_mean": 4.473189300411523,
+      "lattice": "honeycomb",
+      "min_rebin_count": 18.0,
+      "passed": true,
+      "seed": 42004,
+      "sign_mean": 1.0,
+      "string_fill_mean": 0.09386212384259258
+    },
+    {
+      "field_flip_mean": 2.415246913580247,
+      "lattice": "triangular",
+      "min_rebin_count": 18.0,
+      "passed": true,
+      "seed": 42001,
+      "sign_mean": 1.0,
+      "string_fill_mean": 0.1704978861239712
+    },
+    {
+      "field_flip_mean": 2.4053086419753087,
+      "lattice": "triangular",
+      "min_rebin_count": 18.0,
+      "passed": true,
+      "seed": 42002,
+      "sign_mean": 1.0,
+      "string_fill_mean": 0.17014837319958848
+    },
+    {
+      "field_flip_mean": 2.4046090534979423,
+      "lattice": "triangular",
+      "min_rebin_count": 18.0,
+      "passed": true,
+      "seed": 42003,
+      "sign_mean": 1.0,
+      "string_fill_mean": 0.17038620434670781
+    },
+    {
+      "field_flip_mean": 2.40761316872428,
+      "lattice": "triangular",
+      "min_rebin_count": 18.0,
+      "passed": true,
+      "seed": 42004,
+      "sign_mean": 1.0,
+      "string_fill_mean": 0.17042647247942386
+    }
+  ],
+  "gate": {
+    "max_string_fill_mean": 0.8,
+    "max_z_abs": 3.5,
+    "min_field_flip_mean_exclusive": 0,
+    "min_rebin_count": 16,
+    "min_sign_mean": 0.999999,
+    "required_seeds_per_lattice": 4
+  },
+  "observable_checks": [
+    {
+      "between_seed_se": 0.0006161299266913306,
+      "conservative_se": 0.0012968299539577199,
+      "ed": -1.2653654689373193,
+      "lattice": "honeycomb",
+      "mean": -1.2675674695984913,
+      "nominal_se": 0.0012968299539577199,
+      "observable": "Energy",
+      "passed": true,
+      "seed_errors": [
+        0.002868103518409703,
+        0.0022021933046036815,
+        0.0029546206796873904,
+        0.002562449908003572
+      ],
+      "seed_values": [
+        -1.2686903897361417,
+        -1.2660502904865654,
+        -1.2676903292181072,
+        -1.268632897603486
+      ],
+      "z_abs": 1.6979871990555782
+    },
+    {
+      "between_seed_se": 0.0007866841625778225,
+      "conservative_se": 0.0010688034157545878,
+      "ed": 0.566716323359403,
+      "lattice": "honeycomb",
+      "mean": 0.5676691341654746,
+      "nominal_se": 0.0010688034157545878,
+      "observable": "Mag2",
+      "passed": true,
+      "seed_errors": [
+        0.002402588695983972,
+        0.002223978499640606,
+        0.00280547562947035,
+        0.0016375311540215904
+      ],
+      "seed_values": [
+        0.5694862648292824,
+        0.5677268875184863,
+        0.5656403919110082,
+        0.5674848818680878
+      ],
+      "z_abs": 0.8914743272960757
+    },
+    {
+      "between_seed_se": 0.0009452000588522094,
+      "conservative_se": 0.001170482327242206,
+      "ed": 0.4590636785262234,
+      "lattice": "honeycomb",
+      "mean": 0.4600630093876586,
+      "nominal_se": 0.001170482327242206,
+      "observable": "Mag4",
+      "passed": true,
+      "seed_errors": [
+        0.0026164068630564626,
+        0.0024911793375816324,
+        0.002975537125113311,
+        0.0017967735163678094
+      ],
+      "seed_values": [
+        0.46217693093382284,
+        0.4598553647327816,
+        0.45755473698117605,
+        0.4600886957929949
+      ],
+      "z_abs": 0.8537769756761406
+    },
+    {
+      "between_seed_se": 0.0025341167721810603,
+      "conservative_se": 0.0025341167721810603,
+      "ed": -2.3407249812630884,
+      "lattice": "triangular",
+      "mean": -2.341505545969227,
+      "nominal_se": 0.0014199560680235009,
+      "observable": "Energy",
+      "passed": true,
+      "seed_errors": [
+        0.0028649927704395696,
+        0.0031246794017563586,
+        0.002913718177560202,
+        0.0025488621763993455
+      ],
+      "seed_values": [
+        -2.3455501761747226,
+        -2.3338540573979945,
+        -2.341812851340811,
+        -2.3431603862395445
+      ],
+      "z_abs": 0.30802239056517694
+    },
+    {
+      "between_seed_se": 0.00015685780440769824,
+      "conservative_se": 0.00027093715739817323,
+      "ed": 0.9330461945159605,
+      "lattice": "triangular",
+      "mean": 0.9333752703000495,
+      "nominal_se": 0.00027093715739817323,
+      "observable": "Mag2",
+      "passed": true,
+      "seed_errors": [
+        0.0005417960883837135,
+        0.0005232133318142996,
+        0.0005204457277501373,
+        0.0005901577794952298
+      ],
+      "seed_values": [
+        0.9329329243509624,
+        0.9333957364857994,
+        0.9336621108634352,
+        0.9335052416742874
+      ],
+      "z_abs": 1.2145834379055411
+    },
+    {
+      "between_seed_se": 0.0002297662162786347,
+      "conservative_se": 0.0004058214310013032,
+      "ed": 0.896184077245867,
+      "lattice": "triangular",
+      "mean": 0.8966757176260959,
+      "nominal_se": 0.0004058214310013032,
+      "observable": "Mag4",
+      "passed": true,
+      "seed_errors": [
+        0.0008170271364897581,
+        0.0008078096604314404,
+        0.0007596719232222029,
+        0.0008741407914264055
+      ],
+      "seed_values": [
+        0.896021094847155,
+        0.8967299813541554,
+        0.8971133457782714,
+        0.8967820701757115
+      ],
+      "z_abs": 1.2114697319355838
+    }
+  ],
+  "parameters": {
+    "J": 0.73,
+    "beta": 0.85,
+    "h": 1.17
+  },
+  "passed": true,
+  "schema_version": "yanwang148.dedicated-ed-validation-report.v1",
+  "source_commit": "5059613e049a97d5f6f1025f155978d959c62368"
+}

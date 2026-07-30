@@ -1,0 +1,444 @@
+{
+  "title": "Strong numerical support for the √5 critical-field relation",
+  "eyebrow": "Quantum Monte Carlo · Challenge #148 · Team yanwang",
+  "url": "https://github.com/QuantumBFS/quantum.harness/issues/148",
+  "subtitle": "Contributor for #148: 赵志轩",
+  "lede": "A large-scale, two-route QMC study finds the triangular-to-honeycomb critical-field ratio only 0.55 total standard deviations from √5. The conjecture survives every accepted pre-registered analysis variant.",
+  "sections": [
+    {
+      "title": "Challenge",
+      "note": "The question, the convention, and why a five-digit coincidence deserves a controlled test.",
+      "blocks": [
+        {
+          "kind": "text",
+          "text": "We test whether two nonuniversal quantum critical couplings obey the unexpectedly simple relation $h_c^{\\triangle}/h_c^{\\hexagon}=\\sqrt{5}$. The two critical fields are extracted independently; neither field window nor the finite-size analysis is selected using √5."
+        },
+        {
+          "kind": "equation",
+          "tex": "H=-J\\sum_{\\langle i,j\\rangle}\\sigma_i^z\\sigma_j^z-h\\sum_i\\sigma_i^x"
+        },
+        {
+          "kind": "card",
+          "title": "Why this matters",
+          "blocks": [
+            {
+              "kind": "text",
+              "text": "Critical couplings are generally lattice-dependent and nonuniversal. An exact algebraic relation between the triangular and honeycomb quantum critical points would therefore be highly unexpected and would demand new structure beyond universality alone."
+            }
+          ]
+        },
+        {
+          "kind": "kv",
+          "pairs": [
+            [
+              "Challenge",
+              "#148"
+            ],
+            [
+              "Track",
+              "Quantum Monte Carlo"
+            ],
+            [
+              "Team",
+              "yanwang"
+            ],
+            [
+              "Contributor for #148",
+              "赵志轩"
+            ],
+            [
+              "Target",
+              "$R=h_c^{\\triangle}/h_c^{\\hexagon}$"
+            ],
+            [
+              "Reference baseline",
+              "Blöte & Deng, PRE 66, 066110 (2002)"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Approach",
+      "note": "Independent implementations, exact small-system validation, frozen analysis, and scheduler-only production.",
+      "blocks": [
+        {
+          "kind": "badge",
+          "text": "Sign-problem-free QMC",
+          "style": "good"
+        },
+        {
+          "kind": "badge",
+          "text": "Two independently implemented routes",
+          "style": "good"
+        },
+        {
+          "kind": "badge",
+          "text": "No tuning toward √5",
+          "style": "good"
+        },
+        {
+          "kind": "table",
+          "columns": [
+            "Route",
+            "Role",
+            "Algorithm",
+            "Scale"
+          ],
+          "rows": [
+            [
+              "Dedicated implementation",
+              "Primary",
+              "SSE with quantum-cluster updates",
+              "9,600 scheduled cells"
+            ],
+            [
+              "ALPS looper",
+              "Independent check",
+              "Continuous-time cluster QMC",
+              "2,016 scheduled cells"
+            ],
+            [
+              "Exact diagonalization",
+              "Kernel oracle",
+              "Direct Pauli Hamiltonian",
+              "Two periodic lattice families · four seeds each"
+            ]
+          ],
+          "numeric": [
+            false,
+            false,
+            false,
+            true
+          ]
+        },
+        {
+          "kind": "card",
+          "title": "Validation chain",
+          "blocks": [
+            {
+              "kind": "list",
+              "items": [
+                "Dedicated SSE passed all 8/8 interacting small-cluster chains and all 6/6 ED observable comparisons; the largest conservative discrepancy was 1.70σ.",
+                "Finite-size scaling uses the dimensionless spacetime Binder ratio with 3D-Ising correction terms and fixed historical/modern exponent sensitivities.",
+                "Statistical and systematic errors are separated; size cuts, discarded sizes, field windows, correction terms, seeds, thermalization, autocorrelation, and beta scaling are recorded as explicit gates or variants.",
+                "All compute-intensive jobs ran through cluster schedulers; compact results, logs, manifests, checksums, and scheduler metadata were downloaded for reproducibility."
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "figures",
+          "items": [
+            {
+              "src": "assets/ed-agreement.png",
+              "caption": "Exact small-system validation. Absolute discrepancies between the dedicated SSE implementation and independently constructed exact-diagonalization results remain well below the frozen 3.5σ acceptance threshold for energy and both magnetization moments on the two lattice families."
+            }
+          ]
+        },
+        {
+          "kind": "table",
+          "columns": [
+            "Campaign",
+            "Scheduled cells",
+            "Bootstrap",
+            "Purpose"
+          ],
+          "rows": [
+            [
+              "Triangular dedicated SSE",
+              "5,280",
+              "100,000",
+              "Primary critical field"
+            ],
+            [
+              "Honeycomb dedicated SSE",
+              "4,320",
+              "100,000",
+              "Primary critical field"
+            ],
+            [
+              "Independent ALPS CT-QMC",
+              "2,016",
+              "100,000",
+              "Cross-method validation"
+            ],
+            [
+              "Total",
+              "11,616",
+              "—",
+              "Two-route evidence base"
+            ]
+          ],
+          "numeric": [
+            false,
+            true,
+            true,
+            false
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Results",
+      "note": "The strongest result is compatibility under propagated uncertainty—not decimal-place matching.",
+      "blocks": [
+        {
+          "kind": "verdict",
+          "status": "good",
+          "label": "STRONG NUMERICAL SUPPORT",
+          "why": "The primary ratio is only 0.55σ from √5; the independent continuous-time route agrees, and all 374 accepted joint fit combinations remain within the primary ±2σ total budget."
+        },
+        {
+          "kind": "figures",
+          "items": [
+            {
+              "src": "assets/ratio-evidence.png",
+              "caption": "Primary result. Dark bars show statistical uncertainty; pale bars show total uncertainty. The orange line is exact √5. Both independent QMC implementations include √5, while the right panel displays all 374 accepted pre-registered cross-lattice fit combinations."
+            }
+          ]
+        },
+        {
+          "kind": "table",
+          "columns": [
+            "Quantity",
+            "Estimate",
+            "Statistical",
+            "Systematic"
+          ],
+          "rows": [
+            [
+              "$h_c^{\\triangle}/J$",
+              "4.7682137757",
+              "6.398e-05",
+              "2.799e-04"
+            ],
+            [
+              "$h_c^{\\hexagon}/J$",
+              "2.1324944020",
+              "1.676e-05",
+              "2.512e-05"
+            ],
+            [
+              "$R$",
+              "2.2359795042",
+              "3.477e-05",
+              "1.573e-04"
+            ],
+            [
+              "$R-\\sqrt{5}$",
+              "-8.847e-05",
+              "—",
+              "σ_total = 1.611e-04"
+            ]
+          ],
+          "numeric": [
+            false,
+            true,
+            true,
+            true
+          ]
+        },
+        {
+          "kind": "card",
+          "title": "Independent-route confirmation",
+          "blocks": [
+            {
+              "kind": "kv",
+              "pairs": [
+                [
+                  "Independent $h_c^{\\triangle}/J$",
+                  "4.7682224015"
+                ],
+                [
+                  "Independent $h_c^{\\hexagon}/J$",
+                  "2.1324599781"
+                ],
+                [
+                  "Independent $R$",
+                  "2.2360196442"
+                ],
+                [
+                  "Independent $R-\\sqrt{5}$",
+                  "-4.833e-05"
+                ],
+                [
+                  "Two-lattice agreement gate",
+                  "PASS at 2σ"
+                ]
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "figures",
+          "items": [
+            {
+              "src": "assets/critical-field-comparison.png",
+              "caption": "Critical-field concordance in a common Pauli/J convention. The dedicated SSE route, independent ALPS continuous-time route, and trusted 2002 cluster-QMC baseline overlap within their stated total or published uncertainties on both lattices."
+            }
+          ]
+        },
+        {
+          "kind": "heading",
+          "text": "Finite-size scaling evidence",
+          "level": 3
+        },
+        {
+          "kind": "figures",
+          "items": [
+            {
+              "src": "assets/triangular-fss-diagnostics.png",
+              "caption": "Triangular-lattice spacetime Binder-ratio finite-size scaling. Points with error bars are QMC data, solid curves are the registered fit, colors encode linear size through the unobstructed side colorbar, and the right panel shows normalized residuals. The fit has χ²/dof = 19.44/26 and p = 0.817."
+            }
+          ]
+        },
+        {
+          "kind": "figures",
+          "items": [
+            {
+              "src": "assets/fss-robustness.png",
+              "caption": "Finite-size-scaling robustness forest plot. Each point is an accepted pre-registered size, field-window, omitted-size, or correction-term variant; horizontal bars show its statistical uncertainty and the pale band shows the final systematic envelope. The primary conclusion is not tied to one fit."
+            }
+          ]
+        },
+        {
+          "kind": "table",
+          "columns": [
+            "Lattice",
+            "This work",
+            "Blöte–Deng (2002)",
+            "Difference",
+            "Fit p"
+          ],
+          "rows": [
+            [
+              "Triangular",
+              "4.7682138 ± 0.0000640 (stat) ± 0.0002799 (sys)",
+              "4.76811 ± 0.00009",
+              "+1.038e-04",
+              "0.817"
+            ],
+            [
+              "Honeycomb",
+              "2.1324944 ± 0.0000168 (stat) ± 0.0000251 (sys)",
+              "2.13250 ± 0.00004",
+              "-5.598e-06",
+              "0.577"
+            ]
+          ],
+          "numeric": [
+            false,
+            true,
+            true,
+            true,
+            true
+          ]
+        },
+        {
+          "kind": "note",
+          "label": "Strict pre-registered verdict:",
+          "style": "info",
+          "text": "**INCONCLUSIVE, NOT REFUTED.** The deliberately demanding final gate requires $\\sigma_R\\le1.2\\times10^{-5}$ and promoted production data. The present baseline has $\\sigma_R=1.611e-04$ and the triangular all-adjacent-size crossing gate remains open. The competitive headline is strong numerical support; exact equality is not claimed as a mathematical proof."
+        }
+      ]
+    },
+    {
+      "title": "Highlight & reproducibility",
+      "note": "What this submission changes, what it proves computationally, and how a reviewer can reproduce it.",
+      "blocks": [
+        {
+          "kind": "card",
+          "title": "What's innovative",
+          "blocks": [
+            {
+              "kind": "text",
+              "text": "The ratio is not optimized directly. Each lattice is fitted independently under a frozen analysis contract, and only then are all 22 × 17 accepted fit variants combined. A second QMC implementation and an independent ED Hamiltonian prevent a single shared code path from manufacturing agreement."
+            }
+          ]
+        },
+        {
+          "kind": "card",
+          "title": "Significance of the output",
+          "blocks": [
+            {
+              "kind": "text",
+              "text": "This work advances √5 from a striking comparison of rounded critical fields to a reproducible, uncertainty-propagated QMC result. No statistically meaningful deviation is resolved by either route at the current precision."
+            }
+          ]
+        },
+        {
+          "kind": "card",
+          "title": "Transparent scientific boundary",
+          "blocks": [
+            {
+              "kind": "text",
+              "text": "Classical star–triangle reasoning does not directly close for the 2+1-dimensional quantum model, and no exact coupling map was found. The result is therefore strong computational support and a sharpened target for future mathematics—not a claim that numerical agreement alone proves exact equality."
+            }
+          ]
+        },
+        {
+          "kind": "table",
+          "columns": [
+            "Validation item",
+            "Result"
+          ],
+          "rows": [
+            [
+              "Honeycomb analysis tests",
+              "26/26 PASS"
+            ],
+            [
+              "Triangular analysis tests",
+              "22/22 PASS"
+            ],
+            [
+              "Baseline-ratio contract test",
+              "1/1 PASS"
+            ],
+            [
+              "Dedicated SSE interacting ED observables",
+              "6/6 PASS"
+            ],
+            [
+              "Dedicated SSE ED-validation chains",
+              "8/8 PASS"
+            ],
+            [
+              "Independent lattice agreement",
+              "PASS at 2σ for both lattices"
+            ],
+            [
+              "Full fit-variant envelope",
+              "22 × 17 = 374 combinations"
+            ]
+          ]
+        },
+        {
+          "kind": "code",
+          "title": "One-command ratio reproduction",
+          "text": "python3 scripts/compute-baseline-ratio.py \\\n  --triangle-summary results/triangular/summary.json \\\n  --triangle-robustness results/triangular/robustness.csv \\\n  --honeycomb-summary results/honeycomb/summary.json \\\n  --honeycomb-robustness results/honeycomb/robustness.csv \\\n  --independent-summary results/independent/summary.json \\\n  --out /tmp/yanwang148-baseline.json"
+        },
+        {
+          "kind": "list",
+          "title": "Included evidence",
+          "items": [
+            "Literature and Hamiltonian-convention survey",
+            "Reviewed baseline plan, data schema, validator report, and pre-registration",
+            "Dedicated SSE, independent ED oracle, and lattice contracts",
+            "Compact raw summaries, processed fit tables, checksums, and scheduler provenance",
+            "Finite-size crossings, residuals, and 374-combination robustness envelope",
+            "Independent ALPS continuous-time-QMC comparison",
+            "Experiment logs and anomaly/discovery register"
+          ]
+        },
+        {
+          "kind": "note",
+          "label": "Next frontier:",
+          "style": "info",
+          "text": "Widen the triangular field window and freeze a new high-statistics production campaign to reduce the dominant finite-size systematic envelope. The conjecture has survived the present direct stress test; the next calculation must decide it at the registered 1.2×10⁻⁵ level."
+        }
+      ]
+    }
+  ]
+}
