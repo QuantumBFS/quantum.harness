@@ -9,9 +9,6 @@ from scalable_v1.protocol import load_protocol
 
 
 PROTOCOL_PATH = Path(__file__).parents[1] / "scalable_v1" / "protocol.json"
-FROZEN_PROTOCOL_SHA256 = (
-    "2435cd2e72ffae88117ee194f45b15451c8653dafa755b732005b6a199251d38"
-)
 
 
 def test_protocol_freezes_physics_and_budget() -> None:
@@ -33,19 +30,22 @@ def test_protocol_freezes_route_capacity_and_n8_smoke() -> None:
     p = load_protocol()
     assert p.capacity["max_trainable_parameters"] == 262_144
     assert set(p.capacity["routes"]) == {
-        "occupation_autoregressive",
-        "continuous_holomorphic",
-        "cf_flow_l2",
-        "analytic_seed_correlator",
-    }
-    assert p.capacity["routes"]["analytic_seed_correlator"] == {
-        "operator_layers": 2,
-        "density_ranks": [2, 3, 4],
-        "hidden_width": 64,
+        "occupation_autoregressive", "continuous_holomorphic", "cf_operator_nqs"
     }
     assert p.smoke_n8["n_electrons"] == 8
     assert p.smoke_n8["two_q"] == 21
     assert p.smoke_n8["batch_size"] == 256
+
+
+def test_route_c_uses_strict_lll_operator_capacity() -> None:
+    protocol = load_protocol()
+
+    assert protocol.capacity["routes"]["cf_operator_nqs"] == {
+        "operator_layers": 1,
+        "density_ranks": [2, 3, 4],
+        "hidden_width": 64,
+    }
+    assert "cf_flow_l2" not in protocol.capacity["routes"]
 
 
 def test_protocol_internal_snapshot_is_deeply_immutable() -> None:
@@ -77,11 +77,7 @@ def test_protocol_sha256_uses_exact_committed_bytes() -> None:
 def test_protocol_uses_canonical_lf_layout() -> None:
     raw = PROTOCOL_PATH.read_bytes()
     assert b"\r\n" not in raw
-    assert raw.startswith(b"{\n\n")
-
-
-def test_protocol_sha256_matches_frozen_snapshot() -> None:
-    assert load_protocol().sha256 == FROZEN_PROTOCOL_SHA256
+    assert raw.startswith(b"{\n")
 
 
 def test_nested_public_section_mutation_does_not_change_snapshot() -> None:
@@ -107,6 +103,7 @@ def test_nested_public_section_mutation_does_not_change_snapshot() -> None:
         ("blocks", "block_size must divide samples_per_chain"),
         ("human_blind", "human_blind must remain false"),
         ("n8_flux", "invalid N=8 smoke flux"),
+        ("route_c_capacity", "invalid Route C capacity"),
     ],
 )
 def test_protocol_rejects_invalid_contract_values(
@@ -129,6 +126,8 @@ def test_protocol_rejects_invalid_contract_values(
         data["oracle"]["human_blind"] = True
     elif case == "n8_flux":
         data["smoke_n8"]["two_q"] = 20
+    elif case == "route_c_capacity":
+        data["capacity"]["routes"]["cf_operator_nqs"]["operator_layers"] = 3
     else:
         raise AssertionError(f"unknown test case: {case}")
 

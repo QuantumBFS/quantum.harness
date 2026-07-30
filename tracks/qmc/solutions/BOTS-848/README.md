@@ -45,4 +45,8 @@ Larger systems, thermodynamic extrapolation, chiral-metric response, and Landau-
 - The projected random-feature NQS candidate gives raw `E0=3.871634914021247`, `E2=4.003323325986339`, and `Delta2=0.1316884119650923`, with a gap discrepancy of `4.44e-16` from ED and a reported total uncertainty of `1.414e-12`.
 - Every frozen Benchmark v0 gate passes. The candidate uses ED-sized exact `L^2` projection and Ritz optimization, so larger-N scalability and the final challenge research contribution remain future work rather than part of the v0 claim.
 - Scalable v1 Step 1 is complete: the audit-first evaluator is available through [run_scalable_evaluator.py](run_scalable_evaluator.py).
-- No scalable candidate route has been implemented. Before Step 2, the additive Route D admission creates one shared A/B/C/D base; then the four `s02a`-`s02d` lanes may proceed independently from that exact SHA.
+- Route C now has an exact one-layer strict-LLL Operator-NQS implementation
+  and a frozen N=6 trainer.  Its SCNet production launch passed startup and
+  optimizer-update admission, but the user-directed cutoff stopped all three
+  seeds at updates `46/25/19`, before the first checkpoint.  These partial
+  traces are diagnostics only and are not a scalable-v1 or Challenge result.
