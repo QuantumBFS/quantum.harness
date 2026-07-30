@@ -1,0 +1,8 @@
+schema = 1
+kernel = "huang"
+beta_over_L = 1.0
+J = 1.0
+primary_c = 1.0
+thermal_checks = [1.5, 2.0]
+tau_multipliers = [0.25, 0.5, 1.0, 2.0]
+production_authorized = false

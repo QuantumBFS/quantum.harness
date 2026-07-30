@@ -1,0 +1,44 @@
+schema = 1
+J = 1.0
+kernel = "huang"
+production_authorized = false
+
+[calibration]
+multiplier_values = [0.25, 0.5, 1.0, 2.0]
+replicas = 2
+warmup_bins = 8
+retained_bins = 16
+visits_per_bin = 256
+checkpoint_every = 4
+
+[calibration.systems.chain]
+L = 16
+h = 1.0
+c = 1.0
+
+[calibration.systems.square]
+L = 8
+h = 3.044330
+c = 1.0
+
+[regression]
+selected_tau_multipliers = [0.5, 0.5, 1.0]
+calibration_report_sha256 = "4b24cec57f3c4c4fa4349b786fce50a9e5bd48de5e09895a1a653df24cb36006"
+replicas = 4
+warmup_bins = 32
+retained_bins = 64
+visits_per_bin = 1024
+checkpoint_every = 8
+field_anchors = [-1.0, -0.5, 0.0, 0.5, 1.0]
+
+[regression.systems.chain]
+sizes = [8, 12, 16, 24, 32]
+hc_anchor = 1.0
+yt = 1.0
+yi = -1.0
+
+[regression.systems.square]
+sizes = [6, 8, 10, 12, 16]
+hc_anchor = 3.044330
+yt = 1.5873
+yi = -0.83

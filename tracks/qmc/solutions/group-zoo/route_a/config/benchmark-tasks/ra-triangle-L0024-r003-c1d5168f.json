@@ -1,0 +1,1 @@
+{"schema_version":1,"lattice":"triangle","L":24,"J":1.0,"h":4.76811,"c":1.5,"replica":3,"seed":"u64:58bc407fda3ae273","thermalization_sweeps":2000,"measurement_sweeps":2000,"base_bin_size":100,"checkpoint_interval_bins":5,"output_path":"ra-triangle-L0024-r003-bc52ec3e.json"}
