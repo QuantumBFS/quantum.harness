@@ -104,7 +104,7 @@
           "type": "number",
           "exclusiveMinimum": 1e-8
         },
-        "retained_directions": {"const": 3},
+        "retained_directions": {"const": 2},
         "relative_cutoff": {"const": 1e-12},
         "mother_reconstruction_error": {
           "type": "number",

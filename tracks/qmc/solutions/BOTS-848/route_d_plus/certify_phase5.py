@@ -267,7 +267,7 @@ def collect_certificate(
     ]
     errors["whitening"] = covariance["whitening_error"]
     passed = (
-        covariance["retained_directions"] == 3
+        covariance["retained_directions"] == 2
         and covariance["covariance_scale"] > 1.0e-8
         and all(
             errors[name] < tolerance

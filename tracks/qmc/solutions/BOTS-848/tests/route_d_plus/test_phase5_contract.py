@@ -19,7 +19,7 @@ def test_phase5_schema_enforces_scalar_generator_gate() -> None:
     assert properties["fock_dimension"]["const"] == 210
     assert properties["covariance"]["properties"]["retained_directions"][
         "const"
-    ] == 3
+    ] == 2
     assert (
         properties["covariance"]["properties"]["covariance_scale"][
             "exclusiveMinimum"

@@ -67,7 +67,8 @@ Phase 5 adds normal-ordered scalar dressing:
 - `phase5.schema.json` defines the scalar-generator certificate;
 - `certify_phase5.py` verifies LLL closure, Hermiticity, scalarity, backend
   agreement, coupled-channel degeneracy, and mother/tower centering and
-  whitening in the first nontrivial `N=4`, `2Q=9` certification space;
+  whitening in the first nontrivial `N=4`, `2Q=9` certification space,
+  retaining two directions after the prescribed algebraic redundancy cutoff;
 - `phase5.sbatch` runs the Phase 5 gate only after a Phase 4 certificate is
   supplied.
 
