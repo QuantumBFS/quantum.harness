@@ -8,6 +8,7 @@ from pathlib import Path
 import pytest
 
 import long_range_percolation.pilot_analysis as analysis
+import long_range_percolation.pilot_extension as extension
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "scripts" / "analyze_pilot.py"
@@ -176,6 +177,71 @@ def test_build_p1_command_refuses_extension_without_publication(
 
     assert not output.exists()
     assert "P0 extension required" in capsys.readouterr().err
+
+
+def test_build_p0_extension_publishes_once_and_rejects_different_bytes(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+):
+    source = _analysis_document(complete=True)
+    source_path = tmp_path / "p0_analysis.json"
+    output = tmp_path / "p0_extension_v1_protocol.json"
+    source_path.write_bytes(_canonical_bytes(source))
+    protocol = {
+        "schema_version": extension.EXTENSION_PROTOCOL_SCHEMA,
+        "protocol_sha256": "a" * 64,
+    }
+    monkeypatch.setattr(CLI, "build_p0_extension_protocol", lambda _source: protocol)
+
+    assert (
+        CLI.main(
+            [
+                "build-p0-extension",
+                "--analysis",
+                str(source_path),
+                "--output",
+                str(output),
+            ]
+        )
+        == 0
+    )
+    installed = output.read_bytes()
+    assert json.loads(capsys.readouterr().out)["publication"] == "published"
+
+    assert (
+        CLI.main(
+            [
+                "build-p0-extension",
+                "--analysis",
+                str(source_path),
+                "--output",
+                str(output),
+            ]
+        )
+        == 0
+    )
+    assert output.read_bytes() == installed
+    assert json.loads(capsys.readouterr().out)["publication"] == "verified-existing"
+
+    monkeypatch.setattr(
+        CLI,
+        "build_p0_extension_protocol",
+        lambda _source: {**protocol, "protocol_sha256": "b" * 64},
+    )
+    assert (
+        CLI.main(
+            [
+                "build-p0-extension",
+                "--analysis",
+                str(source_path),
+                "--output",
+                str(output),
+            ]
+        )
+        == 1
+    )
+    assert output.read_bytes() == installed
 
 
 def test_verify_command_accepts_bound_canonical_protocol(

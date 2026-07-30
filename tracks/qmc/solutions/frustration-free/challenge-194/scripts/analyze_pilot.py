@@ -23,6 +23,10 @@ from long_range_percolation.pilot_analysis import (
 from long_range_percolation.pilot_analysis import (
     _canonical_bytes as _analysis_canonical_bytes,
 )
+from long_range_percolation.pilot_extension import (
+    EXTENSION_PROTOCOL_SCHEMA,
+    build_p0_extension_protocol,
+)
 
 
 def _parser() -> argparse.ArgumentParser:
@@ -38,6 +42,10 @@ def _parser() -> argparse.ArgumentParser:
     build = commands.add_parser("build-p1")
     build.add_argument("--analysis", type=Path, required=True)
     build.add_argument("--output", type=Path, required=True)
+
+    extension = commands.add_parser("build-p0-extension")
+    extension.add_argument("--analysis", type=Path, required=True)
+    extension.add_argument("--output", type=Path, required=True)
 
     verify = commands.add_parser("verify")
     verify.add_argument("--analysis", type=Path, required=True)
@@ -84,6 +92,22 @@ def main(argv: list[str] | None = None) -> int:
                 "publication": publication,
                 "output": str(arguments.output.resolve()),
                 "analysis_document_sha256": document["analysis_document_sha256"],
+            }
+        elif arguments.command == "build-p0-extension":
+            source = _mapping_document(
+                arguments.analysis.resolve(), "P0 analysis document"
+            )
+            document = build_p0_extension_protocol(source)
+            publication = _publish_or_verify(
+                arguments.output.resolve(),
+                document,
+                EXTENSION_PROTOCOL_SCHEMA,
+            )
+            result = {
+                "status": "ready",
+                "publication": publication,
+                "output": str(arguments.output.resolve()),
+                "protocol_sha256": document["protocol_sha256"],
             }
         elif arguments.command == "build-p1":
             source = _mapping_document(
