@@ -66,8 +66,7 @@ pids=()
 for row in "${task_rows[@]}"; do
   IFS=$'\t' read -r task_id run_dir <<<"${row}"
   mkdir -p "${run_dir}"
-  srun --exclusive --nodes=1 --ntasks=1 --cpus-per-task=2 \
-    "${python}" -m route_d_plus.phase7 worker \
+  "${python}" -m route_d_plus.phase7 worker \
     --repo-root "${repo_root}" \
     --dispatch "${dispatch}" \
     --task-id "${task_id}" \
