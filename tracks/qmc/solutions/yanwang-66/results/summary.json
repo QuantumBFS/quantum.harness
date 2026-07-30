@@ -1,0 +1,74 @@
+{
+  "schema_version": "yanwang-q66-public-summary-v1",
+  "challenge": 66,
+  "team": "yanwang",
+  "frozen_deadline": "2026-07-30T15:27:00+08:00",
+  "closeout": "2026-07-30T18:19:56+08:00",
+  "deadline_disposition": "inconclusive_at_deadline",
+  "headline_claims_authorized": false,
+  "holdout_queries_used": 0,
+  "holdout_query_budget": 1,
+  "accepted_cell_shots_for_engineering_total": 192000000,
+  "total_note": "Discovery and confirmation are distinct experiments and are not pooled as one statistical sample.",
+  "discovery": {
+    "highest_verified_phase": 3,
+    "evidence_timing": "post-deadline supplement",
+    "slurm_analysis_job": "23023314",
+    "physical_groups": 280,
+    "cells": 2240,
+    "policy_vs_none_comparisons": 1960,
+    "cumulative_cell_shots": 179200000,
+    "bootstrap_resamples_per_comparison": 20000,
+    "cell_sampling_status": {
+      "target_met": 81,
+      "continue": 2159
+    },
+    "group_sampling_status": {
+      "target_met": 4,
+      "continue": 276
+    },
+    "provisional_fdr_classification": {
+      "helpful": 502,
+      "no_significant_difference": 1458,
+      "harmful": 0
+    },
+    "fdr": {
+      "method": "Benjamini-Hochberg",
+      "q": 0.05,
+      "scope": "all 1960 policy-vs-none comparisons"
+    },
+    "analysis_checksums_sha256": "b931304d23102e52657d4282c9ed189dddf245b6a8da2d57bdff39eb6ba41fbd",
+    "continuation_plan_sha256": "5cea54fa7dbb8a881d9e90015bf1433bc2aef7f5f6d82f7459e9c17331700fc0"
+  },
+  "confirmation": {
+    "highest_verified_phase": 5,
+    "slurm_analysis_job": "6769978",
+    "physical_groups": 8,
+    "cells": 40,
+    "policy_vs_none_comparisons": 32,
+    "cumulative_cell_shots": 12800000,
+    "shots_per_cell": 320000,
+    "bootstrap_resamples_per_comparison": 20000,
+    "cell_sampling_status": {
+      "target_met": 4,
+      "continue": 36,
+      "inconclusive_at_budget": 0
+    },
+    "comparison_precision_status": {
+      "precision_met": 32,
+      "continue": 0,
+      "inconclusive_at_budget": 0
+    },
+    "precision_fraction": 1.0,
+    "required_precision_fraction": 0.8,
+    "precision_fraction_gate_met": true,
+    "result_checksums_sha256": "3cf868e8d6602aecb8976244041906baf2ea4922cd41271fcd164a7cab1ef945",
+    "analysis_checksums_sha256": "67ab1aa9137cb1a1568617cf3979c5e60c92a2aa3e384e4955695401edd2444b"
+  },
+  "candidate": {
+    "commit": "0a73ba334a4b85403634e710f3d768ef8831d16d",
+    "normalized_source_tree_sha256": "829ade4b3ab7408c9151a6a06222e6779df6c65096b8d2e2d947e26238140482",
+    "validated_score_decoded_shots_per_second": 185.979924557991
+  },
+  "claim_boundary": "The evidence shows promising parameter-region signals and a passed confirmation precision gate. It does not establish a universally superior reload policy or an asymptotic threshold."
+}

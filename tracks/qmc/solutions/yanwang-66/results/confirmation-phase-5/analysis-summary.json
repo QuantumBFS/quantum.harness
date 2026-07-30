@@ -1,0 +1,71 @@
+{
+  "artifacts": [
+    "confirmation-cells.parquet",
+    "confirmation-comparisons.parquet",
+    "continuation-plan.json",
+    "analysis-summary.json",
+    "analysis-checksums.sha256"
+  ],
+  "bootstrap_resamples_per_comparison": 20000,
+  "cell_sampling_status": {
+    "continue": 36,
+    "inconclusive_at_budget": 0,
+    "target_met": 4
+  },
+  "cells": 40,
+  "comparison_precision_status": {
+    "continue": 0,
+    "inconclusive_at_budget": 0,
+    "precision_met": 32
+  },
+  "comparisons": 32,
+  "headline_claims_authorized": false,
+  "initial_matrix": "/work/home/hesicheng5/quantum-harness-ch66/results/confirmation/matrices/confirmation-6769918.json",
+  "initial_matrix_sha256": "1546a85eacd5fb22bd0886ea8c4b99dfb98c1f8d0a6a78796d1592e3c06cf980",
+  "next_phase_cells": 40,
+  "next_phase_groups": 8,
+  "phases": [
+    {
+      "group_count": 8,
+      "phase_index": 1,
+      "results_root": "/work/home/hesicheng5/quantum-harness-ch66/results/confirmation/initial/6769918",
+      "spec": "/work/home/hesicheng5/quantum-harness-ch66/results/confirmation/matrices/confirmation-6769918.json",
+      "spec_sha256": "1546a85eacd5fb22bd0886ea8c4b99dfb98c1f8d0a6a78796d1592e3c06cf980"
+    },
+    {
+      "group_count": 8,
+      "phase_index": 2,
+      "results_root": "/work/home/hesicheng5/quantum-harness-ch66/results/confirmation/continuation/phase-2/6769978",
+      "spec": "/work/home/hesicheng5/quantum-harness-ch66/results/confirmation/analysis/phase-1/6769978/continuation-plan.json",
+      "spec_sha256": "e8fd0a3757f2b83adb532d95bc65fe5aa1fe3e6fdb0312090e9263a5d8b4beb3"
+    },
+    {
+      "group_count": 8,
+      "phase_index": 3,
+      "results_root": "/work/home/hesicheng5/quantum-harness-ch66/results/confirmation/continuation/phase-3/6769978",
+      "spec": "/work/home/hesicheng5/quantum-harness-ch66/results/confirmation/analysis/phase-2/6769978/continuation-plan.json",
+      "spec_sha256": "fb35a012bbd18f0db9e27786ab102d7a9294578694d85f77d8dad7853339b608"
+    },
+    {
+      "group_count": 8,
+      "phase_index": 4,
+      "results_root": "/work/home/hesicheng5/quantum-harness-ch66/results/confirmation/continuation/phase-4/6769978",
+      "spec": "/work/home/hesicheng5/quantum-harness-ch66/results/confirmation/analysis/phase-3/6769978/continuation-plan.json",
+      "spec_sha256": "6a87e28e42c6b2057a33070caf463d6043290a097afdfd65ffe070b013419f4a"
+    },
+    {
+      "group_count": 8,
+      "phase_index": 5,
+      "results_root": "/work/home/hesicheng5/quantum-harness-ch66/results/confirmation/continuation/phase-5/6769978",
+      "spec": "/work/home/hesicheng5/quantum-harness-ch66/results/confirmation/analysis/phase-4/6769978/continuation-plan.json",
+      "spec_sha256": "b2a8014becfff04553efa4c1c4cf2b53c123d87eff5bfbbe68dcdc36d5d0c456"
+    }
+  ],
+  "precision_fraction": 1.0,
+  "precision_fraction_gate_met": true,
+  "required_precision_fraction": 0.8,
+  "schema_version": "q66-confirmation-analysis-v1",
+  "slurm_job_id": "6769978",
+  "status": "provisional",
+  "total_cell_shots": 12800000
+}
