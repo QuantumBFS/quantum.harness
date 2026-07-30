@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="400" font-family="sans-serif" font-size="12">
+<rect width="640" height="400" fill="white"/>
+<text x="320.0" y="20" text-anchor="middle" font-size="14">F3 — Target 1 frontier: signed per-site gap vs N (red dashed = 1e-5 target)</text>
+<line x1="70" y1="350" x2="620" y2="350" stroke="black"/>
+<line x1="70" y1="40" x2="70" y2="350" stroke="black"/>
+<text x="70.0" y="368" text-anchor="middle">50</text>
+<text x="131.11111111111111" y="368" text-anchor="middle">60</text>
+<text x="253.33333333333331" y="368" text-anchor="middle">80</text>
+<text x="375.55555555555554" y="368" text-anchor="middle">100</text>
+<text x="620.0" y="368" text-anchor="middle">140</text>
+<text x="62" y="354.0" text-anchor="end">1.3e-05</text>
+<line x1="70" y1="350.0" x2="620" y2="350.0" stroke="#eee"/>
+<text x="62" y="292.00000000000233" text-anchor="end">1.3e-05</text>
+<line x1="70" y1="288.00000000000233" x2="620" y2="288.00000000000233" stroke="#eee"/>
+<text x="62" y="229.99999999999883" text-anchor="end">1.3e-05</text>
+<line x1="70" y1="225.99999999999883" x2="620" y2="225.99999999999883" stroke="#eee"/>
+<text x="62" y="168.00000000000114" text-anchor="end">1.3e-05</text>
+<line x1="70" y1="164.00000000000114" x2="620" y2="164.00000000000114" stroke="#eee"/>
+<text x="62" y="105.99999999999767" text-anchor="end">1.4e-05</text>
+<line x1="70" y1="101.99999999999767" x2="620" y2="101.99999999999767" stroke="#eee"/>
+<text x="62" y="44.0" text-anchor="end">1.4e-05</text>
+<line x1="70" y1="40.0" x2="620" y2="40.0" stroke="#eee"/>
+<line x1="70" y1="980.7553122571695" x2="620" y2="980.7553122571695" stroke="red" stroke-dasharray="6,3"/>
+<text x="616" y="975.7553122571695" text-anchor="end" fill="red">1e-05</text>
+<path d="M70.0,-411.5 L131.1,-991.6 L253.3,-1414.9 L375.6,-1448.0 L620.0,-1462.8" fill="none" stroke="#1f77b4" stroke-width="2" />
+<circle cx="70.0" cy="-411.5" r="5" fill="#1f77b4" stroke="#1f77b4" stroke-width="2"/>
+<circle cx="131.1" cy="-991.6" r="5" fill="#1f77b4" stroke="#1f77b4" stroke-width="2"/>
+<circle cx="253.3" cy="-1414.9" r="5" fill="#1f77b4" stroke="#1f77b4" stroke-width="2"/>
+<circle cx="375.6" cy="-1448.0" r="5" fill="#1f77b4" stroke="#1f77b4" stroke-width="2"/>
+<circle cx="620.0" cy="-1462.8" r="5" fill="#1f77b4" stroke="#1f77b4" stroke-width="2"/>
+<text x="80" y="56" fill="#1f77b4">CONFIG A (r=5) ladder</text>
+<path d="M375.6,1000.4" fill="none" stroke="#d62728" stroke-width="2" />
+<circle cx="375.6" cy="1000.4" r="5" fill="#d62728" stroke="#d62728" stroke-width="2"/>
+<text x="80" y="72" fill="#d62728">reach-extended r=9 (N=100): +9.931e-06</text>
+<text x="320.0" y="392" text-anchor="middle">N (chain length)</text>
+<text x="16" y="200.0" transform="rotate(-90 16 200.0)" text-anchor="middle">gap = E_Bethe − E_LB (per site)</text>
+</svg>
