@@ -1,11 +1,14 @@
 from dataclasses import replace
 from pathlib import Path
 
+import mpmath as mp
 import pytest
 import sympy as sp
 
+import oracle.oddcycle_survivor_a as survivor_module
 from oracle.oddcycle_survivor_a import (
     FrozenSourceSpec,
+    analyze_hamiltonian,
     load_survivor_a,
     reconstruct_survivor_transfer,
 )
@@ -107,3 +110,72 @@ def test_reconstruction_replays_the_exact_spd_transfer():
         transpose == transpose_word(word)
         for word, transpose in zip(seed.words, seed.transpose_words, strict=True)
     )
+
+
+def test_precision_ladder_reconstructs_normalized_transfer_as_decimal_strings():
+    """Catches a low-precision logarithm or scientific analysis on Windows."""
+
+    analysis = analyze_hamiltonian(
+        sp.diag(1, 2, 3, 4),
+        sp.Rational(1),
+        decimal_places=(40, 60),
+        machine_role="wsl",
+    )
+
+    assert analysis.decimal_places == (40, 60)
+    assert len(analysis.coordinates) == 6
+    assert len(analysis.exponential_residuals) == 2
+    assert len(analysis.coordinate_deltas) == 1
+    assert len(analysis.body_order_norms) == 3
+    assert all(isinstance(value, str) for value in analysis.coordinates)
+    assert all(isinstance(value, str) for value in analysis.exponential_residuals)
+    assert all(isinstance(value, str) for value in analysis.coordinate_deltas)
+    assert all(isinstance(value, str) for value in analysis.body_order_norms)
+    assert abs(mp.mpf(analysis.coordinates[1]) + mp.log(2)) < mp.mpf("1e-35")
+    assert abs(mp.mpf(analysis.coordinates[4]) + mp.log(3)) < mp.mpf("1e-35")
+    assert abs(mp.mpf(analysis.coordinates[5]) - mp.log(mp.mpf(3) / 2)) < mp.mpf(
+        "1e-35"
+    )
+    assert mp.mpf(analysis.exponential_residuals[-1]) < mp.mpf("1e-45")
+    with pytest.raises(
+        ValueError,
+        match="scientific analysis requires machine_role wsl or cpu",
+    ):
+        analyze_hamiltonian(
+            sp.diag(1, 2, 3, 4),
+            sp.Rational(1),
+            decimal_places=(40, 60),
+            machine_role="windows",
+        )
+
+
+def test_precision_analysis_is_invariant_under_eigenvector_signs(monkeypatch):
+    """Catches comparing eigensolver vectors instead of reconstructed matrices."""
+
+    transfer = sp.diag(1, 2, 3, 4)
+    baseline = analyze_hamiltonian(
+        transfer,
+        sp.Rational(1),
+        decimal_places=(40, 60),
+        machine_role="cpu",
+    )
+    real_eigsy = survivor_module.mp.eigsy
+
+    def eigsy_with_flipped_columns(matrix):
+        eigenvalues, eigenvectors = real_eigsy(matrix)
+        flipped = mp.matrix(eigenvectors)
+        for column in range(flipped.cols):
+            if column % 2:
+                for row in range(flipped.rows):
+                    flipped[row, column] = -flipped[row, column]
+        return eigenvalues, flipped
+
+    monkeypatch.setattr(survivor_module.mp, "eigsy", eigsy_with_flipped_columns)
+    sign_flipped = analyze_hamiltonian(
+        transfer,
+        sp.Rational(1),
+        decimal_places=(40, 60),
+        machine_role="cpu",
+    )
+
+    assert sign_flipped == baseline
