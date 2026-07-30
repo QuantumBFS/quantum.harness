@@ -39,7 +39,7 @@ rooted-issue-scan:
 
 final-report:
 	MPLCONFIGDIR=.raw/matplotlib PYTHONPATH=src $(PYTHON) scripts/analyze_deadline.py --nested-results results/deadline_nested_mkl
-	$(PYTHON) scripts/build_final_submission.py
+	MPLCONFIGDIR=.raw/matplotlib $(PYTHON) scripts/build_final_submission.py
 
 clean-results:
 	@echo "Remove results/ and .figures/ manually if you really want to discard them."

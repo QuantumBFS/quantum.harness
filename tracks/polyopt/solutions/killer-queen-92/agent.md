@@ -1,6 +1,6 @@
 # Agent handoff and decision log — issue #92
 
-Last updated: **2026-07-30 18:47 CST**
+Last updated: **2026-07-30 18:56 CST**
 Active workflow: [`status.md`](status.md) — **Gate 3 nested lattice levels**,
 with `W0.5` blocked on a Mosek license
 Issue: [certified bulk spectral-gap bounds for truncated Bose--Hubbard models
@@ -66,7 +66,7 @@ Current completion against that finish line:
 | item | state |
 |---|---|
 | active gate | Gate 3 — nested, geometry-sensitive lattice levels |
-| active work item | monitor optimized cutoff-two TS2 `(1,3)` dry job `41542822` followed by serial `(2,2)` guard `41544379`; collect the remaining P4/P5 refinement trials and line midpoint, then rebuild the deliberately short Target 1/2 academic report from checked rows only |
+| active work item | monitor optimized cutoff-two TS2 `(1,3)` dry job `41542822` followed by serial `(2,2)` guard `41544379`; keep the short Target 1/2 academic report frozen to independently checked result files only |
 | carried blocker | `W0.5` — SCNet is configured, but the pinned upstream Ising solve still lacks a Mosek license |
 | central implementation | `julia/src/` plus Python graph/campaign bridge |
 | work that must wait | required-width endpoint and full-grid claims until unresolved scans and mandatory cells finish; nested comparisons until memory is redesigned |
@@ -452,6 +452,14 @@ Detailed tables belong in `status.md` and `REPORT.md`, not here.
   88 UNKNOWN).  The submission is now a plain four-section academic report
   centered on Target 1 and Target 2, with the atomic and finite-patch ED
   conclusions stated explicitly; its 21 Python tests pass.
+- The academic report now includes exactly two generated figures: Target-2 ED
+  trends and certified hard-core hierarchy search spans.  Keep both captions:
+  the former is finite-patch diagnostic evidence, and FEASIBLE markers in the
+  latter are not physical gap lower bounds.
+- Refinement is complete: line P4 is cleanly checked across `[0.165,0.170]`;
+  `{12,4}` P4 is FEASIBLE at `0.160`, UNKNOWN at `0.170`, and still first
+  exactly excluded at `0.300`.  The report/figures use the 166/212 durable-row
+  aggregate (76 FEASIBLE, 51 EXCLUDED, 85 UNKNOWN).
 
 ## 10. Handoff protocol
 

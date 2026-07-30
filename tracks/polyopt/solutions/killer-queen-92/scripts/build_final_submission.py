@@ -25,6 +25,7 @@ RESULTS = ROOT / "results"
 ANALYSIS = RESULTS / "deadline_analysis"
 OUTPUT = ROOT / "submission"
 TABLES = OUTPUT / "tables"
+ASSETS = OUTPUT / "assets"
 
 ISSUE_URL = "https://github.com/QuantumBFS/quantum.harness/issues/92"
 PAPER_URL = "https://arxiv.org/abs/2606.03836"
@@ -257,6 +258,138 @@ def report_table(columns: list[str], rows: list[list[object]], numeric: list[boo
     }
 
 
+def save_report_figures(
+    finite_patch_ed: list[dict[str, str]],
+    gaps: list[dict[str, str]],
+    transitions: list[dict[str, object]],
+) -> None:
+    """Create the two compact figures used in the academic report."""
+
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    from matplotlib.lines import Line2D
+
+    ASSETS.mkdir(parents=True, exist_ok=True)
+    plt.rcParams.update(
+        {
+            "font.family": "DejaVu Sans",
+            "font.size": 9,
+            "axes.titlesize": 10,
+            "axes.labelsize": 9,
+            "legend.fontsize": 8,
+            "figure.dpi": 120,
+        }
+    )
+
+    colors = {"83": "#2b6cb0", "124": "#c05621", "line83": "#2f855a"}
+    markers = {"83": "o", "124": "s", "line83": "^"}
+    fixed_mu = [
+        row
+        for row in finite_patch_ed
+        if row["nmax"] == "3"
+        and row["scan"] == "fixed_mu"
+        and abs(float(row["mu"]) - 0.5) < 1e-12
+    ]
+    observables = (
+        ("finite_patch_gap", "Finite-patch gap"),
+        ("F0", "Number fluctuation $F_0$"),
+        ("K0", "Hopping correlator $K_0$"),
+    )
+    figure, axes = plt.subplots(1, 3, figsize=(10.2, 3.15), sharex=True)
+    for geometry in ("83", "124", "line83"):
+        rows = sorted(
+            (row for row in fixed_mu if row["geometry"] == geometry),
+            key=lambda row: float(row["hopping"]),
+        )
+        x = [float(row["hopping"]) for row in rows]
+        for axis, (field, label) in zip(axes, observables):
+            axis.plot(
+                x,
+                [float(row[field]) for row in rows],
+                color=colors[geometry],
+                marker=markers[geometry],
+                linewidth=1.7,
+                markersize=5,
+                label=GRAPH_NAMES[geometry],
+            )
+            axis.set_ylabel(label)
+            axis.set_xlabel("$t/U$")
+            axis.grid(True, color="#d9d9d9", linewidth=0.6, alpha=0.75)
+    for axis in axes:
+        axis.relim()
+        axis.autoscale_view()
+        axis.set_ylim(bottom=0)
+    handles, labels = axes[0].get_legend_handles_labels()
+    figure.legend(handles, labels, loc="upper center", ncol=3, frameon=False, bbox_to_anchor=(0.5, 1.02))
+    figure.suptitle("Radius-one ED at $n_{max}=3$ and $\\mu/U=0.5$", y=0.91, fontsize=10)
+    figure.tight_layout(rect=(0, 0, 1, 0.85))
+    temporary = ASSETS / "target2_ed_trends.tmp"
+    figure.savefig(temporary, format="png", dpi=180, bbox_inches="tight", facecolor="white")
+    plt.close(figure)
+    os.replace(temporary, ASSETS / "target2_ed_trends.png")
+
+    geometry_order = {"83": 0, "124": 1, "line83": 2}
+    ordered = sorted(
+        transitions,
+        key=lambda row: (int(str(row["point"])[1:]), geometry_order[str(row["geometry"])]),
+    )
+    figure, axis = plt.subplots(figsize=(8.4, 5.2))
+    y_positions = list(reversed(range(len(ordered))))
+    for y, row in zip(y_positions, ordered):
+        upper = float(row["verified_excluded"])
+        lower = row["last_feasible"]
+        if lower is not None:
+            lower_value = float(lower)
+            axis.plot([lower_value, upper], [y, y], color="#9aa0a6", linewidth=1.5, zorder=1)
+            axis.scatter([lower_value], [y], color="#2b6cb0", marker="o", s=31, zorder=3)
+        axis.scatter([upper], [y], color="#b42318", marker="D", s=34, zorder=4)
+
+        unknown = sorted(
+            {
+                float(trial["gamma"])
+                for trial in gaps
+                if trial.get("geometry") == row["geometry"]
+                and trial.get("point") == row["point"]
+                and trial.get("nmax") == row["nmax"]
+                and trial.get("L") == row["L"]
+                and trial.get("d") == row["d"]
+                and trial.get("classification") == "UNKNOWN"
+                and lower is not None
+                and float(lower) < float(trial["gamma"]) < upper
+            }
+        )
+        if unknown:
+            axis.scatter(unknown, [y] * len(unknown), color="#5f6368", marker="x", s=31, zorder=5)
+
+    axis.set_yticks(
+        y_positions,
+        [f"{row['point']}  {GRAPH_NAMES[str(row['geometry'])]}" for row in ordered],
+    )
+    axis.set_xlabel("tested $\\gamma/U$")
+    axis.set_title("Certified complete hard-core hierarchy, $(L,d)=(1,2)$")
+    axis.set_xlim(left=-0.02)
+    axis.grid(True, axis="x", color="#d9d9d9", linewidth=0.6, alpha=0.75)
+    axis.spines[["top", "right"]].set_visible(False)
+    axis.legend(
+        handles=[
+            Line2D([0], [0], marker="o", color="none", markerfacecolor="#2b6cb0", markeredgecolor="#2b6cb0", label="FEASIBLE trial"),
+            Line2D([0], [0], marker="D", color="none", markerfacecolor="#b42318", markeredgecolor="#b42318", label="verified EXCLUDED"),
+            Line2D([0], [0], marker="x", color="none", markeredgecolor="#5f6368", label="UNKNOWN inside span"),
+        ],
+        loc="lower center",
+        bbox_to_anchor=(0.5, -0.2),
+        ncol=3,
+        frameon=False,
+    )
+    figure.tight_layout(rect=(0, 0.07, 1, 1))
+    temporary = ASSETS / "certified_gap_spans.tmp"
+    figure.savefig(temporary, format="png", dpi=180, bbox_inches="tight", facecolor="white")
+    plt.close(figure)
+    os.replace(temporary, ASSETS / "certified_gap_spans.png")
+
+
 def html_table(columns: list[str], rows: list[list[object]]) -> str:
     head = "".join(f"<th>{html.escape(str(column))}</th>" for column in columns)
     body = "".join(
@@ -285,6 +418,13 @@ def render_academic_html(report: dict[str, object]) -> str:
                 chunks.append(f"<ul>{items}</ul>")
             elif kind == "table":
                 chunks.append(html_table(block["columns"], block["rows"]))
+            elif kind == "figure":
+                source = html.escape(str(block["src"]), quote=True)
+                alt = html.escape(str(block["alt"]), quote=True)
+                caption = html.escape(str(block["caption"]))
+                chunks.append(
+                    f'<figure><img src="{source}" alt="{alt}"><figcaption>{caption}</figcaption></figure>'
+                )
             else:
                 raise ValueError(f"unsupported academic-report block: {kind}")
         chunks.append("</section>")
@@ -321,6 +461,9 @@ def render_academic_html(report: dict[str, object]) -> str:
     table {{ width: 100%; border-collapse: collapse; font-size: .88rem; font-variant-numeric: tabular-nums; }}
     th, td {{ border-bottom: 1px solid #dadce0; padding: 7px 8px; text-align: left; vertical-align: top; white-space: nowrap; }}
     th {{ border-top: 1px solid #9aa0a6; border-bottom-color: #9aa0a6; background: #f8f9fa; font-weight: 600; }}
+    figure {{ margin: 18px 0 23px; }}
+    figure img {{ display: block; width: 100%; height: auto; border: 1px solid #dadce0; }}
+    figcaption {{ margin-top: 7px; color: #5f6368; font-size: .86rem; line-height: 1.45; }}
     footer {{ border-top: 1px solid #dadce0; margin-top: 44px; padding-top: 12px; color: #5f6368; font-size: .85rem; }}
     @media print {{ main {{ width: 100%; margin: 0; }} .table-wrap {{ overflow: visible; }} section {{ break-inside: auto; }} }}
   </style>
@@ -388,6 +531,7 @@ def build() -> None:
         and row.get("certificate_class") == "VERIFIED_EXACT_PROJECTED"
     ]
     transitions = transition_rows(gaps)
+    save_report_figures(finite_patch_ed, gaps, transitions)
     durable_gap_rows = [row for row in gaps if present(row.get("raw_status"))]
     exact_observable_rows = [
         row
@@ -442,6 +586,10 @@ def build() -> None:
             RESULTS / "atomic" / "julia-hierarchy-certificate.json",
         )
     )
+    report_figures = [
+        file_digest(ASSETS / "target2_ed_trends.png"),
+        file_digest(ASSETS / "certified_gap_spans.png"),
+    ]
     counts = {
         "observable_rows": len(observables),
         "accepted_one_sided_objectives": tiers["ACCEPTED"],
@@ -477,9 +625,10 @@ def build() -> None:
         },
         "counts": counts,
         "aggregate_sources": source_files,
+        "report_figures": report_figures,
         "raw_campaign_directories": inventory,
         "active_at_snapshot": [
-            "SCNet refinement array 41549521 and line-P4 midpoint 41550952 were still running.",
+            "SCNet P4/P5 refinement array 41549521 and line-P4 midpoint 41550952 completed.",
             "Optimized cutoff-two TS2 gate 41542822 was still running; 41544379 was dependency-queued.",
             "No scheduler state is promoted to scientific evidence until a result JSON is fetched and re-aggregated.",
         ],
@@ -611,6 +760,16 @@ def build() -> None:
                             "The table shows nmax=3, the largest cutoff calculated."
                         ),
                     },
+                    {
+                        "kind": "figure",
+                        "src": "assets/target2_ed_trends.png",
+                        "alt": "Finite-patch gap, number fluctuation, and hopping correlator versus hopping strength for the three radius-one graph patches.",
+                        "caption": (
+                            "Figure 1. Radius-one ED at nmax=3 and μ/U=0.5. Increasing hopping lowers the "
+                            "finite-patch gap and raises F₀ and K₀; L({8,3}) shows the strongest finite-patch "
+                            "delocalization. These curves are diagnostic, not thermodynamic bounds."
+                        ),
+                    },
                     report_table(
                         ["Point", "Graph", "t", "μ", "ΔED", "ρ₀", "F₀", "K₀"],
                         ed_table,
@@ -641,6 +800,17 @@ def build() -> None:
                             f"At the complete matrix level nmax=1, (L,d)=(1,2), we obtained {len(transitions)} "
                             "independently verified gap upper statements. The first verified EXCLUDED value in "
                             "each row is a rigorous upper statement at this finite hierarchy level."
+                        ),
+                    },
+                    {
+                        "kind": "figure",
+                        "src": "assets/certified_gap_spans.png",
+                        "alt": "Hierarchy search spans with feasible trials, verified excluded endpoints, and unresolved trials.",
+                        "caption": (
+                            "Figure 2. Complete hard-core hierarchy results at (L,d)=(1,2). Red diamonds are "
+                            "independently verified excluded values and therefore finite-level gap upper "
+                            "statements. Blue circles are non-exclusion trials; connecting segments are search "
+                            "spans, not confidence intervals or physical gap lower bounds."
                         ),
                     },
                     report_table(
@@ -744,7 +914,18 @@ def build() -> None:
             {"run_point": "hard-core nested levels", "wall_time": "attempted", "memory": "192 GiB; OOM"},
             {"run_point": "cutoff-two complete (1,2)", "wall_time": "assembled in ~160 s", "memory": "192–237 GiB; OOM"},
         ],
-        "figures": [],
+        "figures": [
+            {
+                "id": "target2-ed-trends",
+                "figure": "assets/target2_ed_trends.png",
+                "scope": "finite radius-one ED diagnostic; nmax=3; mu/U=0.5",
+            },
+            {
+                "id": "certified-gap-spans",
+                "figure": "assets/certified_gap_spans.png",
+                "scope": "thermodynamic hierarchy; nmax=1; complete (L,d)=(1,2)",
+            },
+        ],
         "status": report["status"],
         "source_manifest": "data_manifest.json",
     }
@@ -785,6 +966,10 @@ def build() -> None:
             "",
             "We diagonalized radius-one open patches: four sites and three edges for `{8,3}`, five sites and four edges for `{12,4}`, and five sites and six edges for `L({8,3})`. The table shows `nmax=3`, the largest cutoff calculated.",
             "",
+            "![Radius-one ED trends](assets/target2_ed_trends.png)",
+            "",
+            "*Figure 1. Radius-one ED at `nmax=3` and `μ/U=0.5`. Increasing hopping lowers the finite-patch gap and raises `F0` and `K0`; `L({8,3})` shows the strongest finite-patch delocalization. These curves are diagnostic, not thermodynamic bounds.*",
+            "",
             markdown_table(["point", "graph", "t", "μ", "ΔED", "ρ0", "F0", "K0"], ed_table),
             "",
             "At `μ=0.5`, increasing `t` from `0.03` to `0.06` lowers the finite-patch gap and increases `F0` and `K0` on every graph. At fixed parameters the line graph has the smallest gap and largest fluctuations, `{8,3}` has the largest gap and smallest fluctuations, and `{12,4}` is intermediate. The `nmax=2` and `nmax=3` results have the same ordering; their maximum gap difference is `0.0045` at `t=0.03` and `0.0194` at `t=0.05–0.06`.",
@@ -794,6 +979,10 @@ def build() -> None:
             "### Thermodynamic hierarchy: certified gap statements",
             "",
             f"At the complete matrix level `nmax=1`, `(L,d)=(1,2)`, we obtained {len(transitions)} independently verified gap upper statements. The first verified `EXCLUDED` value is a rigorous upper statement at this finite hierarchy level.",
+            "",
+            "![Certified hierarchy search spans](assets/certified_gap_spans.png)",
+            "",
+            "*Figure 2. Complete hard-core hierarchy results at `(L,d)=(1,2)`. Red diamonds are verified excluded values and therefore finite-level gap upper statements. Blue circles are non-exclusion trials; the connecting segments are search spans, not confidence intervals or physical gap lower bounds.*",
             "",
             markdown_table(
                 ["graph", "point", "(t,μ)", "last FEASIBLE trial", "first verified EXCLUDED", "UNKNOWN inside"],
@@ -849,6 +1038,7 @@ def build() -> None:
             "- `report.json` — structured source for the academic report.",
             "- `run.json` — compact challenge run summary.",
             "- `tables/` — curated accepted/certified rows; floating rows are not mixed in.",
+            "- `assets/` — two compact figures derived from the curated ED and hierarchy rows.",
             "- `data_manifest.json` — hashes of aggregate inputs and roles/sizes of raw campaign directories.",
             "",
             "Raw solver JSON, primal/dual matrices, and scheduler logs remain in `../results/`, which is git-ignored by Harness policy. Rebuild after fetching an HPC checkpoint:",

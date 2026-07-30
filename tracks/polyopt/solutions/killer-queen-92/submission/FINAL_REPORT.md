@@ -2,7 +2,7 @@
 
 - **Issue:** [Quantum Harness #92](https://github.com/QuantumBFS/quantum.harness/issues/92)
 - **Method:** [Xu et al., thermodynamic bulk-gap hierarchy](https://arxiv.org/abs/2606.03836)
-- **Snapshot:** 2026-07-30T18:47:01+08:00
+- **Snapshot:** 2026-07-30T18:56:35+08:00
 - **Status:** Target 1 completed; Target 2 partially completed.
 
 ## 1. Scope and status
@@ -36,6 +36,10 @@ The complete hierarchy check is not a single-site shortcut. It uses a two-site b
 
 We diagonalized radius-one open patches: four sites and three edges for `{8,3}`, five sites and four edges for `{12,4}`, and five sites and six edges for `L({8,3})`. The table shows `nmax=3`, the largest cutoff calculated.
 
+![Radius-one ED trends](assets/target2_ed_trends.png)
+
+*Figure 1. Radius-one ED at `nmax=3` and `μ/U=0.5`. Increasing hopping lowers the finite-patch gap and raises `F0` and `K0`; `L({8,3})` shows the strongest finite-patch delocalization. These curves are diagnostic, not thermodynamic bounds.*
+
 | point | graph | t | μ | ΔED | ρ0 | F0 | K0 |
 |---|---|---|---|---|---|---|---|
 | P1 | {8,3} | 0.03 | 0.5 | 0.3991 | 1.00011 | 0.0106905 | 0.239557 |
@@ -62,10 +66,14 @@ These are finite-open-patch trends only. In particular, the `nmax=1` patches are
 
 At the complete matrix level `nmax=1`, `(L,d)=(1,2)`, we obtained 10 independently verified gap upper statements. The first verified `EXCLUDED` value is a rigorous upper statement at this finite hierarchy level.
 
+![Certified hierarchy search spans](assets/certified_gap_spans.png)
+
+*Figure 2. Complete hard-core hierarchy results at `(L,d)=(1,2)`. Red diamonds are verified excluded values and therefore finite-level gap upper statements. Blue circles are non-exclusion trials; the connecting segments are search spans, not confidence intervals or physical gap lower bounds.*
+
 | graph | point | (t,μ) | last FEASIBLE trial | first verified EXCLUDED | UNKNOWN inside |
 |---|---|---|---|---|---|
 | {12,4} | P2 | (0.05, 0.5) | 0.51 | 0.52 | 1 |
-| {12,4} | P4 | (0.03, 0.15) | 0 | 0.3 | 2 |
+| {12,4} | P4 | (0.03, 0.15) | 0.16 | 0.3 | 1 |
 | {12,4} | P5 | (0.03, 0.75) | 0.75 | 0.8 | 0 |
 | {8,3} | P1 | (0.03, 0.5) | 0.5 | 0.505 | 0 |
 | {8,3} | P2 | (0.05, 0.5) | 0.509 | 0.511 | 1 |
@@ -73,7 +81,7 @@ At the complete matrix level `nmax=1`, `(L,d)=(1,2)`, we obtained 10 independent
 | {8,3} | P4 | (0.03, 0.15) | 0.16 | 0.165 | 0 |
 | {8,3} | P5 | (0.03, 0.75) | 0.75 | 0.755 | 0 |
 | L({8,3}) | P2 | (0.05, 0.5) | 0.51 | 0.53 | 1 |
-| L({8,3}) | P4 | (0.03, 0.15) | 0 | 0.17 | 2 |
+| L({8,3}) | P4 | (0.03, 0.15) | 0.165 | 0.17 | 0 |
 
 A `FEASIBLE` trial is only a non-exclusion at this finite level and is not a lower bound on the physical gap. If `UNKNOWN` samples lie between the two values, the pair is a search span rather than a bracket.
 

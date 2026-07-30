@@ -1,14 +1,14 @@
 {
   "active_at_snapshot": [
-    "SCNet refinement array 41549521 and line-P4 midpoint 41550952 were still running.",
+    "SCNet P4/P5 refinement array 41549521 and line-P4 midpoint 41550952 completed.",
     "Optimized cutoff-two TS2 gate 41542822 was still running; 41544379 was dependency-queued.",
     "No scheduler state is promoted to scientific evidence until a result JSON is fetched and re-aggregated."
   ],
   "aggregate_sources": [
     {
-      "bytes": 68193,
+      "bytes": 68528,
       "path": "results/deadline_analysis/gap_scan_trials.csv",
-      "sha256": "c399a03033e486c7c1d672cbdf9780492299af3236b84bfdee706524947f536c"
+      "sha256": "b77bc673e5d03555dca050f3a72d6d4c72d80fd5261bb415b80457b8efe88d98"
     },
     {
       "bytes": 63137,
@@ -55,15 +55,15 @@
     "accepted_intervals": 2,
     "accepted_one_sided_objectives": 26,
     "certified_gap_upper_statements": 10,
-    "durable_fixed_gamma_rows": 163,
+    "durable_fixed_gamma_rows": 166,
     "exact_projected_observable_bounds": 3,
-    "feasible_fixed_gamma_rows": 73,
+    "feasible_fixed_gamma_rows": 76,
     "fixed_gamma_rows": 212,
     "floating_objectives": 100,
     "interval_rows": 69,
     "objective_errors": 8,
     "observable_rows": 138,
-    "unknown_fixed_gamma_rows": 88,
+    "unknown_fixed_gamma_rows": 85,
     "verified_excluded_fixed_gamma_rows": 51
   },
   "raw_campaign_directories": [
@@ -82,7 +82,7 @@
       "role": "diagnostic"
     },
     {
-      "bytes": 557851,
+      "bytes": 559833,
       "description": "Canonical merged tables, plots, and live calculation report.",
       "directory": "deadline_analysis",
       "files": 11,
@@ -159,7 +159,7 @@
       "role": "production"
     },
     {
-      "bytes": 142526030,
+      "bytes": 137064220,
       "description": "Extended Target-2 geometry grid; may be updated by SCNet.",
       "directory": "deadline_geometry_grid",
       "files": 24,
@@ -278,6 +278,18 @@
       "role": "legacy-aggregate"
     }
   ],
+  "report_figures": [
+    {
+      "bytes": 109286,
+      "path": "submission/assets/target2_ed_trends.png",
+      "sha256": "9f657564d8f3e384bdf60806917dc18de5ee93a1c22158df3e31ea6ac2d2413a"
+    },
+    {
+      "bytes": 76080,
+      "path": "submission/assets/certified_gap_spans.png",
+      "sha256": "ae2d2dddb46b1c67c40a43bb4aad3690444efb615174faa2f3043df5ab2cc9fd"
+    }
+  ],
   "schema": "issue92-submission-data-v1",
   "scientific_scope": {
     "claim_rule": "EXCLUDED appears only after exact projection, 256-bit interval/exact PSD checks, exact affine residual zero, and positive normalized Farkas margin.",
@@ -292,5 +304,5 @@
     "primary_encoding": "matrix",
     "primary_symmetry": "U1_INVARIANT_KMS_STATES"
   },
-  "snapshot_generated": "2026-07-30T18:47:01+08:00"
+  "snapshot_generated": "2026-07-30T18:56:35+08:00"
 }

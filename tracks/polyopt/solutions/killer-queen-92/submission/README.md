@@ -7,6 +7,7 @@ This directory is the stable, lightweight entry point for the professor review a
 - `report.json` — structured source for the academic report.
 - `run.json` — compact challenge run summary.
 - `tables/` — curated accepted/certified rows; floating rows are not mixed in.
+- `assets/` — two compact figures derived from the curated ED and hierarchy rows.
 - `data_manifest.json` — hashes of aggregate inputs and roles/sizes of raw campaign directories.
 
 Raw solver JSON, primal/dual matrices, and scheduler logs remain in `../results/`, which is git-ignored by Harness policy. Rebuild after fetching an HPC checkpoint:

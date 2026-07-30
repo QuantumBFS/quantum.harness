@@ -16,8 +16,19 @@
       "wall_time": "assembled in ~160 s"
     }
   ],
-  "figures": [],
-  "generated": "2026-07-30T18:47:01+08:00",
+  "figures": [
+    {
+      "figure": "assets/target2_ed_trends.png",
+      "id": "target2-ed-trends",
+      "scope": "finite radius-one ED diagnostic; nmax=3; mu/U=0.5"
+    },
+    {
+      "figure": "assets/certified_gap_spans.png",
+      "id": "certified-gap-spans",
+      "scope": "thermodynamic hierarchy; nmax=1; complete (L,d)=(1,2)"
+    }
+  ],
+  "generated": "2026-07-30T18:56:35+08:00",
   "issue": 92,
   "method": {
     "exact": "Exact-checked exclusions; finite hierarchy relaxation",

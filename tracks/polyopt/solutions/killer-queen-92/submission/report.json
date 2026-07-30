@@ -1,5 +1,5 @@
 {
-  "generated": "2026-07-30T18:47:01+08:00",
+  "generated": "2026-07-30T18:56:35+08:00",
   "sections": [
     {
       "blocks": [
@@ -89,6 +89,12 @@
         {
           "kind": "text",
           "text": "We diagonalized radius-one open patches: four sites and three edges for {8,3}, five sites and four edges for {12,4}, and five sites and six edges for L({8,3}). The table shows nmax=3, the largest cutoff calculated."
+        },
+        {
+          "alt": "Finite-patch gap, number fluctuation, and hopping correlator versus hopping strength for the three radius-one graph patches.",
+          "caption": "Figure 1. Radius-one ED at nmax=3 and \u03bc/U=0.5. Increasing hopping lowers the finite-patch gap and raises F\u2080 and K\u2080; L({8,3}) shows the strongest finite-patch delocalization. These curves are diagnostic, not thermodynamic bounds.",
+          "kind": "figure",
+          "src": "assets/target2_ed_trends.png"
         },
         {
           "columns": [
@@ -282,6 +288,12 @@
           "text": "At the complete matrix level nmax=1, (L,d)=(1,2), we obtained 10 independently verified gap upper statements. The first verified EXCLUDED value in each row is a rigorous upper statement at this finite hierarchy level."
         },
         {
+          "alt": "Hierarchy search spans with feasible trials, verified excluded endpoints, and unresolved trials.",
+          "caption": "Figure 2. Complete hard-core hierarchy results at (L,d)=(1,2). Red diamonds are independently verified excluded values and therefore finite-level gap upper statements. Blue circles are non-exclusion trials; connecting segments are search spans, not confidence intervals or physical gap lower bounds.",
+          "kind": "figure",
+          "src": "assets/certified_gap_spans.png"
+        },
+        {
           "columns": [
             "Graph",
             "Point",
@@ -312,9 +324,9 @@
               "{12,4}",
               "P4",
               "(0.03, 0.15)",
-              "0",
+              "0.16",
               "0.3",
-              "2"
+              "1"
             ],
             [
               "{12,4}",
@@ -376,9 +388,9 @@
               "L({8,3})",
               "P4",
               "(0.03, 0.15)",
-              "0",
+              "0.165",
               "0.17",
-              "2"
+              "0"
             ]
           ]
         },

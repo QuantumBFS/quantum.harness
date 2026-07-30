@@ -1,6 +1,6 @@
 # Issue #92 central algorithm and calculation status
 
-Last updated: **2026-07-30 18:47 CST**
+Last updated: **2026-07-30 18:56 CST**
 Source of truth: [Quantum Harness issue #92](https://github.com/QuantumBFS/quantum.harness/issues/92)
 Primary method: Xu *et al.*, [*The bulk spectral gap is semi-decidable: a
 convergent family of certified upper bounds*](https://arxiv.org/abs/2606.03836)
@@ -1129,3 +1129,14 @@ maximum simultaneous issue-92 request at 448 GB.
   complete radius-one Target-2 ED data at `nmax=3`, and keeps finite-patch
   diagnostics separate from certified thermodynamic statements.  The report
   rebuild and all 21 Python tests pass.
+- Added two restrained, reproducible report figures: a three-panel `nmax=3`,
+  `mu/U=0.5` radius-one ED trend plot and a complete hard-core `(1,2)` search-
+  span plot distinguishing FEASIBLE, exact EXCLUDED, and interior UNKNOWN
+  trials.  Their captions preserve the finite-patch and non-lower-bound claim
+  boundaries; the 21 Python tests still pass.
+- All P4/P5 refinement cells completed.  Line P4 now has a clean checked
+  search span `[0.165,0.170]` (FEASIBLE then exact EXCLUDED).  `{12,4}` P4 adds
+  `FEASIBLE(0.160)` but `0.170` remains `UNKNOWN`, so its first exact exclusion
+  remains `0.300`.  The final refinement snapshot has 166/212 durable rows:
+  76 FEASIBLE, 51 EXCLUDED, and 85 UNKNOWN; both report figures were rebuilt
+  from this snapshot.
