@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import argparse
 import datetime as dt
-import hashlib
 import json
 import math
 import os
@@ -264,9 +263,16 @@ def authorize_remediation(
         for item in remediation["seed_results"]
     }
     observed = {}
+    checkpoint_schema = load_json(
+        MODULE_ROOT / "remediated-checkpoint.schema.json"
+    )
+    checkpoint_validator = jsonschema.Draft202012Validator(
+        checkpoint_schema,
+        format_checker=jsonschema.FormatChecker(),
+    )
     for path in checkpoint_paths:
         checkpoint = load_json(path)
-        validate(checkpoint, MODULE_ROOT / "remediated-checkpoint.schema.json")
+        checkpoint_validator.validate(checkpoint)
         observed[checkpoint["seed"]] = sha256_file(path)
     if observed != expected_checkpoint_hashes:
         raise RuntimeError("remediated checkpoint set/hash mismatch")
