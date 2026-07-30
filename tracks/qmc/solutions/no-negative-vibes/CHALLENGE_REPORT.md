@@ -35,7 +35,10 @@ block-TN factorization, a graded-monomial compensation mechanism,
 tensor-square positivity, and local orthogonal-contraction models. Their
 novelty audits are part of the result: several reduce to known
 split/Kramers/Wei, stoquastic, Majorana-square, triangular, or integrable
-mechanisms. We do not call those reductions new sign-free physics.
+positivity mechanisms. A known positive-weight factorization does not by
+itself make the associated interacting Hamiltonian conventionally simulable;
+the orthogonal-contraction model is retained as an active QNC candidate after
+additional algebra and low-energy audits.
 
 ## Evidence grades
 
@@ -59,7 +62,7 @@ mechanisms. We do not call those reductions new sign-free physics.
 | Odd positive-monomial / block-TN | Odd permutation cycles factor the determinant into positive factors; fixed global block partition also works | Model factory exists for a fixed global partition | Matrix result rigorous; elementary cycle factorization is known and natural local crossed partitions fail | [result](docs/SPECULATIVE_STRUCTURE_RESULTS.md), [locality audit](docs/ODD_BLOCK_TN_LOCALITY_AUDIT.md) |
 | Graded monomial | History grade cancels determinant parity exactly | Local odd-ring attractive spinless model | Rigorous but reducible to Majorana reflection positivity / fixed orbit gauges | [candidate](docs/GRADED_MONOMIAL_CANDIDATE.md), [audit](docs/GRADED_MONOMIAL_RESULTS.md) |
 | Tensor-square | For real `X`, `det(I+X tensor X)>=0`; the weight factorizes into modulus-square and real-square pieces | Four-mode plaquette, multi-channel models, and exact `-log` transfer | `m=2` is split; `m=3` has an exact no-fixed-metric result. Positivity is rigorous, while independent physical novelty and phase structure remain open | [result](docs/TENSOR_SQUARE_RESULTS.md), [effective model](docs/TENSOR_SQUARE_EFFECTIVE_MWE.md), [three-candidate audit](docs/THREE_CANDIDATE_AUDIT_RESULTS.md) |
-| Local orthogonal contraction | Products of real orthogonal local vertices give nonnegative determinant weights | Local, extensive, interacting overlapping-plaquette Hamiltonian | Positive and non-diagonally-stoquastic, but the weight is a known doubled-Majorana square; literature/solver novelty remains open | [audit](docs/ORTHOGONAL_CONTRACTION_HAMILTONIAN.md) |
+| Local orthogonal contraction | Products of real orthogonal local vertices give nonnegative determinant weights | Local, extensive, interacting overlapping-plaquette Hamiltonian | Active QNC candidate: the positive weight is a doubled-Majorana square, but the six-mode generators close to full `so(6)`, fixed sectors generate full matrix algebras modulo exact Hodge chirality, and 4/6/8-mode low-energy states are explicitly non-Gaussian. A general complexity theorem and thermodynamic phase diagram remain open | [audit](docs/ORTHOGONAL_CONTRACTION_HAMILTONIAN.md) |
 | Tensor-square phase program | Determinant factorization, Hermiticity, number conservation, ED, and stabilized DQMC gates passed | `m=3,4` pilots and an `m=4,6,8` finite-temperature map | 675/675 coarse cells completed; a robust response ridge was found, while Stage-4 sampler proposals were stopped by preregistered efficiency gates. This is a finite-size signal, not a new phase claim | [status](tensor-square-phase-diagram/STATUS.md), [model](tensor-square-phase-diagram/MODEL.md) |
 | Fixed weighted `l_infinity` contraction | Common norm contraction implies positivity | No successful Hamiltonianization | Rigorous common-contraction control, not a new mechanism | [screen](docs/SPECULATIVE_STRUCTURE_RESULTS.md), [reappraisal](docs/POSITIVE_HAMILTONIAN_REAPPRAISAL_LEDGER.md) |
 | Reciprocal-parabolic and commuting controls | Triangular reciprocal factorization and common commuting algebra give positive weights | No new model | Known triangular/integrable controls | [screen](docs/SPECULATIVE_STRUCTURE_RESULTS.md) |
@@ -141,8 +144,10 @@ because those reductions and reusable oracles are useful research results.
   coarse map found a half-filled response ridge. Thermodynamic scaling and a
   new-phase claim remain open; two Stage-4 sampler proposals were correctly
   stopped rather than overinterpreted.
-- **Local orthogonal contraction:** local and interacting but already a
-  Majorana-square weight; specialized solver/literature novelty is open.
+- **Local orthogonal contraction:** promoted to `active-qnc-candidate`.
+  Full-sector algebra and non-Gaussian low-energy diagnostics rule out the
+  simplest conventional simulations, while a general complexity theorem and
+  thermodynamic phase diagram remain open.
 - **Complex Majorana/Pfaffian formulation:** the full simple matrix theorem
   requested by the challenge remains open.
 - **Majorana parity pattern and non-Klein typed exterior cones:** hypotheses or
@@ -185,7 +190,7 @@ environment (Python 3.11.15):
 | Gate | Result |
 |---|---|
 | `python -m oracle.oddcycle_final_certificate` | `all-exact-gates-passed`; exact payload SHA-256 `176712dc90cd3483e31549aa177ecf418a0162515fe0ccdb89136a68c65aece1` |
-| Main theorem, negative controls, teammate mechanisms, and Survivor A focused suite | `112 passed, 1 skipped, 2 xfailed` |
+| Main theorem, negative controls, teammate mechanisms, and Survivor A focused suite | `114 passed, 1 skipped, 2 xfailed` |
 | Tensor-square phase-diagram suite | `73 passed` |
 | Challenge report renderer | Standard `skills/report/render_report.py` completed; self-contained HTML written under the ignored result root |
 
@@ -221,6 +226,7 @@ and replay code are tracked under this solution directory.
 | `ZiboJin/quantum.harness:challenge/qmc-sign-free-hunter` | Original registration and PR #178 head |
 | `no-negative-vibes/quantum.harness:research/no-negative-vibes` | Reviewed team baseline and teammate PR merges |
 | `xianzhipan/quantum.harness:codex/positive-hamiltonian-reappraisal` | 28 commits covering Fock--CP, tensor-square, gauge/cocycle, odd-block-TN, orthogonal contraction, unconventional-model audits, ledgers, code, fixtures, protocols, and tests |
+| `no-negative-vibes/quantum.harness:codex/positive-hamiltonian-reappraisal` | One subsequent shared commit promoting the orthogonal-contraction route with full `so(6)`/sector-algebra audits, 4/6/8-mode ED, Wick non-Gaussianity diagnostics, literature boundaries, and two tests |
 | `no-negative-vibes/quantum.harness:work/zibo/representation-cones` | Exact-card exterior campaign, oddcycle theorem/novelty/physical transfer, local-H portfolio, Survivor A, distributed checkpoints, and publication package |
 | `ZiboJin/quantum.harness:work/zibojin/tensor-square-phase-diagram` | 23 commits covering ED, stabilized DQMC, 675-cell dual-machine map, Stage-4 statistics, sampler early stops, source, tests, and result summaries |
 

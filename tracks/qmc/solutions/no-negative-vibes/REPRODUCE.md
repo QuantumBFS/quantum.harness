@@ -60,7 +60,8 @@ pytest -q \
   tests/test_grade_charge_model.py \
   tests/test_odd_block_tn_stoquastic.py \
   tests/test_orthogonal_contraction_candidate.py \
-  tests/test_orthogonal_contraction_exclusion.py
+  tests/test_orthogonal_contraction_exclusion.py \
+  tests/test_orthogonal_contraction_physics.py
 ```
 
 ## Tensor-square phase program
