@@ -3,6 +3,8 @@
 use crate::angles::GateCouplings;
 use crate::gaussian::{InvariantErrors, MajoranaState, MeasurementGate};
 use anyhow::{bail, Result};
+use nalgebra::DMatrix;
+use num_complex::Complex64;
 use rand_xoshiro::rand_core::Rng;
 use rand_xoshiro::Xoshiro256PlusPlus;
 use serde::{Deserialize, Serialize};
@@ -263,4 +265,48 @@ pub fn binary_entropy(probability: f64) -> Result<f64> {
         }
     };
     Ok(term(probability) + term(1.0 - probability))
+}
+
+/// Complex-orthogonal single-particle transfer matrix for a forced gate.
+pub fn single_particle_gate(dimension: usize, applied: &AppliedGate) -> Result<DMatrix<Complex64>> {
+    if dimension == 0
+        || applied.measurement.a >= dimension
+        || applied.measurement.b >= dimension
+        || applied.measurement.a == applied.measurement.b
+    {
+        bail!("forced gate indices are invalid for the transfer dimension");
+    }
+    if !matches!(applied.outcome, -1 | 1)
+        || !applied.measurement.strength.is_finite()
+        || !applied.rotation.is_finite()
+    {
+        bail!("forced gate parameters are invalid");
+    }
+
+    let real = applied.outcome as f64
+        * applied.measurement.observable_sign as f64
+        * applied.measurement.strength;
+    let parameter = Complex64::new(real, applied.rotation);
+    let cosine = parameter.cosh();
+    let sine = Complex64::i() * parameter.sinh();
+    let mut gate = DMatrix::<Complex64>::identity(dimension, dimension);
+    let a = applied.measurement.a;
+    let b = applied.measurement.b;
+    gate[(a, a)] = cosine;
+    gate[(a, b)] = sine;
+    gate[(b, a)] = -sine;
+    gate[(b, b)] = cosine;
+    Ok(gate)
+}
+
+/// Product of the disjoint forced gates in one circuit row.
+pub fn single_particle_row(
+    dimension: usize,
+    applied: &[AppliedGate],
+) -> Result<DMatrix<Complex64>> {
+    let mut row = DMatrix::<Complex64>::identity(dimension, dimension);
+    for gate in applied {
+        row = single_particle_gate(dimension, gate)? * row;
+    }
+    Ok(row)
 }

@@ -1,9 +1,10 @@
 //! Stream-level trajectory estimation and block observables.
 
 use crate::angles::GateCouplings;
-use crate::circuit::{BoundarySector, GenericCircuit, SamplingMode};
+use crate::circuit::{single_particle_row, BoundarySector, GenericCircuit, SamplingMode};
 use crate::config::RunConfig;
 use crate::gaussian::MajoranaState;
+use crate::lyapunov::LyapunovAccumulator;
 use crate::rng::{derive_seed, make_rng};
 use anyhow::{bail, Context, Result};
 use serde::{Deserialize, Serialize};
@@ -27,6 +28,7 @@ pub struct BlockEstimate {
     pub half_chain_entropy: f64,
     pub entropy_arc: Vec<EntropyPoint>,
     pub spatial_correlations: Vec<CorrelationPoint>,
+    pub lyapunov: Vec<f64>,
     pub min_probability: f64,
     pub max_antisymmetry_error: f64,
     pub max_purity_error: f64,
@@ -95,6 +97,7 @@ pub fn estimate_stream(
     let mut blocks = Vec::with_capacity(block_count);
 
     for block_index in 0..block_count {
+        let mut lyapunov = LyapunovAccumulator::new(2 * width, 2)?;
         let mut entropy_sum = 0.0;
         let mut min_probability = 1.0_f64;
         let mut max_antisymmetry_error = 0.0_f64;
@@ -111,6 +114,9 @@ pub fn estimate_stream(
             max_antisymmetry_error =
                 max_antisymmetry_error.max(sample.invariant_errors.antisymmetry);
             max_purity_error = max_purity_error.max(sample.invariant_errors.purity);
+            for row in sample.applied_gates.chunks_exact(width) {
+                lyapunov.push(&single_particle_row(2 * width, row)?)?;
+            }
         }
 
         blocks.push(BlockEstimate {
@@ -119,6 +125,7 @@ pub fn estimate_stream(
             half_chain_entropy: state.interval_entropy(0, width / 2)?,
             entropy_arc: entropy_arc(&state)?,
             spatial_correlations: spatial_correlations(&state)?,
+            lyapunov: lyapunov.spectrum()?,
             min_probability,
             max_antisymmetry_error,
             max_purity_error,

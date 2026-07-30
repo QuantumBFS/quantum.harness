@@ -4,6 +4,7 @@ pub mod angles;
 pub mod circuit;
 pub mod config;
 pub mod gaussian;
+pub mod lyapunov;
 pub mod rng;
 pub mod sampler;
 pub mod schema;
