@@ -23,6 +23,7 @@ class AlphaFit:
     standard_error: float
     estimates: tuple[float, ...]
     block_window: tuple[int | None, int | None]
+    window_relative_spread: float
     stable: bool
 
 
@@ -97,15 +98,20 @@ def calibrate_alpha(
     array = np.asarray(estimates)
     alpha = float(array.mean())
     standard_error = float(array.std(ddof=1) / np.sqrt(len(array)))
+    median = float(np.median(array))
+    relative_spread = (
+        float((array.max() - array.min()) / median) if median > 0 else float("inf")
+    )
     stable = bool(
         alpha > 0
         and np.all(array > 0)
-        and (standard_error == 0.0 or np.max(np.abs(array - alpha)) <= 4 * standard_error)
+        and relative_spread <= 0.25
     )
     return AlphaFit(
         alpha=alpha,
         standard_error=standard_error,
         estimates=tuple(float(value) for value in array),
         block_window=window,
+        window_relative_spread=relative_spread,
         stable=stable,
     )

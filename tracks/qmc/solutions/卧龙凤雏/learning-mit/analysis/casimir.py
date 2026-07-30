@@ -19,6 +19,8 @@ class CasimirFit:
     chi2: float
     degrees_of_freedom: int
     covariance_floor: float
+    covariance_condition: float
+    stable_without_smallest: bool
 
 
 def fit_casimir(
@@ -67,11 +69,24 @@ def fit_casimir(
     floor = max(scale * 1e-12, np.finfo(float).eps)
     regularized = eigenvectors @ np.diag(np.maximum(eigenvalues, floor)) @ eigenvectors.T
     precision = np.linalg.inv(regularized)
-    normal = design.T @ precision @ design
-    parameter_covariance = np.linalg.inv(normal)
-    coefficients = parameter_covariance @ design.T @ precision @ gamma
+    coefficients, parameter_covariance, covariance_condition = _solve(
+        design, precision, gamma
+    )
     residuals = gamma - design @ coefficients
     chi2 = float(residuals @ precision @ residuals)
+    trimmed_design = design[1:]
+    trimmed_precision = np.linalg.inv(regularized[1:, 1:])
+    trimmed_coefficients, trimmed_covariance, _ = _solve(
+        trimmed_design, trimmed_precision, gamma[1:]
+    )
+    combined_error = np.sqrt(
+        max(float(parameter_covariance[1, 1]), 0.0)
+        + max(float(trimmed_covariance[1, 1]), 0.0)
+    )
+    stable_without_smallest = bool(
+        abs(float(coefficients[1] - trimmed_coefficients[1]))
+        <= 1.96 * combined_error
+    )
     return CasimirFit(
         widths=_readonly(widths),
         correction=correction,
@@ -83,7 +98,26 @@ def fit_casimir(
         chi2=chi2,
         degrees_of_freedom=len(widths) - design.shape[1],
         covariance_floor=floor,
+        covariance_condition=covariance_condition,
+        stable_without_smallest=stable_without_smallest,
     )
+
+
+def _solve(
+    design: np.ndarray, precision: np.ndarray, values: np.ndarray
+) -> tuple[np.ndarray, np.ndarray, float]:
+    normal = design.T @ precision @ design
+    norms = np.linalg.norm(design, axis=0)
+    if np.any(norms == 0):
+        raise ValueError("Casimir design matrix has a zero column")
+    normalized = design / norms
+    normalized_normal = normalized.T @ precision @ normalized
+    condition = float(np.linalg.cond(normalized_normal))
+    if not np.isfinite(condition) or condition > 1.0e10:
+        raise ValueError("Casimir covariance condition number exceeds 1e10")
+    covariance = np.linalg.inv(normal)
+    coefficients = covariance @ design.T @ precision @ values
+    return coefficients, covariance, condition
 
 
 def _readonly(values: np.ndarray) -> np.ndarray:

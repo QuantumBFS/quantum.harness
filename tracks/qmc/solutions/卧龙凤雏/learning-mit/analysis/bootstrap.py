@@ -21,6 +21,37 @@ class CandidateDistribution:
     central_charge: np.ndarray
 
 
+@dataclass(frozen=True)
+class BootstrapSummary:
+    estimate: float | None
+    interval: tuple[float, float] | None
+    valid_replicates: int
+    failure_fraction: float
+    unavailable: bool
+
+
+def summarize_bootstrap(samples: np.ndarray, requested: int) -> BootstrapSummary:
+    values = np.asarray(samples, dtype=float)
+    if values.ndim != 1 or requested <= 0 or len(values) != requested:
+        raise ValueError("bootstrap summary requires one value per requested replicate")
+    valid = values[np.isfinite(values)]
+    failures = requested - len(valid)
+    failure_fraction = failures / requested
+    unavailable = failure_fraction > 0.05 or len(valid) == 0
+    if unavailable:
+        return BootstrapSummary(None, None, len(valid), failure_fraction, True)
+    return BootstrapSummary(
+        estimate=float(np.mean(valid)),
+        interval=(
+            float(np.quantile(valid, 0.025)),
+            float(np.quantile(valid, 0.975)),
+        ),
+        valid_replicates=len(valid),
+        failure_fraction=failure_fraction,
+        unavailable=False,
+    )
+
+
 def hierarchical_bootstrap_means(
     groups: dict[int, tuple[np.ndarray, ...]], samples: int, seed: int
 ) -> np.ndarray:

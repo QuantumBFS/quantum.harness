@@ -28,3 +28,32 @@ def test_spatial_power_law_and_temporal_gap_recover_alpha():
     assert spatial.delta == pytest.approx(expected_delta, abs=1e-8)
     assert alpha.alpha == pytest.approx(expected_alpha, abs=1e-8)
     assert alpha.alpha > 0
+    assert alpha.window_relative_spread == pytest.approx(0.0, abs=1e-12)
+    assert alpha.stable
+
+
+def test_anisotropy_rejects_a_window_spread_above_25_percent():
+    spatial = fit_spatial_dimension(
+        {
+            16: [
+                np.column_stack(
+                    [
+                        np.arange(2, 8, dtype=float),
+                        np.arange(2, 8, dtype=float) ** -0.8,
+                    ]
+                )
+            ]
+        },
+        (16,),
+        (1 / 8, 3 / 8),
+    )
+    lyapunov = {
+        16: [
+            np.array([0.60, 0.40, -0.5]),
+            np.array([0.52, 0.48, -0.5]),
+            np.array([0.80, 0.20, -0.5]),
+        ]
+    }
+    alpha = calibrate_alpha(spatial, lyapunov, (None, None))
+    assert alpha.window_relative_spread > 0.25
+    assert not alpha.stable

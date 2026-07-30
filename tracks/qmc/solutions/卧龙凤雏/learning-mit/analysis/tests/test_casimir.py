@@ -17,6 +17,8 @@ def test_casimir_recovers_amplitude_with_l3_correction():
     )
     assert fit.casimir_amplitude == pytest.approx(expected, abs=1e-8)
     assert fit.bulk_density == pytest.approx(0.73, abs=1e-10)
+    assert fit.covariance_condition <= 1.0e10
+    assert fit.stable_without_smallest
 
 
 def test_casimir_requires_five_widths_and_known_correction():
