@@ -74,7 +74,7 @@ def test_measurement_batch_uses_one_gpu_allocation_for_all_tasks() -> None:
     batch = (
         ROUTE_D_PLUS_ROOT / "phase6_measurement.sbatch"
     ).read_text(encoding="utf-8")
-    assert "#SBATCH --cpus-per-task=24" in batch
+    assert "#SBATCH --cpus-per-task=16" in batch
     assert "#SBATCH --gres=gpu:1" in batch
     assert "ROUTE_D_PLUS_PHASE6_ATTEMPT:?" in batch
     assert "ROUTE_D_PLUS_MEASUREMENT_RUN_ID:?" in batch
