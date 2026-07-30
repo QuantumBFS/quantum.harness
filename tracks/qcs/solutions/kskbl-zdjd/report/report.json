@@ -753,8 +753,96 @@
         },
         {
           "kind": "note",
-          "label": "⟦zh⟧当前边界与下一步：从单一 p 扩展到逐位 p⟦en⟧Current boundary and next step: from one p to per-bit p",
-          "text": "⟦zh⟧当前估计器假设 12 个输出位共享一个、对称且独立的翻转概率。真实硬件或数据流程可能让高位与低位噪声不同，也可能存在同一字内的相关翻转。下一轮先放宽为十二个逐位噪声率 p₀ 到 p₁₁，并用各位后验熵之和衡量一个输出字的不确定性；若逐位模型仍不足，再检验相关噪声。⟦en⟧The present estimator assumes that all 12 output bits share one symmetric, independent flip probability. Real hardware or data pipelines may give high and low bits different noise rates or introduce correlated flips within a word. The next round first relaxes this to twelve per-bit rates p₀ through p₁₁ and measures word uncertainty as the sum of per-bit posterior entropies; if that remains inadequate, correlated noise will be tested."
+          "label": "⟦zh⟧单一噪声率假设已在下一组实验中放宽⟦en⟧The single-noise-rate assumption is relaxed in the next experiment",
+          "text": "⟦zh⟧下面让 12 个输出位拥有从 5% 到 45% 不等的翻转率，并把快速函数拟合与逐位不确定性校准拆成两个后验轨道。仍保留的边界是：同一位在不同输入上的噪声率不变，且同一输出字内各位翻转相互独立；相关噪声留给后续检验。⟦en⟧The next experiment gives the 12 output bits different flip rates ranging from 5% to 45%, and separates fast function fitting from per-bit uncertainty calibration into two posterior tracks. The remaining boundary is that each bit's rate stays constant across inputs and flips within a word remain independent; correlated noise is left for a later test."
+        },
+        {
+          "kind": "heading",
+          "level": 3,
+          "text": "⟦zh⟧异方差噪声：快速拟合与逐位校准双轨并行⟦en⟧Heterogeneous noise: fast fitting and per-bit calibration in parallel"
+        },
+        {
+          "kind": "verdict",
+          "status": "good",
+          "label": "⟦zh⟧12 位噪声率从 5% 到 45% 混合，四次训练与四次盲停止全部精确⟦en⟧With 12 bit rates mixed from 5% to 45%, all four runs and all four blind stops are exact",
+          "why": "⟦zh⟧两个种子分别运行双轨模型和完全逐位模型。四次最终都恢复同一条 36 项规则。双轨模型用全局有效噪声率快速拟合函数，平均第 455 批首次全对；同时用十二个逐位后验计算校准不确定性。只看“12 位熵和小于 0.001 bit 且最大系数取整残差小于 0.05”的盲停止平均第 855 批触发，四个触发点事后干净全域验证均为 4,096 / 4,096。停止点逐位噪声率估计的平均绝对误差为 0.001194，即 0.119 个百分点，最大为 0.410 个百分点。⟦en⟧Two seeds each run the dual-track and fully per-bit models. All four ultimately recover the same 36-term rule. The dual-track model uses one effective global rate for fast function fitting and first becomes exact at batch 455 on average, while twelve per-bit posteriors provide calibrated uncertainty. A blind stop using only “sum of 12 entropies below 0.001 bit and maximum coefficient rounding residual below 0.05” triggers at batch 855 on average; report-only clean evaluation is 4,096 / 4,096 at all four trigger points. Mean absolute per-bit noise-rate error at the stop is 0.001194, or 0.119 percentage points, with a maximum of 0.410 percentage points."
+        },
+        {
+          "kind": "card",
+          "title": "⟦zh⟧双轨方法如何兼顾速度与可信度⟦en⟧How the dual-track method combines speed and calibration",
+          "blocks": [
+            {
+              "kind": "kv",
+              "pairs": [
+                [
+                  "⟦zh⟧函数拟合轨道⟦en⟧Function-fitting track",
+                  "⟦zh⟧把所有位的重复标签异值对合并成一个有效噪声率，用它形成更激进的干净位后验并投影整数系数；这条轨道负责尽快找到候选规则。⟦en⟧Pool repeated-label disagreements across all bits into one effective noise rate, use it to form a more aggressive clean-bit posterior and project integer coefficients; this track finds a candidate rule quickly."
+                ],
+                [
+                  "⟦zh⟧校准轨道⟦en⟧Calibration track",
+                  "⟦zh⟧对每个输出位分别估计 pⱼ，并用各自的似然比形成十二个后验；这条轨道不改变候选规则，只输出逐位熵以及十二位熵和。⟦en⟧Estimate pⱼ separately for every output bit and form twelve posteriors with their own likelihood ratios; this track does not change the candidate rule and reports per-bit entropy plus their sum."
+                ],
+                [
+                  "⟦zh⟧结构轨道⟦en⟧Structural track",
+                  "⟦zh⟧连续系数距离最近整数的最大残差防止“输出暂时全对但规则仍在整数边界附近”时过早停止。熵衡量标签不确定性，取整残差衡量规则不确定性，两者必须同时低。⟦en⟧The maximum distance from continuous coefficients to their nearest integers prevents stopping when outputs are temporarily exact but the rule remains near an integer boundary. Entropy measures label uncertainty and rounding residual measures rule uncertainty; both must be low."
+                ]
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "table",
+          "columns": [
+            "⟦zh⟧策略与种子⟦en⟧Strategy and seed",
+            "⟦zh⟧首次全对批次⟦en⟧First exact batch",
+            "⟦zh⟧盲停止批次⟦en⟧Blind stop batch",
+            "⟦zh⟧停止点全域准确率，仅报告⟦en⟧Clean accuracy at stop, report only",
+            "⟦zh⟧停止点逐位噪声平均误差⟦en⟧Per-bit noise MAE at stop"
+          ],
+          "rows": [
+            [
+              "⟦zh⟧双轨，种子 207100⟦en⟧Dual-track, seed 207100",
+              "290",
+              "900",
+              "4,096 / 4,096",
+              "0.153 个百分点 / percentage points"
+            ],
+            [
+              "⟦zh⟧双轨，种子 217100⟦en⟧Dual-track, seed 217100",
+              "620",
+              "810",
+              "4,096 / 4,096",
+              "0.100 个百分点 / percentage points"
+            ],
+            [
+              "⟦zh⟧逐位拟合，种子 207100⟦en⟧Per-bit fit, seed 207100",
+              "840",
+              "940",
+              "4,096 / 4,096",
+              "0.134 个百分点 / percentage points"
+            ],
+            [
+              "⟦zh⟧逐位拟合，种子 217100⟦en⟧Per-bit fit, seed 217100",
+              "770",
+              "850",
+              "4,096 / 4,096",
+              "0.090 个百分点 / percentage points"
+            ]
+          ]
+        },
+        {
+          "kind": "figures",
+          "items": [
+            {
+              "src": "noisy-c-per-bit-noise.png",
+              "caption": "⟦zh⟧左：真实的十二位噪声率依次为 5%、10%、15%、20%、25%、30%、35%、40%、45%、12%、28%、38%；两个双轨校准后验在盲停止点几乎覆盖真实折线。中：全局有效噪声率的函数拟合轨道更早出现精确候选，完全逐位拟合更谨慎；四条曲线最终均稳定为 100%。右：横轴是十二位校准后验熵之和，纵轴是最大系数取整残差；虚线围出的左下区域是不读取干净标签的停止区，四个方形或圆形停止点事后都验证精确。⟦en⟧Left: the true twelve-bit noise profile is 5%, 10%, 15%, 20%, 25%, 30%, 35%, 40%, 45%, 12%, 28% and 38%; both dual-track calibration posteriors nearly cover the true curve at the blind stop. Middle: the global effective-rate fitting track produces exact candidates earlier, while fully per-bit fitting is more cautious; all four curves ultimately stabilize at 100%. Right: the horizontal axis is the sum of twelve calibrated posterior entropies and the vertical axis is maximum coefficient rounding residual; the lower-left region bounded by dashed lines is the clean-label-free stop region, and all four square or circular stop points verify exact afterward."
+            }
+          ]
+        },
+        {
+          "kind": "note",
+          "label": "⟦zh⟧不确定性定义现在是可操作的停止规则⟦en⟧Uncertainty is now an operational stopping rule",
+          "text": "⟦zh⟧“不同位数的不确定性相加”具体化为十二个二元后验熵之和，单位为 bit；它能区分某一高噪声位尚未稳定与所有位都已确定。单独用熵仍不够，因为整数系数可能靠近 0.5 取整边界；加入最大取整残差后，四次无需干净标签的停止都没有误判。当前证据是两种子、一个异方差配置，仍需更多噪声剖面才能把阈值 0.001 与 0.05 视为通用。⟦en⟧“Adding uncertainty across different bits” is made concrete as the sum of twelve binary posterior entropies, measured in bits; it distinguishes one unresolved high-noise bit from a word whose bits are all determined. Entropy alone is insufficient because integer coefficients may remain near a 0.5 rounding boundary. Adding maximum rounding residual yields no false stop in these four runs without clean labels. The evidence currently covers two seeds and one heterogeneous profile, so thresholds 0.001 and 0.05 should not yet be treated as universal."
         },
         {
           "kind": "heading",

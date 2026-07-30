@@ -32,6 +32,7 @@ from hidden_oracle import (
 from train_tabular_bayes import (
     BayesianTruthTable,
     PairwiseNoiseBayesianTruthTable,
+    PairwisePerBitNoiseBayesianTruthTable,
 )
 
 
@@ -56,6 +57,7 @@ class Config:
     learner_noise_mode: str
     initial_noise_rate: float | None
     noise_prior_pairs: float | None
+    oracle_per_bit_noise_rates: list[float] | None
     device: str
 
 
@@ -92,7 +94,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--learner-noise-mode",
-        choices=("known", "pairwise-estimated"),
+        choices=("known", "pairwise-estimated", "per-bit-pairwise-estimated"),
         default="known",
     )
     parser.add_argument(
@@ -107,6 +109,12 @@ def parse_args() -> argparse.Namespace:
         default=1_000.0,
         help="Pairwise-disagreement pseudocount for unknown-noise estimation.",
     )
+    parser.add_argument(
+        "--oracle-per-bit-noise-rates",
+        type=str,
+        default=None,
+        help="Comma-separated 12-rate hidden noise profile for stress tests.",
+    )
     parser.add_argument("--device", choices=("cpu",), default="cpu")
     parser.add_argument("--quiet", action="store_true")
     parser.add_argument("--output-dir", type=Path, required=True)
@@ -119,6 +127,17 @@ def sha256(path: Path) -> str:
         for chunk in iter(lambda: handle.read(1 << 20), b""):
             digest.update(chunk)
     return digest.hexdigest()
+
+
+def parse_per_bit_noise_rates(specification: str | None) -> list[float] | None:
+    if specification is None:
+        return None
+    rates = [float(token.strip()) for token in specification.split(",")]
+    if len(rates) != OUTPUT_BITS:
+        raise ValueError("oracle-per-bit-noise-rates must contain 12 values")
+    if any(rate < 0.0 or rate >= 0.5 for rate in rates):
+        raise ValueError("all per-bit noise rates must satisfy 0 <= p < 0.5")
+    return rates
 
 
 def quadratic_features() -> tuple[np.ndarray, list[dict[str, Any]]]:
@@ -486,6 +505,22 @@ def main() -> None:
         raise ValueError("noise-prior-pairs must be nonnegative")
 
     device = torch.device(args.device)
+    per_bit_noise_rates = parse_per_bit_noise_rates(
+        args.oracle_per_bit_noise_rates
+    )
+    if per_bit_noise_rates is not None:
+        if args.input_sampling not in (
+            "d-optimal-cycle",
+            "random-design-cycle",
+        ):
+            raise ValueError("per-bit noise currently requires a fixed design")
+        if args.learner_noise_mode not in (
+            "pairwise-estimated",
+            "per-bit-pairwise-estimated",
+        ):
+            raise ValueError(
+                "per-bit oracle noise requires a pairwise-estimated learner"
+            )
     design_ids: np.ndarray | None = None
     design_diagnostics: dict[str, float | int] | None = None
     if args.input_sampling == "d-optimal-cycle":
@@ -526,14 +561,15 @@ def main() -> None:
         learner_noise_mode=args.learner_noise_mode,
         initial_noise_rate=(
             args.initial_noise_rate
-            if args.learner_noise_mode == "pairwise-estimated"
+            if args.learner_noise_mode != "known"
             else None
         ),
         noise_prior_pairs=(
             args.noise_prior_pairs
-            if args.learner_noise_mode == "pairwise-estimated"
+            if args.learner_noise_mode != "known"
             else None
         ),
+        oracle_per_bit_noise_rates=per_bit_noise_rates,
         device=str(device),
     )
     if args.input_sampling == "uniform":
@@ -555,7 +591,11 @@ def main() -> None:
             raise AssertionError("fixed input design was not constructed")
         stream = FixedDesignFreshNoiseStream(
             batch_size=args.batch_size,
-            noise_rate=args.noise_rate,
+            noise_rate=(
+                torch.tensor(per_bit_noise_rates)
+                if per_bit_noise_rates is not None
+                else args.noise_rate
+            ),
             seed=args.base_seed,
             device=device,
             design_ids=torch.from_numpy(design_ids),
@@ -567,8 +607,16 @@ def main() -> None:
             seed=args.base_seed + 10_000,
             device=device,
         )
-    else:
+    elif args.learner_noise_mode == "pairwise-estimated":
         learner = PairwiseNoiseBayesianTruthTable(
+            initial_noise_rate=args.initial_noise_rate,
+            prior_jitter=args.prior_jitter,
+            noise_prior_pairs=args.noise_prior_pairs,
+            seed=args.base_seed + 10_000,
+            device=device,
+        )
+    else:
+        learner = PairwisePerBitNoiseBayesianTruthTable(
             initial_noise_rate=args.initial_noise_rate,
             prior_jitter=args.prior_jitter,
             noise_prior_pairs=args.noise_prior_pairs,
@@ -614,6 +662,14 @@ def main() -> None:
 
         if step == 1 or step % args.eval_every == 0 or step == args.steps:
             probabilities = learner.probabilities().cpu().numpy()
+            calibrated_probability_method = getattr(
+                learner,
+                "calibrated_probabilities",
+                learner.probabilities,
+            )
+            calibrated_probabilities = (
+                calibrated_probability_method().cpu().numpy()
+            )
             observations = learner.observation_count.cpu().numpy()
             expected_values = probabilities @ bit_weights
             weights = projection_weights(
@@ -635,6 +691,34 @@ def main() -> None:
                 features,
                 integer_coefficients,
             )
+            clipped_probabilities = np.clip(
+                calibrated_probabilities.astype(np.float64),
+                1e-12,
+                1.0 - 1e-12,
+            )
+            posterior_entropy = -(
+                clipped_probabilities * np.log2(clipped_probabilities)
+                + (1.0 - clipped_probabilities)
+                * np.log2(1.0 - clipped_probabilities)
+            )
+            observed_mask = observations > 0
+            per_bit_entropy = posterior_entropy[observed_mask].mean(axis=0)
+            estimated_noise_rates = getattr(
+                learner,
+                "estimated_noise_rates",
+                None,
+            )
+            estimated_noise_rate_list = (
+                estimated_noise_rates.detach().cpu().tolist()
+                if estimated_noise_rates is not None
+                else [float(
+                    getattr(
+                        learner,
+                        "estimated_noise_rate",
+                        args.noise_rate,
+                    )
+                )] * OUTPUT_BITS
+            )
             record = {
                 "step": step,
                 "examples_seen": step * args.batch_size,
@@ -644,6 +728,11 @@ def main() -> None:
                 "teacher_min_observations": int(observations.min()),
                 "estimated_noise_rate": float(
                     getattr(learner, "estimated_noise_rate", args.noise_rate)
+                ),
+                "estimated_noise_rates": estimated_noise_rate_list,
+                "per_bit_posterior_entropy": per_bit_entropy.tolist(),
+                "mean_word_posterior_entropy": float(
+                    per_bit_entropy.sum()
                 ),
                 "effective_noise_pairs": float(
                     getattr(learner, "effective_noise_pairs", 0.0)
@@ -737,10 +826,14 @@ def main() -> None:
                 args.learner_noise_mode == "known"
             ),
             "noise_rate_estimation": (
-                "pairwise repeated-label disagreement"
+                "per-bit pairwise repeated-label disagreement"
+                if args.learner_noise_mode
+                == "per-bit-pairwise-estimated"
+                else "pairwise repeated-label disagreement"
                 if args.learner_noise_mode == "pairwise-estimated"
                 else "known oracle setting"
             ),
+            "oracle_per_bit_noise_rates": per_bit_noise_rates,
             "target_formula_seeded": False,
             "existing_circuit_seeded": False,
             "generic_quadratic_basis_size": features.shape[1],

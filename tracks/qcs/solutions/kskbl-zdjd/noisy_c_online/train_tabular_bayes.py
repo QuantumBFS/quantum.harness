@@ -129,12 +129,22 @@ class PairwiseNoiseBayesianTruthTable:
         )
         self.initial_noise_rate = float(initial_noise_rate)
         self.estimated_noise_rate = float(initial_noise_rate)
+        self.estimated_noise_rates = torch.full(
+            (OUTPUT_BITS,),
+            initial_noise_rate,
+            device=device,
+            dtype=torch.float64,
+        )
+        self.calibrated_log_odds = self.prior_log_odds.clone()
         self.noise_prior_pairs = float(noise_prior_pairs)
         self.empirical_pair_disagreement: float | None = None
         self.effective_noise_pairs = 0.0
 
     def probabilities(self) -> torch.Tensor:
         return torch.sigmoid(self.log_odds).to(torch.float32)
+
+    def calibrated_probabilities(self) -> torch.Tensor:
+        return torch.sigmoid(self.calibrated_log_odds).to(torch.float32)
 
     def noisy_loss_before_update(
         self,
@@ -154,14 +164,15 @@ class PairwiseNoiseBayesianTruthTable:
 
     def _refresh_noise_and_posterior(self) -> None:
         counts = self.observation_count.to(torch.float64)[:, None]
-        disagree_pairs = torch.sum(
-            self.ones_count * (counts - self.ones_count)
-        ).item()
-        total_pairs = (
-            torch.sum(counts * (counts - 1.0)).item()
-            * OUTPUT_BITS
-            / 2.0
+        disagree_pairs_per_bit = torch.sum(
+            self.ones_count * (counts - self.ones_count),
+            dim=0,
         )
+        disagree_pairs = disagree_pairs_per_bit.sum().item()
+        total_pairs_per_bit = torch.sum(
+            counts * (counts - 1.0)
+        ).item() / 2.0
+        total_pairs = total_pairs_per_bit * OUTPUT_BITS
         self.effective_noise_pairs = float(total_pairs)
         initial_disagreement = (
             2.0
@@ -185,6 +196,28 @@ class PairwiseNoiseBayesianTruthTable:
                 max(float(estimate), 1e-4),
                 0.4999,
             )
+        per_bit_denominator = (
+            total_pairs_per_bit + self.noise_prior_pairs
+        )
+        if per_bit_denominator > 0.0:
+            per_bit_disagreement = (
+                disagree_pairs_per_bit
+                + self.noise_prior_pairs * initial_disagreement
+            ) / per_bit_denominator
+            per_bit_disagreement = torch.clamp(
+                per_bit_disagreement,
+                min=0.0,
+                max=0.499999,
+            )
+            self.estimated_noise_rates = torch.clamp(
+                0.5
+                * (
+                    1.0
+                    - torch.sqrt(1.0 - 2.0 * per_bit_disagreement)
+                ),
+                min=1e-4,
+                max=0.4999,
+            )
         evidence = math.log(
             (1.0 - self.estimated_noise_rate)
             / self.estimated_noise_rate
@@ -192,6 +225,151 @@ class PairwiseNoiseBayesianTruthTable:
         self.log_odds = self.prior_log_odds + (
             2.0 * self.ones_count - counts
         ) * evidence
+        calibrated_evidence = torch.log(
+            (1.0 - self.estimated_noise_rates)
+            / self.estimated_noise_rates
+        )
+        self.calibrated_log_odds = self.prior_log_odds + (
+            2.0 * self.ones_count - counts
+        ) * calibrated_evidence[None, :]
+
+    def update(self, ids: torch.Tensor, noisy_targets: torch.Tensor) -> None:
+        self.ones_count.index_add_(
+            0,
+            ids,
+            noisy_targets.to(torch.float64),
+        )
+        self.observation_count.index_add_(
+            0,
+            ids,
+            torch.ones_like(ids, dtype=torch.int64),
+        )
+        self._refresh_noise_and_posterior()
+
+
+class PairwisePerBitNoiseBayesianTruthTable:
+    """Infer one flip rate per output bit from repeated-label disagreements."""
+
+    def __init__(
+        self,
+        initial_noise_rate: float,
+        prior_jitter: float,
+        noise_prior_pairs: float,
+        seed: int,
+        device: torch.device,
+    ) -> None:
+        if not 0.0 < initial_noise_rate < 0.5:
+            raise ValueError("initial_noise_rate must lie between zero and 0.5")
+        if noise_prior_pairs < 0.0:
+            raise ValueError("noise_prior_pairs must be nonnegative")
+        generator = torch.Generator(device=device)
+        generator.manual_seed(seed)
+        self.prior_log_odds = prior_jitter * torch.randn(
+            DOMAIN_SIZE,
+            OUTPUT_BITS,
+            generator=generator,
+            device=device,
+            dtype=torch.float64,
+        )
+        self.log_odds = self.prior_log_odds.clone()
+        self.ones_count = torch.zeros(
+            DOMAIN_SIZE,
+            OUTPUT_BITS,
+            device=device,
+            dtype=torch.float64,
+        )
+        self.observation_count = torch.zeros(
+            DOMAIN_SIZE,
+            dtype=torch.int64,
+            device=device,
+        )
+        self.initial_noise_rate = float(initial_noise_rate)
+        self.estimated_noise_rates = torch.full(
+            (OUTPUT_BITS,),
+            initial_noise_rate,
+            device=device,
+            dtype=torch.float64,
+        )
+        self.estimated_noise_rate = float(initial_noise_rate)
+        self.noise_prior_pairs = float(noise_prior_pairs)
+        self.empirical_pair_disagreement = torch.full(
+            (OUTPUT_BITS,),
+            float("nan"),
+            device=device,
+            dtype=torch.float64,
+        )
+        self.effective_noise_pairs = 0.0
+
+    def probabilities(self) -> torch.Tensor:
+        return torch.sigmoid(self.log_odds).to(torch.float32)
+
+    def calibrated_probabilities(self) -> torch.Tensor:
+        return self.probabilities()
+
+    def noisy_loss_before_update(
+        self,
+        ids: torch.Tensor,
+        noisy_targets: torch.Tensor,
+        noise_rate: float | None = None,
+    ) -> torch.Tensor:
+        del noise_rate
+        clean_probability = torch.sigmoid(self.log_odds[ids]).to(
+            noisy_targets.dtype
+        )
+        rates = self.estimated_noise_rates.to(noisy_targets.dtype)
+        observed_probability = rates + (
+            1.0 - 2.0 * rates
+        ) * clean_probability
+        return F.binary_cross_entropy(observed_probability, noisy_targets)
+
+    def _refresh_noise_and_posterior(self) -> None:
+        counts = self.observation_count.to(torch.float64)[:, None]
+        disagree_pairs = torch.sum(
+            self.ones_count * (counts - self.ones_count),
+            dim=0,
+        )
+        total_pairs = torch.sum(
+            counts * (counts - 1.0)
+        ).item() / 2.0
+        self.effective_noise_pairs = float(total_pairs * OUTPUT_BITS)
+        initial_disagreement = (
+            2.0
+            * self.initial_noise_rate
+            * (1.0 - self.initial_noise_rate)
+        )
+        denominator = total_pairs + self.noise_prior_pairs
+        if denominator > 0.0:
+            pair_disagreement = (
+                disagree_pairs
+                + self.noise_prior_pairs * initial_disagreement
+            ) / denominator
+            if total_pairs > 0.0:
+                self.empirical_pair_disagreement = (
+                    disagree_pairs / total_pairs
+                )
+            pair_disagreement = torch.clamp(
+                pair_disagreement,
+                min=0.0,
+                max=0.499999,
+            )
+            estimates = 0.5 * (
+                1.0 - torch.sqrt(1.0 - 2.0 * pair_disagreement)
+            )
+            self.estimated_noise_rates = torch.clamp(
+                estimates,
+                min=1e-4,
+                max=0.4999,
+            )
+            self.estimated_noise_rate = float(
+                self.estimated_noise_rates.mean().item()
+            )
+        evidence = torch.log(
+            (1.0 - self.estimated_noise_rates)
+            / self.estimated_noise_rates
+        )
+        self.log_odds = self.prior_log_odds + (
+            2.0 * self.ones_count - counts
+        ) * evidence[None, :]
 
     def update(self, ids: torch.Tensor, noisy_targets: torch.Tensor) -> None:
         self.ones_count.index_add_(

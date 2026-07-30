@@ -124,13 +124,23 @@ class FixedDesignFreshNoiseStream:
     """Cycle through a supplied label-blind design with fresh output noise."""
 
     batch_size: int
-    noise_rate: float
+    noise_rate: float | torch.Tensor
     seed: int
     device: torch.device
     design_ids: torch.Tensor
 
     def __post_init__(self) -> None:
-        if not 0.0 <= self.noise_rate < 0.5:
+        if isinstance(self.noise_rate, torch.Tensor):
+            rates = self.noise_rate.to(
+                device=self.device,
+                dtype=torch.float32,
+            ).flatten()
+            if len(rates) != OUTPUT_BITS:
+                raise ValueError("per-bit noise must contain 12 rates")
+            if bool(torch.any(rates < 0.0)) or bool(torch.any(rates >= 0.5)):
+                raise ValueError("all per-bit rates must satisfy 0 <= p < 0.5")
+            self.noise_rate = rates
+        elif not 0.0 <= self.noise_rate < 0.5:
             raise ValueError("noise_rate must satisfy 0 <= p < 0.5")
         design = self.design_ids.to(device=self.device, dtype=torch.int64)
         if design.ndim != 1 or len(design) == 0:
