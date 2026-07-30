@@ -25,10 +25,8 @@ from calibrate import (
     build_calibration_plan,
     build_calibration_artifact,
     build_estimator_plan,
-    build_scaling_plan,
     calibration_cluster_commands,
     legendre_reported_values,
-    analyze_estimator_scaling,
     select_cycle_length,
     validate_calibration,
     validate_calibration_plan,
@@ -81,9 +79,16 @@ def batch_cells(scale=1e-5):
 
 def bindings():
     return {
-        "model": {"beta": 16.0, "U": 0.8},
+        "model": {
+            "beta": 16.0,
+            "U": 0.8,
+            "epsilon_d": -0.4,
+            "mu": 0.0,
+        },
         "meshes": {"n_iw": 2049, "n_tau": 4001},
-        "formulas": {"delta": "analytic_semicircle"},
+        "formulas": {
+            "delta_iw": "Delta(iw) = i*(Gamma/D)*(w-sign(w)*sqrt(w*w+D*D))"
+        },
         "source_manifest": {"x": "1" * 64},
         "source_manifest_sha256": "2" * 64,
         "conda_lock_sha256": "3" * 64,
@@ -182,7 +187,7 @@ def test_batch_means_pairing_variance_and_seed_guards():
 
 
 def accepted_qualification():
-    plan = build_estimator_plan(bindings(), measurement_cycles=1_000_000)
+    plan = build_estimator_plan(bindings(), measurement_cycles=300_000_000)
     return analyze_estimator_qualification(
         _qualification_results(identity=plan["payload"]["input_identity"]), plan
     )
@@ -198,7 +203,7 @@ def test_plan_is_exact_fresh_112_cell_inventory():
     assert [cell["payload"]["cell_kind"] for cell in cells].count("increment") == 64
     assert len({cell["payload"]["seed"] for cell in cells}) == 112
     assert all(cell["payload"]["n_l"] == 100 for cell in cells)
-    assert all(cell["payload"]["truncation"] == 20 for cell in cells)
+    assert all(cell["payload"]["truncation"] == 40 for cell in cells)
     changed = copy.deepcopy(plan)
     changed["payload"]["cells"][0]["payload"]["seed"] += 1
     changed["payload"]["cells"][0]["sha256"] = sha256_bytes(
@@ -244,34 +249,33 @@ def test_calibration_embeds_and_revalidates_all_results():
 def _qualification_results(
     shift=1e-5,
     identity="same",
-    measurement_cycles=1_000_000,
-    high_mode_se=None,
+    measurement_cycles=300_000_000,
 ):
-    cutoffs = [20, 40, 60, 80, 100]
-    pattern = np.array([-7, -5, -3, -1, 1, 3, 5, 7], dtype=float)
-    high_mode_shift = (
-        np.zeros(8)
-        if high_mode_se is None
-        else pattern * high_mode_se * math.sqrt(8) / np.std(pattern, ddof=1)
-    )
+    cutoffs = [40, 60, 80, 100]
     results = []
     for replica in range(8):
+        truncated_values = {}
+        for cutoff in cutoffs:
+            base = replica * 2e-5 + (shift if cutoff == 40 else 0)
+            truncated_values[str(cutoff)] = {
+                "n_d": 1.0,
+                "double_occupancy": 0.1,
+                "G_up_4": base,
+                "G_down_4": base,
+                "G_up_8": base + 0.1,
+                "G_down_8": base + 0.1,
+                "G_up_12": base,
+                "G_down_12": base,
+            }
         payload = {
             "cell_kind": "estimator_qualification",
             "replica": replica,
-            "seed": 823000 + replica,
+            "seed": 828000 + replica,
             "input_identity": identity,
             "measured_n_l": 100,
             "measurement_cycles": measurement_cycles,
             "cutoffs": cutoffs,
-            "truncated_values": {
-                str(cutoff): values(
-                    replica * 2e-5
-                    + (shift if cutoff == 20 else 0)
-                    + (high_mode_shift[replica] if cutoff == 80 else 0)
-                )
-                for cutoff in cutoffs
-            },
+            "truncated_values": truncated_values,
         }
         results.append({"payload": payload, "sha256": sha256_bytes(canonical_json(payload))})
     return results
@@ -285,15 +289,18 @@ def test_legendre_reconstruction_and_qualification_bias_gate():
     )
     assert reconstructed == pytest.approx([1.0, 1.0, 1.0])
 
-    plan = build_estimator_plan(bindings(), measurement_cycles=1_000_000)
+    plan = build_estimator_plan(bindings(), measurement_cycles=300_000_000)
     identity = plan["payload"]["input_identity"]
     result = analyze_estimator_qualification(
         _qualification_results(identity=identity), plan
     )
     assert result["payload"]["status"] == "accepted"
     assert result["payload"]["measured_n_l"] == 100
-    assert result["payload"]["production_reconstruction_cutoff"] == 20
-    gate = result["payload"]["analysis"]["comparisons"]["G_up_4"]["100"]
+    assert result["payload"]["production_reconstruction_cutoff"] == 40
+    assert result["payload"]["analysis"]["comparison_count"] == 8
+    gate = result["payload"]["analysis"]["projected_comparisons"]["G4"][
+        "40_vs_100"
+    ]
     assert gate["degrees_of_freedom"] == 7
     assert gate["equivalence_bound"] == 2.5e-4
     failed = analyze_estimator_qualification(
@@ -301,21 +308,39 @@ def test_legendre_reconstruction_and_qualification_bias_gate():
     )
     assert failed["payload"]["status"] == "failed"
 
+    asymmetric = _qualification_results(identity=identity)
+    for cell in asymmetric:
+        cell["payload"]["truncated_values"]["40"]["G_up_4"] += 3e-4
+        cell["sha256"] = sha256_bytes(canonical_json(cell["payload"]))
+    rejected = analyze_estimator_qualification(asymmetric, plan)
+    assert rejected["payload"]["status"] == "failed"
+    assert rejected["payload"]["analysis"]["symmetry"]["passed"] is False
+
+    wrong_seed = _qualification_results(identity=identity)
+    wrong_seed[0]["payload"]["seed"] = 999999
+    wrong_seed[0]["sha256"] = sha256_bytes(canonical_json(wrong_seed[0]["payload"]))
+    with pytest.raises(ValueError, match="inventory"):
+        analyze_estimator_qualification(wrong_seed, plan)
+
 
 def test_estimator_plan_separates_measurement_basis_from_candidate_cutoff():
-    plan = build_estimator_plan(bindings(), measurement_cycles=1_000_000)
+    plan = build_estimator_plan(bindings(), measurement_cycles=300_000_000)
     cells = plan["payload"]["cells"]
     assert len(cells) == 8
     assert [cell["payload"]["cell_index"] for cell in cells] == list(range(8))
     assert len({cell["payload"]["seed"] for cell in cells}) == 8
     assert all(cell["payload"]["warmup_cycles"] == 50000 for cell in cells)
-    assert all(cell["payload"]["measurement_cycles"] == 1_000_000 for cell in cells)
+    assert all(cell["payload"]["measurement_cycles"] == 300_000_000 for cell in cells)
     assert all(cell["payload"]["cycle_length"] == 50 for cell in cells)
     assert plan["payload"]["measured_n_l"] == 100
-    assert plan["payload"]["candidate_cutoff"] == 20
-    assert plan["payload"]["cutoffs"] == [20, 40, 60, 80, 100]
+    assert plan["payload"]["candidate_cutoff"] == 40
+    assert plan["payload"]["cutoffs"] == [40, 60, 80, 100]
     assert all(cell["payload"]["measured_n_l"] == 100 for cell in cells)
-    assert all(cell["payload"]["cutoffs"] == [20, 40, 60, 80, 100] for cell in cells)
+    assert all(cell["payload"]["cutoffs"] == [40, 60, 80, 100] for cell in cells)
+    changed = bindings()
+    changed["model"]["epsilon_d"] = -0.3
+    with pytest.raises(ValueError, match="symmetry"):
+        build_estimator_plan(changed, measurement_cycles=300_000_000)
 
 
 def test_summary_schema_names_estimator_artifacts():
@@ -423,8 +448,7 @@ def test_legendre_raw_state_does_not_require_unmeasured_g_tau(monkeypatch):
 
 
 def test_cell_truncations_do_not_evaluate_absent_fallback():
-    assert calibrate._cell_truncations({"cutoffs": [20, 40, 60, 80, 100]}) == [
-        20,
+    assert calibrate._cell_truncations({"cutoffs": [40, 60, 80, 100]}) == [
         40,
         60,
         80,
@@ -435,81 +459,30 @@ def test_cell_truncations_do_not_evaluate_absent_fallback():
     assert calibrate._cell_measured_n_l({"n_l": 100}) == 100
 
 
-def _legacy_reference():
-    cells = []
-    for replica in range(8):
-        payload = {
-            "replica": replica,
-            "seed": 823000 + replica,
-            "n_l": 100,
-            "truncations": [60, 80, 100],
-        }
-        cells.append({"payload": payload, "sha256": sha256_bytes(canonical_json(payload))})
-    payload = {
-        "artifact_type": "cthyb_estimator_qualification",
-        "schema_version": 2,
-        "status": "failed",
-        "qualified_n_l": 100,
-        "truncations": [60, 80, 100],
-        "cell_results": cells,
-        "analysis": {
-            "observables": {
-                name: {"standard_error": 3.0e-4} for name in calibrate.GREEN_OBSERVABLES
-            }
-        },
-    }
-    return {"payload": payload, "sha256": sha256_bytes(canonical_json(payload))}
-
-
-def test_scaling_plan_is_diagnostic_fresh_and_powered_from_all_comparisons():
-    plan = build_scaling_plan(bindings(), _legacy_reference())
-    assert plan["payload"]["experiment_kind"] == "scaling"
-    assert plan["payload"]["measurement_cycles"] == 4_000_000
-    assert plan["payload"]["reference_sha256"] == _legacy_reference()["sha256"]
-    assert {cell["payload"]["seed"] for cell in plan["payload"]["cells"]}.isdisjoint(
-        {823000 + replica for replica in range(8)}
-    )
-    assert {cell["payload"]["seed"] for cell in plan["payload"]["cells"]} == {
-        830000 + replica for replica in range(8)
-    }
-    results = _qualification_results(
-        shift=2e-5,
-        identity=plan["payload"]["input_identity"],
-        measurement_cycles=4_000_000,
-        high_mode_se=1.5e-4,
-    )
-    artifact = analyze_estimator_scaling(results, plan)
-    assert artifact["payload"]["status"] == "diagnostic"
-    assert artifact["payload"]["production_reconstruction_cutoff"] is None
-    assert artifact["payload"]["analysis"]["comparison_count"] == 24
-    assert artifact["payload"]["analysis"]["high_mode_scaling"][
-        "approximately_inverse_sqrt_cycles"
-    ] is True
-    assert artifact["payload"]["analysis"]["power"][
-        "required_measurement_cycles_per_seed"
-    ] >= 1
-
-
-def test_scaling_uses_aggregate_ratio_and_variance_power_when_center_is_noisy():
-    ratios = [0.24, 0.34, 0.51, 0.55, 0.76, 0.28]
-    assert calibrate._approximately_inverse_sqrt_scaling(ratios) is True
-    analysis = {
-        "comparisons": {
-            "G_up_4": {
-                "100": {
-                    "quantile": 6.0,
-                    "standard_error": 1.0e-4,
-                    "mean_difference": 3.0e-4,
-                }
-            }
+def test_symmetry_projection_uses_only_exact_model_relations():
+    values_by_cutoff = {
+        "40": {
+            "G_up_4": 1.0,
+            "G_down_4": 3.0,
+            "G_up_8": 5.0,
+            "G_down_8": 7.0,
+            "G_up_12": 9.0,
+            "G_down_12": 11.0,
         }
     }
-    power = calibrate._power_from_comparisons(analysis, 4_000_000)
-    assert power["required_measurement_cycles_per_seed"] == power[
-        "variance_only_measurement_cycles_per_seed"
-    ]
-    assert power["required_measurement_cycles_per_seed"] > 0
-    assert power["observed_center_adjusted_measurement_cycles_per_seed"] is None
+    assert calibrate._projected_values(values_by_cutoff, 40) == {
+        "G4": 6.0,
+        "G8": 6.0,
+    }
+    contrasts = calibrate._symmetry_contrasts(values_by_cutoff, 40)
+    assert contrasts == {
+        "spin_4": -2.0,
+        "spin_8": -2.0,
+        "spin_12": -2.0,
+        "particle_hole_up_4_12": -8.0,
+        "particle_hole_down_4_12": -8.0,
+    }
+    assert not hasattr(calibrate, "_power_from_comparisons")
 
 
 def test_calibration_cluster_commands_and_wrapper_are_serial_offline(tmp_path):

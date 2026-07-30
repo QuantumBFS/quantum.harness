@@ -270,9 +270,28 @@ def legendre_reported_values(
 
 
 MEASURED_N_L = 100
-RECONSTRUCTION_CUTOFFS = [20, 40, 60, 80, 100]
-PRODUCTION_CANDIDATE_CUTOFF = 20
+RECONSTRUCTION_CUTOFFS = [40, 60, 80, 100]
+PRODUCTION_CANDIDATE_CUTOFF = 40
 TRUNCATION_BIAS_BOUND = 2.5e-4
+_SYMMETRIC_BATH_FORMULA = (
+    "Delta(iw) = i*(Gamma/D)*(w-sign(w)*sqrt(w*w+D*D))"
+)
+
+
+def _require_projection_symmetry(bindings: dict[str, object]) -> None:
+    model = bindings.get("model")
+    formulas = bindings.get("formulas")
+    if (
+        not isinstance(model, dict)
+        or float(model.get("U", math.nan)) != 0.8
+        or float(model.get("epsilon_d", math.nan)) != -0.4
+        or float(model.get("mu", math.nan)) != 0.0
+        or not isinstance(formulas, dict)
+        or formulas.get("delta_iw") != _SYMMETRIC_BATH_FORMULA
+    ):
+        raise ValueError(
+            "spin and particle-hole symmetry projection requires the exact symmetric input"
+        )
 
 
 def build_estimator_plan(
@@ -292,6 +311,7 @@ def build_estimator_plan(
     }
     if set(bindings) != required:
         raise ValueError("estimator bindings are incomplete")
+    _require_projection_symmetry(bindings)
     if (
         isinstance(measurement_cycles, bool)
         or not isinstance(measurement_cycles, int)
@@ -364,6 +384,62 @@ def validate_estimator_plan(plan: object) -> None:
         raise ValueError("estimator plan differs from canonical plan")
 
 
+def _projected_values(
+    values_by_cutoff: dict[str, object],
+    cutoff: int,
+) -> dict[str, float]:
+    values = values_by_cutoff[str(cutoff)]
+    return {
+        "G4": mean(
+            [
+                float(values["G_up_4"]),
+                float(values["G_down_4"]),
+                float(values["G_up_12"]),
+                float(values["G_down_12"]),
+            ]
+        ),
+        "G8": mean([float(values["G_up_8"]), float(values["G_down_8"])]),
+    }
+
+
+def _symmetry_contrasts(
+    values_by_cutoff: dict[str, object],
+    cutoff: int,
+) -> dict[str, float]:
+    values = values_by_cutoff[str(cutoff)]
+    return {
+        "spin_4": float(values["G_up_4"]) - float(values["G_down_4"]),
+        "spin_8": float(values["G_up_8"]) - float(values["G_down_8"]),
+        "spin_12": float(values["G_up_12"]) - float(values["G_down_12"]),
+        "particle_hole_up_4_12": (
+            float(values["G_up_4"]) - float(values["G_up_12"])
+        ),
+        "particle_hole_down_4_12": (
+            float(values["G_down_4"]) - float(values["G_down_12"])
+        ),
+    }
+
+
+def _paired_interval(
+    differences: Sequence[float],
+    quantile: float,
+) -> dict[str, object]:
+    converted = [float(value) for value in differences]
+    center = mean(converted)
+    standard_error = stdev(converted) / math.sqrt(_ESTIMATOR_REPLICAS)
+    return {
+        "differences": converted,
+        "mean_difference": center,
+        "standard_error": standard_error,
+        "degrees_of_freedom": 7,
+        "quantile": quantile,
+        "interval": [
+            center - quantile * standard_error,
+            center + quantile * standard_error,
+        ],
+    }
+
+
 def _analyze_cutoff_comparisons(
     cell_results: Sequence[dict[str, object]],
     plan: dict[str, object],
@@ -379,9 +455,14 @@ def _analyze_cutoff_comparisons(
             raise ValueError("estimator result hash mismatch")
         cells.append(result["payload"])
     expected_inventory = set(range(_ESTIMATOR_REPLICAS))
+    expected_seeds = {
+        cell["payload"]["seed"] for cell in plan["payload"]["cells"]
+    }
     if (
         {cell.get("replica") for cell in cells} != expected_inventory
-        or len({cell.get("seed") for cell in cells}) != _ESTIMATOR_REPLICAS
+        or {cell.get("seed") for cell in cells} != expected_seeds
+        or {cell.get("cell_kind") for cell in cells}
+        != {plan["payload"]["cells"][0]["payload"]["cell_kind"]}
         or {cell.get("input_identity") for cell in cells}
         != {plan["payload"]["input_identity"]}
         or {cell.get("measured_n_l") for cell in cells}
@@ -392,54 +473,85 @@ def _analyze_cutoff_comparisons(
         != {tuple(plan["payload"]["cutoffs"])}
     ):
         raise ValueError("estimator result inventory mismatch")
-    candidate = str(plan["payload"]["candidate_cutoff"])
-    larger = [
-        str(cutoff)
-        for cutoff in plan["payload"]["cutoffs"]
-        if cutoff > plan["payload"]["candidate_cutoff"]
+    comparison_specs = [
+        (40, 60),
+        (40, 80),
+        (40, 100),
+        (80, 100),
     ]
-    comparison_count = len(GREEN_OBSERVABLES) * len(larger)
+    comparison_count = 2 * len(comparison_specs)
     quantile = float(t.ppf(1 - 0.01 / (2 * comparison_count), 7))
-    comparisons = {}
-    for name in GREEN_OBSERVABLES:
-        comparisons[name] = {}
-        for cutoff in larger:
-            differences = [
-                float(cell["truncated_values"][candidate][name])
-                - float(cell["truncated_values"][cutoff][name])
-                for cell in cells
-            ]
-            center = mean(differences)
-            standard_error = stdev(differences) / math.sqrt(_ESTIMATOR_REPLICAS)
-            interval = [
-                center - quantile * standard_error,
-                center + quantile * standard_error,
-            ]
-            comparisons[name][cutoff] = {
-                "differences": differences,
-                "mean_difference": center,
-                "standard_error": standard_error,
-                "degrees_of_freedom": 7,
-                "quantile": quantile,
-                "interval": interval,
+    projected_comparisons = {"G4": {}, "G8": {}}
+    for name in projected_comparisons:
+        for lower, upper in comparison_specs:
+            label = f"{lower}_vs_{upper}"
+            gate = _paired_interval(
+                [
+                    _projected_values(cell["truncated_values"], lower)[name]
+                    - _projected_values(cell["truncated_values"], upper)[name]
+                    for cell in cells
+                ],
+                quantile,
+            )
+            gate.update(
+                {
                 "equivalence_bound": TRUNCATION_BIAS_BOUND,
                 "passed": (
-                    interval[0] >= -TRUNCATION_BIAS_BOUND
-                    and interval[1] <= TRUNCATION_BIAS_BOUND
-                ),
-            }
-    passed = all(
+                        gate["interval"][0] >= -TRUNCATION_BIAS_BOUND
+                        and gate["interval"][1] <= TRUNCATION_BIAS_BOUND
+                    ),
+                    "comparison_kind": (
+                        "candidate"
+                        if lower == PRODUCTION_CANDIDATE_CUTOFF
+                        else "reference_stability"
+                    ),
+                }
+            )
+            projected_comparisons[name][label] = gate
+    projected_passed = all(
         gate["passed"]
-        for by_cutoff in comparisons.values()
-        for gate in by_cutoff.values()
+        for by_comparison in projected_comparisons.values()
+        for gate in by_comparison.values()
+    )
+
+    contrast_names = tuple(
+        _symmetry_contrasts(cells[0]["truncated_values"], 40)
+    )
+    symmetry_count = len(RECONSTRUCTION_CUTOFFS) * len(contrast_names)
+    symmetry_quantile = float(t.ppf(1 - 0.01 / (2 * symmetry_count), 7))
+    symmetry_diagnostics = {}
+    for cutoff in RECONSTRUCTION_CUTOFFS:
+        symmetry_diagnostics[str(cutoff)] = {}
+        for name in contrast_names:
+            diagnostic = _paired_interval(
+                [
+                    _symmetry_contrasts(cell["truncated_values"], cutoff)[name]
+                    for cell in cells
+                ],
+                symmetry_quantile,
+            )
+            diagnostic["consistent_with_zero"] = (
+                diagnostic["interval"][0] <= 0 <= diagnostic["interval"][1]
+            )
+            symmetry_diagnostics[str(cutoff)][name] = diagnostic
+    symmetry_passed = all(
+        diagnostic["consistent_with_zero"]
+        for by_contrast in symmetry_diagnostics.values()
+        for diagnostic in by_contrast.values()
     )
     return {
         "family_wise_confidence": 0.99,
         "comparison_count": comparison_count,
         "candidate_cutoff": plan["payload"]["candidate_cutoff"],
-        "larger_cutoffs": [int(value) for value in larger],
-        "comparisons": comparisons,
-        "passed": passed,
+        "projected_observables": ["G4", "G8"],
+        "projected_comparisons": projected_comparisons,
+        "symmetry": {
+            "family_wise_confidence": 0.99,
+            "comparison_count": symmetry_count,
+            "diagnostics": symmetry_diagnostics,
+            "passed": symmetry_passed,
+        },
+        "passed": projected_passed and symmetry_passed,
     }
 
 
@@ -567,51 +679,6 @@ def validate_scaling_plan(plan: object) -> None:
         raise ValueError("scaling plan differs from canonical plan")
 
 
-def _power_from_comparisons(
-    analysis: dict[str, object],
-    measurement_cycles: int,
-) -> dict[str, object]:
-    variance_only = []
-    observed_margin = []
-    limiting = None
-    largest_variance_only = -1
-    for name, by_cutoff in analysis["comparisons"].items():
-        for cutoff, gate in by_cutoff.items():
-            half_width = gate["quantile"] * gate["standard_error"]
-            required = math.ceil(
-                measurement_cycles
-                * (half_width / TRUNCATION_BIAS_BOUND) ** 2
-            )
-            required = max(1, required)
-            variance_only.append(required)
-            if required > largest_variance_only:
-                largest_variance_only = required
-                limiting = {"observable": name, "larger_cutoff": int(cutoff)}
-            margin = TRUNCATION_BIAS_BOUND - abs(gate["mean_difference"])
-            if margin <= 0:
-                observed_margin.append(None)
-                candidate = math.inf
-            else:
-                candidate = max(
-                    1,
-                    math.ceil(measurement_cycles * (half_width / margin) ** 2),
-                )
-                observed_margin.append(candidate)
-    finite_margin = (
-        None if any(value is None for value in observed_margin) else max(observed_margin)
-    )
-    required_cycles = max(variance_only)
-    return {
-        "fixed_independent_seeds": _ESTIMATOR_REPLICAS,
-        "truncation_bias_bound": TRUNCATION_BIAS_BOUND,
-        "variance_only_measurement_cycles_per_seed": required_cycles,
-        "required_measurement_cycles_per_seed": required_cycles,
-        "required_total_measurement_cycles": _ESTIMATOR_REPLICAS * required_cycles,
-        "observed_center_adjusted_measurement_cycles_per_seed": finite_margin,
-        "limiting_comparison": limiting,
-    }
-
-
 def _approximately_inverse_sqrt_scaling(ratios: Sequence[float]) -> bool:
     converted = [float(value) for value in ratios]
     if not converted or not all(math.isfinite(value) and value >= 0 for value in converted):
@@ -650,9 +717,6 @@ def analyze_estimator_scaling(
             ratios
         ),
     }
-    analysis["power"] = _power_from_comparisons(
-        analysis, plan["payload"]["measurement_cycles"]
-    )
     payload = {
         "artifact_type": "cthyb_estimator_scaling",
         "schema_version": 2,

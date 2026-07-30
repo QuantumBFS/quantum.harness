@@ -70,7 +70,9 @@ def _complete_repository(tmp_path: Path) -> tuple[Path, dict[str, object]]:
     bindings = {
         "model": model,
         "meshes": {"n_iw": 2049, "n_tau": 12297},
-        "formulas": {"delta": "analytic_semicircle"},
+        "formulas": {
+            "delta_iw": "Delta(iw) = i*(Gamma/D)*(w-sign(w)*sqrt(w*w+D*D))"
+        },
         "source_manifest": manifest,
         "source_manifest_sha256": sha256_bytes(canonical_json(manifest)),
         "conda_lock_sha256": manifest[
