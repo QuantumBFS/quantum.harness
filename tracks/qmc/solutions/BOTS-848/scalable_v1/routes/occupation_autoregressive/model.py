@@ -80,6 +80,8 @@ class AutoregressiveNQS:
             )
             for sector in _SECTORS
         }
+        self._logpsi_cache: dict[tuple[int, str], complex] = {}
+        self._log_derivative_cache: dict[tuple[int, str], np.ndarray] = {}
 
     @staticmethod
     def _readonly_view(array: np.ndarray) -> np.ndarray:
@@ -253,6 +255,8 @@ class AutoregressiveNQS:
             array = self._parameters[name]
             parameter_slice = self.parameter_slices[name]
             array[...] = flat[parameter_slice].reshape(array.shape)
+        self._logpsi_cache.clear()
+        self._log_derivative_cache.clear()
 
     def _validated_state(self, state: int) -> int:
         configuration = _integer("state", state)
@@ -507,14 +511,34 @@ class AutoregressiveNQS:
     def logpsi(self, state: int, sector: str) -> complex:
         """Return the exactly normalized autoregressive log-wavefunction."""
 
-        value, _ = self._evaluate(state, sector, keep_cache=False)
+        configuration = self._validated_state(state)
+        selected_sector = self._sector(sector)
+        key = (configuration, selected_sector)
+        cached = self._logpsi_cache.get(key)
+        if cached is not None:
+            return cached
+        value, _ = self._evaluate(
+            configuration,
+            selected_sector,
+            keep_cache=False,
+        )
+        self._logpsi_cache[key] = value
         return value
 
     def log_derivative(self, state: int, sector: str) -> np.ndarray:
         """Return analytic complex derivatives in stable flat-tree order."""
 
+        configuration = self._validated_state(state)
         selected_sector = self._sector(sector)
-        _, caches = self._evaluate(state, selected_sector, keep_cache=True)
+        key = (configuration, selected_sector)
+        cached = self._log_derivative_cache.get(key)
+        if cached is not None:
+            return cached.copy()
+        _, caches = self._evaluate(
+            configuration,
+            selected_sector,
+            keep_cache=True,
+        )
         gradients = {
             name: np.zeros(self._parameters[name].shape, dtype=np.complex128)
             for name in self._parameter_names
@@ -568,7 +592,10 @@ class AutoregressiveNQS:
             or not np.all(np.isfinite(flattened.imag))
         ):
             raise FloatingPointError("non-finite autoregressive log-derivative")
-        return flattened
+        cached_score = flattened.copy()
+        cached_score.setflags(write=False)
+        self._log_derivative_cache[key] = cached_score
+        return cached_score.copy()
 
     def sample(self, size: int, sector: str, *, seed: int) -> np.ndarray:
         """Sample sequentially from masked conditionals without support expansion."""

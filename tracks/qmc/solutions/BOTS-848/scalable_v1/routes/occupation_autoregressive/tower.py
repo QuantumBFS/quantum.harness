@@ -425,6 +425,22 @@ class _DerivedTerms:
     amplitude: _LogPolar | None
 
 
+@dataclass(slots=True)
+class _TowerEvaluationCache:
+    derived_terms: dict[tuple[int, int], _DerivedTerms]
+    logpsi: dict[tuple[int, int], complex]
+    log_score: dict[tuple[int, int], np.ndarray]
+
+    @classmethod
+    def empty(cls) -> _TowerEvaluationCache:
+        return cls({}, {}, {})
+
+    def clear(self) -> None:
+        self.derived_terms.clear()
+        self.logpsi.clear()
+        self.log_score.clear()
+
+
 @dataclass(frozen=True, slots=True)
 class LadderComponent:
     """One fixed-``M`` component of a lazily evaluated spin-two tower."""
@@ -437,6 +453,7 @@ class LadderComponent:
     _base_log_score: LogScore | None
     _parent: LadderComponent | None
     _direction: int | None
+    _evaluation_cache: _TowerEvaluationCache
 
     def _validated_state(self, state: object) -> int:
         configuration = _integer("state", state)
@@ -459,6 +476,9 @@ class LadderComponent:
         if parent is None or direction is None:
             raise AssertionError("base component has no derived terms")
         key = (self.m, state)
+        shared = self._evaluation_cache.derived_terms
+        if key in shared:
+            return shared[key]
         if key in memo:
             return memo[key]
 
@@ -509,6 +529,7 @@ class LadderComponent:
             amplitude=_reduce_log_terms(terms),
         )
         memo[key] = derived
+        shared[key] = derived
         return derived
 
     def _logpsi(
@@ -516,27 +537,34 @@ class LadderComponent:
         configuration: int,
         memo: dict[tuple[int, int], _DerivedTerms],
     ) -> complex:
+        key = (self.m, configuration)
+        shared = self._evaluation_cache.logpsi
+        if key in shared:
+            return shared[key]
         if self.m == 0:
             if self._base_logpsi is None:
                 raise AssertionError("M=0 component is missing its callback")
-            return _scalar_complex(
+            value = _scalar_complex(
                 self._base_logpsi(configuration),
                 label="base logpsi",
             )
-
-        terms = self._derived_terms(configuration, memo)
-        if terms.amplitude is None:
-            return complex(-math.inf, 0.0)
-        if self._parent is None or self._direction is None:
-            raise AssertionError("derived component is missing its parent")
-        normalization = spin2_ladder_coefficient(
-            self._parent.m,
-            self._direction,
-        )
-        return complex(
-            terms.amplitude.log_abs - math.log(normalization),
-            terms.amplitude.phase,
-        )
+        else:
+            terms = self._derived_terms(configuration, memo)
+            if terms.amplitude is None:
+                value = complex(-math.inf, 0.0)
+            else:
+                if self._parent is None or self._direction is None:
+                    raise AssertionError("derived component is missing its parent")
+                normalization = spin2_ladder_coefficient(
+                    self._parent.m,
+                    self._direction,
+                )
+                value = complex(
+                    terms.amplitude.log_abs - math.log(normalization),
+                    terms.amplitude.phase,
+                )
+        shared[key] = value
+        return value
 
     def logpsi(self, state: int) -> complex:
         """Evaluate this component without expanding a fixed-``M`` support."""
@@ -549,54 +577,62 @@ class LadderComponent:
         configuration: int,
         memo: dict[tuple[int, int], _DerivedTerms],
     ) -> np.ndarray:
+        key = (self.m, configuration)
+        shared = self._evaluation_cache.log_score
+        cached = shared.get(key)
+        if cached is not None:
+            return cached
         if self.m == 0:
             if self._base_log_score is None:
                 raise AssertionError("M=0 component is missing its score callback")
-            return _score_vector(
+            result = _score_vector(
                 self._base_log_score(configuration),
                 label="base log score",
             )
+        else:
+            terms = self._derived_terms(configuration, memo)
+            if terms.amplitude is None:
+                raise ValueError("log score is undefined for an exact zero amplitude")
+            if self._parent is None:
+                raise AssertionError("derived component is missing its parent")
 
-        terms = self._derived_terms(configuration, memo)
-        if terms.amplitude is None:
-            raise ValueError("log score is undefined for an exact zero amplitude")
-        if self._parent is None:
-            raise AssertionError("derived component is missing its parent")
-
-        scores: list[np.ndarray] = []
-        parameter_count: int | None = None
-        for term in terms.terms:
-            score = _score_vector(
-                self._parent._log_score(
-                    self._parent._validated_state(term.source),
-                    memo,
-                ),
-                label="parent log score",
-            )
-            if parameter_count is None:
-                parameter_count = score.size
-            elif score.size != parameter_count:
-                raise ValueError(
-                    "parent log scores must have the same parameter count"
+            scores: list[np.ndarray] = []
+            parameter_count: int | None = None
+            for term in terms.terms:
+                score = _score_vector(
+                    self._parent._log_score(
+                        self._parent._validated_state(term.source),
+                        memo,
+                    ),
+                    label="parent log score",
                 )
-            scores.append(score)
+                if parameter_count is None:
+                    parameter_count = score.size
+                elif score.size != parameter_count:
+                    raise ValueError(
+                        "parent log scores must have the same parameter count"
+                    )
+                scores.append(score)
 
-        result = _score_ratio_from_log_terms(
-            terms.terms,
-            tuple(scores),
-            terms.amplitude,
-        )
+            result = _score_ratio_from_log_terms(
+                terms.terms,
+                tuple(scores),
+                terms.amplitude,
+            )
         if not np.all(np.isfinite(result.real)) or not np.all(
             np.isfinite(result.imag)
         ):
             raise FloatingPointError("derived log score is non-finite")
-        return result
+        cached_score = result.copy()
+        cached_score.setflags(write=False)
+        shared[key] = cached_score
+        return cached_score
 
     def log_score(self, state: int) -> np.ndarray:
         """Return the analytic parameter derivative of this log amplitude."""
 
         configuration = self._validated_state(state)
-        return self._log_score(configuration, {})
+        return self._log_score(configuration, {}).copy()
 
 
 class LadderTower(Mapping[int, LadderComponent]):
@@ -642,6 +678,7 @@ class LadderTower(Mapping[int, LadderComponent]):
             for m in _SPIN_TWO_M_VALUES
         }
         base_table = tables[0]
+        evaluation_cache = _TowerEvaluationCache.empty()
         components: dict[int, LadderComponent] = {
             0: LadderComponent(
                 m=0,
@@ -652,6 +689,7 @@ class LadderTower(Mapping[int, LadderComponent]):
                 _base_log_score=log_score,
                 _parent=None,
                 _direction=None,
+                _evaluation_cache=evaluation_cache,
             )
         }
         for direction in (1, -1):
@@ -668,6 +706,7 @@ class LadderTower(Mapping[int, LadderComponent]):
                     _base_log_score=None,
                     _parent=parent,
                     _direction=direction,
+                    _evaluation_cache=evaluation_cache,
                 )
                 components[target_m] = component
                 parent = component
@@ -676,7 +715,13 @@ class LadderTower(Mapping[int, LadderComponent]):
         instance._components = MappingProxyType(
             {m: components[m] for m in _SPIN_TWO_M_VALUES}
         )
+        instance._evaluation_cache = evaluation_cache
         return instance
+
+    def clear_evaluation_cache(self) -> None:
+        """Discard all values tied to the current parent parameters."""
+
+        self._evaluation_cache.clear()
 
     def component(self, target_m: int) -> LadderComponent:
         """Return one component with a clear fail-closed target error."""

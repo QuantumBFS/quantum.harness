@@ -102,6 +102,82 @@ def _tiny_model(*, seed: int = 848, width: int = 4) -> AutoregressiveNQS:
     )
 
 
+def test_model_evaluation_cache_is_copy_safe_and_parameter_bound(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    model = _tiny_model(width=3)
+    state = model.feasibility.enumerate_support()[0]
+    original = model._evaluate
+    calls: list[bool] = []
+
+    def recording_evaluate(
+        raw_state: int,
+        sector: str,
+        *,
+        keep_cache: bool,
+    ):
+        calls.append(keep_cache)
+        return original(raw_state, sector, keep_cache=keep_cache)
+
+    monkeypatch.setattr(model, "_evaluate", recording_evaluate)
+    assert model.logpsi(state, "excited") == model.logpsi(state, "excited")
+    first_score = model.log_derivative(state, "excited")
+    expected_score = first_score.copy()
+    first_score[:] = 0.0
+    np.testing.assert_array_equal(
+        model.log_derivative(state, "excited"),
+        expected_score,
+    )
+    assert calls == [False, True]
+
+    model.set_flat_parameters(model.flat_parameters())
+    model.logpsi(state, "excited")
+    model.log_derivative(state, "excited")
+    assert calls == [False, True, False, True]
+
+
+def test_tower_evaluation_cache_is_shared_and_explicitly_invalidated() -> None:
+    model = _tiny_model(width=3)
+    base_logpsi_calls: list[int] = []
+    base_score_calls: list[int] = []
+
+    def base_logpsi(state: int) -> complex:
+        base_logpsi_calls.append(state)
+        return model.logpsi(state, "excited")
+
+    def base_score(state: int) -> np.ndarray:
+        base_score_calls.append(state)
+        return model.log_derivative(state, "excited")
+
+    tower = LadderTower.from_m0(
+        logpsi=base_logpsi,
+        log_score=base_score,
+        n_electrons=model.n_electrons,
+        two_q=model.two_q,
+        l=2,
+    )
+    support = FeasibilityTable.build(
+        n_electrons=model.n_electrons,
+        two_q=model.two_q,
+        target_m2=2,
+    ).enumerate_support()
+    state = next(raw for raw in support if tower[1].logpsi(raw).real != -np.inf)
+    tower.clear_evaluation_cache()
+    tower[1].logpsi(state)
+    expected_score = tower[1].log_score(state)
+    first_counts = (len(base_logpsi_calls), len(base_score_calls))
+    tower[1].logpsi(state)
+    second_score = tower[1].log_score(state)
+    assert (len(base_logpsi_calls), len(base_score_calls)) == first_counts
+    np.testing.assert_array_equal(second_score, expected_score)
+
+    tower.clear_evaluation_cache()
+    tower[1].logpsi(state)
+    tower[1].log_score(state)
+    assert len(base_logpsi_calls) > first_counts[0]
+    assert len(base_score_calls) > first_counts[1]
+
+
 @pytest.mark.parametrize("sector", ["ground", "excited"])
 def test_model_log_probabilities_normalize_on_tiny_support(sector: str) -> None:
     model = _tiny_model()
@@ -539,6 +615,9 @@ def _install_fast_full_training_compute(monkeypatch: pytest.MonkeyPatch) -> None
 
         def __iter__(self):
             return iter((-2, -1, 0, 1, 2))
+
+        def clear_evaluation_cache(self) -> None:
+            return None
 
     fake_tower = FakeTower()
     monkeypatch.setattr(
@@ -1456,12 +1535,16 @@ def test_full_training_runs_frozen_2048_update_six_batch_tower_contract(
     class FakeTower:
         def __init__(self) -> None:
             self.components = {m: FakeComponent(m) for m in (-2, -1, 0, 1, 2)}
+            self.cache_clear_count = 0
 
         def __getitem__(self, m: int) -> FakeComponent:
             return self.components[m]
 
         def __iter__(self):
             return iter((-2, -1, 0, 1, 2))
+
+        def clear_evaluation_cache(self) -> None:
+            self.cache_clear_count += 1
 
     fake_tower = FakeTower()
     monkeypatch.setattr(
@@ -1553,6 +1636,7 @@ def test_full_training_runs_frozen_2048_update_six_batch_tower_contract(
     assert config.batch_size_per_sector == 512
     assert config.checkpoint_interval == 128
     assert artifacts.selected_update == 2048
+    assert fake_tower.cache_clear_count == 2048
     assert len(ground_calls) == 2048
     assert {(size, sector) for size, sector, _seed in ground_calls} == {
         (512, "ground")
