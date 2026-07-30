@@ -1,0 +1,16 @@
+mode = "validation"
+dt_target = 0.05235987755982989 # π / 60
+frequencies = [2.5, 10.0]
+steps = 3819
+compression_tolerance = 1.0e-10
+run_exact = true
+cache_dir = "tracks/mps/results/fig2-strict/cache"
+rebuild_cache = false
+temperature = 0.0
+auto_nc = true
+n_c = 100000
+truncation = "rel"
+cap_rank = 100000
+max_rank = 100000
+low_rank_svd = false
+svd_filtering_tolerance = 0.0

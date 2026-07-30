@@ -85,6 +85,8 @@ reproduced until those jobs finish and pass the physical diagnostics.
 
 ## Recorded checkpoints
 
+- [`validation/20260730-fig2/`](validation/20260730-fig2/) records the complete
+  two-panel Fig. 2 transient reproduction at strict `1e-10` compression.
 - [`validation/20260729-fig3-longitudinal-wd5/`](validation/20260729-fig3-longitudinal-wd5/)
   records the first strict Fig. 3 validation point. The longitudinal
   `ωd=5Ω` spectrum passed all configured diagnostics and overlaps the Zenodo

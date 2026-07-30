@@ -1,0 +1,23 @@
+{
+  "mode": "validation",
+  "compression_tolerance": 1e-10,
+  "bond_dimensions": [279, 279],
+  "if_build_seconds": 38.704093207999996,
+  "propagation_seconds": 8.578680375,
+  "wall_seconds": 54.42,
+  "maximum_resident_bytes": 1464713216,
+  "frequencies": {
+    "2.5": {
+      "max_error": 0.000234847796586668,
+      "rmse": 0.00004735010483706854,
+      "redfield_max_error": 0.6920378612548,
+      "samples": 3820
+    },
+    "10.0": {
+      "max_error": 0.0002780623936389781,
+      "rmse": 0.00006074782127173991,
+      "redfield_max_error": 0.2938341928391537,
+      "samples": 3820
+    }
+  }
+}
