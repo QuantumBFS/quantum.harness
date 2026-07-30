@@ -35,6 +35,7 @@ def test_remediation_certificate_schemas_are_strict() -> None:
         "remediated-checkpoint.schema.json",
         "optimization-remediation-seed.schema.json",
         "optimization-remediation.schema.json",
+        "optimization-remediation-readback.schema.json",
     ):
         schema = json.loads(
             (ROUTE_ROOT / name).read_text(encoding="utf-8")
@@ -56,6 +57,18 @@ def test_remediation_does_not_import_ed_and_uses_fixed_final_update() -> None:
     assert "max_workers=3" in source
     assert "initial_checkpoint=request" in source
     assert "nvidia-smi" in batch
+
+
+def test_independent_remediation_readback_rehashes_every_layer() -> None:
+    source = (
+        ROUTE_ROOT / "verify_optimization_remediation.py"
+    ).read_text(encoding="utf-8")
+    assert 'require(certificate["phase7_stage_gate"])' in source
+    assert 'require(certificate["protocol"])' in source
+    assert 'require(certificate["architecture"])' in source
+    assert 'require(reference["result"])' in source
+    assert 'require(reference["checkpoint"])' in source
+    assert 'require(checkpoint["base_checkpoint"])' in source
 
 
 def test_original_training_defaults_remain_unchanged() -> None:
