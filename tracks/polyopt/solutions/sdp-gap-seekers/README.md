@@ -1,5 +1,19 @@
 # SDP Gap Seekers
 
+> **TL;DR — what we did, what we found, why it's useful.** We attacked
+> challenge #88: certify upper bounds on the bulk spectral gap of frustrated
+> spin-1/2 models via the state-polynomial γ-feasibility SDP hierarchy
+> (arXiv:2606.03836). At the smallest tractable relaxation level (L=1, d=2),
+> **all three target models — square J1-J2, Shastry-Sutherland, triangular —
+> are feasible at every γ we tested**, so that level is too weak to bound the
+> gap. **No certified bound is claimed.** The contribution is **method +
+> machinery**: an exact D4 quotient for the square lattice and a six-layer
+> full-spin isotypic reduction that transfers *unchanged* across all three
+> geometries, plus the tractability analysis that drops the Rung-C solve from
+> ~295 GiB to ~1 GiB. Stronger levels (square L=1/d=3; Shastry-Sutherland L=2)
+> are in flight and are the route to an actual bound. Read on for the strict
+> certification language, two reproduction routes, and limitations.
+
 ## Team
 
 | | |
@@ -143,8 +157,8 @@ Per the source method and the review discipline:
 
 ```
 tracks/polyopt/solutions/sdp-gap-seekers/
-├── README.md                  # this file
-├── docs/                      # issue88 metadata, tractability, reproducibility
+├── README.md                  # this file — start here
+├── docs/                      # issue88 per-calc metadata, tractability, reproducibility
 ├── src/                       # CoreMGK, SquareGapConic, D4, ExactSymmetryReduction,
 │                              # the FullSpin* isotypic reduction modules
 ├── scripts/                   # build_*_mof.jl builders, solve_*_mof.jl solvers,
@@ -152,11 +166,13 @@ tracks/polyopt/solutions/sdp-gap-seekers/
 ├── test/                      # solver-free exact truth gates (Route 1)
 ├── evidence/                  # harvested per-run result/runmeta/SHA256SUMS bundles
 ├── results/                   # generated MOFs, logs, plots (gitignored)
-├── notes/                     # design + proof notes (D4 averaging lemma, etc.)
-├── EXACT_*.md                 # per-layer exact-reduction proof contracts
-├── CHALLENGE88_RESULT.md      # SS reduction-ladder result log
-├── ACTIVE_STATE.md            # running state log (preserved)
-└── DECISION_LEDGER.md         # decision record (preserved)
+└── notes/
+    ├── proofs/                # EXACT_*.md per-layer exact-reduction proof contracts
+    │                          # + CHALLENGE88_RESULT.md (SS reduction-ladder result log)
+    ├── specs/                 # Square/SS basis & model specs (SQUARE_BASIS_SPEC,
+    │                          # square-j1j2-gap-sdp-spec, basis-counts, SS dimer gate)
+    └── process/               # internal session / advisor / decision logs (working record,
+                               # not part of the claimed result)
 ```
 
 ## Division of labor
