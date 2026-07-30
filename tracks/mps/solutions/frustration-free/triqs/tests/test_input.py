@@ -28,6 +28,7 @@ from make_input import (
     write_production_input,
 )
 from source_manifest import REQUIRED_SOURCE_PATHS, build_source_manifest
+import make_input as make_input_module
 
 
 _ASSERTIONS = unittest.TestCase()
@@ -277,6 +278,28 @@ def _refresh_calibration(solution_dir: Path) -> None:
 
 
 class InputHardeningTests(unittest.TestCase):
+    def test_matsubara_generation_uses_shared_hybridization_contract(self):
+        from hybridization import (
+            delta_iw as analytic_delta_iw,
+            serialize_complex128 as analytic_serialize_complex128,
+        )
+
+        with mock.patch.object(
+            make_input_module,
+            "delta_iw",
+            wraps=analytic_delta_iw,
+        ) as delta_mock, mock.patch.object(
+            make_input_module,
+            "serialize_complex128",
+            wraps=analytic_serialize_complex128,
+        ) as serialize_mock:
+            omega, serialized = make_input_module._matsubara_data()
+
+        delta_mock.assert_called_once()
+        serialize_mock.assert_called_once()
+        self.assertEqual(len(omega), 4098)
+        self.assertEqual(len(serialized["real"]), 4098)
+
     def test_numeric_aliases_do_not_bypass_exact_contract(self):
         with tempfile.TemporaryDirectory() as temporary:
             solution_dir, _ = _complete_repository(Path(temporary))

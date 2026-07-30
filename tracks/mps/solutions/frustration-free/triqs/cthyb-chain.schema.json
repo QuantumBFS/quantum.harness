@@ -1,0 +1,204 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://quantum-harness.invalid/challenge-81/cthyb-chain.schema.json",
+  "title": "Challenge 81 CT-HYB chain artifacts",
+  "oneOf": [
+    {"$ref": "#/$defs/summary"},
+    {"$ref": "#/$defs/completion"}
+  ],
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^(?!0000000000000000000000000000000000000000000000000000000000000000$)[0-9a-f]{64}$"
+    },
+    "finiteNumber": {"type": "number"},
+    "canonicalArtifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["payload", "sha256"],
+      "properties": {
+        "payload": {},
+        "sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "summary": {
+      "allOf": [
+        {"$ref": "#/$defs/canonicalArtifact"},
+        {
+          "properties": {
+            "payload": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "artifact_type",
+                "schema_version",
+                "chain_id",
+                "chain_index",
+                "seed",
+                "input_sha256",
+                "input_payload_sha256",
+                "raw_h5_sha256",
+                "raw_archive_members",
+                "model",
+                "reported_tau",
+                "observables",
+                "diagnostics",
+                "solve",
+                "resources",
+                "provenance"
+              ],
+              "properties": {
+                "artifact_type": {"const": "cthyb_chain_summary"},
+                "schema_version": {"const": 2},
+                "chain_id": {"type": "string", "pattern": "^chain-00[0-3]$"},
+                "chain_index": {"type": "integer", "minimum": 0, "maximum": 3},
+                "seed": {"type": "integer", "minimum": 1},
+                "input_sha256": {"$ref": "#/$defs/sha256"},
+                "input_payload_sha256": {"$ref": "#/$defs/sha256"},
+                "raw_h5_sha256": {"$ref": "#/$defs/sha256"},
+                "raw_archive_members": {
+                  "type": "array",
+                  "minItems": 19,
+                  "maxItems": 19,
+                  "uniqueItems": true,
+                  "items": {"type": "string"}
+                },
+                "model": {"type": "object"},
+                "reported_tau": {
+                  "type": "array",
+                  "minItems": 5,
+                  "maxItems": 5,
+                  "items": {"$ref": "#/$defs/finiteNumber"}
+                },
+                "observables": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "n_up",
+                    "n_down",
+                    "n_d",
+                    "double_occupancy",
+                    "G_up",
+                    "G_down"
+                  ],
+                  "properties": {
+                    "n_up": {"$ref": "#/$defs/finiteNumber"},
+                    "n_down": {"$ref": "#/$defs/finiteNumber"},
+                    "n_d": {"$ref": "#/$defs/finiteNumber"},
+                    "double_occupancy": {"$ref": "#/$defs/finiteNumber"},
+                    "G_up": {
+                      "type": "array",
+                      "minItems": 5,
+                      "maxItems": 5,
+                      "items": {"$ref": "#/$defs/finiteNumber"}
+                    },
+                    "G_down": {
+                      "type": "array",
+                      "minItems": 5,
+                      "maxItems": 5,
+                      "items": {"$ref": "#/$defs/finiteNumber"}
+                    }
+                  }
+                },
+                "diagnostics": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "average_sign",
+                    "auto_corr_time",
+                    "auto_corr_time_converged",
+                    "effective_samples"
+                  ],
+                  "properties": {
+                    "average_sign": {"$ref": "#/$defs/finiteNumber"},
+                    "auto_corr_time": {"$ref": "#/$defs/finiteNumber"},
+                    "auto_corr_time_converged": {"const": true},
+                    "effective_samples": {"type": "integer", "minimum": 0}
+                  }
+                },
+                "solve": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["status", "parameters"],
+                  "properties": {
+                    "status": {"const": "normal"},
+                    "parameters": {"type": "object"}
+                  }
+                },
+                "resources": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "started_utc",
+                    "finished_utc",
+                    "wall_seconds",
+                    "peak_rss_bytes",
+                    "hostname",
+                    "slurm"
+                  ],
+                  "properties": {
+                    "started_utc": {"type": "string"},
+                    "finished_utc": {"type": "string"},
+                    "wall_seconds": {"$ref": "#/$defs/finiteNumber"},
+                    "peak_rss_bytes": {"type": "integer", "minimum": 0},
+                    "hostname": {"type": "string", "minLength": 1},
+                    "slurm": {"type": "object"}
+                  }
+                },
+                "provenance": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "source_manifest",
+                    "source_manifest_sha256",
+                    "conda_lock_sha256",
+                    "environment_yml_sha256",
+                    "runtime"
+                  ],
+                  "properties": {
+                    "source_manifest": {"type": "object"},
+                    "source_manifest_sha256": {"$ref": "#/$defs/sha256"},
+                    "conda_lock_sha256": {"$ref": "#/$defs/sha256"},
+                    "environment_yml_sha256": {"$ref": "#/$defs/sha256"},
+                    "runtime": {"type": "object"}
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "completion": {
+      "allOf": [
+        {"$ref": "#/$defs/canonicalArtifact"},
+        {
+          "properties": {
+            "payload": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "artifact_type",
+                "schema_version",
+                "chain_index",
+                "seed",
+                "input_sha256",
+                "chain_summary_sha256",
+                "raw_h5_sha256"
+              ],
+              "properties": {
+                "artifact_type": {"const": "cthyb_chain_completion"},
+                "schema_version": {"const": 2},
+                "chain_index": {"type": "integer", "minimum": 0, "maximum": 3},
+                "seed": {"type": "integer", "minimum": 1},
+                "input_sha256": {"$ref": "#/$defs/sha256"},
+                "chain_summary_sha256": {"$ref": "#/$defs/sha256"},
+                "raw_h5_sha256": {"$ref": "#/$defs/sha256"}
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

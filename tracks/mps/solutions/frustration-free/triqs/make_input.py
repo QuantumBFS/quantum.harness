@@ -7,6 +7,7 @@ import math
 from pathlib import Path
 
 from jsonschema import Draft202012Validator
+import numpy as np
 
 from artifacts import (
     atomic_write_bytes,
@@ -14,6 +15,7 @@ from artifacts import (
     sha256_bytes,
     strict_json_load,
 )
+from hybridization import delta_iw, serialize_complex128
 from source_manifest import build_source_manifest, verify_source_manifest
 
 
@@ -121,21 +123,12 @@ def _production_conventions(
 
 
 def _matsubara_data() -> tuple[list[float], dict[str, object]]:
-    omega = [(2 * index + 1) * math.pi / BETA for index in range(-N_IW, N_IW)]
-    imaginary = [
-        0.1
-        * (
-            value
-            - math.copysign(math.sqrt(value * value + 1.0), value)
-        )
-        for value in omega
-    ]
-    split: dict[str, object] = {
-        "real": [0.0] * len(omega),
-        "imag": imaginary,
-    }
-    split["sha256"] = sha256_bytes(canonical_json(split))
-    return omega, split
+    omega = np.array(
+        [(2 * index + 1) * math.pi / BETA for index in range(-N_IW, N_IW)],
+        dtype=np.float64,
+    )
+    values = delta_iw(omega, gamma=0.1, bandwidth=1.0)
+    return omega.tolist(), serialize_complex128(values)
 
 
 def _validate_calibration(
