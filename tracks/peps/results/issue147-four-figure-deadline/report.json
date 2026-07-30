@@ -1,0 +1,390 @@
+{
+  "title": "Thermodynamics-Aware 2D Finite-Temperature PEPO",
+  "eyebrow": "Harnessing Quantum 2026 · Challenge #147 · Deadline Technical Report",
+  "url": "https://github.com/QuantumBFS/quantum.harness/issues/147",
+  "lede": "We implemented a resumable, auditable 10×10 finite-temperature PEPO prototype pipeline and proposed a compression objective that directly preserves thermodynamic information under fixed tensor capacity. The current evidence establishes the representation, objective, checkpoints, and independent ED/QMC validation chain; the full β range and bond-dimension convergence benchmark remain incomplete.",
+  "sections": [
+    {
+      "title": "Executive Summary",
+      "note": "This section separates verified facts, research hypotheses awaiting validation, and the final completion status of the challenge.",
+      "blocks": [
+        {
+          "kind": "verdict",
+          "status": "warn",
+          "label": "Prototype validated",
+          "why": "The end-to-end PEPO, ED, and QMC evidence chain is operational, but the 10×10 PEPO currently has only two probe points at β=0.025 and 0.05, outside the challenge target range βJ∈[0.1,1.0]."
+        },
+        {
+          "kind": "kv",
+          "pairs": [
+            ["Model", "10×10 open-boundary 2D transverse-field Ising model, J=1, h/J=3"],
+            ["PEPO evidence", "D=4, χ=16, Δβ=0.025; two loadable checkpoints"],
+            ["QMC result", "βJ=0.5: u∞/J=−2.90970±0.00299 (bootstrap SE)"],
+            ["QMC 95% CI", "[−2.91541, −2.90377]"],
+            ["ED evidence", "4×4 full spectrum with 65,536 states, used as a finite-size diagnostic"],
+            ["Most important current limitation", "Both PEPO points accepted zero optimization updates; no ordinary production baseline"]
+          ]
+        },
+        {
+          "kind": "note",
+          "label": "One-sentence contribution",
+          "style": "info",
+          "text": "The value of this project is not a claimed benchmark victory, but an ==observable-aware, resumable, and QMC-falsifiable== research framework for 2D finite-temperature PEPO."
+        }
+      ]
+    },
+    {
+      "title": "Challenge Requirements",
+      "note": "Completion is assessed directly against the mandatory deliverables in issue #147.",
+      "blocks": [
+        {
+          "kind": "table",
+          "columns": ["Requirement", "Status", "Current evidence", "Missing evidence"],
+          "rows": [
+            ["10×10 f, u, and C over βJ∈[0.1,1.0]", "Not completed", "PEPO only at β=0.025 and 0.05; QMC only provides u at β=0.5", "All three thermodynamic curves across the full temperature range"],
+            ["Convergence of u and C for at least three D values", "Not completed", "Only D=4 is currently available", "Representative-temperature scans at D=4, 6, 8, or higher"],
+            ["QMC validation on the same 10×10 system", "Partially completed", "The M=32, 64, 128 extrapolation at β=0.5 has passed validation", "u, C, and relative errors across the full β range"],
+            ["Source code, technical documentation, and one-command test", "Partially completed", "Implementation, tests, SCNet scripts, and this report are available", "One-command reproduction of the complete benchmark"],
+            ["tanTRG accuracy–cost comparison", "Not attempted (bonus)", "PEPO wall time and memory have been recorded", "A tanTRG/LTRG reference at matched parameters"],
+            ["Uniform susceptibility", "Not attempted (bonus)", "None", "χ(T) measurement and QMC validation"]
+          ],
+          "widths": ["28%", "13%", "29%", "30%"]
+        },
+        {
+          "kind": "verdict",
+          "status": "bad",
+          "label": "Mandatory deliverables incomplete",
+          "why": "The current result should be submitted as a high-confidence prototype. Any claim that thermodynamic compression already outperforms the ordinary baseline would exceed the available evidence."
+        }
+      ]
+    },
+    {
+      "title": "Physics Problem",
+      "note": "Near the critical field, growing correlations in low-temperature thermal states make 2D tensor-network compression genuinely difficult.",
+      "blocks": [
+        {
+          "kind": "equation",
+          "tex": "H=-J\\sum_{\\langle i,j\\rangle}\\sigma_i^z\\sigma_j^z-h\\sum_i\\sigma_i^x,\\qquad J=1,\\quad h/J=3"
+        },
+        {
+          "kind": "text",
+          "text": "The target thermal operator is $R(\\beta)=e^{-\\beta H}$. A finite-temperature PEPO represents this exponentially large operator as a 2D tensor network. Imaginary-time evolution continually generates new correlations, while a fixed virtual bond dimension D forces the algorithm to decide which information to retain."
+        },
+        {
+          "kind": "table",
+          "columns": ["Quantity", "Definition", "Physical meaning", "Current coverage"],
+          "rows": [
+            ["z", "ln Z/N", "Local density of free-energy information", "Two PEPO points"],
+            ["f", "−ln Z/(βN)", "Free-energy density", "4×4 ED curve only"],
+            ["u", "⟨H⟩/N", "Mean internal-energy density", "Two PEPO points, one QMC point, and an ED curve"],
+            ["C", "β²(⟨H²⟩−⟨H⟩²)/N", "Energy fluctuations and thermal response", "4×4 ED curve only"]
+          ]
+        },
+        {
+          "kind": "kv",
+          "pairs": [
+            ["Lattice", "10×10 square lattice with open boundaries"],
+            ["Operator convention", "Pauli σ, J=1"],
+            ["Field studied", "h/J=3, near h_c/J≈3.044"],
+            ["Challenge target range", "βJ∈[0.1,1.0]"],
+            ["Current PEPO range", "βJ=0.025 and 0.05 (high-temperature feasibility probes only)"]
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Innovation Hypothesis",
+      "note": "The proposed innovation changes how information is allocated at finite D rather than simply increasing compute or bond dimension.",
+      "blocks": [
+        {
+          "kind": "heading",
+          "level": 3,
+          "text": "From approximating the full operator to prioritizing thermodynamics"
+        },
+        {
+          "kind": "equation",
+          "tex": "\\mathcal{L}_F=\\frac{\\left\\|S-T\\right\\|_F^2}{\\left\\|T\\right\\|_F^2}"
+        },
+        {
+          "kind": "equation",
+          "tex": "\\mathcal{L}_{\\mathrm{thermo}}=\\mathcal{L}_F+\\lambda_z\\left(\\frac{z_S-z_T}{\\epsilon_z}\\right)^2+\\lambda_u\\left(\\frac{u_S-u_T}{\\epsilon_u}\\right)^2+\\lambda_H r_H^2"
+        },
+        {
+          "kind": "text",
+          "text": "Ordinary Frobenius compression asks whether the student is close to the teacher as a huge matrix. The thermodynamic objective additionally asks whether finite capacity preserves statistical weight, mean energy, and physical Hermiticity. The physical picture resembles observable-aware coarse graining: directions irrelevant to macroscopic thermodynamics may be sacrificed so that finite D is reserved for correlation channels that actually change f, u, and thermal response."
+        },
+        {
+          "kind": "card",
+          "title": "Most promising research test",
+          "blocks": [
+            {
+              "kind": "text",
+              "text": "The loss protects z and u but does not directly protect C. If, at matched D, χ, Δβ, and optimization budget, thermodynamic PEPO reduces the QMC error in u and also improves the held-out C(β), that would indicate preservation of a consistent thermodynamic structure along imaginary-time evolution rather than fitting only two numbers."
+            },
+            {
+              "kind": "verdict",
+              "status": "warn",
+              "label": "Prediction awaiting validation",
+              "why": "Testing it requires a matched ordinary chain, the full β curve, and QMC estimates of C(β)."
+            }
+          ]
+        },
+        {
+          "kind": "table",
+          "columns": ["Innovation layer", "Current implementation", "Falsification test"],
+          "rows": [
+            ["Thermodynamics-directed compression", "Frobenius + z + u + Hermiticity objectives", "The hypothesis fails if QMC error does not beat ordinary compression at matched budget"],
+            ["Specific heat as a held-out metric", "C is absent from the one-step loss", "If u improves while C worsens, the method preserved only local targets"],
+            ["Strictly matched two-chain ablation", "The code supports ordinary and thermodynamic modes under a shared budget", "Both production chains must be completed; no matched data exist yet"],
+            ["Scientific-state checkpoints", "Tensors, configuration, and provenance all carry SHA-256 hashes", "Corrupted or configuration-drifted states must be rejected during resume"]
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Algorithm and Data Flow",
+      "note": "Every step leaves a resumable scientific state that cannot be silently overwritten.",
+      "blocks": [
+        {
+          "kind": "list",
+          "title": "PEPO pipeline",
+          "items": [
+            "Start from the identity PEPO at β=0.",
+            "Apply a second-order symmetric Trotter step to generate a temporary teacher, with target production limit D²=16.",
+            "Compress back to student D=4 under matched initialization, χ, cutoff, and optimization budget.",
+            "After checking finiteness, maximum bond dimension, positive partition function, and Hermiticity, atomically write an NPZ+JSON checkpoint.",
+            "Separate measurement from evolution so χ can vary independently without reoptimizing the PEPO."
+          ]
+        },
+        {
+          "kind": "table",
+          "columns": ["Component", "Role", "Auditable evidence"],
+          "rows": [
+            ["FinitePEPO / Trotter", "2D thermal-operator representation and imaginary-time gate sequence", "Tensor indices, tags, and maximum bond dimension recorded in the checkpoint"],
+            ["ThermodynamicLoss", "Compare global and thermodynamic teacher–student errors", "Frobenius, Δz, Δu, and penalty terms recorded separately"],
+            ["Boundary-MPS", "Contract the 2D network with environment dimension χ", "χ=16 and cutoff=10⁻¹⁰ recorded in the budget"],
+            ["Checkpoint codec", "Atomic, pickle-free NPZ+JSON state", "Configuration SHA and tensor SHA"],
+            ["QMC", "Independent reference for the same 10×10 model", "Four chains, three M values, block bootstrap, and R̂"],
+            ["ED", "4×4 full-spectrum small-system calibration", "Ten D₄×Z₂ sectors recover all 65,536 states"]
+          ]
+        },
+        {
+          "kind": "note",
+          "label": "Current probe budget",
+          "style": "pending",
+          "text": "To obtain verifiable output within the supercomputing time limit, this PEPO probe set max_iterations=1. Both checkpoints retained the finite initial PEPO and accepted no optimization update. The probe therefore validates the representation and diagnostic pipeline, not an accuracy improvement caused by optimization."
+        }
+      ]
+    },
+    {
+      "title": "Results and Interpretation",
+      "note": "Each figure states both the supported conclusion and the boundary beyond which extrapolation is not justified.",
+      "blocks": [
+        {
+          "kind": "heading",
+          "level": 3,
+          "text": "Figure 1 · Available thermodynamic evidence"
+        },
+        {
+          "kind": "figures",
+          "items": [
+            {
+              "src": "figure-1-available-thermodynamics.png",
+              "caption": "Partially established. The left panel overlays the 4×4 ED finite-size curve, two 10×10 thermodynamic-PEPO probe points, and the extrapolated 10×10 QMC point at β=0.5. The right panel contains only the 4×4 ED specific heat. The figure shows that outputs from independent methods can be assembled, but it is not a complete accuracy comparison at matched size and temperature range. The PEPO points β=0.025 and 0.05 lie outside the challenge target interval."
+            }
+          ]
+        },
+        {
+          "kind": "heading",
+          "level": 3,
+          "text": "Figure 2 · Thermodynamic-target preservation"
+        },
+        {
+          "kind": "figures",
+          "items": [
+            {
+              "src": "figure-2-target-preservation.png",
+              "caption": "Internal consistency passed. At β=0.05, |Δu|=3.58×10⁻⁸ and |Δz|=6.09×10⁻¹⁰, with all objective components finite; β=0.025 is near machine precision. Because no ordinary production baseline exists and zero updates were accepted, this figure does not establish a method advantage. It only shows that the objective and diagnostics can be evaluated stably."
+            }
+          ]
+        },
+        {
+          "kind": "heading",
+          "level": 3,
+          "text": "Figure 3 · QMC Trotter extrapolation and chain diagnostics"
+        },
+        {
+          "kind": "figures",
+          "items": [
+            {
+              "src": "figure-3-qmc-convergence.png",
+              "caption": "Validation passed. The M=32, 64, and 128 data at βJ=0.5 were linearly extrapolated in (β/M)², yielding u∞/J=−2.90970±0.00299. Error bars are 8-bin block-bootstrap standard errors, and the green band is the zero-step 95% bootstrap confidence interval. The maximum R̂ is 1.0211<1.05 and the maximum split-half |z| is 1.7907<3."
+            }
+          ]
+        },
+        {
+          "kind": "heading",
+          "level": 3,
+          "text": "Figure 4 · PEPO cost and stability"
+        },
+        {
+          "kind": "figures",
+          "items": [
+            {
+              "src": "figure-4-cost-and-stability.png",
+              "caption": "The resource bottleneck is visible. The second imaginary-time step took about 59 minutes and peaked near 9.7 GiB, substantially more than the first step. Both checkpoints have zero Hermiticity residual and maximum bond dimension 4, but neither accepted an optimizer update. This supports engineering feasibility and enforcement of physical constraints, not low-temperature stability or convergence."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Validation and Traceability",
+      "note": "Every headline number in the report can be traced back to machine-readable output.",
+      "blocks": [
+        {
+          "kind": "heading",
+          "level": 3,
+          "text": "QMC acceptance gates"
+        },
+        {
+          "kind": "table",
+          "columns": ["Check", "Observed value", "Threshold", "Status"],
+          "rows": [
+            ["Maximum R̂", "1.021082", "≤1.05", "Pass"],
+            ["Maximum split-half |z|", "1.790720", "≤3.0", "Pass"],
+            ["Reduced χ²", "0.036893", "<4.0", "Pass"],
+            ["Maximum trajectory-prefix difference", "8.88×10⁻¹⁶", "≤10⁻¹²", "Pass"]
+          ]
+        },
+        {
+          "kind": "heading",
+          "level": 3,
+          "text": "Provenance and integrity"
+        },
+        {
+          "kind": "table",
+          "columns": ["Object", "Verified fact", "Hash / provenance"],
+          "rows": [
+            ["PEPO β=0.025", "10×10, D=4, χ=16; checkpoint loads successfully", "tensor SHA 8bc5b982…e71d4"],
+            ["PEPO β=0.05", "10×10, D=4, χ=16; checkpoint loads successfully", "tensor SHA eee97271…39de"],
+            ["PEPO configuration", "Both points share the same configuration", "config SHA 13635e5a…b8ce"],
+            ["ED thermodynamics table", "The 4×4 full spectrum recovers 65,536 states", "SHA 913af33c…e8b2"],
+            ["QMC", "12/12 cells succeeded; analysis accepted=true", "issue147-qmc-reproducible-production/analysis.json"],
+            ["Deadline-report tests", "Input validation, ED hash, and QMC loader", "7 focused tests passed"]
+          ]
+        },
+        {
+          "kind": "list",
+          "title": "Traceability principles",
+          "items": [
+            "Use only success/complete manifests and accepted analyses.",
+            "Each PEPO checkpoint simultaneously validates path β, mode, lattice, D, χ, and configuration SHA.",
+            "The ED table must match the manifest SHA-256 and state_count=65536.",
+            "Do not compute C from two PEPO points, interpolate missing β values, or treat 4×4 ED as 10×10 ground truth.",
+            "PNG files are 300 DPI; PDFs contain no embedded raster-image objects and remain vector outputs."
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Limitations and Risks",
+      "note": "The most important scientific risks are shown explicitly because they determine whether the next computation is worthwhile.",
+      "blocks": [
+        {
+          "kind": "table",
+          "columns": ["Risk", "Why it matters", "Lowest-cost decisive experiment"],
+          "rows": [
+            ["Zero accepted optimization updates", "The current thermodynamic objective did not actually change the student", "First obtain a nonzero-update ordinary/thermodynamic ablation on a small system"],
+            ["No ordinary production chain", "Error differences cannot be attributed to the new objective", "Match every budget parameter and change only the loss function"],
+            ["No data in the target β range", "Low-temperature stability in the quantum-critical fan cannot be assessed", "Advance checkpoints point by point to β≥0.1, then extend within budget"],
+            ["No D convergence", "The D=4 result may be dominated by representation bias", "Compare D=4, 6, and 8 at β=0.1 and 0.5"],
+            ["No χ/Δβ convergence", "Contraction and Trotter errors may masquerade as method improvement", "Vary χ and Δβ separately; do not merge the error sources"],
+            ["C requires differentiation or fluctuation estimation", "Differentiation amplifies point-to-point noise", "Cross-check a dense β grid against QMC C"]
+          ]
+        },
+        {
+          "kind": "verdict",
+          "status": "warn",
+          "label": "Key risk",
+          "why": "Small teacher–student Δu/Δz does not automatically imply better agreement with QMC. Only a matched ordinary ablation and an independent QMC curve can validate the innovation."
+        }
+      ]
+    },
+    {
+      "title": "Why This Is Worth Continuing",
+      "note": "The research opportunity comes from a clear, falsifiable hypothesis that can be expanded step by step.",
+      "blocks": [
+        {
+          "kind": "list",
+          "title": "Near term: prove that the objective changes the representation",
+          "items": [
+            "Obtain nonzero optimizer updates on 2×2 and 4×4 systems and compare with exact exp(−βH).",
+            "Fix D, χ, Δβ, initialization, and iteration budget, then complete matched ordinary and thermodynamic chains.",
+            "Evaluate u and z first, while reserving C as a held-out generalization metric."
+          ]
+        },
+        {
+          "kind": "list",
+          "title": "Medium term: complete the core challenge evidence",
+          "items": [
+            "Generate 10×10 f, u, and C over βJ∈[0.1,1.0].",
+            "Use QMC to report pointwise relative errors and the largest stable β.",
+            "Produce independent convergence plots for D=4, 6, 8 and for χ and Δβ."
+          ]
+        },
+        {
+          "kind": "list",
+          "title": "Long term: establish a methodological contribution",
+          "items": [
+            "Position observable-aware, free-energy-aware, and environment-aware compression within the literature.",
+            "Explore purification or positive-definite PEPO parameterizations that guarantee positivity rather than only Hermiticity.",
+            "Compare wall time, memory, and low-temperature reach against tanTRG at matched accuracy.",
+            "Transfer the method to frustrated magnets and correlated-electron models where the sign problem makes QMC unavailable."
+          ]
+        },
+        {
+          "kind": "note",
+          "label": "Research potential",
+          "style": "info",
+          "text": "If the thermodynamic objective consistently improves the held-out C(β) at matched computational budget, it would be more than an engineering patch: it would become a generalizable answer to what physical information finite tensor capacity should preserve."
+        }
+      ]
+    },
+    {
+      "title": "Reproduction Entry Points",
+      "note": "The commands below only redraw the validated deadline evidence; they do not start new long-running computations.",
+      "blocks": [
+        {
+          "kind": "code",
+          "title": "Rebuild the four figures and evidence tables from the repository root",
+          "text": "$env:PYTHONPATH='tracks/peps/solutions/avi7ii'; python -m qh147.deadline_figures --pepo tracks/peps/results/issue147-pepo-lazy-nojit-capped-two-step-probe --qmc tracks/peps/results/issue147-qmc-reproducible-production --ed tracks/peps/results/issue147-ed/assembled --output tracks/peps/results/issue147-four-figure-deadline"
+        },
+        {
+          "kind": "table",
+          "columns": ["Artifact", "Path", "Purpose"],
+          "rows": [
+            ["Report input", "report.json", "Structured source for all prose, numbers, and captions"],
+            ["Thermodynamics table", "available-thermodynamics.csv", "Available ED, PEPO, and QMC thermodynamic evidence"],
+            ["Target-preservation table", "target-preservation.csv", "Δu, Δz, and loss components"],
+            ["QMC convergence table", "qmc-convergence.csv", "Finite-M estimates, uncertainties, and chain diagnostics"],
+            ["Resource table", "resources.csv", "Per-step wall time, memory, Hermiticity, and iteration counts"],
+            ["Plotting entry point", "qh147/deadline_figures.py", "Input validation, plotting, and CSV export"],
+            ["PEPO core", "qh147/compress.py / evolve.py / checkpoint.py", "Compression objective, evolution state machine, and checkpoints"]
+          ]
+        },
+        {
+          "kind": "code",
+          "title": "Render this report again",
+          "text": "python skills/report/render_report.py tracks/peps/results/issue147-four-figure-deadline"
+        },
+        {
+          "kind": "verdict",
+          "status": "good",
+          "label": "Offline and traceable",
+          "why": "report.html embeds its styles and all four figures. Structured prose remains in report.json, and numerical tables remain in CSV files."
+        }
+      ]
+    }
+  ]
+}
