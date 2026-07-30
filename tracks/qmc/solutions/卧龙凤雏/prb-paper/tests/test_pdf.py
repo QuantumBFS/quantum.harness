@@ -31,12 +31,17 @@ def test_pdf_contains_required_scientific_language(compiled_pdf):
         "Effective Central Charges",
         "Xu Tian",
         "Huidan Tan",
-        "Data Availability",
-        "Author Contributions",
         "Exploratory learning-induced",
         "does not constitute a universal-central-charge estimate",
     ):
         assert phrase.lower() in text.lower()
+
+    for removed_heading in (
+        "Data Availability",
+        "Author Contributions",
+        "Acknowledgments",
+    ):
+        assert removed_heading.lower() not in text.lower()
 
 
 def test_compilation_log_is_clean(paper_dir):
