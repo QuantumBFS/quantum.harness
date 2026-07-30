@@ -516,6 +516,87 @@
         {
           "kind": "heading",
           "level": 3,
+          "text": "⟦zh⟧最新加速：标签盲 D-optimal 实验设计⟦en⟧Newest acceleration: label-blind D-optimal experimental design"
+        },
+        {
+          "kind": "verdict",
+          "status": "good",
+          "label": "⟦zh⟧25% 噪声下平均只需 4,125 个样本，比均匀采样少 59.1 倍⟦en⟧At 25% noise, only 4,125 examples are needed on average—59.1x fewer than uniform sampling",
+          "why": "⟦zh⟧四个完全匹配的随机种子中，D-optimal 方法分别在第 35、40、40、50 批首次恢复全域 4,096 / 4,096；均匀采样分别需要第 2,355、2,355、2,370、2,675 批。每批仍为 100 个输入，每次观察仍重新生成独立 25% 位翻转。四次 D-optimal 训练都得到相同的 36 项整数规则，随后仍编译并验证为同一个 156 门网络。⟦en⟧Across four exactly matched seeds, D-optimal sampling first recovers all 4,096 inputs at batches 35, 40, 40 and 50; uniform sampling needs batches 2,355, 2,355, 2,370 and 2,675. Every batch still contains 100 inputs and every observation receives a new independent 25% bit-flip mask. All four D-optimal runs recover the same 36-term integer rule, which still compiles and verifies as the same 156-gate network."
+        },
+        {
+          "kind": "card",
+          "title": "⟦zh⟧算法思想：用最少输入把通用假设空间“照亮”⟦en⟧Algorithm: illuminate the generic hypothesis space with the fewest inputs",
+          "blocks": [
+            {
+              "kind": "kv",
+              "pairs": [
+                [
+                  "⟦zh⟧学习器预先知道什么⟦en⟧What the learner knows",
+                  "⟦zh⟧只有 12 个输入位以及常数、一次项、两两 AND 构成的 79 维通用二次候选空间；不知道目标公式、正确系数、已有电路或任何干净标签。⟦en⟧Only the 12 input bits and a generic 79-dimensional quadratic candidate space consisting of a constant, linear terms and pairwise ANDs; no target formula, correct coefficients, existing circuit or clean labels."
+                ],
+                [
+                  "⟦zh⟧输入如何选择⟦en⟧How inputs are selected",
+                  "⟦zh⟧先把 0/1 特征改写成正负一效应编码，再对完整输入矩阵做带列主元 QR，选出 79 个满秩、高体积、条件数 8.776 的输入点；选择过程完全不读取输出。⟦en⟧Convert the binary features to effect coding, then apply column-pivoted QR to the full input matrix and select 79 full-rank, high-volume points with condition number 8.776; output values are never consulted."
+                ],
+                [
+                  "⟦zh⟧训练如何进行⟦en⟧How training proceeds",
+                  "⟦zh⟧随机打乱这 79 个点并循环，每次访问都向隐藏 oracle 请求一份新噪声标签；贝叶斯后验与整数投影保持不变。79 也是在该候选空间中唯一确定 79 个系数所需的理论最少独立方程数。⟦en⟧Shuffle and cycle through the 79 points, requesting a newly corrupted label from the hidden oracle on every visit; the Bayesian posterior and integer projection are unchanged. Seventy-nine is also the theoretical minimum number of independent equations for uniquely identifying 79 coefficients in this candidate space."
+                ]
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "table",
+          "columns": [
+            "⟦zh⟧采样方法⟦en⟧Sampling method",
+            "⟦zh⟧四个种子的首次全对批次⟦en⟧First-exact batches, four seeds",
+            "⟦zh⟧平均样本数⟦en⟧Mean examples",
+            "⟦zh⟧成功数⟦en⟧Recovered runs",
+            "⟦zh⟧解释⟦en⟧Interpretation"
+          ],
+          "rows": [
+            [
+              "⟦zh⟧D-optimal 79 点循环⟦en⟧D-optimal 79-point cycle",
+              "35, 40, 40, 50",
+              "4,125",
+              "4 / 4",
+              "⟦zh⟧满秩且条件良好；四次都得到同一条精确规则⟦en⟧Full rank and well conditioned; all four recover the same exact rule"
+            ],
+            [
+              "⟦zh⟧完整域均匀有放回⟦en⟧Uniform with replacement over the full domain",
+              "2,355, 2,355, 2,370, 2,675",
+              "243,875",
+              "4 / 4",
+              "⟦zh⟧必须把证据分散到 4,096 个输入，样本效率低 59.1 倍⟦en⟧Evidence is spread over all 4,096 inputs, requiring 59.1x more examples"
+            ],
+            [
+              "⟦zh⟧随机固定 79 点循环⟦en⟧Random fixed 79-point cycle",
+              "50, 340, 未恢复, 未恢复",
+              "⟦zh⟧不适用⟦en⟧N/A",
+              "2 / 4",
+              "⟦zh⟧两个失败实验各训练到 100,000 个样本；说明“79 点”本身不够，矩阵条件性才是关键⟦en⟧Two failures each trained for 100,000 examples; merely using 79 points is insufficient—the conditioning is essential"
+            ]
+          ]
+        },
+        {
+          "kind": "figures",
+          "items": [
+            {
+              "src": "noisy-c-doptimal-sampling-p25.png",
+              "caption": "⟦zh⟧左：相同四个种子的全域整词准确率轨迹，D-optimal 曲线在约四千个样本处跃迁到 100%，均匀采样在约二十四万个样本处才跃迁。中：每个种子的配对首次全对样本数，纵轴为对数尺度。右：D-optimal 设计的效应基条件数固定为 8.776；随机 79 点设计条件数高得多，且两个实验在 100,000 样本后整词准确率仍只有 25.46% 和 29.69%。⟦en⟧Left: clean-domain word-accuracy traces for the same four seeds; D-optimal runs jump to 100% near four thousand examples, whereas uniform sampling jumps near 240 thousand. Middle: paired first-exact example counts on a logarithmic axis. Right: the effect-basis condition number is 8.776 for the D-optimal design; random 79-point designs are much worse conditioned, and two runs remain at only 25.46% and 29.69% word accuracy after 100,000 examples."
+            }
+          ]
+        },
+        {
+          "kind": "note",
+          "label": "⟦zh⟧边界：这是针对候选空间的主动实验设计，不是无假设的万能捷径⟦en⟧Boundary: this is hypothesis-class-specific experimental design, not an assumption-free shortcut",
+          "text": "⟦zh⟧加速利用了“目标可能落在通用二次整数空间”这一建模假设，但没有利用乘法公式或目标输出。若真正规律含三次或更高阶项，79 点设计会欠定或在未观测输入上失败；因此每个冻结模型仍必须在独立的 4,096 个干净输入上做最终验证。下一步会把同样思想扩展为可增长候选空间：先用二次设计快速拟合，若验证残差呈现结构，再自动加入高阶项。⟦en⟧The acceleration uses the modeling assumption that the target may lie in a generic quadratic integer space, but it does not use the multiplication formula or target outputs. If the true rule contains cubic or higher-order terms, the 79-point design will be misspecified or fail on unseen inputs; every frozen model therefore still receives an independent 4,096-input clean verification. The next step is a growing hypothesis space: fit the quadratic design first, then add higher-order terms automatically if validation residuals remain structured."
+        },
+        {
+          "kind": "heading",
+          "level": 3,
           "text": "⟦zh⟧输入采样消融：速度与结构置信度并不相同⟦en⟧Input-sampling ablation: speed and structural confidence differ"
         },
         {

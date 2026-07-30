@@ -19,10 +19,12 @@ from typing import Any
 
 import numpy as np
 import torch
+from scipy.linalg import qr
 
 from hidden_oracle import (
     CleanDomainEvaluator,
     DOMAIN_SIZE,
+    FixedDesignFreshNoiseStream,
     FreshNoiseStream,
     OUTPUT_BITS,
     ShuffledCycleFreshNoiseStream,
@@ -45,6 +47,9 @@ class Config:
     projection_ridge: float
     weight_mode: str
     input_sampling: str
+    design_size: int | None
+    design_rank: int | None
+    design_condition_number: float | None
     device: str
 
 
@@ -65,10 +70,22 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--input-sampling",
-        choices=("uniform", "shuffled-cycle"),
+        choices=(
+            "uniform",
+            "shuffled-cycle",
+            "random-design-cycle",
+            "d-optimal-cycle",
+        ),
         default="uniform",
     )
+    parser.add_argument(
+        "--design-size",
+        type=int,
+        default=79,
+        help="Number of label-blind design points for d-optimal-cycle.",
+    )
     parser.add_argument("--device", choices=("cpu",), default="cpu")
+    parser.add_argument("--quiet", action="store_true")
     parser.add_argument("--output-dir", type=Path, required=True)
     return parser.parse_args()
 
@@ -104,6 +121,77 @@ def quadratic_features() -> tuple[np.ndarray, list[dict[str, Any]]]:
                 }
             )
     return np.stack(columns, axis=1), metadata
+
+
+def effect_coded_quadratic_features() -> np.ndarray:
+    """Return an orthogonal full-domain basis used only to design inputs."""
+
+    ids = np.arange(DOMAIN_SIZE, dtype=np.uint16)
+    bits = ((ids[:, None] >> np.arange(INPUT_BITS)) & 1).astype(np.float64)
+    effects = 2.0 * bits - 1.0
+    columns = [np.ones(DOMAIN_SIZE, dtype=np.float64)]
+    columns.extend(effects[:, bit] for bit in range(INPUT_BITS))
+    columns.extend(
+        effects[:, left] * effects[:, right]
+        for left in range(INPUT_BITS)
+        for right in range(left + 1, INPUT_BITS)
+    )
+    return np.stack(columns, axis=1)
+
+
+def design_diagnostics(
+    selected: np.ndarray,
+    effect_features: np.ndarray,
+) -> dict[str, float | int]:
+    selected_features = effect_features[selected]
+    return {
+        "size": int(len(selected)),
+        "rank": int(np.linalg.matrix_rank(selected_features)),
+        "condition_number": float(np.linalg.cond(selected_features)),
+    }
+
+
+def d_optimal_design_ids(
+    design_size: int,
+) -> tuple[np.ndarray, dict[str, float | int]]:
+    """Select a well-conditioned quadratic design without consulting labels."""
+
+    if design_size < 79 or design_size > DOMAIN_SIZE:
+        raise ValueError("design-size must lie between 79 and 4096")
+    effect_features = effect_coded_quadratic_features()
+    _, _, pivots = qr(
+        effect_features.T,
+        mode="economic",
+        pivoting=True,
+        check_finite=False,
+    )
+    selected = pivots[:design_size].astype(np.int64)
+    diagnostics = design_diagnostics(selected, effect_features)
+    if diagnostics["rank"] != effect_features.shape[1]:
+        raise AssertionError("label-blind design is not full rank")
+    return selected, diagnostics
+
+
+def random_design_ids(
+    design_size: int,
+    seed: int,
+) -> tuple[np.ndarray, dict[str, float | int]]:
+    """Select a uniformly random fixed design without consulting labels."""
+
+    if design_size < 79 or design_size > DOMAIN_SIZE:
+        raise ValueError("design-size must lie between 79 and 4096")
+    effect_features = effect_coded_quadratic_features()
+    generator = np.random.default_rng(seed + 30_000)
+    for _ in range(1_000):
+        selected = generator.choice(
+            DOMAIN_SIZE,
+            size=design_size,
+            replace=False,
+        ).astype(np.int64)
+        diagnostics = design_diagnostics(selected, effect_features)
+        if diagnostics["rank"] == effect_features.shape[1]:
+            return selected, diagnostics
+    raise RuntimeError("failed to draw a full-rank random design")
 
 
 def projection_weights(
@@ -371,6 +459,17 @@ def main() -> None:
         raise ValueError("invalid coefficient prior settings")
 
     device = torch.device(args.device)
+    design_ids: np.ndarray | None = None
+    design_diagnostics: dict[str, float | int] | None = None
+    if args.input_sampling == "d-optimal-cycle":
+        design_ids, design_diagnostics = d_optimal_design_ids(
+            args.design_size
+        )
+    elif args.input_sampling == "random-design-cycle":
+        design_ids, design_diagnostics = random_design_ids(
+            args.design_size,
+            args.base_seed,
+        )
     config = Config(
         steps=args.steps,
         batch_size=args.batch_size,
@@ -382,19 +481,47 @@ def main() -> None:
         projection_ridge=args.projection_ridge,
         weight_mode=args.weight_mode,
         input_sampling=args.input_sampling,
+        design_size=(
+            int(design_diagnostics["size"])
+            if design_diagnostics is not None
+            else None
+        ),
+        design_rank=(
+            int(design_diagnostics["rank"])
+            if design_diagnostics is not None
+            else None
+        ),
+        design_condition_number=(
+            float(design_diagnostics["condition_number"])
+            if design_diagnostics is not None
+            else None
+        ),
         device=str(device),
     )
-    stream_class = (
-        FreshNoiseStream
-        if args.input_sampling == "uniform"
-        else ShuffledCycleFreshNoiseStream
-    )
-    stream = stream_class(
-        batch_size=args.batch_size,
-        noise_rate=args.noise_rate,
-        seed=args.base_seed,
-        device=device,
-    )
+    if args.input_sampling == "uniform":
+        stream = FreshNoiseStream(
+            batch_size=args.batch_size,
+            noise_rate=args.noise_rate,
+            seed=args.base_seed,
+            device=device,
+        )
+    elif args.input_sampling == "shuffled-cycle":
+        stream = ShuffledCycleFreshNoiseStream(
+            batch_size=args.batch_size,
+            noise_rate=args.noise_rate,
+            seed=args.base_seed,
+            device=device,
+        )
+    else:
+        if design_ids is None:
+            raise AssertionError("fixed input design was not constructed")
+        stream = FixedDesignFreshNoiseStream(
+            batch_size=args.batch_size,
+            noise_rate=args.noise_rate,
+            seed=args.base_seed,
+            device=device,
+            design_ids=torch.from_numpy(design_ids),
+        )
     learner = BayesianTruthTable(
         noise_rate=args.noise_rate,
         prior_jitter=args.prior_jitter,
@@ -492,16 +619,17 @@ def main() -> None:
             if first_exact_step is None and record["word_accuracy"] == 1.0:
                 first_exact_step = step
             final_integer_coefficients = integer_coefficients
-            print(
-                f"step={step:5d} "
-                f"loss={loss_ema:.5f} "
-                f"word={record['word_accuracy']:.6f} "
-                f"bit={record['bit_accuracy']:.6f} "
-                f"active={record['active_integer_coefficients']} "
-                f"round={record['maximum_rounding_residual']:.4f} "
-                f"wall={record['elapsed_seconds']:.2f}s",
-                flush=True,
-            )
+            if not args.quiet:
+                print(
+                    f"step={step:5d} "
+                    f"loss={loss_ema:.5f} "
+                    f"word={record['word_accuracy']:.6f} "
+                    f"bit={record['bit_accuracy']:.6f} "
+                    f"active={record['active_integer_coefficients']} "
+                    f"round={record['maximum_rounding_residual']:.4f} "
+                    f"wall={record['elapsed_seconds']:.2f}s",
+                    flush=True,
+                )
             (args.output_dir / "metrics.json").write_text(
                 json.dumps(metrics, indent=2),
                 encoding="utf-8",
@@ -554,6 +682,8 @@ def main() -> None:
             "teacher_uses_only_fresh_noisy_stream": True,
             "fresh_noise_each_sample": True,
             "input_sampling": args.input_sampling,
+            "input_design_uses_target_labels": False,
+            "input_design_diagnostics": design_diagnostics,
             "target_formula_seeded": False,
             "existing_circuit_seeded": False,
             "generic_quadratic_basis_size": features.shape[1],
@@ -570,7 +700,20 @@ def main() -> None:
         json.dumps(run, indent=2),
         encoding="utf-8",
     )
-    print(json.dumps(run, indent=2), flush=True)
+    if not args.quiet:
+        print(json.dumps(run, indent=2), flush=True)
+    else:
+        print(
+            json.dumps(
+                {
+                    "output_dir": str(args.output_dir),
+                    "first_full_recovery_step": first_exact_step,
+                    "final_word_accuracy": metrics[-1]["word_accuracy"],
+                    "elapsed_seconds": metrics[-1]["elapsed_seconds"],
+                }
+            ),
+            flush=True,
+        )
 
 
 if __name__ == "__main__":
