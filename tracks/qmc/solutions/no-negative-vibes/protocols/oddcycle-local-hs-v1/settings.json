@@ -1,0 +1,18 @@
+{
+  "schema": "oddcycle-local-hs-settings-v1",
+  "seed": 20260730,
+  "dictionary_lengths": [1, 2, 3, 4],
+  "free_localities": [
+    "path-edge",
+    "ring-edge",
+    "path-arc3",
+    "ring-arc3",
+    "cluster-two-body"
+  ],
+  "target_library": "first",
+  "portfolio_sample_count": 256,
+  "promotion_active_ray_limit": 32,
+  "numerical_active_tolerance": 1e-10,
+  "numerical_residual_tolerance": 1e-9,
+  "python_hash_seed": 0
+}
