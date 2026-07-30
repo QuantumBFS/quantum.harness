@@ -1,0 +1,83 @@
+{
+  "schema_version": 1,
+  "solver": "varisat-0.2.2",
+  "encoding": "fanin2-six-op-relation-forbidden-tuples-v1",
+  "status": "timeout",
+  "status_detail": "wall-clock timeout reached at relation gate bound 7; no larger bound was attempted",
+  "problem_sha256": "a3f663058f4c8bafe4d79ab1a544540ce45e25c93d05225c9f4fe5b1d024db9d",
+  "input_width": 4,
+  "output_width": 5,
+  "relation_rows": 16,
+  "maximum_gate_bound": 12,
+  "timeout_ms": 20000,
+  "attempts": [
+    {
+      "gate_bound": 0,
+      "status": "unsat",
+      "variables": 120,
+      "clauses": 1272,
+      "literals": 4035,
+      "elapsed_ms": 3
+    },
+    {
+      "gate_bound": 1,
+      "status": "unsat",
+      "variables": 200,
+      "clauses": 2391,
+      "literals": 7387,
+      "elapsed_ms": 6
+    },
+    {
+      "gate_bound": 2,
+      "status": "unsat",
+      "variables": 284,
+      "clauses": 3692,
+      "literals": 11235,
+      "elapsed_ms": 10
+    },
+    {
+      "gate_bound": 3,
+      "status": "unsat",
+      "variables": 372,
+      "clauses": 5183,
+      "literals": 15595,
+      "elapsed_ms": 27
+    },
+    {
+      "gate_bound": 4,
+      "status": "unsat",
+      "variables": 464,
+      "clauses": 6872,
+      "literals": 20483,
+      "elapsed_ms": 49
+    },
+    {
+      "gate_bound": 5,
+      "status": "unsat",
+      "variables": 560,
+      "clauses": 8767,
+      "literals": 25915,
+      "elapsed_ms": 569
+    },
+    {
+      "gate_bound": 6,
+      "status": "unsat",
+      "variables": 660,
+      "clauses": 10876,
+      "literals": 31907,
+      "elapsed_ms": 375
+    },
+    {
+      "gate_bound": 7,
+      "status": "timeout",
+      "variables": 764,
+      "clauses": 13207,
+      "literals": 38475,
+      "elapsed_ms": 18959
+    }
+  ],
+  "minimal_gate_count": null,
+  "netlist_sha256": null,
+  "netlist": null,
+  "verification": null
+}

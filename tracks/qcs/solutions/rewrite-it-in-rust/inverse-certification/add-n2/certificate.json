@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "solver": "varisat-0.2.2",
+  "encoding": "fanin2-six-op-relation-forbidden-tuples-v1",
+  "status": "sat",
+  "status_detail": "relation bounds 0 through 4 returned UNSAT in-process and bound 5 was SAT; this record is not a DRAT/LRAT proof object",
+  "problem_sha256": "31c6b0a48a82e829573c8d16d6be99151762dccf7a77578542250442c31d3c0c",
+  "input_width": 3,
+  "output_width": 5,
+  "relation_rows": 8,
+  "maximum_gate_bound": 8,
+  "timeout_ms": 60000,
+  "attempts": [
+    {
+      "gate_bound": 0,
+      "status": "unsat",
+      "variables": 70,
+      "clauses": 559,
+      "literals": 1855,
+      "elapsed_ms": 3
+    },
+    {
+      "gate_bound": 1,
+      "status": "unsat",
+      "variables": 122,
+      "clauses": 1120,
+      "literals": 3543,
+      "elapsed_ms": 6
+    },
+    {
+      "gate_bound": 2,
+      "status": "unsat",
+      "variables": 178,
+      "clauses": 1791,
+      "literals": 5519,
+      "elapsed_ms": 11
+    },
+    {
+      "gate_bound": 3,
+      "status": "unsat",
+      "variables": 238,
+      "clauses": 2580,
+      "literals": 7799,
+      "elapsed_ms": 33
+    },
+    {
+      "gate_bound": 4,
+      "status": "unsat",
+      "variables": 302,
+      "clauses": 3495,
+      "literals": 10399,
+      "elapsed_ms": 257
+    },
+    {
+      "gate_bound": 5,
+      "status": "sat",
+      "variables": 370,
+      "clauses": 4544,
+      "literals": 13335,
+      "elapsed_ms": 1453
+    }
+  ],
+  "minimal_gate_count": 5,
+  "netlist_sha256": "05598cd8b9e52244cd173ca4b0758372e866ebdce146c87c7423879ae2dbbf17",
+  "netlist": "INPUTS 3\nw1 = AND x1 x3\nw2 = AND x2 w1\nw3 = AND x3 ~w2\nw4 = XOR x1 x3\nw5 = XOR x2 w1\nOUTPUTS w3 w3 w4 w5 ~w2\n",
+  "verification": {
+    "reparsed_netlist": true,
+    "rows": 8,
+    "valid_rows": 7,
+    "invalid_rows": 1,
+    "mismatches": 0
+  }
+}

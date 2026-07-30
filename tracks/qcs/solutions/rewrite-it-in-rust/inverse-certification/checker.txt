@@ -1,0 +1,24 @@
+checker: drat-trim
+repository: https://github.com/marijnheule/drat-trim
+commit: 2e3b2dc0ecf938addbd779d42877b6ed69d9a985
+build: gcc drat-trim.c -std=c99 -O2 -o drat-trim
+
+add-n2/k-minus-1.cnf + add-n2/k-minus-1.drat
+c parsing input formula with 302 variables and 3495 clauses
+c finished parsing
+c detected empty clause; start verification via backward checking
+c 1311 of 3495 clauses in core
+c 2258 of 8109 lemmas in core using 30411 resolution steps
+c 0 RAT lemmas in core; 498 redundant literals in core lemmas
+s VERIFIED
+c verification time: 0.228 seconds
+
+abs-diff-n2/k-minus-1.cnf + abs-diff-n2/k-minus-1.drat
+c parsing input formula with 40 variables and 227 clauses
+c finished parsing
+c detected empty clause; start verification via backward checking
+c 67 of 227 clauses in core
+c 54 of 89 lemmas in core using 153 resolution steps
+c 0 RAT lemmas in core; 0 redundant literals in core lemmas
+s VERIFIED
+c verification time: 0.236 seconds

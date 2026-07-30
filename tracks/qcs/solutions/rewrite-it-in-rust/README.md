@@ -175,6 +175,18 @@ Remote evidence:
 
 - [Complete standard #71 submission PR](https://github.com/QuantumBFS/quantum.harness/pull/220)
 
+## Certified Inverse-Relation Follow-up
+
+The public [`inverse-certification/`](inverse-certification/) bundle implements the reviewer's
+relation semantics and adds a proof-producing exact-synthesis control experiment. For `n=2`, the
+same forbidden-tuple CNF pipeline recovers and certifies a 5-gate Add inverse and a 1-gate AbsDiff
+inverse. Their `k-1` DIMACS instances and text DRAT proofs both pass pinned `drat-trim`; circuits,
+proof hashes, checker transcript, and frozen source are committed beside this README.
+
+The hard-instance boundary remains explicit: a 20-second Multiply run returned in-process UNSAT
+for bounds 0 through 6 and timed out at bound 7. It has no final proof object, so no Multiply
+minimum is claimed. These control theorems do not make the forward A-D circuits globally minimal.
+
 Because the implementation repository is private, GitHub Actions and release
 links are visible only to authorized reviewers. Exact v0.3.0 run links are
 recorded in the private completion report and both PR descriptions.

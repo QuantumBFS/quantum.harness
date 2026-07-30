@@ -1,0 +1,3 @@
+INPUTS 2
+w1 = AND x1 ~x1
+OUTPUTS x1 x2 w1 w1 ~w1
