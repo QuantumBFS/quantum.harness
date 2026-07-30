@@ -459,12 +459,79 @@
         {
           "kind": "verdict",
           "status": "good",
-          "label": "⟦zh⟧新结果：随机神经集成完整恢复 4,096 / 4,096⟦en⟧New result: random neural ensemble recovers 4,096 / 4,096",
+          "label": "⟦zh⟧新压缩结果：13,872 参数单模型，两次恢复 4,096 / 4,096⟦en⟧New compression result: a 13,872-parameter single model recovers 4,096 / 4,096 twice",
+          "why": "⟦zh⟧宽度 36 的随机初始化学生在两条独立噪声流上分别于第 10,000 和 9,500 步首次全对，之后所有检查点持续精确；两个最终检查点均已独立重新加载并验证。与此前 128 宽单成员相比，连续参数减少 80.96%。⟦en⟧The randomly initialized width-36 student first becomes exact at steps 10,000 and 9,500 on two independent noise streams, then remains exact at every subsequent checkpoint; both final checkpoints were independently reloaded and verified. Continuous parameters fall by 80.96% relative to one previous width-128 member."
+        },
+        {
+          "kind": "card",
+          "title": "⟦zh⟧当前最紧凑、已复现的训练方法⟦en⟧Most compact replicated training method",
+          "blocks": [
+            {
+              "kind": "kv",
+              "pairs": [
+                ["⟦zh⟧学生网络⟦en⟧Student", "⟦zh⟧单模型、随机初始化；298 个通用一至三阶奇偶特征，三层 36 宽 MLP，13,872 个连续参数⟦en⟧One randomly initialized model; 298 generic degree-one to degree-three parity features, three 36-wide hidden layers and 13,872 continuous parameters"],
+                ["⟦zh⟧数据流⟦en⟧Data stream", "⟦zh⟧每步 100 个新输入，每个输出位独立以 25% 概率翻转；无固定噪声数据集⟦en⟧100 fresh inputs per step; every output bit flips independently with 25% probability and no noisy dataset is reused"],
+                ["⟦zh⟧主动后验回放⟦en⟧Active posterior replay", "⟦zh⟧贝叶斯教师只积累新鲜带噪观察；每步从 800 个候选中选择 100 个高置信、高分歧样本，并保留 20% 随机探索⟦en⟧A Bayesian teacher accumulates only fresh noisy observations; 100 high-confidence, high-disagreement examples are selected from 800 candidates while 20% remain random exploration"],
+                ["⟦zh⟧损失触发退火⟦en⟧Loss-triggered annealing", "⟦zh⟧学习率保持 0.001，直到带噪蒸馏损失的指数均值降至 0.05；随后用 1,500 步余弦冷却到 0.00005。触发器不读取干净评测结果⟦en⟧The learning rate stays at 0.001 until the noisy distillation-loss EMA reaches 0.05, then cools to 0.00005 over 1,500 cosine steps. The trigger never reads clean evaluation results"],
+                ["⟦zh⟧主实验⟦en⟧Primary run", "⟦zh⟧第 9,575 步触发退火，第 10,000 步首次全对；之后 5 / 5 个检查点全对⟦en⟧Annealing triggers at step 9,575 and first exact recovery occurs at step 10,000; all 5 / 5 checkpoints from that point are exact"],
+                ["⟦zh⟧独立复跑⟦en⟧Independent replication", "⟦zh⟧第 8,584 步触发退火，第 9,500 步首次全对；之后 6 / 6 个检查点全对⟦en⟧Annealing triggers at step 8,584 and first exact recovery occurs at step 9,500; all 6 / 6 checkpoints from that point are exact"],
+                ["⟦zh⟧完整证据⟦en⟧Evidence", "capacity_schedule_p25_summary.json · SHA-256 recorded inside"]
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "table",
+          "columns": [
+            "⟦zh⟧单模型配置⟦en⟧Single-model configuration",
+            "⟦zh⟧参数数⟦en⟧Parameters",
+            "⟦zh⟧首次全对⟦en⟧First exact",
+            "⟦zh⟧最终整词准确率⟦en⟧Final exact-word accuracy",
+            "⟦zh⟧稳定性⟦en⟧Stability"
+          ],
+          "rows": [
+            ["⟦zh⟧宽 36，损失触发，主实验⟦en⟧h36, loss-triggered, primary", "13,872", "10,000", "100%", "⟦zh⟧首次全对后 5 / 5 检查点全对⟦en⟧5 / 5 checkpoints exact after first recovery"],
+            ["⟦zh⟧宽 36，损失触发，独立复跑⟦en⟧h36, loss-triggered, replication", "13,872", "9,500", "100%", "⟦zh⟧首次全对后 6 / 6 检查点全对⟦en⟧6 / 6 checkpoints exact after first recovery"],
+            ["⟦zh⟧宽 40，损失触发⟦en⟧h40, loss-triggered", "15,732", "6,500", "100%", "⟦zh⟧首次全对后 15 / 15 检查点全对⟦en⟧15 / 15 checkpoints exact after first recovery"],
+            ["⟦zh⟧宽 48，损失触发⟦en⟧h48, loss-triggered", "19,644", "4,900", "100%", "⟦zh⟧首次全对后 22 / 22 检查点全对⟦en⟧22 / 22 checkpoints exact after first recovery"],
+            ["⟦zh⟧宽 48，恒定学习率⟦en⟧h48, constant learning rate", "19,644", "5,000", "100%", "⟦zh⟧达到全对后又出现错误，最终重新全对⟦en⟧Errors reappear after exact recovery before the final return to 100%"],
+            ["⟦zh⟧宽 32，损失触发⟦en⟧h32, loss-triggered", "12,076", "⟦zh⟧12,000 步内未达到⟦en⟧Not reached by 12,000", "74.4385%", "⟦zh⟧这是当前预算下的结果，不宣称为容量硬下界⟦en⟧Current-budget result, not a claimed hard capacity lower bound"]
+          ],
+          "numeric": [false, true, false, true, false]
+        },
+        {
+          "kind": "figures",
+          "items": [
+            {
+              "src": "noisy-c-capacity-schedule-p25.png",
+              "caption": "⟦zh⟧容量与学习率机制的统一比较。左上显示模型越小通常需要越多训练步；右上给出参数数与首次全对时间的前沿。左下固定宽度 48：按总步数预先设定的余弦退火在 6,000 步仅到 80.08%，恒定学习率虽达到 100% 却会再次出错；只用带噪训练损失触发冷却后，从第 4,900 步起 22 个检查点持续全对。右下显示已复现的最小精确学生为宽 36、13,872 参数；宽 32 在 12,000 步的 74.44% 只是一项负结果，不是理论下界。⟦en⟧Unified comparison of capacity and learning-rate mechanisms. The upper left shows that smaller students generally require more optimization; the upper right gives the parameter-versus-first-recovery frontier. At fixed width 48, the lower-left panel shows that fixed-horizon cosine annealing reaches only 80.08% by step 6,000, while a constant rate reaches 100% but later makes errors. Cooling triggered solely by noisy training loss stays exact for 22 checkpoints from step 4,900. The lower right identifies the smallest replicated exact student as width 36 with 13,872 parameters; width 32 at 74.44% after 12,000 steps is a negative result, not a theoretical lower bound."
+            }
+          ]
+        },
+        {
+          "kind": "note",
+          "label": "⟦zh⟧创新点：把“何时降学习率”交给带噪训练状态⟦en⟧Innovation: let noisy training state decide when to lower the learning rate",
+          "text": "⟦zh⟧固定总步数的余弦计划会让小模型在尚未学会结构时过早冻结；恒定学习率又会在已经全对后把模型推离精确解。新的触发式计划只观察蒸馏损失的指数均值：先让小模型长期保持探索能力，达到预设置信区间后再冷却。这不是利用干净验证集调度，因此保留了训练与标准数据评测的隔离。⟦en⟧A fixed-horizon cosine schedule freezes small models before they learn the structure, whereas a constant learning rate can push an already exact model away from the solution. The triggered schedule watches only the distillation-loss EMA: it preserves exploration for as long as needed and cools only after reaching a preset confidence regime. It does not schedule from the clean validation domain, preserving the separation between training and standard-data evaluation."
+        },
+        {
+          "kind": "note",
+          "label": "⟦zh⟧压缩仍不等于少门⟦en⟧Compression is still not a low-gate circuit",
+          "text": "⟦zh⟧13,872 是浮点参数数，不是布尔门数；在线教师还保存 4,096 × 12 个后验状态，主动选择每步仍需评估 800 个候选。当前结果把可复现的精确学生缩小了，但尚未得到可与第一页 156 门电路直接比较的离散门图。下一循环将把稀疏化、离散化和门级验证直接放进目标函数。⟦en⟧The number 13,872 counts floating-point parameters, not Boolean gates. The online teacher still stores 4,096 × 12 posterior states and active selection evaluates 800 candidates per step. This round makes the replicated exact student much smaller, but does not yet produce a discrete gate graph comparable with the 156-gate circuit on page one. The next cycle puts sparsity, discretization and gate-level verification directly into the objective."
+        },
+        {
+          "kind": "heading",
+          "level": 3,
+          "text": "⟦zh⟧此前的最快全精确结果⟦en⟧Previous fastest exact-recovery result"
+        },
+        {
+          "kind": "verdict",
+          "status": "good",
+          "label": "⟦zh⟧速度结果：四成员随机神经集成完整恢复 4,096 / 4,096⟦en⟧Speed result: a four-member random neural ensemble recovers 4,096 / 4,096",
           "why": "⟦zh⟧“三阶奇偶特征 + 主动后验回放”在主实验第 1,400 步首次达到 100%，不同随机种子的独立复跑在第 1,600 步达到 100%；两次实验的最终整词准确率均为 100%。⟦en⟧Third-order parity features with active posterior replay first reach 100% at step 1,400 in the main run and at step 1,600 in an independent seed replication; both runs finish at 100% exact-word accuracy."
         },
         {
           "kind": "card",
-          "title": "⟦zh⟧当前最佳训练方法⟦en⟧Current best training method",
+          "title": "⟦zh⟧此前最快的训练方法⟦en⟧Previous fastest training method",
           "blocks": [
             {
               "kind": "kv",
@@ -573,7 +640,7 @@
         {
           "kind": "note",
           "label": "⟦zh⟧当前结论⟦en⟧Current conclusion",
-          "text": "⟦zh⟧当前实验已经解决了“在 25% 新鲜位噪声下，随机初始化的公式未知神经模型能否完整逼近标准映射”这一阶段性问题：可以，并且两个独立随机种子均在 1,600 步以内首次全对。最有效的组合不是单一技巧，而是贝叶斯去噪、通用低阶布尔交互、主动难例回放和集成投票。下一循环将比较更小隐藏层、结构化剪枝、学生自蒸馏与可微布尔门，使准确率目标与门数目标同时进入优化。⟦en⟧The present experiments answer the intermediate question of whether a randomly initialized, formula-agnostic neural model can completely approach the clean map under fresh 25% bit noise: yes, with first exact recovery by step 1,600 in two independent seeds. The effective mechanism is a combination of Bayesian denoising, generic low-degree Boolean interactions, active hard-example replay and ensemble voting. The next cycle will compare smaller hidden layers, structured pruning, student self-distillation and differentiable Boolean gates so that accuracy and gate count are optimized together."
+          "text": "⟦zh⟧当前实验给出两个互补答案。若目标是速度，四成员宽 128 集成在两个随机种子上分别于第 1,400 和 1,600 步首次全对；若目标是压缩，单个宽 36 学生只用 13,872 个参数，也在两个随机种子上完整恢复，并在首次全对后持续稳定。新的关键不是单纯延长训练，而是让带噪蒸馏损失决定何时退火：它将宽 48 的不稳定精确解变成连续 22 个检查点的稳定精确解。下一循环将从浮点网络继续走向结构化稀疏、离散布尔门和可验证门数。⟦en⟧The experiments now give two complementary answers. For speed, a four-member width-128 ensemble first becomes exact at steps 1,400 and 1,600 in two random seeds. For compression, one width-36 student with only 13,872 parameters also recovers the entire domain in two seeds and remains stable after first recovery. The new mechanism is not merely longer training: noisy distillation loss decides when to anneal, turning the unstable exact width-48 solution into 22 consecutive exact checkpoints. The next cycle moves from floating-point networks toward structured sparsity, discrete Boolean gates and verifiable gate counts."
         }
       ]
     }

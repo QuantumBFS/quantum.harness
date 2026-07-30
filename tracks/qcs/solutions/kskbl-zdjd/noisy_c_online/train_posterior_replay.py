@@ -38,6 +38,9 @@ class Config:
     depth: int
     learning_rate: float
     minimum_learning_rate: float
+    learning_rate_schedule: str
+    anneal_loss_threshold: float
+    anneal_steps: int
     weight_decay: float
     confidence_power: float
     eval_every: int
@@ -69,6 +72,13 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--depth", type=int, default=3)
     parser.add_argument("--learning-rate", type=float, default=1e-3)
     parser.add_argument("--minimum-learning-rate", type=float, default=5e-5)
+    parser.add_argument(
+        "--learning-rate-schedule",
+        choices=("constant", "cosine", "loss-triggered"),
+        default="cosine",
+    )
+    parser.add_argument("--anneal-loss-threshold", type=float, default=0.05)
+    parser.add_argument("--anneal-steps", type=int, default=1000)
     parser.add_argument("--weight-decay", type=float, default=1e-6)
     parser.add_argument("--confidence-power", type=float, default=1.0)
     parser.add_argument("--eval-every", type=int, default=250)
@@ -79,8 +89,20 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def learning_rate_at_step(config: Config, step: int) -> float:
-    progress = min(max(step / config.steps, 0.0), 1.0)
+def learning_rate_at_step(
+    config: Config,
+    step: int,
+    anneal_start_step: int | None,
+) -> float:
+    if config.learning_rate_schedule == "constant":
+        return config.learning_rate
+    if config.learning_rate_schedule == "loss-triggered":
+        if anneal_start_step is None:
+            return config.learning_rate
+        progress = (step - anneal_start_step) / config.anneal_steps
+    else:
+        progress = step / config.steps
+    progress = min(max(progress, 0.0), 1.0)
     cosine = 0.5 * (1.0 + np.cos(np.pi * progress))
     return config.minimum_learning_rate + (
         config.learning_rate - config.minimum_learning_rate
@@ -203,6 +225,8 @@ def main() -> None:
         raise ValueError("replay sizes must be positive")
     if not 0.0 <= args.active_exploration <= 1.0:
         raise ValueError("active-exploration must lie between zero and one")
+    if args.anneal_loss_threshold <= 0.0 or args.anneal_steps <= 0:
+        raise ValueError("loss-triggered annealing settings must be positive")
 
     torch.set_num_threads(args.threads)
     device = torch.device(args.device)
@@ -222,6 +246,9 @@ def main() -> None:
         depth=args.depth,
         learning_rate=args.learning_rate,
         minimum_learning_rate=args.minimum_learning_rate,
+        learning_rate_schedule=args.learning_rate_schedule,
+        anneal_loss_threshold=args.anneal_loss_threshold,
+        anneal_steps=args.anneal_steps,
         weight_decay=args.weight_decay,
         confidence_power=args.confidence_power,
         eval_every=args.eval_every,
@@ -270,6 +297,7 @@ def main() -> None:
     evaluator = CleanDomainEvaluator(device)
     metrics: list[dict[str, object]] = []
     loss_ema: float | None = None
+    anneal_start_step: int | None = None
     input_weights = 2 ** torch.arange(12, device=device, dtype=torch.int64)
     start = time.perf_counter()
     (args.output_dir / "config.json").write_text(
@@ -278,7 +306,11 @@ def main() -> None:
     )
 
     for step in range(1, args.steps + 1):
-        learning_rate = learning_rate_at_step(config, step)
+        learning_rate = learning_rate_at_step(
+            config,
+            step,
+            anneal_start_step,
+        )
         member_losses = []
         for stream, teacher, generator, model, optimizer in zip(
             streams,
@@ -325,12 +357,19 @@ def main() -> None:
             if loss_ema is None
             else 0.98 * loss_ema + 0.02 * mean_loss
         )
+        if (
+            config.learning_rate_schedule == "loss-triggered"
+            and anneal_start_step is None
+            and loss_ema <= config.anneal_loss_threshold
+        ):
+            anneal_start_step = step + 1
         if step == 1 or step % args.eval_every == 0 or step == args.steps:
             record = {
                 "step": step,
                 "examples_seen": step * args.batch_size,
                 "elapsed_seconds": time.perf_counter() - start,
                 "learning_rate": learning_rate,
+                "anneal_start_step": anneal_start_step,
                 "train_loss_ema": loss_ema,
                 **evaluate(models, evaluator),
                 **evaluate_teachers(teachers, evaluator),
@@ -376,6 +415,7 @@ def main() -> None:
             "existing_circuit_seeded": False,
             "fresh_noise_each_sample": True,
         },
+        "anneal_start_step": anneal_start_step,
         "final": final,
     }
     (args.output_dir / "run.json").write_text(

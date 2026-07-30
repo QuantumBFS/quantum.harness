@@ -30,7 +30,13 @@ def build_command(
     params: dict[str, Any],
     output_dir: Path,
 ) -> list[str]:
-    payload = {**settings, **params}
+    payload = {
+        "learning_rate_schedule": "cosine",
+        "anneal_loss_threshold": 0.05,
+        "anneal_steps": 1000,
+        **settings,
+        **params,
+    }
     ordered_keys = (
         "steps",
         "batch_size",
@@ -45,6 +51,9 @@ def build_command(
         "depth",
         "learning_rate",
         "minimum_learning_rate",
+        "learning_rate_schedule",
+        "anneal_loss_threshold",
+        "anneal_steps",
         "weight_decay",
         "confidence_power",
         "eval_every",
