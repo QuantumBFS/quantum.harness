@@ -7,9 +7,6 @@ from dataclasses import dataclass
 import numpy as np
 from scipy.integrate import cumulative_simpson
 
-from .measure import local_polynomial_derivative
-
-
 @dataclass(frozen=True, slots=True)
 class Extrapolated:
     value: float
@@ -93,6 +90,8 @@ def integrate_free_energy(beta, u):
 
 
 def specific_heat_from_u(beta, u):
+    from .measure import local_polynomial_derivative
+
     beta = np.asarray(beta, dtype=float)
     u = np.asarray(u, dtype=float)
     derivative = local_polynomial_derivative(beta, u)
