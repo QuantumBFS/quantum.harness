@@ -24,6 +24,20 @@ from .operators import (
     local_energy,
     local_from_log_neighbors,
 )
+from .tower import FixedMMetropolisSampler, LadderComponent, LadderTower
+
+
+_SPIN_TWO_M_VALUES = (-2, -1, 0, 1, 2)
+_FULL_TRAINING_SEEDS = (848, 1848, 2848)
+_FULL_UPDATES = 2048
+_FULL_BATCH_SIZE = 512
+_FULL_CHECKPOINT_INTERVAL = 128
+_FULL_TOWER_BURN_IN_STEPS = 1024
+_FULL_LEARNING_RATE = 1.0e-3
+_FULL_BETA1 = 0.9
+_FULL_BETA2 = 0.999
+_FULL_EPSILON = 1.0e-8
+_FULL_GRADIENT_CLIP_NORM = 10.0
 
 
 class FeatureStateError(RuntimeError):
@@ -357,6 +371,168 @@ def reduced_objective_and_gradient(
     return objective, np.asarray(gradient, dtype=np.float64), metrics
 
 
+def _tower_mapping(name: str, values: object) -> Mapping[int, object]:
+    if not isinstance(values, Mapping):
+        raise TypeError(f"{name} must be a mapping")
+    if set(values) != set(_SPIN_TWO_M_VALUES):
+        raise ValueError(f"{name} must contain exactly M=-2,-1,0,1,2")
+    return values
+
+
+def full_objective_and_gradient(
+    *,
+    ground_energy: object,
+    ground_l2: object,
+    ground_scores: object,
+    excited_energy_by_m: object,
+    excited_l2_by_m: object,
+    excited_l4_by_m: object,
+    excited_scores_by_m: object,
+) -> tuple[float, np.ndarray, dict[str, float]]:
+    """Evaluate the tower-aware objective with equal component weight."""
+
+    ground_energy_array = _complex_sample_vector("ground_energy", ground_energy)
+    ground_l2_array = _complex_sample_vector("ground_l2", ground_l2)
+    ground_score_array = _complex_score_matrix("ground_scores", ground_scores)
+    if ground_energy_array.shape != ground_l2_array.shape:
+        raise ValueError("ground local estimators must have the same shape")
+    if ground_score_array.shape[0] != ground_energy_array.shape[0]:
+        raise ValueError("ground_scores must contain one row per ground sample")
+    ground_weights = _normalized_weights(None, ground_energy_array.shape[0])
+
+    energy_mapping = _tower_mapping(
+        "excited_energy_by_m",
+        excited_energy_by_m,
+    )
+    l2_mapping = _tower_mapping("excited_l2_by_m", excited_l2_by_m)
+    l4_mapping = _tower_mapping("excited_l4_by_m", excited_l4_by_m)
+    score_mapping = _tower_mapping(
+        "excited_scores_by_m",
+        excited_scores_by_m,
+    )
+    energy_arrays: dict[int, np.ndarray] = {}
+    l2_arrays: dict[int, np.ndarray] = {}
+    l4_arrays: dict[int, np.ndarray] = {}
+    score_arrays: dict[int, np.ndarray] = {}
+    component_weights: dict[int, np.ndarray] = {}
+    for m in _SPIN_TWO_M_VALUES:
+        energy_array = _complex_sample_vector(
+            f"excited_energy_by_m[{m}]",
+            energy_mapping[m],
+        )
+        l2_array = _complex_sample_vector(
+            f"excited_l2_by_m[{m}]",
+            l2_mapping[m],
+        )
+        l4_array = _complex_sample_vector(
+            f"excited_l4_by_m[{m}]",
+            l4_mapping[m],
+        )
+        score_array = _complex_score_matrix(
+            f"excited_scores_by_m[{m}]",
+            score_mapping[m],
+        )
+        if not (energy_array.shape == l2_array.shape == l4_array.shape):
+            raise ValueError(
+                f"excited M={m} local estimators must have the same shape"
+            )
+        if score_array.shape[0] != energy_array.shape[0]:
+            raise ValueError(
+                f"excited_scores_by_m[{m}] must contain one row per sample"
+            )
+        if score_array.shape[1] != ground_score_array.shape[1]:
+            raise ValueError("all scores must have the same parameter count")
+        energy_arrays[m] = energy_array
+        l2_arrays[m] = l2_array
+        l4_arrays[m] = l4_array
+        score_arrays[m] = score_array
+        component_weights[m] = _normalized_weights(None, energy_array.shape[0])
+
+    mean_energy_ground = _hermitian_expectation(
+        ground_energy_array,
+        ground_weights,
+    )
+    mean_l2_ground = _hermitian_expectation(
+        ground_l2_array,
+        ground_weights,
+    )
+    energy_means = {
+        m: _hermitian_expectation(energy_arrays[m], component_weights[m])
+        for m in _SPIN_TWO_M_VALUES
+    }
+    l2_means = {
+        m: _hermitian_expectation(l2_arrays[m], component_weights[m])
+        for m in _SPIN_TWO_M_VALUES
+    }
+    l4_means = {
+        m: _hermitian_expectation(l4_arrays[m], component_weights[m])
+        for m in _SPIN_TWO_M_VALUES
+    }
+    mean_energy_excited = math.fsum(energy_means.values()) / 5.0
+    mean_l2_excited = math.fsum(l2_means.values()) / 5.0
+    mean_l4_excited = math.fsum(l4_means.values()) / 5.0
+    variance_l2_excited = mean_l4_excited - mean_l2_excited**2
+    objective = (
+        mean_energy_ground
+        + mean_energy_excited
+        + 0.25 * mean_l2_ground**2
+        + 0.25 * (mean_l2_excited - 6.0) ** 2
+        + 0.05 * variance_l2_excited
+    )
+
+    def mean_component_covariance(
+        local_values: Mapping[int, np.ndarray],
+    ) -> np.ndarray:
+        component_gradients = [
+            _score_covariance_from_arrays(
+                score_arrays[m],
+                local_values[m],
+                component_weights[m],
+            )
+            for m in _SPIN_TWO_M_VALUES
+        ]
+        return np.sum(component_gradients, axis=0) / 5.0
+
+    ground_l2_gradient = _score_covariance_from_arrays(
+        ground_score_array,
+        ground_l2_array,
+        ground_weights,
+    )
+    excited_l2_gradient = mean_component_covariance(l2_arrays)
+    gradient = (
+        _score_covariance_from_arrays(
+            ground_score_array,
+            ground_energy_array,
+            ground_weights,
+        )
+        + mean_component_covariance(energy_arrays)
+        + 0.5 * mean_l2_ground * ground_l2_gradient
+        + 0.5 * (mean_l2_excited - 6.0) * excited_l2_gradient
+        + 0.05
+        * (
+            mean_component_covariance(l4_arrays)
+            - 2.0 * mean_l2_excited * excited_l2_gradient
+        )
+    )
+    if not math.isfinite(objective) or not math.isfinite(
+        variance_l2_excited
+    ) or not np.all(np.isfinite(gradient)):
+        raise FloatingPointError("non-finite full VMC objective or gradient")
+    metrics = {
+        "energy_ground": mean_energy_ground,
+        "energy_excited": mean_energy_excited,
+        "mean_l2_ground": mean_l2_ground,
+        "mean_l2_excited": mean_l2_excited,
+        "mean_l4_excited": mean_l4_excited,
+        "variance_l2_excited": variance_l2_excited,
+        **{
+            f"energy_excited_m{m:+d}": energy_means[m]
+            for m in _SPIN_TWO_M_VALUES
+        },
+    }
+    return objective, np.asarray(gradient, dtype=np.float64), metrics
+
+
 def clip_gradient(
     gradient: object,
     *,
@@ -496,6 +672,73 @@ class ReducedTrainingConfig:
                 raise ValueError(
                     f"{name} must be a {length}-character {label}"
                 ) from error
+
+
+@dataclass(frozen=True, slots=True)
+class FullTrainingConfig:
+    """The non-overridable A05.2 production schedule."""
+
+    training_seed: int
+    protocol_sha256: str
+    comparison_sha: str
+
+    def __post_init__(self) -> None:
+        if isinstance(self.training_seed, bool) or not isinstance(
+            self.training_seed,
+            Integral,
+        ):
+            raise TypeError("training_seed must be an integer")
+        if int(self.training_seed) not in _FULL_TRAINING_SEEDS:
+            raise ValueError("training_seed must be one of 848, 1848, or 2848")
+        for name, length, label in (
+            ("protocol_sha256", 64, "SHA-256"),
+            ("comparison_sha", 40, "Git SHA"),
+        ):
+            value = getattr(self, name)
+            if not isinstance(value, str) or len(value) != length:
+                raise ValueError(f"{name} must be a {length}-character {label}")
+            try:
+                bytes.fromhex(value)
+            except ValueError as error:
+                raise ValueError(
+                    f"{name} must be a {length}-character {label}"
+                ) from error
+
+    @property
+    def updates(self) -> int:
+        return _FULL_UPDATES
+
+    @property
+    def batch_size_per_sector(self) -> int:
+        return _FULL_BATCH_SIZE
+
+    @property
+    def checkpoint_interval(self) -> int:
+        return _FULL_CHECKPOINT_INTERVAL
+
+    @property
+    def tower_burn_in_steps(self) -> int:
+        return _FULL_TOWER_BURN_IN_STEPS
+
+    @property
+    def learning_rate(self) -> float:
+        return _FULL_LEARNING_RATE
+
+    @property
+    def beta1(self) -> float:
+        return _FULL_BETA1
+
+    @property
+    def beta2(self) -> float:
+        return _FULL_BETA2
+
+    @property
+    def epsilon(self) -> float:
+        return _FULL_EPSILON
+
+    @property
+    def gradient_clip_norm(self) -> float:
+        return _FULL_GRADIENT_CLIP_NORM
 
 
 @dataclass(frozen=True, slots=True)
@@ -656,11 +899,88 @@ def _sector_estimators(
     return energy_array, l2_array, l4_array, score_array
 
 
+def _tower_component_estimators(
+    component: LadderComponent,
+    operator: PreparedPairOperator,
+    states: np.ndarray,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """Evaluate one derived component with its own amplitude and score."""
+
+    if not isinstance(component, LadderComponent):
+        raise TypeError("component must be a LadderComponent")
+    if not isinstance(operator, PreparedPairOperator):
+        raise TypeError("operator must be a PreparedPairOperator")
+    if operator.two_q != component.two_q:
+        raise ValueError("operator and tower component flux do not match")
+    logpsi_cache: dict[int, complex] = {}
+    l2_row_cache: dict[int, dict[int, complex]] = {}
+
+    def logpsi(raw_state: int) -> complex:
+        state = _state_integer(raw_state)
+        value = logpsi_cache.get(state)
+        if value is None:
+            value = component.logpsi(state)
+            logpsi_cache[state] = value
+        return value
+
+    def l2_row(raw_state: int) -> dict[int, complex]:
+        state = _state_integer(raw_state)
+        row = l2_row_cache.get(state)
+        if row is None:
+            row = l2_neighbors(
+                state,
+                two_q=component.two_q,
+                target_m=float(component.m),
+            )
+            l2_row_cache[state] = row
+        return row
+
+    cache: dict[int, tuple[complex, complex, complex, np.ndarray]] = {}
+    energies: list[complex] = []
+    l2_values: list[complex] = []
+    l4_values: list[complex] = []
+    scores: list[np.ndarray] = []
+    for raw_state in states:
+        state = _state_integer(raw_state)
+        evaluated = cache.get(state)
+        if evaluated is None:
+            source_row = l2_row(state)
+            evaluated = (
+                local_energy(state, operator=operator, logpsi=logpsi),
+                local_from_log_neighbors(state, source_row, logpsi),
+                local_from_log_neighbors(
+                    state,
+                    _compose_l2_rows(source_row, l2_row),
+                    logpsi,
+                ),
+                component.log_score(state),
+            )
+            cache[state] = evaluated
+        energy, l2_value, l4_value, score = evaluated
+        energies.append(energy)
+        l2_values.append(l2_value)
+        l4_values.append(l4_value)
+        scores.append(score)
+    arrays = (
+        np.asarray(energies, dtype=np.complex128),
+        np.asarray(l2_values, dtype=np.complex128),
+        np.asarray(l4_values, dtype=np.complex128),
+        np.asarray(scores, dtype=np.complex128),
+    )
+    if any(
+        not np.all(np.isfinite(array.real))
+        or not np.all(np.isfinite(array.imag))
+        for array in arrays
+    ):
+        raise FloatingPointError("non-finite tower-component estimator")
+    return arrays
+
+
 def _checkpoint(
     *,
     model: AutoregressiveNQS,
     adam_state: AdamState,
-    config: ReducedTrainingConfig,
+    config: ReducedTrainingConfig | FullTrainingConfig,
     run_dir: Path,
     completed_update: int,
     final: bool,
@@ -818,6 +1138,207 @@ def run_reduced_training(
                     completed_update=update,
                     final=final_update,
                 )
+
+    if not checkpoint_path.exists() or not optimizer_path.exists():
+        raise RuntimeError("final checkpoint artifacts were not written")
+    return TrainingArtifacts(
+        checkpoint=checkpoint_path,
+        optimizer_state=optimizer_path,
+        training_log=training_log,
+        checkpoint_sha256=_sha256_file(checkpoint_path),
+        optimizer_state_sha256=_sha256_file(optimizer_path),
+        training_log_sha256=_sha256_file(training_log),
+        selected_update=config.updates,
+    )
+
+
+def run_full_training(
+    *,
+    model: AutoregressiveNQS,
+    operator: PreparedPairOperator,
+    config: FullTrainingConfig,
+    run_dir: Path,
+    progress_callback: Callable[[Mapping[str, object]], None] | None = None,
+) -> TrainingArtifacts:
+    """Run the frozen ground plus five-component tower training schedule."""
+
+    if not isinstance(model, AutoregressiveNQS):
+        raise TypeError("model must be an AutoregressiveNQS")
+    if model.target_m2 != 0:
+        raise ValueError("model.target_m2 must be 0 for full training")
+    if not isinstance(operator, PreparedPairOperator):
+        raise TypeError("operator must be a PreparedPairOperator")
+    if operator.two_q != model.two_q:
+        raise ValueError("operator and model flux do not match")
+    if not isinstance(config, FullTrainingConfig):
+        raise TypeError("config must be a FullTrainingConfig")
+    if progress_callback is not None and not callable(progress_callback):
+        raise TypeError("progress_callback must be callable or None")
+    output_dir = Path(run_dir)
+    artifact_names = ("checkpoint.npz", "optimizer-state.npz", "training.jsonl")
+    if output_dir.exists() and any(
+        (output_dir / name).exists() for name in artifact_names
+    ):
+        raise FileExistsError("run directory already contains training artifacts")
+    output_dir.mkdir(parents=True, exist_ok=True)
+    training_log = output_dir / "training.jsonl"
+    tower = LadderTower.from_m0(
+        logpsi=lambda state: model.logpsi(state, "excited"),
+        log_score=lambda state: model.log_derivative(state, "excited"),
+        n_electrons=model.n_electrons,
+        two_q=model.two_q,
+        l=2,
+    )
+    samplers = {
+        m: FixedMMetropolisSampler(tower, target_m=m)
+        for m in _SPIN_TWO_M_VALUES
+    }
+    adam_state = AdamState.zeros(model.parameter_count)
+    checkpoint_path = output_dir / "checkpoint.npz"
+    optimizer_path = output_dir / "optimizer-state.npz"
+    descriptor = os.open(
+        training_log,
+        os.O_WRONLY | os.O_CREAT | os.O_EXCL,
+        0o600,
+    )
+    try:
+        progress = os.fdopen(descriptor, "w", encoding="utf-8", newline="\n")
+        descriptor = -1
+        with progress:
+            for update in range(1, config.updates + 1):
+                seed_base = config.training_seed * 1_000_003 + 6 * (update - 1)
+                ground_seed = seed_base
+                tower_seeds = {
+                    m: seed_base + index
+                    for index, m in enumerate(_SPIN_TWO_M_VALUES, start=1)
+                }
+                ground_states = model.sample(
+                    config.batch_size_per_sector,
+                    "ground",
+                    seed=ground_seed,
+                )
+                ground_energy, ground_l2, _ground_l4, ground_scores = (
+                    _sector_estimators(
+                        model,
+                        operator,
+                        ground_states,
+                        "ground",
+                        include_l4=False,
+                    )
+                )
+                energy_by_m: dict[int, np.ndarray] = {}
+                l2_by_m: dict[int, np.ndarray] = {}
+                l4_by_m: dict[int, np.ndarray] = {}
+                scores_by_m: dict[int, np.ndarray] = {}
+                sample_batches = {}
+                for m in _SPIN_TWO_M_VALUES:
+                    batch = samplers[m].sample(
+                        n_samples=config.batch_size_per_sector,
+                        burn_in_steps=config.tower_burn_in_steps,
+                        seed=tower_seeds[m],
+                    )
+                    sample_batches[m] = batch
+                    (
+                        energy_by_m[m],
+                        l2_by_m[m],
+                        l4_by_m[m],
+                        scores_by_m[m],
+                    ) = _tower_component_estimators(
+                        tower[m],
+                        operator,
+                        batch.configs,
+                    )
+                objective, gradient, metrics = full_objective_and_gradient(
+                    ground_energy=ground_energy,
+                    ground_l2=ground_l2,
+                    ground_scores=ground_scores,
+                    excited_energy_by_m=energy_by_m,
+                    excited_l2_by_m=l2_by_m,
+                    excited_l4_by_m=l4_by_m,
+                    excited_scores_by_m=scores_by_m,
+                )
+                parameters, adam_state, gradient_before, gradient_after = (
+                    adam_update(
+                        model.flat_parameters(),
+                        gradient,
+                        adam_state,
+                        learning_rate=config.learning_rate,
+                        beta1=config.beta1,
+                        beta2=config.beta2,
+                        epsilon=config.epsilon,
+                        clip_norm=config.gradient_clip_norm,
+                    )
+                )
+                model.set_flat_parameters(parameters)
+                final_update = update == config.updates
+                record = {
+                    "update": update,
+                    "selected": final_update,
+                    "selection_rule": "final_update",
+                    "training_seed": config.training_seed,
+                    "ground_samples": config.batch_size_per_sector,
+                    "excited_samples_by_m": {
+                        str(m): sample_batches[m].n_samples
+                        for m in _SPIN_TWO_M_VALUES
+                    },
+                    "total_samples": 6 * config.batch_size_per_sector,
+                    "ground_sample_seed": ground_seed,
+                    "excited_sample_seeds_by_m": {
+                        str(m): tower_seeds[m] for m in _SPIN_TWO_M_VALUES
+                    },
+                    "excited_sampling_by_m": {
+                        str(m): {
+                            "burn_in_steps": sample_batches[m].burn_in_steps,
+                            "burn_in_proposals": sample_batches[m].burn_in_proposals,
+                            "burn_in_accepted_moves": (
+                                sample_batches[m].burn_in_accepted_moves
+                            ),
+                            "sampling_proposals": sample_batches[m].sampling_proposals,
+                            "sampling_accepted_moves": (
+                                sample_batches[m].sampling_accepted_moves
+                            ),
+                        }
+                        for m in _SPIN_TWO_M_VALUES
+                    },
+                    "objective": objective,
+                    **metrics,
+                    "maximum_local_energy_imaginary_part": float(
+                        max(
+                            np.max(np.abs(ground_energy.imag), initial=0.0),
+                            *(
+                                np.max(np.abs(energy_by_m[m].imag), initial=0.0)
+                                for m in _SPIN_TWO_M_VALUES
+                            ),
+                        )
+                    ),
+                    "gradient_norm_before_clip": gradient_before,
+                    "gradient_norm_after_clip": gradient_after,
+                }
+                progress.write(
+                    json.dumps(
+                        record,
+                        sort_keys=True,
+                        separators=(",", ":"),
+                        allow_nan=False,
+                    )
+                    + "\n"
+                )
+                progress.flush()
+                os.fsync(progress.fileno())
+                if update % config.checkpoint_interval == 0 or final_update:
+                    checkpoint_path, optimizer_path = _checkpoint(
+                        model=model,
+                        adam_state=adam_state,
+                        config=config,
+                        run_dir=output_dir,
+                        completed_update=update,
+                        final=final_update,
+                    )
+                    if progress_callback is not None:
+                        progress_callback(dict(record))
+    finally:
+        if descriptor != -1:
+            os.close(descriptor)
 
     if not checkpoint_path.exists() or not optimizer_path.exists():
         raise RuntimeError("final checkpoint artifacts were not written")

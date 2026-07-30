@@ -13,7 +13,7 @@ import tempfile
 import time
 from numbers import Integral
 from pathlib import Path
-from typing import Any, Callable, Sequence
+from typing import Any, Callable, Mapping, Sequence
 
 import numpy as np
 
@@ -32,8 +32,10 @@ from scalable_v1.routes.occupation_autoregressive.operators import (
 )
 from scalable_v1.routes.occupation_autoregressive.train import (
     FeatureStateError,
+    FullTrainingConfig,
     ReducedTrainingConfig,
     TrainingArtifacts,
+    run_full_training,
     run_reduced_training,
 )
 from scalable_v1.routes.occupation_autoregressive.tower import LadderTower
@@ -605,6 +607,29 @@ def _parser() -> argparse.ArgumentParser:
     return parser
 
 
+def _emit_full_training_progress(record: Mapping[str, object]) -> None:
+    """Emit one flushed checkpoint-aligned production progress pulse."""
+
+    print(
+        json.dumps(
+            {
+                "mode": "a05.2-full-tower-training-progress",
+                "update": record["update"],
+                "selected": record["selected"],
+                "training_seed": record["training_seed"],
+                "total_samples": record["total_samples"],
+                "objective": record["objective"],
+                "energy_ground": record["energy_ground"],
+                "energy_excited": record["energy_excited"],
+                "variance_l2_excited": record["variance_l2_excited"],
+            },
+            sort_keys=True,
+            allow_nan=False,
+        ),
+        flush=True,
+    )
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     arguments = _parser().parse_args(argv)
     if arguments.n8_smoke:
@@ -635,9 +660,90 @@ def main(argv: Sequence[str] | None = None) -> int:
         )
         return 0 if complete else 1
     if arguments.smoke_updates is None:
-        raise FeatureStateError(
-            "full tower-aware training remains reserved for A05.2 three-seed freeze"
+        protocol = load_protocol()
+        if protocol.sha256 != PROTOCOL_SHA256:
+            raise ValueError("scalable-v1 protocol SHA-256 mismatch")
+        physics = protocol.physics
+        training = protocol.training
+        capacity = protocol.capacity["routes"]["occupation_autoregressive"]
+        config = FullTrainingConfig(
+            training_seed=arguments.training_seed,
+            protocol_sha256=protocol.sha256,
+            comparison_sha=COMPARISON_SHA,
         )
+        expected_training = {
+            "seeds": [848, 1848, 2848],
+            "optimizer": "adam",
+            "learning_rate": config.learning_rate,
+            "beta1": config.beta1,
+            "beta2": config.beta2,
+            "epsilon": config.epsilon,
+            "gradient_clip_norm": config.gradient_clip_norm,
+            "optimizer_updates": config.updates,
+            "batch_size_per_sector": config.batch_size_per_sector,
+            "checkpoint_interval": config.checkpoint_interval,
+            "checkpoint_selection": "final_update",
+        }
+        for name, expected in expected_training.items():
+            observed = training[name]
+            if observed != expected:
+                raise ValueError(f"full training protocol {name} mismatch")
+        if capacity != {"hidden_width": 128, "hidden_layers": 2}:
+            raise ValueError("full training capacity must be width 128 and two layers")
+        if protocol.sampling["burn_in_steps"] != config.tower_burn_in_steps:
+            raise ValueError("full training tower burn-in mismatch")
+        model = AutoregressiveNQS.initialize(
+            n_electrons=physics["n_electrons"],
+            two_q=physics["two_q"],
+            target_m2=0,
+            width=capacity["hidden_width"],
+            layers=capacity["hidden_layers"],
+            seed=arguments.training_seed,
+            max_trainable_parameters=protocol.capacity[
+                "max_trainable_parameters"
+            ],
+        )
+        artifacts = run_full_training(
+            model=model,
+            operator=_prepared_operator(physics["two_q"]),
+            config=config,
+            run_dir=arguments.run_dir,
+            progress_callback=_emit_full_training_progress,
+        )
+        manifest_path = freeze_training_run(
+            run_dir=arguments.run_dir,
+            artifacts=artifacts,
+            protocol=protocol,
+            training_seed=arguments.training_seed,
+        )
+        print(
+            json.dumps(
+                {
+                    "status": "ok",
+                    "mode": "a05.2-full-tower-training",
+                    "training_seed": arguments.training_seed,
+                    "updates": config.updates,
+                    "batch_size_per_state": config.batch_size_per_sector,
+                    "samples_per_update": 6 * config.batch_size_per_sector,
+                    "tower_components": list((-2, -1, 0, 1, 2)),
+                    "selection_rule": "final_update",
+                    "selected_update": artifacts.selected_update,
+                    "checkpoint_sha256": artifacts.checkpoint_sha256,
+                    "optimizer_state_sha256": (
+                        artifacts.optimizer_state_sha256
+                    ),
+                    "training_log_sha256": artifacts.training_log_sha256,
+                    "training_manifest_path": str(manifest_path),
+                    "training_manifest_sha256": sha256_file(manifest_path),
+                    "protocol_sha256": protocol.sha256,
+                    "comparison_sha": COMPARISON_SHA,
+                },
+                sort_keys=True,
+                allow_nan=False,
+            ),
+            flush=True,
+        )
+        return 0
     if arguments.smoke_updates != A03_SMOKE_UPDATES:
         raise ValueError("A03 reduced smoke must use exactly 16 updates")
     if arguments.training_seed != A03_SMOKE_SEED:
