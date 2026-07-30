@@ -74,7 +74,14 @@ An exponential-tilt lemma then connects this field-selected estimate to the
 zero-field squared magnetization measured in simulations.  In two
 dimensions the theorem covers finite-second-moment interactions and the
 marginal $J(R)\propto |R|^{-4}$ model, including the minimum-image,
-size-normalized torus sequence.  A deterministic lattice audit through
+size-normalized torus sequence.  At the marginal point we further derive the
+rigorous asymptotic finite-size envelope
+\[
+ \langle|\bm M_L|^2\rangle_{L,0}
+ =O_{n,T}\!\left((\log\log L)^{-1/2}\right),
+\]
+which applies directly to the zero-field Monte Carlo observable but is not
+claimed to be its exact decay rate.  A deterministic lattice audit through
 $L=8192$ reproduces the exact logarithmic kernel coefficient to better than
 $9.1\times10^{-7}$ along four momentum paths.  Public-data diagnostics for
 the $n=2$ application explain why a zero asymptote can look ordered over
@@ -605,6 +612,104 @@ For the sequence \eqref{eq:MI}, every finite $n\ge2$, and every $T>0$,
 \end{equation}
 \end{corollary}
 
+\subsection{Quantitative finite-size envelope at marginality}
+
+The same finite-volume ingredients give more than the limiting statement in
+Corollary~\ref{cor:MI}.  They quantify the doubly logarithmic obstruction
+directly for the zero-field observable.
+
+\begin{lemma}[Marginal reciprocal sum]
+\label{lem:quantitative-sum}
+For $h_L=T/L^2$, define
+\begin{equation}
+ A_L(h_L)=\frac1{L^2}\sum_{q\in\mathcal Q_L}
+ \frac1{h_L+E_L(q)}.
+\label{eq:quantitative-A}
+\end{equation}
+For every fixed $T>0$, there are constants $a_T>0$ and $L_T<\infty$ such
+that, for every even $L\ge L_T$,
+\begin{equation}
+ A_L(T/L^2)\ge a_T\log\log L.
+\label{eq:quantitative-sum}
+\end{equation}
+\end{lemma}
+
+\begin{proof}
+Equations~\eqref{eq:marginal-upper} and \eqref{eq:uniform-MI} imply that
+there are constants $B,C,K>0$ such that, for all sufficiently large even
+$L$ and $0<|q|\le1/2$,
+\begin{equation}
+ E_L(q)\le \frac{B}{L^2}+C|q|^2\log\frac K{|q|}.
+\label{eq:finite-L-kernel-upper}
+\end{equation}
+Represent momenta by $q_k=2\pi k/L$ with $k\in D_L$.  Fix
+$0<\alpha<(4\pi\sqrt2)^{-1}$ and let
+\begin{equation}
+ \mathcal S_m=\{k\in D_L:\|k\|_\infty=m\},
+ \qquad1\le m\le\lfloor\alpha L\rfloor.
+\end{equation}
+Every such shell contains exactly $8m$ points, and its momenta satisfy
+$2\pi m/L\le|q_k|\le2\pi\sqrt2m/L\le1/2$.  After enlarging a constant
+$D_T<\infty$, Eq.~\eqref{eq:finite-L-kernel-upper} gives uniformly on these
+shells
+\begin{equation}
+ h_L+E_L(q_k)
+ \le\frac{D_T}{L^2},
+ m^2\log\frac{K'L}{m}.
+\end{equation}
+Discarding the nonnegative zero mode and summing the remaining shells yields
+\begin{align}
+ A_L(h_L)
+ &\ge\frac8{D_T}
+ \sum_{m=1}^{\lfloor\alpha L\rfloor}
+ \frac1{m\log(K'L/m)} \nonumber\\
+ &\ge\frac8{D_T}
+ \left[
+  \log\log(K'L)
+  -\log\log\!\left(\frac{2K'}{\alpha}\right)
+ \right].
+\label{eq:shell-loglog}
+\end{align}
+The last line follows by comparison with the integral of
+$[x\log(K'L/x)]^{-1}$; $K'$ may be enlarged so that this function is
+decreasing throughout the summation range.  Equation~\eqref{eq:quantitative-sum}
+follows for all sufficiently large $L$.  The omitted zero mode is exactly
+$L^{-2}h_L^{-1}=1/T$, so it contributes no logarithmic growth.
+\end{proof}
+
+\begin{corollary}[Quantitative absence of vector LRO]
+\label{cor:quantitative-no-lro}
+For every finite $n\ge2$ and every fixed $T>0$, there are
+$C_{n,T},L_{n,T}<\infty$ such that, for every even $L\ge L_{n,T}$,
+\begin{equation}
+ \boxed{\displaystyle
+ \langle|\bm M_L|^2\rangle_{L,0}
+ \le\frac{C_{n,T}}{\sqrt{\log\log L}}.}
+\label{eq:quantitative-M2}
+\end{equation}
+\end{corollary}
+
+\begin{proof}
+Apply Eq.~\eqref{eq:master-bound} at $h_L=T/L^2$ and use
+Lemma~\ref{lem:quantitative-sum}:
+\begin{equation}
+ m_{L,h_L}
+ \le\frac1{\sqrt{(n-1)T A_L(h_L)}}.
+\end{equation}
+The finite-volume bridge \eqref{eq:bridge} is valid for this $L$-dependent
+field.  Since $\beta h_LL^2=1$, it gives
+\begin{equation}
+ \langle|\bm M_L|^2\rangle_{L,0}
+ \le\frac{n}{\tanh(1)}m_{L,h_L}.
+\end{equation}
+Combining the last two displays with Eq.~\eqref{eq:quantitative-sum} proves
+Eq.~\eqref{eq:quantitative-M2}.
+\end{proof}
+
+Equation~\eqref{eq:quantitative-M2} is a rigorous asymptotic upper envelope.
+Its constants are not optimized, and it is neither a matching lower bound nor
+an exact finite-size decay law.
+
 \subsection{The boundary of the criterion}
 
 For Eq.~\eqref{eq:power-law} with $0<\sigma<2$,
@@ -947,12 +1052,16 @@ In two dimensions, finite-second-moment interactions and the marginal
 $1/r^4$ interaction satisfy the infrared hypothesis.  The precise
 minimum-image, size-normalized torus sequence converges uniformly to that
 fixed model, so its thermodynamic squared magnetization vanishes for every
-finite $n\ge2$ and $T>0$.  The deterministic kernel calculation confirms the
-model convention and exact logarithmic coefficient; the public-data tests
-show why the XY finite-size sequence can nevertheless resemble a positive
-plateau.  The result is a generic theorem for the stated class of classical
-$O(n)$ spin systems, not a theorem for every two-dimensional continuous
-field theory.
+finite $n\ge2$ and $T>0$.  More quantitatively, the zero-field squared
+magnetization is bounded above by
+$C_{n,T}/\sqrt{\log\log L}$ for all sufficiently large even $L$.  This
+envelope makes the marginal obstruction explicit without claiming a sharp
+rate at accessible sizes.  The deterministic kernel calculation confirms
+the model convention and exact logarithmic coefficient; the public-data
+tests show why the XY finite-size sequence can nevertheless resemble a
+positive plateau.  The result is a generic theorem for the stated class of
+classical $O(n)$ spin systems, not a theorem for every two-dimensional
+continuous field theory.
 
 \begin{acknowledgments}
 Acknowledgments, funding information, and the final author list will be

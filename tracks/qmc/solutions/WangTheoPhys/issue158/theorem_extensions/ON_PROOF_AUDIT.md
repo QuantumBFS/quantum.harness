@@ -544,7 +544,105 @@ every \(T>0\),
    \langle|\mathbf M_L|^2\rangle_{L,0}=0.               \tag{10.13}
 \]
 
-### 10.4 Why this is not a theorem for all long-range models
+### 10.4 Quantitative finite-size envelope at marginality
+
+The finite-volume inequality also controls the approach to zero.  Define
+\[
+   A_L(h)=\frac1{L^2}\sum_{q\in\mathcal Q_L}
+   \frac1{h+E_L(q)}                                    \tag{10.14}
+\]
+and choose the size-dependent field
+\[
+   h_L=\frac{T}{L^2}.                                  \tag{10.15}
+\]
+For every fixed \(T>0\), there are constants \(a_T>0\) and
+\(L_T<\infty\) such that
+\[
+   A_L(h_L)\ge a_T\log\log L                           \tag{10.16}
+\]
+for every even \(L\ge L_T\).
+
+Indeed, the uniform minimum-image estimate (10.12) and the marginal upper
+bound (10.7) give constants \(B,C,K>0\) such that
+\[
+   E_L(q)
+   \le \frac{B}{L^2}+C|q|^2\log\frac K{|q|},
+   \qquad0<|q|\le\frac12,                              \tag{10.17}
+\]
+uniformly for all sufficiently large even \(L\).  Write the torus momenta
+as \(q_k=2\pi k/L\), with \(k\) in the centered integer square.  Fix
+\(0<\alpha<(4\pi\sqrt2)^{-1}\) and introduce the max-norm shells
+\[
+   \mathcal S_m=\{k:\|k\|_\infty=m\},
+   \qquad1\le m\le\lfloor\alpha L\rfloor.             \tag{10.18}
+\]
+For \(m<L/2\), each shell contains exactly \(8m\) points, and on the range
+(10.18),
+\[
+   \frac{2\pi m}{L}\le |q_k|
+   \le\frac{2\pi\sqrt2m}{L}\le\frac12.               \tag{10.19}
+\]
+After enlarging a constant \(D_T<\infty\), Eqs. (10.15), (10.17), and
+(10.19) imply the uniform shell bound
+\[
+   h_L+E_L(q_k)
+   \le
+   \frac{D_T}{L^2}m^2\log\frac{K'L}{m}.               \tag{10.20}
+\]
+Consequently,
+\[
+\begin{split}
+   A_L(h_L)
+   &\ge
+   \frac8{D_T}
+   \sum_{m=1}^{\lfloor\alpha L\rfloor}
+   \frac1{m\log(K'L/m)}\\
+   &\ge
+   \frac8{D_T}
+   \left[
+      \log\log(K'L)
+      -\log\log\left(\frac{2K'}{\alpha}\right)
+   \right].                                           \tag{10.21}
+\end{split}
+\]
+The second line is comparison with the integral of
+\([x\log(K'L/x)]^{-1}\); enlarge \(K'\) if necessary so that this function
+is decreasing on the summation interval.  Equation (10.16) follows.  The
+discarded zero mode is exactly
+\[
+   \frac1{L^2h_L}=\frac1T,                             \tag{10.22}
+\]
+so it is only an \(L\)-independent constant and is not the source of the
+double logarithm.
+
+Apply the finite-volume master inequality (7.3) at the same field:
+\[
+   m_{L,h_L}
+   \le
+   \frac1{\sqrt{(n-1)T A_L(h_L)}}.                    \tag{10.23}
+\]
+The tilt bridge (9.8) is a finite-volume statement and therefore permits
+this \(L\)-dependent choice.  Because
+\[
+   \beta h_LL^2=1,                                    \tag{10.24}
+\]
+it gives
+\[
+   \langle|\mathbf M_L|^2\rangle_{L,0}
+   \le\frac{n}{\tanh(1)}m_{L,h_L}.                    \tag{10.25}
+\]
+Combining (10.16), (10.23), and (10.25), for every finite \(n\ge2\) and
+fixed \(0<T<\infty\) there are \(C_{n,T},L_{n,T}<\infty\) such that
+\[
+   \boxed{
+   \langle|\mathbf M_L|^2\rangle_{L,0}
+   \le\frac{C_{n,T}}{\sqrt{\log\log L}}}
+   \qquad(L\ge L_{n,T}\text{ even}).                 \tag{10.26}
+\]
+This is a rigorous asymptotic upper envelope.  It is not a matching bound,
+an exact decay rate, or a sharp numerical prediction at accessible sizes.
+
+### 10.5 Why this is not a theorem for all long-range models
 
 For
 \[
@@ -552,7 +650,7 @@ For
 \]
 one has \(E(q)\asymp|q|^\sigma\).  Then
 \[
-   \int_0^\delta\frac{k\,dk}{k^\sigma}<\infty.          \tag{10.14}
+   \int_0^\delta\frac{k\,dk}{k^\sigma}<\infty.          \tag{10.27}
 \]
 The hypothesis of Theorem 1 fails.  The theorem is silent in this regime,
 and continuous-symmetry long-range order is not excluded.

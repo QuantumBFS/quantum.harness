@@ -7,12 +7,14 @@
 \usepackage{xcolor}
 \usepackage{hyperref}
 \usepackage{amsthm}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning}
 
 \hypersetup{colorlinks=true,citecolor=blue!55!black,
             linkcolor=blue!55!black,urlcolor=blue!55!black,
-            pdftitle={A Finite-Volume Infrared Criterion for the
-                      Absence of Ferromagnetic Long-Range Order
-                      in XY Models}}
+            pdftitle={Rigorous Classification of a Massless Phase at the
+                      Marginal Boundary of the Two-Dimensional Long-Range
+                      XY Model}}
 \theoremstyle{plain}
 \newtheorem{theorem}{Theorem}
 \newtheorem{lemma}{Lemma}
@@ -25,56 +27,129 @@
 
 \begin{document}
 
-\title{A Finite-Volume Infrared Criterion for the Absence of
-       Ferromagnetic Long-Range Order in XY Models}
+\title{Rigorous Classification of a Massless Phase at the Marginal Boundary
+       of the Two-Dimensional Long-Range XY Model}
 
 \author{Authors withheld for internal draft}
 \affiliation{Affiliations to be finalized}
 \date{\today}
 
 \begin{abstract}
-We prove a finite-volume infrared criterion that excludes ferromagnetic
-long-range order in classical XY models on tori in arbitrary dimension.
-Let $E_L(q)$ be the excitation kernels of a sequence of
-translation-invariant ferromagnetic couplings.  If $E_L$ converges uniformly
-to a continuous $E_\infty$ and
-\[
- I(h)=\int_{\BZ}\frac{\dd^dq}{(2\pi)^d}\,
- \frac1{h+E_\infty(q)}
-\]
-diverges as $h\downarrow0$, then, at every finite temperature,
+We rigorously classify a low-temperature regime of the marginal
+two-dimensional long-range XY model as nonmagnetic and massless in the
+precise sense of non-exponential two-point correlations.  For the
+minimum-image, size-normalized $1/r^4$ interaction used in simulations, a
+finite-volume infrared theorem proves, at every finite temperature,
 \[
  \lim_{h\downarrow0}\limsup_{L\to\infty}m_{L,h}=0,
  \qquad
  \lim_{L\to\infty}\langle|\bm M_L|^2\rangle_{L,0}=0.
 \]
-The second conclusion is the zero-field observable extrapolated in
-simulations.  Its proof requires an exponential-tilt inequality that closes
-the logical gap between a field-selected Bogoliubov bound and a symmetric
-finite-volume second moment.  We then verify the criterion for the precise
-minimum-image, size-normalized $1/r^4$ interaction used in simulations of
-the two-dimensional marginal long-range XY model.  Explicit lattice
-estimates give uniform kernel convergence and
+The second limit follows from an exponential-tilt bridge between the
+field-selected Bogoliubov bound and the symmetric zero-field observable.
+Independently, at sufficiently low temperature, Ginibre comparison with the
+nearest-neighbor XY model gives
+\[
+ \liminf_{L\to\infty}
+ \langle\cos(\theta_0-\theta_x)\rangle_{L,0}
+ \ge \frac{1}{8|x|}
+\]
+for every fixed $x\ne0$, excluding conventional exponential clustering.
+Together these results establish the stated massless, nonmagnetic regime.
+Explicit lattice estimates yield
 $E_\infty(q)=(\pi c_\infty/2)|q|^2\log(1/|q|)+O(q^2)$.
-A deterministic audit through $L=8192$, four momentum paths, and
-intercept-free effective slopes reproduces the exact coefficient to below
-$10^{-6}$ relative error.  The theorem excludes an ordered thermodynamic
-intercept at the marginal point, while leaving the exact no-order
-correlation law---logarithmic or ultimately BKT-like---open.
+A deterministic audit through $L=8192$ reproduces the exact logarithmic
+coefficient below $10^{-6}$ relative error.  The resulting $\log\log L$
+infrared divergence explains the severe finite-size ambiguity.  The exact
+massless asymptotic law remains open: ordinary BKT behavior and logarithmic
+quasi-long-range order are two leading possibilities, neither selected here.
 \end{abstract}
 
 \maketitle
 
 \section{Introduction}
 
+At a marginal long-range boundary, proving the absence of order settles only
+half of the infrared problem.  A two-dimensional XY system can be
+ferromagnetically ordered, nonmagnetic with conventional exponential
+clustering, or nonmagnetic and massless.  The last category includes ordinary
+BKT quasi-long-range order and potentially slower logarithmic correlations.
+These alternatives are exceptionally difficult to separate numerically when
+the infrared divergence is only doubly logarithmic.
+
+Here we complete the phase-level classification that can be made rigorously
+for the minimum-image, size-normalized $1/r^4$ XY model.  A direct
+finite-volume theorem excludes ferromagnetic long-range order at every finite
+temperature.  At sufficiently low temperature, an independent Ginibre
+comparison supplies an algebraic two-point lower bound and excludes
+conventional exponential clustering.  Their intersection is a positive
+result: the low-temperature regime is nonmagnetic and massless in this
+precise correlation sense.  The theorem does not determine its exact massless
+decay law.
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[
+  node distance=3.5mm and 3.5mm,
+  every node/.style={font=\scriptsize,align=center},
+  box/.style={draw=black!70,rounded corners=1.5pt,inner sep=3pt,
+              fill=black!2},
+  result/.style={box,very thick,fill=blue!7},
+  endpoint/.style={box,dashed,fill=orange!7},
+  proved/.style={-{Latex[length=1.5mm]},semithick},
+  open/.style={-{Latex[length=1.5mm]},semithick,dashed}
+]
+\node[box,text width=.76\columnwidth] (model)
+  {marginal two-dimensional XY model\\
+   $J_L(R)=c_L/|R|^4$ on the minimum-image torus};
+\node[box,text width=.35\columnwidth,below=4mm of model,
+      xshift=-.205\columnwidth] (nolro)
+  {finite-volume infrared theorem\\
+   $\langle|\bm M_L|^2\rangle\to0$};
+\node[box,text width=.35\columnwidth,below=4mm of model,
+      xshift=.205\columnwidth] (lower)
+  {low-$T$ Ginibre comparison\\
+   algebraic lower bound};
+\node[result,text width=.78\columnwidth,below=17mm of model] (massless)
+  {\textbf{rigorous phase classification}\\
+   nonmagnetic and non-exponentially clustered\\
+   $\Longrightarrow$ massless in the correlation sense};
+\node[endpoint,text width=.34\columnwidth,below=4mm of massless,
+      xshift=-.20\columnwidth] (bkt)
+  {ordinary BKT\\power-law correlations};
+\node[endpoint,text width=.34\columnwidth,below=4mm of massless,
+      xshift=.20\columnwidth] (log)
+  {logarithmic QLRO\\logarithmic correlations};
+\draw[proved] (model) -- (nolro);
+\draw[proved] (model) -- (lower);
+\draw[proved] (nolro) -- (massless);
+\draw[proved] (lower) -- (massless);
+\draw[open] (massless) -- (bkt);
+\draw[open] (massless) -- (log);
+\end{tikzpicture}
+\caption{Logical classification of the marginal model.  Solid arrows are
+proved implications.  Dashed arrows show two leading unresolved massless
+scenarios; the present results neither select nor claim to exhaust them.}
+\label{fig:phase-map}
+\end{figure}
+
+This conclusion reframes the apparent conflict with recent Monte Carlo
+studies reporting a positive thermodynamic intercept at $\sigma=2$.  At the
+marginal point the excitation kernel behaves as $q^2\log(1/q)$, so the
+reciprocal infrared integral grows only as $\log\log L$.  Accessible sizes
+can therefore remain close to an apparent magnetization plateau even though
+the zero-field squared magnetization vanishes thermodynamically.  We keep the
+analytic classification, the finite-size mechanism, and the numerical
+convention audit logically separate.
+
+The no-order ingredient is a general finite-volume infrared criterion.
 Infrared bounds translate soft continuous-symmetry modes into restrictions
-on spontaneous order.  The Mermin--Wagner theorem supplies the canonical
-short-range example \cite{MerminWagner1966}; extensions to algebraic
-interactions can be phrased through the small-momentum excitation kernel
-\cite{Bruno2001,Messager1984,Ioffe2002}.  A recurring technical mismatch,
-however, is that the bound is naturally formulated for a one-point
-magnetization selected by a nonzero field, whereas finite simulations at
-zero field extrapolate
+on spontaneous order; the Mermin--Wagner theorem supplies the canonical
+short-range example \cite{MerminWagner1966}, while algebraic interactions can
+be treated through the small-momentum excitation kernel
+\cite{Bruno2001,Messager1984,Ioffe2002}.  A recurring technical mismatch is
+that the bound is naturally formulated for a one-point magnetization selected
+by a nonzero field, whereas finite simulations at zero field extrapolate
 \begin{equation}
  \langle|\bm M_L|^2\rangle_{L,0}.
 \label{eq:sim-observable}
@@ -82,8 +157,7 @@ zero field extrapolate
 Global symmetry makes $\langle\bm M_L\rangle_{L,0}=0$ at every finite
 $L$, but it does not make Eq.~\eqref{eq:sim-observable} vanish.
 
-This distinction is central at marginal long-range boundaries.  Recent
-Monte Carlo studies of the two-dimensional model
+Recent Monte Carlo studies of the two-dimensional model
 \begin{equation}
  J(r)\propto r^{-2-\sigma}
 \end{equation}
@@ -94,10 +168,8 @@ the kernel is
  E(q)\sim \rho_{\log}q^2\log(1/q).
 \label{eq:marginal-intro}
 \end{equation}
-The corresponding infrared divergence is only $\log\log L$, so very large
-finite systems can look ordered.
-
-We separate the reusable theorem from this particular application.  The
+We separate the reusable theorem from the phase classification of this
+particular model.  The
 general result concerns any sequence of ferromagnetic XY torus couplings
 whose Fourier kernels have a uniform limit with a divergent regulated
 infrared integral.  Its new observable-level step is
@@ -641,17 +713,29 @@ $x\ne0$,
 The proof embeds a fixed free nearest-neighbor box in the torus and uses
 classical Ginibre monotonicity together with the low-temperature
 nearest-neighbor theorem \cite{Ginibre1970,VanEngelenburgLis2023}; it is
-given in the Supplemental Material.  Thus the low-temperature regime is
-rigorously massless but has no ferromagnetic LRO.
-Equation~\eqref{eq:massless-lower} does not distinguish an eventual BKT power law
-from a genuinely logarithmic correlation law.
+given in the Supplemental Material.  The algebraic lower
+bound~\eqref{eq:massless-lower} is incompatible with conventional
+exponential clustering as $|x|\to\infty$.  Combined with
+Corollary~\ref{cor:marginal}, it therefore proves a low-temperature regime
+that is simultaneously nonmagnetic and massless.  Here \emph{massless} has
+this precise correlation meaning: there is no finite-correlation-length
+exponential upper bound.  It does not assert an exact correlation exponent.
 
-\section{What remains open}
+\section{Massless phase and the infrared endpoint}
 
 Theorem~\ref{thm:general} and Corollaries~\ref{cor:marginal}
 and~\ref{cor:massless} exclude ferromagnetic LRO and a conventional
 exponentially clustered low-temperature phase, but they do not select the
 exact massless correlation law.
+The rigorous classification is
+\begin{equation}
+ \boxed{\begin{gathered}
+ \text{finite-temperature order: excluded;}\\
+ \text{low-temperature massive endpoint: excluded;}\\
+ \text{low-temperature massless regime: proved.}
+ \end{gathered}}
+\label{eq:phase-classification}
+\end{equation}
 Equation~\eqref{eq:MMR} is compatible with both a logarithmic decay and a
 sufficiently slow power law.  Around a finite-temperature short-range BKT
 fixed line, the long-range perturbation has linear eigenvalue
@@ -661,35 +745,42 @@ fixed line, the long-range perturbation has linear eigenvalue
 At $\sigma=2$ and $\eta_{\rm sr}>0$, it is locally irrelevant
 \cite{Giachetti2021}.  Coupled spin-wave--vortex work also supports
 persistence of BKT behavior \cite{Walther2026}.  These are infrared
-indications, not a global compact-field theorem.  Thus
-\begin{equation}
- \boxed{\begin{gathered}
- \text{ferromagnetic LRO is excluded;}\\
- \text{the low-temperature regime is massless;}\\
- \text{the exact massless asymptotic law remains open.}
- \end{gathered}}
-\end{equation}
+indications, not a global compact-field theorem.  Ordinary BKT behavior and
+genuinely logarithmic quasi-long-range order are two leading unresolved
+scenarios; the present results neither select nor claim to exhaust them.  A
+proposed finite-momentum step response may help discriminate these scenarios,
+but that is future work rather than evidence used in the present
+classification.
 
 \section{Conclusion}
 
-We have proved a general finite-volume infrared criterion that reaches the
-zero-field squared magnetization of an XY torus sequence.  Uniform kernel
-convergence and a divergent regulated infrared integral first eliminate the
-field-selected magnetization.  The exponential-tilt inequality then converts
-that statement into the zero-field second-moment limit without assuming the
-existence of a thermodynamic magnetization at fixed field.
+We have rigorously classified the low-temperature marginal $1/r^4$ XY model
+as nonmagnetic and massless in the correlation sense.  Two independent
+ingredients are essential.  The finite-volume infrared theorem, completed by
+an exponential-tilt bridge, gives
+$\lim_{h\downarrow0}\limsup_{L\to\infty}m_{L,h}=0$ and
+$\langle|\bm M_L|^2\rangle_{L,0}\to0$.  The low-temperature Ginibre
+comparison gives an algebraic lower bound on the two-point function and rules
+out conventional exponential clustering.  Neither statement alone yields
+the classification; together they exclude both ferromagnetic order and a
+conventional massive endpoint.
 
-The marginal two-dimensional minimum-image $1/r^4$ model satisfies the
-criterion by explicit $O(L^{-2})$ interaction convergence and the
-$q^2\log(1/q)$ kernel bound.  The stronger multipath numerical audit confirms
-the exact logarithmic coefficient and the finite-size convention scaling,
-but the no-order conclusion is analytic.  The reported logarithmic
-observables are therefore retained as evidence of an exceptionally slow
-finite-size regime, not of a positive thermodynamic order parameter.
-At sufficiently low temperature, Ginibre comparison with the
-nearest-neighbor model also proves the non-exponential lower
-bound~\eqref{eq:massless-lower}.  The remaining decision is therefore between
-massless infrared endpoints, not between an ordered and a disordered phase.
+The exact minimum-image sequence satisfies the theorem through explicit
+$O(L^{-2})$ interaction convergence and the marginal $q^2\log(1/q)$ kernel.
+A multipath lattice audit reproduces the exact logarithmic coefficient and
+verifies the simulation convention.  The associated $\log\log L$ divergence
+supplies a mechanism for the exceptionally persistent finite-size plateau
+without altering the thermodynamic conclusion.
+
+What remains open is the asymptotic structure within the massless regime.
+Ordinary BKT power-law behavior and genuinely logarithmic quasi-long-range
+order are two leading scenarios, but the present theorem neither selects nor
+claims to exhaust them.  Resolving that endpoint requires controlled
+large-size information beyond the current public summaries.  The
+theorem-level conflict is nevertheless settled: the low-temperature question
+is no longer positive long-range order versus conventional massive
+clustering, but the correlation law of an already established massless,
+nonmagnetic regime.
 
 \begin{acknowledgments}
 Acknowledgments and funding information will be added after the author list

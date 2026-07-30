@@ -109,6 +109,22 @@
     [
       "field_magnetization_zero",
       "zero_field_M2_zero"
+    ],
+    [
+      "uniform_kernel_limit",
+      "finite_L_shell_upper_bound"
+    ],
+    [
+      "max_norm_shell_count",
+      "log_log_reciprocal_sum"
+    ],
+    [
+      "finite_volume_bound",
+      "quantitative_field_bound"
+    ],
+    [
+      "zero_field_bridge",
+      "quantitative_zero_field_envelope"
     ]
   ],
   "excluded_scope": [
@@ -123,6 +139,8 @@
   "finite_volume_bound": "1 >= (n-1) T m_(L,h)^2 V^(-1) sum_q [h+E_L(q)]^(-1)",
   "not_claimed": [
     "exact logarithmic quasi-long-range-order exponent",
+    "an exact or matching finite-size decay rate",
+    "a sharp bound at currently accessible sizes",
     "a common finite-temperature phase for all n",
     "absence of order when the infrared integral is finite"
   ],
@@ -209,6 +227,22 @@
       "status": "verified"
     },
     {
+      "name": "finite_size_field_h_equals_T_over_L_squared",
+      "status": "verified"
+    },
+    {
+      "name": "max_norm_shell_count_eight_m",
+      "status": "verified"
+    },
+    {
+      "name": "quantitative_marginal_reciprocal_sum",
+      "status": "verified"
+    },
+    {
+      "name": "quantitative_zero_field_upper_envelope",
+      "status": "verified"
+    },
+    {
       "name": "soft_spin_extension_not_claimed",
       "status": "verified"
     },
@@ -223,14 +257,25 @@
   ],
   "proof_document": {
     "path": "ON_PROOF_AUDIT.md",
-    "sha256": "00dd52127c9346aec26ec023c42e10110aa6b1eba1e539f4a9919d8e8e573c54"
+    "sha256": "45d1c488f63671bda72aa95db7de73187729a82c5626c8495065ed376fa4e68f"
+  },
+  "quantitative_finite_size_envelope": {
+    "claim_type": "asymptotic upper envelope, not exact rate",
+    "conclusion": "<|M_L|^2>_(L,0) <= C_(n,T) / sqrt(log log L)",
+    "dimension": 2,
+    "field_choice": "h_L=T/L^2",
+    "interaction": "size-normalized minimum-image 1/r^4",
+    "reciprocal_sum": "A_L(T/L^2) >= a_T log log L",
+    "shell_count": "8m for ||k||_infinity=m<L/2",
+    "tilt_parameter": "beta h_L L^2=1"
   },
   "schema": "issue158.on_theorem_audit.v1",
   "theorem_scope": {
     "component_count": "finite integer n>=2",
     "conclusions": [
       "field-selected longitudinal magnetization vanishes when the regulated infrared integral diverges",
-      "lim_L <|M_L|^2>_(L,0)=0"
+      "lim_L <|M_L|^2>_(L,0)=0",
+      "<|M_L|^2>_(L,0) <= C_(n,T) / sqrt(log log L) for all sufficiently large even L"
     ],
     "interaction": "bilinear translation-invariant ferromagnetic pair coupling",
     "limit_order": "L->infinity at fixed h>0, followed by h->0",

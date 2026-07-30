@@ -4,9 +4,10 @@ This directory records two post-submission strengthenings of the Issue #158
 audit:
 
 1. a finite-volume infrared theorem for classical hard-spin \(O(n)\)
-   ferromagnets with finite \(n\ge2\); and
-2. an XY-specific comparison theorem showing that the marginal \(1/r^4\)
-   model is non-exponentially correlated at sufficiently low temperature.
+   ferromagnets with finite \(n\ge2\), including the marginal finite-size
+   envelope \(\langle|M_L|^2\rangle=O((\log\log L)^{-1/2})\); and
+2. an XY-specific comparison theorem that, together with the no-LRO result,
+   rigorously classifies a low-temperature massless, nonmagnetic regime.
 
 These results have different scopes.  The \(O(n)\) theorem excludes vector
 long-range order when its regulated infrared integral diverges.  The
@@ -16,8 +17,10 @@ the XY/\(O(2)\) model.  Neither result decides whether the remaining XY
 massless regime is ultimately BKT or genuinely logarithmic.
 
 The sources were frozen from the research repository after the proof and
-scope audits.  Compact-model pilot code and finite-volume sampling results
-are intentionally not included in this extension.
+scope audits.  The finite-size envelope is an asymptotic upper bound, not an
+exact decay rate or a sharp prediction at accessible sizes.  Compact-model
+pilot code and finite-volume sampling results are intentionally not included
+in this extension.
 
 ## Contents
 

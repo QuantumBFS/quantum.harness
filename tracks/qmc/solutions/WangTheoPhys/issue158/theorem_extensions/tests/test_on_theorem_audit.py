@@ -32,6 +32,18 @@ def test_on_theorem_audit_closes_scope_and_algebra(tmp_path):
     )
     assert "arbitrary continuous field theories" in payload["excluded_scope"]
     assert payload["numerical_certificates_are_proof_premises"] is False
+    quantitative = payload["quantitative_finite_size_envelope"]
+    assert quantitative["field_choice"] == "h_L=T/L^2"
+    assert quantitative["tilt_parameter"] == "beta h_L L^2=1"
+    assert quantitative["shell_count"] == (
+        "8m for ||k||_infinity=m<L/2"
+    )
+    assert quantitative["reciprocal_sum"] == (
+        "A_L(T/L^2) >= a_T log log L"
+    )
+    assert quantitative["claim_type"] == (
+        "asymptotic upper envelope, not exact rate"
+    )
     assert all(
         item["status"] == "verified"
         for item in payload["obligations"]
@@ -73,6 +85,10 @@ def test_on_proof_document_states_subtleties_without_overclaim():
         "There is no odd--even obstruction in this proof",
         "not a theorem for all long-range models",
         "not a statement about every continuous field theory",
+        "Quantitative finite-size envelope at marginality",
+        r"exactly \(8m\) points",
+        r"\beta h_LL^2=1",
+        "not a matching bound",
     ]
     for phrase in required:
         assert phrase in text

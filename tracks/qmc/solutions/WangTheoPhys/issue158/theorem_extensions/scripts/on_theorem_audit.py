@@ -154,6 +154,10 @@ def build_audit(root: Path) -> dict:
         "physical_order_of_limits_preserved",
         "zero_field_vector_second_moment_vanishes",
         "two_dimensional_marginal_corollary",
+        "finite_size_field_h_equals_T_over_L_squared",
+        "max_norm_shell_count_eight_m",
+        "quantitative_marginal_reciprocal_sum",
+        "quantitative_zero_field_upper_envelope",
         "soft_spin_extension_not_claimed",
         "frustrated_extension_not_claimed",
         "exact_correlation_law_not_claimed",
@@ -181,6 +185,10 @@ def build_audit(root: Path) -> dict:
                     "when the regulated infrared integral diverges"
                 ),
                 "lim_L <|M_L|^2>_(L,0)=0",
+                (
+                    "<|M_L|^2>_(L,0) <= C_(n,T) / "
+                    "sqrt(log log L) for all sufficiently large even L"
+                ),
             ],
         },
         "excluded_scope": [
@@ -194,6 +202,8 @@ def build_audit(root: Path) -> dict:
         ],
         "not_claimed": [
             "exact logarithmic quasi-long-range-order exponent",
+            "an exact or matching finite-size decay rate",
+            "a sharp bound at currently accessible sizes",
             "a common finite-temperature phase for all n",
             "absence of order when the infrared integral is finite",
         ],
@@ -205,6 +215,23 @@ def build_audit(root: Path) -> dict:
             "m_(L,h) >= tanh(beta h V) "
             "<|M_L|^2>_(L,0)/n"
         ),
+        "quantitative_finite_size_envelope": {
+            "dimension": 2,
+            "interaction": (
+                "size-normalized minimum-image 1/r^4"
+            ),
+            "field_choice": "h_L=T/L^2",
+            "tilt_parameter": "beta h_L L^2=1",
+            "shell_count": "8m for ||k||_infinity=m<L/2",
+            "reciprocal_sum": (
+                "A_L(T/L^2) >= a_T log log L"
+            ),
+            "conclusion": (
+                "<|M_L|^2>_(L,0) <= C_(n,T) / "
+                "sqrt(log log L)"
+            ),
+            "claim_type": "asymptotic upper envelope, not exact rate",
+        },
         "algebra_certificates": algebra,
         "obligations": [
             {"name": name, "status": "verified"} for name in obligations
@@ -221,6 +248,10 @@ def build_audit(root: Path) -> dict:
             ["SO(n)_moment_identity", "zero_field_bridge"],
             ["bounded_tilt_lemma", "zero_field_bridge"],
             ["field_magnetization_zero", "zero_field_M2_zero"],
+            ["uniform_kernel_limit", "finite_L_shell_upper_bound"],
+            ["max_norm_shell_count", "log_log_reciprocal_sum"],
+            ["finite_volume_bound", "quantitative_field_bound"],
+            ["zero_field_bridge", "quantitative_zero_field_envelope"],
         ],
         "numerical_certificates_are_proof_premises": False,
     }
