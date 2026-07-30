@@ -53,3 +53,17 @@ def test_dois_and_arxiv_identifiers_are_well_formed(paper_dir):
             assert re.fullmatch(r"10\.\d{4,9}/\S+", entry["doi"]), key
         if "eprint" in entry:
             assert re.fullmatch(r"(?:\d{4}\.\d{4,5}|[a-z-]+/\d{7})", entry["eprint"]), key
+
+
+def test_every_manuscript_citation_has_a_bibliography_entry(paper_dir):
+    manuscript = (paper_dir / "paper.tex").read_text(encoding="utf-8")
+    bibliography = (paper_dir / "references.bib").read_text(encoding="utf-8")
+    available = set(re.findall(r"@\w+\{([^,]+),", bibliography))
+    cited = {
+        key.strip()
+        for group in re.findall(r"\\cite\{([^}]+)\}", manuscript)
+        for key in group.split(",")
+    }
+
+    assert cited <= available
+    assert available <= cited

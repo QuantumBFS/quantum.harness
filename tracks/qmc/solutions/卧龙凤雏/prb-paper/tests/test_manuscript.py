@@ -69,3 +69,34 @@ def test_methods_name_rust_python_rng_and_resampling_units(paper_dir):
         "Python",
     ):
         assert phrase in text
+
+
+def test_results_include_all_figures_and_tables(paper_dir):
+    text = _paper(paper_dir)
+
+    for number in range(1, 9):
+        assert rf"\label{{fig:{number:02d}-" in text
+    for number in range(1, 5):
+        assert rf"\label{{tab:{number:02d}-" in text
+    assert text.count(r"\includegraphics") == 8
+
+
+def test_learning_claim_is_explicitly_conservative(paper_dir):
+    text = re.sub(r"\s+", " ", _paper(paper_dir).lower())
+
+    for phrase in (
+        "does not constitute a universal-central-charge estimate",
+        "transition is not bracketed",
+        "anisotropy calibration is unstable",
+        "estimators disagree",
+    ):
+        assert phrase in text
+    assert r"\learningpublished" in text
+
+
+def test_nishimori_replica_conventions_are_distinguished(paper_dir):
+    text = _paper(paper_dir)
+
+    assert "ordinary quenched" in text
+    assert "0.522" in text
+    assert "higher-replica" in text

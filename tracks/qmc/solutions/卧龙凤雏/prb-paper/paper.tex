@@ -220,63 +220,471 @@ estimate to a diagnostic conditional on the assumed candidate point.
 \section{Benchmark central charges}
 \label{sec:benchmarks}
 
-The three benchmark calculations and their finite-size trends are presented
-in Sec.~\ref{sec:discussion}; here we state the central comparison.  The clean
-Monte Carlo and exact transfer-matrix estimates agree with $1/2$, while the
-two quenched estimates agree with the established ordinary-replica benchmark
-values at their current precision.  Full fit windows and error decompositions
-are given below and in Appendix~\ref{app:bootstrap}.
+\subsection{Clean Ising calibration}
+
+The clean calculation uses periodic $L\times M$ tori with $M=8L$ and
+$L=4,6,\ldots,20$.  We obtain the free energy at $K_c$ in two independent
+ways.  The first evaluates the exact strip transfer matrix.  The second
+integrates the measured energy from the known $K=0$ normalization,
+\begin{equation}
+ F(K_c)=-N\ln2+\int_0^{K_c}\langle H\rangle_K\,dK ,
+ \label{eq:thermodynamic-integration}
+\end{equation}
+on a nested 129-point coupling grid.  The shift between 65- and 129-point
+Simpson quadrature is $0.001955$ in the final central charge, below the
+Monte Carlo standard error.  The cluster streams pass first/second-half and
+between-replica tests with the predeclared $|z|<4$ threshold.
+
+Figure~\ref{fig:02-clean} shows that the stochastic and exact free energies
+share the same Casimir slope.  The primary $L_{\min}=6$ fit, including an
+$L^{-4}$ correction, gives
+\begin{align}
+ c_{\rm MC}&=\CleanMCCharge\pm\CleanMCSE, \nonumber\\
+ c_{\rm exact}&=\CleanExactCharge .
+\end{align}
+The Monte Carlo 95\% interval
+$[\CleanCILow,\CleanCIHigh]$ contains $1/2$.  Diagnostic windows give
+$c_{\rm MC}=0.499053$ for $L_{\min}=4$ and $0.490505$ for $L_{\min}=8$;
+their increasing uncertainty and mutual compatibility show why the central
+window is used without selecting it a posteriori.
+
+\begin{figure*}[t]
+  \includegraphics[width=\textwidth]{generated/fig02-clean.pdf}
+  \caption{Clean Ising calibration.  (Left) Critical free-energy density
+  versus $L^{-2}$ from the exact transfer matrix and thermodynamic-integration
+  Monte Carlo calculation.  (Right) Independent estimates of $c$ compared
+  with the exact Ising value.  Error bars are stream-level bootstrap
+  uncertainties.}
+  \label{fig:02-clean}
+\end{figure*}
+
+\subsection{Nishimori random-bond Ising model}
+
+The $\pm J$ ensemble uses antiferromagnetic-bond probability
+$p=0.1092212$ and
+$K_N=\tfrac12\ln[(1-p)/p]=1.0493604763$.  For each of eight independent
+replicas, a matrix-free transfer product is propagated through 4096 burn-in
+rows and $2\,097\,152$ measured rows at widths
+$L=4,6,8,10,12,14$.  Normalizing after every row prevents overflow and turns
+the accumulated logarithmic norms into the quenched free-energy density.
+
+The joint-width fit and hierarchical bootstrap in
+Fig.~\ref{fig:03-nishimori} give
+\begin{equation}
+ c_{\rm eff}=\NishimoriCharge\pm\NishimoriSE,\qquad
+ {\rm CI}_{95\%}=[\NishimoriCILow,\NishimoriCIHigh].
+\end{equation}
+This interval contains the reference value $0.464$
+\cite{HoneckerJacobsenPiccoPujol2001}.  Removing $L=4$ shifts the center from
+$0.456484$ to $0.461475$; a paired bootstrap of the difference contains zero.
+Independent microscopic audits also pass: the measured negative-bond fraction
+has $z=-0.524$, and a centered coupling derivative differs from the exact
+Nishimori energy identity by only $7.46\times10^{-5}$.
+
+\begin{figure*}[t]
+  \includegraphics[width=\textwidth]{generated/fig03-nishimori.pdf}
+  \caption{Nishimori benchmark.  (Left) Quenched free-energy density and the
+  $L^{-2}+L^{-4}$ fit.  (Center) Hierarchical bootstrap distribution of
+  $c_{\rm eff}$.  (Right) Stability under the lower-width cut.  A disorder
+  realization is resampled together at all widths.}
+  \label{fig:03-nishimori}
+\end{figure*}
+
+It is important to state the replica convention.  Our value tests the
+\emph{ordinary quenched} random-bond Ising free energy and therefore the
+reference $c_{\rm eff}\simeq0.464$.  The often-quoted value near $0.522$
+belongs to a different Born-weighted or higher-replica observable in monitored
+constructions.  The two numbers are not competing estimates of the same
+quantity; substituting the higher-replica target into this benchmark would
+change the ensemble being measured.
+
+\subsection{Weakly self-dual Born ensemble}
+
+The third benchmark evolves a fermionic Gaussian covariance matrix at
+$\theta=\pi/4$ and $\beta=\beta'=0.8813735870$.  Sequential, state-conditioned
+Born sampling generates correlated outcomes according to
+\begin{equation}
+ P(s|\Gamma)=\frac{1+s\tanh(\beta)
+ \langle i\gamma_a\gamma_b\rangle_\Gamma}{2}.
+ \label{eq:born-rule}
+\end{equation}
+The leading Lyapunov or Shannon-free-energy rate is fitted over
+$L=6,8,\ldots,32$ as
+$\gamma_1(L)=f_\infty L-\pi c_{\rm eff}/(6L)+a/L^3$.
+This Gaussian-state representation is consistent with standard efficient
+fermionic simulation methods \cite{Bravyi2005}.
+
+The result,
+\begin{equation}
+ c_{\rm eff}=\WeakCharge\pm\WeakSE,\qquad
+ {\rm CI}_{95\%}=[\WeakCILow,\WeakCIHigh],
+\end{equation}
+contains the reference $0.447$.  As shown in
+Fig.~\ref{fig:04-weak}, the maximum studentized residual is $1.772$, its
+correlation with $1/L$ is $-0.056$, the minimum effective sample size is
+$4517$, and the electric--magnetic self-duality statistic is $z=-1.460$.
+Required fit variants span $0.00553$, smaller than the declared $0.01$
+systematic tolerance.
+
+\begin{figure*}[t]
+  \includegraphics[width=\textwidth]{generated/fig04-weak-self-dual.pdf}
+  \caption{Weak self-dual benchmark.  The panels show the finite-size fit,
+  studentized residuals, electric--magnetic self-duality audit, and
+  autocorrelation/effective-sample-size convergence.  The residual and
+  self-duality diagnostics are evaluated independently of the target value.}
+  \label{fig:04-weak}
+\end{figure*}
+
+\begin{table*}[t]
+\caption{Benchmark central charges.  Parentheses denote one bootstrap standard
+error; intervals are central 95\% bootstrap intervals.  The exact clean result
+has no stochastic uncertainty.}
+\label{tab:02-benchmarks}
+\begin{ruledtabular}
+\begin{tabular}{lccccc}
+Model & Widths & Estimate & 95\% interval & Reference & Outcome\\
+\hline
+Clean Ising, Monte Carlo & $4$--$20$ & $\CleanMCCharge(\CleanMCSE)$
+ & $[\CleanCILow,\CleanCIHigh]$ & $0.500$ & Pass\\
+Clean Ising, exact & $4$--$20$ & $\CleanExactCharge$
+ & --- & $0.500$ & Pass\\
+Nishimori RBIM & $4$--$14$ & $\NishimoriCharge(\NishimoriSE)$
+ & $[\NishimoriCILow,\NishimoriCIHigh]$ & $0.464$ & Pass\\
+Weak self-dual & $6$--$32$ & $\WeakCharge(\WeakSE)$
+ & $[\WeakCILow,\WeakCIHigh]$ & $0.447$ & Pass\\
+\end{tabular}
+\end{ruledtabular}
+\end{table*}
+
+The compact comparison in Fig.~\ref{fig:05-benchmarks} makes the hierarchy
+visible: all three stochastic intervals cover their predeclared references,
+but the meaning of the coefficient changes from a unitary central charge to a
+quenched or Born-weighted effective central charge.
+
+\begin{figure}[t]
+  \includegraphics[width=\columnwidth]{generated/fig05-benchmark-comparison.pdf}
+  \caption{Cross-benchmark comparison.  Circles and horizontal bars show
+  estimates and 95\% intervals; crosses are reference values.}
+  \label{fig:05-benchmarks}
+\end{figure}
 
 \section{Exploratory learning-induced metal--insulator transition}
 \label{sec:learning}
 
-The monitored-model fits are evaluated at the preselected candidate
-$\phi/\pi=\LearningCandidate$.  They remain exploratory because phase,
-anisotropy, and estimator-consistency gates are not all satisfied.  The
-conditional amplitudes are retained to make the origin of the failure
-auditable.
+\subsection{Phase localization and candidate selection}
+
+Measurement-induced entanglement transitions can exhibit conformal scaling,
+but localization, trajectory weighting, and nonlinear replica limits all
+affect its interpretation \cite{SkinnerRuhmanNahum2019,LiChenFisher2018}.
+We therefore first validate the scanning observable in an XY slice.  Its
+crossing lies in $\phi/\pi\in[0.24,0.25]$, inside the reference window
+$[0.20,0.28]$, as shown in Fig.~\ref{fig:06-scans}.  This confirms that the
+scan reacts correctly in the calibration geometry.
+
+The generic DIII scan is different.  Its diagnostic score increases
+monotonically from $0.023$ at $\phi/\pi=0.16$ to $1.387$ at $0.32$, but the
+available points do not exhibit both sides of a transition crossing.  The
+transition is not bracketed.  The boundary value
+$\phi/\pi=\LearningCandidate$ is retained as a preselected exploratory
+candidate, with the unobserved upper side extending to $0.32$; it is not
+promoted to a critical point by the subsequent fits.
+
+\begin{figure*}[t]
+  \includegraphics[width=\textwidth]{generated/fig06-phase-scans.pdf}
+  \caption{Phase diagnostics.  (Left) The XY validation scan brackets its
+  transition between $\phi/\pi=0.24$ and $0.25$.  (Right) The generic-DIII
+  scan rises across the sampled interval but does not bracket a transition.
+  The vertical marker at $0.30$ is therefore an exploratory candidate rather
+  than a localized critical point.}
+  \label{fig:06-scans}
+\end{figure*}
+
+\subsection{Entanglement estimate}
+
+At each width $L=8,12,\ldots,32$, the interval entropy is fitted to the chord
+coordinate in Eq.~\eqref{eq:entanglement}.  The width-dependent coefficients
+are then extrapolated using a prespecified model set; model weights are carried
+into the uncertainty rather than choosing the visually most favorable curve.
+Figure~\ref{fig:07-entanglement} shows both stages.  The resulting conditional
+estimate is
+\begin{equation}
+ c_{\rm eff}^{(S)}=\LearningEntanglementCharge
+ \pm\LearningEntanglementSE,\quad
+ {\rm CI}_{95\%}=[\LearningEntanglementCILow,
+ \LearningEntanglementCIHigh].
+\end{equation}
+The fit has $\chi^2/{\rm dof}=0.370$ and remains available after removing the
+smallest width, but the covariance condition number is
+$6.9\times10^4$.  The wide interval correctly reflects noisy per-width
+coefficients rather than the smoothness of a single $L=32$ chord fit.
+
+\begin{figure*}[t]
+  \includegraphics[width=\textwidth]{generated/fig07-entanglement.pdf}
+  \caption{Entanglement analysis at $\phi/\pi=0.30$.  (Left) Entropy versus
+  conformal chord coordinate for the available widths.  (Right) Extrapolation
+  of the width-dependent effective coefficients.  Model-selection uncertainty
+  is included in the reported interval.}
+  \label{fig:07-entanglement}
+\end{figure*}
+
+\subsection{Casimir estimate and failed consistency gates}
+
+The free-energy amplitude can be converted to a central charge only after
+calibrating the spatial-to-temporal anisotropy.  The frozen calculation gives
+$\alpha=\LearningAlpha$ with a nominal interval
+$[0.02584,0.02956]$.  However, its relative spread across admissible windows
+is $2.69$ and the spatial/temporal decay mismatch is $0.958$.  Thus the
+anisotropy calibration is unstable even though a single-window regression
+error is small.
+
+Using the nominal $\alpha$ gives the conditional Casimir value
+\begin{equation}
+ c_{\rm eff}^{(F)}=\LearningCasimirCharge
+ \pm\LearningCasimirSE,\quad
+ {\rm CI}_{95\%}=[\LearningCasimirCILow,
+ \LearningCasimirCIHigh].
+\end{equation}
+The difference
+$|c_{\rm eff}^{(F)}-c_{\rm eff}^{(S)}|=9.519$ exceeds the combined 95\%
+compatibility threshold $2.446$: the estimators disagree.  Figure
+\ref{fig:08-learning} displays the apparently stable Casimir regression next
+to the unstable calibration and the final inconsistency.  These diagnostics
+show why increasing Monte Carlo steps alone would not resolve the present
+problem.  More steps reduce sampling variance, whereas the leading failures
+are an unbracketed parameter range, calibration drift, and estimator bias or
+mismatch.
+
+\begin{figure*}[t]
+  \includegraphics[width=\textwidth]{generated/fig08-learning-diagnostics.pdf}
+  \caption{Learning-induced-transition diagnostics.  (Left) Casimir-amplitude
+  fit at the exploratory candidate.  (Center) anisotropy estimates under
+  calibration variations.  (Right) entanglement and nominally converted
+  Casimir estimates, whose 95\% intervals do not overlap.}
+  \label{fig:08-learning}
+\end{figure*}
+
+\begin{table}[t]
+\caption{Conditional monitored-model results at
+$\phi/\pi=\LearningCandidate$.  ``No'' means that the quantity is retained as
+a diagnostic but not published as a universal central charge.}
+\label{tab:03-learning}
+\begin{ruledtabular}
+\begin{tabular}{lcc}
+Quantity & Value & Gate\\
+\hline
+XY bracket & $[0.24,0.25]$ & Pass\\
+DIII bracket & None & Fail\\
+$c_{\rm eff}^{(S)}$ & $\LearningEntanglementCharge(\LearningEntanglementSE)$
+ & Available\\
+$\alpha$ & $\LearningAlpha$ & Unstable\\
+$c_{\rm eff}^{(F)}$ & $\LearningCasimirCharge(\LearningCasimirSE)$
+ & Available\\
+Estimator agreement & No & Fail\\
+Published central charge & \LearningPublished & Withheld\\
+\end{tabular}
+\end{ruledtabular}
+\end{table}
+
+Consequently, this pair of numbers in Table~\ref{tab:03-learning} does not
+constitute a universal-central-charge estimate.  They are conditional diagnostics at an
+exploratory parameter value.  This claim boundary is part of the result, not a
+qualification added after observing disagreement.
 
 \section{Cross-model discussion}
 \label{sec:discussion}
 
+\subsection{What the benchmark sequence validates}
+
 The common analysis separates three questions: whether a numerical observable
 is stable, whether its statistical error is correctly estimated, and whether
-the observable supports the intended universal interpretation.  The
-benchmarks answer all three affirmatively; the monitored calculation presently
-answers only the first in selected fit windows.
+the observable supports the intended universal interpretation.  The clean
+model tests normalization, thermodynamic integration, the sign and factor of
+the Casimir coefficient, and finite-size corrections.  Exact agreement rules
+out a broad class of coding errors that an internal goodness of fit cannot
+detect.
+
+The Nishimori calculation then changes the statistical unit.  Rows from one
+transfer product are correlated, and widths sharing a disorder realization
+are paired.  Resampling rows or widths independently would underestimate the
+slope uncertainty.  The identity and bond-frequency audits test the disorder
+generator separately from the fit.  The weak self-dual model adds
+state-conditioned Born sampling: Gaussian invariant errors below
+$2.6\times10^{-13}$ and the electric--magnetic check show that the measured
+coefficient is not merely a stable output of a drifting covariance matrix.
+
+\subsection{Error budget and parameter meaning}
+
+Table~\ref{tab:04-errors} distinguishes error sources that are often collapsed
+into one bar.  Statistical uncertainty is reduced by additional independent
+streams or disorder realizations.  Autocorrelation is reduced by longer runs
+only until the effective sample size becomes adequate.  Finite-size bias
+requires larger $L$ or controlled correction terms.  Transition-location and
+anisotropy errors require new parameter coverage and calibration geometries;
+repeating the same point more accurately cannot remove them.
+
+\begin{table*}[t]
+\caption{Error mechanisms, controls, and effective remedies.}
+\label{tab:04-errors}
+\begin{ruledtabular}
+\begin{tabular}{llll}
+Source & Diagnostic & Present control & Remedy if failed\\
+\hline
+Thermal variance & replica/half-chain $z$ & Wolff streams, blocking
+ & more independent clusters\\
+Quenched variance & bootstrap spread & realization-level paired bootstrap
+ & more disorder realizations\\
+Autocorrelation & ESS & block analysis & longer streams or better updates\\
+Finite-size bias & $L_{\min}$ drift/residuals & $L^{-4}$ or $L^{-3}$ terms
+ & larger widths\\
+Quadrature bias & nested-grid shift & 65/129-point comparison
+ & denser coupling grid\\
+Transition location & phase bracket & XY positive control
+ & extend/refine DIII scan\\
+Anisotropy & window spread & spatial/temporal comparison
+ & dedicated aspect-ratio calibration\\
+Estimator interpretation & $S$--$F$ difference & independent estimators
+ & resolve mapping before universality claim\\
+\end{tabular}
+\end{ruledtabular}
+\end{table*}
+
+The large monitored values are therefore informative without being universal.
+They may reflect evaluation away from criticality, an incorrect anisotropic
+conversion, large finite-width corrections, or genuinely different replica
+observables.  The present data do not discriminate among these mechanisms.
+In particular, the success of a smooth Casimir fit cannot substitute for
+agreement with entanglement or for a bracketed transition.
+
+\subsection{Next decisive calculation}
+
+The efficient next step is not uniform growth of the existing sample count.
+First, extend the DIII scan beyond $0.32$ until the localization diagnostic
+shows a two-sided crossing, then refine that interval using common random
+numbers.  Second, calibrate $\alpha$ from several aspect ratios at the
+bracketed point and require stability under width cuts.  Third, recompute both
+universal estimators with larger widths and bootstrap their difference using
+shared disorder.  Only if the difference interval contains zero should a
+combined central-charge estimate be quoted.  This staged allocation directs
+computation at the dominant uncertainty rather than at the smallest error bar.
 
 \section{Conclusion}
 \label{sec:conclusion}
 
-Validated clean and disordered benchmarks establish a reproducible route from
-simulation records to effective central charges.  Applying the same standard
-to the learning-induced transition exposes, rather than hides, the additional
-data required for a universal claim.
+We have placed four finite-size calculations in one PRB-style validation
+framework.  Clean Ising thermodynamic integration yields
+$c=\CleanMCCharge(\CleanMCSE)$ and agrees with the independent exact value
+$\CleanExactCharge$.  Realization-level resampling gives
+$c_{\rm eff}=\NishimoriCharge(\NishimoriSE)$ for the ordinary quenched
+Nishimori model, and state-conditioned Born sampling gives
+$c_{\rm eff}=\WeakCharge(\WeakSE)$ for the weakly self-dual benchmark.  Each
+reference lies inside its 95\% interval and independent implementation gates
+pass.
+
+At the learning-induced metal--insulator-transition candidate, entanglement
+and nominal Casimir conversions produce
+$\LearningEntanglementCharge(\LearningEntanglementSE)$ and
+$\LearningCasimirCharge(\LearningCasimirSE)$, respectively.  Because the DIII
+transition is unbracketed, the anisotropy is unstable, and the estimators are
+incompatible, \LearningPublished{} is correctly recorded as the publication
+status of a central charge.  The defensible result is a reproducible failure
+of the universality gates together with a concrete refinement path.  Across
+all four models, the central lesson is that more Monte Carlo steps improve
+accuracy only when sampling noise is the limiting error; they cannot repair an
+unlocalized critical point or an uncontrolled observable mapping.
 
 \appendix
 
 \section{Observable mappings}
 \label{app:mappings}
 
-The normalization of the Casimir term follows Eq.~\eqref{eq:casimir}.  For the
-clean square lattice, the exact strip free energy supplies an independent
-mapping from microscopic couplings to the same coefficient.  In random
-ensembles, the mapping is applied after averaging $\ln Z$ over disorder.
+For a periodic cylinder with transfer direction $M\gg L$, write
+$-\ln Z=M g(L)$ and $f(L)=g(L)/L$.  Conformal invariance gives
+\begin{equation}
+ g(L)=f_\infty L-\frac{\pi c}{6L}+O(L^{-3}),
+\end{equation}
+which is Eq.~\eqref{eq:casimir} after division by $L$.  This derivation fixes
+both the sign and the factor of six.  The clean transfer matrix supplies an
+independent microscopic mapping to the same coefficient.
+
+For the $\pm J$ model, $g(L)$ is obtained from the long-product Lyapunov
+exponent.  The physical quenched object is
+\begin{equation}
+ f_q(L)=-\lim_{M\rightarrow\infty}\frac{[\ln Z_{L,M}]_{\rm dis}}{LM}.
+\end{equation}
+The sign convention of the stored logarithmic norm is converted once, before
+the finite-size fit.  For the Born ensemble, $\gamma_1(L)$ is extensive in
+$L$, so the universal correction is $L^{-1}$ rather than $L^{-2}$ until the
+rate is divided by the width.
+
+For monitored entanglement, the coefficient of the chord logarithm is first
+estimated separately at every width.  The reported
+$c_{\rm eff}^{(S)}$ is the large-$L$ extrapolation of those coefficients.
+The Casimir conversion contains the independently calibrated $\alpha$;
+therefore its uncertainty and stability are logically prior to interpreting
+$c_{\rm eff}^{(F)}$.
 
 \section{Bootstrap construction}
 \label{app:bootstrap}
 
-Bootstrap indices are generated at the stream level for the clean model and at
-the realization level for quenched models.  All widths belonging to one
-realization share an index, and every replicate repeats the finite-size fit.
+Let $y_{rL}$ denote the estimate for realization or stream $r$ at width $L$.
+A bootstrap replicate draws indices
+$r_1^\ast,\ldots,r_R^\ast$ with replacement and forms the complete vector
+\begin{equation}
+ \bm{\bar y}^{\,\ast}
+ =\frac{1}{R}\sum_{j=1}^{R}
+ (y_{r_j^\ast L_1},\ldots,y_{r_j^\ast L_n}).
+\end{equation}
+The nonlinear finite-size fit is repeated on this vector.  All widths from one
+quenched realization consequently enter together, preserving the empirical
+cross-width covariance.  The clean analysis applies the same construction to
+independent Monte Carlo streams.  The Nishimori and weak-self-dual production
+analyses use 4000 replicates with fixed analysis seeds, but the simulation RNG
+streams remain independent of those seeds.
+
+For common-disorder comparisons, parameter values $a$ and $b$ share the same
+bootstrap index in every replicate.  The sampled quantity is
+$\Delta c^\ast=c_a^\ast-c_b^\ast$, not the difference of two independently
+resampled fits.  This is the correct uncertainty for a paired fit-window or
+parameter comparison.  Percentile intervals are read directly from the
+replicate distribution; no Gaussian shape is assumed.
 
 \section{Claim-gate audit}
 \label{app:gates}
 
-The monitored result is withheld from publication as a central charge because
-the phase scan does not bracket the DIII transition, the fitted anisotropy is
-not stable under the prescribed checks, and the two central-charge estimators
-are incompatible.
+The frozen run contains \LearningTasks{} independent random streams and widths
+$8,12,\ldots,32$, with elapsed time \LearningRuntime{} s.  Its summary artifact
+has SHA-256 digest
+\begin{widetext}
+\begin{center}
+\texttt{\LearningSummaryHash}.
+\end{center}
+\end{widetext}
+The claim gate evaluates three Boolean conditions.  First, the DIII phase
+diagnostic must supply a lower and an upper boundary; it supplies neither a
+complete bracket nor a crossing in the available interval.  Second, the
+anisotropy must be stable across prescribed windows; its relative spread is
+$2.69$.  Third, the independent 95\% intervals for the entanglement and
+Casimir conversions must be compatible; their center difference $9.519$
+exceeds the combined threshold $2.446$.
+
+All three failures are recorded in the source summary as
+\texttt{diii\_transition\_not\_bracketed},
+\texttt{anisotropy\_unstable}, and
+\texttt{estimator\_disagreement}.  No post-processing rule overrides them.
+The machine-readable publication flag is \LearningPublished.  This audit
+ensures that a reader can reproduce not only the numerical values but also the
+logical reason they are not presented as a central charge.
+
+\section{Data and software availability}
+
+The analysis uses immutable result directories containing configuration,
+manifest, raw records, processed summaries, and plots.  Rust executables
+generate stochastic records with Xoshiro256++ streams; Python scripts load
+hash-gated artifacts, perform resampling and fitting, and build the figures.
+The manuscript values are generated from those adapters rather than copied by
+hand.  The complete workflow is invoked by the package Makefile, which runs
+tests, regenerates figures and TeX macros, compiles the RevTeX source, and
+verifies the resulting PDF.
 
 \begin{acknowledgments}
 The authors thank the Quantum Harness challenge organizers for providing the
