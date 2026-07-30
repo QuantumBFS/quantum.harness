@@ -1736,18 +1736,6 @@ def test_real_full_training_freeze_is_loadable_by_factory(
     assert len(records) == 2048
     assert all("resource_metrics" not in record for record in records[:-1])
     assert [record["selected"] for record in records] == [False] * 2047 + [True]
-    assert records[-1]["resource_metrics"] == {
-        "placement": "remote",
-        "wall_seconds": 2.5,
-        "peak_rss_bytes": 123_456,
-        "peak_vram_bytes": None,
-        "estimator_evaluations": 6_291_456,
-        "effective_sample_size": 0.0,
-        "n8_smoke_complete": True,
-        "n8_to_n6_time_ratio": 4.229112834613484,
-        "n8_to_n6_memory_ratio": 2.3707141015725703,
-        "device_fingerprint": "pytest-full-runtime",
-    }
     manifest = json.loads(
         (run_dir / "training-manifest.json").read_text(encoding="utf-8")
     )
@@ -1765,6 +1753,18 @@ def test_real_full_training_freeze_is_loadable_by_factory(
     )
     candidate = factory.load_candidate()
     resources = candidate.resource_metrics()
+    assert records[-1]["resource_metrics"] == {
+        "placement": "remote",
+        "wall_seconds": 2.5,
+        "peak_rss_bytes": 123_456,
+        "peak_vram_bytes": None,
+        "estimator_evaluations": 6_291_456,
+        "effective_sample_size": 0.0,
+        "n8_smoke_complete": True,
+        "n8_to_n6_time_ratio": 4.229112834613484,
+        "n8_to_n6_memory_ratio": 2.3707141015725703,
+        "device_fingerprint": "pytest-full-runtime",
+    }
     assert resources.placement == "remote"
     assert resources.wall_seconds == 2.5
     assert resources.estimator_evaluations == 6_291_456
