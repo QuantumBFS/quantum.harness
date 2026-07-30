@@ -426,15 +426,24 @@ function full_spin_trivial_isotypic_truth(
         end
     end
 
+    centered_orbits = orbit_sizes[:centered]
+    scalar_orbits = orbit_sizes[:scalar]
     expected_orbits =
-        orbit_sizes[:centered] == fill(3, 36) &&
-        orbit_sizes[:scalar] == [1; fill(3, 36)]
-    exact =
-        source_dimensions == [108, 109] &&
-        trivial_dimensions == [36, 37] &&
-        standard_dimensions == [36, 36] &&
+        all(==(3), centered_orbits) &&
+        count(==(1), scalar_orbits) == 1 &&
+        all(size -> size in (1, 3), scalar_orbits)
+    dimension_pattern =
+        length(source_dimensions) == 2 &&
+        length(trivial_dimensions) == 2 &&
+        length(standard_dimensions) == 2 &&
+        source_dimensions[1] == 3 * standard_dimensions[1] &&
+        source_dimensions[2] == 1 + 3 * standard_dimensions[2] &&
+        trivial_dimensions[1] == standard_dimensions[1] &&
+        trivial_dimensions[2] == 1 + standard_dimensions[2] &&
         singleton_orbit_count == 1 &&
-        triple_orbit_count == 72 &&
+        triple_orbit_count == sum(standard_dimensions)
+    exact =
+        dimension_pattern &&
         expected_orbits &&
         row_actions_unsigned &&
         conjugation_rows_even &&
@@ -447,6 +456,7 @@ function full_spin_trivial_isotypic_truth(
         source_dimensions=source_dimensions,
         trivial_dimensions=trivial_dimensions,
         standard_dimensions=standard_dimensions,
+        dimension_pattern=dimension_pattern,
         singleton_orbit_count=singleton_orbit_count,
         triple_orbit_count=triple_orbit_count,
         orbit_sizes=orbit_sizes,

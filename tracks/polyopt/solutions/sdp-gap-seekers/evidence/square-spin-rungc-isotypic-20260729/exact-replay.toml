@@ -1,0 +1,173 @@
+claim = "exact_rational_strictly_feasible_witness_for_finite_relaxation"
+completed_at_utc = "2026-07-29T14:37:17.930Z"
+passed = true
+schema_version = "square-j1-j2-full-spin-isotypic-rational-witness-replay-v1"
+wall_seconds = 47.53020215034485
+
+[exact_assembly]
+assembly_sha256 = "73b4eaa3f2496d5fb4cb4402635079d8f00e17230e3a279e4bcc34e01d3979de"
+coefficient_map_sha256 = "fe5fec83d6eba8a31769e98e9874a83b0acc469e657394ebd5d2c14d6c09f3e7"
+equality_count = 0
+gap_block_dimensions = [1]
+moment_count = 3250
+positive_block_dimensions = [36, 36, 36, 45, 37, 36, 36, 45]
+real_psd_triangle_entries = 6104
+
+[exact_psd_replay]
+all_blocks_exactly_positive_definite = true
+block_count = 9
+
+    [[exact_psd_replay.attempts]]
+    all_blocks_exactly_positive_definite = true
+    denominator = "1000000"
+    denominator_power = 6
+
+        [exact_psd_replay.attempts.blocks.isotypic_full_spin_gap_gap_active_rx1_ry0_eigen_minus_real_psd]
+        dimension = 1
+        exact_ldl_positive = true
+        float64_minimum_eigenvalue = 0.068016
+        ldl_pivot_count = 1
+        minimum_exact_ldl_pivot = "4251//62500"
+
+        [exact_psd_replay.attempts.blocks.isotypic_full_spin_positive_centered_rx0_ry0_s3_standard_representative_real_psd]
+        dimension = 36
+        exact_ldl_positive = true
+        float64_minimum_eigenvalue = 0.9702498900020659
+        ldl_pivot_count = 36
+        minimum_exact_ldl_pivot = "133034736171709647585665332991499530036413214879296348341608181674168322126189371063//132895943439036365210876522839261617367097752397269489088501584697800501902810312500"
+
+        [exact_psd_replay.attempts.blocks.isotypic_full_spin_positive_centered_rx0_ry0_s3_trivial_real_psd]
+        dimension = 36
+        exact_ldl_positive = true
+        float64_minimum_eigenvalue = 1.4258069999999996
+        ldl_pivot_count = 36
+        minimum_exact_ldl_pivot = "4855419398454151309376257744720719498007952150951385750008604159133561628846415338520250156423143//3298155756211969217742037862736197904163506030096561584823987933003167259049884418319973139000000"
+
+        [exact_psd_replay.attempts.blocks.isotypic_full_spin_positive_centered_rx1_ry0_eigen_minus_real_psd]
+        dimension = 45
+        exact_ldl_positive = true
+        float64_minimum_eigenvalue = 0.019489489031000007
+        ldl_pivot_count = 45
+        minimum_exact_ldl_pivot = "1902597401133943//65258062617000000"
+
+        [exact_psd_replay.attempts.blocks.isotypic_full_spin_positive_centered_rx1_ry0_eigen_plus_real_psd]
+        dimension = 36
+        exact_ldl_positive = true
+        float64_minimum_eigenvalue = 0.9629532994929049
+        ldl_pivot_count = 36
+        minimum_exact_ldl_pivot = "10474119885845878306094196309528790655615323479865173070086353091081921416197108761425717//10539805912834419859980715747528334397547112442482014355441148797461958908856800490825000"
+
+        [exact_psd_replay.attempts.blocks.isotypic_full_spin_positive_scalar_rx0_ry0_s3_standard_representative_real_psd]
+        dimension = 36
+        exact_ldl_positive = true
+        float64_minimum_eigenvalue = 0.9114745518305194
+        ldl_pivot_count = 36
+        minimum_exact_ldl_pivot = "3478411572637010801290013849890823346887845279441435931071615810436207204216486738577473//3695836828562337822546132133978312483509210678366674067391262151126169197668976779247500"
+
+        [exact_psd_replay.attempts.blocks.isotypic_full_spin_positive_scalar_rx0_ry0_s3_trivial_real_psd]
+        dimension = 37
+        exact_ldl_positive = true
+        float64_minimum_eigenvalue = 0.914914566358358
+        ldl_pivot_count = 37
+        minimum_exact_ldl_pivot = "1//1"
+
+        [exact_psd_replay.attempts.blocks.isotypic_full_spin_positive_scalar_rx1_ry0_eigen_minus_real_psd]
+        dimension = 45
+        exact_ldl_positive = true
+        float64_minimum_eigenvalue = 0.4858039999999996
+        ldl_pivot_count = 45
+        minimum_exact_ldl_pivot = "647964705925141554246//1312472402812525515625"
+
+        [exact_psd_replay.attempts.blocks.isotypic_full_spin_positive_scalar_rx1_ry0_eigen_plus_real_psd]
+        dimension = 36
+        exact_ldl_positive = true
+        float64_minimum_eigenvalue = 0.9183918385638538
+        ldl_pivot_count = 36
+        minimum_exact_ldl_pivot = "3496978764830104880528660373237800222255689648446429162271491079231307715724928818112051//3687053507544530838421680430059087838407734344759704080056818640843160337902468234520000"
+
+    [exact_psd_replay.blocks.isotypic_full_spin_gap_gap_active_rx1_ry0_eigen_minus_real_psd]
+    dimension = 1
+    exact_ldl_positive = true
+    float64_minimum_eigenvalue = 0.068016
+    ldl_pivot_count = 1
+    minimum_exact_ldl_pivot = "4251//62500"
+
+    [exact_psd_replay.blocks.isotypic_full_spin_positive_centered_rx0_ry0_s3_standard_representative_real_psd]
+    dimension = 36
+    exact_ldl_positive = true
+    float64_minimum_eigenvalue = 0.9702498900020659
+    ldl_pivot_count = 36
+    minimum_exact_ldl_pivot = "133034736171709647585665332991499530036413214879296348341608181674168322126189371063//132895943439036365210876522839261617367097752397269489088501584697800501902810312500"
+
+    [exact_psd_replay.blocks.isotypic_full_spin_positive_centered_rx0_ry0_s3_trivial_real_psd]
+    dimension = 36
+    exact_ldl_positive = true
+    float64_minimum_eigenvalue = 1.4258069999999996
+    ldl_pivot_count = 36
+    minimum_exact_ldl_pivot = "4855419398454151309376257744720719498007952150951385750008604159133561628846415338520250156423143//3298155756211969217742037862736197904163506030096561584823987933003167259049884418319973139000000"
+
+    [exact_psd_replay.blocks.isotypic_full_spin_positive_centered_rx1_ry0_eigen_minus_real_psd]
+    dimension = 45
+    exact_ldl_positive = true
+    float64_minimum_eigenvalue = 0.019489489031000007
+    ldl_pivot_count = 45
+    minimum_exact_ldl_pivot = "1902597401133943//65258062617000000"
+
+    [exact_psd_replay.blocks.isotypic_full_spin_positive_centered_rx1_ry0_eigen_plus_real_psd]
+    dimension = 36
+    exact_ldl_positive = true
+    float64_minimum_eigenvalue = 0.9629532994929049
+    ldl_pivot_count = 36
+    minimum_exact_ldl_pivot = "10474119885845878306094196309528790655615323479865173070086353091081921416197108761425717//10539805912834419859980715747528334397547112442482014355441148797461958908856800490825000"
+
+    [exact_psd_replay.blocks.isotypic_full_spin_positive_scalar_rx0_ry0_s3_standard_representative_real_psd]
+    dimension = 36
+    exact_ldl_positive = true
+    float64_minimum_eigenvalue = 0.9114745518305194
+    ldl_pivot_count = 36
+    minimum_exact_ldl_pivot = "3478411572637010801290013849890823346887845279441435931071615810436207204216486738577473//3695836828562337822546132133978312483509210678366674067391262151126169197668976779247500"
+
+    [exact_psd_replay.blocks.isotypic_full_spin_positive_scalar_rx0_ry0_s3_trivial_real_psd]
+    dimension = 37
+    exact_ldl_positive = true
+    float64_minimum_eigenvalue = 0.914914566358358
+    ldl_pivot_count = 37
+    minimum_exact_ldl_pivot = "1//1"
+
+    [exact_psd_replay.blocks.isotypic_full_spin_positive_scalar_rx1_ry0_eigen_minus_real_psd]
+    dimension = 45
+    exact_ldl_positive = true
+    float64_minimum_eigenvalue = 0.4858039999999996
+    ldl_pivot_count = 45
+    minimum_exact_ldl_pivot = "647964705925141554246//1312472402812525515625"
+
+    [exact_psd_replay.blocks.isotypic_full_spin_positive_scalar_rx1_ry0_eigen_plus_real_psd]
+    dimension = 36
+    exact_ldl_positive = true
+    float64_minimum_eigenvalue = 0.9183918385638538
+    ldl_pivot_count = 36
+    minimum_exact_ldl_pivot = "3496978764830104880528660373237800222255689648446429162271491079231307715724928818112051//3687053507544530838421680430059087838407734344759704080056818640843160337902468234520000"
+
+[input_hashes]
+model_mof_sha256 = "3310ea7c41b857223fe001e6bb3f9a64c75f187a33788585accbb10091055e68"
+primal_values_sha256 = "5b4a9c8b93fc51d0033997e82404809b09136f0804ae3d987f48d2bcae3a43e2"
+runmeta_sha256 = "9085804ef2c2eaf836095f9df43b83e0cc5bc3feed2a6e1b87da7748b42fee7e"
+solve_result_sha256 = "602975f64379a77b1c098eb20620f07051bd0c9bc56df82d7e5057a4b2f5044e"
+
+[rational_witness]
+common_denominator = "1000000"
+denominator_power = 6
+filename = "rational-witness.tsv"
+normalization_exact = true
+sha256 = "1c9106f4ea27aefcfc3eefb037350baa62745e79254d48115186003238455089"
+variable_count = 3250
+
+[setup]
+degree_d = 2
+g_j2_over_j1 = "1//2"
+gamma = "2//1"
+j1 = "1//1"
+model = "square-j1-j2"
+patch_level = 1
+physical_boundary_condition = "none-local-consistency-window"
+state_class = "unrestricted"
