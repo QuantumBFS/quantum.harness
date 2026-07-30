@@ -35,6 +35,18 @@ Phase 2 adds the one-particle LLL layer:
   reconstruction errors against the fixed `1e-12` gate;
 - `phase2.sbatch` runs the certificate in the pinned remote environment.
 
+Phase 3 adds projected one-particle tensor algebra:
+
+- `tensor.py` constructs Hilbert--Schmidt-normalized canonical unit tensors,
+  spin-representation rotations, the continuous-coordinate one-body kernel,
+  and a quadrature-calibrated generic one-body action;
+- `phase3.schema.json` defines the tensor-algebra certificate;
+- `certify_phase3.py` measures orthonormality, spherical Hermiticity, finite
+  rotation covariance, quadrature reconstruction, kernel equality, and
+  one-body action error;
+- `phase3.sbatch` runs the Phase 3 gate only after a Phase 2 certificate is
+  supplied.
+
 The generated virtual environment, dependency lock, and manifest are runtime
 artifacts. They must remain outside Git under `tracks/qmc/results/`.
 
