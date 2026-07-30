@@ -574,7 +574,7 @@ def _power_from_comparisons(
     variance_only = []
     observed_margin = []
     limiting = None
-    largest = -1
+    largest_variance_only = -1
     for name, by_cutoff in analysis["comparisons"].items():
         for cutoff, gate in by_cutoff.items():
             half_width = gate["quantile"] * gate["standard_error"]
@@ -582,7 +582,11 @@ def _power_from_comparisons(
                 measurement_cycles
                 * (half_width / TRUNCATION_BIAS_BOUND) ** 2
             )
-            variance_only.append(max(1, required))
+            required = max(1, required)
+            variance_only.append(required)
+            if required > largest_variance_only:
+                largest_variance_only = required
+                limiting = {"observable": name, "larger_cutoff": int(cutoff)}
             margin = TRUNCATION_BIAS_BOUND - abs(gate["mean_difference"])
             if margin <= 0:
                 observed_margin.append(None)
@@ -593,22 +597,26 @@ def _power_from_comparisons(
                     math.ceil(measurement_cycles * (half_width / margin) ** 2),
                 )
                 observed_margin.append(candidate)
-            if candidate > largest:
-                largest = candidate
-                limiting = {"observable": name, "larger_cutoff": int(cutoff)}
     finite_margin = (
         None if any(value is None for value in observed_margin) else max(observed_margin)
     )
+    required_cycles = max(variance_only)
     return {
         "fixed_independent_seeds": _ESTIMATOR_REPLICAS,
         "truncation_bias_bound": TRUNCATION_BIAS_BOUND,
-        "variance_only_measurement_cycles_per_seed": max(variance_only),
-        "required_measurement_cycles_per_seed": finite_margin,
-        "required_total_measurement_cycles": (
-            None if finite_margin is None else _ESTIMATOR_REPLICAS * finite_margin
-        ),
+        "variance_only_measurement_cycles_per_seed": required_cycles,
+        "required_measurement_cycles_per_seed": required_cycles,
+        "required_total_measurement_cycles": _ESTIMATOR_REPLICAS * required_cycles,
+        "observed_center_adjusted_measurement_cycles_per_seed": finite_margin,
         "limiting_comparison": limiting,
     }
+
+
+def _approximately_inverse_sqrt_scaling(ratios: Sequence[float]) -> bool:
+    converted = [float(value) for value in ratios]
+    if not converted or not all(math.isfinite(value) and value >= 0 for value in converted):
+        raise ValueError("scaling ratios must be finite and nonnegative")
+    return 0.35 <= mean(converted) <= 0.65
 
 
 def analyze_estimator_scaling(
@@ -638,8 +646,8 @@ def analyze_estimator_scaling(
     analysis["high_mode_scaling"] = {
         "observables": high_mode,
         "mean_ratio": mean(ratios),
-        "approximately_inverse_sqrt_cycles": all(
-            0.35 <= ratio <= 0.65 for ratio in ratios
+        "approximately_inverse_sqrt_cycles": _approximately_inverse_sqrt_scaling(
+            ratios
         ),
     }
     analysis["power"] = _power_from_comparisons(

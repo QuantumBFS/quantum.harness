@@ -487,6 +487,28 @@ def test_scaling_plan_is_diagnostic_fresh_and_powered_from_all_comparisons():
     ] >= 1
 
 
+def test_scaling_uses_aggregate_ratio_and_variance_power_when_center_is_noisy():
+    ratios = [0.24, 0.34, 0.51, 0.55, 0.76, 0.28]
+    assert calibrate._approximately_inverse_sqrt_scaling(ratios) is True
+    analysis = {
+        "comparisons": {
+            "G_up_4": {
+                "100": {
+                    "quantile": 6.0,
+                    "standard_error": 1.0e-4,
+                    "mean_difference": 3.0e-4,
+                }
+            }
+        }
+    }
+    power = calibrate._power_from_comparisons(analysis, 4_000_000)
+    assert power["required_measurement_cycles_per_seed"] == power[
+        "variance_only_measurement_cycles_per_seed"
+    ]
+    assert power["required_measurement_cycles_per_seed"] > 0
+    assert power["observed_center_adjusted_measurement_cycles_per_seed"] is None
+
+
 def test_calibration_cluster_commands_and_wrapper_are_serial_offline(tmp_path):
     commands = calibration_cluster_commands(
         Path("/opt/micromamba"),
