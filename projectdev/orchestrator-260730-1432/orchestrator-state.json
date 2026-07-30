@@ -1,0 +1,30 @@
+{
+  "version": "1.0.0",
+  "goal": "Improve the graviton task against every actionable review.md P0/P1 criticism and add a rigorous NQS chirality path.",
+  "archetype": "build-feature",
+  "mode": "orchestration-loop",
+  "terminal_choice": "stop-at-verified",
+  "cycle_count": 1,
+  "status": "CONVERGED",
+  "best_commit": "a974109",
+  "best_metric": 8,
+  "success_predicate": {
+    "command": "if (Test-Path 'tracks/qmc/solutions/Plasma-Team/scripts/verify_review.ps1') { & powershell -NoProfile -ExecutionPolicy Bypass -File 'tracks/qmc/solutions/Plasma-Team/scripts/verify_review.ps1' } else { Write-Output 0 }",
+    "expected_output": "8"
+  },
+  "guard": "solution pytest suite plus legacy gates 8/8 and 6/6",
+  "units_remaining": [],
+  "out_of_scope_open_research": [
+    "non-enumerated scalable VMC",
+    "input-equivariant neural architecture",
+    "full Coulomb metric-derivative spectral function",
+    "controlled thermodynamic extrapolation",
+    "remote PR publication without explicit user approval"
+  ],
+  "pipeline": [],
+  "handoff": {
+    "verification": "67 pytest; base 8/8; research 6/6; review 8/8",
+    "artifacts": "tracks/qmc/results/20260730-graviton-review",
+    "publication": "local commit only; no push performed"
+  }
+}

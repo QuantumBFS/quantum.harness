@@ -1,0 +1,25 @@
+{
+  "version": "1.0.0",
+  "goal": "Complete the strong Challenge #15 goals: chirality decomposition and an NQS size beyond the dense-projection limit.",
+  "archetype": "build-feature",
+  "mode": "orchestration-loop",
+  "terminal_choice": "stop-at-verified",
+  "cycle_count": 1,
+  "status": "CONVERGED",
+  "success_predicate": {
+    "command": "if (Test-Path 'tracks/qmc/solutions/Plasma-Team/scripts/verify_research.ps1') { & powershell -NoProfile -ExecutionPolicy Bypass -File 'tracks/qmc/solutions/Plasma-Team/scripts/verify_research.ps1' } else { Write-Output 0 }",
+    "expected_output": "6"
+  },
+  "guard": "$env:PYTHONPATH='tracks/qmc/solutions/Plasma-Team/src'; & 'tracks/qmc/solutions/Plasma-Team/.venv/Scripts/python.exe' -m pytest -q tracks/qmc/solutions/Plasma-Team",
+  "units_remaining": [],
+  "pipeline": [
+    {
+      "cycle": 1,
+      "outcome": "progressed",
+      "commit": "a24ddc2",
+      "metric": 6,
+      "guard": "35 passed",
+      "independent_verify": "research gate 6/6"
+    }
+  ]
+}
