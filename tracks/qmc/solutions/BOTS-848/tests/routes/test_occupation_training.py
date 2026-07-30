@@ -1349,12 +1349,14 @@ def test_full_training_runs_frozen_2048_update_six_batch_tower_contract(
         comparison_sha="b" * 40,
     )
     run_dir = tmp_path / "full"
+    progress_pulses: list[dict[str, object]] = []
 
     artifacts = train.run_full_training(
         model=model,
         operator=_zero_pair_operator(model.two_q),
         config=config,
         run_dir=run_dir,
+        progress_callback=progress_pulses.append,
     )
 
     assert config.updates == 2048
@@ -1379,6 +1381,13 @@ def test_full_training_runs_frozen_2048_update_six_batch_tower_contract(
         == {str(m): 512 for m in (-2, -1, 0, 1, 2)}
         for record in records
     )
+    assert [pulse["update"] for pulse in progress_pulses] == list(
+        range(128, 2049, 128)
+    )
+    assert [pulse["selected"] for pulse in progress_pulses] == [False] * 15 + [
+        True
+    ]
+    assert all(pulse["total_samples"] == 3072 for pulse in progress_pulses)
     with np.load(run_dir / "checkpoint.npz", allow_pickle=False) as checkpoint:
         assert checkpoint["selected_update"].item() == 2048
         assert checkpoint["completed_update"].item() == 2048
@@ -1404,6 +1413,7 @@ def test_full_cli_has_only_frozen_seed_schedule_and_freezes_terminal_run(
 
     def fake_run_full_training(**kwargs: object) -> object:
         captured["config"] = kwargs["config"]
+        captured["progress_callback"] = kwargs["progress_callback"]
         output = Path(kwargs["run_dir"])
         output.mkdir(parents=True)
         paths = [
@@ -1429,12 +1439,13 @@ def test_full_cli_has_only_frozen_seed_schedule_and_freezes_terminal_run(
         fake_run_full_training,
         raising=False,
     )
-    monkeypatch.setattr(
-        training_cli,
-        "freeze_training_run",
-        lambda **kwargs: captured.setdefault("freeze", kwargs)
-        and Path(kwargs["run_dir"]) / "training-manifest.json",
-    )
+    def fake_freeze(**kwargs: object) -> Path:
+        captured["freeze"] = kwargs
+        path = Path(kwargs["run_dir"]) / "training-manifest.json"
+        path.write_text("{}\n", encoding="utf-8")
+        return path
+
+    monkeypatch.setattr(training_cli, "freeze_training_run", fake_freeze)
 
     assert training_cli.main(
         ["--training-seed", "1848", "--run-dir", str(run_dir)]
@@ -1447,6 +1458,7 @@ def test_full_cli_has_only_frozen_seed_schedule_and_freezes_terminal_run(
     assert config.batch_size_per_sector == 512
     assert config.checkpoint_interval == 128
     assert captured["freeze"]["training_seed"] == 1848
+    assert callable(captured["progress_callback"])
     emitted = json.loads(capsys.readouterr().out)
     assert emitted["mode"] == "a05.2-full-tower-training"
     assert emitted["selected_update"] == 2048
