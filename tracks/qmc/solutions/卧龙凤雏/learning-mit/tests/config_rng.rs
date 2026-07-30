@@ -1,5 +1,6 @@
 use learning_mit::config::{RunConfig, RuntimeBudget, StageConfig};
 use learning_mit::rng::derive_seed;
+use std::path::Path;
 
 fn fixture() -> RunConfig {
     RunConfig {
@@ -65,4 +66,40 @@ fn seed_derivation_separates_every_coordinate() {
     assert_ne!(a, b);
     assert_ne!(a, c);
     assert_eq!(a, derive_seed(122, 1, 2, 16, 0, 0));
+}
+
+#[test]
+fn production_v2_declares_independent_xy_validation_and_seven_width_diii_locator() {
+    let root = Path::new(env!("CARGO_MANIFEST_DIR"));
+    let config = RunConfig::load(&root.join("configs/production-v2.toml")).unwrap();
+    assert!(config.production_gates);
+    assert_eq!(
+        (
+            config.runtime.target_seconds,
+            config.runtime.ordinary_stop_seconds,
+            config.runtime.hard_stop_seconds,
+            config.runtime.finalize_reserve_seconds,
+        ),
+        (3600, 3300, 5100, 300)
+    );
+    assert_eq!(config.stages.len(), 2);
+
+    let xy = &config.stages[0];
+    assert_eq!(xy.name, "xy-validation");
+    assert_eq!(xy.theta_pi, 0.5);
+    assert_eq!(xy.phi_pi, vec![0.18, 0.21, 0.24, 0.25, 0.27, 0.30]);
+    assert_eq!(xy.widths, vec![8, 12, 16, 24]);
+
+    let diii = &config.stages[1];
+    assert_eq!(diii.name, "diii-locator");
+    assert_eq!(diii.theta_pi, 0.45);
+    assert_eq!(
+        diii.phi_pi,
+        vec![0.16, 0.18, 0.20, 0.22, 0.24, 0.26, 0.28, 0.30, 0.32]
+    );
+    assert_eq!(diii.widths, vec![8, 12, 16, 20, 24, 28, 32]);
+    assert_eq!(diii.streams, 4);
+    assert_eq!(diii.burn_in_layers_per_width, 16);
+    assert_eq!(diii.measurement_layers_per_width, 64);
+    assert_eq!(diii.block_layers_per_width, 8);
 }

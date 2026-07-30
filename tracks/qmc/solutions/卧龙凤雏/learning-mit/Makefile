@@ -1,7 +1,7 @@
 PYTHON ?= .venv/bin/python
 MPLCONFIGDIR ?= /private/tmp/learning-mit-matplotlib
 
-.PHONY: setup test run-test run-pilot run-production
+.PHONY: setup test run-test run-pilot run-production run-production-v2
 
 setup:
 	python3 -m venv .venv
@@ -20,3 +20,6 @@ run-pilot:
 
 run-production:
 	LEARNING_MIT_PYTHON="$(PYTHON)" LEARNING_MIT_CARGO_PROFILE="--release" MPLCONFIGDIR="$(MPLCONFIGDIR)" ./run.sh production
+
+run-production-v2:
+	LEARNING_MIT_PYTHON="$(PYTHON)" LEARNING_MIT_CARGO_PROFILE="--release" MPLCONFIGDIR="$(MPLCONFIGDIR)" ./run.sh production-v2

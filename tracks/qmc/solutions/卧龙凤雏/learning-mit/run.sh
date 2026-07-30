@@ -9,15 +9,22 @@ CARGO_PROFILE="${LEARNING_MIT_CARGO_PROFILE:---release}"
 case "$MODE" in
   test)
     CONFIG="$ROOT/configs/test.toml"
+    RESULT_PREFIX="learning-mit"
     ;;
   pilot)
     CONFIG="$ROOT/configs/pilot.toml"
+    RESULT_PREFIX="learning-mit"
     ;;
   production)
     CONFIG="$ROOT/configs/production.toml"
+    RESULT_PREFIX="learning-mit"
+    ;;
+  production-v2)
+    CONFIG="$ROOT/configs/production-v2.toml"
+    RESULT_PREFIX="learning-mit-production-v2"
     ;;
   *)
-    echo "usage: $0 {test|pilot|production} [run-directory]" >&2
+    echo "usage: $0 {test|pilot|production|production-v2} [run-directory]" >&2
     exit 2
     ;;
 esac
@@ -32,7 +39,7 @@ if [[ $# -ge 2 ]]; then
   RUN_DIR="$2"
 else
   TIMESTAMP="$(date +%Y%m%d-%H%M%S)"
-  RUN_DIR="$ROOT/../../../results/learning-mit-$TIMESTAMP"
+  RUN_DIR="$ROOT/../../../results/$RESULT_PREFIX-$TIMESTAMP"
 fi
 mkdir -p "$RUN_DIR"
 cp "$CONFIG" "$RUN_DIR/config.toml"
@@ -54,6 +61,11 @@ run_rust oracles --config "$RUN_DIR/config.toml" --run-dir "$RUN_DIR"
 
 echo "[2/8] runtime benchmark"
 run_rust benchmark --config "$RUN_DIR/config.toml" --run-dir "$RUN_DIR"
+if [[ "$MODE" == "production-v2" ]]; then
+  "$PYTHON_BIN" -c \
+    'import json, math, sys; value=float(json.load(open(sys.argv[1], encoding="utf-8"))["forecast_seconds"]); raise SystemExit(0 if math.isfinite(value) and value <= 5100 else f"forecast_seconds={value} exceeds production-v2 hard stop 5100")' \
+    "$RUN_DIR/raw/benchmark.json"
+fi
 
 echo "[3/8] coarse Born simulation"
 run_rust simulate --config "$RUN_DIR/config.toml" --run-dir "$RUN_DIR"

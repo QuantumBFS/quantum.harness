@@ -1,0 +1,29 @@
+base_seed = 122
+production_gates = true
+invariant_tolerance = 1.0e-9
+
+[runtime]
+target_seconds = 3600
+ordinary_stop_seconds = 3300
+hard_stop_seconds = 5100
+finalize_reserve_seconds = 300
+
+[[stages]]
+name = "xy-validation"
+theta_pi = 0.5
+phi_pi = [0.18, 0.21, 0.24, 0.25, 0.27, 0.30]
+widths = [8, 12, 16, 24]
+streams = 4
+burn_in_layers_per_width = 12
+measurement_layers_per_width = 40
+block_layers_per_width = 5
+
+[[stages]]
+name = "diii-locator"
+theta_pi = 0.45
+phi_pi = [0.16, 0.18, 0.20, 0.22, 0.24, 0.26, 0.28, 0.30, 0.32]
+widths = [8, 12, 16, 20, 24, 28, 32]
+streams = 4
+burn_in_layers_per_width = 16
+measurement_layers_per_width = 64
+block_layers_per_width = 8
