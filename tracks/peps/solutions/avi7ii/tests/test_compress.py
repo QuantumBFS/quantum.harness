@@ -198,6 +198,7 @@ def test_compression_modes_record_the_same_compute_budget():
     assert ordinary.budget.cutoff == objective.contractor.cutoff
     assert ordinary.budget.max_iterations == 1
     assert ordinary.budget.optimizer == "L-BFGS-B"
+    assert ordinary.budget.max_line_searches == 4
 
 
 def test_optimizer_is_skipped_when_seed_already_meets_tolerance():

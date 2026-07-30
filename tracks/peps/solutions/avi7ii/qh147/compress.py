@@ -186,6 +186,7 @@ class CompressionBudget:
     max_iterations: int
     optimizer: str
     requested_bond: int
+    max_line_searches: int | None = None
 
 
 @dataclass(frozen=True)
@@ -232,6 +233,7 @@ class VariationalCompressor:
         self.objective = objective
         self.max_iterations = max_iterations
         self.optimizer = optimizer
+        self.max_line_searches = 4 if optimizer.lower() == "l-bfgs-b" else None
         if skip_optimization_tolerance is not None and (
             not math.isfinite(skip_optimization_tolerance)
             or skip_optimization_tolerance < 0
@@ -304,6 +306,7 @@ class VariationalCompressor:
                 cutoff=self.objective.contractor.cutoff,
                 max_iterations=self.max_iterations,
                 optimizer=self.optimizer,
+                max_line_searches=self.max_line_searches,
                 requested_bond=max_bond,
             )
             return CompressionResult(
@@ -354,6 +357,7 @@ class VariationalCompressor:
             "optimizer_start",
             mode=mode,
             max_iterations=self.max_iterations,
+            max_line_searches=self.max_line_searches,
         )
         started = time.perf_counter()
         optimizer = qtn.TNOptimizer(
@@ -365,7 +369,13 @@ class VariationalCompressor:
             autodiff_backend="jax",
             callback=optimizer_progress,
         )
-        optimized_tn = optimizer.optimize(self.max_iterations)
+        optimize_options = {}
+        if self.max_line_searches is not None:
+            optimize_options["maxls"] = self.max_line_searches
+        optimized_tn = optimizer.optimize(
+            self.max_iterations,
+            **optimize_options,
+        )
         _emit_stage(
             "optimizer_complete",
             mode=mode,
@@ -409,6 +419,7 @@ class VariationalCompressor:
             cutoff=self.objective.contractor.cutoff,
             max_iterations=self.max_iterations,
             optimizer=self.optimizer,
+            max_line_searches=self.max_line_searches,
             requested_bond=max_bond,
         )
         return CompressionResult(

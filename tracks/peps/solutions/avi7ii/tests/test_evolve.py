@@ -121,10 +121,11 @@ def test_modes_record_the_same_fixed_budget(tmp_path, mode):
     assert budget == {
         "chi": 16,
         "cutoff": 1e-10,
-        "max_iterations": 50,
-        "optimizer": "L-BFGS-B",
-        "requested_bond": 4,
-    }
+            "max_iterations": 50,
+            "optimizer": "L-BFGS-B",
+            "requested_bond": 4,
+            "max_line_searches": None,
+        }
 
 
 def test_failed_step_keeps_previous_checkpoint_and_writes_failure(tmp_path):
