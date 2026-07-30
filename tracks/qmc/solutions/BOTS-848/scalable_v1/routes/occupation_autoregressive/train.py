@@ -1175,7 +1175,12 @@ def run_full_training(
     if progress_callback is not None and not callable(progress_callback):
         raise TypeError("progress_callback must be callable or None")
     output_dir = Path(run_dir)
-    artifact_names = ("checkpoint.npz", "optimizer-state.npz", "training.jsonl")
+    artifact_names = (
+        "checkpoint.npz",
+        "optimizer-state.npz",
+        "training.jsonl",
+        "training-manifest.json",
+    )
     if output_dir.exists() and any(
         (output_dir / name).exists() for name in artifact_names
     ):
