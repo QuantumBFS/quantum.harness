@@ -279,6 +279,44 @@ def geometry_target_grid_cells() -> list[dict[str, object]]:
     return selected
 
 
+def final_geometry_refinement_cells() -> list[dict[str, object]]:
+    """Reproduce the final P4/P5 refinement cells included in the report."""
+    specifications = (
+        ("124", "P4", [0.170, 0.160], "03:00:00", "P4"),
+        ("line83", "P4", [0.170, 0.160], "03:00:00", "P4"),
+        ("124", "P5", [0.800, 0.750], "03:00:00", "P5"),
+        ("line83", "P4", [0.165], "02:00:00", "P4-mid"),
+    )
+    selected: list[dict[str, object]] = []
+    for geometry, point, trials, walltime, suffix in specifications:
+        item = cell(
+            "deadline-geometry-refine", "gap", geometry, 1, 1, 2, "matrix",
+            "complete", "U1_INVARIANT_KMS_STATES", point,
+        )
+        reason = (
+            "resolve the 0.160--0.170 line-graph P4 interval at requested spacing"
+            if suffix == "P4-mid"
+            else (
+                f"refine the exact coarse {point} geometry statement before "
+                "the extended deadline"
+            )
+        )
+        item.update(
+            kind="gap_scan",
+            id=(
+                f"deadline-geometry-refine-{geometry}-n1-L1-d2-matrix-complete-"
+                f"U1_INVARIANT_KMS_STATES-{suffix}"
+            ),
+            gamma_trials=trials,
+            diagnostic_only=True,
+            precision_profile="deadline-balanced",
+            requested_walltime=walltime,
+            retry_reason=reason,
+        )
+        selected.append(item)
+    return selected
+
+
 def remaining_target_gap_cells() -> list[dict[str, object]]:
     """Coarse complete-level gap coverage for the three unsampled Target-2 points."""
     selected: list[dict[str, object]] = []
@@ -513,7 +551,7 @@ def main() -> None:
     geometry_refinements = geometry_refinement_cells()
     geometry_parallel = geometry_parallel_recovery_cells()
     geometry_micro = geometry_micro_recovery_cells()
-    geometry_grid = geometry_target_grid_cells()
+    geometry_grid = [*geometry_target_grid_cells(), *final_geometry_refinement_cells()]
     remaining_gaps = remaining_target_gap_cells()
     target_refinements = target_refinement_cells()
     p5_fine = p5_fine_refinement_cells()

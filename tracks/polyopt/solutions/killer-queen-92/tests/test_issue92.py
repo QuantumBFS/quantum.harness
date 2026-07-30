@@ -247,6 +247,7 @@ class CampaignManifestTests(unittest.TestCase):
         geometry_parallel = BUILD_DEADLINE.geometry_parallel_recovery_cells()
         geometry_micro = BUILD_DEADLINE.geometry_micro_recovery_cells()
         geometry_grid = BUILD_DEADLINE.geometry_target_grid_cells()
+        final_geometry_refinements = BUILD_DEADLINE.final_geometry_refinement_cells()
         remaining_gaps = BUILD_DEADLINE.remaining_target_gap_cells()
         target_refinements = BUILD_DEADLINE.target_refinement_cells()
         p5_fine = BUILD_DEADLINE.p5_fine_refinement_cells()
@@ -312,6 +313,19 @@ class CampaignManifestTests(unittest.TestCase):
         )
         self.assertTrue(all(item["gamma_trials"][-1] == 0.0 for item in geometry_grid))
         self.assertEqual(sum(len(item["gamma_trials"]) for item in geometry_grid), 16)
+        self.assertEqual(len(final_geometry_refinements), 4)
+        self.assertEqual(
+            [
+                (item["geometry"], item["point"], item["gamma_trials"])
+                for item in final_geometry_refinements
+            ],
+            [
+                ("124", "P4", [0.170, 0.160]),
+                ("line83", "P4", [0.170, 0.160]),
+                ("124", "P5", [0.800, 0.750]),
+                ("line83", "P4", [0.165]),
+            ],
+        )
         self.assertEqual({item["point"] for item in remaining_gaps}, {"P1", "P3", "P5"})
         self.assertEqual(sum(len(item["gamma_trials"]) for item in remaining_gaps), 30)
         self.assertEqual([item["point"] for item in target_refinements], ["P5", "P1", "P3"])

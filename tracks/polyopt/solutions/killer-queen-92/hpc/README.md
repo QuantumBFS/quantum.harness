@@ -28,12 +28,12 @@ stage the pinned local depot sources and artifacts from the laptop; compiled
 caches are intentionally rebuilt on the compute node:
 
 ```bash
-ssh scnet 'mkdir -p ~/quantum.harness/tracks/polyopt/solutions/issue92-bose-hubbard-hyperbolic/.raw/julia-depot'
+ssh scnet 'mkdir -p ~/quantum.harness/tracks/polyopt/solutions/killer-queen-92/.raw/julia-depot'
 rsync -az --exclude=compiled --exclude=logs \
   --exclude='packages/Mosek/*/deps/deps.jl' \
   --exclude='packages/Mosek/*/deps/mosekbindir' \
   --exclude='packages/Mosek/*/deps/inst_method' \
-  .raw/julia-depot/ scnet:quantum.harness/tracks/polyopt/solutions/issue92-bose-hubbard-hyperbolic/.raw/julia-depot/
+  .raw/julia-depot/ scnet:quantum.harness/tracks/polyopt/solutions/killer-queen-92/.raw/julia-depot/
 ```
 
 `interactive_test.sh` prepends that staged depot, sets Julia package offline
@@ -60,7 +60,7 @@ Generate graphs, the immutable manifest, and the pinned depot on the laptop
 before syncing:
 
 ```bash
-cd tracks/polyopt/solutions/issue92-bose-hubbard-hyperbolic
+cd tracks/polyopt/solutions/killer-queen-92
 PYTHONPATH=src .raw/venv/bin/python scripts/export_hierarchy_graphs.py --max-radius 3
 .raw/venv/bin/python scripts/build_campaign.py
 JULIA_DEPOT_PATH=.raw/julia-depot: julia --project=julia -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()'

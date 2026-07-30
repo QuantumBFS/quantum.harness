@@ -1,7 +1,8 @@
 #!/bin/bash
 set -euo pipefail
 
-SOLUTION_DIR=${ISSUE92_SOLUTION_DIR:-"$HOME/quantum.harness/tracks/polyopt/solutions/issue92-bose-hubbard-hyperbolic"}
+SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+SOLUTION_DIR=${ISSUE92_SOLUTION_DIR:-"$(cd -- "$SCRIPT_DIR/.." && pwd)"}
 JULIA_BIN=${JULIA_BIN:-"$HOME/.juliaup/bin/julia"}
 
 export JULIA_DEPOT_PATH=${JULIA_DEPOT_PATH:-"$SOLUTION_DIR/.raw/julia-depot:$HOME/.julia"}

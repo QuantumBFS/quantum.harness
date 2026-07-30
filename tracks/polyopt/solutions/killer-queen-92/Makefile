@@ -16,7 +16,7 @@ test-python:
 julia-setup:
 	JULIA_DEPOT_PATH=.raw/julia-depot: julia --project=julia -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()'
 
-test-julia:
+test-julia: graphs
 	JULIA_DEPOT_PATH=.raw/julia-depot: julia --project=julia julia/test/runtests.jl
 
 graphs:
