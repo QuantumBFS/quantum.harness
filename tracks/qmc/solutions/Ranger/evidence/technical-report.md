@@ -169,9 +169,20 @@ Focused verification:
 
 ```bash
 uv run pytest -q \
-  tests/test_fermion_scaling_schema.py \
+  tests/test_fermion_scaling.py \
   tests/test_build_fermion_scaling_report.py \
-  tests/test_render_pr262_sign_response.py
+  tests/test_render_fermion_scaling_tsv.py \
+  tests/test_render_pr262_sign_response.py \
+  tests/test_verify_xh5_finalization.py
+
+uv run python scripts/render_fermion_scaling_tsv.py \
+  --input results/fermion_scaling/summary.json \
+  --output results/fermion_scaling/chains.tsv \
+  --overwrite
+
+# Run after the automatic XH5 finalizer has been copied locally.
+uv run python scripts/verify_xh5_finalization.py \
+  results/fermion_scaling/xh5-final
 
 uv run python scripts/audit_neural_graviton_citations.py
 uv run python scripts/build_neural_graviton_paper.py
