@@ -203,6 +203,7 @@ def fake_runtime(monkeypatch):
     TRACE_CALLS.clear()
     monkeypatch.setattr(runner, "_solver_class", lambda: FakeSolver)
     monkeypatch.setattr(runner, "_archive_class", lambda: FakeArchive)
+    monkeypatch.setattr(runner, "_register_hdf_schemes", lambda: None)
     monkeypatch.setattr(runner, "_number_operator", fake_n)
     monkeypatch.setattr(runner, "_trace_rho_op", fake_trace)
     monkeypatch.setattr(runner, "_mpi_size", lambda: 1)
@@ -572,3 +573,14 @@ def test_opaque_last_configuration_is_retained_without_deserialization(
     assert runner.validate_chain_bundle(
         bundle, strict_json_load(input_path), 0
     )["chain_index"] == 0
+
+
+def test_raw_reload_registers_triqs_hdf_reconstructors(
+    tmp_path, monkeypatch, fake_runtime
+):
+    calls = []
+    monkeypatch.setattr(runner, "_register_hdf_schemes", lambda: calls.append(True))
+    input_path, _, _ = _input_fixture(tmp_path, monkeypatch)
+    bundle = runner.run_chain(input_path, 0, tmp_path / "registered")
+    runner.validate_chain_bundle(bundle, strict_json_load(input_path), 0)
+    assert len(calls) >= 2

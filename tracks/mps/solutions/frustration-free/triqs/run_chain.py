@@ -86,6 +86,11 @@ def _archive_class():
     return HDFArchive
 
 
+def _register_hdf_schemes() -> None:
+    import triqs.atom_diag  # noqa: F401
+    import triqs.stat.histograms  # noqa: F401
+
+
 def _number_operator(spin: str, orbital: int):
     from triqs.operators import n
 
@@ -540,6 +545,7 @@ def _write_raw(path: Path, state: dict[str, object]) -> None:
 
 def _load_raw(path: Path) -> dict[str, object]:
     sha256_file(path)
+    _register_hdf_schemes()
     archive_type = _archive_class()
     with archive_type(str(path), "r") as archive:
         keys = set(archive.keys())
