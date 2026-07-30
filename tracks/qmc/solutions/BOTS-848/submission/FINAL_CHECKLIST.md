@@ -22,19 +22,22 @@ submission action. Do not create a new pull request.
 
 ## Official competition handoff
 
-- [ ] Update the existing registration PR
+- [x] Update the existing registration PR
   [`QuantumBFS/quantum.harness#226`](https://github.com/QuantumBFS/quantum.harness/pull/226);
   do not open a third Challenge #15 PR.
-- [ ] Move the final solution commits from the bhjia fork branch into PR #226's
+- [x] Move the final solution commits from the route branches into PR #226's
   head branch, `TensorSpicyJ:challenge/qmc-chiral-graviton`.
-- [ ] Replace the registration-only PR body with `submission/PR_BODY.md`.
-- [ ] Confirm the PR diff contains the complete
+- [x] Replace the registration-only PR body with `submission/PR_BODY.md`.
+- [x] Confirm the PR diff contains the complete
   `tracks/qmc/solutions/BOTS-848/` package rather than only the registration
   README.
-- [ ] Surface the already rendered challenge report in the final PR review
-  handoff without committing the gitignored bulk result directory.
-- [ ] Confirm PR #226 is ready for review, mergeable, and no longer changing.
-- [ ] Treat the earlier duplicate PR #179 as non-canonical; do not split final
+- [x] Surface the evaluator-facing
+  [final result report](../docs/benchmark-v0-final-result.md), while keeping the
+  rendered offline HTML in the gitignored bulk result directory and recording
+  its SHA-256 in the report and PR body.
+- [x] Confirm PR #226 is open, non-draft, and GitHub reports it mergeable. The
+  repository currently provides no CI checks for this head.
+- [x] Treat the earlier duplicate PR #179 as non-canonical and closed; do not split final
   commits between #179 and #226.
 
 ## Claim boundary
@@ -44,3 +47,6 @@ submission action. Do not create a new pull request.
   algebra/backend stages and an optimization-failure diagnosis.
 - Do not claim a passing scalable D+0 result, thermodynamic extrapolation,
   chirality decomposition, or beyond-ED production result.
+- The A/C/D integration head was not rerun through the complete combined test
+  suite under the submission deadline. Route-specific run evidence remains
+  historical and must not be presented as a fresh integrated-head CI result.

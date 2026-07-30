@@ -24,6 +24,22 @@ Larger systems, thermodynamic extrapolation, chiral-metric response, and Landau-
 > honest separation between the passing Benchmark v0 and the scalable Route D+
 > research candidate.
 
+## Review package
+
+- [Submission report](SUBMISSION.md) — evaluator-facing result and acceptance matrix.
+- [Final Benchmark v0 result](docs/benchmark-v0-final-result.md) — energies,
+  five-component tower, symmetry certificate, and clean Slurm provenance.
+- [Machine-readable result summary](submission/result-summary.json) — portable
+  headline values, gates, hashes, and Route D+ diagnosis.
+- [Route A closeout](logs/scalable-v1/s02a-a05.md) — implementation reviewed;
+  formal three-seed training not run; no scientific result claimed.
+- [Route C closeout](logs/scalable-v1/s02c-a03.md) — partial training traces only;
+  no checkpoint or scientific result claimed.
+- [Route D+ Phase 7](docs/route-d-plus-phase7-result.md) — ED reveal,
+  optimization-failure diagnosis, and independent readback.
+- [Final handoff checklist](submission/FINAL_CHECKLIST.md) — PR delivery status
+  and claim boundary.
+
 ## Working documents
 
 | Document | Purpose |
@@ -39,7 +55,9 @@ Larger systems, thermodynamic extrapolation, chiral-metric response, and Landau-
 | [Four-route admission plan](../../../../docs/superpowers/plans/2026-07-28-challenge-15-four-route-admission.md) | Additive Route D capacity, reveal-only ED fidelity, and the exact common comparison SHA. |
 | [Route A plan](../../../../docs/superpowers/plans/2026-07-28-challenge-15-route-a-occupation-autoregressive.md) | Occupation-space autoregressive NQS in five bounded attempts. |
 | [Route B plan](../../../../docs/superpowers/plans/2026-07-28-challenge-15-route-b-continuous-holomorphic.md) | Continuous fixed-degree holomorphic NQS in five bounded attempts. |
-| [Route C plan](../../../../docs/superpowers/plans/2026-07-28-challenge-15-route-c-cf-flow-l2.md) | CG-coupled CF-Flow `L=2` prototype and explicit LLL-leakage decision. |
+| [Route C prototype (superseded)](../../../../docs/superpowers/plans/2026-07-28-challenge-15-route-c-cf-flow-l2.md) | Original CF-Flow proposal retained only as design history; it is not the submitted Route C contract. |
+| [Route C one-layer amendment](../../../../docs/superpowers/plans/2026-07-30-challenge-15-route-c-one-layer-action.md) | Approved strict-LLL Operator-NQS replacement and exact one-layer action gate. |
+| [Route C fast backend](../../../../docs/superpowers/plans/2026-07-30-challenge-15-route-c-fast-cofactor-jax-admission.md) | Analytic cofactor/local-jet JAX admission and production path. |
 | [Route D plan](../../../../docs/superpowers/plans/2026-07-28-challenge-15-route-d-analytic-seed-neural-correlator.md) | Analytic `L=2` projected-density mother dressed by a scalar neural correlator. |
 | [Route D+ Phase 1](docs/route-d-plus-phase1.md) | Final physics-first workflow: fixed conventions, remote JAX x64/GPU gate, and reproducible environment manifest. |
 | [AITP import source](docs/aitp-2-migration-handoff.md) | Pinned source imported into the current AITP Research Memory Entries and working Note. |
@@ -55,6 +73,11 @@ Larger systems, thermodynamic extrapolation, chiral-metric response, and Landau-
   and a reported total uncertainty of `1.4142135649e-12`.
 - Every frozen Benchmark v0 gate passes. The candidate uses ED-sized exact `L^2` projection and Ritz optimization, so larger-N scalability and the final challenge research contribution remain future work rather than part of the v0 claim.
 - Scalable v1 Step 1 is complete: the audit-first evaluator is available through [run_scalable_evaluator.py](run_scalable_evaluator.py).
+- Route A reached a reviewed, training-ready occupation-autoregressive
+  implementation with an N=8 smoke path.  The formal 2048-update three-seed
+  training was cancelled before launch because the measured runtime exceeded
+  the remaining deadline; one separate exploratory seed was cut off without a
+  checkpoint.  Route A is not frozen and has no final scientific result.
 - Route C now has an exact one-layer strict-LLL Operator-NQS implementation
   and a frozen N=6 trainer.  Its SCNet production launch passed startup and
   optimizer-update admission, but the user-directed cutoff stopped all three
@@ -69,6 +92,6 @@ Larger systems, thermodynamic extrapolation, chiral-metric response, and Landau-
   `0.009995`. The span ceiling (`0.99996`/`0.97806`) identifies an optimization
   failure rather than a capacity failure, so no final scalable-accuracy claim
   is made.
-- The current AITP Research Memory runtime is active at
-  `/home/bhjia/physics/vmc_nqs`; the Phase 1 result is pinned by a canonical
-  Entry and closeout Note. No project code or tests have run on the local host.
+- Route D+ Phase 1 additionally records its AITP Research Memory provenance at
+  `/home/bhjia/physics/vmc_nqs`; that statement applies only to the remote
+  Phase 1 runtime and is not a claim about the integrated checkout.

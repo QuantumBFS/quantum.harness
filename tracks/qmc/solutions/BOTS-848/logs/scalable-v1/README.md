@@ -3,7 +3,7 @@
 | Step | Purpose | Current attempt | Status |
 |---:|---|---:|---|
 | 1 | common protocol and evaluator | a03 | step-pass |
-| 2A | occupation autoregressive NQS | not started | pending |
+| 2A | occupation autoregressive NQS | a05 | implementation-reviewed; training-not-run; route open |
 | 2B | continuous holomorphic NQS | not started | pending |
 | 2C | strict-LLL CF operator NQS | a03 | attempt-incomplete; route open |
 | 2D | analytic L=2 seed times neural correlator | not started | pending |
@@ -25,6 +25,22 @@ Step 1 used three implementation attempts within one research step:
 Attempts a04 and a05 were unused. The additive Route D admission consumes no
 Step 2 attempt. After admission, Steps 2A-2D start in separate worktrees and
 each has its own `a01` through `a05` implementation-attempt counter.
+
+## Step 2A attempt accounting
+
+- [Attempt a01](s02a-a01.md) established the constrained occupation-space
+  support and sampling boundary.
+- [Attempt a02](s02a-a02-logpsi-correctness-accepted.md) closed the accepted
+  log-domain sparse-estimator correctness gate after bounded rescue attempts.
+- [Attempt a03](s02a-a03.md) implemented and reviewed the shared
+  autoregressive model and reduced trainer.
+- [Attempt a04](s02a-a04.md) implemented and reviewed the shared `L=2` tower
+  and its symmetry diagnostics.
+- [Attempt a05](s02a-a05.md) completed the adapter, N=8 smoke path, and
+  training-ready integration. The formal 2048-update three-seed training was
+  not run; a separate exploratory seed was cut off without a checkpoint,
+  optimizer state, or receipt. Route A remains open and is not a scientific
+  result.
 
 ## Step 2C attempt accounting
 

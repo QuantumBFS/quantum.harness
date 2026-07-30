@@ -50,13 +50,23 @@ three-seed ED reveal is honestly classified as an optimization failure:
 ground/tower fidelities `0.99741/0.87731`, gap error `0.009995`, and span
 ceilings `0.99996/0.97806`.
 
+The other merged scalable routes are preserved with explicit claim boundaries:
+
+| Route | Integrated status | Scientific status |
+| --- | --- | --- |
+| A — occupation autoregressive | Reviewed implementation and N=8 smoke path; formal three-seed training not run | No checkpoint or final result; route not frozen |
+| C — strict-LLL Operator-NQS | Exact one-layer implementation and partial production traces | Cut off before checkpoint; diagnostics only |
+| D+ — coordinate VMC/SR | Phases 1–5 and 6A certified; Phase 7/readback complete | Optimization failure; not used for the acceptance claim |
+
 ## Review package
 
-- [Submission report](tracks/qmc/solutions/BOTS-848/SUBMISSION.md)
-- [Final Benchmark v0 result](tracks/qmc/solutions/BOTS-848/docs/benchmark-v0-final-result.md)
-- [Portable machine-readable summary](tracks/qmc/solutions/BOTS-848/submission/result-summary.json)
-- [Route D+ Phase 7 result](tracks/qmc/solutions/BOTS-848/docs/route-d-plus-phase7-result.md)
-- [Final handoff checklist](tracks/qmc/solutions/BOTS-848/submission/FINAL_CHECKLIST.md)
+- [Submission report](https://github.com/TensorSpicyJ/quantum.harness/blob/challenge/qmc-chiral-graviton/tracks/qmc/solutions/BOTS-848/SUBMISSION.md)
+- [Final Benchmark v0 result](https://github.com/TensorSpicyJ/quantum.harness/blob/challenge/qmc-chiral-graviton/tracks/qmc/solutions/BOTS-848/docs/benchmark-v0-final-result.md)
+- [Portable machine-readable summary](https://github.com/TensorSpicyJ/quantum.harness/blob/challenge/qmc-chiral-graviton/tracks/qmc/solutions/BOTS-848/submission/result-summary.json)
+- [Route A honest closeout](https://github.com/TensorSpicyJ/quantum.harness/blob/challenge/qmc-chiral-graviton/tracks/qmc/solutions/BOTS-848/logs/scalable-v1/s02a-a05.md)
+- [Route C honest closeout](https://github.com/TensorSpicyJ/quantum.harness/blob/challenge/qmc-chiral-graviton/tracks/qmc/solutions/BOTS-848/logs/scalable-v1/s02c-a03.md)
+- [Route D+ Phase 7 result](https://github.com/TensorSpicyJ/quantum.harness/blob/challenge/qmc-chiral-graviton/tracks/qmc/solutions/BOTS-848/docs/route-d-plus-phase7-result.md)
+- [Final handoff checklist](https://github.com/TensorSpicyJ/quantum.harness/blob/challenge/qmc-chiral-graviton/tracks/qmc/solutions/BOTS-848/submission/FINAL_CHECKLIST.md)
 
 Clean GPU reproduction: Slurm `23033264`, source `557cb89`, 31 focused tests,
 `run.json` SHA-256 `62a6d0eec15b34f12563076d9f18b055a6831856009cee1fadfa2c4b7be8298d`.
