@@ -94,12 +94,12 @@ def test_chinese_open_research_reports_both_effective_central_charge_estimators(
     figures = [block for block in section.blocks if isinstance(block, Figure)]
 
     for value in (
-        "3.259733",
-        "0.085659",
-        "6.433808",
-        "11.251995",
-        "6.480240",
-        "15.865840",
+        "3.060740",
+        "1.571634",
+        "4.549845",
+        "12.579933",
+        "10.727804",
+        "14.610337",
     ):
         assert value in text
     assert "纠缠有效中心荷" in text

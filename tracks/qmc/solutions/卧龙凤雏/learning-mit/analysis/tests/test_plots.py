@@ -1,7 +1,12 @@
 from pathlib import Path
 
 from analysis.locale import get_locale
-from analysis.plots import _entropy_coefficients, make_plots, plot_data_hashes
+from analysis.plots import (
+    _entropy_coefficients,
+    _localized_window,
+    make_plots,
+    plot_data_hashes,
+)
 from summary_fixture import summary_fixture
 
 
@@ -43,3 +48,10 @@ def test_entropy_coefficients_use_phi_axis_and_separate_coefficient_panels():
     assert len(figure.axes) == 3
     assert figure.axes[-1].get_xlabel() == get_locale("en").labels["phi"]
     assert all(len(axis.lines) == 4 for axis in figure.axes)
+
+
+def test_chinese_anisotropy_window_labels_are_fully_localized():
+    assert (
+        _localized_window("all complete blocks", get_locale("zh"))
+        == "全部完整数据块"
+    )

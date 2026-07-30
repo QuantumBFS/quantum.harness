@@ -127,10 +127,10 @@ independent XY validation bracket is
 
 The DIII evidence did not form a defensible adjacent metal/insulator bracket,
 so the deterministic fallback selected the exploratory candidate
-\(\phi/\pi=0.28\). The entanglement estimator gives
-\(c_{\mathrm{eff}}=3.260\) with a 95% interval \([0.086,6.434]\); the
-Casimir–anisotropy estimator gives \(c_{\mathrm{eff}}=11.252\) with a 95%
-interval \([6.480,15.866]\). These estimates disagree, and the anisotropy
+\(\phi/\pi=0.30\). The entanglement estimator gives
+\(c_{\mathrm{eff}}=3.061\) with a 95% interval \([1.572,4.550]\); the
+Casimir–anisotropy estimator gives \(c_{\mathrm{eff}}=12.580\) with a 95%
+interval \([10.728,14.610]\). These estimates disagree, and the anisotropy
 window test is unstable. The frozen state therefore remains
 `xy_reproduced_diii_inconclusive`; neither estimate is published as a
 universal central charge.

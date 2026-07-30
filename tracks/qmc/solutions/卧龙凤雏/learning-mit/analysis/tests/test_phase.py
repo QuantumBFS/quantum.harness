@@ -12,6 +12,7 @@ from analysis.phase import (
     select_candidate,
     write_refinement_request,
 )
+from analysis.run_analysis import _pre_refinement_groups
 from test_entanglement import arc_points
 
 
@@ -151,3 +152,21 @@ def test_candidate_selection_falls_back_to_largest_score_change_deterministicall
         ]
     )
     assert (tie.lower_phi_pi, tie.upper_phi_pi) == pytest.approx((0.16, 0.18))
+
+
+def test_final_candidate_selection_excludes_adaptive_refinement_data():
+    locator_key = ("diii-locator", 0.45, 0.30, 8)
+    refinement_key = ("diii-refine", 0.45, 0.30, 8)
+    xy_key = ("xy-validation", 0.50, 0.24, 8)
+    grouped = {
+        locator_key: ["locator"],
+        refinement_key: ["refinement"],
+        xy_key: ["xy"],
+    }
+
+    frozen = _pre_refinement_groups(grouped)
+
+    assert frozen == {
+        locator_key: ["locator"],
+        xy_key: ["xy"],
+    }

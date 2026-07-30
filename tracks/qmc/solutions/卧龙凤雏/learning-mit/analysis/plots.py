@@ -409,4 +409,5 @@ def _localized_window(value: str, locale: Locale) -> str:
         "L/8–3L/8": "L/8 至 3L/8",
         "L/6–L/3": "L/6 至 L/3",
         "drop first block": "删除首块",
+        "all complete blocks": "全部完整数据块",
     }.get(value, value.replace("–", " 至 "))

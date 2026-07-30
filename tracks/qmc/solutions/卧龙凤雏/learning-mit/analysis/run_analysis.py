@@ -85,7 +85,9 @@ def build_summary(loaded: LoadedRun) -> dict[str, Any]:
     xy_angles = _scan_evidence(grouped, theta_pi=0.5)
     diii_angles = _scan_evidence(grouped, theta_pi=0.45)
     xy_bracket = _xy_bracket(xy_angles)
-    phase_evidence = _phase_model_evidence(grouped, theta_pi=0.45)
+    phase_evidence = _phase_model_evidence(
+        _pre_refinement_groups(grouped), theta_pi=0.45
+    )
     selection = select_candidate(phase_evidence) if len(phase_evidence) >= 2 else None
     diii_bracket = (
         (selection.lower_phi_pi, selection.upper_phi_pi)
@@ -252,6 +254,16 @@ def _group_streams(
     for key, stream in loaded.streams.items():
         grouped.setdefault(key[:4], []).append(stream)
     return grouped
+
+
+def _pre_refinement_groups(
+    grouped: dict[tuple[str, float, float, int], list[LoadedStream]],
+) -> dict[tuple[str, float, float, int], list[LoadedStream]]:
+    return {
+        key: streams
+        for key, streams in grouped.items()
+        if "refine" not in key[0]
+    }
 
 
 def _scan_evidence(

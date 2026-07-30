@@ -53,23 +53,23 @@ def test_learning_mit_loads_only_the_hash_selected_frozen_summary(repo_root):
     result = load_learning_mit(repo_root)
 
     assert result.summary_sha256 == (
-        "9cc87b98b94ef8af03723a3b0630955cd9ffce707eab282e0f676a69c2e22566"
+        "cc08a6e6d6d414046c744b4d29d48f112d44526dfc2145b867aae01f07d53c33"
     )
     assert result.status == "xy_reproduced_diii_inconclusive"
     assert result.exploratory is True
     assert result.xy_bracket == (0.24, 0.25)
     assert result.diii_bracket is None
     assert result.candidate_status == "exploratory"
-    assert result.candidate_phi_pi == 0.28
-    assert result.entanglement_c_eff == 3.259733473467105
+    assert result.candidate_phi_pi == 0.30
+    assert result.entanglement_c_eff == 3.060739513110786
     assert result.entanglement_interval == (
-        0.08565920495094037,
-        6.433807741983269,
+        1.5716339582529457,
+        4.549845067968627,
     )
-    assert result.casimir_c_eff == 11.25199487072655
+    assert result.casimir_c_eff == 12.579932843147617
     assert result.casimir_interval == (
-        6.480240089763549,
-        15.865840264470688,
+        10.727803858293923,
+        14.610336665219892,
     )
     assert result.estimator_agrees is False
     assert result.claim_status == "exploratory"
