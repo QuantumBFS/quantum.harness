@@ -1,0 +1,33 @@
+[instance]
+name = "2fe2s"
+filename = "2fe_2s_30e_20o.fcidump"
+sha256 = "bd6ef31773f7b082171f73faa6c98924948e2c250b6fbec74504d64361c8c6c7"
+norb = 20
+nelec = 30
+ms2 = 0
+
+[dmrg]
+symmetry = "SU2"
+spin = 0
+seed = 1234
+threads = 8
+stack_mem_gb = 8.0
+bond_dimensions = [250, 500]
+n_sweeps_per_m = 5
+tolerance = 1e-9
+iprint = 1
+stage_noise = 1e-4
+final_stage_noise = 1e-5
+stage_threshold = 1e-6
+final_stage_threshold = 1e-7
+tighten_final_stage = false
+tighten_each_stage = false
+
+[ordering]
+method = "fiedler"
+
+[references]
+public_m250 = -116.52623779075185
+public_m500 = -116.53577219230725
+public_m1000 = -116.60505321572569
+public_m1500 = -116.60547665637114

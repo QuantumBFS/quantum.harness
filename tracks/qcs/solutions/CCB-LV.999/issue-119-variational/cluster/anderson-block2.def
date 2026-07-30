@@ -1,0 +1,33 @@
+Bootstrap: docker
+From: docker.m.daocloud.io/library/python:3.12.11-slim-bookworm
+
+%labels
+    org.opencontainers.image.title Anderson block2 DMRG environment
+    org.opencontainers.image.python 3.12.11
+    org.opencontainers.image.uv 0.11.32
+
+%files
+    pyproject.toml /opt/anderson/pyproject.toml
+    uv.lock /opt/anderson/uv.lock
+
+%post
+    set -eux
+    export DEBIAN_FRONTEND=noninteractive
+    apt-get update
+    apt-get install -y --no-install-recommends ca-certificates libgomp1
+    rm -rf /var/lib/apt/lists/*
+
+    python -m pip install --no-cache-dir uv==0.11.32
+    cd /opt/anderson
+    UV_LINK_MODE=copy uv sync --frozen --no-dev --no-cache
+
+%environment
+    export PATH=/opt/anderson/.venv/bin:$PATH
+    export MPLBACKEND=Agg
+    export PYTHONUNBUFFERED=1
+
+%test
+    /opt/anderson/.venv/bin/python -c "from importlib.metadata import version; assert version('block2') == '0.5.3'; assert version('pyscf') == '2.13.1'; from pyblock2.driver.core import DMRGDriver, SymmetryTypes; print('block2 import: ok')"
+
+%runscript
+    exec /opt/anderson/.venv/bin/python "$@"

@@ -1,0 +1,127 @@
+{
+  "headline": {
+    "bond_dimension": 1500,
+    "energy_hartree": -62.26005366939074,
+    "kind": "finite_m_mps_expectation"
+  },
+  "input": {
+    "sha256": "9c8ceb3faa39ccb9cf2c15632cdc748e449cf26197ee1e8251092a6bb49ce4b6"
+  },
+  "instance": "anderson",
+  "method": "block2-dmrg",
+  "ordering": {
+    "method": "ga",
+    "permutation": [
+      3,
+      28,
+      30,
+      7,
+      24,
+      27,
+      23,
+      20,
+      9,
+      11,
+      12,
+      15,
+      16,
+      13,
+      18,
+      17,
+      14,
+      19,
+      8,
+      10,
+      21,
+      25,
+      22,
+      4,
+      26,
+      6,
+      5,
+      29,
+      31,
+      2,
+      0,
+      1
+    ]
+  },
+  "references": {
+    "cas4": -61.63174447,
+    "rhf": -57.52492815,
+    "skqd": -62.25668182839704
+  },
+  "schema_version": 1,
+  "sector": {
+    "ms2": 0,
+    "nelec": 32,
+    "norb": 32,
+    "spin": 0
+  },
+  "stages": [
+    {
+      "bond_dimension": 100,
+      "discarded_weight": 7.597394413951066e-05,
+      "energy_hartree": -62.253929578507346,
+      "mps_norm": null,
+      "rss_mb": 337.342,
+      "sweep_energy_hartree": null,
+      "wall_time_s": 12.353
+    },
+    {
+      "bond_dimension": 200,
+      "discarded_weight": 1.2898918023739337e-05,
+      "energy_hartree": -62.259729630306744,
+      "mps_norm": null,
+      "rss_mb": 548.422,
+      "sweep_energy_hartree": -62.259827322679456,
+      "wall_time_s": 20.243
+    },
+    {
+      "bond_dimension": 400,
+      "discarded_weight": 1.477009349862993e-06,
+      "energy_hartree": -62.26001573977183,
+      "mps_norm": 0.9999999999999981,
+      "rss_mb": 772.182,
+      "sweep_energy_hartree": -62.26002868762263,
+      "wall_time_s": 65.783
+    },
+    {
+      "bond_dimension": 600,
+      "discarded_weight": 3.8208418604790573e-07,
+      "energy_hartree": -62.260044743233664,
+      "mps_norm": 0.9999999999999992,
+      "rss_mb": 1105.883,
+      "sweep_energy_hartree": -62.260048077117,
+      "wall_time_s": 144.191
+    },
+    {
+      "bond_dimension": 800,
+      "discarded_weight": 1.3704259935644186e-07,
+      "energy_hartree": -62.260050678669316,
+      "mps_norm": 1.0000000000000007,
+      "rss_mb": 1934.438,
+      "sweep_energy_hartree": -62.26005193131118,
+      "wall_time_s": 243.775
+    },
+    {
+      "bond_dimension": 1000,
+      "discarded_weight": 5.558323691239129e-08,
+      "energy_hartree": -62.26005257936649,
+      "mps_norm": 1.000000000000001,
+      "rss_mb": 3638.252,
+      "sweep_energy_hartree": -62.26005309469497,
+      "wall_time_s": 381.273
+    },
+    {
+      "bond_dimension": 1500,
+      "discarded_weight": 9.552999036796187e-09,
+      "energy_hartree": -62.26005366939074,
+      "mps_norm": 0.9999999999999981,
+      "rss_mb": 7838.953,
+      "sweep_energy_hartree": -62.26005376317699,
+      "wall_time_s": 888.421
+    }
+  ],
+  "status": "completed"
+}
