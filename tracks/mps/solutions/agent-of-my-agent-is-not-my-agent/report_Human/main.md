@@ -28,7 +28,9 @@ are computationally plausible.
 
 We study a ferromagnetic transverse-field Ising chain,
 
-$$ x=1 $$
+$$
+H=-\sum_{i<j}J_{L}(j-i,\sigma)Z_iZ_j-\Gamma\sum_iX_i .
+$$
 
 where X and Z are Pauli operators. The finite periodic ring is defined by the
 pinned image-sum coupling
