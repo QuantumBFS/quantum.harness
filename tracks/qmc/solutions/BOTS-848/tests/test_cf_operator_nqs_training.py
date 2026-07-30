@@ -1,15 +1,27 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+import json
+from pathlib import Path
 
 import numpy as np
+import pytest
 
 from scalable_v1.routes.cf_operator_nqs.model import CFOperatorNQS
-from scalable_v1.routes.cf_operator_nqs.sampler import SU2TangentMetropolis
+from scalable_v1.routes.cf_operator_nqs.sampler import (
+    MetropolisBatch,
+    SU2TangentMetropolis,
+)
 from scalable_v1.routes.cf_operator_nqs.train import (
+    FROZEN_BATCH_SIZE,
+    FROZEN_CHECKPOINT_INTERVAL,
+    FROZEN_TRAINING_SEEDS,
+    FROZEN_UPDATES,
     coulomb_local_energy,
     real_energy_gradient,
+    run_training,
 )
+from train_cf_operator_nqs import _parser
 
 
 def _configs(seed: int = 848, *, batch: int = 3) -> np.ndarray:
@@ -182,3 +194,139 @@ def test_real_energy_gradient_matches_complex_covariance_fixture() -> None:
     np.testing.assert_allclose(
         real_energy_gradient(scores, local_energies), expected
     )
+
+
+class _FakeTrainingModel:
+    n_electrons = 2
+    two_q = 3
+    parameter_count = 2
+
+    def __init__(self) -> None:
+        self.parameters = np.asarray([0.1, -0.2])
+        self.sector_batches: list[tuple[int, int]] = []
+
+    def flat_parameters(self) -> np.ndarray:
+        return self.parameters.copy()
+
+    def set_flat_parameters(self, parameters: object) -> None:
+        self.parameters = np.asarray(parameters, dtype=np.float64).copy()
+
+    def log_derivative(
+        self, configs: object, sector_index: int
+    ) -> np.ndarray:
+        values = np.asarray(configs)
+        encoded_sector = int(values[0, 0, 0].real)
+        self.sector_batches.append((sector_index, encoded_sector))
+        coordinate = np.linspace(-1.0, 1.0, values.shape[0])
+        return np.column_stack(
+            (coordinate + 0.1j * sector_index, coordinate**2 - 0.2j)
+        )
+
+
+class _FakeTrainingSampler:
+    def __init__(self, sector_index: int) -> None:
+        self.sector_index = sector_index
+        self.calls = 0
+        self.batch_sizes: list[int] = []
+        self.invalidations = 0
+
+    def sample(self, *, batch_size: int) -> MetropolisBatch:
+        self.calls += 1
+        self.batch_sizes.append(batch_size)
+        configs = np.zeros((batch_size, 2, 2), dtype=np.complex128)
+        configs[:, 0, 0] = self.sector_index
+        return MetropolisBatch(
+            configurations=configs,
+            proposals=batch_size,
+            accepted=batch_size // 2,
+        )
+
+    def invalidate_amplitudes(self) -> None:
+        self.invalidations += 1
+
+
+def _fake_local_energy(configs: object, *, two_q: int) -> np.ndarray:
+    values = np.asarray(configs)
+    sector = values[0, 0, 0].real
+    return sector + np.linspace(0.25, 0.75, values.shape[0]) + 0.0 * two_q
+
+
+def test_full_training_binds_schedule_batches_and_atomic_artifacts(
+    tmp_path: Path,
+) -> None:
+    model = _FakeTrainingModel()
+    samplers = [_FakeTrainingSampler(sector) for sector in range(6)]
+    run_dir = tmp_path / "run"
+
+    final_record = run_training(
+        model=model,
+        samplers=samplers,
+        training_seed=848,
+        run_dir=run_dir,
+        local_energy_fn=_fake_local_energy,
+    )
+
+    assert FROZEN_TRAINING_SEEDS == (848, 1848, 2848)
+    assert FROZEN_UPDATES == 2048
+    assert FROZEN_BATCH_SIZE == 512
+    assert FROZEN_CHECKPOINT_INTERVAL == 128
+    assert final_record["update"] == FROZEN_UPDATES
+    assert final_record["checkpoint_selection"] == "final_update"
+    for sampler in samplers:
+        assert sampler.calls == FROZEN_UPDATES
+        assert sampler.batch_sizes == [FROZEN_BATCH_SIZE] * FROZEN_UPDATES
+        assert sampler.invalidations == FROZEN_UPDATES
+    assert len(model.sector_batches) == 6 * FROZEN_UPDATES
+    for offset in range(0, len(model.sector_batches), 6):
+        assert model.sector_batches[offset : offset + 6] == [
+            (sector, sector) for sector in range(6)
+        ]
+
+    records = [
+        json.loads(line)
+        for line in (run_dir / "training.jsonl").read_text(
+            encoding="utf-8"
+        ).splitlines()
+    ]
+    assert len(records) == FROZEN_UPDATES
+    assert records[0]["update"] == 1
+    assert records[-1]["update"] == FROZEN_UPDATES
+    assert records[-1]["checkpoint"] is True
+    with np.load(run_dir / "checkpoint.npz", allow_pickle=False) as checkpoint:
+        assert int(checkpoint["update"]) == FROZEN_UPDATES
+        np.testing.assert_allclose(checkpoint["parameters"], model.parameters)
+    with np.load(
+        run_dir / "optimizer-state.npz", allow_pickle=False
+    ) as optimizer:
+        assert int(optimizer["update"]) == FROZEN_UPDATES
+        assert optimizer["first_moment"].shape == (model.parameter_count,)
+        assert optimizer["second_moment"].shape == (model.parameter_count,)
+    assert not list(run_dir.glob("*.tmp"))
+    assert not list(run_dir.glob("*.tmp.npz"))
+
+
+def test_full_training_rejects_non_frozen_seed_before_creating_run_dir(
+    tmp_path: Path,
+) -> None:
+    run_dir = tmp_path / "not-created"
+
+    with pytest.raises(ValueError, match="training seed"):
+        run_training(
+            model=_FakeTrainingModel(),
+            samplers=[_FakeTrainingSampler(sector) for sector in range(6)],
+            training_seed=999,
+            run_dir=run_dir,
+            local_energy_fn=_fake_local_energy,
+        )
+
+    assert not run_dir.exists()
+
+
+def test_cli_exposes_only_frozen_seed_and_run_directory() -> None:
+    parser = _parser()
+    destinations = {action.dest for action in parser._actions}
+
+    assert destinations == {"help", "training_seed", "run_dir"}
+    assert "--early-stop" not in parser.format_help()
+    assert "--oracle" not in parser.format_help()
+    assert "--updates" not in parser.format_help()
