@@ -308,7 +308,7 @@ def run(
             )
         )
 
-    concurrent = (
+    ran_concurrently = (
         max(started for started, _ in intervals)
         < min(finished for _, finished in intervals)
     )
@@ -328,7 +328,7 @@ def run(
             "phase7_optimization_failure": True,
             "protocol_schema_valid": True,
             "architecture_unchanged": True,
-            "three_seed_concurrent_execution": concurrent,
+            "three_seed_concurrent_execution": ran_concurrently,
             "all_seed_schemas_valid": True,
             "clean_source_revision": True,
             "gpu_slurm_evidence": True,
@@ -336,7 +336,7 @@ def run(
             "no_ed_gradient": True,
             "no_ed_checkpoint_selection": True,
         },
-        "passed": bool(concurrent),
+        "passed": bool(ran_concurrently),
     }
     validate(certificate, "optimization-remediation.schema.json")
     write_json(output_path, certificate)
