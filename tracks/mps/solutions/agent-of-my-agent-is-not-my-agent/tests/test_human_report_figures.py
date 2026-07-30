@@ -175,6 +175,6 @@ def test_model_and_method_uses_rendered_latex_equations():
     method = method.split("## 2. Numerical validation", maxsplit=1)[0]
     assert "```text" not in method
     assert "$$" in method
-    assert r"\sum_{i<j}" in method
+    assert r"\sum_{i \lt j}" in method
     assert r"\zeta" in method
     assert r"\frac" in method
