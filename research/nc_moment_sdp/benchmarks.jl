@@ -31,6 +31,22 @@ function complex_pauli_benchmark(; order::Integer=1)
                      objective=objective, order=order, sense=:Max)
 end
 
+function heisenberg_su2(; order::Integer=2, localizer::Bool=false)
+    backend = PauliBackend([
+        (:X1, 1, :X), (:Y1, 1, :Y), (:Z1, 1, :Z),
+        (:X2, 2, :X), (:Y2, 2, :Y), (:Z2, 2, :Z),
+    ])
+    heisenberg = Dict((:X1, :X2) => 1.0, (:Y1, :Y2) => 1.0,
+                      (:Z1, :Z2) => 1.0)
+    objective = polynomial(backend, heisenberg)
+    inequalities = localizer ? [polynomial(backend,
+        merge(Dict(() => 1.0), heisenberg))] : NCPolynomial[]
+    name = localizer ? "two-site isotropic Heisenberg localizer / SU2" :
+                       "two-site isotropic Heisenberg / SU2"
+    return NCProblem(name, backend; objective=objective, inequalities=inequalities,
+                     order=order, sense=:Min)
+end
+
 function equality_localizer_benchmark(; order::Integer=2, symmetry::Bool=false)
     backend = LegacyInvolutionBackend([:A, :B]; commuting_pairs=[(:A, :B)])
     objective = polynomial(backend, Dict((:B,) => 1.0))

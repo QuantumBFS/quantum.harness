@@ -48,6 +48,33 @@ struct CompiledSymmetryIR{P<:NCProblem}
     objective::AffineForm
 end
 
+struct SU2BlockIR
+    spin::Int
+    multiplicity::Int
+    highest_weight_basis::Matrix{ComplexF64}
+    pencil::Tuple
+end
+
+struct SU2LocalizingIR
+    polynomial_index::Int
+    basis::Tuple{Vararg{NCWord}}
+    pencil::Tuple
+    blocks::Tuple{Vararg{SU2BlockIR}}
+end
+
+struct CompiledSU2IR{P<:NCProblem}
+    problem::P
+    basis::Tuple{Vararg{NCWord}}
+    coordinate_count::Int
+    moment_words::Tuple{Vararg{NCWord}}
+    moment_forms::Tuple{Vararg{AffineForm}}
+    moment_matrix::Tuple
+    moment_blocks::Tuple{Vararg{SU2BlockIR}}
+    equalities::Tuple{Vararg{AffineForm}}
+    localizers::Tuple{Vararg{SU2LocalizingIR}}
+    objective::AffineForm
+end
+
 function _word_linear(backend, left::NCWord, poly::NCPolynomial, right::NCWord)
     output = Dict{NCWord,ComplexF64}()
     left_star = star_word(backend, left)
@@ -210,6 +237,177 @@ function compile_dense(problem::NCProblem)
     return ir
 end
 
+const _SU2_AXES = (:X, :Y, :Z)
+
+function _levi_civita(left::Symbol, right::Symbol, output::Symbol)
+    (left, right, output) in ((:X, :Y, :Z), (:Y, :Z, :X), (:Z, :X, :Y)) && return 1
+    (left, right, output) in ((:Y, :X, :Z), (:Z, :Y, :X), (:X, :Z, :Y)) && return -1
+    return 0
+end
+
+function su2_generators(backend::PauliBackend, basis)
+    words = collect(basis)
+    indices = Dict(word => index for (index, word) in enumerate(words))
+    generators = Matrix{ComplexF64}[]
+    for rotation_axis in _SU2_AXES
+        generator = zeros(ComplexF64, length(words), length(words))
+        for (column, word) in enumerate(words), (position, letter) in enumerate(word.letters)
+            source_axis = backend.axes[letter]
+            site = backend.sites[letter]
+            for output_axis in _SU2_AXES
+                sign = _levi_civita(rotation_axis, source_axis, output_axis)
+                iszero(sign) && continue
+                replacement = backend.lookup[(site, output_axis)]
+                acted = NCWord((word.letters[1:position-1]..., replacement,
+                                word.letters[position+1:end]...))
+                reduced = reduce_word(backend, acted)
+                haskey(indices, reduced.word) ||
+                    throw(ArgumentError("Pauli word basis is not closed under global SU(2)"))
+                generator[indices[reduced.word], column] += im * sign * reduced.phase
+            end
+        end
+        norm(generator - generator', Inf) <= 1.0e-11 ||
+            error("constructed SU(2) generator is not Hermitian")
+        push!(generators, generator)
+    end
+    return Tuple(generators)
+end
+
+function su2_decomposition(backend::PauliBackend, basis; atol=1.0e-9)
+    Jx, Jy, Jz = su2_generators(backend, basis)
+    J2 = Hermitian(Jx * Jx + Jy * Jy + Jz * Jz)
+    z_spectrum = eigen(Hermitian(Jz))
+    maximum_spin = maximum((length(word) for word in basis); init=0)
+    output = NamedTuple[]
+    covered_dimension = 0
+    lowering = Jx - im * Jy
+    for spin in 0:maximum_spin
+        selected_m = findall(value -> abs(value - spin) <= atol, z_spectrum.values)
+        isempty(selected_m) && continue
+        fixed_m = z_spectrum.vectors[:, selected_m]
+        casimir = eigen(Hermitian(fixed_m' * J2 * fixed_m))
+        selected_spin = findall(value -> abs(value - spin * (spin + 1)) <= 10atol,
+                                casimir.values)
+        isempty(selected_spin) && continue
+        highest = Matrix{ComplexF64}(fixed_m * casimir.vectors[:, selected_spin])
+        weight_bases = Matrix{ComplexF64}[highest]
+        current = highest
+        magnetic = spin
+        while magnetic > -spin
+            normalization = sqrt(spin * (spin + 1) - magnetic * (magnetic - 1))
+            current = lowering * current / normalization
+            push!(weight_bases, current)
+            magnetic -= 1
+        end
+        multiplicity = size(highest, 2)
+        covered_dimension += (2spin + 1) * multiplicity
+        push!(output, (spin=spin, multiplicity=multiplicity,
+                       highest_weight_basis=highest, weight_bases=Tuple(weight_bases)))
+    end
+    covered_dimension == length(basis) ||
+        error("incomplete SU(2) decomposition: covered $covered_dimension of $(length(basis)) dimensions")
+    return Tuple(output)
+end
+
+function _scale_form(form::AffineForm, factor::ComplexF64)
+    return AffineForm(factor * form.constant,
+                      Tuple((index, factor * coefficient) for (index, coefficient) in form.terms))
+end
+
+function _sum_forms(forms)
+    constant = 0.0 + 0.0im
+    coefficients = Dict{Int,ComplexF64}()
+    for form in forms
+        constant += form.constant
+        for (index, coefficient) in form.terms
+            coefficients[index] = get(coefficients, index, 0.0 + 0.0im) + coefficient
+        end
+    end
+    terms = Tuple((index, coefficients[index]) for index in sort!(collect(keys(coefficients)))
+                  if abs(coefficients[index]) > 1.0e-13)
+    return AffineForm(ComplexF64(constant), terms)
+end
+
+function _compress_pencil(pencil, isometry::AbstractMatrix{<:Complex})
+    n, multiplicity = size(isometry)
+    n == length(pencil) || throw(DimensionMismatch("SU(2) isometry and pencil disagree"))
+    return Tuple(Tuple(_sum_forms(_scale_form(pencil[i][j],
+                    conj(isometry[i, left]) * isometry[j, right])
+                for i in 1:n for j in 1:n
+                if abs(isometry[i, left]) * abs(isometry[j, right]) > 1.0e-15)
+            for right in 1:multiplicity) for left in 1:multiplicity)
+end
+
+function _su2_blocks(backend::PauliBackend, basis, pencil)
+    decomposition = su2_decomposition(backend, basis)
+    return Tuple(SU2BlockIR(part.spin, part.multiplicity, part.highest_weight_basis,
+                            _compress_pencil(pencil, part.highest_weight_basis))
+                 for part in decomposition)
+end
+
+function _su2_action(backend::PauliBackend, linear, rotation_axis::Symbol)
+    output = Dict{NCWord,ComplexF64}()
+    for (word, coefficient) in linear, (position, letter) in enumerate(word.letters)
+        source_axis = backend.axes[letter]
+        site = backend.sites[letter]
+        for output_axis in _SU2_AXES
+            sign = _levi_civita(rotation_axis, source_axis, output_axis)
+            iszero(sign) && continue
+            replacement = backend.lookup[(site, output_axis)]
+            acted = NCWord((word.letters[1:position-1]..., replacement,
+                            word.letters[position+1:end]...))
+            reduced = reduce_word(backend, acted)
+            factor = coefficient * im * sign * reduced.phase
+            output[reduced.word] = get(output, reduced.word, 0.0 + 0.0im) + factor
+        end
+    end
+    return output
+end
+
+function _validate_su2_scalar(backend::PauliBackend, polynomial::NCPolynomial, label;
+                              rtol=1.0e-12)
+    scale = maximum(abs.(collect(values(polynomial.terms))); init=0.0)
+    for axis in _SU2_AXES
+        action = _su2_action(backend, polynomial.terms, axis)
+        residual = maximum(abs.(collect(values(action))); init=0.0)
+        residual <= rtol * scale || throw(ArgumentError("$label is not an SU(2) scalar"))
+    end
+end
+
+function compile_su2(problem::NCProblem)
+    problem.backend isa PauliBackend ||
+        throw(ArgumentError("SU(2) formulation requires a PauliBackend"))
+    problem.group_rank == 0 || throw(ArgumentError(
+        "SU(2) formulation does not compose with finite-Abelian symmetry metadata"))
+    backend = problem.backend
+    _validate_su2_scalar(backend, problem.objective, "objective")
+    for (index, equality) in enumerate(problem.equalities)
+        _validate_su2_scalar(backend, equality, "equality $index")
+    end
+    for (index, inequality) in enumerate(problem.inequalities)
+        _validate_su2_scalar(backend, inequality, "inequality $index")
+    end
+
+    dense = compile_dense(problem)
+    form_by_word = Dict(zip(dense.moment_words, dense.moment_forms))
+    invariance_equalities = AffineForm[]
+    for word in dense.moment_words, axis in _SU2_AXES
+        action = _su2_action(backend, Dict(word => 1.0 + 0.0im), axis)
+        maximum(abs.(collect(values(action))); init=0.0) > 0.0 &&
+            push!(invariance_equalities, _convert_word_linear(action, form_by_word))
+    end
+    equalities = (dense.equalities..., invariance_equalities...)
+    moment_blocks = _su2_blocks(backend, dense.basis, dense.moment_matrix)
+    localizers = Tuple(SU2LocalizingIR(localizer.polynomial_index, localizer.basis,
+        localizer.pencil, _su2_blocks(backend, localizer.basis, localizer.pencil))
+        for localizer in dense.localizers)
+    ir = CompiledSU2IR(problem, dense.basis, dense.coordinate_count, dense.moment_words,
+                       dense.moment_forms, dense.moment_matrix, moment_blocks,
+                       equalities, localizers, dense.objective)
+    _validate_compiled(ir)
+    return ir
+end
+
 function compile_symmetry(problem::NCProblem)
     basis = enumerate_words(problem)
     backend = problem.backend
@@ -330,7 +528,7 @@ function _validate_hermitian_pencil(pencil, label)
     end
 end
 
-function _validate_compiled(ir::Union{CompiledDenseIR,CompiledSymmetryIR})
+function _validate_compiled(ir::Union{CompiledDenseIR,CompiledSymmetryIR,CompiledSU2IR})
     _validate_hermitian_pencil(ir.moment_matrix, "moment matrix")
     for localizer in ir.localizers
         _validate_hermitian_pencil(localizer.pencil, "localizer $(localizer.polynomial_index)")
@@ -342,6 +540,14 @@ function _validate_compiled(ir::Union{CompiledDenseIR,CompiledSymmetryIR})
         for localizer in ir.localizers, block in localizer.blocks
             _validate_hermitian_pencil(block.pencil,
                 "localizer $(localizer.polynomial_index) block $(block.character)")
+        end
+    elseif ir isa CompiledSU2IR
+        for block in ir.moment_blocks
+            _validate_hermitian_pencil(block.pencil, "moment spin-$(block.spin) block")
+        end
+        for localizer in ir.localizers, block in localizer.blocks
+            _validate_hermitian_pencil(block.pencil,
+                "localizer $(localizer.polynomial_index) spin-$(block.spin) block")
         end
     end
     abs(imag(ir.objective.constant)) <= 1.0e-11 ||

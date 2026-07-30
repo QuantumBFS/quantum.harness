@@ -168,6 +168,16 @@ function solve_moment_sdp(ir::CompiledSymmetryIR; formulation::Symbol=:symmetry,
                              compile_seconds=compile_seconds)
 end
 
+function solve_moment_sdp(ir::CompiledSU2IR; formulation::Symbol=:su2,
+                          compile_seconds::Float64=0.0)
+    formulation == :su2 || throw(ArgumentError("SU(2) IR requires :su2 formulation"))
+    moment_pencils = [block.pencil for block in ir.moment_blocks]
+    localizer_pencils = [[block.pencil for block in localizer.blocks]
+                         for localizer in ir.localizers]
+    return _solve_moment_sdp(ir, formulation, moment_pencils, localizer_pencils;
+                             compile_seconds=compile_seconds)
+end
+
 function _compile_timed(problem, compiler)
     start = time_ns()
     ir = compiler(problem)
@@ -181,8 +191,11 @@ function solve_moment_sdp(problem::NCProblem; formulation::Symbol=:dense)
     elseif formulation == :symmetry
         ir, compile_seconds = _compile_timed(problem, compile_symmetry)
         return solve_moment_sdp(ir; formulation=formulation, compile_seconds=compile_seconds)
+    elseif formulation == :su2
+        ir, compile_seconds = _compile_timed(problem, compile_su2)
+        return solve_moment_sdp(ir; formulation=formulation, compile_seconds=compile_seconds)
     end
-    throw(ArgumentError("formulation must be :dense or :symmetry"))
+    throw(ArgumentError("formulation must be :dense, :symmetry, or :su2"))
 end
 
 function evaluate_moment(result::SDPResult, backend::StarAlgebraBackend, raw_word)

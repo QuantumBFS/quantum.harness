@@ -51,6 +51,10 @@ function main(arguments)
         (pauli_z2xz2(order=2), :symmetry, nothing),
         (equality_localizer_benchmark(symmetry=true), :dense, nothing),
         (equality_localizer_benchmark(symmetry=true), :symmetry, nothing),
+        (heisenberg_su2(order=2), :dense, nothing),
+        (heisenberg_su2(order=2), :su2, nothing),
+        (heisenberg_su2(order=2, localizer=true), :dense, nothing),
+        (heisenberg_su2(order=2, localizer=true), :su2, nothing),
     ]
     records = Dict{String,Any}[]
     for (problem, formulation, probe) in instances
@@ -59,7 +63,7 @@ function main(arguments)
     end
     report = Dict(
         "solver" => "Mosek via JuMP/MosekTools",
-        "formulation" => "dense and finite-Abelian block complex Hermitian moment/localizing pencils with strict realification",
+        "formulation" => "dense, finite-Abelian character blocks, and non-Abelian SU(2) multiplicity blocks for complex Hermitian moment/localizing pencils with strict realification",
         "instances" => records,
     )
     rendered = JSON.json(report, 2)
