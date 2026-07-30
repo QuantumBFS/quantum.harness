@@ -257,7 +257,17 @@ def _write_manifest(
     for role, path in (
         ("delivery-summary", summary_path),
         ("record-gate", gate_path),
+        (
+            "exact-upper-frontier",
+            project_root / "outputs/final/upper-contraction-frontier.csv",
+        ),
+        (
+            "exact-upper-provenance",
+            project_root / "outputs/final/UPPER_FRONTIER_PROVENANCE.txt",
+        ),
     ):
+        if not path.exists():
+            continue
         try:
             relative = path.relative_to(project_root).as_posix()
         except ValueError:

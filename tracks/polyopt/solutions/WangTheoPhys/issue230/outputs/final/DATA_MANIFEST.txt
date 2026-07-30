@@ -36,6 +36,8 @@ f54d69ba7433747d09be9f9ae1daf883e63c9c46011d45e57af3bf3c5c7ecac7  4450  xxz-grid
 584a77f65209ffb2d863efb552134e43dbf6161dd59fb6992ca7ad24beb88650  6488  xxz-grid  outputs/final/grid/delta_2/level_7_block_8.json
 6d6d33fb6ef784eff0940f8d3360549dfb5b37f2d1cae6eeb3e5b821624123d6  12700  delivery-summary  outputs/final/certificate-summary.csv
 9107f1361cadb293b6cd42ff6c241bb9ddc46a642ef41be4f4113965197b31c0  591  record-gate  outputs/final/record-gate.json
+488cfccccaf7dce6cdba6f8a5d26719e6cbe917cf74db1b23468d380cec4a411  1924  exact-upper-frontier  outputs/final/upper-contraction-frontier.csv
+d33e91ad13964916c2bfdf1ba7de18cab40a3ed9cd1c8b647fc0620474573fd3  1894  exact-upper-provenance  outputs/final/UPPER_FRONTIER_PROVENANCE.txt
 
 Reproduce:
   .venv/bin/python scripts/build_delivery_data.py
