@@ -240,3 +240,23 @@ An experiment is not closed when the program exits. It is closed after:
   weights, shard by disjoint sample-index ranges, and merge with the original
   stable ranking key. Do not change the seeded sample stream merely to obtain
   better load balance.
+
+## WSL identity and private-network reachability
+
+- WSL distributions are registered per Windows user/security context. A
+  Codex sandbox or elevated shell can resolve `wsl.exe` yet see no registered
+  distribution even when a different desktop user previously ran the
+  research environment. Treat `wsl.exe --list --verbose` reporting no
+  distributions as an execution-context failure, not as evidence that the
+  preserved Linux filesystem or research run was deleted.
+- The CPU worker at `162.105.145.128` is intentionally reachable only from
+  the WSL-side private network. A Windows-side SSH timeout is therefore an
+  expected topology diagnostic and must not trigger password retries, key
+  replacement, or a local scientific-compute fallback.
+- Before launching a resumed remote batch, require both hops in one preflight:
+  the intended WSL user must report its hostname, `nproc`, and source commit,
+  then its existing `cpu_worker_ed25519` key must reach the CPU host in
+  `BatchMode`. If the current Codex execution identity cannot see that WSL
+  registration, continue only local code/document work and restore the WSL
+  user context before science; never silently move the calculation to
+  Windows.
