@@ -74,6 +74,10 @@ h1{font-family:var(--sans);font-size:clamp(34px,5vw,58px);line-height:1.06;lette
 }
 .page-hidden{display:none!important}
 section>h2{font-family:var(--sans);font-size:clamp(25px,3vw,34px);letter-spacing:-.03em;margin:0 0 7px;color:#111827}
+.report-page>h2:not(:first-child){
+  margin:46px 0 14px;padding-top:27px;border-top:1px solid #dce3eb;
+  font-size:clamp(23px,2.6vw,30px)
+}
 section>.note{font-size:14px;line-height:1.66;color:var(--muted);max-width:88ch}
 section h3{font-family:var(--sans);font-size:19px;border-top-color:#e2e8f0;margin-top:24px;padding-top:19px;color:#172033}
 .para{font-size:14.5px;line-height:1.72;color:#46556a;max-width:88ch}
@@ -117,6 +121,7 @@ pre code{border:0;background:transparent;color:#075985;line-height:1.65}
   h1{font-size:36px}.lede{font-size:14.5px}.report-controls{left:13px;right:auto;top:12px}
   .page-switcher{position:static;width:100%;overflow-x:auto;justify-content:flex-start}.page-switcher-label{display:none}
   .page-switcher button{white-space:nowrap}.report-page{padding:23px 16px;border-radius:18px;margin-top:14px;overflow:hidden}
+  .report-page>h2:not(:first-child){margin-top:34px;padding-top:22px}
   .verdict{display:block}.verdict .label{display:block;margin-bottom:6px}
   .kv{grid-template-columns:1fr;gap:2px}.kv .v{margin-bottom:8px}
   table{display:block;overflow-x:auto;white-space:nowrap}.figs{width:100%;position:static;left:auto;transform:none}.figbox{padding:6px}
@@ -129,7 +134,7 @@ pre code{border:0;background:transparent;color:#075985;line-height:1.65}
   .hero{padding:0 0 8px;margin:0}.hero:before{display:none}
   h1{font-size:25px;margin:6px 0}.sub{font-size:10px}.lede{font-size:10px;line-height:1.35;margin-top:6px}
   .report-page{margin:0;padding:6px 0 0}.report-page:nth-of-type(2){break-before:page;page-break-before:always}
-  section>h2{font-size:21px;margin-bottom:3px}section>.note,.para,ul.flat li{font-size:9.5px;line-height:1.35}
+  section>h2{font-size:21px;margin-bottom:3px}.report-page>h2:not(:first-child){font-size:16px;margin:10px 0 4px;padding-top:7px}section>.note,.para,ul.flat li{font-size:9.5px;line-height:1.35}
   section h3{font-size:14px;margin-top:8px;padding-top:6px}
   .verdict,.card,.expected{padding:7px 9px;margin:6px 0}.verdict .label{font-size:14px}.verdict .why{font-size:9.5px}
   table{font-size:9px}.thead th,thead th,tbody td{padding:5px 6px}
