@@ -7,6 +7,7 @@ from trottercert.cubic_local import exact_right_generator_stage_contribution
 from trottercert.hpc_artifacts import coordinate_encode_series, merge_coordinate_series
 
 
+@pytest.mark.slow
 def test_stage_contributions_reconstruct_fourth_order_conditions() -> None:
     stages = fourth_order_suzuki_cubic_stages()
     shards = [
