@@ -343,6 +343,100 @@ def test_combined_p0_evidence_validation_rejects_internal_mutation(defect: str):
         )
 
 
+@pytest.mark.parametrize("source_name", ("p0", "extension"))
+@pytest.mark.parametrize(
+    ("field", "malformed"),
+    (
+        ("length", 1024.0),
+        ("length", True),
+        ("length", np.int64(1024)),
+        ("replica_count", 8.0),
+        ("replica_count", True),
+        ("replica_count", np.int64(8)),
+        ("observable_columns", 4.0),
+        ("observable_columns", True),
+    ),
+)
+def test_combine_p0_evidence_requires_builtin_integer_source_fields(
+    source_name: str,
+    field: str,
+    malformed: object,
+):
+    p0, extension_analysis, _ = _combined_source_documents()
+    target = p0 if source_name == "p0" else extension_analysis
+    rows = target["estimates"]
+    assert isinstance(rows, list)
+    if field == "observable_columns":
+        target["observable_columns"] = {
+            **OBSERVABLE_COLUMNS,
+            "s1_fraction": malformed,
+        }
+    else:
+        rows[0][field] = (
+            16.0
+            if source_name == "extension"
+            and field == "replica_count"
+            and malformed == 8.0
+            else np.int64(16)
+            if source_name == "extension"
+            and field == "replica_count"
+            and isinstance(malformed, np.integer)
+            else malformed
+        )
+    if not isinstance(malformed, np.integer):
+        _sign(target)
+
+    with pytest.raises(RuntimeError, match="built-in integer"):
+        extension.combine_p0_evidence(p0, extension_analysis)
+
+
+@pytest.mark.parametrize(
+    ("field", "malformed"),
+    (
+        ("estimate_count", 282.0),
+        ("estimate_count", True),
+        ("estimate_count", np.int64(282)),
+        ("length_axis", 1024.0),
+        ("length_axis", True),
+        ("length_axis", np.int64(1024)),
+        ("row_length", 1024.0),
+        ("row_length", True),
+        ("row_length", np.int64(1024)),
+        ("replica_count", 8.0),
+        ("replica_count", True),
+        ("replica_count", np.int64(8)),
+        ("observable_columns", 4.0),
+        ("observable_columns", True),
+        ("observable_columns", np.int64(4)),
+    ),
+)
+def test_combined_p0_evidence_requires_builtin_integer_output_fields(
+    field: str,
+    malformed: object,
+):
+    p0, extension_analysis, _ = _combined_source_documents()
+    combined = extension.combine_p0_evidence(p0, extension_analysis)
+    if field == "estimate_count":
+        combined["estimate_count"] = malformed
+    elif field == "length_axis":
+        combined["sigma_entries"][0]["lengths"][0] = malformed
+    elif field == "row_length":
+        combined["sigma_entries"][0]["estimates"][0]["length"] = malformed
+    elif field == "replica_count":
+        combined["sigma_entries"][0]["estimates"][0]["replica_count"] = malformed
+    else:
+        combined["observable_columns"]["s1_fraction"] = malformed
+    if not isinstance(malformed, np.integer):
+        _sign(combined)
+
+    with pytest.raises(RuntimeError, match="built-in integer"):
+        extension.validate_combined_p0_evidence(
+            p0,
+            extension_analysis,
+            combined,
+        )
+
+
 def _selector_document(
     *,
     sigmas: tuple[float, ...] = (0.8, 1.1),

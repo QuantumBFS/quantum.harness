@@ -921,6 +921,12 @@ def _exact_revision(raw: object, name: str) -> str:
     return raw
 
 
+def _require_builtin_int(raw: object, name: str) -> int:
+    if type(raw) is not int:
+        _malformed(f"{name} must be a built-in integer")
+    return raw
+
+
 def _analysis_hash(analysis: Mapping[str, object]) -> str:
     digest = _exact_digest(analysis.get("analysis_document_sha256"), "analysis")
     unsigned = dict(analysis)
@@ -950,9 +956,17 @@ def _validated_combination_rows(
         or source.get("schema_version") != schema
     ):
         raise RuntimeError(f"{source_name} analysis schema is invalid")
-    _analysis_hash(source)
-    if source.get("observable_columns") != dict(OBSERVABLE_COLUMNS):
+    raw_columns = source.get("observable_columns")
+    if not isinstance(raw_columns, Mapping) or set(raw_columns) != set(
+        OBSERVABLE_COLUMNS
+    ):
         raise RuntimeError(f"{source_name} observable columns are invalid")
+    for name, expected_index in OBSERVABLE_COLUMNS.items():
+        index = _require_builtin_int(
+            raw_columns[name], f"{source_name} observable column index"
+        )
+        if index != expected_index:
+            raise RuntimeError(f"{source_name} observable columns are invalid")
     raw_rows = source.get("estimates")
     if (
         not isinstance(raw_rows, Sequence)
@@ -976,13 +990,18 @@ def _validated_combination_rows(
             raise RuntimeError(f"{source_name} estimate shape is invalid")
         sigma = _exact_hex(raw.get("sigma_hex"))
         kappa = _exact_hex(raw.get("kappa_hex"))
-        length = raw.get("length")
+        length = _require_builtin_int(
+            raw.get("length"), f"{source_name} estimate length"
+        )
         identity = (sigma, length, kappa)
         if identity != expected:
             raise RuntimeError(
                 f"{source_name} grid estimates are not in canonical order"
             )
-        if raw.get("replica_count") != replica_count:
+        raw_replica_count = _require_builtin_int(
+            raw.get("replica_count"), f"{source_name} replica count"
+        )
+        if raw_replica_count != replica_count:
             raise RuntimeError(f"{source_name} replica count is invalid")
         means = raw.get("means")
         errors = raw.get("standard_errors")
@@ -1032,6 +1051,7 @@ def _validated_combination_rows(
                     f"{source_name} request identity is bound to multiple groups"
                 )
         rows[(sigma, length, kappa)] = raw
+    _analysis_hash(source)
     return rows, group_requests, set(request_owners)
 
 
@@ -1102,8 +1122,10 @@ def _pooled_row(
     p0_row: Mapping[str, object],
     extension_row: Mapping[str, object],
 ) -> dict[str, object]:
-    left_n = int(p0_row["replica_count"])
-    right_n = int(extension_row["replica_count"])
+    left_n = _require_builtin_int(p0_row["replica_count"], "P0 replica count")
+    right_n = _require_builtin_int(
+        extension_row["replica_count"], "extension replica count"
+    )
     left_means = p0_row["means"]
     right_means = extension_row["means"]
     left_errors = p0_row["standard_errors"]
@@ -1230,6 +1252,22 @@ def validate_combined_p0_evidence(
         combined_analysis
     ) != _COMBINED_FIELDS:
         raise RuntimeError("combined analysis fields are invalid")
+    estimate_count = _require_builtin_int(
+        combined_analysis.get("estimate_count"), "combined estimate count"
+    )
+    if estimate_count != 282:
+        raise RuntimeError("combined estimate cardinality is invalid")
+    raw_columns = combined_analysis.get("observable_columns")
+    if not isinstance(raw_columns, Mapping) or set(raw_columns) != set(
+        OBSERVABLE_COLUMNS
+    ):
+        raise RuntimeError("combined observable columns are invalid")
+    for name, expected_index in OBSERVABLE_COLUMNS.items():
+        index = _require_builtin_int(
+            raw_columns[name], "combined observable column index"
+        )
+        if index != expected_index:
+            raise RuntimeError("combined observable columns are invalid")
     raw_entries = combined_analysis.get("sigma_entries")
     if (
         not isinstance(raw_entries, list)
@@ -1241,6 +1279,28 @@ def validate_combined_p0_evidence(
         )
     ):
         raise RuntimeError("combined analysis sigma entries are malformed")
+    for entry in raw_entries:
+        raw_lengths = entry.get("lengths")
+        if not isinstance(raw_lengths, list) or len(raw_lengths) != len(
+            PILOT_LENGTHS
+        ):
+            raise RuntimeError("combined length axis is invalid")
+        lengths = tuple(
+            _require_builtin_int(value, "combined length axis value")
+            for value in raw_lengths
+        )
+        if lengths != tuple(PILOT_LENGTHS):
+            raise RuntimeError("combined length axis is invalid")
+        raw_estimates = entry.get("estimates")
+        if not isinstance(raw_estimates, list):
+            raise RuntimeError("combined estimates are malformed")
+        for raw in raw_estimates:
+            if not isinstance(raw, Mapping) or set(raw) != _ESTIMATE_FIELDS:
+                raise RuntimeError("combined estimate shape is invalid")
+            _require_builtin_int(raw.get("length"), "combined estimate length")
+            _require_builtin_int(
+                raw.get("replica_count"), "combined replica count"
+            )
     expected = _build_combined_p0_evidence(p0_analysis, extension_analysis)
     if _canonical_bytes(combined_analysis) != _canonical_bytes(expected):
         raise RuntimeError("combined analysis semantic recomputation mismatch")
