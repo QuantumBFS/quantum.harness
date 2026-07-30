@@ -32,6 +32,9 @@ export PauliInteractionTemplate,
        assembly_plan,
        basis_manifest,
        validate_basis_manifest,
+       foreach_full_state_scalar_multiset,
+       full_state_scalar_multisets,
+       full_state_entries,
        state_monomial_degree,
        state_monomial_string,
        legacy_ncpoly_data
@@ -163,22 +166,30 @@ struct ExplicitStateSymmetry <: AbstractStateSymmetry
 end
 
 """
-Versioned selection rule for a materialized structured basis.
+Versioned selection rule for a materialized basis.
 
-The `:one_symbol_lift` version 1 family contains every bare Pauli word through
-the requested degree and one pure scalar row `ζ(w)` for every nonidentity
-word. The deliberately weaker `:bare_weight_one` version 1 family contains
-only the identity and single-site bare Pauli words. Both are deterministic,
-but neither applies a symmetry quotient. An individual low-degree manifest
-can nevertheless equal the full finite inventory; `BasisManifest.is_complete`
-records that finite-level fact.
+`:one_symbol_lift` version 1 contains every bare Pauli word through the
+requested degree and one pure scalar row `ζ(w)` for every nonidentity word.
+It is deterministic and nested in degree, but generally incomplete.
+
+`:bare_weight_one` version 1 contains only the identity and single-site bare
+Pauli words; `:bare_operator` version 1 contains the bare operator words.
+Both are deliberately weaker and deterministic.
+
+`:full_state_polynomial` version 1 materializes every canonical
+`ζ(w₁)…ζ(wₖ)v` row through the requested total degree. It is the complete
+finite state-polynomial basis before symmetry quotienting.
+
+None of the families applies a symmetry quotient. An individual low-degree
+manifest can nevertheless equal the full finite inventory;
+`BasisManifest.is_complete` records that finite-level fact.
 """
 struct StructuredBasisSpec
     family::Symbol
     version::Int
 
     function StructuredBasisSpec(family::Symbol, version::Int)
-        family in (:one_symbol_lift, :bare_weight_one, :bare_operator) ||
+        family in (:one_symbol_lift, :bare_weight_one, :bare_operator, :full_state_polynomial) ||
             throw(ArgumentError("unsupported structured basis family"))
         version == 1 ||
             throw(ArgumentError("unsupported structured basis family version"))
@@ -755,10 +766,117 @@ function one_symbol_entries(site_ids::Vector{Int}, max_degree::Int)
     return entries
 end
 
+function full_state_words(
+    site_ids::Vector{Int},
+    max_degree::Int,
+)
+    isempty(site_ids) && throw(ArgumentError("full basis needs at least one site"))
+    issorted(site_ids) || throw(ArgumentError("full basis site IDs must be sorted"))
+    length(unique(site_ids)) == length(site_ids) ||
+        throw(ArgumentError("full basis site IDs must be unique"))
+    all(site -> site > 0, site_ids) ||
+        throw(ArgumentError("full basis site IDs must be positive"))
+    max_degree >= 0 || throw(ArgumentError("basis degree must be nonnegative"))
+
+    local_words = enumerate_pauli_words(length(site_ids), max_degree)
+    words = [remap_word(word, site_ids) for word in local_words]
+    sort!(words; by=word -> (length(word), canonical_word_string(word)))
+    return words
+end
+
+function foreach_full_state_scalar_multiset(
+    callback::F,
+    site_ids::Vector{Int},
+    max_degree::Int,
+) where {F}
+    words = full_state_words(site_ids, max_degree)
+    state_words = filter(word -> !isempty(word.ops), words)
+
+    function enumerate_scalar_multisets!(
+        selected::Vector{PauliWord},
+        first_index::Int,
+        degree::Int,
+    )
+        callback(selected)
+        for index in first_index:length(state_words)
+            word = state_words[index]
+            next_degree = degree + length(word)
+            next_degree > max_degree && break
+            push!(selected, word)
+            enumerate_scalar_multisets!(
+                selected,
+                index,
+                next_degree,
+            )
+            pop!(selected)
+        end
+        return nothing
+    end
+    enumerate_scalar_multisets!(PauliWord[], 1, 0)
+    return nothing
+end
+
+function full_state_words_and_scalar_multisets(
+    site_ids::Vector{Int},
+    max_degree::Int,
+)
+    words = full_state_words(site_ids, max_degree)
+    scalar_multisets = Vector{Vector{PauliWord}}()
+    foreach_full_state_scalar_multiset(site_ids, max_degree) do selected
+        push!(scalar_multisets, copy(selected))
+    end
+    return words, scalar_multisets
+end
+
+"""
+Materialize every canonical commuting state-symbol multiset through
+`max_degree`, without also materializing the operator-row inventory.
+"""
+function full_state_scalar_multisets(
+    site_ids::Vector{Int},
+    max_degree::Int,
+)
+    _, scalar_multisets =
+        full_state_words_and_scalar_multisets(site_ids, max_degree)
+    return scalar_multisets
+end
+
+"""
+Materialize the complete state-polynomial row inventory through `max_degree`.
+
+The recursive state-symbol enumeration uses nondecreasing canonical word
+indices, so commuting products are emitted exactly once. The final ordering is
+the same deterministic degree/serialization ordering used by manifests.
+"""
+function full_state_entries(site_ids::Vector{Int}, max_degree::Int)
+    words, scalar_multisets =
+        full_state_words_and_scalar_multisets(site_ids, max_degree)
+    entries = StateMonomial[]
+    for symbols in scalar_multisets
+        scalar_degree = sum(length, symbols; init=0)
+        for word in words
+            scalar_degree + length(word) <= max_degree || continue
+            push!(entries, StateMonomial(symbols, word))
+        end
+    end
+    sort!(entries; by=state_monomial_sort_key)
+    length(unique(entries)) == length(entries) ||
+        error("full state-polynomial materialization emitted duplicate rows")
+    expected = full_state_basis_count(length(site_ids), max_degree)
+    BigInt(length(entries)) == expected ||
+        error(
+            "full state-polynomial materialization disagrees with its exact count",
+        )
+    return entries
+end
+
 const ONE_SYMBOL_LIFT_V1_SELECTION_RULE =
     "all bare Pauli words through max_degree plus one pure scalar " *
     "zeta(w) row for each nonidentity word; no multi-zeta rows; " *
     "no symmetry quotient"
+const FULL_STATE_POLYNOMIAL_V1_SELECTION_RULE =
+    "all canonical zeta(w1)...zeta(wk)v rows through total max_degree; " *
+    "commuting state symbols stored as a sorted multiset; no symmetry quotient"
 
 const BARE_WEIGHT_ONE_V1_SELECTION_RULE =
     "identity plus all bare Pauli words of support weight one when " *
@@ -874,6 +992,13 @@ function structured_basis_contents(
             entries,
             is_complete,
             BARE_OPERATOR_V1_SELECTION_RULE,
+        )
+    elseif spec.family == :full_state_polynomial && spec.version == 1
+        entries = full_state_entries(site_ids, max_degree)
+        return (
+            entries,
+            true,
+            FULL_STATE_POLYNOMIAL_V1_SELECTION_RULE,
         )
     end
     error("validated structured basis spec has no implementation")
@@ -1100,6 +1225,62 @@ function assembly_plan(problem::GapProblem)
             terms;
             positive_basis_sha256=positive_basis_sha256,
             gap_basis_sha256=gap_basis_sha256,
+        ),
+    )
+end
+
+"""
+Build the structured plan from manifests created immediately for `problem`.
+
+This avoids rebuilding the complete state-polynomial inventories several
+times inside one assembly. The contextual fields are checked here; the
+constructors that produced the fresh manifests already checked exact counts,
+ordering, uniqueness, and their deterministic hashes.
+"""
+function fresh_structured_assembly_plan(
+    problem::GapProblem,
+    positive_manifest::BasisManifest,
+    gap_manifest::BasisManifest,
+)
+    problem.basis_mode == :structured ||
+        throw(ArgumentError("fresh manifests require structured mode"))
+    spec = something(problem.basis_spec)
+    positive_manifest.role == :positive ||
+        throw(ArgumentError("positive manifest has the wrong role"))
+    gap_manifest.role == :gap ||
+        throw(ArgumentError("gap manifest has the wrong role"))
+    all(
+        manifest.family == spec.family &&
+        manifest.family_version == spec.version
+        for manifest in (positive_manifest, gap_manifest)
+    ) || throw(ArgumentError("fresh manifest basis family changed"))
+    positive_manifest.site_ids ==
+        collect(eachindex(problem.patch.sites)) ||
+        throw(ArgumentError("positive manifest has the wrong sites"))
+    gap_manifest.site_ids == problem.patch.inner_ids ||
+        throw(ArgumentError("gap manifest has the wrong sites"))
+    positive_manifest.max_degree == problem.d ||
+        throw(ArgumentError("positive manifest has the wrong degree"))
+    gap_manifest.max_degree == problem.d - 1 ||
+        throw(ArgumentError("gap manifest has the wrong degree"))
+
+    terms = instantiate_terms(problem.model, problem.patch)
+    return AssemblyPlan(
+        length(problem.patch.sites),
+        length(problem.patch.inner_ids),
+        length(terms),
+        BigInt(length(positive_manifest.entries)),
+        BigInt(length(gap_manifest.entries)),
+        problem.basis_mode,
+        positive_manifest.is_complete && gap_manifest.is_complete,
+        positive_manifest.sha256,
+        gap_manifest.sha256,
+        !(problem.symmetry isa NoStateSymmetry),
+        problem_fingerprint(
+            problem,
+            terms;
+            positive_basis_sha256=positive_manifest.sha256,
+            gap_basis_sha256=gap_manifest.sha256,
         ),
     )
 end

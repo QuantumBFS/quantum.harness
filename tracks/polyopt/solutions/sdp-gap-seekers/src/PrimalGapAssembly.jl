@@ -10,9 +10,9 @@ using ..GenericGapModel:
     StateMonomial,
     NoStateSymmetry,
     basis_manifest,
-    validate_basis_manifest,
+    full_state_entries,
     instantiate_terms,
-    assembly_plan,
+    fresh_structured_assembly_plan,
     state_monomial_string
 using ..PrimalGapSymbolics:
     ExactLinearPolynomial,
@@ -41,12 +41,20 @@ const BARE_INNER_STATIONARITY_RULE =
     "patch; identity and exact-zero commutators removed; complex equations " *
     "split into normalized real and imaginary equations; no scalar " *
     "state-symbol multipliers; no symmetry quotient"
+const FULL_INNER_STATE_STATIONARITY_RULE =
+    "all canonical state-polynomial monomials through degree 2d-2 on the " *
+    "inner patch; identity and exact-zero commutators removed; complex " *
+    "equations split into normalized real and imaginary equations; no " *
+    "symmetry quotient"
 
 """
 Versioned selector for stationarity test monomials.
 
-Version 1 deliberately uses only bare operator words. This is a sound subset
-of the full stationarity family, but is not declared complete.
+`:bare_inner_pauli` version 1 deliberately uses only bare operator words. This
+is a sound subset of the full stationarity family, but is not complete.
+
+`:full_inner_state` version 1 uses every canonical state-polynomial monomial
+through degree `2d-2` on the inner patch.
 """
 struct StationaritySpec
     family::Symbol
@@ -56,7 +64,7 @@ struct StationaritySpec
         family::Symbol=:bare_inner_pauli,
         version::Int=1,
     )
-        family == :bare_inner_pauli ||
+        family in (:bare_inner_pauli, :full_inner_state) ||
             throw(ArgumentError("unsupported stationarity family"))
         version == 1 ||
             throw(ArgumentError("unsupported stationarity family version"))
@@ -112,20 +120,28 @@ function stationarity_candidates(
     problem::GapProblem,
     spec::StationaritySpec=StationaritySpec(),
 )
-    spec.family == :bare_inner_pauli && spec.version == 1 ||
-        error("validated stationarity spec has no implementation")
     site_ids = sort!(copy(problem.patch.inner_ids))
     isempty(site_ids) &&
         throw(ArgumentError("stationarity needs at least one inner site"))
-    local_words = enumerate_pauli_words(
-        length(site_ids),
-        2problem.d - 2,
-    )
-    return StateMonomial[
-        StateMonomial(PauliWord[], remap_word(word, site_ids))
-        for word in local_words
-    ]
+    if spec.family == :bare_inner_pauli && spec.version == 1
+        local_words = enumerate_pauli_words(
+            length(site_ids),
+            2problem.d - 2,
+        )
+        return StateMonomial[
+            StateMonomial(PauliWord[], remap_word(word, site_ids))
+            for word in local_words
+        ]
+    elseif spec.family == :full_inner_state && spec.version == 1
+        return full_state_entries(site_ids, 2problem.d - 2)
+    end
+    error("validated stationarity spec has no implementation")
 end
+
+stationarity_selection_rule(spec::StationaritySpec) =
+    spec.family == :bare_inner_pauli ?
+    BARE_INNER_STATIONARITY_RULE :
+    FULL_INNER_STATE_STATIONARITY_RULE
 
 """
 Split complex stationarity expressions into real equations, discard exact
@@ -212,6 +228,78 @@ function assembly_fingerprint(
     return fingerprint_records(PRIMAL_ASSEMBLY_SCHEMA, records)
 end
 
+function keep_structural_moment(
+    symbols::Vector{PauliWord},
+    moment_filter::Symbol,
+)
+    moment_filter == :all && return true
+    moment_filter == :v4_conjugation_even ||
+        throw(ArgumentError("unsupported structural moment filter"))
+    x_odd = false
+    y_odd = false
+    z_odd = false
+    for word in symbols
+        for (_, axis) in word.ops
+            axis == 1 && (x_odd = !x_odd)
+            axis == 2 && (y_odd = !y_odd)
+            axis == 3 && (z_odd = !z_odd)
+        end
+    end
+    return !x_odd && !y_odd && !z_odd
+end
+
+function structural_moment_inventory(
+    problem::GapProblem,
+    moment_filter::Symbol,
+)
+    site_ids = collect(eachindex(problem.patch.sites))
+    max_degree = 2problem.d
+    local_words = enumerate_pauli_words(length(site_ids), max_degree)
+    state_words = PauliWord[
+        remap_word(word, site_ids)
+        for word in local_words
+        if !isempty(word.ops)
+    ]
+
+    bucket_count = max(1, 8Threads.nthreads())
+    buckets = [MomentKey[] for _ in 1:bucket_count]
+    Threads.@threads :dynamic for bucket_index in eachindex(buckets)
+        bucket = buckets[bucket_index]
+        for root_index in
+            bucket_index:bucket_count:length(state_words)
+            root = state_words[root_index]
+            selected = PauliWord[root]
+            function enumerate_from!(
+                first_index::Int,
+                degree::Int,
+            )
+                keep_structural_moment(selected, moment_filter) &&
+                    push!(bucket, moment_key(selected))
+                for index in first_index:length(state_words)
+                    word = state_words[index]
+                    next_degree = degree + length(word)
+                    next_degree > max_degree && break
+                    push!(selected, word)
+                    enumerate_from!(index, next_degree)
+                    pop!(selected)
+                end
+                return nothing
+            end
+            enumerate_from!(root_index, length(root))
+        end
+    end
+
+    ordered_moments = MomentKey[moment_key()]
+    for bucket in buckets
+        append!(ordered_moments, bucket)
+    end
+    sort!(
+        ordered_moments;
+        by=key -> (moment_degree(key), key.canonical),
+    )
+    return ordered_moments
+end
+
 """
 Build the exact scalar-moment inventory and canonical coefficient-map hashes.
 
@@ -222,7 +310,16 @@ matrix entry is visited once.
 function assemble_primal_gap(
     problem::GapProblem;
     stationarity_spec::StationaritySpec=StationaritySpec(),
+    materialize_coefficients::Bool=true,
+    structural_moment_filter::Symbol=:all,
+    materialize_moment_inventory::Bool=true,
 )
+    materialize_coefficients && !materialize_moment_inventory &&
+        throw(
+            ArgumentError(
+                "a materialized coefficient map requires a moment inventory",
+            ),
+        )
     problem.basis_mode == :structured ||
         throw(ArgumentError("exact primal assembly requires :structured mode"))
     problem.symmetry isa NoStateSymmetry ||
@@ -234,11 +331,11 @@ function assemble_primal_gap(
 
     positive_basis = basis_manifest(problem, :positive)
     gap_basis = basis_manifest(problem, :gap)
-    validate_basis_manifest(positive_basis, problem, :positive) ||
-        error("positive basis failed contextual validation")
-    validate_basis_manifest(gap_basis, problem, :gap) ||
-        error("gap basis failed contextual validation")
-    plan = assembly_plan(problem)
+    plan = fresh_structured_assembly_plan(
+        problem,
+        positive_basis,
+        gap_basis,
+    )
     hamiltonian_terms = instantiate_terms(problem.model, problem.patch)
 
     candidates = stationarity_candidates(problem, stationarity_spec)
@@ -256,6 +353,57 @@ function assemble_primal_gap(
         "stationarity-real-equalities-v1",
         equality_records,
     )
+
+    if !materialize_coefficients
+        # The deferred inventory mode is only for downstream exact quotients
+        # that canonicalize every encountered coefficient moment on demand.
+        # Identity remains as a normalization placeholder.
+        ordered_moments = materialize_moment_inventory ?
+            structural_moment_inventory(problem, structural_moment_filter) :
+            MomentKey[moment_key()]
+        if materialize_moment_inventory
+            length(unique(ordered_moments)) == length(ordered_moments) ||
+                error("structural moment inventory contains duplicates")
+            first(ordered_moments) == moment_key() ||
+                error("identity moment must be first")
+        end
+        moments_sha256 = materialize_moment_inventory ?
+            moment_inventory_sha256(ordered_moments) :
+            "deferred-on-demand-v1/" * string(structural_moment_filter)
+        coefficient_map_sha256 =
+            "deferred-structural-v1/" * string(structural_moment_filter)
+        final_sha256 = assembly_fingerprint(
+            plan.problem_sha256,
+            positive_basis.sha256,
+            gap_basis.sha256,
+            stationarity_spec,
+            candidates_sha256,
+            equalities_sha256,
+            moments_sha256,
+            coefficient_map_sha256,
+        )
+        term_type = eltype(hamiltonian_terms)
+        return PrimalAssembly{
+            typeof(problem),
+            term_type,
+        }(
+            PRIMAL_ASSEMBLY_SCHEMA,
+            problem,
+            plan.problem_sha256,
+            positive_basis,
+            gap_basis,
+            hamiltonian_terms,
+            stationarity_spec,
+            stationarity_selection_rule(stationarity_spec),
+            candidates_sha256,
+            equalities,
+            equalities_sha256,
+            ordered_moments,
+            moments_sha256,
+            coefficient_map_sha256,
+            final_sha256,
+        )
+    end
 
     moments = Set{MomentKey}([moment_key()])
     coefficient_records = String[]
@@ -332,7 +480,7 @@ function assemble_primal_gap(
         gap_basis,
         hamiltonian_terms,
         stationarity_spec,
-        BARE_INNER_STATIONARITY_RULE,
+        stationarity_selection_rule(stationarity_spec),
         candidates_sha256,
         equalities,
         equalities_sha256,

@@ -18,6 +18,16 @@ failure signatures and changed actions, not credentials or routine logs.
 
 ## Submission state
 
+- On `xhacnormalb`, `DefMemPerCPU=3931M` is enforced at submission:
+  `--mem=64G --cpus-per-task=16` is rejected even though a node has about
+  513 GB. Request at least 17 CPUs for 64 GB; the verified conservative
+  request is 20 CPUs / 64 GB. Always run `sbatch --test-only` because this
+  failure occurs before a job ID exists.
+- `sbatch --test-only` may report a far-future estimated start even while
+  `sinfo` shows idle or mixed nodes. A real submission can still be throttled
+  by `AssocGrpJobsLimit`; inspect the actual pending reason and do not submit a
+  duplicate. GPU partition `xhhgnormal` is not a CPU-only escape hatch:
+  its QOS rejects jobs without a GPU GRES request.
 - `AssocGrpSubmitJobsLimit` can reject `sbatch` before a job ID exists. That
   attempt is not submitted and must not be reported as queued.
 - `AssocGrpJobsLimit` can leave an accepted job pending. A real job ID exists,
@@ -28,6 +38,20 @@ failure signatures and changed actions, not credentials or routine logs.
 - Always export every fail-closed input explicitly. The rational replay needs
   `SS_INPUT_POINT`, `SS_SOLVE_POINT`, and a unique `SS_RUN_ID`; a new run ID
   is mandatory after any failed attempt.
+- Local environment assignments on `harness_slurm.sh` do not cross the SSH
+  boundary into the remote `sbatch --export=ALL` environment. Job `22992553`
+  therefore reached the batch script without `SS_RUN_ID` and failed at zero
+  elapsed time. Adding a second `--export` through the helper's `--extra`
+  also left job `22992660` without the values because the helper had already
+  emitted its own `--export=ALL`. For an environment-driven fixed sbatch
+  script, issue one audited remote
+  `sbatch --export=ALL,SS_...=... <script>` command (or first extend the
+  helper to support explicit exports), then inspect the startup log before
+  treating the job as launched.
+- When `harness_slurm.sh --extra` invokes the local guardrail parser, use
+  `/usr/bin/python3.12` (or a PATH that resolves to it). The user's default
+  Python 3.10 lacks `tomllib`; silently losing the parsed extra option can
+  change the submitted resource or export request.
 - Create the parent directory named by `#SBATCH --output` before submitting
   from a clean clone. Gitignored `results/` directories are absent from a
   fresh checkout; Slurm otherwise fails with `JobLaunchFailure`, signal 53,

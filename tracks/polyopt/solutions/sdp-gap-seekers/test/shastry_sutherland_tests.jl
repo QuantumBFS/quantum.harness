@@ -118,6 +118,20 @@ include(joinpath(@__DIR__, "..", "src", "ShastrySutherlandPrimalOracle.jl"))
 using .ShastrySutherlandPrimalOracle
 include(joinpath(@__DIR__, "..", "src", "ShastrySutherlandReducedOracle.jl"))
 using .ShastrySutherlandReducedOracle
+include(joinpath(
+    @__DIR__,
+    "..",
+    "src",
+    "ShastryFullStateSpatialOracle.jl",
+))
+using .ShastryFullStateSpatialOracle
+include(joinpath(
+    @__DIR__,
+    "..",
+    "src",
+    "ShastryFullStateSpinSpatialOracle.jl",
+))
+using .ShastryFullStateSpinSpatialOracle
 
 @testset "exact dimer state in assembled M/G/K constraints" begin
     patch = square_patch_geometry(1)
@@ -184,6 +198,51 @@ end
     @test exact_evaluation.equalities_exact_zero
     @test exact_evaluation.positive_minimum >= -1e-10
     @test exact_evaluation.gap_minimum >= -1e-10
+
+    exact_full_state_spatial =
+        assemble_shastry_full_state_spatial_reduced_primal(
+            assemble_full_state_real_reduced_primal(
+                assemble_full_state_v4_reduced_primal(
+                    exact_reduced.source;
+                    verify_truth=false,
+                );
+                verify_truth=false,
+            );
+            verify_truth=false,
+        )
+    exact_spatial_evaluation =
+        evaluate_shastry_spatial_dimer_primal(
+            exact_full_state_spatial,
+        )
+    @test exact_spatial_evaluation.equalities_exact_zero
+    @test exact_spatial_evaluation.positive_minimum >= -1e-10
+    @test exact_spatial_evaluation.gap_minimum >= -1e-10
+
+    exact_full_state_spin_spatial =
+        assemble_shastry_full_state_spin_spatial_reduced_primal(
+            exact_full_state_spatial,
+        )
+    spin_spatial_truth =
+        something(exact_full_state_spin_spatial.truth)
+    @test spin_spatial_truth.exact
+    @test spin_spatial_truth.source_truth.coefficient_count == 190_860
+    @test length(exact_full_state_spin_spatial.moments) == 1_711
+    spin_spatial_evaluation =
+        evaluate_shastry_spin_spatial_dimer_primal(
+            exact_full_state_spin_spatial,
+        )
+    @test spin_spatial_evaluation.equalities_exact_zero
+    @test spin_spatial_evaluation.positive_minimum >= -1e-10
+    @test spin_spatial_evaluation.gap_minimum >= -1e-10
+
+    spin_spatial_jump =
+        build_shastry_full_state_spin_spatial_jump_primal(
+            exact_full_state_spin_spatial,
+        )
+    @test JuMP.num_variables(spin_spatial_jump.model) == 1_711
+    @test length(spin_spatial_jump.psd_constraints) ==
+          length(exact_full_state_spin_spatial.positive_blocks) +
+          length(exact_full_state_spin_spatial.gap_blocks)
 
     overclaim_problem = GapProblem(
         patch,

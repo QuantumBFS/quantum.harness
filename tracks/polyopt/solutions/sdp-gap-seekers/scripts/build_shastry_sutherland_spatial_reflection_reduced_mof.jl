@@ -100,6 +100,13 @@ function progress(message::AbstractString)
     flush(stdout)
 end
 
+function dynamic_scan_input_enabled()
+    value = get(ENV, "SS_SCAN_DYNAMIC_INPUT", "0")
+    value in ("0", "1") ||
+        error("SS_SCAN_DYNAMIC_INPUT must be exactly 0 or 1")
+    return value == "1"
+end
+
 function parse_rational(text::String)
     parts = split(text, '/')
     length(parts) == 1 &&
@@ -148,8 +155,14 @@ function parse_args(arguments::Vector{String})
     ispath(output_path) &&
         throw(ArgumentError("output path already exists"))
     gamma = parse_rational(values["--gamma"])
-    gamma in ALLOWED_GAMMAS ||
-        throw(ArgumentError("gamma must be exactly 0 or 1/2"))
+    gamma >= 0 ||
+        throw(ArgumentError("gamma must be nonnegative"))
+    if !dynamic_scan_input_enabled()
+        gamma in ALLOWED_GAMMAS ||
+            throw(ArgumentError(
+                "gamma must be exactly 0 or 1/2 outside scan mode",
+            ))
+    end
     return (
         output=output_path,
         output_relative=relative,
