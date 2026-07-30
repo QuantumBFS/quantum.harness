@@ -60,8 +60,8 @@
 **Files:**
 - Modify: existing Git commit history and PR #263 metadata only.
 
-- [ ] Review the diff and secret scan.
-- [ ] Commit with the repository-required trailer.
-- [ ] Push `codex/issue-33-vqetape` to `JunkaiWang-TheoPhy/quantum.harness`.
-- [ ] Update the existing upstream PR body with direct artifact links and the honest result matrix.
-- [ ] Confirm the PR is open, ready for review, mergeable, and points to the pushed commit.
+- [x] Review the diff and secret scan.
+- [x] Commit with the repository-required trailer.
+- [x] Push `codex/issue-33-vqetape` to `JunkaiWang-TheoPhy/quantum.harness`.
+- [x] Update the existing upstream PR body with direct artifact links and the honest result matrix.
+- [x] Confirm the PR is open, ready for review, mergeable, and points to the pushed commit.
