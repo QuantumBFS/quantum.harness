@@ -197,6 +197,23 @@ The largest base size-pair crossings, $256/512$, are:
 Every crossing lies inside the preregistered $\beta_c\pm0.002$ window and
 shows the expected finite-size drift.
 
+The physical implications of the four crossing groups are:
+
+- At $\sigma=1.75$, the $R_p$ crossing nearly coincides with the published
+  $\beta_c$, while the $Q_m$ crossing is shifted slightly upward. The critical
+  point is reproduced overall, but the two dimensionless observables still
+  carry visible scaling corrections.
+- At $\sigma=1.875$, both crossings lie above the published $\beta_c$, with a
+  larger shift in $Q_m$. This directly shows slow finite-size drift near a
+  candidate boundary; it should not be interpreted as a new critical
+  temperature.
+- At $\sigma=2.0$, the shifts have the same sign and are more pronounced than
+  at $\sigma=1.875$. Thus the geometric-boundary candidate has not reached a
+  regime of negligible corrections by $L=512$.
+- At $\sigma=2.5$, both crossing shifts are largest, even though the central
+  $R_p,Q_m$ values flow toward the short-range anchors. Crossing locations
+  therefore converge slowly without contradicting the short-range control.
+
 ### 4.2 Secondary exponent $\eta$
 
 Using the base data with $L\ge128$:
@@ -208,9 +225,14 @@ Using the base data with $L\ge128$:
 | 2.0 | 0.2915 |
 | 2.5 | 0.2546 |
 
-The $\sigma=1.875$ value remains above the published thermodynamic estimate
-0.293(3), consistently with strong finite-size corrections. The
-$\sigma=2.5$ value is close to the short-range Ising value $1/4$.
+Together, the four exponent groups give a continuous physical picture.
+The $\sigma=1.75$ value $\eta=0.3729$ retains the strongest long-range
+signature. At $\sigma=1.875$, $\eta=0.3204$ remains above the published
+thermodynamic estimate 0.293(3), indicating strong crossover corrections.
+The $\sigma=2.0$ value 0.2915 moves further toward short-range behavior but
+does not by itself locate the boundary at 2. Finally, $\eta=0.2546$ at
+$\sigma=2.5$ is close to the short-range Ising value $1/4$ and serves as the
+short-range-side control.
 
 ![Critical scaling of chi divided by L squared and power-law fits using L at least 128.](figures/eta_scaling_en.svg)
 
@@ -273,9 +295,21 @@ tell whether those offsets persist or vanish beyond the simulated ladder.
 | 2.0 | -0.076125(19) | 0.83474(11) | 2 |
 | 2.5 | 0.01065 | 0.85351 | 1 |
 
-At $\sigma=1.875$, the $L=2048$ values agree with the published
-thermodynamic estimates at roughly the $1$–$1.5\sigma$ level, supporting
-the end-to-end implementation and normalization.
+The four central-data groups have distinct physical meanings:
+
+- At $\sigma=1.75$, strongly negative $R_p$ and the lowest $Q_m$ preserve
+  the clearest long-range fixed-point signature even at $L=2048$.
+- At $\sigma=1.875$, both ratios move toward the published thermodynamic
+  estimates. The extended ladder is resolving a slow crossover near the Sak
+  candidate boundary, but has not reached a stable limit.
+- At $\sigma=2.0$, $R_p$ remains negative and $Q_m$ remains below the
+  short-range anchor. Significant finite-size corrections therefore persist
+  at the geometric-boundary candidate; these values prove neither a
+  long-range limit nor completed flow to the short-range fixed point.
+- At $\sigma=2.5$, $R_p$ is near zero and $Q_m$ is near 0.856216, showing
+  flow into the two-dimensional short-range Ising universality class. Because
+  this point has only one seed, its statistical precision is not directly
+  comparable to the first three groups.
 
 ### 5.2 Competing correction models
 
@@ -288,11 +322,20 @@ For the full $L=64$–$2048$ window:
 | 2.0 | $R_p$ | 19.06 | 19.12 | 0.06 |
 | 2.0 | $Q_m$ | 20.95 | 21.04 | 0.10 |
 
-These differences are far too small for model selection. Removing smaller
-sizes makes the three-parameter limits less stable. Several $\sigma=1.75$
-fits and the $\sigma=2.5$ $R_p$ fits have poor absolute chi-square or hit
-parameter bounds; their formal $O_\infty$ values are not physically
-interpretable.
+The physical implications of the model-comparison groups are:
+
+- At $\sigma=1.875$, $|\Delta\mathrm{AICc}|$ is only 0.18 for $R_p$ and
+  0.07 for $Q_m$. Neither the topological wrapping observable nor the
+  magnetization ratio distinguishes power from marginal/log corrections, so
+  the ambiguity is not peculiar to one observable.
+- At $\sigma=2.0$, the corresponding differences are 0.06 and 0.10. The
+  geometric-boundary candidate likewise shows no statistical preference for
+  either correction law; proximity to $\sigma=2$ cannot itself be used to
+  select the geometric scenario.
+- Taken together, the four comparisons show that the added sizes make the
+  three-parameter fits computable but do not identify the asymptotic
+  correction law. The limits become less stable when smaller sizes are
+  removed, further excluding a robust boundary decision.
 
 ![Linear extrapolations of Rp and Qm in their respective correction coordinates for sigma 1.875 and 2.0.](figures/competing_extrapolations_en.svg)
 
@@ -405,6 +448,14 @@ This does not prove that $L=65536$ is physically insufficient. It means
 that, under this conditional error budget, merely extending the same type of
 data does not guarantee discrimination.
 
+By group, both $R_p$ and $Q_m$ at $\sigma=1.875$ show that the two asymptotic
+descriptions remain too close over the planned size range near the Sak
+candidate boundary. Neither observable reaches the threshold at
+$\sigma=2.0$ either, showing that simulating directly at the geometric
+candidate does not automatically improve discrimination. Agreement between
+the two observables means that the bottleneck affects both topological
+wrapping and magnetization-fluctuation channels.
+
 ![Maximum model separation reached over the registered forecast range for each fit window.](figures/distinguishability_forecast_en.svg)
 
 **Figure 7 | Distinguishable-size forecast.** Each point is the maximum
@@ -460,6 +511,15 @@ At $L=512$:
 - $\sigma=1.875$: $Q_m$ differs by $-3.21\sigma$;
 - $\sigma=2.0$: $Q_m$ differs by $-4.38\sigma$;
 - maximum $\tau_{\rm int}$ is approximately 7,860 and 8,372 sweeps.
+
+At $\sigma=1.875$, both observables agree within $1\sigma$ through
+$L=256$, showing that Clock and FK sample the same equilibrium distribution
+on small and intermediate sizes in the crossover regime. At $\sigma=2.0$,
+the discrepancy decreases from about $2\sigma$ at $L=64$ to about $1\sigma$
+at larger sizes, so it does not form a growing physical separation. Only at
+$L=512$ do both groups cross $3\sigma$ while developing very large
+autocorrelation times. This group therefore diagnoses Clock mixing failure,
+not algorithm-dependent physics at $\sigma=1.875$ or 2.0.
 
 ### Assessment
 
