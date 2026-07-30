@@ -75,8 +75,10 @@ def build_all_figures(repo_root: Path, output_dir: Path) -> tuple[Path, ...]:
         figure_entanglement,
         figure_learning_diagnostics,
     )
+    if len(EXPECTED_FIGURES) != len(builders):
+        raise ValueError("figure names and builders must have equal lengths")
     paths = []
-    for name, builder in zip(EXPECTED_FIGURES, builders, strict=True):
+    for name, builder in zip(EXPECTED_FIGURES, builders):
         figure = builder(data, root)
         path = output / name
         figure.savefig(path, format="pdf", metadata=_PDF_METADATA)
