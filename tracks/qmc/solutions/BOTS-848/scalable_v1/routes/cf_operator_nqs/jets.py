@@ -116,6 +116,10 @@ class PairJet:
         checked = self._coerce(other)
         if checked is None:
             return NotImplemented
+        if not self.coefficients or not checked.coefficients:
+            return PairJet({})
+        if len(self.coefficients) * len(checked.coefficients) >= 64:
+            return self._vectorized_product(checked)
         result: dict[MultiIndex, complex] = {}
         for left_index, left_value in self.coefficients.items():
             for right_index, right_value in checked.coefficients.items():
@@ -130,6 +134,47 @@ class PairJet:
                     result[target] = (
                         result.get(target, 0.0j) + left_value * right_value
                     )
+        return PairJet(result)
+
+    def _vectorized_product(self, other: "PairJet") -> "PairJet":
+        left_indices = np.asarray(tuple(self.coefficients), dtype=np.int16)
+        right_indices = np.asarray(tuple(other.coefficients), dtype=np.int16)
+        targets = left_indices[:, np.newaxis, :] + right_indices[np.newaxis, :, :]
+        valid = (np.sum(targets[..., :2], axis=-1) <= _PARTICLE_DEGREE) & (
+            np.sum(targets[..., 2:], axis=-1) <= _PARTICLE_DEGREE
+        )
+        if not np.any(valid):
+            return PairJet({})
+        selected = targets[valid]
+        codes = (
+            selected[:, 0] * 125
+            + selected[:, 1] * 25
+            + selected[:, 2] * 5
+            + selected[:, 3]
+        )
+        left_values = np.fromiter(
+            self.coefficients.values(),
+            dtype=np.complex128,
+            count=len(self.coefficients),
+        )
+        right_values = np.fromiter(
+            other.coefficients.values(),
+            dtype=np.complex128,
+            count=len(other.coefficients),
+        )
+        products = (left_values[:, np.newaxis] * right_values[np.newaxis, :])[valid]
+        accumulated = np.zeros(625, dtype=np.complex128)
+        np.add.at(accumulated, codes, products)
+        result: dict[MultiIndex, complex] = {}
+        for code in np.flatnonzero(accumulated):
+            integer = int(code)
+            index = (
+                integer // 125,
+                (integer // 25) % 5,
+                (integer // 5) % 5,
+                integer % 5,
+            )
+            result[index] = accumulated[integer]
         return PairJet(result)
 
     __rmul__ = __mul__
@@ -169,9 +214,10 @@ def jet_determinant(matrix: Sequence[Sequence[PairJet]]) -> PairJet:
                 sign = -1.0 if occupied_after % 2 else 1.0
                 new_mask = mask | (1 << column)
                 term = sign * partial * matrix[row][column]
-                next_states[new_mask] = next_states.get(
-                    new_mask, PairJet.constant(0.0)
-                ) + term
+                if new_mask in next_states:
+                    next_states[new_mask] = next_states[new_mask] + term
+                else:
+                    next_states[new_mask] = term
         states = next_states
     return states[(1 << n) - 1]
 

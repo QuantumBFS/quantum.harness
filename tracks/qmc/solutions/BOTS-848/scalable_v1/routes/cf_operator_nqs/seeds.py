@@ -31,7 +31,7 @@ import math
 from dataclasses import dataclass, field
 from numbers import Integral
 from types import MappingProxyType
-from typing import Any, Mapping
+from typing import Any, Callable, Mapping, Sequence
 
 import numpy as np
 
@@ -300,27 +300,18 @@ class JKCFSeedFamily:
         return configs, is_single
 
     def _amplitude_one(self, l: int, m: int, spinors: np.ndarray) -> complex:
-        pair_factors = _pair_factors(spinors)
-        if any(value == 0.0 for value in pair_factors):
+        if any(value == 0.0 for value in _pair_factors(spinors)):
             return 0.0 + 0.0j
-        if l == 0:
-            amplitude = 1.0 + 0.0j
-            for factor in pair_factors:
-                amplitude *= factor**3
-            return amplitude
-        n0, du_jastrow, dv_jastrow = _projected_orbitals(spinors)
-        total = 0.0 + 0.0j
-        for term in self._couplings[m]:
-            matrix = n0.copy()
-            matrix[:, term.hole_index] = _projected_n1_column(
+        state = self.state(l=l, m=m)
+        return complex(
+            polynomial_seed_amplitude(
+                state,
                 spinors,
-                du_jastrow,
-                dv_jastrow,
-                twice_l=int(round(2.0 * self.particle_l)),
-                twice_m=term.particle_twice_m,
+                lambda matrix: np.linalg.det(
+                    np.asarray(matrix, dtype=np.complex128)
+                ),
             )
-            total += term.coefficient * np.linalg.det(matrix)
-        return complex(total)
+        )
 
     def _log_amplitude_one(self, l: int, m: int, spinors: np.ndarray) -> complex:
         """Evaluate a stable complex logarithm without forming tiny determinants."""
@@ -369,38 +360,41 @@ class JKCFSeedFamily:
         )
 
 
-def _pair_factors(spinors: np.ndarray) -> tuple[complex, ...]:
+def _ring_dtype(spinors: Sequence[Sequence[object]]) -> type[object] | np.dtype:
+    raw = np.asarray(spinors)
+    return object if raw.dtype.kind == "O" else np.dtype(np.complex128)
+
+
+def _pair_factors(spinors: Sequence[Sequence[object]]) -> tuple[object, ...]:
     return tuple(
-        complex(
-            spinors[i, 0] * spinors[j, 1]
-            - spinors[i, 1] * spinors[j, 0]
-        )
+        spinors[i][0] * spinors[j][1] - spinors[i][1] * spinors[j][0]
         for i in range(len(spinors))
         for j in range(i + 1, len(spinors))
     )
 
 
 def _jastrow_and_derivatives(
-    spinors: np.ndarray,
+    spinors: Sequence[Sequence[object]],
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Return ``J_i``, ``dJ_i/du_i`` and ``dJ_i/dv_i`` without division."""
 
     n_electrons = len(spinors)
-    jastrow = np.empty(n_electrons, dtype=np.complex128)
-    derivative_u = np.empty(n_electrons, dtype=np.complex128)
-    derivative_v = np.empty(n_electrons, dtype=np.complex128)
+    dtype = _ring_dtype(spinors)
+    jastrow = np.empty(n_electrons, dtype=dtype)
+    derivative_u = np.empty(n_electrons, dtype=dtype)
+    derivative_v = np.empty(n_electrons, dtype=dtype)
     for particle in range(n_electrons):
         others = [other for other in range(n_electrons) if other != particle]
         factors = np.asarray(
             [
-                spinors[particle, 0] * spinors[other, 1]
-                - spinors[particle, 1] * spinors[other, 0]
+                spinors[particle][0] * spinors[other][1]
+                - spinors[particle][1] * spinors[other][0]
                 for other in others
             ],
-            dtype=np.complex128,
+            dtype=dtype,
         )
-        prefix = np.ones(len(factors) + 1, dtype=np.complex128)
-        suffix = np.ones(len(factors) + 1, dtype=np.complex128)
+        prefix = np.ones(len(factors) + 1, dtype=dtype)
+        suffix = np.ones(len(factors) + 1, dtype=dtype)
         for index, factor in enumerate(factors):
             prefix[index + 1] = prefix[index] * factor
         for index in range(len(factors) - 1, -1, -1):
@@ -408,25 +402,27 @@ def _jastrow_and_derivatives(
         products_excluding = prefix[:-1] * suffix[1:]
         jastrow[particle] = prefix[-1]
         derivative_u[particle] = sum(
-            spinors[other, 1] * product
+            spinors[other][1] * product
             for other, product in zip(others, products_excluding, strict=True)
         )
         derivative_v[particle] = sum(
-            -spinors[other, 0] * product
+            -spinors[other][0] * product
             for other, product in zip(others, products_excluding, strict=True)
         )
     return jastrow, derivative_u, derivative_v
 
 
 def _projected_orbitals(
-    spinors: np.ndarray,
+    spinors: Sequence[Sequence[object]],
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     n_electrons = len(spinors)
+    dtype = _ring_dtype(spinors)
+    checked = np.asarray(spinors, dtype=dtype)
     jastrow, derivative_u, derivative_v = _jastrow_and_derivatives(spinors)
     two_q_star = n_electrons - 1
-    n0 = np.empty((n_electrons, n_electrons), dtype=np.complex128)
-    u = spinors[:, 0]
-    v = spinors[:, 1]
+    n0 = np.empty((n_electrons, n_electrons), dtype=dtype)
+    u = checked[:, 0]
+    v = checked[:, 1]
     for orbital in range(n_electrons):
         n0[:, orbital] = (
             math.sqrt(math.comb(two_q_star, orbital))
@@ -438,29 +434,65 @@ def _projected_orbitals(
 
 
 def _projected_n1_column(
-    spinors: np.ndarray,
+    spinors: Sequence[Sequence[object]],
     derivative_u: np.ndarray,
     derivative_v: np.ndarray,
     *,
     twice_l: int,
     twice_m: int,
 ) -> np.ndarray:
+    dtype = _ring_dtype(spinors)
+    checked = np.asarray(spinors, dtype=dtype)
     a = (twice_l + twice_m) // 2
     b = (twice_l - twice_m) // 2
     normalization = math.sqrt(math.comb(twice_l, a))
-    u = spinors[:, 0]
-    v = spinors[:, 1]
+    u = checked[:, 0]
+    v = checked[:, 1]
     first = (
         b * u**a * v ** (b - 1) * derivative_u
         if b > 0
-        else np.zeros(len(spinors), dtype=np.complex128)
+        else np.zeros(len(spinors), dtype=dtype)
     )
     second = (
         a * u ** (a - 1) * v**b * derivative_v
         if a > 0
-        else np.zeros(len(spinors), dtype=np.complex128)
+        else np.zeros(len(spinors), dtype=dtype)
     )
     return normalization * (first - second)
+
+
+def polynomial_seed_amplitude(
+    state: CFSeed,
+    spinors: Sequence[Sequence[object]],
+    determinant: Callable[[Sequence[Sequence[object]]], object],
+) -> object:
+    """Evaluate the raw division-free JK polynomial over a scalar ring."""
+
+    if not isinstance(state, CFSeed):
+        raise TypeError("state must be a CFSeed")
+    if len(spinors) != state.n_electrons or any(len(row) != 2 for row in spinors):
+        raise ValueError("spinor shape must be (n_electrons, 2)")
+    pair_factors = _pair_factors(spinors)
+    if state.l == 0:
+        amplitude: object = 1.0
+        for factor in pair_factors:
+            amplitude = amplitude * factor**3
+        return amplitude
+
+    n0, derivative_u, derivative_v = _projected_orbitals(spinors)
+    total: object = 0.0
+    family = state._family
+    for term in family._couplings[state.m]:
+        matrix = n0.copy()
+        matrix[:, term.hole_index] = _projected_n1_column(
+            spinors,
+            derivative_u,
+            derivative_v,
+            twice_l=int(round(2.0 * family.particle_l)),
+            twice_m=term.particle_twice_m,
+        )
+        total = total + term.coefficient * determinant(matrix)
+    return total
 
 
 def _validated_tower(tower: Mapping[int, CFSeed]) -> JKCFSeedFamily:
@@ -625,5 +657,6 @@ __all__ = [
     "CFSeedCertificate",
     "JKCFSeedFamily",
     "finite_rotation_residual",
+    "polynomial_seed_amplitude",
     "tower_ladder_residual",
 ]
