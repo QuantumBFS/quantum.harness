@@ -41,20 +41,50 @@ arXiv:2310.00612 的 Table 4 列出了 43 个 7 顶点图，其中 18 个已被�
 
 ## 2. 成果清单
 
-### 25 个精确闭合常数
+### 25 个精确闭合常数（已知图族）
 
 | 图族 | 图 | α | 闭合方式 |
-|------|-----|---|---------|
-| 完全图 Kₙ | K4, K5, K6, K7 | 1 | level-1 即闭合 |
-| 完全二部图 Kₘ,ₙ | K3,3, K4,4, K5,5 | max(m,n) | level-1 |
+|------|-----|---|----------|
+| 完全图 $K_n$ | K4, K5, K6, K7 | 1 | level-1 即闭合 |
+| 完全二部图 $K_{m,n}$ | K3,3, K4,4, K5,5 | max(m,n) | level-1 |
 | 完全多部图 | K2,2,2,2, K3,3,3 | max part | level-1 |
-| 偶圈 C₂ₖ | C6, C8, C10, C12 | k | level-1 |
+| 偶圈 $C_{2k}$ | C6, C8, C10, C12 | k | level-1 |
 | 高对称图 | Petersen, Schläfli, Shrikhande | 各不同 | level-1 + 对称性 |
-| 超立方体 | Q3, Q4, Q5 | 2ⁿ⁻¹ | level-1 |
+| 超立方体 | Q3, Q4, Q5 | $2^{n-1}$ | level-1 |
 | Rook 图 | Rook 4×4, 5×5 | n | level-1 |
 | 其他 | Paley9, comp(Petersen), K6−matching | 各不同 | level-1/2 |
 
 每个闭合都附带**机器可验证的精确证书**（JSON 格式，纯有理数）。
+
+### 6 个 Table 4 新闭合（论文未解决）
+
+> **这是本项目的核心新贡献。** arXiv:2310.00612 的 Table 4 列出了 43 个 7 顶点图，
+> 论文闭合了 18 个，剩余 25 个是开放问题。我们闭合了其中 6 个。
+
+| 图 | 边数 | $C_5$ odd holes | margin | 方法 |
+|----|------|----------------|--------|------|
+| **atlas782** | 12 | 4 | 2.0 | level-2 + odd-hole |
+| **atlas859** | 13 | 2 | 0.5 | level-2 + odd-hole |
+| **atlas888** | 13 | 2 | 0.5 | level-2 + odd-hole |
+| **atlas927** | 14 | 1 | 0.44 | level-2 + odd-hole |
+| **atlas942** | 14 | 2 | 0.5 | level-2 + odd-hole |
+| **atlas990** | 15 | 1 | 0.44 | level-2 + odd-hole |
+
+**方法**：在 level-2 SOHS 对偶 SDP 中加入 odd-hole 不等式（论文 Eq.25）作为额外约束，
+使得对偶矩阵 $Z$ 获得正 margin（严格正定），然后通过约束消元有理化得到精确证书。
+
+**筛选过程**：
+- 遍历 networkx graph atlas 中所有 103 个 $\alpha=2$ 的 7 顶点图
+- Level-1 筛选：0 个可闭合（全部需要 level-2+）
+- Level-2 筛选：**45 个数值闭合**（$\beta \leq 2 + \varepsilon$）
+- 其中 6 个有 $C_5$ odd hole → 正 margin → 精确闭合
+- 剩余 39 个无 odd hole → 对偶奇异 → 需要 level-3 或对称性约化
+
+**进化尝试（atlas961，进行中）**：
+- 目标：atlas961（14 边，$\alpha=2$，level-2 上界=2.019）
+- 策略：OmniEvolve 进化搜索 degree-3 基词组合
+- Gen 1 结果：上界从 2.0189 → 2.0176（添加 14 个 degree-3 子集）
+- 状态：后台继续跑（20 代）
 
 ### Hope signal
 
