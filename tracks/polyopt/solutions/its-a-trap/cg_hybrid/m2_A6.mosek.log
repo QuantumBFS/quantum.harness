@@ -1,0 +1,70 @@
+*********************************** QMBCertify ***********************************
+QMBCertify is launching...
+Generating the monomial basis...
+Obtained the monomial basis in 0.622041414 seconds.
+Starting block-diagonalization...
+Finished block-diagonalization in 0.164857335 seconds.
+SDP size: n = 84, m = 1499
+Adding the rdm constraint...
+Added the rdm constraint in 8.184851625 seconds.
+Solving the SDP...
+Problem
+  Name                   :                 
+  Objective sense        : maximize        
+  Type                   : CONIC (conic optimization problem)
+  Constraints            : 1499            
+  Affine conic cons.     : 6 (49536 rows)
+  Disjunctive cons.      : 0               
+  Cones                  : 0               
+  Scalar variables       : 769             
+  Matrix variables       : 21 (scalarized: 46831)
+  Integer variables      : 0               
+
+Optimizer started.
+Presolve started.
+Linear dependency checker started.
+Linear dependency checker terminated.
+Eliminator started.
+Freed constraints in eliminator : 0
+Eliminator terminated.
+Eliminator - tries                  : 1                 time                   : 0.00            
+Lin. dep.  - tries                  : 1                 time                   : 0.00            
+Lin. dep.  - primal attempts        : 1                 successes              : 1               
+Lin. dep.  - dual attempts          : 0                 successes              : 0               
+Lin. dep.  - primal deps.           : 0                 dual deps.             : 0               
+Presolve terminated. Time: 0.01    
+Optimizer  - threads                : 16              
+Optimizer  - solved problem         : the primal      
+Optimizer  - Constraints            : 51035           
+Optimizer  - Cones                  : 1               
+Optimizer  - Scalar variables       : 771               conic                  : 770             
+Optimizer  - Semi-definite variables: 26                scalarized             : 96366           
+Factor     - setup time             : 26.28           
+Factor     - dense det. time        : 14.46             GP order time          : 0.84            
+Factor     - nonzeros before factor : 2.07e+08          after factor           : 3.35e+08        
+Factor     - dense dim.             : 2                 flops                  : 2.91e+12        
+Factor     - GP saved nzs           : 1.43e+07          GP saved flops         : 1.84e+11        
+ITE PFEAS    DFEAS    GFEAS    PRSTATUS   POBJ              DOBJ              MU       TIME  
+0   1.3e+03  1.0e+00  1.0e+00  0.00e+00   -0.000000000e+00  -0.000000000e+00  1.0e+00  26.35 
+1   7.4e+02  5.8e-01  4.4e-01  1.00e+00   -1.363510385e-03  -2.036289381e-04  5.8e-01  39.14 
+2   9.9e+00  7.8e-03  5.5e-04  1.01e+00   -3.617200134e-03  -9.872052255e-04  7.8e-03  51.71 
+3   1.5e+00  1.2e-03  2.3e-05  1.45e+00   -7.485240972e-02  -7.438636182e-02  1.2e-03  65.34 
+4   1.2e+00  9.3e-04  1.6e-05  1.22e+00   -1.772675906e-01  -1.769299787e-01  9.3e-04  79.13 
+5   3.3e-01  2.6e-04  2.6e-06  1.15e+00   -3.653240376e-01  -3.652532210e-01  2.6e-04  93.82 
+6   1.0e-01  8.0e-05  4.7e-07  1.02e+00   -4.225044644e-01  -4.224850667e-01  8.0e-05  105.55
+7   2.2e-02  1.7e-05  4.6e-08  1.00e+00   -4.419333327e-01  -4.419288728e-01  1.7e-05  117.61
+8   8.8e-03  6.8e-06  1.2e-08  1.00e+00   -4.453903162e-01  -4.453886243e-01  6.8e-06  131.13
+9   2.3e-03  1.8e-06  1.6e-09  1.00e+00   -4.469638017e-01  -4.469633425e-01  1.8e-06  143.28
+10  3.4e-04  2.7e-07  8.5e-11  1.00e+00   -4.473617121e-01  -4.473616398e-01  2.7e-07  155.71
+11  1.6e-04  1.2e-07  2.8e-11  1.00e+00   -4.473895495e-01  -4.473895172e-01  1.2e-07  168.74
+12  2.4e-05  1.8e-08  1.6e-12  1.00e+00   -4.474081709e-01  -4.474081662e-01  1.8e-08  182.00
+13  4.1e-06  3.9e-09  1.1e-13  1.00e+00   -4.474099299e-01  -4.474099291e-01  3.2e-09  194.77
+14  6.5e-07  2.7e-09  7.3e-15  1.00e+00   -4.474103963e-01  -4.474103962e-01  5.1e-10  247.37
+15  4.1e-07  1.8e-08  4.7e-16  1.00e+00   -4.474104524e-01  -4.474104524e-01  8.3e-11  262.88
+16  4.1e-07  1.8e-08  4.7e-16  1.00e+00   -4.474104524e-01  -4.474104524e-01  8.3e-11  283.00
+Optimizer terminated. Time: 297.13  
+
+SDP solving time: 297.866322766 seconds.
+termination status: SLOW_PROGRESS
+solution status: FEASIBLE_POINT
+optimum = -0.4474104523989353

@@ -54,8 +54,18 @@ const reduce4     = QMBCertify.reduce4
 const posepsd8!   = QMBCertify.posepsd8!
 const posepsd9!   = QMBCertify.posepsd9!
 const posepsd10!  = QMBCertify.posepsd10!
+# the four below surfaced when M0-C first exercised pso>0/lso/SU2 paths —
+# the alias list now covers EVERY package-internal call in the GSB body
+# (extraction: awk GSB body | grep identifiers ∩ package definitions)
+const PSDstate_entry   = QMBCertify.PSDstate_entry
+const add_SU2_equality! = QMBCertify.add_SU2_equality!
+const eigen_circmat    = QMBCertify.eigen_circmat
+const generate_mons    = QMBCertify.generate_mons
 import QMBCertify: reduce!, mosek_para, qmb_data
 const MOI = JuMP.MOI
+# explicit binding: TensorKit (loaded by the VUMPS scripts) also exports
+# `dual`, which would make the fork body's `dual(con)` ambiguous in Main
+const dual = JuMP.dual
 
 # ------------------------------------------------------- the dual extension --
 """Insert the ω-tower's dual terms (THEOREM_CONTRACT §4) into the SOHS model.
@@ -126,6 +136,14 @@ eval(Meta.parseall(_FORK_BODY))
 function GSB_cg(supp, coe, L, d; lattice = "chain", correlation = false,
                 energy = [], SU2_symmetry = false, writetofile = false,
                 tower = nothing, kwargs...)
+    # HARD GUARD (final-plan amendment 2 / ten-corrections law): a tower may
+    # only be attached when a validated gate record exists next to this file.
+    if tower !== nothing
+        gate = joinpath(@__DIR__, "hybrid_test.out")
+        isfile(gate) || error("tower=on without gate record: $(gate) missing — run hybrid_test.jl first")
+        startswith(readline(gate), "hybrid_test.jl  PASS") ||
+            error("tower=on but gate record is not PASS — no coupled run permitted")
+    end
     lattice == "chain"      || error("GSB_cg envelope: lattice=chain only")
     correlation == false    || error("GSB_cg envelope: correlation unsupported")
     isempty(energy)         || error("GSB_cg envelope: energy window unsupported")

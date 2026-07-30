@@ -1,0 +1,44 @@
+== M1 tower gates ==
+G2 flow k=2->3 residual 0.00e+00 PASS
+G2 flow k=3->4 residual 0.00e+00 PASS
+G2 flow k=4->5 residual 0.00e+00 PASS
+E_lti(3)=-0.5000000090 (OPTIMAL)  E_lti(4)=-0.5000000000 (OPTIMAL)
+G1  sandwich: E_cg(4,U)=-0.5000000080 (OPTIMAL)  [lti3-1e-8 ≤ cg ≤ lti4+1e-8] PASS
+G1b strict oracle: E=-0.4999999997 (OPTIMAL) |Δ vs lti4|=2.78e-10 PASS
+    measured lossless-equality claim: |E_cg−E_lti4|=8.01e-09 (expected NONZERO — traced links are lossy; see GATE NOTE)
+E_cg(4, mps m=2) = -0.4999999999 (OPTIMAL)
+E_cg(5, mps m=2) = -0.4999999995 (OPTIMAL)
+E_cg(6, mps m=2) = -0.5000000052 (OPTIMAL)
+G4 monotone in n: PASS
+G3 ED N=8: tr(h ρ2)=-0.456386676117 vs E0/N=-0.456386676117 |Δ|=1.67e-16 PASS
+G3 LTI M=3 residual 1.11e-16 PASS
+G3 LTI M=4 residual 5.55e-17 PASS
+G3 LTI M=5 residual 5.55e-17 PASS
+G3 LTI M=6 residual 2.78e-17 PASS
+G3 T2 residual 1.25e-17 PASS
+G3 T3 M=4 residual 6.95e-18 PASS
+G3 ω_4 min-eig 1.78e-06 PASS
+G3 T3 M=5 residual 5.43e-18 PASS
+G3 ω_5 min-eig -2.34e-18 PASS
+== M1 tower gates ==
+G2 flow k=2->3 residual 0.00e+00 PASS
+G2 flow k=3->4 residual 0.00e+00 PASS
+G2 flow k=4->5 residual 0.00e+00 PASS
+E_lti(3)=-0.5000000090 (OPTIMAL)  E_lti(4)=-0.5000000000 (OPTIMAL)
+G1  sandwich: E_cg(4,U)=-0.5000000000 (OPTIMAL)  [lti3-1e-8 ≤ cg ≤ lti4+1e-8] PASS
+G1b strict oracle: E=-0.4999999997 (OPTIMAL) |Δ vs lti4|=2.78e-10 PASS
+    measured lossless-equality claim: |E_cg−E_lti4|=2.31e-11 (expected NONZERO — traced links are lossy; see GATE NOTE)
+E_cg(4, mps m=2) = -0.5000000001 (OPTIMAL)
+E_cg(5, mps m=2) = -0.4999999999 (OPTIMAL)
+E_cg(6, mps m=2) = -0.5000000010 (OPTIMAL)
+G4 monotone in n: PASS
+G3 ED N=8: tr(h ρ2)=-0.456386676117 vs E0/N=-0.456386676117 |Δ|=1.67e-16 PASS
+G3 LTI M=3 residual 1.11e-16 PASS
+G3 LTI M=4 residual 5.55e-17 PASS
+G3 LTI M=5 residual 5.55e-17 PASS
+G3 LTI M=6 residual 2.78e-17 PASS
+G3 T2 residual 2.78e-17 PASS
+G3 T3 M=4 residual 1.39e-17 PASS
+G3 ω_4 min-eig 5.87e-07 PASS
+G3 T3 M=5 residual 4.56e-18 PASS
+G3 ω_5 min-eig -3.84e-18 PASS

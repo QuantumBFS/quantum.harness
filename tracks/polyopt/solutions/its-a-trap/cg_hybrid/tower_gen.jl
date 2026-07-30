@@ -79,22 +79,37 @@ function rho3_groups(L::Int)
 end
 
 # ------------------------------------------------------- the generator ------
-"""build_tower(L, n, A) → NamedTuple matching gsb_cg.jl's tower contract.
-L = ring size, n = tower top level (Lemma 1: n ≤ L−1), A = uMPS tensors
-(vector of two m×m matrices). ω blocks: M = 4..n, each (2m²·2)-dim Hermitian.
-Link maps copied VERBATIM from the gate-validated tower.jl E_cg (G1–G4)."""
-function build_tower(L::Int, n::Int, A::Vector{Matrix{ComplexF64}})
-    mm = size(A[1], 1)
+"""build_tower(L, n, As) → NamedTuple matching gsb_cg.jl's tower contract.
+As = TWO site tensors [A_odd, A_even] (each a vector of two m×m matrices) —
+the two-parity tower for period-2 uMPS (2-site VUMPS): blocks ω_M^p are
+indexed by tower level M = 4..n AND window-anchor parity p ∈ {1,2}. Links:
+T2 and T3-right stay within parity p; T3-left connects ω_{M+1}^p to
+ω_M^{p+1} (the traced window shifts by one site). Every link is still a
+Theorem-1 CP-map identity; the ED oracle validates all rows numerically.
+A single tensor A (old interface) is accepted and duplicated."""
+build_tower(L::Int, n::Int, A::Vector{Matrix{ComplexF64}}) = build_tower(L, n, [A, A])
+
+# product of alternating tensors: sites q, q+1, ..., q+k-1 (parities mod 2)
+function chainmap2(As, k::Int, q::Int)
+    mm = size(As[1][1], 1)
+    W = zeros(ComplexF64, mm * mm, 2^k)
+    for μs in Iterators.product(fill(1:2, k)...)
+        P = foldl(*, (As[mod1(q + t - 1, 2)][μs[t]] for t in 1:k))
+        col = 1 + sum((μs[t] - 1) * 2^(k - t) for t in 1:k)
+        for I_ in 1:mm, J in 1:mm
+            W[(I_-1)*mm+J, col] = P[I_, J]
+        end
+    end
+    return W
+end
+
+function build_tower(L::Int, n::Int, As::Vector{Vector{Matrix{ComplexF64}}})
+    mm = size(As[1][1], 1)
     dω = 2 * mm * mm * 2
     @assert 4 <= n <= L - 1 "Lemma 1 requires n_tower ≤ N−1 (got n=$n, N=$L)"
-    W2 = chainmap(A, 2)
-    X  = kron(σI, W2)                    # T2-left conjugation
-    X2 = kron(W2, σI)                    # T2-right conjugation
-    Bm = bmat(A); BmL = bmat_left(A)
-    TR = kron(Matrix{ComplexF64}(I, 2mm, 2mm), Bm)
-    TL = kron(BmL, Matrix{ComplexF64}(I, mm * 2, mm * 2))
+    blk(M, p) = 2 * (M - 4) + p              # ω_M^p block index
+    nblk = 2 * (n - 3)
     groups = rho3_groups(L)
-    nblk = n - 3
     hb = hermbasis(dω)
 
     ycoef = Vector{Vector{Tuple{Vector{UInt16},Float64}}}()
@@ -123,20 +138,31 @@ function build_tower(L::Int, n::Int, A::Vector{Matrix{ComplexF64}})
         end
     end
 
-    # (T2) boundary links: + y-image − ω4-trace  (tower.jl lines, verbatim maps)
-    push_rows!(2mm, ρ -> ptr_mid(X * ρ * X', 2mm, mm, 1),
-        [(1, Ω -> ptr_last(ptr_mid(Ω, 2mm, mm, 2), 2mm), -1.0)])
-    push_rows!(mm * 2, ρ -> ptr_first_m(X2 * ρ * X2', mm, mm * 2),
-        [(1, Ω -> ptr_first(ptr_mid(Ω, 2, mm, mm * 2), mm * 2), -1.0)])
-    # (T3) tower links: + 𝓡/𝓛(ω_M) − trace(ω_{M+1})
-    for M in 4:(n - 1)
-        blk = M - 3
+    # (T2) boundary links per parity p: window sites (s..s+3), interior
+    # parities (p+1, p+2); the right variant's shifted ρ3 window compresses
+    # the SAME physical sites → same W2p (no parity crossing at T2).
+    for p in 1:2
+        W2p = chainmap2(As, 2, p + 1)
+        Xp  = kron(σI, W2p)
+        X2p = kron(W2p, σI)
+        push_rows!(2mm, ρ -> ptr_mid(Xp * ρ * Xp', 2mm, mm, 1),
+            [(blk(4, p), Ω -> ptr_last(ptr_mid(Ω, 2mm, mm, 2), 2mm), -1.0)])
+        push_rows!(mm * 2, ρ -> ptr_first_m(X2p * ρ * X2p', mm, mm * 2),
+            [(blk(4, p), Ω -> ptr_first(ptr_mid(Ω, 2, mm, mm * 2), mm * 2), -1.0)])
+    end
+    # (T3) tower links: right appends site s+M-1 (parity p+M-1, same-p link);
+    # left absorbs site s+1 (parity p+1) and lands on the p+1 tower.
+    for M in 4:(n - 1), p in 1:2
+        pr = mod1(p + M - 1, 2)
+        TRp = kron(Matrix{ComplexF64}(I, 2mm, 2mm), bmat(As[pr]))
         push_rows!(2mm, nothing,
-            [(blk,     Ω -> ptr_last_m(TR * Ω * TR', 2mm, mm),                +1.0),
-             (blk + 1, Ω -> ptr_last_m(ptr_last(Ω, 2mm * mm), 2mm, mm),      -1.0)])
+            [(blk(M, p),     Ω -> ptr_last_m(TRp * Ω * TRp', 2mm, mm),           +1.0),
+             (blk(M + 1, p), Ω -> ptr_last_m(ptr_last(Ω, 2mm * mm), 2mm, mm),    -1.0)])
+        pl = mod1(p + 1, 2)
+        TLp = kron(bmat_left(As[pl]), Matrix{ComplexF64}(I, mm * 2, mm * 2))
         push_rows!(mm * 2, nothing,
-            [(blk,     Ω -> ptr_first_m(TL * Ω * TL', mm, mm * 2),            +1.0),
-             (blk + 1, Ω -> ptr_first_m(ptr_first(Ω, mm * mm * 2), mm, mm * 2), -1.0)])
+            [(blk(M, pl),    Ω -> ptr_first_m(TLp * Ω * TLp', mm, mm * 2),        +1.0),
+             (blk(M + 1, p), Ω -> ptr_first_m(ptr_first(Ω, mm * mm * 2), mm, mm * 2), -1.0)])
     end
 
     # dual blocks: Z_blk = real-embed(mat(−S'μ)) ⪰ 0, dim 2dω; upper triangle
@@ -196,9 +222,11 @@ end
 (y from ground-state moments, ω_M = 𝒞_M(ρ_M)) to ≤ tol. Validates R AND S in
 the exact numeric conventions the consumer will see. Also cross-checks the
 reduce! moment interpretation and the ρ3(y) reconstruction."""
-function oracle_check(L::Int, n::Int, A::Vector{Matrix{ComplexF64}}; tol = 1e-10)
-    tw = build_tower(L, n, A)
-    mm = size(A[1], 1); dω = 2 * mm * mm * 2
+oracle_check(L::Int, n::Int, A::Vector{Matrix{ComplexF64}}; tol = 1e-10) =
+    oracle_check(L, n, [A, A]; tol = tol)
+function oracle_check(L::Int, n::Int, As::Vector{Vector{Matrix{ComplexF64}}}; tol = 1e-10)
+    tw = build_tower(L, n, As)
+    mm = size(As[1][1], 1); dω = 2 * mm * mm * 2
     hb = hermbasis(dω)
     E0, ψ = heis_ground(L)
 
@@ -219,11 +247,12 @@ function oracle_check(L::Int, n::Int, A::Vector{Matrix{ComplexF64}}; tol = 1e-10
     ρ3 = window_marginal(ψ, L, 0, 3)
     worst_rec = maximum(abs, sum(y[w] .* G for (w, G) in groups) - ρ3)
 
-    # ω from the physical marginals
+    # ω from the physical marginals, both parities (ρ_M is TI: same marginal,
+    # different compression maps); block order matches blk(M,p) = 2(M-4)+p
     ωs = Vector{Matrix{ComplexF64}}()
-    for M in 4:n
+    for M in 4:n, p in 1:2
         ρM = window_marginal(ψ, L, 0, M)
-        C = cmat(chainmap(A, M - 2), mm)
+        C = cmat(chainmap2(As, M - 2, p + 1), mm)
         push!(ωs, C * ρM * C')
     end
     xcoords = [[hcoord(h, Ω) for h in hb] for Ω in ωs]

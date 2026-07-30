@@ -17,6 +17,9 @@ if [ ! -x "$HOME/julia/bin/julia" ]; then
   rm /tmp/julia.tar.gz
 fi
 export PATH="$HOME/julia/bin:$PATH"
+# old system libstdc++ lacks GLIBCXX_3.4.21 needed by Mosek libtbb —
+# julia ships a newer one (fix verified on login02, MOSEK 11.2.2 runs)
+export LD_LIBRARY_PATH="$HOME/julia/lib/julia:$HOME/mosek/bin:${LD_LIBRARY_PATH:-}"
 julia -e 'println(VERSION)'
 
 # 2. Mosek licence + binaries must have been shipped

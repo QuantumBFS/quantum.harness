@@ -1,0 +1,262 @@
+m0c_tail armed 2026-07-28T23:56:30+08:00; waiting for queue v3
+queue v3 finished; starting M0-C 2026-07-29T02:22:30+08:00
+=== m0c N=10 cfg=rdm8 variant=stock start 2026-07-29T02:22:30+08:00
+[36m[1m┌ [22m[39m[36m[1mInfo: [22m[39mGSB_cg_raw forked
+[36m[1m└ [22m[39m  sha256 = "bc33d5913868e4556651408495b93543e19cf704699ccabc4b5b4ad37f2ab96c"
+[91m[1mERROR: [22m[39mLoadError: SystemError: opening file "/home/outerlink/code/qh-method/tracks/julia-env/Manifest.toml": No such file or directory
+Stacktrace:
+  [1] [0m[1msystemerror[22m[0m[1m([22m[90mp[39m::[0mString, [90merrno[39m::[0mInt32; [90mextrainfo[39m::[0mNothing[0m[1m)[22m
+[90m    @[39m [90mBase[39m [90m./[39m[90m[4merror.jl:186[24m[39m
+  [2] [0m[1mopen[22m[0m[1m([22m[90mfname[39m::[0mString; [90mlock[39m::[0mBool, [90mread[39m::[0mNothing, [90mwrite[39m::[0mNothing, [90mcreate[39m::[0mNothing, [90mtruncate[39m::[0mNothing, [90mappend[39m::[0mNothing[0m[1m)[22m
+[90m    @[39m [90mBase[39m [90m./[39m[90m[4miostream.jl:317[24m[39m
+  [3] [0m[1mopen[22m
+[90m    @[39m [90m./[39m[90m[4miostream.jl:296[24m[39m[90m [inlined][39m
+  [4] [0m[1mopen[22m[0m[1m([22m[90mf[39m::[0mBase.var"#read##0#read##1"[90m{Tuple{}}[39m, [90margs[39m::[0mString; [90mkwargs[39m::[0m@Kwargs[90m{}[39m[0m[1m)[22m
+[90m    @[39m [90mBase[39m [90m./[39m[90m[4mio.jl:410[24m[39m
+  [5] [0m[1mopen[22m
+[90m    @[39m [90m./[39m[90m[4mio.jl:409[24m[39m[90m [inlined][39m
+  [6] [0m[1mread[22m[0m[1m([22m::[0mString[0m[1m)[22m
+[90m    @[39m [90mBase[39m [90m./[39m[90m[4mio.jl:507[24m[39m
+  [7] top-level scope
+[90m    @[39m [90m~/code/qh-method/tracks/polyopt/solutions/its-a-trap/cg_hybrid/[39m[90m[4mm0c_cell.jl:36[24m[39m
+  [8] [0m[1minclude[22m[0m[1m([22m[90mmod[39m::[0mModule, [90m_path[39m::[0mString[0m[1m)[22m
+[90m    @[39m [90mBase[39m [90m./[39m[90m[4mBase.jl:306[24m[39m
+  [9] [0m[1mexec_options[22m[0m[1m([22m[90mopts[39m::[0mBase.JLOptions[0m[1m)[22m
+[90m    @[39m [90mBase[39m [90m./[39m[90m[4mclient.jl:317[24m[39m
+ [10] [0m[1m_start[22m[0m[1m([22m[0m[1m)[22m
+[90m    @[39m [90mBase[39m [90m./[39m[90m[4mclient.jl:550[24m[39m
+in expression starting at /home/outerlink/code/qh-method/tracks/polyopt/solutions/its-a-trap/cg_hybrid/m0c_cell.jl:36
+*********************************** QMBCertify ***********************************
+QMBCertify is launching...
+optimum = -0.4515446245785644
+=== exit=1 2026-07-29T02:23:04+08:00
+=== m0c N=10 cfg=rdm8 variant=adapter start 2026-07-29T02:23:04+08:00
+[36m[1m┌ [22m[39m[36m[1mInfo: [22m[39mGSB_cg_raw forked
+[36m[1m└ [22m[39m  sha256 = "bc33d5913868e4556651408495b93543e19cf704699ccabc4b5b4ad37f2ab96c"
+[91m[1mERROR: [22m[39mLoadError: SystemError: opening file "/home/outerlink/code/qh-method/tracks/julia-env/Manifest.toml": No such file or directory
+Stacktrace:
+  [1] [0m[1msystemerror[22m[0m[1m([22m[90mp[39m::[0mString, [90merrno[39m::[0mInt32; [90mextrainfo[39m::[0mNothing[0m[1m)[22m
+[90m    @[39m [90mBase[39m [90m./[39m[90m[4merror.jl:186[24m[39m
+  [2] [0m[1mopen[22m[0m[1m([22m[90mfname[39m::[0mString; [90mlock[39m::[0mBool, [90mread[39m::[0mNothing, [90mwrite[39m::[0mNothing, [90mcreate[39m::[0mNothing, [90mtruncate[39m::[0mNothing, [90mappend[39m::[0mNothing[0m[1m)[22m
+[90m    @[39m [90mBase[39m [90m./[39m[90m[4miostream.jl:317[24m[39m
+  [3] [0m[1mopen[22m
+[90m    @[39m [90m./[39m[90m[4miostream.jl:296[24m[39m[90m [inlined][39m
+  [4] [0m[1mopen[22m[0m[1m([22m[90mf[39m::[0mBase.var"#read##0#read##1"[90m{Tuple{}}[39m, [90margs[39m::[0mString; [90mkwargs[39m::[0m@Kwargs[90m{}[39m[0m[1m)[22m
+[90m    @[39m [90mBase[39m [90m./[39m[90m[4mio.jl:410[24m[39m
+  [5] [0m[1mopen[22m
+[90m    @[39m [90m./[39m[90m[4mio.jl:409[24m[39m[90m [inlined][39m
+  [6] [0m[1mread[22m[0m[1m([22m::[0mString[0m[1m)[22m
+[90m    @[39m [90mBase[39m [90m./[39m[90m[4mio.jl:507[24m[39m
+  [7] top-level scope
+[90m    @[39m [90m~/code/qh-method/tracks/polyopt/solutions/its-a-trap/cg_hybrid/[39m[90m[4mm0c_cell.jl:36[24m[39m
+  [8] [0m[1minclude[22m[0m[1m([22m[90mmod[39m::[0mModule, [90m_path[39m::[0mString[0m[1m)[22m
+[90m    @[39m [90mBase[39m [90m./[39m[90m[4mBase.jl:306[24m[39m
+  [9] [0m[1mexec_options[22m[0m[1m([22m[90mopts[39m::[0mBase.JLOptions[0m[1m)[22m
+[90m    @[39m [90mBase[39m [90m./[39m[90m[4mclient.jl:317[24m[39m
+ [10] [0m[1m_start[22m[0m[1m([22m[0m[1m)[22m
+[90m    @[39m [90mBase[39m [90m./[39m[90m[4mclient.jl:550[24m[39m
+in expression starting at /home/outerlink/code/qh-method/tracks/polyopt/solutions/its-a-trap/cg_hybrid/m0c_cell.jl:36
+*********************************** QMBCertify ***********************************
+QMBCertify is launching...
+optimum = -0.4515446245785644
+=== exit=1 2026-07-29T02:23:33+08:00
+=== m0c N=14 cfg=rdm8 variant=stock start 2026-07-29T02:23:33+08:00
+[36m[1m┌ [22m[39m[36m[1mInfo: [22m[39mGSB_cg_raw forked
+[36m[1m└ [22m[39m  sha256 = "bc33d5913868e4556651408495b93543e19cf704699ccabc4b5b4ad37f2ab96c"
+[91m[1mERROR: [22m[39mLoadError: SystemError: opening file "/home/outerlink/code/qh-method/tracks/julia-env/Manifest.toml": No such file or directory
+Stacktrace:
+  [1] [0m[1msystemerror[22m[0m[1m([22m[90mp[39m::[0mString, [90merrno[39m::[0mInt32; [90mextrainfo[39m::[0mNothing[0m[1m)[22m
+[90m    @[39m [90mBase[39m [90m./[39m[90m[4merror.jl:186[24m[39m
+  [2] [0m[1mopen[22m[0m[1m([22m[90mfname[39m::[0mString; [90mlock[39m::[0mBool, [90mread[39m::[0mNothing, [90mwrite[39m::[0mNothing, [90mcreate[39m::[0mNothing, [90mtruncate[39m::[0mNothing, [90mappend[39m::[0mNothing[0m[1m)[22m
+[90m    @[39m [90mBase[39m [90m./[39m[90m[4miostream.jl:317[24m[39m
+  [3] [0m[1mopen[22m
+[90m    @[39m [90m./[39m[90m[4miostream.jl:296[24m[39m[90m [inlined][39m
+  [4] [0m[1mopen[22m[0m[1m([22m[90mf[39m::[0mBase.var"#read##0#read##1"[90m{Tuple{}}[39m, [90margs[39m::[0mString; [90mkwargs[39m::[0m@Kwargs[90m{}[39m[0m[1m)[22m
+[90m    @[39m [90mBase[39m [90m./[39m[90m[4mio.jl:410[24m[39m
+  [5] [0m[1mopen[22m
+[90m    @[39m [90m./[39m[90m[4mio.jl:409[24m[39m[90m [inlined][39m
+  [6] [0m[1mread[22m[0m[1m([22m::[0mString[0m[1m)[22m
+[90m    @[39m [90mBase[39m [90m./[39m[90m[4mio.jl:507[24m[39m
+  [7] top-level scope
+[90m    @[39m [90m~/code/qh-method/tracks/polyopt/solutions/its-a-trap/cg_hybrid/[39m[90m[4mm0c_cell.jl:36[24m[39m
+  [8] [0m[1minclude[22m[0m[1m([22m[90mmod[39m::[0mModule, [90m_path[39m::[0mString[0m[1m)[22m
+[90m    @[39m [90mBase[39m [90m./[39m[90m[4mBase.jl:306[24m[39m
+  [9] [0m[1mexec_options[22m[0m[1m([22m[90mopts[39m::[0mBase.JLOptions[0m[1m)[22m
+[90m    @[39m [90mBase[39m [90m./[39m[90m[4mclient.jl:317[24m[39m
+ [10] [0m[1m_start[22m[0m[1m([22m[0m[1m)[22m
+[90m    @[39m [90mBase[39m [90m./[39m[90m[4mclient.jl:550[24m[39m
+in expression starting at /home/outerlink/code/qh-method/tracks/polyopt/solutions/its-a-trap/cg_hybrid/m0c_cell.jl:36
+*********************************** QMBCertify ***********************************
+QMBCertify is launching...
+optimum = -0.44741047710079174
+=== exit=1 2026-07-29T02:24:05+08:00
+=== m0c N=14 cfg=rdm8 variant=adapter start 2026-07-29T02:24:05+08:00
+[36m[1m┌ [22m[39m[36m[1mInfo: [22m[39mGSB_cg_raw forked
+[36m[1m└ [22m[39m  sha256 = "bc33d5913868e4556651408495b93543e19cf704699ccabc4b5b4ad37f2ab96c"
+[91m[1mERROR: [22m[39mLoadError: SystemError: opening file "/home/outerlink/code/qh-method/tracks/julia-env/Manifest.toml": No such file or directory
+Stacktrace:
+  [1] [0m[1msystemerror[22m[0m[1m([22m[90mp[39m::[0mString, [90merrno[39m::[0mInt32; [90mextrainfo[39m::[0mNothing[0m[1m)[22m
+[90m    @[39m [90mBase[39m [90m./[39m[90m[4merror.jl:186[24m[39m
+  [2] [0m[1mopen[22m[0m[1m([22m[90mfname[39m::[0mString; [90mlock[39m::[0mBool, [90mread[39m::[0mNothing, [90mwrite[39m::[0mNothing, [90mcreate[39m::[0mNothing, [90mtruncate[39m::[0mNothing, [90mappend[39m::[0mNothing[0m[1m)[22m
+[90m    @[39m [90mBase[39m [90m./[39m[90m[4miostream.jl:317[24m[39m
+  [3] [0m[1mopen[22m
+[90m    @[39m [90m./[39m[90m[4miostream.jl:296[24m[39m[90m [inlined][39m
+  [4] [0m[1mopen[22m[0m[1m([22m[90mf[39m::[0mBase.var"#read##0#read##1"[90m{Tuple{}}[39m, [90margs[39m::[0mString; [90mkwargs[39m::[0m@Kwargs[90m{}[39m[0m[1m)[22m
+[90m    @[39m [90mBase[39m [90m./[39m[90m[4mio.jl:410[24m[39m
+  [5] [0m[1mopen[22m
+[90m    @[39m [90m./[39m[90m[4mio.jl:409[24m[39m[90m [inlined][39m
+  [6] [0m[1mread[22m[0m[1m([22m::[0mString[0m[1m)[22m
+[90m    @[39m [90mBase[39m [90m./[39m[90m[4mio.jl:507[24m[39m
+  [7] top-level scope
+[90m    @[39m [90m~/code/qh-method/tracks/polyopt/solutions/its-a-trap/cg_hybrid/[39m[90m[4mm0c_cell.jl:36[24m[39m
+  [8] [0m[1minclude[22m[0m[1m([22m[90mmod[39m::[0mModule, [90m_path[39m::[0mString[0m[1m)[22m
+[90m    @[39m [90mBase[39m [90m./[39m[90m[4mBase.jl:306[24m[39m
+  [9] [0m[1mexec_options[22m[0m[1m([22m[90mopts[39m::[0mBase.JLOptions[0m[1m)[22m
+[90m    @[39m [90mBase[39m [90m./[39m[90m[4mclient.jl:317[24m[39m
+ [10] [0m[1m_start[22m[0m[1m([22m[0m[1m)[22m
+[90m    @[39m [90mBase[39m [90m./[39m[90m[4mclient.jl:550[24m[39m
+in expression starting at /home/outerlink/code/qh-method/tracks/polyopt/solutions/its-a-trap/cg_hybrid/m0c_cell.jl:36
+*********************************** QMBCertify ***********************************
+QMBCertify is launching...
+optimum = -0.44741047710079174
+=== exit=1 2026-07-29T02:24:35+08:00
+=== m0c N=10 cfg=configA variant=stock start 2026-07-29T02:24:35+08:00
+[36m[1m┌ [22m[39m[36m[1mInfo: [22m[39mGSB_cg_raw forked
+[36m[1m└ [22m[39m  sha256 = "bc33d5913868e4556651408495b93543e19cf704699ccabc4b5b4ad37f2ab96c"
+[91m[1mERROR: [22m[39mLoadError: SystemError: opening file "/home/outerlink/code/qh-method/tracks/julia-env/Manifest.toml": No such file or directory
+Stacktrace:
+  [1] [0m[1msystemerror[22m[0m[1m([22m[90mp[39m::[0mString, [90merrno[39m::[0mInt32; [90mextrainfo[39m::[0mNothing[0m[1m)[22m
+[90m    @[39m [90mBase[39m [90m./[39m[90m[4merror.jl:186[24m[39m
+  [2] [0m[1mopen[22m[0m[1m([22m[90mfname[39m::[0mString; [90mlock[39m::[0mBool, [90mread[39m::[0mNothing, [90mwrite[39m::[0mNothing, [90mcreate[39m::[0mNothing, [90mtruncate[39m::[0mNothing, [90mappend[39m::[0mNothing[0m[1m)[22m
+[90m    @[39m [90mBase[39m [90m./[39m[90m[4miostream.jl:317[24m[39m
+  [3] [0m[1mopen[22m
+[90m    @[39m [90m./[39m[90m[4miostream.jl:296[24m[39m[90m [inlined][39m
+  [4] [0m[1mopen[22m[0m[1m([22m[90mf[39m::[0mBase.var"#read##0#read##1"[90m{Tuple{}}[39m, [90margs[39m::[0mString; [90mkwargs[39m::[0m@Kwargs[90m{}[39m[0m[1m)[22m
+[90m    @[39m [90mBase[39m [90m./[39m[90m[4mio.jl:410[24m[39m
+  [5] [0m[1mopen[22m
+[90m    @[39m [90m./[39m[90m[4mio.jl:409[24m[39m[90m [inlined][39m
+  [6] [0m[1mread[22m[0m[1m([22m::[0mString[0m[1m)[22m
+[90m    @[39m [90mBase[39m [90m./[39m[90m[4mio.jl:507[24m[39m
+  [7] top-level scope
+[90m    @[39m [90m~/code/qh-method/tracks/polyopt/solutions/its-a-trap/cg_hybrid/[39m[90m[4mm0c_cell.jl:36[24m[39m
+  [8] [0m[1minclude[22m[0m[1m([22m[90mmod[39m::[0mModule, [90m_path[39m::[0mString[0m[1m)[22m
+[90m    @[39m [90mBase[39m [90m./[39m[90m[4mBase.jl:306[24m[39m
+  [9] [0m[1mexec_options[22m[0m[1m([22m[90mopts[39m::[0mBase.JLOptions[0m[1m)[22m
+[90m    @[39m [90mBase[39m [90m./[39m[90m[4mclient.jl:317[24m[39m
+ [10] [0m[1m_start[22m[0m[1m([22m[0m[1m)[22m
+[90m    @[39m [90mBase[39m [90m./[39m[90m[4mclient.jl:550[24m[39m
+in expression starting at /home/outerlink/code/qh-method/tracks/polyopt/solutions/its-a-trap/cg_hybrid/m0c_cell.jl:36
+*********************************** QMBCertify ***********************************
+QMBCertify is launching...
+optimum = -0.45154459452835116
+=== exit=1 2026-07-29T02:57:50+08:00
+=== m0c N=10 cfg=configA variant=adapter start 2026-07-29T02:57:50+08:00
+[36m[1m┌ [22m[39m[36m[1mInfo: [22m[39mGSB_cg_raw forked
+[36m[1m└ [22m[39m  sha256 = "bc33d5913868e4556651408495b93543e19cf704699ccabc4b5b4ad37f2ab96c"
+[91m[1mERROR: [22m[39mLoadError: UndefVarError: `PSDstate_entry` not defined in `Main`
+Suggestion: check for spelling errors or missing imports.
+Stacktrace:
+ [1] [0m[1mmacro expansion[22m
+[90m   @[39m [90m./[39m[90m[4mnone:132[24m[39m[90m [inlined][39m
+ [2] [0m[1mmacro expansion[22m
+[90m   @[39m [90m./[39m[90m[4mtiming.jl:461[24m[39m[90m [inlined][39m
+ [3] [0m[1mGSB_cg_raw[22m[0m[1m([22m[90msupp[39m::[0mVector[90m{Vector{Int64}}[39m, [90mcoe[39m::[0mVector[90m{Float64}[39m, [90mL[39m::[0mInt64, [90md[39m::[0mInt64; [90mH_supp[39m::[0mVector[90m{Vector{Int64}}[39m, [90mH_coe[39m::[0mVector[90m{Float64}[39m, [90mSU2_symmetry[39m::[0mBool, [90mlso[39m::[0mBool, [90mlol[39m::[0mInt64, [90mpso[39m::[0mInt64, [90menergy[39m::[0mVector[90m{Any}[39m, [90mQUIET[39m::[0mBool, [90mlattice[39m::[0mString, [90mrdm[39m::[0mInt64, [90mextra[39m::[0mInt64, [90mthree_type[39m::[0mVector[90m{Int64}[39m, [90mJ2[39m::[0mInt64, [90mcorrelation[39m::[0mBool, [90mGram[39m::[0mBool, [90mwritetofile[39m::[0mBool, [90mmosek_setting[39m::[0mmosek_para, [90mtower[39m::[0mNothing[0m[1m)[22m
+[90m   @[39m [35mMain[39m [90m./[39m[90m[4mnone:8[24m[39m
+ [4] [0m[1mGSB_cg_raw[22m
+[90m   @[39m [90m./[39m[90m[4mnone:1[24m[39m[90m [inlined][39m
+ [5] [0m[1m#GSB_cg#122[22m
+[90m   @[39m [90m~/code/qh-method/tracks/polyopt/solutions/its-a-trap/cg_hybrid/[39m[90m[4mgsb_cg.jl:142[24m[39m[90m [inlined][39m
+ [6] top-level scope
+[90m   @[39m [90m~/code/qh-method/tracks/polyopt/solutions/its-a-trap/cg_hybrid/[39m[90m[4mm0c_cell.jl:23[24m[39m
+ [7] [0m[1minclude[22m[0m[1m([22m[90mmod[39m::[0mModule, [90m_path[39m::[0mString[0m[1m)[22m
+[90m   @[39m [90mBase[39m [90m./[39m[90m[4mBase.jl:306[24m[39m
+ [8] [0m[1mexec_options[22m[0m[1m([22m[90mopts[39m::[0mBase.JLOptions[0m[1m)[22m
+[90m   @[39m [90mBase[39m [90m./[39m[90m[4mclient.jl:317[24m[39m
+ [9] [0m[1m_start[22m[0m[1m([22m[0m[1m)[22m
+[90m   @[39m [90mBase[39m [90m./[39m[90m[4mclient.jl:550[24m[39m
+in expression starting at /home/outerlink/code/qh-method/tracks/polyopt/solutions/its-a-trap/cg_hybrid/m0c_cell.jl:19
+*********************************** QMBCertify ***********************************
+QMBCertify is launching...
+=== exit=1 2026-07-29T02:58:06+08:00
+=== m0c N=14 cfg=configA variant=stock start 2026-07-29T02:58:06+08:00
+[36m[1m┌ [22m[39m[36m[1mInfo: [22m[39mGSB_cg_raw forked
+[36m[1m└ [22m[39m  sha256 = "bc33d5913868e4556651408495b93543e19cf704699ccabc4b5b4ad37f2ab96c"
+[91m[1mERROR: [22m[39mLoadError: SystemError: opening file "/home/outerlink/code/qh-method/tracks/julia-env/Manifest.toml": No such file or directory
+Stacktrace:
+  [1] [0m[1msystemerror[22m[0m[1m([22m[90mp[39m::[0mString, [90merrno[39m::[0mInt32; [90mextrainfo[39m::[0mNothing[0m[1m)[22m
+[90m    @[39m [90mBase[39m [90m./[39m[90m[4merror.jl:186[24m[39m
+  [2] [0m[1mopen[22m[0m[1m([22m[90mfname[39m::[0mString; [90mlock[39m::[0mBool, [90mread[39m::[0mNothing, [90mwrite[39m::[0mNothing, [90mcreate[39m::[0mNothing, [90mtruncate[39m::[0mNothing, [90mappend[39m::[0mNothing[0m[1m)[22m
+[90m    @[39m [90mBase[39m [90m./[39m[90m[4miostream.jl:317[24m[39m
+  [3] [0m[1mopen[22m
+[90m    @[39m [90m./[39m[90m[4miostream.jl:296[24m[39m[90m [inlined][39m
+  [4] [0m[1mopen[22m[0m[1m([22m[90mf[39m::[0mBase.var"#read##0#read##1"[90m{Tuple{}}[39m, [90margs[39m::[0mString; [90mkwargs[39m::[0m@Kwargs[90m{}[39m[0m[1m)[22m
+[90m    @[39m [90mBase[39m [90m./[39m[90m[4mio.jl:410[24m[39m
+  [5] [0m[1mopen[22m
+[90m    @[39m [90m./[39m[90m[4mio.jl:409[24m[39m[90m [inlined][39m
+  [6] [0m[1mread[22m[0m[1m([22m::[0mString[0m[1m)[22m
+[90m    @[39m [90mBase[39m [90m./[39m[90m[4mio.jl:507[24m[39m
+  [7] top-level scope
+[90m    @[39m [90m~/code/qh-method/tracks/polyopt/solutions/its-a-trap/cg_hybrid/[39m[90m[4mm0c_cell.jl:36[24m[39m
+  [8] [0m[1minclude[22m[0m[1m([22m[90mmod[39m::[0mModule, [90m_path[39m::[0mString[0m[1m)[22m
+[90m    @[39m [90mBase[39m [90m./[39m[90m[4mBase.jl:306[24m[39m
+  [9] [0m[1mexec_options[22m[0m[1m([22m[90mopts[39m::[0mBase.JLOptions[0m[1m)[22m
+[90m    @[39m [90mBase[39m [90m./[39m[90m[4mclient.jl:317[24m[39m
+ [10] [0m[1m_start[22m[0m[1m([22m[0m[1m)[22m
+[90m    @[39m [90mBase[39m [90m./[39m[90m[4mclient.jl:550[24m[39m
+in expression starting at /home/outerlink/code/qh-method/tracks/polyopt/solutions/its-a-trap/cg_hybrid/m0c_cell.jl:36
+*********************************** QMBCertify ***********************************
+QMBCertify is launching...
+optimum = -0.44739636848093645
+=== exit=1 2026-07-29T03:34:01+08:00
+=== m0c N=14 cfg=configA variant=adapter start 2026-07-29T03:34:01+08:00
+[36m[1m┌ [22m[39m[36m[1mInfo: [22m[39mGSB_cg_raw forked
+[36m[1m└ [22m[39m  sha256 = "bc33d5913868e4556651408495b93543e19cf704699ccabc4b5b4ad37f2ab96c"
+[91m[1mERROR: [22m[39mLoadError: UndefVarError: `PSDstate_entry` not defined in `Main`
+Suggestion: check for spelling errors or missing imports.
+Stacktrace:
+ [1] [0m[1mmacro expansion[22m
+[90m   @[39m [90m./[39m[90m[4mnone:132[24m[39m[90m [inlined][39m
+ [2] [0m[1mmacro expansion[22m
+[90m   @[39m [90m./[39m[90m[4mtiming.jl:461[24m[39m[90m [inlined][39m
+ [3] [0m[1mGSB_cg_raw[22m[0m[1m([22m[90msupp[39m::[0mVector[90m{Vector{Int64}}[39m, [90mcoe[39m::[0mVector[90m{Float64}[39m, [90mL[39m::[0mInt64, [90md[39m::[0mInt64; [90mH_supp[39m::[0mVector[90m{Vector{Int64}}[39m, [90mH_coe[39m::[0mVector[90m{Float64}[39m, [90mSU2_symmetry[39m::[0mBool, [90mlso[39m::[0mBool, [90mlol[39m::[0mInt64, [90mpso[39m::[0mInt64, [90menergy[39m::[0mVector[90m{Any}[39m, [90mQUIET[39m::[0mBool, [90mlattice[39m::[0mString, [90mrdm[39m::[0mInt64, [90mextra[39m::[0mInt64, [90mthree_type[39m::[0mVector[90m{Int64}[39m, [90mJ2[39m::[0mInt64, [90mcorrelation[39m::[0mBool, [90mGram[39m::[0mBool, [90mwritetofile[39m::[0mBool, [90mmosek_setting[39m::[0mmosek_para, [90mtower[39m::[0mNothing[0m[1m)[22m
+[90m   @[39m [35mMain[39m [90m./[39m[90m[4mnone:8[24m[39m
+ [4] [0m[1mGSB_cg_raw[22m
+[90m   @[39m [90m./[39m[90m[4mnone:1[24m[39m[90m [inlined][39m
+ [5] [0m[1m#GSB_cg#122[22m
+[90m   @[39m [90m~/code/qh-method/tracks/polyopt/solutions/its-a-trap/cg_hybrid/[39m[90m[4mgsb_cg.jl:142[24m[39m[90m [inlined][39m
+ [6] top-level scope
+[90m   @[39m [90m~/code/qh-method/tracks/polyopt/solutions/its-a-trap/cg_hybrid/[39m[90m[4mm0c_cell.jl:23[24m[39m
+ [7] [0m[1minclude[22m[0m[1m([22m[90mmod[39m::[0mModule, [90m_path[39m::[0mString[0m[1m)[22m
+[90m   @[39m [90mBase[39m [90m./[39m[90m[4mBase.jl:306[24m[39m
+ [8] [0m[1mexec_options[22m[0m[1m([22m[90mopts[39m::[0mBase.JLOptions[0m[1m)[22m
+[90m   @[39m [90mBase[39m [90m./[39m[90m[4mclient.jl:317[24m[39m
+ [9] [0m[1m_start[22m[0m[1m([22m[0m[1m)[22m
+[90m   @[39m [90mBase[39m [90m./[39m[90m[4mclient.jl:550[24m[39m
+in expression starting at /home/outerlink/code/qh-method/tracks/polyopt/solutions/its-a-trap/cg_hybrid/m0c_cell.jl:19
+*********************************** QMBCertify ***********************************
+QMBCertify is launching...
+=== exit=1 2026-07-29T03:34:26+08:00
+== M1 tower gates ==
+G2 flow k=2->3 residual 0.00e+00 PASS
+G2 flow k=3->4 residual 0.00e+00 PASS
+G2 flow k=4->5 residual 0.00e+00 PASS
+E_lti(3)=-0.5000000090 (OPTIMAL)  E_lti(4)=-0.5000000000 (OPTIMAL)
+G1  sandwich: E_cg(4,U)=-0.5000000080 (OPTIMAL)  [lti3-1e-8 ≤ cg ≤ lti4+1e-8] PASS
+G1b strict oracle: E=-0.4999999997 (OPTIMAL) |Δ vs lti4|=2.78e-10 PASS
+    measured lossless-equality claim: |E_cg−E_lti4|=8.01e-09 (expected NONZERO — traced links are lossy; see GATE NOTE)
+E_cg(4, mps m=2) = -0.4999999999 (OPTIMAL)
+E_cg(5, mps m=2) = -0.4999999995 (OPTIMAL)
+E_cg(6, mps m=2) = -0.5000000052 (OPTIMAL)
+G4 monotone in n: PASS
+G3 ED N=8: tr(h ρ2)=-0.456386676117 vs E0/N=-0.456386676117 |Δ|=1.67e-16 PASS
+G3 LTI M=3 residual 1.11e-16 PASS
+G3 LTI M=4 residual 5.55e-17 PASS
+G3 LTI M=5 residual 5.55e-17 PASS
+G3 LTI M=6 residual 2.78e-17 PASS
+G3 T2 residual 1.25e-17 PASS
+G3 T3 M=4 residual 6.95e-18 PASS
+G3 ω_4 min-eig 1.78e-06 PASS
+G3 T3 M=5 residual 5.43e-18 PASS
+G3 ω_5 min-eig -2.34e-18 PASS
+M1 GATES: PASS (with GATE NOTE measured)
+M0C TAIL DONE 2026-07-29T03:34:45+08:00
