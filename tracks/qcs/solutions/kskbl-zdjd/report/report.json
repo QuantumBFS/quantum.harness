@@ -591,8 +591,78 @@
         },
         {
           "kind": "note",
-          "label": "⟦zh⟧边界：这是针对候选空间的主动实验设计，不是无假设的万能捷径⟦en⟧Boundary: this is hypothesis-class-specific experimental design, not an assumption-free shortcut",
-          "text": "⟦zh⟧加速利用了“目标可能落在通用二次整数空间”这一建模假设，但没有利用乘法公式或目标输出。若真正规律含三次或更高阶项，79 点设计会欠定或在未观测输入上失败；因此每个冻结模型仍必须在独立的 4,096 个干净输入上做最终验证。下一步会把同样思想扩展为可增长候选空间：先用二次设计快速拟合，若验证残差呈现结构，再自动加入高阶项。⟦en⟧The acceleration uses the modeling assumption that the target may lie in a generic quadratic integer space, but it does not use the multiplication formula or target outputs. If the true rule contains cubic or higher-order terms, the 79-point design will be misspecified or fail on unseen inputs; every frozen model therefore still receives an independent 4,096-input clean verification. The next step is a growing hypothesis space: fit the quadratic design first, then add higher-order terms automatically if validation residuals remain structured."
+          "label": "⟦zh⟧原有限制：D-optimal 加速仍预先指定了“二次”候选空间⟦en⟧Previous limitation: D-optimal acceleration still preselected a quadratic candidate space",
+          "text": "⟦zh⟧这个限制现在由下一项实验直接处理：学习器从 13 维一次模型开始，只根据独立的新鲜噪声留出集决定拒绝、扩展或接受，不再把正确阶数写进初始化。最终干净全域仍只在所有阶数决策锁定后用于报告。⟦en⟧The next experiment addresses this limitation directly. The learner begins with a 13-dimensional linear model and uses only an independent fresh-noise holdout to reject, expand or accept; the correct degree is no longer encoded at initialization. The clean full domain is evaluated for reporting only after every degree decision is locked."
+        },
+        {
+          "kind": "heading",
+          "level": 3,
+          "text": "⟦zh⟧自适应模型族：连“二次”假设也由噪声数据发现⟦en⟧Adaptive model family: even the quadratic assumption is discovered from noisy data"
+        },
+        {
+          "kind": "verdict",
+          "status": "good",
+          "label": "⟦zh⟧四次随机复跑都先拒绝一次模型，再接受二次模型，并恢复同一个 156 门精确网络⟦en⟧All four random replications reject the linear model, accept the quadratic model and recover the same exact 156-gate network",
+          "why": "⟦zh⟧学习器从随机高斯系数的一次模型出发，真实翻转率 25% 不提供给训练器；它只从重复噪声标签估计噪声底，并用另一条从不参与更新的新鲜噪声流判断模型失配。四次均在第 40 批拒绝一次空间，在第 55、60、60、60 批接受二次空间。所有选择完成后才运行 4,096 输入干净检查，四次均为 100%，非零的 36 个整数系数也都与已逐门验证的 156 门网络一致。⟦en⟧The learner starts from a linear model with random Gaussian coefficients and is not given the true 25% flip rate. It estimates the noise floor from repeated corrupted labels and uses a separate fresh-noise stream that never updates the model to diagnose misspecification. Every run rejects the linear space at batch 40 and accepts the quadratic space at batches 55, 60, 60 and 60. The clean 4,096-input audit runs only after all choices are locked: every model is exact, and all 36 nonzero integer coefficients match the previously gate-by-gate verified 156-gate network."
+        },
+        {
+          "kind": "card",
+          "title": "⟦zh⟧序贯阶数发现怎样避免偷看标准答案⟦en⟧How sequential degree discovery avoids peeking at the clean answer",
+          "blocks": [
+            {
+              "kind": "kv",
+              "pairs": [
+                [
+                  "⟦zh⟧候选空间阶梯⟦en⟧Candidate ladder",
+                  "⟦zh⟧从常数加 12 个一次位的 13 维空间开始；若拒绝，再扩展到常数、一次项及全部两两 AND 的 79 维空间；三次项的 299 维空间只有二次模型也失败时才会建立。⟦en⟧Start with the 13-dimensional space containing a constant and 12 linear bits. On rejection, expand to the 79-dimensional space containing the constant, linear terms and every pairwise AND. The 299-dimensional cubic space is created only if the quadratic model also fails."
+                ],
+                [
+                  "⟦zh⟧模型失配信号⟦en⟧Misspecification signal",
+                  "⟦zh⟧冻结当前整数模型，在 4,096 个独立新鲜噪声词上测预测与观测的分歧率，再减去由训练重复标签估计的翻转率。模型正确时差值应接近 0；一次模型的差值稳定在约 23.5 个百分点。⟦en⟧Freeze the current integer model, measure prediction-versus-observation disagreement on 4,096 independent freshly corrupted words, then subtract the flip rate estimated from repeated training labels. A correct model should give a value near zero; the linear model remains near 23.5 percentage points."
+                ],
+                [
+                  "⟦zh⟧拒绝与接受⟦en⟧Reject and accept",
+                  "⟦zh⟧连续三次高出噪声底 15 个百分点才早停拒绝；连续三次与噪声底相差不到 1 个百分点、且最大系数取整残差小于 0.10 才接受。取整稳定性只约束接受，不会掩盖明显失配。⟦en⟧Reject early only after three consecutive checks more than 15 percentage points above the noise floor. Accept only after three checks within one percentage point of the floor and with maximum coefficient-rounding residual below 0.10. Rounding stability safeguards acceptance without hiding clear misspecification."
+                ],
+                [
+                  "⟦zh⟧信息隔离⟦en⟧Information isolation",
+                  "⟦zh⟧训练流只更新后验；带噪留出流只做阶数选择；干净全域在选择锁定后才附加到日志。目标公式、现有电路、真实噪声率和正确阶数均未提供。⟦en⟧The training stream only updates the posterior; the noisy holdout only selects model degree; the clean domain is attached to the log after selection is locked. The target formula, existing circuit, true noise rate and correct degree are all withheld."
+                ]
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "table",
+          "columns": [
+            "⟦zh⟧随机种子⟦en⟧Seed",
+            "⟦zh⟧一次模型拒绝⟦en⟧Linear rejection",
+            "⟦zh⟧二次模型接受⟦en⟧Quadratic acceptance",
+            "⟦zh⟧接受时留出差值⟦en⟧Holdout excess at acceptance",
+            "⟦zh⟧训练样本⟦en⟧Training examples",
+            "⟦zh⟧最终全域⟦en⟧Final full domain"
+          ],
+          "rows": [
+            ["277100", "⟦zh⟧第 40 批 · +23.78 pp⟦en⟧Batch 40 · +23.78 pp", "⟦zh⟧第 55 批⟦en⟧Batch 55", "−0.37 pp", "9,500", "4,096 / 4,096"],
+            ["287100", "⟦zh⟧第 40 批 · +23.24 pp⟦en⟧Batch 40 · +23.24 pp", "⟦zh⟧第 60 批⟦en⟧Batch 60", "+0.23 pp", "10,000", "4,096 / 4,096"],
+            ["297100", "⟦zh⟧第 40 批 · +23.54 pp⟦en⟧Batch 40 · +23.54 pp", "⟦zh⟧第 60 批⟦en⟧Batch 60", "−0.17 pp", "10,000", "4,096 / 4,096"],
+            ["307100", "⟦zh⟧第 40 批 · +23.38 pp⟦en⟧Batch 40 · +23.38 pp", "⟦zh⟧第 60 批⟦en⟧Batch 60", "−0.21 pp", "10,000", "4,096 / 4,096"]
+          ],
+          "numeric": [true, false, false, true, true, true]
+        },
+        {
+          "kind": "figures",
+          "items": [
+            {
+              "src": "noisy-c-adaptive-degree.png",
+              "caption": "⟦zh⟧左：一次模型的独立留出分歧始终比自估噪声底高约 23.5 个百分点，二次模型则随训练降到零附近。中：一次模型在留出差值上明确越过拒绝线；二次模型同时进入“留出差值不超过 1 个百分点、取整残差小于 0.10”的接受区域。右：透明计入样本代价——自适应训练平均用 9,875 个训练词，但反复阶数检验另用 80,896 个独立带噪留出词，合计 90,771；仍少于已知阶数时均匀采样的 243,875，但高于直接指定二次空间的 D-optimal 4,125。⟦en⟧Left: independent holdout disagreement for the linear model stays roughly 23.5 percentage points above the self-estimated noise floor, while the quadratic model falls toward zero. Middle: the linear model clearly crosses the rejection line; the quadratic model simultaneously enters the acceptance region with holdout excess within one percentage point and rounding residual below 0.10. Right: the sample cost is counted transparently—the adaptive learner averages 9,875 training words plus 80,896 independent noisy holdout words for repeated degree tests, totaling 90,771. This remains below 243,875 for uniform sampling with known degree, but exceeds the 4,125 needed by D-optimal sampling when the quadratic space is specified directly."
+            }
+          ]
+        },
+        {
+          "kind": "note",
+          "label": "⟦zh⟧当前边界：阶数先验已移除，但留出审计仍偏昂贵⟦en⟧Current boundary: the degree prior is removed, but holdout auditing is still expensive",
+          "text": "⟦zh⟧平均 90,771 个带噪 oracle 词中，89% 花在固定 4,096 词的重复留出检查，而不是参数训练。这个实验优先证明“无需干净标签也能选对模型族”；下一步的直接优化方向是把固定留出改成置信序贯检验，在证据很强时用更小留出提前结束，同时保持相同误选风险上界。可复核记录为 adaptive_degree_summary.json。⟦en⟧Of the mean 90,771 noisy oracle words, 89% are spent on repeated fixed 4,096-word holdout checks rather than parameter training. This experiment prioritizes demonstrating that the correct model family can be selected without clean labels. The direct next optimization is a confidence-sequential holdout that stops with fewer words when evidence is strong while preserving the same upper bound on misselection risk. The auditable record is adaptive_degree_summary.json."
         },
         {
           "kind": "heading",

@@ -1,0 +1,111 @@
+{
+  "kind": "fresh-noise-holdout-adaptive-degree-discovery",
+  "protocol": {
+    "candidate_degrees": [
+      1,
+      2,
+      3
+    ],
+    "learner_initial_noise_rate": 0.1,
+    "oracle_noise_rate": 0.25,
+    "batch_size": 100,
+    "fresh_noisy_holdout_words_per_check": 4096,
+    "acceptance_rule": "three checks with absolute holdout excess below 0.01 and maximum coefficient-rounding residual below 0.10",
+    "early_rejection_rule": "three checks with holdout excess above 0.15",
+    "clean_labels_used_for_updates_or_selection": false,
+    "target_degree_seeded": false,
+    "target_formula_seeded": false
+  },
+  "claims": {
+    "all_four_runs_reject_linear_at_step_40": true,
+    "all_four_runs_accept_quadratic": true,
+    "quadratic_acceptance_steps": [
+      55,
+      60,
+      60,
+      60
+    ],
+    "all_four_final_models_exact": true,
+    "all_four_recover_verified_36_term_rule": true,
+    "verified_rule_compiles_to_gates": 156,
+    "mean_training_examples": 9875.0,
+    "mean_independent_noisy_holdout_words": 80896.0,
+    "mean_total_noisy_oracle_words": 90771.0,
+    "mean_absolute_noise_rate_error_at_acceptance": 0.0012439973213989736,
+    "maximum_absolute_noise_rate_error_at_acceptance": 0.002043815481569733
+  },
+  "runs": [
+    {
+      "path": "tracks/qcs/results/20260730-230000-noisy-c-adaptive-degree/seed277100/run.json",
+      "run_sha256": "a7afee11bae15ec0b77399f012692ba1eb36b51e49055980d238e2677e8bfd22",
+      "base_seed": 277100,
+      "linear_decision": "reject-and-expand",
+      "linear_decision_step": 40,
+      "linear_holdout_gap_at_decision": 0.23783693611702927,
+      "quadratic_decision": "accept",
+      "quadratic_decision_step": 55,
+      "quadratic_holdout_gap_at_decision": -0.0037121097524030755,
+      "quadratic_rounding_residual_at_decision": 0.011166778892477228,
+      "estimated_noise_rate_at_acceptance": 0.25204381548156973,
+      "training_examples": 9500,
+      "independent_noisy_holdout_words": 77824,
+      "total_noisy_oracle_words": 87324,
+      "final_clean_word_accuracy": 1.0,
+      "active_integer_coefficients": 36
+    },
+    {
+      "path": "tracks/qcs/results/20260730-230000-noisy-c-adaptive-degree/seed287100/run.json",
+      "run_sha256": "7e9afcd2efcfbeacfe1197d9cec64d0d1144886c9c3e6fb358a710c0af7174a3",
+      "base_seed": 287100,
+      "linear_decision": "reject-and-expand",
+      "linear_decision_step": 40,
+      "linear_holdout_gap_at_decision": 0.23244668313374373,
+      "quadratic_decision": "accept",
+      "quadratic_decision_step": 60,
+      "quadratic_holdout_gap_at_decision": 0.0022626685617826436,
+      "quadratic_rounding_residual_at_decision": 0.010337245838587618,
+      "estimated_noise_rate_at_acceptance": 0.24875458404238404,
+      "training_examples": 10000,
+      "independent_noisy_holdout_words": 81920,
+      "total_noisy_oracle_words": 91920,
+      "final_clean_word_accuracy": 1.0,
+      "active_integer_coefficients": 36
+    },
+    {
+      "path": "tracks/qcs/results/20260730-230000-noisy-c-adaptive-degree/seed297100/run.json",
+      "run_sha256": "a25696a256ae3e42699a455cc366fc025c4453504a91ad794d936c98682ea753",
+      "base_seed": 297100,
+      "linear_decision": "reject-and-expand",
+      "linear_decision_step": 40,
+      "linear_holdout_gap_at_decision": 0.2354097095723076,
+      "quadratic_decision": "accept",
+      "quadratic_decision_step": 60,
+      "quadratic_holdout_gap_at_decision": -0.0016972723409035828,
+      "quadratic_rounding_residual_at_decision": 0.00969750657667964,
+      "estimated_noise_rate_at_acceptance": 0.2509851955179869,
+      "training_examples": 10000,
+      "independent_noisy_holdout_words": 81920,
+      "total_noisy_oracle_words": 91920,
+      "final_clean_word_accuracy": 1.0,
+      "active_integer_coefficients": 36
+    },
+    {
+      "path": "tracks/qcs/results/20260730-230000-noisy-c-adaptive-degree/seed307100/run.json",
+      "run_sha256": "76a8c624675f858529c01fccbf2934901aa864e3ea89a790d91f77bd91ba1008",
+      "base_seed": 307100,
+      "linear_decision": "reject-and-expand",
+      "linear_decision_step": 40,
+      "linear_holdout_gap_at_decision": 0.23375887713439236,
+      "quadratic_decision": "accept",
+      "quadratic_decision_step": 60,
+      "quadratic_holdout_gap_at_decision": -0.002146061026339935,
+      "quadratic_rounding_residual_at_decision": 0.010268543861157352,
+      "estimated_noise_rate_at_acceptance": 0.2507015623284233,
+      "training_examples": 10000,
+      "independent_noisy_holdout_words": 81920,
+      "total_noisy_oracle_words": 91920,
+      "final_clean_word_accuracy": 1.0,
+      "active_integer_coefficients": 36
+    }
+  ]
+}
