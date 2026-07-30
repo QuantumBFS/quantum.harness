@@ -138,6 +138,53 @@ def test_protocol_has_exact_axes_fresh_identities_and_canonical_cells():
     )
 
 
+def test_protocol_rejects_actual_frozen_progress_drift(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+):
+    source = _source()
+    protocol = extension.build_p0_extension_protocol(source)
+    drifted = tmp_path / "progress.json"
+    drifted.write_bytes(b"{}\n")
+    monkeypatch.setattr(extension, "_p0_progress_path", lambda: drifted)
+    with pytest.raises(RuntimeError, match="progress"):
+        extension.build_p0_extension_protocol(source)
+    with pytest.raises(RuntimeError, match="progress"):
+        extension.validate_p0_extension_protocol(source, protocol)
+
+
+def test_protocol_rejects_recomputed_bracket_mismatch(
+    monkeypatch: pytest.MonkeyPatch,
+):
+    source = _source()
+    protocol = extension.build_p0_extension_protocol(source)
+    forged = copy.deepcopy(extension.select_p1_brackets(source))
+    forged["requires_p0_extension"] = False
+    assert forged["bracket_document_sha256"] == extension.P0_BRACKET_DOCUMENT_SHA256
+    monkeypatch.setattr(extension, "select_p1_brackets", lambda _source: forged)
+    with pytest.raises(RuntimeError, match="bracket"):
+        extension.build_p0_extension_protocol(source)
+    with pytest.raises(RuntimeError, match="bracket"):
+        extension.validate_p0_extension_protocol(source, protocol)
+
+
+@pytest.mark.parametrize(
+    ("field", "value", "message"),
+    [
+        ("request_sha256", [], "request"),
+        ("rng_material_sha256", [{}, "0" * 64, "1" * 64, "2" * 64], "RNG"),
+    ],
+)
+def test_validator_normalizes_malformed_digest_types(
+    field: str, value: object, message: str
+):
+    source = _source()
+    protocol = copy.deepcopy(extension.build_p0_extension_protocol(source))
+    protocol["cells"][0][field] = value
+    _rehash(protocol)
+    with pytest.raises(RuntimeError, match=message):
+        extension.validate_p0_extension_protocol(source, protocol)
+
+
 @pytest.mark.parametrize(
     ("mutation", "message"),
     [

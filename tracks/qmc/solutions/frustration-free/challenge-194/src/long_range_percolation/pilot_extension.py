@@ -20,6 +20,7 @@ from .pilot_analysis import (
     P1_REPLICAS,
     _selector_estimates,
     _transition_evidence,
+    select_p1_brackets,
 )
 from .trajectory import TrajectoryRequest, request_digest
 
@@ -151,6 +152,10 @@ def _p0_run_spec_path() -> Path:
     return _repo_root() / "results/challenge-194/pilot-p0-739880d/run_spec.json"
 
 
+def _p0_progress_path() -> Path:
+    return _repo_root() / "results/challenge-194/pilot-p0-739880d/progress.json"
+
+
 def _file_sha256(path: Path) -> str:
     return _sha256(path.read_bytes())
 
@@ -276,6 +281,31 @@ def _validate_source(p0_analysis: Mapping[str, object]) -> None:
     if _sha256(_canonical_bytes(p0_analysis)) != P0_ANALYSIS_FILE_SHA256:
         raise RuntimeError("P0 source canonical file hash mismatch")
     _selector_estimates(p0_analysis)
+    _validate_frozen_progress()
+    _validate_recomputed_brackets(p0_analysis)
+
+
+def _validate_frozen_progress() -> None:
+    try:
+        payload = _p0_progress_path().read_bytes()
+        document = json.loads(payload)
+    except (OSError, json.JSONDecodeError) as error:
+        raise RuntimeError("frozen P0 progress artifact is unreadable") from error
+    if _sha256(payload) != P0_PROGRESS_SHA256 or payload != _canonical_bytes(document):
+        raise RuntimeError("frozen P0 progress artifact hash or encoding mismatch")
+
+
+def _validate_recomputed_brackets(p0_analysis: Mapping[str, object]) -> None:
+    bracket = select_p1_brackets(p0_analysis)
+    if not isinstance(bracket, Mapping):
+        _malformed("recomputed P0 bracket document is malformed")
+    unsigned = dict(bracket)
+    digest = unsigned.pop("bracket_document_sha256", None)
+    if (
+        digest != P0_BRACKET_DOCUMENT_SHA256
+        or _sha256(_canonical_bytes(unsigned)) != digest
+    ):
+        raise RuntimeError("recomputed P0 bracket document hash mismatch")
 
 
 def _grid_id(entry: Mapping[str, object]) -> str:
@@ -484,6 +514,16 @@ def _exact_hex(raw: object) -> float:
     return value
 
 
+def _exact_digest(raw: object, name: str) -> str:
+    if (
+        not isinstance(raw, str)
+        or len(raw) != 64
+        or any(character not in "0123456789abcdef" for character in raw)
+    ):
+        _malformed(f"extension {name} digest is malformed")
+    return raw
+
+
 def validate_p0_extension_protocol(
     p0_analysis: Mapping[str, object],
     protocol: Mapping[str, object],
@@ -597,11 +637,13 @@ def validate_p0_extension_protocol(
             or raw.get("replica") != replica
         ):
             raise RuntimeError("extension cells are not in canonical order")
-        request_sha256 = raw.get("request_sha256")
-        streams = raw.get("rng_material_sha256")
-        if request_sha256 in p0_request_set or (
-            isinstance(streams, list)
-            and any(digest in p0_stream_set for digest in streams)
+        request_sha256 = _exact_digest(raw.get("request_sha256"), "request")
+        raw_streams = raw.get("rng_material_sha256")
+        if not isinstance(raw_streams, list) or len(raw_streams) != STREAM_COUNT:
+            _malformed("extension RNG material digest list is malformed")
+        streams = tuple(_exact_digest(digest, "RNG material") for digest in raw_streams)
+        if request_sha256 in p0_request_set or any(
+            digest in p0_stream_set for digest in streams
         ):
             raise RuntimeError("extension identity collision with P0")
         kernel_sha256 = _kernel_hash(length, sigma)
@@ -627,7 +669,7 @@ def validate_p0_extension_protocol(
         )
         if request_sha256 != expected_request:
             raise RuntimeError("extension request digest mismatch")
-        if streams != list(expected_streams):
+        if streams != expected_streams:
             raise RuntimeError("extension RNG material digest mismatch")
         if request_sha256 in seen_requests or any(
             digest in seen_streams for digest in expected_streams
