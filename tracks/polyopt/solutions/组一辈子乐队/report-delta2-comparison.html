@@ -16,7 +16,7 @@
 <div class="eyebrow">Infinite spin-½ XXZ chain · Δ=2 · J=1</div>
 <h1>Tighter early-hierarchy lower bounds with a D-scalable U(1) formulation</h1>
 <p class="hero-claim"><strong>Up to 5.3× tighter</strong> than the digitized D=6 paper curve at matched n=5–12.</p>
-<p class="sub">The core result is the comparison plot below: existing D=6 coarse-RDM outputs are aligned to Kull et al. Figure 5(c) by physical hierarchy size. Real U(1)-blocked PSD matrices make larger bond dimension D and deep hierarchies computationally accessible. The exact per-site energy is −0.617222045975865; no calculation was rerun for this report.</p>
+<p class="sub">The core result is the comparison plot below: existing D=6 coarse-RDM outputs are aligned to Kull et al. Figure 5(c) by physical hierarchy size. Real U(1)-blocked PSD matrices make larger bond dimension D and deep hierarchies computationally accessible: on the matched D=6, m=5 benchmark path, measured cluster peak RSS fell from 98.0 GB to 7.7 GB (12.8×). The exact per-site energy is −0.617222045975865; no calculation was rerun for this report.</p>
 <div class="answer"><strong>Index mapping: n = m + 2.</strong> The output parameter <code>m</code> is the largest interior coarse-graining-map length. One physical boundary site remains on each side, so the support compared with Kull et al. is <code>n=m+2</code>.</div>
 </header>
 
@@ -28,13 +28,17 @@
 
 <div class="grid">
 <div class="metric primary"><div class="label">Early-hierarchy advantage</div><div class="value">2.7×–5.3× tighter</div><div class="note">Matched n=5,8,10,12</div></div>
+<div class="metric primary"><div class="label">Measured memory reduction</div><div class="value">98.0 → 7.7 GB</div><div class="note">12.8× lower peak RSS; D=6, m=5 path</div></div>
 <div class="metric"><div class="label">Largest demonstrated hierarchy</div><div class="value">m=32 → n=34</div><div class="note">D=6; candidate numerical lower estimate</div></div>
-<div class="metric"><div class="label">D=64 variational reference</div><div class="value">2.22438×10⁻⁶</div><div class="note">Error from exact; clean VUMPS convergence</div></div>
 </div>
 
 <div class="scalable">
-<div class="card"><div class="big">The scalability mechanism is structural, not just a larger memory request.</div><p class="note">U(1) charge sectors split each coarse RDM into real symmetric PSD blocks. A single shared D=6 VUMPS state then feeds multiple hierarchy depths in parallel, avoiding repeated state optimization while keeping the deep SDP sweep practical.</p></div>
-<div class="card"><div class="label note">Shared m=10/20/32 solve</div><div class="number">56.1 GiB</div><div class="note">peak RSS for three concurrent depths; completed without OOM</div></div>
+<div class="card"><div class="big">Symmetry changes the memory scaling, not merely the requested node size.</div><p class="note">U(1) charge conservation removes cross-charge matrix entries and splits each coarse RDM into smaller PSD blocks. On the D=6, m=5 comparison path, the earlier complex/Hermitian U(1) run reached 98,019,548 K peak RSS, whereas the real U(1)-blocked grid containing the same cell peaked at 7,658,816 K—even while also completing eight other cells sequentially.</p></div>
+<div class="card"><div class="label note">Measured cluster peak RSS</div><div class="number">12.8× lower</div><div class="note">98.0 GB → 7.7 GB; equivalently about 93.5 GiB → 7.3 GiB</div></div>
+</div>
+<div class="scalable">
+<div class="card"><div class="big">A real MPS removes avoidable complex arithmetic.</div><p class="note">For the real XXZ Hamiltonian and the selected U(1) sector, the optimized MPS can remain in <code>Float64</code>. The frozen coarse maps and SDP blocks therefore stay real. Compared with a general complex-MPS/Hermitian representation, this avoids storing and constraining redundant imaginary components and makes factorization and contraction substantially cheaper.</p></div>
+<div class="card"><div class="label note">Shared m=10/20/32 solve</div><div class="number">56.1 GiB</div><div class="note">three concurrent depths from one real D=6 VUMPS state; completed without OOM</div></div>
 </div>
 
 <section id="method">
@@ -50,12 +54,13 @@
 <div class="equation">minimize energy density &nbsp; subject to &nbsp; ρ ⪰ 0, &nbsp; ω⁽ⁿ⁾ ⪰ 0, &nbsp; trace/overlap consistency, &nbsp; and coarse-graining flow</div>
 
 <div class="grid">
-<div class="card"><h3>4 · Exploit U(1) symmetry</h3><p>Total Sᶻ conservation decomposes every RDM and linear map into charge sectors. The implementation stores real symmetric positive-semidefinite blocks instead of one dense complex matrix. This reduces the effective SDP size and is the main mechanism for scaling bond dimension <code>D</code> and hierarchy depth.</p></div>
+<div class="card"><h3>4 · Combine U(1) blocks with a real scalar domain</h3><p>Total Sᶻ conservation decomposes every RDM and linear map into charge sectors, eliminating all cross-charge entries. Because the Δ=2 Hamiltonian and chosen state can be represented with real tensors, the implementation also uses real symmetric PSD blocks rather than general complex Hermitian blocks. These are complementary gains: symmetry makes the matrices block sparse; the real domain removes imaginary variables inside each surviving block.</p></div>
 <div class="card"><h3>5 · Obtain the lower side</h3><p>Minimizing the local energy over this relaxed, consistency-constrained RDM set gives <code>E_lb</code>. The reported corrected value accounts for measured feasibility residuals. A clean solve should satisfy <code>E_lb ≤ E_exact</code>.</p></div>
 <div class="card"><h3>6 · Compare a certified bracket</h3><p>The MPS and SDP play different roles: <code>E_lb</code> comes from the coarse-RDM relaxation, while <code>E_VUMPS</code> comes from a trial wavefunction. Together they target <code>E_lb ≤ E₀ ≤ E_VUMPS</code>; the D=64 value in this report is only the upper-side VUMPS reference.</p></div>
 </div>
 
-<div class="callout good"><strong>What is new here:</strong> the coarse-RDM hierarchy is implemented directly in real U(1) charge blocks, and one frozen VUMPS state is shared across several depths. This preserves the lower-bound construction while avoiding repeated state optimization and dense cross-charge PSD matrices.</div>
+<div class="callout good"><strong>What is new here:</strong> the coarse-RDM hierarchy is implemented directly in real U(1) charge blocks, and one frozen VUMPS state is shared across several depths. The measured D=6, m=5 path drops from 98.0 GB to 7.7 GB peak RSS (12.8×), while the shared-state design avoids repeated VUMPS optimization. Together these changes make larger bond dimension <code>D</code> and deeper hierarchy <code>n</code> practical.</div>
+<div class="callout"><strong>Comparison with the paper implementation:</strong> the reference workflow uses a general complex MPS representation. That representation is mathematically valid but inefficient for this real Hamiltonian and symmetry sector: it carries real and imaginary components through MPS contractions and Hermitian SDP constraints. Our <code>Float64</code> MPS and real symmetric blocks exploit the available real structure. The 12.8× figure measures the complete transition to the real U(1)-blocked implementation; it should not be attributed to real arithmetic alone.</div>
 <div class="callout"><strong>Numerical boundary:</strong> an SDP point is presented as clean only when the solver status and feasibility residuals pass the repository gate. The m=8/10/20/32 values remain candidate lower estimates because MOSEK stopped with <code>SLOW_PROGRESS</code>; the method description does not upgrade those points into rigorous certificates.</div>
 </section>
 
@@ -111,7 +116,8 @@
 <h2>Provenance</h2>
 <ul class="sources">
 <li>Paper comparison data: <code>PAPER_FIG5C_DELTA2_D6_DIGITIZATION_SOURCE_OF_TRUTH.json</code>, Figure 5(c), nominal D=6. Central values and digitization ranges are reproduced unchanged.</li>
-<li>Local D=6 runs: Slurm jobs 23024915/23025154 (m=3/6/8) and shared-VUMPS job 23026308 (m=10/20/32), completed 2026-07-30.</li>
+<li>Measured memory comparison: complex/Hermitian U(1) job 23011264.batch, D=6 and m=5, MaxRSS 98,019,548 K; real U(1)-blocked job 23014055.batch, whose nine-cell grid included the same D=6 and m=5 cell, MaxRSS 7,658,816 K. Values are reported in scheduler decimal-style GB and also converted approximately to GiB.</li>
+<li>Local D=6 Δ=2 runs: Slurm jobs 23024915/23025154 (m=3/6/8) and shared-VUMPS job 23026308 (m=10/20/32), completed 2026-07-30.</li>
 <li>D=64 VUMPS reference: Slurm job 23031348, algorithm error 8.21×10⁻¹⁰, clean=true.</li>
 <li>Exact reference supplied for this comparison: E_exact/site = −0.617222045975865.</li>
 <li>Hamiltonian convention: H=Σᵢ(SᵢˣSᵢ₊₁ˣ+SᵢʸSᵢ₊₁ʸ+2SᵢᶻSᵢ₊₁ᶻ), J=1.</li>
