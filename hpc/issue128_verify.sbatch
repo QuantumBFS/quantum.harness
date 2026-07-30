@@ -5,7 +5,7 @@
 #SBATCH --qos=user_acamtw70yu
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=1
+#SBATCH --cpus-per-task=9
 #SBATCH --mem=32G
 #SBATCH --time=04:30:00
 #SBATCH --output=results/slurm-%x-%j.out
