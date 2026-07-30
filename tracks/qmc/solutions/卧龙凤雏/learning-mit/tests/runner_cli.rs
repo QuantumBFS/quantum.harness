@@ -169,6 +169,9 @@ fn refinement_request_requires_its_manifest_hash_and_runs_only_requested_tasks()
         .iter()
         .filter(|task| task.key.starts_with("diii-refine"))
         .all(|task| task.state == learning_mit::schema::TaskState::Completed));
+
+    let resumed_coarse = run_simulation(config, run_dir.path(), SamplingMode::Born).unwrap();
+    assert_eq!(resumed_coarse.tasks.len(), 10);
 }
 
 #[test]

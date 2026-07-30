@@ -62,7 +62,11 @@ impl RunConfig {
     }
 
     pub fn compatible_with(&self, other: &Self) -> bool {
-        self == other
+        self.base_seed == other.base_seed
+            && self.production_gates == other.production_gates
+            && self.invariant_tolerance == other.invariant_tolerance
+            && self.runtime == other.runtime
+            && self.stages.starts_with(&other.stages)
     }
 }
 
