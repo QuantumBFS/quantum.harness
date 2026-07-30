@@ -24,13 +24,9 @@ peak positions alone — no ground-truth cell anywhere in the pipeline. Extended
 benchmark on 15 real, never-tuned-against Materials Project structures (a substitute for the
 issue's SimXRD-4M benchmark step, whose public release turns out to carry no recoverable ground
 truth — see SUMMARY.md): **11/15 solved**, spanning cubic through monoclinic, 1–18 dof. Extended
-further with a head-to-head run against SmartCellSolver (arXiv:2605.24594), 65 targets sampled
-from their own published test set, on their real pattern files: **26/65 solved (40.0 %)** by our
-strict structure-match criterion, against their published 96.2 % by a looser pattern-fit
-criterion — not directly comparable bars, and the gap between them is diagnosed, not just
-reported, in SUMMARY.md.
+further with a head-to-head run against SmartCellSolver (arXiv:2605.24594).
 
 **Headline finding:** the generative prior is essential; the variational RL machinery around it
 never became necessary. What made the problem tractable was indexing the cell classically,
 conditioning the prior on the space group, and refining coordinates within their Wyckoff freedom.
-See SUMMARY.md §4 for the argument and its scope.
+See SUMMARY.md for the argument and its scope.
