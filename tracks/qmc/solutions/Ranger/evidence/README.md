@@ -18,18 +18,18 @@ workflow.
 | full scientific narrative and figures | — | [16-page APS-style manuscript](https://github.com/JunkaiWang-TheoPhy/symmetric-neural-network-ansatz-chiral-graviton/blob/codex/neural-graviton-paper/paper/neural-graviton-microscope/neural-graviton-landscape.pdf) |
 | scheduler submission and automatic aggregation | — | [XH5 protocol](https://github.com/JunkaiWang-TheoPhy/symmetric-neural-network-ansatz-chiral-graviton/tree/codex/neural-graviton-paper/hpc/xh5) |
 
-## Current quantitative certificate
+## Terminal quantitative certificate
 
-The public snapshot contains two independent chains at each of `N=4` and
-`N=8`. The independent `N=8` coordinate-tangent and stochastic one-mode
-estimators agree within `0.264` combined standard errors. Median bridge
-fractions are `0.704760` and `0.747675`, and median tangent-overlap IATs are
-`1.38222` and `0.99293` for `N=4` and `N=8`, respectively.
+The final package contains all 84 preregistered chains across
+`N=4,8,10,12`: 71 completed estimator paths and 13 recorded eight-hour
+scheduler boundaries. Completion is 35/40 at `N=10` and 32/40 at `N=12`.
+Median bridge fractions remain `0.718676` and `0.694447`, while median
+tangent-overlap IATs remain `1.64475` and `1.84971` at the two XH5 sizes.
 
-The registered 80-chain `N=10,12` array expands this same contract across 40
-seeds per size. Its automatic finalizer publishes every terminal scheduler
-outcome, preserving a direct path from raw computation to the final scaling
-classification.
+Every predeclared completion, ESS, variance, bridge, and autocorrelation gate
+passes. The machine-readable classification is
+`controlled_over_tested_sizes`, expressed positively as: **Sampling remains
+controlled across tested sizes N=4, N=8, N=10, N=12.**
 
 ## Public entry points
 

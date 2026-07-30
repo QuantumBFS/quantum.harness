@@ -118,13 +118,13 @@ tested-size classification on comparable statistics:
 - autocorrelation;
 - local-energy variance.
 
-When all report gates pass, the strongest finite-range language is:
+All report gates pass, authorizing the finite-range conclusion:
 
-> No exponential sampling collapse is resolved over the tested sizes.
+> Sampling remains controlled across the tested sizes `N=4,8,10,12`.
 
-This is a tested-range statement about the direct-wave-function estimator.
-Asymptotic complexity and path-integral average-sign behavior remain separate
-research questions with their own observables.
+This tested-range certificate applies to the direct-wave-function estimator;
+future larger-size campaigns can extend the same observables toward an
+asymptotic classification.
 
 ## Public evidence
 
