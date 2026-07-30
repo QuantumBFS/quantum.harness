@@ -14,8 +14,8 @@ export LC_ALL=C
 export LANG=C
 export JULIA_NUM_THREADS="${SLURM_CPUS_PER_TASK:-20}"
 
-readonly EXPECTED_ROOT="/public/home/sihhu/quantum-hackson/checkouts/ss-exact-reduction"
-readonly JULIA_BIN="/public/home/sihhu/quantum-hackson/toolchains/julia-1.11.5/bin/julia"
+readonly EXPECTED_ROOT="$HOME/quantum-hackson/checkouts/ss-exact-reduction"
+readonly JULIA_BIN="$HOME/quantum-hackson/toolchains/julia-1.11.5/bin/julia"
 readonly OUTPUT="tracks/polyopt/solutions/sdp-gap-seekers/results/ss-full-state-spin-isotypic-probe-scnet-20260729-r2.toml"
 
 cd "${SLURM_SUBMIT_DIR:?SLURM_SUBMIT_DIR is required}"

@@ -14,15 +14,15 @@ set -euo pipefail
 : "${SS_EXPECTED_GAMMA:?set SS_EXPECTED_GAMMA to 0 or 1/2}"
 : "${SS_RUN_ID:?set SS_RUN_ID to a unique result directory name}"
 
-JULIA_BIN="${JULIA_BIN:-/work/home/sihhu/.julia/juliaup/julia-1.11.5+0.x64.linux.gnu/bin/julia}"
-JULIA_PROJECT="${JULIA_PROJECT:-/work/home/sihhu/quantum-hackson/challenge-88/repo-cb725ac3/julia-env}"
-MOSEK_BIN_DIR="${MOSEK_BIN_DIR:-/work/home/sihhu/quantum-hackson/toolchains/mosek-11.2/mosek/11.2/tools/platform/linux64x86/bin}"
-MOSEK_LICENSE="${MOSEK_LICENSE:-/work/home/sihhu/mosek/mosek.lic}"
+JULIA_BIN="${JULIA_BIN:-$HOME/.julia/juliaup/julia-1.11.5+0.x64.linux.gnu/bin/julia}"
+JULIA_PROJECT="${JULIA_PROJECT:-$HOME/quantum-hackson/challenge-88/repo-cb725ac3/julia-env}"
+MOSEK_BIN_DIR="${MOSEK_BIN_DIR:-$HOME/quantum-hackson/toolchains/mosek-11.2/mosek/11.2/tools/platform/linux64x86/bin}"
+MOSEK_LICENSE="${MOSEK_LICENSE:-$HOME/mosek/mosek.lic}"
 SS_TIME_LIMIT_SECONDS="${SS_TIME_LIMIT_SECONDS:-3300}"
 SS_AUDIT_TOLERANCE="${SS_AUDIT_TOLERANCE:-1e-7}"
 
 REPOSITORY_ROOT="$(git rev-parse --show-toplevel)"
-EXPECTED_ROOT="/work/home/sihhu/quantum-hackson/challenge-88/bohr-agent/ss-exact-reduction"
+EXPECTED_ROOT="$HOME/quantum-hackson/challenge-88/bohr-agent/ss-exact-reduction"
 [[ "$REPOSITORY_ROOT" == "$EXPECTED_ROOT" ]] || {
     echo "[ss-full-spin-solve] refusing checkout: $REPOSITORY_ROOT" >&2
     exit 2

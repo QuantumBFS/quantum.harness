@@ -21,13 +21,13 @@ export SHASTRY_STREAM_ROW_BATCH="${SLURM_CPUS_PER_TASK:-32}"
 export SHASTRY_NATIVE_FINGERPRINT=1
 export SHASTRY_SU2_RANK4_REDUCTION=1
 
-readonly EXPECTED_ROOT="${SS_EXPECTED_ROOT:-/public/home/sihhu/quantum-hackson/checkouts/ss-remote-su2-audit}"
+readonly EXPECTED_ROOT="${SS_EXPECTED_ROOT:-$HOME/quantum-hackson/checkouts/ss-remote-su2-audit}"
 readonly EXPECTED_COMMIT="${SS_EXPECTED_COMMIT:?SS_EXPECTED_COMMIT is required}"
 readonly EXPECTED_HASH="7308c57ba6b515501fd1c0c00f753868c0bb8cb32531429398fd902b4d63231a"
-readonly JULIA_ROOT="/public/home/sihhu/quantum-hackson/toolchains/julia-1.11.5"
+readonly JULIA_ROOT="$HOME/quantum-hackson/toolchains/julia-1.11.5"
 readonly JULIA_BIN="$JULIA_ROOT/bin/julia"
-readonly JULIA_PROJECT="/public/home/sihhu/quantum-hackson/envs/ss-full-state"
-readonly MOSEK_LICENSE="/public/home/sihhu/quantum-hackson/licenses/mosek.lic"
+readonly JULIA_PROJECT="$HOME/quantum-hackson/envs/ss-full-state"
+readonly MOSEK_LICENSE="$HOME/quantum-hackson/licenses/mosek.lic"
 readonly OUTPUT_DIR="tracks/polyopt/solutions/sdp-gap-seekers/results/ss-full-state-spin-isotypic-l1d2-g0p8-gamma2-native-primal-su2-scnet-${SLURM_JOB_ID}"
 
 cd "${SLURM_SUBMIT_DIR:?SLURM_SUBMIT_DIR is required}"

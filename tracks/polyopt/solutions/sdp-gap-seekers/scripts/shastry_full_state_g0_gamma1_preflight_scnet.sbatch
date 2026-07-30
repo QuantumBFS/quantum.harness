@@ -14,9 +14,9 @@ export LC_ALL=C
 export LANG=C
 export JULIA_NUM_THREADS="${SLURM_CPUS_PER_TASK:-20}"
 
-readonly EXPECTED_ROOT="/public/home/sihhu/quantum-hackson/checkouts/ss-exact-reduction"
-readonly JULIA_BIN="/public/home/sihhu/quantum-hackson/toolchains/julia-1.11.5/bin/julia"
-readonly JULIA_PROJECT="/public/home/sihhu/quantum-hackson/envs/ss-full-state"
+readonly EXPECTED_ROOT="$HOME/quantum-hackson/checkouts/ss-exact-reduction"
+readonly JULIA_BIN="$HOME/quantum-hackson/toolchains/julia-1.11.5/bin/julia"
+readonly JULIA_PROJECT="$HOME/quantum-hackson/envs/ss-full-state"
 readonly RUN_DIR="tracks/polyopt/solutions/sdp-gap-seekers/results/ss-full-state-g0-gamma1-scnet-20260729-r1"
 readonly LOG_DIR="tracks/polyopt/solutions/sdp-gap-seekers/results/_slurm"
 

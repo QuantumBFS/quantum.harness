@@ -21,12 +21,12 @@ export SHASTRY_STREAM_ROW_BATCH="${SLURM_CPUS_PER_TASK:-64}"
 export SHASTRY_CERTIFICATE_FINGERPRINT=1
 export SS_EXPECTED_COEFFICIENT_MAP_SHA256="935aab36220ec3f0b2bfaa92ea7527463c9dc1a2d579014798e4fe5534b6b1b4"
 
-readonly EXPECTED_ROOT="${SS_EXPECTED_ROOT:-/work/home/sihhu/quantum-hackson/challenge-88/bohr-agent/ss-remote-dual-solve}"
-readonly JULIA_ROOT="/work/home/sihhu/.julia/juliaup/julia-1.11.5+0.x64.linux.gnu"
+readonly EXPECTED_ROOT="${SS_EXPECTED_ROOT:-$HOME/quantum-hackson/challenge-88/bohr-agent/ss-remote-dual-solve}"
+readonly JULIA_ROOT="$HOME/.julia/juliaup/julia-1.11.5+0.x64.linux.gnu"
 readonly JULIA_BIN="$JULIA_ROOT/bin/julia"
-readonly JULIA_PROJECT="/work/home/sihhu/quantum-hackson/challenge-88/repo-cb725ac3/julia-env"
-readonly MOSEK_BIN_DIR="/work/home/sihhu/quantum-hackson/toolchains/mosek-11.2/mosek/11.2/tools/platform/linux64x86/bin"
-readonly MOSEK_LICENSE="/work/home/sihhu/mosek/mosek.lic"
+readonly JULIA_PROJECT="$HOME/quantum-hackson/challenge-88/repo-cb725ac3/julia-env"
+readonly MOSEK_BIN_DIR="$HOME/quantum-hackson/toolchains/mosek-11.2/mosek/11.2/tools/platform/linux64x86/bin"
+readonly MOSEK_LICENSE="$HOME/mosek/mosek.lic"
 readonly OUTPUT_DIR="tracks/polyopt/solutions/sdp-gap-seekers/results/ss-full-state-spin-isotypic-l2d2-g0p8-gamma2-native-dual-xh5-${SLURM_JOB_ID}"
 
 cd "${SLURM_SUBMIT_DIR:?SLURM_SUBMIT_DIR is required}"

@@ -14,11 +14,11 @@ set -euo pipefail
 : "${SS_SOLVE_POINT:?set SS_SOLVE_POINT to the exported gamma=1/2 solve}"
 : "${SS_RUN_ID:?set SS_RUN_ID to a unique result directory name}"
 
-JULIA_BIN="${JULIA_BIN:-/work/home/sihhu/.julia/juliaup/julia-1.11.5+0.x64.linux.gnu/bin/julia}"
-JULIA_PROJECT="${JULIA_PROJECT:-/work/home/sihhu/quantum-hackson/challenge-88/repo-cb725ac3/julia-env}"
+JULIA_BIN="${JULIA_BIN:-$HOME/.julia/juliaup/julia-1.11.5+0.x64.linux.gnu/bin/julia}"
+JULIA_PROJECT="${JULIA_PROJECT:-$HOME/quantum-hackson/challenge-88/repo-cb725ac3/julia-env}"
 
 REPOSITORY_ROOT="$(git rev-parse --show-toplevel)"
-EXPECTED_ROOT="/work/home/sihhu/quantum-hackson/challenge-88/bohr-agent/ss-exact-reduction"
+EXPECTED_ROOT="$HOME/quantum-hackson/challenge-88/bohr-agent/ss-exact-reduction"
 [[ "$REPOSITORY_ROOT" == "$EXPECTED_ROOT" ]] || {
     echo "[ss-isotypic-rational-witness] refusing checkout: $REPOSITORY_ROOT" >&2
     exit 2

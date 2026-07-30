@@ -14,9 +14,9 @@ export LC_ALL=C
 export LANG=C
 export JULIA_NUM_THREADS="${SLURM_CPUS_PER_TASK:-20}"
 
-readonly EXPECTED_ROOT="/work/home/sihhu/quantum-hackson/challenge-88/bohr-agent/ss-exact-reduction"
-readonly JULIA_BIN="/work/home/sihhu/.julia/juliaup/julia-1.11.5+0.x64.linux.gnu/bin/julia"
-readonly JULIA_PROJECT="/work/home/sihhu/quantum-hackson/challenge-88/repo-cb725ac3/julia-env"
+readonly EXPECTED_ROOT="$HOME/quantum-hackson/challenge-88/bohr-agent/ss-exact-reduction"
+readonly JULIA_BIN="$HOME/.julia/juliaup/julia-1.11.5+0.x64.linux.gnu/bin/julia"
+readonly JULIA_PROJECT="$HOME/quantum-hackson/challenge-88/repo-cb725ac3/julia-env"
 readonly RUN_DIR="tracks/polyopt/solutions/sdp-gap-seekers/results/ss-full-state-g0-gamma1-xh5-20260729-r1"
 readonly LOG_DIR="tracks/polyopt/solutions/sdp-gap-seekers/results/_slurm"
 

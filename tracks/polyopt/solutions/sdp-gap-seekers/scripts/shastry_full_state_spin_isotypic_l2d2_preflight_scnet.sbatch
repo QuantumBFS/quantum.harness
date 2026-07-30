@@ -14,10 +14,10 @@ export LC_ALL=C
 export LANG=C
 export JULIA_NUM_THREADS="${SLURM_CPUS_PER_TASK:-32}"
 
-readonly EXPECTED_ROOT="/public/home/sihhu/quantum-hackson/checkouts/ss-exact-reduction"
-readonly JULIA_ROOT="/public/home/sihhu/quantum-hackson/toolchains/julia-1.11.5"
+readonly EXPECTED_ROOT="$HOME/quantum-hackson/checkouts/ss-exact-reduction"
+readonly JULIA_ROOT="$HOME/quantum-hackson/toolchains/julia-1.11.5"
 readonly JULIA_BIN="$JULIA_ROOT/bin/julia"
-readonly JULIA_PROJECT="/public/home/sihhu/quantum-hackson/envs/ss-full-state"
+readonly JULIA_PROJECT="$HOME/quantum-hackson/envs/ss-full-state"
 readonly OUTPUT_DIR="tracks/polyopt/solutions/sdp-gap-seekers/results/ss-full-state-spin-isotypic-l2d2-g0p8-gamma2-preflight-scnet-20260729-r2"
 
 cd "${SLURM_SUBMIT_DIR:?SLURM_SUBMIT_DIR is required}"

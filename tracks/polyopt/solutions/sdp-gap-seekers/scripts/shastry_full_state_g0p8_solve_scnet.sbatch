@@ -17,11 +17,11 @@ export JULIA_NUM_THREADS="${SLURM_CPUS_PER_TASK:-32}"
 export SS_MOSEK_SOLVE_FORM="${SS_MOSEK_SOLVE_FORM:-free}"
 export SS_MOSEK_LOG_LEVEL="${SS_MOSEK_LOG_LEVEL:-1}"
 
-readonly EXPECTED_ROOT="/public/home/sihhu/quantum-hackson/checkouts/ss-exact-reduction"
-readonly JULIA_ROOT="/public/home/sihhu/quantum-hackson/toolchains/julia-1.11.5"
+readonly EXPECTED_ROOT="$HOME/quantum-hackson/checkouts/ss-exact-reduction"
+readonly JULIA_ROOT="$HOME/quantum-hackson/toolchains/julia-1.11.5"
 readonly JULIA_BIN="$JULIA_ROOT/bin/julia"
-readonly JULIA_PROJECT="/public/home/sihhu/quantum-hackson/envs/ss-full-state"
-readonly MOSEK_LICENSE="/public/home/sihhu/quantum-hackson/licenses/mosek.lic"
+readonly JULIA_PROJECT="$HOME/quantum-hackson/envs/ss-full-state"
+readonly MOSEK_LICENSE="$HOME/quantum-hackson/licenses/mosek.lic"
 
 case "${SLURM_ARRAY_TASK_ID:?SLURM_ARRAY_TASK_ID is required}" in
     0)

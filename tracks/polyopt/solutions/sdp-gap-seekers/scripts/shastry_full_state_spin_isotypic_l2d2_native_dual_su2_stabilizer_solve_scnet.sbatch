@@ -27,13 +27,13 @@ export SHASTRY_SU2_RANK4_REDUCTION=1
 export SHASTRY_STABILIZER_COEFFICIENT_TRUTH=1
 export SHASTRY_STABILIZER_CONE_SPLIT=1
 
-readonly EXPECTED_ROOT="${SS_EXPECTED_ROOT:-/public/home/sihhu/quantum-hackson/checkouts/ss-remote-cone-dev}"
+readonly EXPECTED_ROOT="${SS_EXPECTED_ROOT:-$HOME/quantum-hackson/checkouts/ss-remote-cone-dev}"
 readonly EXPECTED_COMMIT="${SS_EXPECTED_COMMIT:?SS_EXPECTED_COMMIT is required}"
 readonly EXPECTED_HASH="${SS_EXPECTED_COEFFICIENT_MAP_SHA256:?SS_EXPECTED_COEFFICIENT_MAP_SHA256 is required}"
-readonly JULIA_ROOT="/public/home/sihhu/quantum-hackson/toolchains/julia-1.11.5"
+readonly JULIA_ROOT="$HOME/quantum-hackson/toolchains/julia-1.11.5"
 readonly JULIA_BIN="$JULIA_ROOT/bin/julia"
-readonly JULIA_PROJECT="/public/home/sihhu/quantum-hackson/envs/ss-full-state"
-readonly MOSEK_LICENSE="/public/home/sihhu/quantum-hackson/licenses/mosek.lic"
+readonly JULIA_PROJECT="$HOME/quantum-hackson/envs/ss-full-state"
+readonly MOSEK_LICENSE="$HOME/quantum-hackson/licenses/mosek.lic"
 readonly OUTPUT_DIR="tracks/polyopt/solutions/sdp-gap-seekers/results/ss-full-state-spin-isotypic-l2d2-g0p8-gamma2-native-dual-su2-stabilizer-hm500-scnet-${SLURM_JOB_ID}"
 
 cd "${SLURM_SUBMIT_DIR:?SLURM_SUBMIT_DIR is required}"

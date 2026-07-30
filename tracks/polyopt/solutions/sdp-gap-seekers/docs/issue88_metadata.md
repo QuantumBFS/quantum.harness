@@ -118,8 +118,8 @@ affordable). Evidence: `evidence/square-spin-rungc-isotypic-20260729/`.
 | **Restrictions** | full-spin isotypic + on-demand SO(3) moment quotient + stabilizer split. |
 | **Relaxation** | **L=2**, d=2 (stronger than the L=1 scan above). |
 | **Size** | Preflight (job 118169520): positive basis **14,026**, gap **55**, stationarity **1,080**; moments after V4+conjugation pre-projection = **4,802,176**. After an exact SO(3) l=2 cone-congruence proof: **38 → 26 PSD blocks**, packed cone entries **2,540,067 → 1,600,017** (−37%), **max side 490**. |
-| **Solver** | Mosek 11.2.0 — **exhausted memory during factor fill before iteration zero**. |
-| **Cost** | factor-fill OOM; no solve completed. |
+| **Solver** | Mosek 11.2.0 — **exhausted memory during factor fill, after presolve and before iteration zero** (4-thread native-primal route; KKT factor-fill unrelieved by GraphPar). |
+| **Cost** | factor-fill OOM, peak RSS ~109.6 GiB (`114,926,580` KiB), wall 1:35:07; no solve completed. |
 | **Gap result** | **Not produced / inconclusive** — model built, no feasibility status (resource failure). |
 | **Observable result** | Not produced. |
 

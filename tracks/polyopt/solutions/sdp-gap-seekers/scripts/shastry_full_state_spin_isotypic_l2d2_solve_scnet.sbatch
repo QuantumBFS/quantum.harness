@@ -17,11 +17,11 @@ export SS_MOSEK_THREADS="${SLURM_CPUS_PER_TASK:-32}"
 export SS_MOSEK_TIME_LIMIT_SECONDS=28800
 export SS_MOSEK_LOG_LEVEL=2
 
-readonly EXPECTED_ROOT="${SS_EXPECTED_ROOT:-/public/home/sihhu/quantum-hackson/checkouts/ss-exact-reduction}"
-readonly JULIA_ROOT="/public/home/sihhu/quantum-hackson/toolchains/julia-1.11.5"
+readonly EXPECTED_ROOT="${SS_EXPECTED_ROOT:-$HOME/quantum-hackson/checkouts/ss-exact-reduction}"
+readonly JULIA_ROOT="$HOME/quantum-hackson/toolchains/julia-1.11.5"
 readonly JULIA_BIN="$JULIA_ROOT/bin/julia"
-readonly JULIA_PROJECT="/public/home/sihhu/quantum-hackson/envs/ss-full-state"
-readonly MOSEK_LICENSE="/public/home/sihhu/quantum-hackson/licenses/mosek.lic"
+readonly JULIA_PROJECT="$HOME/quantum-hackson/envs/ss-full-state"
+readonly MOSEK_LICENSE="$HOME/quantum-hackson/licenses/mosek.lic"
 readonly OUTPUT_DIR="tracks/polyopt/solutions/sdp-gap-seekers/results/ss-full-state-spin-isotypic-l2d2-g0p8-gamma2-solve-scnet-${SLURM_JOB_ID}"
 
 cd "${SLURM_SUBMIT_DIR:?SLURM_SUBMIT_DIR is required}"

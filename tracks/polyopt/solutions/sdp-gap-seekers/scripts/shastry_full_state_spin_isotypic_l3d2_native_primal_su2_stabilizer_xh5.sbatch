@@ -24,13 +24,13 @@ export SHASTRY_SU2_RANK4_REDUCTION=1
 export SHASTRY_STABILIZER_COEFFICIENT_TRUTH=1
 export SHASTRY_STABILIZER_CONE_SPLIT=1
 
-readonly EXPECTED_ROOT="${SS_EXPECTED_ROOT:-/work/home/sihhu/quantum-hackson/challenge-88/checkouts/ss-l3-su2-stabilizer}"
+readonly EXPECTED_ROOT="${SS_EXPECTED_ROOT:-$HOME/quantum-hackson/challenge-88/checkouts/ss-l3-su2-stabilizer}"
 readonly EXPECTED_COMMIT="${SS_EXPECTED_COMMIT:?SS_EXPECTED_COMMIT is required}"
-readonly JULIA_ROOT="/work/home/sihhu/.julia/juliaup/julia-1.11.5+0.x64.linux.gnu"
+readonly JULIA_ROOT="$HOME/.julia/juliaup/julia-1.11.5+0.x64.linux.gnu"
 readonly JULIA_BIN="$JULIA_ROOT/bin/julia"
-readonly JULIA_PROJECT="/work/home/sihhu/quantum-hackson/challenge-88/repo-cb725ac3/julia-env"
-readonly MOSEK_BIN_DIR="/work/home/sihhu/quantum-hackson/toolchains/mosek-11.2/mosek/11.2/tools/platform/linux64x86/bin"
-readonly MOSEK_LICENSE="/work/home/sihhu/mosek/mosek.lic"
+readonly JULIA_PROJECT="$HOME/quantum-hackson/challenge-88/repo-cb725ac3/julia-env"
+readonly MOSEK_BIN_DIR="$HOME/quantum-hackson/toolchains/mosek-11.2/mosek/11.2/tools/platform/linux64x86/bin"
+readonly MOSEK_LICENSE="$HOME/mosek/mosek.lic"
 readonly OUTPUT_DIR="tracks/polyopt/solutions/sdp-gap-seekers/results/ss-full-state-spin-isotypic-l3d2-g0p8-gamma2-native-primal-su2-stabilizer-xh5-${SLURM_JOB_ID}"
 
 cd "${SLURM_SUBMIT_DIR:?SLURM_SUBMIT_DIR is required}"

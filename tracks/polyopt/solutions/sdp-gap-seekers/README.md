@@ -121,7 +121,10 @@ solver run passed before Mosek was attached.
 
 Reproduces the harvested γ-scan results. Requires SCNet access, Mosek 11.2,
 Julia 1.11.5, and the pinned environment. The runners are parameterized by
-environment variables (no hardcoded account or cluster path). Pinned versions,
+environment variables with `$HOME`-relative defaults (no account name or
+absolute home path; the Shastry-Sutherland runners assume a checkout layout
+under `$HOME` and accept overrides via `JULIA_BIN` / `JULIA_PROJECT` /
+`MOSEK_LICENSE` / `MOSEK_BIN_DIR`). Pinned versions,
 the external SpectralGap source pin/patch, the SCNet resource allocations, and
 exact per-calculation commands are enumerated in
 [`docs/reproducibility.md`](docs/reproducibility.md).
@@ -198,10 +201,8 @@ tracks/polyopt/solutions/sdp-gap-seekers/
 └── notes/
     ├── proofs/                # EXACT_*.md per-layer exact-reduction proof contracts
     │                          # + CHALLENGE88_RESULT.md (SS reduction-ladder result log)
-    ├── specs/                 # Square/SS basis & model specs (SQUARE_BASIS_SPEC,
-    │                          # square-j1j2-gap-sdp-spec, basis-counts, SS dimer gate)
-    └── process/               # internal session / advisor / decision logs (working record,
-                               # not part of the claimed result)
+    └── specs/                 # Square/SS basis & model specs (SQUARE_BASIS_SPEC,
+                               # square-j1j2-gap-sdp-spec, basis-counts, SS dimer gate)
 ```
 
 ## Division of labor
@@ -210,5 +211,6 @@ tracks/polyopt/solutions/sdp-gap-seekers/
   reduction, the Rung C full-spin isotypic port, the L=1/d=3 experiment);
   Triangular J1 port; the γ-scans; integration.
 - **Sihan Hu (胡思寒)** — Shastry-Sutherland: the six-layer full-spin isotypic
-  reduction, its exact truth gates, and the L=2 extension.
+  reduction, its exact truth gates, and the L=2 exact reduction/assembly
+  extension (solve remains intractable).
 - Joint review on certification language and the final PR.
