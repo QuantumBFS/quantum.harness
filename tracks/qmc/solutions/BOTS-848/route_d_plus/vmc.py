@@ -29,6 +29,14 @@ class ChainResult:
         return self.accepted_local / self.proposed_local
 
 
+@dataclass(frozen=True)
+class SRTrace:
+    coefficients: np.ndarray
+    energies: np.ndarray
+    effective_sample_sizes: np.ndarray
+    step_norms: np.ndarray
+
+
 def spinors_to_vectors(spinors: np.ndarray) -> np.ndarray:
     array = np.asarray(spinors, dtype=np.complex128)
     if array.ndim != 2 or array.shape[1] != 2:
@@ -259,6 +267,133 @@ def energy_gradient_metric(
     return mean_energy, gradient, 0.5 * (metric + metric.T)
 
 
+def importance_weights(
+    channels: np.ndarray,
+    coefficients: np.ndarray,
+) -> np.ndarray:
+    """Normalized candidate/base weights for fixed mother-distribution samples."""
+
+    values = np.asarray(channels, dtype=np.complex128)
+    numerator = np.sum(
+        np.abs(linear_dplus0_amplitudes(values, coefficients)) ** 2,
+        axis=tuple(range(1, values.ndim - 1)),
+    )
+    denominator = np.sum(
+        np.abs(values[..., 0]) ** 2,
+        axis=tuple(range(1, values.ndim - 1)),
+    )
+    ratios = numerator / np.maximum(denominator, np.finfo(float).tiny)
+    return ratios / np.sum(ratios)
+
+
+def weighted_energy_gradient_metric(
+    energy: np.ndarray,
+    log_derivatives: np.ndarray,
+    weights: np.ndarray,
+) -> tuple[float, np.ndarray, np.ndarray, float]:
+    """Weighted energy, gradient, metric, and importance-sampling ESS."""
+
+    values = np.asarray(energy, dtype=np.float64)
+    derivatives = np.asarray(log_derivatives, dtype=np.complex128)
+    probabilities = np.asarray(weights, dtype=np.float64)
+    probabilities /= np.sum(probabilities)
+    mean_energy = float(probabilities @ values)
+    mean_derivative = np.sum(
+        probabilities[:, None] * derivatives, axis=0
+    )
+    centered = derivatives - mean_derivative
+    gradient = 2.0 * np.real(
+        np.sum(
+            probabilities[:, None]
+            * centered.conj()
+            * (values - mean_energy)[:, None],
+            axis=0,
+        )
+    )
+    metric = np.real(
+        centered.conj().T @ (probabilities[:, None] * centered)
+    )
+    effective_sample_size = float(1.0 / np.sum(probabilities**2))
+    return (
+        mean_energy,
+        gradient,
+        0.5 * (metric + metric.T),
+        effective_sample_size,
+    )
+
+
+def center_whiten_channels(
+    channels: np.ndarray,
+    mean: np.ndarray,
+    whitening: np.ndarray,
+) -> np.ndarray:
+    """Replace raw generator channels by centered, whitened channels."""
+
+    values = np.asarray(channels, dtype=np.complex128)
+    centers = np.asarray(mean, dtype=np.float64)
+    transform = np.asarray(whitening, dtype=np.float64)
+    if values.shape[-1] != centers.size + 1:
+        raise ValueError("mean does not match raw generator channels")
+    if transform.ndim != 2 or transform.shape[1] != centers.size:
+        raise ValueError("whitening has incompatible shape")
+    centered = values[..., 1:] - values[..., :1] * centers
+    dressed = centered @ transform.T
+    return np.concatenate((values[..., :1], dressed), axis=-1)
+
+
+def correlated_sr_optimize(
+    channels: np.ndarray,
+    energy: np.ndarray,
+    initial_coefficients: np.ndarray,
+    *,
+    updates: int,
+    learning_rate: float = 0.1,
+    diagonal_shift: float = 1.0e-2,
+    trust_radius: float = 0.05,
+) -> SRTrace:
+    """Optimize one D+0 sector using mother-distribution correlated samples."""
+
+    coefficients = np.asarray(
+        initial_coefficients, dtype=np.complex128
+    ).copy()
+    energies = []
+    effective_sizes = []
+    step_norms = []
+    for _ in range(updates):
+        weights = importance_weights(channels, coefficients)
+        if channels.ndim == 2:
+            derivatives = linear_log_derivatives(channels, coefficients)
+        elif channels.ndim == 3:
+            derivatives = multiplet_log_derivatives(
+                channels, coefficients
+            )
+        else:
+            raise ValueError("channels must describe a scalar or multiplet")
+        estimate, gradient, metric, effective_size = (
+            weighted_energy_gradient_metric(
+                energy, derivatives, weights
+            )
+        )
+        step = sr_update(
+            metric,
+            gradient,
+            learning_rate=learning_rate,
+            diagonal_shift=diagonal_shift,
+            trust_radius=trust_radius,
+        )
+        count = coefficients.size
+        coefficients += step[:count] + 1.0j * step[count:]
+        energies.append(estimate)
+        effective_sizes.append(effective_size)
+        step_norms.append(float(np.linalg.norm(step)))
+    return SRTrace(
+        coefficients=coefficients,
+        energies=np.asarray(energies),
+        effective_sample_sizes=np.asarray(effective_sizes),
+        step_norms=np.asarray(step_norms),
+    )
+
+
 def sr_update(
     metric: np.ndarray,
     gradient: np.ndarray,
@@ -281,16 +416,21 @@ def sr_update(
 
 __all__ = [
     "ChainResult",
+    "SRTrace",
+    "center_whiten_channels",
     "channel_weight",
     "coulomb_potential",
     "energy_gradient_metric",
     "geodesic_proposal",
     "linear_log_derivatives",
+    "importance_weights",
     "metropolis_chain",
     "multiplet_log_derivatives",
     "random_configuration",
     "random_global_rotation",
     "spinors_to_vectors",
     "sr_update",
+    "correlated_sr_optimize",
     "vectors_to_spinors",
+    "weighted_energy_gradient_metric",
 ]

@@ -3,7 +3,9 @@ from __future__ import annotations
 import numpy as np
 
 from route_d_plus.vmc import (
+    center_whiten_channels,
     channel_weight,
+    correlated_sr_optimize,
     coulomb_potential,
     energy_gradient_metric,
     geodesic_proposal,
@@ -98,3 +100,47 @@ def test_sr_step_decreases_linearized_objective_with_trust_region() -> None:
     )
     assert float(gradient @ step) < 0.0
     assert float(step @ metric @ step) <= 0.05**2 * (1.0 + 1.0e-12)
+
+
+def test_center_whiten_channels_preserves_mother_and_reduces_rank() -> None:
+    channels = np.array(
+        [
+            [2.0, 3.0, 5.0, 7.0],
+            [1.0, -2.0, 4.0, 3.0],
+        ],
+        dtype=np.complex128,
+    )
+    mean = np.array([0.5, -0.25, 0.75])
+    whitening = np.array([[1.0, 2.0, 0.0], [0.0, -1.0, 1.0]])
+    transformed = center_whiten_channels(channels, mean, whitening)
+    centered = channels[:, 1:] - channels[:, :1] * mean
+    assert transformed.shape == (2, 3)
+    assert np.max(np.abs(transformed[:, 0] - channels[:, 0])) == 0.0
+    assert np.max(
+        np.abs(transformed[:, 1:] - centered @ whitening.T)
+    ) == 0.0
+
+
+def test_correlated_sr_reduces_fixed_sample_energy() -> None:
+    rng = np.random.default_rng(75)
+    samples = 2048
+    channels = np.column_stack(
+        (
+            np.ones(samples),
+            rng.normal(size=samples),
+            rng.normal(size=samples),
+        )
+    ).astype(np.complex128)
+    energy = (
+        1.0
+        + 0.4 * channels[:, 1].real
+        - 0.25 * channels[:, 2].real
+    )
+    trace = correlated_sr_optimize(
+        channels,
+        energy,
+        np.array([1.0e-3 + 2.0e-4j, -1.0e-3j]),
+        updates=12,
+    )
+    assert trace.energies[-1] < trace.energies[0]
+    assert np.min(trace.effective_sample_sizes) > 0.5 * samples
