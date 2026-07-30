@@ -88,4 +88,8 @@ reproduced until those jobs finish and pass the physical diagnostics.
 - [`validation/20260729-fig3-longitudinal-wd5/`](validation/20260729-fig3-longitudinal-wd5/)
   records the first strict Fig. 3 validation point. The longitudinal
   `ωd=5Ω` spectrum passed all configured diagnostics and overlaps the Zenodo
-  reference; the remaining Fig. 3 points are intentionally marked pending.
+  reference.
+- [`validation/20260730-fig3-transversal-wd1/`](validation/20260730-fig3-transversal-wd1/)
+  records the strict 8192-lag transversal `ωd=1Ω` validation point and a
+  two-point visual checkpoint. Both recorded points pass the configured
+  diagnostics; the other four Fig. 3 frequencies remain pending.

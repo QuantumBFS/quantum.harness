@@ -1,0 +1,27 @@
+mode = "validation"
+dt_target = 0.05235987755982989 # π / 60
+longitudinal_frequencies = []
+transversal_frequencies = [1.0]
+correlation_lag_steps = 8192
+tail_count = 128
+tail_norm_tolerance = 1.0e-4
+tail_mean_tolerance = 1.0e-5
+tail_slope_tolerance = 1.0e-5
+c0_tolerance = 1.0e-8
+omega_max = 20.0
+nmax = 20
+weight_tolerance = 1.0e-12
+eigensolver_tolerance = 1.0e-10
+eigensolver_max_iterations = 1000
+
+compression_tolerance = 1.0e-10
+cache_dir = "tracks/mps/results/fig3-transversal-wd1/cache"
+rebuild_cache = false
+temperature = 0.0
+auto_nc = true
+n_c = 100000
+truncation = "rel"
+cap_rank = 100000
+max_rank = 100000
+low_rank_svd = false
+svd_filtering_tolerance = 0.0
