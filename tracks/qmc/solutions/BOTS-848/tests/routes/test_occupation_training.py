@@ -76,6 +76,20 @@ def _write_synthetic_reviewed_n8_smoke(path: Path) -> Path:
     return path
 
 
+def _bind_synthetic_reviewed_n8_smoke(
+    monkeypatch: pytest.MonkeyPatch,
+    path: Path,
+) -> Path:
+    reviewed = _write_synthetic_reviewed_n8_smoke(path)
+    monkeypatch.setattr(
+        training_cli,
+        "REVIEWED_N8_SMOKE_SHA256",
+        hashlib.sha256(reviewed.read_bytes()).hexdigest(),
+        raising=False,
+    )
+    return reviewed
+
+
 def _tiny_model(*, seed: int = 848, width: int = 4) -> AutoregressiveNQS:
     return AutoregressiveNQS.initialize(
         n_electrons=2,
@@ -1609,8 +1623,12 @@ def test_full_cli_has_only_frozen_seed_schedule_and_freezes_terminal_run(
     model = _tiny_model(width=3)
     operator = _zero_pair_operator(model.two_q)
     run_dir = tmp_path / "production"
-    reviewed_n8 = _write_synthetic_reviewed_n8_smoke(tmp_path / "n8-smoke.json")
+    reviewed_n8 = _bind_synthetic_reviewed_n8_smoke(
+        monkeypatch,
+        tmp_path / "n8-smoke.json",
+    )
     monkeypatch.setenv(N8_SMOKE_ARTIFACT_ENV, str(reviewed_n8))
+    monkeypatch.delenv("SLURM_JOB_ID", raising=False)
     clock = iter((10.0, 12.5))
     monkeypatch.setattr(training_cli.time, "perf_counter", lambda: next(clock))
     monkeypatch.setattr(training_cli, "peak_rss_bytes", lambda: 123_456)
@@ -1695,6 +1713,8 @@ def test_full_cli_has_only_frozen_seed_schedule_and_freezes_terminal_run(
     emitted = json.loads(capsys.readouterr().out)
     assert emitted["mode"] == "a05.2-full-tower-training"
     assert emitted["selected_update"] == 2048
+    record = json.loads((run_dir / "training.jsonl").read_text(encoding="utf-8"))
+    assert record["resource_metrics"]["placement"] == "local"
 
 
 def test_real_full_training_freeze_is_loadable_by_factory(
@@ -1702,7 +1722,10 @@ def test_real_full_training_freeze_is_loadable_by_factory(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
-    reviewed_n8 = _write_synthetic_reviewed_n8_smoke(tmp_path / "n8-smoke.json")
+    reviewed_n8 = _bind_synthetic_reviewed_n8_smoke(
+        monkeypatch,
+        tmp_path / "n8-smoke.json",
+    )
     run_dir = tmp_path / "production"
     monkeypatch.setenv(N8_SMOKE_ARTIFACT_ENV, str(reviewed_n8))
     _install_fast_full_training_compute(monkeypatch)
@@ -1809,6 +1832,30 @@ def test_full_cli_requires_reviewed_n8_smoke_before_training(
         )
 
 
+def test_full_cli_rejects_wrong_reviewed_n8_smoke_sha_before_training(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    reviewed_n8 = _write_synthetic_reviewed_n8_smoke(tmp_path / "n8-smoke.json")
+    monkeypatch.setenv(N8_SMOKE_ARTIFACT_ENV, str(reviewed_n8))
+    monkeypatch.setattr(
+        training_cli,
+        "REVIEWED_N8_SMOKE_SHA256",
+        "0" * 64,
+        raising=False,
+    )
+    monkeypatch.setattr(
+        training_cli.AutoregressiveNQS,
+        "initialize",
+        lambda **_kwargs: pytest.fail("training started before N=8 SHA validation"),
+    )
+
+    with pytest.raises(ValueError, match="reviewed N=8 smoke SHA-256 mismatch"):
+        training_cli.main(
+            ["--training-seed", "848", "--run-dir", str(tmp_path / "run")]
+        )
+
+
 @pytest.mark.parametrize(
     ("field", "value", "message"),
     [
@@ -1837,6 +1884,12 @@ def test_full_cli_rejects_unreviewed_n8_smoke_before_training(
         encoding="utf-8",
         newline="\n",
     )
+    monkeypatch.setattr(
+        training_cli,
+        "REVIEWED_N8_SMOKE_SHA256",
+        hashlib.sha256(reviewed_n8.read_bytes()).hexdigest(),
+        raising=False,
+    )
     monkeypatch.setenv(N8_SMOKE_ARTIFACT_ENV, str(reviewed_n8))
     monkeypatch.setattr(
         training_cli.AutoregressiveNQS,
@@ -1857,7 +1910,10 @@ def test_full_cli_rejects_existing_manifest_before_training_starts(
     model = _tiny_model(width=3)
     run_dir = tmp_path / "protected-run"
     run_dir.mkdir()
-    reviewed_n8 = _write_synthetic_reviewed_n8_smoke(tmp_path / "n8-smoke.json")
+    reviewed_n8 = _bind_synthetic_reviewed_n8_smoke(
+        monkeypatch,
+        tmp_path / "n8-smoke.json",
+    )
     monkeypatch.setenv(N8_SMOKE_ARTIFACT_ENV, str(reviewed_n8))
     manifest = run_dir / "training-manifest.json"
     sentinel = b"preexisting-provenance\n"
