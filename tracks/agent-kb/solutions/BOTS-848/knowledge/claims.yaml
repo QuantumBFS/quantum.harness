@@ -1,0 +1,110 @@
+{
+  "schema_version": "1.0.0",
+  "claim_statuses": [
+    "exact-constraint",
+    "numerical-evidence",
+    "working-hypothesis",
+    "open-question"
+  ],
+  "claims": [
+    {
+      "claim_id": "ward-conserved-charge",
+      "statement": "Gauge invariance constrains the conserved charge vertex through q_mu Gamma^mu = G^{-1}(k+q) - G^{-1}(k).",
+      "status": "exact-constraint",
+      "source_ids": ["Nambu1960", "Hedin1965"],
+      "source_traceable": true,
+      "scope": "Conserved charge vertex with the order of momentum and frequency limits stated explicitly.",
+      "limitations": "This does not constrain generic orbital, bond, spin, or finite-q phonon operators."
+    },
+    {
+      "claim_id": "adiabatic-dfpt-static",
+      "statement": "Standard adiabatic DFPT computes a static self-consistent Kohn-Sham response around a chosen ground-state reference.",
+      "status": "exact-constraint",
+      "source_ids": ["Gonze1995", "Baroni2001"],
+      "source_traceable": true,
+      "scope": "Adiabatic DFPT and its static linear-response construction.",
+      "limitations": "A correct static derivative does not by itself validate a vertex at the physical phonon frequency."
+    },
+    {
+      "claim_id": "ueg-finite-q-response",
+      "statement": "A uniform equilibrium electron gas has finite-q density response; only q=0 density equals the conserved total particle number.",
+      "status": "exact-constraint",
+      "source_ids": ["Cai2025"],
+      "source_traceable": true,
+      "scope": "Translationally invariant uniform electron gas and density perturbations.",
+      "limitations": "The claim does not imply that a finite-q quasiparticle vertex is protected."
+    },
+    {
+      "claim_id": "ueg-dfpt-agreement",
+      "statement": "Variational diagrammatic Monte Carlo reports close agreement between the interacting UEG quasiparticle vertex and a DFPT-like static-kernel expression for r_s from 1 to 5 and momentum transfers up to 2 k_F.",
+      "status": "numerical-evidence",
+      "source_ids": ["Cai2025"],
+      "source_traceable": true,
+      "scope": "UEG benchmark in arXiv:2512.19382v2, especially Eq. 34 and Fig. 8.",
+      "limitations": "This is numerical evidence in a scalar-density model, not an exact theorem for crystals."
+    },
+    {
+      "claim_id": "matching-not-ward-alone",
+      "statement": "The static comparison requires a quantitative matching among quasiparticle weight, charge vertex, and static density response; the dynamic Ward limit alone does not produce that matching.",
+      "status": "working-hypothesis",
+      "source_ids": ["Cai2025", "Hedin1965"],
+      "source_traceable": true,
+      "scope": "Interpretation of the scalar static DFPT-to-many-body comparison.",
+      "limitations": "Vertex and screening conventions must be checked before transferring the relation between papers."
+    },
+    {
+      "claim_id": "common-operator-not-common-band-shift",
+      "statement": "An operator proportional to the identity inside a local subspace can produce different band matrix elements because Bloch states have different subspace weights and phases.",
+      "status": "exact-constraint",
+      "source_ids": ["Giustino2017"],
+      "source_traceable": true,
+      "scope": "Projection of a local operator into Bloch-state matrix elements.",
+      "limitations": "The chosen localized subspace and gauge must be declared."
+    },
+    {
+      "claim_id": "srvo3-mode-contrast",
+      "statement": "In one DFT+DMFT study of SrVO3, the orbital-splitting Jahn-Teller mode changes much more than the charge-like breathing mode relative to DFPT.",
+      "status": "numerical-evidence",
+      "source_ids": ["Abramovitch2025"],
+      "source_traceable": true,
+      "scope": "Wannier-local coupling at omega=0 for the M Jahn-Teller and R breathing modes with the paper's stated U and J.",
+      "limitations": "This is one material and one projector/normalization convention."
+    },
+    {
+      "claim_id": "cacu2o-dynamic-risk",
+      "statement": "In the cited CaCuO2 calculation, static changes can remain moderate while the coupling varies strongly across the phonon-energy window at larger U.",
+      "status": "numerical-evidence",
+      "source_ids": ["Abramovitch2025"],
+      "source_traceable": true,
+      "scope": "0.15-hole-doped CaCuO2, breathing modes, U up to 4.7 eV.",
+      "limitations": "A static omega=0 comparison cannot establish the physical-frequency scattering vertex."
+    },
+    {
+      "claim_id": "reference-state-gate",
+      "statement": "If the base functional gives the wrong electronic phase, interpreting an ordinary-DFPT derivative as a quantitative correlated-state vertex is unsafe.",
+      "status": "numerical-evidence",
+      "source_ids": ["Zhou2021"],
+      "source_traceable": true,
+      "scope": "CoO comparison between ordinary DFPT and DFPT+U.",
+      "limitations": "DFPT+U is one repair route and does not supply generic dynamical or nonlocal self-energy derivatives."
+    },
+    {
+      "claim_id": "channel-selective-protection",
+      "statement": "Static DFPT errors are controlled more directly by the phonon operator channel and its susceptibility than by a material-wide label of correlation strength.",
+      "status": "working-hypothesis",
+      "source_ids": ["Abramovitch2025", "Cai2025", "Zhou2021", "Li2019"],
+      "source_traceable": true,
+      "scope": "Proposed organizing hypothesis for held-out material-mode-momentum-frequency tests.",
+      "limitations": "It must be rejected if channel weights fail to predict correction size or if per-matrix-element kernels are required."
+    },
+    {
+      "claim_id": "universal-dfpt-validity",
+      "statement": "A universal accuracy bound for ordinary DFPT across all correlated materials and phonon modes is not established.",
+      "status": "open-question",
+      "source_ids": ["Issue35", "Cai2025"],
+      "source_traceable": true,
+      "scope": "General electron-phonon prediction beyond the validated benchmarks.",
+      "limitations": "Accuracy must be calibrated on material-mode tuples with matched conventions."
+    }
+  ]
+}

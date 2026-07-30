@@ -1,0 +1,39 @@
+\section{Conclusions and immediate decision}
+\label{sec:conclusions}
+
+The apparent broad usefulness of DFPT should not be described as a mysterious
+global cancellation.  DFPT computes a full, state-dependent static Kohn--Sham
+response.  The missing many-body object is the phonon derivative of the
+beyond-Kohn--Sham self-energy.  That derivative can be small for one perturbation
+and large for another even when the equilibrium self-energy and mass enhancement
+are large.
+
+The clearest physical anchor is a uniform common potential coupled to conserved
+total charge: it only changes the energy zero, so interactions cannot arbitrarily
+renormalize it.  The Ward identity states this constraint precisely, but its
+dynamic and static limits must not be confused.  The UEG extends the picture with
+strong numerical evidence that a static density kernel remains accurate over
+finite momenta up to $2k_F$ in the tested regime.  Because the UEG contains only
+the density channel, this result suggests a compression principle rather than a
+universal proof.
+
+Real crystals add internal orbital, bond, hopping, hybridization, spin, and
+interaction-modulation operators.  Existing DFT+DMFT, DFPT+$U$, and GWPT results
+show that their corrections can be strongly mode-selective.  This motivates the
+proposal's central hypothesis: the useful small parameter is not ``correlation
+strength'' by itself, but the weight of a phonon in each operator channel times
+the many-body amplification and dynamical variation of that channel.
+
+The proposed next-generation calculation therefore retains DFPT, decomposes its
+perturbation, and applies a channel kernel only where diagnostics demand it.  This
+can be simpler and faster than computing a complete many-body vertex while being
+more physically transparent than a black-box correction to every matrix element.
+
+\begin{keypoint}[First decision after submission]
+The first research milestone should test one sharp statement: in SrVO$_3$, does a
+basis-robust measure of traceless orbital-channel weight separate the strongly
+enhanced Jahn--Teller mode from the weakly corrected breathing mode, while the UEG
+density relation supplies the charge-channel control?  A positive result justifies
+building the static prototype; a negative result forces the hypothesis to be
+revised before software expansion.
+\end{keypoint}

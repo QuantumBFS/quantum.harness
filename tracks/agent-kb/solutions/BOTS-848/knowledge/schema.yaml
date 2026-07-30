@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "BOTS:848 DFPT research knowledge schema",
+  "description": "JSON-compatible YAML schema for source-traceable claims and material-mode cases.",
+  "definitions": {
+    "claim": {
+      "type": "object",
+      "required": [
+        "claim_id",
+        "statement",
+        "status",
+        "source_ids",
+        "source_traceable",
+        "scope",
+        "limitations"
+      ],
+      "properties": {
+        "claim_id": {"type": "string"},
+        "statement": {"type": "string"},
+        "status": {
+          "enum": [
+            "exact-constraint",
+            "numerical-evidence",
+            "working-hypothesis",
+            "open-question"
+          ]
+        },
+        "source_ids": {"type": "array", "items": {"type": "string"}},
+        "source_traceable": {"type": "boolean"},
+        "scope": {"type": "string"},
+        "limitations": {"type": "string"}
+      }
+    },
+    "reported_value": {
+      "type": "object",
+      "required": ["method", "value", "unit", "source_id", "source_location"]
+    },
+    "material_case": {
+      "type": "object",
+      "required": [
+        "case_id",
+        "material",
+        "mode",
+        "q_point",
+        "frequency_or_limit",
+        "observable",
+        "status",
+        "source_ids",
+        "normalization_note",
+        "limitations",
+        "verification_state"
+      ]
+    }
+  }
+}

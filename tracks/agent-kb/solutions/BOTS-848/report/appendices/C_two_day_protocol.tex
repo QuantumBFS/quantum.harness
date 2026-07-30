@@ -1,0 +1,60 @@
+\section{Two-day literature and hypothesis-freeze protocol}
+\label{app:twoday}
+
+The initial exploration is limited to two days.  Its purpose is not to survey the
+entire electron--phonon literature, but to decide whether the channel-selective
+hypothesis is physically defensible and to freeze the first decisive comparison.
+
+\subsection*{Day 1: establish constraints and collect contrasts}
+
+\begin{enumerate}
+  \item \textbf{Morning: foundations.}  Verify the DFPT response convention,
+  physical quasiparticle vertex, proper versus screened vertex, Ward identity, and
+  static/dynamic limit ordering from primary sources
+  \citep{Baroni2001,Giustino2017,Hedin1965,Nambu1960}.
+  \item \textbf{Midday: UEG.}  Reproduce the algebra of
+  \cref{eq:matchingcondition}; extract the reported $q$, $r_s$, temperature, and
+  error ranges from \citet{Cai2025}; list which statements are numerical and which
+  are exact.
+  \item \textbf{Afternoon: correlated contrasts.}  Extract mode definitions,
+  eigenvectors, parameters, normalization, static vertices, and frequency
+  dependence for SrVO$_3$ and CaCuO$_2$.
+
+  The primary source is \citet{Abramovitch2025}.  Add CoO and one GWPT case to
+  identify failure mechanisms not represented by local DMFT.
+  \item \textbf{Evening gate.}  Produce a one-page evidence table with at least
+  one supporting and one challenging case for each proposed channel.
+\end{enumerate}
+
+\subsection*{Day 2: turn the idea into a falsifiable first experiment}
+
+\begin{enumerate}
+  \item \textbf{Morning: define observables.}  Freeze the localized subspace,
+  operator normalization, Fermi-window weights, target $g$ convention, and basis
+  robustness checks.
+  \item \textbf{Midday: compare alternatives.}  Test at least three hypotheses on
+  the evidence table: correlation strength alone, quasiparticle residue alone,
+  and channel weight times channel susceptibility.  Record which observations
+  each cannot explain.
+  \item \textbf{Afternoon: design the first calculation.}  Select a SrVO$_3$
+  Jahn--Teller/breathing contrast and a UEG density control.  Specify input data,
+  code path, acceptance thresholds, and the result that would reject the channel
+  hypothesis.
+  \item \textbf{Final gate.}  Freeze one paragraph stating the physical
+  hypothesis, one equation for the first correction model, one benchmark table,
+  and one stop/go decision for implementation.
+\end{enumerate}
+
+\subsection*{Required outputs after 48 hours}
+
+\begin{itemize}
+  \item a source-checked evidence matrix with no mixed normalization conventions;
+  \item a claim ledger labeling exact results, established methods, numerical
+  evidence, and hypotheses;
+  \item the first two material/mode comparisons and their input availability;
+  \item a minimal operator-decomposition prototype specification; and
+  \item an explicit decision: implement, revise the hypothesis, or stop.
+\end{itemize}
+
+The literature sprint is successful only if it reduces uncertainty about the
+physical hypothesis.  The number of papers read is not itself a success metric.

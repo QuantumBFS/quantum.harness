@@ -1,0 +1,124 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[margin=2.35cm]{geometry}
+\usepackage{fontspec}
+\usepackage{amsmath,amssymb,bm,mathtools}
+\usepackage{booktabs,longtable,tabularx,array,multirow}
+\usepackage{graphicx}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,fit,shapes.geometric}
+\usepackage{enumitem}
+\usepackage{microtype}
+\usepackage{caption}
+\usepackage{natbib}
+\usepackage{hyperref}
+\usepackage[nameinlink,noabbrev]{cleveref}
+
+\definecolor{deepblue}{HTML}{1F4E79}
+\definecolor{softblue}{HTML}{EAF2F8}
+\definecolor{deeporange}{HTML}{B45F06}
+\definecolor{softorange}{HTML}{FCE5CD}
+\definecolor{deepgreen}{HTML}{38761D}
+\definecolor{softgreen}{HTML}{D9EAD3}
+\definecolor{deepred}{HTML}{990000}
+\definecolor{softgray}{HTML}{F3F4F6}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=deepblue,
+  citecolor=deepgreen,
+  urlcolor=deeporange,
+  pdftitle={Toward a Next-Generation First-Principles Theory of Electron--Phonon Coupling},
+  pdfauthor={AITP Research Notes}
+}
+
+\setlist[itemize]{leftmargin=1.6em,itemsep=0.3em,topsep=0.4em}
+\setlist[enumerate]{leftmargin=1.8em,itemsep=0.3em,topsep=0.4em}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.55em}
+\renewcommand{\arraystretch}{1.18}
+
+\newcommand{\dfpt}{\mathrm{DFPT}}
+\newcommand{\ks}{\mathrm{KS}}
+\newcommand{\mb}{\mathrm{MB}}
+\newcommand{\ii}{\mathrm{i}}
+\newcommand{\ee}{\mathrm{e}}
+\newcommand{\vq}{\bm{q}}
+\newcommand{\vk}{\bm{k}}
+\newcommand{\vr}{\bm{r}}
+\newcommand{\Tr}{\operatorname{Tr}}
+\newcommand{\order}{\mathcal{O}}
+\newcommand{\claimstatus}[1]{\textsc{#1}}
+
+\newenvironment{keypoint}[1][Key point]
+{\vspace{0.35em}\noindent\color{deepblue}\rule{\linewidth}{0.7pt}\par
+ \noindent\textbf{#1.}\ \color{black}}
+{\par\noindent\color{deepblue}\rule{\linewidth}{0.7pt}\color{black}\vspace{0.35em}}
+
+\title{\textbf{Toward a Next-Generation First-Principles Theory\\of Electron--Phonon Coupling}\\[0.45em]
+\large Why DFPT Works, Where It Fails, and a Channel-Resolved Correction Strategy}
+\author{AITP Research Notes}
+\date{30 July 2026}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Density-functional perturbation theory (DFPT) is the standard first-principles
+method for lattice dynamics and electron--phonon coupling.  Its practical success
+extends from simple metals and semiconductors to several materials with appreciable
+electronic correlations, even though the physical scattering amplitude is a
+many-body vertex and DFPT uses a static Kohn--Sham response.  The central question
+of this proposal is therefore not whether corrections to DFPT exist, but why they
+are often small for some phonons and large for others.
+
+We formulate a testable working hypothesis: the DFPT error is controlled primarily
+by the operator channel in which a phonon perturbs the low-energy electronic
+Hamiltonian, together with the channel-resolved many-body susceptibility and its
+frequency dependence.  A common charge-like perturbation is constrained in the
+strict uniform limit and has a particularly simple realization in the uniform
+electron gas.  Orbital splitting, hybridization, hopping, spin, and interaction
+modulation are not protected by the same constraint.  This distinction explains
+why strong correlation alone is not a sufficient failure criterion and motivates
+a next-generation method: preserve DFPT as a low-cost baseline, project each
+phonon perturbation into physically defined channels, and add only the static or
+dynamic many-body corrections required by those channels.  The proposal specifies
+the equations, limits, benchmark materials, falsification criteria, a two-day
+literature sprint, and an AI-agent workflow for turning the hypothesis into a
+transparent prediction framework.
+\end{abstract}
+
+\begin{keypoint}[Proposed deliverable]
+The intended result is not a universal scalar multiplier for every
+electron--phonon matrix element.  It is a channel-resolved, uncertainty-aware
+correction layer on top of DFPT that can also decide when uncorrected DFPT is
+already adequate.
+\end{keypoint}
+
+\tableofcontents
+\listoffigures
+\listoftables
+\clearpage
+
+\input{sections/01_motivation_scope}
+\input{sections/02_dfpt_baseline}
+\input{sections/03_many_body_constraints}
+\input{sections/04_ueg_benchmark}
+\input{sections/05_material_channels}
+\input{sections/06_working_hypothesis}
+\input{sections/07_next_generation_dfpt}
+\input{sections/08_ai_research_program}
+\input{sections/09_conclusions}
+
+\appendix
+\input{appendices/A_derivations}
+\input{appendices/B_evidence_matrix}
+\input{appendices/C_two_day_protocol}
+\input{appendices/D_claim_ledger}
+
+\bibliographystyle{unsrtnat}
+\bibliography{references}
+
+\end{document}

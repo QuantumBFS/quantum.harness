@@ -1,0 +1,53 @@
+\section{Claim ledger: what is known and what is proposed}
+\label{app:claims}
+
+\begin{longtable}{@{}p{2.4cm}p{8.2cm}p{3.1cm}@{}}
+\caption{Epistemic status of the central statements.}
+\label{tab:claims}\\
+\toprule
+Status & Statement & Main support \\
+\midrule
+\endfirsthead
+\toprule
+Status & Statement & Main support \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+\claimstatus{Established} & Standard adiabatic DFPT is a self-consistent static
+Kohn--Sham response and computes the matrix element of
+$\partial_{\nu\vq}V_{\ks}$. & \citet{Gonze1995,Baroni2001,Giustino2017} \\
+
+\claimstatus{Established} & The many-body response closes screening,
+polarization, self-energy, and a vertex; they are not three arbitrary independent
+factors. & \citet{Hedin1965} \\
+
+\claimstatus{Exact limit} & A strict uniform common scalar potential coupled to
+total charge is an energy-zero shift; the corresponding dynamic Ward limit gives
+$z\Gamma^0_\omega=1$. & \citet{Nambu1960} and
+\cref{app:derivations} \\
+
+\claimstatus{Limitation} & The static $\vq\to0$ density response is not fixed by
+$z\Gamma=1$ alone; finite-$q$ density is not a conserved operator. & Ward limit
+ordering and Fermi-liquid compressibility \\
+
+\claimstatus{Numerical evidence} & In the tested UEG regime, a DFPT-like static
+density-kernel vertex agrees accurately with a high-level vertex over momenta up
+to $2k_F$. & \citet{Cai2025}; recent preprint \\
+
+\claimstatus{Numerical evidence} & Beyond-DFPT corrections can differ strongly
+between phonons in the same correlated material and can be frequency dependent. &
+\citet{Abramovitch2025} \\
+
+\claimstatus{Working hypothesis} & Channel content times channel-resolved
+many-body amplification is a better predictor of DFPT error than $U$ or $z$
+alone. & Proposed here; to be tested on \cref{tab:benchmarks} \\
+
+\claimstatus{Proposed method} & A small static/dynamic operator kernel can correct
+DFPT with substantially fewer high-level calculations than a full vertex grid. &
+\cref{sec:nextdfpt}; not yet validated \\
+
+\claimstatus{Open question} & The scalar UEG matching condition has a useful,
+basis-robust matrix generalization in a crystal with local fields and multiple
+orbitals. & First formal task after the literature sprint \\
+\end{longtable}

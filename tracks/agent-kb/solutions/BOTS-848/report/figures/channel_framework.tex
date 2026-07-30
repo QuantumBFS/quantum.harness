@@ -1,0 +1,39 @@
+\begin{tikzpicture}[
+  node distance=5.5mm and 4.5mm,
+  box/.style={draw,rounded corners=2pt,align=center,font=\small,
+              minimum height=8.5mm,text width=2.7cm,inner sep=3pt},
+  base/.style={box,fill=softblue,draw=deepblue},
+  channel/.style={box,fill=softorange,draw=deeporange,text width=2.35cm},
+  decision/.style={box,fill=softgreen,draw=deepgreen,text width=2.8cm},
+  arrow/.style={-{Latex[length=2.2mm]},thick,draw=black!70}
+]
+  \node[base] (dfpt) {DFPT baseline\\$D^{\ks}_{\nu\vq}$};
+  \node[base,right=of dfpt] (project) {Localized projection\\$P_cD^{\ks}P_c$};
+
+  \node[channel,right=of project,yshift=18mm] (charge) {Charge / common\\potential};
+  \node[channel,right=of project,yshift=6mm] (internal) {Orbital / internal\\splitting};
+  \node[channel,right=of project,yshift=-6mm] (nonlocal) {Hopping /\\hybridization};
+  \node[channel,right=of project,yshift=-18mm] (interaction) {$U,J$ / interaction\\modulation};
+
+  \node[decision,right=12mm of internal,yshift=-6mm] (risk) {Channel weights +\\static/dynamic risk};
+
+  \node[base,right=of risk,yshift=18mm] (safe) {Use DFPT};
+  \node[decision,right=of risk] (static) {Static channel\\correction};
+  \node[box,fill=softorange,draw=deepred,right=of risk,yshift=-18mm] (dynamic) {Dynamic correction\\or abstention};
+
+  \node[base,below=35mm of risk] (validate) {Validate $g$ first,\\then observables};
+  \coordinate (merge) at ([xshift=6mm]static.east |- validate.east);
+
+  \draw[arrow] (dfpt) -- (project);
+  \foreach \x in {charge,internal,nonlocal,interaction}
+    \draw[arrow] (project.east) -- (\x.west);
+  \foreach \x in {charge,internal,nonlocal,interaction}
+    \draw[arrow] (\x.east) -- (risk.west);
+  \draw[arrow] (risk) -- (safe);
+  \draw[arrow] (risk) -- (static);
+  \draw[arrow] (risk) -- (dynamic);
+  \draw[thick,draw=black!70] (safe.east) -| (merge);
+  \draw[thick,draw=black!70] (static.east) -| (merge);
+  \draw[thick,draw=black!70] (dynamic.east) -| (merge);
+  \draw[arrow] (merge) -- (validate.east);
+\end{tikzpicture}

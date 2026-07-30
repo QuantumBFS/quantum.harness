@@ -1,0 +1,110 @@
+\section{Working physical hypothesis}
+\label{sec:hypothesis}
+
+The preceding theory suggests a hypothesis that is stronger than a statement of
+numerical cancellation and weaker than a claimed universal theorem.
+
+\begin{keypoint}[Channel-selective protection hypothesis]
+For a low-energy electron--phonon process, the leading error of static DFPT is
+controlled by (i) the decomposition of the self-consistent phonon perturbation
+into charge, internal, nonlocal, and interaction-modulation operators; (ii) the
+many-body amplification in each operator channel; and (iii) the momentum and
+frequency path of the response.  Strong correlation changes the error mainly when
+the phonon has appreciable weight in an unprotected channel with a large or
+dynamic susceptibility.
+\end{keypoint}
+
+Write the projected perturbation in an orthonormal operator basis,
+\begin{equation}
+  D_{\nu\vq}^{\ks}=\sum_a d_{a,\nu\vq}O_a,
+  \qquad
+  \Tr(O_a^\dagger O_b)=\delta_{ab}.
+  \label{eq:operatorbasis}
+\end{equation}
+The corresponding many-body perturbation is represented by a channel kernel
+\begin{equation}
+  D_{\nu\vq}^{\mb}(\omega)
+  =\sum_{ab}\mathcal K_{ab}(\vq,\omega)
+  d_{b,\nu\vq}O_a.
+  \label{eq:channelkernel}
+\end{equation}
+The first implementation may retain only diagonal or small-block kernels, but the
+general expression allows channel mixing.  The hypothesis predicts the following.
+
+\begin{enumerate}
+  \item The strict uniform common-charge direction has an exact consistency
+  constraint: it is an energy-zero shift and cannot acquire an arbitrary
+  quasiparticle renormalization.
+  \item The finite-$q$ density channel is not exactly protected, but UEG evidence
+  suggests that it may often be represented by a compact static kernel.
+  \item Traceless on-site orbital operators, hopping/hybridization operators, and
+  interaction derivatives are not constrained by charge conservation and may
+  receive large, mode-specific corrections.
+  \item Static and dynamic validity are separate.  A channel may have
+  $\mathcal K_a(\vq,0)\simeq1$ while varying rapidly across
+  $\omega_{\nu\vq}$.
+\end{enumerate}
+
+\subsection{Measurable channel weights}
+
+A simple Frobenius norm of an operator can overemphasize matrix elements that do
+not connect the relevant electronic states.  For a target energy window
+$\mathcal W$ and nonnegative sampling weights $w_{n\vk}$, define a
+Fermi-window channel strength
+\begin{equation}
+  S_{a,\nu\vq}
+  =\sum_{mn\vk\in\mathcal W}
+   w_{n\vk}w_{m,\vk+\vq}
+   \left|
+   \langle\psi_{m,\vk+\vq}|
+   d_{a,\nu\vq}O_a
+   |\psi_{n\vk}\rangle
+   \right|^2.
+  \label{eq:channelstrength}
+\end{equation}
+Normalize $w_a=S_a/\sum_bS_b$ for interpretation.  These weights answer which
+operators the actual low-energy scattering process samples, not merely which
+matrix block is largest in a localized representation.
+
+A correction-risk score should combine channel weight and amplification.  A
+minimal form is
+\begin{equation}
+  R_{\nu\vq}
+  =\left[
+   \sum_a w_{a,\nu\vq}
+   \left|\mathcal K_a(\vq,0)-1\right|^2
+  \right]^{1/2}
+  +\lambda_{\mathrm{dyn}}\max_a\eta^{\mathrm{dyn}}_{a,\nu\vq},
+  \label{eq:risk}
+\end{equation}
+where
+\begin{equation}
+  \eta^{\mathrm{dyn}}_{a,\nu\vq}
+  =\omega_{\nu\vq}
+   \left|
+   \partial_\omega\ln\mathcal K_a(\vq,\omega)
+   \right|_{\omega=0}.
+  \label{eq:dynamicrisk}
+\end{equation}
+The threshold and $\lambda_{\mathrm{dyn}}$ are calibration parameters, not
+universal constants.
+
+\subsection{Falsification criteria}
+
+The hypothesis must be rejected or revised if any of the following occur across a
+held-out benchmark set:
+
+\begin{itemize}
+  \item channel weights do not correlate with the size or sign of the
+  beyond-DFPT correction;
+  \item nominally charge-dominated modes show large, uncontrolled corrections
+  that cannot be explained by finite-$q$, local-field, or dynamic effects;
+  \item the kernel requires essentially independent parameters for every
+  band--momentum matrix element, eliminating the proposed compression; or
+  \item dynamic effects dominate so broadly that a static risk gate cannot
+  identify a useful low-cost regime.
+\end{itemize}
+
+The theory will then need an enlarged operator basis, nonlocal channel mixing, or
+a fully frequency-dependent formulation.  A negative result would still identify
+why the proposed simplification fails.

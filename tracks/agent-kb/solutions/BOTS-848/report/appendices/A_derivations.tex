@@ -1,0 +1,71 @@
+\section{Detailed derivations and convention checks}
+\label{app:derivations}
+
+\subsection{DFPT response factorization in a scalar system}
+
+Starting from \cref{eq:vksresponse,eq:chisresponse},
+\begin{align}
+  \delta V_{\ks}
+  &=\delta V_{\mathrm{ion}}
+   +(v+f_{\mathrm{xc}})\chi_s\delta V_{\ks},\\
+  \bigl[1-(v+f_{\mathrm{xc}})\chi_s\bigr]\delta V_{\ks}
+  &=\delta V_{\mathrm{ion}}.
+\end{align}
+With $P=\chi_s/(1-f_{\mathrm{xc}}\chi_s)$,
+\begin{align}
+  (1-vP)(1-f_{\mathrm{xc}}\chi_s)
+  &=1-f_{\mathrm{xc}}\chi_s
+   -v\frac{\chi_s}{1-f_{\mathrm{xc}}\chi_s}
+       (1-f_{\mathrm{xc}}\chi_s)\\
+  &=1-(v+f_{\mathrm{xc}})\chi_s.
+\end{align}
+Thus
+\begin{equation}
+  g^{\dfpt}
+  =\frac{g^0}{(1-vP)(1-f_{\mathrm{xc}}\chi_s)}.
+\end{equation}
+Comparing with $g^{\mathrm{phys}}=g^0z\Gamma_\rho/(1-vP)$ yields
+$z\Gamma_\rho=P/\chi_s$.  This algebra establishes the matching condition under
+the scalar definitions; it does not establish that the condition is exact.
+
+\subsection{Uniform-potential cancellation at a quasiparticle pole}
+
+Let the pole satisfy
+\begin{equation}
+  E_u-\varepsilon-Du-\Sigma_0(E_u-Du)=0.
+\end{equation}
+Differentiate at $u=0$:
+\begin{equation}
+  \frac{dE}{du}-D
+  -\partial_\omega\Sigma_0\left(\frac{dE}{du}-D\right)=0.
+\end{equation}
+Provided the pole is well-defined,
+$(1-\partial_\omega\Sigma_0)(dE/du-D)=0$, so $dE/du=D$.  In the alternative
+form where $\partial_u\Sigma=-D\partial_\omega\Sigma$, the same result is
+$z(D+\partial_u\Sigma)=D$ with
+$z=(1-\partial_\omega\Sigma)^{-1}$.  The result follows from the common shift of
+frequency and chemical potential, not from weak interaction.
+
+\subsection{Limit ordering in the Ward identity}
+
+Expand the right-hand side of \cref{eq:ward} for small four-momentum:
+\begin{equation}
+  G^{-1}(k+q)-G^{-1}(k)
+  =\ii\nu\,\partial_{\ii\omega}G^{-1}
+   +\vq\cdot\nabla_{\vk}G^{-1}+\order(q^2).
+\end{equation}
+At $\vq=0$, matching the coefficient of $\ii\nu$ gives the scalar dynamic
+vertex.  At $\nu=0$, matching the coefficient of $\vq$ gives the longitudinal
+current vertex.  A static scalar perturbation also changes the distribution and
+self-consistent field, producing the compressibility vertex.  This explicit
+expansion shows why swapping the two limits changes the conclusion.
+
+\subsection{Matrix generalization}
+
+In a crystal, $v$, $P$, $\chi_s$, $f_{\mathrm{xc}}$, and $\epsilon$ are matrices
+in reciprocal vectors $\bm G,\bm G'$.  Products do not generally commute, so the
+scalar factorization in \cref{eq:factorization} cannot be transferred by simply
+replacing every scalar with a matrix.  A crystal implementation must retain
+matrix ordering and local-field components, or derive a controlled projected
+version of the relation.  This is one of the first theoretical tasks of the
+project.

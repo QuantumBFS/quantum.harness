@@ -1,0 +1,107 @@
+\section{From a common shift to real material perturbations}
+\label{sec:channels}
+
+\subsection{Projection and operator decomposition}
+
+Let $P_c$ project onto a localized low-energy or correlated subspace, such as
+transition-metal $d$ orbitals and ligand $p$ orbitals.  The projected DFPT
+perturbation is
+\begin{equation}
+  D_{\nu\vq}=P_c\,\partial_{\nu\vq}V_{\ks}\,P_c.
+  \label{eq:projectedD}
+\end{equation}
+For each correlated site $i$, split its on-site block into an orbital trace and a
+traceless remainder,
+\begin{align}
+  D^{\mathrm{charge}}_{i}
+  &= \frac{\Tr_{\mathrm{orb}}D_{ii}}{N_{\mathrm{orb}}}\,I_i,
+  \label{eq:chargechannel}\\
+  D^{\mathrm{internal}}_{i}
+  &= D_{ii}-D^{\mathrm{charge}}_i.
+  \label{eq:internalchannel}
+\end{align}
+The off-site blocks $D_{ij}$, $i\ne j$, describe changes in hopping and
+hybridization.  If needed, extra channels represent derivatives of interaction
+parameters, such as $\partial U/\partial u$ and $\partial J/\partial u$.  Thus
+\begin{equation}
+  D_{\nu\vq}
+  =D^{\mathrm{charge}}_{\nu\vq}
+  +D^{\mathrm{internal}}_{\nu\vq}
+  +D^{\mathrm{nonlocal}}_{\nu\vq}
+  +D^{\mathrm{interaction}}_{\nu\vq}.
+  \label{eq:channeldecomp}
+\end{equation}
+This decomposition is basis-dependent, so the project must state the Wannier or
+projector construction and test robustness against a reasonable basis change.
+
+\subsection{Why a local common operator does not shift all bands equally}
+
+Suppose a phonon produces the same local potential $D$ on all orbitals of the
+correlated subspace.  A Bloch state still shifts by
+\begin{equation}
+  \delta\varepsilon_{n\vk}
+  =D\langle\psi_{n\vk}|P_c|\psi_{n\vk}\rangle,
+  \label{eq:bandweight}
+\end{equation}
+which depends on its correlated-orbital weight.  At finite momentum,
+\begin{equation}
+  g_{mn}(\vk,\vq)
+  =D\langle\psi_{m,\vk+\vq}|P_c|\psi_{n\vk}\rangle,
+  \label{eq:finiteqweight}
+\end{equation}
+which also depends on phases and interband overlaps.  DFPT already computes these
+geometric and hybridization effects.  The proposed correction concerns the
+many-body renormalization of the operator, not a replacement of all matrix
+elements by a common number.
+
+\subsection{Evidence from correlated materials}
+
+DFT+DMFT calculations provide a useful controlled contrast because they evaluate
+the derivative of a local, frequency-dependent correlated self-energy
+\citep{Abramovitch2025}.  For SrVO$_3$ with $U=4.5$ eV and $J=0.675$ eV, the
+reported zero-frequency coupling for an M-point Jahn--Teller mode increases from
+about $44$ meV in DFPT to $87$ meV in DFT+DMFT.  The corresponding R-point
+breathing-mode coupling changes from about $58$ meV to $50$ meV.  The same
+correlated material therefore contains a strongly corrected orbital-splitting
+mode and a comparatively stable charge-like breathing mode.
+
+For hole-doped CaCuO$_2$ at a representative interaction $U=3.1$ eV, the reported
+zero-frequency half- and full-breathing couplings change from approximately
+$70$ to $76$ meV and from $53$ to $45$ meV, respectively
+\citep{Abramovitch2025}.  These static changes are modest even though the
+quasiparticle weight is reduced.  At larger $U=4.7$ eV, however, the same study
+finds strong vertex frequency dependence on the phonon energy scale.  Agreement at
+$\omega=0$ is then insufficient to validate a dynamic scattering calculation.
+
+These cases support a mode-resolved interpretation, but they do not yet prove the
+specific decomposition in \cref{eq:channeldecomp}.  Two further methods establish
+that standard DFPT has genuine, computable limitations:
+
+\begin{itemize}
+  \item DFPT+$U$ corrects both the reference electronic structure and the response
+  of Hubbard occupations.  In CoO, this changes the polar Fr\"ohlich interaction
+  relative to ordinary DFPT \citep{Zhou2021}.
+  \item GW perturbation theory differentiates a nonlocal, energy-dependent GW
+  self-energy.  It produces correlation-enhanced electron--phonon interactions in
+  Ba$_{1-x}$K$_x$BiO$_3$ \citep{Li2019}.
+\end{itemize}
+
+These are not competing anecdotes.  They identify distinct missing channels:
+local correlated occupations in DFPT+$U$, local dynamic self-energy in DFT+DMFT,
+and nonlocal quasiparticle self-energy in GW perturbation theory.
+Earlier correlated-electron analyses likewise show that vertex corrections can be
+strongly momentum- and channel-dependent \citep{Grilli1994}.
+
+\subsection{What ``DFPT works in a strongly correlated material'' can mean}
+
+A material may be strongly correlated according to its spectral weight, Hubbard
+bands, or mass enhancement while a particular phonon derivative
+$\partial_u\Sigma^{\mathrm{corr}}$ remains small or nearly common within the
+relevant low-energy subspace.  Conversely, a seemingly small traceless orbital
+component can be strongly amplified near an orbital instability.  The correction
+is controlled by the product of perturbation weight and channel susceptibility,
+not by either factor alone.
+
+Accordingly, a successful DFPT result in one mode should not be generalized to
+all modes of that material.  The correct unit of comparison is a
+material--phonon--momentum--frequency tuple.

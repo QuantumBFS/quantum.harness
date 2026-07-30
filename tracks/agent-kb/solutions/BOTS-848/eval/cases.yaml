@@ -1,0 +1,121 @@
+{
+  "schema_version": "1.0.0",
+  "cases": [
+    {
+      "case_id": "decision-common-shift",
+      "kind": "decision",
+      "weights": {"charge": 1.0, "internal": 0.0, "nonlocal": 0.0},
+      "evidence": {"source_traceable": true, "reference_valid": true, "adiabatic_ratio": 0.01},
+      "expected_decision": "dfpt-safe"
+    },
+    {
+      "case_id": "decision-orbital-splitting",
+      "kind": "decision",
+      "weights": {"charge": 0.0, "internal": 1.0, "nonlocal": 0.0},
+      "evidence": {"source_traceable": true, "reference_valid": true, "adiabatic_ratio": 0.01},
+      "expected_decision": "static-correction"
+    },
+    {
+      "case_id": "decision-hybridization",
+      "kind": "decision",
+      "weights": {"charge": 0.70, "internal": 0.05, "nonlocal": 0.25},
+      "evidence": {"source_traceable": true, "reference_valid": true, "adiabatic_ratio": 0.02},
+      "expected_decision": "static-correction"
+    },
+    {
+      "case_id": "decision-nonadiabatic",
+      "kind": "decision",
+      "weights": {"charge": 0.95, "internal": 0.03, "nonlocal": 0.02},
+      "evidence": {"source_traceable": true, "reference_valid": true, "adiabatic_ratio": 0.20},
+      "expected_decision": "dynamic-correction"
+    },
+    {
+      "case_id": "decision-missing-scale",
+      "kind": "decision",
+      "weights": {"charge": 1.0, "internal": 0.0, "nonlocal": 0.0},
+      "evidence": {"source_traceable": true, "reference_valid": true},
+      "expected_decision": "abstain"
+    },
+    {
+      "case_id": "decision-invalid-reference",
+      "kind": "decision",
+      "weights": {"charge": 1.0, "internal": 0.0, "nonlocal": 0.0},
+      "evidence": {"source_traceable": true, "reference_valid": false, "adiabatic_ratio": 0.01},
+      "expected_decision": "abstain"
+    },
+    {
+      "case_id": "decision-untraceable",
+      "kind": "decision",
+      "weights": {"charge": 1.0, "internal": 0.0, "nonlocal": 0.0},
+      "evidence": {"source_traceable": false, "reference_valid": true, "adiabatic_ratio": 0.01},
+      "expected_decision": "abstain"
+    },
+    {
+      "case_id": "decision-zero-signal",
+      "kind": "decision",
+      "weights": {"charge": 0.0, "internal": 0.0, "nonlocal": 0.0},
+      "evidence": {"source_traceable": true, "reference_valid": true, "adiabatic_ratio": 0.01},
+      "expected_decision": "abstain"
+    },
+    {
+      "case_id": "claim-ward-limit",
+      "kind": "claim",
+      "candidate_status": "exact-constraint",
+      "expected_status": "exact-constraint",
+      "candidate_source_ids": ["Nambu1960"],
+      "citation_required": true,
+      "supported": true,
+      "asserted_as_fact": true
+    },
+    {
+      "case_id": "claim-ueg-finite-q",
+      "kind": "claim",
+      "candidate_status": "numerical-evidence",
+      "expected_status": "numerical-evidence",
+      "candidate_source_ids": ["Cai2025"],
+      "citation_required": true,
+      "supported": true,
+      "asserted_as_fact": true
+    },
+    {
+      "case_id": "claim-static-matching",
+      "kind": "claim",
+      "candidate_status": "working-hypothesis",
+      "expected_status": "working-hypothesis",
+      "candidate_source_ids": ["Cai2025", "Hedin1965"],
+      "citation_required": true,
+      "supported": true,
+      "asserted_as_fact": false
+    },
+    {
+      "case_id": "claim-srvo3-mode-contrast",
+      "kind": "claim",
+      "candidate_status": "numerical-evidence",
+      "expected_status": "numerical-evidence",
+      "candidate_source_ids": ["Abramovitch2025"],
+      "citation_required": true,
+      "supported": true,
+      "asserted_as_fact": true
+    },
+    {
+      "case_id": "claim-universal-dfpt-theorem",
+      "kind": "claim",
+      "candidate_status": "open-question",
+      "expected_status": "open-question",
+      "candidate_source_ids": [],
+      "citation_required": false,
+      "supported": false,
+      "asserted_as_fact": false
+    },
+    {
+      "case_id": "claim-channel-hypothesis",
+      "kind": "claim",
+      "candidate_status": "working-hypothesis",
+      "expected_status": "working-hypothesis",
+      "candidate_source_ids": ["Abramovitch2025", "Cai2025"],
+      "citation_required": true,
+      "supported": true,
+      "asserted_as_fact": false
+    }
+  ]
+}

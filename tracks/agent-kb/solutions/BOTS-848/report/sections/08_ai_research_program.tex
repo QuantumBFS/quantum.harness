@@ -1,0 +1,118 @@
+\section{AI-agent research and implementation program}
+\label{sec:program}
+
+The AI agent is not used to replace physical validation.  Its role is to maintain
+traceability across literature, material cases, calculations, code, and failed
+hypotheses, while automating the repetitive parts of comparison and model
+construction.
+
+\subsection{Closed-loop workflow}
+
+For each candidate material and phonon mode, the agent executes the following
+auditable loop.
+
+\begin{enumerate}
+  \item \textbf{Read and extract.}  Search primary literature and record the
+  material, mode eigenvector, $\vq$, electronic method, interaction parameters,
+  definition and normalization of $g$, frequency at which the vertex is evaluated,
+  and reported uncertainty.
+  \item \textbf{Classify the perturbation.}  Project the DFPT perturbation,
+  compute the charge, internal, and nonlocal channel weights of
+  \cref{eq:channelstrength}, and attach a human-readable physical interpretation.
+  \item \textbf{Select a benchmark.}  Choose the least expensive many-body method
+  able to represent the active channel: UEG/vertex Monte Carlo for density,
+  DFT+DMFT for local correlated channels, GW perturbation theory for nonlocal
+  quasiparticle response, or an explicit model when interaction derivatives are
+  central.
+  \item \textbf{Generate a hypothesis.}  Propose a low-dimensional form of
+  $\mathcal K_{ab}(\vq,\omega)$ with symmetry, Ward/gauge, locality, and causality
+  constraints encoded before fitting.
+  \item \textbf{Design a discriminating calculation.}  Select the mode or
+  momentum point that maximizes disagreement between the current hypothesis and a
+  plausible alternative, instead of merely adding more similar data.
+  \item \textbf{Implement and test.}  Produce a versioned correction module,
+  unit tests for algebraic invariants, and numerical regression tests against
+  held-out high-level vertices.
+  \item \textbf{Update or reject.}  Store negative evidence and revise the claim
+  ledger.  The agent may not promote an empirical relation to an exact principle.
+\end{enumerate}
+
+Each extracted number must retain source, equation/table/figure location,
+normalization convention, and whether it was read directly or inferred.  This is
+essential because electron--phonon matrix elements can differ by phonon
+normalization, spin factors, mode phase, orbital gauge, and screening convention.
+
+\subsection{Minimal benchmark ladder}
+
+The proposed ladder is designed to distinguish physical channels, not simply to
+cover many chemical compositions.
+
+\begin{table}[htbp]
+\centering
+\caption{Minimal benchmark ladder for developing and falsifying the method.}
+\label{tab:benchmarks}
+\begin{tabularx}{\linewidth}{@{}p{2.7cm}p{3.1cm}XX@{}}
+\toprule
+System & Active contrast & Reference level & Question answered \\
+\midrule
+Uniform electron gas & $q=0$ anchor versus $0<q\le2k_F$ density response &
+Vertex diagrammatic Monte Carlo & Is the finite-$q$ density prior accurate and
+what controls its residual? \\
+SrVO$_3$ & Jahn--Teller versus breathing modes & DFT+DMFT & Does traceless orbital
+weight predict the large mode-selective correction? \\
+Doped CaCuO$_2$ & Half- versus full-breathing, static versus dynamic vertex &
+DFT+DMFT & Can the dynamic-risk indicator detect failure of a static correction? \\
+CoO & Correlated insulator and polar coupling & DFPT+$U$ / experiment & Does the
+framework detect an invalid reference state and occupation-response channel? \\
+Ba$_{1-x}$K$_x$BiO$_3$ or a simpler GWPT solid & Nonlocal quasiparticle response &
+GW perturbation theory & Can a sparse nonlocal kernel reproduce the high-level
+correction? \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+The UEG is the first diagnostic object because it isolates density physics.  It
+must not be the only validation object, because success there cannot test internal
+crystal channels.
+
+\subsection{Accuracy, speed, and transparency metrics}
+
+The target should be evaluated against three independent axes.
+
+\paragraph{Accuracy.}
+Report the error of complex matrix elements where phases are comparable, squared
+couplings averaged on the relevant energy shell, and final observables.  A
+practical initial threshold is to reduce the high-level-versus-DFPT error by at
+least a factor of two while keeping the median corrected $|g|$ error below
+10--15\% on held-out modes.  This threshold is a project criterion and may be
+revised after the evidence matrix is complete.
+
+\paragraph{Cost.}
+Count the number of high-level displaced/response calculations, total core or GPU
+hours, memory, and wall time relative to a dense many-body calculation of every
+mode and $\vq$.  Speedup is meaningful only at comparable numerical convergence.
+
+\paragraph{Transparency.}
+For every prediction, output the operator decomposition, selected correction
+level, training-source distance, uncertainty, and any violated invariant.  The
+framework should expose why a mode was corrected rather than only returning a
+number.
+
+\subsection{Implementation layers}
+
+The initial software can be separated into small testable modules:
+
+\begin{enumerate}
+  \item a reader for DFPT perturbation matrices and wavefunctions;
+  \item localized-subspace construction and gauge checks;
+  \item operator decomposition and Fermi-window channel weights;
+  \item adapters for high-level reference data from UEG, DFT+DMFT, DFPT+$U$, and
+  GWPT;
+  \item constrained kernel fitting/interpolation with uncertainty;
+  \item corrected-matrix-element reconstruction; and
+  \item validation reports separating matrix-element and observable gates.
+\end{enumerate}
+
+No production implementation should begin before the two-day literature sprint
+freezes the first hypothesis, the exact comparison quantities, and the first two
+material-mode contrasts.
