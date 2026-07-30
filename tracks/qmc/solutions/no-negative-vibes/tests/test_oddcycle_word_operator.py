@@ -3,10 +3,13 @@ import sympy as sp
 from oracle.fock_basis import one_body_operator
 from oracle.oddcycle_word_operator import (
     NormalOrderedLabel,
+    build_word_dictionary,
     normal_ordered_coordinates,
     normal_ordered_labels,
     normal_ordered_monomial,
     reconstruct_normal_ordered,
+    transpose_word,
+    word_matrix,
 )
 
 
@@ -34,3 +37,19 @@ def test_exact_normal_ordered_coordinates_round_trip():
     assert all(
         value == 0 for label, value in coordinates.items() if label.body_order > 2
     )
+
+
+def test_transpose_word_matches_exact_matrix_transpose():
+    word = (0, 2, 1, 3)
+    assert transpose_word(word) == (2, 0, 3, 1)
+    assert word_matrix(transpose_word(word)) == word_matrix(word).T
+
+
+def test_word_dictionary_is_transpose_and_matrix_deduplicated():
+    columns = build_word_dictionary(max_length=2)
+    assert columns
+    assert all(column.word <= column.transpose_word for column in columns)
+    assert len({column.matrix_orbit_key for column in columns}) == len(columns)
+    for column in columns:
+        assert column.fock_pair == column.fock_pair.T
+        assert reconstruct_normal_ordered(column.coordinates, 5) == column.fock_pair
