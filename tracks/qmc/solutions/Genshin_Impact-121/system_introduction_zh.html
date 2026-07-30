@@ -61,30 +61,30 @@
 </div>
 </section>
 <section class=section>
-<h2>数值证据：哪些已经通过，哪些还没有？</h2>
+<h2>最终数值证据：正性通过，混合仍是瓶颈</h2>
 <div class=grid>
-<article class=card><h3>v2 独立链</h3><div class=kpi>32/32</div><p>每条 300000 步，四链冷热启动，全部产生哈希绑定完成哨兵。</p></article>
-<article class=card><h3>权重正性</h3><div class=kpi>8/8</div><p class=ok>负行列式 0；零权重 0。</p></article>
-<article class=card><h3>严格门状态</h3><div class=kpi style=color:#aa6b00>INCONCLUSIVE</div><p>仅一个动量 one-body 叶节点略超旧式误差阈值。</p></article>
+<article class=card><h3>v3 独立链</h3><div class=kpi>32/32</div><p>每条 300000 步，四链冷热启动；所有 ED 复观测量保存逐测量实/虚轨迹。</p></article>
+<article class=card><h3>G1 权重正性</h3><div class=kpi>8/8</div><p class=ok>负行列式 0；零权重 0；零行列式失败 0。</p></article>
+<article class=card><h3>严格门状态</h3><div class=kpi style=color:#147d64>G1 PASS</div><p>160/160 个 ED 比较全部通过；下游 G2 因大尺度慢混合为 INCONCLUSIVE。</p></article>
 <article class=card wide><h3>误差条为何必须包含自相关？</h3><svg viewBox=0,0,760,310 role=img aria-label=v2失败分量的误差与允许值比较><line class=axis x1=90 y1=260 x2=710 y2=260></line><line class=axis x1=90 y1=35 x2=90 y2=260></line><rect class=bar1 x=170 y=148 width=120 height=112></rect><rect class=bar2 x=440 y=35 width=120 height=225></rect><line class=limit x1=90 y1=202 x2=710 y2=202></line><text class=svgtext x=172 y=285>v2 naive MCSE</text><text class=svgtext x=420 y=285>由轨迹重构的相关 MCSE</text><text class=svgtext small x=105 y=195>观测误差 1.884×10⁻⁴</text><text class=svgtext x=183 y=138>3.609×10⁻⁵</text><text class=svgtext x=451 y=28>3.638×10⁻⁴</text></svg><p class=caption>唯一失败：L=2、β=4、q=(1,0) 的 one-body。v2 冻结规则只给实空间量使用相关 MCSE，所以不能事后改判；但完整实空间轨迹可精确傅里叶重构该动量轨迹，得到 τint≈42.5–46.3。这直接促成 v3 的统一误差协议。</p></article>
-<article class=card><h3>旧偏差已消失</h3><p>v1 的 L=3、β=1/2、G(1,0)：</p><div class=kpi>2.97×10⁻⁶</div><p>v2 绝对误差，远小于允许值 2.83×10⁻⁴。</p></article>
-<article class=card full><h3>严格状态表</h3><table><thead><tr><th>协议</th><th>数据</th><th>正性</th><th>ED/统计</th><th>结论</th></tr></thead><tbody><tr><td>v1 · commit 382e64e</td><td>32×30000 steps</td><td><span class=status pass>8/8 PASS</span></td><td>1 个实空间偏差；3 个高接受率门</td><td><span class=status inc>INCONCLUSIVE</span></td></tr><tr><td>v2 · commit 5bf5905</td><td>32×300000 steps</td><td><span class=status pass>8/8 PASS</span></td><td>旧偏差通过；1 个动量量漏计相关误差</td><td><span class=status inc>INCONCLUSIVE</span></td></tr><tr><td>v3 · 全观测量相关误差</td><td>全新种子 321000000+</td><td>待运行</td><td>所有复观测量统一 R̂/ESS/τint</td><td><span class=status open>前瞻验证</span></td></tr></tbody></table></article>
+<article class=card><h3>v3 最坏统计量</h3><p>跨全部 G1 观测量：</p><div class=kpi>R̂=1.0064</div><p>min bulk ESS=1127.7；min tail ESS=3351.0，均越过冻结门槛。</p></article>
+<article class=card full><h3>严格状态表</h3><table><thead><tr><th>阶段</th><th>数据</th><th>正性</th><th>ED/统计</th><th>结论</th></tr></thead><tbody><tr><td>v1 · 382e64e</td><td>32×30000 steps</td><td><span class=status pass>8/8 PASS</span></td><td>1 个实空间偏差；3 个高接受率门</td><td><span class=status inc>INCONCLUSIVE</span></td></tr><tr><td>v2 · 5bf5905</td><td>32×300000 steps</td><td><span class=status pass>8/8 PASS</span></td><td>旧偏差通过；1 个动量量漏计相关误差</td><td><span class=status inc>INCONCLUSIVE</span></td></tr><tr><td>v3 G1 · a6b091c</td><td>32×300000 steps</td><td><span class=status pass>8/8 PASS</span></td><td>160/160 ED；R̂/ESS 全通过</td><td><span class=status pass>PASS</span></td></tr><tr><td>v3 G2 pilot</td><td>N=16,64,144；12×100000 steps</td><td><span class=status pass>3/3 PASS</span></td><td>L=8,12 冻结长度下混合不足</td><td><span class=status inc>INCONCLUSIVE</span></td></tr></tbody></table></article>
 </div>
 </section>
 <section class=section>
 <h2>从小体系走向大体系</h2>
 <div class=grid>
-<article class=card wide><svg viewBox=0,0,760,270 role=img aria-label=预注册系统尺寸网格><line class=axis x1=70 y1=210 x2=710 y2=210></line><circle class=site cx=140 cy=210 r=15></circle><circle class=site cx=250 cy=185 r=18></circle><circle class=site cx=365 cy=155 r=22></circle><circle class=site cx=505 cy=100 r=29></circle><circle class=site cx=655 cy=45 r=38></circle><text class=svgtext x=118 y=246>L=4</text><text class=svgtext x=225 y=246>L=6</text><text class=svgtext x=338 y=246>L=8</text><text class=svgtext x=475 y=246>L=12</text><text class=svgtext x=625 y=246>L=16</text><text class=svgtext small x=120 y=190>N=16</text><text class=svgtext small x=225 y=160>N=36</text><text class=svgtext small x=337 y=125>N=64</text><text class=svgtext small x=470 y=62>N=144</text><text class=svgtext small x=620 y=105>N=256</text></svg><p class=caption>完整生产网格还交叉 β∈{1/2,1,2,4}，每格点四条固定种子链。必须依次通过 G1 小体系正确性、G2 资源与自相关 pilot、G3 全网格、G4 provenance 审计。</p></article>
-<article class=card><h3>为什么 QMC 有意义？</h3><p>ED 的 Hilbert 空间维数是 2ᴺ，N=256 不可能直接对角化；行列式 QMC 只操作 N×N 单粒子矩阵，才有机会研究有限温度大系统。</p></article>
-<article class=card full><div class=flow><span class=pill>G0 代数与代码</span><span class=arrow>→</span><span class=pill>G1 N=4,9 对 ED</span><span class=arrow>→</span><span class=pill>G2 N=16,64,144 pilot</span><span class=arrow>→</span><span class=pill>G3 N≤256 全网格</span><span class=arrow>→</span><span class=pill>G4 独立 provenance</span></div></article>
+<article class=card wide><svg viewBox=0,0,760,270 role=img aria-label=预注册系统尺寸网格><line class=axis x1=70 y1=210 x2=710 y2=210></line><circle class=site cx=140 cy=210 r=15></circle><circle class=site cx=250 cy=185 r=18></circle><circle class=site cx=365 cy=155 r=22></circle><circle class=site cx=505 cy=100 r=29></circle><circle class=site cx=655 cy=45 r=38></circle><text class=svgtext x=118 y=246>L=4</text><text class=svgtext x=225 y=246>L=6</text><text class=svgtext x=338 y=246>L=8</text><text class=svgtext x=475 y=246>L=12</text><text class=svgtext x=625 y=246>L=16</text><text class=svgtext small x=120 y=190>N=16</text><text class=svgtext small x=225 y=160>N=36</text><text class=svgtext small x=337 y=125>N=64</text><text class=svgtext small x=470 y=62>N=144</text><text class=svgtext small x=620 y=105>N=256</text></svg><p class=caption>G2 已实际运行 N=16、64、144：三格正性全部通过；N=16 收敛通过，N=64、144 暴露长自相关。完整 N≤256 网格被依赖门正确阻断，没有把未收敛数据包装成结果。</p></article>
+<article class=card><h3>N=256 内核</h3><div class=kpi>34.1×</div><p>秩 3 插入相对完整重构的中位加速；删除为 31.2×，误差小于 7.8×10⁻¹⁵，fallback 为 0。</p></article><article class=card><h3>N=256 资源投影</h3><div class=kpi>396 s</div><p>每条 100000 步链约 104 MiB；这是 pilot 外推，不是完整生产结果。</p></article><article class=card full><h3>真正的瓶颈</h3><p>L=12、β=4 的最坏 τint≈408 次测量；冻结 warmup=10000 步，而 50τ 规则要求约 204045 步。最坏 R̂=1.103、bulk ESS=130.8，所以 G2 必须保持 INCONCLUSIVE。</p></article>
+<article class=card full><div class=flow><span class=pill>G0 PASS</span><span class=arrow>→</span><span class=pill>G1 PASS · N=4,9</span><span class=arrow>→</span><span class=pill>G2 INCONCLUSIVE · N=16,64,144</span><span class=arrow>→</span><span class=pill>G3/G4 正确阻断</span></div></article>
 </div>
 </section>
 <section class=section>
 <h2>物理解释与诚实边界</h2>
 <div class=grid>
-<article class=card half><h3 class=ok>已经成立</h3><ul><li>一个开放参数区域，而非孤立 A 数值。</li><li>任意深度、任意局域重叠下 det(I+T)&gt;0。</li><li>二维三角晶格上的广延、相互作用、粒子数守恒模型。</li><li>连续时间高斯顶点展开可直接用于行列式 QMC。</li><li>N=4、9 上所有配置均无负权重。</li></ul></article>
-<article class=card half><h3 class=bad>尚未成立</h3><ul><li>μ=0 的零温基态是真空；非平凡有限密度仍未解决。</li><li>尚无快速混合证明。</li><li>v2 G1 严格状态仍为 INCONCLUSIVE。</li><li>N=256 的完整生产数据尚未完成。</li><li>没有证明文献优先权或达到论文接收标准。</li></ul></article>
-<article class=card full><div class=note><b>最准确的一句话：</b>我们已经找到并实现了一个数学上严格无符号、物理上真正二维且相互作用的有限温度费米子系统；当前最后障碍不是符号问题，而是把所有观测量的蒙特卡洛自相关误差统一纳入前瞻验证，并通过大尺度性能门。</div></article>
+<article class=card half><h3 class=ok>已经成立</h3><ul><li>一个开放参数区域，而非孤立 A 数值。</li><li>任意深度、任意局域重叠下 det(I+T)&gt;0。</li><li>二维三角晶格上的广延、相互作用、粒子数守恒模型。</li><li>v3 G1：32 条长链、160 个 ED 比较严格通过。</li><li>大系统 pilot 到 N=144 仍无负权重；N=256 更新内核正确且有 31–34× 加速。</li></ul></article>
+<article class=card half><h3 class=bad>尚未成立</h3><ul><li>μ=0 的零温基态是真空；非平凡有限密度仍未解决。</li><li>没有快速混合证明；L=8、12 pilot 已观测到长自相关。</li><li>G2 严格状态为 INCONCLUSIVE，G3/G4 未运行。</li><li>N=256 目前只有内核与资源外推，没有完整生产观测量。</li><li>没有证明文献优先权或达到论文接收标准。</li></ul></article>
+<article class=card full><div class=note><b>最准确的一句话：</b>解析上，我们得到一个严格无符号、真正二维且相互作用的有限温度费米子系统；数值上，小体系 ED 门已完整通过且正性扩展到 N=144 pilot，N=256 内核可行，但大尺度慢混合仍阻止完整生产结论。</div></article>
 </div>
 </section>
 <section class=section>
@@ -93,10 +93,10 @@
 <div class=event><h3>物理化</h3><p>通过 S₃ 群平均恢复厄米性，Fock 展开出现不可约四费米子和三体局域项。</p></div>
 <div class=event><h3>v1：发现误差条缺口</h3><p>正性完全通过，但实空间 G(1,0) 的 naive MCSE 低估且高接受率被误当成失败。</p></div>
 <div class=event><h3>v2：实空间修复成功</h3><p>旧偏差消失；一个傅里叶后的动量观测量暴露同一统计缺口。</p></div>
-<div class=event><h3>v3：统一全观测量协议</h3><p>全新随机种子；所有 ED 复观测量保存逐测量实/虚轨迹，并统一采用相关、链间、naive 三者最大 MCSE。</p></div>
+<div class=event><h3>v3：G1 全观测量严格通过</h3><p>全新随机种子；160 个 ED 复观测量采用相关、链间、naive 三者最大 MCSE，false 叶节点为 0。</p></div><div class=event><h3>G2：大系统暴露慢混合</h3><p>N=16、64、144 权重正性继续通过；L=8、12 的 R̂/ESS 与 50τ warmup 门未通过，因此生产网格被阻断。</p></div>
 </div>
 </section>
 <section class=section>
-<h2>复现入口</h2><div class=card full><ul class=sources><li><code>main_theorem.md</code>：开放 A/B 家族、任意深度证明与分离证书。</li><li><code>physical_realization.md</code>：S₃ twirl、局域相互作用与连续时间展开。</li><li><code>g1_v2_preregistration.md</code>：v1→v2 的不可追溯修正规则。</li><li><code>g1_v3_preregistration.md</code>：v2→v3 的全观测量相关误差规则。</li><li><code>large_lattice_ctqmc.py</code>：密集矩阵 CTQMC 参考实现。</li><li><code>large_lattice_protocol.py</code>：哈希绑定、R̂/ESS/τint、ED 和 Slurm gates。</li><li><code>tracks/qmc/results/Genshin_Impact-121/20260730-large-lattice-5bf5905/gates/G1.json</code>：v2 不可变审计记录。</li></ul></div></section>
-<footer class=footer><b>Genshin_Impact · QuantumBFS issue #121</b><br>报告生成于 2026-07-30，证据截至 commit 5bf5905 与 v2 G1 SHA256 d865048b10a88b51d9caefff158c80961c19bce9b5b453c86074a20084c7db73。本文区分解析定理、已完成数值证据、事后诊断与尚未完成的前瞻验证。</footer>
+<h2>复现入口</h2><div class=card full><ul class=sources><li><code>main_theorem.md</code>：开放 A/B 家族、任意深度证明与分离证书。</li><li><code>physical_realization.md</code>：S₃ twirl、局域相互作用与连续时间展开。</li><li><code>g1_v3_preregistration.md</code>：v2→v3 的全观测量相关误差规则。</li><li><code>large_lattice_ctqmc.py</code>：密集矩阵 CTQMC 参考实现。</li><li><code>large_lattice_protocol.py</code>：哈希绑定、R̂/ESS/τint、ED 和 Slurm gates。</li><li><code>tracks/qmc/results/Genshin_Impact-121/20260730-large-lattice-a6b091c/gates/G1.json</code>：v3 G1 PASS 不可变审计。</li><li><code>tracks/qmc/results/Genshin_Impact-121/20260730-large-lattice-a6b091c/gates/G2.json</code>：G2 INCONCLUSIVE 与资源/混合证据。</li></ul></div></section>
+<footer class=footer><b>Genshin_Impact · QuantumBFS issue #121</b><br>报告更新于 2026-07-30，执行 commit a6b091c。v3 G1 SHA256 bef1f76d7d63ccdcb14d2c061490762a000fe02e2c76b187e6d827a10d4fbd91；G2 SHA256 458dd04f985d75005587410230f375122cebd6b2f0a66ea74f186feafc3a9cd8。本文严格区分解析定理、已通过数值门、资源外推与尚未收敛的生产计算。</footer>
 </main></body></html>
