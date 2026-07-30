@@ -40,12 +40,12 @@ def _elementary_homogeneous(
         updated = [xp.asarray(0.0 + 0.0j) for _ in coefficients]
         for degree in range(len(coefficients)):
             updated[degree] = (
-                updated[degree] + spinors[row, 1] * coefficients[degree]
+                updated[degree] + spinors[row][1] * coefficients[degree]
             )
             if degree:
                 updated[degree] = (
                     updated[degree]
-                    + spinors[row, 0] * coefficients[degree - 1]
+                    + spinors[row][0] * coefficients[degree - 1]
                 )
         coefficients = updated
     return xp.stack(coefficients)
@@ -70,15 +70,15 @@ def _replacement_column(
         if b:
             first = (
                 b
-                * spinors[row, 0] ** a
-                * spinors[row, 1] ** (b - 1)
+                * spinors[row][0] ** a
+                * spinors[row][1] ** (b - 1)
                 * derivative_u[row]
             )
         if a:
             second = (
                 a
-                * spinors[row, 0] ** (a - 1)
-                * spinors[row, 1] ** b
+                * spinors[row][0] ** (a - 1)
+                * spinors[row][1] ** b
                 * derivative_v[row]
             )
         result.append(normalization * (first - second))
@@ -157,11 +157,22 @@ def cofactor_seed_family_amplitudes(
     if tuple(checked.shape) != expected_shape:
         raise ValueError(f"spinor shape must be {expected_shape}")
 
+    return _cofactor_seed_family_amplitudes(family, checked, xp=xp)
+
+
+def _cofactor_seed_family_amplitudes(
+    family: JKCFSeedFamily,
+    checked: object,
+    *,
+    xp: Any,
+) -> object:
+    """Evaluate over an already validated scalar-ring spinor matrix."""
+
     n_electrons = family.n_electrons
     delta = [
         [
-            checked[first, 0] * checked[second, 1]
-            - checked[first, 1] * checked[second, 0]
+            checked[first][0] * checked[second][1]
+            - checked[first][1] * checked[second][0]
             for second in range(n_electrons)
         ]
         for first in range(n_electrons)
@@ -175,7 +186,7 @@ def cofactor_seed_family_amplitudes(
         jastrow.append(_product(factors))
         derivative_u.append(
             sum(
-                checked[other, 1]
+                checked[other][1]
                 * _product(
                     [factor for index, factor in enumerate(factors) if index != slot]
                 )
@@ -184,7 +195,7 @@ def cofactor_seed_family_amplitudes(
         )
         derivative_v.append(
             sum(
-                -checked[other, 0]
+                -checked[other][0]
                 * _product(
                     [factor for index, factor in enumerate(factors) if index != slot]
                 )
