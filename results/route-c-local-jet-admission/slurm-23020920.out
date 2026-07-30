@@ -1,0 +1,8 @@
+compile sector=l0 seconds=211.543497423
+warmup sector=l0 index=1 seconds=8.689749906
+warmup sector=l0 index=2 seconds=8.490875771
+measure sector=l0 index=1 seconds=8.242571667
+measure sector=l0 index=2 seconds=8.307270458
+measure sector=l0 index=3 seconds=8.429528512
+measure sector=l0 index=4 seconds=8.689250739
+measure sector=l0 index=5 seconds=8.319856115
