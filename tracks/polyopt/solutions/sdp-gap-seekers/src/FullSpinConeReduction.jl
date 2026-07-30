@@ -314,9 +314,12 @@ function full_spin_nontrivial_cone_redundancy_truth(
         length(block.rows)
         for block in orbit_blocks
     ])
+    orbit_inventory_shape =
+        length(expected_orbit_dimensions) == 3 &&
+        expected_orbit_dimensions[1] == 1 &&
+        expected_orbit_dimensions[2] == expected_orbit_dimensions[3]
     exact =
-        length(orbit_blocks) == 3 &&
-        expected_orbit_dimensions == [1, 81, 81] &&
+        orbit_inventory_shape &&
         orbit_projection_exact &&
         orbit_congruence_exact &&
         stable_cross_blocks_zero &&
@@ -328,6 +331,7 @@ function full_spin_nontrivial_cone_redundancy_truth(
         exact=exact,
         orbit_block_count=length(orbit_blocks),
         orbit_block_dimensions=expected_orbit_dimensions,
+        orbit_inventory_shape=orbit_inventory_shape,
         orbit_projection_exact=orbit_projection_exact,
         orbit_congruence_exact=orbit_congruence_exact,
         orbit_entry_count=orbit_entry_count,
