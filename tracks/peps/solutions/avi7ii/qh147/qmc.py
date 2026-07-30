@@ -332,6 +332,7 @@ def main(argv=None) -> int:
     parser.add_argument("--beta", type=float, required=True)
     parser.add_argument("--M", type=int, required=True)
     parser.add_argument("--chain", type=int, required=True)
+    parser.add_argument("--thermal-sweeps", type=int)
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args(argv)
     raw = json.loads(Path(args.config).read_text(encoding="utf-8"))
@@ -347,6 +348,13 @@ def main(argv=None) -> int:
         + 10 * m_index
         + args.chain
     )
+    thermal_sweeps = (
+        raw["thermal_sweeps"]
+        if args.thermal_sweeps is None
+        else args.thermal_sweeps
+    )
+    if thermal_sweeps <= 0:
+        raise ValueError("thermal_sweeps must be positive")
     cfg = QMCConfig(
         raw["model"]["lx"],
         raw["model"]["ly"],
@@ -354,7 +362,7 @@ def main(argv=None) -> int:
         args.field,
         raw["model"]["j"],
         args.M,
-        raw["thermal_sweeps"],
+        thermal_sweeps,
         raw["measure_sweeps"],
         raw["bins"],
         seed,

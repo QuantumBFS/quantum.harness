@@ -4,6 +4,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 
+import qh147.qmc as qmc_module
 from qh147.qmc import QMCConfig, main, run_chain
 
 
@@ -130,3 +131,63 @@ def test_cli_dry_run_writes_the_selected_cell(tmp_path):
     assert code == 0
     assert manifest["status"] == "rehearsed"
     assert manifest["params"]["seed"] == 148912
+    assert manifest["params"]["thermal_sweeps"] == 1000
+
+
+def test_cli_thermal_sweeps_override_is_recorded(tmp_path, monkeypatch):
+    monkeypatch.setattr(
+        qmc_module,
+        "run_chain",
+        lambda cfg, output: qmc_module.QMCResult(
+            bin_energy=np.asarray([-1.0, -1.1]),
+            mean_energy=-1.05,
+            stderr_energy=0.05,
+            mean_cluster_fraction=0.25,
+        ),
+    )
+
+    assert main(
+        [
+            "--config",
+            str(CONFIG),
+            "--run-dir",
+            str(tmp_path),
+            "--field",
+            "3.0",
+            "--beta",
+            "0.5",
+            "--M",
+            "128",
+            "--chain",
+            "0",
+            "--thermal-sweeps",
+            "16000",
+        ]
+    ) == 0
+
+    manifest = json.loads((tmp_path / "manifest.json").read_text(encoding="utf-8"))
+    assert manifest["settings"]["thermal_sweeps"] == 16000
+
+
+@pytest.mark.parametrize("value", ("0", "-1"))
+def test_cli_rejects_nonpositive_thermal_sweeps_override(tmp_path, value):
+    with pytest.raises(ValueError, match="thermal_sweeps"):
+        main(
+            [
+                "--config",
+                str(CONFIG),
+                "--run-dir",
+                str(tmp_path),
+                "--field",
+                "3.0",
+                "--beta",
+                "0.5",
+                "--M",
+                "32",
+                "--chain",
+                "0",
+                "--thermal-sweeps",
+                value,
+                "--dry-run",
+            ]
+        )

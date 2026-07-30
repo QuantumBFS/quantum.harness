@@ -59,16 +59,19 @@ def _echo_contract(
     manifest: dict, *, params: dict, settings: dict, provenance: dict
 ) -> dict:
     runtime_provenance = manifest.get("provenance", {})
+    runtime_settings = manifest.get("settings", {})
     result = dict(manifest)
     if runtime_provenance:
         result["runtime_provenance"] = runtime_provenance
+    if runtime_settings:
+        result["runtime_settings"] = runtime_settings
     result.update(
         {"params": params, "settings": settings, "provenance": provenance}
     )
     return result
 
 
-def _dry_run(kind: str, params: dict) -> dict:
+def _dry_run(kind: str, params: dict, settings: dict) -> dict:
     if kind == "qmc":
         raw = json.loads(QMC_CONFIG.read_text(encoding="utf-8"))
         h_index = raw["model"]["fields"].index(params["h"])
@@ -91,7 +94,7 @@ def _dry_run(kind: str, params: dict) -> dict:
             params["h"],
             raw["model"]["j"],
             params["M"],
-            raw["thermal_sweeps"],
+            settings.get("thermal_sweeps", raw["thermal_sweeps"]),
             raw["measure_sweeps"],
             raw["bins"],
             seed,
@@ -110,23 +113,24 @@ def _dry_run(kind: str, params: dict) -> dict:
     return {"status": "rehearsed"}
 
 
-def _run_qmc(params: dict, output: Path) -> dict:
-    code = qmc.main(
-        [
-            "--config",
-            str(QMC_CONFIG),
-            "--run-dir",
-            str(output),
-            "--field",
-            str(params["h"]),
-            "--beta",
-            str(params["beta"]),
-            "--M",
-            str(params["M"]),
-            "--chain",
-            str(params["chain"]),
-        ]
-    )
+def _run_qmc(params: dict, settings: dict, output: Path) -> dict:
+    command = [
+        "--config",
+        str(QMC_CONFIG),
+        "--run-dir",
+        str(output),
+        "--field",
+        str(params["h"]),
+        "--beta",
+        str(params["beta"]),
+        "--M",
+        str(params["M"]),
+        "--chain",
+        str(params["chain"]),
+    ]
+    if "thermal_sweeps" in settings:
+        command.extend(["--thermal-sweeps", str(settings["thermal_sweeps"])])
+    code = qmc.main(command)
     if code:
         raise RuntimeError(f"QMC cell returned {code}")
     return json.loads((output / "manifest.json").read_text(encoding="utf-8"))
@@ -217,9 +221,9 @@ def main(argv=None) -> int:
             return 0
     try:
         if args.dry_run:
-            manifest = _dry_run(args.kind, params)
+            manifest = _dry_run(args.kind, params, settings)
         elif args.kind == "qmc":
-            manifest = _run_qmc(params, output)
+            manifest = _run_qmc(params, settings, output)
         elif args.kind == "pepo":
             manifest = _run_pepo(params, output)
         else:
