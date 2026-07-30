@@ -36,16 +36,26 @@ unmatched entries set the truth result to exact. There are 12 target blocks
 and 940,050 mapped triangle entries at `L=2,d=2`. Cone removal is guarded by
 the exact result and is disabled in the truth-only jobs.
 
-## L=1 normalization diagnostic
+## L=1 controls
 
 SCNet job `118194879`, source commit `81a1875`, proved all 12 spin-blind row
 maps bijective. All six centered target blocks were entrywise equal after the
 SO(3) projection. The six scalar blocks had 1,107 entries that were neither
 equal nor sign-opposite under unit scaling. This disproves naïve equality but
-does not disprove congruence: scalar stabilizer rows can be singleton or
-two-row combinations and therefore carry different exact integer norms. The
-next control uses the norm-derived positive diagonal congruence above; no cone
-was removed by `118194879`.
+did not by itself disprove congruence: scalar stabilizer rows can be singleton
+or two-row combinations and therefore carry different exact integer norms.
+No cone was removed by `118194879`.
+
+SCNet job `118195346`, source commit `7850757`, tested the norm-derived
+positive diagonal congruence and disproved it for the scalar blocks. Each
+scalar-minus block has 30 rows with norm ratio 1 and 3 rows with ratio 1/2;
+all 465 ordinary/ordinary entries pass and all 96 entries touching an
+exceptional row fail. Each scalar-plus block has 42 ordinary rows and 6
+ratio-1/2 rows; all 903 ordinary/ordinary entries pass and all 273 incident
+entries fail. Zero entries were repaired by scaling and there were no sign-
+opposite matches. The centered blocks still pass exactly. Therefore the L=2
+gate is not authorized: the exceptional scalar rows require a different
+multiplicity-basis map or their cones must be retained.
 
 If the gate passes, removing the three duplicate `l=2` copies per group would
 change the retained inventory from 2,540,067 to 1,600,017 packed entries while

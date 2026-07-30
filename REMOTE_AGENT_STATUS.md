@@ -1,6 +1,6 @@
 # Quantum Harness Issue #88 — remote research agent status
 
-Updated: 2026-07-30T00:54:25Z
+Updated: 2026-07-30T01:09:31Z
 
 - Objective: obtain a new reproducible numerical certificate for an
   unrestricted frustrated spin-1/2 model, prioritizing the Shastry--Sutherland
@@ -317,15 +317,24 @@ Updated: 2026-07-30T00:54:25Z
   correct any mapping failure before launching the separate L=2 truth gate.
 - Job `118194879` closed after 15:09 at 2,598,132 KiB peak. All 12 row maps
   were bijective and all centered entries matched, but scalar blocks produced
-  1,107 unit-scaling mismatches with no sign-only cases. This is a
-  normalization diagnostic, not a congruence disproof. The revised L=1 gate
-  uses expanded integer row norms to test the exact positive diagonal
-  congruence before any L=2 job or cone removal.
+  1,107 unit-scaling mismatches with no sign-only cases. This motivated, but
+  did not prove, a normalization hypothesis. The revised L=1 gate uses
+  expanded integer row norms to test the exact positive diagonal congruence
+  before any L=2 job or cone removal.
 - Commit `7850757` implements that exact norm-derived congruence. Slurm
   test-only accepted it, and SCNet L=1 truth-only control job `118195346` was
   submitted from the immutable commit on 8 CPUs / 16000 MiB / 30 minutes. It
   has no optimizer and cannot delete cones. Keep the checkout fixed until the
   control closes; launch no L=2 truth job unless opposite and unmatched counts
   are both exactly zero.
+- Job `118195346` closed fail-closed after 14:11 at 2,517,212 KiB peak. All
+  centered entries still passed. In each scalar-minus block, 30 ordinary rows
+  had ratio 1 and 3 exceptional rows had norm ratio 1/2; exactly all 96 entries
+  touching an exceptional row failed. Scalar-plus similarly had 42 ordinary
+  rows, 6 exceptional ratio-1/2 rows, and all 273 incident entries failed.
+  There were zero scaled, irrational-zero, or opposite matches. Thus row norm
+  does not repair the scalar subspace, no cone is removed, and no L=2 job is
+  authorized. The next changed action is to identify the exceptional scalar
+  rows and derive their correct SO(3) multiplicity map at L=1.
 
 No user input or new credential is currently required.

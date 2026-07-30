@@ -1538,8 +1538,8 @@ deliberate gate failure. All 12 row maps were bijective. The six centered
 blocks were exactly equal after projection. Each scalar-minus character had
 465 equal and 96 unmatched entries; each scalar-plus character had 903 equal
 and 273 unmatched entries. There were zero opposite-sign matches, for 14,715
-equal and 1,107 unmatched entries overall. This localizes the issue to row
-normalization: scalar stabilizer eigenspaces include differently sized
+equal and 1,107 unmatched entries overall. This suggested a row-normalization
+hypothesis because scalar stabilizer eigenspaces include differently sized
 integer combinations. The next changed action is not an L=2 run. First rerun
 L=1 with the exact positive diagonal congruence obtained from expanded source-
 row norms. An irrational scale product is accepted only when both entries are
@@ -1553,3 +1553,18 @@ test-only accepted the 8-CPU / 16000-MiB / 30-minute request, and SCNet job
 no optimizer and no cone-removal flag. The next action is conditional: zero
 opposite and zero unmatched entries authorize the separate L=2 truth audit;
 any failure must be diagnosed at L=1 without repeating the L=2 signature.
+
+SCNet L=1 control `118195346`, source `7850757`, ended fail-closed after
+14:11 at 2,517,212 KiB peak RSS. The norm-derived diagonal congruence did not
+change a single classification: 14,715 unit-equal, zero scaled, zero
+irrational-zero, zero opposite, and 1,107 unmatched entries. The ratio
+inventory explains the exact partition. Each scalar-minus block has 30 rows
+at ratio 1 and 3 rows at ratio 1/2; the 465 ordinary/ordinary entries all pass
+and all 90 mixed plus 6 exceptional/exceptional entries fail. Each scalar-plus
+block has 42 rows at ratio 1 and 6 at ratio 1/2; the 903 ordinary/ordinary
+entries pass and all 252 mixed plus 21 exceptional/exceptional entries fail.
+This falsifies the diagonal normalization tactic without running an optimizer
+or producing physics evidence. No cone is removed and no L=2 truth job is
+authorized. Next changed action: expose the exceptional scalar row signatures
+and exact entry relations at L=1, then derive a correct multiplicity-basis map
+or retain those cones.

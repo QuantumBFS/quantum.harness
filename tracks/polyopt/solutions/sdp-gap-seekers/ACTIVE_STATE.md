@@ -892,12 +892,22 @@ Updated: 2026-07-29 UTC.
   12 spin-blind maps were all bijective. The six centered blocks matched every
   projected entry exactly, while the scalar blocks had 1,107 unit-scaling
   mismatches and zero sign-only mismatches. This disproves naïve equality,
-  not congruence: scalar l=2 rows have different exact integer norms. The
-  changed control compares the exact positive diagonal congruence determined
-  by expanded row norms; cone deletion remains disabled until it passes.
+  not yet congruence; different exact integer norms were the next tested
+  hypothesis. The changed control compares the exact positive diagonal
+  congruence determined by expanded row norms; cone deletion remains disabled
+  until it passes.
 - Commit `7850757` applies the norm correction. After Slurm test-only
   admission, L=1 truth-only control `118195346` was submitted on SCNet from
   that immutable commit using 8 CPUs / 16000 MiB / 30 minutes. The runner has
   no optimizer and cone deletion is disabled. Preserve the checkout and do
   not launch the L=2 gate unless this control has zero opposite and zero
   unmatched exact entries.
+- L=1 control `118195346` failed the corrected gate after 14:11 at 2,517,212
+  KiB peak RSS. Centered blocks remained exact. For each scalar-minus block,
+  the 30 ratio-1 rows generated all 465 passing entries while every one of the
+  96 entries incident to 3 norm-ratio-1/2 rows failed. Scalar-plus repeated the
+  same partition with 42 ordinary and 6 exceptional rows: 903 pass, 273 fail.
+  There were zero scaled, irrational-zero, or opposite matches. This disproves
+  the diagonal row-normalization repair. No cone was removed and L=2 remains
+  forbidden; identify the exceptional scalar rows and their correct SO(3)
+  map next.
