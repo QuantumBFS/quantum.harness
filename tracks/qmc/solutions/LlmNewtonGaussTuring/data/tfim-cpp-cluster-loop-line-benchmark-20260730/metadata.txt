@@ -1,0 +1,17 @@
+run_id=tfim-cpp-cluster-loop-line-benchmark-20260730
+purpose=dependency-free C++17 cluster-versus-loop-versus-segment-line performance pilot
+run_base_commit=670220a2ea92f2fb6777333b917f7207f335d0c7
+command=build/tfim_update_benchmark data/processed/tfim-cpp-cluster-loop-line-benchmark-20260730/efficiency.csv 1 100 1000
+algorithms=cluster,loop,line
+interaction=-1.0
+longitudinal_field=0.0
+triangular=Lx=12,Ly=12,Gamma=4.76811,beta=24.0
+honeycomb=Lx=8,Ly=8,Gamma=2.13250,beta=16.0
+thermalization_sweeps=100
+measurement_sweeps=1000
+repeats=1
+source_sha256.tfim_sse.cpp=1f0650c94efaac7c96491d9551c123714733d230185414ab01351852d5e6e6a8
+source_sha256.tfim_sse.hpp=bc066ede386e7e7f77a1325a4e52425dc3b6e36e8cdf663a37db93ba049aacce
+source_sha256.benchmark_updates.cpp=545406e6f9ee264e775dc2012160f91676249b25c2165579bc463717a90a02a2
+output_sha256.efficiency.csv=ae459466599dea9b8b409637ed389f47bb5631a34d202f21aa4916f4ccee8e1f
+limitation=one short chain per cell; directional performance pilot only
