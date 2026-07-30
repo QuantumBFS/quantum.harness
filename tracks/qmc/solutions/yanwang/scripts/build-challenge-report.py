@@ -111,14 +111,14 @@ def configure_plot_style(plt) -> None:
             "ytick.labelsize": 9.5,
             "legend.fontsize": 9,
             "figure.titlesize": 16,
-            "figure.facecolor": "#fbfaf6",
+            "figure.facecolor": "#ffffff",
             "axes.facecolor": "#ffffff",
             "axes.edgecolor": "#333333",
             "axes.linewidth": 0.8,
             "grid.color": "#e6e3da",
             "grid.linewidth": 0.75,
             "grid.alpha": 0.9,
-            "savefig.facecolor": "#fbfaf6",
+            "savefig.facecolor": "#ffffff",
         }
     )
 
