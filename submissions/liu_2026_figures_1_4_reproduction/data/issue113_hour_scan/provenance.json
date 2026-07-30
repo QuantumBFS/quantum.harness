@@ -1,0 +1,12 @@
+{
+  "issue": "https://github.com/QuantumBFS/quantum.harness/issues/113",
+  "paper": "arXiv:2606.05060v1",
+  "simulator_commit": "02108750a5b5f9217b21864ff1ee52453442fdd4",
+  "data_kind": "synthetic query-only finite-shot parameter scan",
+  "claim": "fixed-rank-10 gap and seed study; not a dimension sweep or full-parameter baseline",
+  "wall_budget_seconds": 3600,
+  "pilot_four_cycle_runtime_seconds": 354.9,
+  "pilot_max_rss_kib": 313444,
+  "production_cycle_cutoff": 2,
+  "cutoff_reason": "nine four-cycle cells would press or exceed the one-hour wall budget after measured pilot cost"
+}

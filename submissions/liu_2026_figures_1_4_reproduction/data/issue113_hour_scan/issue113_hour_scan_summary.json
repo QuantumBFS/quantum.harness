@@ -1,0 +1,34 @@
+{
+  "scope": "fixed k=10; three gap strengths; three seeds",
+  "claim_boundary": "This is a gap/seed scan, not the required subspace-dimension scan or a full-parameter black-box baseline.",
+  "aggregate": [
+    {
+      "gap_strength": 0.03,
+      "successful_cells": 3,
+      "target_success_rate": 1.0,
+      "final_coherent_error_mean": 0.0002529303533393608,
+      "final_coherent_error_std": 3.8755067451067976e-05,
+      "queries_to_target_mean": 104.0,
+      "queries_to_target_std": 10.392304845413264
+    },
+    {
+      "gap_strength": 0.11,
+      "successful_cells": 3,
+      "target_success_rate": 1.0,
+      "final_coherent_error_mean": 0.0002991586853861768,
+      "final_coherent_error_std": 0.0001417473718935656,
+      "queries_to_target_mean": 218.66666666666666,
+      "queries_to_target_std": 62.93117934166921
+    },
+    {
+      "gap_strength": 0.7,
+      "successful_cells": 3,
+      "target_success_rate": 0.0,
+      "final_coherent_error_mean": 0.06005913082965553,
+      "final_coherent_error_std": 0.014035215636554105,
+      "queries_to_target_mean": null,
+      "queries_to_target_std": null
+    }
+  ],
+  "plot": "submissions/liu_2026_figures_1_4_reproduction/figures/issue113/issue113_hour_scan.png"
+}

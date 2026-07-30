@@ -1,0 +1,211 @@
+{
+  "schema_version": 2,
+  "provenance": "synthetic demonstration",
+  "description": "User-replaceable Figure 2-4 experimental-data and microscopic-model manifest. Inline panel rows are deliberately synthetic test data.",
+  "physical_model": {
+    "provenance": "paper-stated values plus explicit unavailable placeholders",
+    "atom": {
+      "isotope": "171Yb",
+      "qubit_states": [
+        {"label": "0", "configuration": "6s6p", "term": "3P0", "F": 0.5, "m_F": -0.5, "source": "arXiv:2606.05060v1 Section II"},
+        {"label": "1", "configuration": "6s6p", "term": "3P0", "F": 0.5, "m_F": 0.5, "source": "arXiv:2606.05060v1 Section II"}
+      ],
+      "intermediate_states": [],
+      "rydberg_states": [
+        {"label": "r", "configuration": "6s-nu-s", "nu": 52.3, "F": 0.5, "m_F": -0.5, "source": "arXiv:2606.05060v1 Section II"},
+        {"label": "rprime", "configuration": "6s-nu-s", "nu": 52.3, "F": 0.5, "m_F": 0.5, "source": "arXiv:2606.05060v1 Section II"}
+      ]
+    },
+    "laser_beams": [
+      {
+        "id": "gate_uv",
+        "role": "direct_single_photon_rydberg_gate",
+        "wavelength_nm": 302.0,
+        "detuning_mhz": 0.0,
+        "rabi_frequency_mhz": 6.0,
+        "propagation_direction_lab": null,
+        "polarization": {
+          "description": "linear and perpendicular to the quantization field",
+          "sigma_minus_relative_amplitude": 1.0,
+          "pi_relative_amplitude_upper_bound": 0.0018,
+          "sigma_plus_relative_amplitude": 1.0
+        },
+        "frequency_conversion_sources_nm": [1971.0, 1560.0],
+        "source": "arXiv:2606.05060v1 Section II and Appendix A"
+      }
+    ],
+    "magnetic_field": {
+      "magnitude_gauss": null,
+      "direction_lab": null,
+      "angle_to_gate_beam_deg": 90.0,
+      "rydberg_zeeman_splitting_mhz": 16.1,
+      "source": "paper gives the direction relation and measured splitting, not the field magnitude"
+    },
+    "geometry": {
+      "dimer_distance_um": 2.0,
+      "dimer_axis_lab": null,
+      "neighboring_dimer_distance_um": 25.0,
+      "source": "arXiv:2606.05060v1 Appendix A; absolute orientation is not reported"
+    },
+    "microscopic_inputs": {
+      "pulse_waveform": {
+        "source": "unavailable",
+        "path": "",
+        "provenance": "authors' numerical pulse array is not published"
+      },
+      "zeeman_calibration": {
+        "source": "unavailable",
+        "path": "",
+        "provenance": "supply measured shifts versus magnetic field"
+      },
+      "polarization_calibration": {
+        "source": "unavailable",
+        "path": "",
+        "provenance": "supply measured spherical polarization components"
+      },
+      "mqdt_pair_states": {
+        "source": "unavailable",
+        "path": "",
+        "provenance": "supply pair eigenenergies and product-state overlaps versus distance"
+      },
+      "distance_samples": {
+        "source": "unavailable",
+        "path": "",
+        "provenance": "supply measured or calibrated thermal position samples"
+      },
+      "decay_branching": {
+        "source": "unavailable",
+        "path": "",
+        "provenance": "supply state-resolved Rydberg decay rates"
+      },
+      "laser_phase_noise_psd": {
+        "source": "unavailable",
+        "path": "",
+        "provenance": "supply measured one-sided phase-noise spectrum"
+      },
+      "laser_amplitude_noise_psd": {
+        "source": "unavailable",
+        "path": "",
+        "provenance": "supply measured one-sided fractional-amplitude-noise spectrum"
+      }
+    }
+  },
+  "panels": {
+    "fig2a_imaging": {
+      "source": "inline",
+      "rows": [
+        {"shot_id": 1, "prepared_state": "0", "first_image_photon_count": 94, "second_image_photon_count": 7, "state_assignment": "0", "loss_assignment": false},
+        {"shot_id": 2, "prepared_state": "0", "first_image_photon_count": 102, "second_image_photon_count": 11, "state_assignment": "0", "loss_assignment": false},
+        {"shot_id": 3, "prepared_state": "0", "first_image_photon_count": 87, "second_image_photon_count": 5, "state_assignment": "0", "loss_assignment": false},
+        {"shot_id": 4, "prepared_state": "0", "first_image_photon_count": 111, "second_image_photon_count": 8, "state_assignment": "0", "loss_assignment": false},
+        {"shot_id": 5, "prepared_state": "0", "first_image_photon_count": 78, "second_image_photon_count": 14, "state_assignment": "0", "loss_assignment": false},
+        {"shot_id": 6, "prepared_state": "0", "first_image_photon_count": 12, "second_image_photon_count": 9, "state_assignment": "loss", "loss_assignment": true},
+        {"shot_id": 7, "prepared_state": "1", "first_image_photon_count": 8, "second_image_photon_count": 91, "state_assignment": "1", "loss_assignment": false},
+        {"shot_id": 8, "prepared_state": "1", "first_image_photon_count": 13, "second_image_photon_count": 104, "state_assignment": "1", "loss_assignment": false},
+        {"shot_id": 9, "prepared_state": "1", "first_image_photon_count": 6, "second_image_photon_count": 86, "state_assignment": "1", "loss_assignment": false},
+        {"shot_id": 10, "prepared_state": "1", "first_image_photon_count": 9, "second_image_photon_count": 112, "state_assignment": "1", "loss_assignment": false},
+        {"shot_id": 11, "prepared_state": "1", "first_image_photon_count": 15, "second_image_photon_count": 77, "state_assignment": "1", "loss_assignment": false},
+        {"shot_id": 12, "prepared_state": "1", "first_image_photon_count": 7, "second_image_photon_count": 8, "state_assignment": "loss", "loss_assignment": true}
+      ]
+    },
+    "fig2b_single_qubit_rb": {
+      "source": "inline",
+      "rows": [
+        {"rb_depth": 1, "sequence_id": 1, "shot_id": 1, "success": true, "survival": 1, "postselection_flag": true},
+        {"rb_depth": 1, "sequence_id": 2, "shot_id": 2, "success": true, "survival": 1, "postselection_flag": true},
+        {"rb_depth": 4, "sequence_id": 1, "shot_id": 3, "success": true, "survival": 1, "postselection_flag": true},
+        {"rb_depth": 4, "sequence_id": 2, "shot_id": 4, "success": true, "survival": 1, "postselection_flag": true},
+        {"rb_depth": 8, "sequence_id": 1, "shot_id": 5, "success": true, "survival": 1, "postselection_flag": true},
+        {"rb_depth": 8, "sequence_id": 2, "shot_id": 6, "success": false, "survival": 0, "postselection_flag": true},
+        {"rb_depth": 16, "sequence_id": 1, "shot_id": 7, "success": true, "survival": 1, "postselection_flag": true},
+        {"rb_depth": 16, "sequence_id": 2, "shot_id": 8, "success": false, "survival": 0, "postselection_flag": true}
+      ]
+    },
+    "fig3d_mode_sensitivity": {
+      "source": "inline",
+      "rows": [
+        {"mode": 1, "coefficient": -0.02, "rb_fidelity_or_error": 0.0044, "uncertainty": 0.0002, "theory_sensitivity": 11.0},
+        {"mode": 1, "coefficient": 0.00, "rb_fidelity_or_error": 0.0040, "uncertainty": 0.0002, "theory_sensitivity": 10.0},
+        {"mode": 1, "coefficient": 0.02, "rb_fidelity_or_error": 0.0045, "uncertainty": 0.0002, "theory_sensitivity": 11.0},
+        {"mode": 2, "coefficient": -0.02, "rb_fidelity_or_error": 0.0049, "uncertainty": 0.0002, "theory_sensitivity": 14.0},
+        {"mode": 2, "coefficient": 0.00, "rb_fidelity_or_error": 0.0041, "uncertainty": 0.0002, "theory_sensitivity": 12.0},
+        {"mode": 2, "coefficient": 0.02, "rb_fidelity_or_error": 0.0048, "uncertainty": 0.0002, "theory_sensitivity": 14.0}
+      ]
+    },
+    "fig3e_channel_decomposition": {
+      "source": "inline",
+      "rows": [
+        {"mode": 1, "coefficient": -0.02, "initial_computational_state": "00", "leakage_channel": "00_to_Wprime", "measured_leakage": 0.0008, "leakage_uncertainty": 0.0001, "ramsey_phase": 0.001, "ramsey_phase_uncertainty": 0.0004},
+        {"mode": 1, "coefficient": 0.00, "initial_computational_state": "01", "leakage_channel": "01_to_0r", "measured_leakage": 0.0011, "leakage_uncertainty": 0.0001, "ramsey_phase": 0.000, "ramsey_phase_uncertainty": 0.0004},
+        {"mode": 2, "coefficient": 0.02, "initial_computational_state": "11", "leakage_channel": "11_to_W", "measured_leakage": 0.0015, "leakage_uncertainty": 0.0002, "ramsey_phase": -0.001, "ramsey_phase_uncertainty": 0.0004}
+      ]
+    },
+    "fig4a_waveforms": {
+      "source": "inline",
+      "rows": [
+        {"time_us": 0.00, "ideal_amplitude": 0.0, "before_amplitude": 0.0, "after_amplitude": 0.0, "ideal_intensity": 0.0, "before_intensity": 0.0, "after_intensity": 0.0, "wrapped_phase": 0.0, "unwrapped_phase": 0.0, "measurement_uncertainty": 0.001},
+        {"time_us": 0.25, "ideal_amplitude": 0.95, "before_amplitude": 0.89, "after_amplitude": 0.94, "ideal_intensity": 0.9025, "before_intensity": 0.7921, "after_intensity": 0.8836, "wrapped_phase": 0.30, "unwrapped_phase": 0.30, "measurement_uncertainty": 0.005},
+        {"time_us": 0.55, "ideal_amplitude": 0.0, "before_amplitude": 0.02, "after_amplitude": 0.005, "ideal_intensity": 0.0, "before_intensity": 0.0004, "after_intensity": 0.000025, "wrapped_phase": 0.0, "unwrapped_phase": 0.0, "measurement_uncertainty": 0.001}
+      ]
+    },
+    "fig4b_closed_loop": {
+      "source": "inline",
+      "rows": [
+        {"cycle": 1, "mode": 1, "scan_coefficient": -0.02, "gate_error": 0.0048, "uncertainty": 0.0002, "selected_optimum": false},
+        {"cycle": 1, "mode": 1, "scan_coefficient": -0.01, "gate_error": 0.0042, "uncertainty": 0.0002, "selected_optimum": false},
+        {"cycle": 1, "mode": 1, "scan_coefficient": 0.00, "gate_error": 0.0040, "uncertainty": 0.0002, "selected_optimum": true},
+        {"cycle": 1, "mode": 1, "scan_coefficient": 0.01, "gate_error": 0.0041, "uncertainty": 0.0002, "selected_optimum": false},
+        {"cycle": 1, "mode": 1, "scan_coefficient": 0.02, "gate_error": 0.0047, "uncertainty": 0.0002, "selected_optimum": false}
+      ]
+    },
+    "fig4c_echoed_rb": {
+      "source": "inline",
+      "rows": [
+        {"rb_circuit_depth": 1, "sequence_id": 1, "shot_id": 1, "success": true, "loss": false, "postselection_flag": true},
+        {"rb_circuit_depth": 1, "sequence_id": 2, "shot_id": 2, "success": true, "loss": false, "postselection_flag": true},
+        {"rb_circuit_depth": 4, "sequence_id": 1, "shot_id": 3, "success": true, "loss": false, "postselection_flag": true},
+        {"rb_circuit_depth": 4, "sequence_id": 2, "shot_id": 4, "success": true, "loss": false, "postselection_flag": true},
+        {"rb_circuit_depth": 8, "sequence_id": 1, "shot_id": 5, "success": true, "loss": false, "postselection_flag": true},
+        {"rb_circuit_depth": 8, "sequence_id": 2, "shot_id": 6, "success": false, "loss": false, "postselection_flag": true},
+        {"rb_circuit_depth": 16, "sequence_id": 1, "shot_id": 7, "success": false, "loss": false, "postselection_flag": true},
+        {"rb_circuit_depth": 16, "sequence_id": 2, "shot_id": 8, "success": false, "loss": false, "postselection_flag": true}
+      ]
+    },
+    "fig4d_intensity": {
+      "source": "inline",
+      "rows": [
+        {"gate_type": "AR", "intensity_ratio": 0.94, "gate_error": 0.00475, "uncertainty": 0.0001, "fidelity_convention": "pointwise_cz_equivalent"},
+        {"gate_type": "AR", "intensity_ratio": 0.97, "gate_error": 0.00410, "uncertainty": 0.0001, "fidelity_convention": "pointwise_cz_equivalent"},
+        {"gate_type": "AR", "intensity_ratio": 0.98, "gate_error": 0.00403, "uncertainty": 0.0001, "fidelity_convention": "pointwise_cz_equivalent"},
+        {"gate_type": "AR", "intensity_ratio": 0.99, "gate_error": 0.00402, "uncertainty": 0.0001, "fidelity_convention": "pointwise_cz_equivalent"},
+        {"gate_type": "AR", "intensity_ratio": 1.01, "gate_error": 0.00402, "uncertainty": 0.0001, "fidelity_convention": "pointwise_cz_equivalent"},
+        {"gate_type": "AR", "intensity_ratio": 1.02, "gate_error": 0.00403, "uncertainty": 0.0001, "fidelity_convention": "pointwise_cz_equivalent"},
+        {"gate_type": "AR", "intensity_ratio": 1.03, "gate_error": 0.00410, "uncertainty": 0.0001, "fidelity_convention": "pointwise_cz_equivalent"},
+        {"gate_type": "AR", "intensity_ratio": 1.06, "gate_error": 0.00475, "uncertainty": 0.0001, "fidelity_convention": "pointwise_cz_equivalent"},
+        {"gate_type": "same_duration_nonrobust_surrogate", "intensity_ratio": 0.94, "gate_error": 0.0050, "uncertainty": 0.0001, "fidelity_convention": "pointwise_cz_equivalent"},
+        {"gate_type": "same_duration_nonrobust_surrogate", "intensity_ratio": 0.97, "gate_error": 0.00425, "uncertainty": 0.0001, "fidelity_convention": "pointwise_cz_equivalent"},
+        {"gate_type": "same_duration_nonrobust_surrogate", "intensity_ratio": 0.98, "gate_error": 0.00410, "uncertainty": 0.0001, "fidelity_convention": "pointwise_cz_equivalent"},
+        {"gate_type": "same_duration_nonrobust_surrogate", "intensity_ratio": 0.99, "gate_error": 0.00402, "uncertainty": 0.0001, "fidelity_convention": "pointwise_cz_equivalent"},
+        {"gate_type": "same_duration_nonrobust_surrogate", "intensity_ratio": 1.01, "gate_error": 0.00402, "uncertainty": 0.0001, "fidelity_convention": "pointwise_cz_equivalent"},
+        {"gate_type": "same_duration_nonrobust_surrogate", "intensity_ratio": 1.02, "gate_error": 0.00410, "uncertainty": 0.0001, "fidelity_convention": "pointwise_cz_equivalent"},
+        {"gate_type": "same_duration_nonrobust_surrogate", "intensity_ratio": 1.03, "gate_error": 0.00425, "uncertainty": 0.0001, "fidelity_convention": "pointwise_cz_equivalent"},
+        {"gate_type": "same_duration_nonrobust_surrogate", "intensity_ratio": 1.06, "gate_error": 0.0050, "uncertainty": 0.0001, "fidelity_convention": "pointwise_cz_equivalent"}
+      ]
+    },
+    "fig4e_stability": {
+      "source": "inline",
+      "rows": [
+        {"elapsed_time": 0.0, "gate_error": 0.0040, "uncertainty": 0.0002, "calibration_or_reoptimization_event": "initial"},
+        {"elapsed_time": 1.0, "gate_error": 0.0042, "uncertainty": 0.0002, "calibration_or_reoptimization_event": "none"},
+        {"elapsed_time": 2.0, "gate_error": 0.0041, "uncertainty": 0.0002, "calibration_or_reoptimization_event": "recalibration"}
+      ]
+    },
+    "fig4f_error_budget": {
+      "source": "inline",
+      "rows": [
+        {"noise_source": "synthetic_decay", "raw_contribution": 0.0031, "postselected_contribution": 0.00012, "uncertainty": 0.00002, "parameter_source": "synthetic test value"},
+        {"noise_source": "synthetic_phase_noise", "raw_contribution": 0.00014, "postselected_contribution": 0.00010, "uncertainty": 0.00002, "parameter_source": "synthetic test value"}
+      ]
+    }
+  }
+}

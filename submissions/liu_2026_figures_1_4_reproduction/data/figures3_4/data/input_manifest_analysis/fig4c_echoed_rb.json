@@ -1,0 +1,93 @@
+{
+  "status": "analysis of supplied manifest data",
+  "provenance": "simulator/theory synthetic data; not experimental",
+  "panel": "fig4c_echoed_rb",
+  "input_manifest": "/home/thy/thy/work/quantum_harnessing/quantum.harness/tracks/qcs/results/20260730-143545-liu-2026-fig34-effective-digital-twin/input.in",
+  "input_source": "/home/thy/thy/work/quantum_harnessing/quantum.harness/tracks/qcs/results/20260730-143545-liu-2026-fig34-effective-digital-twin/generated_input/fig4c_echoed_rb.csv",
+  "fit": {
+    "aggregated": [
+      {
+        "depth": 1.0,
+        "shots": 6250,
+        "postselected_shots": 6224,
+        "success_probability": 0.9998393316195373,
+        "binomial_sigma": 0.00016065547277998318
+      },
+      {
+        "depth": 2.0,
+        "shots": 6250,
+        "postselected_shots": 6191,
+        "success_probability": 0.9990308512356647,
+        "binomial_sigma": 0.0003954615563042742
+      },
+      {
+        "depth": 4.0,
+        "shots": 6250,
+        "postselected_shots": 6153,
+        "success_probability": 0.9985372988785958,
+        "binomial_sigma": 0.0004872103275508144
+      },
+      {
+        "depth": 8.0,
+        "shots": 6250,
+        "postselected_shots": 6060,
+        "success_probability": 0.9971947194719472,
+        "binomial_sigma": 0.0006794254670061051
+      },
+      {
+        "depth": 16.0,
+        "shots": 6250,
+        "postselected_shots": 5874,
+        "success_probability": 0.991317671092952,
+        "binomial_sigma": 0.0012104798649877088
+      },
+      {
+        "depth": 24.0,
+        "shots": 6250,
+        "postselected_shots": 5673,
+        "success_probability": 0.9883659439450027,
+        "binomial_sigma": 0.0014236986409790146
+      },
+      {
+        "depth": 32.0,
+        "shots": 6250,
+        "postselected_shots": 5498,
+        "success_probability": 0.9825391051291379,
+        "binomial_sigma": 0.001766468116707125
+      },
+      {
+        "depth": 48.0,
+        "shots": 6250,
+        "postselected_shots": 5154,
+        "success_probability": 0.9743888242142026,
+        "binomial_sigma": 0.0022004357816476482
+      }
+    ],
+    "fit": {
+      "amplitude": 1.9999999999193412,
+      "decay": 0.999735785592696,
+      "offset": -0.9996116274606872,
+      "covariance": [
+        [
+          3293.9037810911436,
+          0.4370071749636223,
+          -3293.909726411573
+        ],
+        [
+          0.4370071749636223,
+          5.797860804455889e-05,
+          -0.4370079647411207
+        ],
+        [
+          -3293.9097264115726,
+          -0.4370079647411207,
+          3293.9156717663573
+        ]
+      ]
+    }
+  },
+  "rows": 50000,
+  "synthetic_points_generated": false,
+  "figure": "/home/thy/thy/work/quantum_harnessing/quantum.harness/tracks/qcs/results/20260730-143545-liu-2026-fig34-effective-digital-twin/figs/input_manifest_analysis/diagnostics/fig4c_echoed_rb.png",
+  "figure_provenance": "simulator/theory synthetic data; not experimental"
+}

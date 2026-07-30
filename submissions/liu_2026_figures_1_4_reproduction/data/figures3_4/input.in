@@ -1,0 +1,176 @@
+{
+  "schema_version": 2,
+  "provenance": "synthetic demonstration",
+  "description": "Finite-shot digital-twin data generated locally from cs_tweezer_sim plus an equivalent Figure-3 reoptimization. No author raw shots, AR array, or MQDT table are claimed.",
+  "physical_model": {
+    "provenance": "paper-stated values plus independently reoptimized pulse and explicit effective-model placeholders",
+    "atom": {
+      "isotope": "171Yb",
+      "qubit_states": [
+        {
+          "label": "0",
+          "configuration": "6s6p",
+          "term": "3P0",
+          "F": 0.5,
+          "m_F": -0.5,
+          "source": "arXiv:2606.05060v1 Section II"
+        },
+        {
+          "label": "1",
+          "configuration": "6s6p",
+          "term": "3P0",
+          "F": 0.5,
+          "m_F": 0.5,
+          "source": "arXiv:2606.05060v1 Section II"
+        }
+      ],
+      "intermediate_states": [],
+      "rydberg_states": [
+        {
+          "label": "r",
+          "configuration": "6s-nu-s",
+          "nu": 52.3,
+          "F": 0.5,
+          "m_F": -0.5,
+          "source": "arXiv:2606.05060v1 Section II"
+        },
+        {
+          "label": "rprime",
+          "configuration": "6s-nu-s",
+          "nu": 52.3,
+          "F": 0.5,
+          "m_F": 0.5,
+          "source": "arXiv:2606.05060v1 Section II"
+        }
+      ]
+    },
+    "laser_beams": [
+      {
+        "id": "gate_uv",
+        "role": "direct_single_photon_rydberg_gate",
+        "wavelength_nm": 302.0,
+        "detuning_mhz": 0.0,
+        "rabi_frequency_mhz": 6.0,
+        "propagation_direction_lab": null,
+        "polarization": {
+          "description": "linear and perpendicular to the quantization field",
+          "sigma_minus_relative_amplitude": 1.0,
+          "pi_relative_amplitude_upper_bound": 0.0018,
+          "sigma_plus_relative_amplitude": 1.0
+        },
+        "frequency_conversion_sources_nm": [
+          1971.0,
+          1560.0
+        ],
+        "source": "arXiv:2606.05060v1 Section II and Appendix A"
+      }
+    ],
+    "magnetic_field": {
+      "magnitude_gauss": null,
+      "direction_lab": null,
+      "angle_to_gate_beam_deg": 90.0,
+      "rydberg_zeeman_splitting_mhz": 16.1,
+      "source": "paper gives the direction relation and measured splitting, not the field magnitude"
+    },
+    "geometry": {
+      "dimer_distance_um": 2.0,
+      "dimer_axis_lab": null,
+      "neighboring_dimer_distance_um": 25.0,
+      "source": "arXiv:2606.05060v1 Appendix A; absolute orientation is not reported"
+    },
+    "microscopic_inputs": {
+      "pulse_waveform": {
+        "source": "csv",
+        "path": "generated_input/pulse_waveform.csv",
+        "provenance": "independent source-constrained 400-bin reoptimization; not the authors' unpublished waveform"
+      },
+      "zeeman_calibration": {
+        "source": "unavailable",
+        "path": "",
+        "provenance": "supply measured shifts versus magnetic field"
+      },
+      "polarization_calibration": {
+        "source": "unavailable",
+        "path": "",
+        "provenance": "supply measured spherical polarization components"
+      },
+      "mqdt_pair_states": {
+        "source": "unavailable",
+        "path": "",
+        "provenance": "supply pair eigenenergies and product-state overlaps versus distance"
+      },
+      "distance_samples": {
+        "source": "unavailable",
+        "path": "",
+        "provenance": "supply measured or calibrated thermal position samples"
+      },
+      "decay_branching": {
+        "source": "unavailable",
+        "path": "",
+        "provenance": "supply state-resolved Rydberg decay rates"
+      },
+      "laser_phase_noise_psd": {
+        "source": "unavailable",
+        "path": "",
+        "provenance": "supply measured one-sided phase-noise spectrum"
+      },
+      "laser_amplitude_noise_psd": {
+        "source": "unavailable",
+        "path": "",
+        "provenance": "supply measured one-sided fractional-amplitude-noise spectrum"
+      }
+    }
+  },
+  "panels": {
+    "fig2a_imaging": {
+      "source": "csv",
+      "path": "generated_input/fig2a_imaging.csv",
+      "provenance": "simulator/theory synthetic data; not experimental"
+    },
+    "fig2b_single_qubit_rb": {
+      "source": "csv",
+      "path": "generated_input/fig2b_single_qubit_rb.csv",
+      "provenance": "simulator/theory synthetic data; not experimental"
+    },
+    "fig3d_mode_sensitivity": {
+      "source": "csv",
+      "path": "generated_input/fig3d_mode_sensitivity.csv",
+      "provenance": "simulator/theory synthetic data; not experimental"
+    },
+    "fig3e_channel_decomposition": {
+      "source": "csv",
+      "path": "generated_input/fig3e_channel_decomposition.csv",
+      "provenance": "simulator/theory synthetic data; not experimental"
+    },
+    "fig4a_waveforms": {
+      "source": "csv",
+      "path": "generated_input/fig4a_waveforms.csv",
+      "provenance": "simulator/theory synthetic data; not experimental"
+    },
+    "fig4b_closed_loop": {
+      "source": "csv",
+      "path": "generated_input/fig4b_closed_loop.csv",
+      "provenance": "simulator/theory synthetic data; not experimental"
+    },
+    "fig4c_echoed_rb": {
+      "source": "csv",
+      "path": "generated_input/fig4c_echoed_rb.csv",
+      "provenance": "simulator/theory synthetic data; not experimental"
+    },
+    "fig4d_intensity": {
+      "source": "csv",
+      "path": "generated_input/fig4d_intensity.csv",
+      "provenance": "simulator/theory synthetic data; not experimental"
+    },
+    "fig4e_stability": {
+      "source": "csv",
+      "path": "generated_input/fig4e_stability.csv",
+      "provenance": "simulator/theory synthetic data; not experimental"
+    },
+    "fig4f_error_budget": {
+      "source": "csv",
+      "path": "generated_input/fig4f_error_budget.csv",
+      "provenance": "simulator/theory synthetic data; not experimental"
+    }
+  }
+}

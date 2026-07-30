@@ -1,0 +1,10 @@
+{
+  "run_id": "liu-2026-figure1-local",
+  "status": "approved",
+  "method": {
+    "settings": {
+      "time_nodes": 201,
+      "distortion_seed": 260605060
+    }
+  }
+}

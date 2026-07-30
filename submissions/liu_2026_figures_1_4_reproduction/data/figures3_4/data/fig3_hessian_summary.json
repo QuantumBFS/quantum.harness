@@ -1,0 +1,80 @@
+{
+  "provenance": "equivalent numerical reoptimization",
+  "default_convention": "paper_lab_iq",
+  "diagnostic_convention": "local_amplitude_phase_frame",
+  "frame_relation": "The continuous coordinates are related by a time-dependent orthogonal rotation through the ideal phase. Finite piecewise constant bins need not have identical spectra.",
+  "finite_bin_top10_spectrum_relative_difference": 0.02231591130472402,
+  "propagation_top10_spectrum_relative_differences": [
+    0.006571913289235598,
+    0.009604221248744514,
+    0.01370651232428533
+  ],
+  "propagation_top10_spectrum_max_relative_difference": 0.01370651232428533,
+  "last_bin_refinement_top10_spectrum_relative_difference": 0.11739771791597636,
+  "selected_resolution": {
+    "n_bins": 64,
+    "nodes": 401
+  },
+  "front_14_eigenvalues": [
+    239.0350976455415,
+    183.4692170339533,
+    178.9008880401155,
+    130.9908975562562,
+    76.01448652629419,
+    30.62781349693746,
+    23.554675063220845,
+    23.15258737360482,
+    10.553928841703748,
+    4.994445745138608,
+    6.798411962828891e-14,
+    5.276740522663394e-14,
+    4.755775153308385e-14,
+    4.3696570985708533e-14
+  ],
+  "lambda10_over_lambda11_absolute": 73464888159857.36,
+  "minimum_eigenvalue": -7.683610300160226e-14,
+  "psd_violation": -7.683610300160226e-14,
+  "symmetry_residual": 1.5747531547342823e-14,
+  "rank": 10,
+  "rank_stable_across_resolutions": true,
+  "fd_best_relative_error_by_principal_mode": [
+    4.7563974931183124e-07,
+    4.0842254198660005e-07,
+    3.558575603439885e-07,
+    2.717663632754764e-07,
+    2.0256125054854943e-07,
+    4.5659192465677407e-08,
+    1.125326317715552e-07,
+    8.169589371711007e-08,
+    2.229934549685379e-08,
+    7.370473851940377e-08
+  ],
+  "fd_max_best_relative_error": 4.7563974931183124e-07,
+  "null_fd_best_absolute_curvatures": [
+    1.381610875089084e-07,
+    1.7763568394002505e-07,
+    6.661338147750939e-07,
+    2.467162276944793e-07,
+    1.739349405246079e-07,
+    1.6159912913988393e-07,
+    5.10702591327572e-07,
+    1.36927506370436e-07
+  ],
+  "null_fd_max_best_curvature_over_lambda10": 1.3337492261748596e-07,
+  "plots": [
+    "/home/thy/thy/work/quantum_harnessing/quantum.harness/tracks/qcs/results/20260730-143545-liu-2026-fig34-effective-digital-twin/figs/fig3_theory_hessian.png",
+    "/home/thy/thy/work/quantum_harnessing/quantum.harness/tracks/qcs/results/20260730-143545-liu-2026-fig34-effective-digital-twin/figs/fig3_hessian_principal_modes_xy.png"
+  ],
+  "acceptance": {
+    "symmetric": true,
+    "psd_within_numerical_tolerance": true,
+    "rank_10_stable": true,
+    "principal_null_spectral_gap": true,
+    "principal_finite_difference": true,
+    "null_finite_difference": true,
+    "lab_local_frame_rank_invariance": true,
+    "lab_local_frame_spectrum_convergence": false,
+    "propagation_grid_convergence": true,
+    "all": false
+  }
+}

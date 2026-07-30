@@ -1,0 +1,50 @@
+{
+  "cell_id": "cell-0009",
+  "params": {
+    "gap_strength": 0.7,
+    "seed": 260605062
+  },
+  "settings": {
+    "principal_modes": 10,
+    "cycles": 2,
+    "scan_points": 9,
+    "shots_per_query": 50000,
+    "target_coherent_error": 0.001,
+    "irreducible_raw_floor": 0.004,
+    "cache_policy": "reuse fixed optimized waveform and Hessian; vary only black-box AOM gap and finite-shot seed; stop after two cycles to respect the one-hour wall budget"
+  },
+  "provenance": {
+    "issue": "https://github.com/QuantumBFS/quantum.harness/issues/113",
+    "paper": "arXiv:2606.05060v1",
+    "simulator_commit": "02108750a5b5f9217b21864ff1ee52453442fdd4",
+    "data_kind": "synthetic query-only finite-shot parameter scan",
+    "claim": "fixed-rank-10 gap and seed study; not a dimension sweep or full-parameter baseline"
+  },
+  "status": "success",
+  "success": true,
+  "results": {
+    "target_reached": false,
+    "target_cycle": null,
+    "query_count_to_target": null,
+    "shots_to_target": null,
+    "total_queries": 354,
+    "total_shots": 17700000,
+    "initial_coherent_error": 0.43913031098890554,
+    "final_coherent_error": 0.04760827343186058,
+    "final_observed_total_error": 0.051988960220795584,
+    "final_observed_uncertainty": 0.0009928155606202121,
+    "oracle_information_used": false,
+    "acceptance": {
+      "serialized_scans_present": true,
+      "target_budget_cycle_present": true
+    }
+  },
+  "evidence": {
+    "fixed_theory_config_hash": "0c8405dd46885bd3a72c68734529c25f9baa76a050d8e39a0343473daf6028da",
+    "fixed_theory_code_version": "02108750a5b5f9217b21864ff1ee52453442fdd4+source-07ed6f247ac9ae53",
+    "waveform_sha256": "bc4e55365da7da7eb8d566c5bbba9062d655449fd42aeebd6f033d6bb527f4c5",
+    "hessian_sha256": "783225001fae18806d49a87e2bf8a049c261101b591874a61e721a6487e5cade",
+    "runtime_seconds": 5.249510194000322,
+    "reused_complete_serialized_cell": false
+  }
+}

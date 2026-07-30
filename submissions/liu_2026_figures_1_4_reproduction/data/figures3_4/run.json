@@ -1,0 +1,236 @@
+{
+  "run_id": "20260730-143545-liu-2026-fig34-effective-digital-twin",
+  "status": "complete",
+  "paper": {
+    "id": "arXiv:2606.05060v1",
+    "title": "High-fidelity neutral atom gates leveraging low-rank Hessian optimization — Figures 3–4",
+    "url": "https://arxiv.org/abs/2606.05060"
+  },
+  "model": {
+    "name": "two-atom 171Yb four-level AR-CZ effective digital twin",
+    "H": "H(t)=\\Delta_r\\Pi_{r'}+\\frac{1}{2}\\left[\\Omega(t)\\sigma_+ + \\Omega^*(t)\\sigma_-\\right]+B_{\\mathrm{eff}}(R)\\Pi_{\\mathrm{double}},\\quad B_{\\mathrm{eff}}(R)=B_0\\left(\\frac{2\\,\\mu\\mathrm m}{R}\\right)^6",
+    "couplings": {
+      "Ω₀": "2π×6.0 MHz",
+      "Δᵣ": "2π×16.1 MHz",
+      "gate duration": "0.55 μs",
+      "nominal separation": "2.0 μm"
+    },
+    "lattice": "one addressed 171Yb dimer",
+    "boundary": "perfect blockade for pulse design/Hessian; calibrated effective finite blockade for digital-twin execution"
+  },
+  "method": {
+    "family": "source-constrained optimal control plus exact open-system simulation",
+    "exact": false,
+    "tool": "JAX x64 optimizer + QuTiP multilevel digital twin",
+    "settings": {
+      "waveform": "400 piecewise-constant phase intervals with fixed envelope",
+      "optimizer_starts": 6,
+      "optimizer_maxiter": 500,
+      "hessian_bins": "16, 32, 64",
+      "propagation_nodes": "201, 401; source checks through 1601",
+      "shots_per_scan_point": 50000,
+      "jax_device": "CPU",
+      "precision": "float64/complex128"
+    },
+    "note": "The AR waveform is independently reoptimized under source-stated envelope/phase constraints and is not the authors' unpublished array. The ten-state perfect-blockade calculation supplies the principal modes. The digital twin applies calibrated effective finite blockade and Rydberg decay; Doppler and laser-noise entries remain paper-reported anchors because the required microscopic samples and spectra are unavailable."
+  },
+  "params": [
+    {
+      "name": "AR waveform representation",
+      "value": "fixed envelope, 400 phase intervals",
+      "source": "Liu et al. cited robust-GRAPE method; source-constrained repository backend",
+      "why": "It follows the published pulse family more closely than a low-dimensional spline.",
+      "risk": "The 400 phase values, edge duration, regularizer, and seed were not published, so the optimized phase is non-unique.",
+      "fix": "Judge terminal fidelity, robustness, rank, and channel structure rather than visual pointwise phase agreement."
+    },
+    {
+      "name": "optimizer search",
+      "value": "6 starts, at most 500 nominal iterations",
+      "source": "user-selected standard search effort",
+      "why": "Multiple starts reduce the chance that a poor local solution controls every downstream panel.",
+      "risk": "The 400-variable optimization may be slow on the local CPU.",
+      "fix": "Write each accepted stage incrementally and preserve the best valid waveform if the wall budget is reached."
+    },
+    {
+      "name": "Hessian resolution",
+      "value": "16, 32, 64 bins; 201 and 401 propagation nodes",
+      "source": "standard reproduction profile",
+      "why": "The size series tests whether the ten-dimensional principal space is stable.",
+      "risk": "A coarse time basis can create spurious small eigenvalues or rotate the weakest modes.",
+      "fix": "Require rank 10 at all declared thresholds and compare the top-ten spectrum across resolutions."
+    },
+    {
+      "name": "finite-shot sampling",
+      "value": "50,000 shots per plotted scan point",
+      "source": "standard reproduction profile",
+      "why": "It resolves gate errors near 10⁻³–10⁻² without making binomial noise dominate mode fits.",
+      "risk": "Shot noise alone does not capture uncertainty across slowly varying physical conditions.",
+      "fix": "Keep stochastic physical contexts separate from the final binomial sampling and report both."
+    },
+    {
+      "name": "effective blockade",
+      "value": "B₀ calibrated so nominal finite-blockade raw error is 1.6×10⁻⁴ at R=2.0 μm; R⁻⁶ thereafter",
+      "source": "Appendix E nominal finite-blockade contribution plus user-ratified effective-model route",
+      "why": "The simulator needs a concrete pair interaction while the experiment-specific MQDT table is unavailable.",
+      "risk": "The calibration anchor is not an independent prediction and R⁻⁶ misses the van-der-Waals/Förster crossover.",
+      "fix": "Exclude the nominal blockade anchor from the match verdict and flag thermal-distance predictions as effective-model results."
+    },
+    {
+      "name": "Rydberg decay",
+      "value": "42 μs lifetime; 90% of lifetime-induced errors leave the computational subspace",
+      "source": "Appendix E measured values",
+      "why": "Rydberg decay is the largest reported raw error channel.",
+      "risk": "The microscopic branching table is unavailable; the remaining 10% partition is model-dependent.",
+      "fix": "Use the simulator's trace-preserving effective split and label it as an assumption."
+    },
+    {
+      "name": "temperature",
+      "value": "2.7 μK in radial and axial directions",
+      "source": "Appendix E",
+      "why": "It sets Doppler shifts and thermal distance variation.",
+      "risk": "The exact trap frequencies and measured distance samples are unavailable.",
+      "fix": "Use the declared effective thermal model and avoid claiming apparatus-level prediction."
+    },
+    {
+      "name": "JAX execution",
+      "value": "CPU, x64, whole heavy kernel JIT-compiled",
+      "source": "available local hardware and accuracy-sensitive optimizer/Hessian",
+      "why": "The active environment already matches the pinned JAX stack and no cluster profile is configured.",
+      "risk": "Compilation and 400-variable optimization may make the run exceed the initial wall estimate.",
+      "fix": "Record compile and warm execution separately; keep stage caches and progress logs."
+    }
+  ],
+  "scope": {
+    "label": "standard Figures 3–4 effective-model digital-twin reproduction"
+  },
+  "estimate": [
+    {
+      "point": "AR waveform optimization",
+      "wall": "1–4 h",
+      "memory": "2–5 GB"
+    },
+    {
+      "point": "Hessian and theory panels",
+      "wall": "30–120 min",
+      "memory": "2–5 GB"
+    },
+    {
+      "point": "digital-twin scans and finite-shot data",
+      "wall": "20–90 min",
+      "memory": "1–4 GB"
+    },
+    {
+      "point": "plot assembly and comparison",
+      "wall": "2–10 min",
+      "memory": "<1 GB"
+    }
+  ],
+  "actual": [
+    {
+      "point": "source-constrained AR optimization",
+      "wall": "approximately 12 min including six-start nominal and robust continuation stages",
+      "memory": "within the 7.6 GiB local host limit"
+    },
+    {
+      "point": "Hessian, intensity, synthetic plant, and plot assembly",
+      "wall": "minutes locally",
+      "memory": "within the 7.6 GiB local host limit"
+    }
+  ],
+  "where": "local CPU; no usable Slurm profile is configured",
+  "risks": [
+    "The source-constrained 400-phase optimization is substantially heavier than the low-dimensional spline route.",
+    "The effective R⁻⁶ interaction is calibrated to one paper-reported error and is not the missing MQDT model.",
+    "The paper's exact AOM transfer function, noise spectra, waveform array, and raw RB records remain unavailable.",
+    "Figure 4 comparisons must separate calibrated anchors, literal transcriptions, and downstream simulator predictions."
+  ],
+  "figures": [
+    {
+      "id": "Figure 3",
+      "paper_image": "paper_figure3.png",
+      "plots": "four-level AR waveform, Rydberg populations, Hessian sensitivity, and channel decomposition",
+      "x": "time or Hessian mode index",
+      "x_range": "0–0.55 μs; principal modes 1–10 plus four null modes",
+      "y": "normalized intensity/phase, Rydberg population, or sensitivity λᵢ",
+      "observe": {
+        "quantity": "optimized waveform, state-resolved population, mode curvature, and leakage/phase contributions",
+        "normalization": "|Ω/Ω₀|²; Hessian modes normalized over gate time",
+        "states": "|00⟩, |01⟩, |10⟩, |11⟩ and accessible r/r′ leakage channels"
+      },
+      "expected": "The source-constrained pulse closes the AR terminal conditions, the Hessian rank is 10 across resolution thresholds, principal modes are clearly separated from four null modes, and the simulated leakage/phase decomposition has the same channel organization as the paper.",
+      "results": {
+        "figure": "figs/input_manifest_analysis/paper_layout/figure3_paper_layout_mixed_provenance.png",
+        "match": "partly",
+        "why": "The independently optimized pulse closes the AR conditions and gives the reported rank-10 principal space, but it is not the unpublished author waveform and one finite-bin coordinate-spectrum check misses its fixed tolerance slightly.",
+        "numbers": {
+          "adaptive optimized 1−F": "2.23×10⁻⁹",
+          "maximum leakage": "3.64×10⁻⁹",
+          "Hessian rank": "10",
+          "λ₁₀/|λ₁₁|": "7.35×10¹³",
+          "principal finite-difference error": "4.76×10⁻⁷",
+          "lab/local finite-bin spectrum difference": "2.2316% (threshold 2.0%)"
+        },
+        "wall": "≈12 min optimization plus downstream analysis",
+        "changes": [
+          "used a source-constrained equivalent 400-bin reoptimization",
+          "kept the marginal 2.2316% frame-spectrum miss rather than relaxing the threshold"
+        ],
+        "rerun": "JAX_ENABLE_X64=true JAX_PLATFORM_NAME=cpu MPLCONFIGDIR=/tmp/liu-figures-mpl .venv/bin/python reproduce/liu_2026_fig234_reproduction.py --standard --config /home/thy/thy/work/quantum_harnessing/quantum.harness/tracks/qcs/results/20260730-143545-liu-2026-fig34-effective-digital-twin/source_constrained_standard.json --stage hessian --run-dir /home/thy/thy/work/quantum_harnessing/quantum.harness/tracks/qcs/results/20260730-143545-liu-2026-fig34-effective-digital-twin",
+        "optimized_adaptive_infidelity": 2.2265318477820983e-9,
+        "maximum_leakage": 3.6448004614442198e-9,
+        "hessian_rank": 10,
+        "lambda10_over_abs_lambda11": 7.346488815985736e13,
+        "principal_fd_max_relative_error": 4.7563974931183124e-7,
+        "null_curvature_over_lambda10": 1.3337492261748596e-7,
+        "verification": "core rank/finite-difference checks pass; finite-bin lab/local-frame spectrum difference 2.2316% marginally misses the fixed 2.0% threshold"
+      }
+    },
+    {
+      "id": "Figure 4",
+      "paper_image": "paper_figure4.png",
+      "plots": "AOM distortion, closed-loop correction, RB, intensity robustness, stability, and error budget",
+      "x": "time, optimization cycle, circuit depth, intensity ratio, or elapsed hours",
+      "x_range": "paper panel ranges including I/I₀=0.7–1.2",
+      "y": "waveform, CZ error/fidelity, or error-channel contribution",
+      "observe": {
+        "quantity": "raw and no-loss postselected gate performance under control and noise perturbations",
+        "normalization": "computational-subspace CZ-equivalent fidelity with raw/postselected results kept separate",
+        "states": "two-qubit computational basis plus Rydberg and effective erasure states"
+      },
+      "expected": "One Hessian scan cycle removes most AOM-induced excess error; the AR gate remains substantially flatter than the non-robust surrogate under approximately ±20% intensity variation; decay and Doppler dominate the modeled error budget; simulated raw/postselected errors are compared with 4.0(5)×10⁻³ and 1.0(2)×10⁻³ without forcing agreement.",
+      "results": {
+        "figure": "figs/input_manifest_analysis/paper_layout/figure4_paper_layout_synthetic.png",
+        "match": "partly",
+        "why": "The effective digital twin independently predicts the raw and postselected CZ errors near the paper values and recovers quartic intensity robustness, but B₀ is calibrated to one paper anchor and the missing MQDT/noise data prevent an apparatus-level reproduction.",
+        "numbers": {
+          "raw CZ error: simulator / paper": "4.57×10⁻³ / 4.0(5)×10⁻³",
+          "postselected CZ error: simulator / experiment": "5.35×10⁻⁴ / 1.0(2)×10⁻³",
+          "postselected CZ error: simulator / Appendix-E simulation": "5.35×10⁻⁴ / 6.6×10⁻⁴",
+          "B₀/(2π)": "303.3 MHz (calibrated)",
+          "erasure fraction: simulator / paper": "0.884 / 0.75(6)",
+          "intensity exponent: AR / nonrobust": "≈4.00 / ≈1.98"
+        },
+        "wall": "minutes after the optimized waveform was available",
+        "changes": [
+          "applied B_eff to every double-Rydberg product state",
+          "kept Doppler and laser-noise entries as paper-reported anchors"
+        ],
+        "rerun": "MPLCONFIGDIR=/tmp/liu-figures-mpl .venv/bin/python /home/thy/thy/work/quantum_harnessing/quantum.harness/tracks/qcs/solutions/liu_2026_simulator_input_bridge.py --sim-repo /home/thy/thy/work/quantum_harnessing/quantum.harness/Sim-to-real-reproduction-run --theory-run-dir /home/thy/thy/work/quantum_harnessing/quantum.harness/tracks/qcs/results/20260730-143545-liu-2026-fig34-effective-digital-twin --figure2-run-dir /home/thy/thy/work/quantum_harnessing/quantum.harness/tracks/qcs/results/20260730-143544-liu-2026-fig2-simulator-readout --output /home/thy/thy/work/quantum_harnessing/quantum.harness/tracks/qcs/results/20260730-143545-liu-2026-fig34-effective-digital-twin/input.in",
+        "effective_blockade_B0_over_2pi_mhz": 303.32537141073584,
+        "simulated_raw_cz_error": 0.004570168441337,
+        "simulated_postselected_cz_error": 0.0005346450839893,
+        "paper_raw_cz_error": 0.004,
+        "paper_postselected_cz_error": 0.001,
+        "appendix_E_simulated_postselected_error": 0.00066,
+        "simulated_erasure_fraction_of_raw_error": 0.8835,
+        "paper_erasure_fraction": 0.75,
+        "AR_intensity_exponent": "approximately 4.00 in the theory fit",
+        "nonrobust_intensity_exponent": "approximately 1.98 in the theory fit",
+        "synthetic_closed_loop_error": {
+          "initial": 0.058812182901566645,
+          "final": 0.0001224858418040764
+        }
+      }
+    }
+  ]
+}

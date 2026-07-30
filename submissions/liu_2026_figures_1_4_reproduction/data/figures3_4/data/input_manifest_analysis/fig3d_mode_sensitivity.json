@@ -1,0 +1,73 @@
+{
+  "status": "analysis of supplied manifest data",
+  "provenance": "simulator/theory synthetic data; not experimental",
+  "panel": "fig3d_mode_sensitivity",
+  "input_manifest": "/home/thy/thy/work/quantum_harnessing/quantum.harness/tracks/qcs/results/20260730-143545-liu-2026-fig34-effective-digital-twin/input.in",
+  "input_source": "/home/thy/thy/work/quantum_harnessing/quantum.harness/tracks/qcs/results/20260730-143545-liu-2026-fig34-effective-digital-twin/generated_input/fig3d_mode_sensitivity.csv",
+  "fit": {
+    "1.0": {
+      "curvature_lambda": 387.99155887160117,
+      "linear": -0.8456338506045104,
+      "offset": 0.06242131058463505,
+      "optimum": 0.002179516103556154
+    },
+    "2.0": {
+      "curvature_lambda": 85.15213184815094,
+      "linear": 0.8124388739503137,
+      "offset": 0.06201109394600363,
+      "optimum": -0.009541027996798833
+    },
+    "3.0": {
+      "curvature_lambda": 211.17632330355792,
+      "linear": -2.530935577185328,
+      "offset": 0.059222759431810504,
+      "optimum": 0.011984940061425373
+    },
+    "4.0": {
+      "curvature_lambda": 79.66418736330252,
+      "linear": 0.25865849785469663,
+      "offset": 0.03856423473845572,
+      "optimum": -0.003246860432719963
+    },
+    "5.0": {
+      "curvature_lambda": 38.44400221128814,
+      "linear": -1.878392396702216,
+      "offset": 0.03821184351751911,
+      "optimum": 0.0488604798839251
+    },
+    "6.0": {
+      "curvature_lambda": 9.144826774979627,
+      "linear": -0.1886513944158081,
+      "offset": 0.009386384255196147,
+      "optimum": 0.020629302124339954
+    },
+    "7.0": {
+      "curvature_lambda": 18.325703527131598,
+      "linear": 0.24775956387651019,
+      "offset": 0.008239608065020788,
+      "optimum": -0.013519784575238643
+    },
+    "8.0": {
+      "curvature_lambda": 14.7237732996401,
+      "linear": 0.12235600620416624,
+      "offset": 0.006893841379150073,
+      "optimum": -0.008310098485906262
+    },
+    "9.0": {
+      "curvature_lambda": 12.859574772030163,
+      "linear": 0.10244231228818813,
+      "offset": 0.005993479298837642,
+      "optimum": -0.007966228596531998
+    },
+    "10.0": {
+      "curvature_lambda": 3.362522159738662,
+      "linear": 0.0007380879062630529,
+      "offset": 0.005713082490394451,
+      "optimum": -0.00021950425044051387
+    }
+  },
+  "rows": 90,
+  "synthetic_points_generated": false,
+  "figure": "/home/thy/thy/work/quantum_harnessing/quantum.harness/tracks/qcs/results/20260730-143545-liu-2026-fig34-effective-digital-twin/figs/input_manifest_analysis/diagnostics/fig3d_mode_sensitivity.png",
+  "figure_provenance": "simulator/theory synthetic data; not experimental"
+}

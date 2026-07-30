@@ -1,0 +1,133 @@
+{
+  "run_id": "20260730-143544-liu-2026-fig2-simulator-readout",
+  "status": "complete",
+  "paper": {
+    "id": "arXiv:2606.05060v1",
+    "title": "High-fidelity neutral atom gates leveraging low-rank Hessian optimization — Figure 2",
+    "url": "https://arxiv.org/abs/2606.05060"
+  },
+  "model": {
+    "name": "171Yb three-outcome state readout and single-qubit RB simulator",
+    "H": "H_{\\mathrm{RF}}(t)=\\frac{1}{2}\\left[\\Omega_{\\mathrm{RF}}(t)|1\\rangle\\langle0|+\\Omega_{\\mathrm{RF}}^*(t)|0\\rangle\\langle1|\\right]",
+    "couplings": {
+      "RF Rabi": "approximately 2π×300 Hz",
+      "outcomes": "|0⟩, |1⟩, loss"
+    },
+    "lattice": "independent 171Yb qubits in the gate zone",
+    "boundary": "finite-shot public observation; no privileged truth used by the fitted RB estimator"
+  },
+  "method": {
+    "family": "finite-shot digital-twin experiment",
+    "exact": false,
+    "tool": "cs-tweezer-sim public runtime and observation model",
+    "settings": {
+      "shots_per_point": 50000,
+      "readout_images": 2,
+      "provenance": "synthetic demonstration"
+    },
+    "note": "The simulator generates photon counts, classifications, retention/loss records, and RB successes. Camera counts use a published neutral-atom fluorescence calibration from Radnaev et al., not Liu's unavailable raw calibration. The RB decay uses the Liu raw-fidelity value as an explicit anchor and is therefore a closure demonstration, not an independent prediction."
+  },
+  "params": [
+    {
+      "name": "shots per plotted point",
+      "value": "50,000",
+      "source": "standard simulation profile; paper does not publish a single common shot count",
+      "why": "At an error near 4×10⁻³ this gives a binomial standard deviation near 2.8×10⁻⁴.",
+      "risk": "Synthetic error bars may be smaller or larger than the paper because its exact sequence counts are unavailable.",
+      "fix": "Compare fitted central values and quote our independently generated uncertainty."
+    },
+    {
+      "name": "readout outcomes",
+      "value": "|0⟩, |1⟩, loss",
+      "source": "Figure 2 and Appendix F",
+      "why": "Postselection is meaningful only when loss remains a separate recorded outcome.",
+      "risk": "Collapsing loss into a qubit state would inflate or obscure postselected fidelity.",
+      "fix": "Preserve raw and no-loss analyses separately in input.in and plots."
+    },
+    {
+      "name": "readout calibration",
+      "value": "published Radnaev-2025 fluorescence-mixture fit",
+      "source": "simulator data package; different neutral-atom apparatus",
+      "why": "Liu's raw photon distributions are unavailable, so this tests the full camera/threshold pipeline without fabricating their calibration.",
+      "risk": "Confusion and loss probabilities need not match Liu Table I quantitatively.",
+      "fix": "Report the differences as simulator predictions; keep the RB fidelity anchor separate."
+    }
+  ],
+  "scope": {
+    "label": "standard finite-shot Figure 2 reconstruction"
+  },
+  "estimate": [
+    {
+      "point": "Figure 2 simulator data and fit",
+      "wall": "2–10 min",
+      "memory": "<1 GB"
+    }
+  ],
+  "actual": [
+    {
+      "point": "Figure 2 finite-shot generation",
+      "wall": "completed locally in the simulator bridge run",
+      "memory": "<1 GB"
+    }
+  ],
+  "where": "local CPU",
+  "risks": [
+    "The exact experimental RB sequence list and raw photon records are unavailable.",
+    "The fluorescence calibration is from another apparatus; the single-qubit RB fidelity is a paper anchor rather than an independent prediction."
+  ],
+  "figures": [
+    {
+      "id": "Figure 2",
+      "paper_image": "paper_figure2.png",
+      "plots": "two-image photon counts and single-qubit randomized benchmarking",
+      "x": "first/second image photon counts or RB circuit depth",
+      "x_range": "paper-layout ranges; RB depths through 300",
+      "y": "assigned outcome density or success probability",
+      "observe": {
+        "quantity": "three-outcome confusion probabilities and raw/postselected RB decay",
+        "normalization": "probability per prepared state; success probability per RB depth",
+        "states": "prepared |0⟩ and |1⟩ with loss retained as a third outcome"
+      },
+      "expected": "The simulated Table-I closure should agree within generated sampling uncertainty; the RB fit should distinguish raw fidelity from the higher no-loss postselected fidelity and reproduce the paper's leakage-dominated trend.",
+      "results": {
+        "figure": "figs/figure2_paper_layout_synthetic.png",
+        "match": "partly",
+        "why": "The simulator reproduces the three-outcome camera/RB analysis pipeline, but the camera calibration comes from another apparatus and the RB fidelity is explicitly anchored to the paper.",
+        "numbers": {
+          "prepare |0⟩ correct: simulator / paper": "98.40% / 98.75%",
+          "prepare |0⟩ loss: simulator / paper": "1.272% / 1.07%",
+          "prepare |1⟩ correct: simulator / paper": "98.368% / 97.53%",
+          "prepare |1⟩ loss: simulator / paper": "1.304% / 1.65%",
+          "single-qubit RB raw-fidelity anchor": "0.99935"
+        },
+        "wall": "included in the simulator bridge run",
+        "changes": [
+          "used the published Radnaev-2025 fluorescence fit because Liu raw photon calibration is unavailable"
+        ],
+        "rerun": "MPLCONFIGDIR=/tmp/liu-figures-mpl .venv/bin/python reproduce/liu_2026_fig234_reproduction.py --stage experimental --input-in /home/thy/thy/work/quantum_harnessing/quantum.harness/tracks/qcs/results/20260730-143545-liu-2026-fig34-effective-digital-twin/input.in --theory-run-dir /home/thy/thy/work/quantum_harnessing/quantum.harness/tracks/qcs/results/20260730-143545-liu-2026-fig34-effective-digital-twin --run-dir /home/thy/thy/work/quantum_harnessing/quantum.harness/tracks/qcs/results/20260730-143545-liu-2026-fig34-effective-digital-twin",
+        "shots": 50000,
+        "simulated_prepare_0": {
+          "assigned_0": 0.984,
+          "assigned_1": 0.00328,
+          "loss": 0.01272
+        },
+        "simulated_prepare_1": {
+          "assigned_0": 0.00328,
+          "assigned_1": 0.98368,
+          "loss": 0.01304
+        },
+        "paper_table_I_prepare_0": {
+          "assigned_0": 0.9875,
+          "assigned_1": 0.0017,
+          "loss": 0.0107
+        },
+        "paper_table_I_prepare_1": {
+          "assigned_0": 0.0083,
+          "assigned_1": 0.9753,
+          "loss": 0.0165
+        },
+        "single_qubit_rb_raw_fidelity_anchor": 0.99935
+      }
+    }
+  ]
+}

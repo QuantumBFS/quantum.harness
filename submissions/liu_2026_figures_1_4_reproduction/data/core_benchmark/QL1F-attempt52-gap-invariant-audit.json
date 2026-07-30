@@ -1,0 +1,320 @@
+{
+  "artifacts": {
+    "figure": {
+      "path": "plots/attempt45-gap-size-evidence-development.png",
+      "sha256": "2c9f0b876dfcf5d57857c930ddfca7f550bd01748419e7b47933c51bdd2f34d7"
+    }
+  },
+  "attempt": 52,
+  "checks": {
+    "all_selected_systems_full_su_controllable": true,
+    "attempt26_reachability_construction_retained": true,
+    "attempt34_v1_failure_retained": true,
+    "attempt45_complete": true,
+    "attempt45_plot_hash_closes": true,
+    "attempt45_upstream_hashes_close": true,
+    "combined_failure_boundary_visible": true,
+    "d4_old_rank_discrepancy_marked_numerical_artifact": true,
+    "endpoint_hessian_rank_equality_holds": true,
+    "endpoint_ranks_are_physical": true,
+    "finite_difference_errors_below_5e_3": true,
+    "no_confirmation_truths_opened": true,
+    "no_new_simulator_queries": true,
+    "old_attempt27_gap_ranks_are_3_8_8": true,
+    "resource_scaling_nonidentifiability_preserved": true,
+    "selected_points_are_converged_controls": true,
+    "three_failure_families_retained": true,
+    "three_gap_levels_retained": true,
+    "three_hilbert_dimensions_retained": true,
+    "unconditional_rank_law_rejected": true,
+    "unitarity_residuals_below_1e_6": true,
+    "weighted_gram_errors_below_0_05": true
+  },
+  "claim_boundary": {
+    "confirmation_truths_opened": 0,
+    "cross_dimension_resource_advantage": false,
+    "fresh_confirmation": false,
+    "hardware_or_cesium_evidence": false,
+    "new_simulator_queries": 0,
+    "qubit_count_scaling": false,
+    "universal_rank_theorem": false
+  },
+  "construction_context": {
+    "reachability": {
+      "2": {
+        "eligible": true,
+        "fraction": 1.0,
+        "reached_1e-6": 4,
+        "total": 4
+      },
+      "3": {
+        "eligible": true,
+        "fraction": 1.0,
+        "reached_1e-6": 4,
+        "total": 4
+      },
+      "4": {
+        "eligible": true,
+        "fraction": 0.75,
+        "reached_1e-6": 3,
+        "total": 4
+      }
+    },
+    "representative_selection_warning": "Attempt-26/27 spectral-gap ranks are historical diagnostics, not physical-rank evidence.",
+    "source_attempt": 26
+  },
+  "cross_size_invariant": {
+    "distinct_hilbert_dimensions": [
+      2,
+      3,
+      4
+    ],
+    "interpretation": "near a converged optimum, Hessian rank matches accessible weighted phase-blind endpoint-error channels",
+    "numerical_artifact_correction": "optimizer-residual/spectral-gap artifact",
+    "observed_rank_pairs": [
+      [
+        3,
+        3
+      ],
+      [
+        8,
+        8
+      ],
+      [
+        15,
+        15
+      ],
+      [
+        15,
+        15
+      ]
+    ],
+    "old_attempt27_gap_ranks": [
+      3,
+      8,
+      8
+    ],
+    "rejected_claim": "Unconditional rank(H)=d^2-1.",
+    "rows": [
+      {
+        "dimension": 2,
+        "endpoint_rank": 3,
+        "hessian_rank": 3,
+        "infidelity": 8.622195550126813e-12,
+        "parameter_count": 20,
+        "point": "exact-construction",
+        "ranks_match": true,
+        "system": "general-d2",
+        "unitarity_residual_frobenius": 9.145082032246559e-12
+      },
+      {
+        "dimension": 3,
+        "endpoint_rank": 8,
+        "hessian_rank": 8,
+        "infidelity": -5.821806000246473e-12,
+        "parameter_count": 30,
+        "point": "exact-construction",
+        "ranks_match": true,
+        "system": "general-d3",
+        "unitarity_residual_frobenius": 1.1227591434277806e-11
+      },
+      {
+        "dimension": 4,
+        "endpoint_rank": 15,
+        "hessian_rank": 15,
+        "infidelity": -1.8092960463178545e-11,
+        "parameter_count": 40,
+        "point": "exact-construction",
+        "ranks_match": true,
+        "system": "general-d4",
+        "unitarity_residual_frobenius": 9.78963394959448e-11
+      },
+      {
+        "dimension": 4,
+        "endpoint_rank": 15,
+        "hessian_rank": 15,
+        "infidelity": 6.38907038386094e-11,
+        "parameter_count": 40,
+        "point": "refined-optimized",
+        "ranks_match": true,
+        "system": "original-d4-cnot",
+        "unitarity_residual_frobenius": 2.0504735628398595e-10
+      }
+    ],
+    "source_attempts": [
+      34,
+      45
+    ],
+    "spectral_gap_is_rank_definition": false,
+    "supported_claim": "Near a sufficiently converged optimum, Hessian rank equals the rank of accessible weighted phase-blind endpoint-error channels for the audited controllable systems."
+  },
+  "failure_mode_evidence": {
+    "claim_boundary": "This is historical development evidence, not a fresh principal-global confirmation sweep.",
+    "families": [
+      "combined",
+      "control-map",
+      "drift"
+    ],
+    "gap_levels": [
+      0.02,
+      0.05,
+      0.1
+    ],
+    "interpretation": "Development success degrades as the model-truth gap grows; the combined family falls from 0.875 at epsilon=0.05 to 0.15625 at epsilon=0.10.",
+    "method": "historical joint-15-v1 coordinate-scan package",
+    "rows": [
+      {
+        "epsilon": 0.02,
+        "family": "combined",
+        "lower_95": 1.0,
+        "method": "joint-15-v1",
+        "nested_replicates_per_truth": 4,
+        "success": 1.0,
+        "truth_cells": 8,
+        "upper_95": 1.0
+      },
+      {
+        "epsilon": 0.05,
+        "family": "combined",
+        "lower_95": 0.78125,
+        "method": "joint-15-v1",
+        "nested_replicates_per_truth": 4,
+        "success": 0.875,
+        "truth_cells": 8,
+        "upper_95": 0.96875
+      },
+      {
+        "epsilon": 0.1,
+        "family": "combined",
+        "lower_95": 0.03125,
+        "method": "joint-15-v1",
+        "nested_replicates_per_truth": 4,
+        "success": 0.15625,
+        "truth_cells": 8,
+        "upper_95": 0.34375
+      },
+      {
+        "epsilon": 0.02,
+        "family": "control-map",
+        "lower_95": 1.0,
+        "method": "joint-15-v1",
+        "nested_replicates_per_truth": 4,
+        "success": 1.0,
+        "truth_cells": 8,
+        "upper_95": 1.0
+      },
+      {
+        "epsilon": 0.05,
+        "family": "control-map",
+        "lower_95": 0.8125,
+        "method": "joint-15-v1",
+        "nested_replicates_per_truth": 4,
+        "success": 0.90625,
+        "truth_cells": 8,
+        "upper_95": 0.96875
+      },
+      {
+        "epsilon": 0.1,
+        "family": "control-map",
+        "lower_95": 0.40625,
+        "method": "joint-15-v1",
+        "nested_replicates_per_truth": 4,
+        "success": 0.59375,
+        "truth_cells": 8,
+        "upper_95": 0.78125
+      },
+      {
+        "epsilon": 0.02,
+        "family": "drift",
+        "lower_95": 1.0,
+        "method": "joint-15-v1",
+        "nested_replicates_per_truth": 4,
+        "success": 1.0,
+        "truth_cells": 8,
+        "upper_95": 1.0
+      },
+      {
+        "epsilon": 0.05,
+        "family": "drift",
+        "lower_95": 1.0,
+        "method": "joint-15-v1",
+        "nested_replicates_per_truth": 4,
+        "success": 1.0,
+        "truth_cells": 8,
+        "upper_95": 1.0
+      },
+      {
+        "epsilon": 0.1,
+        "family": "drift",
+        "lower_95": 0.53125,
+        "method": "joint-15-v1",
+        "nested_replicates_per_truth": 4,
+        "success": 0.71875,
+        "truth_cells": 8,
+        "upper_95": 0.875
+      }
+    ],
+    "source_attempt": 45
+  },
+  "honest_negative_result": {
+    "claim": "no cross-dimension resource-scaling advantage",
+    "cross_dimension_resource_advantage_established": false,
+    "reason": "The frozen epsilon leaves zero-cost raw baselines, so the resource-scaling hypothesis is not identifiable.",
+    "source_attempt": 28,
+    "status": "unidentifiable-zero-cost-raw-baseline",
+    "zero_cost_raw_by_dimension": {
+      "2": true,
+      "3": true,
+      "4": true
+    }
+  },
+  "no_new_compute": {
+    "confirmation_truths_opened": 0,
+    "fidelity_calls": 0,
+    "gradient_calls": 0,
+    "hessian_calls": 0,
+    "optimization_calls": 0,
+    "simulator_queries": 0
+  },
+  "protocol": {
+    "canonical_sha256": "7251a64401a052f6eb1b0dde6df1a6c1f854922658409dc36306e779b9cf320e",
+    "path": "docs/ATTEMPT52_PROTOCOL.md"
+  },
+  "runner": {
+    "canonical_sha256": "5f47bbaa5fbc83f73202ca93e5ed6173e46df9f97ebd64726859a1107284eef9",
+    "path": "code/attempt52_gap_invariant_audit.py"
+  },
+  "schema": "QL1F-attempt52-derived-invariant-audit-v2",
+  "scope": "simulator-free verification of development failure-mode and cross-size mechanism evidence",
+  "source_hashes": {
+    "attempt25": {
+      "canonical_sha256": "610548abc3c54e611009c5a03f9cfcf81f6b283e55822ee4f1a947aa7b22045e",
+      "path": "results_summary/QL1F-attempt25-mismatch-boundary.json"
+    },
+    "attempt26": {
+      "canonical_sha256": "305c19e79e2703493f58037f9fe0082105b1e69d223e58e8c53f7b57fc713144",
+      "path": "results_summary/QL1F-attempt26-dimension-benchmark.json"
+    },
+    "attempt27": {
+      "canonical_sha256": "880bd1681337fd56d43d9e37b0278abb72325063e3e76edf58b9aabeb15c0969",
+      "path": "results_summary/QL1F-attempt27-exact-dimension-scaling.json"
+    },
+    "attempt28": {
+      "canonical_sha256": "d632c6d13a419311b9d49744d62626499a9bea9dd901a4862716524a46b2b5d2",
+      "path": "results_summary/QL1F-attempt28-joint-dimension-scaling.json"
+    },
+    "attempt34": {
+      "canonical_sha256": "1b31e657a4d1e37da440759bf8d1de9916c6e0c998eaaca0970964d605218604",
+      "path": "results_summary/QL1F-attempt34-endpoint-rank-audit.json"
+    },
+    "attempt34_v1": {
+      "canonical_sha256": "7f8f8a29993475f041e31ec0383a1bdde902bdc1f4d87d335c44a30a8811e283",
+      "path": "results_summary/QL1F-attempt34-endpoint-rank-audit.v1-default-ode.json"
+    },
+    "attempt45": {
+      "canonical_sha256": "5b4df570cbca1a5fa8cb4e6917e42bbeb18ab834614f3b36c61e4a920162568d",
+      "path": "results_summary/QL1F-attempt45-existing-gap-size-evidence.json"
+    }
+  },
+  "status": "pass"
+}

@@ -1,0 +1,54 @@
+{
+  "provenance": "synthetic demonstration",
+  "algorithm": "synthetic plant-in-loop Hessian calibration",
+  "aom_parameters": {
+    "case": "paper_scale",
+    "bandwidth_mhz": 8.0,
+    "damping_ratio": 0.65,
+    "delay_us": 0.02,
+    "iq_imbalance": 0.02,
+    "distortion_strength_small": 0.03,
+    "distortion_strength_paper_scale": 0.03,
+    "distortion_strength_stress": 0.7,
+    "cycles": 2,
+    "scan_points": 9,
+    "scan_hardware_bound": 0.12,
+    "shots": 50000,
+    "random_seed": 260605061,
+    "irreducible_baseline": 0.004,
+    "ridge_projection": 1e-08,
+    "status": "all are assumed synthetic values"
+  },
+  "initial_quadratic_infidelity_raw": 0.004543038185529779,
+  "initial_full_schrodinger_infidelity_raw": 0.004393667484109853,
+  "final_quadratic_infidelity_raw": 0.00026784788743563354,
+  "final_full_schrodinger_infidelity_raw": 0.00029522081207689066,
+  "remaining_principal_space_distortion_norm": 0.004899348382101091,
+  "remaining_null_space_distortion_norm": 0.03746496440218003,
+  "quadratic_full_relative_disagreement_by_cycle": [
+    0.0339968151800609,
+    0.037040540303058006,
+    0.0927201725673995
+  ],
+  "measurement_model": "shot-count binomial failures with Jeffreys posterior mean and heteroskedastic uncertainty; weighted quadratic fits",
+  "scan_range_rule": "theory curvature + shot noise + hardware bounds initially; prior fit uncertainty thereafter; edge minima trigger bounded expansion",
+  "oracle_information_used": false,
+  "serialization_consistency": {
+    "before_plant_residual": 0.0,
+    "after_plant_residual": 0.0,
+    "before_additive_reconstruction_residual": 3.6955587428207345e-15,
+    "after_additive_reconstruction_residual": 1.4087150935148696e-15,
+    "relative_tolerance": 1e-12,
+    "all": true
+  },
+  "irreducible_baseline": 0.004,
+  "plot": "submissions/liu_2026_figures_1_4_reproduction/data/issue113_hour_scan/cells/cell-0002/figs/fig4_synthetic_closed_loop.png",
+  "warning": "No point is experimental and no synthetic point is overlaid as a paper measurement.",
+  "acceptance": {
+    "serialization_consistent": true,
+    "oracle_free_scan_rule": true,
+    "full_schrodinger_error_reduced": true,
+    "quadratic_and_full_curves_both_saved": true,
+    "all": true
+  }
+}

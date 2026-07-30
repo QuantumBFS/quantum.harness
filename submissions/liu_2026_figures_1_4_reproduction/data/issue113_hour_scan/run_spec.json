@@ -1,0 +1,85 @@
+{
+  "run_id": "issue113-hour-scan",
+  "run_dir": "submissions/liu_2026_figures_1_4_reproduction/data/issue113_hour_scan",
+  "settings": {
+    "principal_modes": 10,
+    "cycles": 2,
+    "scan_points": 9,
+    "shots_per_query": 50000,
+    "target_coherent_error": 0.001,
+    "irreducible_raw_floor": 0.004,
+    "cache_policy": "reuse fixed optimized waveform and Hessian; vary only black-box AOM gap and finite-shot seed; stop after two cycles to respect the one-hour wall budget"
+  },
+  "provenance": {
+    "issue": "https://github.com/QuantumBFS/quantum.harness/issues/113",
+    "paper": "arXiv:2606.05060v1",
+    "simulator_commit": "02108750a5b5f9217b21864ff1ee52453442fdd4",
+    "data_kind": "synthetic query-only finite-shot parameter scan",
+    "claim": "fixed-rank-10 gap and seed study; not a dimension sweep or full-parameter baseline"
+  },
+  "cells": [
+    {
+      "cell_id": "cell-0001",
+      "params": {
+        "gap_strength": 0.03,
+        "seed": 260605060
+      }
+    },
+    {
+      "cell_id": "cell-0002",
+      "params": {
+        "gap_strength": 0.03,
+        "seed": 260605061
+      }
+    },
+    {
+      "cell_id": "cell-0003",
+      "params": {
+        "gap_strength": 0.03,
+        "seed": 260605062
+      }
+    },
+    {
+      "cell_id": "cell-0004",
+      "params": {
+        "gap_strength": 0.11,
+        "seed": 260605060
+      }
+    },
+    {
+      "cell_id": "cell-0005",
+      "params": {
+        "gap_strength": 0.11,
+        "seed": 260605061
+      }
+    },
+    {
+      "cell_id": "cell-0006",
+      "params": {
+        "gap_strength": 0.11,
+        "seed": 260605062
+      }
+    },
+    {
+      "cell_id": "cell-0007",
+      "params": {
+        "gap_strength": 0.7,
+        "seed": 260605060
+      }
+    },
+    {
+      "cell_id": "cell-0008",
+      "params": {
+        "gap_strength": 0.7,
+        "seed": 260605061
+      }
+    },
+    {
+      "cell_id": "cell-0009",
+      "params": {
+        "gap_strength": 0.7,
+        "seed": 260605062
+      }
+    }
+  ]
+}

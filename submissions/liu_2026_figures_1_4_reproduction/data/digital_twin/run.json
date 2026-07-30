@@ -1,0 +1,77 @@
+{
+  "run_id": "20260730-175720-liu-digital-twin",
+  "status": "approved",
+  "paper": {
+    "id": "arXiv:2606.05060v1",
+    "title": "High-fidelity neutral atom gates leveraging low-rank Hessian optimization",
+    "target": "Figure 4 closed-loop digital twin"
+  },
+  "platform": {
+    "repository": "thy10817/Sim-to-real-simulation",
+    "local_commit": "c9e4066e61767f77afc10611a227a7d6f0c3a4ac",
+    "workspace": "Sim-to-real-simulation/Cold_Atom Gate Simu_Platform",
+    "public_oracle_separation": true
+  },
+  "system": {
+    "isotope": "171Yb",
+    "factorized_dimers": 5,
+    "atoms_per_dimer": 2,
+    "dimer_spacing_um": 2.0,
+    "inter_dimer_spacing_um": 25.0,
+    "local_levels": ["0", "1", "r", "r_prime", "erasure"],
+    "computational_levels": ["0", "1"],
+    "target_gate": "CZ up to local Z and global phase",
+    "boundary": "isolated factorized dimers; no inter-dimer interaction",
+    "conserved_sector": "none after Lindblad decay"
+  },
+  "hamiltonian": {
+    "drive": "one shared complex 302-nm actuator drives 1<->r and 0<->r_prime",
+    "rabi_mhz": 6.0,
+    "r_prime_splitting_mhz": 16.1,
+    "gate_duration_us": 0.55,
+    "pair_model": "effective rr, rr_prime/r_prime_r, and r_prime_r_prime R^-6 interactions",
+    "pair_anchor": "B0 calibrated to the paper-reported 1.6e-4 finite-blockade contribution; not MQDT",
+    "effective_decay": "42 us lifetime; 90% to erasure and assumed equal split of the remaining 10% to 0/1"
+  },
+  "hardware": {
+    "model": "HardwareTransferGraph with GainOffsetTransfer and FirstOrderLowPassTransfer",
+    "aom_bandwidth_search_mhz": [2.0, 20.0],
+    "amplitude_gain_search": [0.9, 1.1],
+    "fit_target": "digitized blue Before trace in paper Figure 4a",
+    "eom": "not included because Liu et al. do not report an independent EOM in this gate path"
+  },
+  "noise": {
+    "temperature_uk": 2.7,
+    "wavelength_nm": 302.0,
+    "position_sigma_um": 0.02,
+    "pulse_energy_rms": 0.01,
+    "nominal_linewidth_hz": 1000.0,
+    "linewidth_sweep_hz": [100.0, 1000.0, 10000.0, 300000.0],
+    "quasistatic_frequency_sigma_hz": 500.0,
+    "ou_frequency_sigma_hz": 1000.0,
+    "ou_correlation_time_us": 0.2
+  },
+  "feedback": {
+    "principal_modes": 10,
+    "scan_points_per_mode": 5,
+    "cycles": 1,
+    "noise_contexts_per_candidate": 4,
+    "effective_shots_per_candidate": 50000,
+    "observable": "finite-shot raw symmetric-design CZ fidelity",
+    "controller_access": "counts/fidelity estimate only; no state, exact channel, hidden context, gradient, or Hessian"
+  },
+  "runtime_contract": {
+    "local_wall_limit_minutes": 55,
+    "mwe": "three 64-bin intensity points with coherent and exact open-system metrics",
+    "mwe_observed_seconds": 77.50150684700202,
+    "acceleration": "average a fixed hidden-context ensemble then draw finite shots; exact open-system anchors only at initial and final points",
+    "reason": "the platform's stochastic public runtime propagates once per shot and would exceed the one-hour budget"
+  },
+  "claim_boundary": [
+    "The source-constrained AR waveform is an equivalent reoptimization because the authors did not publish the waveform array.",
+    "The effective R^-6 pair model is not the missing Liu MQDT table.",
+    "The AOM response is inferred from the rasterized paper trace, not a measured transfer-function file.",
+    "Laser spectra and microscopic decay branching remain calibrated priors with explicit provenance.",
+    "Simulator-generated finite-shot observations are digital-twin data, not laboratory measurements."
+  ]
+}

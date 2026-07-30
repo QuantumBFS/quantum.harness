@@ -1,0 +1,74 @@
+{
+  "run_id": "20260730-143543-liu-2026-fig1-perfect-blockade",
+  "time_nodes": 201,
+  "baseline_cz_infidelity": 6.3732058688259485e-06,
+  "reduced_full_max_abs_difference": 4.927201804035743e-13,
+  "active_hessian_rank": 5,
+  "lambda_1": 2.403145516356173,
+  "lambda_5_over_lambda_1": 0.07215932836828666,
+  "lambda_6_over_lambda_1": 1.2223791873387053e-16,
+  "maximum_mode_norm_error": 1.3322676295501878e-15,
+  "cross_method": {
+    "max_principal_relative_error": 4.468553145770559e-06,
+    "max_principal_step_instability": 4.60661222154348e-06,
+    "max_null_curvature_ratio": 7.998850389012809e-07,
+    "principal_pass": true,
+    "stability_pass": true,
+    "null_pass": true
+  },
+  "ansatz_tangent_rank": 4,
+  "ansatz_orthogonal_direction_count": 4,
+  "optimization_objective_calls": 2933,
+  "continuous_optimization_validation_calls": 328,
+  "piecewise_vs_continuous_baseline_max_difference": 0.000547827682329674,
+  "panel_h_final_infidelities": {
+    "Hessian eigenvectors": 3.8445913119744546e-12,
+    "Chebyshev, first 6 orders": 7.3851615933762105e-09,
+    "Analytical ansatz": 4.94203191114817e-05,
+    "AA + orthogonal eigenbasis": 4.394614403113728e-05
+  },
+  "panel_h_first_cycle_infidelity": 8.652202598824488e-07,
+  "panel_h_quadratic_first_cycle_infidelity": 4.748059826362678e-34,
+  "panel_i_initial_and_final": {
+    "0.100": {
+      "initial": 0.10000000022252686,
+      "final": 0.0028446484384051507,
+      "floor_ratio": 0.028446484320750438
+    },
+    "0.025": {
+      "initial": 0.025000000080704354,
+      "final": 0.0006108005142954065,
+      "floor_ratio": 0.024432020492945444
+    },
+    "0.006": {
+      "initial": 0.006000000000325634,
+      "final": 0.00013004051912646197,
+      "floor_ratio": 0.021673419853234063
+    }
+  },
+  "timing_seconds": {
+    "primary": 2.255704227998649,
+    "secondary": 3.4423055200022645,
+    "optimization": 51.46692078900014,
+    "total": 72.52268003000063
+  },
+  "peak_resident_memory_mib": 378.8515625,
+  "software": {
+    "python": "3.12.13",
+    "numpy": "2.5.1",
+    "scipy": "1.18.0",
+    "matplotlib": "3.11.1",
+    "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.43"
+  },
+  "acceptance": {
+    "rank_pass": true,
+    "unitary_pass": true,
+    "normalization_pass": true,
+    "principal_curvature_pass": true,
+    "finite_difference_stability_pass": true,
+    "null_curvature_pass": true,
+    "nonlinear_hessian_cycle_pass": true,
+    "waveform_evidence_pass": true,
+    "all_pass": true
+  }
+}

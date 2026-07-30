@@ -1,0 +1,24 @@
+{
+  "profile": "standard",
+  "optimizer": {
+    "backend": "source_phase",
+    "robustness_objective": "common_alpha_s11",
+    "coefficients_per_channel": 400,
+    "edge_adiabatic_factor": 10.0,
+    "starts": 6,
+    "nominal_maxiter": 500,
+    "ar_continuation_maxiter": 500,
+    "robust_max_nfev": 1200,
+    "smooth_maxiter": 80,
+    "coarse_nodes": 401,
+    "fine_nodes": 801,
+    "regularizer_nodes": 801,
+    "phase_bound_turns": 2.0,
+    "use_paper_shaped_diagnostic_seed": false,
+    "smoothness_weight": 1e-6
+  },
+  "adaptive_max_step_fraction": 0.00125,
+  "grid_node_counts": [401, 801, 1601],
+  "waveform_output_nodes": 801,
+  "population_nodes": 801
+}

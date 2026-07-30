@@ -1,0 +1,151 @@
+{
+  "provenance": "equivalent numerical reoptimization",
+  "intensity_amplitude_relation": "Omega/Omega0=sqrt(I/I0)",
+  "paper_range": [
+    0.8,
+    1.2
+  ],
+  "extended_diagnostic_range": [
+    0.75,
+    1.25
+  ],
+  "gate_label_warning": "The comparator is a same-duration non-robust surrogate, not the paper's time-optimal gate and not quantitatively identified with it.",
+  "fidelity_conventions": {
+    "fixed_standard_cz": "fixed diag(1,1,1,-1) target",
+    "fixed_nominal_virtual_z": "one symmetric virtual-Z phase determined at I/I0=1 and held fixed for the entire scan",
+    "pointwise_cz_equivalent": "a separately removed symmetric local-Z at every intensity; this is an echoed/CZ-equivalent metric, not an ordinary uncalibrated CZ fidelity"
+  },
+  "nominal_virtual_z": {
+    "AR equivalent reoptimization": 3.0800222566134785,
+    "same-duration non-robust surrogate": -1.1753844993743099
+  },
+  "nominal_numerical_floors": {
+    "AR equivalent reoptimization": {
+      "fixed_standard_cz": 0.7999992819025168,
+      "fixed_nominal_virtual_z": 9.214851104388799e-14,
+      "pointwise_cz_equivalent": 9.214851104388799e-14
+    },
+    "same-duration non-robust surrogate": {
+      "fixed_standard_cz": 0.4162506372706811,
+      "fixed_nominal_virtual_z": 1.3788969965844444e-13,
+      "pointwise_cz_equivalent": 1.3788969965844444e-13
+    }
+  },
+  "fit_window_summaries": {
+    "AR equivalent reoptimization": {
+      "fixed_standard_cz": {
+        "negative": {
+          "median_exponent": NaN,
+          "window_spread": NaN,
+          "exponents": []
+        },
+        "positive": {
+          "median_exponent": NaN,
+          "window_spread": NaN,
+          "exponents": []
+        }
+      },
+      "fixed_nominal_virtual_z": {
+        "negative": {
+          "median_exponent": 4.006821729078282,
+          "window_spread": 0.004034125468169059,
+          "exponents": [
+            4.004964659521021,
+            4.006821729078282,
+            4.00899878498919
+          ]
+        },
+        "positive": {
+          "median_exponent": 3.9920389191244903,
+          "window_spread": 0.005503374818028206,
+          "exponents": [
+            3.9945113431240786,
+            3.9920389191244903,
+            3.9890079683060504
+          ]
+        }
+      },
+      "pointwise_cz_equivalent": {
+        "negative": {
+          "median_exponent": 4.00586986036551,
+          "window_spread": 0.0026344101561432964,
+          "exponents": [
+            4.004574566216894,
+            4.00586986036551,
+            4.007208976373037
+          ]
+        },
+        "positive": {
+          "median_exponent": 3.9906085622696685,
+          "window_spread": 0.007042457807272751,
+          "exponents": [
+            3.9937287549885587,
+            3.9906085622696685,
+            3.986686297181286
+          ]
+        }
+      }
+    },
+    "same-duration non-robust surrogate": {
+      "fixed_standard_cz": {
+        "negative": {
+          "median_exponent": NaN,
+          "window_spread": NaN,
+          "exponents": []
+        },
+        "positive": {
+          "median_exponent": NaN,
+          "window_spread": NaN,
+          "exponents": []
+        }
+      },
+      "fixed_nominal_virtual_z": {
+        "negative": {
+          "median_exponent": 1.9818385197223107,
+          "window_spread": 0.02228301500698593,
+          "exponents": [
+            1.9909414199433153,
+            1.9818385197223107,
+            1.9686584049363294
+          ]
+        },
+        "positive": {
+          "median_exponent": 1.9863057902667793,
+          "window_spread": 0.017320163868313587,
+          "exponents": [
+            1.9934554632553312,
+            1.9863057902667793,
+            1.9761352993870176
+          ]
+        }
+      },
+      "pointwise_cz_equivalent": {
+        "negative": {
+          "median_exponent": 1.9928575318298474,
+          "window_spread": 0.015477126132405594,
+          "exponents": [
+            1.9987859447496932,
+            1.9928575318298474,
+            1.9833088186172876
+          ]
+        },
+        "positive": {
+          "median_exponent": 1.9774128655988032,
+          "window_spread": 0.021708101151720838,
+          "exponents": [
+            1.9866994424866182,
+            1.9774128655988032,
+            1.9649913413348974
+          ]
+        }
+      }
+    }
+  },
+  "plot": "/home/thy/thy/work/quantum_harnessing/quantum.harness/tracks/qcs/results/20260730-143545-liu-2026-fig34-effective-digital-twin/figs/fig4_theory_intensity_scaling.png",
+  "acceptance": {
+    "nonrobust_quadratic_both_directions": true,
+    "ar_echoed_quartic_both_directions": true,
+    "fixed_z_reported_without_forced_exponent": true,
+    "all": true
+  }
+}

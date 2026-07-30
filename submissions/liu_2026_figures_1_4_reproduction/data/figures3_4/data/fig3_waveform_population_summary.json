@@ -1,0 +1,17 @@
+{
+  "plot": "/home/thy/thy/work/quantum_harnessing/quantum.harness/tracks/qcs/results/20260730-143545-liu-2026-fig34-effective-digital-twin/figs/fig3_theory_waveform_populations.png",
+  "figure3b_plot": "/home/thy/thy/work/quantum_harnessing/quantum.harness/tracks/qcs/results/20260730-143545-liu-2026-fig34-effective-digital-twin/figs/fig3b_source_constrained_waveform.png",
+  "provenance": "equivalent numerical reoptimization",
+  "max_populations": {
+    "P00_total_rydberg": 0.6250556473651847,
+    "P01_total_rydberg": 0.9787295007385368,
+    "P11_total_rydberg": 0.8390421443843413
+  },
+  "integrated_rydberg_population_us": {
+    "P00_total_rydberg": 0.08964081147573306,
+    "P01_total_rydberg": 0.24447090072451036,
+    "P11_total_rydberg": 0.17334224918387514
+  },
+  "symmetry_statement": "The |10> total Rydberg population equals |01> by atom-exchange symmetry of the reduced Hamiltonian.",
+  "waveform_match_claim": "No pixelwise or array-level match to the unpublished paper pulse is claimed."
+}

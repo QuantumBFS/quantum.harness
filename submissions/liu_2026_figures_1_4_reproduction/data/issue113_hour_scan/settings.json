@@ -1,0 +1,9 @@
+{
+  "principal_modes": 10,
+  "cycles": 2,
+  "scan_points": 9,
+  "shots_per_query": 50000,
+  "target_coherent_error": 0.001,
+  "irreducible_raw_floor": 0.004,
+  "cache_policy": "reuse fixed optimized waveform and Hessian; vary only black-box AOM gap and finite-shot seed; stop after two cycles to respect the one-hour wall budget"
+}

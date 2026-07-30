@@ -1,0 +1,206 @@
+{
+  "status": "physical-model input contract validated",
+  "provenance": "paper-stated values plus independently reoptimized pulse and explicit effective-model placeholders",
+  "atom": {
+    "isotope": "171Yb",
+    "qubit_states": [
+      {
+        "label": "0",
+        "configuration": "6s6p",
+        "term": "3P0",
+        "F": 0.5,
+        "m_F": -0.5,
+        "source": "arXiv:2606.05060v1 Section II"
+      },
+      {
+        "label": "1",
+        "configuration": "6s6p",
+        "term": "3P0",
+        "F": 0.5,
+        "m_F": 0.5,
+        "source": "arXiv:2606.05060v1 Section II"
+      }
+    ],
+    "intermediate_states": [],
+    "rydberg_states": [
+      {
+        "label": "r",
+        "configuration": "6s-nu-s",
+        "nu": 52.3,
+        "F": 0.5,
+        "m_F": -0.5,
+        "source": "arXiv:2606.05060v1 Section II"
+      },
+      {
+        "label": "rprime",
+        "configuration": "6s-nu-s",
+        "nu": 52.3,
+        "F": 0.5,
+        "m_F": 0.5,
+        "source": "arXiv:2606.05060v1 Section II"
+      }
+    ],
+    "state_labels": {
+      "qubit": [
+        "0",
+        "1"
+      ],
+      "intermediate": [],
+      "rydberg": [
+        "r",
+        "rprime"
+      ]
+    }
+  },
+  "laser_beams": [
+    {
+      "id": "gate_uv",
+      "role": "direct_single_photon_rydberg_gate",
+      "wavelength_nm": 302.0,
+      "detuning_mhz": 0.0,
+      "rabi_frequency_mhz": 6.0,
+      "propagation_direction_lab": null,
+      "polarization": {
+        "description": "linear and perpendicular to the quantization field",
+        "sigma_minus_relative_amplitude": 1.0,
+        "pi_relative_amplitude_upper_bound": 0.0018,
+        "sigma_plus_relative_amplitude": 1.0
+      },
+      "frequency_conversion_sources_nm": [
+        1971.0,
+        1560.0
+      ],
+      "source": "arXiv:2606.05060v1 Section II and Appendix A"
+    }
+  ],
+  "laser_beam_ids": [
+    "gate_uv"
+  ],
+  "magnetic_field": {
+    "magnitude_gauss": null,
+    "direction_lab": null,
+    "angle_to_gate_beam_deg": 90.0,
+    "rydberg_zeeman_splitting_mhz": 16.1,
+    "source": "paper gives the direction relation and measured splitting, not the field magnitude"
+  },
+  "geometry": {
+    "dimer_distance_um": 2.0,
+    "dimer_axis_lab": null,
+    "neighboring_dimer_distance_um": 25.0,
+    "source": "arXiv:2606.05060v1 Appendix A; absolute orientation is not reported"
+  },
+  "microscopic_inputs": {
+    "pulse_waveform": {
+      "source": "csv",
+      "status": "supplied",
+      "rows": 801,
+      "path": "/home/thy/thy/work/quantum_harnessing/quantum.harness/tracks/qcs/results/20260730-143545-liu-2026-fig34-effective-digital-twin/generated_input/pulse_waveform.csv",
+      "required_columns": [
+        "time_us",
+        "amplitude_rad_per_us",
+        "phase_rad"
+      ],
+      "provenance": "independent source-constrained 400-bin reoptimization; not the authors' unpublished waveform",
+      "consumed_by_current_hessian": false
+    },
+    "zeeman_calibration": {
+      "source": "unavailable",
+      "status": "unavailable",
+      "rows": 0,
+      "path": null,
+      "required_columns": [
+        "state_label",
+        "field_gauss",
+        "shift_mhz",
+        "uncertainty_mhz"
+      ],
+      "provenance": "supply measured shifts versus magnetic field",
+      "consumed_by_current_hessian": false
+    },
+    "polarization_calibration": {
+      "source": "unavailable",
+      "status": "unavailable",
+      "rows": 0,
+      "path": null,
+      "required_columns": [
+        "beam_id",
+        "component",
+        "relative_amplitude",
+        "phase_rad",
+        "uncertainty"
+      ],
+      "provenance": "supply measured spherical polarization components",
+      "consumed_by_current_hessian": false
+    },
+    "mqdt_pair_states": {
+      "source": "unavailable",
+      "status": "unavailable",
+      "rows": 0,
+      "path": null,
+      "required_columns": [
+        "distance_um",
+        "pair_state_id",
+        "energy_mhz",
+        "product_state",
+        "overlap_real",
+        "overlap_imag"
+      ],
+      "provenance": "supply pair eigenenergies and product-state overlaps versus distance",
+      "consumed_by_current_hessian": false
+    },
+    "distance_samples": {
+      "source": "unavailable",
+      "status": "unavailable",
+      "rows": 0,
+      "path": null,
+      "required_columns": [
+        "sample_id",
+        "distance_um",
+        "polar_angle_rad",
+        "azimuth_rad"
+      ],
+      "provenance": "supply measured or calibrated thermal position samples",
+      "consumed_by_current_hessian": false
+    },
+    "decay_branching": {
+      "source": "unavailable",
+      "status": "unavailable",
+      "rows": 0,
+      "path": null,
+      "required_columns": [
+        "initial_state",
+        "final_state",
+        "rate_per_us"
+      ],
+      "provenance": "supply state-resolved Rydberg decay rates",
+      "consumed_by_current_hessian": false
+    },
+    "laser_phase_noise_psd": {
+      "source": "unavailable",
+      "status": "unavailable",
+      "rows": 0,
+      "path": null,
+      "required_columns": [
+        "frequency_mhz",
+        "psd_rad2_per_mhz"
+      ],
+      "provenance": "supply measured one-sided phase-noise spectrum",
+      "consumed_by_current_hessian": false
+    },
+    "laser_amplitude_noise_psd": {
+      "source": "unavailable",
+      "status": "unavailable",
+      "rows": 0,
+      "path": null,
+      "required_columns": [
+        "frequency_mhz",
+        "psd_fraction2_per_mhz"
+      ],
+      "provenance": "supply measured one-sided fractional-amplitude-noise spectrum",
+      "consumed_by_current_hessian": false
+    }
+  },
+  "supplied_input_count": 1,
+  "missing_input_count": 7,
+  "current_hessian_model": "ten-state perfect-blockade model configured separately; physical_model inputs are audited but not silently consumed"
+}
