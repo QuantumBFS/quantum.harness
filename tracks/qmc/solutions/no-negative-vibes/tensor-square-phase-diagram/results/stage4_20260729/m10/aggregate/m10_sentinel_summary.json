@@ -1,0 +1,142 @@
+{
+  "acceptance_range": [
+    0.3916822429906542,
+    0.4047857142857143
+  ],
+  "audited_m10_replicas": 2,
+  "candidate": {
+    "beta": 4.0,
+    "g_b_over_g_a": 0.25,
+    "m": 10,
+    "mu": 0.0,
+    "t": 0.5
+  },
+  "early_stop_replicas": 2,
+  "experiment_id": "stage4-m10-numerical-sentinel-20260729-v1",
+  "finite_size_judgement": "\u8fbe\u5230\u65e9\u505c\uff1b\u5f53\u524d\u4fe1\u53f7\u6309\u6709\u9650\u5c3a\u5bf8\u6216\u666e\u901a crossover \u5904\u7406\uff0c\u4e0d\u652f\u6301\u7ee7\u7eed Stage 5 \u7684\u76f8\u4e3b\u5f20",
+  "healthy_m10_cell": false,
+  "m10_passing_replica_aggregate": {
+    "channel_balance_mean": -0.565470164841495,
+    "channel_balance_stderr": 0.00479948114019427,
+    "correlation_length_over_m_mean": 0.33405695798008844,
+    "correlation_length_over_m_stderr": 0.0027554687103936155,
+    "correlation_length_proxy_mean": 3.3405695798008845,
+    "correlation_length_proxy_stderr": 0.02755468710393627,
+    "density_mean": 0.5000000000000002,
+    "density_stderr": 5.551115123125783e-17,
+    "energy_mean": -64.12736146753102,
+    "energy_stderr": 0.021618398237647826,
+    "near_staggered_structure_mean": 0.11199565762661337,
+    "near_staggered_structure_stderr": 0.005448675939352287,
+    "nematic_sq_mean": 0.005014315801456397,
+    "nematic_sq_stderr": 5.908504150845418e-07,
+    "q_a_binder_mean": -0.3259168822311266,
+    "q_a_binder_stderr": 0.0028783354024434216,
+    "q_a_mean_mean": 2.1340036184350843,
+    "q_a_mean_stderr": 0.001977705354376165,
+    "q_a_sq_mean": 4.563360535276786,
+    "q_a_sq_stderr": 0.008245451967542018,
+    "q_a_susceptibility_mean": 0.015475689550267888,
+    "q_a_susceptibility_stderr": 0.004091515101734827,
+    "q_b_binder_mean": 0.0009489927715661817,
+    "q_b_binder_stderr": 0.0007559845733794979,
+    "q_b_mean_mean": 1.1004772034422554,
+    "q_b_mean_stderr": 0.007645464402025042,
+    "q_b_sq_mean": 1.270262452052774,
+    "q_b_sq_stderr": 0.0168870759539279,
+    "q_b_susceptibility_mean": 0.1471361249207948,
+    "q_b_susceptibility_stderr": 0.033511487630391676,
+    "q_combined_mean": 2.91681149366478,
+    "q_combined_stderr": 0.009005487260415277,
+    "staggered_structure_mean": 0.5892173990367322,
+    "staggered_structure_stderr": 0.008879396733152588
+  },
+  "m8_reference": {
+    "q_combined_mean": 2.36025525218135,
+    "q_combined_stderr": 0.0042337507476072145
+  },
+  "m8_to_m10_diagnostic_trends": {
+    "correlation_length_over_m": {
+      "combined_stderr": 0.0029341217224872766,
+      "delta": 0.06704656198016207,
+      "extend_positive": true,
+      "high": 0.33405695798008844,
+      "low": 0.2670103959999264,
+      "relative_delta": 0.2511009420778529,
+      "strict_positive": true,
+      "z": 22.85064094864006
+    },
+    "q_a_binder": {
+      "combined_stderr": 0.012969172105511224,
+      "delta": 0.14003132173474214,
+      "extend_positive": true,
+      "high": -0.3259168822311266,
+      "low": -0.4659482039658687,
+      "relative_delta": 0.30052980254646416,
+      "strict_positive": true,
+      "z": 10.797244465221963
+    },
+    "q_a_susceptibility": {
+      "combined_stderr": 0.005396239982301626,
+      "delta": 0.0030933149958865327,
+      "extend_positive": false,
+      "high": 0.015475689550267888,
+      "low": 0.012382374554381355,
+      "relative_delta": 0.24981597691954815,
+      "strict_positive": false,
+      "z": 0.573235253812259
+    },
+    "q_b_binder": {
+      "combined_stderr": 0.002769536212081054,
+      "delta": -0.005146199579874222,
+      "extend_positive": false,
+      "high": 0.0009489927715661817,
+      "low": 0.006095192351440404,
+      "relative_delta": -0.8443047049463636,
+      "strict_positive": false,
+      "z": -1.85814489712244
+    },
+    "q_b_susceptibility": {
+      "combined_stderr": 0.05416676595906174,
+      "delta": 0.10373906569222399,
+      "extend_positive": true,
+      "high": 0.1471361249207948,
+      "low": 0.04339705922857082,
+      "relative_delta": 2.390463029898729,
+      "strict_positive": false,
+      "z": 1.9151792405444346
+    },
+    "staggered_structure": {
+      "combined_stderr": 0.011400205242286507,
+      "delta": 0.11628101558024839,
+      "extend_positive": true,
+      "high": 0.5892173990367322,
+      "low": 0.4729363834564838,
+      "relative_delta": 0.24587031078133945,
+      "strict_positive": true,
+      "z": 10.19990544985366
+    }
+  },
+  "m8_to_m10_q_trend": {
+    "combined_stderr": 0.009951052516712315,
+    "delta": 0.5565562414834302,
+    "extend_positive": true,
+    "high": 2.91681149366478,
+    "low": 2.36025525218135,
+    "relative_delta": 0.23580341192718898,
+    "strict_positive": true,
+    "z": 55.92938440920904
+  },
+  "m8_to_m10_supporting_diagnostics": [
+    "staggered_structure",
+    "correlation_length_over_m"
+  ],
+  "maximum_weight_log_error": 1.7053025658242404e-13,
+  "minimum_direct_sign": 1.0,
+  "physics_claim_permitted": false,
+  "release_digest": "7ad15e5ceb539a752bbde5146dde48535e61979d0c785121dd4b10c556c6545a",
+  "requested_replicas": 4,
+  "residual_uncertainty": "Two passing replicas show size enhancement, but two matched replicas hit the frozen autocorrelation cap.",
+  "source_revision": "dc87c6c814e37098b7593ba49e661b3b7adb741b",
+  "supports_continue_stage5_phase_claim": false
+}

@@ -1,0 +1,11 @@
+{
+  "complete": 36,
+  "early_stops": 0,
+  "error_replicas": [],
+  "errors": 0,
+  "experiment_id": "stage4-dense-20260729-v1",
+  "finished_utc": "2026-07-29T15:04:55.159383+00:00",
+  "machine": "wsl",
+  "phase": "pilot",
+  "requested": 36
+}

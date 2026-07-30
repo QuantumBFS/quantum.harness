@@ -1,0 +1,139 @@
+{
+  "blas_threads": {
+    "MKL_NUM_THREADS": "1",
+    "NUMEXPR_NUM_THREADS": "1",
+    "OMP_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1"
+  },
+  "command": [
+    "python",
+    "scripts/run_phase_scan.py",
+    "--output-dir",
+    "results/stage3_coarse_20260729",
+    "--machine",
+    "cpu",
+    "--workers",
+    "62"
+  ],
+  "created_utc": "2026-07-29T12:42:42.964756+00:00",
+  "experiment_id": "stage3-coarse-20260729",
+  "full_grid_cells": 675,
+  "git": {
+    "commit": "b4459ae0d1c64ba021ffce634d26402362575171",
+    "dirty": false
+  },
+  "grid": {
+    "beta": [
+      2.0,
+      4.0,
+      8.0
+    ],
+    "dt": 0.2,
+    "g_b_over_g_a": [
+      0.0,
+      0.25,
+      0.5,
+      1.0,
+      2.0
+    ],
+    "m": [
+      4,
+      6,
+      8
+    ],
+    "mu": [
+      -1.5,
+      0.0,
+      1.5
+    ],
+    "stabilized_beta": [
+      4.0,
+      8.0
+    ],
+    "t": [
+      0.0,
+      0.25,
+      0.5,
+      1.0,
+      2.0
+    ]
+  },
+  "grid_cells": 540,
+  "machine": "cpu",
+  "max_processes": 62,
+  "seed_rule": "uint32_be(SHA256(experiment_id|cell_id|worker_id)[:4])",
+  "software": {
+    "numpy": "2.4.6",
+    "python": "3.11.15",
+    "scipy": "1.17.1"
+  },
+  "sweeps": {
+    "measure_every": 2,
+    "measurement": 80,
+    "warmup": 40
+  },
+  "worker_ids": [
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    33,
+    34,
+    35,
+    36,
+    37,
+    38,
+    39,
+    40,
+    41,
+    42,
+    43,
+    44,
+    45,
+    46,
+    47,
+    48,
+    49,
+    50,
+    51,
+    52,
+    53,
+    54,
+    55,
+    56,
+    57,
+    58,
+    59,
+    60,
+    61,
+    62,
+    63,
+    64,
+    65,
+    66,
+    67,
+    68,
+    69,
+    70,
+    71,
+    72,
+    73,
+    74,
+    75
+  ]
+}

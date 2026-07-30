@@ -1,0 +1,34 @@
+{
+  "content_sha256_without_hash": "2e6fab390833588e0165a5ccdd65d3c53dcebf0218239e8de46e7eed1d793d9f",
+  "created_utc": "2026-07-29T10:43:03.045636+00:00",
+  "experiment_id": "stage0-oracle-20260729",
+  "hamiltonian": {
+    "hamiltonian_nnz": 6526,
+    "hermiticity_max_abs": 0.0,
+    "hilbert_dimension": 512,
+    "m": 3,
+    "normal_ordering_max_abs": 8.881784197001252e-16,
+    "number_commutator_max_abs": 0.0,
+    "q1_nnz": 1536,
+    "q2_nnz": 1536
+  },
+  "oracle": {
+    "max_eigenvalue_relative_error": 1.0910324435647788e-06,
+    "max_factorized_relative_error": 1.5931915087965548e-06,
+    "minimum_direct_weight": 1.1456468719948152,
+    "near_zero_case": {
+      "direct": 2.4999998001437895e-13,
+      "eigenvalue": 2.499999800143798e-13,
+      "factorized": 2.499999800143796e-13
+    },
+    "negative_weight_threshold": -2e-10,
+    "samples": 54
+  },
+  "samples_per_m": 18,
+  "seed": 2026072901,
+  "versions": {
+    "numpy": "2.4.6",
+    "python": "3.11.15",
+    "scipy": "1.17.1"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "complete": 135,
+  "error_cells": [],
+  "errors": 0,
+  "experiment_id": "stage3-coarse-20260729",
+  "finished_utc": "2026-07-29T12:43:21.935088+00:00",
+  "machine": "wsl",
+  "requested": 135
+}
