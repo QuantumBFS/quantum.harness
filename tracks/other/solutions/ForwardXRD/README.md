@@ -20,7 +20,10 @@ issue proposes, and the measurements behind each choice.
 
 **Result:** 7/7 benchmark structures recovered at rms ≤ 0.0015 (strict `ltol = stol = 0.05`),
 spanning five crystal systems and 1–9 free internal coordinates, with the unit cell derived from
-peak positions alone — no ground-truth cell anywhere in the pipeline.
+peak positions alone — no ground-truth cell anywhere in the pipeline. Extended with a held-out
+benchmark on 15 real, never-tuned-against Materials Project structures (a substitute for the
+issue's SimXRD-4M benchmark step, whose public release turns out to carry no recoverable ground
+truth — see SUMMARY.md §8): **11/15 solved**, spanning cubic through monoclinic, 1–18 dof.
 
 **Headline finding:** the generative prior is essential; the variational RL machinery around it
 never became necessary. What made the problem tractable was indexing the cell classically,
