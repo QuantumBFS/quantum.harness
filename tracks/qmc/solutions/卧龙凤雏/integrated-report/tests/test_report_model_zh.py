@@ -39,7 +39,7 @@ def test_chinese_report_uses_all_localized_figures(models, learning_mit):
         if isinstance(block, Figure)
     ]
 
-    assert len(figures) == 23
+    assert len(figures) == 27
     assert all(
         str(figure.source).startswith("generated/zh/")
         or "/plots/zh/" in str(figure.source)
@@ -83,3 +83,27 @@ def test_chinese_open_research_chapter_is_explicitly_exploratory(
     assert "探索性" in text
     assert "不发布" in text
     assert "0.24" in build_report_zh(models, learning_mit).plain_text()
+
+
+def test_chinese_open_research_reports_both_effective_central_charge_estimators(
+    models, learning_mit
+):
+    report = build_report_zh(models, learning_mit)
+    section = report.section_for_slug("learning-induced-mit")
+    text = report.plain_text()
+    figures = [block for block in section.blocks if isinstance(block, Figure)]
+
+    for value in (
+        "3.259733",
+        "0.085659",
+        "6.433808",
+        "11.251995",
+        "6.480240",
+        "15.865840",
+    ):
+        assert value in text
+    assert "纠缠有效中心荷" in text
+    assert "Casimir–各向异性有效中心荷" in text
+    assert "各向异性不稳定" in text
+    assert "估计器不一致" in text
+    assert len(figures) == 6

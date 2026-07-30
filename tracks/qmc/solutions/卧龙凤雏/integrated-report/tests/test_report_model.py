@@ -1,4 +1,5 @@
 from analysis.report_model import build_report
+from analysis.report_model import Figure
 
 
 REQUIRED_TITLES = [
@@ -63,3 +64,27 @@ def test_open_research_numbers_are_separate_and_exploratory(models, learning_mit
     assert "not publish" in text.lower()
     headline = report.section_for_slug("executive-summary").blocks[2]
     assert len(headline.rows) == 3
+
+
+def test_open_research_reports_both_effective_central_charge_estimators(
+    models, learning_mit
+):
+    report = build_report(models, learning_mit)
+    section = report.section_for_slug("learning-induced-mit")
+    text = report.plain_text()
+    figures = [block for block in section.blocks if isinstance(block, Figure)]
+
+    for value in (
+        "3.259733",
+        "0.085659",
+        "6.433808",
+        "11.251995",
+        "6.480240",
+        "15.865840",
+    ):
+        assert value in text
+    assert "c_eff^S(L)" in text
+    assert "c_eff^C = 6 A alpha / pi" in text
+    assert "anisotropy_unstable" in text
+    assert "estimator_disagreement" in text
+    assert len(figures) == 6

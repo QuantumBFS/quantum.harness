@@ -777,6 +777,20 @@ def _open_research(result: LearningMitResult) -> Section:
                 "D 类分块，进入本挑战关注的一般 DIII 情形。",
                 "25",
             ),
+            Equation(
+                "S_L(ell) = (c_eff^S(L)/3) log[(L/pi) sin(pi ell/L)] + b_L + q_L cos(2 pi ell/L)/L^2",
+                "纠缠估计只拟合 1/4 <= ell/L <= 3/4 的中央区间，以减小端点与晶格效应。"
+                "每个宽度分别拟合常数偏移与振荡修正，再把 c_eff^S(L) 对 1/L^2 外推到"
+                "无限尺寸。",
+                "26",
+            ),
+            Equation(
+                "gamma(L) = f_bulk L + A/L + B/L^3; c_eff^C = 6 A alpha / pi",
+                "独立的 Casimir 路线从冻结自由能率代理量 gamma 的 1/L 曲率提取 A，"
+                "再用各向异性标定 alpha 换算时空单位。1/L^3 项吸收预声明的首个"
+                "有限尺寸修正，避免把它错误归入 A。",
+                "27",
+            ),
             Paragraph(
                 "Rust 使用 Xoshiro256++ 逐次抽取条件 Born 结果，并演化实反对称高斯协方差"
                 "矩阵。分式测量更新之后施加依赖结果的正交旋转；每个周期结束后用正交极分解"
@@ -810,31 +824,83 @@ def _open_research(result: LearningMitResult) -> Section:
                         "预声明验证",
                     ),
                     ("DIII 括区", "无", "探索性 / 结论不足"),
-                    ("Casimir c_eff alpha", "未拟合", "探索性 / 不发布"),
-                    ("各向异性 alpha", "不稳定", "探索性 / 不发布"),
-                    ("DIII 中心荷", "不发布", "探索性 / 不发布"),
+                    (
+                        "候选 phi/pi",
+                        f"{result.candidate_phi_pi:.2f}",
+                        "探索性",
+                    ),
+                    (
+                        "纠缠有效中心荷",
+                        f"{result.entanglement_c_eff:.6f} "
+                        f"[{result.entanglement_interval[0]:.6f}, "
+                        f"{result.entanglement_interval[1]:.6f}]",
+                        "探索性 / 不发布",
+                    ),
+                    (
+                        "Casimir–各向异性有效中心荷",
+                        f"{result.casimir_c_eff:.6f} "
+                        f"[{result.casimir_interval[0]:.6f}, "
+                        f"{result.casimir_interval[1]:.6f}]",
+                        "探索性 / 不发布",
+                    ),
+                    (
+                        "各向异性 alpha",
+                        f"{result.alpha:.6f}" if result.alpha is not None else "不可用",
+                        "各向异性不稳定 / 不发布",
+                    ),
+                    (
+                        "失败的声明门控",
+                        "DIII 转变未括定、各向异性不稳定、估计器不一致",
+                        "探索性",
+                    ),
                     (
                         "运行时间",
                         f"{result.elapsed_s:.3f} 秒",
-                        f"低于 {result.ordinary_stop_s:.0f} 秒普通上限",
+                        f"使用冗余额度，低于 {result.hard_stop_s:.0f} 秒硬停止",
                     ),
                 ),
-                "所有 DIII 条目均为探索性。空估计是严格声明门控的科学结果，不是报告漏项。",
+                "两个数值估计都因实际存在而完整展示，但都不是已发布的普适常数；失败门控"
+                "本身属于冻结结果。",
             ),
             Figure(
                 result.figures["zh"][0],
-                "批准角度网格上的 XY 线有限尺寸相证据。",
-                "验证扫描：冻结 XY 括区为 "
-                f"[{result.xy_bracket[0]:.2f}, {result.xy_bracket[1]:.2f}]，位于声明的"
-                "参考窗口内。",
-                "该图只验证特殊 D 类线上的实现，不能据此证明一般 DIII 转变。",
+                "所选探索性角度处的弦长纠缠拟合。",
+                "中央区间纠缠数据与用于提取 c_eff^S(L) 的共形弦长形式比较。",
+                "弦长曲线视觉上平滑，不能消除跨宽度外推误差，也不能单独证明 DIII 临界点。",
             ),
             Figure(
                 result.figures["zh"][1],
-                "八个方位角点上的探索性 DIII 相证据分数。",
-                "探索性一般 DIII 扫描。分数随网格平滑变化，但没有相邻点满足完整的"
-                "持续相反相证据规则。",
-                "该分数是复合有限尺寸诊断，不是中心荷，也不是零点具有普适意义的独立序参量。",
+                "纠缠有效中心荷的有限尺寸外推。",
+                f"截距为 {result.entanglement_c_eff:.6f}，95% 区间为 "
+                f"[{result.entanglement_interval[0]:.6f}, "
+                f"{result.entanglement_interval[1]:.6f}]。",
+                "区间很宽，原因是逐宽度斜率噪声较大且有限尺寸依赖显著。",
+            ),
+            Figure(
+                result.figures["zh"][2],
+                "七个宽度上的自由能率代理量 Casimir 拟合。",
+                "体项、1/L Casimir 项和 1/L^3 修正项被联合拟合。",
+                "只有施加独立估计的各向异性因子后，Casimir 振幅才能转换为有效中心荷。",
+            ),
+            Figure(
+                result.figures["zh"][3],
+                "预声明 Casimir 有限尺寸模型的残差。",
+                "残差结构用于检验所选修正族能否解释观测到的宽度依赖。",
+                "小残差不能补救不稳定的各向异性标定。",
+            ),
+            Figure(
+                result.figures["zh"][4],
+                "预声明分析窗口下的各向异性稳定性。",
+                f"冻结 alpha 估计为 {result.alpha:.6f}；稳定性门控通过："
+                f"{'是' if result.alpha_stable else '否'}。",
+                "窗口敏感性直接传播到 c_eff^C，因此它是发布所必需的门控。",
+            ),
+            Figure(
+                result.figures["zh"][5],
+                "两种有效中心荷估计器的直接比较。",
+                f"纠缠路线给出 {result.entanglement_c_eff:.6f}，Casimir–各向异性路线"
+                f"给出 {result.casimir_c_eff:.6f}。",
+                "两者的不确定区间没有通过预声明的一致性检验；报告保留差异，不对其强行平均。",
             ),
             Table(
                 "探索性 DIII 证据扫描",
@@ -847,13 +913,15 @@ def _open_research(result: LearningMitResult) -> Section:
                 f"{result.born_mean:.6f} 和 {result.iid_mean:.6f}，z={result.negative_control_z:.2f}。"
                 "这确认了无条件随机符号不能替代依赖当前态的 Born 抽样。科学 oracle 通过，"
                 f"{len(result.widths)} 个宽度 {result.widths}、每点 {result.streams} 条流全部"
-                "完成，且没有使用运行时冗余额度。"
+                f"完成。运行时间 {result.elapsed_s:.3f} 秒仅因预声明的最大宽度未完成理由"
+                f"超过 {result.ordinary_stop_s:.0f} 秒普通停止点，并保持在硬停止点以下。"
             ),
             Callout(
                 "尚未解决的问题",
-                "当前数据不发布 DIII 转变、Casimir 振幅、各向异性或中心荷。后续研究应在"
-                "低 phi 交叉区增加独立流和宽度，预声明更细的精化网格，并检验相标签是否在"
-                "替代有限尺寸窗口下持续成立。“结论不足”不等于“转变不存在”。",
+                "当前数据产生了两个探索性有效中心荷估计，但都不发布。失败原因是 DIII "
+                "转变未括定、各向异性不稳定、估计器不一致。后续研究应先取得相邻相括区，"
+                "再用更多时空窗口稳定 alpha，最后在新的独立流上要求两种估计器一致。"
+                "“结论不足”不等于“转变不存在”。",
                 "principle",
             ),
         ),

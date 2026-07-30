@@ -58,9 +58,24 @@ class LearningMitResult:
     diii_theta_pi: float
     diii_bracket: Optional[Tuple[float, float]]
     diii_evidence: Tuple[Tuple[float, float], ...]
+    candidate_status: str
+    candidate_phi_pi: float
+    entanglement_c_eff: float
+    entanglement_standard_error: float
+    entanglement_interval: Tuple[float, float]
+    entanglement_stable: bool
     casimir_amplitude: Optional[float]
+    casimir_c_eff: float
+    casimir_standard_error: float
+    casimir_interval: Tuple[float, float]
+    casimir_fit_stable: bool
     alpha: Optional[float]
     alpha_stable: bool
+    estimator_agrees: bool
+    claim_status: str
+    claim_value: float
+    claim_interval: Tuple[float, float]
+    claim_reasons: Tuple[str, ...]
     central_charge_published: bool
     elapsed_s: float
     ordinary_stop_s: float
@@ -143,13 +158,25 @@ def load_learning_mit(repo_root: Path) -> LearningMitResult:
     run = summary["run"]
     central_charge = summary["central_charge"]
     casimir = summary["casimir"]
+    candidate = summary["candidate_selection"]
+    entanglement_c_eff = summary["entanglement_c_eff"]
+    casimir_c_eff = summary["casimir_c_eff"]
+    estimator_comparison = summary["estimator_comparison"]
+    claim = summary["claim"]
     anisotropy = summary["anisotropy"]
     negative = summary["negative_control"]
     oracles = summary["oracles"]
     figures = {
         language: tuple(
             result_dir / f"plots/{language}/{name}"
-            for name in ("xy-phase-scan.png", "diii-phase-scan.png")
+            for name in (
+                "entropy-chord-fit.png",
+                "entropy-ceff-extrapolation.png",
+                "casimir-fit.png",
+                "casimir-residuals.png",
+                "anisotropy-stability.png",
+                "ceff-comparison.png",
+            )
         )
         for language in ("en", "zh")
     }
@@ -175,9 +202,30 @@ def load_learning_mit(repo_root: Path) -> LearningMitResult:
             (float(row["phi_pi"]), float(row["score"]))
             for row in diii["evidence"]
         ),
+        candidate_status=str(candidate["status"]),
+        candidate_phi_pi=float(candidate["candidate_phi_pi"]),
+        entanglement_c_eff=float(entanglement_c_eff["value"]),
+        entanglement_standard_error=float(
+            entanglement_c_eff["standard_error"]
+        ),
+        entanglement_interval=_interval(
+            entanglement_c_eff["interval"], "learning-mit"
+        ),
+        entanglement_stable=bool(
+            entanglement_c_eff["stable_without_smallest"]
+        ),
         casimir_amplitude=_optional_float(casimir.get("amplitude")),
+        casimir_c_eff=float(casimir_c_eff["value"]),
+        casimir_standard_error=float(casimir_c_eff["standard_error"]),
+        casimir_interval=_interval(casimir_c_eff["interval"], "learning-mit"),
+        casimir_fit_stable=bool(casimir_c_eff["fit_stable"]),
         alpha=_optional_float(anisotropy.get("alpha")),
         alpha_stable=bool(anisotropy["alpha_stable"]),
+        estimator_agrees=bool(estimator_comparison["agrees"]),
+        claim_status=str(claim["status"]),
+        claim_value=float(claim["value"]),
+        claim_interval=_interval(claim["interval"], "learning-mit"),
+        claim_reasons=tuple(str(reason) for reason in claim["reasons"]),
         central_charge_published=bool(central_charge["published"]),
         elapsed_s=float(run["elapsed_seconds"]),
         ordinary_stop_s=float(run["ordinary_stop_seconds"]),
@@ -454,6 +502,15 @@ def _validate_learning_mit(result: LearningMitResult) -> None:
         *result.xy_bracket,
         *result.xy_reference_window,
         result.diii_theta_pi,
+        result.candidate_phi_pi,
+        result.entanglement_c_eff,
+        result.entanglement_standard_error,
+        *result.entanglement_interval,
+        result.casimir_c_eff,
+        result.casimir_standard_error,
+        *result.casimir_interval,
+        result.claim_value,
+        *result.claim_interval,
         result.elapsed_s,
         result.ordinary_stop_s,
         result.hard_stop_s,
@@ -466,10 +523,18 @@ def _validate_learning_mit(result: LearningMitResult) -> None:
         raise ValueError("learning-mit: non-finite frozen value")
     if not result.oracle_passed:
         raise ValueError("learning-mit: scientific oracles did not pass")
-    if result.elapsed_s <= 0 or result.elapsed_s >= result.ordinary_stop_s:
-        raise ValueError("learning-mit: runtime did not satisfy the ordinary budget")
+    if result.elapsed_s <= 0 or result.elapsed_s >= result.hard_stop_s:
+        raise ValueError("learning-mit: runtime exceeded the scientific hard stop")
     if not result.widths or result.streams <= 0 or not result.diii_evidence:
         raise ValueError("learning-mit: incomplete frozen scan")
+    if result.candidate_status not in {"bracketed", "exploratory"}:
+        raise ValueError("learning-mit: invalid candidate-selection state")
+    if result.entanglement_standard_error <= 0 or result.casimir_standard_error <= 0:
+        raise ValueError("learning-mit: estimator uncertainty must be positive")
+    if result.claim_status not in {"candidate", "exploratory"}:
+        raise ValueError("learning-mit: invalid effective-central-charge claim state")
+    if not result.claim_reasons and result.claim_status == "exploratory":
+        raise ValueError("learning-mit: exploratory claim lacks failed gates")
     if result.status.endswith("inconclusive"):
         if result.diii_bracket is not None or result.central_charge_published:
             raise ValueError("learning-mit: inconclusive result publishes a DIII claim")

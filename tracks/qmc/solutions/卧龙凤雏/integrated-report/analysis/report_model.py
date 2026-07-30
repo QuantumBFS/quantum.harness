@@ -1054,6 +1054,22 @@ def _open_research(result: LearningMitResult) -> Section:
                 "components remove the special class-D block decomposition.",
                 "25",
             ),
+            Equation(
+                "S_L(ell) = (c_eff^S(L)/3) log[(L/pi) sin(pi ell/L)] + b_L + q_L cos(2 pi ell/L)/L^2",
+                "The entanglement estimator fits only the central interval "
+                "1/4 <= ell/L <= 3/4, where endpoint and lattice effects are smaller. "
+                "Each width has its own offset and oscillatory correction; the fitted "
+                "c_eff^S(L) values are then extrapolated linearly in 1/L^2.",
+                "26",
+            ),
+            Equation(
+                "gamma(L) = f_bulk L + A/L + B/L^3; c_eff^C = 6 A alpha / pi",
+                "The independent Casimir route isolates the 1/L curvature of the frozen "
+                "free-energy-rate proxy gamma. The anisotropy calibration alpha converts "
+                "temporal and spatial units. The 1/L^3 term absorbs the leading declared "
+                "finite-size correction rather than forcing it into A.",
+                "27",
+            ),
             Paragraph(
                 "Rust generated every conditional Born outcome with Xoshiro256++ and "
                 "evolved a real antisymmetric Gaussian covariance matrix. Rational "
@@ -1092,41 +1108,89 @@ def _open_research(result: LearningMitResult) -> Section:
                     ),
                     ("DIII bracket", "none", "exploratory / inconclusive"),
                     (
-                        "Casimir c_eff alpha",
-                        "not fitted",
+                        "candidate phi/pi",
+                        f"{result.candidate_phi_pi:.2f}",
+                        result.candidate_status,
+                    ),
+                    (
+                        "entanglement c_eff",
+                        f"{result.entanglement_c_eff:.6f} "
+                        f"[{result.entanglement_interval[0]:.6f}, "
+                        f"{result.entanglement_interval[1]:.6f}]",
                         "exploratory / not published",
                     ),
-                    ("anisotropy alpha", "unstable", "exploratory / not published"),
                     (
-                        "DIII central charge",
-                        "not published",
+                        "Casimir-anisotropy c_eff",
+                        f"{result.casimir_c_eff:.6f} "
+                        f"[{result.casimir_interval[0]:.6f}, "
+                        f"{result.casimir_interval[1]:.6f}]",
                         "exploratory / not published",
+                    ),
+                    (
+                        "anisotropy alpha",
+                        f"{result.alpha:.6f}" if result.alpha is not None else "unavailable",
+                        "unstable / not published",
+                    ),
+                    (
+                        "failed claim gates",
+                        ", ".join(result.claim_reasons),
+                        result.claim_status,
                     ),
                     (
                         "runtime",
                         f"{result.elapsed_s:.3f} s",
-                        f"within {result.ordinary_stop_s:.0f} s ordinary limit",
+                        f"reserve used; below {result.hard_stop_s:.0f} s hard stop",
                     ),
                 ),
-                "Every DIII entry is exploratory. Null estimates are scientific outcomes "
-                "of the claim gates, not missing report fields.",
+                "Both numerical estimates are shown because they exist, but neither is a "
+                "published universal constant. Failed gates remain part of the result.",
             ),
             Figure(
                 result.figures["en"][0],
-                "XY-line finite-size phase evidence across the approved azimuthal scan.",
-                "Validation scan: the frozen XY bracket is "
-                f"[{result.xy_bracket[0]:.2f}, {result.xy_bracket[1]:.2f}], inside the "
-                "declared reference window.",
-                "This figure validates the implementation on a special class-D line; it "
-                "does not establish a generic-DIII transition.",
+                "Chord-length entropy fit at the selected exploratory angle.",
+                "The central-interval entropy data are compared with the conformal chord "
+                "form used to obtain c_eff^S(L).",
+                "A visually smooth chord fit does not remove cross-width extrapolation "
+                "uncertainty or establish a DIII critical point.",
             ),
             Figure(
                 result.figures["en"][1],
-                "Exploratory DIII phase-evidence score across eight azimuthal points.",
-                "Exploratory generic-DIII scan. Scores evolve smoothly across the grid, "
-                "but no adjacent pair satisfies the full persistent opposite-phase rule.",
-                "The score is a composite finite-size diagnostic, not a central charge or "
-                "a standalone order parameter with a universal zero.",
+                "Finite-size extrapolation of the entanglement effective central charge.",
+                f"The intercept is {result.entanglement_c_eff:.6f}, with 95% interval "
+                f"[{result.entanglement_interval[0]:.6f}, "
+                f"{result.entanglement_interval[1]:.6f}].",
+                "The interval is broad because individual-width slopes are noisy and "
+                "strongly finite-size dependent.",
+            ),
+            Figure(
+                result.figures["en"][2],
+                "Casimir fit of the free-energy-rate proxy across seven widths.",
+                "The bulk, 1/L Casimir, and 1/L^3 correction terms are fitted together.",
+                "The Casimir amplitude becomes an effective central charge only after the "
+                "separately estimated anisotropy factor is applied.",
+            ),
+            Figure(
+                result.figures["en"][3],
+                "Residuals of the declared Casimir finite-size model.",
+                "Residual structure tests whether the selected correction family absorbs "
+                "the measured width dependence.",
+                "Small residuals alone cannot rescue an unstable anisotropy calibration.",
+            ),
+            Figure(
+                result.figures["en"][4],
+                "Anisotropy stability under the declared analysis windows.",
+                f"The frozen alpha estimate is {result.alpha:.6f}; the stability gate "
+                f"passed={result.alpha_stable}.",
+                "Window sensitivity propagates directly into c_eff^C and is therefore a "
+                "required publication gate.",
+            ),
+            Figure(
+                result.figures["en"][5],
+                "Direct comparison of the two effective-central-charge estimators.",
+                f"Entanglement gives {result.entanglement_c_eff:.6f}, whereas the "
+                f"Casimir-anisotropy route gives {result.casimir_c_eff:.6f}.",
+                "Their uncertainty bands do not satisfy the predeclared agreement test; "
+                "the discrepancy is reported rather than averaged away.",
             ),
             Table(
                 "Exploratory DIII evidence scan",
@@ -1142,16 +1206,18 @@ def _open_research(result: LearningMitResult) -> Section:
                 "confirms that unconditional random signs cannot replace state-conditioned "
                 "Born draws. Scientific oracles passed, all "
                 f"{len(result.widths)} widths {result.widths} and {result.streams} streams "
-                "per point completed, and no runtime reserve was needed."
+                f"per point completed. Runtime {result.elapsed_s:.3f} s exceeded the "
+                f"{result.ordinary_stop_s:.0f} s ordinary stop only under the predeclared "
+                "largest-width reserve and remained below the hard stop."
             ),
             Callout(
                 "What remains unresolved",
-                "The present data do not publish a DIII transition, Casimir amplitude, "
-                "anisotropy, or central charge. A future study should add independent "
-                "streams and widths around the low-phi crossover, predeclare a sharper "
-                "refinement grid, and test whether phase labels persist under alternative "
-                "finite-size windows. Inconclusive does not mean that a transition is "
-                "absent.",
+                "The present data produce two exploratory effective-central-charge "
+                f"estimates but do not publish either one. The failed gates are "
+                f"{', '.join(result.claim_reasons)}. A future study should first secure an "
+                "adjacent phase bracket, then stabilize alpha with additional temporal "
+                "and spatial windows, and finally demand estimator agreement on new "
+                "independent streams. Inconclusive does not mean that a transition is absent.",
                 "principle",
             ),
         ),
