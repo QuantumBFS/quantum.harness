@@ -1,0 +1,649 @@
+\documentclass[11pt]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage[a4paper,margin=1.05in]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{bm}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{enumitem}
+\usepackage{url}
+\usepackage[hidelinks]{hyperref}
+\usepackage[nameinlink,capitalise,noabbrev]{cleveref}
+
+\allowdisplaybreaks
+\setlist[itemize]{leftmargin=1.45em,itemsep=0.25em,topsep=0.35em}
+\numberwithin{equation}{section}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{remark}[theorem]{Remark}
+
+\newcommand{\cF}{\mathcal F}
+\newcommand{\bbP}{\mathbb P}
+\newcommand{\bbE}{\mathbb E}
+\newcommand{\Hh}{\mathbb H}
+\newcommand{\yy}{\bm y}
+\newcommand{\xx}{\bm x}
+\newcommand{\zz}{\bm z}
+\newcommand{\betab}{\bm\beta}
+\newcommand{\diag}{\operatorname{diag}}
+\newcommand{\Comp}{\operatorname{Comp}}
+\newcommand{\Var}{\operatorname{Var}}
+\newcommand{\Cov}{\operatorname{Cov}}
+\newcommand{\ind}{\mathbf 1}
+
+\hypersetup{
+  pdftitle={Differential Unrooting and Stable Incident-Edge Marginals in Weighted Random Forests},
+  pdfauthor={Shigang Ou},
+  pdfsubject={Random forests, real stable polynomials, and negative dependence},
+  pdfkeywords={random forest, arboreal gas, real stable polynomial, strongly Rayleigh, negative dependence}
+}
+
+\title{\textbf{Differential Unrooting and Stable Incident-Edge\\Marginals in Weighted Random Forests}}
+\author{Shigang Ou\\
+\small Institute of Physics, Chinese Academy of Sciences, Beijing, China\\
+\small School of Physics, University of Chinese Academy of Sciences, Beijing, China}
+\date{July 30, 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Let a random forest of a finite loopless multigraph have probability proportional to the product of its nonnegative edge activities.  For every vertex, we prove that the multivariate generating polynomial of the set of incident edges present in the forest is real stable: it does not vanish when all marker variables have positive imaginary part.  Thus every incident-edge marginal is strongly Rayleigh.  The conclusion remains valid after arbitrary feasible coordinate conditioning on edges outside the star.  It follows that incident edges are negatively associated under such conditioning, every pair of adjacent edges is negatively correlated for arbitrary inhomogeneous activities, and the number of selected edges in any part of a star has a Poisson-binomial distribution.
+
+The main algebraic result is more general.  For a weighted graph $K$, a component fugacity $q\geq0$, and vertex variables $\xx$, the component-marked forest polynomial
+\[
+ \sum_{F\in\cF(K)}\yy^F
+ \prod_{C\in\Comp(F)}\left(q+\sum_{u\in C}x_u\right)
+\]
+is real stable in $\xx$.  We obtain it from the rooted matrix-forest determinant by the exact differential-unrooting identity
+\[
+ \prod_{ij\in E(K)}\left(1-qy_{ij}\partial_i\partial_j\right)
+ \det\!\left(qI+L_K+\diag\xx\right).
+\]
+Each factor preserves multiaffine stability.  The full unrooted forest polynomial need not itself be stable, even for a triangle, so the result is genuinely local and does not resolve the open negative-correlation problem for disjoint edges.  A detailed appendix gives a coefficientwise audit of every new identity and records the precise imported stability results.
+\end{abstract}
+
+\noindent\textbf{2020 Mathematics Subject Classification.}
+Primary 05C80; secondary 05B35, 60C05, 26C10.
+
+\noindent\textbf{Keywords.}
+Weighted random forest, arboreal gas, real stable polynomial, strongly Rayleigh measure, negative dependence, matrix-forest theorem.
+
+\section{Introduction}\label{sec:intro}
+
+Let $G=(V,E)$ be a finite undirected loopless multigraph; parallel edges are labelled and a parallel pair is a two-edge cycle.  Give every edge $e$ an activity $\beta_e\geq0$.  For a spanning forest $F\subseteq E$, write $\betab^F=\prod_{e\in F}\beta_e$, and set
+\begin{equation}\label{eq:partition}
+ Z_G(\betab)=\sum_{F\in\cF(G)}\betab^F,
+ \qquad
+ \bbP_{G,\betab}(F)=\frac{\betab^F}{Z_G(\betab)}.
+\end{equation}
+The empty forest ensures $Z_G(\betab)>0$.  This is the finite-volume arboreal-gas measure; for constant activity it is Bernoulli bond percolation conditioned to be acyclic \cite{BauerschmidtCrawfordHelmuthSwan2021}.
+
+A central open question asks whether distinct edges are always negatively correlated:
+\begin{equation}\label{eq:global-nc}
+ \bbP(e,f\in F)
+ \leq
+ \bbP(e\in F)\bbP(f\in F).
+\end{equation}
+The uniform version was studied by Grimmett and Winkler, and the inhomogeneous formulation is the assertion that every graphic matroid is independent-set Rayleigh \cite{GrimmettWinkler2004,SempleWelsh2008,ChoeWagner2006}.  Despite substantial work, the general problem remains open \cite{Huang2024,TangZhang2026}.  In particular, Huang proved \eqref{eq:global-nc} for adjacent edges when a common activity is sufficiently large \cite{Huang2024}.  One purpose of this paper is to remove both the common-activity and large-activity restrictions.
+
+The route through global real stability is unavailable.  If $G$ is a triangle and all edge activities are one, its full forest polynomial is
+\[
+ 1+z_1+z_2+z_3+z_1z_2+z_1z_3+z_2z_3.
+\]
+On the diagonal this becomes $1+3t+3t^2$, whose two roots are nonreal.  Hence the full forest measure is not strongly Rayleigh.  The result below identifies a robust local remnant: after every edge outside a single vertex star has been marginalized out, real stability is restored.
+
+For a vertex $v$, let $S_v=\delta(v)$ be the multiset of labelled edges incident to $v$.  Define the unnormalized star-marginal polynomial
+\begin{equation}\label{eq:star-polynomial-intro}
+ P_{G,v}^{\betab}(\zz)
+ =\sum_{F\in\cF(G)}\betab^F
+   \prod_{e\in F\cap S_v}z_e.
+\end{equation}
+Our first principal result is the following.
+
+\begin{theorem}[Stable incident-edge marginal]\label{thm:star-intro}
+For every finite loopless multigraph $G$, every nonnegative activity vector $\betab$, and every vertex $v$, the polynomial $P_{G,v}^{\betab}$ is multiaffine and real stable.  Equivalently, the normalized law of $F\cap S_v$ is strongly Rayleigh.
+\end{theorem}
+
+The conclusion is stronger than unconditional pairwise correlation.  If any feasible collection of edges outside $S_v$ is forced present and any other collection outside $S_v$ is forced absent, the remaining incident-edge marginal is still strongly Rayleigh; see \Cref{thm:conditional-star}.  Consequently, increasing events supported on disjoint parts of the star are negatively associated under every such coordinate conditioning.  A second concrete consequence is that the random degree at $v$, and more generally the number of selected edges in any subset of $S_v$, is distributed as a sum of independent Bernoulli variables; see \Cref{cor:poisson-binomial}.
+
+The triangle already displays the local--global distinction.  With unit activities, its full edge polynomial is not stable, as noted above.  After the edge opposite $v$ is marginalized out, however, the two-edge star polynomial is
+\[
+ 2+2z_1+2z_2+z_1z_2,
+\]
+which is stable.  Theorem~\ref{thm:star-intro} asserts this phenomenon simultaneously for every vertex of every weighted loopless multigraph, with no restriction on degree or topology.
+
+The proof is based on a general component-marked forest polynomial.  If $K=(W,D)$ is a weighted graph, $q\geq0$, and $x(C)=\sum_{u\in C}x_u$, put
+\begin{equation}\label{eq:Phi-intro}
+ \Phi_{K,q}(\xx)
+ =\sum_{F\in\cF(K)}\yy^F
+  \prod_{C\in\Comp(F)}\bigl(q+x(C)\bigr).
+\end{equation}
+The parameter $q$ is a component fugacity; $q=1$ is the value needed for the star marginal.
+
+\begin{theorem}[Stable component-marked forest polynomial]\label{thm:Phi-intro}
+For every finite loopless weighted multigraph $K$, every nonnegative edge-activity vector $\yy$, and every $q\geq0$, the polynomial $\Phi_{K,q}$ is multiaffine and real stable in the vertex variables $\xx$.
+\end{theorem}
+
+The key identity starts from the rooted matrix-forest determinant
+\[
+ R_{K,q}(\xx)=\det\!\left(qI+L_K+\diag\xx\right),
+\]
+whose component factor is $q|C|+x(C)$.  The commuting operator
+\[
+ \mathcal U_{K,q}
+ =\prod_{g=ij\in D}\left(1-qy_g\partial_i\partial_j\right)
+\]
+removes exactly the excess $q(|C|-1)$ from each tree component while annihilating cyclic edge monomials.  Thus
+\begin{equation}\label{eq:unrooting-intro}
+ \Phi_{K,q}=\mathcal U_{K,q}R_{K,q}.
+\end{equation}
+Each factor $1-\lambda\partial_i\partial_j$, $\lambda\geq0$, preserves multiaffine real stability by the Borcea--Br\"and\'en algebraic-symbol criterion \cite{BorceaBranden2009}.  We call \eqref{eq:unrooting-intro} \emph{differential unrooting}.
+
+To the best of our knowledge, neither the full incident-edge stability statement in \Cref{thm:star-intro} for arbitrary inhomogeneous activities nor the differential-unrooting identity \eqref{eq:unrooting-intro} has previously been recorded.  The result does not address arbitrary disjoint edges, and no claim is made to settle the unrestricted graphic independent-set Rayleigh conjecture.  Recent work on complete graphs and on polynomial classes extending real stability further illustrates the active status of this broader problem \cite{TangZhang2026,FangMa2026}.
+
+The paper is organized as follows.  \Cref{sec:stability} recalls the stability facts used.  \Cref{sec:unrooting} proves \Cref{thm:Phi-intro}.  \Cref{sec:star} derives the star theorem and its conditional form.  \Cref{sec:consequences} proves negative association and the Poisson-binomial degree law.  \Cref{sec:discussion} discusses scope and possible extensions.  \Cref{app:audit} is a proof audit: it expands every new coefficient calculation and isolates the three imported theorems used by the argument.
+
+\section{Stability preliminaries}\label{sec:stability}
+
+Let
+\[
+ \Hh=\{z\in\mathbb C:\operatorname{Im}z>0\}.
+\]
+A polynomial $p\in\mathbb C[z_1,\dots,z_m]$ is \emph{stable} if either $p\equiv0$ or $p(\zz)\neq0$ whenever $\zz\in\Hh^m$.  If its coefficients are real, it is \emph{real stable}.  A probability measure on subsets of $[m]$ is \emph{strongly Rayleigh} if its multiaffine generating polynomial is real stable \cite{BorceaBrandenLiggett2009}.
+
+We use three standard facts.
+
+\begin{enumerate}[label=(S\arabic*)]
+\item\label{item:symbol} Let $T$ be a linear operator on multiaffine polynomials in $x_1,\dots,x_m$.  If its algebraic symbol
+\begin{equation}\label{eq:symbol-criterion}
+ T\!\left[\prod_{k=1}^m(x_k+w_k)\right]
+\end{equation}
+is stable in $(\xx,\bm w)$, then $T$ preserves real stability \cite{BorceaBranden2009}.
+
+\item\label{item:specialization} Positive rescaling, identification of variables, and specialization of a variable to a real number preserve real stability, with the usual convention that the result may be identically zero.  The boundary-specialization statement follows from Hurwitz's theorem \cite{BorceaBranden2009}.
+
+\item\label{item:NA} Strongly Rayleigh measures are negatively associated and, more strongly, conditionally negatively associated under external fields and coordinate conditioning \cite{BorceaBrandenLiggett2009}.
+\end{enumerate}
+
+Only the sufficient direction of the algebraic-symbol theorem is required.  The symbol calculation for the particular operator used below is included in full.
+
+\begin{lemma}[Two-derivative stability preserver]\label{lem:preserver}
+Let $i\neq j$ and $\lambda\geq0$.  On multiaffine polynomials,
+\begin{equation}\label{eq:T-operator}
+ T_{ij,\lambda}=1-\lambda\partial_i\partial_j
+\end{equation}
+preserves real stability.
+\end{lemma}
+
+\begin{proof}
+By \ref{item:symbol}, it is enough to inspect
+\begin{align}
+ T_{ij,\lambda}\!\left[\prod_k(x_k+w_k)\right]
+ &=\prod_{k\neq i,j}(x_k+w_k)
+ \bigl((x_i+w_i)(x_j+w_j)-\lambda\bigr).
+ \label{eq:preserver-symbol}
+\end{align}
+If all $x_k,w_k\in\Hh$, every factor $x_k+w_k$ is in $\Hh$.  The product of two upper-half-plane numbers cannot be a nonnegative real number: the sum of their arguments lies strictly between $0$ and $2\pi$.  Hence the last factor in \eqref{eq:preserver-symbol} cannot vanish for $\lambda\geq0$.  The symbol is stable, so \eqref{eq:T-operator} preserves real stability.
+\end{proof}
+
+\section{Differential unrooting}\label{sec:unrooting}
+
+Let $K=(W,D)$ be a finite loopless multigraph with labelled edge activities $y_g\geq0$.  Its weighted Laplacian is
+\[
+ (L_K)_{uu}=\sum_{g\ni u}y_g,
+ \qquad
+ (L_K)_{uv}=-\sum_{g:\,g=uv}y_g
+ \quad(u\neq v).
+\]
+For $X=\diag(x_u:u\in W)$ and $q\geq0$, define
+\begin{equation}\label{eq:R-def}
+ R_{K,q}(\xx)=\det(qI+L_K+X).
+\end{equation}
+
+\subsection{The rooted determinant}
+
+The principal-minor matrix-tree theorem gives the following rooted-forest expansion; see, for example, \cite{ChebotarevShamis1997}.  A derivation is reproduced in \Cref{app:rooted-expansion}.
+
+\begin{proposition}[Rooted matrix-forest expansion]\label{prop:rooted-expansion}
+For every $q\geq0$,
+\begin{equation}\label{eq:R-expansion}
+ R_{K,q}(\xx)
+ =\sum_{F\in\cF(K)}\yy^F
+  \prod_{C\in\Comp(F)}\bigl(q|C|+x(C)\bigr).
+\end{equation}
+\end{proposition}
+
+\begin{lemma}[Determinantal stability]\label{lem:R-stable}
+For fixed $q\geq0$ and $\yy\geq0$, the polynomial $R_{K,q}$ is multiaffine and real stable in $\xx$.
+\end{lemma}
+
+\begin{proof}
+Multiaffinity follows because $x_u$ occurs in exactly one diagonal entry.  Suppose all $x_u\in\Hh$ and $(qI+L_K+X)a=0$ for a nonzero complex vector $a$.  Since $qI+L_K$ is real symmetric,
+\[
+ 0=\operatorname{Im}\bigl(a^*(qI+L_K+X)a\bigr)
+  =\sum_{u\in W}(\operatorname{Im}x_u)|a_u|^2>0,
+\]
+a contradiction.  Thus the determinant does not vanish on $\Hh^W$.
+\end{proof}
+
+\subsection{The unrooting identity}
+
+Set
+\begin{equation}\label{eq:U-def}
+ \mathcal U_{K,q}
+ =\prod_{g=ij\in D}\left(1-qy_g\partial_i\partial_j\right),
+ \qquad \partial_i=\frac{\partial}{\partial x_i}.
+\end{equation}
+The factors commute.  Recall $\Phi_{K,q}$ from \eqref{eq:Phi-intro}.
+
+\begin{theorem}[Differential unrooting]\label{thm:unrooting}
+For every finite loopless weighted multigraph $K$ and every $q\geq0$,
+\begin{equation}\label{eq:unrooting}
+ \Phi_{K,q}(\xx)=\mathcal U_{K,q}R_{K,q}(\xx).
+\end{equation}
+\end{theorem}
+
+\begin{proof}
+Expand \eqref{eq:R-expansion} and the product in \eqref{eq:U-def}.  Fix a labelled edge set $H\subseteq D$ and consider the coefficient of the squarefree monomial $\yy^H$.  A contributing term is specified by a decomposition
+\[
+ H=F\mathbin{\dot\cup}M,
+ \qquad F\in\cF(K),
+\]
+where $M$ is the set of operator edges.  Its differential part is
+\begin{equation}\label{eq:coefficient-summand}
+ (-q)^{|M|}
+ \left(\prod_{ij\in M}\partial_i\partial_j\right)
+ \prod_{C\in\Comp(F)}\bigl(q|C|+x(C)\bigr).
+\end{equation}
+Contract every component of $F$ and retain the edges of $M$.  The expression \eqref{eq:coefficient-summand} is nonzero only if no affine component factor is differentiated twice.  Equivalently, the resulting quotient multigraph has no loop and maximum degree at most one, so it is a matching.
+
+If $H$ contains a cycle, contracting the forest $F$ leaves a closed walk among the retained edges $M$, whereas a matching has no closed walk.  Thus the coefficient is zero, as it must be in $\Phi_{K,q}$.
+
+Now suppose $H$ is a forest.  The calculation factors over its tree components.  Fix one such component $T$, and let $r=|M\cap E(T)|$.  Contracting the components of $T\setminus M$ turns the $r$ retained edges into a connected tree with $r$ edges.  A connected matching has at most one edge, so only $r=0$ and $r=1$ contribute.  The choice $r=0$ contributes
+\[
+ q|T|+x(T).
+\]
+If $r=1$, each choice of an edge of $T$ contributes $-q$, because the two derivatives hit the two component factors created by deleting that edge.  There are $|T|-1$ choices.  Hence the total factor for $T$ is
+\[
+ q|T|+x(T)-q(|T|-1)=q+x(T).
+\]
+Multiplying over the components of $H$ gives exactly the coefficient
+$\prod_{T\in\Comp(H)}(q+x(T))$ in \eqref{eq:Phi-intro}.  The same argument also shows that nonsquarefree edge monomials vanish: if an operator edge already belongs to the rooted forest, both derivatives hit the same affine component factor.  Therefore \eqref{eq:unrooting} holds coefficientwise.
+\end{proof}
+
+\begin{proof}[Proof of \Cref{thm:Phi-intro}]
+By \Cref{lem:R-stable}, $R_{K,q}$ is multiaffine and real stable.  Apply \Cref{lem:preserver} successively to every labelled edge $g=ij$, with $\lambda=qy_g\geq0$.  Differentiation does not increase any variable degree, so every intermediate polynomial remains multiaffine.  The identity \eqref{eq:unrooting} then shows that $\Phi_{K,q}$ is real stable.  Its multiaffinity is also immediate from \eqref{eq:Phi-intro}, since each vertex belongs to exactly one component of a forest.
+\end{proof}
+
+\begin{remark}\label{rem:q-endpoints}
+At $q=0$, the operator in \eqref{eq:U-def} is the identity and $\Phi_{K,0}=\det(L_K+X)$ is the usual rooted-forest polynomial with one marked vertex per component.  At $q=1$, differential unrooting changes the rooted factor $|C|+x(C)$ into the unrooted factor $1+x(C)$ needed below.
+\end{remark}
+
+\section{Stable incident-edge marginals}\label{sec:star}
+
+Fix a vertex $v$ of $G$, write $K=G-v$, and retain the activities $\beta_g$ of the edges of $K$.  For each $u\in V(K)$, define the positive linear form
+\begin{equation}\label{eq:star-substitution}
+ x_u(\zz)=
+ \sum_{\substack{h\in S_v\\ h=vu}}\beta_hz_h,
+\end{equation}
+where all labelled parallel edges from $v$ to $u$ are included.
+
+\begin{lemma}[Star substitution]\label{lem:star-substitution}
+With $q=1$ and $y_g=\beta_g$ for $g\in E(K)$,
+\begin{equation}\label{eq:star-Phi}
+ P_{G,v}^{\betab}(\zz)
+ =\Phi_{K,1}(\xx)\big|_{x_u=x_u(\zz)}.
+\end{equation}
+\end{lemma}
+
+\begin{proof}
+Fix the restriction $F_0=F\cap E(K)$.  It is a forest of $K$.  In a component $C$ of $F_0$, at most one edge from $v$ to a vertex of $C$ may be selected: two such edges, together with the unique path between their endpoints inside $C$, form a cycle.  Edges joining $v$ to different components may be selected independently.  Therefore the total contribution above $F_0$ is
+\[
+ \betab^{F_0}
+ \prod_{C\in\Comp(F_0)}
+ \left(1+\sum_{\substack{h=vu\\u\in C}}\beta_hz_h\right),
+\]
+which is exactly the $F_0$ term of the right-hand side of \eqref{eq:star-Phi}.  The argument includes labelled parallel edges: two parallel star edges already form a two-edge cycle and therefore cannot be chosen together.
+\end{proof}
+
+\begin{proof}[Proof of \Cref{thm:star-intro}]
+By \Cref{thm:Phi-intro}, $\Phi_{K,1}$ is real stable in $\xx$.  If all $z_h\in\Hh$, every nonzero linear form in \eqref{eq:star-substitution} lies in $\Hh$ because its coefficients are nonnegative.  A form with all coefficients zero is the real specialization $x_u=0$.  Stability under positive linear substitution and real boundary specialization therefore gives real stability of \eqref{eq:star-Phi}.  Multiaffinity follows either from the forest constraint or directly from the component-wise argument in \Cref{lem:star-substitution}.
+\end{proof}
+
+The theorem survives arbitrary information revealed away from the star.  This does not follow from global strong Rayleigh theory, since the full forest measure need not be strongly Rayleigh.
+
+\begin{theorem}[Conditional star stability]\label{thm:conditional-star}
+Assume the activities are nonnegative.  Let $A,B\subseteq E\setminus S_v$ be disjoint, and suppose the conditioning event
+\begin{equation}\label{eq:conditioning-event}
+ \mathcal E_{A,B}=\{A\subseteq F,\ F\cap B=\varnothing\}
+\end{equation}
+has positive probability.  Conditional on $\mathcal E_{A,B}$, the law of $F\cap S_v$ is strongly Rayleigh.
+\end{theorem}
+
+\begin{proof}
+The event has positive probability only if $A$ is a forest.  Contract the edges of $A$, delete the edges of $B$, and delete any loops created by contraction.  Because $A\cap S_v=\varnothing$, the vertex $v$ is not contracted; every surviving edge of $S_v$ is still incident to the image of $v$, although several such edges may become parallel.
+
+For a remaining edge set $T$, the condition that $A\cup T$ is a forest in $G$ is equivalent to $T$ being a forest in the minor $G/A\setminus B$.  Moreover, the factor $\betab^A$ is constant under the conditioning and cancels in normalization.  Thus the conditional law on all remaining edges is precisely the weighted random-forest law of this minor with the inherited activities.  Applying \Cref{thm:star-intro} to the image of $v$ proves the claim.
+\end{proof}
+
+\begin{corollary}\label{cor:exact-outside}
+For every feasible exact configuration of all edges outside $S_v$, the conditional law on $S_v$ is strongly Rayleigh.  It remains strongly Rayleigh after any further coordinate conditioning or external reweighting inside the star.
+\end{corollary}
+
+\begin{proof}
+Take $A$ to be the present outside edges and $B$ the absent outside edges in \Cref{thm:conditional-star}.  The final statement is a standard closure property of strongly Rayleigh measures \cite{BorceaBrandenLiggett2009}.
+\end{proof}
+
+\section{Probabilistic consequences}\label{sec:consequences}
+
+\subsection{Conditional negative association}
+
+\begin{corollary}[Local conditional negative association]\label{cor:local-NA}
+Under the assumptions of \Cref{thm:conditional-star}, let $I,J\subseteq S_v$ be disjoint.  If $f$ and $g$ are increasing functions of the edge indicators in $I$ and $J$, respectively, then
+\begin{equation}\label{eq:conditional-NA}
+ \bbE[fg\mid\mathcal E_{A,B}]
+ \leq
+ \bbE[f\mid\mathcal E_{A,B}]
+ \bbE[g\mid\mathcal E_{A,B}].
+\end{equation}
+In particular, for distinct adjacent edges $e,f$ and arbitrary nonnegative inhomogeneous activities,
+\begin{equation}\label{eq:adjacent-NC}
+ \bbP(e,f\in F)
+ \leq
+ \bbP(e\in F)\bbP(f\in F).
+\end{equation}
+The same inequality holds conditional on any feasible partial configuration of edges outside a common endpoint.
+\end{corollary}
+
+\begin{proof}
+The conditional star law is strongly Rayleigh by \Cref{thm:conditional-star}, hence negatively associated by \ref{item:NA}.  Apply this to $f$ and $g$.  Taking $f=\ind_{\{e\in F\}}$ and $g=\ind_{\{f\in F\}}$ gives \eqref{eq:adjacent-NC}.  If $e$ and $f$ are parallel, the joint probability is zero, so the conclusion is also immediate.
+\end{proof}
+
+\subsection{A Poisson-binomial degree law}
+
+A random variable is \emph{Poisson-binomial} if it is a sum of independent, not necessarily identically distributed, Bernoulli variables.
+
+\begin{corollary}[Poisson-binomial star counts]\label{cor:poisson-binomial}
+Let $T\subseteq S_v$.  Unconditionally, or under any conditioning allowed in \Cref{thm:conditional-star}, there exist independent Bernoulli random variables $B_1,\dots,B_{|T|}$ with parameters $p_i\in[0,1]$ such that
+\begin{equation}\label{eq:PB-law}
+ |F\cap T|\ \stackrel{d}{=}\ \sum_{i=1}^{|T|}B_i.
+\end{equation}
+Consequently, if $a_k=\bbP(|F\cap T|=k)$ and $m=|T|$, then the normalized rank sequence is log-concave:
+\begin{equation}\label{eq:ULC}
+ \left(\frac{a_k}{\binom{m}{k}}\right)^2
+ \geq
+ \frac{a_{k-1}}{\binom{m}{k-1}}
+ \frac{a_{k+1}}{\binom{m}{k+1}}
+ \qquad(1\leq k<m),
+\end{equation}
+and
+\begin{equation}\label{eq:variance-bound}
+ \Var(|F\cap T|)\leq \bbE|F\cap T|.
+\end{equation}
+In particular, the random degree $\deg_F(v)=|F\cap S_v|$ is Poisson-binomial.
+\end{corollary}
+
+\begin{proof}
+Project the strongly Rayleigh star law to $T$ by setting all marker variables outside $T$ equal to one.  Let $Q(\zz)$ be the resulting normalized generating polynomial and set
+\[
+ g(t)=Q(t,\dots,t)=\sum_{k=0}^m a_kt^k.
+\]
+Real stability implies that $g$ has only real zeros.  Its coefficients are nonnegative, so every zero is nonpositive.  After adding zero-probability Bernoulli variables if necessary, $g$ factors as
+\begin{equation}\label{eq:PB-factorization}
+ g(t)=\prod_{i=1}^m(1-p_i+p_it),
+ \qquad p_i\in[0,1],
+\end{equation}
+which is the probability generating function of the right-hand side of \eqref{eq:PB-law}.  When every $p_i<1$, write
+\[
+ g(t)=\left(\prod_{i=1}^m(1-p_i)\right)
+       \prod_{i=1}^m(1+r_it),
+ \qquad r_i=\frac{p_i}{1-p_i}\geq0.
+\]
+Newton's inequalities for the elementary symmetric functions of $r_1,\dots,r_m$ give \eqref{eq:ULC}; parameters $p_i=1$ follow by continuity.  Finally,
+\[
+ \Var\!\left(\sum_iB_i\right)
+ =\sum_i p_i(1-p_i)
+ \leq\sum_i p_i
+ =\bbE\!\left(\sum_iB_i\right),
+\]
+proving \eqref{eq:variance-bound}.
+\end{proof}
+
+\begin{remark}\label{rem:direct-bivariate}
+For readers interested only in adjacent-edge correlation, the implication from real stability can be checked without invoking the general negative-association theorem.  A stable bivariate multiaffine polynomial $a+bz+cw+dzw$ with nonnegative coefficients satisfies $bc\geq ad$, which is exactly the corresponding covariance inequality.  The full calculation appears in \Cref{app:bivariate}.
+\end{remark}
+
+\section{Scope and further questions}\label{sec:discussion}
+
+\subsection{Local stability versus global instability}
+
+The triangle calculation in the introduction shows that the forest generating polynomial may fail real stability globally, while \Cref{thm:star-intro} shows that every one-vertex incident-edge marginal is stable.  The conditional result is particularly local: even after the entire exterior configuration is exposed, the remaining star law retains the strongest standard polynomial form of negative dependence.
+
+This distinction also clarifies what has and has not been proved.  Theorem~\ref{thm:star-intro} settles \eqref{eq:global-nc} for adjacent edges and strengthens it to all-order negative dependence within a star.  It gives no inequality for a pair of disjoint edges whose four endpoints are distinct.  The general weighted graphic independent-set Rayleigh problem therefore remains open.
+
+\subsection{The differential-unrooting mechanism}
+
+The identity \eqref{eq:unrooting} is not tied to a particular graph size, topology, or activity regime.  It converts a determinantal rooted-forest polynomial into a component-marked unrooted polynomial through stability-preserving operators.  The parameter $q$ shows that this is a family of identities rather than an isolated cancellation at $q=1$.
+
+Two extensions appear natural.  First, one may ask whether analogous unrooting operators exist for models in which a component may carry more than one mark.  Second, one may seek stable marginals supported on incident edges of several vertices.  A naive multi-apex construction allows different new vertices to attach to the same component and introduces interactions not present in the one-star factor $q+x(C)$; new ideas seem necessary.
+
+\subsection{Auditability}
+
+No computational assertion is used in the proof of any theorem in this paper.  The complete coefficient proof of differential unrooting, the matrix-forest expansion, the conditional minor correspondence, and the one-variable factorization are expanded in \Cref{app:audit}.  The accompanying source archive also contains a standard-library-only regression script that verifies the $q$-identity symbolically for every simple graph on at most five vertices and for several labelled parallel-edge examples.  That script is a diagnostic check, not part of the logical proof.
+
+\section*{Acknowledgements and disclosure}
+
+Automated tools assisted proof exploration, finite regression checks, literature triage, and language editing.  The author is responsible for the mathematical statements, the verification of the proofs, the accuracy of the citations, and the final submitted text.  The main results are analytic and do not depend on computer-generated certificates or numerical experiments.
+
+\appendix
+
+\section{Detailed proof audit}\label{app:audit}
+
+\subsection{Dependency ledger and trust boundary}\label{app:ledger}
+
+\begin{center}
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{0.26\textwidth}>{\raggedright\arraybackslash}p{0.18\textwidth}>{\raggedright\arraybackslash}X@{}}
+\toprule
+Item & Status & Verification route \\
+\midrule
+Principal-minor matrix-tree theorem & Imported & Standard all-minors matrix-tree theorem; used only to derive \eqref{eq:R-expansion}. \\
+Borcea--Br\"and\'en symbol criterion & Imported & Only the sufficient direction \ref{item:symbol}; the symbol of the actual operator is computed in \eqref{eq:preserver-symbol}. \\
+Strongly Rayleigh $\Rightarrow$ negative association & Imported & Borcea--Br\"and\'en--Liggett \cite{BorceaBrandenLiggett2009}. \\
+Rooted expansion & Derived & Full principal-minor calculation in \Cref{app:rooted-expansion}. \\
+Differential unrooting & New, analytic & Complete coefficientwise proof in \Cref{thm:unrooting} and expanded in \Cref{app:coefficient-audit}. \\
+Star substitution & New, analytic & Direct component-by-component bijective accounting in \Cref{lem:star-substitution}. \\
+Conditional star theorem & New, analytic & Explicit deletion--contraction correspondence in \Cref{app:minor-audit}. \\
+Poisson-binomial law & Derived & One-variable real-rooted factorization in \Cref{app:PB-audit}. \\
+Computer assistance & Nonlogical & Exhaustive regression only; no theorem depends on its output. \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+Thus the proof has exactly three imported mathematical inputs: the principal-minor matrix-tree theorem, the multiaffine algebraic-symbol criterion, and the implication from strong Rayleigh to negative association.  Every graph-specific and coefficient-specific statement is proved in the manuscript.
+
+\subsection{Principal-minor derivation of the rooted expansion}\label{app:rooted-expansion}
+
+Put $D=qI+X=\diag(q+x_u:u\in W)$.  Expanding a determinant by the diagonal entries of $D$ gives
+\begin{equation}\label{eq:principal-minor-expansion}
+ \det(L_K+D)
+ =\sum_{R\subseteq W}
+  \left(\prod_{u\in R}(q+x_u)\right)
+  \det L_K[W\setminus R,W\setminus R].
+\end{equation}
+The principal-minor matrix-tree theorem says that the minor indexed by $R$ is the total weight of spanning forests in which each component contains exactly one vertex of $R$.  Fix an unrooted forest $F$.  Summing over its admissible root sets chooses one root in each component, so its total root factor is
+\begin{align*}
+ \prod_{C\in\Comp(F)}\sum_{u\in C}(q+x_u)
+ &=\prod_{C\in\Comp(F)}\bigl(q|C|+x(C)\bigr).
+\end{align*}
+Substituting this into \eqref{eq:principal-minor-expansion} proves \eqref{eq:R-expansion}.  The argument is valid for disconnected graphs and labelled parallel edges because the matrix-tree minors expand in the labelled edge weights.
+
+\subsection{Expanded coefficient audit for differential unrooting}\label{app:coefficient-audit}
+
+For a labelled edge set $H\subseteq D$, expanding both \eqref{eq:R-expansion} and \eqref{eq:U-def} gives the coefficient of $\yy^H$ in $\mathcal U_{K,q}R_{K,q}$ as
+\begin{equation}\label{eq:full-coefficient}
+ \sum_{\substack{M\subseteq H\\H\setminus M\in\cF(K)}}
+ (-q)^{|M|}
+ \left(\prod_{ij\in M}\partial_i\partial_j\right)
+ \prod_{C\in\Comp(H\setminus M)}\bigl(q|C|+x(C)\bigr).
+\end{equation}
+Let $F=H\setminus M$, contract each component of $F$, and call the quotient formed by the retained labelled edges of $M$ the graph $Q(F,M)$.  A derivative $\partial_i$ acts on the unique affine factor corresponding to the component of $F$ containing $i$.  Hence a term in \eqref{eq:full-coefficient} is nonzero if and only if
+\begin{equation}\label{eq:matching-condition}
+ Q(F,M)\text{ has no loops and every quotient vertex has degree at most one.}
+\end{equation}
+Thus $Q(F,M)$ must be a matching.  This statement also covers parallel quotient edges: two parallel edges give degree two at both endpoints and therefore a zero derivative.
+
+If $H$ contains a cycle, contract each maximal subpath of the cycle lying in $F$.  The remaining edges of that cycle form a closed walk in $Q(F,M)$.  A matching contains no closed walk, so every summand vanishes.
+
+If $H$ is a forest, \eqref{eq:full-coefficient} factors over its tree components.  For a tree $T$, write $M_T=M\cap E(T)$.  The components of $T\setminus M_T$ contract to a connected tree with $|M_T|$ edges.  Condition \eqref{eq:matching-condition} therefore forces $|M_T|\in\{0,1\}$.  The zero-edge choice contributes $q|T|+x(T)$.  For a one-edge choice $g=ij$, deleting $g$ gives components $T_i,T_j$, and
+\begin{align*}
+ -q\,\partial_i\partial_j
+ \bigl(q|T_i|+x(T_i)\bigr)
+ \bigl(q|T_j|+x(T_j)\bigr)
+ =-q.
+\end{align*}
+Summing over the $|T|-1$ choices of $g$ gives $q+x(T)$.  The product over all tree components is the coefficient in \eqref{eq:Phi-intro}.
+
+Finally, a nonsquarefree edge monomial could only arise if an operator supplies a factor $y_g$ already present in the rooted forest term.  Then the endpoints of $g$ lie in the same component of that forest, so $\partial_i\partial_j$ differentiates one affine factor twice and gives zero.  This completes a literal coefficient-by-coefficient verification of \eqref{eq:unrooting} in $\mathbb R[q,\xx,\yy]$.
+
+\subsection{Boundary cases in the stability argument}\label{app:stability-boundary}
+
+The proof of \Cref{lem:R-stable} uses only that $qI+L_K$ is real symmetric.  Nonnegative edge activities make $L_K$ positive semidefinite, but positive semidefiniteness is not needed for the imaginary-part contradiction.  Zero edge activities are therefore harmless.
+
+For the star substitution, if at least one coefficient $\beta_h$ in \eqref{eq:star-substitution} is positive and all $z_h\in\Hh$, then
+\[
+ \operatorname{Im}x_u(\zz)
+ =\sum_{h=vu}\beta_h\operatorname{Im}z_h>0.
+\]
+If every coefficient is zero, $x_u=0$.  Specialization to zero is obtained as the locally uniform limit $x_u=i\varepsilon\to0$; Hurwitz's theorem gives a stable limit or the zero polynomial.  The constant term coming from the empty forest prevents the final star polynomial from being identically zero.
+
+The operator parameters are $\lambda=qy_g\geq0$.  The argument of a number in $\Hh$ lies strictly between $0$ and $\pi$, so the product of two such numbers has argument strictly between $0$ and $2\pi$ and cannot lie on $[0,\infty)$.  This includes $\lambda=0$, for which the operator is the identity.
+
+\subsection{Deletion--contraction audit for the conditional theorem}\label{app:minor-audit}
+
+Let $A,B\subseteq E\setminus S_v$ be disjoint and $A$ a forest.  Define a map
+\[
+ F\longmapsto T=F\setminus A
+\]
+from forests satisfying $A\subseteq F$ and $F\cap B=\varnothing$ to subsets of the remaining edges.  The standard cycle criterion for contraction gives
+\begin{equation}\label{eq:minor-equivalence}
+ A\cup T\in\cF(G)
+ \quad\Longleftrightarrow\quad
+ T\in\cF(G/A\setminus B),
+\end{equation}
+where loops produced by contraction are deleted.  This is a bijection.  Its weight relation is
+\[
+ \betab^{A\cup T}=\betab^A\betab^T.
+\]
+The constant factor $\betab^A$ cancels from conditional probabilities, proving that the conditional law is exactly the forest law of the minor.
+
+No edge of $A$ is incident to $v$.  Hence $v$ remains a singleton contraction class.  Every original star edge either survives as an edge incident to that class or becomes parallel to another such edge; it cannot become a loop.  This verifies every graph-theoretic assertion in the proof of \Cref{thm:conditional-star}.
+
+\subsection{Poisson-binomial factorization audit}\label{app:PB-audit}
+
+Let $g(t)=\sum_{k=0}^m a_kt^k$ be the diagonal probability generating polynomial in the proof of \Cref{cor:poisson-binomial}.  A univariate real stable polynomial is real-rooted: a nonreal root would bring its conjugate into the opposite half-plane, so one of the pair would lie in $\Hh$.  Since $a_k\geq0$, $g$ has no positive real root.  Write its nonzero roots as $-\lambda_1,\dots,-\lambda_d$ with $\lambda_i>0$, and let zero have multiplicity $r$.  Normalization $g(1)=1$ gives
+\[
+ g(t)=t^r\prod_{i=1}^{d}\frac{t+\lambda_i}{1+\lambda_i}.
+\]
+A factor $t$ is the generating function of a Bernoulli variable with parameter one, and
+\[
+ \frac{t+\lambda_i}{1+\lambda_i}
+ =1-p_i+p_it,
+ \qquad p_i=\frac{1}{1+\lambda_i}.
+\]
+If $r+d<m$, append Bernoulli variables with parameter zero.  This proves \eqref{eq:PB-factorization} including all degenerate cases.
+
+\subsection{Direct bivariate audit of adjacent-edge correlation}\label{app:bivariate}
+
+Specialize every star variable except $z_e,z_f$ to one.  The resulting stable polynomial is
+\[
+ p(z,w)=a+bz+cw+dzw,
+ \qquad a,b,c,d\geq0.
+\]
+For $w\in\Hh$, a zero in $z$ is
+\[
+ z=-\frac{a+cw}{b+dw},
+\]
+when the denominator is nonzero.  Direct calculation yields
+\begin{equation}\label{eq:mobius-imaginary}
+ \operatorname{Im}z
+ =\frac{(ad-bc)\operatorname{Im}w}{|b+dw|^2}.
+\end{equation}
+Stability forbids this zero from lying in $\Hh$, hence $bc\geq ad$; degenerate cases follow by continuity.  With $Z=p(1,1)$,
+\begin{align*}
+ Z^2\bigl(\bbP(e)\bbP(f)-\bbP(e,f)\bigr)
+ &=(b+d)(c+d)-d(a+b+c+d)\\
+ &=bc-ad\geq0.
+\end{align*}
+Thus the pairwise inequality is independently visible at the bivariate level.
+
+\begin{thebibliography}{99}
+
+\bibitem{BauerschmidtCrawfordHelmuthSwan2021}
+R.~Bauerschmidt, N.~Crawford, T.~Helmuth, and A.~Swan,
+\newblock Random spanning forests and hyperbolic symmetry,
+\newblock \emph{Comm. Math. Phys.} \textbf{381} (2021), 1223--1261.
+\newblock \url{https://doi.org/10.1007/s00220-020-03921-y}.
+
+\bibitem{BorceaBranden2009}
+J.~Borcea and P.~Br\"and\'en,
+\newblock The Lee--Yang and P\'olya--Schur programs. I. Linear operators preserving stability,
+\newblock \emph{Invent. Math.} \textbf{177} (2009), 541--569.
+\newblock \url{https://doi.org/10.1007/s00222-009-0189-3}.
+
+\bibitem{BorceaBrandenLiggett2009}
+J.~Borcea, P.~Br\"and\'en, and T.~M. Liggett,
+\newblock Negative dependence and the geometry of polynomials,
+\newblock \emph{J. Amer. Math. Soc.} \textbf{22} (2009), 521--567.
+\newblock \url{https://doi.org/10.1090/S0894-0347-08-00618-8}.
+
+\bibitem{ChebotarevShamis1997}
+P.~Yu. Chebotarev and E.~V. Shamis,
+\newblock The matrix-forest theorem and measuring relations in small social groups,
+\newblock \emph{Autom. Remote Control} \textbf{58} (1997), 1505--1514.
+
+\bibitem{ChoeWagner2006}
+Y.-B. Choe and D.~G. Wagner,
+\newblock Rayleigh matroids,
+\newblock \emph{Combin. Probab. Comput.} \textbf{15} (2006), 765--781.
+\newblock \url{https://doi.org/10.1017/S0963548306007494}.
+
+\bibitem{FangMa2026}
+H.~Fang and B.~Ma,
+\newblock G{\aa}rding polynomials,
+\newblock arXiv:2604.27755, 2026.
+
+\bibitem{GrimmettWinkler2004}
+G.~R. Grimmett and S.~N. Winkler,
+\newblock Negative association in uniform forests and connected graphs,
+\newblock \emph{Random Structures Algorithms} \textbf{24} (2004), 444--460.
+\newblock \url{https://doi.org/10.1002/rsa.20005}.
+
+\bibitem{Huang2024}
+X.~Huang,
+\newblock On negative correlation of arboreal gas for specific parameters,
+\newblock \emph{Statist. Probab. Lett.} \textbf{213} (2024), 110174.
+\newblock \url{https://doi.org/10.1016/j.spl.2024.110174}.
+
+\bibitem{SempleWelsh2008}
+C.~Semple and D.~Welsh,
+\newblock Negative correlation in graphs and matroids,
+\newblock \emph{Combin. Probab. Comput.} \textbf{17} (2008), 423--435.
+\newblock \url{https://doi.org/10.1017/S0963548307008978}.
+
+\bibitem{TangZhang2026}
+P.~Tang and Z.~Zhang,
+\newblock Pairwise negative correlation for uniform spanning subgraphs of the complete graph,
+\newblock arXiv:2603.10738, 2026.
+
+\end{thebibliography}
+
+\end{document}

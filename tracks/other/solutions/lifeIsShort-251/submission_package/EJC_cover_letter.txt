@@ -1,0 +1,24 @@
+30 July 2026
+
+Dear Editors of The Electronic Journal of Combinatorics,
+
+Please consider the manuscript
+
+  “Differential Unrooting and Stable Incident-Edge Marginals in Weighted Random Forests”
+
+by Shigang Ou for publication as a research article.
+
+The general negative-correlation problem for weighted random forests remains open. The manuscript proves a local result of a stronger polynomial kind: for every vertex of every finite loopless multigraph, and for arbitrary nonnegative inhomogeneous edge activities, the complete incident-edge marginal has a multiaffine real-stable generating polynomial. The conclusion persists after feasible coordinate conditioning on edges outside the star. It implies conditional negative association within a star, negative correlation for all adjacent edge pairs without a common-activity or asymptotic assumption, and a Poisson-binomial law for every star count.
+
+The proof is based on a component-marked forest polynomial and an exact “differential unrooting” identity that converts the rooted matrix-forest determinant into the required unrooted polynomial by stability-preserving second-derivative operators. The paper includes a detailed coefficientwise proof audit. An accompanying finite symbolic regression test is diagnostic only; no theorem depends on computation.
+
+The manuscript explicitly does not claim negative correlation for disjoint edges or global strong Rayleighness. It is original, self-contained, and is not submitted to another journal. Automated tools assisted proof exploration, finite regression checks, literature triage, and language editing; this assistance is disclosed in the manuscript, and the author accepts responsibility for all proofs, citations, and text.
+
+Thank you for your consideration.
+
+Sincerely,
+
+Shigang Ou
+Institute of Physics, Chinese Academy of Sciences
+School of Physics, University of Chinese Academy of Sciences
+Beijing, China
