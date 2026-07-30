@@ -375,6 +375,18 @@ def execution_environment() -> Mapping[str,Any]:
                "array_task_id":os.environ.get("SLURM_ARRAY_TASK_ID"),
                "cluster_name":os.environ.get("SLURM_CLUSTER_NAME")}}
 
+def append_resource_tsv(path:Path,wall_seconds:float,
+                        max_rss_kb:Optional[int])->None:
+    path.parent.mkdir(parents=True,exist_ok=True)
+    rss=0 if max_rss_kb is None else int(max_rss_kb)
+    if not math.isfinite(wall_seconds) or wall_seconds<0 or rss<=0:
+        raise ManifestError("invalid resource measurement")
+    with path.open("a",encoding="utf-8") as handle:
+        handle.write(f"elapsed_seconds\t{wall_seconds:.17g}\n")
+        handle.write(f"max_rss_kb\t{rss}\n")
+        handle.flush()
+        os.fsync(handle.fileno())
+
 def validate_existing_complete(output: Path, manifest_sha256: str,
                                expected_steps: int) -> Mapping[str,Any]:
     result_path=output/"result.json"; done_path=output/"CHAIN_COMPLETE"
@@ -678,6 +690,8 @@ class CTQMC:
         result_path=self.output_dir/"result.json"
         atomic_write_json(result_path,result)
         self.save_checkpoint("run_complete_unvalidated")
+        append_resource_tsv(
+            self.output_dir/"resource.tsv",wall_seconds,max_rss_kb)
         result_sha256=hashlib.sha256(result_path.read_bytes()).hexdigest()
         atomic_write_json(self.output_dir/"CHAIN_COMPLETE",{
           "schema_version":1,"status":"run_complete_unvalidated",

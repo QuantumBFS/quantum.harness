@@ -1099,6 +1099,13 @@ def test_complete_validation_is_hash_bound_and_idempotent(tmp_path: Path) -> Non
         manifest, output, manifest_sha256=digest
     )
     result = sampler.run()
+    resource_lines = (output / "resource.tsv").read_text(
+        encoding="utf-8"
+    ).splitlines()
+    assert resource_lines[0].startswith("elapsed_seconds\t")
+    assert float(resource_lines[0].split("\t")[1]) >= 0
+    assert resource_lines[1].startswith("max_rss_kb\t")
+    assert int(resource_lines[1].split("\t")[1]) > 0
     assert ctqmc.validate_existing_complete(output, digest, 8) == result
     assert ctqmc.main([
         "--manifest", str(manifest_path), "--output", str(output)

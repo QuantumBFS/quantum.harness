@@ -296,6 +296,7 @@ def _array_script(table: str, count: int, python_bin: str, result_root: str) -> 
 #SBATCH --cpus-per-task=1
 #SBATCH --mem=8G
 #SBATCH --time=04:00:00
+#SBATCH --chdir={result_root}
 set -euo pipefail
 ROOT={shlex.quote(result_root)}
 SOLUTION_DIR={shlex.quote(str(SOLUTION_DIR))}
@@ -312,7 +313,6 @@ if [[ -f "$output/CHAIN_COMPLETE" ]]; then
  exit 0
 fi
 if [[ -f "$output/checkpoint.json" ]]; then resume=(--resume); fi
-/usr/bin/time -a -f 'elapsed_seconds\\t%e\\nmax_rss_kb\\t%M' -o "$output/resource.tsv" \\
  "$PYTHON_BIN" "$SOLUTION_DIR/large_lattice_ctqmc.py" \\
  --manifest "$ROOT/$manifest_rel" --output "$output" "${{resume[@]}}" \\
  >>"$output/runner.stdout" 2>>"$output/runner.stderr"
@@ -332,6 +332,7 @@ done < "$ROOT/ed_tasks.tsv"
 #SBATCH --cpus-per-task=1
 #SBATCH --mem=8G
 #SBATCH --time=04:00:00
+#SBATCH --chdir={result_root}
 set -euo pipefail
 ROOT={shlex.quote(result_root)}
 SOLUTION_DIR={shlex.quote(str(SOLUTION_DIR))}
@@ -376,6 +377,7 @@ def _benchmark_script(python_bin: str, result_root: str) -> str:
 #SBATCH --cpus-per-task=1
 #SBATCH --mem=8G
 #SBATCH --time=04:00:00
+#SBATCH --chdir={result_root}
 set -euo pipefail
 ROOT={shlex.quote(result_root)}
 SOLUTION_DIR={shlex.quote(str(SOLUTION_DIR))}
@@ -384,11 +386,10 @@ preflight=$("$PYTHON_BIN" "$SOLUTION_DIR/large_lattice_protocol.py" validate --r
 mkdir -p "$ROOT/benchmark"
 printf '%s\\n' "$preflight" >"$ROOT/benchmark/preflight.log"
 if [[ -f "$ROOT/benchmark/kernel_benchmark.json" ]]; then exit 0; fi
-/usr/bin/time -a -f 'elapsed_seconds\\t%e\\nmax_rss_kb\\t%M' \\
- -o "$ROOT/benchmark/resource.tsv" \\
  "$PYTHON_BIN" "$SOLUTION_DIR/large_lattice_kernel_benchmark.py" \\
  --sizes 4,8,12,16 --beta 4 --seed 121730001 --repeats 9 --warmup 2 \\
  --condition-max 1e12 --output "$ROOT/benchmark/kernel_benchmark.json" \\
+ --resource-output "$ROOT/benchmark/resource.tsv" \\
  >>"$ROOT/benchmark/runner.stdout" 2>>"$ROOT/benchmark/runner.stderr"
 """.replace("$","$")
 
@@ -407,6 +408,7 @@ def _generated_scripts(python_bin: str, result_root: str) -> Mapping[str,str]:
 #SBATCH --cpus-per-task=1
 #SBATCH --mem=4G
 #SBATCH --time=00:30:00
+#SBATCH --chdir={result_root}
 set -euo pipefail
 ROOT={shlex.quote(result_root)}
 SOLUTION_DIR={shlex.quote(str(SOLUTION_DIR))}

@@ -385,6 +385,19 @@ def test_materialization_freezes_environment_and_restart_wrapper(
     assert "CHAIN_COMPLETE" in script
     assert "--resume" in script
     assert '>>"$output/runner.stdout"' in script
+    assert "/usr/bin/time" not in script
+    benchmark_script = (
+        root / "slurm" / "run_kernel_benchmark.sbatch"
+    ).read_text(encoding="utf-8")
+    assert "/usr/bin/time" not in benchmark_script
+    assert "--resource-output" in benchmark_script
+    sbatch_files = list((root / "slurm").glob("*.sbatch"))
+    assert len(sbatch_files) == 9
+    expected_chdir = f"#SBATCH --chdir={root.resolve()}"
+    assert all(
+        expected_chdir in path.read_text(encoding="utf-8")
+        for path in sbatch_files
+    )
 
 
 def test_materialization_rejects_cardinality_path_and_tsv_tamper(

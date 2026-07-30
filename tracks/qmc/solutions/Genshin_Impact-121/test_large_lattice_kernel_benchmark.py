@@ -15,6 +15,8 @@ for _name in _THREAD_ENV:
 
 import json
 import math
+from pathlib import Path
+import tempfile
 import unittest
 
 import large_lattice_kernel_benchmark as benchmark
@@ -117,6 +119,28 @@ class KernelBenchmarkTests(unittest.TestCase):
         )
         decoded = json.loads(encoded)
         self.assertIs(decoded["overall_correctness_pass"], True)
+
+    def test_cli_writes_atomic_resource_tsv(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            output = root / "benchmark.json"
+            resource = root / "resource.tsv"
+            code = benchmark.main([
+                "--sizes", "2",
+                "--beta", "0.5",
+                "--repeats", "1",
+                "--warmup", "0",
+                "--output", str(output),
+                "--resource-output", str(resource),
+            ])
+            self.assertEqual(code, 0)
+            self.assertTrue(output.is_file())
+            lines = resource.read_text(encoding="utf-8").splitlines()
+            self.assertEqual(len(lines), 2)
+            self.assertEqual(lines[0].split("\t")[0], "elapsed_seconds")
+            self.assertGreaterEqual(float(lines[0].split("\t")[1]), 0.0)
+            self.assertEqual(lines[1].split("\t")[0], "max_rss_kb")
+            self.assertGreater(int(lines[1].split("\t")[1]), 0)
 
     def test_fixed_seed_reproduces_word_and_candidate_fixtures(self) -> None:
         arguments = {

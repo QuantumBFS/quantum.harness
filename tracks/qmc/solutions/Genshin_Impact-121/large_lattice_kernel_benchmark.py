@@ -154,6 +154,31 @@ def atomic_write_json(path: Path, payload: Mapping[str, Any]) -> None:
             os.unlink(temporary)
 
 
+def atomic_write_resource_tsv(
+    path: Path, wall_seconds: float, max_rss_kb: Optional[int]
+) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    rss = 0 if max_rss_kb is None else int(max_rss_kb)
+    if not math.isfinite(wall_seconds) or wall_seconds < 0 or rss <= 0:
+        raise ValueError("invalid resource measurement")
+    raw = (
+        f"elapsed_seconds\t{wall_seconds:.17g}\n"
+        f"max_rss_kb\t{rss}\n"
+    )
+    descriptor, temporary = tempfile.mkstemp(
+        prefix="." + path.name + ".", suffix=".tmp", dir=path.parent
+    )
+    try:
+        with os.fdopen(descriptor, "w", encoding="utf-8") as handle:
+            handle.write(raw)
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(temporary, path)
+    finally:
+        if os.path.exists(temporary):
+            os.unlink(temporary)
+
+
 def relative_inf_error(actual: np.ndarray, reference: np.ndarray) -> float:
     return float(
         np.linalg.norm(actual - reference, np.inf)
@@ -636,8 +661,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         default=DEFAULT_CONDITION_MAX,
     )
     parser.add_argument("--output", type=Path)
+    parser.add_argument("--resource-output", type=Path)
     parser.add_argument("--compact", action="store_true")
     args = parser.parse_args(argv)
+    started = time.perf_counter()
     report = run_benchmark(
         sizes=args.sizes,
         beta=args.beta,
@@ -646,6 +673,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         warmup=args.warmup,
         condition_max=args.condition_max,
     )
+    if args.resource_output is not None:
+        atomic_write_resource_tsv(
+            args.resource_output,
+            float(time.perf_counter() - started),
+            ctqmc.linux_max_rss_kb(),
+        )
     if args.output is not None:
         atomic_write_json(args.output, report)
         print(json.dumps({
