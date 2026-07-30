@@ -35,6 +35,12 @@ round is also above `1e-4`. The status therefore remains preliminary.
 Every recommendation has `automatic_submission=false`. The `L=128` and
 `chi=256` specifications are intentionally empty for this closeout.
 
+## PR handoff
+
+- [`PR_TITLE.txt`](PR_TITLE.txt): proposed replacement title for PR 167.
+- [`PR_BODY.md`](PR_BODY.md): proposed replacement body for PR 167, with
+  repository-relative evidence links.
+
 ## Provenance and verification
 
 - Compute commit:
