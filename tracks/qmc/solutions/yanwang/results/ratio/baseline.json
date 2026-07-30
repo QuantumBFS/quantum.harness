@@ -1,0 +1,2349 @@
+{
+  "accepted_variant_combination_count": 374,
+  "accepted_variant_combinations": [
+    {
+      "absolute_shift_from_primary": 0.0,
+      "honeycomb_fit_id": "historical-inner-all-sizes",
+      "ratio": 2.235979504194356,
+      "triangular_fit_id": "historical-inner-all-sizes"
+    },
+    {
+      "absolute_shift_from_primary": 3.084182941925917e-06,
+      "honeycomb_fit_id": "historical-outer-all-sizes",
+      "ratio": 2.235982588377298,
+      "triangular_fit_id": "historical-inner-all-sizes"
+    },
+    {
+      "absolute_shift_from_primary": 1.1417756803133727e-05,
+      "honeycomb_fit_id": "historical-inner-Lmin12",
+      "ratio": 2.235990921951159,
+      "triangular_fit_id": "historical-inner-all-sizes"
+    },
+    {
+      "absolute_shift_from_primary": 2.633659622963691e-05,
+      "honeycomb_fit_id": "historical-inner-Lmin14",
+      "ratio": 2.2360058407905856,
+      "triangular_fit_id": "historical-inner-all-sizes"
+    },
+    {
+      "absolute_shift_from_primary": 2.4065032673270537e-06,
+      "honeycomb_fit_id": "historical-inner-Lmin16",
+      "ratio": 2.2359819106976233,
+      "triangular_fit_id": "historical-inner-all-sizes"
+    },
+    {
+      "absolute_shift_from_primary": 2.603742431839251e-05,
+      "honeycomb_fit_id": "historical-inner-Lmax28",
+      "ratio": 2.2359534667700376,
+      "triangular_fit_id": "historical-inner-all-sizes"
+    },
+    {
+      "absolute_shift_from_primary": 1.1417756803133727e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L10-out",
+      "ratio": 2.235990921951159,
+      "triangular_fit_id": "historical-inner-all-sizes"
+    },
+    {
+      "absolute_shift_from_primary": 3.2989403297989384e-07,
+      "honeycomb_fit_id": "historical-inner-leave-L12-out",
+      "ratio": 2.235979174300323,
+      "triangular_fit_id": "historical-inner-all-sizes"
+    },
+    {
+      "absolute_shift_from_primary": 4.956622641216768e-06,
+      "honeycomb_fit_id": "historical-inner-leave-L14-out",
+      "ratio": 2.235984460816997,
+      "triangular_fit_id": "historical-inner-all-sizes"
+    },
+    {
+      "absolute_shift_from_primary": 3.2451289659896077e-06,
+      "honeycomb_fit_id": "historical-inner-leave-L16-out",
+      "ratio": 2.23597625906539,
+      "triangular_fit_id": "historical-inner-all-sizes"
+    },
+    {
+      "absolute_shift_from_primary": 5.2170095545811535e-06,
+      "honeycomb_fit_id": "historical-inner-leave-L18-out",
+      "ratio": 2.2359742871848014,
+      "triangular_fit_id": "historical-inner-all-sizes"
+    },
+    {
+      "absolute_shift_from_primary": 2.193761444502229e-06,
+      "honeycomb_fit_id": "historical-inner-leave-L20-out",
+      "ratio": 2.2359816979558005,
+      "triangular_fit_id": "historical-inner-all-sizes"
+    },
+    {
+      "absolute_shift_from_primary": 1.643746441182259e-07,
+      "honeycomb_fit_id": "historical-inner-leave-L24-out",
+      "ratio": 2.235979339819712,
+      "triangular_fit_id": "historical-inner-all-sizes"
+    },
+    {
+      "absolute_shift_from_primary": 1.1821580433224455e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L28-out",
+      "ratio": 2.235991325774789,
+      "triangular_fit_id": "historical-inner-all-sizes"
+    },
+    {
+      "absolute_shift_from_primary": 2.603742431839251e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L32-out",
+      "ratio": 2.2359534667700376,
+      "triangular_fit_id": "historical-inner-all-sizes"
+    },
+    {
+      "absolute_shift_from_primary": 2.0604615791341985e-09,
+      "honeycomb_fit_id": "historical-inner-add-c1",
+      "ratio": 2.2359795062548176,
+      "triangular_fit_id": "historical-inner-all-sizes"
+    },
+    {
+      "absolute_shift_from_primary": 2.84467675548683e-06,
+      "honeycomb_fit_id": "modern-inner-all-sizes",
+      "ratio": 2.2359823488711115,
+      "triangular_fit_id": "historical-inner-all-sizes"
+    },
+    {
+      "absolute_shift_from_primary": 2.252041367167834e-06,
+      "honeycomb_fit_id": "historical-inner-all-sizes",
+      "ratio": 2.235977252152989,
+      "triangular_fit_id": "historical-outer-all-sizes"
+    },
+    {
+      "absolute_shift_from_primary": 8.3213846835406e-07,
+      "honeycomb_fit_id": "historical-outer-all-sizes",
+      "ratio": 2.2359803363328243,
+      "triangular_fit_id": "historical-outer-all-sizes"
+    },
+    {
+      "absolute_shift_from_primary": 9.165703935831715e-06,
+      "honeycomb_fit_id": "historical-inner-Lmin12",
+      "ratio": 2.235988669898292,
+      "triangular_fit_id": "historical-outer-all-sizes"
+    },
+    {
+      "absolute_shift_from_primary": 2.4084528336576483e-05,
+      "honeycomb_fit_id": "historical-inner-Lmin14",
+      "ratio": 2.2360035887226926,
+      "triangular_fit_id": "historical-outer-all-sizes"
+    },
+    {
+      "absolute_shift_from_primary": 1.54459475876223e-07,
+      "honeycomb_fit_id": "historical-inner-Lmin16",
+      "ratio": 2.235979658653832,
+      "triangular_fit_id": "historical-outer-all-sizes"
+    },
+    {
+      "absolute_shift_from_primary": 2.8289439461648413e-05,
+      "honeycomb_fit_id": "historical-inner-Lmax28",
+      "ratio": 2.2359512147548943,
+      "triangular_fit_id": "historical-outer-all-sizes"
+    },
+    {
+      "absolute_shift_from_primary": 9.165703935831715e-06,
+      "honeycomb_fit_id": "historical-inner-leave-L10-out",
+      "ratio": 2.235988669898292,
+      "triangular_fit_id": "historical-outer-all-sizes"
+    },
+    {
+      "absolute_shift_from_primary": 2.581935067968999e-06,
+      "honeycomb_fit_id": "historical-inner-leave-L12-out",
+      "ratio": 2.235976922259288,
+      "triangular_fit_id": "historical-outer-all-sizes"
+    },
+    {
+      "absolute_shift_from_primary": 2.7045762815980368e-06,
+      "honeycomb_fit_id": "historical-inner-leave-L14-out",
+      "ratio": 2.2359822087706376,
+      "triangular_fit_id": "historical-outer-all-sizes"
+    },
+    {
+      "absolute_shift_from_primary": 5.4971670651049465e-06,
+      "honeycomb_fit_id": "historical-inner-leave-L16-out",
+      "ratio": 2.235974007027291,
+      "triangular_fit_id": "historical-outer-all-sizes"
+    },
+    {
+      "absolute_shift_from_primary": 7.469045667729546e-06,
+      "honeycomb_fit_id": "historical-inner-leave-L18-out",
+      "ratio": 2.2359720351486883,
+      "triangular_fit_id": "historical-outer-all-sizes"
+    },
+    {
+      "absolute_shift_from_primary": 5.8282132453513213e-08,
+      "honeycomb_fit_id": "historical-inner-leave-L20-out",
+      "ratio": 2.2359794459122235,
+      "triangular_fit_id": "historical-outer-all-sizes"
+    },
+    {
+      "absolute_shift_from_primary": 2.416415846084874e-06,
+      "honeycomb_fit_id": "historical-inner-leave-L24-out",
+      "ratio": 2.23597708777851,
+      "triangular_fit_id": "historical-outer-all-sizes"
+    },
+    {
+      "absolute_shift_from_primary": 9.569527159580815e-06,
+      "honeycomb_fit_id": "historical-inner-leave-L28-out",
+      "ratio": 2.2359890737215156,
+      "triangular_fit_id": "historical-outer-all-sizes"
+    },
+    {
+      "absolute_shift_from_primary": 2.8289439461648413e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L32-out",
+      "ratio": 2.2359512147548943,
+      "triangular_fit_id": "historical-outer-all-sizes"
+    },
+    {
+      "absolute_shift_from_primary": 2.249980907809146e-06,
+      "honeycomb_fit_id": "historical-inner-add-c1",
+      "ratio": 2.235977254213448,
+      "triangular_fit_id": "historical-outer-all-sizes"
+    },
+    {
+      "absolute_shift_from_primary": 5.926325230554141e-07,
+      "honeycomb_fit_id": "modern-inner-all-sizes",
+      "ratio": 2.235980096826879,
+      "triangular_fit_id": "historical-outer-all-sizes"
+    },
+    {
+      "absolute_shift_from_primary": 3.1511629567937405e-05,
+      "honeycomb_fit_id": "historical-inner-all-sizes",
+      "ratio": 2.236011015823924,
+      "triangular_fit_id": "historical-inner-Lmin8"
+    },
+    {
+      "absolute_shift_from_primary": 3.4595855975094736e-05,
+      "honeycomb_fit_id": "historical-outer-all-sizes",
+      "ratio": 2.236014100050331,
+      "triangular_fit_id": "historical-inner-Lmin8"
+    },
+    {
+      "absolute_shift_from_primary": 4.292954728102316e-05,
+      "honeycomb_fit_id": "historical-inner-Lmin12",
+      "ratio": 2.236022433741637,
+      "triangular_fit_id": "historical-inner-Lmin8"
+    },
+    {
+      "absolute_shift_from_primary": 5.784859695889821e-05,
+      "honeycomb_fit_id": "historical-inner-Lmin14",
+      "ratio": 2.236037352791315,
+      "triangular_fit_id": "historical-inner-Lmin8"
+    },
+    {
+      "absolute_shift_from_primary": 3.3918166749913325e-05,
+      "honeycomb_fit_id": "historical-inner-Lmin16",
+      "ratio": 2.236013422361106,
+      "triangular_fit_id": "historical-inner-Lmin8"
+    },
+    {
+      "absolute_shift_from_primary": 5.473838304403955e-06,
+      "honeycomb_fit_id": "historical-inner-Lmax28",
+      "ratio": 2.2359849780326604,
+      "triangular_fit_id": "historical-inner-Lmin8"
+    },
+    {
+      "absolute_shift_from_primary": 4.292954728102316e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L10-out",
+      "ratio": 2.236022433741637,
+      "triangular_fit_id": "historical-inner-Lmin8"
+    },
+    {
+      "absolute_shift_from_primary": 3.118173088578757e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L12-out",
+      "ratio": 2.2360106859252418,
+      "triangular_fit_id": "historical-inner-Lmin8"
+    },
+    {
+      "absolute_shift_from_primary": 3.6468322062610525e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L14-out",
+      "ratio": 2.2360159725164186,
+      "triangular_fit_id": "historical-inner-Lmin8"
+    },
+    {
+      "absolute_shift_from_primary": 2.826645486786461e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L16-out",
+      "ratio": 2.236007770649224,
+      "triangular_fit_id": "historical-inner-Lmin8"
+    },
+    {
+      "absolute_shift_from_primary": 2.629454648994667e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L18-out",
+      "ratio": 2.236005798740846,
+      "triangular_fit_id": "historical-inner-Lmin8"
+    },
+    {
+      "absolute_shift_from_primary": 3.3705421929042245e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L20-out",
+      "ratio": 2.236013209616285,
+      "triangular_fit_id": "historical-inner-Lmin8"
+    },
+    {
+      "absolute_shift_from_primary": 3.134725260700577e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L24-out",
+      "ratio": 2.236010851446963,
+      "triangular_fit_id": "historical-inner-Lmin8"
+    },
+    {
+      "absolute_shift_from_primary": 4.33333766025612e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L28-out",
+      "ratio": 2.2360228375709585,
+      "triangular_fit_id": "historical-inner-Lmin8"
+    },
+    {
+      "absolute_shift_from_primary": 5.473838304403955e-06,
+      "honeycomb_fit_id": "historical-inner-leave-L32-out",
+      "ratio": 2.2359849780326604,
+      "triangular_fit_id": "historical-inner-Lmin8"
+    },
+    {
+      "absolute_shift_from_primary": 3.151369005838234e-05,
+      "honeycomb_fit_id": "historical-inner-add-c1",
+      "ratio": 2.2360110178844144,
+      "triangular_fit_id": "historical-inner-Lmin8"
+    },
+    {
+      "absolute_shift_from_primary": 3.4356346413133565e-05,
+      "honeycomb_fit_id": "modern-inner-all-sizes",
+      "ratio": 2.236013860540769,
+      "triangular_fit_id": "historical-inner-Lmin8"
+    },
+    {
+      "absolute_shift_from_primary": 1.1887216221140307e-05,
+      "honeycomb_fit_id": "historical-inner-all-sizes",
+      "ratio": 2.235991391410577,
+      "triangular_fit_id": "historical-inner-Lmin10"
+    },
+    {
+      "absolute_shift_from_primary": 1.497141555972803e-05,
+      "honeycomb_fit_id": "historical-outer-all-sizes",
+      "ratio": 2.2359944756099157,
+      "triangular_fit_id": "historical-inner-Lmin10"
+    },
+    {
+      "absolute_shift_from_primary": 2.3305033724607682e-05,
+      "honeycomb_fit_id": "historical-inner-Lmin12",
+      "ratio": 2.2360028092280806,
+      "triangular_fit_id": "historical-inner-Lmin10"
+    },
+    {
+      "absolute_shift_from_primary": 3.8223952464999655e-05,
+      "honeycomb_fit_id": "historical-inner-Lmin14",
+      "ratio": 2.236017728146821,
+      "triangular_fit_id": "historical-inner-Lmin10"
+    },
+    {
+      "absolute_shift_from_primary": 1.4293732281789318e-05,
+      "honeycomb_fit_id": "historical-inner-Lmin16",
+      "ratio": 2.2359937979266378,
+      "triangular_fit_id": "historical-inner-Lmin10"
+    },
+    {
+      "absolute_shift_from_primary": 1.4150346521191182e-05,
+      "honeycomb_fit_id": "historical-inner-Lmax28",
+      "ratio": 2.235965353847835,
+      "triangular_fit_id": "historical-inner-Lmin10"
+    },
+    {
+      "absolute_shift_from_primary": 2.3305033724607682e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L10-out",
+      "ratio": 2.2360028092280806,
+      "triangular_fit_id": "historical-inner-Lmin10"
+    },
+    {
+      "absolute_shift_from_primary": 1.1557320434452123e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L12-out",
+      "ratio": 2.2359910615147904,
+      "triangular_fit_id": "historical-inner-Lmin10"
+    },
+    {
+      "absolute_shift_from_primary": 1.684386521327852e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L14-out",
+      "ratio": 2.2359963480595693,
+      "triangular_fit_id": "historical-inner-Lmin10"
+    },
+    {
+      "absolute_shift_from_primary": 8.642070002728985e-06,
+      "honeycomb_fit_id": "historical-inner-leave-L16-out",
+      "ratio": 2.2359881462643587,
+      "triangular_fit_id": "historical-inner-Lmin10"
+    },
+    {
+      "absolute_shift_from_primary": 6.670178930967552e-06,
+      "honeycomb_fit_id": "historical-inner-leave-L18-out",
+      "ratio": 2.235986174373287,
+      "triangular_fit_id": "historical-inner-Lmin10"
+    },
+    {
+      "absolute_shift_from_primary": 1.4080989328313365e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L20-out",
+      "ratio": 2.2359935851836843,
+      "triangular_fit_id": "historical-inner-Lmin10"
+    },
+    {
+      "absolute_shift_from_primary": 1.1722840703054516e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L24-out",
+      "ratio": 2.235991227035059,
+      "triangular_fit_id": "historical-inner-Lmin10"
+    },
+    {
+      "absolute_shift_from_primary": 2.370885950186974e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L28-out",
+      "ratio": 2.236003213053858,
+      "triangular_fit_id": "historical-inner-Lmin10"
+    },
+    {
+      "absolute_shift_from_primary": 1.4150346521191182e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L32-out",
+      "ratio": 2.235965353847835,
+      "triangular_fit_id": "historical-inner-Lmin10"
+    },
+    {
+      "absolute_shift_from_primary": 1.1889276693377582e-05,
+      "honeycomb_fit_id": "historical-inner-add-c1",
+      "ratio": 2.2359913934710494,
+      "triangular_fit_id": "historical-inner-Lmin10"
+    },
+    {
+      "absolute_shift_from_primary": 1.4731908099641089e-05,
+      "honeycomb_fit_id": "modern-inner-all-sizes",
+      "ratio": 2.2359942361024556,
+      "triangular_fit_id": "historical-inner-Lmin10"
+    },
+    {
+      "absolute_shift_from_primary": 9.480550987284175e-05,
+      "honeycomb_fit_id": "historical-inner-all-sizes",
+      "ratio": 2.235884698684483,
+      "triangular_fit_id": "historical-inner-Lmin12"
+    },
+    {
+      "absolute_shift_from_primary": 9.17214577000891e-05,
+      "honeycomb_fit_id": "historical-outer-all-sizes",
+      "ratio": 2.235887782736656,
+      "triangular_fit_id": "historical-inner-Lmin12"
+    },
+    {
+      "absolute_shift_from_primary": 8.338823718245791e-05,
+      "honeycomb_fit_id": "historical-inner-Lmin12",
+      "ratio": 2.2358961159571735,
+      "triangular_fit_id": "historical-inner-Lmin12"
+    },
+    {
+      "absolute_shift_from_primary": 6.847003031484888e-05,
+      "honeycomb_fit_id": "historical-inner-Lmin14",
+      "ratio": 2.235911034164041,
+      "triangular_fit_id": "historical-inner-Lmin12"
+    },
+    {
+      "absolute_shift_from_primary": 9.2399108641672e-05,
+      "honeycomb_fit_id": "historical-inner-Lmin16",
+      "ratio": 2.2358871050857143,
+      "triangular_fit_id": "historical-inner-Lmin12"
+    },
+    {
+      "absolute_shift_from_primary": 0.0001208418302049985,
+      "honeycomb_fit_id": "historical-inner-Lmax28",
+      "ratio": 2.235858662364151,
+      "triangular_fit_id": "historical-inner-Lmin12"
+    },
+    {
+      "absolute_shift_from_primary": 8.338823718245791e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L10-out",
+      "ratio": 2.2358961159571735,
+      "triangular_fit_id": "historical-inner-Lmin12"
+    },
+    {
+      "absolute_shift_from_primary": 9.51353899183438e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L12-out",
+      "ratio": 2.2358843688044376,
+      "triangular_fit_id": "historical-inner-Lmin12"
+    },
+    {
+      "absolute_shift_from_primary": 8.984909739240265e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L14-out",
+      "ratio": 2.2358896550969636,
+      "triangular_fit_id": "historical-inner-Lmin12"
+    },
+    {
+      "absolute_shift_from_primary": 9.80505012457833e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L16-out",
+      "ratio": 2.23588145369311,
+      "triangular_fit_id": "historical-inner-Lmin12"
+    },
+    {
+      "absolute_shift_from_primary": 0.00010002229822658748,
+      "honeycomb_fit_id": "historical-inner-leave-L18-out",
+      "ratio": 2.2358794818961294,
+      "triangular_fit_id": "historical-inner-Lmin12"
+    },
+    {
+      "absolute_shift_from_primary": 9.26118414437127e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L20-out",
+      "ratio": 2.2358868923529123,
+      "triangular_fit_id": "historical-inner-Lmin12"
+    },
+    {
+      "absolute_shift_from_primary": 9.496987754786801e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L24-out",
+      "ratio": 2.235884534316808,
+      "triangular_fit_id": "historical-inner-Lmin12"
+    },
+    {
+      "absolute_shift_from_primary": 8.298443067422667e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L28-out",
+      "ratio": 2.2358965197636818,
+      "triangular_fit_id": "historical-inner-Lmin12"
+    },
+    {
+      "absolute_shift_from_primary": 0.0001208418302049985,
+      "honeycomb_fit_id": "historical-inner-leave-L32-out",
+      "ratio": 2.235858662364151,
+      "triangular_fit_id": "historical-inner-Lmin12"
+    },
+    {
+      "absolute_shift_from_primary": 9.48034494987482e-05,
+      "honeycomb_fit_id": "historical-inner-add-c1",
+      "ratio": 2.2358847007448572,
+      "triangular_fit_id": "historical-inner-Lmin12"
+    },
+    {
+      "absolute_shift_from_primary": 9.196095373198432e-05,
+      "honeycomb_fit_id": "modern-inner-all-sizes",
+      "ratio": 2.235887543240624,
+      "triangular_fit_id": "historical-inner-Lmin12"
+    },
+    {
+      "absolute_shift_from_primary": 0.0001312743546599826,
+      "honeycomb_fit_id": "historical-inner-all-sizes",
+      "ratio": 2.235848229839696,
+      "triangular_fit_id": "historical-inner-Lmin14"
+    },
+    {
+      "absolute_shift_from_primary": 0.00012819035279054702,
+      "honeycomb_fit_id": "historical-outer-all-sizes",
+      "ratio": 2.2358513138415654,
+      "triangular_fit_id": "historical-inner-Lmin14"
+    },
+    {
+      "absolute_shift_from_primary": 0.00011985726819352394,
+      "honeycomb_fit_id": "historical-inner-Lmin12",
+      "ratio": 2.2358596469261625,
+      "triangular_fit_id": "historical-inner-Lmin14"
+    },
+    {
+      "absolute_shift_from_primary": 0.00010493930465216295,
+      "honeycomb_fit_id": "historical-inner-Lmin14",
+      "ratio": 2.235874564889704,
+      "triangular_fit_id": "historical-inner-Lmin14"
+    },
+    {
+      "absolute_shift_from_primary": 0.00012886799267919358,
+      "honeycomb_fit_id": "historical-inner-Lmin16",
+      "ratio": 2.235850636201677,
+      "triangular_fit_id": "historical-inner-Lmin14"
+    },
+    {
+      "absolute_shift_from_primary": 0.00015731025032161838,
+      "honeycomb_fit_id": "historical-inner-Lmax28",
+      "ratio": 2.2358221939440344,
+      "triangular_fit_id": "historical-inner-Lmin14"
+    },
+    {
+      "absolute_shift_from_primary": 0.00011985726819352394,
+      "honeycomb_fit_id": "historical-inner-leave-L10-out",
+      "ratio": 2.2358596469261625,
+      "triangular_fit_id": "historical-inner-Lmin14"
+    },
+    {
+      "absolute_shift_from_primary": 0.0001316042293248998,
+      "honeycomb_fit_id": "historical-inner-leave-L12-out",
+      "ratio": 2.235847899965031,
+      "triangular_fit_id": "historical-inner-Lmin14"
+    },
+    {
+      "absolute_shift_from_primary": 0.00012631802302243145,
+      "honeycomb_fit_id": "historical-inner-leave-L14-out",
+      "ratio": 2.2358531861713336,
+      "triangular_fit_id": "historical-inner-Lmin14"
+    },
+    {
+      "absolute_shift_from_primary": 0.00013451929310503985,
+      "honeycomb_fit_id": "historical-inner-leave-L16-out",
+      "ratio": 2.235844984901251,
+      "triangular_fit_id": "historical-inner-Lmin14"
+    },
+    {
+      "absolute_shift_from_primary": 0.00013649105792445937,
+      "honeycomb_fit_id": "historical-inner-leave-L18-out",
+      "ratio": 2.2358430131364315,
+      "triangular_fit_id": "historical-inner-Lmin14"
+    },
+    {
+      "absolute_shift_from_primary": 0.0001290807220111212,
+      "honeycomb_fit_id": "historical-inner-leave-L20-out",
+      "ratio": 2.235850423472345,
+      "triangular_fit_id": "historical-inner-Lmin14"
+    },
+    {
+      "absolute_shift_from_primary": 0.0001314387196540423,
+      "honeycomb_fit_id": "historical-inner-leave-L24-out",
+      "ratio": 2.235848065474702,
+      "triangular_fit_id": "historical-inner-Lmin14"
+    },
+    {
+      "absolute_shift_from_primary": 0.00011945346827202385,
+      "honeycomb_fit_id": "historical-inner-leave-L28-out",
+      "ratio": 2.235860050726084,
+      "triangular_fit_id": "historical-inner-Lmin14"
+    },
+    {
+      "absolute_shift_from_primary": 0.00015731025032161838,
+      "honeycomb_fit_id": "historical-inner-leave-L32-out",
+      "ratio": 2.2358221939440344,
+      "triangular_fit_id": "historical-inner-Lmin14"
+    },
+    {
+      "absolute_shift_from_primary": 0.00013127229431963983,
+      "honeycomb_fit_id": "historical-inner-add-c1",
+      "ratio": 2.2358482319000363,
+      "triangular_fit_id": "historical-inner-Lmin14"
+    },
+    {
+      "absolute_shift_from_primary": 0.00012842984491578946,
+      "honeycomb_fit_id": "modern-inner-all-sizes",
+      "ratio": 2.23585107434944,
+      "triangular_fit_id": "historical-inner-Lmin14"
+    },
+    {
+      "absolute_shift_from_primary": 9.779482622551683e-05,
+      "honeycomb_fit_id": "historical-inner-all-sizes",
+      "ratio": 2.2358817093681305,
+      "triangular_fit_id": "historical-inner-Lmin16"
+    },
+    {
+      "absolute_shift_from_primary": 9.471077817613249e-05,
+      "honeycomb_fit_id": "historical-outer-all-sizes",
+      "ratio": 2.23588479341618,
+      "triangular_fit_id": "historical-inner-Lmin16"
+    },
+    {
+      "absolute_shift_from_primary": 8.63775687998114e-05,
+      "honeycomb_fit_id": "historical-inner-Lmin12",
+      "ratio": 2.235893126625556,
+      "triangular_fit_id": "historical-inner-Lmin16"
+    },
+    {
+      "absolute_shift_from_primary": 7.145938187713696e-05,
+      "honeycomb_fit_id": "historical-inner-Lmin14",
+      "ratio": 2.235908044812479,
+      "triangular_fit_id": "historical-inner-Lmin16"
+    },
+    {
+      "absolute_shift_from_primary": 9.538842821132931e-05,
+      "honeycomb_fit_id": "historical-inner-Lmin16",
+      "ratio": 2.2358841157661447,
+      "triangular_fit_id": "historical-inner-Lmin16"
+    },
+    {
+      "absolute_shift_from_primary": 0.00012383111174774086,
+      "honeycomb_fit_id": "historical-inner-Lmax28",
+      "ratio": 2.2358556730826082,
+      "triangular_fit_id": "historical-inner-Lmin16"
+    },
+    {
+      "absolute_shift_from_primary": 8.63775687998114e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L10-out",
+      "ratio": 2.235893126625556,
+      "triangular_fit_id": "historical-inner-Lmin16"
+    },
+    {
+      "absolute_shift_from_primary": 9.81247058300383e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L12-out",
+      "ratio": 2.235881379488526,
+      "triangular_fit_id": "historical-inner-Lmin16"
+    },
+    {
+      "absolute_shift_from_primary": 9.283842037177692e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L14-out",
+      "ratio": 2.235886665773984,
+      "triangular_fit_id": "historical-inner-Lmin16"
+    },
+    {
+      "absolute_shift_from_primary": 0.00010103981326015088,
+      "honeycomb_fit_id": "historical-inner-leave-L16-out",
+      "ratio": 2.235878464381096,
+      "triangular_fit_id": "historical-inner-Lmin16"
+    },
+    {
+      "absolute_shift_from_primary": 0.00010301160760439743,
+      "honeycomb_fit_id": "historical-inner-leave-L18-out",
+      "ratio": 2.2358764925867516,
+      "triangular_fit_id": "historical-inner-Lmin16"
+    },
+    {
+      "absolute_shift_from_primary": 9.560116072915292e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L20-out",
+      "ratio": 2.235883903033627,
+      "triangular_fit_id": "historical-inner-Lmin16"
+    },
+    {
+      "absolute_shift_from_primary": 9.795919368071893e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L24-out",
+      "ratio": 2.2358815450006753,
+      "triangular_fit_id": "historical-inner-Lmin16"
+    },
+    {
+      "absolute_shift_from_primary": 8.597376283159264e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L28-out",
+      "ratio": 2.2358935304315244,
+      "triangular_fit_id": "historical-inner-Lmin16"
+    },
+    {
+      "absolute_shift_from_primary": 0.00012383111174774086,
+      "honeycomb_fit_id": "historical-inner-leave-L32-out",
+      "ratio": 2.2358556730826082,
+      "triangular_fit_id": "historical-inner-Lmin16"
+    },
+    {
+      "absolute_shift_from_primary": 9.77927658540878e-05,
+      "honeycomb_fit_id": "historical-inner-add-c1",
+      "ratio": 2.235881711428502,
+      "triangular_fit_id": "historical-inner-Lmin16"
+    },
+    {
+      "absolute_shift_from_primary": 9.49502738873953e-05,
+      "honeycomb_fit_id": "modern-inner-all-sizes",
+      "ratio": 2.2358845539204686,
+      "triangular_fit_id": "historical-inner-Lmin16"
+    },
+    {
+      "absolute_shift_from_primary": 6.377147380032255e-05,
+      "honeycomb_fit_id": "historical-inner-all-sizes",
+      "ratio": 2.2359157327205557,
+      "triangular_fit_id": "historical-inner-Lmax20"
+    },
+    {
+      "absolute_shift_from_primary": 6.068737882092279e-05,
+      "honeycomb_fit_id": "historical-outer-all-sizes",
+      "ratio": 2.235918816815535,
+      "triangular_fit_id": "historical-inner-Lmax20"
+    },
+    {
+      "absolute_shift_from_primary": 5.2354042638480536e-05,
+      "honeycomb_fit_id": "historical-inner-Lmin12",
+      "ratio": 2.2359271501517175,
+      "triangular_fit_id": "historical-inner-Lmax20"
+    },
+    {
+      "absolute_shift_from_primary": 3.743562870628381e-05,
+      "honeycomb_fit_id": "historical-inner-Lmin14",
+      "ratio": 2.2359420685656497,
+      "triangular_fit_id": "historical-inner-Lmax20"
+    },
+    {
+      "absolute_shift_from_primary": 6.136503916831515e-05,
+      "honeycomb_fit_id": "historical-inner-Lmin16",
+      "ratio": 2.2359181391551877,
+      "triangular_fit_id": "historical-inner-Lmax20"
+    },
+    {
+      "absolute_shift_from_primary": 8.980815551584698e-05,
+      "honeycomb_fit_id": "historical-inner-Lmax28",
+      "ratio": 2.23588969603884,
+      "triangular_fit_id": "historical-inner-Lmax20"
+    },
+    {
+      "absolute_shift_from_primary": 5.2354042638480536e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L10-out",
+      "ratio": 2.2359271501517175,
+      "triangular_fit_id": "historical-inner-Lmax20"
+    },
+    {
+      "absolute_shift_from_primary": 6.410135842438436e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L12-out",
+      "ratio": 2.2359154028359316,
+      "triangular_fit_id": "historical-inner-Lmax20"
+    },
+    {
+      "absolute_shift_from_primary": 5.881499252513578e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L14-out",
+      "ratio": 2.235920689201831,
+      "triangular_fit_id": "historical-inner-Lmax20"
+    },
+    {
+      "absolute_shift_from_primary": 6.701651021367994e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L16-out",
+      "ratio": 2.2359124876841423,
+      "triangular_fit_id": "historical-inner-Lmax20"
+    },
+    {
+      "absolute_shift_from_primary": 6.898833456281395e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L18-out",
+      "ratio": 2.235910515859793,
+      "triangular_fit_id": "historical-inner-Lmax20"
+    },
+    {
+      "absolute_shift_from_primary": 6.157777492310501e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L20-out",
+      "ratio": 2.235917926419433,
+      "triangular_fit_id": "historical-inner-Lmax20"
+    },
+    {
+      "absolute_shift_from_primary": 6.393584375663508e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L24-out",
+      "ratio": 2.2359155683505993,
+      "triangular_fit_id": "historical-inner-Lmax20"
+    },
+    {
+      "absolute_shift_from_primary": 5.195023052539938e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L28-out",
+      "ratio": 2.2359275539638306,
+      "triangular_fit_id": "historical-inner-Lmax20"
+    },
+    {
+      "absolute_shift_from_primary": 8.980815551584698e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L32-out",
+      "ratio": 2.23588969603884,
+      "triangular_fit_id": "historical-inner-Lmax20"
+    },
+    {
+      "absolute_shift_from_primary": 6.376941339780728e-05,
+      "honeycomb_fit_id": "historical-inner-add-c1",
+      "ratio": 2.235915734780958,
+      "triangular_fit_id": "historical-inner-Lmax20"
+    },
+    {
+      "absolute_shift_from_primary": 6.092687817682574e-05,
+      "honeycomb_fit_id": "modern-inner-all-sizes",
+      "ratio": 2.235918577316179,
+      "triangular_fit_id": "historical-inner-Lmax20"
+    },
+    {
+      "absolute_shift_from_primary": 6.924380680395359e-06,
+      "honeycomb_fit_id": "historical-inner-all-sizes",
+      "ratio": 2.2359864285750364,
+      "triangular_fit_id": "historical-inner-Lmax28"
+    },
+    {
+      "absolute_shift_from_primary": 1.0008573173347912e-05,
+      "honeycomb_fit_id": "historical-outer-all-sizes",
+      "ratio": 2.2359895127675293,
+      "triangular_fit_id": "historical-inner-Lmax28"
+    },
+    {
+      "absolute_shift_from_primary": 1.8342172841911975e-05,
+      "honeycomb_fit_id": "historical-inner-Lmin12",
+      "ratio": 2.235997846367198,
+      "triangular_fit_id": "historical-inner-Lmax28"
+    },
+    {
+      "absolute_shift_from_primary": 3.3261058469236104e-05,
+      "honeycomb_fit_id": "historical-inner-Lmin14",
+      "ratio": 2.236012765252825,
+      "triangular_fit_id": "historical-inner-Lmax28"
+    },
+    {
+      "absolute_shift_from_primary": 9.330891399983443e-06,
+      "honeycomb_fit_id": "historical-inner-Lmin16",
+      "ratio": 2.235988835085756,
+      "triangular_fit_id": "historical-inner-Lmax28"
+    },
+    {
+      "absolute_shift_from_primary": 1.9113124270830895e-05,
+      "honeycomb_fit_id": "historical-inner-Lmax28",
+      "ratio": 2.235960391070085,
+      "triangular_fit_id": "historical-inner-Lmax28"
+    },
+    {
+      "absolute_shift_from_primary": 1.8342172841911975e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L10-out",
+      "ratio": 2.235997846367198,
+      "triangular_fit_id": "historical-inner-Lmax28"
+    },
+    {
+      "absolute_shift_from_primary": 6.5944856260102824e-06,
+      "honeycomb_fit_id": "historical-inner-leave-L12-out",
+      "ratio": 2.235986098679982,
+      "triangular_fit_id": "historical-inner-Lmax28"
+    },
+    {
+      "absolute_shift_from_primary": 1.1881018671111576e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L14-out",
+      "ratio": 2.235991385213027,
+      "triangular_fit_id": "historical-inner-Lmax28"
+    },
+    {
+      "absolute_shift_from_primary": 3.6792416646669324e-06,
+      "honeycomb_fit_id": "historical-inner-leave-L16-out",
+      "ratio": 2.2359831834360206,
+      "triangular_fit_id": "historical-inner-Lmax28"
+    },
+    {
+      "absolute_shift_from_primary": 1.707354969404662e-06,
+      "honeycomb_fit_id": "historical-inner-leave-L18-out",
+      "ratio": 2.2359812115493254,
+      "triangular_fit_id": "historical-inner-Lmax28"
+    },
+    {
+      "absolute_shift_from_primary": 9.11814891857432e-06,
+      "honeycomb_fit_id": "historical-inner-leave-L20-out",
+      "ratio": 2.2359886223432746,
+      "triangular_fit_id": "historical-inner-Lmax28"
+    },
+    {
+      "absolute_shift_from_primary": 6.760005526906809e-06,
+      "honeycomb_fit_id": "historical-inner-leave-L24-out",
+      "ratio": 2.235986264199883,
+      "triangular_fit_id": "historical-inner-Lmax28"
+    },
+    {
+      "absolute_shift_from_primary": 1.8745997723002006e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L28-out",
+      "ratio": 2.235998250192079,
+      "triangular_fit_id": "historical-inner-Lmax28"
+    },
+    {
+      "absolute_shift_from_primary": 1.9113124270830895e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L32-out",
+      "ratio": 2.235960391070085,
+      "triangular_fit_id": "historical-inner-Lmax28"
+    },
+    {
+      "absolute_shift_from_primary": 6.926441148191742e-06,
+      "honeycomb_fit_id": "historical-inner-add-c1",
+      "ratio": 2.235986430635504,
+      "triangular_fit_id": "historical-inner-Lmax28"
+    },
+    {
+      "absolute_shift_from_primary": 9.769066245279845e-06,
+      "honeycomb_fit_id": "modern-inner-all-sizes",
+      "ratio": 2.2359892732606013,
+      "triangular_fit_id": "historical-inner-Lmax28"
+    },
+    {
+      "absolute_shift_from_primary": 3.1511629567937405e-05,
+      "honeycomb_fit_id": "historical-inner-all-sizes",
+      "ratio": 2.236011015823924,
+      "triangular_fit_id": "historical-inner-leave-L6-out"
+    },
+    {
+      "absolute_shift_from_primary": 3.4595855975094736e-05,
+      "honeycomb_fit_id": "historical-outer-all-sizes",
+      "ratio": 2.236014100050331,
+      "triangular_fit_id": "historical-inner-leave-L6-out"
+    },
+    {
+      "absolute_shift_from_primary": 4.292954728102316e-05,
+      "honeycomb_fit_id": "historical-inner-Lmin12",
+      "ratio": 2.236022433741637,
+      "triangular_fit_id": "historical-inner-leave-L6-out"
+    },
+    {
+      "absolute_shift_from_primary": 5.784859695889821e-05,
+      "honeycomb_fit_id": "historical-inner-Lmin14",
+      "ratio": 2.236037352791315,
+      "triangular_fit_id": "historical-inner-leave-L6-out"
+    },
+    {
+      "absolute_shift_from_primary": 3.3918166749913325e-05,
+      "honeycomb_fit_id": "historical-inner-Lmin16",
+      "ratio": 2.236013422361106,
+      "triangular_fit_id": "historical-inner-leave-L6-out"
+    },
+    {
+      "absolute_shift_from_primary": 5.473838304403955e-06,
+      "honeycomb_fit_id": "historical-inner-Lmax28",
+      "ratio": 2.2359849780326604,
+      "triangular_fit_id": "historical-inner-leave-L6-out"
+    },
+    {
+      "absolute_shift_from_primary": 4.292954728102316e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L10-out",
+      "ratio": 2.236022433741637,
+      "triangular_fit_id": "historical-inner-leave-L6-out"
+    },
+    {
+      "absolute_shift_from_primary": 3.118173088578757e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L12-out",
+      "ratio": 2.2360106859252418,
+      "triangular_fit_id": "historical-inner-leave-L6-out"
+    },
+    {
+      "absolute_shift_from_primary": 3.6468322062610525e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L14-out",
+      "ratio": 2.2360159725164186,
+      "triangular_fit_id": "historical-inner-leave-L6-out"
+    },
+    {
+      "absolute_shift_from_primary": 2.826645486786461e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L16-out",
+      "ratio": 2.236007770649224,
+      "triangular_fit_id": "historical-inner-leave-L6-out"
+    },
+    {
+      "absolute_shift_from_primary": 2.629454648994667e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L18-out",
+      "ratio": 2.236005798740846,
+      "triangular_fit_id": "historical-inner-leave-L6-out"
+    },
+    {
+      "absolute_shift_from_primary": 3.3705421929042245e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L20-out",
+      "ratio": 2.236013209616285,
+      "triangular_fit_id": "historical-inner-leave-L6-out"
+    },
+    {
+      "absolute_shift_from_primary": 3.134725260700577e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L24-out",
+      "ratio": 2.236010851446963,
+      "triangular_fit_id": "historical-inner-leave-L6-out"
+    },
+    {
+      "absolute_shift_from_primary": 4.33333766025612e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L28-out",
+      "ratio": 2.2360228375709585,
+      "triangular_fit_id": "historical-inner-leave-L6-out"
+    },
+    {
+      "absolute_shift_from_primary": 5.473838304403955e-06,
+      "honeycomb_fit_id": "historical-inner-leave-L32-out",
+      "ratio": 2.2359849780326604,
+      "triangular_fit_id": "historical-inner-leave-L6-out"
+    },
+    {
+      "absolute_shift_from_primary": 3.151369005838234e-05,
+      "honeycomb_fit_id": "historical-inner-add-c1",
+      "ratio": 2.2360110178844144,
+      "triangular_fit_id": "historical-inner-leave-L6-out"
+    },
+    {
+      "absolute_shift_from_primary": 3.4356346413133565e-05,
+      "honeycomb_fit_id": "modern-inner-all-sizes",
+      "ratio": 2.236013860540769,
+      "triangular_fit_id": "historical-inner-leave-L6-out"
+    },
+    {
+      "absolute_shift_from_primary": 1.588697297405517e-05,
+      "honeycomb_fit_id": "historical-inner-all-sizes",
+      "ratio": 2.23599539116733,
+      "triangular_fit_id": "historical-inner-leave-L8-out"
+    },
+    {
+      "absolute_shift_from_primary": 1.8971177829563146e-05,
+      "honeycomb_fit_id": "historical-outer-all-sizes",
+      "ratio": 2.2359984753721855,
+      "triangular_fit_id": "historical-inner-leave-L8-out"
+    },
+    {
+      "absolute_shift_from_primary": 2.7304810902073484e-05,
+      "honeycomb_fit_id": "historical-inner-Lmin12",
+      "ratio": 2.236006809005258,
+      "triangular_fit_id": "historical-inner-leave-L8-out"
+    },
+    {
+      "absolute_shift_from_primary": 4.2223756329118345e-05,
+      "honeycomb_fit_id": "historical-inner-Lmin14",
+      "ratio": 2.236021727950685,
+      "triangular_fit_id": "historical-inner-leave-L8-out"
+    },
+    {
+      "absolute_shift_from_primary": 1.829349333970498e-05,
+      "honeycomb_fit_id": "historical-inner-Lmin16",
+      "ratio": 2.2359977976876957,
+      "triangular_fit_id": "historical-inner-leave-L8-out"
+    },
+    {
+      "absolute_shift_from_primary": 1.0150636344352648e-05,
+      "honeycomb_fit_id": "historical-inner-Lmax28",
+      "ratio": 2.2359693535580116,
+      "triangular_fit_id": "historical-inner-leave-L8-out"
+    },
+    {
+      "absolute_shift_from_primary": 2.7304810902073484e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L10-out",
+      "ratio": 2.236006809005258,
+      "triangular_fit_id": "historical-inner-leave-L8-out"
+    },
+    {
+      "absolute_shift_from_primary": 1.5557076597172426e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L12-out",
+      "ratio": 2.235995061270953,
+      "triangular_fit_id": "historical-inner-leave-L8-out"
+    },
+    {
+      "absolute_shift_from_primary": 2.0843630832878546e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L14-out",
+      "ratio": 2.236000347825189,
+      "triangular_fit_id": "historical-inner-leave-L8-out"
+    },
+    {
+      "absolute_shift_from_primary": 1.2641820950509697e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L16-out",
+      "ratio": 2.2359921460153065,
+      "triangular_fit_id": "historical-inner-leave-L8-out"
+    },
+    {
+      "absolute_shift_from_primary": 1.0669926351791759e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L18-out",
+      "ratio": 2.2359901741207078,
+      "triangular_fit_id": "historical-inner-leave-L8-out"
+    },
+    {
+      "absolute_shift_from_primary": 1.8080750005644575e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L20-out",
+      "ratio": 2.2359975849443616,
+      "triangular_fit_id": "historical-inner-leave-L8-out"
+    },
+    {
+      "absolute_shift_from_primary": 1.5722597161538232e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L24-out",
+      "ratio": 2.2359952267915175,
+      "triangular_fit_id": "historical-inner-leave-L8-out"
+    },
+    {
+      "absolute_shift_from_primary": 2.7708637401424596e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L28-out",
+      "ratio": 2.2360072128317574,
+      "triangular_fit_id": "historical-inner-leave-L8-out"
+    },
+    {
+      "absolute_shift_from_primary": 1.0150636344352648e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L32-out",
+      "ratio": 2.2359693535580116,
+      "triangular_fit_id": "historical-inner-leave-L8-out"
+    },
+    {
+      "absolute_shift_from_primary": 1.5889033450289247e-05,
+      "honeycomb_fit_id": "historical-inner-add-c1",
+      "ratio": 2.2359953932278063,
+      "triangular_fit_id": "historical-inner-leave-L8-out"
+    },
+    {
+      "absolute_shift_from_primary": 1.8731669941374207e-05,
+      "honeycomb_fit_id": "modern-inner-all-sizes",
+      "ratio": 2.2359982358642974,
+      "triangular_fit_id": "historical-inner-leave-L8-out"
+    },
+    {
+      "absolute_shift_from_primary": 2.315248871287423e-06,
+      "honeycomb_fit_id": "historical-inner-all-sizes",
+      "ratio": 2.2359771889454847,
+      "triangular_fit_id": "historical-inner-leave-L10-out"
+    },
+    {
+      "absolute_shift_from_primary": 7.689308771929859e-07,
+      "honeycomb_fit_id": "historical-outer-all-sizes",
+      "ratio": 2.235980273125233,
+      "triangular_fit_id": "historical-inner-leave-L10-out"
+    },
+    {
+      "absolute_shift_from_primary": 9.10249610885927e-06,
+      "honeycomb_fit_id": "historical-inner-Lmin12",
+      "ratio": 2.235988606690465,
+      "triangular_fit_id": "historical-inner-leave-L10-out"
+    },
+    {
+      "absolute_shift_from_primary": 2.402132008771929e-05,
+      "honeycomb_fit_id": "historical-inner-Lmin14",
+      "ratio": 2.2360035255144437,
+      "triangular_fit_id": "historical-inner-leave-L10-out"
+    },
+    {
+      "absolute_shift_from_primary": 9.125190381098491e-08,
+      "honeycomb_fit_id": "historical-inner-Lmin16",
+      "ratio": 2.23597959544626,
+      "triangular_fit_id": "historical-inner-leave-L10-out"
+    },
+    {
+      "absolute_shift_from_primary": 2.8352646229468093e-05,
+      "honeycomb_fit_id": "historical-inner-Lmax28",
+      "ratio": 2.2359511515481265,
+      "triangular_fit_id": "historical-inner-leave-L10-out"
+    },
+    {
+      "absolute_shift_from_primary": 9.10249610885927e-06,
+      "honeycomb_fit_id": "historical-inner-leave-L10-out",
+      "ratio": 2.235988606690465,
+      "triangular_fit_id": "historical-inner-leave-L10-out"
+    },
+    {
+      "absolute_shift_from_primary": 2.6451425627627145e-06,
+      "honeycomb_fit_id": "historical-inner-leave-L12-out",
+      "ratio": 2.235976859051793,
+      "triangular_fit_id": "historical-inner-leave-L10-out"
+    },
+    {
+      "absolute_shift_from_primary": 2.6413686371462575e-06,
+      "honeycomb_fit_id": "historical-inner-leave-L14-out",
+      "ratio": 2.235982145562993,
+      "triangular_fit_id": "historical-inner-leave-L10-out"
+    },
+    {
+      "absolute_shift_from_primary": 5.560374477742158e-06,
+      "honeycomb_fit_id": "historical-inner-leave-L16-out",
+      "ratio": 2.2359739438198782,
+      "triangular_fit_id": "historical-inner-leave-L10-out"
+    },
+    {
+      "absolute_shift_from_primary": 7.532253024411517e-06,
+      "honeycomb_fit_id": "historical-inner-leave-L18-out",
+      "ratio": 2.2359719719413316,
+      "triangular_fit_id": "historical-inner-leave-L10-out"
+    },
+    {
+      "absolute_shift_from_primary": 1.2148969830150236e-07,
+      "honeycomb_fit_id": "historical-inner-leave-L20-out",
+      "ratio": 2.2359793827046577,
+      "triangular_fit_id": "historical-inner-leave-L10-out"
+    },
+    {
+      "absolute_shift_from_primary": 2.479623345763571e-06,
+      "honeycomb_fit_id": "historical-inner-leave-L24-out",
+      "ratio": 2.23597702457101,
+      "triangular_fit_id": "historical-inner-leave-L10-out"
+    },
+    {
+      "absolute_shift_from_primary": 9.506319321062051e-06,
+      "honeycomb_fit_id": "historical-inner-leave-L28-out",
+      "ratio": 2.235989010513677,
+      "triangular_fit_id": "historical-inner-leave-L10-out"
+    },
+    {
+      "absolute_shift_from_primary": 2.8352646229468093e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L32-out",
+      "ratio": 2.2359511515481265,
+      "triangular_fit_id": "historical-inner-leave-L10-out"
+    },
+    {
+      "absolute_shift_from_primary": 2.313188412372824e-06,
+      "honeycomb_fit_id": "historical-inner-add-c1",
+      "ratio": 2.2359771910059436,
+      "triangular_fit_id": "historical-inner-leave-L10-out"
+    },
+    {
+      "absolute_shift_from_primary": 5.29424938111589e-07,
+      "honeycomb_fit_id": "modern-inner-all-sizes",
+      "ratio": 2.235980033619294,
+      "triangular_fit_id": "historical-inner-leave-L10-out"
+    },
+    {
+      "absolute_shift_from_primary": 1.8145275637593272e-07,
+      "honeycomb_fit_id": "historical-inner-all-sizes",
+      "ratio": 2.2359793227415996,
+      "triangular_fit_id": "historical-inner-leave-L12-out"
+    },
+    {
+      "absolute_shift_from_primary": 2.902729935527759e-06,
+      "honeycomb_fit_id": "historical-outer-all-sizes",
+      "ratio": 2.2359824069242915,
+      "triangular_fit_id": "historical-inner-leave-L12-out"
+    },
+    {
+      "absolute_shift_from_primary": 1.1236303119943614e-05,
+      "honeycomb_fit_id": "historical-inner-Lmin12",
+      "ratio": 2.235990740497476,
+      "triangular_fit_id": "historical-inner-leave-L12-out"
+    },
+    {
+      "absolute_shift_from_primary": 2.615514133585961e-05,
+      "honeycomb_fit_id": "historical-inner-Lmin14",
+      "ratio": 2.236005659335692,
+      "triangular_fit_id": "historical-inner-leave-L12-out"
+    },
+    {
+      "absolute_shift_from_primary": 2.2250503155518686e-06,
+      "honeycomb_fit_id": "historical-inner-Lmin16",
+      "ratio": 2.2359817292446715,
+      "triangular_fit_id": "historical-inner-leave-L12-out"
+    },
+    {
+      "absolute_shift_from_primary": 2.6218874961791983e-05,
+      "honeycomb_fit_id": "historical-inner-Lmax28",
+      "ratio": 2.235953285319394,
+      "triangular_fit_id": "historical-inner-leave-L12-out"
+    },
+    {
+      "absolute_shift_from_primary": 1.1236303119943614e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L10-out",
+      "ratio": 2.235990740497476,
+      "triangular_fit_id": "historical-inner-leave-L12-out"
+    },
+    {
+      "absolute_shift_from_primary": 5.11346762710474e-07,
+      "honeycomb_fit_id": "historical-inner-leave-L12-out",
+      "ratio": 2.2359789928475933,
+      "triangular_fit_id": "historical-inner-leave-L12-out"
+    },
+    {
+      "absolute_shift_from_primary": 4.775169482496011e-06,
+      "honeycomb_fit_id": "historical-inner-leave-L14-out",
+      "ratio": 2.2359842793638385,
+      "triangular_fit_id": "historical-inner-leave-L12-out"
+    },
+    {
+      "absolute_shift_from_primary": 3.426581459464728e-06,
+      "honeycomb_fit_id": "historical-inner-leave-L16-out",
+      "ratio": 2.2359760776128965,
+      "triangular_fit_id": "historical-inner-leave-L12-out"
+    },
+    {
+      "absolute_shift_from_primary": 5.398461887740069e-06,
+      "honeycomb_fit_id": "historical-inner-leave-L18-out",
+      "ratio": 2.2359741057324682,
+      "triangular_fit_id": "historical-inner-leave-L12-out"
+    },
+    {
+      "absolute_shift_from_primary": 2.0123085100465232e-06,
+      "honeycomb_fit_id": "historical-inner-leave-L20-out",
+      "ratio": 2.235981516502866,
+      "triangular_fit_id": "historical-inner-leave-L12-out"
+    },
+    {
+      "absolute_shift_from_primary": 3.458273876155715e-07,
+      "honeycomb_fit_id": "historical-inner-leave-L24-out",
+      "ratio": 2.2359791583669684,
+      "triangular_fit_id": "historical-inner-leave-L12-out"
+    },
+    {
+      "absolute_shift_from_primary": 1.1640126717615829e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L28-out",
+      "ratio": 2.2359911443210736,
+      "triangular_fit_id": "historical-inner-leave-L12-out"
+    },
+    {
+      "absolute_shift_from_primary": 2.6218874961791983e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L32-out",
+      "ratio": 2.235953285319394,
+      "triangular_fit_id": "historical-inner-leave-L12-out"
+    },
+    {
+      "absolute_shift_from_primary": 1.7939229524088773e-07,
+      "honeycomb_fit_id": "historical-inner-add-c1",
+      "ratio": 2.2359793248020607,
+      "triangular_fit_id": "historical-inner-leave-L12-out"
+    },
+    {
+      "absolute_shift_from_primary": 2.6632237681845083e-06,
+      "honeycomb_fit_id": "modern-inner-all-sizes",
+      "ratio": 2.235982167418124,
+      "triangular_fit_id": "historical-inner-leave-L12-out"
+    },
+    {
+      "absolute_shift_from_primary": 4.7356142651722166e-07,
+      "honeycomb_fit_id": "historical-inner-all-sizes",
+      "ratio": 2.2359790306329295,
+      "triangular_fit_id": "historical-inner-leave-L14-out"
+    },
+    {
+      "absolute_shift_from_primary": 2.6106208621534677e-06,
+      "honeycomb_fit_id": "historical-outer-all-sizes",
+      "ratio": 2.235982114815218,
+      "triangular_fit_id": "historical-inner-leave-L14-out"
+    },
+    {
+      "absolute_shift_from_primary": 1.0944192958106669e-05,
+      "honeycomb_fit_id": "historical-inner-Lmin12",
+      "ratio": 2.235990448387314,
+      "triangular_fit_id": "historical-inner-leave-L14-out"
+    },
+    {
+      "absolute_shift_from_primary": 2.5863029225359213e-05,
+      "honeycomb_fit_id": "historical-inner-Lmin14",
+      "ratio": 2.2360053672235813,
+      "triangular_fit_id": "historical-inner-leave-L14-out"
+    },
+    {
+      "absolute_shift_from_primary": 1.932941330995419e-06,
+      "honeycomb_fit_id": "historical-inner-Lmin16",
+      "ratio": 2.235981437135687,
+      "triangular_fit_id": "historical-inner-leave-L14-out"
+    },
+    {
+      "absolute_shift_from_primary": 2.6510980230654013e-05,
+      "honeycomb_fit_id": "historical-inner-Lmax28",
+      "ratio": 2.2359529932141253,
+      "triangular_fit_id": "historical-inner-leave-L14-out"
+    },
+    {
+      "absolute_shift_from_primary": 1.0944192958106669e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L10-out",
+      "ratio": 2.235990448387314,
+      "triangular_fit_id": "historical-inner-leave-L14-out"
+    },
+    {
+      "absolute_shift_from_primary": 8.034553897751096e-07,
+      "honeycomb_fit_id": "historical-inner-leave-L12-out",
+      "ratio": 2.235978700738966,
+      "triangular_fit_id": "historical-inner-leave-L14-out"
+    },
+    {
+      "absolute_shift_from_primary": 4.483060164872654e-06,
+      "honeycomb_fit_id": "historical-inner-leave-L14-out",
+      "ratio": 2.235983987254521,
+      "triangular_fit_id": "historical-inner-leave-L14-out"
+    },
+    {
+      "absolute_shift_from_primary": 3.7186897055008217e-06,
+      "honeycomb_fit_id": "historical-inner-leave-L16-out",
+      "ratio": 2.2359757855046505,
+      "triangular_fit_id": "historical-inner-leave-L14-out"
+    },
+    {
+      "absolute_shift_from_primary": 5.690569876204421e-06,
+      "honeycomb_fit_id": "historical-inner-leave-L18-out",
+      "ratio": 2.2359738136244798,
+      "triangular_fit_id": "historical-inner-leave-L14-out"
+    },
+    {
+      "absolute_shift_from_primary": 1.720199553467694e-06,
+      "honeycomb_fit_id": "historical-inner-leave-L20-out",
+      "ratio": 2.2359812243939095,
+      "triangular_fit_id": "historical-inner-leave-L14-out"
+    },
+    {
+      "absolute_shift_from_primary": 6.379360359964892e-07,
+      "honeycomb_fit_id": "historical-inner-leave-L24-out",
+      "ratio": 2.23597886625832,
+      "triangular_fit_id": "historical-inner-leave-L14-out"
+    },
+    {
+      "absolute_shift_from_primary": 1.1348016502932268e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L28-out",
+      "ratio": 2.235990852210859,
+      "triangular_fit_id": "historical-inner-leave-L14-out"
+    },
+    {
+      "absolute_shift_from_primary": 2.6510980230654013e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L32-out",
+      "ratio": 2.2359529932141253,
+      "triangular_fit_id": "historical-inner-leave-L14-out"
+    },
+    {
+      "absolute_shift_from_primary": 4.7150096538217667e-07,
+      "honeycomb_fit_id": "historical-inner-add-c1",
+      "ratio": 2.2359790326933906,
+      "triangular_fit_id": "historical-inner-leave-L14-out"
+    },
+    {
+      "absolute_shift_from_primary": 2.3711147263405508e-06,
+      "honeycomb_fit_id": "modern-inner-all-sizes",
+      "ratio": 2.2359818753090823,
+      "triangular_fit_id": "historical-inner-leave-L14-out"
+    },
+    {
+      "absolute_shift_from_primary": 6.152754422839024e-06,
+      "honeycomb_fit_id": "historical-inner-all-sizes",
+      "ratio": 2.235973351439933,
+      "triangular_fit_id": "historical-inner-leave-L16-out"
+    },
+    {
+      "absolute_shift_from_primary": 3.0685799674579073e-06,
+      "honeycomb_fit_id": "historical-outer-all-sizes",
+      "ratio": 2.2359764356143885,
+      "triangular_fit_id": "historical-inner-leave-L16-out"
+    },
+    {
+      "absolute_shift_from_primary": 5.264970961871285e-06,
+      "honeycomb_fit_id": "historical-inner-Lmin12",
+      "ratio": 2.235984769165318,
+      "triangular_fit_id": "historical-inner-leave-L16-out"
+    },
+    {
+      "absolute_shift_from_primary": 2.018376933632382e-05,
+      "honeycomb_fit_id": "historical-inner-Lmin14",
+      "ratio": 2.2359996879636923,
+      "triangular_fit_id": "historical-inner-leave-L16-out"
+    },
+    {
+      "absolute_shift_from_primary": 3.7462577777702677e-06,
+      "honeycomb_fit_id": "historical-inner-Lmin16",
+      "ratio": 2.235975757936578,
+      "triangular_fit_id": "historical-inner-leave-L16-out"
+    },
+    {
+      "absolute_shift_from_primary": 3.219010709409886e-05,
+      "honeycomb_fit_id": "historical-inner-Lmax28",
+      "ratio": 2.235947314087262,
+      "triangular_fit_id": "historical-inner-leave-L16-out"
+    },
+    {
+      "absolute_shift_from_primary": 5.264970961871285e-06,
+      "honeycomb_fit_id": "historical-inner-leave-L10-out",
+      "ratio": 2.235984769165318,
+      "triangular_fit_id": "historical-inner-leave-L16-out"
+    },
+    {
+      "absolute_shift_from_primary": 6.482647548100573e-06,
+      "honeycomb_fit_id": "historical-inner-leave-L12-out",
+      "ratio": 2.235973021546808,
+      "triangular_fit_id": "historical-inner-leave-L16-out"
+    },
+    {
+      "absolute_shift_from_primary": 1.1961454209341582e-06,
+      "honeycomb_fit_id": "historical-inner-leave-L14-out",
+      "ratio": 2.235978308048935,
+      "triangular_fit_id": "historical-inner-leave-L16-out"
+    },
+    {
+      "absolute_shift_from_primary": 9.39787445952689e-06,
+      "honeycomb_fit_id": "historical-inner-leave-L16-out",
+      "ratio": 2.2359701063198965,
+      "triangular_fit_id": "historical-inner-leave-L16-out"
+    },
+    {
+      "absolute_shift_from_primary": 1.136974962179238e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L18-out",
+      "ratio": 2.235968134444734,
+      "triangular_fit_id": "historical-inner-leave-L16-out"
+    },
+    {
+      "absolute_shift_from_primary": 3.9589990148414245e-06,
+      "honeycomb_fit_id": "historical-inner-leave-L20-out",
+      "ratio": 2.235975545195341,
+      "triangular_fit_id": "historical-inner-leave-L16-out"
+    },
+    {
+      "absolute_shift_from_primary": 6.317128614874434e-06,
+      "honeycomb_fit_id": "historical-inner-leave-L24-out",
+      "ratio": 2.235973187065741,
+      "triangular_fit_id": "historical-inner-leave-L16-out"
+    },
+    {
+      "absolute_shift_from_primary": 5.668793480850809e-06,
+      "honeycomb_fit_id": "historical-inner-leave-L28-out",
+      "ratio": 2.235985172987837,
+      "triangular_fit_id": "historical-inner-leave-L16-out"
+    },
+    {
+      "absolute_shift_from_primary": 3.219010709409886e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L32-out",
+      "ratio": 2.235947314087262,
+      "triangular_fit_id": "historical-inner-leave-L16-out"
+    },
+    {
+      "absolute_shift_from_primary": 6.15069396703305e-06,
+      "honeycomb_fit_id": "historical-inner-add-c1",
+      "ratio": 2.235973353500389,
+      "triangular_fit_id": "historical-inner-leave-L16-out"
+    },
+    {
+      "absolute_shift_from_primary": 3.308085495312696e-06,
+      "honeycomb_fit_id": "modern-inner-all-sizes",
+      "ratio": 2.2359761961088607,
+      "triangular_fit_id": "historical-inner-leave-L16-out"
+    },
+    {
+      "absolute_shift_from_primary": 9.042399986114447e-06,
+      "honeycomb_fit_id": "historical-inner-all-sizes",
+      "ratio": 2.23597046179437,
+      "triangular_fit_id": "historical-inner-leave-L18-out"
+    },
+    {
+      "absolute_shift_from_primary": 5.958229516433988e-06,
+      "honeycomb_fit_id": "historical-outer-all-sizes",
+      "ratio": 2.2359735459648395,
+      "triangular_fit_id": "historical-inner-leave-L18-out"
+    },
+    {
+      "absolute_shift_from_primary": 2.3753106432877757e-06,
+      "honeycomb_fit_id": "historical-inner-Lmin12",
+      "ratio": 2.2359818795049993,
+      "triangular_fit_id": "historical-inner-leave-L18-out"
+    },
+    {
+      "absolute_shift_from_primary": 1.7294089737163176e-05,
+      "honeycomb_fit_id": "historical-inner-Lmin14",
+      "ratio": 2.235996798284093,
+      "triangular_fit_id": "historical-inner-leave-L18-out"
+    },
+    {
+      "absolute_shift_from_primary": 6.635906451002427e-06,
+      "honeycomb_fit_id": "historical-inner-Lmin16",
+      "ratio": 2.235972868287905,
+      "triangular_fit_id": "historical-inner-leave-L18-out"
+    },
+    {
+      "absolute_shift_from_primary": 3.507971900784668e-05,
+      "honeycomb_fit_id": "historical-inner-Lmax28",
+      "ratio": 2.235944424475348,
+      "triangular_fit_id": "historical-inner-leave-L18-out"
+    },
+    {
+      "absolute_shift_from_primary": 2.3753106432877757e-06,
+      "honeycomb_fit_id": "historical-inner-leave-L10-out",
+      "ratio": 2.2359818795049993,
+      "triangular_fit_id": "historical-inner-leave-L18-out"
+    },
+    {
+      "absolute_shift_from_primary": 9.372292684606265e-06,
+      "honeycomb_fit_id": "historical-inner-leave-L12-out",
+      "ratio": 2.2359701319016714,
+      "triangular_fit_id": "historical-inner-leave-L18-out"
+    },
+    {
+      "absolute_shift_from_primary": 4.085797389752344e-06,
+      "honeycomb_fit_id": "historical-inner-leave-L14-out",
+      "ratio": 2.2359754183969662,
+      "triangular_fit_id": "historical-inner-leave-L18-out"
+    },
+    {
+      "absolute_shift_from_primary": 1.2287515828823814e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L16-out",
+      "ratio": 2.235967216678527,
+      "triangular_fit_id": "historical-inner-leave-L18-out"
+    },
+    {
+      "absolute_shift_from_primary": 1.4259388442905419e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L18-out",
+      "ratio": 2.235965244805913,
+      "triangular_fit_id": "historical-inner-leave-L18-out"
+    },
+    {
+      "absolute_shift_from_primary": 6.848647413182363e-06,
+      "honeycomb_fit_id": "historical-inner-leave-L20-out",
+      "ratio": 2.235972655546943,
+      "triangular_fit_id": "historical-inner-leave-L18-out"
+    },
+    {
+      "absolute_shift_from_primary": 9.206773965431125e-06,
+      "honeycomb_fit_id": "historical-inner-leave-L24-out",
+      "ratio": 2.2359702974203906,
+      "triangular_fit_id": "historical-inner-leave-L18-out"
+    },
+    {
+      "absolute_shift_from_primary": 2.7791326404624783e-06,
+      "honeycomb_fit_id": "historical-inner-leave-L28-out",
+      "ratio": 2.2359822833269964,
+      "triangular_fit_id": "historical-inner-leave-L18-out"
+    },
+    {
+      "absolute_shift_from_primary": 3.507971900784668e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L32-out",
+      "ratio": 2.235944424475348,
+      "triangular_fit_id": "historical-inner-leave-L18-out"
+    },
+    {
+      "absolute_shift_from_primary": 9.040339532973007e-06,
+      "honeycomb_fit_id": "historical-inner-add-c1",
+      "ratio": 2.235970463854823,
+      "triangular_fit_id": "historical-inner-leave-L18-out"
+    },
+    {
+      "absolute_shift_from_primary": 6.197734734758598e-06,
+      "honeycomb_fit_id": "modern-inner-all-sizes",
+      "ratio": 2.2359733064596212,
+      "triangular_fit_id": "historical-inner-leave-L18-out"
+    },
+    {
+      "absolute_shift_from_primary": 1.1244712410096724e-06,
+      "honeycomb_fit_id": "historical-inner-all-sizes",
+      "ratio": 2.235980628665597,
+      "triangular_fit_id": "historical-inner-leave-L20-out"
+    },
+    {
+      "absolute_shift_from_primary": 4.2086557341391995e-06,
+      "honeycomb_fit_id": "historical-outer-all-sizes",
+      "ratio": 2.23598371285009,
+      "triangular_fit_id": "historical-inner-leave-L20-out"
+    },
+    {
+      "absolute_shift_from_primary": 1.2542233785772794e-05,
+      "honeycomb_fit_id": "historical-inner-Lmin12",
+      "ratio": 2.2359920464281418,
+      "triangular_fit_id": "historical-inner-leave-L20-out"
+    },
+    {
+      "absolute_shift_from_primary": 2.7461080715163178e-05,
+      "honeycomb_fit_id": "historical-inner-Lmin14",
+      "ratio": 2.236006965275071,
+      "triangular_fit_id": "historical-inner-leave-L20-out"
+    },
+    {
+      "absolute_shift_from_primary": 3.5309757180357337e-06,
+      "honeycomb_fit_id": "historical-inner-Lmin16",
+      "ratio": 2.235983035170074,
+      "triangular_fit_id": "historical-inner-leave-L20-out"
+    },
+    {
+      "absolute_shift_from_primary": 2.491296617179728e-05,
+      "honeycomb_fit_id": "historical-inner-Lmax28",
+      "ratio": 2.235954591228184,
+      "triangular_fit_id": "historical-inner-leave-L20-out"
+    },
+    {
+      "absolute_shift_from_primary": 1.2542233785772794e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L10-out",
+      "ratio": 2.2359920464281418,
+      "triangular_fit_id": "historical-inner-leave-L20-out"
+    },
+    {
+      "absolute_shift_from_primary": 7.945770419404141e-07,
+      "honeycomb_fit_id": "historical-inner-leave-L12-out",
+      "ratio": 2.235980298771398,
+      "triangular_fit_id": "historical-inner-leave-L20-out"
+    },
+    {
+      "absolute_shift_from_primary": 6.081096374899175e-06,
+      "honeycomb_fit_id": "historical-inner-leave-L14-out",
+      "ratio": 2.235985585290731,
+      "triangular_fit_id": "historical-inner-leave-L20-out"
+    },
+    {
+      "absolute_shift_from_primary": 2.1206593574518706e-06,
+      "honeycomb_fit_id": "historical-inner-leave-L16-out",
+      "ratio": 2.2359773835349985,
+      "triangular_fit_id": "historical-inner-leave-L20-out"
+    },
+    {
+      "absolute_shift_from_primary": 4.092540937250533e-06,
+      "honeycomb_fit_id": "historical-inner-leave-L18-out",
+      "ratio": 2.2359754116534187,
+      "triangular_fit_id": "historical-inner-leave-L20-out"
+    },
+    {
+      "absolute_shift_from_primary": 3.318233788629499e-06,
+      "honeycomb_fit_id": "historical-inner-leave-L20-out",
+      "ratio": 2.2359828224281446,
+      "triangular_fit_id": "historical-inner-leave-L20-out"
+    },
+    {
+      "absolute_shift_from_primary": 9.600965138467643e-07,
+      "honeycomb_fit_id": "historical-inner-leave-L24-out",
+      "ratio": 2.23598046429087,
+      "triangular_fit_id": "historical-inner-leave-L20-out"
+    },
+    {
+      "absolute_shift_from_primary": 1.294605761925638e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L28-out",
+      "ratio": 2.2359924502519752,
+      "triangular_fit_id": "historical-inner-leave-L20-out"
+    },
+    {
+      "absolute_shift_from_primary": 2.491296617179728e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L32-out",
+      "ratio": 2.235954591228184,
+      "triangular_fit_id": "historical-inner-leave-L20-out"
+    },
+    {
+      "absolute_shift_from_primary": 1.126531703476985e-06,
+      "honeycomb_fit_id": "historical-inner-add-c1",
+      "ratio": 2.2359806307260595,
+      "triangular_fit_id": "historical-inner-leave-L20-out"
+    },
+    {
+      "absolute_shift_from_primary": 3.9691494269078476e-06,
+      "honeycomb_fit_id": "modern-inner-all-sizes",
+      "ratio": 2.235983473343783,
+      "triangular_fit_id": "historical-inner-leave-L20-out"
+    },
+    {
+      "absolute_shift_from_primary": 3.8082411486506373e-06,
+      "honeycomb_fit_id": "historical-inner-all-sizes",
+      "ratio": 2.2359833124355046,
+      "triangular_fit_id": "historical-inner-leave-L24-out"
+    },
+    {
+      "absolute_shift_from_primary": 6.8924293432637285e-06,
+      "honeycomb_fit_id": "historical-outer-all-sizes",
+      "ratio": 2.2359863966236992,
+      "triangular_fit_id": "historical-inner-leave-L24-out"
+    },
+    {
+      "absolute_shift_from_primary": 1.5226017398006775e-05,
+      "honeycomb_fit_id": "historical-inner-Lmin12",
+      "ratio": 2.235994730211754,
+      "triangular_fit_id": "historical-inner-leave-L24-out"
+    },
+    {
+      "absolute_shift_from_primary": 3.014488223351819e-05,
+      "honeycomb_fit_id": "historical-inner-Lmin14",
+      "ratio": 2.2360096490765895,
+      "triangular_fit_id": "historical-inner-leave-L24-out"
+    },
+    {
+      "absolute_shift_from_primary": 6.214748514477009e-06,
+      "honeycomb_fit_id": "historical-inner-Lmin16",
+      "ratio": 2.2359857189428705,
+      "triangular_fit_id": "historical-inner-leave-L24-out"
+    },
+    {
+      "absolute_shift_from_primary": 2.222922751604628e-05,
+      "honeycomb_fit_id": "historical-inner-Lmax28",
+      "ratio": 2.23595727496684,
+      "triangular_fit_id": "historical-inner-leave-L24-out"
+    },
+    {
+      "absolute_shift_from_primary": 1.5226017398006775e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L10-out",
+      "ratio": 2.235994730211754,
+      "triangular_fit_id": "historical-inner-leave-L24-out"
+    },
+    {
+      "absolute_shift_from_primary": 3.478346553897893e-06,
+      "honeycomb_fit_id": "historical-inner-leave-L12-out",
+      "ratio": 2.23598298254091,
+      "triangular_fit_id": "historical-inner-leave-L24-out"
+    },
+    {
+      "absolute_shift_from_primary": 8.764872231559195e-06,
+      "honeycomb_fit_id": "historical-inner-leave-L14-out",
+      "ratio": 2.2359882690665875,
+      "triangular_fit_id": "historical-inner-leave-L24-out"
+    },
+    {
+      "absolute_shift_from_primary": 5.631066550826347e-07,
+      "honeycomb_fit_id": "historical-inner-leave-L16-out",
+      "ratio": 2.235980067301011,
+      "triangular_fit_id": "historical-inner-leave-L24-out"
+    },
+    {
+      "absolute_shift_from_primary": 1.408777291711516e-06,
+      "honeycomb_fit_id": "historical-inner-leave-L18-out",
+      "ratio": 2.2359780954170643,
+      "triangular_fit_id": "historical-inner-leave-L24-out"
+    },
+    {
+      "absolute_shift_from_primary": 6.002006329719478e-06,
+      "honeycomb_fit_id": "historical-inner-leave-L20-out",
+      "ratio": 2.2359855062006857,
+      "triangular_fit_id": "historical-inner-leave-L24-out"
+    },
+    {
+      "absolute_shift_from_primary": 3.64386622431212e-06,
+      "honeycomb_fit_id": "historical-inner-leave-L24-out",
+      "ratio": 2.2359831480605803,
+      "triangular_fit_id": "historical-inner-leave-L24-out"
+    },
+    {
+      "absolute_shift_from_primary": 1.5629841715991688e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L28-out",
+      "ratio": 2.235995134036072,
+      "triangular_fit_id": "historical-inner-leave-L24-out"
+    },
+    {
+      "absolute_shift_from_primary": 2.222922751604628e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L32-out",
+      "ratio": 2.23595727496684,
+      "triangular_fit_id": "historical-inner-leave-L24-out"
+    },
+    {
+      "absolute_shift_from_primary": 3.810301613338396e-06,
+      "honeycomb_fit_id": "historical-inner-add-c1",
+      "ratio": 2.2359833144959693,
+      "triangular_fit_id": "historical-inner-leave-L24-out"
+    },
+    {
+      "absolute_shift_from_primary": 6.652922748706658e-06,
+      "honeycomb_fit_id": "modern-inner-all-sizes",
+      "ratio": 2.2359861571171047,
+      "triangular_fit_id": "historical-inner-leave-L24-out"
+    },
+    {
+      "absolute_shift_from_primary": 3.2634428186462117e-06,
+      "honeycomb_fit_id": "historical-inner-all-sizes",
+      "ratio": 2.2359762407515373,
+      "triangular_fit_id": "historical-inner-leave-L28-out"
+    },
+    {
+      "absolute_shift_from_primary": 1.7926437800852568e-07,
+      "honeycomb_fit_id": "historical-outer-all-sizes",
+      "ratio": 2.235979324929978,
+      "triangular_fit_id": "historical-inner-leave-L28-out"
+    },
+    {
+      "absolute_shift_from_primary": 8.154297320039916e-06,
+      "honeycomb_fit_id": "historical-inner-Lmin12",
+      "ratio": 2.235987658491676,
+      "triangular_fit_id": "historical-inner-leave-L28-out"
+    },
+    {
+      "absolute_shift_from_primary": 2.307311497240505e-05,
+      "honeycomb_fit_id": "historical-inner-Lmin14",
+      "ratio": 2.2360025773093284,
+      "triangular_fit_id": "historical-inner-leave-L28-out"
+    },
+    {
+      "absolute_shift_from_primary": 8.569430640648079e-07,
+      "honeycomb_fit_id": "historical-inner-Lmin16",
+      "ratio": 2.235978647251292,
+      "triangular_fit_id": "historical-inner-leave-L28-out"
+    },
+    {
+      "absolute_shift_from_primary": 2.9300829135436857e-05,
+      "honeycomb_fit_id": "historical-inner-Lmax28",
+      "ratio": 2.2359502033652205,
+      "triangular_fit_id": "historical-inner-leave-L28-out"
+    },
+    {
+      "absolute_shift_from_primary": 8.154297320039916e-06,
+      "honeycomb_fit_id": "historical-inner-leave-L10-out",
+      "ratio": 2.235987658491676,
+      "triangular_fit_id": "historical-inner-leave-L28-out"
+    },
+    {
+      "absolute_shift_from_primary": 3.593336370233402e-06,
+      "honeycomb_fit_id": "historical-inner-leave-L12-out",
+      "ratio": 2.2359759108579857,
+      "triangular_fit_id": "historical-inner-leave-L28-out"
+    },
+    {
+      "absolute_shift_from_primary": 1.6931725883573279e-06,
+      "honeycomb_fit_id": "historical-inner-leave-L14-out",
+      "ratio": 2.2359811973669443,
+      "triangular_fit_id": "historical-inner-leave-L28-out"
+    },
+    {
+      "absolute_shift_from_primary": 6.5085670488684855e-06,
+      "honeycomb_fit_id": "historical-inner-leave-L16-out",
+      "ratio": 2.235972995627307,
+      "triangular_fit_id": "historical-inner-leave-L28-out"
+    },
+    {
+      "absolute_shift_from_primary": 8.480444759317862e-06,
+      "honeycomb_fit_id": "historical-inner-leave-L18-out",
+      "ratio": 2.2359710237495967,
+      "triangular_fit_id": "historical-inner-leave-L28-out"
+    },
+    {
+      "absolute_shift_from_primary": 1.0696845760271856e-06,
+      "honeycomb_fit_id": "historical-inner-leave-L20-out",
+      "ratio": 2.23597843450978,
+      "triangular_fit_id": "historical-inner-leave-L28-out"
+    },
+    {
+      "absolute_shift_from_primary": 3.4278172234003534e-06,
+      "honeycomb_fit_id": "historical-inner-leave-L24-out",
+      "ratio": 2.2359760763771326,
+      "triangular_fit_id": "historical-inner-leave-L28-out"
+    },
+    {
+      "absolute_shift_from_primary": 8.558120360824262e-06,
+      "honeycomb_fit_id": "historical-inner-leave-L28-out",
+      "ratio": 2.235988062314717,
+      "triangular_fit_id": "historical-inner-leave-L28-out"
+    },
+    {
+      "absolute_shift_from_primary": 2.9300829135436857e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L32-out",
+      "ratio": 2.2359502033652205,
+      "triangular_fit_id": "historical-inner-leave-L28-out"
+    },
+    {
+      "absolute_shift_from_primary": 3.261382360175702e-06,
+      "honeycomb_fit_id": "historical-inner-add-c1",
+      "ratio": 2.235976242811996,
+      "triangular_fit_id": "historical-inner-leave-L28-out"
+    },
+    {
+      "absolute_shift_from_primary": 4.1877021539349357e-07,
+      "honeycomb_fit_id": "modern-inner-all-sizes",
+      "ratio": 2.2359790854241406,
+      "triangular_fit_id": "historical-inner-leave-L28-out"
+    },
+    {
+      "absolute_shift_from_primary": 6.924380680395359e-06,
+      "honeycomb_fit_id": "historical-inner-all-sizes",
+      "ratio": 2.2359864285750364,
+      "triangular_fit_id": "historical-inner-leave-L32-out"
+    },
+    {
+      "absolute_shift_from_primary": 1.0008573173347912e-05,
+      "honeycomb_fit_id": "historical-outer-all-sizes",
+      "ratio": 2.2359895127675293,
+      "triangular_fit_id": "historical-inner-leave-L32-out"
+    },
+    {
+      "absolute_shift_from_primary": 1.8342172841911975e-05,
+      "honeycomb_fit_id": "historical-inner-Lmin12",
+      "ratio": 2.235997846367198,
+      "triangular_fit_id": "historical-inner-leave-L32-out"
+    },
+    {
+      "absolute_shift_from_primary": 3.3261058469236104e-05,
+      "honeycomb_fit_id": "historical-inner-Lmin14",
+      "ratio": 2.236012765252825,
+      "triangular_fit_id": "historical-inner-leave-L32-out"
+    },
+    {
+      "absolute_shift_from_primary": 9.330891399983443e-06,
+      "honeycomb_fit_id": "historical-inner-Lmin16",
+      "ratio": 2.235988835085756,
+      "triangular_fit_id": "historical-inner-leave-L32-out"
+    },
+    {
+      "absolute_shift_from_primary": 1.9113124270830895e-05,
+      "honeycomb_fit_id": "historical-inner-Lmax28",
+      "ratio": 2.235960391070085,
+      "triangular_fit_id": "historical-inner-leave-L32-out"
+    },
+    {
+      "absolute_shift_from_primary": 1.8342172841911975e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L10-out",
+      "ratio": 2.235997846367198,
+      "triangular_fit_id": "historical-inner-leave-L32-out"
+    },
+    {
+      "absolute_shift_from_primary": 6.5944856260102824e-06,
+      "honeycomb_fit_id": "historical-inner-leave-L12-out",
+      "ratio": 2.235986098679982,
+      "triangular_fit_id": "historical-inner-leave-L32-out"
+    },
+    {
+      "absolute_shift_from_primary": 1.1881018671111576e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L14-out",
+      "ratio": 2.235991385213027,
+      "triangular_fit_id": "historical-inner-leave-L32-out"
+    },
+    {
+      "absolute_shift_from_primary": 3.6792416646669324e-06,
+      "honeycomb_fit_id": "historical-inner-leave-L16-out",
+      "ratio": 2.2359831834360206,
+      "triangular_fit_id": "historical-inner-leave-L32-out"
+    },
+    {
+      "absolute_shift_from_primary": 1.707354969404662e-06,
+      "honeycomb_fit_id": "historical-inner-leave-L18-out",
+      "ratio": 2.2359812115493254,
+      "triangular_fit_id": "historical-inner-leave-L32-out"
+    },
+    {
+      "absolute_shift_from_primary": 9.11814891857432e-06,
+      "honeycomb_fit_id": "historical-inner-leave-L20-out",
+      "ratio": 2.2359886223432746,
+      "triangular_fit_id": "historical-inner-leave-L32-out"
+    },
+    {
+      "absolute_shift_from_primary": 6.760005526906809e-06,
+      "honeycomb_fit_id": "historical-inner-leave-L24-out",
+      "ratio": 2.235986264199883,
+      "triangular_fit_id": "historical-inner-leave-L32-out"
+    },
+    {
+      "absolute_shift_from_primary": 1.8745997723002006e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L28-out",
+      "ratio": 2.235998250192079,
+      "triangular_fit_id": "historical-inner-leave-L32-out"
+    },
+    {
+      "absolute_shift_from_primary": 1.9113124270830895e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L32-out",
+      "ratio": 2.235960391070085,
+      "triangular_fit_id": "historical-inner-leave-L32-out"
+    },
+    {
+      "absolute_shift_from_primary": 6.926441148191742e-06,
+      "honeycomb_fit_id": "historical-inner-add-c1",
+      "ratio": 2.235986430635504,
+      "triangular_fit_id": "historical-inner-leave-L32-out"
+    },
+    {
+      "absolute_shift_from_primary": 9.769066245279845e-06,
+      "honeycomb_fit_id": "modern-inner-all-sizes",
+      "ratio": 2.2359892732606013,
+      "triangular_fit_id": "historical-inner-leave-L32-out"
+    },
+    {
+      "absolute_shift_from_primary": 1.6331737251462641e-07,
+      "honeycomb_fit_id": "historical-inner-all-sizes",
+      "ratio": 2.2359793408769835,
+      "triangular_fit_id": "historical-inner-add-c1"
+    },
+    {
+      "absolute_shift_from_primary": 2.9208653442580612e-06,
+      "honeycomb_fit_id": "historical-outer-all-sizes",
+      "ratio": 2.2359824250597002,
+      "triangular_fit_id": "historical-inner-add-c1"
+    },
+    {
+      "absolute_shift_from_primary": 1.1254438596619565e-05,
+      "honeycomb_fit_id": "historical-inner-Lmin12",
+      "ratio": 2.2359907586329526,
+      "triangular_fit_id": "historical-inner-add-c1"
+    },
+    {
+      "absolute_shift_from_primary": 2.6173276933327827e-05,
+      "honeycomb_fit_id": "historical-inner-Lmin14",
+      "ratio": 2.2360056774712893,
+      "triangular_fit_id": "historical-inner-add-c1"
+    },
+    {
+      "absolute_shift_from_primary": 2.2431857189531e-06,
+      "honeycomb_fit_id": "historical-inner-Lmin16",
+      "ratio": 2.235981747380075,
+      "triangular_fit_id": "historical-inner-add-c1"
+    },
+    {
+      "absolute_shift_from_primary": 2.620073978931714e-05,
+      "honeycomb_fit_id": "historical-inner-Lmax28",
+      "ratio": 2.2359533034545667,
+      "triangular_fit_id": "historical-inner-add-c1"
+    },
+    {
+      "absolute_shift_from_primary": 1.1254438596619565e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L10-out",
+      "ratio": 2.2359907586329526,
+      "triangular_fit_id": "historical-inner-add-c1"
+    },
+    {
+      "absolute_shift_from_primary": 4.932113810696137e-07,
+      "honeycomb_fit_id": "historical-inner-leave-L12-out",
+      "ratio": 2.235979010982975,
+      "triangular_fit_id": "historical-inner-add-c1"
+    },
+    {
+      "absolute_shift_from_primary": 4.7933049067694355e-06,
+      "honeycomb_fit_id": "historical-inner-leave-L14-out",
+      "ratio": 2.2359842974992628,
+      "triangular_fit_id": "historical-inner-add-c1"
+    },
+    {
+      "absolute_shift_from_primary": 3.4084461018046852e-06,
+      "honeycomb_fit_id": "historical-inner-leave-L16-out",
+      "ratio": 2.235976095748254,
+      "triangular_fit_id": "historical-inner-add-c1"
+    },
+    {
+      "absolute_shift_from_primary": 5.380326546067238e-06,
+      "honeycomb_fit_id": "historical-inner-leave-L18-out",
+      "ratio": 2.23597412386781,
+      "triangular_fit_id": "historical-inner-add-c1"
+    },
+    {
+      "absolute_shift_from_primary": 2.030443912115487e-06,
+      "honeycomb_fit_id": "historical-inner-leave-L20-out",
+      "ratio": 2.235981534638268,
+      "triangular_fit_id": "historical-inner-add-c1"
+    },
+    {
+      "absolute_shift_from_primary": 3.2769200464244364e-07,
+      "honeycomb_fit_id": "historical-inner-leave-L24-out",
+      "ratio": 2.2359791765023513,
+      "triangular_fit_id": "historical-inner-add-c1"
+    },
+    {
+      "absolute_shift_from_primary": 1.1658262197400404e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L28-out",
+      "ratio": 2.2359911624565534,
+      "triangular_fit_id": "historical-inner-add-c1"
+    },
+    {
+      "absolute_shift_from_primary": 2.620073978931714e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L32-out",
+      "ratio": 2.2359533034545667,
+      "triangular_fit_id": "historical-inner-add-c1"
+    },
+    {
+      "absolute_shift_from_primary": 1.6125691093549221e-07,
+      "honeycomb_fit_id": "historical-inner-add-c1",
+      "ratio": 2.235979342937445,
+      "triangular_fit_id": "historical-inner-add-c1"
+    },
+    {
+      "absolute_shift_from_primary": 2.6813591751384536e-06,
+      "honeycomb_fit_id": "modern-inner-all-sizes",
+      "ratio": 2.235982185553531,
+      "triangular_fit_id": "historical-inner-add-c1"
+    },
+    {
+      "absolute_shift_from_primary": 1.6400648732428635e-06,
+      "honeycomb_fit_id": "historical-inner-all-sizes",
+      "ratio": 2.2359778641294827,
+      "triangular_fit_id": "modern-inner-all-sizes"
+    },
+    {
+      "absolute_shift_from_primary": 1.4441158064926185e-06,
+      "honeycomb_fit_id": "historical-outer-all-sizes",
+      "ratio": 2.2359809483101625,
+      "triangular_fit_id": "modern-inner-all-sizes"
+    },
+    {
+      "absolute_shift_from_primary": 9.777683554812455e-06,
+      "honeycomb_fit_id": "historical-inner-Lmin12",
+      "ratio": 2.235989281877911,
+      "triangular_fit_id": "modern-inner-all-sizes"
+    },
+    {
+      "absolute_shift_from_primary": 2.469651203851342e-05,
+      "honeycomb_fit_id": "historical-inner-Lmin14",
+      "ratio": 2.2360042007063945,
+      "triangular_fit_id": "modern-inner-all-sizes"
+    },
+    {
+      "absolute_shift_from_primary": 7.66436628829581e-07,
+      "honeycomb_fit_id": "historical-inner-Lmin16",
+      "ratio": 2.235980270630985,
+      "triangular_fit_id": "modern-inner-all-sizes"
+    },
+    {
+      "absolute_shift_from_primary": 2.7677470093578904e-05,
+      "honeycomb_fit_id": "historical-inner-Lmax28",
+      "ratio": 2.2359518267242624,
+      "triangular_fit_id": "modern-inner-all-sizes"
+    },
+    {
+      "absolute_shift_from_primary": 9.777683554812455e-06,
+      "honeycomb_fit_id": "historical-inner-leave-L10-out",
+      "ratio": 2.235989281877911,
+      "triangular_fit_id": "modern-inner-all-sizes"
+    },
+    {
+      "absolute_shift_from_primary": 1.969958664194138e-06,
+      "honeycomb_fit_id": "historical-inner-leave-L12-out",
+      "ratio": 2.235977534235692,
+      "triangular_fit_id": "modern-inner-all-sizes"
+    },
+    {
+      "absolute_shift_from_primary": 3.3165541322155434e-06,
+      "honeycomb_fit_id": "historical-inner-leave-L14-out",
+      "ratio": 2.235982820748488,
+      "triangular_fit_id": "modern-inner-all-sizes"
+    },
+    {
+      "absolute_shift_from_primary": 4.885191459358396e-06,
+      "honeycomb_fit_id": "historical-inner-leave-L16-out",
+      "ratio": 2.2359746190028966,
+      "triangular_fit_id": "modern-inner-all-sizes"
+    },
+    {
+      "absolute_shift_from_primary": 6.857070601551385e-06,
+      "honeycomb_fit_id": "historical-inner-leave-L18-out",
+      "ratio": 2.2359726471237544,
+      "triangular_fit_id": "modern-inner-all-sizes"
+    },
+    {
+      "absolute_shift_from_primary": 5.536949623241583e-07,
+      "honeycomb_fit_id": "historical-inner-leave-L20-out",
+      "ratio": 2.2359800578893183,
+      "triangular_fit_id": "modern-inner-all-sizes"
+    },
+    {
+      "absolute_shift_from_primary": 1.8044393970129136e-06,
+      "honeycomb_fit_id": "historical-inner-leave-L24-out",
+      "ratio": 2.235977699754959,
+      "triangular_fit_id": "modern-inner-all-sizes"
+    },
+    {
+      "absolute_shift_from_primary": 1.0181506889139769e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L28-out",
+      "ratio": 2.235989685701245,
+      "triangular_fit_id": "modern-inner-all-sizes"
+    },
+    {
+      "absolute_shift_from_primary": 2.7677470093578904e-05,
+      "honeycomb_fit_id": "historical-inner-leave-L32-out",
+      "ratio": 2.2359518267242624,
+      "triangular_fit_id": "modern-inner-all-sizes"
+    },
+    {
+      "absolute_shift_from_primary": 1.6380044134400862e-06,
+      "honeycomb_fit_id": "historical-inner-add-c1",
+      "ratio": 2.2359778661899425,
+      "triangular_fit_id": "modern-inner-all-sizes"
+    },
+    {
+      "absolute_shift_from_primary": 1.2046097954687696e-06,
+      "honeycomb_fit_id": "modern-inner-all-sizes",
+      "ratio": 2.2359807088041515,
+      "triangular_fit_id": "modern-inner-all-sizes"
+    }
+  ],
+  "cross_method_check": {
+    "delta_sqrt5": -4.833328323305963e-05,
+    "implementation_id": "ALPS-looper-continuous-time-QMC",
+    "lattices": {
+      "honeycomb": {
+        "combined_sigma": 0.0002466440499059633,
+        "delta": 3.4423903557900815e-05,
+        "independent": 2.132459978101218,
+        "independent_sigma_total": 0.000244788892015364,
+        "passed_2sigma": true,
+        "primary": 2.132494402004776,
+        "primary_sigma_total": 3.0194133534608554e-05,
+        "z_combined": 0.13956916281185555
+      },
+      "triangular": {
+        "combined_sigma": 0.00036131228115071726,
+        "delta": -8.625848052723484e-06,
+        "independent": 4.768222401539932,
+        "independent_sigma_total": 0.00021928524857973324,
+        "passed_2sigma": true,
+        "primary": 4.768213775691879,
+        "primary_sigma_total": 0.0002871594404954494,
+        "z_combined": 0.023873664147954356
+      }
+    },
+    "note": "Independent-route systematic ratio uncertainty is a conservative delta-method approximation from its two single-lattice envelopes.",
+    "passed_2sigma_both_lattices": true,
+    "production_result": false,
+    "ratio": 2.2360196442165567,
+    "ratio_sigma_stat": 0.00010615680675215703,
+    "ratio_sigma_sys_approximate": 0.00025531958084773634,
+    "ratio_sigma_total_approximate": 0.000276509233090106,
+    "same_delta_sign": true
+  },
+  "data_class": "baseline",
+  "delta_sqrt5": -8.84733054338227e-05,
+  "eligible_for_final_verdict": false,
+  "gates": {
+    "final_production_data": false,
+    "independent_route_passed_2sigma": true,
+    "pilot_promotion_ready": false,
+    "target_sigma_R_le_1_2e_5": false,
+    "technical_ready": true
+  },
+  "inputs": {
+    "honeycomb_robustness": {
+      "path": "data/processed/20260729-honeycomb-narrow-baseline/attempt-056-parallel/robustness.csv",
+      "sha256": "3fa9f0d0b845fc86d3451aa774ca378b1119a3a48c6e7c9e45ab1d5094ffddbf"
+    },
+    "honeycomb_summary": {
+      "path": "data/processed/reference-inputs/honeycomb-attempt-056-summary.json",
+      "sha256": "134473a8a1ea5fa8158b5cdec1bbccc7e3b501d6ea4cfc069155d19c3402c3a4"
+    },
+    "independent_summary": {
+      "path": "data/processed/reference-inputs/independent-attempt-067-summary.json",
+      "sha256": "a0714b357b0ce46be81e7b86b2712aafb6a3deb61cd03bedc30432a103f7d9da"
+    },
+    "triangle_robustness": {
+      "path": "data/processed/20260729-triangular-narrow-baseline/attempt-075-full/robustness.csv",
+      "sha256": "25bb75672106e864e2616599e194f1c040298831f36a181a685da9ba082b98c4"
+    },
+    "triangle_summary": {
+      "path": "data/processed/20260729-triangular-narrow-baseline/attempt-075-full/summary.json",
+      "sha256": "d6eae8a205261b95e6555f35fa12ec4e7bfe8751a3f28e5a74af24085fcc7268"
+    }
+  },
+  "lattices": {
+    "honeycomb": {
+      "path": "/Users/thom/Desktop/Hackathon/yanwang-148-research/.worktrees/attempt-075/data/processed/reference-inputs/honeycomb-attempt-056-summary.json",
+      "pilot_promotion_gate": false,
+      "primary_gate": true,
+      "run_id": "20260729-122148-blote-deng-honeycomb-narrow-baseline",
+      "sha256": "134473a8a1ea5fa8158b5cdec1bbccc7e3b501d6ea4cfc069155d19c3402c3a4",
+      "sigma_stat": 1.6757151341977625e-05,
+      "sigma_sys": 2.5117395940021936e-05,
+      "technical_gate": true,
+      "value": 2.132494402004776
+    },
+    "triangular": {
+      "path": "/Users/thom/Desktop/Hackathon/yanwang-148-research/.worktrees/attempt-075/data/processed/20260729-triangular-narrow-baseline/attempt-075-full/summary.json",
+      "pilot_promotion_gate": false,
+      "primary_gate": true,
+      "run_id": "20260729-blote-deng-triangular-narrow-baseline",
+      "sha256": "d6eae8a205261b95e6555f35fa12ec4e7bfe8751a3f28e5a74af24085fcc7268",
+      "sigma_stat": 6.397748100051347e-05,
+      "sigma_sys": 0.00027994182643986676,
+      "technical_gate": true,
+      "value": 4.768213775691879
+    }
+  },
+  "ratio": 2.235979504194356,
+  "schema_version": "yanwang148.baseline-ratio.v1",
+  "sigma_stat": 3.476767610689855e-05,
+  "sigma_sys": 0.00015731025032161838,
+  "sigma_total": 0.0001611065056356336,
+  "sqrt5": 2.23606797749979,
+  "systematic_rule": "maximum absolute ratio shift over the Cartesian product of all accepted frozen single-lattice fit variants",
+  "verdict": "inconclusive",
+  "verdict_reason": "Baseline-only data cannot trigger the preregistered final verdict; at least one pilot-promotion gate is also false.",
+  "z_abs_baseline_only": 0.5491603525553356
+}
