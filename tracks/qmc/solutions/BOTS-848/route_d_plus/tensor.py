@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import math
 from collections.abc import Callable
-from functools import lru_cache
+from functools import cache
 
 import numpy as np
 from scipy.linalg import expm
@@ -43,7 +43,7 @@ def _validate_rank_component(two_j: int, ell: int, m: int) -> tuple[int, int]:
     return ell_value, m_value
 
 
-@lru_cache(maxsize=None)
+@cache
 def _canonical_tensor_cached(two_j: int, ell: int, m: int) -> np.ndarray:
     dimension = two_j + 1
     raw = np.zeros((dimension, dimension), dtype=np.complex128)
