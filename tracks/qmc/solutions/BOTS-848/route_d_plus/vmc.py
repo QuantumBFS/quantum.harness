@@ -37,6 +37,26 @@ class SRTrace:
     step_norms: np.ndarray
 
 
+@dataclass(frozen=True)
+class DelayedChainResult:
+    samples: np.ndarray
+    channel_values: np.ndarray
+    final_configuration: np.ndarray
+    accepted_corrections: int
+    proposed_corrections: int
+    accepted_mother_moves: int
+    proposed_mother_moves: int
+    global_rotation_residual: float
+
+    @property
+    def correction_acceptance(self) -> float:
+        return self.accepted_corrections / self.proposed_corrections
+
+    @property
+    def mother_acceptance(self) -> float:
+        return self.accepted_mother_moves / self.proposed_mother_moves
+
+
 def spinors_to_vectors(spinors: np.ndarray) -> np.ndarray:
     array = np.asarray(spinors, dtype=np.complex128)
     if array.ndim != 2 or array.shape[1] != 2:
@@ -194,6 +214,127 @@ def metropolis_chain(
         proposed_local=proposed,
         global_rotation_residual=rotation_residual,
         delta_max=delta_max,
+    )
+
+
+def delayed_acceptance_chain(
+    mother_evaluator: ChannelEvaluator,
+    full_evaluator: ChannelEvaluator,
+    *,
+    n_particles: int,
+    coefficients: np.ndarray,
+    seed: int,
+    sample_steps: int,
+    proposal_sweeps: int,
+    delta_max: float,
+    initial_configuration: np.ndarray | None = None,
+    global_rotation_interval: int = 8,
+) -> DelayedChainResult:
+    """Exact target chain using a reversible mother kernel as proposal.
+
+    Detailed balance of the inner kernel with respect to ``p_mother`` reduces
+    the outer Hastings ratio to the ratio of ``p_target / p_mother``.
+    Rejected outer steps are retained in the returned time series.
+    """
+
+    if sample_steps <= 0 or proposal_sweeps <= 0:
+        raise ValueError("sample_steps and proposal_sweeps must be positive")
+    rng = np.random.default_rng(seed)
+    configuration = (
+        random_configuration(rng, n_particles)
+        if initial_configuration is None
+        else np.asarray(initial_configuration, dtype=np.complex128).copy()
+    )
+    mother_channels = mother_evaluator(configuration)
+    full_channels = full_evaluator(configuration)
+    mother_weight = channel_weight(
+        mother_channels, np.empty(0, dtype=np.complex128)
+    )
+    target_weight = channel_weight(full_channels, coefficients)
+    correction_weight = target_weight / max(
+        mother_weight, np.finfo(float).tiny
+    )
+    accepted_corrections = 0
+    accepted_mother = 0
+    proposed_mother = 0
+    rotation_residual = 0.0
+    samples = []
+    values = []
+    for step in range(sample_steps):
+        proposal = configuration.copy()
+        proposal_mother_channels = mother_channels.copy()
+        proposal_mother_weight = mother_weight
+        for _ in range(proposal_sweeps * n_particles):
+            particle = int(rng.integers(n_particles))
+            delta = rng.uniform(-delta_max, delta_max)
+            local = geodesic_proposal(proposal, particle, delta, rng)
+            local_channels = mother_evaluator(local)
+            local_weight = channel_weight(
+                local_channels, np.empty(0, dtype=np.complex128)
+            )
+            ratio = local_weight / max(
+                proposal_mother_weight, np.finfo(float).tiny
+            )
+            proposed_mother += 1
+            if rng.random() < min(1.0, ratio):
+                proposal = local
+                proposal_mother_channels = local_channels
+                proposal_mother_weight = local_weight
+                accepted_mother += 1
+        proposal_full_channels = full_evaluator(proposal)
+        proposal_target_weight = channel_weight(
+            proposal_full_channels, coefficients
+        )
+        proposal_correction = proposal_target_weight / max(
+            proposal_mother_weight, np.finfo(float).tiny
+        )
+        correction_ratio = proposal_correction / max(
+            correction_weight, np.finfo(float).tiny
+        )
+        if rng.random() < min(1.0, correction_ratio):
+            configuration = proposal
+            mother_channels = proposal_mother_channels
+            full_channels = proposal_full_channels
+            mother_weight = proposal_mother_weight
+            target_weight = proposal_target_weight
+            correction_weight = proposal_correction
+            accepted_corrections += 1
+        if global_rotation_interval and (
+            step + 1
+        ) % global_rotation_interval == 0:
+            rotated = random_global_rotation(configuration, rng)
+            rotated_mother = mother_evaluator(rotated)
+            rotated_full = full_evaluator(rotated)
+            rotated_mother_weight = channel_weight(
+                rotated_mother, np.empty(0, dtype=np.complex128)
+            )
+            rotated_target_weight = channel_weight(
+                rotated_full, coefficients
+            )
+            rotation_residual = max(
+                rotation_residual,
+                abs(rotated_target_weight - target_weight)
+                / max(target_weight, np.finfo(float).tiny),
+            )
+            configuration = rotated
+            mother_channels = rotated_mother
+            full_channels = rotated_full
+            mother_weight = rotated_mother_weight
+            target_weight = rotated_target_weight
+            correction_weight = target_weight / max(
+                mother_weight, np.finfo(float).tiny
+            )
+        samples.append(configuration.copy())
+        values.append(full_channels.copy())
+    return DelayedChainResult(
+        samples=np.asarray(samples),
+        channel_values=np.asarray(values),
+        final_configuration=configuration,
+        accepted_corrections=accepted_corrections,
+        proposed_corrections=sample_steps,
+        accepted_mother_moves=accepted_mother,
+        proposed_mother_moves=proposed_mother,
+        global_rotation_residual=rotation_residual,
     )
 
 
@@ -492,6 +633,7 @@ def block_estimate(
 
 __all__ = [
     "ChainResult",
+    "DelayedChainResult",
     "SRTrace",
     "center_whiten_channels",
     "block_estimate",
@@ -510,6 +652,7 @@ __all__ = [
     "spinors_to_vectors",
     "sr_update",
     "correlated_sr_optimize",
+    "delayed_acceptance_chain",
     "vectors_to_spinors",
     "weighted_energy_gradient_metric",
 ]

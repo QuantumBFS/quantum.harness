@@ -7,6 +7,7 @@ from route_d_plus.vmc import (
     center_whiten_channels,
     channel_weight,
     correlated_sr_optimize,
+    delayed_acceptance_chain,
     coulomb_potential,
     energy_gradient_metric,
     geodesic_proposal,
@@ -159,3 +160,31 @@ def test_block_diagnostics_distinguish_correlated_chains() -> None:
     assert diagnostics["integrated_autocorrelation_time"] > 1.0
     assert diagnostics["effective_sample_size"] < chains.size
     assert 0.9 < diagnostics["r_hat"] < 1.1
+
+
+def test_delayed_acceptance_retains_rejections_and_invariants() -> None:
+    def mother(configuration: np.ndarray) -> np.ndarray:
+        z_sum = np.sum(spinors_to_vectors(configuration)[:, 2])
+        return np.array([np.exp(0.15 * z_sum)], dtype=np.complex128)
+
+    def full(configuration: np.ndarray) -> np.ndarray:
+        base = mother(configuration)[0]
+        z_sum = np.sum(spinors_to_vectors(configuration)[:, 2])
+        return np.array([base, z_sum * base], dtype=np.complex128)
+
+    result = delayed_acceptance_chain(
+        mother,
+        full,
+        n_particles=3,
+        coefficients=np.array([0.35 + 0.1j]),
+        seed=77,
+        sample_steps=32,
+        proposal_sweeps=2,
+        delta_max=0.4,
+        global_rotation_interval=0,
+    )
+    assert result.samples.shape == (32, 3, 2)
+    assert result.channel_values.shape == (32, 2)
+    assert 0.0 < result.correction_acceptance <= 1.0
+    assert 0.0 < result.mother_acceptance < 1.0
+    assert result.proposed_mother_moves == 32 * 2 * 3
