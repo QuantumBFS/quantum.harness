@@ -787,7 +787,7 @@ def build_document(
         "title": "Strong numerical support for the √5 critical-field relation",
         "eyebrow": "Quantum Monte Carlo · Challenge #148 · Team yanwang",
         "url": "https://github.com/QuantumBFS/quantum.harness/issues/148",
-        "subtitle": "Zhixuan Zhao · First-year undergraduate",
+        "subtitle": "— Zhixuan Zhao · First-year undergraduate",
         "lede": (
             "Across 9,600 dedicated-SSE parameter/seed cells at 600,000 measurement "
             "sweeps each — 5.76×10⁹ scheduled measurement sweeps — plus 2,016 "
@@ -1301,7 +1301,7 @@ def apply_report_typography(html_path: Path) -> None:
     )
     byline_css = (
         ".hero .byline{margin:7px 0 0;font-size:15px;font-weight:600;"
-        "color:#4b5563;letter-spacing:.015em}"
+        "color:#4b5563;letter-spacing:.015em;text-align:right}"
     )
     vector_css = (
         ".figbox svg.vector-figure{max-width:100%;height:auto;display:block;"
@@ -1342,7 +1342,7 @@ def apply_report_typography(html_path: Path) -> None:
     )
     title_after = (
         "<h1>Strong numerical support for the √5 critical-field relation</h1>"
-        '<p class="byline">Zhixuan Zhao · First-year undergraduate</p>'
+        '<p class="byline">— Zhixuan Zhao · First-year undergraduate</p>'
     )
     require(title_before in html, "canonical report title not found")
     html = html.replace(title_before, title_after, 1)
@@ -1352,6 +1352,25 @@ def apply_report_typography(html_path: Path) -> None:
     )
     require(lede_result_before in html, "canonical report lede result not found")
     html = html.replace(lede_result_before, lede_result_after, 1)
+    scale_highlights = [
+        (
+            "9,600 dedicated-SSE parameter/seed cells at 600,000 measurement "
+            "sweeps each",
+            "<strong>9,600 dedicated-SSE parameter/seed cells at 600,000 "
+            "measurement sweeps each</strong>",
+        ),
+        (
+            "5.76×10⁹ scheduled measurement sweeps",
+            "<strong>5.76×10⁹ scheduled measurement sweeps</strong>",
+        ),
+        (
+            "2,016 independent CT-QMC cells",
+            "<strong>2,016 independent CT-QMC cells</strong>",
+        ),
+    ]
+    for plain, emphasized in scale_highlights:
+        require(plain in html, f"canonical report scale text not found: {plain}")
+        html = html.replace(plain, emphasized, 1)
     verdict_before = (
         '<span class="why">The primary ratio is only 0.55σ from √5; '
         "the independent continuous-time route agrees, and all 374 accepted "
