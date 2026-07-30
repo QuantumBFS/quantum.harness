@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import itertools
 import json
 import math
 import os
@@ -82,6 +83,39 @@ class BitwiseDenseLearner(nn.Module):
         return torch.einsum("boh,oh->bo", hidden, self.output_weight) + self.output_bias
 
 
+class ParityFeatureLearner(nn.Module):
+    """A generic degree-three Boolean interaction lift followed by a shared MLP."""
+
+    def __init__(self, hidden: int, depth: int) -> None:
+        super().__init__()
+        subsets = [
+            subset
+            for degree in range(1, 4)
+            for subset in itertools.combinations(range(12), degree)
+        ]
+        mask = torch.zeros(len(subsets), 12, dtype=torch.bool)
+        for row, subset in enumerate(subsets):
+            mask[row, list(subset)] = True
+        self.register_buffer("feature_mask", mask)
+        layers: list[nn.Module] = [
+            nn.Linear(len(subsets), hidden),
+            nn.GELU(),
+        ]
+        for _ in range(depth - 1):
+            layers.extend((nn.Linear(hidden, hidden), nn.GELU()))
+        layers.append(nn.Linear(hidden, OUTPUT_BITS))
+        self.network = nn.Sequential(*layers)
+
+    def forward(self, inputs: torch.Tensor) -> torch.Tensor:
+        spins = 2.0 * inputs - 1.0
+        lifted = torch.where(
+            self.feature_mask[None, :, :],
+            spins[:, None, :],
+            torch.ones((), device=inputs.device, dtype=inputs.dtype),
+        ).prod(dim=2)
+        return self.network(lifted)
+
+
 @dataclass
 class Config:
     steps: int
@@ -111,7 +145,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--depth", type=int, default=4)
     parser.add_argument(
         "--architecture",
-        choices=("shared", "bitwise"),
+        choices=("shared", "bitwise", "parity3"),
         default="shared",
     )
     parser.add_argument("--learning-rate", type=float, default=1e-3)
@@ -149,6 +183,8 @@ def set_seed(seed: int) -> None:
 def make_model(architecture: str, hidden: int, depth: int) -> nn.Module:
     if architecture == "bitwise":
         return BitwiseDenseLearner(hidden, depth)
+    if architecture == "parity3":
+        return ParityFeatureLearner(hidden, depth)
     return DenseLearner(hidden, depth)
 
 

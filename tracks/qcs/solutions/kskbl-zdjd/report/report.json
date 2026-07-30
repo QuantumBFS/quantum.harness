@@ -459,8 +459,62 @@
         {
           "kind": "verdict",
           "status": "good",
-          "label": "⟦zh⟧最快恢复 100%；最佳紧凑神经结果 98.22%⟦en⟧Fastest recovery: 100%; best compact neural result: 98.22%",
-          "why": "⟦zh⟧贝叶斯证据表在第 1,200 步恢复全部 4,096 个输入，但需要逐输入存储；不保存真值表的共享 MLP 达到 98.2178% 整词准确率。⟦en⟧A Bayesian evidence table recovers all 4,096 inputs at step 1,200 but requires per-input storage. A shared MLP that stores no truth table reaches 98.2178% exact-word accuracy."
+          "label": "⟦zh⟧新结果：随机神经集成完整恢复 4,096 / 4,096⟦en⟧New result: random neural ensemble recovers 4,096 / 4,096",
+          "why": "⟦zh⟧“三阶奇偶特征 + 主动后验回放”在主实验第 1,400 步首次达到 100%，不同随机种子的独立复跑在第 1,600 步达到 100%；两次实验的最终整词准确率均为 100%。⟦en⟧Third-order parity features with active posterior replay first reach 100% at step 1,400 in the main run and at step 1,600 in an independent seed replication; both runs finish at 100% exact-word accuracy."
+        },
+        {
+          "kind": "card",
+          "title": "⟦zh⟧当前最佳训练方法⟦en⟧Current best training method",
+          "blocks": [
+            {
+              "kind": "kv",
+              "pairs": [
+                ["⟦zh⟧学生网络⟦en⟧Student", "⟦zh⟧随机初始化；298 个通用一至三阶奇偶特征，三层 128 宽 MLP，72,844 个参数⟦en⟧Random initialization; 298 generic degree-one to degree-three parity features, three 128-wide hidden layers, 72,844 parameters"],
+                ["⟦zh⟧在线教师⟦en⟧Online teacher", "⟦zh⟧只累积新鲜带噪观察的贝叶斯对数似然，不读取公式或 156 门电路⟦en⟧Bayesian log-likelihood accumulated only from fresh noisy observations; it cannot read the formula or 156-gate circuit"],
+                ["⟦zh⟧主动回放⟦en⟧Active replay", "⟦zh⟧每步从 800 个随机候选中选 100 个；80% 按“教师置信度 × 学生分歧”排序，20% 保持随机探索⟦en⟧Select 100 of 800 random candidates per step; 80% rank by teacher confidence times student disagreement and 20% preserve random exploration"],
+                ["⟦zh⟧主实验首次全对⟦en⟧Main first full recovery", "1,400 steps · 140,000 fresh examples/member · 20.14 s"],
+                ["⟦zh⟧独立复跑首次全对⟦en⟧Replication first full recovery", "1,600 steps · 160,000 fresh examples/member · 24.10 s"],
+                ["⟦zh⟧完整证据⟦en⟧Evidence", "posterior_replay_p25_summary.json · SHA-256 recorded inside"]
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "table",
+          "columns": [
+            "⟦zh⟧方法⟦en⟧Method",
+            "⟦zh⟧最终整词准确率⟦en⟧Final exact-word accuracy",
+            "⟦zh⟧首次完整恢复⟦en⟧First full recovery",
+            "⟦zh⟧最终位分歧⟦en⟧Final bit disagreement",
+            "⟦zh⟧说明⟦en⟧Scope"
+          ],
+          "rows": [
+            ["⟦zh⟧主动后验回放，主实验⟦en⟧Active posterior replay, main", "100%", "1,400", "0.000183", "⟦zh⟧第 1,400 至 3,000 步的 17 个检查点全部保持全对⟦en⟧All 17 checkpoints from step 1,400 through 3,000 remain exact"],
+            ["⟦zh⟧主动后验回放，独立复跑⟦en⟧Active posterior replay, replication", "100%", "1,600", "0.006226", "⟦zh⟧第 1,700 步曾短暂出现一个整词错误，1,800 至 2,000 步再次全对⟦en⟧One transient word error reappears at step 1,700; steps 1,800 through 2,000 are exact again"],
+            ["⟦zh⟧贝叶斯证据表⟦en⟧Bayesian evidence table", "100%", "1,200", "0", "⟦zh⟧最快，但推理仍需逐输入后验表⟦en⟧Fastest, but inference retains a per-input posterior table"],
+            ["⟦zh⟧直接共享 MLP⟦en⟧Direct shared MLP", "98.2178%", "⟦zh⟧未达到⟦en⟧Not reached", "0.1552", "30,000 steps"],
+            ["⟦zh⟧十二位独立 MLP⟦en⟧Twelve independent MLPs", "90.1855%", "⟦zh⟧未达到⟦en⟧Not reached", "0.4360", "30,000 steps"]
+          ],
+          "numeric": [false, true, false, true, false]
+        },
+        {
+          "kind": "figures",
+          "items": [
+            {
+              "src": "noisy-c-posterior-replay-p25.png",
+              "caption": "⟦zh⟧新方法的主实验、独立复跑、直接共享 MLP 与贝叶斯表的统一比较。左上显示整词准确率：两条后验回放曲线都在 2,000 步内到达 100%，而直接 MLP 在 30,000 步仍为 98.22%。右下是单模型消融：主动采样会伤害普通共享表示，却把三阶奇偶表示从 98.51% 提高到 99.76%，说明主动回放与表示能力存在强耦合。每个集成成员每步接收 100 个新鲜样本；完整干净定义域只评测，不产生梯度。⟦en⟧Unified comparison of the new method, its independent replication, the direct shared MLP and the Bayesian table. Exact-word accuracy shows that both posterior-replay runs reach 100% within 2,000 steps, while the direct MLP remains at 98.22% after 30,000. The single-model ablation shows a strong interaction: active selection harms the ordinary shared representation but raises the degree-three parity representation from 98.51% to 99.76%. Every ensemble member receives 100 fresh examples per step; the complete clean domain is evaluated only and supplies no gradients."
+            }
+          ]
+        },
+        {
+          "kind": "note",
+          "label": "⟦zh⟧这还不是少门电路⟦en⟧This is not yet a low-gate circuit",
+          "text": "⟦zh⟧学生在推理时不查真值表，但在线教师仍保存 4,096 × 12 个后验状态；学生本身有 72,844 个连续参数，主动选择还需每步评分 800 个候选。因此该结果证明“能够快速、稳定地学到标准映射”，不证明已经得到紧凑门图。下一阶段必须做教师移除、参数剪枝、离散化和门级验证。⟦en⟧The student performs inference without a truth-table lookup, but the online teacher still stores 4,096 × 12 posterior states; the student has 72,844 continuous parameters and active selection scores 800 candidates per step. The result demonstrates rapid and repeatable recovery of the clean mapping, not a compact gate graph. The next stage must remove the teacher, prune parameters, discretize the model and verify the resulting gates."
+        },
+        {
+          "kind": "heading",
+          "level": 3,
+          "text": "⟦zh⟧统一噪声协议⟦en⟧Common noise protocol"
         },
         {
           "kind": "card",
@@ -469,7 +523,7 @@
             {
               "kind": "kv",
               "pairs": [
-                ["⟦zh⟧每个训练步⟦en⟧Every training step", "⟦zh⟧重新随机抽取 100 个十二位输入⟦en⟧Resample 100 twelve-bit inputs"],
+                ["⟦zh⟧每个训练步⟦en⟧Every training step", "⟦zh⟧每个集成成员重新随机抽取 100 个十二位输入；四成员方法合计接收 400 个独立观察⟦en⟧Each ensemble member resamples 100 twelve-bit inputs; a four-member method receives 400 independent observations in total"],
                 ["⟦zh⟧单个位翻转概率⟦en⟧Flip probability per output bit", "25%"],
                 ["⟦zh⟧同一输入再次出现⟦en⟧When an input reappears", "⟦zh⟧重新独立生成噪声，不复用旧错误⟦en⟧Regenerate noise independently; never reuse old errors"],
                 ["⟦zh⟧十二位标签完全不变⟦en⟧Twelve-bit label untouched", "3.17%"],
@@ -483,42 +537,43 @@
         {
           "kind": "heading",
           "level": 3,
-          "text": "⟦zh⟧同一协议下的方法对比⟦en⟧Methods under the same protocol"
+          "text": "⟦zh⟧2,000 步单模型消融⟦en⟧Single-model ablation at 2,000 steps"
         },
         {
           "kind": "table",
           "columns": [
-            "⟦zh⟧方法⟦en⟧Method",
             "⟦zh⟧表示形式⟦en⟧Representation",
+            "⟦zh⟧回放选择⟦en⟧Replay selection",
             "⟦zh⟧逐位准确率⟦en⟧Bit accuracy",
             "⟦zh⟧整词准确率⟦en⟧Exact-word accuracy",
-            "⟦zh⟧首次完整恢复⟦en⟧First full recovery"
+            "⟦zh⟧干净 BCE⟦en⟧Clean BCE"
           ],
           "rows": [
-            ["⟦zh⟧贝叶斯证据表⟦en⟧Bayesian evidence table", "⟦zh⟧4,096 × 12 个后验状态⟦en⟧4,096 × 12 posterior states", "100%", "100%", "1,200 步"],
-            ["⟦zh⟧共享 MLP⟦en⟧Shared MLP", "⟦zh⟧四成员紧凑神经网络⟦en⟧Four-member compact neural model", "99.8494%", "98.2178%", "⟦zh⟧未达到⟦en⟧Not reached"],
-            ["⟦zh⟧十二位独立 MLP⟦en⟧Twelve independent MLPs", "⟦zh⟧各输出位独立训练⟦en⟧One model per output bit", "99.0356%", "90.1855%", "⟦zh⟧未达到⟦en⟧Not reached"]
+            ["⟦zh⟧普通共享 MLP⟦en⟧Ordinary shared MLP", "⟦zh⟧均匀⟦en⟧Uniform", "85.1522%", "18.5547%", "0.27200"],
+            ["⟦zh⟧普通共享 MLP⟦en⟧Ordinary shared MLP", "⟦zh⟧主动⟦en⟧Active", "81.6243%", "7.4219%", "0.33505"],
+            ["⟦zh⟧三阶奇偶特征⟦en⟧Degree-three parity features", "⟦zh⟧均匀⟦en⟧Uniform", "99.8698%", "98.5107%", "0.01421"],
+            ["⟦zh⟧三阶奇偶特征⟦en⟧Degree-three parity features", "⟦zh⟧主动⟦en⟧Active", "99.9797%", "99.7559%", "0.01905"]
           ],
-          "numeric": [false, false, true, true, false]
+          "numeric": [false, false, true, true, true]
         },
         {
           "kind": "figures",
           "items": [
             {
               "src": "noisy-c-method-comparison-p25.png",
-              "caption": "⟦zh⟧25% 新鲜位翻转下的统一收敛曲线。四个面板依次显示整词准确率、完整干净定义域 loss、四个随机成员的位分歧，以及按二进制位权重计算的数值误差。横轴为训练步数，每步恰好接收 100 个新鲜带噪样本；干净指标只记录、不训练。⟦en⟧Unified convergence under fresh 25% bit flips. The panels show exact-word accuracy, complete clean-domain loss, bit disagreement across four random members and bit-significance-weighted numerical error. The horizontal axis is training steps, each receiving exactly 100 fresh noisy examples; clean metrics are recorded but never trained on."
+              "caption": "⟦zh⟧早期基线在 25% 新鲜位翻转下的收敛曲线。四个面板依次显示整词准确率、完整干净定义域 loss、四个随机成员的位分歧，以及按二进制位权重计算的数值误差。横轴为训练步数，每个成员每步接收 100 个新鲜带噪样本；干净指标只记录、不训练。该图保留在后部作为新方法出现前的历史对照。⟦en⟧Convergence of the earlier baselines under fresh 25% bit flips. The panels show exact-word accuracy, complete clean-domain loss, disagreement among four random members and bit-significance-weighted numerical error. The horizontal axis is training steps, with 100 fresh noisy examples per member per step; clean metrics are recorded but never trained on. This figure is retained as the historical comparison preceding the new method."
             }
           ]
         },
         {
           "kind": "note",
           "label": "⟦zh⟧不确定性⟦en⟧Uncertainty",
-          "text": "⟦zh⟧位不确定性衡量四个随机成员在十二个输出位上的总分歧，0 表示完全一致，最大值为 12；数值不确定性让高位分歧权重更大。贝叶斯证据表最终两项均为 0；共享 MLP 最终位不确定性为 0.1552。⟦en⟧Bit uncertainty measures total disagreement across twelve output bits among four random members: zero means complete agreement and the maximum is twelve. Value uncertainty weights significant-bit disagreement more heavily. Both end at zero for the Bayesian evidence table; the shared MLP ends at 0.1552 bit uncertainty."
+          "text": "⟦zh⟧位不确定性衡量四个随机成员在十二个输出位上的总硬预测分歧，0 表示完全一致，最大值为 12；数值不确定性让高位分歧权重更大。主实验在首次全对时位分歧仍为 0.04395，说明集成投票已经正确但单成员尚不稳定；到第 3,000 步降为 0.000183。独立复跑最终为 0.006226。这里不把“集成输出全对”等同于“所有成员都全对”。⟦en⟧Bit uncertainty measures total hard-prediction disagreement across twelve output bits among four random members: zero means complete agreement and the maximum is twelve. At the main run's first exact checkpoint it is still 0.04395, showing that the vote is exact while individual members remain imperfect; it falls to 0.000183 by step 3,000. The independent replication ends at 0.006226. Exact ensemble output is not conflated with every member being exact."
         },
         {
           "kind": "note",
           "label": "⟦zh⟧当前结论⟦en⟧Current conclusion",
-          "text": "⟦zh⟧在线重复证据能够快速消除随机噪声；真正的难点是把完整映射压缩成小网络或少量布尔门。独立位网络明显更慢，说明不同输出位之间共享结构有价值。后续方向是把贝叶斯去噪教师蒸馏到共享交互网络，再离散化为门图。⟦en⟧Repeated online evidence removes random noise quickly; the harder problem is compressing the complete mapping into a small network or a few Boolean gates. Independent-bit models are much slower, showing that shared structure across outputs is valuable. The next step is to distill the Bayesian denoising teacher into a shared interaction model and then discretize it into a gate graph."
+          "text": "⟦zh⟧当前实验已经解决了“在 25% 新鲜位噪声下，随机初始化的公式未知神经模型能否完整逼近标准映射”这一阶段性问题：可以，并且两个独立随机种子均在 1,600 步以内首次全对。最有效的组合不是单一技巧，而是贝叶斯去噪、通用低阶布尔交互、主动难例回放和集成投票。下一循环将比较更小隐藏层、结构化剪枝、学生自蒸馏与可微布尔门，使准确率目标与门数目标同时进入优化。⟦en⟧The present experiments answer the intermediate question of whether a randomly initialized, formula-agnostic neural model can completely approach the clean map under fresh 25% bit noise: yes, with first exact recovery by step 1,600 in two independent seeds. The effective mechanism is a combination of Bayesian denoising, generic low-degree Boolean interactions, active hard-example replay and ensemble voting. The next cycle will compare smaller hidden layers, structured pruning, student self-distillation and differentiable Boolean gates so that accuracy and gate count are optimized together."
         }
       ]
     }
