@@ -1,11 +1,18 @@
 from pathlib import Path
 
 from pypdf import PdfReader
+from reportlab.platypus import KeepTogether
 
 from analysis.html_renderer import render_html
-from analysis.pdf_renderer import render_pdf
+from analysis.locale import get_locale
+from analysis.pdf_renderer import (
+    _figure,
+    _register_cjk_font,
+    _styles,
+    render_pdf,
+)
 from analysis.plots import make_plots
-from analysis.report_model import build_report
+from analysis.report_model import Figure, build_report
 from analysis.verify_outputs import verify_report_pair
 from summary_fixture import summary_fixture
 
@@ -38,3 +45,25 @@ def test_bilingual_models_share_numeric_facts_but_localize_all_reader_text(tmp_p
 
     verification = verify_report_pair(tmp_path)
     assert verification.passed, verification.errors
+
+
+def test_pdf_keeps_each_figure_with_its_caption_and_interpretation(tmp_path: Path):
+    summary = summary_fixture()
+    document = build_report(summary, "en")
+    make_plots(summary, "en", tmp_path / "plots/en")
+    figure = next(
+        block
+        for section in document.sections
+        for block in section.blocks
+        if isinstance(block, Figure)
+    )
+
+    flowables = _figure(
+        figure,
+        1,
+        tmp_path,
+        _styles(_register_cjk_font()),
+        get_locale("en").labels,
+    )
+
+    assert any(isinstance(flowable, KeepTogether) for flowable in flowables)

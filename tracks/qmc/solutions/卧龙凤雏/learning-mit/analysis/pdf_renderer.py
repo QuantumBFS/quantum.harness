@@ -16,6 +16,7 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.platypus import (
     Image,
+    KeepTogether,
     LongTable,
     PageBreak,
     Paragraph,
@@ -147,18 +148,22 @@ def _figure(block: Figure, number: int, root: Path, styles: dict, labels: dict) 
         display_height = 150 * mm
         display_width = display_height * width / height
     return [
-        Spacer(1, 3 * mm),
-        Image(str(source), width=display_width, height=display_height),
-        Paragraph(
-            f"<b>{html.escape(labels['figure'])} {number}.</b> "
-            f"{html.escape(_safe(block.caption))}",
-            styles["caption"],
-        ),
-        Paragraph(
-            f"<b>{html.escape(labels['interpretation'])}:</b> "
-            f"{html.escape(_safe(block.inference_limit))}",
-            styles["note"],
-        ),
+        KeepTogether(
+            [
+                Spacer(1, 3 * mm),
+                Image(str(source), width=display_width, height=display_height),
+                Paragraph(
+                    f"<b>{html.escape(labels['figure'])} {number}.</b> "
+                    f"{html.escape(_safe(block.caption))}",
+                    styles["caption"],
+                ),
+                Paragraph(
+                    f"<b>{html.escape(labels['interpretation'])}:</b> "
+                    f"{html.escape(_safe(block.inference_limit))}",
+                    styles["note"],
+                ),
+            ]
+        )
     ]
 
 

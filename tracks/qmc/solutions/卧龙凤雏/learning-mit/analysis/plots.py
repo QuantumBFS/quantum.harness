@@ -131,18 +131,34 @@ def _entanglement_arcs(summary: dict, locale: Locale):
 
 
 def _entropy_coefficients(summary: dict, locale: Locale):
-    figure, axis = _figure()
     rows = summary.get("entanglement", {}).get("coefficients", [])
-    x = np.arange(len(rows))
-    for name, color in (("v", "#277c5a"), ("c_prime", "#b95c23"), ("c", "#175a7a")):
-        axis.plot(x, [row[name] for row in rows], "o-", label=name, color=color)
-    axis.set(
-        xticks=x,
-        xticklabels=[f"{row['phi_pi']:.2f}/L{row['width']}" for row in rows],
-        ylabel=locale.labels["coefficient"],
-    )
-    axis.legend(frameon=False)
-    return figure, axis
+    figure, axes = plt.subplots(3, 1, figsize=(7.2, 6.0), sharex=True)
+    widths = sorted({int(row["width"]) for row in rows})
+    colors = ("#175a7a", "#277c5a", "#b95c23", "#7a5a9e")
+    for axis, (name, display) in zip(
+        axes,
+        (("v", "v"), ("c_prime", "c_prime"), ("c", "c")),
+        strict=True,
+    ):
+        axis.grid(True, color="#dce5ea", linewidth=0.7, alpha=0.8)
+        axis.spines[["top", "right"]].set_visible(False)
+        for color, width in zip(colors, widths, strict=False):
+            selected = sorted(
+                (row for row in rows if int(row["width"]) == width),
+                key=lambda row: float(row["phi_pi"]),
+            )
+            axis.plot(
+                [float(row["phi_pi"]) for row in selected],
+                [float(row[name]) for row in selected],
+                "o-",
+                color=color,
+                label=f"L={width}",
+            )
+        axis.set_ylabel(display)
+    axes[0].legend(frameon=False, ncol=max(1, min(4, len(widths))), fontsize=8)
+    axes[-1].set_xlabel(locale.labels["phi"])
+    figure.tight_layout()
+    return figure, axes[0]
 
 
 def _casimir(summary: dict, locale: Locale):
