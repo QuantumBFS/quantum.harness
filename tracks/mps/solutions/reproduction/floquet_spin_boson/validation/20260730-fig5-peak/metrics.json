@@ -1,0 +1,33 @@
+{
+  "mode": "validation",
+  "omega_d": 1.25,
+  "compression_tolerance": 1e-11,
+  "bond_dimension": 506,
+  "correlation_lag_steps": 8192,
+  "wall_seconds": 5072.81,
+  "maximum_resident_bytes": 1498382336,
+  "longitudinal": {
+    "total_current": 0.09213814742777274,
+    "reference_current": 0.09210566123718586,
+    "reference_error": 0.00003248619058687785,
+    "energy_balance_error": 0.0009467082155822239,
+    "tail_norm": 0.000006727723282405531,
+    "tail_mean_real": -2.762199527817719e-7,
+    "tail_slope": 1.1161371324304109e-10,
+    "c0_error": 6.569019775749656e-10,
+    "point_seconds": 2525.3791725
+  },
+  "transversal": {
+    "continuous_current": 0.08061785152598003,
+    "delta_current": 0.0072072538022048,
+    "total_current": 0.08782510532818483,
+    "reference_current": 0.08780740406078946,
+    "reference_error": 0.000017701267395364706,
+    "energy_balance_error": 0.0006430861733535707,
+    "tail_norm": 0.000007085231808324839,
+    "tail_mean_real": -6.254434326611207e-7,
+    "tail_slope": -2.770856551340875e-10,
+    "c0_error": 2.0042213082454947e-9,
+    "point_seconds": 2527.595926333
+  }
+}
