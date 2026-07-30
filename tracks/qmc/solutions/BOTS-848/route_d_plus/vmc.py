@@ -80,7 +80,11 @@ def geodesic_proposal(
     proposed[particle] = (
         math.cos(delta) * normal + math.sin(delta) * tangent
     )
-    return vectors_to_spinors(proposed)
+    result = np.asarray(spinors, dtype=np.complex128).copy()
+    result[particle] = vectors_to_spinors(
+        proposed[particle : particle + 1]
+    )[0]
+    return result
 
 
 def random_global_rotation(
