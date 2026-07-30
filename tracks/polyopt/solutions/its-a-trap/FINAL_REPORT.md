@@ -123,33 +123,98 @@ that seam (`rg_selection/src/local_cone_adapter.jl`).
   (bit-identical bounds, equal block hashes). The N=200 adaptive
   deployment built on these gates was cancelled before submission.
 
-## Fine-variable elimination: operational replacement prototype (revision)
+## Fine-variable elimination (consolidated findings; revisions 1–2)
 
-A four-hour pre-registered test in the Sec. III-D-2 replacement direction
-(x_fine → x_retained ⊕ x_coarse), run on the deadline afternoon. Arms on
-the stripped chassis (rdm=false, pso=0, lso=false): A = fine-rich reach
-comparator (r=N/2); B = truncated core (r=r_of(N)); C6 = B + depth-6
-ω-tower; D/E = C6 + moment bundles. Mandatory grid outcome: **6/8 rows
-OPTIMAL + 2/8 resource-frontier (D@14, D@20 at the 18 GiB local
-frontier)**. All numbers from
-`rg_selection/results/replacement_{build,solve,summary}.csv` (hashes in
-`SHA256SUMS`); full narrative in `rg_selection/results/SUMMARY.md`.
+> Eliminating fine variables reduced the tested SDP's structural size by
+> 30.3% with no resolved wall-time or memory penalty, and the comparison
+> with an additive tower of the same family localizes realized
+> interior-point cost to PSD block dimension rather than model size.
+> Accuracy recovery from the eliminated region remained unresolved in
+> every configuration tested, and the correction channel intended to
+> supply it has not yet been tested — once for resource reasons, and once
+> because the declared bundle was structurally absorbed by the retained
+> closure.
 
-The operational coarse-replacement prototype exhibits a clear separation
-between structural and realized solver cost. The PSD-scalar ratio of the
-depth-6 tower relative to the fine-rich reach comparator decreases from
-1.447 at N=14 to 0.848, 0.610 and 0.530 at N=20, 26 and 30, establishing
-a structural crossover between N=14 and N=20. At the solved sizes,
-however, the tower remained substantially more expensive in wall time and
-peak RSS. The truncated reach gap was resolved, whereas the depth-6 tower
-recovered less than ~0.56% (N=14) and less than ~0.14% (N=20) of the
-resolved reach gap — the numerator lies inside the comparison band while
-the denominator is resolved (d = 4.679e-05 and 1.566e-04 per site).
-Full-pool and deeper-tower solves reached the 18 GiB local-memory
-frontier, so their accuracy contributions remain unavailable. Coarse
-graining therefore reduced structural model size at moderate N, but the
-current interior-point formulation did not yet convert that reduction
-into lower realized cost or resolved accuracy recovery.
+Two measurement campaigns on the deadline day probe one question — where
+does the realized cost of coarse replacement come from, and what does it
+buy: a pre-registered additive D=4 ω-tower comparison (arms A/B/C6/D/E at
+N=14/20, builds to N=30; evidence table below, frozen CSVs under
+`rg_selection/results/`, ledger C13–C15) and a gate-first direct
+replacement MVP in which deleted fine variables are provably never
+created (D=2, one level, N=10 primary; artifacts under
+`rg_selection/direct/`, ledger C16–C18). Tables are bound to their frozen
+CSVs and are reproduced unchanged; the narrative below is organized by
+finding, not by experiment.
+
+### 1. Structural size and realized solver cost separate [C13, C16]
+
+Structural model size and realized interior-point cost are not
+interchangeable, and PSD block dimension is the operative axis. Additive
+D=4 depth-6 tower: structural ratio vs the fine-rich comparator
+1.447 → 0.848 → 0.610 → 0.530 (N=14/20/26/30, crossover between 14 and
+20) — but realized wall 10.7x/9.0x and RSS 11.8x/5.7x (N=14/20), largest
+block 128. Direct D=2 one-level replacement at N=10: structural 0.697
+(30.3% reduction, meeting the pre-declared 0.7 threshold) at realized
+wall/RSS parity (19.1 s / 1.25 G vs 19.6 s / 1.21 G), largest block 66 —
+BELOW the comparator's 84. Reading, with its confound in the same
+sentence: PSD-scalar counts understate interior-point cost when scalars
+concentrate in large blocks, and since the two configurations differ
+simultaneously in D, depth and N this localization is consistent-with
+rather than isolated — the controlled check (direct replacement at N=14)
+was not run.
+
+### 2. The eliminated zone, and what reaches it [C14, C17]
+
+Recovery of the truncated-reach information is unresolved in every
+configuration measured, and the geometry explains why. The denominator is
+resolved and grows with N: d = +4.679e-05 / +1.566e-04 (additive chassis,
+N=14/20) and +4.97e-06 (direct chassis, N=10). The depth-6 D=4 tower
+recovers < 0.557% / < 0.139% of d (N=14/20) — a one-sided bound that
+TIGHTENS with N; the D=2 single level recovers < 0.53% (central value
+−0.02%). Geometry: the eliminated separations extend to N/2 while the
+tower's fine-side footprint is 3-site window moments (containment proven
+by enumeration: every tower link word lies inside closure(G_retained)),
+so the coarse layer can act on the eliminated zone only indirectly.
+Window size / depth is the axis that would give a direct path — and the
+depth attempt (C10 at N=20) PASSED its validity admission (1792 link
+rows, residual ≤ 1.7e-15) with its interior-point solve crossing the
+18 GiB local frontier.
+
+### 3. The correction channel has not been tested [C15, C18]
+
+There is no measurement of moment-bundle recovery, for two distinct
+reasons. On the additive chassis the full-pool and transferred-pair arms
+first PASSED ED admission (gate green, mutation red at E = +0.563) and
+then hit the 18 GiB frontier — status: admitted, resource-limited. On the
+direct chassis the declared bundle's product closure fell entirely inside
+W_R (W_bundle = ∅, machine-asserted; D ≡ C to 1e-11) — structural
+absorption, not an independent test. The resulting criterion: a
+correction bundle can carry eliminated-zone content only if its product
+closure intersects W_D; the 55 enumerated W_D classes at N=10
+(`BASIS_PARTITION_N10.json`) give the anchoring set. This is also the
+structural reading of the week's earlier bundle null (28 training scores
+in the e-9 band; the measured pool adds 55 PSD scalars ≈ 0.08% of the
+model): those pools were chosen by geometric distance, not W_D anchoring.
+(Whether the pool operators lie inside the Gram basis itself — which
+would make Γ_S a principal submatrix and its positivity logically implied
+— was checked only at the tsupp/closure level, not at the Gram-row level,
+so that stronger statement is not claimed.)
+
+### 4. Architecture and soundness [C16; release gates C10]
+
+Deleted words are machine-provably never created: post-extension basis ≡
+frozen hashed allowlist, seam admits nothing (seam_newwords = 0), no
+deleted variable/row/block exists. Map certificate: per-parity isometry
+5.1e-16, dual-parity flow identity 0.0. ED gates: link residual ≤ 1e-10
+over all rows, coarse and retained-witness Gram PSD at the ED state;
+targeted link-coefficient mutation goes red (E = +0.0999); the objective
+class is carried exactly. N=8 serves as the finite-size
+partition-collapse control (closure refill ⇒ W_D = ∅, A ≡ B; |C−B| =
+2.1e-10 — the machinery produces no spurious tightening in the degenerate
+case). Positioning: a direct/operational replacement prototype — not a
+completed implementation of Sec. III-D-2.
+
+### Evidence table — additive-tower campaign (frozen CSVs, reproduced unchanged)
 
 | finding | numbers |
 |---|---|
@@ -159,34 +224,6 @@ into lower realized cost or resolved accuracy recovery.
 | PSD-scalar count is an unreliable cost proxy when block-dimension distributions differ | at N=20: structural ratio 0.85 vs wall ~9x and RSS ~5.7x — the tower concentrates scalars in dimension-128 blocks, for which the interior-point method pays super-linearly |
 | bundle / deeper-tower contributions: resource-frontier, not numerical failure | D, E at the 18 GiB frontier at both sizes; C10@N=20 deeper-tower validity passed (1792 link rows, residual ≤ 1.7e-15) and its interior-point solve crossed the local 18 GiB frontier; frontier rows retained with status |
 | validity | every accepted row ≤ E_Bethe + 5e-7; L_B ≤ L_A and L_B ≤ L_C6 within ε_cmp at both sizes |
-
-No cost-at-matched-accuracy claim is made. This is an operational
-replacement prototype, not a completed coarse replacement and not an
-implementation of Sec. III-D-2.
-
-### Direct fine-to-coarse replacement MVP (second revision, late afternoon)
-
-A narrower, gate-first MVP in which deleted fine variables are provably
-never created: a Gram-induced partition (frozen hashed allowlist; N=10:
-|W_full| = 527, |W_R| = 472, |W_D| = 55) with a one-level D=2 dual-parity
-coarse registry entering through T2-type link identities whose pullbacks
-are enumerated inside the retained span. All gates passed — map
-certificate (isometry 5.1e-16, flow identity 0.0), deleted-object-zero
-assertions (post-extension basis ≡ allowlist, seam admits nothing), exact
-objective, ED feasibility (link residual ≤ 1e-10), mutation red. Result
-at N=10 (all arms OPTIMAL, every row ≤ E_Bethe + 5e-7): structural cost
-of DirectCG = **0.697 of FullFine (meets the pre-declared 0.7 preferred
-threshold) at realized wall/RSS parity** — unlike the additive D=4 tower,
-whose 0.85 structural ratio came with ~9x wall. The eliminated reach gap
-d = +4.97e-06 is resolved-positive; recovery by the single D=2 level is
-UNRESOLVED (one-sided bound < 0.53% of d, central value −0.02%). Two
-boundary findings of record: the N=8 partition is degenerate (closure
-refill ⇒ |W_D| = 0, A ≡ B — kept as control row), and the declared
-correction bundle (B_half) is absorbed by the retained closure at N=10
-(W_bundle = ∅ exactly, machine-asserted) — a correction registry that
-actually carries deleted-zone content must anchor on the 55 enumerated
-W_D classes. Evidence: `rg_selection/direct/` (contract, partitions,
-audits, gates, solves, SHA256SUMS).
 
 ## Reproducibility
 
