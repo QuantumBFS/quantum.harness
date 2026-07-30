@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="520" viewBox="0 0 900 520" role="img" aria-labelledby="title desc">
+  <title id="title">Corrected numerical lower estimate versus coarse depth</title>
+  <desc id="desc">For bond dimension six, estimates improve from minus 0.381903 at depth three toward minus 0.377244 by depth twenty and remain stable through depth sixty.</desc>
+  <rect width="900" height="520" fill="#fbfaf6"/>
+  <g stroke="#ddd8cc" stroke-width="1">
+    <line x1="110" y1="70" x2="840" y2="70"/><line x1="110" y1="157" x2="840" y2="157"/>
+    <line x1="110" y1="244" x2="840" y2="244"/><line x1="110" y1="331" x2="840" y2="331"/>
+    <line x1="110" y1="418" x2="840" y2="418"/>
+  </g>
+  <g stroke="#333" stroke-width="2"><line x1="110" y1="70" x2="110" y2="418"/><line x1="110" y1="418" x2="840" y2="418"/></g>
+  <g fill="#555" font-family="system-ui,sans-serif" font-size="14">
+    <text x="35" y="75">−0.377</text><text x="35" y="162">−0.3785</text><text x="35" y="249">−0.380</text>
+    <text x="35" y="336">−0.3815</text><text x="35" y="423">−0.383</text>
+    <text x="138" y="446">3</text><text x="163" y="446">5</text><text x="189" y="446">7</text><text x="350" y="446">20</text>
+    <text x="414" y="446">25</text><text x="478" y="446">30</text><text x="802" y="446">60</text>
+    <text x="410" y="486" font-size="16">coarse depth</text>
+    <text transform="translate(19 350) rotate(-90)" font-size="16">corrected lower estimate per site</text>
+  </g>
+  <polyline points="148,354.4 173,171.2 199,112.1 365,72.1 429,72.1 493,72.2 813,72.1" fill="none" stroke="#1f5cd6" stroke-width="4"/>
+  <g fill="#1f5cd6" stroke="#fff" stroke-width="2">
+    <circle cx="148" cy="354.4" r="6"/><circle cx="173" cy="171.2" r="6"/><circle cx="199" cy="112.1" r="6"/>
+    <circle cx="365" cy="72.1" r="6"/><circle cx="429" cy="72.1" r="6"/><circle cx="493" cy="72.2" r="6"/><circle cx="813" cy="72.1" r="7"/>
+  </g>
+  <path d="M350 86 H830" stroke="#b8651e" stroke-width="2" stroke-dasharray="7 6"/>
+  <g font-family="system-ui,sans-serif">
+    <text x="110" y="35" font-size="20" font-weight="600" fill="#1a1a1a">D = 6 depth convergence</text>
+    <text x="530" y="106" font-size="14" fill="#8b4b18">depth 20–60 spread ≈ 9×10⁻⁷</text>
+    <text x="605" y="61" font-size="14" fill="#1f5cd6">depth 60: −0.3772436555</text>
+  </g>
+</svg>

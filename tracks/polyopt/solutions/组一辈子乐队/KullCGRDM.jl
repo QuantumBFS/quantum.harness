@@ -31,6 +31,111 @@ struct U1Symmetry
     virtual_charges::Vector{Int}
 end
 
+"Explicit on-site and virtual-bond representations of spin-flip Z₂."
+struct SpinFlipSymmetry
+    physical_flip::Matrix{ComplexF64}
+    virtual_flip::Matrix{ComplexF64}
+    physical_permutation::Vector{Int}
+    virtual_permutation::Vector{Int}
+    SpinFlipSymmetry(physical_flip::Matrix{ComplexF64}, virtual_flip::Matrix{ComplexF64},
+        physical_permutation::Vector{Int}, virtual_permutation::Vector{Int},
+        ::Val{:validated}) = new(physical_flip, virtual_flip,
+            physical_permutation, virtual_permutation)
+end
+
+function permutation_matrix(permutation::AbstractVector{<:Integer})
+    n = length(permutation)
+    sort(Int.(permutation)) == collect(1:n) ||
+        throw(ArgumentError("flip permutation must contain each basis index exactly once"))
+    F = zeros(ComplexF64, n, n)
+    for source in 1:n
+        F[permutation[source], source] = 1
+    end
+    F
+end
+
+function _matrix_permutation(F::AbstractMatrix; atol::Real=1e-12)
+    size(F, 1) == size(F, 2) || throw(DimensionMismatch("flip matrix must be square"))
+    permutation = Int[]
+    for column in axes(F, 2)
+        rows = findall(value -> abs(value) > atol, F[:,column])
+        length(rows) == 1 && abs(F[only(rows),column] - 1) <= atol ||
+            throw(ArgumentError("flip matrix is not a permutation matrix"))
+        push!(permutation, only(rows))
+    end
+    sort(permutation) == collect(1:size(F, 1)) ||
+        throw(ArgumentError("flip matrix is not a permutation matrix"))
+    permutation
+end
+
+function SpinFlipSymmetry(physical_permutation::AbstractVector{<:Integer},
+        virtual_permutation::AbstractVector{<:Integer}; atol::Real=1e-12)
+    physical = Int.(physical_permutation)
+    virtual = Int.(virtual_permutation)
+    SpinFlipSymmetry(permutation_matrix(physical), permutation_matrix(virtual),
+        physical, virtual; atol)
+end
+
+function SpinFlipSymmetry(physical_flip::AbstractMatrix, virtual_flip::AbstractMatrix;
+        atol::Real=1e-12)
+    SpinFlipSymmetry(physical_flip, virtual_flip,
+        _matrix_permutation(physical_flip; atol), _matrix_permutation(virtual_flip; atol); atol)
+end
+
+function SpinFlipSymmetry(physical_flip::AbstractMatrix, virtual_flip::AbstractMatrix,
+        physical_permutation::AbstractVector{<:Integer},
+        virtual_permutation::AbstractVector{<:Integer}; atol::Real=1e-12)
+    atol >= 0 || throw(ArgumentError("atol must be nonnegative"))
+    physical = Int.(physical_permutation)
+    virtual = Int.(virtual_permutation)
+    Fp = Matrix{ComplexF64}(physical_flip)
+    Fv = Matrix{ComplexF64}(virtual_flip)
+    size(Fp) == (length(physical), length(physical)) ||
+        throw(DimensionMismatch("physical flip matrix and permutation dimensions differ"))
+    size(Fv) == (length(virtual), length(virtual)) ||
+        throw(DimensionMismatch("virtual flip matrix and permutation dimensions differ"))
+    norm(Fp - permutation_matrix(physical), Inf) <= atol ||
+        throw(ArgumentError("physical flip matrix does not realize its declared permutation"))
+    norm(Fv - permutation_matrix(virtual), Inf) <= atol ||
+        throw(ArgumentError("virtual flip matrix does not realize its declared permutation"))
+    symmetry = SpinFlipSymmetry(Fp, Fv, physical, virtual, Val(:validated))
+    validate_spin_flip(symmetry; atol)
+    symmetry
+end
+
+function validate_spin_flip(symmetry::SpinFlipSymmetry; atol::Real=1e-12)
+    atol >= 0 || throw(ArgumentError("atol must be nonnegative"))
+    dp, dv = size(symmetry.physical_flip, 1), size(symmetry.virtual_flip, 1)
+    checks = Dict{String,Float64}(
+        "physical_involution" => norm(symmetry.physical_flip^2 - Matrix{ComplexF64}(I, dp, dp), Inf),
+        "physical_unitarity" => norm(symmetry.physical_flip' * symmetry.physical_flip - Matrix{ComplexF64}(I, dp, dp), Inf),
+        "virtual_involution" => norm(symmetry.virtual_flip^2 - Matrix{ComplexF64}(I, dv, dv), Inf),
+        "virtual_unitarity" => norm(symmetry.virtual_flip' * symmetry.virtual_flip - Matrix{ComplexF64}(I, dv, dv), Inf))
+    maximum(values(checks)) <= atol ||
+        throw(ArgumentError("spin-flip matrices must be unitary involutions; residuals=$checks"))
+    all(symmetry.physical_permutation[symmetry.physical_permutation[i]] == i
+        for i in eachindex(symmetry.physical_permutation)) ||
+        throw(ArgumentError("physical flip permutation is not an involution"))
+    all(symmetry.virtual_permutation[symmetry.virtual_permutation[i]] == i
+        for i in eachindex(symmetry.virtual_permutation)) ||
+        throw(ArgumentError("virtual flip permutation is not an involution"))
+    checks
+end
+
+function validate_charge_reversal(symmetry::SpinFlipSymmetry, u1::U1Symmetry)
+    length(u1.physical_charges) == length(symmetry.physical_permutation) ||
+        throw(DimensionMismatch("physical charge and flip dimensions differ"))
+    length(u1.virtual_charges) == length(symmetry.virtual_permutation) ||
+        throw(DimensionMismatch("virtual charge and flip dimensions differ"))
+    all(u1.physical_charges[symmetry.physical_permutation[i]] == -u1.physical_charges[i]
+        for i in eachindex(u1.physical_charges)) ||
+        throw(ArgumentError("physical spin flip does not map charge q to -q"))
+    all(u1.virtual_charges[symmetry.virtual_permutation[i]] == -u1.virtual_charges[i]
+        for i in eachindex(u1.virtual_charges)) ||
+        throw(ArgumentError("virtual spin flip does not map charge q to -q"))
+    true
+end
+
 const AXIS_CONTRACT = (
     A = (:virtual_left, :physical, :virtual_right),
     omega = (:physical_left, :virtual_left, :virtual_right, :physical_right),
@@ -544,6 +649,111 @@ function mps_charge_residual(frozen::FrozenUniformMPS, symmetry::U1Symmetry)
         if symmetry.virtual_charges[right] != symmetry.virtual_charges[left] + symmetry.physical_charges[physical]); init=0.0)
 end
 
+"Tensor-product spin flip in the column-major subsystem convention used by this module."
+function product_flip(flips::AbstractMatrix...)
+    isempty(flips) && return ones(ComplexF64, 1, 1)
+    foldl((acc, flip) -> kron(flip, acc), flips;
+        init=ones(ComplexF64, 1, 1))
+end
+
+"Residual of K Fᵢₙ = Fₒᵤₜ K for a spin-flip intertwiner."
+function spin_flip_equivariance_residual(K::AbstractMatrix,
+        output_flip::AbstractMatrix, input_flip::AbstractMatrix)
+    size(K) == (size(output_flip, 1), size(input_flip, 1)) ||
+        throw(DimensionMismatch("map and spin-flip dimensions differ"))
+    size(output_flip, 1) == size(output_flip, 2) ||
+        throw(DimensionMismatch("output spin flip must be square"))
+    size(input_flip, 1) == size(input_flip, 2) ||
+        throw(DimensionMismatch("input spin flip must be square"))
+    norm(K * input_flip - output_flip * K, Inf)
+end
+
+"Largest tensor-level spin-flip intertwiner residual, without modifying the frozen tensors."
+function mps_spin_flip_residual(frozen::FrozenUniformMPS, symmetry::SpinFlipSymmetry)
+    frozen.physical_dimension == size(symmetry.physical_flip, 1) ||
+        throw(DimensionMismatch("physical spin-flip dimension does not match MPS"))
+    D = _uniform_bond_dimension(frozen)
+    D == size(symmetry.virtual_flip, 1) ||
+        throw(DimensionMismatch("virtual spin-flip dimension does not match MPS"))
+    maximum((spin_flip_equivariance_residual(
+        reshape(permutedims(A, (1, 3, 2)), D^2, frozen.physical_dimension),
+        product_flip(conj(symmetry.virtual_flip), symmetry.virtual_flip),
+        symmetry.physical_flip) for A in frozen.tensors); init=0.0)
+end
+
+function parity_basis(flip::AbstractMatrix; atol::Real=1e-12)
+    size(flip, 1) == size(flip, 2) || throw(DimensionMismatch("spin flip must be square"))
+    isapprox(flip, flip'; atol, rtol=0) || throw(ArgumentError("spin flip must be Hermitian"))
+    decomposition = eigen(Hermitian(Matrix{ComplexF64}(flip)))
+    all(abs(abs(value) - 1) <= atol for value in decomposition.values) ||
+        throw(ArgumentError("spin-flip eigenvalues must be ±1"))
+    minus = findall(<(0), decomposition.values)
+    plus = findall(>(0), decomposition.values)
+    U = decomposition.vectors[:, [plus; minus]]
+    (; U, plus=collect(1:length(plus)),
+        minus=collect(length(plus)+1:size(flip, 1)))
+end
+
+spin_flip_invariance_residual(X::AbstractMatrix, flip::AbstractMatrix) =
+    norm(X * flip - flip * X, Inf)
+
+function spin_flip_map_residuals(frozen::FrozenUniformMPS,
+        symmetry::SpinFlipSymmetry; k0::Int=2, m::Int=k0, start_site::Int=1)
+    Fp, Fv = symmetry.physical_flip, symmetry.virtual_flip
+    rho_flip = product_flip(ntuple(_ -> Fp, k0 + 1)...)
+    omega_flip = product_flip(Fp, conj(Fv), Fv, Fp)
+    bridge = bottom_bridge_operators(frozen; k0, start_site)
+    flow = flow_operators(frozen, m; start_site)
+    Dict{String,Float64}(
+        "mps" => mps_spin_flip_residual(frozen, symmetry),
+        "Wm" => spin_flip_equivariance_residual(direct_Wm(frozen, m; start_site),
+            product_flip(conj(Fv), Fv), product_flip(ntuple(_ -> Fp, m)...)),
+        "bottom_left" => spin_flip_equivariance_residual(bridge.to_trace_physical_left,
+            product_flip(conj(Fv), Fv, Fp), rho_flip),
+        "bottom_right" => spin_flip_equivariance_residual(bridge.to_trace_physical_right,
+            product_flip(Fp, conj(Fv), Fv), rho_flip),
+        "flow_left" => spin_flip_equivariance_residual(flow.to_trace_physical_left,
+            product_flip(conj(Fv), Fv, Fp), omega_flip),
+        "flow_right" => spin_flip_equivariance_residual(flow.to_trace_physical_right,
+            product_flip(Fp, conj(Fv), Fv), omega_flip))
+end
+
+function partial_trace_spin_flip_residual(X::AbstractMatrix, dims::Tuple, axis::Int,
+        subsystem_flips::Tuple)
+    length(dims) == length(subsystem_flips) ||
+        throw(DimensionMismatch("one spin flip is required per subsystem"))
+    input_flip = product_flip(subsystem_flips...)
+    kept_flips = Tuple(subsystem_flips[i] for i in eachindex(dims) if i != axis)
+    output_flip = product_flip(kept_flips...)
+    norm(partial_trace(input_flip * X * input_flip', dims, axis) -
+        output_flip * partial_trace(X, dims, axis) * output_flip', Inf)
+end
+
+function congruence_spin_flip_residual(K::AbstractMatrix, X::AbstractMatrix,
+        output_flip::AbstractMatrix, input_flip::AbstractMatrix)
+    norm(congruence(K, input_flip * X * input_flip') -
+        output_flip * congruence(K, X) * output_flip', Inf)
+end
+
+function _parity_psd_matrix(model::JuMP.Model, flip::AbstractMatrix, base_name::String)
+    basis = parity_basis(flip)
+    dimension = size(flip, 1)
+    transformed = Matrix{Any}(zeros(ComplexF64, dimension, dimension))
+    blocks = Dict{Int,Any}()
+    for (parity, indices) in ((1, basis.plus), (-1, basis.minus))
+        isempty(indices) && continue
+        n = length(indices)
+        block = @variable(model, [1:n, 1:n] in HermitianPSDCone(),
+            base_name="$(base_name)_parity_$(parity == 1 ? "plus" : "minus")")
+        blocks[parity] = block
+        transformed[indices, indices] = block
+    end
+    matrix = [sum(basis.U[i,a] * transformed[a,b] * conj(basis.U[j,b])
+        for a in 1:dimension, b in 1:dimension)
+        for i in 1:dimension, j in 1:dimension]
+    matrix, blocks, basis
+end
+
 function _block_psd_matrix(model::JuMP.Model, charges::AbstractVector{<:Integer}, base_name::String;
         real_sdp::Bool=false)
     dimension = length(charges)
@@ -683,14 +893,18 @@ end
 function build_kull_primal(h::AbstractMatrix; frozen::Union{Nothing,FrozenUniformMPS}=nothing,
         depth::Int=3, k0::Union{Nothing,Int}=nothing, optimizer=nothing,
         solver_settings=Dict{String,Any}(), vumps_upper_endpoint::Real=NaN,
-        symmetry::Union{Nothing,U1Symmetry}=nothing, real_sdp::Bool=false)
+        symmetry=nothing, real_sdp::Bool=false)
     size(h, 1) == size(h, 2) || throw(DimensionMismatch("h must be square"))
     d = isqrt(size(h, 1))
     d^2 == size(h, 1) || throw(DimensionMismatch("h must act on two equal-dimensional sites"))
     isapprox(h, h'; atol=1e-12, rtol=1e-12) || throw(ArgumentError("h must be Hermitian"))
 
-    real_sdp && isnothing(symmetry) &&
-        throw(ArgumentError("real SDP representation currently requires U(1) block structure"))
+    symmetry isa Tuple && throw(ArgumentError(
+        "combined U(1)⋊Z2 symmetry is unsupported; use standalone U(1) or standalone Z2"))
+    symmetry isa Union{Nothing,U1Symmetry,SpinFlipSymmetry} ||
+        throw(ArgumentError("symmetry must be nothing, U1Symmetry, or standalone SpinFlipSymmetry"))
+    real_sdp && !(symmetry isa U1Symmetry) &&
+        throw(ArgumentError("real SDP representation currently requires standalone U(1) block structure"))
     real_sdp && maximum(abs, imag.(h); init=0.0) > 1e-12 &&
         throw(ArgumentError("real SDP representation requires a real Hamiltonian"))
     real_sdp && !isnothing(frozen) &&
@@ -710,7 +924,9 @@ function build_kull_primal(h::AbstractMatrix; frozen::Union{Nothing,FrozenUnifor
     rho_support = selected_k0 + 1
     rho_dims = ntuple(_ -> d, rho_support)
     rho_dimension = d^rho_support
-    if !isnothing(symmetry)
+    is_u1 = symmetry isa U1Symmetry
+    is_z2 = symmetry isa SpinFlipSymmetry
+    if is_u1
         length(symmetry.physical_charges) == d ||
             throw(DimensionMismatch("physical charge count must equal d"))
         hcharges = product_charges(symmetry.physical_charges, symmetry.physical_charges)
@@ -718,6 +934,24 @@ function build_kull_primal(h::AbstractMatrix; frozen::Union{Nothing,FrozenUnifor
             throw(ArgumentError("Hamiltonian does not conserve the supplied U(1) charge"))
         !isnothing(frozen) && mps_charge_residual(frozen, symmetry) > 1e-12 &&
             throw(ArgumentError("frozen MPS is not an intertwiner for the supplied U(1) charges"))
+    elseif is_z2
+        size(symmetry.physical_flip) == (d, d) ||
+            throw(DimensionMismatch("physical spin-flip dimension must equal d"))
+        hflip = product_flip(symmetry.physical_flip, symmetry.physical_flip)
+        spin_flip_invariance_residual(h, hflip) <= 1e-12 ||
+            throw(ArgumentError("Hamiltonian is not invariant under the supplied standalone Z2 spin flip"))
+        if !isnothing(frozen)
+            size(symmetry.virtual_flip) == (D, D) ||
+                throw(DimensionMismatch("virtual spin-flip dimension must equal the coarse bond dimension"))
+            mps_spin_flip_residual(frozen, symmetry) <= 1e-12 ||
+                throw(ArgumentError("frozen MPS is not a spin-flip intertwiner"))
+            for parity in parities, m in selected_k0:depth
+                residuals = spin_flip_map_residuals(frozen, symmetry;
+                    k0=selected_k0, m, start_site=parity)
+                maximum(values(residuals)) <= 1e-12 ||
+                    throw(ArgumentError("coarse maps are not spin-flip equivariant; residuals=$residuals"))
+            end
+        end
     end
     model = isnothing(optimizer) ? Model() : Model(optimizer)
     for (attribute, value) in solver_settings
@@ -725,25 +959,24 @@ function build_kull_primal(h::AbstractMatrix; frozen::Union{Nothing,FrozenUnifor
     end
     symmetry_blocks = Dict{String,Any}()
     symmetry_charges = Dict{String,Vector{Int}}()
+    parity_bases = Dict{String,Any}()
     rho_charges = Int[]
     if isnothing(symmetry)
         @variable(model, rho3[1:rho_dimension, 1:rho_dimension] in HermitianPSDCone())
-    else
+    elseif is_u1
         rho_charges = product_charges(ntuple(_ -> symmetry.physical_charges, rho_support)...)
         rho3, symmetry_blocks["rho3"] = _block_psd_matrix(model, rho_charges, "rho"; real_sdp)
         symmetry_charges["rho3"] = rho_charges
+    else
+        rho_flip = product_flip(ntuple(_ -> symmetry.physical_flip, rho_support)...)
+        rho3, symmetry_blocks["rho3"], parity_bases["rho3"] =
+            _parity_psd_matrix(model, rho_flip, "rho")
     end
     constraints = Dict{Symbol,Vector{Any}}(
         :normalization => Any[], :lti => Any[], :bottom => Any[], :flow => Any[])
     push!(constraints[:normalization], @constraint(model,
         real(sum(rho3[i,i] for i in 1:rho_dimension)) == 1))
-    if isnothing(symmetry)
-        left_marginal = _jump_edge_marginal(rho3, rho_dims, selected_k0, :left)
-        right_marginal = _jump_edge_marginal(rho3, rho_dims, selected_k0, :right)
-        append!(constraints[:lti], _add_hermitian_equalities!(model,
-            left_marginal, right_marginal))
-        objective_marginal = _jump_edge_marginal(rho3, rho_dims, 2, :right)
-    else
+    if is_u1
         rho_subsystems = ntuple(_ -> symmetry.physical_charges, rho_support)
         marginal_charges = product_charges(ntuple(_ -> symmetry.physical_charges,
             selected_k0)...)
@@ -754,6 +987,12 @@ function build_kull_primal(h::AbstractMatrix; frozen::Union{Nothing,FrozenUnifor
         append!(constraints[:lti], _add_charge_equalities!(model,
             left_marginal, right_marginal, marginal_charges; real_sdp))
         objective_marginal = _jump_charge_edge_marginal(rho3, rho_subsystems, 2, :right)
+    else
+        left_marginal = _jump_edge_marginal(rho3, rho_dims, selected_k0, :left)
+        right_marginal = _jump_edge_marginal(rho3, rho_dims, selected_k0, :right)
+        append!(constraints[:lti], _add_hermitian_equalities!(model,
+            left_marginal, right_marginal))
+        objective_marginal = _jump_edge_marginal(rho3, rho_dims, 2, :right)
     end
     @objective(model, Min, real(sum(h[i,j] * objective_marginal[j,i]
         for i in 1:d^2, j in 1:d^2)))
@@ -762,23 +1001,29 @@ function build_kull_primal(h::AbstractMatrix; frozen::Union{Nothing,FrozenUnifor
     if !isnothing(frozen)
         q = d^2 * D^2
         omega_dims = (d, D, D, d)
-        omega_charges = isnothing(symmetry) ? Int[] : product_charges(symmetry.physical_charges,
+        omega_charges = is_u1 ? product_charges(symmetry.physical_charges,
             -symmetry.virtual_charges, symmetry.virtual_charges,
-            symmetry.physical_charges)
+            symmetry.physical_charges) : Int[]
+        omega_flip = is_z2 ? product_flip(symmetry.physical_flip,
+            conj(symmetry.virtual_flip), symmetry.virtual_flip,
+            symmetry.physical_flip) : zeros(ComplexF64, 0, 0)
         for m in selected_k0:depth, parity in parities
             key = _omega_key(frozen, m, parity)
             name = _omega_name(frozen, m, parity)
             if isnothing(symmetry)
                 omegas[key] = @variable(model, [1:q, 1:q] in HermitianPSDCone(), base_name=name)
-            else
+            elseif is_u1
                 omegas[key], symmetry_blocks[name] = _block_psd_matrix(model, omega_charges, name; real_sdp)
                 symmetry_charges[name] = omega_charges
+            else
+                omegas[key], symmetry_blocks[name], parity_bases[name] =
+                    _parity_psd_matrix(model, omega_flip, name)
             end
         end
         for parity in parities
             key = _omega_key(frozen, selected_k0, parity)
             bridge = bottom_bridge_operators(frozen; k0=selected_k0, start_site=parity)
-            if isnothing(symmetry)
+            if !is_u1
                 append!(constraints[:bottom], _add_hermitian_equalities!(model,
                     _jump_congruence(bridge.to_trace_physical_left, rho3),
                     _jump_partial_trace(omegas[key], omega_dims, 1)))
@@ -806,7 +1051,7 @@ function build_kull_primal(h::AbstractMatrix; frozen::Union{Nothing,FrozenUnifor
             left_parity = frozen.unit_cell_length == 1 ? parity : _switch_parity(parity)
             left_source = _omega_key(frozen, m, left_parity)
             flow = flow_operators(frozen, m; start_site=parity)
-            if isnothing(symmetry)
+            if !is_u1
                 append!(constraints[:flow], _add_hermitian_equalities!(model,
                     _jump_congruence(flow.to_trace_physical_left, omegas[left_source]),
                     _jump_partial_trace(omegas[next_key], omega_dims, 1)))
@@ -834,7 +1079,7 @@ function build_kull_primal(h::AbstractMatrix; frozen::Union{Nothing,FrozenUnifor
 
     inventory = resource_inventory(d, D, depth; k0=selected_k0,
         start_parities=length(parities))
-    if !isnothing(symmetry)
+    if is_u1
         rho_sizes = last.(charge_sectors(product_charges(ntuple(_ -> symmetry.physical_charges, rho_support)...))) .|> length
         omega_sizes = isnothing(D) ? Int[] :
             last.(charge_sectors(product_charges(symmetry.physical_charges,
@@ -853,6 +1098,25 @@ function build_kull_primal(h::AbstractMatrix; frozen::Union{Nothing,FrozenUnifor
         local_feasible = peak_bytes < 16 * 1024^3 && wall_seconds < 600
         inventory = KullResourceInventory(block_sizes, length(block_sizes), variables,
             sparse_equalities, coefficient_bytes, peak_bytes, wall_seconds, local_feasible)
+    elseif is_z2
+        rho_basis = parity_bases["rho3"]
+        rho_sizes = filter(>(0), [length(rho_basis.plus), length(rho_basis.minus)])
+        omega_sizes = Int[]
+        if !isnothing(D)
+            omega_basis = parity_bases[_omega_name(frozen, selected_k0, first(parities))]
+            omega_sizes = filter(>(0), [length(omega_basis.plus), length(omega_basis.minus)])
+        end
+        block_sizes = [rho_sizes; repeat(omega_sizes,
+            length(parities) * (depth - selected_k0 + 1))]
+        variables = sum(abs2, block_sizes)
+        equalities = sum(length, values(constraints))
+        coefficient_bytes = 16 * (variables + 8 * equalities)
+        peak_bytes = coefficient_bytes + 8 * equalities^2 + 16 * variables
+        wall_seconds = max(1.0, sum(block^3 for block in block_sizes) / 2.0e7 +
+            equalities^2 / 2.0e7)
+        inventory = KullResourceInventory(block_sizes, length(block_sizes), variables,
+            equalities, coefficient_bytes, peak_bytes, wall_seconds,
+            peak_bytes < 16 * 1024^3 && wall_seconds < 600)
     end
     metadata = Dict{String,Any}(
         "depth" => depth, "n" => depth, "k0" => selected_k0,
@@ -864,10 +1128,16 @@ function build_kull_primal(h::AbstractMatrix; frozen::Union{Nothing,FrozenUnifor
         "map_fingerprint" => isnothing(frozen) ? nothing : frozen.fingerprint,
         "frozen_map" => frozen, "vumps_upper_endpoint" => Float64(vumps_upper_endpoint),
         "representation" => isnothing(symmetry) ? "JuMP HermitianPSDCone" :
-            (real_sdp ? "U(1) block SymmetricPSDCone" : "U(1) block HermitianPSDCone"),
+            (is_u1 ? (real_sdp ? "U(1) block SymmetricPSDCone" :
+                "U(1) block HermitianPSDCone") :
+                "standalone Z2 parity-block HermitianPSDCone"),
+        "symmetry_mode" => isnothing(symmetry) ? "none" :
+            (is_u1 ? "standalone U(1)" : "standalone Z2"),
+        "semidirect_product_supported" => false,
         "real_sdp" => real_sdp,
         "symmetry" => symmetry, "symmetry_blocks" => symmetry_blocks,
-        "symmetry_charges" => symmetry_charges, "optimized" => false,
+        "symmetry_charges" => symmetry_charges, "parity_bases" => parity_bases,
+        "optimized" => false,
         "coefficient_policy" => isnothing(frozen) ?
             Dict{String,Any}("mode" => "exact-hamiltonian-only", "complete_interval_enclosure" => true) :
             coefficient_enclosure_policy(frozen))
@@ -980,6 +1250,8 @@ end
 
 "Export all cone/equality duals and reconstruct stationarity with the shared map adjoints."
 function reconstruct_dual_certificate(problem::KullPrimalProblem)
+    problem.metadata["symmetry"] isa SpinFlipSymmetry &&
+        throw(ArgumentError("dual-certificate reconstruction for standalone Z2 parity blocks is unsupported"))
     problem.metadata["optimized"] || throw(ArgumentError("solve the primal before exporting its dual"))
     dual_status(problem.model) in (MOI.FEASIBLE_POINT, MOI.NEARLY_FEASIBLE_POINT) ||
         throw(ArgumentError("the solver did not return a dual point"))
@@ -1200,7 +1472,11 @@ function solve_kull_primal!(problem::KullPrimalProblem; clean_tolerance::Real=1e
 end
 
 export Sx, Sy, Sz, HEISENBERG_H, EXACT_ENERGY, xxz_hamiltonian, blocked_xxz_hamiltonian
-export U1Symmetry, product_charges, charge_sectors, equivariance_residual, mps_charge_residual
+export U1Symmetry, SpinFlipSymmetry, permutation_matrix, validate_spin_flip, validate_charge_reversal
+export product_charges, charge_sectors, equivariance_residual, mps_charge_residual
+export product_flip, parity_basis, spin_flip_equivariance_residual, spin_flip_invariance_residual
+export mps_spin_flip_residual, spin_flip_map_residuals, partial_trace_spin_flip_residual
+export congruence_spin_flip_residual
 export FrozenUniformMPS, frozen_fingerprint, product_frozen_mps, random_canonical_frozen_mps
 export AXIS_CONTRACT, flatten_ket, unflatten_ket, matrix_to_named_operator, named_operator_to_matrix
 export site_tensor, direct_Wm, W2, left_absorption, right_absorption, recursive_Wm

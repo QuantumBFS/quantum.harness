@@ -196,6 +196,77 @@ const QUIET = Dict("MSK_IPAR_LOG" => 0)
         end
     end
 
+    @testset "standalone spin-flip Z2 parity blocks" begin
+        symmetry = SpinFlipSymmetry([2, 1], [1])
+        @test SpinFlipSymmetry(symmetry.physical_flip, symmetry.virtual_flip).physical_permutation == [2, 1]
+        @test maximum(values(validate_spin_flip(symmetry))) == 0
+        @test permutation_matrix([2, 1]) == ComplexF64[0 1; 1 0]
+        @test_throws ArgumentError SpinFlipSymmetry([1, 1], [1])
+        @test_throws ArgumentError SpinFlipSymmetry([2, 3, 1], [1])
+        @test_throws ArgumentError SpinFlipSymmetry(ComplexF64[0 1; 1 0], ones(ComplexF64, 1, 1),
+            [1, 2], [1])
+        @test_throws ArgumentError SpinFlipSymmetry(ComplexF64[1 0; 0 im], ones(ComplexF64, 1, 1))
+
+        plus_map = product_frozen_mps(ComplexF64[1, 1])
+        @test mps_spin_flip_residual(plus_map, symmetry) < 1e-14
+        residuals = spin_flip_map_residuals(plus_map, symmetry; k0=2, m=3)
+        @test all(value < 1e-13 for value in values(residuals))
+        Fp = symmetry.physical_flip
+        @test spin_flip_invariance_residual(HEISENBERG_H, product_flip(Fp, Fp)) < 1e-14
+
+        rng = MersenneTwister(9812)
+        X = randn(rng, ComplexF64, 8, 8)
+        @test partial_trace_spin_flip_residual(X, (2, 2, 2), 2, (Fp, Fp, Fp)) < 1e-12
+        bridge = bottom_bridge_operators(plus_map; k0=2)
+        @test congruence_spin_flip_residual(bridge.to_trace_physical_left, X,
+            product_flip(symmetry.virtual_flip, symmetry.virtual_flip, Fp),
+            product_flip(Fp, Fp, Fp)) < 1e-12
+
+        dense = build_kull_primal(HEISENBERG_H; frozen=plus_map, depth=3, k0=2,
+            optimizer=MosekTools.Optimizer, solver_settings=QUIET)
+        z2 = build_kull_primal(HEISENBERG_H; frozen=plus_map, depth=3, k0=2,
+            symmetry, optimizer=MosekTools.Optimizer, solver_settings=QUIET)
+        @test z2.inventory.psd_block_dimensions == [4, 4, 2, 2, 2, 2]
+        @test sort(collect(keys(z2.metadata["symmetry_blocks"]["rho3"]))) == [-1, 1]
+        @test z2.metadata["symmetry_mode"] == "standalone Z2"
+        @test z2.metadata["representation"] == "standalone Z2 parity-block HermitianPSDCone"
+        @test z2.metadata["semidirect_product_supported"] === false
+        dense_result = solve_kull_primal!(dense; print_inventory=false)
+        z2_result = solve_kull_primal!(z2; print_inventory=false)
+        @test dense_result.clean
+        @test z2_result.clean
+        @test z2_result.lower_bound_candidate ≈ dense_result.lower_bound_candidate atol=2e-7 rtol=0
+        @test spin_flip_invariance_residual(value.(z2.rho3), product_flip(Fp, Fp, Fp)) < 1e-8
+        @test_throws ArgumentError reconstruct_dual_certificate(z2)
+
+        u1 = U1Symmetry([1, -1], [0])
+        @test validate_charge_reversal(symmetry, u1)
+        dense_common = build_kull_primal(HEISENBERG_H; depth=2, k0=2,
+            optimizer=MosekTools.Optimizer, solver_settings=QUIET)
+        u1_problem = build_kull_primal(HEISENBERG_H; depth=2, k0=2,
+            symmetry=u1, optimizer=MosekTools.Optimizer, solver_settings=QUIET)
+        z2_common = build_kull_primal(HEISENBERG_H; depth=2, k0=2,
+            symmetry, optimizer=MosekTools.Optimizer, solver_settings=QUIET)
+        dense_common_result = solve_kull_primal!(dense_common; print_inventory=false)
+        u1_result = solve_kull_primal!(u1_problem; print_inventory=false)
+        z2_common_result = solve_kull_primal!(z2_common; print_inventory=false)
+        @test dense_common_result.clean && u1_result.clean && z2_common_result.clean
+        @test u1_result.lower_bound_candidate ≈ dense_common_result.lower_bound_candidate atol=2e-7 rtol=0
+        @test z2_common_result.lower_bound_candidate ≈ dense_common_result.lower_bound_candidate atol=2e-7 rtol=0
+        @test z2.inventory.real_scalar_variables < dense.inventory.real_scalar_variables
+        @test u1_problem.inventory.real_scalar_variables < dense_common.inventory.real_scalar_variables
+
+        bad_h = HEISENBERG_H + 0.1kron(Sz, Matrix{ComplexF64}(I, 2, 2))
+        @test_throws ArgumentError build_kull_primal(bad_h; depth=2, k0=2, symmetry)
+        bad_map = product_frozen_mps(ComplexF64[1, 0])
+        @test_throws ArgumentError build_kull_primal(HEISENBERG_H;
+            frozen=bad_map, depth=2, k0=2, symmetry)
+        @test_throws ArgumentError validate_charge_reversal(symmetry,
+            U1Symmetry([1, 0], [0]))
+        @test_throws ArgumentError build_kull_primal(HEISENBERG_H;
+            depth=2, k0=2, symmetry=(u1, symmetry))
+    end
+
     @testset "accepted solver terminations" begin
         @test KullCGRDM._accepted_termination(JuMP.MOI.OPTIMAL)
         @test KullCGRDM._accepted_termination(JuMP.MOI.SLOW_PROGRESS)

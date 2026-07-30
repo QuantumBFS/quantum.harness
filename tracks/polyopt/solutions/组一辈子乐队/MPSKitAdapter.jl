@@ -170,6 +170,36 @@ function freeze_u1_blocked_mpskit(state, record::Dict{String,Any})
     return (; frozen, symmetry, metadata)
 end
 
+"Freeze dense MPSKit tensors only after explicit spin-flip validation; tensors are copied, never projected or averaged."
+function freeze_spin_flip_mpskit(state, record::Dict{String,Any},
+        symmetry::SpinFlipSymmetry; atol::Real=1e-12)
+    before = [dense_left_physical_right(tensor) for tensor in state.AL]
+    frozen = freeze_mpskit(state, record)
+    residual = mps_spin_flip_residual(frozen, symmetry)
+    residual <= atol || throw(ArgumentError(
+        "MPSKit state is not a spin-flip intertwiner; residual=$residual"))
+    all(frozen.tensors[i] == before[i] for i in eachindex(before)) ||
+        error("spin-flip validation modified an MPS tensor")
+    metadata = Dict{String,Any}(
+        "symmetry_mode" => "standalone Z2",
+        "semidirect_product_supported" => false,
+        "spin_flip_residual" => residual,
+        "tensor_projection_applied" => false,
+        "tensor_averaging_applied" => false)
+    (; frozen, symmetry, metadata)
+end
+
+"Validate a frozen MPSKit state under spin flip without changing or freezing its tensors."
+function validate_mpskit_spin_flip(state, symmetry::SpinFlipSymmetry; atol::Real=1e-12)
+    tensors = [dense_left_physical_right(tensor) for tensor in state.AL]
+    frozen = FrozenUniformMPS(tensors)
+    residual = mps_spin_flip_residual(frozen, symmetry)
+    residual <= atol || throw(ArgumentError(
+        "MPSKit state is not a spin-flip intertwiner; residual=$residual"))
+    (; residual, tensors_unchanged=all(tensors[i] == dense_left_physical_right(state.AL[i])
+        for i in eachindex(tensors)))
+end
+
 "Compare transfer, norm-density, and local-energy invariants after freezing."
 function validate_adapter_invariants(state, record::Dict{String,Any};
         h=HEISENBERG_H, atol=1e-11)
@@ -189,5 +219,5 @@ end
 
 export dense_left_physical_right, dense_u1_charges, transfer_matrix, dominant_fixed_points
 export dense_two_site_energy, freeze_mpskit, freeze_u1_blocked_mpskit
-export validate_adapter_invariants
+export freeze_spin_flip_mpskit, validate_mpskit_spin_flip, validate_adapter_invariants
 end
