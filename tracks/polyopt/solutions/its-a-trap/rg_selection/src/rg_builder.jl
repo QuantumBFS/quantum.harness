@@ -10,7 +10,8 @@ include(joinpath(@__DIR__, "moment_bundles.jl"))
 const SUPP = [[1, 4]]; const COE = [3 / 4]
 
 function build_rg_selection_model(N::Int; S::Vector{String} = String[],
-        rg = nothing, vspace::Symbol = :auto, rdm = 8, pso = 0, lso = true)
+        rg = nothing, vspace::Symbol = :auto, rdm = 8, pso = 0, lso = true,
+        keeplog::Union{Nothing,String} = nothing)
     extra = r_of(N) - 1
     counters = Dict{String,Int}()
     ext = nothing
@@ -52,7 +53,9 @@ function build_rg_selection_model(N::Int; S::Vector{String} = String[],
         flush(logio); r
     end
     close(logio)
-    log = read(logpath, String); rm(logpath; force = true)
+    log = read(logpath, String)
+    keeplog === nothing || cp(logpath, keeplog; force = true)
+    rm(logpath; force = true)
     m = match(r"SDP size: n = (\d+), m = (\d+)", log)
     mos = match(r"Matrix variables\s+: (\d+) \(scalarized: (\d+)\)", log)
     con = match(r"Constraints\s+: (\d+)", log)

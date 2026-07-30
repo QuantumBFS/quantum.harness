@@ -1,0 +1,13 @@
+timer_start=2026-07-30T10:11:34+08:00
+2026-07-30T10:11:36+08:00 BASELINE rc=0 elapsed=2s
+2026-07-30T10:11:37+08:00 B_bond_edge rc=0 elapsed=3s
+2026-07-30T10:11:38+08:00 B_bond_half rc=0 elapsed=4s
+2026-07-30T10:11:40+08:00 B_half rc=0 elapsed=6s
+2026-07-30T10:11:41+08:00 B_pair_edge rc=0 elapsed=7s
+2026-07-30T10:11:42+08:00 B_bond_edge+B_bond_half rc=0 elapsed=8s
+2026-07-30T10:11:43+08:00 B_bond_edge+B_half rc=0 elapsed=9s
+2026-07-30T10:11:45+08:00 B_bond_edge+B_pair_edge rc=0 elapsed=11s
+2026-07-30T10:11:46+08:00 B_bond_half+B_half rc=0 elapsed=12s
+2026-07-30T10:11:47+08:00 B_bond_half+B_pair_edge rc=0 elapsed=13s
+2026-07-30T10:11:48+08:00 B_half+B_pair_edge rc=0 elapsed=14s
+ENUMERATION-COMPLETE elapsed=14s
