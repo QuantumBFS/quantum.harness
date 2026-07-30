@@ -87,6 +87,7 @@ class PromotionSummary:
     completed: int
     skipped: int
     exact_survivors: int
+    exact_rejected: int
     inconclusive: int
     elapsed_seconds: float
     output_dir: str
@@ -667,19 +668,7 @@ def run_cell(
             raise ValueError(f"completed cell {cell.id!r} has different settings")
         return existing
 
-    try:
-        payload = _compute_cell_payload(cell)
-    except Exception as error:
-        payload = {
-            "schema": CELL_SCHEMA,
-            "cell_id": cell.id,
-            "cell": _jsonable(cell),
-            "status": "inconclusive",
-            "error": {
-                "type": type(error).__name__,
-                "message": str(error),
-            },
-        }
+    payload = _compute_cell_payload(cell)
     return _atomic_write_payload(payload, final_path)
 
 
@@ -781,6 +770,7 @@ def _read_jsonl_records(
     except OSError as error:
         raise ValueError(f"cannot read manifest {path}") from error
     lines = text.splitlines()
+    repaired_torn_tail = False
     for line_number, line in enumerate(lines, start=1):
         if not line:
             continue
@@ -793,6 +783,7 @@ def _read_jsonl_records(
                     text[: prefix_end + 1] if prefix_end >= 0 else ""
                 )
                 _repair_torn_manifest(path, valid_prefix)
+                repaired_torn_tail = True
                 break
             raise ValueError(
                 f"invalid manifest JSON on line {line_number}"
@@ -824,6 +815,8 @@ def _read_jsonl_records(
                 f"conflicting duplicate manifest records for {record_id!r}"
             )
         records[record_id] = record
+    if text and not text.endswith("\n") and not repaired_torn_tail:
+        _repair_torn_manifest(path, text + "\n")
     return records
 
 
@@ -1078,12 +1071,20 @@ def _promote_source_candidates(
                 0,
                 error_type=type(build_error).__name__,
             )
-        status = (
-            "exact-survivor"
-            if certificate.get("status")
-            == "exact-local-interacting-hs-survivor"
-            else "inconclusive"
-        )
+        certificate_status = certificate.get("status")
+        if certificate_status == "exact-local-interacting-hs-survivor":
+            status = "exact-survivor"
+        elif certificate_status in {
+            "no-positive-exact-kernel",
+            "exact-local-hs-gate-failed",
+        }:
+            status = "exact-rejected"
+        elif certificate_status == "exact-promotion-inconclusive":
+            status = "inconclusive"
+        else:
+            raise ValueError(
+                f"unknown exact certificate status {certificate_status!r}"
+            )
         payload = {
             "schema": PROMOTION_SCHEMA,
             "promotion_id": promotion_id,
@@ -1099,6 +1100,11 @@ def _promote_source_candidates(
         final_path = promotions_dir / f"{promotion_id}.json"
         if final_path.exists():
             existing = _read_promotion_payload(final_path)
+            _validate_promotion_candidate_identity(
+                existing,
+                candidate,
+                promotion_id,
+            )
             if (
                 existing.get("source_cell_payload_sha256")
                 != payload["source_cell_payload_sha256"]
@@ -1133,9 +1139,29 @@ def _read_promotion_payload(path: Path) -> dict[str, object]:
         or stored_hash != _payload_sha256(payload)
     ):
         raise ValueError(f"payload hash mismatch for promotion {promotion_id!r}")
-    if payload.get("status") not in {"exact-survivor", "inconclusive"}:
+    if payload.get("status") not in {
+        "exact-survivor",
+        "exact-rejected",
+        "inconclusive",
+    }:
         raise ValueError(f"promotion {promotion_id!r} lacks terminal status")
     return payload
+
+
+def _validate_promotion_candidate_identity(
+    record: Mapping[str, object],
+    candidate: Mapping[str, object],
+    promotion_id: str,
+) -> None:
+    cell = candidate.get("cell")
+    if (
+        not isinstance(cell, BatchCell)
+        or record.get("cell_id") != cell.id
+        or record.get("scan_index") != candidate.get("scan_index")
+    ):
+        raise ValueError(
+            f"promotion {promotion_id!r} has different candidate identity"
+        )
 
 
 def _promotion_manifest_record(
@@ -1182,10 +1208,13 @@ def _promotion_resume_records(
     for promotion_id, record in manifest_records.items():
         candidate = expected[promotion_id]
         cell = candidate["cell"]
+        _validate_promotion_candidate_identity(
+            record,
+            candidate,
+            promotion_id,
+        )
         if (
             not isinstance(cell, BatchCell)
-            or record.get("cell_id") != cell.id
-            or record.get("scan_index") != candidate["scan_index"]
             or record.get("cell_settings_sha256")
             != _cell_settings_sha256(cell)
             or record.get("source_cell_payload_sha256")
@@ -1210,6 +1239,11 @@ def _promotion_resume_records(
             record = _promotion_manifest_record(payload)
             candidate = expected[promotion_id]
             cell = candidate["cell"]
+            _validate_promotion_candidate_identity(
+                record,
+                candidate,
+                promotion_id,
+            )
             if (
                 not isinstance(cell, BatchCell)
                 or record["cell_settings_sha256"]
@@ -1290,6 +1324,7 @@ def promote_from_payloads(
                 "promotion-progress "
                 f"completed={len(completed_records)}/{len(candidates)} "
                 f"exact-survivor={counts['exact-survivor']} "
+                f"exact-rejected={counts['exact-rejected']} "
                 f"inconclusive={counts['inconclusive']} "
                 f"elapsed={time.monotonic() - started:.3f}s "
                 f"output={root}",
@@ -1314,6 +1349,7 @@ def promote_from_payloads(
             "promotion-progress "
             f"completed={len(completed_records)}/{len(candidates)} "
             f"exact-survivor={counts['exact-survivor']} "
+            f"exact-rejected={counts['exact-rejected']} "
             f"inconclusive={counts['inconclusive']} "
             f"elapsed={time.monotonic() - started:.3f}s "
             f"output={root}",
@@ -1326,6 +1362,7 @@ def promote_from_payloads(
         completed=newly_completed,
         skipped=skipped,
         exact_survivors=counts["exact-survivor"],
+        exact_rejected=counts["exact-rejected"],
         inconclusive=counts["inconclusive"],
         elapsed_seconds=time.monotonic() - started,
         output_dir=str(root),
@@ -1335,7 +1372,11 @@ def promote_from_payloads(
 def _promotion_status_counts(
     records: Mapping[str, Mapping[str, object]],
 ) -> dict[str, int]:
-    counts = {"exact-survivor": 0, "inconclusive": 0}
+    counts = {
+        "exact-survivor": 0,
+        "exact-rejected": 0,
+        "inconclusive": 0,
+    }
     for record in records.values():
         status = record.get("status")
         if status not in counts:
