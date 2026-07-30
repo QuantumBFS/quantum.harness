@@ -140,6 +140,7 @@ def forbidden_source_references() -> list[str]:
         module_root / "coordinate.py",
         module_root / "vmc.py",
         module_root / "train_dplus0.py",
+        module_root / "symmetry.py",
         module_root / "certify_phase6.py",
     ]
     findings = []
