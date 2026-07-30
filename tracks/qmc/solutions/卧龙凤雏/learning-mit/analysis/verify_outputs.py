@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 import html
 import json
+import math
 from pathlib import Path
 import re
 
@@ -17,9 +18,54 @@ class VerificationResult:
     errors: tuple[str, ...]
 
 
+def verify_summary_claim(summary: dict) -> tuple[str, ...]:
+    errors: list[str] = []
+    claim = summary.get("claim", {})
+    status = claim.get("status")
+    if status not in {"candidate", "exploratory", "unavailable"}:
+        errors.append("claim status is missing or unknown")
+        return tuple(errors)
+    if status == "candidate":
+        if len(summary.get("entanglement_c_eff", {}).get("widths", [])) < 5:
+            errors.append("candidate requires at least five widths")
+        if not summary.get("casimir_c_eff", {}).get("fit_stable"):
+            errors.append("candidate requires a stable Casimir fit")
+        if not summary.get("anisotropy", {}).get("alpha_stable"):
+            errors.append("candidate requires stable anisotropy")
+        if not summary.get("estimator_comparison", {}).get("agrees"):
+            errors.append("candidate requires estimator agreement")
+        if claim.get("reasons"):
+            errors.append("candidate claim must not contain failed-gate reasons")
+        if not claim.get("published"):
+            errors.append("candidate claim must be published")
+    elif status == "exploratory":
+        if not claim.get("reasons"):
+            errors.append("exploratory claim requires failed-gate reasons")
+        if claim.get("published"):
+            errors.append("exploratory claim must not be published")
+    value = claim.get("value")
+    interval = claim.get("interval")
+    if value is not None and not math.isfinite(value):
+        errors.append("claim value must be finite")
+    if interval is not None and (
+        len(interval) != 2
+        or not all(math.isfinite(bound) for bound in interval)
+        or interval[0] > interval[1]
+    ):
+        errors.append("claim interval must be finite and ordered")
+    return tuple(errors)
+
+
 def verify_report_pair(run_dir: Path) -> VerificationResult:
     run_dir = Path(run_dir)
     errors: list[str] = []
+    summary_path = run_dir / "summary.json"
+    if summary_path.is_file():
+        errors.extend(
+            verify_summary_claim(
+                json.loads(summary_path.read_text(encoding="utf-8"))
+            )
+        )
     html_paths = (run_dir / "report.html", run_dir / "report-zh.html")
     pdf_paths = (run_dir / "report.pdf", run_dir / "report-zh.pdf")
     for path in (*html_paths, *pdf_paths):

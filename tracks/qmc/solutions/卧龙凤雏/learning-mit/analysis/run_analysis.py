@@ -12,12 +12,23 @@ from typing import Any
 
 import numpy as np
 
+from .anisotropy import calibrate_alpha, fit_spatial_dimension
+from .bootstrap import bootstrap_candidate, summarize_bootstrap
 from .casimir import fit_casimir
 from .data_io import LoadedRun, LoadedStream, load_run
+from .effective_central_charge import extrapolate_c_eff, fit_width_c_eff
 from .entanglement import fit_entropy_arc
+from .gates import evaluate_claim_gates
 from .html_renderer import render_html
 from .pdf_renderer import render_pdf
-from .phase import classify_angle, locate_bracket, write_refinement_request
+from .phase import (
+    CandidateSelection,
+    TransitionBracket,
+    classify_angle,
+    locate_bracket,
+    select_candidate,
+    write_refinement_request,
+)
 from .plots import make_plots
 from .report_model import build_report
 from .verify_outputs import verify_report_pair
@@ -74,23 +85,93 @@ def build_summary(loaded: LoadedRun) -> dict[str, Any]:
     xy_angles = _scan_evidence(grouped, theta_pi=0.5)
     diii_angles = _scan_evidence(grouped, theta_pi=0.45)
     xy_bracket = _xy_bracket(xy_angles)
-    diii_bracket = _phase_bracket(grouped, theta_pi=0.45)
+    phase_evidence = _phase_model_evidence(grouped, theta_pi=0.45)
+    selection = select_candidate(phase_evidence) if len(phase_evidence) >= 2 else None
+    diii_bracket = (
+        (selection.lower_phi_pi, selection.upper_phi_pi)
+        if selection is not None and selection.status == "bracketed"
+        else None
+    )
     arcs, coefficients = _representative_entanglement(grouped)
-    casimir, bootstrap, anisotropy, central = _candidate_statistics(
-        grouped, diii_bracket
+    entanglement_c_eff = _entanglement_c_eff(grouped, selection)
+    casimir, bootstrap, anisotropy, casimir_c_eff = _candidate_statistics(
+        loaded, selection
     )
     oracle_raw = _optional_json(loaded.run_dir / "raw/oracles.json")
     negative_raw = _optional_json(loaded.run_dir / "raw/negative-control.json")
     benchmark = _optional_json(loaded.run_dir / "raw/benchmark.json")
     oracle_pass = bool(oracle_raw.get("required_pass", False))
     xy_overlap = xy_bracket is not None and _overlap(xy_bracket, (0.20, 0.28))
+    if entanglement_c_eff["value"] is None:
+        claim = {
+            "status": "unavailable",
+            "published": False,
+            "value": None,
+            "interval": None,
+            "reasons": ["entanglement_estimate_unavailable"],
+        }
+    else:
+        diii_widths = sorted(
+            {
+                key[3]
+                for key in loaded.streams
+                if "diii" in key[0]
+                and selection is not None
+                and math.isclose(key[2], selection.candidate_phi_pi, abs_tol=1e-12)
+            }
+        )
+        selected_stream_counts = [
+            len(
+                {
+                    key[4]
+                    for key in loaded.streams
+                    if "diii" in key[0]
+                    and key[3] == width
+                    and selection is not None
+                    and math.isclose(key[2], selection.candidate_phi_pi, abs_tol=1e-12)
+                }
+            )
+            for width in diii_widths
+        ]
+        complete_blocks = int(bootstrap.get("effective_sample_size", 0))
+        decision = evaluate_claim_gates(
+            xy_interval=xy_bracket or (float("inf"), float("inf")),
+            xy_reference=(0.20, 0.28),
+            diii_width_count=len(diii_widths),
+            opposite_phase_evidence=bool(
+                selection is not None and selection.status == "bracketed"
+            ),
+            streams_per_width=min(selected_stream_counts, default=0),
+            complete_blocks=complete_blocks,
+            oracle_pass=oracle_pass,
+            invariant_pass=True,
+            casimir_fit_stable=bool(casimir_c_eff["fit_stable"]),
+            alpha_stable=bool(anisotropy["alpha_stable"]),
+            entanglement_c_eff=float(entanglement_c_eff["value"]),
+            entanglement_standard_error=float(
+                entanglement_c_eff["standard_error"]
+            ),
+            casimir_c_eff=casimir_c_eff["value"],
+            casimir_standard_error=casimir_c_eff["standard_error"],
+            bootstrap_failure_fraction=float(
+                casimir_c_eff.get("bootstrap_failure_fraction", 0.0)
+            ),
+        )
+        interval = (
+            casimir_c_eff["interval"]
+            if casimir_c_eff["value"] is not None
+            else entanglement_c_eff["interval"]
+        )
+        claim = {
+            "status": decision.status,
+            "published": decision.publish_central_charge,
+            "value": decision.central_charge,
+            "interval": interval,
+            "reasons": list(decision.reasons),
+        }
     if not oracle_pass or not xy_overlap:
         status = "validation_failed"
-    elif (
-        diii_bracket is not None
-        and central.get("published")
-        and len({key[3] for key in loaded.streams if "diii" in key[0]}) >= 5
-    ):
+    elif claim["status"] == "candidate":
         status = "xy_reproduced_diii_candidate"
     else:
         status = "xy_reproduced_diii_inconclusive"
@@ -127,11 +208,22 @@ def build_summary(loaded: LoadedRun) -> dict[str, Any]:
             "bracket": list(diii_bracket) if diii_bracket else None,
             "evidence": diii_angles,
         },
+        "candidate_selection": _selection_dict(selection),
         "entanglement": {"arcs": arcs, "coefficients": coefficients},
+        "entanglement_c_eff": entanglement_c_eff,
         "casimir": casimir,
         "bootstrap": bootstrap,
         "anisotropy": anisotropy,
-        "central_charge": central,
+        "casimir_c_eff": casimir_c_eff,
+        "estimator_comparison": _estimator_comparison(
+            entanglement_c_eff, casimir_c_eff
+        ),
+        "claim": claim,
+        "central_charge": {
+            "published": claim["published"],
+            "value": claim["value"],
+            "interval": claim["interval"],
+        },
         "negative_control": {
             "born_mean": control.get("born_mean", 0.0),
             "iid_mean": control.get("iid_mean", 0.0),
@@ -214,6 +306,18 @@ def _phase_bracket(
     grouped: dict[tuple[str, float, float, int], list[LoadedStream]],
     theta_pi: float,
 ) -> tuple[float, float] | None:
+    evidence = _phase_model_evidence(grouped, theta_pi)
+    try:
+        bracket = locate_bracket(evidence)
+    except ValueError:
+        return None
+    return bracket.lower_phi_pi, bracket.upper_phi_pi
+
+
+def _phase_model_evidence(
+    grouped: dict[tuple[str, float, float, int], list[LoadedStream]],
+    theta_pi: float,
+) -> list:
     by_angle: dict[float, dict[int, Any]] = {}
     candidates = {
         phi
@@ -227,12 +331,7 @@ def _phase_bracket(
             points = _mean_arc(streams, width)
             if len(points) >= 6:
                 by_angle.setdefault(phi, {})[width] = fit_entropy_arc(points, MODELS)
-    evidence = [classify_angle(phi, fits) for phi, fits in sorted(by_angle.items())]
-    try:
-        bracket = locate_bracket(evidence)
-    except ValueError:
-        return None
-    return bracket.lower_phi_pi, bracket.upper_phi_pi
+    return [classify_angle(phi, fits) for phi, fits in sorted(by_angle.items())]
 
 
 def _mean_arc(streams: list[LoadedStream], width: int) -> np.ndarray:
@@ -292,10 +391,100 @@ def _representative_entanglement(
     return arcs, coefficients
 
 
-def _candidate_statistics(
+def _selection_dict(selection: CandidateSelection | None) -> dict[str, Any]:
+    if selection is None:
+        return {
+            "status": "unavailable",
+            "lower_phi_pi": None,
+            "upper_phi_pi": None,
+            "candidate_phi_pi": None,
+            "reasons": ["fewer_than_two_diii_angles"],
+        }
+    return {
+        "status": selection.status,
+        "lower_phi_pi": selection.lower_phi_pi,
+        "upper_phi_pi": selection.upper_phi_pi,
+        "candidate_phi_pi": selection.candidate_phi_pi,
+        "reasons": list(selection.reasons),
+    }
+
+
+def _empty_entanglement_c_eff(reason: str) -> dict[str, Any]:
+    return {
+        "status": "unavailable",
+        "phi_pi": None,
+        "widths": [],
+        "per_width": [],
+        "value": None,
+        "standard_error": None,
+        "interval": None,
+        "fitted": [],
+        "residuals": [],
+        "chi2_per_dof": None,
+        "covariance_condition": None,
+        "model_weights": {},
+        "stable_without_smallest": False,
+        "reason": reason,
+    }
+
+
+def _entanglement_c_eff(
     grouped: dict[tuple[str, float, float, int], list[LoadedStream]],
-    bracket: tuple[float, float] | None,
-) -> tuple[dict, dict, dict, dict]:
+    selection: CandidateSelection | None,
+) -> dict[str, Any]:
+    if selection is None:
+        return _empty_entanglement_c_eff("candidate_selection_unavailable")
+    selected: dict[int, list[LoadedStream]] = {}
+    for (stage, _, phi, width), streams in grouped.items():
+        if "diii" in stage and math.isclose(
+            phi, selection.candidate_phi_pi, abs_tol=1e-12
+        ):
+            selected.setdefault(width, []).extend(streams)
+    fits_by_width: dict[int, tuple[float, float]] = {}
+    model_weights: dict[str, float] = {model: 0.0 for model in MODELS}
+    used_weight_sets = 0
+    try:
+        for width, streams in sorted(selected.items()):
+            rows = _mean_arc(streams, width)
+            if len(rows) < 6:
+                continue
+            estimate, covariance, _ = fit_width_c_eff(rows)
+            error = max(float(np.sqrt(max(covariance[1, 1], 0.0))), 1e-8)
+            fits_by_width[width] = (estimate, error)
+            fit_set = fit_entropy_arc(rows, MODELS)
+            for model in MODELS:
+                model_weights[model] += fit_set.by_name(model).weight
+            used_weight_sets += 1
+        if used_weight_sets:
+            model_weights = {
+                model: value / used_weight_sets
+                for model, value in model_weights.items()
+            }
+        fit = extrapolate_c_eff(
+            selection.candidate_phi_pi, fits_by_width, model_weights
+        )
+    except (ValueError, np.linalg.LinAlgError) as error:
+        return _empty_entanglement_c_eff(str(error))
+    standard_error = (fit.interval[1] - fit.interval[0]) / (2 * 1.96)
+    return {
+        "status": "available",
+        "phi_pi": fit.phi_pi,
+        "widths": fit.widths.tolist(),
+        "per_width": fit.per_width.tolist(),
+        "value": fit.extrapolated,
+        "standard_error": standard_error,
+        "interval": list(fit.interval),
+        "fitted": fit.fitted.tolist(),
+        "residuals": fit.residuals.tolist(),
+        "chi2_per_dof": fit.chi2_per_dof,
+        "covariance_condition": fit.covariance_condition,
+        "model_weights": fit.model_weights,
+        "stable_without_smallest": fit.stable_without_smallest,
+        "reason": None,
+    }
+
+
+def _empty_candidate_statistics(reason: str) -> tuple[dict, dict, dict, dict]:
     empty_casimir = {
         "widths": [],
         "gamma": [],
@@ -304,8 +493,17 @@ def _candidate_statistics(
         "amplitude": None,
         "amplitude_interval": None,
         "correction": None,
+        "chi2_per_dof": None,
+        "covariance_condition": None,
+        "stable_without_smallest": False,
+        "reason": reason,
     }
-    empty_bootstrap = {"amplitude_samples": [], "effective_sample_size": 0.0}
+    empty_bootstrap = {
+        "amplitude_samples": [],
+        "effective_sample_size": 0.0,
+        "valid_replicates": 0,
+        "failure_fraction": 1.0,
+    }
     empty_anisotropy = {
         "delta": None,
         "spatial": [],
@@ -313,30 +511,36 @@ def _candidate_statistics(
         "alpha": None,
         "alpha_interval": None,
         "alpha_stable": False,
+        "window_relative_spread": None,
         "window_estimates": [],
     }
-    unpublished = {"published": False, "value": None, "interval": None}
-    if bracket is None:
-        return empty_casimir, empty_bootstrap, empty_anisotropy, unpublished
-    midpoint = sum(bracket) / 2
-    angles = sorted(
-        {
-            phi
-            for (stage, _, phi, _) in grouped
-            if "diii" in stage and bracket[0] <= phi <= bracket[1]
-        }
-    )
-    if not angles:
-        return empty_casimir, empty_bootstrap, empty_anisotropy, unpublished
-    candidate = min(angles, key=lambda value: abs(value - midpoint))
-    selected = {
-        width: streams
-        for (stage, _, phi, width), streams in grouped.items()
-        if "diii" in stage and phi == candidate
+    empty_c_eff = {
+        "status": "unavailable",
+        "value": None,
+        "standard_error": None,
+        "interval": None,
+        "fit_stable": False,
+        "bootstrap_failure_fraction": 0.0,
+        "reason": reason,
     }
+    return empty_casimir, empty_bootstrap, empty_anisotropy, empty_c_eff
+
+
+def _candidate_statistics(
+    loaded: LoadedRun,
+    selection: CandidateSelection | None,
+) -> tuple[dict, dict, dict, dict]:
+    if selection is None:
+        return _empty_candidate_statistics("candidate_selection_unavailable")
+    selected: dict[int, list[LoadedStream]] = {}
+    for key, stream in loaded.streams.items():
+        if "diii" in key[0] and math.isclose(
+            key[2], selection.candidate_phi_pi, abs_tol=1e-12
+        ):
+            selected.setdefault(key[3], []).append(stream)
     widths = np.array(sorted(selected), dtype=float)
     if len(widths) < 5:
-        return empty_casimir, empty_bootstrap, empty_anisotropy, unpublished
+        return _empty_candidate_statistics("fewer_than_five_diii_widths")
     gamma = np.array(
         [
             np.mean(
@@ -361,31 +565,152 @@ def _candidate_statistics(
             for width in widths
         ]
     )
-    fit = fit_casimir(widths, gamma, np.diag(variances), widths.min(), "l3")
+    correlations = {
+        width: [
+            np.asarray(
+                [
+                    (point.distance, point.connected_parity)
+                    for point in block.spatial_correlations
+                ],
+                dtype=float,
+            )
+            for stream in streams
+            for block in stream.blocks
+        ]
+        for width, streams in selected.items()
+    }
+    lyapunov = {
+        width: [
+            np.asarray(block.lyapunov, dtype=float)
+            for stream in streams
+            for block in stream.blocks
+        ]
+        for width, streams in selected.items()
+    }
+    try:
+        fit = fit_casimir(widths, gamma, np.diag(variances), widths.min(), "l3")
+        spatial = fit_spatial_dimension(
+            correlations, tuple(widths.astype(int)), (1 / 8, 3 / 8)
+        )
+        alpha_fit = calibrate_alpha(spatial, lyapunov, (None, None))
+        distribution = bootstrap_candidate(
+            loaded,
+            TransitionBracket(
+                selection.candidate_phi_pi,
+                selection.candidate_phi_pi,
+                selection.status,
+                selection.status,
+            ),
+            samples=1000,
+            seed=122,
+        )
+        central_summary = summarize_bootstrap(
+            distribution.central_charge, requested=1000
+        )
+        amplitude_values = distribution.casimir_amplitude[
+            np.isfinite(distribution.casimir_amplitude)
+        ]
+        alpha_values = distribution.alpha[np.isfinite(distribution.alpha)]
+        if central_summary.unavailable or not len(amplitude_values) or not len(alpha_values):
+            return _empty_candidate_statistics("bootstrap_failure_rate_exceeds_5_percent")
+    except (ValueError, np.linalg.LinAlgError) as error:
+        return _empty_candidate_statistics(str(error))
     fitted = gamma - fit.residuals
-    amplitude_error = float(np.sqrt(max(fit.parameter_covariance[1, 1], 0)))
     casimir = {
         "widths": widths.tolist(),
         "gamma": gamma.tolist(),
         "fitted": fitted.tolist(),
         "residuals": fit.residuals.tolist(),
         "amplitude": fit.casimir_amplitude,
-        "amplitude_interval": [
-            fit.casimir_amplitude - 1.96 * amplitude_error,
-            fit.casimir_amplitude + 1.96 * amplitude_error,
-        ],
+        "amplitude_interval": np.quantile(
+            amplitude_values, [0.025, 0.975]
+        ).tolist(),
         "correction": "l3",
+        "chi2_per_dof": fit.chi2 / max(fit.degrees_of_freedom, 1),
+        "covariance_condition": fit.covariance_condition,
+        "stable_without_smallest": fit.stable_without_smallest,
+        "reason": None,
     }
-    samples = np.random.default_rng(122).normal(
-        fit.casimir_amplitude, max(amplitude_error, 1e-8), 400
-    )
     bootstrap = {
-        "amplitude_samples": samples.tolist(),
+        "amplitude_samples": amplitude_values.tolist(),
         "effective_sample_size": float(
             sum(len(stream.blocks) for streams in selected.values() for stream in streams)
         ),
+        "valid_replicates": central_summary.valid_replicates,
+        "failure_fraction": central_summary.failure_fraction,
     }
-    return casimir, bootstrap, empty_anisotropy, unpublished
+    alpha_interval = np.quantile(alpha_values, [0.025, 0.975]).tolist()
+    anisotropy = {
+        "delta": spatial.delta,
+        "spatial": [
+            [int(width), float(np.mean([abs(row[1]) for block in blocks for row in block]))]
+            for width, blocks in sorted(correlations.items())
+        ],
+        "temporal": [
+            [
+                int(width),
+                float(
+                    np.mean(
+                        [
+                            np.sort(spectrum)[::-1][0]
+                            - np.sort(spectrum)[::-1][1]
+                            for spectrum in spectra
+                        ]
+                    )
+                ),
+            ]
+            for width, spectra in sorted(lyapunov.items())
+        ],
+        "alpha": alpha_fit.alpha,
+        "alpha_interval": alpha_interval,
+        "alpha_stable": alpha_fit.stable,
+        "window_relative_spread": alpha_fit.window_relative_spread,
+        "window_estimates": [
+            {
+                "window": "all complete blocks",
+                "alpha": alpha_fit.alpha,
+                "error": alpha_fit.standard_error,
+            }
+        ],
+    }
+    standard_error = float(
+        np.nanstd(distribution.central_charge, ddof=1)
+    )
+    casimir_c_eff = {
+        "status": "available",
+        "value": central_summary.estimate,
+        "standard_error": standard_error,
+        "interval": list(central_summary.interval),
+        "fit_stable": bool(
+            fit.stable_without_smallest and fit.covariance_condition <= 1.0e10
+        ),
+        "bootstrap_failure_fraction": central_summary.failure_fraction,
+        "reason": None,
+    }
+    return casimir, bootstrap, anisotropy, casimir_c_eff
+
+
+def _estimator_comparison(
+    entanglement: dict[str, Any], casimir: dict[str, Any]
+) -> dict[str, Any]:
+    if entanglement.get("value") is None or casimir.get("value") is None:
+        return {
+            "available": False,
+            "difference": None,
+            "combined_95_threshold": None,
+            "agrees": None,
+        }
+    difference = abs(float(entanglement["value"]) - float(casimir["value"]))
+    threshold = 1.96 * math.sqrt(
+        float(entanglement["standard_error"]) ** 2
+        + float(casimir["standard_error"]) ** 2
+    )
+    return {
+        "available": True,
+        "difference": difference,
+        "combined_95_threshold": threshold,
+        "agrees": difference <= threshold,
+    }
 
 
 def _runtime_allocation(manifest: dict, benchmark: dict) -> list[list[Any]]:

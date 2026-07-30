@@ -13,7 +13,7 @@ from analysis.pdf_renderer import (
 )
 from analysis.plots import make_plots
 from analysis.report_model import Figure, build_report
-from analysis.verify_outputs import verify_report_pair
+from analysis.verify_outputs import verify_report_pair, verify_summary_claim
 from summary_fixture import summary_fixture
 
 
@@ -88,3 +88,23 @@ def test_inconclusive_report_describes_null_estimates_without_python_none():
     assert "not fitted" in english
     assert "不发布" in chinese
     assert "None" not in chinese
+
+
+def test_summary_verifier_enforces_candidate_and_exploratory_claim_contracts():
+    candidate = summary_fixture()
+    assert verify_summary_claim(candidate) == ()
+
+    candidate["entanglement_c_eff"]["widths"] = [8, 12, 16, 24]
+    assert "candidate requires at least five widths" in verify_summary_claim(candidate)
+
+    exploratory = summary_fixture()
+    exploratory["claim"] = {
+        "status": "exploratory",
+        "published": False,
+        "value": 0.34,
+        "interval": [0.30, 0.38],
+        "reasons": [],
+    }
+    assert "exploratory claim requires failed-gate reasons" in verify_summary_claim(
+        exploratory
+    )

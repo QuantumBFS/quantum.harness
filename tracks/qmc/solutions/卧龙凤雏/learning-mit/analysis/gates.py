@@ -28,8 +28,8 @@ def evaluate_claim_gates(
     alpha_stable: bool,
     entanglement_c_eff: float,
     entanglement_standard_error: float,
-    casimir_c_eff: float,
-    casimir_standard_error: float,
+    casimir_c_eff: float | None,
+    casimir_standard_error: float | None,
     bootstrap_failure_fraction: float,
 ) -> ClaimDecision:
     validation_reasons = []
@@ -58,10 +58,19 @@ def evaluate_claim_gates(
             None,
             ("bootstrap_failure_rate_exceeds_5_percent",),
         )
-    estimates = (entanglement_c_eff, casimir_c_eff)
-    errors = (entanglement_standard_error, casimir_standard_error)
-    if not all(math.isfinite(value) for value in estimates + errors) or any(
-        error < 0 for error in errors
+    if (
+        not math.isfinite(entanglement_c_eff)
+        or not math.isfinite(entanglement_standard_error)
+        or entanglement_standard_error < 0
+    ):
+        return ClaimDecision(
+            "unavailable", False, None, ("nonfinite_effective_central_charge",)
+        )
+    casimir_available = casimir_c_eff is not None and casimir_standard_error is not None
+    if casimir_available and (
+        not math.isfinite(casimir_c_eff)
+        or not math.isfinite(casimir_standard_error)
+        or casimir_standard_error < 0
     ):
         return ClaimDecision(
             "unavailable", False, None, ("nonfinite_effective_central_charge",)
@@ -80,14 +89,21 @@ def evaluate_claim_gates(
         reasons.append("casimir_fit_unstable")
     if not alpha_stable:
         reasons.append("anisotropy_unstable")
-    combined = 1.96 * math.sqrt(
-        entanglement_standard_error**2 + casimir_standard_error**2
-    )
-    if abs(entanglement_c_eff - casimir_c_eff) > combined:
-        reasons.append("estimator_disagreement")
+    if not casimir_available:
+        reasons.append("casimir_estimate_unavailable")
+    else:
+        combined = 1.96 * math.sqrt(
+            entanglement_standard_error**2 + casimir_standard_error**2
+        )
+        if abs(entanglement_c_eff - casimir_c_eff) > combined:
+            reasons.append("estimator_disagreement")
 
     if reasons:
         return ClaimDecision(
-            "exploratory", False, casimir_c_eff, tuple(reasons)
+            "exploratory",
+            False,
+            casimir_c_eff if casimir_available else entanglement_c_eff,
+            tuple(reasons),
         )
+    assert casimir_c_eff is not None
     return ClaimDecision("candidate", True, casimir_c_eff, ())

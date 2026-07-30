@@ -72,3 +72,20 @@ def test_claim_gate_marks_unidentifiable_or_invalid_results_unavailable():
     decision = evaluate_claim_gates(**failed_bootstrap)
     assert decision.status == "unavailable"
     assert decision.reasons == ("bootstrap_failure_rate_exceeds_5_percent",)
+
+
+def test_claim_gate_keeps_entanglement_only_estimate_exploratory():
+    inputs = valid_inputs()
+    inputs.update(
+        {
+            "opposite_phase_evidence": False,
+            "casimir_fit_stable": False,
+            "alpha_stable": False,
+            "casimir_c_eff": None,
+            "casimir_standard_error": None,
+        }
+    )
+    decision = evaluate_claim_gates(**inputs)
+    assert decision.status == "exploratory"
+    assert decision.central_charge == 0.34
+    assert "casimir_estimate_unavailable" in decision.reasons

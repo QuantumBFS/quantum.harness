@@ -44,3 +44,18 @@ def test_tiny_run_generates_one_hashed_bilingual_result(tmp_path: Path):
     summary_hash = hashlib.sha256((run_dir / "summary.json").read_bytes()).hexdigest()
     assert f'name="summary-sha256" content="{summary_hash}"' in english
     assert f'name="summary-sha256" content="{summary_hash}"' in chinese
+
+    summary = json.loads((run_dir / "summary.json").read_text(encoding="utf-8"))
+    assert set(
+        (
+            "candidate_selection",
+            "entanglement_c_eff",
+            "casimir_c_eff",
+            "estimator_comparison",
+            "claim",
+        )
+    ).issubset(summary)
+    assert summary["claim"]["status"] == "unavailable"
+    assert summary["claim"]["reasons"]
+    assert summary["entanglement"]["coefficients"] == []
+    assert "None" not in json.dumps(summary)
