@@ -362,6 +362,43 @@ def test_extension_operational_contract_matches_approval_registry():
     )
 
 
+def test_extension_bundle_publication_is_remote_no_clobber():
+    plan = (
+        Path(__file__).resolve().parents[6]
+        / "docs/superpowers/plans/2026-07-30-challenge-194-p0-extension.md"
+    ).read_text(encoding="utf-8")
+    preflight = """ssh wuzh02-jiangweiqi "
+  set -euo pipefail
+  test ! -e '${REMOTE_BUNDLE}'
+  test ! -e '${REMOTE_REPO}'
+  test ! -e '${REMOTE_BUNDLE_STAGE}'
+\""""
+    staging_upload = 'scp "${LOCAL_BUNDLE}" "wuzh02-jiangweiqi:${REMOTE_BUNDLE_STAGE}"'
+    staged_hash = "sha256sum '${REMOTE_BUNDLE_STAGE}'"
+    install = "ln -- '${REMOTE_BUNDLE_STAGE}' '${REMOTE_BUNDLE}'"
+    file_sync = "sync -f -- '${REMOTE_BUNDLE}'"
+    final_hash = "sha256sum '${REMOTE_BUNDLE}'"
+    remove_stage = "rm -- '${REMOTE_BUNDLE_STAGE}'"
+
+    assert 'BUNDLE_SHA256="$(sha256sum "${LOCAL_BUNDLE}"' in plan
+    assert 'REMOTE_BUNDLE_STAGE="${REMOTE_BUNDLE}.upload-' in plan
+    assert preflight in plan
+    assert staging_upload in plan
+    for command in (staged_hash, install, file_sync, final_hash, remove_stage):
+        assert command in plan
+    assert (
+        plan.index(preflight)
+        < plan.index(staging_upload)
+        < plan.index(staged_hash)
+        < plan.index(install)
+        < plan.index(file_sync)
+        < plan.index(final_hash)
+        < plan.index(remove_stage)
+    )
+    assert 'scp "${LOCAL_BUNDLE}" "wuzh02-jiangweiqi:${REMOTE_BUNDLE}"' not in plan
+    assert "Preserve the staging path on any failure" in plan
+
+
 @pytest.mark.parametrize(
     "invalid_value",
     [{1, 2}, ("not", "canonical")],

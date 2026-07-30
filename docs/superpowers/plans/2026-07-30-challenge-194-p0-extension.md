@@ -839,6 +839,7 @@ export REMOTE_PROTOCOL="${REMOTE_RESULTS}/p0_extension_v1_protocol.json"
 export REMOTE_VALIDATION="${REMOTE_RESULTS}/validation-prod-877ab93/report/report.json"
 export REMOTE_PYTHON="/work/share/giggleliu/jiangweiqi/quantum.harness-challenge-194/.venv/bin/python"
 export LOCAL_BUNDLE="/tmp/challenge-194-p0-extension-v2.bundle"
+export REMOTE_BUNDLE_STAGE="${REMOTE_BUNDLE}.upload-${SUBMIT_SHA}-$(date -u +%Y%m%dT%H%M%S%N)-$$"
 scripts/harness_slurm.sh precheck
 scripts/harness_slurm.sh probe-partitions
 ```
@@ -859,7 +860,22 @@ Run:
 
 ```bash
 git bundle create "${LOCAL_BUNDLE}" challenge/194
-scp "${LOCAL_BUNDLE}" "wuzh02-jiangweiqi:${REMOTE_BUNDLE}"
+BUNDLE_SHA256="$(sha256sum "${LOCAL_BUNDLE}" | awk '{print $1}')"
+ssh wuzh02-jiangweiqi "
+  set -euo pipefail
+  test ! -e '${REMOTE_BUNDLE}'
+  test ! -e '${REMOTE_REPO}'
+  test ! -e '${REMOTE_BUNDLE_STAGE}'
+"
+scp "${LOCAL_BUNDLE}" "wuzh02-jiangweiqi:${REMOTE_BUNDLE_STAGE}"
+ssh wuzh02-jiangweiqi "
+  set -euo pipefail
+  test \"\$(sha256sum '${REMOTE_BUNDLE_STAGE}' | awk '{print \$1}')\" = '${BUNDLE_SHA256}'
+  ln -- '${REMOTE_BUNDLE_STAGE}' '${REMOTE_BUNDLE}'
+  sync -f -- '${REMOTE_BUNDLE}'
+  test \"\$(sha256sum '${REMOTE_BUNDLE}' | awk '{print \$1}')\" = '${BUNDLE_SHA256}'
+  rm -- '${REMOTE_BUNDLE_STAGE}'
+"
 scp results/challenge-194/p0_analysis.json "wuzh02-jiangweiqi:${REMOTE_ANALYSIS}"
 ssh wuzh02-jiangweiqi "
   set -euo pipefail
@@ -873,8 +889,16 @@ ssh wuzh02-jiangweiqi "
 "
 ```
 
+`ln` is the atomic no-replace publication primitive: a concurrent or existing
+final bundle makes it fail without changing either object.
+Preserve the staging path on any failure for diagnosis; remove it only after
+hard-link installation,
+file sync, and final SHA256 verification all succeed. Never delete or overwrite
+an existing final bundle, deployment, staging diagnostic, or failed-attempt
+artifact.
+
 Expected: clean detached deployment at exactly `SUBMIT_SHA`; both hashes and
-offline Python checks pass. Existing deployment/root paths fail closed.
+offline Python checks pass. Existing bundle/deployment paths fail closed.
 
 - [ ] **Step 3: Feasibility-check and submit the build job**
 
