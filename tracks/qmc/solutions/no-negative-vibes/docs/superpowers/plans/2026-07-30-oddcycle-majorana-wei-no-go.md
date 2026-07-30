@@ -4,7 +4,7 @@
 
 **Goal:** Add a solver-independent exact certificate that excludes Wei's full ten-Majorana contraction-semigroup sufficient condition for the final oddcycle alphabet, including arbitrary fixed complex orthogonal Majorana basis changes.
 
-**Architecture:** Pull every possible Wei contraction metric into the number-conserving Nambu representation.  Reuse the frozen exact Gordan--Stiemke dual to force any nonstrict contraction to the group boundary, prove the four-letter commutant is scalar by exact rational rank, and reject the only surviving boundary form with the orthogonal-complex-structure compatibility identity.
+**Architecture:** Pull every possible Wei contraction metric into the number-conserving Nambu representation \(G(B)=\operatorname{diag}(B^{-1},B^{\mathsf T})\).  Reuse the frozen exact Gordan--Stiemke dual to force any nonstrict contraction to the group boundary, prove the four-letter commutant is scalar by exact rational rank, and reject the only surviving boundary form with the orthogonal-complex-structure compatibility identity.
 
 **Tech Stack:** Python 3, SymPy exact arithmetic, existing frozen oddcycle dual, pytest, JSON.
 
@@ -207,7 +207,13 @@ positive-definite multipliers.  Convert those gates to:
 
 The last field is a theorem-level consequence of positive-semidefinite gaps,
 positive-definite multipliers, and zero trace sum; document that implication
-in the function docstring.
+in the function docstring.  The Nambu upper-left gaps are initially
+\(H-B^{-\mathsf T}HB^{-1}\) and
+\(H-B^{-1}HB^{-\mathsf T}\).  Congruence by \(B^{\mathsf T}\) and \(B\)
+puts \(R=-H\) into the two frozen dual orientations.  The lower-right gaps
+for \(D\) already reduce to those orientations.  Record this convention
+explicitly so the certificate is not confused with
+\(\operatorname{diag}(B,B^{-\mathsf T})\).
 
 - [ ] **Step 4: Verify the Nambu compatibility sign**
 

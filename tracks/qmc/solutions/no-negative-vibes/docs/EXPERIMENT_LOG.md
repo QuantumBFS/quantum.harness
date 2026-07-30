@@ -2641,7 +2641,7 @@ A stronger exact route was derived in
 In Nambu coordinates the four one-particle letters act as
 
 \[
-G(B)=\operatorname{diag}(B,B^{-\mathsf T})
+G(B)=\operatorname{diag}(B^{-1},B^{\mathsf T})
 \]
 
 and preserve
@@ -2656,13 +2656,15 @@ contraction inequality and
 
 The frozen positive-definite Gordan--Stiemke dual forces the diagonal
 one-particle blocks of every such nonstrict metric to the equality boundary.
-Positive-semidefinite block structure then forces the off-diagonal gaps to
-zero.  For the main pair, the difference of the two base matrices is a
-nonzero multiple of \(E_{34}\), and the transpose difference is a nonzero
-multiple of \(E_{43}\).  Commuting with those two units and one base matrix
-shows by hand that the four-letter complex commutant is only
-\(\mathbb C I_5\).  Irreducibility plus \(\det B=8\) kills both diagonal
-metric blocks, leaving only
+For the upper-left block this uses congruence by \(B^{\mathsf T}\) and \(B\)
+and the substitution \(R=-H\); the lower-right block gives the two frozen
+dual orientations directly.  Positive-semidefinite block structure then
+forces the off-diagonal gaps to zero.  For the main pair, the difference of
+the two base matrices is a nonzero multiple of \(E_{34}\), and the transpose
+difference is a nonzero multiple of \(E_{43}\).  Commuting with those two
+units and one base matrix shows by hand that the four-letter complex
+commutant is only \(\mathbb C I_5\).  Irreducibility plus \(\det B=8\) kills
+both diagonal metric blocks, leaving only
 
 \[
 \eta=\begin{pmatrix}0&kI_5\\\bar kI_5&0\end{pmatrix}.
@@ -2686,4 +2688,9 @@ Reusable lesson: arbitrary complex Majorana basis freedom is best handled
 by pulling its metric back to the canonical Nambu CAR form, not by searching
 directly over basis matrices.  The pulled metric carries an exact quadratic
 compatibility identity whose sign can rule out boundary forms that ordinary
-contraction LMIs alone cannot distinguish.
+contraction LMIs alone cannot distinguish.  A pressure audit also caught the
+operator-order convention before implementation: for
+\(\Psi=(c,c^\dagger)\), the correct adjoint matrix is
+\(\operatorname{diag}(B^{-1},B^{\mathsf T})\); congruence, rather than a
+silent replacement by \(\operatorname{diag}(B,B^{-\mathsf T})\), connects it
+to the frozen one-particle dual.

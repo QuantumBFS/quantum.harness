@@ -43,13 +43,21 @@ I_5&0
 The number-conserving lift of a real invertible one-particle matrix \(B\) is
 
 \[
-G(B)=\operatorname{diag}(B,B^{-\mathsf T}),\qquad
+G(B)=\operatorname{diag}(B^{-1},B^{\mathsf T}),\qquad
 G(B)^{\mathsf T}\Omega G(B)=\Omega .
 \]
 
-All four oddcycle letters have positive determinant and a real logarithm.
-The scalar separating the complex-fermion lift from the Majorana Spin lift
-is therefore positive, so it does not alter the configuration sign.
+This convention follows from the adjoint action of
+\(\Gamma_\wedge(B)=\exp(c^\dagger\log(B)c)\) on
+\((c,c^\dagger)\).  All four oddcycle letters have positive determinant and
+a real logarithm.  The scalar separating the complex-fermion lift from the
+Majorana Spin lift is \(\sqrt{\det B}>0\), so it does not alter the
+configuration sign.  In particular,
+
+\[
+\det(I_{10}+G(B))
+={\det(I_5+B)^2\over\det B}.
+\]
 
 ## Necessary Wei metric
 
@@ -100,21 +108,29 @@ K^\dagger&D
 \qquad H=H^\dagger,\quad D=D^\dagger .
 \]
 
-The upper-left principal blocks of (1), for \(B_j\) and \(B_j^{\mathsf T}\),
-are
+The upper-left principal blocks of (1), for \(B_j\) and
+\(B_j^{\mathsf T}\), are
 
 \[
-H-B_j^{\mathsf T}HB_j\succeq0,\qquad
-H-B_jHB_j^{\mathsf T}\succeq0.
+H-B_j^{-\mathsf T}HB_j^{-1}\succeq0,\qquad
+H-B_j^{-1}HB_j^{-\mathsf T}\succeq0.
 \tag{3}
 \]
 
-Pairing (3) with the four frozen positive-definite dual multipliers gives
-zero total trace by exact dual cancellation.  Every term is nonnegative, so
-all four matrices in (3) vanish.  The same argument, after congruence by
-\(B_j\) and \(B_j^{\mathsf T}\), makes the two lower-right gaps vanish.
-A positive-semidefinite block matrix with a zero diagonal principal block
-has a zero corresponding off-diagonal block.  Consequently,
+Congruence by \(B_j^{\mathsf T}\) and \(B_j\), respectively, turns (3) into
+
+\[
+B_j^{\mathsf T}HB_j-H\succeq0,\qquad
+B_jHB_j^{\mathsf T}-H\succeq0.
+\]
+
+Thus \(R=-H\) obeys the two nonstrict forward/transpose gaps paired by the
+frozen exact dual.  The lower-right principal blocks directly give the same
+two gap orientations for \(D\).  Pairing them with the four frozen
+positive-definite dual multipliers gives zero total trace by exact dual
+cancellation.  Every term is nonnegative, so all diagonal-block gaps
+vanish.  A positive-semidefinite block matrix with a zero diagonal principal
+block has a zero corresponding off-diagonal block.  Consequently,
 
 \[
 K B_j=B_jK,\qquad K B_j^{\mathsf T}=B_j^{\mathsf T}K.
