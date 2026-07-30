@@ -12,6 +12,7 @@ from pathlib import Path
 import numpy
 import sympy
 
+from .oddcycle_majorana_wei_audit import majorana_wei_no_go_summary
 from .oddcycle_metric_dual import exact_no_common_metric_certificate
 from .oddcycle_pair_physical import exact_pair_physical_certificate
 from .oddcycle_path_metric import exact_last_letter_path_metric_certificate
@@ -58,10 +59,17 @@ def final_certificate_summary() -> dict[str, object]:
     theorem = exact_last_letter_path_metric_certificate()
     novelty = exact_no_common_metric_certificate()
     physical = exact_pair_physical_certificate()
+    majorana_wei = majorana_wei_no_go_summary()
+    majorana_wei_compact = {
+        "commutant_nullity": majorana_wei["commutant"]["nullity"],
+        "boundary_sign": majorana_wei["compatibility"]["boundary_sign"],
+        "wei_sign": majorana_wei["compatibility"]["wei_sign"],
+    }
     exact_payload = {
         "theorem": theorem,
         "novelty": novelty,
         "physical": physical,
+        "majorana_wei": majorana_wei_compact,
     }
     digest = hashlib.sha256(
         json.dumps(
@@ -84,6 +92,10 @@ def final_certificate_summary() -> dict[str, object]:
                 "all_coefficients_positive"
             ]
             and physical["sign_free_gate"].startswith("closed by")
+        ),
+        "outside_wei_majorana_sufficient_class": (
+            majorana_wei["status"]
+            == "exact-no-wei-contraction-certificate"
         ),
     }
     return {
@@ -123,6 +135,7 @@ def final_certificate_summary() -> dict[str, object]:
                 "nonzero_entry_count"
             ],
         },
+        "majorana_wei": majorana_wei_compact,
         "environment": {
             "python": platform.python_version(),
             "numpy": numpy.__version__,

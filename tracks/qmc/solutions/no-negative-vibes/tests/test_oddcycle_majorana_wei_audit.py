@@ -6,6 +6,7 @@ def test_exact_nambu_reduction_excludes_full_wei_contraction():
 
     result = audit.majorana_wei_no_go_summary()
 
+    assert result["schema"] == "oddcycle-majorana-wei-no-go-v1"
     assert result["status"] == "exact-no-wei-contraction-certificate"
     assert result["alphabet"] == {
         "dimension": 5,
@@ -34,4 +35,6 @@ def test_exact_nambu_reduction_excludes_full_wei_contraction():
         "boundary_sign": 1,
         "compatible": False,
     }
-    assert len(result["exact_certificate_sha256"]) == 64
+    digest = result["exact_certificate_sha256"]
+    assert len(digest) == 64
+    assert int(digest, 16) >= 0
