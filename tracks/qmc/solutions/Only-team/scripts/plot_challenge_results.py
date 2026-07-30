@@ -30,6 +30,7 @@ COLORS = [
 MARKERS = ["o", "s", "^", "D", "v", "P", "X", "*"]
 YT = 1.587
 YI = -0.815
+NORMAL_95 = 1.959963984540054
 
 
 def _style() -> None:
@@ -78,7 +79,6 @@ def plot_binder_curves(
     ]
     sizes = sorted({int(row["L"]) for row in selected})
     fig, ax = plt.subplots(figsize=(5.6, 3.6))
-    warning_present = False
     for index, size in enumerate(sizes):
         rows = sorted(
             (row for row in selected if int(row["L"]) == size),
@@ -95,31 +95,10 @@ def plot_binder_curves(
             capsize=1.5,
             label=f"L={size}",
         )
-        warned = [row for row in rows if row.get("quality_status") != "pass"]
-        if warned:
-            warning_present = True
-            ax.scatter(
-                [float(row["hTrfd"]) for row in warned],
-                [float(row["binder_Q"]) for row in warned],
-                facecolors="none",
-                edgecolors="#D55E00",
-                s=42,
-                linewidths=1.0,
-                zorder=5,
-            )
     ax.set_xlabel("Transverse field h")
     ax.set_ylabel("Binder moment ratio Q")
     ax.set_title(f"{lattice.capitalize()} lattice, requested Δτ=0.013")
     ax.legend(frameon=False, ncol=2)
-    if warning_present:
-        ax.text(
-            0.01,
-            0.02,
-            "Orange rings: declared quality warning",
-            transform=ax.transAxes,
-            color="#D55E00",
-            fontsize=7,
-        )
     _save_pair(fig, path)
 
 
@@ -360,31 +339,89 @@ def plot_dtau_extrapolation(
     _save_pair(fig, path)
 
 
-def plot_ratio(result: dict[str, Any], path: Path) -> None:
+def ratio_comparison_series(
+    primary: dict[str, Any],
+    sensitivity: dict[str, Any],
+) -> list[dict[str, Any]]:
+    """Return the three independently labelled critical-field-ratio estimates."""
+    primary_ratio = primary["ratio"]
+    sensitivity_ratio = sensitivity["ratio"]
+    pre_ratio = primary["pre_comparison"]["ratio"]
+    pre_value = float(pre_ratio["value"])
+    pre_sem = float(pre_ratio["standard_error"])
+    return [
+        {
+            "label": "Blöte–Deng PRE 66, 066110 (2002)",
+            "value": pre_value,
+            "standard_error": pre_sem,
+            "low": pre_value - NORMAL_95 * pre_sem,
+            "high": pre_value + NORMAL_95 * pre_sem,
+            "interval": "95% propagated normal interval",
+        },
+        {
+            "label": "Primary analysis (243 cells)",
+            "value": float(primary_ratio["median"]),
+            "standard_error": float(primary_ratio["standard_error"]),
+            "low": float(primary_ratio["ci95"][0]),
+            "high": float(primary_ratio["ci95"][1]),
+            "interval": "95% bootstrap interval",
+        },
+        {
+            "label": "Δτ=0.004 sensitivity (273 cells)",
+            "value": float(sensitivity_ratio["median"]),
+            "standard_error": float(sensitivity_ratio["standard_error"]),
+            "low": float(sensitivity_ratio["ci95"][0]),
+            "high": float(sensitivity_ratio["ci95"][1]),
+            "interval": "95% bootstrap interval",
+        },
+    ]
+
+
+def plot_ratio(
+    primary: dict[str, Any],
+    sensitivity: dict[str, Any],
+    path: Path,
+) -> None:
     _style()
-    fig, ax = plt.subplots(figsize=(5.2, 2.5))
-    median = float(result["median"])
-    low, high = map(float, result["ci95"])
-    sqrt5 = float(result["sqrt5"])
-    ax.errorbar(
-        [median],
-        [0.0],
-        xerr=[[median - low], [high - median]],
-        fmt="o",
-        color=COLORS[0],
-        capsize=3,
-        label="QMC result (95% bootstrap interval)",
+    fig, ax = plt.subplots(figsize=(7.2, 3.2))
+    series = ratio_comparison_series(primary, sensitivity)
+    sqrt5 = float(primary["ratio"]["sqrt5"])
+    y_positions = np.arange(len(series) - 1, -1, -1)
+    for index, (item, y_position) in enumerate(zip(series, y_positions)):
+        value = float(item["value"])
+        low = float(item["low"])
+        high = float(item["high"])
+        ax.errorbar(
+            [value],
+            [y_position],
+            xerr=[[value - low], [high - value]],
+            fmt=MARKERS[index],
+            color=COLORS[index],
+            capsize=3,
+            markersize=5,
+        )
+    ax.axvline(
+        sqrt5,
+        color="#000000",
+        linestyle="--",
+        linewidth=1.0,
+        label="Conjecture √5",
     )
-    ax.axvline(sqrt5, color="#000000", linestyle="--", linewidth=1.0, label="√5")
-    ax.set_yticks([])
+    ax.set_yticks(y_positions, [item["label"] for item in series])
     ax.set_xlabel("Critical-field ratio R")
-    ax.set_title("Critical-field ratio")
-    ax.legend(frameon=False, loc="upper center")
+    ax.set_title("Critical-field ratio: literature and present estimates")
+    ax.legend(frameon=False, loc="upper right")
+    distances = [abs(float(item["value"]) - sqrt5) for item in series]
     ax.text(
         0.02,
-        0.08,
-        f"R−√5 = {median - sqrt5:+.2e};  σ(R) = {float(result['standard_error']):.2e}",
+        -0.22,
+        (
+            f"Central-value distance |R−√5|: PRE {distances[0]:.2e}; "
+            f"primary {distances[1]:.2e} (closer); "
+            f"Δτ=0.004 sensitivity {distances[2]:.2e} (farther)."
+        ),
         transform=ax.transAxes,
+        fontsize=7,
     )
     _save_pair(fig, path)
 
@@ -400,6 +437,7 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument("--finite-size-fits", type=Path, required=True)
     parser.add_argument("--dtau-fits", type=Path, required=True)
     parser.add_argument("--final-results", type=Path, required=True)
+    parser.add_argument("--sensitivity-results", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, required=True)
     return parser.parse_args()
 
@@ -410,13 +448,14 @@ def main() -> None:
     fits = _read_csv(args.finite_size_fits)
     dtau = _read_csv(args.dtau_fits)
     final = json.loads(args.final_results.read_text(encoding="utf-8"))
+    sensitivity = json.loads(args.sensitivity_results.read_text(encoding="utf-8"))
     args.output_dir.mkdir(parents=True, exist_ok=True)
     plot_binder_curves(cells, "triangular", args.output_dir / "binder_Q_triangular.png")
     plot_binder_curves(cells, "honeycomb", args.output_dir / "binder_Q_honeycomb.png")
     plot_data_collapse(cells, fits, args.output_dir / "data_collapse.png")
     plot_fit_stability(fits, "both", args.output_dir / "finite_size_fit_stability.png")
     plot_dtau_extrapolation(dtau, "both", args.output_dir / "dtau2_extrapolation.png")
-    plot_ratio(final["ratio"], args.output_dir / "ratio_vs_sqrt5.png")
+    plot_ratio(final, sensitivity, args.output_dir / "ratio_vs_sqrt5.png")
     print(f"wrote 6 PNG/PDF figure pairs to {args.output_dir}", flush=True)
 
 

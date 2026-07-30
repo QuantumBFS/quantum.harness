@@ -29,6 +29,11 @@ WINDOWS = {
 }
 EXPECTED_COUNTS = {"triangular": 45, "honeycomb": 21}
 BUNDLE_COUNTS = {"triangular": 12, "honeycomb": 8}
+SMALL_STEP_FIELDS = {
+    "triangular": [4.7677, 4.7682, 4.7687, 4.7692, 4.7697],
+    "honeycomb": [2.1317, 2.1322, 2.1327, 2.1332, 2.1337],
+}
+SMALL_STEP_SEED_OFFSETS = {"triangular": 7000, "honeycomb": 8000}
 
 
 def cost_proxy(params: dict[str, Any]) -> float:
@@ -122,16 +127,81 @@ def build_spec(lattice: str) -> dict[str, Any]:
     }
 
 
+def build_small_step_spec(lattice: str) -> dict[str, Any]:
+    if lattice not in SIZES:
+        raise ValueError(f"unsupported lattice {lattice!r}")
+    points = sorted(
+        [
+            {
+                "lattice": lattice,
+                "L": size,
+                "hTrfd": field,
+                "FixedDltau": 0.004,
+                "scan_kind": "dtau",
+            }
+            for size, field in itertools.product(
+                SIZES[lattice],
+                SMALL_STEP_FIELDS[lattice],
+            )
+        ],
+        key=cost_proxy,
+        reverse=True,
+    )
+    cells = []
+    for index, point in enumerate(points, start=1):
+        params = dict(point)
+        params["seed"] = (
+            int(SETTINGS["base_seed"])
+            + SMALL_STEP_SEED_OFFSETS[lattice]
+            + index
+        )
+        cells.append({"cell_id": f"cell-{index:04d}", "params": params})
+    settings = dict(SETTINGS)
+    settings["FixedDltau"] = 0.004
+    run_id = f"challenge-dtau004-{lattice}-20260729"
+    return {
+        "run_id": run_id,
+        "run_dir": f"tracks/qmc/results/Only-team/{run_id}",
+        "settings": settings,
+        "provenance": {
+            "field_selection": (
+                "five fields spaced by 0.0005 around the dtau2-predicted "
+                "crossing; triangular shifted left by 0.0005 after user "
+                "review"
+            ),
+            "ordering": "largest size first",
+            "parent_analysis": "challenge-analysis-20260729",
+            "parent_recovery": (
+                f"challenge-precision-recovery-{lattice}-20260729"
+            ),
+        },
+        "cells": cells,
+    }
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--repo-root", required=True)
+    parser.add_argument(
+        "--include-small-step",
+        action="store_true",
+        help="also write the two 15-cell FixedDltau=0.004 specifications",
+    )
     args = parser.parse_args()
     repo_root = Path(args.repo_root).resolve()
     allowed = (
         repo_root / "tracks" / "qmc" / "results" / "Only-team"
     ).resolve()
-    for lattice in ("triangular", "honeycomb"):
-        spec = build_spec(lattice)
+    specs = [
+        build_spec(lattice)
+        for lattice in ("triangular", "honeycomb")
+    ]
+    if args.include_small_step:
+        specs.extend(
+            build_small_step_spec(lattice)
+            for lattice in ("triangular", "honeycomb")
+        )
+    for spec in specs:
         run_dir = (repo_root / spec["run_dir"]).resolve()
         run_dir.relative_to(allowed)
         run_dir.mkdir(parents=True, exist_ok=False)
@@ -141,7 +211,8 @@ def main() -> None:
             encoding="utf-8",
         )
         print(
-            f"{lattice}: {len(spec['cells'])} cells -> {destination}",
+            f"{spec['run_id']}: {len(spec['cells'])} cells -> "
+            f"{destination}",
             flush=True,
         )
 

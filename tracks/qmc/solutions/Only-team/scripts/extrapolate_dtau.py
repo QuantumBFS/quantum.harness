@@ -31,11 +31,26 @@ STEP_SIZES = {
     "triangular": (32, 40, 48),
     "honeycomb": (24, 28, 32),
 }
-STEP_FIELDS = {
+BASELINE_FIELDS = {
     "triangular": (4.76711, 4.76761, 4.76811, 4.76861, 4.76911),
     "honeycomb": (2.1315, 2.1320, 2.1325, 2.1330, 2.1335),
 }
-REQUESTED_STEPS = (0.013, 0.016, 0.020)
+RECOVERY_STEP_FIELDS = {
+    "triangular": {
+        0.004: (4.7677, 4.7682, 4.7687, 4.7692, 4.7697),
+        0.010: (4.7705, 4.7710, 4.7715, 4.7720, 4.7725),
+        0.013: (4.7728, 4.7733, 4.7738, 4.7743, 4.7748),
+        0.016: (4.7743, 4.7748, 4.7753, 4.7758, 4.7763),
+        0.020: BASELINE_FIELDS["triangular"],
+    },
+    "honeycomb": {
+        0.004: (2.1317, 2.1322, 2.1327, 2.1332, 2.1337),
+        0.010: (2.1318, 2.1323, 2.1328, 2.1333, 2.1338),
+        0.013: BASELINE_FIELDS["honeycomb"],
+        0.016: BASELINE_FIELDS["honeycomb"] + (2.1340, 2.1345),
+        0.020: BASELINE_FIELDS["honeycomb"],
+    },
+}
 TERMS = frozenset({"a2"})
 
 
@@ -92,6 +107,47 @@ class JointFitResult:
     chi2_per_dof: float
     converged: bool
     boundary_contact: bool
+
+
+def declared_step_specs(lattice: str) -> tuple[StepFitSpec, ...]:
+    if lattice not in RECOVERY_STEP_FIELDS:
+        raise ValueError(f"unsupported lattice: {lattice}")
+    return tuple(
+        StepFitSpec(
+            lattice=lattice,
+            FixedDltau=requested_dt,
+            sizes=STEP_SIZES[lattice],
+            fields=fields,
+        )
+        for requested_dt, fields in RECOVERY_STEP_FIELDS[lattice].items()
+    )
+
+
+def primary_step_specs(lattice: str) -> tuple[StepFitSpec, ...]:
+    maximum_step = 0.016 if lattice == "triangular" else 0.020
+    return tuple(
+        spec
+        for spec in declared_step_specs(lattice)
+        if 0.010 <= spec.FixedDltau <= maximum_step
+    )
+
+
+def small_step_sensitivity_specs(lattice: str) -> tuple[StepFitSpec, ...]:
+    primary = primary_step_specs(lattice)
+    return tuple(
+        spec
+        for spec in declared_step_specs(lattice)
+        if math.isclose(spec.FixedDltau, 0.004, rel_tol=0.0, abs_tol=1e-12)
+        or spec in primary
+    )
+
+
+def analysis_step_specs(lattice: str, mode: str) -> tuple[StepFitSpec, ...]:
+    if mode == "primary":
+        return primary_step_specs(lattice)
+    if mode == "small_step_sensitivity":
+        return small_step_sensitivity_specs(lattice)
+    raise ValueError(f"unsupported time-step mode: {mode}")
 
 
 def _matches(value: float, candidates: Sequence[float]) -> bool:
@@ -261,15 +317,10 @@ def joint_actual_dtau_fit(
     rows: list[dict[str, Any]],
     lattice: str,
     initial: ExtrapolationResult,
+    specs: Sequence[StepFitSpec] | None = None,
 ) -> JointFitResult:
     selected = []
-    for requested_dt in REQUESTED_STEPS:
-        spec = StepFitSpec(
-            lattice,
-            requested_dt,
-            STEP_SIZES[lattice],
-            STEP_FIELDS[lattice],
-        )
+    for spec in specs if specs is not None else primary_step_specs(lattice):
         selected.extend(_step_rows(rows, spec))
     sizes = np.array([float(row["L"]) for row in selected])
     fields = np.array([float(row["hTrfd"]) for row in selected])
@@ -353,18 +404,27 @@ def run_analysis(
     *,
     samples: int,
     seed: int,
+    step_mode: str = "primary",
 ) -> dict[str, Any]:
-    output: dict[str, Any] = {"steps": {}, "extrapolations": {}, "draws": {}, "joint": {}}
-    child_seeds = iter(np.random.SeedSequence(seed).spawn(6))
+    output: dict[str, Any] = {
+        "time_step_mode": step_mode,
+        "steps": {},
+        "extrapolations": {},
+        "draws": {},
+        "joint": {},
+    }
+    selected_specs = {
+        lattice: analysis_step_specs(lattice, step_mode)
+        for lattice in ("triangular", "honeycomb")
+    }
+    step_count = sum(
+        len(selected_specs[lattice])
+        for lattice in ("triangular", "honeycomb")
+    )
+    child_seeds = iter(np.random.SeedSequence(seed).spawn(step_count))
     for lattice in ("triangular", "honeycomb"):
         steps = []
-        for requested_dt in REQUESTED_STEPS:
-            spec = StepFitSpec(
-                lattice,
-                requested_dt,
-                STEP_SIZES[lattice],
-                STEP_FIELDS[lattice],
-            )
+        for spec in selected_specs[lattice]:
             step = _step_bootstrap(
                 cells,
                 bins,
@@ -374,7 +434,7 @@ def run_analysis(
             )
             steps.append(step)
             print(
-                f"{lattice} dt={requested_dt:.3f}: "
+                f"{lattice} dt={spec.FixedDltau:.3f}: "
                 f"h_c={step.fit.parameters['h_c']:.9f}, "
                 f"bootstrap={step.bootstrap.successful_samples}/{samples}",
                 flush=True,
@@ -389,7 +449,12 @@ def run_analysis(
         ]
         extrapolation = linear_dtau2_fit(points)
         intercept_draws, slope_draws = _bootstrap_extrapolation(steps)
-        joint = joint_actual_dtau_fit(cells, lattice, extrapolation)
+        joint = joint_actual_dtau_fit(
+            cells,
+            lattice,
+            extrapolation,
+            selected_specs[lattice],
+        )
         output["steps"][lattice] = steps
         output["extrapolations"][lattice] = extrapolation
         output["draws"][lattice] = {
@@ -468,6 +533,45 @@ def _finite_size_stability(
             "main_grid_fifth_decimal_stable": len(rounded) == 1,
         }
     return result
+
+
+def collect_limitations(
+    analysis: dict[str, Any],
+    final: dict[str, Any],
+) -> list[str]:
+    outside = [
+        f"{lattice} Δτ={step.spec.FixedDltau:.3f}"
+        for lattice in ("triangular", "honeycomb")
+        for step in analysis["steps"][lattice]
+        if not step.fit.h_c_inside_scan
+    ]
+    limitations = []
+    if outside:
+        limitations.append(
+            "Step-specific critical fields outside their measured field windows: "
+            + ", ".join(outside)
+            + "."
+        )
+    if any(
+        abs(final["critical_fields"][lattice]["joint_difference"]) >= 0.5e-5
+        for lattice in ("triangular", "honeycomb")
+    ):
+        limitations.append(
+            "The two-stage and joint actual-Dltau fits disagree beyond the "
+            "fifth-decimal target."
+        )
+    if (
+        any(
+            not final["critical_fields"][lattice]["precision_target_pass"]
+            for lattice in ("triangular", "honeycomb")
+        )
+        or not final["ratio"]["precision_target_pass"]
+    ):
+        limitations.append(
+            "The achieved bootstrap uncertainties exceed at least one declared "
+            "precision target."
+        )
+    return limitations
 
 
 def write_outputs(
@@ -601,6 +705,7 @@ def write_outputs(
         "fit_selection": {
             "terms": ["a2"],
             "Lmin": 16,
+            "time_step_mode": analysis["time_step_mode"],
             "selection_basis": "fit_quality_stability_and_parsimony_before_ratio",
         },
         "critical_fields": {},
@@ -683,11 +788,7 @@ def write_outputs(
             "variants do not round to one common fifth decimal."
         ),
     }
-    final["limitations"] = [
-        "All triangular step-specific critical fields lie outside their measured field windows.",
-        "The two-stage and joint actual-Dltau fits disagree beyond the fifth-decimal target.",
-        "The achieved bootstrap uncertainties exceed every declared precision target.",
-    ]
+    final["limitations"] = collect_limitations(analysis, final)
     (output_dir / "final_results.json").write_text(
         json.dumps(final, indent=2, sort_keys=True, allow_nan=False) + "\n",
         encoding="utf-8",
@@ -701,6 +802,11 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--bootstrap", type=int, default=2000)
     parser.add_argument("--seed", type=int, default=20260731)
+    parser.add_argument(
+        "--step-mode",
+        choices=("primary", "small_step_sensitivity"),
+        default="primary",
+    )
     parser.add_argument("--finite-size-fits", type=Path)
     parser.add_argument("--finite-size-sensitivities", type=Path)
     return parser.parse_args()
@@ -713,6 +819,7 @@ def main() -> None:
         _read_csv(args.bins),
         samples=args.bootstrap,
         seed=args.seed,
+        step_mode=args.step_mode,
     )
     write_outputs(
         args.output_dir,

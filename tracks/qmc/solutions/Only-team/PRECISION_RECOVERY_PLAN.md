@@ -106,8 +106,23 @@ bundles, with one 32-core allocation per bundle:
 | honeycomb | 23012219 | 8 × 32 cores | all running |
 
 All 20 bundles subsequently completed with scheduler exit code zero. Their
-66 cells require collection and the standard manifest-level audit before
-entering a fit.
+66 cells were collected and passed the standard manifest-level audit. The
+merged 243-cell analysis uses the recovery windows at `Δτ=0.010,0.013,0.016`
+for triangular and retains the bracketed honeycomb `Δτ=0.020` point. The
+unbracketed triangular `Δτ=0.020` point remains a recorded diagnostic rather
+than entering the primary continuum fit.
+
+The resulting continuum estimates are:
+
+```text
+h_c(triangular) = 4.768626879 ± 0.001019229
+h_c(honeycomb)  = 2.132538417 ± 0.000562147
+R               = 2.236157603 ± 0.000759908
+```
+
+The ratio remains statistically compatible with `√5`; the 66-cell recovery
+improves field coverage and reduces the ratio standard error from
+`0.001006930` to `0.000759908`, but it does not reach the challenge target.
 
 An additional `Δτ=0.004` anchor contains five fields at each of three sizes:
 
@@ -116,12 +131,12 @@ An additional `Δτ=0.004` anchor contains five fields at each of three sizes:
 | triangular | 32, 40, 48 | 4.7677, 4.7682, 4.7687, 4.7692, 4.7697 |
 | honeycomb | 24, 28, 32 | 2.1317, 2.1322, 2.1327, 2.1332, 2.1337 |
 
-The 30 cells now use 20 independent 32-core allocations, each running one or
-two cells sequentially. Jobs `23015225`–`23015236` and
-`23015238`–`23015245` were all running at the status time, using the full
-640-core allowance. Each job had established its MPI step, all 20 first-cell
-directories existed, and their configurations retained
-`FixedDltau=0.004`, `nLocal=1`, and `nWolff=5`.
+The 30 cells used 20 independent 32-core allocations, each running one or two
+cells sequentially. Jobs `23015225`–`23015236` and `23015238`–`23015245`
+completed with scheduler exit code zero. All 30 manifests passed the standard
+integrity audit, producing a merged total of 273 cells and 8736 bin rows.
+Their configurations retained `FixedDltau=0.004`, `nLocal=1`, and
+`nWolff=5`.
 
 The independent layout replaces an eight-job packed layout whose nested
 Slurm steps did not run concurrently. Startup diagnostics also found and
@@ -133,6 +148,20 @@ to `failed-startup-attempts/23015155-23015162/` for audit rather than deleted.
 Pending jobs `23013562` and `23013563` were cancelled before execution and
 superseded by the balanced 20-lane layout. They consumed no measured runtime
 and produced no cell manifests.
+
+The primary 243-cell estimate remains unchanged. Adding `Δτ=0.004` as the
+predeclared sensitivity gives
+
+```text
+h_c(triangular) = 4.768620763 ± 0.000575824
+h_c(honeycomb)  = 2.132295859 ± 0.000355061
+R               = 2.236429014 ± 0.000461302
+```
+
+Its 95% ratio interval is `[2.235482503, 2.237300897]`. The additional anchor
+reduces the ratio standard error by 39.3% but still does not resolve equality
+with `√5`; the two-stage versus joint-fit difference also remains above the
+fifth-decimal target.
 
 Generated run specifications, logs, manifests, data, and figures remain in
 `tracks/qmc/results/Only-team/` and are not added to Git. Scheduler states

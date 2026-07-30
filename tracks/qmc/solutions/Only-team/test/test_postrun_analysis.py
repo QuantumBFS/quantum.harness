@@ -10,6 +10,7 @@ import tempfile
 import types
 import unittest
 from pathlib import Path
+from unittest import mock
 
 import numpy as np
 
@@ -617,6 +618,88 @@ class DtauExtrapolationTests(unittest.TestCase):
     def setUpClass(cls) -> None:
         cls.extrapolate = importlib.import_module("extrapolate_dtau")
 
+    def test_small_step_anchor_is_predeclared_sensitivity_not_primary(self) -> None:
+        triangular = self.extrapolate.declared_step_specs("triangular")
+        honeycomb = self.extrapolate.declared_step_specs("honeycomb")
+
+        self.assertEqual(
+            tuple(spec.FixedDltau for spec in triangular),
+            (0.004, 0.010, 0.013, 0.016, 0.020),
+        )
+        self.assertEqual(
+            tuple(spec.FixedDltau for spec in honeycomb),
+            (0.004, 0.010, 0.013, 0.016, 0.020),
+        )
+        self.assertEqual(
+            triangular[0].fields,
+            (4.7677, 4.7682, 4.7687, 4.7692, 4.7697),
+        )
+        self.assertEqual(
+            honeycomb[0].fields,
+            (2.1317, 2.1322, 2.1327, 2.1332, 2.1337),
+        )
+        self.assertEqual(
+            triangular[2].fields,
+            (4.7728, 4.7733, 4.7738, 4.7743, 4.7748),
+        )
+        self.assertEqual(
+            honeycomb[3].fields,
+            (2.1315, 2.1320, 2.1325, 2.1330, 2.1335, 2.1340, 2.1345),
+        )
+        self.assertEqual(
+            tuple(
+                spec.FixedDltau
+                for spec in self.extrapolate.primary_step_specs("triangular")
+            ),
+            (0.010, 0.013, 0.016),
+        )
+        self.assertEqual(
+            tuple(
+                spec.FixedDltau
+                for spec in self.extrapolate.primary_step_specs("honeycomb")
+            ),
+            (0.010, 0.013, 0.016, 0.020),
+        )
+        self.assertEqual(
+            tuple(
+                spec.FixedDltau
+                for spec in self.extrapolate.small_step_sensitivity_specs(
+                    "triangular"
+                )
+            ),
+            (0.004, 0.010, 0.013, 0.016),
+        )
+        self.assertEqual(
+            tuple(
+                spec.FixedDltau
+                for spec in self.extrapolate.small_step_sensitivity_specs(
+                    "honeycomb"
+                )
+            ),
+            (0.004, 0.010, 0.013, 0.016, 0.020),
+        )
+        self.assertTrue(hasattr(self.extrapolate, "analysis_step_specs"))
+        self.assertEqual(
+            tuple(
+                spec.FixedDltau
+                for spec in self.extrapolate.analysis_step_specs(
+                    "triangular", "primary"
+                )
+            ),
+            (0.010, 0.013, 0.016),
+        )
+        self.assertEqual(
+            tuple(
+                spec.FixedDltau
+                for spec in self.extrapolate.analysis_step_specs(
+                    "triangular", "small_step_sensitivity"
+                )
+            ),
+            (0.004, 0.010, 0.013, 0.016),
+        )
+        with self.assertRaisesRegex(ValueError, "unsupported time-step mode"):
+            self.extrapolate.analysis_step_specs("triangular", "closest_to_sqrt5")
+
     def test_weighted_linear_dtau2_fit_recovers_intercept(self) -> None:
         h_zero = 4.76821
         slope = 27.5
@@ -637,6 +720,40 @@ class DtauExtrapolationTests(unittest.TestCase):
         self.assertAlmostEqual(result.delta_sqrt5, 0.0, delta=1.0e-15)
         self.assertGreater(result.standard_error, 0.0)
 
+    def test_limitations_name_only_unbracketed_primary_steps(self) -> None:
+        analysis = {
+            "steps": {
+                "triangular": [
+                    types.SimpleNamespace(
+                        spec=types.SimpleNamespace(FixedDltau=0.010),
+                        fit=types.SimpleNamespace(h_c_inside_scan=True),
+                    ),
+                    types.SimpleNamespace(
+                        spec=types.SimpleNamespace(FixedDltau=0.013),
+                        fit=types.SimpleNamespace(h_c_inside_scan=False),
+                    ),
+                ],
+                "honeycomb": [],
+            }
+        }
+        final = {
+            "critical_fields": {
+                "triangular": {
+                    "joint_difference": 1.0e-4,
+                    "precision_target_pass": False,
+                },
+                "honeycomb": {
+                    "joint_difference": 0.0,
+                    "precision_target_pass": True,
+                },
+            },
+            "ratio": {"precision_target_pass": False},
+        }
+        limitations = self.extrapolate.collect_limitations(analysis, final)
+        self.assertIn("triangular Δτ=0.013", limitations[0])
+        self.assertNotIn("All triangular", limitations[0])
+        self.assertEqual(len(limitations), 3)
+
 
 class PlotSmokeTests(unittest.TestCase):
     @classmethod
@@ -646,6 +763,91 @@ class PlotSmokeTests(unittest.TestCase):
     def assert_pair(self, path: Path) -> None:
         self.assertGreater(path.stat().st_size, 1000)
         self.assertGreater(path.with_suffix(".pdf").stat().st_size, 1000)
+
+    def test_binder_plot_does_not_overlay_quality_rings(self) -> None:
+        cells = [
+            {
+                "lattice": "triangular",
+                "L": 48,
+                "hTrfd": 4.7733,
+                "FixedDltau": 0.013,
+                "binder_Q": 0.53,
+                "binder_Q_error": 4.0e-4,
+                "quality_status": "candidate",
+            }
+        ]
+        with tempfile.TemporaryDirectory() as temporary:
+            path = Path(temporary) / "binder.png"
+            with mock.patch("matplotlib.axes.Axes.scatter") as scatter:
+                self.plotting.plot_binder_curves(cells, "triangular", path)
+            scatter.assert_not_called()
+
+    def test_ratio_comparison_series_keeps_pre_primary_and_sensitivity_distinct(
+        self,
+    ) -> None:
+        primary = {
+            "ratio": {
+                "median": 2.236157603,
+                "ci95": [2.234599154, 2.237603704],
+                "standard_error": 0.000759908,
+                "sqrt5": math.sqrt(5.0),
+            },
+            "pre_comparison": {
+                "ratio": {
+                    "value": 2.2359249706916766,
+                    "standard_error": 5.949905894828089e-5,
+                }
+            },
+        }
+        sensitivity = {
+            "ratio": {
+                "median": 2.236429014,
+                "ci95": [2.235482503, 2.237300897],
+                "standard_error": 0.000461302,
+            }
+        }
+        series = self.plotting.ratio_comparison_series(primary, sensitivity)
+        self.assertEqual(
+            [item["label"] for item in series],
+            [
+                "Blöte–Deng PRE 66, 066110 (2002)",
+                "Primary analysis (243 cells)",
+                "Δτ=0.004 sensitivity (273 cells)",
+            ],
+        )
+        self.assertAlmostEqual(series[0]["value"], 2.2359249706916766)
+        self.assertAlmostEqual(series[0]["standard_error"], 5.949905894828089e-5)
+        self.assertEqual(
+            (series[1]["low"], series[1]["high"]),
+            (2.234599154, 2.237603704),
+        )
+        self.assertEqual(
+            (series[2]["low"], series[2]["high"]),
+            (2.235482503, 2.237300897),
+        )
+
+    def test_plot_cli_accepts_explicit_sensitivity_results(self) -> None:
+        argv = [
+            "plot_challenge_results.py",
+            "--cells",
+            "cells.csv",
+            "--finite-size-fits",
+            "finite_size_fits.csv",
+            "--dtau-fits",
+            "dtau_fits.csv",
+            "--final-results",
+            "final_results.json",
+            "--sensitivity-results",
+            "dtau004-sensitivity/final_results.json",
+            "--output-dir",
+            "figures",
+        ]
+        with mock.patch.object(sys, "argv", argv):
+            args = self.plotting._parse_args()
+        self.assertEqual(
+            args.sensitivity_results,
+            Path("dtau004-sensitivity/final_results.json"),
+        )
 
     def test_all_plot_functions_create_png_and_pdf(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
@@ -753,10 +955,25 @@ class PlotSmokeTests(unittest.TestCase):
             ratio_path = root / "ratio.png"
             self.plotting.plot_ratio(
                 {
-                    "median": math.sqrt(5.0),
-                    "ci95": [2.235, 2.237],
-                    "standard_error": 5e-4,
-                    "sqrt5": math.sqrt(5.0),
+                    "ratio": {
+                        "median": 2.236157603,
+                        "ci95": [2.234599154, 2.237603704],
+                        "standard_error": 0.000759908,
+                        "sqrt5": math.sqrt(5.0),
+                    },
+                    "pre_comparison": {
+                        "ratio": {
+                            "value": 2.2359249706916766,
+                            "standard_error": 5.949905894828089e-5,
+                        }
+                    },
+                },
+                {
+                    "ratio": {
+                        "median": 2.236429014,
+                        "ci95": [2.235482503, 2.237300897],
+                        "standard_error": 0.000461302,
+                    }
                 },
                 ratio_path,
             )
@@ -796,16 +1013,33 @@ class ChallengeRunRecordTests(unittest.TestCase):
         self.assertEqual(len(record["time_step"]["step_variants"]), 6)
         self.assertIn("ratio", record["results"])
         self.assertIn("raw_inventory_sha256", record["provenance"])
+        self.assertIn(
+            "--sensitivity-results",
+            "\n".join(record["commands"]),
+        )
         self.assertGreaterEqual(len(record["figures"]), 5)
         self.assertTrue(all("src" in figure for figure in record["figures"]))
         json.dumps(record, allow_nan=False)
         report = self.builder.build_report(record)
-        self.assertEqual(len(report["sections"]), 4)
+        self.assertEqual(len(report["sections"]), 6)
         self.assertEqual(
             [section["title"] for section in report["sections"]],
-            ["Challenge", "Approach", "Results", "Highlight"],
+            [
+                "Result at a glance",
+                "Model and QMC method",
+                "Verification",
+                "Finite-size scaling",
+                "Continuum limit and ratio",
+                "Reproducibility and limitations",
+            ],
         )
-        result_blocks = report["sections"][2]["blocks"]
+        sections = {
+            section["title"]: section
+            for section in report["sections"]
+        }
+        finite_size_blocks = sections["Finite-size scaling"]["blocks"]
+        continuum_blocks = sections["Continuum limit and ratio"]["blocks"]
+        result_blocks = finite_size_blocks + continuum_blocks
         figure_sources = [
             item["src"]
             for block in result_blocks
@@ -817,10 +1051,283 @@ class ChallengeRunRecordTests(unittest.TestCase):
             figure_sources.index("figures/data_collapse.png"),
             figure_sources.index("figures/dtau2_extrapolation.png"),
         )
+        stability_heading_index = next(
+            index
+            for index, block in enumerate(finite_size_blocks)
+            if block.get("kind") == "heading"
+            and block.get("text") == "Finite-size and time-step stability"
+        )
+        paired_figures = finite_size_blocks[stability_heading_index + 1]
+        standalone_dtau = continuum_blocks[0]
+        following_table = continuum_blocks[1]
+        self.assertEqual(
+            [item["src"] for item in paired_figures["items"]],
+            [
+                "figures/data_collapse.png",
+                "figures/finite_size_fit_stability.png",
+            ],
+        )
+        self.assertEqual(
+            [item["src"] for item in standalone_dtau["items"]],
+            ["figures/dtau2_extrapolation.png"],
+        )
+        self.assertEqual(following_table["kind"], "table")
         figure_ids = [figure["id"] for figure in record["figures"]]
         self.assertIn("data-collapse", figure_ids)
         self.assertIn("DRAFT", report["eyebrow"])
+        approach_text = json.dumps(
+            sections["Model and QMC method"],
+            ensure_ascii=False,
+        )
+        verification_text = json.dumps(
+            sections["Verification"],
+            ensure_ascii=False,
+        )
+        reproduction_text = json.dumps(
+            sections["Reproducibility and limitations"],
+            ensure_ascii=False,
+        )
+        report_text = json.dumps(report, ensure_ascii=False)
+        self.assertIn("Algorithm in brief", approach_text)
+        self.assertIn(
+            "anisotropic (2+1)-dimensional classical Ising model",
+            approach_text,
+        )
+        self.assertIn("Suzuki–Trotter", approach_text)
+        self.assertIn("Local Metropolis sweeps", approach_text)
+        self.assertIn("without an additional acceptance test", approach_text)
+        self.assertIn("independent Markov chains", approach_text)
+        self.assertIn("Binder moment ratio", report_text)
+        self.assertIn("correction-to-scaling", report_text)
+        self.assertIn("bootstrap over bin averages", report_text)
+        algorithm_card = next(
+            block
+            for block in sections["Model and QMC method"]["blocks"]
+            if block.get("kind") == "card"
+            and block.get("title") == "Algorithm in brief"
+        )
+        equation_tex = [
+            block["tex"]
+            for block in algorithm_card["blocks"]
+            if block.get("kind") == "equation"
+        ]
+        self.assertIn(
+            r"H=J_1\sum_{\langle i,j\rangle}\sigma_i^z\sigma_j^z"
+            r"-h\sum_i\sigma_i^x",
+            equation_tex,
+        )
+        self.assertIn(
+            r"K_{\mathrm{space}}=-\Delta\tau J_1,\qquad "
+            r"K_\tau=-\frac{1}{2}\log\left[\tanh(h\Delta\tau)\right]",
+            equation_tex,
+        )
+        self.assertIn(
+            r"P_{\mathrm{acc}}=\min\left[1,\exp(\Delta\log W)\right]",
+            equation_tex,
+        )
+        self.assertIn(
+            r"p_{\mathrm{space}}=1-\exp(-2K_{\mathrm{space}}),\qquad "
+            r"p_\tau=1-\exp(-2K_\tau)",
+            equation_tex,
+        )
+        self.assertNotIn("Small-system ED cross-check", approach_text)
+        self.assertIn("Small-system ED cross-check", verification_text)
+        self.assertIn("exact diagonalization", verification_text)
+        self.assertIn(
+            "triangular 3×3 and honeycomb 2×2",
+            verification_text,
+        )
+        self.assertIn("$z(Q)=0.742$ and $0.394$", verification_text)
+        self.assertIn("0.1008% and 0.0277%", verification_text)
+        self.assertNotIn("peak RSS unavailable from scheduler", report_text)
+        self.assertIn("without out-of-memory failures", reproduction_text)
+        self.assertIn("Blöte and Deng", report_text)
+        self.assertIn("2.235924971", report_text)
         json.dumps(report, allow_nan=False)
+
+        enlarged = json.loads(json.dumps(record))
+        enlarged["audit"]["total_cells"] = 243
+        enlarged["audit"]["unique_parameter_cells"] = 243
+        enlarged["audit"]["quality_status_counts"] = {
+            "candidate": 68,
+            "pass": 175,
+        }
+        enlarged["results"]["ratio"]["standard_error"] = 0.0007599083
+        enlarged["scan"]["triangular"]["binder_panel"] = {
+            "requested_Dltau": 0.013,
+            "cell_count": 77,
+            "size_count": 8,
+            "warning_count": 28,
+        }
+        enlarged["scan"]["honeycomb"]["binder_panel"] = {
+            "requested_Dltau": 0.013,
+            "cell_count": 55,
+            "size_count": 7,
+            "warning_count": 0,
+        }
+        enlarged["time_step"]["small_step_sensitivity"] = {
+            "critical_fields": {
+                "triangular": {
+                    "h_c_zero": 4.7686207628,
+                    "standard_error": 0.0005758244,
+                    "ci95": [4.7675721086, 4.7697548001],
+                },
+                "honeycomb": {
+                    "h_c_zero": 2.1322958588,
+                    "standard_error": 0.0003550606,
+                    "ci95": [2.1315828804, 2.1329767123],
+                },
+            },
+            "ratio": {
+                "median": 2.2364290138,
+                "standard_error": 0.0004613018,
+                "ci95": [2.2354825035, 2.2373008974],
+                "sqrt5_verdict": "cannot_distinguish",
+            },
+        }
+        enlarged_report = self.builder.build_report(enlarged)
+        enlarged_text = json.dumps(enlarged_report, ensure_ascii=False)
+        enlarged_sections = {
+            section["title"]: section
+            for section in enlarged_report["sections"]
+        }
+        self.assertIn("243/243 cells passed the integrity audit", enlarged_text)
+        self.assertIn(
+            "68 cells triggered at least one predeclared diagnostic flag",
+            enlarged_text,
+        )
+        captions = {
+            item["src"]: item["caption"]
+            for section_name in ("Finite-size scaling", "Continuum limit and ratio")
+            for block in enlarged_sections[section_name]["blocks"]
+            if block.get("kind") == "figures"
+            for item in block["items"]
+        }
+        triangular_caption = captions["figures/binder_Q_triangular.png"]
+        honeycomb_caption = captions["figures/binder_Q_honeycomb.png"]
+        self.assertIn("77 audited cells across 8 sizes", triangular_caption)
+        self.assertIn("Lines and markers encode $L$", triangular_caption)
+        self.assertNotIn("orange ring", triangular_caption.lower())
+        self.assertIn("55 audited cells across 7 sizes", honeycomb_caption)
+        self.assertIn("no per-cell precision warnings", honeycomb_caption)
+        self.assertIn("Lines and markers encode $L$", honeycomb_caption)
+        self.assertIn(
+            r"Before production, we set $\\mathrm{SEM}(Q)\\leq10^{-4}$",
+            enlarged_text,
+        )
+        self.assertIn(
+            r"$\\mathrm{SEM}(Q)=3.50\\times10^{-4}$–"
+            r"$6.18\\times10^{-4}$",
+            enlarged_text,
+        )
+        self.assertIn(
+            "12–38 times more independent samples",
+            enlarged_text,
+        )
+        self.assertIn(
+            "Future work should concentrate additional independent chains and "
+            "sweeps near each crossing",
+            enlarged_text,
+        )
+        self.assertIn(
+            "just below the common $L=32,40,48$ field window",
+            captions["figures/dtau2_extrapolation.png"],
+        )
+        self.assertIn(
+            r"dotted lines mark $\pm2$ SEM",
+            captions["figures/data_collapse.png"],
+        )
+        self.assertIn(
+            r"x position is $L_{\min}$",
+            captions["figures/finite_size_fit_stability.png"],
+        )
+        self.assertIn(
+            "PRE interval propagates the two published field uncertainties",
+            captions["figures/ratio_vs_sqrt5.png"],
+        )
+        self.assertIn("primary estimate is closer", enlarged_text)
+        self.assertIn("small-time-step sensitivity is farther", enlarged_text)
+        self.assertIn("Small-time-step sensitivity", enlarged_text)
+        self.assertIn("2.236429014", enlarged_text)
+        self.assertIn("39.3%", enlarged_text)
+        sensitivity_sources = [
+            item["src"]
+            for block in enlarged_sections["Continuum limit and ratio"]["blocks"]
+            if block.get("kind") == "figures"
+            for item in block["items"]
+        ]
+        self.assertIn(
+            "dtau004-sensitivity/figures/dtau2_extrapolation.png",
+            sensitivity_sources,
+        )
+
+    def test_scan_axes_records_binder_panel_counts(self) -> None:
+        rows = [
+            {
+                "lattice": lattice,
+                "L": str(size),
+                "hTrfd": str(field),
+                "FixedDltau": str(dtau),
+                "Dltau": str(dtau),
+                "quality_status": quality,
+            }
+            for lattice, size, field, dtau, quality in (
+                ("triangular", 32, 4.7728, 0.013, "pass"),
+                ("triangular", 40, 4.7733, 0.013, "candidate"),
+                ("triangular", 48, 4.7748, 0.013, "candidate"),
+                ("triangular", 32, 4.7705, 0.010, "pass"),
+                ("honeycomb", 24, 2.1320, 0.013, "pass"),
+                ("honeycomb", 28, 2.1325, 0.013, "pass"),
+                ("honeycomb", 32, 2.1330, 0.013, "pass"),
+                ("honeycomb", 24, 2.1310, 0.010, "pass"),
+            )
+        ]
+        axes = self.builder._scan_axes(rows)
+        self.assertEqual(
+            axes["triangular"]["binder_panel"],
+            {
+                "requested_Dltau": 0.013,
+                "cell_count": 3,
+                "size_count": 3,
+                "warning_count": 2,
+            },
+        )
+        self.assertEqual(
+            axes["honeycomb"]["binder_panel"],
+            {
+                "requested_Dltau": 0.013,
+                "cell_count": 3,
+                "size_count": 3,
+                "warning_count": 0,
+            },
+        )
+
+    def test_cli_always_refreshes_report_and_draft_flag_only_sets_label(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            analysis_dir = Path(temporary)
+            record = {"record": "fresh"}
+            report = {"title": "fresh report", "sections": []}
+            args = types.SimpleNamespace(
+                analysis_dir=analysis_dir,
+                draft_report=False,
+            )
+            with (
+                mock.patch.object(self.builder, "_parse_args", return_value=args),
+                mock.patch.object(self.builder, "build_run", return_value=record),
+                mock.patch.object(
+                    self.builder,
+                    "build_report",
+                    return_value=report,
+                ) as build_report,
+            ):
+                self.builder.main()
+            build_report.assert_called_once_with(record, draft=False)
+            self.assertEqual(
+                json.loads((analysis_dir / "report.json").read_text()),
+                report,
+            )
 
 
 class PrecisionRecoverySpecificationTests(unittest.TestCase):
@@ -885,6 +1392,101 @@ class PrecisionRecoverySpecificationTests(unittest.TestCase):
             loads = [bundle["cost_proxy_sum"] for bundle in bundles]
             self.assertLessEqual(max(loads) / min(loads), 1.25)
 
+    def test_small_step_specs_recreate_all_30_cells(self) -> None:
+        expected = {
+            "triangular": {
+                "sizes": {32, 40, 48},
+                "fields": {4.7677, 4.7682, 4.7687, 4.7692, 4.7697},
+                "first_seed": 20267730,
+            },
+            "honeycomb": {
+                "sizes": {24, 28, 32},
+                "fields": {2.1317, 2.1322, 2.1327, 2.1332, 2.1337},
+                "first_seed": 20268730,
+            },
+        }
+        for lattice, target in expected.items():
+            spec = self.generator.build_small_step_spec(lattice)
+            cells = spec["cells"]
+            self.assertEqual(
+                spec["run_id"],
+                f"challenge-dtau004-{lattice}-20260729",
+            )
+            self.assertEqual(
+                spec["provenance"],
+                {
+                    "field_selection": (
+                        "five fields spaced by 0.0005 around the "
+                        "dtau2-predicted crossing; triangular shifted left "
+                        "by 0.0005 after user review"
+                    ),
+                    "ordering": "largest size first",
+                    "parent_analysis": "challenge-analysis-20260729",
+                    "parent_recovery": (
+                        f"challenge-precision-recovery-{lattice}-20260729"
+                    ),
+                },
+            )
+            self.assertEqual(spec["settings"]["FixedDltau"], 0.004)
+            self.assertEqual(len(cells), 15)
+            self.assertEqual(
+                {cell["params"]["L"] for cell in cells},
+                target["sizes"],
+            )
+            self.assertEqual(
+                {cell["params"]["hTrfd"] for cell in cells},
+                target["fields"],
+            )
+            self.assertEqual(
+                [cell["params"]["seed"] for cell in cells],
+                list(
+                    range(
+                        target["first_seed"],
+                        target["first_seed"] + 15,
+                    )
+                ),
+            )
+            self.assertTrue(
+                all(
+                    cell["params"]["FixedDltau"] == 0.004
+                    and cell["params"]["scan_kind"] == "dtau"
+                    for cell in cells
+                )
+            )
+            costs = [
+                self.generator.cost_proxy(cell["params"])
+                for cell in cells
+            ]
+            self.assertEqual(costs, sorted(costs, reverse=True))
+
+    def test_cli_can_write_recovery_and_small_step_specs(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            with mock.patch.object(
+                sys,
+                "argv",
+                [
+                    "generate_precision_recovery_specs.py",
+                    "--repo-root",
+                    tmp,
+                    "--include-small-step",
+                ],
+            ):
+                self.generator.main()
+            results = Path(tmp) / "tracks" / "qmc" / "results" / "Only-team"
+            expected_ids = {
+                "challenge-precision-recovery-triangular-20260729",
+                "challenge-precision-recovery-honeycomb-20260729",
+                "challenge-dtau004-triangular-20260729",
+                "challenge-dtau004-honeycomb-20260729",
+            }
+            self.assertEqual(
+                {
+                    path.parent.name
+                    for path in results.glob("*/run_spec.json")
+                },
+                expected_ids,
+            )
+
     def test_array_scripts_request_32_ranks_and_six_hours(self) -> None:
         for lattice, count in (("triangular", 45), ("honeycomb", 21)):
             script = (
@@ -929,6 +1531,38 @@ class PrecisionRecoverySpecificationTests(unittest.TestCase):
                 "run_precision_recovery_bundle.sh",
                 source,
             )
+
+
+class ReadmeReviewTests(unittest.TestCase):
+    def test_readme_has_new_reader_demo_and_reproduction_paths(self) -> None:
+        readme = (PROJECT_ROOT / "README.md").read_text(encoding="utf-8")
+        for heading in (
+            "## Physics problem",
+            "## Algorithm",
+            "## Quick start",
+            "### Five-minute single-rank demo",
+            "### MPI demo",
+            "## Configuration",
+            "## Output files",
+            "## Reproduce the challenge analysis",
+            "## Verification and limitations",
+        ):
+            self.assertIn(heading, readme)
+        for fragment in (
+            "using Pkg; Pkg.instantiate()",
+            "scripts/run.jl",
+            "configs/smoke-triangular.toml",
+            "mpiexec -n 2 julia",
+            "using Pkg; Pkg.test()",
+            "--sensitivity-results",
+            "results.csv",
+            "metadata.toml",
+            "bins.csv",
+        ):
+            self.assertIn(fragment, readme)
+        self.assertIn("J1=-1", readme)
+        self.assertIn("Q=<m²>²/<m⁴>", readme)
+        self.assertIn("existing non-empty output directory", readme)
 
 
 if __name__ == "__main__":
