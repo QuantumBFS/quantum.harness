@@ -158,10 +158,13 @@ block 128. Direct D=2 one-level replacement at N=10: structural 0.697
 wall/RSS parity (19.1 s / 1.25 G vs 19.6 s / 1.21 G), largest block 66 —
 BELOW the comparator's 84. Reading, with its confound in the same
 sentence: PSD-scalar counts understate interior-point cost when scalars
-concentrate in large blocks, and since the two configurations differ
-simultaneously in D, depth and N this localization is consistent-with
-rather than isolated — the controlled check (direct replacement at N=14)
-was not run.
+concentrate in large blocks. The controlled check WAS subsequently run
+(third revision): at the same N=14, same retained basis, same level count
+and same link-family generator, swapping only the map package D=2 → D=4
+(66-dim → 128-dim blocks) moved realized cost from wall 0.87x / RSS 0.90x
+to wall 2.37x / RSS 6.80x of the comparator while the structural ratio
+stayed below 1 (0.542 → 0.830) — the block-dimension package is isolated
+as the realized-cost driver within that boundary (ledger C20).
 
 ### 2. The eliminated zone, and what reaches it [C14, C17]
 
@@ -178,7 +181,13 @@ so the coarse layer can act on the eliminated zone only indirectly.
 Window size / depth is the axis that would give a direct path — and the
 depth attempt (C10 at N=20) PASSED its validity admission (1792 link
 rows, residual ≤ 1.7e-15) with its interior-point solve crossing the
-18 GiB local frontier.
+18 GiB local frontier. Third-revision extension: the direct D=2 curve
+holds the same verdict at every solved size — recovery bounds < 0.525% /
+< 0.072% / < 0.096% / < 0.219% of d at N=10/12/14/20 (central values
+|·| ≤ 0.02%), beside cost ratios that IMPROVE with N (structural
+0.697 → 0.383, wall 0.97 → 0.75, RSS 1.03 → 0.51); N=20 is the
+campaign's first both-axes-cheaper configuration, still with unresolved
+recovery (ledger C19).
 
 ### 3. The correction channel has not been tested [C15, C18]
 
@@ -198,7 +207,13 @@ model): those pools were chosen by geometric distance, not W_D anchoring.
 (Whether the pool operators lie inside the Gram basis itself — which
 would make Γ_S a principal submatrix and its positivity logically implied
 — was checked only at the tsupp/closure level, not at the Gram-row level,
-so that stronger statement is not claimed.)
+so that stronger statement is not claimed.) Third-revision enumeration
+closes the question at every tested size: W_bundle = 0 for all four pool
+bundles at all N ∈ {10, 12, 14, 20} (`direct/wbundle_table.csv`) — the
+pre-registered expectation that B_half becomes W_D-reaching by N=14–20 is
+FALSIFIED; the translation-quotiented closure contains every plain
+pair/bond product class at every tested N, so the correction channel
+remains untested for the structural reason at all sizes (ledger C21).
 
 ### 4. Architecture and soundness [C16; release gates C10]
 
@@ -224,6 +239,22 @@ completed implementation of Sec. III-D-2.
 | PSD-scalar count is an unreliable cost proxy when block-dimension distributions differ | at N=20: structural ratio 0.85 vs wall ~9x and RSS ~5.7x — the tower concentrates scalars in dimension-128 blocks, for which the interior-point method pays super-linearly |
 | bundle / deeper-tower contributions: resource-frontier, not numerical failure | D, E at the 18 GiB frontier at both sizes; C10@N=20 deeper-tower validity passed (1792 link rows, residual ≤ 1.7e-15) and its interior-point solve crossed the local 18 GiB frontier; frontier rows retained with status |
 | validity | every accepted row ≤ E_Bethe + 5e-7; L_B ≤ L_A and L_B ≤ L_C6 within ε_cmp at both sizes |
+
+### Evidence table — direct-replacement campaign (frozen CSVs under `rg_selection/direct/`)
+
+| N | R_struct C/A | wall C/A | RSS C/A | d = L_A−L_B | recovery bound (central) |
+|---|---|---|---|---|---|
+| 10 | 0.697 | 0.97 | 1.03 | +4.972e-06 | < 0.525% (−0.016%) |
+| 12 | 0.611 | 1.01 | 0.99 | +3.070e-05 | < 0.072% (+0.019%) |
+| 14 | 0.542 | 0.87 | 0.90 | +4.679e-05 | < 0.096% (+0.010%) |
+| 20 | 0.383 | 0.75 | 0.51 | +1.566e-04 | < 0.219% (+0.001%) |
+| 26 | 0.345 | build-only | — | — | — |
+| 30 | 0.336 | build-only | — | — | — |
+| 14 (C4, D=4 package) | 0.830 | 2.37 | 6.80 | same d | < 0.630% (+0.002%) |
+
+A/B comparators at N=14/20 are reused from the morning campaign under the
+exact-match record `rg_selection/direct/PROVENANCE_MATCH.md`; D rows at
+N=12/14/20 are STRUCTURALLY_ABSORBED (W_bundle = 0, `wbundle_table.csv`).
 
 ## Reproducibility
 
