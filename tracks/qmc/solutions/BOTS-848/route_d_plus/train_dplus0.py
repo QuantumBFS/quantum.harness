@@ -276,7 +276,7 @@ def _run_combined_update(
     )
     tower_gradient, tower_metric, next_tower, tower_record = (
         _sample_sector_update(
-            mother_evaluator=tower_mother_channels,
+            mother_evaluator=ground_mother_channels,
             full_evaluator=tower_evaluator,
             coefficients=tower_coefficients,
             configurations=tower_configurations,
@@ -352,13 +352,14 @@ def _pilot_samples(seed: int, chains: int, samples_per_chain: int) -> tuple[
         for chain in range(chains)
     ]
     tower_results = [
-        metropolis_chain(
+        delayed_acceptance_chain(
+            ground_mother_channels,
             tower_mother_channels,
             n_particles=N_ELECTRONS,
             coefficients=np.empty(0, dtype=np.complex128),
             seed=seed + 100 + chain,
-            burn_in_sweeps=16,
-            sample_sweeps=samples_per_chain,
+            sample_steps=16 + samples_per_chain,
+            proposal_sweeps=2,
             delta_max=0.35,
             global_rotation_interval=4,
         )
@@ -368,7 +369,11 @@ def _pilot_samples(seed: int, chains: int, samples_per_chain: int) -> tuple[
         [result.samples for result in ground_results], axis=0
     )
     tower_samples = np.concatenate(
-        [result.samples for result in tower_results], axis=0
+        [
+            result.samples[-samples_per_chain:]
+            for result in tower_results
+        ],
+        axis=0,
     )
     return (
         np.asarray([ground_raw_channels(item) for item in ground_samples]),
@@ -434,13 +439,14 @@ def _initial_configurations(
         for chain in range(chains)
     ]
     tower_results = [
-        metropolis_chain(
+        delayed_acceptance_chain(
+            ground_mother_channels,
             tower_mother_channels,
             n_particles=N_ELECTRONS,
             coefficients=np.empty(0, dtype=np.complex128),
             seed=seed + 100 + chain,
-            burn_in_sweeps=16,
-            sample_sweeps=1,
+            sample_steps=16,
+            proposal_sweeps=2,
             delta_max=0.35,
             global_rotation_interval=4,
         )
@@ -600,7 +606,7 @@ def train_seed(
     final_tower_started = time.perf_counter()
     final_tower = [
         delayed_acceptance_chain(
-            tower_mother_channels,
+            ground_mother_channels,
             tower_evaluator,
             n_particles=N_ELECTRONS,
             coefficients=tower_coefficients,

@@ -44,6 +44,11 @@ def test_phase6_batch_requires_phase5_and_gpu_certificate() -> None:
     assert "combined_state_averaged_sr" in certificate
     assert "ProcessPoolExecutor" in certificate
     assert 'multiprocessing.get_context("spawn")' in certificate
+    training = (ROUTE_D_PLUS_ROOT / "train_dplus0.py").read_text(
+        encoding="utf-8"
+    )
+    assert "mother_evaluator=ground_mother_channels" in training
+    assert "ground_mother_channels,\n            tower_mother_channels" in training
     assert "validate_certificate(collected)" in certificate
     assert "phase6-attempt.json" in certificate
     assert "validate_attempt(attempt)" in certificate
