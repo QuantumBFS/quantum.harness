@@ -1,0 +1,334 @@
+{
+  "compact_artifacts": [
+    {
+      "path": "01_task_folder/task_05/script/output/citation_audit_v1.json",
+      "sha256": "fc6ae93ea34a683ca3ded4cb66439a569cddf4b44d0763b3819fa89e62e33e60",
+      "size_bytes": 35012,
+      "storage_class": "git"
+    },
+    {
+      "path": "01_task_folder/task_05/script/output/geometric_eth_topology_assets_v3.json",
+      "sha256": "5b94879aba1a8c58b9e2d130b4cc5f9539de74b40d666c6acc00308c4406504e",
+      "size_bytes": 1622,
+      "storage_class": "git"
+    },
+    {
+      "path": "01_task_folder/task_05/script/output/geometric_eth_topology_delivery_audit_v3.json",
+      "sha256": "e1e51369fd919175b22ae3bb00f83480a882c3e0dc299555e868eae87ea34c39",
+      "size_bytes": 6085,
+      "storage_class": "git"
+    },
+    {
+      "path": "01_task_folder/task_05/script/output/matrix_element_delivery_audit_v3.json",
+      "sha256": "c627de3bb3c7d65b2aab603f8ac01be8314557f740c919990b03748c75d3f715",
+      "size_bytes": 2163,
+      "storage_class": "git"
+    },
+    {
+      "path": "01_task_folder/task_05/script/output/matrix_element_geometric_eth_v3.json",
+      "sha256": "bbacad6f795559f417c1e39c034a6fe51669fd509a983099c10965fb68ee34a3",
+      "size_bytes": 7960,
+      "storage_class": "git"
+    },
+    {
+      "path": "01_task_folder/task_05/script/output/matrix_element_geometric_eth_v3.npz",
+      "sha256": "c817a758fd03710483883840758a28ba2d5d9c74270a8f30ad71874a6336262c",
+      "size_bytes": 53248,
+      "storage_class": "git"
+    },
+    {
+      "path": "01_task_folder/task_05/script/output/matrix_element_topology_theory_v3.json",
+      "sha256": "0d4d13ecb7771e76354f798d3d9e4f3c097be64f6afea6542f2b1236489479a5",
+      "size_bytes": 808,
+      "storage_class": "git"
+    },
+    {
+      "path": "01_task_folder/task_05/script/output/spectral_silence_delivery_audit_v2.json",
+      "sha256": "11a2730c44fe1a88f414393e88e370ac952659fed9476953acb7570f1b44bf88",
+      "size_bytes": 4588,
+      "storage_class": "git"
+    },
+    {
+      "path": "01_task_folder/task_05/script/output/spectral_silence_statistics_v2.json",
+      "sha256": "2808020357176fa6f60d0280c509e2dea18b8d472c8a9090f8b6f619a1dfe706",
+      "size_bytes": 4101,
+      "storage_class": "git"
+    },
+    {
+      "path": "01_task_folder/task_05/script/output/spectral_silence_statistics_v2.npz",
+      "sha256": "ef2bf7bdfea65e595def17d8b08ac0786a86afeb4e57aea71c7472504b7c773e",
+      "size_bytes": 86073,
+      "storage_class": "git"
+    },
+    {
+      "path": "01_task_folder/task_05/script/output/spectral_silence_v2.json",
+      "sha256": "5a2da65d83ded56a0fbebb23f69d5c26bd41382ebaa5f32a333fb239bffd5778",
+      "size_bytes": 2792,
+      "storage_class": "git"
+    },
+    {
+      "path": "01_task_folder/task_05/script/output/topological_holonomy_delivery_audit_v3.json",
+      "sha256": "224d546389ccd4cec53343c6db789d449b988eda88f8b8efee84628b8892f42b",
+      "size_bytes": 2593,
+      "storage_class": "git"
+    },
+    {
+      "path": "01_task_folder/task_05/script/output/topological_holonomy_v3.json",
+      "sha256": "ff15e7cd2f947b43da5a5973bb82c50319b164877883d187c7c46b2a073823c6",
+      "size_bytes": 10000,
+      "storage_class": "git"
+    },
+    {
+      "path": "01_task_folder/task_05/script/output/topological_holonomy_v3.npz",
+      "sha256": "f459fa37facf82c6f67c44f4961749095fb0817516ff16d6ca6814bbaf952208",
+      "size_bytes": 3785530,
+      "storage_class": "git"
+    }
+  ],
+  "external_artifacts": [
+    {
+      "path": "01_task_folder/task_05/script/output/covariance_model_v1.npz",
+      "producer": "bash run_large_scale_article_v1.sh",
+      "sha256": "7581adc06ceeb6afb3d5bb5f58f1ca91a1ae9398e45dc09869751989f86a4836",
+      "size_bytes": 7937484,
+      "storage_class": "recompute_or_release_asset"
+    },
+    {
+      "path": "01_task_folder/task_05/script/output/matrix_element_v3_checkpoints/N3_site_response_v3.npz",
+      "producer": "FULL_RECOMPUTE=1 bash run_geometric_eth_topology_article_v3.sh",
+      "sha256": "3c3736d0b00d5406dc7eae33a532c2d014ce7af4551bbf9df865e3aa0d94e7db",
+      "size_bytes": 472086,
+      "storage_class": "recompute_or_release_asset"
+    },
+    {
+      "path": "01_task_folder/task_05/script/output/matrix_element_v3_checkpoints/N4_site_response_v3.npz",
+      "producer": "FULL_RECOMPUTE=1 bash run_geometric_eth_topology_article_v3.sh",
+      "sha256": "b0211c60560b60e1d2355bc8b839e38fa44232d8e2f5cf0481dcb479d912b0cc",
+      "size_bytes": 6853101,
+      "storage_class": "recompute_or_release_asset"
+    },
+    {
+      "path": "01_task_folder/task_05/script/output/matrix_element_v3_checkpoints/N5_site_response_v3.npz",
+      "producer": "FULL_RECOMPUTE=1 bash run_geometric_eth_topology_article_v3.sh",
+      "sha256": "c974be5d3a89167b20f12c0119b0ab85cffad0bb94a484bac182974cbe2d1690",
+      "size_bytes": 86799435,
+      "storage_class": "recompute_or_release_asset"
+    },
+    {
+      "path": "01_task_folder/task_05/script/output/physical_ensemble_v1.npz",
+      "producer": "bash run_large_scale_article_v1.sh",
+      "sha256": "cf44e830188f6a7252ff692c0db33ea3f2cd3ce604a37e31b49a80d37ad70652",
+      "size_bytes": 14416568,
+      "storage_class": "recompute_or_release_asset"
+    },
+    {
+      "path": "01_task_folder/task_05/script/output/rank_scaling_v1.npz",
+      "producer": "bash run_large_scale_article_v1.sh",
+      "sha256": "0373a6b0ddef31ea0208f0acc3d6feee0bda372058eb2a0d689b0eed92cd4338",
+      "size_bytes": 17817643,
+      "storage_class": "recompute_or_release_asset"
+    },
+    {
+      "path": "01_task_folder/task_05/script/output/rank_scaling_v1_checkpoints/n10_v1.npz",
+      "producer": "bash run_large_scale_article_v1.sh",
+      "sha256": "894a8b6f4cdf0ee3815f3e9ac9bffa0496cb1ed0b851e2df9413ff9d498edbe8",
+      "size_bytes": 1347389,
+      "storage_class": "recompute_or_release_asset"
+    },
+    {
+      "path": "01_task_folder/task_05/script/output/rank_scaling_v1_checkpoints/n12_v1.npz",
+      "producer": "bash run_large_scale_article_v1.sh",
+      "sha256": "36cd0b76c91176b3735ed36e11f9ec923e938dda556a64bf55cd10e164a2fe49",
+      "size_bytes": 3002769,
+      "storage_class": "recompute_or_release_asset"
+    },
+    {
+      "path": "01_task_folder/task_05/script/output/rank_scaling_v1_checkpoints/n14_v1.npz",
+      "producer": "bash run_large_scale_article_v1.sh",
+      "sha256": "d1001f8d2cabe32a31df0b88bf7216ed445c0bf64cec8137e7a095b01c6b1b9a",
+      "size_bytes": 2817874,
+      "storage_class": "recompute_or_release_asset"
+    },
+    {
+      "path": "01_task_folder/task_05/script/output/rank_scaling_v1_checkpoints/n16_v1.npz",
+      "producer": "bash run_large_scale_article_v1.sh",
+      "sha256": "0f363271e0c0d116d0078cf679fdfc799117f74cd52d3f89b50d8c3e28fe1caf",
+      "size_bytes": 4720431,
+      "storage_class": "recompute_or_release_asset"
+    },
+    {
+      "path": "01_task_folder/task_05/script/output/rank_scaling_v1_checkpoints/n18_v1.npz",
+      "producer": "bash run_large_scale_article_v1.sh",
+      "sha256": "bfd81f652fe2a5a2cc067307e9464bd533e8dd27e3551d7c41e258023e997f6b",
+      "size_bytes": 3581467,
+      "storage_class": "recompute_or_release_asset"
+    },
+    {
+      "path": "01_task_folder/task_05/script/output/rank_scaling_v1_checkpoints/n20_v1.npz",
+      "producer": "bash run_large_scale_article_v1.sh",
+      "sha256": "1b645babf65da6069642d57d3e3eba9f5b1c81d2567fcf4b4adc3b5bd3978d21",
+      "size_bytes": 1900507,
+      "storage_class": "recompute_or_release_asset"
+    },
+    {
+      "path": "01_task_folder/task_05/script/output/rank_scaling_v1_checkpoints/n8_v1.npz",
+      "producer": "bash run_large_scale_article_v1.sh",
+      "sha256": "50e86cee177f173f9e6f25ad2d449efd9f6e934020837ab38fb382c7a8b82959",
+      "size_bytes": 446636,
+      "storage_class": "recompute_or_release_asset"
+    },
+    {
+      "path": "01_task_folder/task_05/script/output/spectral_silence_v2.npz",
+      "producer": "bash run_spectral_silence_article_v2.sh",
+      "sha256": "f85e2fe87b8a21aa8b0961e962c84557276020d80bc7a06cfab5464da187bcd9",
+      "size_bytes": 13772014,
+      "storage_class": "recompute_or_release_asset"
+    },
+    {
+      "path": "01_task_folder/task_05/script/output/topological_holonomy_mesh12_alias_audit_v3.npz",
+      "producer": "FULL_RECOMPUTE=1 bash run_geometric_eth_topology_article_v3.sh",
+      "sha256": "06c649b89a6e3760a817807283dce4f0f7f3c474dd324e86433844ca2b781bae",
+      "size_bytes": 3666138,
+      "storage_class": "recompute_or_release_asset"
+    },
+    {
+      "path": "01_task_folder/task_05/script/output/topology_v3_checkpoints/N3_mesh12_twist_bundle_v3.npz",
+      "producer": "FULL_RECOMPUTE=1 bash run_geometric_eth_topology_article_v3.sh",
+      "sha256": "2957b7cffebb2da83c31e4dec0d8d586861b3b904fb35f10e973b0d101067ff1",
+      "size_bytes": 4508114,
+      "storage_class": "recompute_or_release_asset"
+    },
+    {
+      "path": "01_task_folder/task_05/script/output/topology_v3_checkpoints/N3_mesh16_twist_bundle_v3.npz",
+      "producer": "FULL_RECOMPUTE=1 bash run_geometric_eth_topology_article_v3.sh",
+      "sha256": "3618cca495411df6d1e6811e66fe7e108a17e6f81605cca6af4b3c09cf0541d8",
+      "size_bytes": 8013038,
+      "storage_class": "recompute_or_release_asset"
+    },
+    {
+      "path": "01_task_folder/task_05/script/output/topology_v3_checkpoints/N3_mesh20_twist_bundle_v3.npz",
+      "producer": "FULL_RECOMPUTE=1 bash run_geometric_eth_topology_article_v3.sh",
+      "sha256": "db1a4af4eb28a79df92369463ca00dc0c131535b01ec0483ee0214d2b73fb6e6",
+      "size_bytes": 12519524,
+      "storage_class": "recompute_or_release_asset"
+    },
+    {
+      "path": "01_task_folder/task_05/script/output/topology_v3_checkpoints/N3_mesh6_twist_bundle_v3.npz",
+      "producer": "FULL_RECOMPUTE=1 bash run_geometric_eth_topology_article_v3.sh",
+      "sha256": "cfa7affea3177f4c694d4d9c0faeddd76c7addfa97a9caf08f7d069202a45c06",
+      "size_bytes": 1127865,
+      "storage_class": "recompute_or_release_asset"
+    },
+    {
+      "path": "01_task_folder/task_05/script/output/topology_v3_checkpoints/N3_mesh8_twist_bundle_v3.npz",
+      "producer": "FULL_RECOMPUTE=1 bash run_geometric_eth_topology_article_v3.sh",
+      "sha256": "70448f58e0483ae9e324886e69b151a131892236b302f5a73da25cd6529b097b",
+      "size_bytes": 2004305,
+      "storage_class": "recompute_or_release_asset"
+    },
+    {
+      "path": "01_task_folder/task_05/script/output/topology_v3_checkpoints/N4_mesh12_twist_bundle_v3.npz",
+      "producer": "FULL_RECOMPUTE=1 bash run_geometric_eth_topology_article_v3.sh",
+      "sha256": "712a49732df613a1514f9e2ab9a9c1be8d54a7bb4bcab4ffafaa192e85fb8e4e",
+      "size_bytes": 39997177,
+      "storage_class": "recompute_or_release_asset"
+    },
+    {
+      "path": "01_task_folder/task_05/script/output/topology_v3_checkpoints/N4_mesh16_twist_bundle_v3.npz",
+      "producer": "FULL_RECOMPUTE=1 bash run_geometric_eth_topology_article_v3.sh",
+      "sha256": "1fba58f6126a2f9a52d08c175871c52a912e6cdcc409d67aafe2c3a7ac02b46d",
+      "size_bytes": 71104774,
+      "storage_class": "recompute_or_release_asset"
+    },
+    {
+      "path": "01_task_folder/task_05/script/output/topology_v3_checkpoints/N4_mesh20_twist_bundle_v3.npz",
+      "producer": "FULL_RECOMPUTE=1 bash run_geometric_eth_topology_article_v3.sh",
+      "sha256": "d756a5ef23d8ac6e4f77e556ad4694e4724abd9711a7f4565ae43540c22b4f30",
+      "size_bytes": 111101102,
+      "storage_class": "recompute_or_release_asset"
+    },
+    {
+      "path": "01_task_folder/task_05/script/output/topology_v3_checkpoints/N4_mesh6_twist_bundle_v3.npz",
+      "producer": "FULL_RECOMPUTE=1 bash run_geometric_eth_topology_article_v3.sh",
+      "sha256": "92167af8d52e724d50b2a8b3b6ec54c6835c42e7f86da6a654376fb6db88e1f2",
+      "size_bytes": 9999850,
+      "storage_class": "recompute_or_release_asset"
+    },
+    {
+      "path": "01_task_folder/task_05/script/output/topology_v3_checkpoints/N4_mesh8_twist_bundle_v3.npz",
+      "producer": "FULL_RECOMPUTE=1 bash run_geometric_eth_topology_article_v3.sh",
+      "sha256": "b9a8fd496721b9a02e685b93a108627805a9c61ded297f47ebb3f67efb557322",
+      "size_bytes": 17777502,
+      "storage_class": "recompute_or_release_asset"
+    }
+  ],
+  "figures": [
+    {
+      "path": "01_task_folder/task_05/script/output/figure_1_spectral_silence_v2.png",
+      "role": "principal_result",
+      "sha256": "5c02927662ca4b2b1c7a9a072873ac49c76f02df7d06537fdac4cf3f34c35167",
+      "size_bytes": 318452
+    },
+    {
+      "path": "01_task_folder/task_05/script/output/figure_2_falsification_triangle_v2.png",
+      "role": "main_figure",
+      "sha256": "8227f7fee24eeb038a1f85bd2cc27b6be8c7221d402d3ff92a81029041a64dbf",
+      "size_bytes": 201455
+    },
+    {
+      "path": "01_task_folder/task_05/script/output/figure_3_independent_channels_v2.png",
+      "role": "main_figure",
+      "sha256": "c1d14697b983bf1fb18c3e21a37a8f3bb564a35ff3a155ee749410b2c85a62b8",
+      "size_bytes": 217515
+    },
+    {
+      "path": "01_task_folder/task_05/script/output/figure_4_geometric_hierarchy_v2.png",
+      "role": "main_figure",
+      "sha256": "c6dec6fe962dedc72aa75134883791bc72b0c9dda2ee8eed9bcc29edbb4a0f99",
+      "size_bytes": 256963
+    },
+    {
+      "path": "01_task_folder/task_05/script/output/figure_5_jacobi_atoms_v2.png",
+      "role": "main_figure",
+      "sha256": "d96c8889f31c2dd9a31de8706d18f19fc6e1f8ad9847782da12ed3523d1fb278",
+      "size_bytes": 332956
+    },
+    {
+      "path": "01_task_folder/task_05/script/output/figure_6_wick_factorization_v3.png",
+      "role": "main_figure",
+      "sha256": "7cf914a353f9849b86299669c99577c16c9994d7d7814c6dad2e2537698035ce",
+      "size_bytes": 346911
+    },
+    {
+      "path": "01_task_folder/task_05/script/output/figure_7_topological_holonomy_v3.png",
+      "role": "main_figure",
+      "sha256": "4c19bc37413ea4cdbece1ef84023b505d3d279264e2107601907cb72d2d731ff",
+      "size_bytes": 289213
+    }
+  ],
+  "generated_utc": "2026-07-30T06:31:04.730833+00:00",
+  "headline": "Exact degeneracy turns quantum geometry into the signal.",
+  "paper": {
+    "page_count": 17,
+    "path": "01_task_folder/task_05/script/output/spectral_silence_and_geometric_chaos_v3.pdf",
+    "sha256": "a75377f76acd78eb3354e186a57933abdf11abbbe5e9a8abd43482ca8c4e05ad",
+    "size_bytes": 672204,
+    "title": "Spectral Silence and Geometric Chaos in an Exactly Degenerate Topological Manifold"
+  },
+  "release_id": "task05-geometric-chaos-v1",
+  "result_branches": {
+    "matrix_element": "deformed_geometric_eth",
+    "topology": "fixed_chern_deformed_holonomy"
+  },
+  "schema_version": 1,
+  "scientific_scope": [
+    "exact-degeneracy projector geometry",
+    "finite-rank local Jacobi universality",
+    "structured matrix-element and Wilson correlations"
+  ],
+  "verification": {
+    "article": "bash run_geometric_eth_topology_article_v3.sh",
+    "full": "bash run_full_recompute_v1.sh",
+    "quick": "bash run_quick_verify_v1.sh"
+  }
+}

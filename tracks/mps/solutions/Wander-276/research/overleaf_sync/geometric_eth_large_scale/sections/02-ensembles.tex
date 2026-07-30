@@ -1,0 +1,181 @@
+\section{Projector geometry and finite Jacobi theory}
+\label{sec:ensembles}
+
+\subsection{Gauge-invariant response of a degenerate projector}
+
+Let \(H(\lambda)\) have an isolated \(D\)-dimensional eigenspace at energy
+\(E_0\), with spectral projector \(P\), complement \(Q=1-P\), and reduced
+resolvent
+\begin{equation}
+ R=Q\bigl[Q(H-E_0)Q\bigr]^{-1}Q .
+ \label{eq:reduced-resolvent}
+\end{equation}
+For the tangent \(V_\mu=\partial_\mu H\), define the
+projector-to-complement response channel
+\begin{equation}
+ X_\mu=P V_\mu R .
+ \label{eq:channel}
+\end{equation}
+In bases of the degenerate fiber and its coupled complement, \(X_\mu\) is a
+\(D\times M\) matrix.
+Kato perturbation theory gives, for two real directions \(v,w\),
+\begin{equation}
+ F_{vw}=i\left(X_vX_w^\dagger-X_wX_v^\dagger\right),\qquad
+ \Gamma=X_vX_v^\dagger+X_wX_w^\dagger .
+ \label{eq:curvature-metric}
+\end{equation}
+Here \(F_{vw}\) is Hermitian under our convention, and \(\Gamma\) is the
+positive two-direction quantum metric.
+Both transform by conjugation under a basis change within \(P\), so the
+generalized eigenvalues of \((F_{vw},\Gamma)\) are gauge invariant.
+
+The raw curvature scale depends on tangent normalization and energy
+denominators.
+We remove it by restricting to the \(r=\rank\Gamma\) support and defining
+\begin{equation}
+ \Omega=\Gamma^{-1/2}F_{vw}\Gamma^{-1/2}.
+ \label{eq:normalized-curvature-intro}
+\end{equation}
+This normalization is algebraic and model agnostic.
+It converts the diagnostic into the relative orientation of the two response
+channels.
+With
+\begin{equation}
+ B=\begin{pmatrix}X_v&X_w\end{pmatrix},\qquad
+ J=\begin{pmatrix}0&iI_M\\-iI_M&0\end{pmatrix},
+ \label{eq:BJ}
+\end{equation}
+whitening gives
+\begin{equation}
+ Y=\Gamma^{-1/2}B,\qquad
+ YY^\dagger=I_r,\qquad
+ \Omega=YJY^\dagger .
+ \label{eq:isometry-compression}
+\end{equation}
+Thus \(\Omega\) is a compression of a fixed matrix with \(M\) positive and
+\(M\) negative eigenvalues.
+Its statistics depend only on an \(r\)-plane in
+\(\mathbb C^{2M}\), i.e., a point on a complex Grassmannian.
+This observation makes the random-matrix reference precise: randomness is
+assigned exclusively to the orientation of the whitened response row space.
+
+\subsection{Finite complex-Jacobi point process}
+
+If the row space of \(Y\) is Haar distributed, the continuously distributed
+eigenvalues of Eq.~\eqref{eq:isometry-compression} form a complex Jacobi
+ensemble \cite{zyczkowski2000,collins2005}.
+For \(r\leq M\), all \(k=r\) levels lie in \((-1,1)\) and
+\begin{equation}
+ p(\lambda_1,\ldots,\lambda_k)\propto
+ \prod_{a<b}|\lambda_a-\lambda_b|^2
+ \prod_{a=1}^{k}(1-\lambda_a^2)^{M-r}.
+ \label{eq:jacobi-density}
+\end{equation}
+More generally, let
+\begin{equation}
+ k=\min(r,2M-r),\qquad a=|M-r| .
+ \label{eq:jacobi-parameters}
+\end{equation}
+After the exact boundary levels derived below are removed, the interior joint
+density has the same form as Eq.~\eqref{eq:jacobi-density} with \(r\) replaced
+by \(k\) and exponent \(a\).
+
+Let \(p_n^{(a)}(x)\) be orthonormal on \((-1,1)\) with weight
+\(w_a(x)=(1-x^2)^a\), and define the weighted projection kernel
+\begin{equation}
+ {\cal K}_k(x,y)=\sqrt{w_a(x)w_a(y)}
+ \sum_{n=0}^{k-1}p_n^{(a)}(x)p_n^{(a)}(y).
+ \label{eq:jacobi-kernel}
+\end{equation}
+Its diagonal \(\rho_k(x)={\cal K}_k(x,x)\) integrates to \(k\).
+The finite-rank unfolding is therefore
+\begin{equation}
+ u(x)=\int_{-1}^{x}\rho_k(s)\,\dd s .
+ \label{eq:finite-unfolding}
+\end{equation}
+For the unfolded partition sum
+\(Z_F(\tau)=\sum_{j=1}^{k}e^{-2\pi i\tau u(\lambda_j)}\), we use one
+normalization throughout:
+\begin{equation}
+ \begin{aligned}
+ K_{F,\mathrm{raw}}(\tau)
+ &=\frac{1}{k}\left\langle |Z_F(\tau)|^2\right\rangle,\\
+ K_{F,\mathrm{disc}}(\tau)
+ &=\frac{1}{k}\left|\left\langle Z_F(\tau)\right\rangle\right|^2,\\
+ K_{F,c}(\tau)&=K_{F,\mathrm{raw}}(\tau)
+ -K_{F,\mathrm{disc}}(\tau).
+ \end{aligned}
+ \label{eq:sff-conventions}
+\end{equation}
+The determinantal identity
+\(\rho_2(x,y)=\rho_k(x)\rho_k(y)-|{\cal K}_k(x,y)|^2\) then yields the exact
+finite-\(k\) prediction
+\begin{equation}
+ K_{J,c}^{(k)}(\tau)
+ =1-\frac{1}{k}\int_{-1}^{1}\!\!\dd x\int_{-1}^{1}\!\!\dd y\,
+ e^{-2\pi i\tau[u(x)-u(y)]}|{\cal K}_k(x,y)|^2 .
+ \label{eq:finite-jacobi-sff}
+\end{equation}
+Equation~\eqref{eq:finite-jacobi-sff} generates the finite-\(D\) ramp directly
+and gives
+\(K_{J,c}^{(k)}(0)=0\) from the projector identity and approaches the unit
+plateau when the oscillatory cluster term is washed out.
+We evaluate the double integral by Gauss--Jacobi quadrature; convergence and
+an independent matrix-beta Monte Carlo comparison are given in
+Appendix~\ref{app:numerics}.
+
+The word ``form factor'' in Eq.~\eqref{eq:sff-conventions} denotes a Fourier
+transform of the curvature point process, with \(\tau\) serving as a
+dimensionless geometric Fourier coordinate.  A future dynamical extension
+can connect this coordinate to operator growth and thermalization scales.
+
+\subsection{Boundary-atom theorem and form-factor plateau}
+\label{sec:atom-theorem}
+
+When \(r>M\), the row space \(\cS\subset\mathbb C^{2M}\) must intersect both
+\(M\)-dimensional eigenspaces \(\cH_\pm\) of \(J\):
+\begin{equation}
+ \dim(\cS\cap\cH_\pm)\geq r+M-2M=r-M .
+ \label{eq:intersection-bound}
+\end{equation}
+Every vector in these intersections is an exact eigenvector of the
+compression with eigenvalue \(\pm1\).
+For a generic \(r\)-plane the bound is saturated, giving
+\begin{equation}
+ m_+=m_-=r-M,\qquad k=2M-r.
+ \label{eq:atom-count}
+\end{equation}
+The atoms are deterministic under the Jacobi ensemble, so their connected
+covariance is exactly zero.
+If the full spectrum is normalized by its total rank \(r\), the exact
+connected form factor is consequently
+\begin{equation}
+ K_{J,c}^{\mathrm{full}}(\tau)
+ =\frac{k}{r}K_{J,c}^{(k)}(\tau),\qquad
+ K_{J,c}^{\mathrm{full}}(\infty)=\frac{k}{r}.
+ \label{eq:atom-plateau}
+\end{equation}
+This is an exact finite-dimensional plateau theorem.
+
+For completeness, the raw, non-unfolded form factor retains deterministic
+interference with the atoms.
+Writing
+\begin{equation}
+ \begin{aligned}
+ Z_{\rm full}(s)&=Z_{\rm at}(s)+Z_{\rm int}(s),\\
+ Z_{\rm at}(s)&=m_-e^{2\pi i s}+m_+e^{-2\pi i s},
+ \end{aligned}
+ \label{eq:atom-partition}
+\end{equation}
+gives the exact decomposition
+\begin{equation}
+ K_{\rm raw}^{\rm full}
+ =\frac{|Z_{\rm at}|^2}{r}
+ +\frac{2\,\mathrm{Re}\!\left[
+ Z_{\rm at}^{*}\langle Z_{\rm int}\rangle\right]}{r}
+ +\frac{\langle|Z_{\rm int}|^2\rangle}{r}.
+ \label{eq:atom-raw-decomposition}
+\end{equation}
+Equations~\eqref{eq:atom-plateau} and
+\eqref{eq:atom-raw-decomposition} distinguish deterministic geometry from
+correlated fluctuations and provide two independent numerical closure tests.

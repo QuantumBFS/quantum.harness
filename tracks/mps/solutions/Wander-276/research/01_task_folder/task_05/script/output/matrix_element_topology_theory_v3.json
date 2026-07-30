@@ -1,0 +1,30 @@
+{
+  "checks": {
+    "chern_branch": true,
+    "chern_isomorphism": true,
+    "gauge_R4": true,
+    "gauge_tensor": true,
+    "gram_reduction": true,
+    "wick_monte_carlo": true
+  },
+  "gauge_and_gram": {
+    "R4_error": 1.1102230246251565e-16,
+    "gram_spectrum_error": 6.661338147750939e-16,
+    "tensor_error": 3.3306690738754696e-15
+  },
+  "generated_utc": "2026-07-28T17:54:45.183871+00:00",
+  "passed": true,
+  "topology": {
+    "chern_after": -0.9999999999999991,
+    "chern_before": -0.9999999999999994,
+    "chern_error": 3.3306690738754696e-16,
+    "minimum_branch_margin": 3.0518857391907717
+  },
+  "version": "v3",
+  "wick": {
+    "A_left": 1.0850661625708886,
+    "B_right": 0.6469893742621016,
+    "maximum_absolute_error": 0.00937106043678515,
+    "relative_error": 0.007298791405822385
+  }
+}

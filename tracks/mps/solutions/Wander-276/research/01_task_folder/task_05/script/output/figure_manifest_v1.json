@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "version": "v1",
+  "figure_width_inches": 7.0,
+  "png_dpi": 300,
+  "inputs": {
+    "output/physical_ensemble_v1.json": "f0f0c97483f66800b8da208fd3dad7259fc30a7650b7360060499f9326ad4000",
+    "output/covariance_model_v1.json": "7183934946be50deb9973755dc189360b9f8aaabcdbd7107860980b15ae859a0",
+    "output/covariance_model_v1.npz": "7581adc06ceeb6afb3d5bb5f58f1ca91a1ae9398e45dc09869751989f86a4836",
+    "output/rank_scaling_v1.json": "46be556194eac79ff29017c9b969146e32b6e0a08a1407a6cfe4e2a924cf77e7",
+    "output/rank_scaling_v1.npz": "0373a6b0ddef31ea0208f0acc3d6feee0bda372058eb2a0d689b0eed92cd4338",
+    "output/statistical_analysis_v1.json": "5f18f62a9ad65f21ee5474c74454c0e39e800e584e391c2545484e4d961f709d",
+    "output/statistical_analysis_v1.npz": "0146d0c1680cd31095ab568906e25d8c0504b53a398b80b87009a54031baf063"
+  },
+  "figures": {
+    "figure_1": {
+      "pdf": "output/figure_1_physical_law_v1.pdf",
+      "png": "output/figure_1_physical_law_v1.png",
+      "width_inches": 7.0,
+      "png_width_pixels": 2100,
+      "dpi": 300,
+      "pdf_sha256": "350b914657fcabac8d3d67b0eb1b3109688805ca975e6b555a34a986105343ae",
+      "png_sha256": "81a9ef1ad11470cb715589c079a8041dbe785fe74b11309812a50ddbb2387da3"
+    },
+    "figure_2": {
+      "pdf": "output/figure_2_scale_hierarchy_v1.pdf",
+      "png": "output/figure_2_scale_hierarchy_v1.png",
+      "width_inches": 7.0,
+      "png_width_pixels": 2100,
+      "dpi": 300,
+      "pdf_sha256": "37bc3317c79119b384b7925e423ade7ba5657c371e050235e33ca4e51f78a39d",
+      "png_sha256": "4bff81589676c1c7f583c88d2373ea883b28f4fd9059206c56d45d26f85104ef"
+    },
+    "figure_3": {
+      "pdf": "output/figure_3_atom_crossover_v1.pdf",
+      "png": "output/figure_3_atom_crossover_v1.png",
+      "width_inches": 7.0,
+      "png_width_pixels": 2100,
+      "dpi": 300,
+      "pdf_sha256": "9a85f844a9c8d99148afc126e09081ece9ed831b59b71bcecb2162396eb61593",
+      "png_sha256": "ee8eb2408ee641e2c2d0cbaf5f9afa068284c7a38180b65c913b42e7a81ab406"
+    },
+    "figure_4": {
+      "pdf": "output/figure_4_finite_size_v1.pdf",
+      "png": "output/figure_4_finite_size_v1.png",
+      "width_inches": 7.0,
+      "png_width_pixels": 2100,
+      "dpi": 300,
+      "pdf_sha256": "60a7ca479c14db4beb351788eaef4aece94418d7433f327d45e7d7f4d313a293",
+      "png_sha256": "e277868a30987ad70318a61722990b355bd5558e284ca6c55e2febed3cded08d"
+    },
+    "figure_5": {
+      "pdf": "output/figure_5_covariance_mechanism_v1.pdf",
+      "png": "output/figure_5_covariance_mechanism_v1.png",
+      "width_inches": 7.0,
+      "png_width_pixels": 2100,
+      "dpi": 300,
+      "pdf_sha256": "039718bd9db982bb702dba14dcd8000834f259bc316c72640353619ae7eec36d",
+      "png_sha256": "5a03ea042d7fcf9501e44d2e591b9c03a1b31b51f73c32cd57fd48edf83abb45"
+    }
+  },
+  "atom_annotations": {
+    "D546_each_boundary": 6,
+    "D800_each_boundary": 120,
+    "D800_total_weight": 0.3
+  }
+}

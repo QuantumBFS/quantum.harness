@@ -1,0 +1,246 @@
+\section{Numerical methods, inference, and reproducibility}
+\label{app:numerics}
+
+\subsection{Physical parent and response cache}
+
+The single-particle Kapit--Mueller hopping matrix is constructed with
+magneto-periodic boundary conditions and projected to its flat lowest band
+\cite{kapitmueller2010}.
+The many-body contact interaction is represented as a positive constraint
+factor before diagonalization.
+Its numerical null space supplies \(P\); the nonzero eigenvectors and energy
+denominators supply \(R\) in Eq.~\eqref{eq:reduced-resolvent}.
+For a site-potential coefficient vector \(v\), linearity is used to cache
+\(X[v]=PV[v]R\).
+Every sampled channel is checked against a direct many-body
+Hilbert--Schmidt norm, and every normalized curvature is audited for
+\(YY^\dagger=I_r\), Hermiticity, rank, and
+\(\operatorname{spec}\Omega\subset[-1,1]\).
+
+The random-local ensemble has \(\PhysicalMatrices\) tangent pairs in eight
+independently seeded blocks.
+A fixed permutation determines a \(12000/4000/4000\)
+training/validation/test split before any density, covariance, or form-factor
+comparison.
+The \(\PhysicalTestMatrices\)-matrix test set is used in all v2 physical
+figures.
+The Fourier reference enumerates all nonzero momenta and combines them into
+the \(\StructuredOrbits\) distinct \(\bm q\leftrightarrow-\bm q\) orbit-level
+statistical units.
+
+\subsection{Exact finite-Jacobi quadrature}
+
+Equation~\eqref{eq:finite-jacobi-sff} is evaluated directly by quadrature.
+At Gauss--Jacobi nodes \(x_i\) and weights \(\omega_i\) of order \(q=512\),
+we form the weighted orthonormal basis
+\begin{equation}
+ \Phi_{in}=\sqrt{\omega_i}\,
+ \frac{P_n^{(a,a)}(x_i)}{\sqrt{h_n^{(a)}}},
+ \qquad 0\leq n<k ,
+ \label{eq:quadrature-basis}
+\end{equation}
+where
+\begin{equation}
+ h_n^{(a)}
+ =\frac{2^{2a+1}}{2n+2a+1}
+ \frac{\Gamma(n+a+1)^2}{\Gamma(n+1)\Gamma(n+2a+1)} .
+ \label{eq:jacobi-norm}
+\end{equation}
+The discrete projection kernel is \({\cal P}=\Phi\Phi^\dagger\), its diagonal
+is the quadrature mass of \(\rho_k\), and the midpoint cumulative sum of that
+diagonal implements Eq.~\eqref{eq:finite-unfolding}.
+The registered \(D=50,M=170\) calculation has density-mass error
+\(4.19\times10^{-13}\) and basis-orthogonality error
+\(4.18\times10^{-13}\).
+Repeating the complete curve at quadrature orders \(384\) and \(512\) changes
+it by less than \(5\times10^{-5}\).
+
+As an independent test, two complex Wishart matrices generate the
+matrix-beta Jacobi ensemble.
+For rank \(16\), \(1500\) independently sampled spectra agree with the
+determinantal-kernel connected SFF within \(0.075\) over the registered test
+grid.
+For \(r>M\), exact \(\pm1\) atoms are appended algebraically.
+The identity in Eq.~\eqref{eq:atom-plateau} is satisfied to floating-point
+zero, and the raw decomposition
+Eq.~\eqref{eq:atom-raw-decomposition} closes within
+\(1.14\times10^{-13}\).
+
+\subsection{Interpolation ensembles}
+
+The geometric interpolation uses
+\[
+ g=0,\ 0.02,\ 0.05,\ 0.10,\ 0.20,\ 0.40,\ 0.70,\ 1.00 .
+\]
+At every positive \(g\), \(\GeometricSamplesPerPoint\) independent random
+local residual pairs are mixed with a registered Fourier pair through
+Eq.~\eqref{eq:geometric-interpolation}.
+All \(28000\) positive-\(g\) curvature matrices have active rank \(50\).
+The complete script-generated scalar adjacent-gap intervals are retained with
+the numerical artifacts; the Haar--Jacobi simultaneous interval is
+\(0.598440\)--\(0.600349\).
+
+The spectral interpolation uses
+\[
+ \alpha=0,\ 0.10,\ 0.20,\ 0.35,\ 0.50,\ 0.70,\ 0.85,\ 1.00
+\]
+and \(\SpectralSamplesPerPoint\) matrices per value.
+For every sample, the same Poisson and GUE endpoints are used across
+\(\alpha\), which reduces interpolation noise while different samples remain
+independent.
+The target projector is recomputed numerically from the embedded full
+Hamiltonian rather than assumed fixed.
+The maximum measured distance in
+Eq.~\eqref{eq:projector-invariance} and the zero curvature-spectrum error are
+hard delivery gates.
+
+\subsection{Connected estimators and simultaneous inference}
+
+Raw, disconnected, and connected form factors are retained separately for
+every ensemble:
+\begin{equation}
+ \widehat K_{\rm raw}
+ =\frac{1}{D N_s}\sum_{s=1}^{N_s}|Z_s|^2,\qquad
+ \widehat K_{\rm disc}
+ =\frac{1}{D}\left|\frac{1}{N_s}\sum_{s=1}^{N_s}Z_s\right|^2 .
+ \label{eq:empirical-sff}
+\end{equation}
+Their difference is the displayed connected estimator.
+This common convention is used for the exact-degenerate energy baseline,
+physical curvature, Fourier control, interpolation ensembles, and Monte Carlo
+Jacobi reference.
+At \(\tau=0\), connected values below \(5\times10^{-15}\) are set to zero
+only after raw-minus-disconnected subtraction.
+
+Complete matrices are the independent statistical units.  Physical curves are
+first averaged within eight independent seed blocks;
+Fourier curves are averaged within the twelve momentum orbits; the Haar
+reference uses complete matrices.
+We construct \(\BootstrapReplicatesVTwo\)-replicate Gaussian-multiplier or
+hierarchical-block processes and take the 95th percentile of the maximum
+studentized deviation over each registered grid.
+Thus every shaded region used for an onset or compatibility statement is a
+simultaneous confidence band across the complete registered grid.
+
+For an SFF residual band \([\ell(\tau),u(\tau)]\), the registered compatibility
+onset is the first grid point \(\tau_*\in[0.25,1.5]\) such that
+\(0\in[\ell(\tau),u(\tau)]\) for every subsequent registered point.
+An interpolation value \(g\) is said to possess a nontrivial compatibility
+window only if at least eight grid points remain.
+The number-variance compatibility extent is the largest \(L\) in the
+contiguous initial interval beginning at \(L=0.25\) whose residual band
+contains zero.
+These definitions were fixed before reading the reported onsets.
+
+\subsection{One-point covariance and finite-rank sequence}
+
+The v1 analysis retained in the present expanded article tests a distinct
+observable: the ensemble-mean ambient row-space projector
+\begin{equation}
+ \overline\Pi=\mathbb E[Y^\dagger Y].
+ \label{eq:mean-row-projector}
+\end{equation}
+A covariance-deformed Gaussian row-space ensemble learned from
+\(\TrainingRows\) training matrices and selected on validation data reduces
+the held-out density \(L^1\) error from \(\DensityHaarLone\) to
+\(\DensityCovLone\), while preserving the local gap ratio.
+The exact Jacobi SFF in v2 remains parameter free; this result explains why
+one-point and long-range observables can retain structure alongside local
+two-level agreement.
+
+For the rank sequence, cyclic \((1,2)\)-admissible root configurations and
+their one-body descendants are generated independently of the lattice cache.
+The seven registered sample counts are
+\[
+ 2000,\ 2000,\ 2000,\ 1000,\ 1000,\ 500,\ 250 .
+\]
+Atoms are labeled by Eq.~\eqref{eq:atom-count} before their numerical
+eigenvalues are inspected.
+The final \(D=800\) case therefore contains \(120+120\) exact atoms and
+\(560\) interior levels in every matrix.
+Because \(N=3\) remains fixed, changes along this sequence are described as
+finite-rank evidence only.
+
+\subsection{Many-body Wick sequence}
+
+The fixed-two-quasihole sequence uses \(n_\phi=2N+2\) and the exact cyclic
+zero-mode ranks \(D=16,25,36\).
+The \(N=3,4\) parents are diagonalized densely.
+For \(N=5\), the complete 36-column kernel frame is obtained by a block sparse
+eigensolver; its residual norm is \(3.59\times10^{-9}\).
+Complement resolvents are evaluated at two positive shifts and extrapolated
+linearly to zero shift.
+The maximum \(N=5\) relative equation residual is
+\(2.75\times10^{-7}\), and the maximum two-shift difference is
+\(3.94\times10^{-4}\).
+The physical sequence begins at \(N=3\), since the \(N=2,n_\phi=6\)
+Kapit--Mueller parent has 12 numerical zero modes compared with the cyclic
+target rank nine.
+
+\begin{table*}[t]
+ \caption{Registered matrix-element sequence. The Gaussian column is the
+ covariance-matched finite-size median; ``excess'' is the physical median
+ minus that value.}
+ \label{tab:matrix-element-v3}
+ \begin{ruledtabular}
+ \begin{tabular}{cccccccc}
+ \(N\) & \(n_\phi\) & \(D\) & \(\dim\mathcal H\) & \(\Delta\) &
+ \(R_4\) & \(R_4^{\rm G}\) & excess\\
+ \MatrixElementResultRows
+ \end{tabular}
+ \end{ruledtabular}
+\end{table*}
+
+For each size, 24 deterministic balanced local-density panels supply the
+physical resampling units.
+Each panel has eight operators.
+The finite-size null uses 2000 complete covariance-matched Gaussian response
+tensors per size.
+All target and external gauge checks are applied before the four-channel
+tensor is evaluated.
+
+\subsection{Closed twist bundle and Wilson statistics}
+
+The base twist bundles are diagonalized at every point of the periodic mesh.
+Physical many-body overlaps include the exact symmetric bosonic lift of the
+single-particle orbital overlap.
+The undeformed \(6\times6\) and \(8\times8\) meshes establish the base
+integer.  A \(12\times12\) preflight identifies a determinant-branch alias
+and a shifted \(C_1=8\) for one \(N=4,g=1\) seed.  The accepted production
+pair \(16\times16\) and \(20\times20\) resolves the full \(g\leq1\) orbit,
+with the coarse alias artifact retained for provenance.
+
+\begin{table*}[t]
+ \caption{Accepted closed-surface topology and Wilson statistics. The final
+ and CUE columns are median circular adjacent-gap ratios.}
+ \label{tab:topology-v3}
+ \begin{ruledtabular}
+ \begin{tabular}{cccccccc}
+ \(N\) & \(D\) & \(C_1\) & \(\Delta_{\min}\) &
+ branch margin & overlap minimum & \(\langle r_W\rangle_{g=1}\) &
+ \(\langle r_W\rangle_{\rm CUE}\)\\
+ \TopologyResultRows
+ \end{tabular}
+ \end{ruledtabular}
+\end{table*}
+
+Eight independently seeded noncommuting generator pairs and one commuting
+control are evaluated at \(g=0,0.25,0.5,0.75,1\).
+Generator seeds are the cluster units in the bootstrap.
+The CUE reference contains 10000 independent matrices per rank.
+Per-loop arrays are retained within their generator-seed clusters for
+bootstrap inference.
+
+\subsection{Reproducibility gates}
+
+The task-local delivery requires regenerated hashes for every source artifact;
+exact registered sample counts, ranks, and interpolation points; disjoint
+training, validation, and test indices; matrix-level confidence calculations;
+finite-Jacobi mass, orthogonality, Monte Carlo, atom, and raw-closure checks;
+fixed-projector error below \(10^{-12}\); synchronized figure hashes; resolved
+LaTeX references; and a render record for every compiled page.  Task isolation
+keeps the v3 implementation fully self-contained.  Additional gates require
+both independent v3 audits, the registered \(16/20\) topology pair, the
+retained coarse-mesh alias preflight, exact result branches, executable Wick
+and Chern identities, and source hashes for
+Figs.~\ref{fig:wick-factorization} and~\ref{fig:topological-holonomy}.

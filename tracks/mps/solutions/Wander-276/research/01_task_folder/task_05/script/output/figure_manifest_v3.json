@@ -1,0 +1,42 @@
+{
+  "figure_6_wick_factorization_v3": {
+    "panels": [
+      "genuine_manybody_sequence",
+      "four_channel_residual",
+      "non_gaussian_excess",
+      "covariance_geometry"
+    ],
+    "pdf": "output/figure_6_wick_factorization_v3.pdf",
+    "pdf_sha256": "57efed4dfd0fb77858c52980e50c468d064300505dcdfb0a635ce47f89ce0c1e",
+    "png": "output/figure_6_wick_factorization_v3.png",
+    "png_sha256": "7cf914a353f9849b86299669c99577c16c9994d7d7814c6dad2e2537698035ce",
+    "png_width_pixels": 2100,
+    "result_branch": "deformed_geometric_eth",
+    "source": "output/matrix_element_geometric_eth_v3.json",
+    "source_sha256": "bbacad6f795559f417c1e39c034a6fe51669fd509a983099c10965fb68ee34a3",
+    "width_inches": 7.0
+  },
+  "figure_7_topological_holonomy_v3": {
+    "checkpoint_hashes": {
+      "output/topology_v3_checkpoints/N4_mesh16_twist_bundle_v3.json": "cba044e2b0171b4fc59a4226d59ed21e6cdb828e89d9fd6f95c5ee7fc83a9129",
+      "output/topology_v3_checkpoints/N4_mesh16_twist_bundle_v3.npz": "1fba58f6126a2f9a52d08c175871c52a912e6cdcc409d67aafe2c3a7ac02b46d"
+    },
+    "panels": [
+      "fixed_chern_and_gap",
+      "determinant_winding",
+      "wilson_gap_ratio",
+      "wilson_form_factor"
+    ],
+    "pdf": "output/figure_7_topological_holonomy_v3.pdf",
+    "pdf_sha256": "11e101309d975a61a3efedb1025c2552149c7f1a6f72433594f4adb1c0a16258",
+    "png": "output/figure_7_topological_holonomy_v3.png",
+    "png_sha256": "4c19bc37413ea4cdbece1ef84023b505d3d279264e2107601907cb72d2d731ff",
+    "png_width_pixels": 2100,
+    "result_branch": "fixed_chern_deformed_holonomy",
+    "source_json": "output/topological_holonomy_v3.json",
+    "source_json_sha256": "ff15e7cd2f947b43da5a5973bb82c50319b164877883d187c7c46b2a073823c6",
+    "source_npz": "output/topological_holonomy_v3.npz",
+    "source_npz_sha256": "f459fa37facf82c6f67c44f4961749095fb0817516ff16d6ca6814bbaf952208",
+    "width_inches": 7.0
+  }
+}

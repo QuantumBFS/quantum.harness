@@ -1,0 +1,128 @@
+\section{Gauge-invariant response cumulants and bundle topology}
+\label{app:matrix-topology}
+
+\subsection{Response maps and gauge covariance}
+
+Let \(\Phi_P(\lambda)\) and \(\Phi_Q(\lambda)\) be orthonormal frames for the \(D\)-dimensional zero-mode fiber and its resolved complement, respectively. For a fixed local perturbation \(V_\mu\), we use the complement-to-fiber response map
+\begin{equation}
+ X_\mu=R_Q QV_\mu P,\qquad R_Q=[Q(H-E_0)Q]^{-1},
+ \label{eq:appendix-response-map}
+\end{equation}
+whose matrix in these frames has shape \(M\times D\). Independent frame changes \(\Phi_P\mapsto\Phi_PU_P\) and \(\Phi_Q\mapsto\Phi_QU_Q\) act as
+\begin{equation}
+ X_\mu\mapsto U_Q^\dagger X_\mu U_P.
+ \label{eq:response-gauge-transformation}
+\end{equation}
+Consequently the channel-label covariance
+\begin{equation}
+ C_{\mu\nu}=\frac{1}{D}\Tr(X_\mu^\dagger X_\nu)
+ \label{eq:channel-label-covariance}
+\end{equation}
+is independent of both frame gauges. On the strictly positive support of \(C\), define \(\widetilde X_\mu=(C^{-1/2})_{\mu\nu}X_\nu\). The algebraic support projection retains precisely the accessible perturbation directions. The normalized four-channel tensor
+\begin{equation}
+ T_{\mu\nu\rho\sigma}
+ =\frac{1}{D}\Tr\!\left(
+ \widetilde X_\mu^\dagger\widetilde X_\nu
+ \widetilde X_\rho^\dagger\widetilde X_\sigma\right)
+ \label{eq:invariant-four-channel-tensor}
+\end{equation}
+is therefore invariant under \(U(M)\times U(D)\) frame rotations. Label-space rotations transform all four indices covariantly, so the Frobenius norm of its connected part is label-basis independent as well.
+
+\subsection{Separable Gaussian contraction}
+
+The covariance-matched null model is a complex Gaussian response tensor satisfying
+\begin{equation}
+ \mathbb E[(X_\mu)_{ai}(X_\nu)^*_{bj}]
+ =\delta_{\mu\nu}R_{ab}L_{ij},
+ \qquad
+ \frac{\Tr R\,\Tr L}{D}=1 .
+ \label{eq:separable-gaussian-covariance}
+\end{equation}
+Here \(R\) and \(L\) are positive external- and target-space covariances; the last identity is precisely the label-whitening normalization. Expanding Eq.~\eqref{eq:invariant-four-channel-tensor} in indices gives
+\begin{equation}
+ T_{\mu\nu\rho\sigma}
+ =\frac{1}{D}\sum_{abij}
+ X_{\mu,ai}^*X_{\nu,aj}
+ X_{\rho,bj}^*X_{\sigma,bi}.
+ \label{eq:four-channel-indices}
+\end{equation}
+Complex Wick contraction permits two pairings. Pairing \((\mu,\nu)\) and \((\rho,\sigma)\) yields
+\begin{equation}
+ \frac{(\Tr R)^2\Tr L^2}{D}
+ \delta_{\mu\nu}\delta_{\rho\sigma}
+ =A_L\delta_{\mu\nu}\delta_{\rho\sigma},
+ \qquad
+ A_L=D\frac{\Tr L^2}{(\Tr L)^2}.
+ \label{eq:left-wick-pairing}
+\end{equation}
+Pairing \((\mu,\sigma)\) and \((\rho,\nu)\) instead yields
+\begin{equation}
+ \frac{\Tr R^2(\Tr L)^2}{D}
+ \delta_{\mu\sigma}\delta_{\rho\nu}
+ =B_R\delta_{\mu\sigma}\delta_{\rho\nu},
+ \qquad
+ B_R=D\frac{\Tr R^2}{(\Tr R)^2}.
+ \label{eq:right-wick-pairing}
+\end{equation}
+Thus
+\begin{equation}
+ \begin{aligned}
+ T^{\rm Wick}_{\mu\nu\rho\sigma}
+ &=A_L\delta_{\mu\nu}\delta_{\rho\sigma}
+ +B_R\delta_{\mu\sigma}\delta_{\rho\nu},\\
+ R_4&=\frac{\|T-T^{\rm Wick}\|_F}{\|T^{\rm Wick}\|_F}.
+ \end{aligned}
+ \label{eq:wick-residual-appendix}
+\end{equation}
+This defines a finite-dimensional distribution of \(R_4\). The comparison ensemble is generated with the measured spectra of \(L\) and \(R\), passed through the identical whitening map, and evaluated at the same \((D,M,m)\).
+
+\subsection{External covariance through a compact Gram space}
+
+Stack the whitened maps as \(\mathsf X=(\widetilde X_1\,\widetilde X_2\cdots\widetilde X_m)\), an \(M\times mD\) matrix. The external covariance and its Gram reduction are
+\begin{equation}
+ R=\frac{1}{m}\mathsf X\mathsf X^\dagger,\qquad
+ G=\frac{1}{m}\mathsf X^\dagger\mathsf X.
+ \label{eq:gram-reduction}
+\end{equation}
+If \(R u=\lambda u\) with \(\lambda\ne0\), then \(\mathsf X^\dagger u\ne0\) and \(G(\mathsf X^\dagger u)=\lambda(\mathsf X^\dagger u)\); the reverse implication follows by applying \(\mathsf X\). Hence \(R\) and \(G\) have identical nonzero spectra, including multiplicities. The coefficient \(B_R\) is therefore evaluated efficiently in the \(mD\)-dimensional Gram space.
+
+\subsection{Periodic ambient conjugation}
+
+Let \(E_0\to T^2\) be the base zero-mode bundle and let \(\mathcal U_g:T^2\to U(\mathcal H)\) be smooth and periodic. The deformed Hamiltonian and projector are
+\begin{equation}
+ \begin{aligned}
+ H_g(\theta)
+ &=\mathcal U_g(\theta)H_0(\theta)\mathcal U_g^\dagger(\theta),\\
+ P_g(\theta)
+ &=\mathcal U_g(\theta)P_0(\theta)\mathcal U_g^\dagger(\theta).
+ \end{aligned}
+ \label{eq:periodic-ambient-conjugation}
+\end{equation}
+Every eigenvalue, the kernel dimension, and the external gap are identical pointwise. More strongly, \((\theta,v)\mapsto(\theta,\mathcal U_g(\theta)v)\) is a globally defined vector-bundle isomorphism \(E_0\simeq E_g\). Naturality of Chern classes therefore gives
+\begin{equation}
+ c_1(E_g)=c_1(E_0).
+ \label{eq:chern-isomorphism}
+\end{equation}
+The same conclusion follows at the level of connections. For a local frame \(\Phi_g=\mathcal U_g\Phi_0\) and the convention \(A=i\Phi^\dagger\dd\Phi\),
+\begin{equation}
+ A_g=A_0+i\Phi_0^\dagger\mathcal U_g^\dagger
+ (\dd\mathcal U_g)\Phi_0
+ \equiv A_0+\mathcal A_g.
+ \label{eq:connection-shift}
+\end{equation}
+The difference \(\mathcal A_g\) is a globally defined endomorphism-valued one-form on the identified bundle. Since \(\Tr[A_\mu,A_\nu]=0\),
+\begin{equation}
+ \Tr F_g-\Tr F_0=\dd\,\Tr\mathcal A_g,\qquad
+ \frac{1}{2\pi}\int_{T^2}(\Tr F_g-\Tr F_0)=0.
+ \label{eq:chern-exact-difference}
+\end{equation}
+Equation~\eqref{eq:connection-shift} also explains the compatibility of fixed topology and variable holonomy. For a generic projected one-form \(\mathcal A_g\), the path-ordered exponential changes around a noncontractible cycle. The determinant winding remains constrained by Eq.~\eqref{eq:chern-isomorphism}, while the relative \(SU(D)\) eigenphases may deform.
+
+\subsection{Discrete links and branch control}
+
+On a periodic mesh, neighboring physical many-body frames have overlap \(M_\ell\). We use its polar unitary \(U_\ell=M_\ell(M_\ell^\dagger M_\ell)^{-1/2}\), so arbitrary local \(U(D)\) frame gauges act on links by endpoint conjugation. Plaquette products transform by similarity, and both their eigenphases and \(\arg\det W_\square\) are gauge invariant. The lattice first Chern estimator is
+\begin{equation}
+ C_1=\frac{1}{2\pi}\sum_\square\arg\det W_\square.
+ \label{eq:lattice-chern-v3}
+\end{equation}
+We require positive overlap singular-value and determinant-branch margins, agreement of determinant and trace-log estimators, and the same integer on two meshes. Directly unwrapping determinant Wilson phases can alias when the flux accumulated across an entire transverse strip exceeds \(\pi\); Fig.~\ref{fig:topological-holonomy} instead accumulates the branch-resolved plaquette flux within each strip. The retained \(12\times12\) alias preflight and accepted \(16\times16\)/\(20\times20\) pair make this distinction explicit.
