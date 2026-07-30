@@ -386,12 +386,18 @@ def _pilot_samples(seed: int, chains: int, samples_per_chain: int) -> tuple[
 def calibrate_architecture(
     seed: int,
     *,
+    source_revision: str,
     chains: int = 4,
     samples_per_chain: int = 32,
     relative_cutoff: float = 1.0e-12,
 ) -> dict[str, Any]:
     """Calibrate one shared N=6 architecture before any training seed."""
 
+    if len(source_revision) != 40 or any(
+        character not in "0123456789abcdef"
+        for character in source_revision
+    ):
+        raise ValueError("source_revision must be a 40-character Git SHA")
     pilot_ground, pilot_tower, _, _ = _pilot_samples(
         seed, chains, samples_per_chain
     )
@@ -402,6 +408,7 @@ def calibrate_architecture(
     )
     return {
         "schema_version": "challenge-15-route-d-plus-architecture-v1",
+        "source_revision": source_revision,
         "n_electrons": N_ELECTRONS,
         "two_q": TWO_Q,
         "raw_generator_ranks": list(RAW_RANKS),
@@ -634,6 +641,7 @@ def train_seed(
         "two_q": TWO_Q,
         "raw_generator_ranks": list(RAW_RANKS),
         "architecture_sha256": architecture_sha256,
+        "source_revision": architecture["source_revision"],
         "ground_coefficients": {
             "real": ground_coefficients.real.tolist(),
             "imag": ground_coefficients.imag.tolist(),

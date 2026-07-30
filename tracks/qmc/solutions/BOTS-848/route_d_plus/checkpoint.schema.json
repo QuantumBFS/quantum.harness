@@ -10,6 +10,7 @@
     "two_q",
     "raw_generator_ranks",
     "architecture_sha256",
+    "source_revision",
     "ground_coefficients",
     "tower_coefficients",
     "initialization_norm",
@@ -32,6 +33,10 @@
     "architecture_sha256": {
       "type": "string",
       "pattern": "^[0-9a-f]{64}$"
+    },
+    "source_revision": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
     },
     "ground_coefficients": {"$ref": "#/$defs/complex_vector"},
     "tower_coefficients": {"$ref": "#/$defs/complex_vector"},

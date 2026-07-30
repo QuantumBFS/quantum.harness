@@ -259,7 +259,10 @@ def collect_certificate(
     checkpoints = []
     seed_results = []
     with blind_training_audit() as calibration_events:
-        architecture = calibrate_architecture(60_860)
+        architecture = calibrate_architecture(
+            60_860,
+            source_revision=commit,
+        )
         architecture_schema_path = Path(__file__).with_name(
             "architecture.schema.json"
         )

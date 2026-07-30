@@ -6,6 +6,7 @@
   "additionalProperties": false,
   "required": [
     "schema_version",
+    "source_revision",
     "n_electrons",
     "two_q",
     "raw_generator_ranks",
@@ -24,6 +25,10 @@
   "properties": {
     "schema_version": {
       "const": "challenge-15-route-d-plus-architecture-v1"
+    },
+    "source_revision": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
     },
     "n_electrons": {"const": 6},
     "two_q": {"const": 15},

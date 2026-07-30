@@ -138,6 +138,8 @@ def finalize(
     if sha256_file(architecture_schema) != architecture_reference["schema_sha256"]:
         raise RuntimeError("architecture schema hash mismatch")
     architecture = schema_artifact(architecture_path, architecture_schema)
+    if load_json(architecture_path)["source_revision"] != revision:
+        raise RuntimeError("architecture source revision mismatch")
 
     seed_artifacts = []
     for reference in phase6["checkpoints"]:
@@ -147,6 +149,8 @@ def finalize(
         symmetry_schema = MODULE_ROOT / "symmetry.schema.json"
         if sha256_file(checkpoint_path) != reference["sha256"]:
             raise RuntimeError("checkpoint hash mismatch")
+        if load_json(checkpoint_path)["source_revision"] != revision:
+            raise RuntimeError("checkpoint source revision mismatch")
         if sha256_file(checkpoint_schema) != reference["schema_sha256"]:
             raise RuntimeError("checkpoint schema hash mismatch")
         if sha256_file(symmetry_path) != reference["symmetry_sha256"]:
