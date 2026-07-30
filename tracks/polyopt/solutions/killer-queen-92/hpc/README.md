@@ -106,6 +106,10 @@ progress messages by default.  For the `{8,3}` cutoff-two gates, `(1,3)` has
 10,921 moment monomials and 11,595,621 charge-compatible upper-triangle pairs
 per closure pass; `(2,2)` has 5,421 and 3,109,596.  The full 577-assertion
 suite passes with four Julia threads before the 104-thread SCNet retry.
+Final clique matrices are likewise materialized in parallel into an indexed
+output vector.  Each worker owns its matrix, inputs are read-only, and the
+indexed merge preserves the exact clique order; entry-by-entry tests compare
+the result with dense-reference sparsification.
 Reproduce the deterministic chordal kernel comparison with:
 
 ```bash

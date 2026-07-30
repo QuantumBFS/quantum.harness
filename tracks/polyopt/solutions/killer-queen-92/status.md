@@ -1,6 +1,6 @@
 # Issue #92 central algorithm and calculation status
 
-Last updated: **2026-07-30 17:41 CST**
+Last updated: **2026-07-30 18:42 CST**
 Source of truth: [Quantum Harness issue #92](https://github.com/QuantumBFS/quantum.harness/issues/92)
 Primary method: Xu *et al.*, [*The bulk spectral gap is semi-decidable: a
 convergent family of certified upper bounds*](https://arxiv.org/abs/2606.03836)
@@ -1112,3 +1112,18 @@ maximum simultaneous issue-92 request at 448 GB.
   bound.  The refreshed aggregate has 157/205 durable rows: 71 FEASIBLE,
   49 EXCLUDED, and 85 UNKNOWN.  Isolated task-0 recovery `41546113_0` is active
   on a different node.
+- Submitted refinement array `41549521` for `{12,4}`/line P4 at
+  `gamma/U=0.170,0.160` and `{12,4}` P5 at `0.800,0.750`.  All three 64-GiB
+  cells started on nonsuspect nodes.  Together with the 64-GiB P1 recovery and
+  serial 192-GiB TS2 lane, the maximum active issue request is exactly 448 GiB;
+  every trial checkpoints independently and remains `UNKNOWN` until checked.
+- Fetched the first durable refinement trials.  Exact-projected exclusions
+  improve the line-graph P4 statement from `Gamma_(1,2)/U<=0.300` to `<=0.170`
+  and the `{12,4}` P5 statement from `<=1.000` to `<=0.800`; the lower trials
+  and line midpoint were still running and remain `UNKNOWN`.  The refreshed
+  aggregate has 162/212 durable rows: 72 FEASIBLE, 51 EXCLUDED, and 89 UNKNOWN.
+- Replaced the presentation-style submission with a short academic Target 1/2
+  report.  It now states the atomic ED conclusion explicitly, includes the
+  complete radius-one Target-2 ED data at `nmax=3`, and keeps finite-patch
+  diagnostics separate from certified thermodynamic statements.  The report
+  rebuild and all 21 Python tests pass.

@@ -1,244 +1,294 @@
 {
-  "eyebrow": "Quantum Harness Issue #92 \u00b7 PolyOpt Track",
-  "lede": "A complete Julia/JuMP hierarchy implementation with exact certificate checking produces 10 certified hard-core finite-level gap upper statements and 2 accepted observable intervals; the full cutoff and nested Target 2 campaign remains incomplete.",
+  "generated": "2026-07-30T18:44:28+08:00",
   "sections": [
     {
       "blocks": [
         {
           "kind": "text",
-          "text": "Issue #92 asks whether the thermodynamic state-polynomial hierarchy of Xu et al. can be extended from spin systems to occupation-truncated bosons, then used to bound the bulk gap and local Mott diagnostics on three infinite hyperbolic graphs. The challenge is not to diagonalize a finite patch: it is to exclude an assumed thermodynamic gap using a finite, independently checkable semidefinite certificate."
-        },
-        {
-          "blocks": [
-            {
-              "kind": "text",
-              "text": "Certified thermodynamic statements avoid the uncontrolled finite-size extrapolation that is especially delicate on hyperbolic lattices. The truncated-boson extension also supplies a reusable finite-matrix route for bosonic models while stating explicitly that no cutoff result certifies the untruncated Bose\u2013Hubbard model."
-            }
-          ],
-          "kind": "card",
-          "title": "Significance"
-        },
-        {
-          "kind": "equation",
-          "tex": "H=-t\\sum_{\\langle i,j\\rangle}(b_i^\\dagger b_j+b_j^\\dagger b_i)+\\frac{U}{2}\\sum_i n_i(n_i-1)-\\mu\\sum_i n_i,\\qquad U=1"
-        },
-        {
-          "kind": "kv",
-          "pairs": [
-            [
-              "Graphs",
-              "{8,3}; {12,4}; line graph L({8,3})"
-            ],
-            [
-              "Target points",
-              "P1\u2013P5: five distinct (t/U, \u03bc/U) values near unit filling"
-            ],
-            [
-              "Requested cutoffs",
-              "nmax=1,2; nmax=3 when computationally feasible"
-            ],
-            [
-              "Primary sector",
-              "U1_INVARIANT_KMS_STATES"
-            ],
-            [
-              "Primary finite level reported",
-              "complete matrix basis, (L,d)=(1,2), nmax=1"
-            ],
-            [
-              "Campaign status",
-              "Partial: core complete; baseline subset certified; nested/cutoff expansion incomplete"
-            ]
-          ]
+          "text": "We studied the occupation-truncated Bose\u2013Hubbard Hamiltonian with U=1. Target 1 is the atomic limit t=0, \u03bc=0.5. Target 2 consists of five parameter points on {8,3}, {12,4}, and L({8,3})."
         },
         {
           "kind": "note",
-          "label": "Claim boundary",
-          "style": "info",
-          "text": "Every \u0393 value below is an upper statement from one finite hierarchy level in the U(1)-invariant sector. A FEASIBLE sample proves no positive gap; ED is diagnostic only; and numerical ordering of finite-level upper statements is not an ordering of the unknown true gaps."
+          "text": "Status: Target 1 is reproduced. For Target 2, finite-patch ED is complete for nmax=1,2,3, while independently certified thermodynamic results currently cover the complete hard-core level nmax=1, (L,d)=(1,2), in the U(1)-invariant sector."
+        },
+        {
+          "kind": "text",
+          "text": "Finite ED and thermodynamic hierarchy results are reported separately. ED describes small open patches and is not used as a thermodynamic bound."
         }
       ],
-      "note": "The physical question and the precise scope of the claims.",
-      "title": "Challenge"
+      "title": "1. Scope and status"
     },
     {
       "blocks": [
         {
-          "kind": "badge",
-          "style": "good",
-          "text": "Rigorous exclusions at a finite relaxation"
-        },
-        {
-          "kind": "kv",
-          "pairs": [
-            [
-              "Local algebra",
-              "Independent charge-adapted basis of M_(nmax+1), exact Q(\u221a2,\u221a3) coefficients"
-            ],
-            [
-              "Thermodynamic window",
-              "\u039b_G(L), interaction buffer one, excitations/stationarity in \u039b_G(L\u22121)"
-            ],
-            [
-              "Encodings",
-              "Matrix degree (primary) and exact ladder-word filtration (cross-check)"
-            ],
-            [
-              "PSD reduction",
-              "Exact U(1)-charge blocks; deterministic nested TS2 support closure"
-            ],
-            [
-              "Solvers",
-              "Clarabel for available campaign runs; Mosek interface present but license unavailable"
-            ],
-            [
-              "Exclusion checker",
-              "Exact affine projection, 256-bit Arb intervals, rigorous PSD LDL, normalized Farkas margin"
-            ],
-            [
-              "Execution",
-              "Resumable per-cell manifests on SCNet; raw primal/dual data retained"
-            ]
-          ]
-        },
-        {
           "kind": "text",
-          "text": "The same canonical multiplication and adjoint engine serves both degree encodings. For each level, the code enumerates the complete state-polynomial moment basis, stationarity identities, covariance-corrected gap matrix, and the \u03c1\u2080, F\u2080, K\u2080 objectives. Solver infeasibility remains UNKNOWN until the separately implemented checker reconstructs the exact coefficient identity and verifies every cone."
-        },
-        {
-          "kind": "equation",
-          "tex": "\\Gamma_{L,d}\\searrow\\Delta_{\\mathrm{bulk}},\\qquad \\gamma\\geq\\Gamma_{L,d}\\;\\Rightarrow\\;\\mathcal F_{L,d}(\\gamma)=\\varnothing"
+          "text": "At t=0 and \u03bc=0.5 the Hamiltonian is a sum of independent onsite terms. The ground state has one boson per site. Removing one boson costs 0.5; for nmax\u22652, adding a second boson also costs 0.5. Therefore \u0394bulk=0.5, \u03c1\u2080=1, F\u2080=0, and K\u2080=0."
         },
         {
           "columns": [
-            "Acceptance gate",
-            "Evidence",
-            "Status"
+            "Calculation",
+            "Coverage",
+            "Gap result",
+            "Local observables"
           ],
           "kind": "table",
           "numeric": [
+            false,
             false,
             false,
             false
           ],
           "rows": [
             [
-              "Exact algebra and degree filtrations",
-              "nmax=1,2,3; adjoint, charge, cutoff commutator",
-              "PASS"
+              "Analytic product state",
+              "nmax\u22652",
+              "\u0394=0.5 exactly",
+              "\u03c1\u2080=1, F\u2080=0, K\u2080=0"
             ],
             [
-              "Julia hierarchy/certificate suite",
-              "577 assertions; includes corrupted-certificate rejection",
-              "PASS"
+              "Radius-one finite ED",
+              "3 graphs; nmax=1,2,3",
+              "finite-patch gap=0.5",
+              "\u03c1\u2080=1, F\u2080=0, K\u2080=0"
             ],
             [
-              "Python graph/report suite",
-              "21 tests",
-              "PASS"
+              "Atomic state-polynomial SDP",
+              "nmax=1,2,3",
+              "numerical [0.5, 0.5000009537]",
+              "\u03c1\u2080=1 and F\u2080=0 to solver tolerance"
             ],
             [
-              "Atomic limit",
-              "\u0394/U=0.5, \u03c1=1, F=K=0 without special physics constraints",
-              "PASS"
-            ],
-            [
-              "Pinned upstream Ising reproduction",
-              "SpectralGap a1171c9; no SCNet/local Mosek license",
-              "BLOCKED"
-            ],
-            [
-              "Nested numerical monotonicity",
-              "Both larger complete hard-core solves exhausted memory",
-              "UNKNOWN"
+              "Complete Julia hierarchy",
+              "nmax=1; (L,d)=(1,2)",
+              "\u03b3=0.49 FEASIBLE; \u03b3=0.51 EXCLUDED",
+              "0.999998986\u2264\u03c1\u2080\u22641.00000017"
             ]
           ]
         },
         {
+          "kind": "heading",
+          "text": "ED conclusion"
+        },
+        {
+          "kind": "text",
+          "text": "The radius-one ED calculation gives the same gap 0.5 and the same local observables on all three graphs and at all three cutoffs. This is the expected conclusion: at t=0 the sites decouple, so lattice geometry and patch boundary do not affect the answer. At nmax=1 only the hole excitation remains; nmax=2 and 3 test both the hole and particle excitations required by the stated atomic benchmark."
+        },
+        {
+          "kind": "text",
+          "text": "The full hierarchy check is not a single-site shortcut: it uses a two-site buffered local window, complete moment and gap blocks, stationarity constraints, and the same certificate checker used for Target 2. Its \u03b3=0.51 exclusion has exact affine residual zero, verified PSD blocks, 256-bit coefficient checks, and positive Farkas margin."
+        }
+      ],
+      "title": "2. Target 1: atomic limit"
+    },
+    {
+      "blocks": [
+        {
+          "kind": "heading",
+          "text": "Finite-patch ED diagnostics"
+        },
+        {
+          "kind": "text",
+          "text": "We diagonalized radius-one open patches: four sites and three edges for {8,3}, five sites and four edges for {12,4}, and five sites and six edges for L({8,3}). The table shows nmax=3, the largest cutoff calculated."
+        },
+        {
           "columns": [
-            "Representative {8,3} level",
-            "Family",
-            "Moment basis",
-            "Gap basis",
-            "Equalities",
-            "Peak RSS (GiB)"
+            "Point",
+            "Graph",
+            "t",
+            "\u03bc",
+            "\u0394ED",
+            "\u03c1\u2080",
+            "F\u2080",
+            "K\u2080"
           ],
           "kind": "table",
           "numeric": [
             false,
             false,
-            true,
-            true,
-            true,
-            true
+            false,
+            false,
+            false,
+            false,
+            false,
+            false
           ],
           "rows": [
             [
-              "nmax=1",
-              "(1,2)",
-              "complete",
-              "147",
-              "5",
-              "3",
-              "7.012871"
+              "P1",
+              "{8,3}",
+              "0.03",
+              "0.5",
+              "0.3991",
+              "1.00011",
+              "0.0106905",
+              "0.239557"
             ],
             [
-              "nmax=1",
-              "(1,3)",
-              "complete",
-              "927",
-              "9",
-              "5",
-              "88.60851"
+              "P1",
+              "{12,4}",
+              "0.03",
+              "0.5",
+              "0.38343",
+              "1.00022",
+              "0.0142587",
+              "0.240204"
             ],
             [
-              "nmax=1",
-              "(2,2)",
-              "complete",
-              "936",
-              "17",
-              "51",
-              "74.34607"
+              "P1",
+              "L({8,3})",
+              "0.03",
+              "0.5",
+              "0.347447",
+              "1.0002",
+              "0.0168483",
+              "0.272576"
             ],
             [
-              "nmax=2",
-              "(1,2)",
-              "complete",
-              "801",
-              "11",
-              "7",
-              "229.1583"
+              "P2",
+              "{8,3}",
+              "0.05",
+              "0.5",
+              "0.335728",
+              "1.0008",
+              "0.029165",
+              "0.397859"
+            ],
+            [
+              "P2",
+              "{12,4}",
+              "0.05",
+              "0.5",
+              "0.310382",
+              "1.0016",
+              "0.0389246",
+              "0.400829"
+            ],
+            [
+              "P2",
+              "L({8,3})",
+              "0.05",
+              "0.5",
+              "0.250538",
+              "1.00175",
+              "0.0502008",
+              "0.487933"
+            ],
+            [
+              "P3",
+              "{8,3}",
+              "0.06",
+              "0.5",
+              "0.305373",
+              "1.00162",
+              "0.0414818",
+              "0.476196"
+            ],
+            [
+              "P3",
+              "{12,4}",
+              "0.06",
+              "0.5",
+              "0.275531",
+              "1.00323",
+              "0.0553894",
+              "0.481283"
+            ],
+            [
+              "P3",
+              "L({8,3})",
+              "0.06",
+              "0.5",
+              "0.204805",
+              "1.00378",
+              "0.0738573",
+              "0.603063"
+            ],
+            [
+              "P4",
+              "{8,3}",
+              "0.03",
+              "0.15",
+              "0.103434",
+              "1.00011",
+              "0.0106905",
+              "0.239557"
+            ],
+            [
+              "P4",
+              "{12,4}",
+              "0.03",
+              "0.15",
+              "0.0962349",
+              "1.00022",
+              "0.0142587",
+              "0.240204"
+            ],
+            [
+              "P4",
+              "L({8,3})",
+              "0.03",
+              "0.15",
+              "0.0778816",
+              "1.0002",
+              "0.0168483",
+              "0.272576"
+            ],
+            [
+              "P5",
+              "{8,3}",
+              "0.03",
+              "0.75",
+              "0.1491",
+              "1.00011",
+              "0.0106905",
+              "0.239557"
+            ],
+            [
+              "P5",
+              "{12,4}",
+              "0.03",
+              "0.75",
+              "0.13343",
+              "1.00022",
+              "0.0142587",
+              "0.240204"
+            ],
+            [
+              "P5",
+              "L({8,3})",
+              "0.03",
+              "0.75",
+              "0.097447",
+              "1.0002",
+              "0.0168483",
+              "0.272576"
             ]
           ]
-        }
-      ],
-      "note": "Paper-faithful hierarchy, exact algebra, solver layer, and independent checker.",
-      "title": "Approach"
-    },
-    {
-      "blocks": [
+        },
         {
-          "kind": "verdict",
-          "label": "Partial Target 2 campaign",
-          "status": "warn",
-          "why": "10 hard-core finite-level gap upper statements are certified; cutoff-two, nested-level, ladder, unrestricted, and optional cutoff-three coverage does not yet satisfy the full issue grid."
+          "kind": "text",
+          "text": "ED conclusion: at \u03bc=0.5, increasing t from 0.03 to 0.06 lowers the finite-patch gap and increases the number fluctuation F\u2080 and hopping correlator K\u2080 on every graph. At fixed parameters the line graph has the smallest gap and largest fluctuations, {8,3} has the largest gap and smallest fluctuations, and {12,4} is intermediate. The nmax=2 and nmax=3 results have the same ordering; their maximum gap difference is 0.0045 at t=0.03 and 0.0194 at t=0.05\u20130.06."
+        },
+        {
+          "kind": "note",
+          "text": "These ED trends are finite-open-patch diagnostics only. In particular, the nmax=1 patches are saturated and give \u03c1\u2080=1 and F\u2080=K\u2080=0, so they do not by themselves resolve the thermodynamic Mott behavior."
         },
         {
           "kind": "heading",
-          "level": 2,
-          "text": "Certified gap upper statements"
+          "text": "Thermodynamic hierarchy: certified gap statements"
+        },
+        {
+          "kind": "text",
+          "text": "At the complete matrix level nmax=1, (L,d)=(1,2), we obtained 10 independently verified gap upper statements. The first verified EXCLUDED value in each row is a rigorous upper statement at this finite hierarchy level."
         },
         {
           "columns": [
             "Graph",
             "Point",
-            "(t/U, \u03bc/U)",
-            "(L,d)",
-            "last FEASIBLE",
-            "first EXCLUDED",
-            "span",
-            "unknown inside",
-            "clean 0.005"
+            "(t, \u03bc)",
+            "last FEASIBLE trial",
+            "first verified EXCLUDED",
+            "UNKNOWN inside"
           ],
           "kind": "table",
           "numeric": [
@@ -246,10 +296,7 @@
             false,
             false,
             false,
-            true,
-            true,
-            true,
-            true,
+            false,
             false
           ],
           "rows": [
@@ -257,345 +304,219 @@
               "{12,4}",
               "P2",
               "(0.05, 0.5)",
-              "(1,2)",
               "0.51",
               "0.52",
-              "0.01",
-              "1",
-              "no"
+              "1"
             ],
             [
               "{12,4}",
               "P4",
               "(0.03, 0.15)",
-              "(1,2)",
               "0",
               "0.3",
-              "0.3",
-              "0",
-              "no"
+              "2"
             ],
             [
               "{12,4}",
               "P5",
               "(0.03, 0.75)",
-              "(1,2)",
               "0",
-              "1",
-              "1",
-              "0",
-              "no"
+              "0.8",
+              "1"
             ],
             [
               "{8,3}",
               "P1",
               "(0.03, 0.5)",
-              "(1,2)",
               "0.5",
               "0.505",
-              "0.005",
-              "0",
-              "yes"
+              "0"
             ],
             [
               "{8,3}",
               "P2",
               "(0.05, 0.5)",
-              "(1,2)",
               "0.509",
               "0.511",
-              "0.002",
-              "1",
-              "no"
+              "1"
             ],
             [
               "{8,3}",
               "P3",
               "(0.06, 0.5)",
-              "(1,2)",
               "0.514",
               "0.518",
-              "0.004",
-              "2",
-              "no"
+              "2"
             ],
             [
               "{8,3}",
               "P4",
               "(0.03, 0.15)",
-              "(1,2)",
               "0.16",
               "0.165",
-              "0.005",
-              "0",
-              "yes"
+              "0"
             ],
             [
               "{8,3}",
               "P5",
               "(0.03, 0.75)",
-              "(1,2)",
               "0.75",
               "0.755",
-              "0.005",
-              "0",
-              "yes"
+              "0"
             ],
             [
               "L({8,3})",
               "P2",
               "(0.05, 0.5)",
-              "(1,2)",
               "0.51",
               "0.53",
-              "0.02",
-              "1",
-              "no"
+              "1"
             ],
             [
               "L({8,3})",
               "P4",
               "(0.03, 0.15)",
-              "(1,2)",
               "0",
-              "0.3",
-              "0.3",
-              "0",
-              "no"
-            ]
-          ]
-        },
-        {
-          "kind": "text",
-          "text": "All 10 EXCLUDED endpoints have exact affine residual zero, 256-bit coefficient checks, rigorous PSD verification, and normalized Farkas margin at least one. 3 transitions have a clean 0.005U search span. Rows containing unresolved samples are search spans, not numerical brackets."
-        },
-        {
-          "items": [
-            {
-              "caption": "Checked fixed-gap hierarchy outcomes. Circles are FEASIBLE non-exclusions, crosses are exact-certificate EXCLUDED trials, and squares are UNKNOWN. The map separates scientific classification from scheduler completion.",
-              "src": "assets/fixed_gamma_status.png"
-            }
-          ],
-          "kind": "figures"
-        },
-        {
-          "kind": "heading",
-          "level": 2,
-          "text": "Certified observable information"
-        },
-        {
-          "columns": [
-            "Graph",
-            "Point",
-            "\u03b3/U",
-            "Observable",
-            "Accepted interval",
-            "(L,d)"
-          ],
-          "kind": "table",
-          "numeric": [
-            false,
-            false,
-            true,
-            false,
-            false,
-            false
-          ],
-          "rows": [
-            [
-              "{8,3}",
-              "P5",
-              "0.05",
-              "F0",
-              "[4.879816e-07, 0.005592673]",
-              "(1,2)"
-            ],
-            [
-              "{8,3}",
-              "P5",
-              "0.05",
-              "rho0",
-              "[0.9944073, 0.9999995]",
-              "(1,2)"
-            ]
-          ]
-        },
-        {
-          "columns": [
-            "Graph",
-            "Point",
-            "\u03b3/U",
-            "Observable",
-            "Sense",
-            "Certified endpoint",
-            "Certificate"
-          ],
-          "kind": "table",
-          "numeric": [
-            false,
-            false,
-            true,
-            false,
-            false,
-            true,
-            false
-          ],
-          "rows": [
-            [
-              "{8,3}",
-              "P4",
-              "0.1",
-              "F0",
-              "\u2264",
-              "0.05446525",
-              "DERIVED_EXACT_AFFINE_FROM_VERIFIED_EXACT_PROJECTED_BOUND"
-            ],
-            [
-              "{8,3}",
-              "P4",
-              "0.1",
-              "K0",
-              "\u2264",
-              "0.3025838",
-              "VERIFIED_EXACT_PROJECTED_BOUND"
-            ],
-            [
-              "{8,3}",
-              "P4",
-              "0.1",
-              "rho0",
-              "\u2265",
-              "0.9455347",
-              "VERIFIED_EXACT_PROJECTED_BOUND"
-            ]
-          ]
-        },
-        {
-          "kind": "text",
-          "text": "The accepted two-sided result is the {8,3} P5 cell at \u03b3/U=0.05: 0.9944073 \u2264 \u03c1\u2080 \u2264 0.9999995 and 4.879816\u00d710\u207b\u2077 \u2264 F\u2080 \u2264 0.005592673. At hard-core cutoff F\u2080=1\u2212\u03c1\u2080 exactly. The representative P4, \u03b3/U=0.10 exact-projection run additionally certifies \u03c1\u2080\u22650.9455347492, F\u2080\u22640.0544652508, and K\u2080\u22640.3025838233."
-        },
-        {
-          "items": [
-            {
-              "caption": "Accepted and floating one-sided endpoints for {8,3} P2. Increasing the assumed \u03b3 tightens the conditional feasible set; it does not tune the Hamiltonian or measure how the physical gap changes.",
-              "src": "assets/working_endpoints_83_p2.png"
-            }
-          ],
-          "kind": "figures"
-        },
-        {
-          "kind": "heading",
-          "level": 2,
-          "text": "Coverage and computational boundary"
-        },
-        {
-          "columns": [
-            "Evidence class",
-            "Count",
-            "Interpretation"
-          ],
-          "kind": "table",
-          "numeric": [
-            false,
-            true,
-            false
-          ],
-          "rows": [
-            [
-              "Accepted one-sided objectives",
-              "26",
-              "Passed independent residual/PSD/objective-gap checks"
-            ],
-            [
-              "Floating objectives",
-              "100",
-              "Numerical values retained, not certified bounds"
-            ],
-            [
-              "Accepted intervals",
-              "2 / 69",
-              "Both endpoints accepted and ordered"
-            ],
-            [
-              "Fixed-\u03b3 records",
-              "157 / 205",
-              "Durable solver/checker result exists"
-            ],
-            [
-              "Verified excluded trial rows",
-              "49",
-              "Exact-projected Farkas certificates"
-            ],
-            [
-              "Unknown fixed-\u03b3 rows",
-              "85",
-              "Missing, numerical, unfinished, or resource-limited"
+              "0.17",
+              "2"
             ]
           ]
         },
         {
           "kind": "note",
-          "label": "Resource result",
-          "style": "pending",
-          "text": "Complete nmax=2 (L,d)=(1,2) assembled but exhausted 192\u2013237 GiB in every Clarabel factorization route (MKL and QDLDL). Complete hard-core (1,3) and (2,2) solves also exhausted 192 GiB. These are explicit UNKNOWN outcomes, not missing rows. Optimized TS2 dry assemblies and an isolated extended-geometry P1 recovery were still running at this snapshot. Only fetched rows that already passed the independent checker are included in the claims above."
+          "text": "A FEASIBLE trial is only a non-exclusion at this finite level and is not a lower bound on the physical gap. When UNKNOWN samples lie between the two reported trials, the pair is a search span rather than a numerical bracket."
+        },
+        {
+          "kind": "heading",
+          "text": "Thermodynamic hierarchy: accepted observable bounds"
+        },
+        {
+          "columns": [
+            "Graph",
+            "Point",
+            "\u03b3",
+            "Observable",
+            "Bound",
+            "Certificate status"
+          ],
+          "kind": "table",
+          "numeric": [
+            false,
+            false,
+            false,
+            false,
+            false,
+            false
+          ],
+          "rows": [
+            [
+              "{8,3}",
+              "P5",
+              "0.05",
+              "\u03c1\u2080",
+              "[0.9944073, 0.9999995]",
+              "accepted two-sided interval"
+            ],
+            [
+              "{8,3}",
+              "P5",
+              "0.05",
+              "F\u2080",
+              "[4.879816\u00d710\u207b\u2077, 0.005592673]",
+              "accepted two-sided interval"
+            ],
+            [
+              "{8,3}",
+              "P4",
+              "0.10",
+              "\u03c1\u2080",
+              "\u2265 0.9455347492",
+              "exact-projected lower bound"
+            ],
+            [
+              "{8,3}",
+              "P4",
+              "0.10",
+              "F\u2080",
+              "\u2264 0.0544652508",
+              "derived from F\u2080=1\u2212\u03c1\u2080"
+            ],
+            [
+              "{8,3}",
+              "P4",
+              "0.10",
+              "K\u2080",
+              "\u2264 0.3025838233",
+              "exact-projected upper bound"
+            ]
+          ]
+        },
+        {
+          "kind": "text",
+          "text": "The strongest observable result is therefore consistent with unit filling and small onsite fluctuations for {8,3} at P5. The available certified observable set is too small to establish systematic dependence on graph, cutoff, L, or d."
         }
       ],
-      "note": "Snapshot 2026-07-30T17:41:42+08:00; only independently accepted statements appear as results.",
-      "title": "Results"
+      "title": "3. Target 2: hyperbolic lattices"
     },
     {
       "blocks": [
         {
-          "blocks": [
-            {
-              "kind": "text",
-              "text": "The implementation specializes the thermodynamic hierarchy to finite truncated-boson matrix algebras without using infinite-dimensional CCR relations. It combines a shared exact algebra engine, two auditable degree filtrations, exact charge blocks, deterministic nested TS2 sparsity, and an independent Q(\u221a2,\u221a3)/Arb certificate checker in one reusable Julia/JuMP core."
-            }
-          ],
-          "kind": "card",
-          "title": "What's innovative"
+          "kind": "text",
+          "text": "The Julia/JuMP implementation uses exact finite matrix algebra over Q(\u221a2,\u221a3), complete state-polynomial moment, stationarity, and gap matrices, exact U(1) charge blocks, and an independent certificate checker. Exclusions are reported only after exact affine projection, rigorous PSD verification, 256-bit coefficient evaluation, and a positive normalized Farkas margin."
         },
         {
-          "blocks": [
-            {
-              "kind": "text",
-              "text": "The attempt advances beyond a solver-only demonstration: every reported gap exclusion can be replayed as an exact coefficient identity with rigorous cone checks. It establishes a certified hard-core baseline on all five {8,3} points and a P2 comparison on all three geometries, while making the remaining computational limits explicit."
-            }
+          "columns": [
+            "Check",
+            "Result"
           ],
-          "kind": "card",
-          "title": "Significance of the output"
+          "kind": "table",
+          "numeric": [
+            false,
+            false
+          ],
+          "rows": [
+            [
+              "Atomic benchmark",
+              "passed"
+            ],
+            [
+              "Julia hierarchy and certificate tests",
+              "577 assertions passed"
+            ],
+            [
+              "Python graph and reporting tests",
+              "21 tests passed"
+            ],
+            [
+              "Deliberately corrupted certificates",
+              "rejected"
+            ]
+          ]
         },
         {
-          "blocks": [
-            {
-              "kind": "text",
-              "text": "The algebra, hierarchy assembly, and checker are graph- and cutoff-aware rather than tied to one lattice. They provide a foundation for certified thermodynamic studies of other finite-cutoff bosonic Hamiltonians and a clear interface for stronger sparsity or commercial conic solvers."
-            }
-          ],
-          "kind": "card",
-          "title": "Broader impact"
+          "kind": "heading",
+          "text": "Limitations"
         },
         {
           "items": [
-            "Complete the nested hard-core (1,3) and (2,2) numerical levels or introduce a formally justified stronger reduction.",
-            "Finish the mandatory cutoff-two complete/TS2 grid; run cutoff three only if its recorded resource gate passes.",
-            "Add the prescribed ladder-encoding and unrestricted-state comparisons.",
-            "Run the pinned upstream Ising reference when a Mosek license becomes available.",
-            "Re-run the aggregate and this submission builder after every fetched HPC checkpoint; never promote floating values silently."
+            "Complete hard-core (1,3) and (2,2) solves exhausted 192 GiB; no numerical L- or d-tightening is claimed.",
+            "The complete nmax=2, (1,2) model assembled but its Clarabel factorization exhausted 192\u2013237 GiB.",
+            "The requested cutoff-two TS2 grid, ladder comparison, unrestricted comparison, and optional cutoff three are incomplete.",
+            "The pinned upstream Ising reproduction remains blocked because no Mosek license was available.",
+            "Running HPC jobs are not counted until their result files are fetched and independently checked."
           ],
-          "kind": "list",
-          "title": "What is still required for full acceptance"
+          "kind": "list"
         },
         {
-          "kind": "code",
-          "text": "make final-report",
-          "title": "Rebuild the audited report"
+          "kind": "text",
+          "text": "Thus Target 1 is complete. Target 2 currently supplies a complete finite-patch ED diagnostic data set and a certified hard-core thermodynamic baseline, but not the full cutoff and nested-level campaign requested by the issue."
         }
       ],
-      "note": "What this attempt contributes, and what remains before the issue is complete.",
-      "title": "Highlight"
+      "title": "4. Method, verification, and limitations"
     }
   ],
-  "title": "Certified bulk-gap bounds for truncated Bose\u2013Hubbard models",
+  "status": "Target 1 completed; Target 2 partially completed.",
+  "subtitle": "Results for Targets 1 and 2 of Quantum Harness issue #92",
+  "title": "Truncated Bose\u2013Hubbard gap calculations",
   "url": "https://github.com/QuantumBFS/quantum.harness/issues/92"
 }

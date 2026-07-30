@@ -1,14 +1,14 @@
 {
   "active_at_snapshot": [
-    "SCNet extended geometry grid 41543225 was still running/array-throttled.",
+    "SCNet refinement array 41549521 and line-P4 midpoint 41550952 were still running.",
     "Optimized cutoff-two TS2 gate 41542822 was still running; 41544379 was dependency-queued.",
     "No scheduler state is promoted to scientific evidence until a result JSON is fetched and re-aggregated."
   ],
   "aggregate_sources": [
     {
-      "bytes": 65807,
+      "bytes": 68068,
       "path": "results/deadline_analysis/gap_scan_trials.csv",
-      "sha256": "3e0fa438b6a7f7b7af3ee9ba2a326c79cea5b7771d97a612b03eeb5d85d56e36"
+      "sha256": "605cbe12cd9d02c45ef229d19e40b99e26fef0c8d4d93114947a00e3aff9b8ba"
     },
     {
       "bytes": 63137,
@@ -34,22 +34,37 @@
       "bytes": 241,
       "path": "results/deadline_analysis/nestedness_checks.csv",
       "sha256": "562ce56bb721e048076dea058e38da62780b7b0bdc90afb34927331694aa182a"
+    },
+    {
+      "bytes": 12852,
+      "path": "results/finite_patch_ed.csv",
+      "sha256": "9d0d81326e7ec7d0dfb1e366bc44846df11326a0cbb4b4decd73fc83174d876f"
+    },
+    {
+      "bytes": 344,
+      "path": "results/atomic_gap_brackets.csv",
+      "sha256": "965a27a958d02c7eee8ba68eaa0f1a12901882c6ca98efb70764a4f3f08fc6ef"
+    },
+    {
+      "bytes": 2332328,
+      "path": "results/atomic/julia-hierarchy-certificate.json",
+      "sha256": "5f493d99a0d35bf6193b6a2c866a6c5cad14d90fcb0a109812671e8d86531f42"
     }
   ],
   "counts": {
     "accepted_intervals": 2,
     "accepted_one_sided_objectives": 26,
     "certified_gap_upper_statements": 10,
-    "durable_fixed_gamma_rows": 157,
+    "durable_fixed_gamma_rows": 162,
     "exact_projected_observable_bounds": 3,
-    "feasible_fixed_gamma_rows": 71,
-    "fixed_gamma_rows": 205,
+    "feasible_fixed_gamma_rows": 72,
+    "fixed_gamma_rows": 212,
     "floating_objectives": 100,
     "interval_rows": 69,
     "objective_errors": 8,
     "observable_rows": 138,
-    "unknown_fixed_gamma_rows": 85,
-    "verified_excluded_fixed_gamma_rows": 49
+    "unknown_fixed_gamma_rows": 89,
+    "verified_excluded_fixed_gamma_rows": 51
   },
   "raw_campaign_directories": [
     {
@@ -67,7 +82,7 @@
       "role": "diagnostic"
     },
     {
-      "bytes": 547985,
+      "bytes": 557274,
       "description": "Canonical merged tables, plots, and live calculation report.",
       "directory": "deadline_analysis",
       "files": 11,
@@ -144,10 +159,10 @@
       "role": "production"
     },
     {
-      "bytes": 81769276,
+      "bytes": 152382719,
       "description": "Extended Target-2 geometry grid; may be updated by SCNet.",
       "directory": "deadline_geometry_grid",
-      "files": 16,
+      "files": 24,
       "role": "production-live"
     },
     {
@@ -277,5 +292,5 @@
     "primary_encoding": "matrix",
     "primary_symmetry": "U1_INVARIANT_KMS_STATES"
   },
-  "snapshot_generated": "2026-07-30T17:41:42+08:00"
+  "snapshot_generated": "2026-07-30T18:44:28+08:00"
 }

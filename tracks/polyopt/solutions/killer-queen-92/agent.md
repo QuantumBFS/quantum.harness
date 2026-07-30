@@ -1,6 +1,6 @@
 # Agent handoff and decision log — issue #92
 
-Last updated: **2026-07-30 17:41 CST**
+Last updated: **2026-07-30 18:42 CST**
 Active workflow: [`status.md`](status.md) — **Gate 3 nested lattice levels**,
 with `W0.5` blocked on a Mosek license
 Issue: [certified bulk spectral-gap bounds for truncated Bose--Hubbard models
@@ -66,7 +66,7 @@ Current completion against that finish line:
 | item | state |
 |---|---|
 | active gate | Gate 3 — nested, geometry-sensitive lattice levels |
-| active work item | monitor optimized cutoff-two TS2 `(1,3)` dry job `41542822` followed by serial `(2,2)` guard `41544379`; geometry tasks 1--7 completed and isolated task-0 recovery `41546113_0` runs on a different node; synchronize every durable checkpoint and freeze the report before 20:00 CST |
+| active work item | monitor optimized cutoff-two TS2 `(1,3)` dry job `41542822` followed by serial `(2,2)` guard `41544379`; collect the remaining P4/P5 refinement trials and line midpoint, then rebuild the deliberately short Target 1/2 academic report from checked rows only |
 | carried blocker | `W0.5` — SCNet is configured, but the pinned upstream Ising solve still lacks a Mosek license |
 | central implementation | `julia/src/` plus Python graph/campaign bridge |
 | work that must wait | required-width endpoint and full-grid claims until unresolved scans and mandatory cells finish; nested comparisons until memory is redesigned |
@@ -441,6 +441,16 @@ Detailed tables belong in `status.md` and `REPORT.md`, not here.
   Line P1/P3/P5 positive probes are numerical `UNKNOWN` and contribute no
   bound.  The snapshot now has 157/205 durable rows (71 FEASIBLE, 49 EXCLUDED,
   85 UNKNOWN); isolated P1 recovery `41546113_0` remains active.
+- Refinement array `41549521` runs `{12,4}`/line P4 at `0.170,0.160` and
+  `{12,4}` P5 at `0.800,0.750`.  Its three 64-GiB cells, the 64-GiB P1 recovery,
+  and the serial 192-GiB TS2 lane total 448 GiB.  Preserve independent trial
+  checkpoints and promote nothing before exact/primal checking.
+- First refinement checkpoints promote exact exclusions at line P4 `0.170`
+  and `{12,4}` P5 `0.800`; the later trials remain `UNKNOWN`.  The aggregate is
+  162/212 durable rows (72 FEASIBLE, 51 EXCLUDED, 89 UNKNOWN).  The submission
+  is now a plain four-section academic report centered on Target 1 and Target
+  2, with the atomic and finite-patch ED conclusions stated explicitly; its 21
+  Python tests pass.
 
 ## 10. Handoff protocol
 

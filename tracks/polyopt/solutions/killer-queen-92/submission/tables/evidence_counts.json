@@ -2,15 +2,15 @@
   "accepted_intervals": 2,
   "accepted_one_sided_objectives": 26,
   "certified_gap_upper_statements": 10,
-  "durable_fixed_gamma_rows": 157,
+  "durable_fixed_gamma_rows": 162,
   "exact_projected_observable_bounds": 3,
-  "feasible_fixed_gamma_rows": 71,
-  "fixed_gamma_rows": 205,
+  "feasible_fixed_gamma_rows": 72,
+  "fixed_gamma_rows": 212,
   "floating_objectives": 100,
-  "generated": "2026-07-30T17:41:42+08:00",
+  "generated": "2026-07-30T18:44:28+08:00",
   "interval_rows": 69,
   "objective_errors": 8,
   "observable_rows": 138,
-  "unknown_fixed_gamma_rows": 85,
-  "verified_excluded_fixed_gamma_rows": 49
+  "unknown_fixed_gamma_rows": 89,
+  "verified_excluded_fixed_gamma_rows": 51
 }
