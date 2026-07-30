@@ -359,8 +359,18 @@ def collect_certificate(
         ),
         "finite_statistics": finite_results,
         "sampling_acceptance": all(
-            0.05 <= result[sector]["correction_acceptance"] <= 1.0
-            and 0.20 <= result[sector]["mother_acceptance"] <= 0.80
+            all(
+                0.05 <= acceptance <= 1.0
+                for acceptance in result[sector][
+                    "per_chain_correction_acceptance"
+                ]
+            )
+            and all(
+                0.25 <= acceptance <= 0.70
+                for acceptance in result[sector][
+                    "per_chain_mother_acceptance"
+                ]
+            )
             for result in seed_results
             for sector in ("final_ground", "final_tower")
         ),

@@ -188,6 +188,7 @@ def _sample_sector_update(
     full_evaluator: Callable[[np.ndarray], np.ndarray],
     coefficients: np.ndarray,
     configurations: list[np.ndarray],
+    delta_maxima: list[float],
     seed: int,
     multiplet: bool,
     sample_steps: int,
@@ -209,7 +210,7 @@ def _sample_sector_update(
             seed=seed + chain,
             sample_steps=sample_steps,
             proposal_sweeps=proposal_sweeps,
-            delta_max=0.35,
+            delta_max=delta_maxima[chain],
             initial_configuration=configurations[chain],
             global_rotation_interval=4,
         )
@@ -252,6 +253,8 @@ def _run_combined_update(
     tower_coefficients: np.ndarray,
     ground_configurations: list[np.ndarray],
     tower_configurations: list[np.ndarray],
+    ground_delta_maxima: list[float],
+    tower_delta_maxima: list[float],
     seed: int,
     sample_steps: int,
     proposal_sweeps: int,
@@ -270,6 +273,7 @@ def _run_combined_update(
             full_evaluator=ground_evaluator,
             coefficients=ground_coefficients,
             configurations=ground_configurations,
+            delta_maxima=ground_delta_maxima,
             seed=seed,
             multiplet=False,
             sample_steps=sample_steps,
@@ -282,6 +286,7 @@ def _run_combined_update(
             full_evaluator=tower_evaluator,
             coefficients=tower_coefficients,
             configurations=tower_configurations,
+            delta_maxima=tower_delta_maxima,
             seed=seed + 100,
             multiplet=True,
             sample_steps=sample_steps,
@@ -337,6 +342,36 @@ def _run_combined_update(
     )
 
 
+def _pilot_tower_chain(
+    request: tuple[int, int],
+) -> Any:
+    """Run one independently tuned tower pilot chain in a spawn worker."""
+
+    seed, samples_per_chain = request
+    mother_burn_in = metropolis_chain(
+        ground_mother_channels,
+        n_particles=N_ELECTRONS,
+        coefficients=np.empty(0, dtype=np.complex128),
+        seed=seed,
+        burn_in_sweeps=16,
+        sample_sweeps=1,
+        delta_max=0.35,
+        global_rotation_interval=4,
+    )
+    return delayed_acceptance_chain(
+        ground_mother_channels,
+        tower_mother_channels,
+        n_particles=N_ELECTRONS,
+        coefficients=np.empty(0, dtype=np.complex128),
+        seed=seed + 10_000,
+        sample_steps=16 + samples_per_chain,
+        proposal_sweeps=2,
+        delta_max=mother_burn_in.delta_max,
+        initial_configuration=mother_burn_in.samples[-1],
+        global_rotation_interval=4,
+    )
+
+
 def _pilot_samples(
     seed: int,
     chains: int,
@@ -358,34 +393,29 @@ def _pilot_samples(
         )
         for chain in range(chains)
     ]
-    tower_results = [
-        delayed_acceptance_chain(
-            ground_mother_channels,
-            tower_mother_channels,
-            n_particles=N_ELECTRONS,
-            coefficients=np.empty(0, dtype=np.complex128),
-            seed=seed + 100 + chain,
-            sample_steps=16 + samples_per_chain,
-            proposal_sweeps=2,
-            delta_max=0.35,
-            global_rotation_interval=4,
-        )
-        for chain in range(chains)
-    ]
     ground_samples = np.concatenate(
         [result.samples for result in ground_results], axis=0
-    )
-    tower_samples = np.concatenate(
-        [
-            result.samples[-samples_per_chain:]
-            for result in tower_results
-        ],
-        axis=0,
     )
     with concurrent.futures.ProcessPoolExecutor(
         max_workers=raw_amplitude_workers,
         mp_context=multiprocessing.get_context("spawn"),
     ) as executor:
+        tower_results = list(
+            executor.map(
+                _pilot_tower_chain,
+                [
+                    (seed + 100 + chain, samples_per_chain)
+                    for chain in range(chains)
+                ],
+            )
+        )
+        tower_samples = np.concatenate(
+            [
+                result.samples[-samples_per_chain:]
+                for result in tower_results
+            ],
+            axis=0,
+        )
         tower_raw = list(executor.map(tower_raw_channels, tower_samples))
     return (
         np.asarray([ground_raw_channels(item) for item in ground_samples]),
@@ -434,6 +464,7 @@ def calibrate_architecture(
         "chains": chains,
         "samples_per_chain": samples_per_chain,
         "raw_amplitude_workers": raw_amplitude_workers,
+        "pilot_chain_workers": raw_amplitude_workers,
         "sector_weights": {"ground": 0.5, "tower": 0.5},
         "relative_covariance_cutoff": relative_cutoff,
         "centering_mean": mean.tolist(),
@@ -450,7 +481,12 @@ def calibrate_architecture(
 def _initial_configurations(
     seed: int,
     chains: int,
-) -> tuple[list[np.ndarray], list[np.ndarray]]:
+) -> tuple[
+    list[np.ndarray],
+    list[np.ndarray],
+    list[float],
+    list[float],
+]:
     ground_results = [
         metropolis_chain(
             ground_mother_channels,
@@ -464,16 +500,30 @@ def _initial_configurations(
         )
         for chain in range(chains)
     ]
+    tower_mother_results = [
+        metropolis_chain(
+            ground_mother_channels,
+            n_particles=N_ELECTRONS,
+            coefficients=np.empty(0, dtype=np.complex128),
+            seed=seed + 100 + chain,
+            burn_in_sweeps=16,
+            sample_sweeps=1,
+            delta_max=0.35,
+            global_rotation_interval=4,
+        )
+        for chain in range(chains)
+    ]
     tower_results = [
         delayed_acceptance_chain(
             ground_mother_channels,
             tower_mother_channels,
             n_particles=N_ELECTRONS,
             coefficients=np.empty(0, dtype=np.complex128),
-            seed=seed + 100 + chain,
+            seed=seed + 200 + chain,
             sample_steps=16,
             proposal_sweeps=2,
-            delta_max=0.35,
+            delta_max=tower_mother_results[chain].delta_max,
+            initial_configuration=tower_mother_results[chain].samples[-1],
             global_rotation_interval=4,
         )
         for chain in range(chains)
@@ -481,6 +531,8 @@ def _initial_configurations(
     return (
         [result.samples[-1] for result in ground_results],
         [result.samples[-1] for result in tower_results],
+        [float(result.delta_max) for result in ground_results],
+        [float(result.delta_max) for result in tower_mother_results],
     )
 
 
@@ -561,10 +613,12 @@ def train_seed(
         raise ValueError(f"architecture mismatch: {mismatches}")
     mean = np.asarray(architecture["centering_mean"], dtype=np.float64)
     whitening = np.asarray(architecture["whitening"], dtype=np.float64)
-    ground_configurations, tower_configurations = _initial_configurations(
-        seed,
-        chains,
-    )
+    (
+        ground_configurations,
+        tower_configurations,
+        ground_delta_maxima,
+        tower_delta_maxima,
+    ) = _initial_configurations(seed, chains)
     ground_evaluator = _make_whitened_evaluator(
         ground_raw_channels, mean, whitening
     )
@@ -601,6 +655,8 @@ def train_seed(
             tower_coefficients=tower_coefficients,
             ground_configurations=ground_configurations,
             tower_configurations=tower_configurations,
+            ground_delta_maxima=ground_delta_maxima,
+            tower_delta_maxima=tower_delta_maxima,
             seed=seed + 1_000 * update,
             sample_steps=samples_per_update,
             proposal_sweeps=proposal_sweeps,
@@ -622,7 +678,7 @@ def train_seed(
             seed=seed + 20_000 + chain,
             sample_steps=final_samples_per_chain,
             proposal_sweeps=proposal_sweeps,
-            delta_max=0.35,
+            delta_max=ground_delta_maxima[chain],
             initial_configuration=ground_configurations[chain],
             global_rotation_interval=4,
         )
@@ -639,7 +695,7 @@ def train_seed(
             seed=seed + 21_000 + chain,
             sample_steps=final_samples_per_chain,
             proposal_sweeps=proposal_sweeps,
-            delta_max=0.35,
+            delta_max=tower_delta_maxima[chain],
             initial_configuration=tower_configurations[chain],
             global_rotation_interval=4,
         )
@@ -661,6 +717,11 @@ def train_seed(
         "raw_generator_ranks": list(RAW_RANKS),
         "architecture_sha256": architecture_sha256,
         "source_revision": architecture["source_revision"],
+        "proposal_adaptation": (
+            "burn-in-only-target-0.35-0.60-frozen-before-training"
+        ),
+        "ground_delta_maxima": ground_delta_maxima,
+        "tower_delta_maxima": tower_delta_maxima,
         "ground_coefficients": {
             "real": ground_coefficients.real.tolist(),
             "imag": ground_coefficients.imag.tolist(),

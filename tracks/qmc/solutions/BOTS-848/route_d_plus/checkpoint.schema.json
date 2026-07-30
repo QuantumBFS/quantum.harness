@@ -11,6 +11,9 @@
     "raw_generator_ranks",
     "architecture_sha256",
     "source_revision",
+    "proposal_adaptation",
+    "ground_delta_maxima",
+    "tower_delta_maxima",
     "ground_coefficients",
     "tower_coefficients",
     "initialization_norm",
@@ -38,6 +41,11 @@
       "type": "string",
       "pattern": "^[0-9a-f]{40}$"
     },
+    "proposal_adaptation": {
+      "const": "burn-in-only-target-0.35-0.60-frozen-before-training"
+    },
+    "ground_delta_maxima": {"$ref": "#/$defs/delta_maxima"},
+    "tower_delta_maxima": {"$ref": "#/$defs/delta_maxima"},
     "ground_coefficients": {"$ref": "#/$defs/complex_vector"},
     "tower_coefficients": {"$ref": "#/$defs/complex_vector"},
     "initialization_norm": {
@@ -53,6 +61,16 @@
     "checkpoint_selection": {"const": "final_update"}
   },
   "$defs": {
+    "delta_maxima": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "items": {
+        "type": "number",
+        "minimum": 0.02,
+        "maximum": 3.141592653589793
+      }
+    },
     "complex_vector": {
       "type": "object",
       "additionalProperties": false,
