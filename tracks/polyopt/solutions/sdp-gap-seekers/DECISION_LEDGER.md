@@ -1587,3 +1587,17 @@ SCNet environment also loaded the immutable checkout. Slurm test-only accepted
 the 8-CPU / 16000-MiB / 30-minute request and L=1 truth-only job `118195948`
 was submitted. It has neither an optimizer nor cone-removal flag. Preserve
 the checkout; a failed or partial candidate graph keeps L=2 blocked.
+
+SCNet L=1 truth job `118195948`, immutable source `e81c463`, completed after
+13:44 with 2,570,152 KiB peak RSS and exit 0. The final congruence gate is
+exact over all 15,822 mapped entries: 14,715 direct unit-equalities, 1,107
+entries resolved by the exceptional map, zero final opposite, and zero final
+unmatched. Each of the three scalar-minus blocks has the unique solution
+`16=>16@1/2,24=>24@1/2,31=>31@1/2`; each scalar-plus block has the unique
+solution `22=>22@1/2,31=>31@1/2,38=>38@1/2,42=>42@1/2,46=>46@1/2,48=>48@1/2`.
+Every mixed entry fixes the rational scale, every diagonal checks its square,
+and the exceptional submatrix replay passes. This proves an invertible PSD
+congruence without imposing state symmetry. The job had no optimizer and is
+not feasibility or gap evidence. It authorizes the changed next action: the
+L=2 truth-only audit over 12 blocks / 940,050 target triangle entries before
+any cone removal.
