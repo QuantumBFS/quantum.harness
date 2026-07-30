@@ -917,6 +917,69 @@
         {
           "kind": "heading",
           "level": 3,
+          "text": "⟦zh⟧156 门全局重综合审计：独立方法追平，但尚未突破⟦en⟧Global resynthesis audit of 156 gates: independent methods match but do not beat it"
+        },
+        {
+          "kind": "verdict",
+          "status": "neutral",
+          "label": "⟦zh⟧当前最优已验证值仍为 156；这是更强的经验上界证据，不是下界证明⟦en⟧The best verified value remains 156; this strengthens the empirical upper bound but is not a lower-bound proof",
+          "why": "⟦zh⟧将学到的 156 门网表导出为 Verilog 后，使用 Yosys 0.67 与 ABC 做全局重综合。允许 NAND、NOR、ANDNOT、ORNOT、XNOR 等“一个基础门加免费反相”的等价形式时，ABC 独立返回恰好 156 个计数门；五个不同延迟约束也全部返回 156。Python 再对 ABC JSON 网表逐门模拟，十二个输出在全部 4,096 个输入上同时匹配源网络与标准答案。没有任何测试方法低于 156。⟦en⟧The learned 156-gate graph is exported to Verilog and globally resynthesized with Yosys 0.67 and ABC. When NAND, NOR, ANDNOT, ORNOT and XNOR are admitted as one base gate plus free inversion, ABC independently returns exactly 156 counted gates; five delay constraints also all return 156. A Python simulator then evaluates the ABC JSON netlist gate by gate and all twelve outputs match both the source graph and clean answers on all 4,096 inputs. No tested method goes below 156."
+        },
+        {
+          "kind": "table",
+          "columns": [
+            "⟦zh⟧重综合或搜索方法⟦en⟧Resynthesis or search method",
+            "⟦zh⟧计数门数或最好误差⟦en⟧Counted gates or best error",
+            "⟦zh⟧全域验证⟦en⟧Full-domain verification",
+            "⟦zh⟧结论⟦en⟧Conclusion"
+          ],
+          "rows": [
+            [
+              "⟦zh⟧学到的 MDFA + 盲语义重代入⟦en⟧Learned MDFA plus blind semantic resubstitution",
+              "156 gates",
+              "4,096 / 4,096",
+              "⟦zh⟧当前基准⟦en⟧Current reference"
+            ],
+            [
+              "⟦zh⟧ABC 快速全局映射，免费反相等价门族⟦en⟧ABC fast global map, free-inversion-equivalent gate family",
+              "156 gates",
+              "4,096 / 4,096",
+              "⟦zh⟧不同门型组合独立追平；另有五个延迟目标仍全为 156⟦en⟧Independent tie with a different cell mix; five delay targets also remain 156"
+            ],
+            [
+              "⟦zh⟧ABC 快速映射，只允许 AND/OR/XOR⟦en⟧ABC fast map, AND/OR/XOR only",
+              "160 gates",
+              "⟦zh⟧综合保持等价⟦en⟧Equivalence preserved by synthesis",
+              "⟦zh⟧比当前基准多 4 门⟦en⟧Four gates worse"
+            ],
+            [
+              "⟦zh⟧ABC 默认面积流程，只允许 AND/OR/XOR⟦en⟧ABC default area flow, AND/OR/XOR only",
+              "243 gates",
+              "⟦zh⟧综合保持等价⟦en⟧Equivalence preserved by synthesis",
+              "⟦zh⟧AIG 展开破坏了紧凑 XOR 结构⟦en⟧AIG expansion destroys compact XOR structure"
+            ],
+            [
+              "⟦zh⟧从学到的 36 项多项式重新综合，不写入乘法公式⟦en⟧Recompile the learned 36-term polynomial without inserting the multiplication formula",
+              "252 gates",
+              "4,096 / 4,096",
+              "⟦zh⟧通用加法器综合明显更差⟦en⟧Generic adder synthesis is substantially worse"
+            ],
+            [
+              "⟦zh⟧把重复 10 次的 8 门 MDFA 进化为 7 门，三个种子⟦en⟧Evolve the ten-times-repeated 8-gate MDFA into seven gates, three seeds",
+              "171,018,000 candidates; best mismatch 4",
+              "⟦zh⟧未找到 32 / 32 精确宏⟦en⟧No exact 32 / 32 macro found",
+              "⟦zh⟧否定结果仅是启发式搜索证据，不是 8 门下界⟦en⟧Negative heuristic evidence only, not an eight-gate lower bound"
+            ]
+          ]
+        },
+        {
+          "kind": "note",
+          "label": "⟦zh⟧为什么仍不能声称 156 最优⟦en⟧Why 156 still cannot be claimed optimal",
+          "text": "⟦zh⟧ABC 的 156 说明另一个成熟全局综合器在同一门模型下也停在相同大小，三个 MDFA 搜索则说明最直接的“每个宏少一门”路线很难；但两者都没有穷尽所有 12 输入、12 输出、155 门电路。要得到真正下界，需要 SAT/SMT 精确综合证书、形式化不可满足证明，或更强的电路复杂度论证。下一步若继续压门数，应优先联合综合相邻压缩器，而不是继续重复同一个 7 门宏随机搜索。⟦en⟧ABC reaching 156 shows that another mature global synthesizer stops at the same size in the same gate model, while the three MDFA searches show that the most direct “save one gate per macro” route is difficult. Neither enumerates all 12-input, 12-output, 155-gate circuits. A genuine lower bound would require a SAT/SMT exact-synthesis certificate, a formal unsatisfiability proof or a stronger circuit-complexity argument. Further gate reduction should prioritize joint synthesis of adjacent compressors rather than repeating the same random seven-gate macro search."
+        },
+        {
+          "kind": "heading",
+          "level": 3,
           "text": "⟦zh⟧此前的浮点学生容量压缩结果⟦en⟧Previous floating-student capacity result"
         },
         {

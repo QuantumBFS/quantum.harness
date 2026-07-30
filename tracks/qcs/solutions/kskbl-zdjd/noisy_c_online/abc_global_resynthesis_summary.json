@@ -1,0 +1,37 @@
+{
+  "kind": "independent-yosys-abc-global-resynthesis",
+  "source_network": "tracks/qcs/solutions/kskbl-zdjd/noisy_c_online/learned_mdfa_p25_optimized_network.json",
+  "yosys_json": "tracks/qcs/results/20260730-221500-abc-global/fast-gates.json",
+  "verification": {
+    "domain_size": 4096,
+    "matches_source_network": true,
+    "matches_clean_domain": true,
+    "all_outputs_exact": true
+  },
+  "gate_model": {
+    "counted_two_input_families": [
+      "AND",
+      "NAND",
+      "ANDNOT",
+      "OR",
+      "NOR",
+      "ORNOT",
+      "XOR",
+      "XNOR"
+    ],
+    "NOT_cost": 0
+  },
+  "source_counted_gates": 156,
+  "resynthesized_counted_gates": 156,
+  "cell_breakdown": {
+    "$_ANDNOT_": 15,
+    "$_AND_": 36,
+    "$_NAND_": 2,
+    "$_NOR_": 1,
+    "$_NOT_": 4,
+    "$_ORNOT_": 3,
+    "$_OR_": 10,
+    "$_XNOR_": 28,
+    "$_XOR_": 61
+  }
+}

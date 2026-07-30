@@ -1,0 +1,231 @@
+{
+  "kind": "learned-156-gate-minimization-audit",
+  "gate_model": {
+    "two_input_AND_OR_XOR_with_free_edge_inversion": true,
+    "equivalent_single_gate_families": [
+      "AND",
+      "NAND",
+      "ANDNOT",
+      "OR",
+      "NOR",
+      "ORNOT",
+      "XOR",
+      "XNOR"
+    ],
+    "NOT_cost": 0
+  },
+  "claims": {
+    "best_verified_gate_count": 156,
+    "abc_independently_returns_156": true,
+    "abc_delay_scan_all_return_156": true,
+    "seven_gate_mdfa_found": false,
+    "seven_gate_mdfa_search_is_not_a_lower_bound_proof": true,
+    "total_seven_gate_candidates_evaluated": 171018000,
+    "best_seven_gate_total_hamming_mismatch": 4,
+    "no_tested_method_beats_156": true
+  },
+  "mdfa_seven_gate_searches": [
+    {
+      "seed": 247100,
+      "evaluations": 57006000,
+      "all_32_inputs_exact": false,
+      "best_total_hamming_mismatch": 4
+    },
+    {
+      "seed": 257100,
+      "evaluations": 57006000,
+      "all_32_inputs_exact": false,
+      "best_total_hamming_mismatch": 4
+    },
+    {
+      "seed": 267100,
+      "evaluations": 57006000,
+      "all_32_inputs_exact": false,
+      "best_total_hamming_mismatch": 4
+    }
+  ],
+  "abc_results": {
+    "fast_free_inversion_library": {
+      "kind": "independent-yosys-abc-global-resynthesis",
+      "source_network": "tracks/qcs/solutions/kskbl-zdjd/noisy_c_online/learned_mdfa_p25_optimized_network.json",
+      "yosys_json": "tracks/qcs/results/20260730-221500-abc-global/fast-gates.json",
+      "verification": {
+        "domain_size": 4096,
+        "matches_source_network": true,
+        "matches_clean_domain": true,
+        "all_outputs_exact": true
+      },
+      "gate_model": {
+        "counted_two_input_families": [
+          "AND",
+          "NAND",
+          "ANDNOT",
+          "OR",
+          "NOR",
+          "ORNOT",
+          "XOR",
+          "XNOR"
+        ],
+        "NOT_cost": 0
+      },
+      "source_counted_gates": 156,
+      "resynthesized_counted_gates": 156,
+      "cell_breakdown": {
+        "$_ANDNOT_": 15,
+        "$_AND_": 36,
+        "$_NAND_": 2,
+        "$_NOR_": 1,
+        "$_NOT_": 4,
+        "$_ORNOT_": 3,
+        "$_OR_": 10,
+        "$_XNOR_": 28,
+        "$_XOR_": 61
+      }
+    },
+    "five_delay_targets": [
+      {
+        "path": "tracks/qcs/results/20260730-221500-abc-global/fast-gates-D20-stat.txt",
+        "counted_gates": 156,
+        "free_NOT_cells": 4,
+        "cell_breakdown": {
+          "$_ANDNOT_": 15,
+          "$_AND_": 36,
+          "$_NAND_": 2,
+          "$_NOR_": 1,
+          "$_NOT_": 4,
+          "$_ORNOT_": 3,
+          "$_OR_": 10,
+          "$_XNOR_": 28,
+          "$_XOR_": 61
+        }
+      },
+      {
+        "path": "tracks/qcs/results/20260730-221500-abc-global/fast-gates-D40-stat.txt",
+        "counted_gates": 156,
+        "free_NOT_cells": 4,
+        "cell_breakdown": {
+          "$_ANDNOT_": 15,
+          "$_AND_": 36,
+          "$_NAND_": 2,
+          "$_NOR_": 1,
+          "$_NOT_": 4,
+          "$_ORNOT_": 3,
+          "$_OR_": 10,
+          "$_XNOR_": 28,
+          "$_XOR_": 61
+        }
+      },
+      {
+        "path": "tracks/qcs/results/20260730-221500-abc-global/fast-gates-D80-stat.txt",
+        "counted_gates": 156,
+        "free_NOT_cells": 4,
+        "cell_breakdown": {
+          "$_ANDNOT_": 15,
+          "$_AND_": 36,
+          "$_NAND_": 2,
+          "$_NOR_": 1,
+          "$_NOT_": 4,
+          "$_ORNOT_": 3,
+          "$_OR_": 10,
+          "$_XNOR_": 28,
+          "$_XOR_": 61
+        }
+      },
+      {
+        "path": "tracks/qcs/results/20260730-221500-abc-global/fast-gates-D160-stat.txt",
+        "counted_gates": 156,
+        "free_NOT_cells": 4,
+        "cell_breakdown": {
+          "$_ANDNOT_": 15,
+          "$_AND_": 36,
+          "$_NAND_": 2,
+          "$_NOR_": 1,
+          "$_NOT_": 4,
+          "$_ORNOT_": 3,
+          "$_OR_": 10,
+          "$_XNOR_": 28,
+          "$_XOR_": 61
+        }
+      },
+      {
+        "path": "tracks/qcs/results/20260730-221500-abc-global/fast-gates-D1000-stat.txt",
+        "counted_gates": 156,
+        "free_NOT_cells": 4,
+        "cell_breakdown": {
+          "$_ANDNOT_": 15,
+          "$_AND_": 36,
+          "$_NAND_": 2,
+          "$_NOR_": 1,
+          "$_NOT_": 4,
+          "$_ORNOT_": 3,
+          "$_OR_": 10,
+          "$_XNOR_": 28,
+          "$_XOR_": 61
+        }
+      }
+    ],
+    "fast_AND_OR_XOR_only": {
+      "path": "tracks/qcs/results/20260730-221500-abc-global/fast-stat.txt",
+      "counted_gates": 160,
+      "free_NOT_cells": 26,
+      "cell_breakdown": {
+        "$_AND_": 54,
+        "$_NOT_": 26,
+        "$_OR_": 13,
+        "$_XOR_": 93
+      }
+    },
+    "default_AND_OR_XOR_only": {
+      "path": "tracks/qcs/results/20260730-221500-abc-global/default-techmap-stat.txt",
+      "counted_gates": 243,
+      "free_NOT_cells": 42,
+      "cell_breakdown": {
+        "$_AND_": 105,
+        "$_NOT_": 42,
+        "$_OR_": 69,
+        "$_XOR_": 69
+      }
+    },
+    "learned_polynomial_recompiled": {
+      "kind": "independent-yosys-abc-global-resynthesis",
+      "source_network": "tracks/qcs/solutions/kskbl-zdjd/noisy_c_online/learned_mdfa_p25_optimized_network.json",
+      "yosys_json": "tracks/qcs/results/20260730-221500-abc-global/polynomial-fast-gates.json",
+      "verification": {
+        "domain_size": 4096,
+        "matches_source_network": true,
+        "matches_clean_domain": true,
+        "all_outputs_exact": true
+      },
+      "gate_model": {
+        "counted_two_input_families": [
+          "AND",
+          "NAND",
+          "ANDNOT",
+          "OR",
+          "NOR",
+          "ORNOT",
+          "XOR",
+          "XNOR"
+        ],
+        "NOT_cost": 0
+      },
+      "source_counted_gates": 156,
+      "resynthesized_counted_gates": 252,
+      "cell_breakdown": {
+        "$_ANDNOT_": 71,
+        "$_AND_": 33,
+        "$_NAND_": 16,
+        "$_NOR_": 6,
+        "$_NOT_": 4,
+        "$_ORNOT_": 14,
+        "$_OR_": 12,
+        "$_XNOR_": 20,
+        "$_XOR_": 80
+      }
+    }
+  },
+  "interpretation": {
+    "lower_bound_proved": false,
+    "result": "Independent global mapping matches 156 gates but does not improve it; heuristic seven-gate MDFA searches also fail."
+  }
+}
