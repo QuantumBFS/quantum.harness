@@ -1,0 +1,42 @@
+{
+  "all_official_commitments_match": true,
+  "challenge": "QuantumBFS/quantum.harness issue 71",
+  "instances": {
+    "A": {
+      "commitment_matches": true,
+      "gates": 37,
+      "netlist": "tracks/qcs/solutions/Genshin_Impact-71/frontier-347/netlists/mystery-A.txt",
+      "netlist_sha256": "56c95acceeedb40f54fdae2e5fc2840d1bf58e0989f46a950e6a56742fd20e24",
+      "official_commitment_sha256": "51e3f026def41778ecd0d7dcaee9f970b9937488e6716891932b73824c16d4c7",
+      "prediction": "tracks/qcs/solutions/Genshin_Impact-71/predictions/mystery-A/test_outputs.csv",
+      "prediction_sha256": "51e3f026def41778ecd0d7dcaee9f970b9937488e6716891932b73824c16d4c7"
+    },
+    "B": {
+      "commitment_matches": true,
+      "gates": 49,
+      "netlist": "tracks/qcs/solutions/Genshin_Impact-71/frontier-347/netlists/mystery-B.txt",
+      "netlist_sha256": "289b60494a703cf7f74a4aef2f540d225aeff22d86c4d709aaa5b661cc69a0a7",
+      "official_commitment_sha256": "e2c9d0e23ee36bfc0f12d7f39fdfe2ca5a8abe8eb194fec56500733694b75c28",
+      "prediction": "tracks/qcs/solutions/Genshin_Impact-71/predictions/mystery-B/test_outputs.csv",
+      "prediction_sha256": "e2c9d0e23ee36bfc0f12d7f39fdfe2ca5a8abe8eb194fec56500733694b75c28"
+    },
+    "C": {
+      "commitment_matches": true,
+      "gates": 152,
+      "netlist": "tracks/qcs/solutions/Genshin_Impact-71/frontier-347/netlists/mystery-C.txt",
+      "netlist_sha256": "67540307369fedfffdb2b1a6473eff5e0bbfeb0e4873d03fddbeceb653cd071c",
+      "official_commitment_sha256": "c7b37413844bf0b10ebad0010046469f500354a22cc2ba95cbe42709f8e8337d",
+      "prediction": "tracks/qcs/solutions/Genshin_Impact-71/predictions/mystery-C/test_outputs.csv",
+      "prediction_sha256": "c7b37413844bf0b10ebad0010046469f500354a22cc2ba95cbe42709f8e8337d"
+    },
+    "D": {
+      "commitment_matches": true,
+      "gates": 109,
+      "netlist": "tracks/qcs/solutions/Genshin_Impact-71/frontier-347/netlists/mystery-D.txt",
+      "netlist_sha256": "cd3f317f4a0b88818e54869e40b4550fd67549f8eb4a5eb02c74db4ec6864dbd",
+      "official_commitment_sha256": "b445a717483303fa3c5d8a1f7abe81888b267b7c472121c9c464fa9766808580",
+      "prediction": "tracks/qcs/solutions/Genshin_Impact-71/predictions/mystery-D/test_outputs.csv",
+      "prediction_sha256": "b445a717483303fa3c5d8a1f7abe81888b267b7c472121c9c464fa9766808580"
+    }
+  }
+}

@@ -1,0 +1,4 @@
+numpy==2.3.2 \
+    --hash=sha256:938065908d1d869c7d75d8ec45f735a034771c6ea07088867f713d1cd3bbbe4f
+scipy==1.16.1 \
+    --hash=sha256:fedc2cbd1baed37474b1924c331b97bdff611d762c196fac1a9b71e67b813b1b

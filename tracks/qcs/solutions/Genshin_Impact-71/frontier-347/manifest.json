@@ -1,0 +1,68 @@
+{
+  "all_formula_audits_exact": true,
+  "challenge": "QuantumBFS/quantum.harness issue 71",
+  "gate_basis": [
+    "AND",
+    "OR",
+    "XOR",
+    "NAND",
+    "NOR",
+    "XNOR"
+  ],
+  "instances": {
+    "A": {
+      "assignments_exhaustively_checked": 65536,
+      "formula": "x+y",
+      "formula_audit_sha256": "3f94c8e5b9a58472573b18f1fc9280ab67dfcd1c60dc1b51d6b2d4dcecba2a39",
+      "gates": 37,
+      "inputs": 16,
+      "netlist_sha256": "56c95acceeedb40f54fdae2e5fc2840d1bf58e0989f46a950e6a56742fd20e24",
+      "output_bits_checked": 589824,
+      "outputs": 9,
+      "source": "reference-355/mystery-A.txt",
+      "synthesis": "37-gate ripple-carry adder; independently audited"
+    },
+    "B": {
+      "assignments_exhaustively_checked": 16384,
+      "formula": "abs(x-y)",
+      "formula_audit_sha256": "035e5ec36e21f5364696192094bf40fdf0293fd0052e055c42e3e9ab2349aa8f",
+      "gates": 49,
+      "inputs": 14,
+      "netlist_sha256": "289b60494a703cf7f74a4aef2f540d225aeff22d86c4d709aaa5b661cc69a0a7",
+      "output_bits_checked": 114688,
+      "outputs": 7,
+      "source": "reference-355/mystery-B.txt",
+      "synthesis": "49-gate absolute-difference circuit; independently audited"
+    },
+    "C": {
+      "assignments_exhaustively_checked": 4096,
+      "formula": "x*y",
+      "formula_audit_sha256": "e540f25439453daef23253398c6509b353ae927f1927e137eed4bbb108303195",
+      "gates": 152,
+      "inputs": 12,
+      "netlist_sha256": "67540307369fedfffdb2b1a6473eff5e0bbfeb0e4873d03fddbeceb653cd071c",
+      "output_bits_checked": 49152,
+      "outputs": 12,
+      "source": "eSLIM stage2 job 43188 task 3",
+      "synthesis": "relation-SAT cascade from C154, window size 7, root seed 42"
+    },
+    "D": {
+      "assignments_exhaustively_checked": 1024,
+      "formula": "x*x+y*y",
+      "formula_audit_sha256": "df096f3e3b987e11a49d26986efae3f4d14249fb3b573136a5ddb65b3a1cf226",
+      "gates": 109,
+      "inputs": 10,
+      "netlist_sha256": "cd3f317f4a0b88818e54869e40b4550fd67549f8eb4a5eb02c74db4ec6864dbd",
+      "output_bits_checked": 11264,
+      "outputs": 11,
+      "source": "eSLIM pilot job 42633",
+      "synthesis": "relation-SAT local resynthesis, size 6, seed 42"
+    }
+  },
+  "inverters_free": true,
+  "root_seed": 42,
+  "total_assignments_exhaustively_checked": 87040,
+  "total_gates": 347,
+  "total_output_bits_checked": 764928,
+  "trust_boundary": "Competitor material was never executed. Pure netlists were parsed as strict ASCII data and all frontier circuits were exhaustively checked directly against independently encoded arithmetic formulas."
+}
