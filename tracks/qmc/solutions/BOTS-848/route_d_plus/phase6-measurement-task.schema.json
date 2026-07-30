@@ -1,0 +1,108 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "challenge-15-route-d-plus-phase6-measurement-task-v1",
+  "title": "Route D+ Phase 6 immutable-checkpoint measurement task",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "seed",
+    "sector",
+    "chain",
+    "measurement_seed",
+    "samples",
+    "measurement_chunk",
+    "warmup_steps",
+    "proposal_sweeps",
+    "producer_source_revision",
+    "measurement_source_revision",
+    "architecture_sha256",
+    "checkpoint_sha256",
+    "warmup",
+    "correction_acceptance",
+    "mother_acceptance",
+    "global_rotation_residual",
+    "energy_samples",
+    "runtime_seconds",
+    "blind_audit_events",
+    "forbidden_modules_loaded",
+    "ed_accessed",
+    "passed"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "challenge-15-route-d-plus-phase6-measurement-task-v1"
+    },
+    "seed": {"enum": [848, 1848, 2848]},
+    "sector": {"enum": ["ground", "tower"]},
+    "chain": {"type": "integer", "minimum": 0, "maximum": 3},
+    "measurement_seed": {"type": "integer", "minimum": 7000000},
+    "samples": {"const": 2048},
+    "measurement_chunk": {"const": 128},
+    "warmup_steps": {"const": 64},
+    "proposal_sweeps": {"const": 2},
+    "producer_source_revision": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "measurement_source_revision": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "architecture_sha256": {"$ref": "#/$defs/sha256"},
+    "checkpoint_sha256": {"$ref": "#/$defs/sha256"},
+    "warmup": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mother_acceptance",
+        "tower_correction_acceptance",
+        "dressed_correction_acceptance"
+      ],
+      "properties": {
+        "mother_acceptance": {"type": "number", "minimum": 0, "maximum": 1},
+        "tower_correction_acceptance": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "dressed_correction_acceptance": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      }
+    },
+    "correction_acceptance": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "mother_acceptance": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "global_rotation_residual": {
+      "type": "number",
+      "minimum": 0
+    },
+    "energy_samples": {
+      "type": "array",
+      "minItems": 2048,
+      "maxItems": 2048,
+      "items": {"type": "number"}
+    },
+    "runtime_seconds": {"type": "number", "exclusiveMinimum": 0},
+    "blind_audit_events": {"type": "array", "maxItems": 0},
+    "forbidden_modules_loaded": {"type": "array", "maxItems": 0},
+    "ed_accessed": {"const": false},
+    "passed": {"const": true}
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    }
+  }
+}
