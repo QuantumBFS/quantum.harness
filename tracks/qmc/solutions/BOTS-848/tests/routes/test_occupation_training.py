@@ -1731,6 +1731,7 @@ def test_real_full_training_freeze_is_loadable_by_factory(
     )
     run_dir = tmp_path / "production"
     monkeypatch.setenv(N8_SMOKE_ARTIFACT_ENV, str(reviewed_n8))
+    monkeypatch.setenv("SLURM_JOB_ID", "pytest-slurm")
     _install_fast_full_training_compute(monkeypatch)
     monkeypatch.setattr(
         training_cli,
