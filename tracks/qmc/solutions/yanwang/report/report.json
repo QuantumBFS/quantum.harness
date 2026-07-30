@@ -2,7 +2,7 @@
   "title": "Strong numerical support for the √5 critical-field relation",
   "eyebrow": "Quantum Monte Carlo · Challenge #148 · Team yanwang",
   "url": "https://github.com/QuantumBFS/quantum.harness/issues/148",
-  "subtitle": "Contributor for #148: 赵志轩",
+  "subtitle": "Zhixuan Zhao · First-year undergraduate",
   "lede": "Across 9,600 dedicated-SSE parameter/seed cells at 600,000 measurement sweeps each — 5.76×10⁹ scheduled measurement sweeps — plus 2,016 independent CT-QMC cells, the triangular-to-honeycomb critical-field ratio is only 0.55 total standard deviations from √5. The conjecture survives every accepted pre-registered analysis variant.",
   "sections": [
     {
@@ -16,6 +16,15 @@
         {
           "kind": "equation",
           "tex": "H=-J\\sum_{\\langle i,j\\rangle}\\sigma_i^z\\sigma_j^z-h\\sum_i\\sigma_i^x"
+        },
+        {
+          "kind": "figures",
+          "items": [
+            {
+              "src": "assets/lattice-conjecture.svg",
+              "caption": "The triangular and honeycomb geometries tested in this work. Their coordination numbers differ, and both critical fields are fitted independently before forming the ratio; the lattice sketch is an original vector rendering inspired by the challenge statement."
+            }
+          ]
         },
         {
           "kind": "card",

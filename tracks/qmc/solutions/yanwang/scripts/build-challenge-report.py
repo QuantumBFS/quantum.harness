@@ -98,7 +98,7 @@ def inline_svg_figures(html: str) -> str:
         return svg
 
     html, count = pattern.subn(replace_image, html)
-    require(count == 5, f"expected 5 embedded SVG figures, found {count}")
+    require(count == 6, f"expected 6 embedded SVG figures, found {count}")
     return html
 
 
@@ -787,7 +787,7 @@ def build_document(
         "title": "Strong numerical support for the √5 critical-field relation",
         "eyebrow": "Quantum Monte Carlo · Challenge #148 · Team yanwang",
         "url": "https://github.com/QuantumBFS/quantum.harness/issues/148",
-        "subtitle": "Contributor for #148: 赵志轩",
+        "subtitle": "Zhixuan Zhao · First-year undergraduate",
         "lede": (
             "Across 9,600 dedicated-SSE parameter/seed cells at 600,000 measurement "
             "sweeps each — 5.76×10⁹ scheduled measurement sweeps — plus 2,016 "
@@ -816,6 +816,21 @@ def build_document(
                             "H=-J\\sum_{\\langle i,j\\rangle}\\sigma_i^z\\sigma_j^z"
                             "-h\\sum_i\\sigma_i^x"
                         ),
+                    },
+                    {
+                        "kind": "figures",
+                        "items": [
+                            {
+                                "src": "assets/lattice-conjecture.svg",
+                                "caption": (
+                                    "The triangular and honeycomb geometries tested in "
+                                    "this work. Their coordination numbers differ, and "
+                                    "both critical fields are fitted independently before "
+                                    "forming the ratio; the lattice sketch is an original "
+                                    "vector rendering inspired by the challenge statement."
+                                ),
+                            }
+                        ],
                     },
                     {
                         "kind": "card",
@@ -1284,12 +1299,16 @@ def apply_report_typography(html_path: Path) -> None:
         ),
         1,
     )
+    byline_css = (
+        ".hero .byline{margin:7px 0 0;font-size:15px;font-weight:600;"
+        "color:#4b5563;letter-spacing:.015em}"
+    )
     vector_css = (
         ".figbox svg.vector-figure{max-width:100%;height:auto;display:block;"
         "margin:0 auto;border-radius:3px}"
     )
     require("</style>" in html, "canonical report style terminator not found")
-    html = html.replace("</style>", vector_css + "</style>", 1)
+    html = html.replace("</style>", byline_css + vector_css + "</style>", 1)
     lede_before = (
         ".lede{font-size:15px;color:#2a2a2a;margin:14px 0 0;max-width:72ch}"
     )
@@ -1318,6 +1337,21 @@ def apply_report_typography(html_path: Path) -> None:
     html = html.replace(lede_before, lede_after, 1)
     html = html.replace(result_before, result_after, 1)
     html = html.replace(figures_before, figures_after, 1)
+    title_before = (
+        "<h1>Strong numerical support for the √5 critical-field relation</h1>"
+    )
+    title_after = (
+        "<h1>Strong numerical support for the √5 critical-field relation</h1>"
+        '<p class="byline">Zhixuan Zhao · First-year undergraduate</p>'
+    )
+    require(title_before in html, "canonical report title not found")
+    html = html.replace(title_before, title_after, 1)
+    lede_result_before = "ratio is only 0.55 total standard deviations from √5."
+    lede_result_after = (
+        "ratio is only <strong>0.55 total standard deviations</strong> from √5."
+    )
+    require(lede_result_before in html, "canonical report lede result not found")
+    html = html.replace(lede_result_before, lede_result_after, 1)
     verdict_before = (
         '<span class="why">The primary ratio is only 0.55σ from √5; '
         "the independent continuous-time route agrees, and all 374 accepted "
