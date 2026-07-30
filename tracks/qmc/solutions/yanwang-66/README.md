@@ -6,7 +6,7 @@
 >
 > 核心结论、4 张矢量图、独立种子确认、因果配对设计、证据边界与复核命令均集中在此。
 
-[GitHub 可读结果摘要](RESULTS.md) · [HTML 源文件 / 离线下载](report/report.html) · [机器可读汇总](results/summary.json) · [Challenge #66](https://github.com/QuantumBFS/quantum.harness/issues/66)
+[GitHub 可读结果摘要](https://github.com/Thatht137/quantum.harness/blob/challenge/qmc-atom-reload-surface-code/tracks/qmc/solutions/yanwang-66/RESULTS.md) · [HTML 源文件 / 离线下载](https://github.com/Thatht137/quantum.harness/blob/challenge/qmc-atom-reload-surface-code/tracks/qmc/solutions/yanwang-66/report/report.html) · [机器可读汇总](https://github.com/Thatht137/quantum.harness/blob/challenge/qmc-atom-reload-surface-code/tracks/qmc/solutions/yanwang-66/results/summary.json) · [Challenge #66](https://github.com/QuantumBFS/quantum.harness/issues/66)
 
 ## Team yanwang
 
