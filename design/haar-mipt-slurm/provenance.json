@@ -1,0 +1,9 @@
+{
+  "challenge_issue": "https://github.com/QuantumBFS/quantum.harness/issues/122",
+  "reference": "arXiv:2107.03393",
+  "model": "one-dimensional brickwork Haar random unitary circuit with single-site projective measurements",
+  "critical_probability": 0.17,
+  "estimator": "trajectory cumulative Shannon cost slope after a 4L burn-in, recorded for 24L layers",
+  "initial_state_families": ["global_haar", "product"],
+  "created_utc": "2026-07-30"
+}
