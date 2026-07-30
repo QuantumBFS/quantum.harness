@@ -206,6 +206,27 @@ def _group_estimates(
     return estimates
 
 
+def _pool_estimates(
+    left_n: int,
+    left_mean: float,
+    left_se: float,
+    right_n: int,
+    right_mean: float,
+    right_se: float,
+) -> tuple[int, float, float]:
+    total = left_n + right_n
+    delta = right_mean - left_mean
+    mean = left_mean + delta * right_n / total
+    left_m2 = (left_n - 1) * left_n * left_se * left_se
+    right_m2 = (right_n - 1) * right_n * right_se * right_se
+    pooled_m2 = left_m2 + right_m2 + delta * delta * left_n * right_n / total
+    sample_variance = pooled_m2 / (total - 1)
+    standard_error = math.sqrt(sample_variance / total)
+    if not all(math.isfinite(value) for value in (mean, standard_error)):
+        raise RuntimeError("combined estimate is nonfinite")
+    return total, mean, standard_error
+
+
 def _aggregate_p0(
     run_spec: Path,
     *,

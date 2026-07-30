@@ -6,6 +6,7 @@ import multiprocessing
 import shutil
 import weakref
 from dataclasses import FrozenInstanceError
+from itertools import pairwise
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -13,6 +14,7 @@ import numpy as np
 import pytest
 
 import long_range_percolation.pilot_analysis as analysis
+import long_range_percolation.pilot_extension as extension
 from long_range_percolation import pilot
 from long_range_percolation.pilot import PilotCell
 from long_range_percolation.pilot_extension import EXTENSION_ANALYSIS_SCHEMA
@@ -37,6 +39,308 @@ def _canonical_bytes(document: object) -> bytes:
         ).encode("utf-8")
         + b"\n"
     )
+
+
+def _sign(document: dict[str, object]) -> None:
+    unsigned = dict(document)
+    unsigned.pop("analysis_document_sha256", None)
+    document["analysis_document_sha256"] = hashlib.sha256(
+        _canonical_bytes(unsigned)
+    ).hexdigest()
+
+
+def _extension_grid(lower: float, upper: float) -> tuple[float, ...]:
+    points = [lower, upper]
+    for _ in range(4):
+        ordered = sorted(points)
+        points.extend(
+            left + (right - left) / 2.0
+            for left, right in pairwise(ordered)
+        )
+    return tuple(sorted(set(points)))
+
+
+def _combined_source_documents() -> tuple[
+    dict[str, object],
+    dict[str, object],
+    dict[tuple[str, float, int, float, str], np.ndarray],
+]:
+    sigmas = (0.8, 0.9, 1.0, 1.1)
+    lengths = pilot.PILOT_LENGTHS
+    p0_kappas = pilot.PILOT_KAPPAS
+    extension_grids = {
+        0.9: _extension_grid(p0_kappas[4], p0_kappas[8]),
+        1.0: _extension_grid(p0_kappas[5], p0_kappas[10]),
+    }
+    samples: dict[tuple[str, float, int, float, str], np.ndarray] = {}
+
+    def estimates(
+        source: str,
+        source_sigmas: tuple[float, ...],
+        grids: dict[float, tuple[float, ...]],
+        replicas: int,
+    ) -> list[dict[str, object]]:
+        rows: list[dict[str, object]] = []
+        for sigma_index, sigma in enumerate(source_sigmas):
+            for length_index, length in enumerate(lengths):
+                requests = [
+                    hashlib.sha256(
+                        f"{source}|{sigma.hex()}|{length}|{replica}".encode()
+                    ).hexdigest()
+                    for replica in range(replicas)
+                ]
+                for kappa_index, kappa in enumerate(grids[sigma]):
+                    means: dict[str, float] = {}
+                    standard_errors: dict[str, float] = {}
+                    for observable_index, name in enumerate(OBSERVABLE_COLUMNS):
+                        values = np.asarray(
+                            [
+                                1000.0 * sigma_index
+                                + 100.0 * length_index
+                                + 10.0 * kappa_index
+                                + observable_index
+                                + (50.0 if source == "extension" else 0.0)
+                                + replica * (observable_index + 1) / 8.0
+                                for replica in range(replicas)
+                            ],
+                            dtype=np.float64,
+                        )
+                        samples[(source, sigma, length, kappa, name)] = values
+                        means[name] = float(np.mean(values))
+                        standard_errors[name] = float(
+                            np.std(values, ddof=1) / np.sqrt(replicas)
+                        )
+                    rows.append(
+                        {
+                            "sigma_hex": sigma.hex(),
+                            "length": length,
+                            "kappa_hex": kappa.hex(),
+                            "replica_count": replicas,
+                            "means": means,
+                            "standard_errors": standard_errors,
+                            "request_sha256": requests,
+                        }
+                    )
+        return rows
+
+    p0: dict[str, object] = {
+        "schema_version": analysis.ANALYSIS_SCHEMA,
+        "p0_run_spec_sha256": "1" * 64,
+        "p0_progress_sha256": "2" * 64,
+        "source_revision": "3" * 40,
+        "analysis_plan_sha256": "4" * 64,
+        "observable_columns": OBSERVABLE_COLUMNS,
+        "estimates": estimates(
+            "p0",
+            sigmas,
+            {sigma: p0_kappas for sigma in sigmas},
+            8,
+        ),
+    }
+    extension_analysis: dict[str, object] = {
+        "schema_version": EXTENSION_ANALYSIS_SCHEMA,
+        "source_extension_protocol_sha256": "5" * 64,
+        "extension_run_spec_sha256": "6" * 64,
+        "extension_progress_sha256": "7" * 64,
+        "source_revision": "8" * 40,
+        "analysis_plan_sha256": "9" * 64,
+        "observable_columns": OBSERVABLE_COLUMNS,
+        "estimates": estimates(
+            "extension",
+            (0.9, 1.0),
+            extension_grids,
+            16,
+        ),
+    }
+    _sign(p0)
+    _sign(extension_analysis)
+    return p0, extension_analysis, samples
+
+
+def test_combine_p0_evidence_unions_grids_and_pools_whole_replica_moments():
+    p0, extension_analysis, samples = _combined_source_documents()
+
+    combined = extension.combine_p0_evidence(p0, extension_analysis)
+
+    entries = combined["sigma_entries"]
+    assert [entry["sigma_hex"] for entry in entries] == [
+        sigma.hex() for sigma in (0.8, 0.9, 1.0, 1.1)
+    ]
+    assert [len(entry["kappas"]) for entry in entries] == [16, 31, 31, 16]
+    assert all(entry["lengths"] == list(pilot.PILOT_LENGTHS) for entry in entries)
+    assert [len(entry["estimates"]) for entry in entries] == [48, 93, 93, 48]
+    assert combined["estimate_count"] == 282
+
+    p0_rows = p0["estimates"]
+    assert entries[0]["estimates"] == p0_rows[:48]
+    assert entries[3]["estimates"] == p0_rows[-48:]
+    blocked = entries[1]
+    shared = set(pilot.PILOT_KAPPAS) & {
+        float.fromhex(value) for value in blocked["kappas"]
+    }
+    assert len(shared) == 16
+    extension_grid = {
+        float.fromhex(row["kappa_hex"])
+        for row in extension_analysis["estimates"]
+        if row["sigma_hex"] == (0.9).hex()
+    }
+    assert len(shared & extension_grid) == 2
+    replica_counts = {
+        row["replica_count"] for entry in entries for row in entry["estimates"]
+    }
+    assert replica_counts == {8, 16, 24}
+
+    endpoint = min(shared & extension_grid)
+    pooled = next(
+        row
+        for row in blocked["estimates"]
+        if row["length"] == pilot.PILOT_LENGTHS[0]
+        and row["kappa_hex"] == endpoint.hex()
+    )
+    for name in OBSERVABLE_COLUMNS:
+        direct = np.concatenate(
+            (
+                samples[("p0", 0.9, pilot.PILOT_LENGTHS[0], endpoint, name)],
+                samples[
+                    ("extension", 0.9, pilot.PILOT_LENGTHS[0], endpoint, name)
+                ],
+            )
+        )
+        assert pooled["means"][name] == pytest.approx(float(np.mean(direct)))
+        assert pooled["standard_errors"][name] == pytest.approx(
+            float(np.std(direct, ddof=1) / np.sqrt(24))
+        )
+    assert pooled["request_sha256"] == (
+        next(
+            row["request_sha256"]
+            for row in p0_rows
+            if row["sigma_hex"] == (0.9).hex()
+            and row["length"] == pilot.PILOT_LENGTHS[0]
+        )
+        + next(
+            row["request_sha256"]
+            for row in extension_analysis["estimates"]
+            if row["sigma_hex"] == (0.9).hex()
+            and row["length"] == pilot.PILOT_LENGTHS[0]
+        )
+    )
+    assert len(set(pooled["request_sha256"])) == 24
+
+
+def test_combine_p0_evidence_binds_sources_and_hashes_unsigned_document():
+    p0, extension_analysis, _ = _combined_source_documents()
+
+    combined = extension.combine_p0_evidence(p0, extension_analysis)
+    unsigned = dict(combined)
+    digest = unsigned.pop("analysis_document_sha256")
+
+    assert combined["schema_version"] == extension.COMBINED_ANALYSIS_SCHEMA
+    assert combined["source_p0_analysis_document_sha256"] == p0[
+        "analysis_document_sha256"
+    ]
+    assert combined["source_extension_analysis_document_sha256"] == (
+        extension_analysis["analysis_document_sha256"]
+    )
+    assert combined["p0_run_spec_sha256"] == p0["p0_run_spec_sha256"]
+    assert combined["p0_progress_sha256"] == p0["p0_progress_sha256"]
+    assert combined["extension_run_spec_sha256"] == extension_analysis[
+        "extension_run_spec_sha256"
+    ]
+    assert combined["extension_progress_sha256"] == extension_analysis[
+        "extension_progress_sha256"
+    ]
+    assert combined["p0_source_revision"] == p0["source_revision"]
+    assert combined["extension_source_revision"] == extension_analysis[
+        "source_revision"
+    ]
+    assert combined["observable_columns"] == OBSERVABLE_COLUMNS
+    assert digest == hashlib.sha256(_canonical_bytes(unsigned)).hexdigest()
+
+
+@pytest.mark.parametrize(
+    ("defect", "match"),
+    (
+        ("source-hash", "digest"),
+        ("wrong-grid", "grid"),
+        ("extra-overlap", "grid|overlap"),
+        ("duplicate-request", "request"),
+        ("missing-length", "cardinality|canonical"),
+        ("missing-replica", "replica"),
+        ("reordered", "canonical"),
+        ("noncanonical-hex", "canonical"),
+        ("nonfinite", "finite"),
+        ("observable-columns", "observable"),
+        ("different-shape", "canonical|cardinality|shape"),
+    ),
+)
+def test_combine_p0_evidence_rejects_adversarial_sources(defect: str, match: str):
+    p0, extension_analysis, _ = _combined_source_documents()
+    target = extension_analysis
+    estimates = target["estimates"]
+    assert isinstance(estimates, list)
+    if defect == "source-hash":
+        target["analysis_document_sha256"] = "0" * 64
+    elif defect == "wrong-grid":
+        estimates[1]["kappa_hex"] = float.fromhex(estimates[1]["kappa_hex"]).hex()
+        estimates[1]["kappa_hex"] = (float.fromhex(estimates[1]["kappa_hex"]) + 1e-6).hex()
+        _sign(target)
+    elif defect == "extra-overlap":
+        estimates[1]["kappa_hex"] = pilot.PILOT_KAPPAS[1].hex()
+        _sign(target)
+    elif defect == "duplicate-request":
+        estimates[0]["request_sha256"][1] = estimates[0]["request_sha256"][0]
+        _sign(target)
+    elif defect == "missing-length":
+        del estimates[17:34]
+        _sign(target)
+    elif defect == "missing-replica":
+        estimates[0]["replica_count"] = 15
+        estimates[0]["request_sha256"].pop()
+        _sign(target)
+    elif defect == "reordered":
+        estimates[0], estimates[1] = estimates[1], estimates[0]
+        _sign(target)
+    elif defect == "noncanonical-hex":
+        estimates[0]["kappa_hex"] = "0X1.F400000000000P-2"
+        _sign(target)
+    elif defect == "nonfinite":
+        estimates[0]["means"]["q_g"] = float("inf")
+    elif defect == "observable-columns":
+        target["observable_columns"] = {**OBSERVABLE_COLUMNS, "q_g": 7}
+        _sign(target)
+    else:
+        estimates[-1] = dict(estimates[0])
+        _sign(target)
+
+    with pytest.raises(RuntimeError, match=match):
+        extension.combine_p0_evidence(p0, extension_analysis)
+
+
+@pytest.mark.parametrize(
+    "defect",
+    ("source-binding", "reordered-sigma-entries", "rehashed-different-shape"),
+)
+def test_combined_p0_evidence_validation_rejects_internal_mutation(defect: str):
+    p0, extension_analysis, _ = _combined_source_documents()
+    combined = extension.combine_p0_evidence(p0, extension_analysis)
+    if defect == "source-binding":
+        combined["source_extension_analysis_document_sha256"] = "0" * 64
+    elif defect == "reordered-sigma-entries":
+        combined["sigma_entries"][0], combined["sigma_entries"][1] = (
+            combined["sigma_entries"][1],
+            combined["sigma_entries"][0],
+        )
+    else:
+        combined["sigma_entries"][1]["estimates"].pop()
+        assert combined["estimate_count"] == 282
+    _sign(combined)
+
+    with pytest.raises(RuntimeError, match="recomputation"):
+        extension.validate_combined_p0_evidence(
+            p0,
+            extension_analysis,
+            combined,
+        )
 
 
 def _selector_document(

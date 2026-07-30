@@ -16,10 +16,13 @@ import numpy as np
 from .counter_rng import STREAM_COUNT, StreamIdentity, derive_stream_material
 from .kernel import periodic_kernel
 from .pilot import (
+    PILOT_KAPPAS,
+    PILOT_LENGTHS,
     PILOT_MASTER_SEED,
     PILOT_PROGRESS_MAX_BYTES,
     PILOT_REPLICAS,
     PILOT_RUN_SPEC_MAX_BYTES,
+    PILOT_SIGMAS,
     _close_directory_chain,
     _file_hash,
     _open_directory_chain,
@@ -30,8 +33,11 @@ from .pilot import (
     _require_regular_at_identity,
 )
 from .pilot_analysis import (
+    ANALYSIS_SCHEMA,
+    OBSERVABLE_COLUMNS,
     P1_MASTER_SEED,
     P1_REPLICAS,
+    _pool_estimates,
     _selector_estimates,
     _transition_evidence,
     select_p1_brackets,
@@ -855,3 +861,395 @@ def validate_p0_extension_protocol(
         p0_evidence_root,
         expected_source_revision=_current_revision(),
     )
+
+
+_ESTIMATE_FIELDS = {
+    "sigma_hex",
+    "length",
+    "kappa_hex",
+    "replica_count",
+    "means",
+    "standard_errors",
+    "request_sha256",
+}
+_P0_ANALYSIS_FIELDS = {
+    "schema_version",
+    "p0_run_spec_sha256",
+    "p0_progress_sha256",
+    "source_revision",
+    "analysis_plan_sha256",
+    "observable_columns",
+    "estimates",
+    "analysis_document_sha256",
+}
+_EXTENSION_ANALYSIS_FIELDS = {
+    "schema_version",
+    "source_extension_protocol_sha256",
+    "extension_run_spec_sha256",
+    "extension_progress_sha256",
+    "source_revision",
+    "analysis_plan_sha256",
+    "observable_columns",
+    "estimates",
+    "analysis_document_sha256",
+}
+_COMBINED_FIELDS = {
+    "schema_version",
+    "source_p0_analysis_document_sha256",
+    "source_extension_analysis_document_sha256",
+    "p0_run_spec_sha256",
+    "p0_progress_sha256",
+    "extension_run_spec_sha256",
+    "extension_progress_sha256",
+    "p0_source_revision",
+    "extension_source_revision",
+    "observable_columns",
+    "sigma_entries",
+    "estimate_count",
+    "analysis_document_sha256",
+}
+_COMBINED_SIGMA_FIELDS = {"sigma_hex", "kappas", "lengths", "estimates"}
+
+
+def _exact_revision(raw: object, name: str) -> str:
+    if (
+        not isinstance(raw, str)
+        or len(raw) != 40
+        or any(character not in "0123456789abcdef" for character in raw)
+    ):
+        _malformed(f"{name} source revision is malformed")
+    return raw
+
+
+def _analysis_hash(analysis: Mapping[str, object]) -> str:
+    digest = _exact_digest(analysis.get("analysis_document_sha256"), "analysis")
+    unsigned = dict(analysis)
+    unsigned.pop("analysis_document_sha256", None)
+    if _sha256(_canonical_bytes(unsigned)) != digest:
+        raise RuntimeError("source analysis document digest mismatch")
+    return digest
+
+
+def _validated_combination_rows(
+    source: Mapping[str, object],
+    *,
+    schema: str,
+    sigmas: tuple[float, ...],
+    grids: Mapping[float, tuple[float, ...]],
+    replica_count: int,
+    source_name: str,
+    expected_fields: set[str],
+) -> tuple[
+    dict[tuple[float, int, float], Mapping[str, object]],
+    dict[tuple[float, int], tuple[str, ...]],
+    set[str],
+]:
+    if (
+        not isinstance(source, Mapping)
+        or set(source) != expected_fields
+        or source.get("schema_version") != schema
+    ):
+        raise RuntimeError(f"{source_name} analysis schema is invalid")
+    _analysis_hash(source)
+    if source.get("observable_columns") != dict(OBSERVABLE_COLUMNS):
+        raise RuntimeError(f"{source_name} observable columns are invalid")
+    raw_rows = source.get("estimates")
+    if (
+        not isinstance(raw_rows, Sequence)
+        or isinstance(raw_rows, (str, bytes))
+    ):
+        _malformed(f"{source_name} estimates are malformed")
+    expected_identities = [
+        (sigma, length, kappa)
+        for sigma in sigmas
+        for length in PILOT_LENGTHS
+        for kappa in grids[sigma]
+    ]
+    if len(raw_rows) != len(expected_identities):
+        raise RuntimeError(f"{source_name} estimate cardinality is invalid")
+
+    rows: dict[tuple[float, int, float], Mapping[str, object]] = {}
+    group_requests: dict[tuple[float, int], tuple[str, ...]] = {}
+    request_owners: dict[str, tuple[float, int]] = {}
+    for raw, expected in zip(raw_rows, expected_identities, strict=True):
+        if not isinstance(raw, Mapping) or set(raw) != _ESTIMATE_FIELDS:
+            raise RuntimeError(f"{source_name} estimate shape is invalid")
+        sigma = _exact_hex(raw.get("sigma_hex"))
+        kappa = _exact_hex(raw.get("kappa_hex"))
+        length = raw.get("length")
+        identity = (sigma, length, kappa)
+        if identity != expected:
+            raise RuntimeError(
+                f"{source_name} grid estimates are not in canonical order"
+            )
+        if raw.get("replica_count") != replica_count:
+            raise RuntimeError(f"{source_name} replica count is invalid")
+        means = raw.get("means")
+        errors = raw.get("standard_errors")
+        if (
+            not isinstance(means, Mapping)
+            or not isinstance(errors, Mapping)
+            or set(means) != set(OBSERVABLE_COLUMNS)
+            or set(errors) != set(OBSERVABLE_COLUMNS)
+        ):
+            raise RuntimeError(f"{source_name} observable moments are invalid")
+        for name in OBSERVABLE_COLUMNS:
+            mean = means[name]
+            error = errors[name]
+            if (
+                not isinstance(mean, (int, float))
+                or isinstance(mean, bool)
+                or not isinstance(error, (int, float))
+                or isinstance(error, bool)
+                or not math.isfinite(float(mean))
+                or not math.isfinite(float(error))
+                or float(error) < 0.0
+            ):
+                raise RuntimeError(
+                    f"{source_name} observable moments must be finite"
+                )
+        raw_requests = raw.get("request_sha256")
+        if (
+            not isinstance(raw_requests, list)
+            or len(raw_requests) != replica_count
+        ):
+            raise RuntimeError(f"{source_name} request replica list is invalid")
+        requests = tuple(
+            _exact_digest(value, "request") for value in raw_requests
+        )
+        if len(set(requests)) != replica_count:
+            raise RuntimeError(f"{source_name} request identities are duplicate")
+        group = (sigma, length)
+        previous = group_requests.setdefault(group, requests)
+        if previous != requests:
+            raise RuntimeError(
+                f"{source_name} ordered request bindings are inconsistent"
+            )
+        for request in requests:
+            owner = request_owners.setdefault(request, group)
+            if owner != group:
+                raise RuntimeError(
+                    f"{source_name} request identity is bound to multiple groups"
+                )
+        rows[(sigma, length, kappa)] = raw
+    return rows, group_requests, set(request_owners)
+
+
+def _validated_combination_sources(
+    p0_analysis: Mapping[str, object],
+    extension_analysis: Mapping[str, object],
+) -> tuple[
+    dict[tuple[float, int, float], Mapping[str, object]],
+    dict[tuple[float, int, float], Mapping[str, object]],
+    dict[float, tuple[float, ...]],
+]:
+    if not isinstance(p0_analysis, Mapping) or not isinstance(
+        extension_analysis, Mapping
+    ):
+        _malformed("combination source analysis is malformed")
+    for field in (
+        "p0_run_spec_sha256",
+        "p0_progress_sha256",
+        "analysis_plan_sha256",
+    ):
+        _exact_digest(p0_analysis.get(field), f"P0 {field}")
+    _exact_revision(p0_analysis.get("source_revision"), "P0")
+    for field in (
+        "source_extension_protocol_sha256",
+        "extension_run_spec_sha256",
+        "extension_progress_sha256",
+        "analysis_plan_sha256",
+    ):
+        _exact_digest(extension_analysis.get(field), f"extension {field}")
+    _exact_revision(extension_analysis.get("source_revision"), "extension")
+    p0_grids = {sigma: tuple(PILOT_KAPPAS) for sigma in PILOT_SIGMAS}
+    p0_rows, _p0_groups, p0_requests = _validated_combination_rows(
+        p0_analysis,
+        schema=ANALYSIS_SCHEMA,
+        sigmas=tuple(PILOT_SIGMAS),
+        grids=p0_grids,
+        replica_count=len(PILOT_REPLICAS),
+        source_name="P0",
+        expected_fields=_P0_ANALYSIS_FIELDS,
+    )
+    extension_grids = {
+        0.9: _recursive_binary64_grid_17(PILOT_KAPPAS[4], PILOT_KAPPAS[8]),
+        1.0: _recursive_binary64_grid_17(PILOT_KAPPAS[5], PILOT_KAPPAS[10]),
+    }
+    for sigma, grid in extension_grids.items():
+        digest = _sha256(
+            _canonical_bytes({"kappas": [value.hex() for value in grid]})
+        )
+        if digest != EXTENSION_GRID_HASHES[sigma.hex()]:
+            raise RuntimeError("extension grid binding is invalid")
+    extension_rows, _extension_groups, extension_requests = (
+        _validated_combination_rows(
+            extension_analysis,
+            schema=EXTENSION_ANALYSIS_SCHEMA,
+            sigmas=EXTENSION_SIGMAS,
+            grids=extension_grids,
+            replica_count=len(EXTENSION_REPLICAS),
+            source_name="extension",
+            expected_fields=_EXTENSION_ANALYSIS_FIELDS,
+        )
+    )
+    if p0_requests & extension_requests:
+        raise RuntimeError("P0 and extension request identities overlap")
+    return p0_rows, extension_rows, extension_grids
+
+
+def _pooled_row(
+    p0_row: Mapping[str, object],
+    extension_row: Mapping[str, object],
+) -> dict[str, object]:
+    left_n = int(p0_row["replica_count"])
+    right_n = int(extension_row["replica_count"])
+    left_means = p0_row["means"]
+    right_means = extension_row["means"]
+    left_errors = p0_row["standard_errors"]
+    right_errors = extension_row["standard_errors"]
+    if not all(
+        isinstance(value, Mapping)
+        for value in (left_means, right_means, left_errors, right_errors)
+    ):
+        _malformed("source observable moments are malformed")
+    means: dict[str, float] = {}
+    standard_errors: dict[str, float] = {}
+    total = 0
+    for name in OBSERVABLE_COLUMNS:
+        total, mean, standard_error = _pool_estimates(
+            left_n,
+            float(left_means[name]),
+            float(left_errors[name]),
+            right_n,
+            float(right_means[name]),
+            float(right_errors[name]),
+        )
+        means[name] = mean
+        standard_errors[name] = standard_error
+    requests = list(p0_row["request_sha256"]) + list(
+        extension_row["request_sha256"]
+    )
+    if len(requests) != total or len(set(requests)) != total:
+        raise RuntimeError("combined request identities are invalid")
+    return {
+        "sigma_hex": p0_row["sigma_hex"],
+        "length": p0_row["length"],
+        "kappa_hex": p0_row["kappa_hex"],
+        "replica_count": total,
+        "means": means,
+        "standard_errors": standard_errors,
+        "request_sha256": requests,
+    }
+
+
+def _build_combined_p0_evidence(
+    p0_analysis: Mapping[str, object],
+    extension_analysis: Mapping[str, object],
+) -> dict[str, object]:
+    p0_rows, extension_rows, extension_grids = _validated_combination_sources(
+        p0_analysis, extension_analysis
+    )
+    sigma_entries: list[dict[str, object]] = []
+    estimate_count = 0
+    for sigma in PILOT_SIGMAS:
+        kappas = (
+            tuple(PILOT_KAPPAS)
+            if sigma not in extension_grids
+            else tuple(sorted(set(PILOT_KAPPAS) | set(extension_grids[sigma])))
+        )
+        expected_count = 16 if sigma in (0.8, 1.1) else 31
+        if len(kappas) != expected_count:
+            raise RuntimeError("combined grid overlap or cardinality is invalid")
+        estimates: list[dict[str, object]] = []
+        for length in PILOT_LENGTHS:
+            for kappa in kappas:
+                identity = (sigma, length, kappa)
+                p0_row = p0_rows.get(identity)
+                extension_row = extension_rows.get(identity)
+                if p0_row is not None and extension_row is not None:
+                    row = _pooled_row(p0_row, extension_row)
+                elif p0_row is not None:
+                    row = dict(p0_row)
+                elif extension_row is not None:
+                    row = dict(extension_row)
+                else:
+                    raise RuntimeError("combined estimate is missing")
+                estimates.append(row)
+        estimate_count += len(estimates)
+        sigma_entries.append(
+            {
+                "sigma_hex": sigma.hex(),
+                "kappas": [value.hex() for value in kappas],
+                "lengths": list(PILOT_LENGTHS),
+                "estimates": estimates,
+            }
+        )
+    if estimate_count != 282:
+        raise RuntimeError("combined estimate cardinality is invalid")
+    document: dict[str, object] = {
+        "schema_version": COMBINED_ANALYSIS_SCHEMA,
+        "source_p0_analysis_document_sha256": _analysis_hash(p0_analysis),
+        "source_extension_analysis_document_sha256": _analysis_hash(
+            extension_analysis
+        ),
+        "p0_run_spec_sha256": _exact_digest(
+            p0_analysis.get("p0_run_spec_sha256"), "P0 run spec"
+        ),
+        "p0_progress_sha256": _exact_digest(
+            p0_analysis.get("p0_progress_sha256"), "P0 progress"
+        ),
+        "extension_run_spec_sha256": _exact_digest(
+            extension_analysis.get("extension_run_spec_sha256"),
+            "extension run spec",
+        ),
+        "extension_progress_sha256": _exact_digest(
+            extension_analysis.get("extension_progress_sha256"),
+            "extension progress",
+        ),
+        "p0_source_revision": _exact_revision(
+            p0_analysis.get("source_revision"), "P0"
+        ),
+        "extension_source_revision": _exact_revision(
+            extension_analysis.get("source_revision"), "extension"
+        ),
+        "observable_columns": dict(OBSERVABLE_COLUMNS),
+        "sigma_entries": sigma_entries,
+        "estimate_count": estimate_count,
+    }
+    document["analysis_document_sha256"] = _sha256(_canonical_bytes(document))
+    return document
+
+
+def validate_combined_p0_evidence(
+    p0_analysis: Mapping[str, object],
+    extension_analysis: Mapping[str, object],
+    combined_analysis: Mapping[str, object],
+) -> None:
+    if not isinstance(combined_analysis, Mapping) or set(
+        combined_analysis
+    ) != _COMBINED_FIELDS:
+        raise RuntimeError("combined analysis fields are invalid")
+    raw_entries = combined_analysis.get("sigma_entries")
+    if (
+        not isinstance(raw_entries, list)
+        or len(raw_entries) != len(PILOT_SIGMAS)
+        or any(
+            not isinstance(entry, Mapping)
+            or set(entry) != _COMBINED_SIGMA_FIELDS
+            for entry in raw_entries
+        )
+    ):
+        raise RuntimeError("combined analysis sigma entries are malformed")
+    expected = _build_combined_p0_evidence(p0_analysis, extension_analysis)
+    if _canonical_bytes(combined_analysis) != _canonical_bytes(expected):
+        raise RuntimeError("combined analysis semantic recomputation mismatch")
+
+
+def combine_p0_evidence(
+    p0_analysis: Mapping[str, object],
+    extension_analysis: Mapping[str, object],
+) -> dict[str, object]:
+    document = _build_combined_p0_evidence(p0_analysis, extension_analysis)
+    validate_combined_p0_evidence(p0_analysis, extension_analysis, document)
+    return document
