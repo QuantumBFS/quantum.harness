@@ -56,3 +56,14 @@ def test_phase6_batch_requires_phase5_and_gpu_certificate() -> None:
     assert "validate_attempt(attempt)" in certificate
     assert "runtime_library_sha256=" in batch
     assert "LD_LIBRARY_PATH=" in batch
+
+
+def test_phase6_smoke_uses_an_importable_spawn_entrypoint() -> None:
+    smoke = (ROUTE_D_PLUS_ROOT / "smoke_phase6.py").read_text(
+        encoding="utf-8"
+    )
+    assert 'if __name__ == "__main__"' in smoke
+    assert "calibrate_architecture(" in smoke
+    assert "source_revision=args.source_revision" in smoke
+    assert "blind_training_audit" in smoke
+    assert 'devices[0].platform != "gpu"' in smoke
