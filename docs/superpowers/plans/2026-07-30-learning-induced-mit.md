@@ -136,9 +136,14 @@ pub struct StageConfig {
 }
 ```
 
-Validation must enforce the exact 3600/3300/5100/300 production timing
-contract, the derived total limit of 5400 seconds, unique increasing even widths, finite
-angles in the first octant, positive complete blocks, and nonempty stages.
+Validation must always enforce
+`ordinary_stop_seconds < hard_stop_seconds`,
+`target_seconds <= hard_stop_seconds + finalize_reserve_seconds`, unique
+increasing even widths, finite angles in the first octant, positive complete
+blocks, and nonempty stages. When `production_gates` is true, additionally
+enforce the exact 3600/3300/5100/300 production timing contract and the
+derived total limit of 5400 seconds. This permits a seconds-long
+`configs/test.toml` without weakening the production contract.
 Use SplitMix64-style mixing for coordinate-separated deterministic seeds and
 return `Xoshiro256PlusPlus::seed_from_u64(seed)` from `make_rng`.
 
