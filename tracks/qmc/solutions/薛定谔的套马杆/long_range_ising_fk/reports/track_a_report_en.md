@@ -1,3 +1,5 @@
+<!-- BILINGUAL SYNC: when changing conclusions, numbers, tables, figures, or captions, check track_a_report_zh.md and update it when applicable. -->
+
 # Issue #86 Track A Reproduction and Extension Report (English)
 
 **Project:** Long-range/short-range universality boundary in the 2D classical long-range Ising model
@@ -37,27 +39,36 @@ contains 36 successful cells: 30 central-$\beta_c$ cells and six incomplete
 large-size crossing cells. Central data reach $L=2048$. The independent
 Clock production completed 16/16 cells.
 
-The principal findings are:
+We observe three connected results. First, at $\sigma=2.5$, $R_p$ flows
+toward the short-range anchor zero, the extrapolated $Q_m$ is 0.85623, and
+$\eta=0.2546$ is close to the two-dimensional short-range Ising value $1/4$.
+In contrast, all $\sigma\le2$ points remain visibly separated from these
+anchors at $L=2048$. The data therefore resolve a finite-size flow from
+long-range to short-range behavior and are compatible with a universality
+change near $\sigma=2$. At $\sigma=1.875,L=2048$, we obtain
+$R_p=-0.1885(103)$ and $Q_m=0.80589(17)$, differing from the published
+thermodynamic estimates by about $1.35\sigma$ and $1.11\sigma$. This
+supports the consistency of the implementation, normalization, and FK
+observable definitions.
 
-1. The published finite-size drift and the $\sigma=2.5$ short-range control
-   trend are reproduced.
-2. At $\sigma=1.875,L=2048$, we obtain
-   $R_p=-0.1885(103)$ and $Q_m=0.80589(17)$. These differ from the
-   published thermodynamic estimates $R_p=-0.207(9)$ and $Q_m=0.815(8)$
-   by about $1.35\sigma$ and $1.11\sigma$, respectively.
-3. Power and marginal/log corrections differ in AICc by no more than 0.18 in
-   the key windows. The extrapolated limits become unstable when $L_{\min}$
-   is changed, so neither scenario can be selected.
-4. Under the registered uncertainty model, no forecast reaches stable
-   $3\sigma$ discrimination by $L=65536$.
-5. The independent Clock method agrees with FK through $L=256$, but at
-   $L=512$ it suffers from inadequate mixing with
-   $\tau_{\rm int}\sim8\times10^3$, establishing a clear algorithmic scale
-   limit.
+Second, the finite-size flow does not have a unique thermodynamic
+interpretation. Power and marginal/log corrections have
+$|\Delta\mathrm{AICc}|\le0.18$ in the key windows, while both the preferred
+model and extrapolated limit change with $L_{\min}$. The observed drift can
+therefore represent either a long-range fixed point in the $\sigma_*=2$
+scenario or an unfinished long-range-to-short-range crossover under
+$\sigma_*=7/4$. With the current error model, forecasts of the same data type
+do not reach stable $3\sigma$ discrimination by $L=65536$.
 
-The defensible result is therefore a successful reproduction with an
-unresolved boundary dispute, not a forced choice between
-$\sigma_*=7/4$ and $2$.
+Third, the independent Clock method agrees with FK for $Q_m,\chi$ through
+$L=256$, but at $L=512$ it develops
+$\tau_{\rm int}\sim8\times10^3$ and deviations beyond $3\sigma$. This
+identifies inadequate local-update mixing rather than conflicting equilibrium
+physics.
+
+The result is thus a successful finite-size reproduction compatible with the
+$\sigma_*=2$ proposal, but it does not exclude the Sak boundary
+$\sigma_*=7/4$. Thermodynamic boundary discrimination remains inconclusive.
 
 ---
 
@@ -199,6 +210,20 @@ The $\sigma=1.875$ value remains above the published thermodynamic estimate
 0.293(3), consistently with strong finite-size corrections. The
 $\sigma=2.5$ value is close to the short-range Ising value $1/4$.
 
+![Critical scaling of chi with L and power-law fits using L at least 128.](figures/eta_scaling_en.svg)
+
+**Figure 1 | Finite-size fit of eta.** Points and error bars are the
+central-critical-point data; dashed lines are fits of
+$\chi\propto L^{2-\eta}$ using $L\ge128$. The dedicated multi-size NN anchor
+will be added in the same form when the $L=256$ production completes.
+
+![Finite-size flow of Rp and Qm at the central critical points.](figures/critical_finite_size_extended_en.svg)
+
+**Figure 2 | Finite-size flow.** Points and error bars are the frozen central
+data; dashed horizontal lines mark the two-dimensional short-range Ising
+anchors. The plot shows the flow over accessible sizes and does not by itself
+determine the $L\to\infty$ boundary.
+
 ---
 
 ## 5. Results for the official scientific question
@@ -232,6 +257,23 @@ sizes makes the three-parameter limits less stable. Several $\sigma=1.75$
 fits and the $\sigma=2.5$ $R_p$ fits have poor absolute chi-square or hit
 parameter bounds; their formal $O_\infty$ values are not physically
 interpretable.
+
+![Rp and Qm data with competing power and logarithmic extrapolations for sigma 1.875 and 2.0.](figures/competing_extrapolations_en.svg)
+
+**Figure 3 | Competing extrapolations.** Black points are the frozen
+$L\le2048$ data. Green and orange curves are the power and marginal/log fits
+using the full $L_{\min}=64$ window. They describe the measured interval
+almost equally well but diverge in the forecast region. Curves beyond the
+measured range visualize model ambiguity and are not evidence for unmeasured
+physics.
+
+![Thermodynamic limits from power and logarithmic corrections as the minimum fitted size changes.](figures/extrapolation_window_stability_en.svg)
+
+**Figure 4 | Extrapolation-window stability.** The horizontal axis is the
+smallest retained size and the vertical axis is the model-dependent
+thermodynamic limit; error bars are the 16%–84% intervals from 1,000 bootstrap
+replicas. Strong model and window dependence prevents a stable
+$L\to\infty$ conclusion.
 
 The result for the official question is:
 
@@ -289,6 +331,15 @@ Every registered forecast for the primary observables returns `>65536`.
 This does not prove that $L=65536$ is physically insufficient. It means
 that, under the current model ambiguity and error budget, merely extending the
 same type of data does not guarantee discrimination.
+
+![Maximum model separation reached over the registered forecast range for each fit window.](figures/distinguishability_forecast_en.svg)
+
+**Figure 5 | Distinguishable-size forecast.** Each point is the maximum
+power–log separation reached over the registered candidate sizes
+$3072\le L\le65536$ for the corresponding $L_{\min}$ fit. The dashed line is
+the $3\sigma$ decision threshold. Every $\sigma=1.875,2.0$ forecast for
+$R_p,Q_m$ remains far below it, so `>65536` is a planning result after
+uncertainty propagation, not a claim about unmeasured physics.
 
 ### Assessment
 

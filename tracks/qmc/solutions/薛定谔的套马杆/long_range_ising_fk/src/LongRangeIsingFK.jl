@@ -182,7 +182,7 @@ long-range displacement table and therefore remains O(L^2) in memory and per
 sweep at large L.
 """
 function run_nn_chain(;L=8,beta=log(1+sqrt(2))/2,seed=1,therm=100,
-                      meas=500,blocks=50,progress_every=0,
+                      meas=500,blocks=50,nb=nothing,progress_every=0,
                       return_blocks=false)
     L>=3 || throw(ArgumentError("L must be at least 3 for the periodic bond convention"))
     therm>=0 || throw(ArgumentError("therm must be nonnegative"))
@@ -222,12 +222,15 @@ function run_nn_chain(;L=8,beta=log(1+sqrt(2))/2,seed=1,therm=100,
             flush(stdout)
         end
     end
-    nb=min(blocks,max(2,meas÷50))
-    bs=meas÷nb
-    used=nb*bs
-    block(v)=[mean(@view v[(i-1)*bs+1:i*bs]) for i in 1:nb]
+    requested_blocks=isnothing(nb) ? blocks : nb
+    nblocks=min(requested_blocks,max(2,meas÷50))
+    bs=meas÷nblocks
+    used=nblocks*bs
+    block(v)=[mean(@view v[(i-1)*bs+1:i*bs]) for i in 1:nblocks]
     bm2=block(@view m2[1:used])
     bm4=block(@view m4[1:used])
+    br0=block(@view r0[1:used])
+    br2=block(@view r2[1:used])
     rp_series=r2.-2r0
     brp=block(@view rp_series[1:used])
     bc1=block(@view c1[1:used])
@@ -253,10 +256,11 @@ function run_nn_chain(;L=8,beta=log(1+sqrt(2))/2,seed=1,therm=100,
       mean_abs_m=mean(mabs),mean_m2=mean(m2),mean_m4=mean(m4),
       Qm=q,se_Qm=stderr_blocks(bqm),chi,se_chi=stderr_blocks(bchi),
       R0=mean(r0),R2=mean(r2),Rp=rp,se_Rp=stderr_blocks(brp),
-      mean_C1=mean(c1),tau_m2=tauint(m2),blocks=nb,
+      mean_C1=mean(c1),tau_m2=tauint(m2),blocks=nblocks,
       runtime_s=time()-t,sumJ=4.0)
     return_blocks ? (summary=summary,block_m2=bm2,block_m4=bm4,
-                     block_qm=bqm,block_chi=bchi,block_rp=brp,
+                     block_qm=bqm,block_chi=bchi,block_r0=br0,
+                     block_r2=br2,block_rp=brp,
                      block_c1=bc1) : summary
 end
 
