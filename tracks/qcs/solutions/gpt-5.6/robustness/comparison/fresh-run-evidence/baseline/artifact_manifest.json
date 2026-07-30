@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "manifest_is_self_contained": false,
+  "excluded_paths": [
+    "artifact_manifest.json",
+    "progress.json",
+    "*.tmp"
+  ],
+  "artifacts": [
+    {
+      "path": "data/baseline.json",
+      "bytes": 741,
+      "sha256": "9e0be5dbfa2f170e1a608702765f4b04c73176d8b60fb66efba83ca816b42352"
+    },
+    {
+      "path": "data/baseline.npz",
+      "bytes": 4210450,
+      "sha256": "f65292fb56c4e562b0f4c3cf682897896fd7cfa801b43760f218a511d60d06e6"
+    },
+    {
+      "path": "figs/fig01_baseline_hessian.png",
+      "bytes": 370675,
+      "sha256": "eafa364fd7e249d5d5fdf25f43f00b0b73ab8929874e9a7948fe7e81d89c4252"
+    },
+    {
+      "path": "summary.json",
+      "bytes": 3553,
+      "sha256": "55b772e2f64c4c2c09730e5d97362e586fe1eae3b27d0aa651c3f27694f185de"
+    }
+  ]
+}

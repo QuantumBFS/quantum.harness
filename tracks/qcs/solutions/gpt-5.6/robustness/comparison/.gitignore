@@ -1,0 +1,8 @@
+reproduced-baseline/
+reproduced-full/
+*.aux
+*.log
+*.out
+*.synctex.gz
+*.toc
+__pycache__/

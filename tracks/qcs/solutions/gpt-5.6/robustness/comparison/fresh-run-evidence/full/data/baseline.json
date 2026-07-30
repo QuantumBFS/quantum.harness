@@ -1,0 +1,25 @@
+{
+  "accepted": true,
+  "baseline_infidelity": 6.599615889280042e-06,
+  "leakage_01": 1.035936525237723e-06,
+  "leakage_11": 2.4304014767022437e-05,
+  "controlled_phase": 3.141399037835893,
+  "phase_error_to_pi": 0.00019361575390020036,
+  "active_rank": 5,
+  "largest_eigenvalue": 0.07165857574571571,
+  "sixth_to_first_eigenvalue": 2.5669566807740995e-16,
+  "propagation_compile_seconds": 0.13732965500000205,
+  "hessian_compile_seconds": 2.1074943160000004,
+  "environment": {
+    "python": "3.12.13",
+    "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.43",
+    "jax": "0.11.0",
+    "jaxlib": "0.11.0",
+    "numpy": "2.5.1",
+    "scipy": "1.18.0",
+    "jax_devices": [
+      "cpu:0"
+    ],
+    "jax_x64": true
+  }
+}

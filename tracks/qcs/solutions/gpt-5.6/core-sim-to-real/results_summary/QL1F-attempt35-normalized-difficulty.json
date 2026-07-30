@@ -1,0 +1,1930 @@
+{
+  "attempt": 35,
+  "checks": {
+    "96_cells": true,
+    "96_success_manifests": true,
+    "all_selected_raw_reachable": true,
+    "all_selected_warm_band": true,
+    "at_least_four_selected_per_family": true,
+    "selection_is_smallest_eligible_epsilon": true
+  },
+  "environment": {
+    "backend": "cpu",
+    "devices": [
+      "TFRT_CPU_0"
+    ],
+    "jax": "0.4.38",
+    "jaxlib": "0.4.38",
+    "numpy": "2.2.6",
+    "platform_request": "cpu",
+    "python": "3.13.14",
+    "scipy": "1.15.3",
+    "x64": true
+  },
+  "protocol": "tracks/other/solutions/QL1F/ATTEMPT35_PROTOCOL.md",
+  "raw_reachability_max": 1e-05,
+  "run_spec": "tracks/other/results/QL1F-attempt35-normalized-difficulty-scan/run_spec.json",
+  "runs": [
+    {
+      "epsilon": 0.005,
+      "family": "control-map",
+      "raw_exact_final_infidelity": 5.525400256223279e-08,
+      "raw_exact_gradient_norm": 2.693548068502969e-08,
+      "raw_exact_optimizer": {
+        "function_calls": 59,
+        "iterations": 35,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": false,
+      "truth_seed": 260605,
+      "warm_band_pass": false,
+      "warm_infidelity": 2.048953848488022e-05
+    },
+    {
+      "epsilon": 0.02,
+      "family": "control-map",
+      "raw_exact_final_infidelity": 5.322458077605674e-08,
+      "raw_exact_gradient_norm": 9.450315009040987e-08,
+      "raw_exact_optimizer": {
+        "function_calls": 58,
+        "iterations": 35,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": false,
+      "truth_seed": 260605,
+      "warm_band_pass": false,
+      "warm_infidelity": 0.0003280070373294919
+    },
+    {
+      "epsilon": 0.05,
+      "family": "control-map",
+      "raw_exact_final_infidelity": 5.065673599480292e-08,
+      "raw_exact_gradient_norm": 4.662102751602282e-08,
+      "raw_exact_optimizer": {
+        "function_calls": 64,
+        "iterations": 36,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": false,
+      "truth_seed": 260605,
+      "warm_band_pass": false,
+      "warm_infidelity": 0.0020532313671191016
+    },
+    {
+      "epsilon": 0.1,
+      "family": "control-map",
+      "raw_exact_final_infidelity": 5.922958171700188e-08,
+      "raw_exact_gradient_norm": 3.4846932893763026e-08,
+      "raw_exact_optimizer": {
+        "function_calls": 55,
+        "iterations": 36,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": true,
+      "truth_seed": 260605,
+      "warm_band_pass": true,
+      "warm_infidelity": 0.008212432295029548
+    },
+    {
+      "epsilon": 0.005,
+      "family": "control-map",
+      "raw_exact_final_infidelity": 5.499320104851435e-08,
+      "raw_exact_gradient_norm": 3.792596685815655e-07,
+      "raw_exact_optimizer": {
+        "function_calls": 76,
+        "iterations": 32,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": false,
+      "truth_seed": 260606,
+      "warm_band_pass": false,
+      "warm_infidelity": 0.00011560347121120085
+    },
+    {
+      "epsilon": 0.02,
+      "family": "control-map",
+      "raw_exact_final_infidelity": 5.2598086364152864e-08,
+      "raw_exact_gradient_norm": 4.3128992073126665e-07,
+      "raw_exact_optimizer": {
+        "function_calls": 76,
+        "iterations": 32,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": false,
+      "truth_seed": 260606,
+      "warm_band_pass": false,
+      "warm_infidelity": 0.0018618445293027142
+    },
+    {
+      "epsilon": 0.05,
+      "family": "control-map",
+      "raw_exact_final_infidelity": 5.053437716062703e-08,
+      "raw_exact_gradient_norm": 1.1598880253366131e-10,
+      "raw_exact_optimizer": {
+        "function_calls": 40,
+        "iterations": 38,
+        "message": "Optimization terminated successfully.",
+        "status": 0,
+        "success": true
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": false,
+      "truth_seed": 260606,
+      "warm_band_pass": false,
+      "warm_infidelity": 0.011750246787451735
+    },
+    {
+      "epsilon": 0.1,
+      "family": "control-map",
+      "raw_exact_final_infidelity": 5.1592280259082913e-08,
+      "raw_exact_gradient_norm": 3.318871887455997e-11,
+      "raw_exact_optimizer": {
+        "function_calls": 41,
+        "iterations": 39,
+        "message": "Optimization terminated successfully.",
+        "status": 0,
+        "success": true
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": false,
+      "truth_seed": 260606,
+      "warm_band_pass": false,
+      "warm_infidelity": 0.04720772897198389
+    },
+    {
+      "epsilon": 0.005,
+      "family": "control-map",
+      "raw_exact_final_infidelity": 5.8311600292793036e-08,
+      "raw_exact_gradient_norm": 2.1871959676495996e-07,
+      "raw_exact_optimizer": {
+        "function_calls": 75,
+        "iterations": 30,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": false,
+      "truth_seed": 260607,
+      "warm_band_pass": false,
+      "warm_infidelity": 5.7621124158080406e-05
+    },
+    {
+      "epsilon": 0.02,
+      "family": "control-map",
+      "raw_exact_final_infidelity": 6.567799827328358e-08,
+      "raw_exact_gradient_norm": 1.442006819562693e-07,
+      "raw_exact_optimizer": {
+        "function_calls": 63,
+        "iterations": 35,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": false,
+      "truth_seed": 260607,
+      "warm_band_pass": false,
+      "warm_infidelity": 0.0009169399868754757
+    },
+    {
+      "epsilon": 0.05,
+      "family": "control-map",
+      "raw_exact_final_infidelity": 7.935443852025159e-08,
+      "raw_exact_gradient_norm": 3.899612650339473e-08,
+      "raw_exact_optimizer": {
+        "function_calls": 73,
+        "iterations": 36,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": true,
+      "truth_seed": 260607,
+      "warm_band_pass": true,
+      "warm_infidelity": 0.00567520217830042
+    },
+    {
+      "epsilon": 0.1,
+      "family": "control-map",
+      "raw_exact_final_infidelity": 8.676318733469302e-08,
+      "raw_exact_gradient_norm": 3.965675869081804e-08,
+      "raw_exact_optimizer": {
+        "function_calls": 76,
+        "iterations": 36,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": false,
+      "truth_seed": 260607,
+      "warm_band_pass": false,
+      "warm_infidelity": 0.0222144395282452
+    },
+    {
+      "epsilon": 0.005,
+      "family": "control-map",
+      "raw_exact_final_infidelity": 6.229773651389436e-08,
+      "raw_exact_gradient_norm": 1.1448349831966509e-07,
+      "raw_exact_optimizer": {
+        "function_calls": 82,
+        "iterations": 32,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": false,
+      "truth_seed": 260608,
+      "warm_band_pass": false,
+      "warm_infidelity": 4.3405995250100915e-05
+    },
+    {
+      "epsilon": 0.02,
+      "family": "control-map",
+      "raw_exact_final_infidelity": 8.029090311501009e-08,
+      "raw_exact_gradient_norm": 4.896976926939513e-11,
+      "raw_exact_optimizer": {
+        "function_calls": 40,
+        "iterations": 38,
+        "message": "Optimization terminated successfully.",
+        "status": 0,
+        "success": true
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": false,
+      "truth_seed": 260608,
+      "warm_band_pass": false,
+      "warm_infidelity": 0.0006913147503074812
+    },
+    {
+      "epsilon": 0.05,
+      "family": "control-map",
+      "raw_exact_final_infidelity": 8.263370480099398e-08,
+      "raw_exact_gradient_norm": 4.009158227140024e-08,
+      "raw_exact_optimizer": {
+        "function_calls": 83,
+        "iterations": 35,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": true,
+      "truth_seed": 260608,
+      "warm_band_pass": true,
+      "warm_infidelity": 0.004300112433724634
+    },
+    {
+      "epsilon": 0.1,
+      "family": "control-map",
+      "raw_exact_final_infidelity": 8.499758278324166e-08,
+      "raw_exact_gradient_norm": 2.0625515388711407e-08,
+      "raw_exact_optimizer": {
+        "function_calls": 68,
+        "iterations": 35,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": false,
+      "truth_seed": 260608,
+      "warm_band_pass": false,
+      "warm_infidelity": 0.017002823883124463
+    },
+    {
+      "epsilon": 0.005,
+      "family": "control-map",
+      "raw_exact_final_infidelity": 5.894787408200486e-08,
+      "raw_exact_gradient_norm": 1.0963751886018804e-06,
+      "raw_exact_optimizer": {
+        "function_calls": 77,
+        "iterations": 33,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": false,
+      "truth_seed": 260609,
+      "warm_band_pass": false,
+      "warm_infidelity": 6.804708105379031e-05
+    },
+    {
+      "epsilon": 0.02,
+      "family": "control-map",
+      "raw_exact_final_infidelity": 5.9581525257979e-08,
+      "raw_exact_gradient_norm": 9.546721326606839e-07,
+      "raw_exact_optimizer": {
+        "function_calls": 81,
+        "iterations": 36,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": false,
+      "truth_seed": 260609,
+      "warm_band_pass": false,
+      "warm_infidelity": 0.0010840209627409614
+    },
+    {
+      "epsilon": 0.05,
+      "family": "control-map",
+      "raw_exact_final_infidelity": 8.14669271931301e-08,
+      "raw_exact_gradient_norm": 2.8302366553044e-10,
+      "raw_exact_optimizer": {
+        "function_calls": 80,
+        "iterations": 40,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": true,
+      "truth_seed": 260609,
+      "warm_band_pass": true,
+      "warm_infidelity": 0.00672467663774845
+    },
+    {
+      "epsilon": 0.1,
+      "family": "control-map",
+      "raw_exact_final_infidelity": 8.207272473859107e-08,
+      "raw_exact_gradient_norm": 1.41316049217001e-07,
+      "raw_exact_optimizer": {
+        "function_calls": 72,
+        "iterations": 37,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": false,
+      "truth_seed": 260609,
+      "warm_band_pass": false,
+      "warm_infidelity": 0.02641812827114598
+    },
+    {
+      "epsilon": 0.005,
+      "family": "control-map",
+      "raw_exact_final_infidelity": 5.347580328551871e-08,
+      "raw_exact_gradient_norm": 6.414501202868761e-10,
+      "raw_exact_optimizer": {
+        "function_calls": 86,
+        "iterations": 37,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": false,
+      "truth_seed": 260610,
+      "warm_band_pass": false,
+      "warm_infidelity": 5.208427129721471e-05
+    },
+    {
+      "epsilon": 0.02,
+      "family": "control-map",
+      "raw_exact_final_infidelity": 4.8397975527247897e-08,
+      "raw_exact_gradient_norm": 3.093928530724051e-09,
+      "raw_exact_optimizer": {
+        "function_calls": 116,
+        "iterations": 38,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": false,
+      "truth_seed": 260610,
+      "warm_band_pass": false,
+      "warm_infidelity": 0.0008293361122425624
+    },
+    {
+      "epsilon": 0.05,
+      "family": "control-map",
+      "raw_exact_final_infidelity": 5.4251259962168065e-08,
+      "raw_exact_gradient_norm": 1.4147843990146073e-06,
+      "raw_exact_optimizer": {
+        "function_calls": 63,
+        "iterations": 35,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": true,
+      "truth_seed": 260610,
+      "warm_band_pass": true,
+      "warm_infidelity": 0.0051438131987052715
+    },
+    {
+      "epsilon": 0.1,
+      "family": "control-map",
+      "raw_exact_final_infidelity": 8.075786966932341e-08,
+      "raw_exact_gradient_norm": 1.2909129809396535e-08,
+      "raw_exact_optimizer": {
+        "function_calls": 84,
+        "iterations": 36,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": false,
+      "truth_seed": 260610,
+      "warm_band_pass": false,
+      "warm_infidelity": 0.020221280434644995
+    },
+    {
+      "epsilon": 0.005,
+      "family": "control-map",
+      "raw_exact_final_infidelity": 5.321731938456864e-08,
+      "raw_exact_gradient_norm": 1.7486271764116203e-10,
+      "raw_exact_optimizer": {
+        "function_calls": 109,
+        "iterations": 39,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": false,
+      "truth_seed": 260611,
+      "warm_band_pass": false,
+      "warm_infidelity": 5.8041843482570243e-05
+    },
+    {
+      "epsilon": 0.02,
+      "family": "control-map",
+      "raw_exact_final_infidelity": 4.754854033839351e-08,
+      "raw_exact_gradient_norm": 1.9882174556585846e-09,
+      "raw_exact_optimizer": {
+        "function_calls": 58,
+        "iterations": 38,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": false,
+      "truth_seed": 260611,
+      "warm_band_pass": false,
+      "warm_infidelity": 0.000924245877252261
+    },
+    {
+      "epsilon": 0.05,
+      "family": "control-map",
+      "raw_exact_final_infidelity": 5.416947258529703e-08,
+      "raw_exact_gradient_norm": 5.24005482555352e-11,
+      "raw_exact_optimizer": {
+        "function_calls": 41,
+        "iterations": 40,
+        "message": "Optimization terminated successfully.",
+        "status": 0,
+        "success": true
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": true,
+      "truth_seed": 260611,
+      "warm_band_pass": true,
+      "warm_infidelity": 0.005722529569300638
+    },
+    {
+      "epsilon": 0.1,
+      "family": "control-map",
+      "raw_exact_final_infidelity": 8.002246149052539e-08,
+      "raw_exact_gradient_norm": 1.7032815365507172e-08,
+      "raw_exact_optimizer": {
+        "function_calls": 60,
+        "iterations": 38,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": false,
+      "truth_seed": 260611,
+      "warm_band_pass": false,
+      "warm_infidelity": 0.022419209275200913
+    },
+    {
+      "epsilon": 0.005,
+      "family": "control-map",
+      "raw_exact_final_infidelity": 6.273230693798482e-08,
+      "raw_exact_gradient_norm": 4.542072552268548e-07,
+      "raw_exact_optimizer": {
+        "function_calls": 60,
+        "iterations": 29,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": false,
+      "truth_seed": 260612,
+      "warm_band_pass": false,
+      "warm_infidelity": 6.070355007492534e-05
+    },
+    {
+      "epsilon": 0.02,
+      "family": "control-map",
+      "raw_exact_final_infidelity": 8.14627317935468e-08,
+      "raw_exact_gradient_norm": 2.404089941057988e-07,
+      "raw_exact_optimizer": {
+        "function_calls": 75,
+        "iterations": 32,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": false,
+      "truth_seed": 260612,
+      "warm_band_pass": false,
+      "warm_infidelity": 0.0009721863337165404
+    },
+    {
+      "epsilon": 0.05,
+      "family": "control-map",
+      "raw_exact_final_infidelity": 7.400967424464611e-08,
+      "raw_exact_gradient_norm": 4.723862010907673e-07,
+      "raw_exact_optimizer": {
+        "function_calls": 68,
+        "iterations": 24,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": true,
+      "truth_seed": 260612,
+      "warm_band_pass": true,
+      "warm_infidelity": 0.006091759519401996
+    },
+    {
+      "epsilon": 0.1,
+      "family": "control-map",
+      "raw_exact_final_infidelity": 5.980204983435656e-08,
+      "raw_exact_gradient_norm": 2.2184553874274125e-08,
+      "raw_exact_optimizer": {
+        "function_calls": 74,
+        "iterations": 37,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": false,
+      "truth_seed": 260612,
+      "warm_band_pass": false,
+      "warm_infidelity": 0.024293834701515804
+    },
+    {
+      "epsilon": 0.005,
+      "family": "drift",
+      "raw_exact_final_infidelity": 6.978190020268116e-08,
+      "raw_exact_gradient_norm": 3.469368109020331e-10,
+      "raw_exact_optimizer": {
+        "function_calls": 85,
+        "iterations": 37,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": false,
+      "truth_seed": 260605,
+      "warm_band_pass": false,
+      "warm_infidelity": 2.2178797919436555e-05
+    },
+    {
+      "epsilon": 0.02,
+      "family": "drift",
+      "raw_exact_final_infidelity": 8.111141726052651e-08,
+      "raw_exact_gradient_norm": 1.0933319651594815e-08,
+      "raw_exact_optimizer": {
+        "function_calls": 114,
+        "iterations": 36,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": false,
+      "truth_seed": 260605,
+      "warm_band_pass": false,
+      "warm_infidelity": 0.0003555177964791323
+    },
+    {
+      "epsilon": 0.05,
+      "family": "drift",
+      "raw_exact_final_infidelity": 7.582763371649649e-08,
+      "raw_exact_gradient_norm": 6.300299180236823e-11,
+      "raw_exact_optimizer": {
+        "function_calls": 40,
+        "iterations": 38,
+        "message": "Optimization terminated successfully.",
+        "status": 0,
+        "success": true
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": false,
+      "truth_seed": 260605,
+      "warm_band_pass": false,
+      "warm_infidelity": 0.002220447667149017
+    },
+    {
+      "epsilon": 0.1,
+      "family": "drift",
+      "raw_exact_final_infidelity": 8.192256769623541e-08,
+      "raw_exact_gradient_norm": 5.692588675011279e-08,
+      "raw_exact_optimizer": {
+        "function_calls": 75,
+        "iterations": 35,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": true,
+      "truth_seed": 260605,
+      "warm_band_pass": true,
+      "warm_infidelity": 0.008846024422100474
+    },
+    {
+      "epsilon": 0.005,
+      "family": "drift",
+      "raw_exact_final_infidelity": 5.982569083462508e-08,
+      "raw_exact_gradient_norm": 7.136010206986845e-08,
+      "raw_exact_optimizer": {
+        "function_calls": 62,
+        "iterations": 35,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": false,
+      "truth_seed": 260606,
+      "warm_band_pass": false,
+      "warm_infidelity": 1.743917974250664e-05
+    },
+    {
+      "epsilon": 0.02,
+      "family": "drift",
+      "raw_exact_final_infidelity": 7.214199081451157e-08,
+      "raw_exact_gradient_norm": 7.550011817110357e-08,
+      "raw_exact_optimizer": {
+        "function_calls": 76,
+        "iterations": 35,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": false,
+      "truth_seed": 260606,
+      "warm_band_pass": false,
+      "warm_infidelity": 0.00027987982296351355
+    },
+    {
+      "epsilon": 0.05,
+      "family": "drift",
+      "raw_exact_final_infidelity": 8.313110443358697e-08,
+      "raw_exact_gradient_norm": 5.69322358984915e-10,
+      "raw_exact_optimizer": {
+        "function_calls": 88,
+        "iterations": 39,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": false,
+      "truth_seed": 260606,
+      "warm_band_pass": false,
+      "warm_infidelity": 0.0017586397822468847
+    },
+    {
+      "epsilon": 0.1,
+      "family": "drift",
+      "raw_exact_final_infidelity": 7.131729068410309e-08,
+      "raw_exact_gradient_norm": 7.722272606151077e-08,
+      "raw_exact_optimizer": {
+        "function_calls": 77,
+        "iterations": 36,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": true,
+      "truth_seed": 260606,
+      "warm_band_pass": true,
+      "warm_infidelity": 0.007081473639574565
+    },
+    {
+      "epsilon": 0.005,
+      "family": "drift",
+      "raw_exact_final_infidelity": 5.218772004544903e-08,
+      "raw_exact_gradient_norm": 3.4737523852340906e-09,
+      "raw_exact_optimizer": {
+        "function_calls": 61,
+        "iterations": 35,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": false,
+      "truth_seed": 260607,
+      "warm_band_pass": false,
+      "warm_infidelity": 1.5091163979019662e-05
+    },
+    {
+      "epsilon": 0.02,
+      "family": "drift",
+      "raw_exact_final_infidelity": 5.041490330759402e-08,
+      "raw_exact_gradient_norm": 4.928625852067394e-07,
+      "raw_exact_optimizer": {
+        "function_calls": 99,
+        "iterations": 32,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": false,
+      "truth_seed": 260607,
+      "warm_band_pass": false,
+      "warm_infidelity": 0.0002414906067561562
+    },
+    {
+      "epsilon": 0.05,
+      "family": "drift",
+      "raw_exact_final_infidelity": 7.203558739510285e-08,
+      "raw_exact_gradient_norm": 7.595622703805733e-08,
+      "raw_exact_optimizer": {
+        "function_calls": 55,
+        "iterations": 34,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": false,
+      "truth_seed": 260607,
+      "warm_band_pass": false,
+      "warm_infidelity": 0.001507864442978235
+    },
+    {
+      "epsilon": 0.1,
+      "family": "drift",
+      "raw_exact_final_infidelity": 8.277686583957334e-08,
+      "raw_exact_gradient_norm": 6.65731801962682e-07,
+      "raw_exact_optimizer": {
+        "function_calls": 70,
+        "iterations": 32,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": true,
+      "truth_seed": 260607,
+      "warm_band_pass": true,
+      "warm_infidelity": 0.006006989801914719
+    },
+    {
+      "epsilon": 0.005,
+      "family": "drift",
+      "raw_exact_final_infidelity": 5.72506262286332e-08,
+      "raw_exact_gradient_norm": 2.477672952543169e-09,
+      "raw_exact_optimizer": {
+        "function_calls": 108,
+        "iterations": 36,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": false,
+      "truth_seed": 260608,
+      "warm_band_pass": false,
+      "warm_infidelity": 2.350061067235565e-05
+    },
+    {
+      "epsilon": 0.02,
+      "family": "drift",
+      "raw_exact_final_infidelity": 6.130806363691122e-08,
+      "raw_exact_gradient_norm": 1.2227232585468331e-08,
+      "raw_exact_optimizer": {
+        "function_calls": 56,
+        "iterations": 35,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": false,
+      "truth_seed": 260608,
+      "warm_band_pass": false,
+      "warm_infidelity": 0.00037531548540947757
+    },
+    {
+      "epsilon": 0.05,
+      "family": "drift",
+      "raw_exact_final_infidelity": 6.10242112286663e-08,
+      "raw_exact_gradient_norm": 3.2558532333811426e-08,
+      "raw_exact_optimizer": {
+        "function_calls": 56,
+        "iterations": 35,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": false,
+      "truth_seed": 260608,
+      "warm_band_pass": false,
+      "warm_infidelity": 0.0023394100540938823
+    },
+    {
+      "epsilon": 0.1,
+      "family": "drift",
+      "raw_exact_final_infidelity": 6.710808116983103e-08,
+      "raw_exact_gradient_norm": 5.143897932906336e-09,
+      "raw_exact_optimizer": {
+        "function_calls": 116,
+        "iterations": 37,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": true,
+      "truth_seed": 260608,
+      "warm_band_pass": true,
+      "warm_infidelity": 0.009293493746430626
+    },
+    {
+      "epsilon": 0.005,
+      "family": "drift",
+      "raw_exact_final_infidelity": 5.010457287957237e-08,
+      "raw_exact_gradient_norm": 2.2189559927887679e-10,
+      "raw_exact_optimizer": {
+        "function_calls": 79,
+        "iterations": 36,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": false,
+      "truth_seed": 260609,
+      "warm_band_pass": false,
+      "warm_infidelity": 1.676900631242262e-05
+    },
+    {
+      "epsilon": 0.02,
+      "family": "drift",
+      "raw_exact_final_infidelity": 6.491244176620725e-08,
+      "raw_exact_gradient_norm": 4.809025456463804e-07,
+      "raw_exact_optimizer": {
+        "function_calls": 76,
+        "iterations": 33,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": false,
+      "truth_seed": 260609,
+      "warm_band_pass": false,
+      "warm_infidelity": 0.0002666580829330245
+    },
+    {
+      "epsilon": 0.05,
+      "family": "drift",
+      "raw_exact_final_infidelity": 5.250687754587702e-08,
+      "raw_exact_gradient_norm": 2.1579947975716138e-07,
+      "raw_exact_optimizer": {
+        "function_calls": 68,
+        "iterations": 34,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": false,
+      "truth_seed": 260609,
+      "warm_band_pass": false,
+      "warm_infidelity": 0.0016685151483066818
+    },
+    {
+      "epsilon": 0.1,
+      "family": "drift",
+      "raw_exact_final_infidelity": 7.423489657432114e-08,
+      "raw_exact_gradient_norm": 6.239718708290476e-08,
+      "raw_exact_optimizer": {
+        "function_calls": 57,
+        "iterations": 35,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": true,
+      "truth_seed": 260609,
+      "warm_band_pass": true,
+      "warm_infidelity": 0.006686237428399799
+    },
+    {
+      "epsilon": 0.005,
+      "family": "drift",
+      "raw_exact_final_infidelity": 6.285583887821744e-08,
+      "raw_exact_gradient_norm": 2.267948634617884e-07,
+      "raw_exact_optimizer": {
+        "function_calls": 90,
+        "iterations": 37,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": false,
+      "truth_seed": 260610,
+      "warm_band_pass": false,
+      "warm_infidelity": 1.4450963952028495e-05
+    },
+    {
+      "epsilon": 0.02,
+      "family": "drift",
+      "raw_exact_final_infidelity": 8.252491502380721e-08,
+      "raw_exact_gradient_norm": 2.8618400731792813e-09,
+      "raw_exact_optimizer": {
+        "function_calls": 68,
+        "iterations": 37,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": false,
+      "truth_seed": 260610,
+      "warm_band_pass": false,
+      "warm_infidelity": 0.00023086148200335277
+    },
+    {
+      "epsilon": 0.05,
+      "family": "drift",
+      "raw_exact_final_infidelity": 8.090903141910744e-08,
+      "raw_exact_gradient_norm": 3.99938702941549e-07,
+      "raw_exact_optimizer": {
+        "function_calls": 62,
+        "iterations": 34,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": false,
+      "truth_seed": 260610,
+      "warm_band_pass": false,
+      "warm_infidelity": 0.001437710405423287
+    },
+    {
+      "epsilon": 0.1,
+      "family": "drift",
+      "raw_exact_final_infidelity": 5.888071553661334e-08,
+      "raw_exact_gradient_norm": 3.7048894054761027e-08,
+      "raw_exact_optimizer": {
+        "function_calls": 80,
+        "iterations": 35,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": true,
+      "truth_seed": 260610,
+      "warm_band_pass": true,
+      "warm_infidelity": 0.005703837373306264
+    },
+    {
+      "epsilon": 0.005,
+      "family": "drift",
+      "raw_exact_final_infidelity": 5.4677217187215636e-08,
+      "raw_exact_gradient_norm": 2.5452652073280946e-07,
+      "raw_exact_optimizer": {
+        "function_calls": 73,
+        "iterations": 32,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": false,
+      "truth_seed": 260611,
+      "warm_band_pass": false,
+      "warm_infidelity": 1.9572644266330208e-05
+    },
+    {
+      "epsilon": 0.02,
+      "family": "drift",
+      "raw_exact_final_infidelity": 5.117782458929909e-08,
+      "raw_exact_gradient_norm": 4.026141087530653e-09,
+      "raw_exact_optimizer": {
+        "function_calls": 69,
+        "iterations": 37,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": false,
+      "truth_seed": 260611,
+      "warm_band_pass": false,
+      "warm_infidelity": 0.00031201318352880314
+    },
+    {
+      "epsilon": 0.05,
+      "family": "drift",
+      "raw_exact_final_infidelity": 4.795176108407518e-08,
+      "raw_exact_gradient_norm": 8.311842359808907e-09,
+      "raw_exact_optimizer": {
+        "function_calls": 76,
+        "iterations": 37,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": false,
+      "truth_seed": 260611,
+      "warm_band_pass": false,
+      "warm_infidelity": 0.0019527551618538919
+    },
+    {
+      "epsilon": 0.1,
+      "family": "drift",
+      "raw_exact_final_infidelity": 4.8060311230724295e-08,
+      "raw_exact_gradient_norm": 2.858353007985651e-07,
+      "raw_exact_optimizer": {
+        "function_calls": 62,
+        "iterations": 35,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": true,
+      "truth_seed": 260611,
+      "warm_band_pass": true,
+      "warm_infidelity": 0.007822850303000228
+    },
+    {
+      "epsilon": 0.005,
+      "family": "drift",
+      "raw_exact_final_infidelity": 5.105201447141994e-08,
+      "raw_exact_gradient_norm": 6.457578595906768e-09,
+      "raw_exact_optimizer": {
+        "function_calls": 68,
+        "iterations": 34,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": false,
+      "truth_seed": 260612,
+      "warm_band_pass": false,
+      "warm_infidelity": 1.2892668930120088e-05
+    },
+    {
+      "epsilon": 0.02,
+      "family": "drift",
+      "raw_exact_final_infidelity": 8.636037213127779e-08,
+      "raw_exact_gradient_norm": 2.502657961196091e-08,
+      "raw_exact_optimizer": {
+        "function_calls": 66,
+        "iterations": 34,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": false,
+      "truth_seed": 260612,
+      "warm_band_pass": false,
+      "warm_infidelity": 0.0002055632413413555
+    },
+    {
+      "epsilon": 0.05,
+      "family": "drift",
+      "raw_exact_final_infidelity": 7.978826127574834e-08,
+      "raw_exact_gradient_norm": 6.288963262621515e-08,
+      "raw_exact_optimizer": {
+        "function_calls": 75,
+        "iterations": 34,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": false,
+      "truth_seed": 260612,
+      "warm_band_pass": false,
+      "warm_infidelity": 0.0012828075093369584
+    },
+    {
+      "epsilon": 0.1,
+      "family": "drift",
+      "raw_exact_final_infidelity": 8.665235368132684e-08,
+      "raw_exact_gradient_norm": 8.170526792546916e-08,
+      "raw_exact_optimizer": {
+        "function_calls": 74,
+        "iterations": 35,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": true,
+      "truth_seed": 260612,
+      "warm_band_pass": true,
+      "warm_infidelity": 0.0051109878739689085
+    },
+    {
+      "epsilon": 0.005,
+      "family": "combined",
+      "raw_exact_final_infidelity": 6.879364681244838e-08,
+      "raw_exact_gradient_norm": 6.214676453451717e-07,
+      "raw_exact_optimizer": {
+        "function_calls": 66,
+        "iterations": 30,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": false,
+      "truth_seed": 260605,
+      "warm_band_pass": false,
+      "warm_infidelity": 5.289186815904401e-05
+    },
+    {
+      "epsilon": 0.02,
+      "family": "combined",
+      "raw_exact_final_infidelity": 8.272079424775925e-08,
+      "raw_exact_gradient_norm": 4.999794295651718e-08,
+      "raw_exact_optimizer": {
+        "function_calls": 56,
+        "iterations": 35,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": false,
+      "truth_seed": 260605,
+      "warm_band_pass": false,
+      "warm_infidelity": 0.0008523556968179635
+    },
+    {
+      "epsilon": 0.05,
+      "family": "combined",
+      "raw_exact_final_infidelity": 5.36330876044211e-08,
+      "raw_exact_gradient_norm": 7.980566493508534e-10,
+      "raw_exact_optimizer": {
+        "function_calls": 87,
+        "iterations": 37,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": true,
+      "truth_seed": 260605,
+      "warm_band_pass": true,
+      "warm_infidelity": 0.005377455355733862
+    },
+    {
+      "epsilon": 0.1,
+      "family": "combined",
+      "raw_exact_final_infidelity": 6.613039692515698e-08,
+      "raw_exact_gradient_norm": 5.761213524652358e-07,
+      "raw_exact_optimizer": {
+        "function_calls": 72,
+        "iterations": 36,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": false,
+      "truth_seed": 260605,
+      "warm_band_pass": false,
+      "warm_infidelity": 0.021712616566005982
+    },
+    {
+      "epsilon": 0.005,
+      "family": "combined",
+      "raw_exact_final_infidelity": 5.861777404581048e-08,
+      "raw_exact_gradient_norm": 1.6594277778125424e-10,
+      "raw_exact_optimizer": {
+        "function_calls": 39,
+        "iterations": 37,
+        "message": "Optimization terminated successfully.",
+        "status": 0,
+        "success": true
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": false,
+      "truth_seed": 260606,
+      "warm_band_pass": false,
+      "warm_infidelity": 0.00014319972703014106
+    },
+    {
+      "epsilon": 0.02,
+      "family": "combined",
+      "raw_exact_final_infidelity": 6.776783555428878e-08,
+      "raw_exact_gradient_norm": 7.309517438879888e-11,
+      "raw_exact_optimizer": {
+        "function_calls": 40,
+        "iterations": 38,
+        "message": "Optimization terminated successfully.",
+        "status": 0,
+        "success": true
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": false,
+      "truth_seed": 260606,
+      "warm_band_pass": false,
+      "warm_infidelity": 0.0023041764286663158
+    },
+    {
+      "epsilon": 0.05,
+      "family": "combined",
+      "raw_exact_final_infidelity": 8.56254503189824e-08,
+      "raw_exact_gradient_norm": 8.181047205472116e-10,
+      "raw_exact_optimizer": {
+        "function_calls": 99,
+        "iterations": 38,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": false,
+      "truth_seed": 260606,
+      "warm_band_pass": false,
+      "warm_infidelity": 0.014497205869719698
+    },
+    {
+      "epsilon": 0.1,
+      "family": "combined",
+      "raw_exact_final_infidelity": 7.240926963580918e-08,
+      "raw_exact_gradient_norm": 8.042532245751432e-09,
+      "raw_exact_optimizer": {
+        "function_calls": 80,
+        "iterations": 37,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": false,
+      "truth_seed": 260606,
+      "warm_band_pass": false,
+      "warm_infidelity": 0.05786779540135778
+    },
+    {
+      "epsilon": 0.005,
+      "family": "combined",
+      "raw_exact_final_infidelity": 5.396060179796436e-08,
+      "raw_exact_gradient_norm": 7.492345285527605e-08,
+      "raw_exact_optimizer": {
+        "function_calls": 85,
+        "iterations": 35,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": false,
+      "truth_seed": 260607,
+      "warm_band_pass": false,
+      "warm_infidelity": 0.00010896282051020556
+    },
+    {
+      "epsilon": 0.02,
+      "family": "combined",
+      "raw_exact_final_infidelity": 8.983557039377033e-08,
+      "raw_exact_gradient_norm": 1.553865573322422e-10,
+      "raw_exact_optimizer": {
+        "function_calls": 134,
+        "iterations": 40,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": false,
+      "truth_seed": 260607,
+      "warm_band_pass": false,
+      "warm_infidelity": 0.0017399942737709173
+    },
+    {
+      "epsilon": 0.05,
+      "family": "combined",
+      "raw_exact_final_infidelity": 6.433126612526153e-08,
+      "raw_exact_gradient_norm": 4.2695727389178753e-07,
+      "raw_exact_optimizer": {
+        "function_calls": 79,
+        "iterations": 35,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": false,
+      "truth_seed": 260607,
+      "warm_band_pass": false,
+      "warm_infidelity": 0.010802046910194596
+    },
+    {
+      "epsilon": 0.1,
+      "family": "combined",
+      "raw_exact_final_infidelity": 6.491866576530114e-08,
+      "raw_exact_gradient_norm": 5.712784871764329e-09,
+      "raw_exact_optimizer": {
+        "function_calls": 78,
+        "iterations": 37,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": false,
+      "truth_seed": 260607,
+      "warm_band_pass": false,
+      "warm_infidelity": 0.04230723463468378
+    },
+    {
+      "epsilon": 0.005,
+      "family": "combined",
+      "raw_exact_final_infidelity": 6.361038143998244e-08,
+      "raw_exact_gradient_norm": 1.102295676935737e-07,
+      "raw_exact_optimizer": {
+        "function_calls": 72,
+        "iterations": 34,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": false,
+      "truth_seed": 260608,
+      "warm_band_pass": false,
+      "warm_infidelity": 4.279814136598503e-05
+    },
+    {
+      "epsilon": 0.02,
+      "family": "combined",
+      "raw_exact_final_infidelity": 7.722547555877314e-08,
+      "raw_exact_gradient_norm": 2.748894501848641e-09,
+      "raw_exact_optimizer": {
+        "function_calls": 59,
+        "iterations": 37,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": false,
+      "truth_seed": 260608,
+      "warm_band_pass": false,
+      "warm_infidelity": 0.0006877164574072836
+    },
+    {
+      "epsilon": 0.05,
+      "family": "combined",
+      "raw_exact_final_infidelity": 7.570966212844255e-08,
+      "raw_exact_gradient_norm": 1.2779605156787197e-08,
+      "raw_exact_optimizer": {
+        "function_calls": 121,
+        "iterations": 37,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": true,
+      "truth_seed": 260608,
+      "warm_band_pass": true,
+      "warm_infidelity": 0.004347320262410914
+    },
+    {
+      "epsilon": 0.1,
+      "family": "combined",
+      "raw_exact_final_infidelity": 8.709278874752259e-08,
+      "raw_exact_gradient_norm": 2.7574264186353443e-08,
+      "raw_exact_optimizer": {
+        "function_calls": 91,
+        "iterations": 36,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": false,
+      "truth_seed": 260608,
+      "warm_band_pass": false,
+      "warm_infidelity": 0.017639657042171297
+    },
+    {
+      "epsilon": 0.005,
+      "family": "combined",
+      "raw_exact_final_infidelity": 5.188073431972029e-08,
+      "raw_exact_gradient_norm": 1.3359840521306385e-07,
+      "raw_exact_optimizer": {
+        "function_calls": 69,
+        "iterations": 35,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": false,
+      "truth_seed": 260609,
+      "warm_band_pass": false,
+      "warm_infidelity": 6.023729314974524e-05
+    },
+    {
+      "epsilon": 0.02,
+      "family": "combined",
+      "raw_exact_final_infidelity": 4.967652381671073e-08,
+      "raw_exact_gradient_norm": 1.1562108483095107e-10,
+      "raw_exact_optimizer": {
+        "function_calls": 39,
+        "iterations": 38,
+        "message": "Optimization terminated successfully.",
+        "status": 0,
+        "success": true
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": false,
+      "truth_seed": 260609,
+      "warm_band_pass": false,
+      "warm_infidelity": 0.0009576468890775125
+    },
+    {
+      "epsilon": 0.05,
+      "family": "combined",
+      "raw_exact_final_infidelity": 7.06050797716351e-08,
+      "raw_exact_gradient_norm": 1.472299855875512e-07,
+      "raw_exact_optimizer": {
+        "function_calls": 59,
+        "iterations": 36,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": true,
+      "truth_seed": 260609,
+      "warm_band_pass": true,
+      "warm_infidelity": 0.005934305837636877
+    },
+    {
+      "epsilon": 0.1,
+      "family": "combined",
+      "raw_exact_final_infidelity": 7.053631806419602e-08,
+      "raw_exact_gradient_norm": 0.0001097232227694663,
+      "raw_exact_optimizer": {
+        "function_calls": 80,
+        "iterations": 30,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": false,
+      "truth_seed": 260609,
+      "warm_band_pass": false,
+      "warm_infidelity": 0.023312677141223204
+    },
+    {
+      "epsilon": 0.005,
+      "family": "combined",
+      "raw_exact_final_infidelity": 5.966160093739958e-08,
+      "raw_exact_gradient_norm": 2.0997018998303596e-07,
+      "raw_exact_optimizer": {
+        "function_calls": 58,
+        "iterations": 33,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": false,
+      "truth_seed": 260610,
+      "warm_band_pass": false,
+      "warm_infidelity": 5.8310390574245474e-05
+    },
+    {
+      "epsilon": 0.02,
+      "family": "combined",
+      "raw_exact_final_infidelity": 7.204285518147557e-08,
+      "raw_exact_gradient_norm": 6.270616400208501e-07,
+      "raw_exact_optimizer": {
+        "function_calls": 66,
+        "iterations": 34,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": false,
+      "truth_seed": 260610,
+      "warm_band_pass": false,
+      "warm_infidelity": 0.0009339565171513353
+    },
+    {
+      "epsilon": 0.05,
+      "family": "combined",
+      "raw_exact_final_infidelity": 8.581287674891414e-08,
+      "raw_exact_gradient_norm": 1.6652137357746814e-09,
+      "raw_exact_optimizer": {
+        "function_calls": 86,
+        "iterations": 37,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": true,
+      "truth_seed": 260610,
+      "warm_band_pass": true,
+      "warm_infidelity": 0.005846165800649783
+    },
+    {
+      "epsilon": 0.1,
+      "family": "combined",
+      "raw_exact_final_infidelity": 8.408415949068271e-08,
+      "raw_exact_gradient_norm": 8.475994763589151e-08,
+      "raw_exact_optimizer": {
+        "function_calls": 72,
+        "iterations": 35,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": false,
+      "truth_seed": 260610,
+      "warm_band_pass": false,
+      "warm_infidelity": 0.02330166209130924
+    },
+    {
+      "epsilon": 0.005,
+      "family": "combined",
+      "raw_exact_final_infidelity": 5.201884570871229e-08,
+      "raw_exact_gradient_norm": 4.640371645613146e-07,
+      "raw_exact_optimizer": {
+        "function_calls": 67,
+        "iterations": 32,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": false,
+      "truth_seed": 260611,
+      "warm_band_pass": false,
+      "warm_infidelity": 8.630455554903271e-05
+    },
+    {
+      "epsilon": 0.02,
+      "family": "combined",
+      "raw_exact_final_infidelity": 4.7382205481394383e-08,
+      "raw_exact_gradient_norm": 1.9646122745392848e-07,
+      "raw_exact_optimizer": {
+        "function_calls": 62,
+        "iterations": 35,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": false,
+      "truth_seed": 260611,
+      "warm_band_pass": false,
+      "warm_infidelity": 0.0013780815641935007
+    },
+    {
+      "epsilon": 0.05,
+      "family": "combined",
+      "raw_exact_final_infidelity": 6.34639162000461e-08,
+      "raw_exact_gradient_norm": 8.367120258227492e-08,
+      "raw_exact_optimizer": {
+        "function_calls": 77,
+        "iterations": 36,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": true,
+      "truth_seed": 260611,
+      "warm_band_pass": true,
+      "warm_infidelity": 0.00857556988053998
+    },
+    {
+      "epsilon": 0.1,
+      "family": "combined",
+      "raw_exact_final_infidelity": 6.427155158084119e-08,
+      "raw_exact_gradient_norm": 8.750919396831707e-09,
+      "raw_exact_optimizer": {
+        "function_calls": 63,
+        "iterations": 38,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": false,
+      "truth_seed": 260611,
+      "warm_band_pass": false,
+      "warm_infidelity": 0.03380889644685747
+    },
+    {
+      "epsilon": 0.005,
+      "family": "combined",
+      "raw_exact_final_infidelity": 5.622626874091097e-08,
+      "raw_exact_gradient_norm": 2.984406775563703e-09,
+      "raw_exact_optimizer": {
+        "function_calls": 62,
+        "iterations": 36,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": false,
+      "truth_seed": 260612,
+      "warm_band_pass": false,
+      "warm_infidelity": 7.684823839482213e-05
+    },
+    {
+      "epsilon": 0.02,
+      "family": "combined",
+      "raw_exact_final_infidelity": 8.307220452641318e-08,
+      "raw_exact_gradient_norm": 1.0104242928983101e-11,
+      "raw_exact_optimizer": {
+        "function_calls": 41,
+        "iterations": 40,
+        "message": "Optimization terminated successfully.",
+        "status": 0,
+        "success": true
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": false,
+      "truth_seed": 260612,
+      "warm_band_pass": false,
+      "warm_infidelity": 0.0012350716398890071
+    },
+    {
+      "epsilon": 0.05,
+      "family": "combined",
+      "raw_exact_final_infidelity": 7.48834330877024e-08,
+      "raw_exact_gradient_norm": 1.4419474887156228e-08,
+      "raw_exact_optimizer": {
+        "function_calls": 83,
+        "iterations": 36,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": true,
+      "truth_seed": 260612,
+      "warm_band_pass": true,
+      "warm_infidelity": 0.0077806102354155415
+    },
+    {
+      "epsilon": 0.1,
+      "family": "combined",
+      "raw_exact_final_infidelity": 8.912187036136388e-08,
+      "raw_exact_gradient_norm": 3.848756672220435e-09,
+      "raw_exact_optimizer": {
+        "function_calls": 71,
+        "iterations": 37,
+        "message": "Desired error not necessarily achieved due to precision loss.",
+        "status": 2,
+        "success": false
+      },
+      "raw_reachability_pass": true,
+      "selection_eligible": false,
+      "truth_seed": 260612,
+      "warm_band_pass": false,
+      "warm_infidelity": 0.03124600973546554
+    }
+  ],
+  "selected_cells": [
+    {
+      "epsilon": 0.1,
+      "family": "control-map",
+      "raw_exact_final_infidelity": 5.922958171700188e-08,
+      "truth_seed": 260605,
+      "warm_infidelity": 0.008212432295029548
+    },
+    {
+      "epsilon": 0.05,
+      "family": "control-map",
+      "raw_exact_final_infidelity": 7.935443852025159e-08,
+      "truth_seed": 260607,
+      "warm_infidelity": 0.00567520217830042
+    },
+    {
+      "epsilon": 0.05,
+      "family": "control-map",
+      "raw_exact_final_infidelity": 8.263370480099398e-08,
+      "truth_seed": 260608,
+      "warm_infidelity": 0.004300112433724634
+    },
+    {
+      "epsilon": 0.05,
+      "family": "control-map",
+      "raw_exact_final_infidelity": 8.14669271931301e-08,
+      "truth_seed": 260609,
+      "warm_infidelity": 0.00672467663774845
+    },
+    {
+      "epsilon": 0.05,
+      "family": "control-map",
+      "raw_exact_final_infidelity": 5.4251259962168065e-08,
+      "truth_seed": 260610,
+      "warm_infidelity": 0.0051438131987052715
+    },
+    {
+      "epsilon": 0.05,
+      "family": "control-map",
+      "raw_exact_final_infidelity": 5.416947258529703e-08,
+      "truth_seed": 260611,
+      "warm_infidelity": 0.005722529569300638
+    },
+    {
+      "epsilon": 0.05,
+      "family": "control-map",
+      "raw_exact_final_infidelity": 7.400967424464611e-08,
+      "truth_seed": 260612,
+      "warm_infidelity": 0.006091759519401996
+    },
+    {
+      "epsilon": 0.1,
+      "family": "drift",
+      "raw_exact_final_infidelity": 8.192256769623541e-08,
+      "truth_seed": 260605,
+      "warm_infidelity": 0.008846024422100474
+    },
+    {
+      "epsilon": 0.1,
+      "family": "drift",
+      "raw_exact_final_infidelity": 7.131729068410309e-08,
+      "truth_seed": 260606,
+      "warm_infidelity": 0.007081473639574565
+    },
+    {
+      "epsilon": 0.1,
+      "family": "drift",
+      "raw_exact_final_infidelity": 8.277686583957334e-08,
+      "truth_seed": 260607,
+      "warm_infidelity": 0.006006989801914719
+    },
+    {
+      "epsilon": 0.1,
+      "family": "drift",
+      "raw_exact_final_infidelity": 6.710808116983103e-08,
+      "truth_seed": 260608,
+      "warm_infidelity": 0.009293493746430626
+    },
+    {
+      "epsilon": 0.1,
+      "family": "drift",
+      "raw_exact_final_infidelity": 7.423489657432114e-08,
+      "truth_seed": 260609,
+      "warm_infidelity": 0.006686237428399799
+    },
+    {
+      "epsilon": 0.1,
+      "family": "drift",
+      "raw_exact_final_infidelity": 5.888071553661334e-08,
+      "truth_seed": 260610,
+      "warm_infidelity": 0.005703837373306264
+    },
+    {
+      "epsilon": 0.1,
+      "family": "drift",
+      "raw_exact_final_infidelity": 4.8060311230724295e-08,
+      "truth_seed": 260611,
+      "warm_infidelity": 0.007822850303000228
+    },
+    {
+      "epsilon": 0.1,
+      "family": "drift",
+      "raw_exact_final_infidelity": 8.665235368132684e-08,
+      "truth_seed": 260612,
+      "warm_infidelity": 0.0051109878739689085
+    },
+    {
+      "epsilon": 0.05,
+      "family": "combined",
+      "raw_exact_final_infidelity": 5.36330876044211e-08,
+      "truth_seed": 260605,
+      "warm_infidelity": 0.005377455355733862
+    },
+    {
+      "epsilon": 0.05,
+      "family": "combined",
+      "raw_exact_final_infidelity": 7.570966212844255e-08,
+      "truth_seed": 260608,
+      "warm_infidelity": 0.004347320262410914
+    },
+    {
+      "epsilon": 0.05,
+      "family": "combined",
+      "raw_exact_final_infidelity": 7.06050797716351e-08,
+      "truth_seed": 260609,
+      "warm_infidelity": 0.005934305837636877
+    },
+    {
+      "epsilon": 0.05,
+      "family": "combined",
+      "raw_exact_final_infidelity": 8.581287674891414e-08,
+      "truth_seed": 260610,
+      "warm_infidelity": 0.005846165800649783
+    },
+    {
+      "epsilon": 0.05,
+      "family": "combined",
+      "raw_exact_final_infidelity": 6.34639162000461e-08,
+      "truth_seed": 260611,
+      "warm_infidelity": 0.00857556988053998
+    },
+    {
+      "epsilon": 0.05,
+      "family": "combined",
+      "raw_exact_final_infidelity": 7.48834330877024e-08,
+      "truth_seed": 260612,
+      "warm_infidelity": 0.0077806102354155415
+    }
+  ],
+  "selection_counts": {
+    "combined": 6,
+    "control-map": 7,
+    "drift": 8
+  },
+  "status": "complete",
+  "unavailable_cells": [
+    {
+      "family": "control-map",
+      "truth_seed": 260606
+    },
+    {
+      "family": "combined",
+      "truth_seed": 260606
+    },
+    {
+      "family": "combined",
+      "truth_seed": 260607
+    }
+  ],
+  "warm_band": [
+    0.003,
+    0.01
+  ]
+}

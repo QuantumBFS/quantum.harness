@@ -1,0 +1,8 @@
+# Audited CPU environment for the Challenge-113 reproducibility package.
+# A CUDA-enabled jaxlib may be substituted only in a separately recorded
+# environment; numerical claims in the current package use x64 CPU.
+jax==0.4.38
+jaxlib==0.4.38
+matplotlib==3.11.1
+numpy==2.2.6
+scipy==1.15.3

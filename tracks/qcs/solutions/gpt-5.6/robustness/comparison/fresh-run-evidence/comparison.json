@@ -1,0 +1,12 @@
+{
+  "absolute_tolerance": 1e-10,
+  "categorical_comparisons": 402,
+  "maximum_absolute_difference": 0.00355953024700284,
+  "maximum_relative_difference": 1.9064473775090545,
+  "maximum_tolerance_ratio": 0.2064761612288416,
+  "mismatch_count": 0,
+  "mismatches": [],
+  "numeric_comparisons": 3951,
+  "relative_tolerance": 1e-08,
+  "status": "pass"
+}
