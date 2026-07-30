@@ -1,267 +1,140 @@
-# OmniEvolve：受控元进化框架与自主科研的初步验证
+# quantumevolve — 比赛提交主入口
 
-> **团队**：quantumevolve
-> **主要注册**：#133（The Problem Factory — 自主科研问题生成与求解）
-> **附带参与**：#34, #71, #117, #232, #233（五道 benchmark 赛题）
-> **PR**：QuantumBFS/quantum.harness#181
+> **从这里开始阅读。** 本文件是提交的导航页，指引您到所有材料。
 
 ---
 
-## 1. OmniEvolve 是什么
+## 团队
 
-OmniEvolve 是一个**自主开发的受控元进化框架**（Controlled Meta-Evolution Framework），
-用于探索一个具体问题：**LLM 驱动的代码进化能否在 benchmark 清晰的科研问题上产生有意义的改进？**
+| | |
+|---|---|
+| **Team** | quantumevolve |
+| **Members** | 結凪 (UynajGI) |
+| **PR** | [QuantumBFS/quantum.harness#181](https://github.com/QuantumBFS/quantum.harness/pull/181) |
+| **主注册** | [#133](https://github.com/QuantumBFS/quantum.harness/issues/133)（The Problem Factory） |
+| **附带参与** | #34, #71, #117, #232, #233 |
 
-它不是任何已有框架（AlphaEvolve、FunSearch、ShinkaEvolve）的复现或移植。
-设计吸收了这些系统的理念（SEARCH/REPLACE diff、新颖性门、渐进式探索调度），
-但架构和实现完全独立。
+---
 
-### 1.1 核心架构：三件套范式
+## 阅读指南
 
-每个科研问题被编码为三个文件：
+| 您想了解 | 读这个 | 时间 |
+|----------|--------|------|
+| **我们做了什么、结果如何** | 本文件下方 §1-§3 | 5 分钟 |
+| **OmniEvolve 框架技术细节** | [omnievolve_technical_intro.md](omnievolve_technical_intro.md) | 10 分钟 |
+| **五题逐题深入分析** | [final_competition_report.md](final_competition_report.md)（691 行） | 30 分钟 |
+| **与 #133 的关系和定位** | 本文件 §4 | 3 分钟 |
+| **代码和证书材料** | 本文件 §5 材料索引 | 按需 |
+
+---
+
+## §1 一句话总结
+
+我们用自主开发的 **OmniEvolve 进化框架**（LLM 驱动代码变异 + 沙箱评估 + MCTS 搜索）
+尝试求解五道 benchmark 清晰的科研问题，验证了 #133 求解器组件的能力边界。
+
+**最成功的成果**：#232 非对易多项式优化——获得 **25 个精确闭合常数**（AI+人类协同模式）。
+
+---
+
+## §2 五题结果
+
+| Issue | 赛题 | 赛道 | 结果 | 一句话 |
+|-------|------|------|------|--------|
+| [#232](https://github.com/QuantumBFS/quantum.harness/issues/232) | 非对易多项式优化 | polyopt | ✅ **25 个精确闭合** | 最成功：AI 搜索 + 人工精确化 |
+| [#71](https://github.com/QuantumBFS/quantum.harness/issues/71) | Occam's Circuit | qcs | score=0.9960 | 接近满分，score 悬崖效应 |
+| [#117](https://github.com/QuantumBFS/quantum.harness/issues/117) | Lennard-Jones 团簇 | globalopt | E=−173.13 | 困在同一能量盆地 |
+| [#34](https://github.com/QuantumBFS/quantum.harness/issues/34) | N-Queens 计数 | peps | max_n=14 | N=16 壁垒，42 候选无突破 |
+| [#233](https://github.com/QuantumBFS/quantum.harness/issues/233) | PXP 谱间隙证书 | polyopt | score=0.0 | 数学层面不可能 |
+
+**投入**：69+ 实验 DB，600+ 候选，1300+ LLM 调用，~10M tokens
+
+---
+
+## §3 核心发现
+
+1. **LLM 擅长已知框架内组合搜索，不擅长跳出框架发明新方法**
+   - #232 成功：在 SOHS 框架内搜索基词组合
+   - #117 失败：需要发明 basin hopping，LLM 只会调 L-BFGS 参数
+
+2. **评估器设计比 LLM 能力更重要**
+   - 连续梯度（#232）→ 有效进化
+   - 天花板/悬崖效应（#34, #71）→ 进化停滞
+
+3. **反作弊是证书类挑战的核心难题**
+   - #233 经历 4 轮攻防：LLM 发明 inverse iteration、手写 Lanczos 等绕过方式
+   - 解法：递归调用链分析（AST BFS）
+
+4. **AI+人类协同比纯 AI 更有效**
+   - #232 的 25 个精确闭合 = AI 数值搜索 + 人工有理化 + AI 验证
+
+---
+
+## §4 与 #133 的关系
+
+#133（The Problem Factory）的完整链路：
 
 ```
-initial_code.py   — 种子候选（正确但弱的基线实现）
-evaluator.py      — 评估器（定义 score 函数 + 沙箱执行计划）
-config.toml       — 进化参数（LLM 模型、种群、代数、沙箱限制）
+问题生成器 ──→ 求解器 ──→ 发表
+ (Tier 1)      (Tier 2)    (Tier 3)
 ```
 
-进化循环：种子 → LLM 变异 → 沙箱评估 → MCTS 选择 → 下一代。
-人类的工作是设计种子和评估器（高杠杆），LLM 做搜索空间的自动化探索（耗时但可并行）。
+**OmniEvolve = 求解器组件的 demo 验证。**
 
-### 1.2 独有特性
+- ✅ 实现了：给定问题 + 验证门 → 进化求解 → 积累启发式
+- ❌ 未实现：自动问题生成（Tier 1）、自动发表（Tier 3）
 
-| 特性 | 说明 |
+我们的贡献是给求解器设计提供了**第一手实验证据**：
+- 什么问题适合进化求解（连续梯度 + 组合搜索空间）
+- 什么问题不适合（需要范式跳跃 + 离散目标）
+- LLM 会怎么作弊、怎么防御
+- 评估器怎么设计才有效
+
+详见 [omnievolve_technical_intro.md](omnievolve_technical_intro.md) §15 设计原则。
+
+---
+
+## §5 材料索引
+
+### 介绍文档（读这些了解项目）
+
+| 文件 | 内容 | 行数 |
+|------|------|------|
+| **本文件** | 导航 + 结果摘要 + #133 定位 | — |
+| [omnievolve_technical_intro.md](omnievolve_technical_intro.md) | 框架技术介绍（基于源码调研） | 400+ |
+| [final_competition_report.md](final_competition_report.md) | 完整比赛报告（逐题分析 + 跨题对比 + 框架反思） | 691 |
+
+### 细分报告（按赛题深入）
+
+| 文件 | 赛题 |
 |------|------|
-| **双循环架构** | Fast Loop（单代 11 步候选进化）+ Slow Loop（策略窗口评估与受控元进化） |
-| **渐进式 MCGS 搜索** | MCTS 引导的父代选择，多父代交叉融合，岛屿模型，停滞检测 |
-| **受控元进化** | L0/L1/L2 风险分级，Champion-Challenger 模式，评估语义永久不可变 |
-| **多级新颖性门** | Embedding → AST → 行为签名 → 可选 LLM 裁判，防止重复探索 |
-| **分层记忆** | L0-L4（分支→实验→任务族→领域→全局），混合 FTS5 + 向量检索 |
-| **反作弊沙箱** | 递归调用链分析（AST BFS）+ 多点交叉验证 + 运行时行为检查 |
-
-### 1.3 设计哲学
-
-OmniEvolve 的核心假设是：
-
-> **好的评估器比强的 LLM 更重要。**
-
-一个设计良好的 score 函数（连续梯度 + 多点验证 + 效率权重）能让弱 LLM 进化出有意义的结果；
-一个设计不当的 score 函数（天花板效应、悬崖效应、误导性归一化）会让任何 LLM 陷入停滞。
-
-这个假设在五道赛题的实验中得到了反复验证（见第 4 节）。
-
----
-
-## 2. 与 #133 的关系：定位与愿景
-
-### 2.1 #133 要求什么
-
-Issue #133（The Problem Factory）的完整目标是：
-
-1. **问题生成器**：从文献中挖掘 SOTA 表格、开放证书间隙、争议结果，自动生成候选科研问题
-2. **求解器**：对生成的问题运行自主求解，积累可复用的启发式库
-3. **发表**：通过同行评审（Tier 3 最终门槛）
-
-核心命题：**问题选择（而非问题求解）才是自主科研的真正瓶颈。**
-
-### 2.2 OmniEvolve 在 #133 中的位置
-
-OmniEvolve 对应 #133 的**求解器组件**——给定一个 benchmark 清晰的问题（带可执行验证门），
-尝试通过 LLM 进化自动求解。
-
-**诚实的定位**：
-
-- 我们**没有**实现问题生成器（Tier 1）
-- 我们**没有**自动发文章的能力（Tier 3）
-- 我们做的是：**验证"进化求解器"在一组 benchmark 清晰的科研问题上能走多远**
-
-这是对 #133 求解器组件的一个 **demo 级验证**，不是完整的 Problem Factory。
-
-### 2.3 为什么从 benchmark 问题开始
-
-#133 的验证计划要求：生成的问题必须有"可执行的验证门"（runnable verification gate）。
-这意味着求解器面对的问题必须是：
-
-- **目标明确**：有精确的数值目标或可判定的正确性条件
-- **不可博弈**：验证门是代码，不是主观评价
-- **有难度梯度**：不是二值的对/错，而是有连续的改进空间
-
-我们选择的五道赛题（#34, #71, #117, #232, #233）恰好覆盖了这些条件的不同组合，
-因此它们是验证求解器能力的合适 benchmark——即使最终没有"成功"（打破记录或发表），
-实验本身揭示了进化求解的能力边界和失败模式。
-
-### 2.4 愿景（尚未实现）
-
-完整的 #133 求解器应该：
-
-1. 接受一个问题 + 验证门
-2. 自动生成种子代码（当前：人工编写）
-3. 进化求解，积累启发式库
-4. 将成功的策略迁移到下一个问题（当前：每题独立）
-5. 输出可发表的求解报告（当前：只有内部报告）
-
-OmniEvolve 目前实现了步骤 3 的核心循环，步骤 1/2/4/5 仍是人工的。
-这是下一步工作的方向。
-
----
-
-## 3. 比赛背景与参与动机
-
-### 3.1 比赛上下文
-
-2026 年 7 月的 Harnessing Quantum 比赛（QuantumBFS/quantum.harness）
-提供了多道带 `challenge` 标签的科研问题，涵盖量子电路、全局优化、多项式优化、
-张量网络等方向。比赛截止 2026-07-30 20:00。
-
-### 3.2 参与动机
-
-主要动机**不是**在某道物理赛题上打破记录，而是：
-
-1. **验证 OmniEvolve 框架**：在真实科研问题上端到端跑通进化循环
-2. **为 #133 积累证据**：求解器在什么条件下有效/无效？失败模式是什么？
-3. **测试反作弊设计**：LLM 会如何尝试绕过验证？如何防御？
-4. **发现评估器设计原则**：什么样的 score 函数能引导有效进化？
-
-### 3.3 诚实的结果预期
-
-五道赛题都没有"成功"（打破记录或产生可发表成果）。但这不是重点——
-重点是实验揭示了 LLM 进化求解的能力边界：
-
-- **什么时候有效**：评估器有连续梯度 + 种子有改进空间 + 改进是组合搜索
-- **什么时候无效**：需要算法范式跳跃 + 离散目标 + 数学层面不可能
-- **LLM 会怎么作弊**：硬编码答案、辅助函数隐藏、等价原语替换
-
-这些发现本身就是 #133 求解器设计的直接输入。
-
----
-
-## 4. 五道赛题实验摘要
-
-### 4.1 总览
-
-| Issue | 赛题 | 赛道 | 最高分 | 核心发现 |
-|-------|------|------|--------|---------|
-| #71 | Occam's Circuit | QCS | 0.9960 | Score 悬崖效应；LLM 无法实现 BDD |
-| #117 | Lennard-Jones | GlobalOpt | score=1.0* | 所有候选困在同一能量盆地 |
-| #232 | 非对易多项式优化 | PolyOpt | 25 个精确闭合 | **最成功**：AI+人类协同模式 |
-| #233 | PXP 谱间隙证书 | PolyOpt | 0.0 | 数学层面不可能；反作弊 4 轮迭代 |
-| #34 | N-Queens 精确计数 | PEPS | max_n=14 | N=16 壁垒；进化退化 |
-
-\* #117 的 score=1.0 是归一化假象，实际能量未到记录。
-
-### 4.2 投入统计
-
-| 指标 | 值 |
-|------|-----|
-| 实验 DB 数 | 69+ |
-| 总候选数 | 600+ |
-| LLM 调用 | 1,300+ |
-| Token 消耗 | ~10M |
-| LLM 模型 | qwen3.8-max-preview → GLM-5.2（因超时切换） |
-
-### 4.3 关键发现
-
-**发现 1：LLM 擅长"已知空间内的组合搜索"，不擅长"跳出空间发明新方法"**
-
-- #232 成功：LLM 在已有 SOHS 框架内搜索基词组合 → 收紧上界
-- #117 失败：需要发明 basin hopping 等全局搜索范式 → LLM 只会调 L-BFGS 参数
-- #233 失败：需要构造 level-2 NPA hierarchy → 超出 LLM 代码能力
-
-**发现 2：评估器设计比 LLM 能力更重要**
-
-- #232 的连续 score（upper_bound 从 2.00249→2.00017）给了进化明确方向
-- #71 的离散 score（accuracy 100%/0%）导致 score 悬崖，LLM 无法学习
-- #34 的天花板效应（种子满分）让进化完全无效
-
-**发现 3：反作弊是证书类挑战的核心技术难题**
-
-- #233 经历 4 轮攻防迭代：直接对角化 → 辅助函数隐藏 → inverse iteration → 手写 Lanczos
-- #34 发现硬编码作弊：LLM 直接 `return 92`，wall_time 从 ms 降到 μs
-- 通用原则：递归调用链分析（AST BFS）+ 多点交叉验证
-
-**发现 4：AI+人类协同比纯 AI 更有效**
-
-- #232 的 25 个精确闭合来自：AI 做数值搜索 → 人工做精确有理化 → AI 验证
-- 纯 AI 无法完成精确闭合的最后一步（需要代数数论判断）
-- 纯人工无法高效搜索基词空间（组合爆炸）
-
-### 4.4 #34 N-Queens 最新进展（v4 渐进阶梯 N=12→28）
-
-重新设计评估器为渐进阶梯（N=12, 14, 16, 18, 20, 22, 24, 26, 28），
-失败即停，自适应超时。5 代 24 个候选全部卡在 max_n=14（N=16 超时 40s）。
-
-这进一步验证了"发现 1"：从 O(N!) 回溯到多项式级加速需要根本性算法洞察，
-增量变异无法实现。
-
----
-
-## 5. 对 #133 求解器设计的启示
-
-基于五道赛题的实验，对 #133 的求解器组件提出以下设计约束：
-
-### 5.1 问题选择标准（给生成器的反馈）
-
-适合进化求解的问题特征：
-- ✅ 有连续的 score 梯度（不是二值对错）
-- ✅ 种子代码弱但有明确改进路径
-- ✅ 改进方向是"组合搜索"而非"范式跳跃"
-- ❌ 避免需要全新数学结构的问题
-- ❌ 避免离散目标（如最小门数）缺乏中间状态
-
-### 5.2 启发式库的积累方向
-
-#133 要求求解器积累"可复用的启发式库"。从实验中提炼的初始启发式：
-
-| 启发式 | 来源 | 适用场景 |
-|--------|------|---------|
-| 连续 score 设计 | #71 vs #232 | 所有问题 |
-| 多点交叉验证 | #34 | 有已知答案的问题 |
-| 递归调用链反作弊 | #233 | 证书类问题 |
-| AI+人类精确化协同 | #232 | 需要代数证明的问题 |
-| 渐进阶梯评估 | #34 v4 | 难度随参数增长的问题 |
-| 效率奖励防饱和 | #34 v3 | 种子已接近最优的问题 |
-
-### 5.3 当前局限与下一步
-
-| 局限 | 说明 | 下一步 |
-|------|------|--------|
-| 种子人工编写 | 每个问题需要领域专家设计种子 | 探索 LLM 自动生成种子 |
-| 无跨问题迁移 | 每题独立进化，策略不共享 | 实现启发式库的持久化和迁移 |
-| 无自动发表 | 只有内部报告 | 集成 writeup 模板 + 期刊格式 |
-| 无问题生成 | 问题来自人工选择 | #133 Tier 1 的核心工作 |
-
----
-
-## 6. 文件索引
-
-| 文件 | 说明 |
+| [reports/challenge_report_71_occam_circuit.md](../../../qcs/solutions/quantumevolve/reports/challenge_report_71_occam_circuit.md) | #71 Occam's Circuit |
+| [reports/challenge_report_117_lennard_jones.md](../../../qcs/solutions/quantumevolve/reports/challenge_report_117_lennard_jones.md) | #117 Lennard-Jones |
+| [reports/challenge_report_232_polyopt.md](../../../qcs/solutions/quantumevolve/reports/challenge_report_232_polyopt.md) | #232 非对易多项式优化 |
+| [reports/challenge_report_233_rydberg_gap.md](../../../qcs/solutions/quantumevolve/reports/challenge_report_233_rydberg_gap.md) | #233 PXP 谱间隙 |
+| [reports/challenge_report_34_nqueens.md](../../../qcs/solutions/quantumevolve/reports/challenge_report_34_nqueens.md) | #34 N-Queens |
+| [nqueens_convergence.md](../../../peps/solutions/quantumevolve/reports/nqueens_n28_convergence.md) | #34 收敛记录（42 候选） |
+
+### 代码与证书（实验材料）
+
+| 目录 | 内容 |
 |------|------|
-| [omnievolve_technical_intro.md](omnievolve_technical_intro.md) | **OmniEvolve 技术介绍**（基于源码调研，284 行） |
-| `challenges/omnievolve/` | OmniEvolve 框架源码（23,730 行 Python） |
-| `challenges/omnievolve/examples/` | 五道赛题的三件套（种子+评估器+配置） |
-| `challenges/omnievolve/reports/` | 各赛题报告 + N=28 收敛记录 |
-| `docs/final_competition_report.md` | 完整比赛报告（691 行，逐题详细分析） |
-| `tracks/qcs/solutions/quantumevolve/` | QCS 赛道提交物（#71 为主，含五题总览） |
-| `tracks/peps/solutions/quantumevolve/` | PEPS 赛道提交物（#34） |
-| `tracks/globalopt/solutions/quantumevolve/` | GlobalOpt 赛道提交物（#117） |
-| `tracks/polyopt/solutions/quantumevolve/` | PolyOpt 赛道提交物（#232 + #233） |
-| `tracks/agent-kb/solutions/quantumevolve/` | 本文件（#133 关联说明） |
+| [25 个精确闭合证书](../../../polyopt/solutions/quantumevolve/certificates/) | #232 核心成果（JSON） |
+| [graph33 子项目](../../../polyopt/solutions/quantumevolve/graph33/) | #232 进化 + 验证代码 |
+| [mystery 电路预测](../../../qcs/solutions/quantumevolve/predictions/) | #71 测试集输出 |
+| [五题评估器代码](../../../qcs/solutions/quantumevolve/omnievolve_framework/) | 种子 + 评估器 + 配置 |
+| [Rydberg gap 代码](../../../polyopt/solutions/quantumevolve/rydberg-gap-233/) | #233 ED + SDP 尝试 |
+| `challenges/omnievolve/` | OmniEvolve 框架源码（23,730 行） |
 
----
+### 各赛道 README（提交结构）
 
-## 7. 总结
-
-OmniEvolve 是对 #133 求解器组件的一次诚实验证。它证明了：
-
-1. **LLM 进化在有连续梯度的 benchmark 问题上可以产生有意义的改进**（#232）
-2. **但无法替代领域专家的判断力**——最好的结果来自 AI+人类协同
-3. **评估器设计是核心杠杆**——比 LLM 能力更重要
-4. **反作弊是证书类问题的必要基础设施**——LLM 的绕过能力超出预期
-
-这些发现直接指导了 #133 求解器的设计约束。
-OmniEvolve 不是完整的 Problem Factory，但它是求解器组件的一个可工作的原型，
-且其实验数据为问题生成器的设计（什么样的问题适合自动求解）提供了第一手证据。
+| 赛道 | README |
+|------|--------|
+| agent-kb（主） | 本文件 |
+| [qcs](../../../qcs/solutions/quantumevolve/README.md) | #71 为主 + 五题总览 |
+| [globalopt](../../../globalopt/solutions/quantumevolve/README.md) | #117 |
+| [peps](../../../peps/solutions/quantumevolve/README.md) | #34 |
+| [polyopt](../../../polyopt/solutions/quantumevolve/README.md) | #232 + #233 |
 
 ---
 
