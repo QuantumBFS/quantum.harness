@@ -1,0 +1,4 @@
+timestamp=2026-07-27T17:52:40.746
+hostname=a01r01n03
+julia=1.12.6
+slurm_job=22958341
