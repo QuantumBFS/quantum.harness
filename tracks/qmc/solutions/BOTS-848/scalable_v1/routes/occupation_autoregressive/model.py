@@ -82,6 +82,7 @@ class AutoregressiveNQS:
         }
         self._logpsi_cache: dict[tuple[int, str], complex] = {}
         self._log_derivative_cache: dict[tuple[int, str], np.ndarray] = {}
+        self._parameter_revision = 0
 
     @staticmethod
     def _readonly_view(array: np.ndarray) -> np.ndarray:
@@ -238,6 +239,12 @@ class AutoregressiveNQS:
             [self._parameters[name].reshape(-1) for name in self._parameter_names]
         )
 
+    @property
+    def parameter_revision(self) -> int:
+        """Return the monotonic cache token for the current parameter values."""
+
+        return self._parameter_revision
+
     def set_flat_parameters(self, values: np.ndarray) -> None:
         """Update parameter values in place without replacing shared arrays."""
 
@@ -257,6 +264,7 @@ class AutoregressiveNQS:
             array[...] = flat[parameter_slice].reshape(array.shape)
         self._logpsi_cache.clear()
         self._log_derivative_cache.clear()
+        self._parameter_revision += 1
 
     def _validated_state(self, state: int) -> int:
         configuration = _integer("state", state)

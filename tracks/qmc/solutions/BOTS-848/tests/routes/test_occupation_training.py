@@ -155,6 +155,7 @@ def test_tower_evaluation_cache_is_shared_and_explicitly_invalidated() -> None:
         n_electrons=model.n_electrons,
         two_q=model.two_q,
         l=2,
+        cache_token=lambda: model.parameter_revision,
     )
     support = FeasibilityTable.build(
         n_electrons=model.n_electrons,

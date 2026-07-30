@@ -19,6 +19,7 @@ LogAmplitude = Callable[[int], complex]
 LogScore = Callable[[int], np.ndarray]
 _SPIN_TWO_M_VALUES = (-2, -1, 0, 1, 2)
 _LOG_COMPLEX128_MAX = math.log(np.finfo(np.float64).max)
+_CACHE_TOKEN_UNSET = object()
 
 
 def _integer(name: str, value: object) -> int:
@@ -430,15 +431,30 @@ class _TowerEvaluationCache:
     derived_terms: dict[tuple[int, int], _DerivedTerms]
     logpsi: dict[tuple[int, int], complex]
     log_score: dict[tuple[int, int], np.ndarray]
+    token_provider: Callable[[], object] | None
+    last_token: object
 
     @classmethod
-    def empty(cls) -> _TowerEvaluationCache:
-        return cls({}, {}, {})
+    def empty(
+        cls,
+        token_provider: Callable[[], object] | None,
+    ) -> _TowerEvaluationCache:
+        return cls({}, {}, {}, token_provider, _CACHE_TOKEN_UNSET)
 
     def clear(self) -> None:
         self.derived_terms.clear()
         self.logpsi.clear()
         self.log_score.clear()
+        self.last_token = _CACHE_TOKEN_UNSET
+
+    def begin_evaluation(self) -> None:
+        if self.token_provider is None:
+            self.clear()
+            return
+        token = self.token_provider()
+        if self.last_token is _CACHE_TOKEN_UNSET or token != self.last_token:
+            self.clear()
+            self.last_token = token
 
 
 @dataclass(frozen=True, slots=True)
@@ -569,6 +585,7 @@ class LadderComponent:
     def logpsi(self, state: int) -> complex:
         """Evaluate this component without expanding a fixed-``M`` support."""
 
+        self._evaluation_cache.begin_evaluation()
         configuration = self._validated_state(state)
         return self._logpsi(configuration, {})
 
@@ -631,6 +648,7 @@ class LadderComponent:
     def log_score(self, state: int) -> np.ndarray:
         """Return the analytic parameter derivative of this log amplitude."""
 
+        self._evaluation_cache.begin_evaluation()
         configuration = self._validated_state(state)
         return self._log_score(configuration, {}).copy()
 
@@ -652,6 +670,7 @@ class LadderTower(Mapping[int, LadderComponent]):
         n_electrons: int,
         two_q: int,
         l: int = 2,
+        cache_token: Callable[[], object] | None = None,
     ) -> LadderTower:
         """Build five components from a unit-normalized ``M=0`` state.
 
@@ -665,6 +684,8 @@ class LadderTower(Mapping[int, LadderComponent]):
             raise TypeError("logpsi must be callable")
         if not callable(log_score):
             raise TypeError("log_score must be callable")
+        if cache_token is not None and not callable(cache_token):
+            raise TypeError("cache_token must be callable or None")
         angular_momentum = _integer("l", l)
         if angular_momentum != 2:
             raise ValueError("l must be 2")
@@ -678,7 +699,7 @@ class LadderTower(Mapping[int, LadderComponent]):
             for m in _SPIN_TWO_M_VALUES
         }
         base_table = tables[0]
-        evaluation_cache = _TowerEvaluationCache.empty()
+        evaluation_cache = _TowerEvaluationCache.empty(cache_token)
         components: dict[int, LadderComponent] = {
             0: LadderComponent(
                 m=0,

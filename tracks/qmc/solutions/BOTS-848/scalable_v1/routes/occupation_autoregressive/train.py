@@ -1193,6 +1193,7 @@ def run_full_training(
         n_electrons=model.n_electrons,
         two_q=model.two_q,
         l=2,
+        cache_token=lambda: model.parameter_revision,
     )
     samplers = {
         m: FixedMMetropolisSampler(tower, target_m=m)
