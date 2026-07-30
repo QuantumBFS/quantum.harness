@@ -98,9 +98,12 @@ def collect_certificate(
     dirty = bool(git_output(repo_root, "status", "--porcelain"))
     if len(commit) != 40 or dirty:
         raise RuntimeError("Phase 6 requires a clean committed source revision")
+    jax.config.update("jax_enable_x64", True)
     devices = jax.devices()
     if not devices or devices[0].platform != "gpu":
         raise RuntimeError("Phase 6 must run inside a JAX GPU allocation")
+    if not jax.config.read("jax_enable_x64"):
+        raise RuntimeError("Phase 6 requires JAX x64 mode")
     source_findings = forbidden_source_references()
     loaded_forbidden = sorted(
         name
@@ -118,6 +121,7 @@ def collect_certificate(
     seed_results = []
     checkpoint_dir = output_path.parent / "checkpoints"
     for seed in SEEDS:
+        print(f"phase6 seed {seed}: training start", flush=True)
         checkpoint, result = train_seed(seed)
         checkpoint_path = checkpoint_dir / f"dplus0-seed-{seed}.json"
         write_checkpoint(checkpoint_path, checkpoint)
@@ -130,6 +134,10 @@ def collect_certificate(
             }
         )
         seed_results.append(result)
+        print(
+            f"phase6 seed {seed}: checkpoint {checkpoints[-1]['sha256']}",
+            flush=True,
+        )
 
     finite_results = all(
         all(
@@ -196,6 +204,7 @@ def collect_certificate(
         "runtime_seconds": time.perf_counter() - started,
         "jax_device": str(devices[0]),
         "jax_platform": devices[0].platform,
+        "jax_x64_enabled": jax.config.read("jax_enable_x64"),
         "git_commit": commit,
         "git_dirty": dirty,
         "hostname": platform.node(),

@@ -17,6 +17,34 @@ if [[ ! -x "${repo_root}/.venv/bin/python" ]]; then
   exit 2
 fi
 
+runtime_compat="/work/home/jiabohan5/.cache/route-d-plus/runtime-libs"
+runtime_library="${runtime_compat}/libstdc++.so.6.0.29"
+runtime_library_sha256="4f045231ff3a95c2fbfde450575f0ef45d23e95be15193c8729b521fc363ece4"
+if [[ ! -f "${runtime_library}" ]]; then
+  echo "Pinned Route D+ compatibility runtime is unavailable" >&2
+  exit 2
+fi
+actual_runtime_sha256="$(sha256sum "${runtime_library}" | cut -d ' ' -f 1)"
+if [[ "${actual_runtime_sha256}" != "${runtime_library_sha256}" ]]; then
+  echo "Pinned Route D+ compatibility runtime hash mismatch" >&2
+  exit 2
+fi
+
+nvidia_root="${repo_root}/.venv/lib/python3.11/site-packages/nvidia"
+cuda_library_path="${runtime_compat}"
+for component in \
+  cuda_cupti cufft cudnn cusolver nvjitlink nccl cuda_runtime cublas cusparse
+do
+  component_library="${nvidia_root}/${component}/lib"
+  if [[ ! -d "${component_library}" ]]; then
+    echo "CUDA wheel library directory is unavailable: ${component_library}" >&2
+    exit 2
+  fi
+  cuda_library_path="${cuda_library_path}:${component_library}"
+done
+export LD_LIBRARY_PATH="${cuda_library_path}${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+export JAX_ENABLE_X64=true
+
 mkdir -p "${run_dir}"
 cd "${repo_root}/tracks/qmc/solutions/BOTS-848"
 "${repo_root}/.venv/bin/python" -m ruff check \

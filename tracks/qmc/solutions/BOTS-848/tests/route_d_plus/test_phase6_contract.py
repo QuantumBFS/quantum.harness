@@ -34,5 +34,8 @@ def test_phase6_batch_requires_phase5_and_gpu_certificate() -> None:
     assert "-m route_d_plus.certify_phase6" in batch
     assert "require_phase5_certificate" in certificate
     assert 'devices[0].platform != "gpu"' in certificate
+    assert 'jax.config.update("jax_enable_x64", True)' in certificate
     assert "FORBIDDEN_MODULE_PREFIXES" in certificate
     assert "validate_certificate(payload)" in certificate
+    assert "runtime_library_sha256=" in batch
+    assert "LD_LIBRARY_PATH=" in batch
