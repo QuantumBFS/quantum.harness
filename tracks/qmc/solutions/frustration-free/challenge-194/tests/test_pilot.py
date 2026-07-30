@@ -32,9 +32,7 @@ def test_frozen_registry_has_exact_order_grid_and_unique_identities(tmp_path: Pa
     spec = pilot._build_test_pilot_run_spec(tmp_path / "pilot")
     cells = [PilotCell.from_document(item) for item in spec["cells"]]
     assert len(cells) == 96
-    assert [
-        (cell.sigma, cell.length, cell.replica) for cell in cells
-    ] == [
+    assert [(cell.sigma, cell.length, cell.replica) for cell in cells] == [
         (sigma, length, replica)
         for sigma in (0.8, 0.9, 1.0, 1.1)
         for length in (2**10, 2**14, 2**18)
@@ -76,15 +74,17 @@ def test_small_cell_end_to_end_is_idempotent_and_portable(tmp_path: Path):
 
     copied = tmp_path / "downloaded"
     shutil.copytree(path.parent, copied)
-    assert pilot._verify_test_pilot_download(copied / "run_spec.json")[
-        "cell_count"
-    ] == 1
+    assert (
+        pilot._verify_test_pilot_download(copied / "run_spec.json")["cell_count"] == 1
+    )
 
 
 def test_duplicate_execution_has_one_equivalent_verified_winner(tmp_path: Path):
     path = _tiny_spec(tmp_path)
     with ThreadPoolExecutor(max_workers=2) as pool:
-        results = list(pool.map(lambda _: pilot._run_test_pilot_cell(path, 0), range(2)))
+        results = list(
+            pool.map(lambda _: pilot._run_test_pilot_cell(path, 0), range(2))
+        )
     assert results[0] == results[1]
     run = next((path.parent / "cells").iterdir()) / "run"
     assert len(list((run / "trajectories").glob("trajectory-*.h5"))) == 1
@@ -131,9 +131,7 @@ def test_run_spec_read_allows_same_parent_to_gain_cells_directory(
     original = pilot._read_descriptor_bounded
     held = False
 
-    def hold_after_read(
-        descriptor: int, maximum_size: int, description: str
-    ) -> bytes:
+    def hold_after_read(descriptor: int, maximum_size: int, description: str) -> bytes:
         nonlocal held
         payload = original(descriptor, maximum_size, description)
         if description == "pilot run spec" and not held:
@@ -148,7 +146,7 @@ def test_run_spec_read_allows_same_parent_to_gain_cells_directory(
             pilot._load_pilot_spec,
             path,
             verify_current_environment=False,
-                expected_schema=pilot.TEST_RUN_SPEC_SCHEMA,
+            expected_schema=pilot.TEST_RUN_SPEC_SCHEMA,
         )
         assert descriptor_read.wait(timeout=10)
         (path.parent / "cells").mkdir()
@@ -272,13 +270,13 @@ def test_correctness_evidence_requires_checked_in_approval_digest(
     }
     validation_spec_path.write_bytes(pilot._canonical_bytes(validation_spec))
     monkeypatch.setattr(pilot, "validate_report_payload", lambda *_: None)
-    monkeypatch.setattr(pilot, "validate_validation_run_spec", lambda *_args, **_kwargs: None)
+    monkeypatch.setattr(
+        pilot, "validate_validation_run_spec", lambda *_args, **_kwargs: None
+    )
     report["checks"] = [
         {
             "passed": True,
-            "internal_sha256": pilot._sha256(
-                pilot._canonical_bytes({"changed": True})
-            ),
+            "internal_sha256": pilot._sha256(pilot._canonical_bytes({"changed": True})),
         }
     ]
     report_path.write_bytes(pilot._canonical_bytes(report))
@@ -300,9 +298,7 @@ def test_correctness_evidence_requires_checked_in_approval_digest(
         "path",
     ),
 )
-def test_public_loader_never_downgrades_frozen_p0(
-    tmp_path: Path, mutation: str
-):
+def test_public_loader_never_downgrades_frozen_p0(tmp_path: Path, mutation: str):
     path = _frozen_spec(tmp_path)
     document = json.loads(path.read_text())
     if mutation == "cell-count":
@@ -326,9 +322,7 @@ def test_public_loader_never_downgrades_frozen_p0(
         document["cells"][0]["request_sha256"] = "f" * 64
     else:
         document["cells"][0]["run_path"] = "cells/other/run"
-    document["run_spec_sha256"] = pilot._document_hash(
-        document, "run_spec_sha256"
-    )
+    document["run_spec_sha256"] = pilot._document_hash(document, "run_spec_sha256")
     path.write_bytes(pilot._canonical_bytes(document))
     with pytest.raises(RuntimeError):
         pilot.load_pilot_run_spec(path, verify_current_environment=False)
@@ -341,13 +335,9 @@ def test_public_loader_rejects_private_tiny_schema(tmp_path: Path):
 
 
 def test_public_p0_loader_rejects_internally_rehashed_extension(tmp_path: Path):
-    path = pilot._write_test_extension_run_spec(
-        tmp_path / "extension", tiny=True
-    )
+    path = pilot._write_test_extension_run_spec(tmp_path / "extension", tiny=True)
     document = json.loads(path.read_text())
-    document["run_spec_sha256"] = pilot._document_hash(
-        document, "run_spec_sha256"
-    )
+    document["run_spec_sha256"] = pilot._document_hash(document, "run_spec_sha256")
     path.write_bytes(pilot._canonical_bytes(document))
     with pytest.raises(RuntimeError, match="P0 run spec"):
         pilot.load_pilot_run_spec(path, verify_current_environment=False)
@@ -369,9 +359,7 @@ def test_public_loader_rejects_internally_rehashed_non_p0_registry(
     kwargs = {field: value}
     document = pilot._build_test_pilot_run_spec(root, **kwargs)
     document["schema_version"] = pilot.RUN_SPEC_SCHEMA
-    document["run_spec_sha256"] = pilot._document_hash(
-        document, "run_spec_sha256"
-    )
+    document["run_spec_sha256"] = pilot._document_hash(document, "run_spec_sha256")
     root.mkdir()
     path = root / "run_spec.json"
     path.write_bytes(pilot._canonical_bytes(document))
@@ -379,18 +367,12 @@ def test_public_loader_rejects_internally_rehashed_non_p0_registry(
         pilot.load_pilot_run_spec(path, verify_current_environment=False)
 
 
-def test_bounded_json_reader_rejects_limit_plus_one_malformed_and_deep(
-    tmp_path: Path
-):
+def test_bounded_json_reader_rejects_limit_plus_one_malformed_and_deep(tmp_path: Path):
     valid = tmp_path / "valid.json"
     valid.write_bytes(pilot._canonical_bytes({"schema_version": "test"}))
-    pilot._read_canonical(
-        valid, "test", maximum_size=valid.stat().st_size
-    )
+    pilot._read_canonical(valid, "test", maximum_size=valid.stat().st_size)
     with pytest.raises(RuntimeError, match="byte-size"):
-        pilot._read_canonical(
-            valid, "test", maximum_size=valid.stat().st_size - 1
-        )
+        pilot._read_canonical(valid, "test", maximum_size=valid.stat().st_size - 1)
 
     oversized = tmp_path / "oversized.json"
     with oversized.open("wb") as stream:
@@ -418,9 +400,7 @@ def test_bounded_json_reader_rejects_limit_plus_one_malformed_and_deep(
     with pytest.raises(RuntimeError, match="string"):
         pilot._validate_json_bounds("x" * (pilot.PILOT_JSON_MAX_STRING + 1))
     with pytest.raises(RuntimeError, match="sequence"):
-        pilot._validate_json_bounds(
-            [None] * (pilot.PILOT_JSON_MAX_CONTAINER + 1)
-        )
+        pilot._validate_json_bounds([None] * (pilot.PILOT_JSON_MAX_CONTAINER + 1))
     pilot._validate_json_bounds([None, None], maximum_nodes=3)
     with pytest.raises(RuntimeError, match="node"):
         pilot._validate_json_bounds([None, None, None], maximum_nodes=3)
@@ -489,9 +469,7 @@ def test_publication_rejects_parent_swap_to_symlink(
 
     monkeypatch.setattr(pilot, "_link_at", swapping_link)
     with pytest.raises(RuntimeError, match="parent|identity|changed"):
-        pilot._publish_once(
-            parent / "marker.json", {"schema_version": "test"}
-        )
+        pilot._publish_once(parent / "marker.json", {"schema_version": "test"})
     assert not (hostile / "marker.json").exists()
 
 
@@ -505,10 +483,10 @@ def test_publication_rejects_noncooperating_destination_winner(
         source: str, target: str, source_fd: int, destination_fd: int
     ) -> None:
         descriptor = os.open(
-                target,
-                os.O_WRONLY | os.O_CREAT | os.O_EXCL,
-                0o600,
-                dir_fd=destination_fd,
+            target,
+            os.O_WRONLY | os.O_CREAT | os.O_EXCL,
+            0o600,
+            dir_fd=destination_fd,
         )
         try:
             os.write(
@@ -535,11 +513,7 @@ def test_cell_root_replacement_after_descriptor_open_fails_closed(
 
     def swapping_flock(descriptor: int, operation: int) -> None:
         nonlocal swapped
-        if (
-            operation == pilot.fcntl.LOCK_EX
-            and not swapped
-            and cell_root.exists()
-        ):
+        if operation == pilot.fcntl.LOCK_EX and not swapped and cell_root.exists():
             swapped = True
             cell_root.rename(path.parent / "detached-cell")
             cell_root.mkdir()
@@ -550,7 +524,9 @@ def test_cell_root_replacement_after_descriptor_open_fails_closed(
         pilot._run_test_pilot_cell(path, 0)
 
 
-def test_approval_registry_rejects_symlink(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+def test_approval_registry_rejects_symlink(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+):
     real = pilot._approval_registry_path()
     linked = tmp_path / "approval.json"
     linked.symlink_to(real)
@@ -609,11 +585,7 @@ def test_publication_rejects_ancestor_replacement_before_descriptor_open(
     ancestor = tmp_path / "ancestor"
     parent = ancestor / "parent"
     parent.mkdir(parents=True)
-    flags = (
-        os.O_RDONLY
-        | getattr(os, "O_DIRECTORY", 0)
-        | getattr(os, "O_NOFOLLOW", 0)
-    )
+    flags = os.O_RDONLY | getattr(os, "O_DIRECTORY", 0) | getattr(os, "O_NOFOLLOW", 0)
     swapped = False
 
     def swapping_open(name: str, parent_fd: int) -> int:
@@ -624,9 +596,7 @@ def test_publication_rejects_ancestor_replacement_before_descriptor_open(
             (ancestor / "parent").mkdir(parents=True)
         return os.open(name, flags, dir_fd=parent_fd)
 
-    monkeypatch.setattr(
-        pilot, "_open_directory_at", swapping_open, raising=False
-    )
+    monkeypatch.setattr(pilot, "_open_directory_at", swapping_open, raising=False)
     with pytest.raises(RuntimeError, match="ancestor|generation|identity"):
         pilot._publish_once(parent / "marker.json", {"schema_version": "test"})
 
@@ -638,9 +608,7 @@ def test_directory_chain_accepts_generation_only_metadata_drift(
     root.mkdir()
     descriptor = os.open(
         root,
-        os.O_RDONLY
-        | getattr(os, "O_DIRECTORY", 0)
-        | getattr(os, "O_NOFOLLOW", 0),
+        os.O_RDONLY | getattr(os, "O_DIRECTORY", 0) | getattr(os, "O_NOFOLLOW", 0),
     )
     original = os.fstat(descriptor)
     real_lstat = Path.lstat

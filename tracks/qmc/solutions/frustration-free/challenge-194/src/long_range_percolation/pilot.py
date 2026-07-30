@@ -1374,7 +1374,9 @@ def _validate_pilot_spec(
         expected_kappa_count = (
             len(PILOT_KAPPAS)
             if contract.production_kind == "p0"
-            else 17 if is_extension else None
+            else 17
+            if is_extension
+            else None
         )
         if (
             set(raw) != expected_keys
@@ -1884,9 +1886,7 @@ def _pending_registered_cells(
     return pending
 
 
-def run_p0_extension_cell(
-    run_spec_path: Path, cell_index: int
-) -> dict[str, object]:
+def run_p0_extension_cell(run_spec_path: Path, cell_index: int) -> dict[str, object]:
     from .pilot_extension import EXTENSION_RUN_SPEC_SCHEMA
 
     return _run_cell(
@@ -2924,8 +2924,10 @@ def _open_verified_pilot_analysis_snapshot(
     _expected_schema: str | None = None,
 ) -> Iterator[_PilotAnalysisSnapshot]:
     expected_schema = (
-        RUN_SPEC_SCHEMA if production else TEST_RUN_SPEC_SCHEMA
-    ) if _expected_schema is None else _expected_schema
+        (RUN_SPEC_SCHEMA if production else TEST_RUN_SPEC_SCHEMA)
+        if _expected_schema is None
+        else _expected_schema
+    )
     contract = _contract_for_schema(expected_schema)
     if (
         not isinstance(run_spec_path, Path)

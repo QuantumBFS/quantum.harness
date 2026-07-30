@@ -53,10 +53,7 @@ def _extension_grid(lower: float, upper: float) -> tuple[float, ...]:
     points = [lower, upper]
     for _ in range(4):
         ordered = sorted(points)
-        points.extend(
-            left + (right - left) / 2.0
-            for left, right in pairwise(ordered)
-        )
+        points.extend(left + (right - left) / 2.0 for left, right in pairwise(ordered))
     return tuple(sorted(set(points)))
 
 
@@ -201,9 +198,7 @@ def test_combine_p0_evidence_unions_grids_and_pools_whole_replica_moments():
         direct = np.concatenate(
             (
                 samples[("p0", 0.9, pilot.PILOT_LENGTHS[0], endpoint, name)],
-                samples[
-                    ("extension", 0.9, pilot.PILOT_LENGTHS[0], endpoint, name)
-                ],
+                samples[("extension", 0.9, pilot.PILOT_LENGTHS[0], endpoint, name)],
             )
         )
         assert pooled["means"][name] == pytest.approx(float(np.mean(direct)))
@@ -235,24 +230,27 @@ def test_combine_p0_evidence_binds_sources_and_hashes_unsigned_document():
     digest = unsigned.pop("analysis_document_sha256")
 
     assert combined["schema_version"] == extension.COMBINED_ANALYSIS_SCHEMA
-    assert combined["source_p0_analysis_document_sha256"] == p0[
-        "analysis_document_sha256"
-    ]
-    assert combined["source_extension_analysis_document_sha256"] == (
-        extension_analysis["analysis_document_sha256"]
+    assert (
+        combined["source_p0_analysis_document_sha256"] == p0["analysis_document_sha256"]
+    )
+    assert (
+        combined["source_extension_analysis_document_sha256"]
+        == (extension_analysis["analysis_document_sha256"])
     )
     assert combined["p0_run_spec_sha256"] == p0["p0_run_spec_sha256"]
     assert combined["p0_progress_sha256"] == p0["p0_progress_sha256"]
-    assert combined["extension_run_spec_sha256"] == extension_analysis[
-        "extension_run_spec_sha256"
-    ]
-    assert combined["extension_progress_sha256"] == extension_analysis[
-        "extension_progress_sha256"
-    ]
+    assert (
+        combined["extension_run_spec_sha256"]
+        == extension_analysis["extension_run_spec_sha256"]
+    )
+    assert (
+        combined["extension_progress_sha256"]
+        == extension_analysis["extension_progress_sha256"]
+    )
     assert combined["p0_source_revision"] == p0["source_revision"]
-    assert combined["extension_source_revision"] == extension_analysis[
-        "source_revision"
-    ]
+    assert (
+        combined["extension_source_revision"] == extension_analysis["source_revision"]
+    )
     assert combined["observable_columns"] == OBSERVABLE_COLUMNS
     assert digest == hashlib.sha256(_canonical_bytes(unsigned)).hexdigest()
 
@@ -282,7 +280,9 @@ def test_combine_p0_evidence_rejects_adversarial_sources(defect: str, match: str
         target["analysis_document_sha256"] = "0" * 64
     elif defect == "wrong-grid":
         estimates[1]["kappa_hex"] = float.fromhex(estimates[1]["kappa_hex"]).hex()
-        estimates[1]["kappa_hex"] = (float.fromhex(estimates[1]["kappa_hex"]) + 1e-6).hex()
+        estimates[1]["kappa_hex"] = (
+            float.fromhex(estimates[1]["kappa_hex"]) + 1e-6
+        ).hex()
         _sign(target)
     elif defect == "extra-overlap":
         estimates[1]["kappa_hex"] = pilot.PILOT_KAPPAS[1].hex()
@@ -564,9 +564,7 @@ def _combined_selector_document(
             if row["sigma_hex"] == sigma.hex()
             and row["length"] == pilot.PILOT_LENGTHS[0]
         )
-        combined_kappas = tuple(
-            sorted(set(pilot.PILOT_KAPPAS) | set(extension_kappas))
-        )
+        combined_kappas = tuple(sorted(set(pilot.PILOT_KAPPAS) | set(extension_kappas)))
         threshold = combined_kappas[combined_interval]
         for rows, kappas in (
             (p0_rows, tuple(pilot.PILOT_KAPPAS)),
@@ -663,9 +661,7 @@ def _tiny_complete_p0_extension(
         cell = dict(raw)
         sigma = float.fromhex(cell["sigma"])
         kappas = sigma_kappas[sigma]
-        cell["sigma_grid_id"] = (
-            f"pilot-p0-extension-test-v1|sigma-f64={sigma.hex()}"
-        )
+        cell["sigma_grid_id"] = f"pilot-p0-extension-test-v1|sigma-f64={sigma.hex()}"
         cell["kappas"] = [value.hex() for value in kappas]
         provisional = PilotCell.from_document(cell)
         request = provisional.request(
@@ -714,9 +710,7 @@ def _tiny_complete_p0_extension(
     document["rng_assignment_sha256"] = hashlib.sha256(
         _canonical_bytes({"assignments": assignments})
     ).hexdigest()
-    document["run_spec_sha256"] = pilot._document_hash(
-        document, "run_spec_sha256"
-    )
+    document["run_spec_sha256"] = pilot._document_hash(document, "run_spec_sha256")
     pilot._validate_pilot_spec(
         document,
         contract=pilot.TEST_EXTENSION_CONTRACT,
@@ -736,9 +730,7 @@ def _tiny_complete_p0_extension(
             for sigma in sigmas
         ],
     }
-    protocol["protocol_sha256"] = hashlib.sha256(
-        _canonical_bytes(protocol)
-    ).hexdigest()
+    protocol["protocol_sha256"] = hashlib.sha256(_canonical_bytes(protocol)).hexdigest()
 
     def deterministic_trajectory(
         request: object, _kernel: np.ndarray, _alias: object
@@ -790,7 +782,9 @@ def test_aggregate_p0_extension_groups_sigma_grids_with_bounded_retention(
     ) -> TrajectoryResult:
         nonlocal previous_trajectory
         if previous_trajectory is not None:
-            assert previous_trajectory() is None, "more than one trajectory was retained"
+            assert previous_trajectory() is None, (
+                "more than one trajectory was retained"
+            )
         result = original_loader(trajectory, expected, required_digest)
         previous_trajectory = weakref.ref(result)
         return result
@@ -807,9 +801,7 @@ def test_aggregate_p0_extension_groups_sigma_grids_with_bounded_retention(
             assert previous_group() is None, "more than one group array was retained"
         observed_group_shapes.append(values.shape)
         previous_group = weakref.ref(values)
-        return original_grouper(
-            sigma, length, kappas, values, request_sha256
-        )
+        return original_grouper(sigma, length, kappas, values, request_sha256)
 
     monkeypatch.setattr(pilot, "_load_analysis_trajectory", tracking_loader)
     monkeypatch.setattr(analysis, "_group_estimates", tracking_grouper)
@@ -849,10 +841,7 @@ def test_aggregate_p0_extension_binds_exact_sources_and_document_hash(
     digest = unsigned.pop("analysis_document_sha256")
 
     assert document["schema_version"] == EXTENSION_ANALYSIS_SCHEMA
-    assert (
-        document["source_extension_protocol_sha256"]
-        == protocol["protocol_sha256"]
-    )
+    assert document["source_extension_protocol_sha256"] == protocol["protocol_sha256"]
     assert (
         document["extension_run_spec_sha256"]
         == hashlib.sha256(path.read_bytes()).hexdigest()
@@ -994,8 +983,7 @@ def test_aggregate_p0_extension_requires_exact_production_cardinality(
     lengths = (2**10, 2**14, 2**18)
     replicas = tuple(range(24, 40))
     grids = {
-        sigma: tuple(sigma + 0.125 * index for index in range(17))
-        for sigma in sigmas
+        sigma: tuple(sigma + 0.125 * index for index in range(17)) for sigma in sigmas
     }
     protocol: dict[str, object] = {
         "loop_order": ["sigma", "length", "replica"],
@@ -1009,9 +997,7 @@ def test_aggregate_p0_extension_requires_exact_production_cardinality(
             for sigma in sigmas
         ],
     }
-    protocol["protocol_sha256"] = hashlib.sha256(
-        _canonical_bytes(protocol)
-    ).hexdigest()
+    protocol["protocol_sha256"] = hashlib.sha256(_canonical_bytes(protocol)).hexdigest()
     cells: list[dict[str, object]] = []
     for sigma in sigmas:
         for length in lengths:
@@ -1690,8 +1676,7 @@ def test_combined_selector_uses_per_sigma_axes_and_preserves_control_windows():
 
     assert first["schema_version"] == analysis.COMBINED_BRACKET_SCHEMA
     assert (
-        first["source_analysis_document_sha256"]
-        == combined["analysis_document_sha256"]
+        first["source_analysis_document_sha256"] == combined["analysis_document_sha256"]
     )
     assert _canonical_bytes(first) == _canonical_bytes(second)
     assert first["requires_p0_extension"] is False
@@ -1725,9 +1710,7 @@ def test_combined_selector_uses_per_sigma_axes_and_preserves_control_windows():
 
 
 def test_combined_selector_fails_closed_when_one_sigma_remains_unresolved():
-    p0, extension_analysis, combined = _combined_selector_document(
-        unresolved_sigma=1.0
-    )
+    p0, extension_analysis, combined = _combined_selector_document(unresolved_sigma=1.0)
 
     brackets = analysis.select_p1_brackets(
         combined,
@@ -1762,12 +1745,14 @@ def test_p1_accepts_combined_only_with_selected_v2_brackets():
         extension_analysis=extension_analysis,
     )
 
-    assert protocol["source_analysis_document_sha256"] == combined[
-        "analysis_document_sha256"
-    ]
-    assert protocol["source_bracket_document_sha256"] == brackets[
-        "bracket_document_sha256"
-    ]
+    assert (
+        protocol["source_analysis_document_sha256"]
+        == combined["analysis_document_sha256"]
+    )
+    assert (
+        protocol["source_bracket_document_sha256"]
+        == brackets["bracket_document_sha256"]
+    )
     assert protocol["grid_namespace"] == "pilot-p1-v1"
     assert protocol["master_seed"] == 19_420_261_729
     assert protocol["replicas"] == list(range(8, 24))
@@ -1874,9 +1859,7 @@ def test_combined_build_rejects_rebound_cross_generation_brackets():
         extension_analysis=alternate_extension,
     )
     rebound = json.loads(json.dumps(alternate_brackets))
-    rebound["source_analysis_document_sha256"] = combined[
-        "analysis_document_sha256"
-    ]
+    rebound["source_analysis_document_sha256"] = combined["analysis_document_sha256"]
     unsigned = dict(rebound)
     unsigned.pop("bracket_document_sha256")
     rebound["bracket_document_sha256"] = hashlib.sha256(

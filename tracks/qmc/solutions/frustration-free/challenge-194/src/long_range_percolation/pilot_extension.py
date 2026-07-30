@@ -968,10 +968,7 @@ def _validated_combination_rows(
         if index != expected_index:
             raise RuntimeError(f"{source_name} observable columns are invalid")
     raw_rows = source.get("estimates")
-    if (
-        not isinstance(raw_rows, Sequence)
-        or isinstance(raw_rows, (str, bytes))
-    ):
+    if not isinstance(raw_rows, Sequence) or isinstance(raw_rows, (str, bytes)):
         _malformed(f"{source_name} estimates are malformed")
     expected_identities = [
         (sigma, length, kappa)
@@ -1024,18 +1021,11 @@ def _validated_combination_rows(
                 or not math.isfinite(float(error))
                 or float(error) < 0.0
             ):
-                raise RuntimeError(
-                    f"{source_name} observable moments must be finite"
-                )
+                raise RuntimeError(f"{source_name} observable moments must be finite")
         raw_requests = raw.get("request_sha256")
-        if (
-            not isinstance(raw_requests, list)
-            or len(raw_requests) != replica_count
-        ):
+        if not isinstance(raw_requests, list) or len(raw_requests) != replica_count:
             raise RuntimeError(f"{source_name} request replica list is invalid")
-        requests = tuple(
-            _exact_digest(value, "request") for value in raw_requests
-        )
+        requests = tuple(_exact_digest(value, "request") for value in raw_requests)
         if len(set(requests)) != replica_count:
             raise RuntimeError(f"{source_name} request identities are duplicate")
         group = (sigma, length)
@@ -1097,21 +1087,17 @@ def _validated_combination_sources(
         1.0: _recursive_binary64_grid_17(PILOT_KAPPAS[5], PILOT_KAPPAS[10]),
     }
     for sigma, grid in extension_grids.items():
-        digest = _sha256(
-            _canonical_bytes({"kappas": [value.hex() for value in grid]})
-        )
+        digest = _sha256(_canonical_bytes({"kappas": [value.hex() for value in grid]}))
         if digest != EXTENSION_GRID_HASHES[sigma.hex()]:
             raise RuntimeError("extension grid binding is invalid")
-    extension_rows, _extension_groups, extension_requests = (
-        _validated_combination_rows(
-            extension_analysis,
-            schema=EXTENSION_ANALYSIS_SCHEMA,
-            sigmas=EXTENSION_SIGMAS,
-            grids=extension_grids,
-            replica_count=len(EXTENSION_REPLICAS),
-            source_name="extension",
-            expected_fields=_EXTENSION_ANALYSIS_FIELDS,
-        )
+    extension_rows, _extension_groups, extension_requests = _validated_combination_rows(
+        extension_analysis,
+        schema=EXTENSION_ANALYSIS_SCHEMA,
+        sigmas=EXTENSION_SIGMAS,
+        grids=extension_grids,
+        replica_count=len(EXTENSION_REPLICAS),
+        source_name="extension",
+        expected_fields=_EXTENSION_ANALYSIS_FIELDS,
     )
     if p0_requests & extension_requests:
         raise RuntimeError("P0 and extension request identities overlap")
@@ -1149,9 +1135,7 @@ def _pooled_row(
         )
         means[name] = mean
         standard_errors[name] = standard_error
-    requests = list(p0_row["request_sha256"]) + list(
-        extension_row["request_sha256"]
-    )
+    requests = list(p0_row["request_sha256"]) + list(extension_row["request_sha256"])
     if len(requests) != total or len(set(requests)) != total:
         raise RuntimeError("combined request identities are invalid")
     return {
@@ -1212,9 +1196,7 @@ def _build_combined_p0_evidence(
     document: dict[str, object] = {
         "schema_version": COMBINED_ANALYSIS_SCHEMA,
         "source_p0_analysis_document_sha256": _analysis_hash(p0_analysis),
-        "source_extension_analysis_document_sha256": _analysis_hash(
-            extension_analysis
-        ),
+        "source_extension_analysis_document_sha256": _analysis_hash(extension_analysis),
         "p0_run_spec_sha256": _exact_digest(
             p0_analysis.get("p0_run_spec_sha256"), "P0 run spec"
         ),
@@ -1229,9 +1211,7 @@ def _build_combined_p0_evidence(
             extension_analysis.get("extension_progress_sha256"),
             "extension progress",
         ),
-        "p0_source_revision": _exact_revision(
-            p0_analysis.get("source_revision"), "P0"
-        ),
+        "p0_source_revision": _exact_revision(p0_analysis.get("source_revision"), "P0"),
         "extension_source_revision": _exact_revision(
             extension_analysis.get("source_revision"), "extension"
         ),
@@ -1248,9 +1228,10 @@ def validate_combined_p0_evidence(
     extension_analysis: Mapping[str, object],
     combined_analysis: Mapping[str, object],
 ) -> None:
-    if not isinstance(combined_analysis, Mapping) or set(
-        combined_analysis
-    ) != _COMBINED_FIELDS:
+    if (
+        not isinstance(combined_analysis, Mapping)
+        or set(combined_analysis) != _COMBINED_FIELDS
+    ):
         raise RuntimeError("combined analysis fields are invalid")
     estimate_count = _require_builtin_int(
         combined_analysis.get("estimate_count"), "combined estimate count"
@@ -1273,17 +1254,14 @@ def validate_combined_p0_evidence(
         not isinstance(raw_entries, list)
         or len(raw_entries) != len(PILOT_SIGMAS)
         or any(
-            not isinstance(entry, Mapping)
-            or set(entry) != _COMBINED_SIGMA_FIELDS
+            not isinstance(entry, Mapping) or set(entry) != _COMBINED_SIGMA_FIELDS
             for entry in raw_entries
         )
     ):
         raise RuntimeError("combined analysis sigma entries are malformed")
     for entry in raw_entries:
         raw_lengths = entry.get("lengths")
-        if not isinstance(raw_lengths, list) or len(raw_lengths) != len(
-            PILOT_LENGTHS
-        ):
+        if not isinstance(raw_lengths, list) or len(raw_lengths) != len(PILOT_LENGTHS):
             raise RuntimeError("combined length axis is invalid")
         lengths = tuple(
             _require_builtin_int(value, "combined length axis value")
@@ -1298,9 +1276,7 @@ def validate_combined_p0_evidence(
             if not isinstance(raw, Mapping) or set(raw) != _ESTIMATE_FIELDS:
                 raise RuntimeError("combined estimate shape is invalid")
             _require_builtin_int(raw.get("length"), "combined estimate length")
-            _require_builtin_int(
-                raw.get("replica_count"), "combined replica count"
-            )
+            _require_builtin_int(raw.get("replica_count"), "combined replica count")
     expected = _build_combined_p0_evidence(p0_analysis, extension_analysis)
     if _canonical_bytes(combined_analysis) != _canonical_bytes(expected):
         raise RuntimeError("combined analysis semantic recomputation mismatch")

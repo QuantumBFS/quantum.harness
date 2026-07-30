@@ -355,7 +355,9 @@ def _validated_extension_axes(
     protocol: Mapping[str, object],
     *,
     production: bool,
-) -> tuple[tuple[float, ...], tuple[int, ...], tuple[int, ...], tuple[tuple[float, ...], ...]]:
+) -> tuple[
+    tuple[float, ...], tuple[int, ...], tuple[int, ...], tuple[tuple[float, ...], ...]
+]:
     digest = protocol.get("protocol_sha256")
     if not isinstance(digest, str):
         _malformed("extension protocol digest is malformed")
@@ -371,9 +373,7 @@ def _validated_extension_axes(
     except (TypeError, ValueError) as error:
         raise RuntimeError("extension protocol axes are malformed") from error
     raw_entries = protocol.get("sigma_entries")
-    if isinstance(raw_entries, (str, bytes)) or not isinstance(
-        raw_entries, Sequence
-    ):
+    if isinstance(raw_entries, (str, bytes)) or not isinstance(raw_entries, Sequence):
         _malformed("extension sigma entries are malformed")
     sigmas: list[float] = []
     grids: list[tuple[float, ...]] = []
@@ -383,8 +383,7 @@ def _validated_extension_axes(
         try:
             sigma = float.fromhex(str(raw.get("sigma_hex")))
             kappas = tuple(
-                float.fromhex(str(value))
-                for value in _protocol_axis(raw, "kappas")
+                float.fromhex(str(value)) for value in _protocol_axis(raw, "kappas")
             )
         except (TypeError, ValueError) as error:
             raise RuntimeError("extension sigma grid is malformed") from error
@@ -448,9 +447,10 @@ def _aggregate_p0_extension(
     ) as snapshot:
         spec = snapshot.spec
         source_protocol_sha256 = protocol["protocol_sha256"]
-        if production and spec.get(
-            "source_extension_protocol_sha256"
-        ) != source_protocol_sha256:
+        if (
+            production
+            and spec.get("source_extension_protocol_sha256") != source_protocol_sha256
+        ):
             raise RuntimeError("extension run spec is not bound to the protocol")
         raw_cells = spec.get("cells")
         expected_cell_count = len(sigmas) * len(lengths) * len(replicas)
@@ -666,9 +666,7 @@ def _selector_v2_evidence(
     analysis: Mapping[str, object],
 ) -> tuple[SelectorSigmaEvidence, ...]:
     raw_entries = analysis.get("sigma_entries")
-    if isinstance(raw_entries, (str, bytes)) or not isinstance(
-        raw_entries, Sequence
-    ):
+    if isinstance(raw_entries, (str, bytes)) or not isinstance(raw_entries, Sequence):
         _malformed("combined analysis sigma entries are malformed")
     evidence: list[SelectorSigmaEvidence] = []
     estimate_count = 0
@@ -694,9 +692,7 @@ def _selector_v2_evidence(
         ):
             _malformed("combined analysis length axis is malformed")
         lengths = tuple(raw_lengths)
-        kappas = tuple(
-            _exact_hex_value(value, "coupling") for value in raw_kappas
-        )
+        kappas = tuple(_exact_hex_value(value, "coupling") for value in raw_kappas)
         if (
             len(lengths) < 2
             or len(set(lengths)) != len(lengths)
@@ -742,11 +738,7 @@ def _selector_v2_evidence(
                 raise RuntimeError("combined analysis contains duplicate estimates")
             identities.append(identity)
             values[identity] = (observables[0], observables[1])
-        expected = [
-            (sigma, length, kappa)
-            for length in lengths
-            for kappa in kappas
-        ]
+        expected = [(sigma, length, kappa) for length in lengths for kappa in kappas]
         if identities != expected:
             if len(identities) != len(expected):
                 raise RuntimeError(
