@@ -1,0 +1,66 @@
+{
+  "created_at_utc": "2026-07-30T10:25:29.627508+00:00",
+  "dispatch": {
+    "path": "/work/home/jiabohan5/route-d-plus-phase7-20260730-03/phase7-dispatch.json",
+    "sha256": "54defd3a0be69784dd92fdfb60db663212333a69ad7a009d91bcc691b8b34076"
+  },
+  "gates": {
+    "all_artifact_hashes_valid": true,
+    "all_task_schemas_valid": true,
+    "clean_consistent_source_revision": true,
+    "dispatch_schema_valid": true,
+    "exact_task_set": true,
+    "gpu_slurm_evidence": true,
+    "isolated_run_directories": true,
+    "prerequisite_hashes_valid": true,
+    "stage_gate_matches_tasks": true,
+    "stage_gate_schema_valid": true
+  },
+  "passed": true,
+  "schema_version": "challenge-15-route-d-plus-future-aggregate-v1",
+  "slurm_cluster_name": "xhcs3",
+  "slurm_job_id": "23030080",
+  "source_revision": "9c0e3b1e9a575e840c5e1f371865e49faa8ea5e8",
+  "stage": "phase7",
+  "stage_gate": {
+    "path": "/work/home/jiabohan5/route-d-plus-phase7-20260730-03/phase7-stage-gate.json",
+    "sha256": "b80407081bc1f58748ce9f47b7f85b4b95de674ea9984bba68e4466e8b1f6619"
+  },
+  "task_certificates": [
+    {
+      "path": "/work/home/jiabohan5/route-d-plus-phase7-20260730-03/tasks/m-minus-2/task-certificate.json",
+      "sha256": "0bd9722f4d359f0a506fceba0df588ff3c87faa2fc69e43e1e9bf93ded1e3065",
+      "task_id": "m-minus-2"
+    },
+    {
+      "path": "/work/home/jiabohan5/route-d-plus-phase7-20260730-03/tasks/m-minus-1/task-certificate.json",
+      "sha256": "6e8b66401569d326da0cf00f86500b41a7cfabd4e15a4c3b19916e24b7f1fb11",
+      "task_id": "m-minus-1"
+    },
+    {
+      "path": "/work/home/jiabohan5/route-d-plus-phase7-20260730-03/tasks/m-zero/task-certificate.json",
+      "sha256": "b7b59bba0846aa2c7a1d2b42897f226001e0b05ecbdf8ab033dc13cf58d1dceb",
+      "task_id": "m-zero"
+    },
+    {
+      "path": "/work/home/jiabohan5/route-d-plus-phase7-20260730-03/tasks/m-plus-1/task-certificate.json",
+      "sha256": "3c6203e8a27124fbad16dae6c9adb741da5f7cba3043d90b9ec7baaa25f47cbd",
+      "task_id": "m-plus-1"
+    },
+    {
+      "path": "/work/home/jiabohan5/route-d-plus-phase7-20260730-03/tasks/m-plus-2/task-certificate.json",
+      "sha256": "ad249680515d97f6b68a51e50a2fd0e51e2f1e42c0cc8f41914780275191d2c7",
+      "task_id": "m-plus-2"
+    },
+    {
+      "path": "/work/home/jiabohan5/route-d-plus-phase7-20260730-03/tasks/overlap/task-certificate.json",
+      "sha256": "23f51933ee1283364c9ef7f09d044c58a57f1e4d39a324608f035042373e743d",
+      "task_id": "overlap"
+    },
+    {
+      "path": "/work/home/jiabohan5/route-d-plus-phase7-20260730-03/tasks/span-ceiling/task-certificate.json",
+      "sha256": "7008f80a879d06d5bc3a39b76fd49e419c5154acb38608a9dca8d255f5b3207c",
+      "task_id": "span-ceiling"
+    }
+  ]
+}

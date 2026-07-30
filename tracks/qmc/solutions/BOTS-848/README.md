@@ -19,6 +19,11 @@ The Challenge #15 minimum acceptance criteria are the project benchmark. Benchma
 
 Larger systems, thermodynamic extrapolation, chiral-metric response, and Landau-level-mixing scans are research extensions. They do not block Benchmark v0.
 
+> **Submission entry point:** [SUBMISSION.md](SUBMISSION.md) contains the
+> evaluator-facing result, acceptance checklist, reproduction command, and an
+> honest separation between the passing Benchmark v0 and the scalable Route D+
+> research candidate.
+
 ## Working documents
 
 | Document | Purpose |
@@ -47,11 +52,15 @@ Larger systems, thermodynamic extrapolation, chiral-metric response, and Landau-
 - The projected random-feature NQS candidate gives raw `E0=3.871634914021247`, `E2=4.003323325986339`, and `Delta2=0.1316884119650923`, with a gap discrepancy of `4.44e-16` from ED and a reported total uncertainty of `1.414e-12`.
 - Every frozen Benchmark v0 gate passes. The candidate uses ED-sized exact `L^2` projection and Ritz optimization, so larger-N scalability and the final challenge research contribution remain future work rather than part of the v0 claim.
 - Scalable v1 Step 1 is complete: the audit-first evaluator is available through [run_scalable_evaluator.py](run_scalable_evaluator.py).
-- No scalable candidate route has been implemented. Before Step 2, the additive Route D admission creates one shared A/B/C/D base; then the four `s02a`-`s02d` lanes may proceed independently from that exact SHA.
-- Route D+ Phase 1 passed on Slurm job `23005815`: the pinned Python
-  3.11/JAX 0.4.38 CUDA12 environment produced a schema-valid RTX 3090
-  manifest. Phase 2 one-particle LLL code and its certificate contract are
-  present and await remote Slurm validation.
+- The scalable Route D+ candidate is implemented through continuous-coordinate
+  VMC/SR, certificate schemas, isolated Slurm workflows, Phase 7 ED comparison,
+  and optimizer remediation.
+- Route D+ Phases 1–5 and Phase 6A passed remote GPU certificate gates.
+  Phase 7 completed on jobs `23029855` and `23030080`; the first frozen D+0
+  family has mean ground/tower fidelities `0.99741`/`0.87731` and gap error
+  `0.009995`. The span ceiling (`0.99996`/`0.97806`) identifies an optimization
+  failure rather than a capacity failure, so no final scalable-accuracy claim
+  is made.
 - The current AITP Research Memory runtime is active at
   `/home/bhjia/physics/vmc_nqs`; the Phase 1 result is pinned by a canonical
   Entry and closeout Note. No project code or tests have run on the local host.
