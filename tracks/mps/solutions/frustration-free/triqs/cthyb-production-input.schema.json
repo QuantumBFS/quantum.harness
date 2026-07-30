@@ -135,7 +135,7 @@
           "additionalProperties": false,
           "required": ["n_tau", "reported_tau"],
           "properties": {
-            "n_tau": {"const": 4001},
+            "n_tau": {"const": 4101},
             "reported_tau": {
               "type": "array",
               "prefixItems": [

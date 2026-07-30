@@ -237,7 +237,7 @@ def test_run_chain_binds_solver_controls_raw_evidence_and_reload(
         "beta": 16.0,
         "gf_struct": [("up", 1), ("down", 1)],
         "n_iw": 2049,
-        "n_tau": 4001,
+        "n_tau": 4101,
     }
     parameters = solver.solve_calls[0]
     assert parameters["random_seed"] == 810001
