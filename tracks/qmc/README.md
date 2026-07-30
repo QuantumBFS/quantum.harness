@@ -16,3 +16,23 @@ The official MATLAB constrained-path QMC (CPMC) package for the single-band repu
    A. W. Sandvik, "Computational Studies of Quantum Spin Systems," *AIP Conf. Proc.* **1297**, 135 (2010). [doi:10.1063/1.3518900](https://doi.org/10.1063/1.3518900), [arXiv:1101.3281](https://arxiv.org/abs/1101.3281).
 4. **Becca & Sorella (2017)** — textbook on QMC for correlated systems.
    F. Becca and S. Sorella, *Quantum Monte Carlo Approaches for Correlated Systems* (Cambridge University Press, 2017). [doi:10.1017/9781316417041](https://doi.org/10.1017/9781316417041).
+
+## LlmNewtonGaussTuring TFIM solution
+
+`solutions/LlmNewtonGaussTuring/` shares one graph, ED, SSE, and Berry-curvature
+codebase across Challenges 148 and 73. Its audited contracts are:
+
+- The paper-faithful Challenge 148 time aspect is `beta*h/L = c_tau`, so
+  `beta = c_tau*L/h`; the current reproduction uses `c_tau=1` and its doubled
+  finite-temperature check uses `c_tau=2`.
+- The Challenge 73 FHS curvature is minus the normalized-overlap Wilson phase
+  divided by the oriented plaquette area. Finite-grid FHS is checked against a
+  same-size Jordan-Wigner oracle under grid refinement.
+- The historical `dthetah_diagonal` quantity is only the prefactor-weighted ZZ
+  expectation in the unrotated TFIM ensemble. It is not a generalized force or
+  a physical component expectation in the rotated ground state.
+- `config_checked=false` means no per-sweep world-line check was performed; the
+  result exports `consistency_failures=-1`, never a misleading zero.
+- The deterministic Stage 4 scanner is not yet a production runner: resumable
+  cell manifests, atomic output, full build/host provenance, and hashes remain
+  pending.

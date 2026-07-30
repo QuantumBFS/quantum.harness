@@ -1,0 +1,5 @@
+observable,L_first,L_second,crossing,bootstrap_error,bootstrap_success,bootstrap_failed
+Q,12,24,nan,nan,732,1268
+Q,24,48,nan,nan,624,1376
+xi_over_L,12,24,nan,nan,900,1100
+xi_over_L,24,48,nan,nan,64,1936

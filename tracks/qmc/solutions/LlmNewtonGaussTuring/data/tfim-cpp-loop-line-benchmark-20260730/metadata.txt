@@ -1,0 +1,18 @@
+run_id=tfim-cpp-loop-line-benchmark-20260730
+purpose=dependency-free C++17 loop-versus-segment-line performance pilot
+run_base_commit=670220a2ea92f2fb6777333b917f7207f335d0c7
+compiler=g++ (Ubuntu 15.2.0-16ubuntu1) 15.2.0
+command=build/tfim_update_benchmark data/processed/tfim-cpp-loop-line-benchmark-20260730/efficiency.csv 1 100 1000
+algorithms=loop, line
+interaction=-1.0
+longitudinal_field=0.0
+triangular=Lx=12,Ly=12,Gamma=4.76811,beta=24.0
+honeycomb=Lx=8,Ly=8,Gamma=2.13250,beta=16.0
+thermalization_sweeps=100
+measurement_sweeps=1000
+repeats=1
+source_sha256.benchmark_updates.cpp=aa2fc4cb56692de659616be14066807c3189c0008dbf00f1733fdd8bd5510ada
+source_sha256.tfim_sse.cpp=5f508c0232fcaebceb519de68c007f6e001d9713dab32245555390facacda922
+source_sha256.tfim_sse.hpp=107082064ce64aa9a979f4ce117d4bae185fe2e6fe2aefadb860284a90fdbaec
+output_sha256.efficiency.csv=58ee0998ee90ef562970a326ef37bdaaa8a201197767ee3b63097df299b0d656
+limitation=one short chain per cell; performance pilot only

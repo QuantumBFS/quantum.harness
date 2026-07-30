@@ -1,0 +1,15 @@
+run_id=tfim-cpp-cluster-loop-line-ed-validation-20260730
+purpose=dependency-free C++ finite-temperature ED validation for cluster, loop, and segment-line SSE
+run_base_commit=670220a2ea92f2fb6777333b917f7207f335d0c7
+command=build/tfim_ed_validation data/processed/tfim-cpp-cluster-loop-line-ed-validation-20260730/validation.csv
+interaction=-1.0
+longitudinal_field=0.0
+beta=2.0
+triangular=Lx=3,Ly=2,sites=6,Gamma=4.76811,dimension=64
+honeycomb=Lx=2,Ly=2,sites=8,Gamma=2.13250,dimension=256
+thermalization_sweeps=5000
+measurement_sweeps=20000
+qmc_acceptance_budget=4_standard_errors
+result=18_of_18_passed;maximum_z_score=1.44457842809
+source_sha256.ed_validation.cpp=d45a812a73d4ec30befae542275237832baec2070e768fb5bcbffd6df3e81064
+output_sha256.validation.csv=88566ecea7e20e21d751c926f1a4186c7b7f34a2a8da5f06ad8b6a7854a91a67
