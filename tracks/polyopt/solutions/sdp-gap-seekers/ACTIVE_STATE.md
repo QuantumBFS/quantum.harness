@@ -582,3 +582,345 @@ Updated: 2026-07-29 UTC.
   3,392,068 KiB MaxRSS because it still carried the disproven, unused
   nontrivial-block diagnostic. Preflight r2 job `118156605` removes that
   work and is running on 32 CPUs / 114,000 MiB.
+- Remote terminal-solve takeover uses clean branch
+  `remote/challenge88-terminal-solve` at commit `87be317`. SCNet baseline job
+  `118171391` is preserved and was `RUNNING` at 2026-07-29T14:48Z on 32 CPUs /
+  114000 MiB. Its log shows exact `L=2,d=2` coefficient/isotypic assembly,
+  before JuMP/Mosek; process RSS was about 6.1 GB. xH5 baseline job `23011251`
+  is also preserved and remained `PENDING (Priority)` at 64 CPUs / 240 GB.
+- The next changed action is not another gamma scan. While both baselines
+  continue, audit a single-pass solver export and add a fail-closed numerical
+  result audit so any terminal feasibility or infeasibility statement is tied
+  to residual/certificate evidence.
+- Bounded-memory coefficient fingerprinting is verified locally on the exact
+  `L=1,d=2` regression: the coefficient stage completed in 225.425 s with
+  7,231 moments, 75,967 PSD entries, and unchanged SHA-256
+  `2a6753a6ea7c57fa43bd33e09339046206fae5217ac3ae47c0cf9cc3b2dc2679`.
+  The new route removes the all-entry diagnostic-string inventory without
+  changing exact coefficients or their provenance fingerprint.
+- xH5 job `23011251` began running at 2026-07-29T14:49:17Z from immutable
+  commit `2de1678`; both it and SCNet job `118171391` remain in their original
+  coefficient pass and have not been modified.
+- The fail-closed direct-solve audit is verified on SCNet. Synthetic job
+  `118172573` passed 9/9 PSD/status assertions; extended job `118172627`
+  passed 14/14 including exact IEEE-754 primal export and file hashing. The
+  changed source is commit `4227ec2` (with its import fix in `1c339e5`). Use it
+  only for the next decision-relevant solve or independent audit rerun; do not
+  duplicate the two immutable L=2 baselines while they are active.
+- Raw solver-artifact regression job `118172817` passed 23/23 assertions in
+  41 seconds with 509,788 KiB MaxRSS. Commit `c0b2c64` therefore preserves a
+  hashed Mosek interior solution after every solve and a compressed task for
+  an infeasibility candidate. These files make an independent ray replay
+  possible; their existence alone is not a certificate.
+- The native solution-file formats did not meet the replay gate: text `.sol`
+  reloaded as `UNKNOWN` with zero vectors, while JSOL and binary-solution
+  reloads raised Mosek error 1050 even when paired with serialized or binary
+  tasks. These are closed implementation branches, not scientific results.
+- Commit `1b08236` replaces them with a versioned binary export of every
+  scalar, affine-conic, and semidefinite dual-ray component plus source status
+  codes. The reader inserts those exact Float64 values into a fresh binary
+  task and asks Mosek to recompute dual objective and violations. After small
+  fixture corrections in `623c070` and `451fd33`, job `118173664` passed all
+  29 scalar-ray tests with dual objective 1, normalized separation 1, and zero
+  violation. Semidefinite fixture r15, job `118173766`, replayed successfully
+  but rejected its own storage assertion: MosekTools represents the affine PSD
+  cone through an affine-conic dual (`doty`), not a bar variable. Corrected r16
+  job `118173855` passed 36/36 tests. Its three-component PSD ray has dual
+  objective 0.7526914264023223, normalized separation
+  0.5981688276525166, and zero recomputed dual violation. The floating ray
+  preservation/replay path is now authorized for the scientific model.
+- The native direct-Mosek route merged at `e50da6c` passed the post-merge
+  scalar/PSD Farkas replay in job `118174144` (36/36). Its corrected L=1
+  construction truth gate, job `118174309`, passed in 1:12 with 1,468,728 KiB
+  MaxRSS: 7,231 moments, 23 affine PSD cones, 75,967 packed entries, 233,206
+  scalar terms, and exact coefficient SHA-256
+  `2a6753a6ea7c57fa43bd33e09339046206fae5217ac3ae47c0cf9cc3b2dc2679`.
+- Commit `6aa430b` enables bounded native coefficient fingerprinting for the
+  target L=2 solve and aborts unless it reproduces the known exact coefficient
+  SHA-256 `935aab36220ec3f0b2bfaa92ea7527463c9dc1a2d579014798e4fe5534b6b1b4`.
+  SCNet native job `118174488` started at 2026-07-29T16:13:27Z on 32 CPUs /
+  114000 MiB. It is decision-relevant because it streams directly into Mosek
+  in one coefficient pass; protected JuMP jobs `118171391` and `23011251`
+  remain untouched and had still not entered optimization at 16:14Z.
+- Native launch r1, job `118174488`, stopped before model construction because
+  the isolated checkout was detached and the provenance guard requires a
+  symbolic branch. Reattach the same clean branch and resubmit once; this was
+  not a scientific run and does not change the planned signature.
+- The branch was reattached and verified clean at `4f33981`; native L=2 r2 is
+  SCNet job `118174638`, started 2026-07-29T16:17:15Z on 32 CPUs / 114000 MiB.
+- Job `118174638` passed its complete native construction gate in 1,733.452 s:
+  461,186 moments, 26 affine PSD cones / 4,446,492 packed rows, 15,802,343
+  scalar terms, zero remaining equalities, and exact expected coefficient hash
+  `935aab36220ec3f0b2bfaa92ea7527463c9dc1a2d579014798e4fe5534b6b1b4`.
+  Stage RSS was 13,829,968 KiB. Mosek is now running; presolve took 6.28 s.
+  No feasibility or spectral-gap conclusion is available yet.
+- Protected xH5 baseline `23011251` ended `OUT_OF_MEMORY` after 1:48:50 during
+  JuMP→Mosek transfer, before solver iterations. Slurm MaxRSS was 234,603,960
+  KiB (`/usr/bin/time`: 251,835,816 KiB) against 240 GB. Its coefficient and
+  JuMP stages had completed in 1,835.530 s and 3,991.145 s. This is not a
+  physics result; do not repeat that signature. Native job `118174638`
+  remains the active exact decision solve.
+- Dual-certificate replay code is committed at `09729d7`. Its first synthetic
+  SCNet test, job `118177325`, never launched (`JobLaunchFailure`, zero
+  runtime, no log). Resubmit this unchanged tiny test once on another node.
+- Audit r2 `118177473` exposed the actual common launch error: the new clone
+  lacks its gitignored `results/_slurm` output directory. Create only that
+  directory and use a fail-closed path preflight for r3.
+- Dual audit r3 `118177590` ran and passed 43/46 checks. Its new native
+  certificate had valid source status and RHS structure, but fresh-task
+  violation was 1.0 because the artifact omitted constraint activities. The
+  artifact now stores their exact Float64 bits for a complete replay in r4.
+- Corrected dual audit r4 `118177811` passed 46/46 in 1:07 at 514,500 KiB
+  MaxRSS. Fresh-task native bar-certificate replay has exact RHS structure and
+  zero recomputed primal violation.
+- Native primal `118174638` ended `OUT_OF_MEMORY` after 52:21 during
+  post-presolve factorization, before iterations: 104,717,420 KiB Slurm MaxRSS
+  (`/usr/bin/time`: 116,125,540 KiB) versus 114000 MiB. It is not a physics
+  result. Next changed solve: native bar-variable dual on xH5, 64 CPUs /
+  240 GB, with hash gate and replayable output.
+- xH5 rejected that submission before creating a job because its group is at
+  the 200-job submit cap. No unrelated job will be cancelled. Route the same
+  native dual to SCNet high-memory `ksagnormal01`, 32 CPUs / 256000 MiB; this
+  request is justified by the measured 116–252 GB failed-form peaks.
+- SCNet test-only requires `--gres=gpu:1` on that partition (`QOSMinGRES`).
+  Add the required reservation explicitly, then repeat test-only; no job was
+  created by the rejected request.
+- Protected SCNet JuMP baseline `118171391` ended naturally `OUT_OF_MEMORY`
+  after 2:27:56 during JuMP→Mosek transfer, before any solver iteration. Its
+  Slurm batch MaxRSS was 105,617,508 KiB and `/usr/bin/time` measured
+  114,714,824 KiB against 114000 MiB. It was not cancelled and is not gap or
+  feasibility evidence. Both conservative JuMP baselines are now closed OOM.
+- High-memory job `118178575` was rejected at time zero as `BadConstraints`:
+  the partition enforces GPU-to-CPU topology binding, but one admission GPU
+  cannot bind 32 CPU cores. Since Mosek is CPU-only, add
+  `--gres-flags=disable-binding`; `sbatch --test-only` then accepts the exact
+  32-CPU / 256000-MiB / one-GPU request. Submit this changed runner once.
+- The header directive alone is ineffective on this Slurm 22.05 deployment;
+  the same flag supplied to `sbatch` is accepted. Native-dual job `118178932`
+  is now pending `Priority` on `ksagnormal01` from immutable commit `a77fc0e`,
+  requesting 32 CPUs, 256000 MiB, and one admission GPU with
+  `GresEnforceBind=No`. Monitor it; do not launch an identical high-memory
+  duplicate while it is queued.
+- While `118178932` waits, an exact continuous-spin reduction is being gated.
+  The existing V4/S3 quotient is octahedral; at the only missing tensor rank
+  for `d=2`, SO(3) invariance gives `T_xxxx = T_xxyy + T_xyxy + T_xyyx` for
+  each fixed moment skeleton. Commit the opt-in substitution separately,
+  preserve the old hashes by default, and require an L=1 comparison before
+  any L=2 solve. This is WLOG rotation averaging of an unrestricted state,
+  not a total-spin sector restriction.
+- L=1 SO(3) gate `118179614` completed in 13:40 at 4,820,548 KiB Slurm
+  MaxRSS. It eliminated 1,917 of 7,231 moment equations (26.5%) and produced
+  coefficient hash
+  `7308c57ba6b515501fd1c0c00f753868c0bb8cb32531429398fd902b4d63231a`.
+  However, its native dual returned an apparent certificate with maximum
+  constraint violation `2.3730706288915826e-8`, contradicting the established
+  feasible unreduced L=1 model. Fresh-task replay passes at `1e-7` and fails at
+  `1e-9`. Do not use this as evidence or launch reduced L=2 yet. Next changed
+  action: run the identical unreduced native-dual control at `1e-9`; then
+  distinguish dual-formulation error from projection/conditioning error.
+- Unreduced control `118180537` completed in 13:18 at 10,652,388 KiB MaxRSS.
+  It reproduced the established 7,231 moments and exact coefficient hash
+  `2a6753a6ea7c57fa43bd33e09339046206fae5217ac3ae47c0cf9cc3b2dc2679`,
+  yet Mosek again returned approximate `OPTIMAL`; maximum constraint violation
+  `1.053194864653051e-9` correctly failed the `1e-9` audit. This localizes the
+  contradiction to weak/numerical feasibility of the explicit bar system,
+  not specifically the SO(3) relation. Next gate: solve the 5,314-coordinate
+  SO(3)-reduced primal directly, require the same reduced hash, and audit its
+  affine-cone residuals at `1e-9`.
+- The decisive reduced-primal control passed. SCNet job `118181379`, source
+  commit `4de8fc4`, completed in 17:39 at 24,548,328 KiB Slurm MaxRSS. It
+  reproduced 5,314 moments, 23 affine PSD cones / 75,967 packed rows, 241,903
+  scalar terms, 1,917 eliminated rank-four coordinates, and exact reduced
+  coefficient hash
+  `7308c57ba6b515501fd1c0c00f753868c0bb8cb32531429398fd902b4d63231a`.
+  Mosek returned primal-and-dual feasible; its saved native-primal audit is
+  `feasible_residual_checked_float` at `1e-9`, with maximum affine-cone and
+  equality violations both recorded as zero. This authorizes the exact SO(3)
+  rank-four quotient for L=2 without restricting the state sector.
+- Next changed action: run the L=2 reduced construction in exact build-only
+  mode to establish its moment count and coefficient hash. Only then may the
+  independently rebuilt solve run, guarded by that exact hash and a `1e-9`
+  residual/certificate audit. High-memory unreduced job `118178932` remains
+  queued and must not be cancelled or duplicated.
+- Exact build-only L=2 SO(3) job `118182637` started on SCNet at
+  2026-07-29T18:45:55Z from immutable commit `5a219a9`, using 32 CPUs and
+  48000 MiB. It has no optimizer call. Monitor through complete coefficient
+  construction and record its moment inventory/hash before submitting the
+  separately gated solve.
+- Build-only job `118182637` completed successfully in 37:17 at 17,142,132
+  KiB Slurm MaxRSS. The exact reduced inventory is 343,761 moment-matching
+  equations, 26 unchanged PSD blocks / 4,446,492 packed rows, maximum side
+  975, zero explicit equalities, and 16,647,108 scalar coefficient terms.
+  Exact coefficient SHA-256 is
+  `fac50bccd926fd020a51a87fa791ec627356160a044a4125e4442aa260bed9a8`.
+  Relative to the unreduced native task, this removes 117,425 moment
+  coordinates (25.4615%) while increasing expanded scalar terms by 844,765
+  (5.3458%); no cone or state restriction was introduced.
+- Next action: rebuild the same L=2 formulation in the numerical runner with
+  the new hash required fail-closed, then audit any infeasibility candidate at
+  `1e-9` and replay its exact-bit certificate in a fresh task. Solver status
+  alone is not evidence because both L=1 dual controls were near-feasible.
+- The first solve preflight requested 124000 MiB and was rejected before job
+  creation: `kshcnormal` enforces `DefMemPerCPU=3569` MiB, so 32 CPUs permit at
+  most 114208 MiB. Change the reproducible runner to 114000 MiB and repeat
+  test-only once. This is a scheduler-policy correction, not a numerical
+  attempt; the exact model/hash/audit signature is unchanged.
+- The corrected 114000-MiB preflight passed. Reduced L=2 numerical job
+  `118185571` started on SCNet at 2026-07-29T19:29:29Z from immutable commit
+  `738268d`, 32 CPUs, 12-hour limit. It requires exact coefficient hash
+  `fac50bccd926fd020a51a87fa791ec627356160a044a4125e4442aa260bed9a8`
+  and uses audit tolerance `1e-9`. Monitor through the hash gate and either a
+  residual-checked terminal status or fresh-task certificate replay.
+- Reduced solve `118185571` exactly reproduced the independent 343,761-row
+  hash and entered Mosek, but ended `OUT_OF_MEMORY` after 37:56 immediately
+  after presolve and before an interior-point iteration. Slurm MaxRSS was
+  112,077,220 KiB (`/usr/bin/time`: 113,680,612 KiB) against 114000 MiB. This
+  proves the second construction gate, but it is not feasibility or gap
+  evidence and the same normal-node signature must not be repeated.
+- Preserved unreduced high-memory job `118178932` started at
+  2026-07-29T19:43:26Z from immutable commit `a77fc0e`. It independently
+  rebuilt 461,186 constraints / 26 PSD blocks, entered Mosek, completed
+  presolve, and at 25:32 used 135,791,748 KiB on its 250-GiB allocation.
+  Monitor it through factorization. If it fails operationally or remains
+  undetermined, the changed next solve is the 343,761-row SO(3) formulation on
+  a high-memory node, not another 114000-MiB attempt.
+- Unreduced high-memory job `118178932` also ended `OUT_OF_MEMORY`, after
+  26:30 and before an iteration. Slurm sampled 186,906,872 KiB, while
+  `/usr/bin/time` measured 262,191,096 KiB against the 256000-MiB cgroup; no
+  physics result exists. The exact SO(3) fallback is now decision-relevant:
+  submit its already-reproduced 343,761-row task once at 256000 MiB with the
+  required reduced hash and `1e-9` audit. Its normal-node optimizer-entry peak
+  was 113,680,612 KiB versus 262,191,096 KiB for the unreduced task, so this is
+  a materially changed factorization signature, not a duplicate.
+- Reduced high-memory decision job `118188038` started on SCNet at
+  2026-07-29T20:14:12Z from immutable commit `001fc6f`, using 32 CPUs,
+  256000 MiB, one partition-admission GPU with binding disabled, and a
+  12-hour limit. It requires exact hash `fac50bcc…bed9a8` and audits at
+  `1e-9`. Monitor through reconstruction, factorization, and independently
+  replay any candidate before interpretation.
+- Job `118188038` ended `OUT_OF_MEMORY` after 32:20, post-presolve and before
+  an iteration. Slurm sampled 153,757,812 KiB; `/usr/bin/time` reached
+  262,193,468 KiB at the 256000-MiB cgroup. The exact reduced hash passed, but
+  no numerical decision exists. Because both reduced and unreduced tasks hit
+  the same cgroup ceiling, the first factorization allocation is dominated by
+  the unchanged PSD cones.
+- `ksagnormal01` exposes about 1,031,692 MiB per node and permits up to 509,344
+  MiB for 32 CPUs (`DefMemPerCPU=15917`). One changed resource rerun at 500000
+  MiB is justified by the two measured 256000-MiB OOMs; keep the exact reduced
+  hash and `1e-9` audit. In parallel, treat continuous-spin cone blocking—not
+  additional moment-only elimination—as the algorithmic shrink target.
+- The 500000-MiB preflight passed and SCNet job `118189392` started at
+  2026-07-29T20:50:14Z on `gnode37`, from immutable commit `01e341d`. Its
+  signature is the unrestricted `L=2,d=2,g=4/5,gamma=2` SO(3)-reduced native
+  dual, 32 CPUs, one admission GPU with binding disabled, exact required hash
+  `fac50bcc…bed9a8`, and `1e-9` audit. This is the only active decision solve;
+  do not alter its checkout or submit a duplicate. Monitor through the hash
+  gate, first interior-point iteration, and fresh replay of any candidate.
+- Independent cone-route structural job `118189732` completed in 1:24 from
+  commit `b61e331`. The exact stabilizer involution splits every nontrivial
+  positive block as `975=490+485`, `900=460+440`, `650=315+335`, or
+  `600=310+290`; the second summand exactly matches the corresponding
+  S3-standard `l=2` multiplicity, while every 6/3-side gap block is purely
+  `l=1`. No cone has yet been deleted. If exact coefficient cross-zero passes,
+  the stabilizer split alone predicts 2,540,067 packed rows (down 42.87%) and
+  maximum side 490. Next gate: replay all within-character `l=1/l=2` cross
+  entries exactly, then test SO(3)-projected `l=2` congruence separately.
+- Exact coefficient gate job `118189871` is running on SCNet from immutable
+  commit `49bd9ea`, 32 CPUs / 64000 MiB. It rebuilds the same L=2 setup with
+  no optimizer and checks all 1,906,425 within-character `l=1/l=2` cross
+  entries. Do not update its `ss-remote-cone-dev` checkout while it runs.
+- Decision job `118189392` passed the reduced hash, completed presolve, then
+  ended `OUT_OF_MEMORY` after 38:16 before iteration 0. `/usr/bin/time`
+  measured 512,036,704 KiB at the 500000-MiB cgroup (Slurm sampled
+  505,842,856 KiB). It produced no numerical or physical result. Do not raise
+  memory again: the next solve must use the exact stabilizer-split cones after
+  job `118189871` authorizes them and a new independent coefficient hash is
+  established.
+- Stabilizer coefficient job `118189871` completed in 28:58 at 6,016,104 KiB
+  peak and proved all 1,906,425 within-character `l=1/l=2` cross entries are
+  exactly zero. Runmeta SHA-256 is `ad7ba185…de7b`. The 2,540,067-row,
+  maximum-side-490 cone split is now authorized; this is an exact formulation
+  result, not physics. Advance the idle cone checkout and run one split
+  build-only coefficient fingerprint before any numerical solve.
+- Split build-only job `118190562` started on SCNet from immutable commit
+  `402e2ce`, 32 CPUs / 64000 MiB / three-hour limit. It repeats the exact
+  1,906,425-entry gate, streams the 490-side split cones through the validated
+  SO(3) rank-four moment projection, and cannot invoke the optimizer. Record
+  its exact inventory and coefficient SHA-256 before a separate solve.
+- Decision-solve resource prechoice: the split keeps 57.13% of the packed
+  rows, so linear scaling from the measured 512,036,704-KiB full-cone peak is
+  about 292.5 GB. Use one 500000-MiB high-memory run after the hash gate, not a
+  likely-failing 114000-MiB normal-node reconstruction; submit with explicit
+  `--gres-flags=disable-binding`.
+- Split build-only job `118190562` completed successfully from immutable
+  commit `402e2ce` in 1:14:17 with 14,248,044 KiB Slurm peak RSS. The repeated
+  1,906,425-entry exact cross-zero gate passed. The independently streamed
+  formulation has 343,761 moment equations, 38 PSD blocks, 2,540,067 packed
+  entries, maximum side 490, and 16,110,543 scalar coefficient terms. Its
+  exact coefficient SHA-256 is
+  `b4a9884636dcea65be67e60e6f2ef0dffe23812e1ab8e6bf5205f23f549874e5`.
+  Classification is `not_run_exact_build_only`; this is the required
+  formulation fingerprint, not physics evidence. Advance the now-idle split
+  checkout, preflight one 500000-MiB hash-gated decision solve, and submit it
+  with GRES binding disabled.
+- The exact 500000-MiB request passed Slurm test-only and decision job
+  `118192695` was submitted from immutable commit `6e7d508` on 32 CPUs with a
+  12-hour limit, one partition-admission GPU, and GRES binding disabled. It
+  requires coefficient hash `b4a98846…74e5`, repeats the exact cross-zero gate,
+  rebuilds the 38-block formulation, and audits at `1e-9`. It is the sole
+  active split decision solve. Do not update `ss-remote-cone-dev` or submit a
+  duplicate; monitor pending-to-running transition, exact hash match, first
+  interior-point iteration, and independently replay any candidate.
+- Split decision job `118192695` passed the repeated exact cross-zero gate,
+  reconstructed all 38 blocks, matched the required 343,761-row formulation,
+  entered Mosek, and completed presolve. It then ended `OUT_OF_MEMORY` after
+  1:02:53 before iteration 0. Slurm measured 509,850,832 KiB peak RSS against
+  500000 MiB; no numerical or physical result exists. Do not request more
+  memory or repeat this signature. The next changed route is an exact
+  coefficient-level congruence test between the equal-dimensional continuous-
+  spin `l=2` cones after the SO(3) rank-four projection; only a proved
+  congruence may authorize removal of duplicate PSD constraints.
+- Commit `81a1875` adds the fail-closed SO(3) `l=2` congruence route. It first
+  requires 12 bijective spin-blind multiplicity maps, then compares 940,050
+  mapped L=2 triangle entries exactly after the rank-four projection. Equal,
+  opposite-sign, and unmatched entries are recorded separately; truth-only
+  mode has no optimizer and cone deduplication remains disabled. L=1 control
+  job `118194879` was submitted on SCNet from this immutable commit using 8
+  CPUs / 16000 MiB / 30 minutes. Preserve the checkout until it closes; use
+  its result to correct the mapping or authorize the separate L=2 truth job.
+- L=1 control `118194879` closed after 15:09 with 2,598,132 KiB peak RSS. Its
+  12 spin-blind maps were all bijective. The six centered blocks matched every
+  projected entry exactly, while the scalar blocks had 1,107 unit-scaling
+  mismatches and zero sign-only mismatches. This disproves naïve equality,
+  not yet congruence; different exact integer norms were the next tested
+  hypothesis. The changed control compares the exact positive diagonal
+  congruence determined by expanded row norms; cone deletion remains disabled
+  until it passes.
+- Commit `7850757` applies the norm correction. After Slurm test-only
+  admission, L=1 truth-only control `118195346` was submitted on SCNet from
+  that immutable commit using 8 CPUs / 16000 MiB / 30 minutes. The runner has
+  no optimizer and cone deletion is disabled. Preserve the checkout and do
+  not launch the L=2 gate unless this control has zero opposite and zero
+  unmatched exact entries.
+- L=1 control `118195346` failed the corrected gate after 14:11 at 2,517,212
+  KiB peak RSS. Centered blocks remained exact. For each scalar-minus block,
+  the 30 ratio-1 rows generated all 465 passing entries while every one of the
+  96 entries incident to 3 norm-ratio-1/2 rows failed. Scalar-plus repeated the
+  same partition with 42 ordinary and 6 exceptional rows: 903 pass, 273 fail.
+  There were zero scaled, irrational-zero, or opposite matches. This disproves
+  the diagonal row-normalization repair. No cone was removed and L=2 remains
+  forbidden; identify the exceptional scalar rows and their correct SO(3)
+  map next.
+- The changed L=1 route is an exact exceptional-row congruence search. It
+  fixes the already-proved ordinary rows, infers a rational signed scale for
+  each exceptional target/reference candidate from every mixed entry, checks
+  its diagonal, and uses an incrementally pruned exact bijection search over
+  the exceptional submatrix. Any complete solution proves `T = D P R Pᵀ D`;
+  otherwise the gate records expanded spin-aware row signatures and fails.
+  This is not a repeated signature: job `118195346` had no candidate search
+  or row-level diagnostics. L=2 and cone deletion stay disabled pending L=1.
+- Commit `e81c463` implements and locally loads the exact exceptional search.
+  After Slurm test-only admission, SCNet L=1 truth-only job `118195948` was
+  submitted from that immutable commit using 8 CPUs / 16000 MiB / 30 minutes.
+  Preserve the checkout. The job has no optimizer and cannot delete cones;
+  only an exact complete solution may unlock the distinct L=2 truth audit.

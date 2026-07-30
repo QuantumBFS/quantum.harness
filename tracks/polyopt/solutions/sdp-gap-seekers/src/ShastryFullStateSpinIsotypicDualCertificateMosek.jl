@@ -2,9 +2,12 @@ module ShastryFullStateSpinIsotypicDualCertificateMosek
 
 using Mosek
 using SHA
+using ..SquareJ1J2Prototype:
+    PauliWord
 using ..PrimalGapSymbolics:
     ExactLinearPolynomial,
     MomentKey,
+    add_term!,
     moment_degree,
     moment_key,
     polynomial_sha256
@@ -14,10 +17,16 @@ using ..ShastryFullStateSpinIsotypicReduction:
     ShastryFullStateSpinIsotypicReducedPrimalAssembly,
     block_label,
     shastry_spin_isotypic_block_entry
+using ..ShastryFullStateSpatialReduction:
+    parse_moment_word
+using ..ShastryFullStateSpinSpatialReduction:
+    spin_spatial_representative
 
 export ShastryFullStateSpinIsotypicMosekDualCertificate,
        build_shastry_full_state_spin_isotypic_mosek_dual_certificate,
-       optimize_shastry_full_state_spin_isotypic_mosek_dual_certificate!
+       optimize_shastry_full_state_spin_isotypic_mosek_dual_certificate!,
+       su2_rank4_moment_projection,
+       su2_rank4_polynomial_projection
 
 struct ShastryFullStateSpinIsotypicMosekDualCertificate
     task::Mosek.Task
@@ -26,6 +35,100 @@ struct ShastryFullStateSpinIsotypicMosekDualCertificate
     equality_multipliers::Int
     scalar_coefficient_terms::Int
     coefficient_map_sha256::String
+    su2_rank4_reduction::Bool
+    su2_rank4_eliminated_moments::Int
+end
+
+"""
+Project one octahedral-invariant rank-four moment into exact SO(3)-invariant
+coordinates.
+
+For four fixed vector slots, every SO(3)-invariant tensor has the form
+
+    alpha delta_ab delta_cd + beta delta_ac delta_bd + gamma delta_ad delta_bc.
+
+Consequently `T_xxxx = T_xxyy + T_xyxy + T_xyyx`. The finite V4/S3
+quotient has already identified global axis permutations, so this is the only
+additional continuous-spin relation through moment degree four. It is a
+WLOG state average, not a restriction to a Hilbert-space spin sector.
+"""
+function su2_rank4_moment_projection(
+    key::MomentKey,
+    assembly::ShastryFullStateSpinIsotypicReducedPrimalAssembly,
+)
+    result = ExactLinearPolynomial()
+    if moment_degree(key) != 4
+        add_term!(result, key, 1)
+        return result
+    end
+    words = PauliWord[
+        parse_moment_word(serialized)
+        for serialized in split(key.canonical, '|')
+    ]
+    slots = Tuple{Int,Int}[
+        (word_index, operation_index)
+        for (word_index, word) in enumerate(words)
+        for operation_index in eachindex(word.ops)
+    ]
+    length(slots) == 4 || error("rank-four moment has a malformed slot count")
+    axes = UInt8[
+        words[word_index].ops[operation_index][2]
+        for (word_index, operation_index) in slots
+    ]
+    if length(unique(axes)) != 1
+        add_term!(result, key, 1)
+        return result
+    end
+
+    for assigned_axes in (
+        (0x01, 0x01, 0x02, 0x02),
+        (0x01, 0x02, 0x01, 0x02),
+        (0x01, 0x02, 0x02, 0x01),
+    )
+        transformed_words = PauliWord[
+            PauliWord(copy(word.ops))
+            for word in words
+        ]
+        for (slot_index, (word_index, operation_index)) in enumerate(slots)
+            site = transformed_words[word_index].ops[operation_index][1]
+            transformed_words[word_index].ops[operation_index] =
+                (site, assigned_axes[slot_index])
+        end
+        paired = moment_key(transformed_words)
+        representative = spin_spatial_representative(
+            assembly.source.quotient,
+            paired,
+        )
+        add_term!(result, representative, 1)
+    end
+    return result
+end
+
+function su2_rank4_polynomial_projection(
+    polynomial::ExactLinearPolynomial,
+    assembly::ShastryFullStateSpinIsotypicReducedPrimalAssembly,
+    eliminated_moments::Set{MomentKey},
+    projection_cache::Dict{MomentKey,ExactLinearPolynomial},
+)
+    result = ExactLinearPolynomial()
+    for (key, coefficient) in polynomial.terms
+        projection = get!(projection_cache, key) do
+            su2_rank4_moment_projection(key, assembly)
+        end
+        (
+            length(projection.terms) != 1 ||
+            !haskey(projection.terms, key) ||
+            projection.terms[key] != 1
+        ) && push!(eliminated_moments, key)
+        for (projected_key, projected_coefficient) in projection.terms
+            add_term!(
+                result,
+                projected_key,
+                coefficient * projected_coefficient,
+            )
+        end
+    end
+    return result
 end
 
 function update_fingerprint!(
@@ -86,6 +189,9 @@ function append_block_triplets!(
     block_index::Int,
     progress_callback::Function,
     coefficient_fingerprint::Union{Nothing,SHA.SHA2_256_CTX},
+    su2_rank4_reduction::Bool,
+    su2_rank4_eliminated_moments::Set{MomentKey},
+    su2_rank4_projection_cache::Dict{MomentKey,ExactLinearPolynomial},
 )
     dimension = length(block.rows)
     row_batch_size = max(
@@ -122,6 +228,19 @@ function append_block_triplets!(
                     )
                 batch_polynomials[batch_index][column - row + 1] =
                     polynomial
+            end
+        end
+
+        if su2_rank4_reduction
+            for polynomials in batch_polynomials
+                for index in eachindex(polynomials)
+                    polynomials[index] = su2_rank4_polynomial_projection(
+                        polynomials[index],
+                        assembly,
+                        su2_rank4_eliminated_moments,
+                        su2_rank4_projection_cache,
+                    )
+                end
             end
         end
 
@@ -226,6 +345,7 @@ function build_shastry_full_state_spin_isotypic_mosek_dual_certificate(
     log_level::Int=1,
     progress_callback::Function=message -> nothing,
     fingerprint_coefficients::Bool=false,
+    su2_rank4_reduction::Bool=false,
 )
     task = Mosek.maketask()
     Mosek.putstreamfunc(
@@ -254,9 +374,14 @@ function build_shastry_full_state_spin_isotypic_mosek_dual_certificate(
     scalar_term_count = 0
     coefficient_fingerprint =
         fingerprint_coefficients ? SHA.SHA2_256_CTX() : nothing
+    su2_rank4_eliminated_moments = Set{MomentKey}()
+    su2_rank4_projection_cache =
+        Dict{MomentKey,ExactLinearPolynomial}()
     if !isnothing(coefficient_fingerprint)
         update_fingerprint!(
             coefficient_fingerprint,
+            su2_rank4_reduction ?
+            "shastry-full-state-spin-isotypic-su2-rank4-coefficients-v1" :
             "shastry-full-state-spin-isotypic-coefficients-v1",
         )
     end
@@ -269,6 +394,9 @@ function build_shastry_full_state_spin_isotypic_mosek_dual_certificate(
             block_index,
             progress_callback,
             coefficient_fingerprint,
+            su2_rank4_reduction,
+            su2_rank4_eliminated_moments,
+            su2_rank4_projection_cache,
         )
     end
 
@@ -285,23 +413,31 @@ function build_shastry_full_state_spin_isotypic_mosek_dual_certificate(
             Inf,
         )
         for (offset, equality) in enumerate(assembly.equalities)
-            all(iszero ∘ imag, values(equality.terms)) ||
+            projected_equality = su2_rank4_reduction ?
+                su2_rank4_polynomial_projection(
+                    equality,
+                    assembly,
+                    su2_rank4_eliminated_moments,
+                    su2_rank4_projection_cache,
+                ) :
+                equality
+            all(iszero ∘ imag, values(projected_equality.terms)) ||
                 error("native Mosek dual equality is not exactly real")
             ensure_moment_constraints!(
                 task,
                 moment_constraints,
-                keys(equality.terms),
+                keys(projected_equality.terms),
             )
             variable_index = Int32(first_variable + offset - 1)
             constraint_indices = Int32[
                 moment_constraints[key]
-                for key in keys(equality.terms)
+                for key in keys(projected_equality.terms)
             ]
             variable_indices =
                 fill(variable_index, length(constraint_indices))
             coefficients = Float64[
                 checked_float(real(coefficient))
-                for coefficient in values(equality.terms)
+                for coefficient in values(projected_equality.terms)
             ]
             Mosek.putaijlist(
                 task,
@@ -327,6 +463,8 @@ function build_shastry_full_state_spin_isotypic_mosek_dual_certificate(
         equality_count,
         scalar_term_count,
         coefficient_map_sha256,
+        su2_rank4_reduction,
+        length(su2_rank4_eliminated_moments),
     )
 end
 
@@ -346,10 +484,51 @@ function optimize_shastry_full_state_spin_isotypic_mosek_dual_certificate!(
     else
         "dual_certificate_numerically_undetermined"
     end
+    has_primal_solution =
+        solution_status == Mosek.MSK_SOL_STA_OPTIMAL
+    constraint_count = Int(Mosek.getnumcon(certificate.task))
+    scalar_variable_count = Int(Mosek.getnumvar(certificate.task))
+    semidefinite_variable_count =
+        Int(Mosek.getnumbarvar(certificate.task))
+    maximum_constraint_violation = has_primal_solution &&
+                                   constraint_count > 0 ?
+        maximum(
+            Mosek.getpviolcon(
+                certificate.task,
+                Mosek.MSK_SOL_ITR,
+                Int32.(1:constraint_count),
+            ),
+        ) :
+        (has_primal_solution ? 0.0 : Inf)
+    maximum_scalar_variable_violation = has_primal_solution &&
+                                        scalar_variable_count > 0 ?
+        maximum(
+            Mosek.getpviolvar(
+                certificate.task,
+                Mosek.MSK_SOL_ITR,
+                Int32.(1:scalar_variable_count),
+            ),
+        ) :
+        (has_primal_solution ? 0.0 : Inf)
+    maximum_semidefinite_variable_violation = has_primal_solution &&
+                                              semidefinite_variable_count > 0 ?
+        maximum(
+            Mosek.getpviolbarvar(
+                certificate.task,
+                Mosek.MSK_SOL_ITR,
+                Int32.(1:semidefinite_variable_count),
+            ),
+        ) :
+        (has_primal_solution ? 0.0 : Inf)
     return (
         classification=classification,
         problem_status=problem_status,
         solution_status=solution_status,
+        maximum_constraint_violation=maximum_constraint_violation,
+        maximum_scalar_variable_violation=
+            maximum_scalar_variable_violation,
+        maximum_semidefinite_variable_violation=
+            maximum_semidefinite_variable_violation,
     )
 end
 
