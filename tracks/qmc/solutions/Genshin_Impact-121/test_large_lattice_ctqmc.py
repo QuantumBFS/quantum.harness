@@ -925,7 +925,7 @@ def test_checkpoint_roundtrip_preserves_word_rng_and_primary_traces(
         seed=121_2030,
     )
     sampler.moves_since_rebuild = 5
-    sampler.completed_steps = 11
+    sampler.completed_steps = 3
     observation = ctqmc.measure_configuration(
         sampler.factors,
         sampler.geometry,
@@ -957,7 +957,7 @@ def test_checkpoint_roundtrip_preserves_word_rng_and_primary_traces(
     restored.load_checkpoint()
     actual_random = restored.rng.random(8)
 
-    assert restored.completed_steps == 11
+    assert restored.completed_steps == 3
     assert restored.moves_since_rebuild == 5
     assert list(restored.word) == list(sampler.word)
     assert restored.accumulator.state() == sampler.accumulator.state()
@@ -1088,3 +1088,91 @@ def test_manifest_helpers_do_not_mutate_input(tmp_path: Path) -> None:
     original = deepcopy(manifest)
     ctqmc.CTQMC.from_manifest(manifest, tmp_path)
     assert manifest == original
+
+def test_complete_validation_is_hash_bound_and_idempotent(tmp_path: Path) -> None:
+    manifest = _manifest(steps=8, warmup=1)
+    manifest_path = tmp_path / "manifest.json"
+    ctqmc.atomic_write_json(manifest_path, manifest)
+    digest = hashlib.sha256(manifest_path.read_bytes()).hexdigest()
+    output = tmp_path / "run"
+    sampler = ctqmc.CTQMC.from_manifest(
+        manifest, output, manifest_sha256=digest
+    )
+    result = sampler.run()
+    assert ctqmc.validate_existing_complete(output, digest, 8) == result
+    assert ctqmc.main([
+        "--manifest", str(manifest_path), "--output", str(output)
+    ]) == 0
+    complete = json.loads((output / "CHAIN_COMPLETE").read_text())
+    complete["result_json_sha256"] = "0" * 64
+    ctqmc.atomic_write_json(output / "CHAIN_COMPLETE", complete)
+    with pytest.raises(ctqmc.ManifestError, match="hash"):
+        ctqmc.validate_existing_complete(output, digest, 8)
+
+
+def test_only_recoverable_failed_marker_is_archived(tmp_path: Path) -> None:
+    failed = tmp_path / "FAILED"
+    ctqmc.atomic_write_json(
+        failed,
+        {"determinant_failure_kind": None, "error_type": "OSError"},
+    )
+    archive = ctqmc.archive_recoverable_failure(failed)
+    assert not failed.exists()
+    assert archive.is_file()
+    scientific = tmp_path / "FAILED"
+    ctqmc.atomic_write_json(
+        scientific,
+        {"determinant_failure_kind": "negative"},
+    )
+    with pytest.raises(ctqmc.ManifestError, match="scientific"):
+        ctqmc.archive_recoverable_failure(scientific)
+    assert scientific.is_file()
+
+
+def test_resume_without_checkpoint_preserves_active_failed(tmp_path: Path) -> None:
+    manifest_path = tmp_path / "manifest.json"
+    ctqmc.atomic_write_json(manifest_path, _manifest())
+    output = tmp_path / "run"
+    output.mkdir()
+    failed = output / "FAILED"
+    ctqmc.atomic_write_json(
+        failed,
+        {"determinant_failure_kind": None, "error_type": "OSError"},
+    )
+    original = failed.read_bytes()
+
+    with pytest.raises(ctqmc.ManifestError, match="needs checkpoint"):
+        ctqmc.main([
+            "--manifest", str(manifest_path),
+            "--output", str(output),
+            "--resume",
+        ])
+
+    assert failed.read_bytes() == original
+    assert not (output / "failures").exists()
+
+
+def test_load_checkpoint_rejects_accumulator_count_mismatch(
+    tmp_path: Path,
+) -> None:
+    sampler = _sampler(tmp_path)
+    sampler.completed_steps = 3
+    observation = ctqmc.measure_configuration(
+        sampler.factors,
+        sampler.geometry,
+        sampler.beta,
+        sampler.G0,
+        len(sampler.word),
+        sampler.momenta,
+        sampler.displacements,
+    )
+    sampler.accumulator.add(observation)
+    sampler.save_checkpoint("running")
+    path = tmp_path / "checkpoint.json"
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    payload["accumulator"]["count"] = 0
+    ctqmc.atomic_write_json(path, payload)
+
+    restored = _sampler(tmp_path)
+    with pytest.raises(ctqmc.ManifestError, match="accumulator count"):
+        restored.load_checkpoint()

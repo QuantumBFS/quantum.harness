@@ -29,7 +29,8 @@ storage. QR/UDT stabilization and production autocorrelation analysis are not
 implemented and must not be claimed.
 """
 from __future__ import annotations
-import argparse, hashlib, itertools, json, math, os, sys, tempfile, time
+import argparse, hashlib, importlib.metadata, itertools, json, math, os
+import platform, sys, tempfile, time
 from collections import deque
 from dataclasses import dataclass
 from fractions import Fraction
@@ -364,6 +365,53 @@ def atomic_write_json(path:Path,payload:Mapping[str,Any])->None:
     finally:
         if os.path.exists(tmp):os.unlink(tmp)
 
+def execution_environment() -> Mapping[str,Any]:
+    return {"python_executable":str(Path(sys.executable).resolve()),
+      "python_version":platform.python_version(),
+      "numpy_version":importlib.metadata.version("numpy"),
+      "scipy_version":importlib.metadata.version("scipy"),
+      "slurm":{"job_id":os.environ.get("SLURM_JOB_ID"),
+               "array_job_id":os.environ.get("SLURM_ARRAY_JOB_ID"),
+               "array_task_id":os.environ.get("SLURM_ARRAY_TASK_ID"),
+               "cluster_name":os.environ.get("SLURM_CLUSTER_NAME")}}
+
+def validate_existing_complete(output: Path, manifest_sha256: str,
+                               expected_steps: int) -> Mapping[str,Any]:
+    result_path=output/"result.json"; done_path=output/"CHAIN_COMPLETE"
+    if not result_path.is_file() or not done_path.is_file():
+        raise ManifestError("incomplete CHAIN_COMPLETE artifact set")
+    result=json.loads(result_path.read_text()); done=json.loads(done_path.read_text())
+    digest=hashlib.sha256(result_path.read_bytes()).hexdigest()
+    for payload,label in ((result,"result"),(done,"CHAIN_COMPLETE")):
+        if payload.get("algorithm_id")!=ALGORITHM_ID:
+            raise ManifestError(f"{label} algorithm mismatch")
+        if payload.get("status")!="run_complete_unvalidated":
+            raise ManifestError(f"{label} status mismatch")
+        if payload.get("scope")!="single_chain_execution_only":
+            raise ManifestError(f"{label} scope mismatch")
+        if payload.get("manifest_sha256")!=manifest_sha256:
+            raise ManifestError(f"{label} manifest mismatch")
+        if int(payload.get("completed_steps",-1))!=expected_steps:
+            raise ManifestError(f"{label} step mismatch")
+    if done.get("result_json_sha256")!=digest:
+        raise ManifestError("CHAIN_COMPLETE result hash mismatch")
+    return result
+
+def archive_recoverable_failure(failed: Path) -> Path:
+    payload=json.loads(failed.read_text())
+    if payload.get("determinant_failure_kind") in ("zero","negative"):
+        raise ManifestError("scientific determinant failure is immutable")
+    raw=failed.read_bytes(); digest=hashlib.sha256(raw).hexdigest()
+    archive=failed.parent/"failures"/f"FAILED.{digest}.json"
+    archive.parent.mkdir(parents=True,exist_ok=True)
+    if archive.exists() and archive.read_bytes()!=raw:
+        raise ManifestError("failure archive hash collision")
+    if not archive.exists():
+        os.replace(failed,archive)
+    else:
+        failed.unlink()
+    return archive
+
 class CTQMC:
     """Cyclic-word sampler; resume rebuilds dense factors from the word."""
     def __init__(self,geometry:TriangularGeometry,catalog:Sequence[LocalVertex],
@@ -547,9 +595,25 @@ class CTQMC:
         atomic_write_json(self.output_dir/"checkpoint.json",self.checkpoint_payload(status))
     def load_checkpoint(self)->None:
         data=json.loads((self.output_dir/"checkpoint.json").read_text())
+        if data.get("schema_version")!=1 or data.get("status") not in {
+                "running","run_failed","run_complete_unvalidated"}:
+            raise ManifestError("checkpoint schema/status mismatch")
         if data.get("algorithm_id")!=ALGORITHM_ID or data.get("manifest_sha256")!=self.manifest_sha256:
             raise ManifestError("checkpoint protocol mismatch")
-        self.completed_steps=int(data["completed_steps"])
+        completed=data.get("completed_steps")
+        if isinstance(completed,bool) or not isinstance(completed,int) or not (
+                0<=completed<=self.steps):
+            raise ManifestError("checkpoint completed_steps invalid")
+        accumulator=data.get("accumulator")
+        expected_count=max(0,completed-self.warmup)//self.measure_every
+        if not isinstance(accumulator,Mapping) or accumulator.get("count")!=expected_count:
+            raise ManifestError("checkpoint accumulator count mismatch")
+        traces=accumulator.get("primary_traces")
+        if not isinstance(traces,Mapping) or set(traces)!=set(ObservableAccumulator.KEYS) or any(
+                not isinstance(trace,list) or len(trace)!=expected_count
+                for trace in traces.values()):
+            raise ManifestError("checkpoint primary trace length mismatch")
+        self.completed_steps=completed
         self.word=deque(Event.from_json(e) for e in data["word"])
         self.rng.bit_generator.state=data["rng_state"];self.counters=data["counters"]
         self.counters.setdefault("determinant_failures",{"zero":0,"negative":0})
@@ -596,6 +660,12 @@ class CTQMC:
           "rebuild_diagnostics":self.rebuild_diagnostics,
           "timing":{"wall_seconds":wall_seconds},
           "resource_usage":{"max_rss_kb":max_rss_kb},
+          "execution_environment":execution_environment(),
+          "recovered_failure_archives":[
+            {"path":str(path.relative_to(self.output_dir)),
+             "sha256":hashlib.sha256(path.read_bytes()).hexdigest()}
+            for path in sorted((self.output_dir/"failures").glob("FAILED.*.json"))
+          ] if (self.output_dir/"failures").is_dir() else [],
           "observables":self.accumulator.summary(self.beta,self.geometry.n_sites),
           "implementation":{"fock_space_constructed":False,
             "local_storage":"12 local 3x3 B/B_inv templates","state":"dense T,Q,logdet",
@@ -645,13 +715,19 @@ def main(argv:Optional[Sequence[str]]=None)->int:
     chain_complete=args.output/"CHAIN_COMPLETE"
     failed=args.output/"FAILED"
     if chain_complete.exists():
-        raise ManifestError("CHAIN_COMPLETE exists; completed chain output is immutable")
+        completed=validate_existing_complete(
+            args.output,digest,int(manifest["monte_carlo"]["steps"]))
+        print(json.dumps({"status":completed["status"],
+          "idempotent_existing_complete":True},allow_nan=False),flush=True)
+        return 0
+    if args.resume and not checkpoint.is_file():
+        raise ManifestError("--resume needs checkpoint; active FAILED retained")
     if failed.exists():
-        raise ManifestError("FAILED exists; failed chain output is immutable")
-    if args.resume:
-        if not checkpoint.is_file():
-            raise ManifestError("--resume needs checkpoint")
-    elif checkpoint.exists() or result.exists():
+        if args.resume:
+            archive_recoverable_failure(failed)
+        else:
+            raise ManifestError("FAILED exists; use --resume for recoverable failures")
+    if not args.resume and (checkpoint.exists() or result.exists()):
         raise ManifestError("output exists; use --resume or a new directory")
     sampler:Optional[CTQMC]=None
     try:

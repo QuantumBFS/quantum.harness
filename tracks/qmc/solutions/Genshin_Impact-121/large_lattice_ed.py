@@ -69,6 +69,7 @@ class OracleInput:
     model: Mapping[str, float]
     momenta: Tuple[Tuple[int, int], ...]
     hermitian_tolerance: float
+    displacements: Tuple[Tuple[int, int], ...] = ()
 
 
 def _as_mapping(value: Any, name: str) -> Mapping[str, Any]:
@@ -160,6 +161,27 @@ def load_runner_input(path: Path) -> OracleInput:
         momenta.append((kx, ky))
     if len(set(momenta)) != len(momenta):
         raise ctqmc.ManifestError("measurements.momenta contains duplicates")
+    raw_displacements = measurements.get("displacements", [])
+    if (
+        not isinstance(raw_displacements, Sequence)
+        or isinstance(raw_displacements, (str, bytes))
+    ):
+        raise ctqmc.ManifestError("measurements.displacements must be a sequence")
+    displacements = []
+    for index, raw in enumerate(raw_displacements):
+        if (
+            not isinstance(raw, Sequence)
+            or isinstance(raw, (str, bytes))
+            or len(raw) != 2
+        ):
+            raise ctqmc.ManifestError(
+                f"measurements.displacements[{index}] must be [dx,dy]"
+            )
+        dx = _signed_integer(raw[0], f"measurements.displacements[{index}][0]")
+        dy = _signed_integer(raw[1], f"measurements.displacements[{index}][1]")
+        displacements.append((dx, dy))
+    if len(set(displacements)) != len(displacements):
+        raise ctqmc.ManifestError("measurements.displacements contains duplicates")
 
     ed_config = _as_mapping(
         manifest.get("exact_diagonalization", {}),
@@ -179,6 +201,7 @@ def load_runner_input(path: Path) -> OracleInput:
         model,
         tuple(momenta),
         hermitian_tolerance,
+        tuple(displacements),
     )
 
 
@@ -453,6 +476,26 @@ def momentum_observables(
     return result
 
 
+def real_space_green_observables(
+    geometry: ctqmc.TriangularGeometry,
+    green: np.ndarray,
+    displacements: Sequence[Tuple[int, int]],
+) -> Mapping[str, Any]:
+    result = {}
+    for dx, dy in displacements:
+        total = 0.0j
+        for sx in range(geometry.Lx):
+            for sy in range(geometry.Ly):
+                i = sx * geometry.Ly + sy
+                j = (
+                    ((sx + dx) % geometry.Lx) * geometry.Ly
+                    + (sy + dy) % geometry.Ly
+                )
+                total += complex(green[i, j])
+        result[f"{dx},{dy}"] = _complex_pair(total / geometry.n_sites)
+    return result
+
+
 def run_oracle(manifest_path: Path) -> Mapping[str, Any]:
     oracle = load_runner_input(manifest_path)
     layout = build_fock_layout(oracle.geometry.n_sites)
@@ -556,6 +599,11 @@ def run_oracle(manifest_path: Path) -> Mapping[str, Any]:
                 density,
                 density_pair,
                 oracle.momenta,
+            ),
+            "real_space_green": real_space_green_observables(
+                oracle.geometry,
+                green,
+                oracle.displacements,
             ),
             "momentum_definition": {
                 "one_body": "phase^dagger G phase / N",
