@@ -90,6 +90,15 @@
     .flow span { background: rgba(29,96,71,.08); padding: 7px 10px; border-radius: 8px; }
     .flow i { color: var(--muted); font-style: normal; }
     .route-link { display: inline-block; margin-top: 7px; color: var(--green); font-weight: 800; text-decoration-thickness: 1px; text-underline-offset: 4px; }
+    .contribution { display: grid; grid-template-columns: .85fr 1.15fr; gap: 24px; align-items: stretch; }
+    .contribution-summary { padding: 38px; border-radius: 28px; background: linear-gradient(145deg, var(--blue), #203e52); color: white; box-shadow: var(--shadow); }
+    .contribution-summary h3 { margin: 14px 0 12px; font-size: 32px; line-height: 1.12; }
+    .contribution-summary p { color: rgba(255,255,255,.75); }
+    .contribution-summary .route-link { color: white; }
+    .model-list { display: grid; gap: 14px; }
+    .model-item { padding: 24px 28px; border: 1px solid var(--line); border-radius: 20px; background: rgba(255,255,255,.5); }
+    .model-item b { display: block; margin-bottom: 5px; font-size: 19px; }
+    .model-item p { margin: 0; color: var(--muted); font-size: 14px; }
     .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin: 38px 0 60px; }
     .stat { padding: 24px; min-height: 150px; border-top: 4px solid var(--green); background: var(--card); border-radius: 4px 4px 18px 18px; }
     .stat:nth-child(even) { border-color: var(--orange); }
@@ -130,7 +139,7 @@
     @media (max-width: 850px) {
       .nav-links { display: none; }
       .hero { min-height: auto; }
-      .hero-grid, .section-head, .result-grid, .boundary { grid-template-columns: 1fr; }
+      .hero-grid, .section-head, .result-grid, .boundary, .contribution { grid-template-columns: 1fr; }
       .orbit { width: min(80vw, 380px); }
       .timeline, .stats { grid-template-columns: 1fr 1fr; }
       .timeline::before { display: none; }
@@ -165,6 +174,7 @@
       <div class="nav-links">
         <a href="#timeline">四天进程</a>
         <a href="#routes">技术路线</a>
+        <a href="#contribution">开源贡献</a>
         <a href="#results">关键结果</a>
         <a href="#lessons">经验</a>
         <a href="#boundary">成果边界</a>
@@ -210,7 +220,7 @@
           <article class="day reveal" data-day="01"><div class="day-card"><div class="date">7 月 27 日</div><h3>问题拆解</h3><p>确立粗粒化 NPA 路线：MPS 生成映射，半正定规划保留下界；不把近似态误当认证条件。</p></div></article>
           <article class="day reveal" data-day="02"><div class="day-card"><div class="date">7 月 28 日</div><h3>对称原型</h3><p>完成有限 Abelian 分块、重构验证、50 模型语料，以及独立非交换矩 SDP 基线。</p></div></article>
           <article class="day reveal" data-day="03"><div class="day-card"><div class="date">7 月 29 日</div><h3>链路打通</h3><p>接通 U(1) VUMPS—粗粒化 RDM—SDP；并扩展 Z₂ʳ、局域化矩阵、SU(2) 证据与自动识别。</p></div></article>
-          <article class="day reveal" data-day="04"><div class="day-card"><div class="date">7 月 30 日</div><h3>规模与固化</h3><p>完成 D=6、深度 60 的百万变量计算，整理资源、残差、回归测试与复现实验记录。</p></div></article>
+          <article class="day reveal" data-day="04"><div class="day-card"><div class="date">7 月 30 日</div><h3>规模与固化</h3><p>完成 D=6、深度 60 的百万变量计算；并将 MG 点、二聚化链与 ZXZ cluster 加场模型固化为可回归的开源实现。</p></div></article>
         </div>
       </div>
     </section>
@@ -236,6 +246,28 @@
             <div class="flow"><span>识别对称</span><i>→</i><span>生成分块</span><i>→</i><span>约化求解</span><i>→</i><span>等价验证</span></div>
             <a class="route-link" href="https://github.com/QuantumBFS/quantum.harness/pull/245">查看 PR #245</a>
           </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="contribution">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <div><div class="kicker">Open-source contribution</div><h2>从通用编译器到两个模型关卡</h2></div>
+          <p class="section-intro">在 QMBCertify 原型仓库中补齐显式 Pauli 多项式、固定预算基组、可观测量、精确对角化基准与扫描停止规则，让模型扩展成为可检查的研究流程。</p>
+        </div>
+        <div class="contribution">
+          <article class="contribution-summary reveal">
+            <div class="route-number" style="color:var(--mint)">QMBCERTIFY · JULIA</div>
+            <h3>Hamiltonian Bootstrap 模型阶梯</h3>
+            <p>编译与求解分离；确定性生成 B†B、线性/PSD state-optimality 与小区域 RDM 约束，并记录约束来源、块尺寸和可复现 fingerprint。普通求解结果保持 numerical relaxation / solver bound 的诚实范围。</p>
+            <a class="route-link" href="https://github.com/hz-xiaxz/hackthon-bootstrap">查看贡献仓库</a>
+          </article>
+          <div class="model-list">
+            <article class="model-item reveal"><b>MG 点与显式二聚化 J₁–J₂ 链</b><p>实现 Majumdar–Ghosh 点、解耦 dimer 点、强弱键与关联可观测量；用连续三站点 RDM positivity 在 25×25 主矩块预算下将 L=6 的 MG 能量密度恢复到 −0.3749999983，对精确值 −3/8 的误差为 1.69×10⁻⁹。</p></article>
+            <article class="model-item reveal"><b>ZXZ cluster 链与外场</b><p>实现 H=−JΣ Zᵢ₋₁XᵢZᵢ₊₁−hₓΣXᵢ−h_zΣZᵢ，加入 stabilizer/string 可观测量、参数匹配的平移/反射/π-X 对称性，以及 h_z≠0 时错误对称性的拒绝测试。</p></article>
+            <article class="model-item reveal"><b>固定预算比较与负结果保留</b><p>统一比较 local 与 operator-adapted basis。MG/dimer 关卡在恢复后通过；ZXZ 横场扫描及 ZZ、XX、ZX seed ablation 未见 adapted 改善，因此按预设规则停止，没有用扩大预算掩盖负结果。</p></article>
+          </div>
         </div>
       </div>
     </section>
@@ -295,7 +327,7 @@
           <p class="section-intro">四天走通了研究闭环，但没有把研究原型包装成“万能黑盒”。</p>
         </div>
         <div class="boundary reveal">
-          <div class="done"><h3>已经完成</h3><ul><li>真实 U(1) VUMPS—粗粒化 RDM—SDP 计算链路</li><li>百万变量、高深度集群计算与数值诊断</li><li>Z₂ʳ 非交换矩及局域化 PSD 锥约化</li><li>50 模型全谱重构与等价性验证</li><li>U(1)、Z₂、平移、SU(2) 自动匹配接口</li></ul></div>
+          <div class="done"><h3>已经完成</h3><ul><li>真实 U(1) VUMPS—粗粒化 RDM—SDP 计算链路</li><li>百万变量、高深度集群计算与数值诊断</li><li>Z₂ʳ 非交换矩及局域化 PSD 锥约化</li><li>50 模型全谱重构与等价性验证</li><li>U(1)、Z₂、平移、SU(2) 自动匹配接口</li><li>MG/二聚化与 ZXZ cluster 模型的显式编译、ED 基准和固定预算扫描</li></ul></div>
           <div class="next"><h3>下一步</h3><ul><li>有理数或区间算术的独立精确证书</li><li>SU(2) 进入非交换矩与局域化 PSD 锥</li><li>Permutation 与一般非 Abelian 对称性</li><li>跨模型规模测试与稳定的 CI</li><li>两条路线最终合流：粗粒化块再做自动对称约化</li></ul></div>
         </div>
       </div>
@@ -305,7 +337,7 @@
       <div class="wrap closing-card reveal">
         <h2>AI 不只是解释物理，也可以参与构造、运行、验证和修正计算。</h2>
         <p>真正的 Vibe Physics，是在更短时间内完成从物理假设、数学形式、代码实现、数值求解，到误差诊断与边界声明的闭环。</p>
-        <div class="pr-buttons"><a class="button" href="https://github.com/QuantumBFS/quantum.harness/pull/211">粗粒化 NPA · PR #211</a><a class="button" href="https://github.com/QuantumBFS/quantum.harness/pull/245">自动对称约化 · PR #245</a></div>
+        <div class="pr-buttons"><a class="button" href="https://github.com/QuantumBFS/quantum.harness/pull/211">粗粒化 NPA · PR #211</a><a class="button" href="https://github.com/QuantumBFS/quantum.harness/pull/245">自动对称约化 · PR #245</a><a class="button" href="https://github.com/hz-xiaxz/hackthon-bootstrap">MG / ZXZ · QMBCertify</a></div>
       </div>
     </section>
   </main>
