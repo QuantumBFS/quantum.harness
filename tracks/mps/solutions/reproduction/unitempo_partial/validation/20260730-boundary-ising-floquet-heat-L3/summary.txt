@@ -1,0 +1,16 @@
+L=3
+J=1
+h0=1
+amplitude=0.5
+omega_drive=2
+alpha=0.05
+omega_cutoff=5
+delta_t=0.0654498469498
+period_steps=48
+warmup_periods=200
+bond_dimension=80
+wall_seconds=455.306903
+mean_drive_power=0.0858600363907
+mean_energy_derivative=-2.08166817117e-17
+mean_heat_current_to_bath=0.0858600363907
+balance_current=0.0858600363907

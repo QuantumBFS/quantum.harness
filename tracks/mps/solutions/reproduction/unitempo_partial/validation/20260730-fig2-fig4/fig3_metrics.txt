@@ -1,0 +1,8 @@
+comparison=generated UniformTEMPO continuous spectra vs author-deposited continuous CSV curves
+note=author data are read only after independent generation; delta-function weights are not compared as sampled curves
+longitudinal omega_d=10.0 rmse=2.0707592e-05 max_abs=0.00012191338
+longitudinal omega_d=5.0 rmse=2.3729451e-05 max_abs=0.00016563236
+longitudinal omega_d=2.5 rmse=1.1023766e-05 max_abs=8.692849e-05
+transversal omega_d=2.0 rmse=5.9236e-05 max_abs=0.00019449978
+transversal omega_d=1.5 rmse=0.00013635083 max_abs=0.00059073869
+transversal omega_d=1.0 rmse=0.00033274627 max_abs=0.0019439892

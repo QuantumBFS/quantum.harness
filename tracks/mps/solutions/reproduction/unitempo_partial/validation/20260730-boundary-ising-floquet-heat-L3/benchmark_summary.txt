@@ -1,0 +1,16 @@
+null_bath_mean_balance_current=-2.61078562415e-10
+null_bath_mean_drive_power=-2.6107859682e-10
+physical_alpha=0.05
+chi=80
+warmup_periods=200
+wall_seconds=261.980139
+cycle_1_mean_power=0.0858835647179
+cycle_1_mean_energy_derivative=-6.01370805005e-17
+cycle_1_mean_balance_current=0.0858835647179
+cycle_2_mean_power=0.0825340275915
+cycle_2_mean_energy_derivative=0
+cycle_2_mean_balance_current=0.0825340275915
+cycle_3_mean_power=0.0781216152443
+cycle_3_mean_energy_derivative=2.03540887848e-16
+cycle_3_mean_balance_current=0.0781216152443
+three_cycle_power_drift=0.00776194947365
