@@ -68,6 +68,13 @@ accepts `--shard-index I --shard-count N`; each shard binds the complete plan
 but runs only positions whose canonical zero-based index is congruent to `I`
 modulo `N`. Task 8 claims and atomic publication make retries restartable.
 
+Closed-loop searches use pycma CMA-ES for every search-space kind and
+dimension. For `k=1` only, the pycma bound-range standard-deviation limiter is
+disabled because pycma 4.4.4 cannot represent its initialized length-one
+diagonal scaling vector; the existing coordinate bounds, bound transform,
+candidate clipping, population ask/evaluate/tell semantics, seeds, and query
+budget remain unchanged. No dummy coordinate or duplicate evaluation is used.
+
 ## LASG02 Apptainer gate
 
 `scripts/calibrate_pilot.py` measures the representative two-qubit, 80-parameter

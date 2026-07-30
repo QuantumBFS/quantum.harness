@@ -748,7 +748,7 @@ def _population_size(dimension: int) -> int:
 
 
 def _cma_options(space: SearchSpace, seed: int) -> dict[str, object]:
-    return {
+    options: dict[str, object] = {
         "bounds": [space.lower_bounds.tolist(), space.upper_bounds.tolist()],
         "popsize": _population_size(space.dimension),
         # pycma reserves zero for a time-derived seed, so offset the public
@@ -759,6 +759,9 @@ def _cma_options(space: SearchSpace, seed: int) -> dict[str, object]:
         "verb_log": 0,
         "verb_time": False,
     }
+    if space.dimension == 1:
+        options["maxstd_boundrange"] = np.inf
+    return options
 
 
 def run_closed_loop(

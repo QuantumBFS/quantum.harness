@@ -6,11 +6,13 @@ import json
 from pathlib import Path
 import subprocess
 import sys
+from types import SimpleNamespace
 
 import numpy as np
 import pytest
 
 import qcontrol.artifacts as artifacts_module
+import qcontrol.closed_loop as closed_loop_module
 import qcontrol.experiments as experiments_module
 from qcontrol.artifacts import ArtifactConflict, ArtifactStore
 from qcontrol.closed_loop import make_model_hessian_space, make_search_space
@@ -1181,6 +1183,59 @@ def test_production_matrix_has_exact_design_coverage() -> None:
 
 
 @pytest.mark.integration
+def test_exact_failed_dimension_one_trial_uses_safe_cma_options() -> None:
+    trial_id = "trial-20e15a66415a0832b8c82051"
+    spec = next(
+        spec
+        for spec in generate_paired_trials(default_sweep_configs("production"))
+        if spec.trial_id == trial_id
+    )
+    assert spec.config.search == SearchConfig("random", 1, 2_000)
+    assert spec.config.device == DeviceConfig(0.2, 1_000, 8)
+    assert spec.config.trial_seed == 8
+
+    prepared = experiments_module.prepare_model(spec.config)
+    space = make_search_space(
+        spec.config.search,
+        prepared.origin,
+        model_basis=prepared.landscape.model_basis,
+        seed=spec.config.trial_seed,
+    )
+
+    options = closed_loop_module._cma_options(space, spec.config.trial_seed)
+    assert np.isinf(options["maxstd_boundrange"])
+
+
+@pytest.mark.integration
+def test_exact_failed_dimension_one_trial_publishes_and_resumes(tmp_path) -> None:
+    trial_id = "trial-20e15a66415a0832b8c82051"
+    spec = next(
+        spec
+        for spec in generate_paired_trials(default_sweep_configs("production"))
+        if spec.trial_id == trial_id
+    )
+    store = ArtifactStore(tmp_path)
+
+    first = run_sweep([spec], store)
+    digest = store.trial_hashes()[trial_id]
+    resumed = run_sweep(
+        [spec],
+        store,
+        executor=lambda unused: pytest.fail(f"reran completed trial: {unused}"),
+    )
+    payload = store.read_json(f"trials/{trial_id}.json")
+    result = TrialResult.from_canonical_dict(payload)
+    report = validate_sweep([spec], store)
+
+    assert first == resumed == SweepStatus(1, 1, 0)
+    assert store.trial_hashes()[trial_id] == digest
+    assert result.trial_id == trial_id
+    assert len(result.attempts) == result.ledger["total_queries"]
+    assert result.result["evaluations"] == result.ledger["optimizer_queries"]
+    assert report.valid
+
+
+@pytest.mark.integration
 def test_every_canonical_production_search_space_constructs() -> None:
     specs = generate_paired_trials(default_sweep_configs("production"))
     representatives = {}
@@ -1214,6 +1269,66 @@ def test_every_canonical_production_search_space_constructs() -> None:
             seed=config.trial_seed,
         )
         assert space.dimension == config.search.dimension
+
+
+@pytest.mark.integration
+def test_all_dimension_one_production_configs_execute_bounded_smoke() -> None:
+    specs = [
+        spec
+        for spec in generate_paired_trials(default_sweep_configs("production"))
+        if spec.config.search.dimension == 1
+    ]
+    assert len(specs) == 600
+    prepared = experiments_module.prepare_model(specs[0].config)
+
+    class SmokeDevice:
+        def __init__(self, shots: int | None) -> None:
+            self.shots = shots or 0
+            self.ledger = SimpleNamespace(
+                optimizer_queries=0,
+                optimizer_shots=0,
+                validation_queries=0,
+                validation_shots=0,
+            )
+
+        def query(self, pulse) -> Observation:
+            del pulse
+            self.ledger.optimizer_queries += 1
+            self.ledger.optimizer_shots += self.shots
+            index = self.ledger.optimizer_queries
+            return Observation(0.5, self.shots, index, False, index)
+
+        def validate(self, pulse, shots=100_000):
+            raise AssertionError((pulse, shots))
+
+        def certifies(self, observation, threshold=0.999) -> bool:
+            del observation, threshold
+            return False
+
+    for spec in specs:
+        config = spec.config
+        space = make_search_space(
+            config.search,
+            prepared.origin,
+            model_basis=prepared.landscape.model_basis,
+            oracle_basis=prepared.landscape.model_basis,
+            seed=config.trial_seed,
+        )
+        device = SmokeDevice(config.device.shots)
+        audited = []
+        result = closed_loop_module.run_closed_loop(
+            device,
+            space,
+            budget=2,
+            seed=config.trial_seed,
+            audit_sink=lambda pulse, observation: audited.append(
+                (pulse.copy(), observation)
+            ),
+        )
+
+        assert result.evaluations == device.ledger.optimizer_queries == 2
+        assert device.ledger.optimizer_shots == 2 * (config.device.shots or 0)
+        assert all(np.all(np.abs(pulse) <= 1.0) for pulse, _ in audited)
 
 
 @pytest.mark.parametrize("invalid", (True, 1.0, "1"))

@@ -320,6 +320,135 @@ def test_budget_is_never_exceeded_and_failed_queries_are_charged() -> None:
     assert result.budget_exhausted
 
 
+def test_one_dimensional_cma_avoids_broken_bound_range_std_limiter() -> None:
+    origin = np.zeros(3, dtype=np.float64)
+    space = make_random_space(origin, dimension=1, seed=8, bound=0.1)
+    device = _SyntheticDevice(
+        target=np.ones(3, dtype=np.float64),
+        allow_certification=False,
+    )
+
+    result = run_closed_loop(device, space, budget=5, seed=8)
+
+    assert result.evaluations == 5
+    assert result.budget_exhausted
+    assert device.ledger.optimizer_queries == 5
+
+
+@pytest.mark.parametrize("method", ("full", "model_hessian", "random", "oracle"))
+def test_one_dimensional_search_kinds_are_reproducible_and_bounded(method) -> None:
+    origin = np.zeros(1 if method == "full" else 4, dtype=np.float64)
+    config = SearchConfig(method, 1, 5)
+    kwargs = {
+        "model_basis": np.eye(origin.size),
+        "oracle_basis": np.eye(origin.size),
+        "seed": 8,
+    }
+    first_space = make_search_space(config, origin, **kwargs)
+    second_space = make_search_space(config, origin, **kwargs)
+    first_audit = []
+    second_audit = []
+
+    first = run_closed_loop(
+        _SyntheticDevice(
+            target=np.ones(origin.size, dtype=np.float64),
+            allow_certification=False,
+        ),
+        first_space,
+        budget=5,
+        seed=8,
+        audit_sink=lambda pulse, observation: first_audit.append(
+            (pulse.copy(), observation)
+        ),
+    )
+    second = run_closed_loop(
+        _SyntheticDevice(
+            target=np.ones(origin.size, dtype=np.float64),
+            allow_certification=False,
+        ),
+        second_space,
+        budget=5,
+        seed=8,
+        audit_sink=lambda pulse, observation: second_audit.append(
+            (pulse.copy(), observation)
+        ),
+    )
+    replayed = ClosedLoopResult.from_canonical_dict(
+        json.loads(json.dumps(first.canonical_dict(), allow_nan=False))
+    )
+
+    assert first == second == replayed
+    assert first.evaluations == 5
+    assert first.budget_exhausted
+    assert len(first_audit) == len(second_audit) == 5
+    assert all(np.all(np.abs(pulse) <= 1.0) for pulse, _ in first_audit)
+    for (first_pulse, _), (second_pulse, _) in zip(first_audit, second_audit):
+        np.testing.assert_array_equal(first_pulse, second_pulse)
+
+
+@pytest.mark.parametrize("shots", (None, 1_000))
+def test_one_dimensional_cma_preserves_exact_and_finite_shot_accounting(
+    shots,
+) -> None:
+    system_config = SystemConfig("one_qubit", 3, 4.0)
+    model = make_system(system_config)
+    pulse_space = PulseSpace.from_system(model, system_config.segments)
+    truth = perturb_system(model, gap=0.2, seed=8)
+    device_config = DeviceConfig(gap=0.2, shots=shots, perturbation_seed=8)
+    space = make_random_space(
+        np.zeros(pulse_space.parameter_count, dtype=np.float64),
+        dimension=1,
+        seed=8,
+    )
+    device = make_query_device(truth, pulse_space, device_config, seed=8)
+
+    result = run_closed_loop(device, space, budget=5, seed=8)
+
+    assert result.evaluations == device.ledger.optimizer_queries
+    assert result.evaluations <= 5
+    assert device.ledger.optimizer_shots == result.evaluations * (shots or 0)
+    assert device.ledger.total_queries == (
+        device.ledger.optimizer_queries + device.ledger.validation_queries
+    )
+    assert device.ledger.total_shots == (
+        device.ledger.optimizer_shots + device.ledger.validation_shots
+    )
+
+
+def test_one_dimensional_cma_certifies_and_stops_on_flat_fitness() -> None:
+    certified = run_closed_loop(
+        _SyntheticDevice(target=np.zeros(1, dtype=np.float64)),
+        make_full_space(np.zeros(1, dtype=np.float64)),
+        budget=20,
+        seed=8,
+    )
+    stopped = run_closed_loop(
+        _ScriptedValidationDevice((0.5,)),
+        make_full_space(np.zeros(1, dtype=np.float64)),
+        budget=100,
+        seed=8,
+    )
+
+    assert certified.certified
+    assert certified.stop_reason == "certified"
+    assert certified.evaluations == 1
+    assert not stopped.certified
+    assert stopped.stop_reason == "optimizer_stopped"
+    assert not stopped.budget_exhausted
+    assert stopped.evaluations < stopped.budget
+
+
+def test_cma_options_for_dimension_two_remain_unchanged() -> None:
+    options = closed_loop_module._cma_options(
+        make_full_space(np.zeros(2, dtype=np.float64)),
+        seed=8,
+    )
+
+    assert "maxstd_boundrange" not in options
+    assert options["popsize"] == 6
+    assert options["seed"] == 9
+
+
 def test_audit_sink_receives_copies_without_influencing_cma() -> None:
     origin = np.zeros(5, dtype=np.float64)
     target = np.asarray([0.5, -0.4, 0.3, 0.0, 0.0])

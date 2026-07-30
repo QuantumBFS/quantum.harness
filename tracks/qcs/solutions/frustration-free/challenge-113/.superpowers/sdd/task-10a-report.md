@@ -170,3 +170,28 @@ or Slurm submission was made.
 - Compute-like tests use an absolute container-only Python symlink, exercise
   every truncated SHA variable, and require actionable gate/path diagnostics
   before any container call. No job was submitted.
+
+## One-dimensional optimizer correction
+
+- Production was stopped after 98 old-revision trials. Array element
+  `2818032_2` preserved `not yet initialized (dimension needed)` while executing
+  canonical trial `trial-20e15a66415a0832b8c82051` (one-qubit, random `k=1`,
+  gap 0.2, 1,000 shots, seed 8).
+- The full local traceback locates the exception in pycma 4.4.4
+  `DiagonalDecoding.set_i`, called by `_stds_into_limits`. pycma supports
+  `N=1`, but its sentinel check cannot distinguish an initialized length-one
+  scaling vector when the default bound-range standard-deviation limiter
+  activates.
+- The minimal correction keeps CMA-ES for every method and disables only that
+  defective limiter for `k=1`. Bounds, clipping, population size,
+  ask/evaluate/tell generations, deterministic seed offset, query/shot
+  accounting, and validation remain unchanged; `k>=2` options are byte-for-byte
+  unchanged at the qcontrol boundary.
+- RED reproduced the exact traceback and missing option. GREEN covers the exact
+  canonical trial, exact and finite-shot devices, certification, optimizer
+  stop, budget exhaustion, all four search-space factories, reproducibility,
+  bounds, ledger reconciliation, JSON roundtrip, publication/resume, all 9,500
+  constructions, and bounded execution of all 600 canonical `k=1` configs.
+- The old `3862d4f` production root is revision-incompatible and must remain
+  quarantined. Any resumed production must start under a fresh revision/run-ID.
+  No cluster job was submitted.
