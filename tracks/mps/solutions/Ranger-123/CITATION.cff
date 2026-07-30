@@ -1,0 +1,29 @@
+cff-version: 1.2.0
+title: "Floquet-IF Many-body: N=2,3"
+message: "If you use this research implementation, cite this software and the upstream methods."
+type: software
+authors:
+  - family-names: "Wang"
+    given-names: "Thomas"
+version: 0.1.0
+date-released: 2026-07-29
+license: AGPL-3.0-or-later
+references:
+  - type: article
+    title: "Exact Floquet Dynamics of Strongly Damped Driven Quantum Systems"
+    authors:
+      - family-names: Mickiewicz
+        given-names: Konrad
+      - family-names: Link
+        given-names: Valentin
+      - family-names: Strunz
+        given-names: Walter T.
+    year: 2026
+    doi: 10.1103/5z1m-122d
+  - type: software
+    title: "UniformTEMPO.jl"
+    url: "https://github.com/uniformTEMPO/UniformTEMPO.jl"
+    version: "b76a018c32e5415989761d902b1b0e95f1a337da"
+  - type: software
+    title: "OQuPy"
+    url: "https://github.com/tempoCollaboration/OQuPy"

@@ -1,0 +1,13 @@
+model:
+  n: 2
+  j: 0.5
+  omega: 1.0
+  drive_amplitude: 0.2
+  drive_frequency: 0.6180339887498949
+  normalization: bounded
+bath:
+  alpha: 0.05
+  cutoff: 2.5
+  temperature: 0.0
+sector: triplet
+method: finite_memory_if

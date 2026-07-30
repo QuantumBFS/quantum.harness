@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "generated_date": "2026-07-30",
+  "source_snapshot_commit": "2a6d61b5028c7960d3808111c51663cb65893ca9",
+  "heat_valve_generated_date": "2026-07-30",
+  "heat_valve_source_snapshot_commit": "b42725363a01e2ca88b951c3d28026df8104aa40",
+  "uniform_tempo_revision": "b76a018c32e5415989761d902b1b0e95f1a337da",
+  "verification": {
+    "pytest": "105 passed",
+    "ruff": "passed",
+    "mypy": "passed",
+    "result_audit": "passed: 6 result files",
+    "paper_audit": "passed",
+    "julia_import_smoke": "passed: 2/2 environment tests",
+    "wheel_build": "passed",
+    "heat_valve_audit": "expected rejection: dark-channel gates not met"
+  },
+  "sha256": {
+    "results/paper/n3_heat_manifest.json": "67e157c8bcf353873c3c9bc725ef7d92267f0074c04a11ca0c53c430ef0bf507",
+    "results/paper/error_map_manifest.json": "482182b661fa63d243a929771339d553d6b1588ce7f52fa088736dff24658230",
+    "results/paper/model_comparison_manifest.json": "30e5bc4bf4228c9da1f83cc15f85ac921788bd2c0d4b4923bc9374309a75cef8",
+    "results/validation/uniform_tempo_single_spin.json": "ffa32de8d9fdc64b191a1168ea4285639d7fcaae962d8701d1c0a3be789d8720",
+    "results/validation/uniform_tempo_oqupy_crosscheck.json": "7f0cb2840805180ddb157100fd1a6f3fea92178a9aa7e95813a3025c1b1940b7",
+    "figures/paper/n3_sector_heat.png": "0e37e61b6c74464fbd051239712617d67513602c6edcbaa95b0490fb80554828",
+    "figures/paper/n3_sector_heat.pdf": "af783a170eddbc79c155cd2ff4df100040dbbad73b0b9a0d8bee76e336387ae5",
+    "figures/paper/n3_odd_difference.png": "f048a37aed6b68c89eb42cf93fdd45bfbb62e34e5250d07aa01a93b4f8f7bc4b",
+    "figures/paper/n3_odd_difference.pdf": "4fe9f941b069475e2304f9b037a7da3ba59bf0121e270cbfb35fce39d86deae1",
+    "figures/paper/error_maps.png": "366055d2284c83a9e3c88fcf1ae53931f2af86254d3693266441592ea59eeb4b",
+    "figures/paper/error_maps.pdf": "9ea3153a169ffb090a1201eab6feae16e2aabac1aa670895b8e8cf9d0838ca3a",
+    "figures/paper/dark_diagnostics.png": "511a625e345768d88a51bc0fc28a02124dc83ac4cdde9af8bc929956a8bc764e",
+    "figures/paper/dark_diagnostics.pdf": "960b07cacf57529c06cc0f3db6d6c4968c7e6fd72453ec48c4d0687082d5b7d6",
+    "figures/paper/model_variants.png": "b19332ffaabc4cce65890df12a053814427ae3191a9a28c4482aa0a8e134091f",
+    "figures/paper/model_variants.pdf": "2e494978fd56104c83cf7e9e84f0b962a4ddfa3c413fccfbd3b6bf3d8adcbbaf",
+    "results/heat-valve/isolated_scan.json": "629a7fc00fad22912de6f2ed3ce0197b4aa467334791e1b7b9ff54baa3a9eb40",
+    "results/heat-valve/heat_valve_manifest.json": "d7bb70e257089a4b7f88ba278a85e5533f1ac3fb8e5a6a7f637e98c714693303",
+    "figures/heat-valve/heat_valve_hero.png": "fd203c4bab0f6a95da7b13139339f7e4a124c26a494e20d249ef1c77f6d56134",
+    "figures/heat-valve/heat_valve_hero.pdf": "ebc15ff891106b3592f41e3b1770a2dfae7d8b02533e1793d24a725f1a2a86d4"
+  }
+}
