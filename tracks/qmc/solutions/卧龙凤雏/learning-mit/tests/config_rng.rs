@@ -1,6 +1,4 @@
-use learning_mit::config::{
-    RunConfig, RuntimeBudget, StageConfig,
-};
+use learning_mit::config::{RunConfig, RuntimeBudget, StageConfig};
 use learning_mit::rng::derive_seed;
 
 fn fixture() -> RunConfig {

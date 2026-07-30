@@ -35,6 +35,8 @@ All physics evolution runs in Rust:
 - a real antisymmetric \(2L\times2L\) covariance matrix represents each pure
   Gaussian trajectory;
 - measurement updates use the exact rational covariance formula;
+- an orthogonal polar projection after each circuit period removes accumulated
+  roundoff from \(\Gamma^2=-I\) without changing the Born sampling rule;
 - orthogonal rotations act as \(\Gamma\mapsto R\Gamma R^T\);
 - conditional binary entropy provides the Rao-Blackwellized record
   free-energy estimator;

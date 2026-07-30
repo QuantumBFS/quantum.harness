@@ -188,6 +188,7 @@ impl GenericCircuit {
                 applied_gates.push(applied);
             }
         }
+        state.recondition_pure()?;
 
         Ok(PeriodSample {
             onsite,

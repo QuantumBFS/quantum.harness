@@ -209,6 +209,19 @@ impl MajoranaState {
         }
     }
 
+    pub(crate) fn recondition_pure(&mut self) -> Result<()> {
+        let decomposition = self.matrix.clone().svd(true, true);
+        let left = decomposition
+            .u
+            .ok_or_else(|| anyhow::anyhow!("pure-state reconditioning omitted the left vectors"))?;
+        let right_transpose = decomposition.v_t.ok_or_else(|| {
+            anyhow::anyhow!("pure-state reconditioning omitted the right vectors")
+        })?;
+        self.matrix = left * right_transpose;
+        antisymmetrize(&mut self.matrix);
+        Ok(())
+    }
+
     fn validate_measurement(&self, gate: MeasurementGate, outcome: i8) -> Result<()> {
         self.validate_indices_and_sign(gate.a, gate.b, gate.observable_sign)?;
         if outcome != -1 && outcome != 1 {

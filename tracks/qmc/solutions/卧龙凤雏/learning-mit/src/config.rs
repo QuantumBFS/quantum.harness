@@ -109,11 +109,7 @@ impl StageConfig {
         {
             bail!("phi_pi values must be finite and lie in [0, 0.5]");
         }
-        if self
-            .phi_pi
-            .windows(2)
-            .any(|pair| pair[0] >= pair[1])
-        {
+        if self.phi_pi.windows(2).any(|pair| pair[0] >= pair[1]) {
             bail!("phi_pi values must be strictly increasing");
         }
         if self.widths.is_empty() {

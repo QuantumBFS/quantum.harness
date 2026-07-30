@@ -2,7 +2,7 @@ use learning_mit::angles::GateCouplings;
 use learning_mit::circuit::{BoundarySector, GenericCircuit, SamplingMode};
 use learning_mit::config::RunConfig;
 use learning_mit::gaussian::MajoranaState;
-use learning_mit::rng::make_rng;
+use learning_mit::rng::{derive_seed, make_rng};
 use learning_mit::sampler::estimate_stream;
 use std::path::Path;
 
@@ -59,6 +59,24 @@ fn stream_estimator_returns_complete_blocks_and_tags_iid_as_diagnostic() {
         .blocks
         .iter()
         .all(|block| block.min_probability > 0.0 && block.min_probability <= 1.0));
+}
+
+#[test]
+fn production_diii_long_stream_stays_inside_the_invariant_gate() {
+    let config = RunConfig::load(Path::new("configs/production.toml")).unwrap();
+    let couplings = GateCouplings::from_pi_units(0.45, 0.14).unwrap();
+    let circuit = GenericCircuit::new(24, couplings, BoundarySector::vacuum()).unwrap();
+    let seed = derive_seed(122, 1, 2, 24, 2, 0x424f_524e);
+    let mut rng = make_rng(seed);
+    let mut state = MajoranaState::paired_vacuum(24).unwrap();
+
+    for _ in 0..360 {
+        let sample = circuit
+            .sample_period(&mut state, &mut rng, SamplingMode::Born)
+            .unwrap();
+        assert!(sample.invariant_errors.antisymmetry <= config.invariant_tolerance);
+        assert!(sample.invariant_errors.purity <= config.invariant_tolerance);
+    }
 }
 
 fn fixture_circuit(width: usize) -> GenericCircuit {

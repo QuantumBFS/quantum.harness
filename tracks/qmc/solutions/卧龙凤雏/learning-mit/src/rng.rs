@@ -10,13 +10,7 @@ pub fn derive_seed(
     purpose: u64,
 ) -> u64 {
     let mut value = base;
-    for coordinate in [
-        stage,
-        angle as u64,
-        width as u64,
-        stream as u64,
-        purpose,
-    ] {
+    for coordinate in [stage, angle as u64, width as u64, stream as u64, purpose] {
         value ^= coordinate.wrapping_add(0x9e37_79b9_7f4a_7c15);
         value = splitmix64(value);
     }
