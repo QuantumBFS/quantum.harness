@@ -142,10 +142,12 @@ centers were scanned; center 20 gives the smallest published-baseline
 instantiation, with site-density upper bound `164.97591695274392` and 393
 steps.
 
-We separately audited the standard recursive Suzuki orders 2, 4, 6, and 8
-with a generic locality-tail theorem. Their merged group counts are 269,677,
-36,361, 83,101, and 377,251 respectively, so simply raising the recursive
-Suzuki order does not provide a closer rigorous competitor at this benchmark.
+We separately audited the standard recursive Suzuki orders 2, 4, 6, and 8.
+The authoritative schema-v3 certificate records 179,785, 24,241, 55,501, and
+251,251 merged groups, respectively. These are contextual audit values and do
+not enter the primary 393-versus-97 comparison. An earlier short report copied
+a legacy set of auxiliary values; the discrepancy and its non-impact on the
+main claim are documented in the [report erratum](issue128/docs/report/ERRATA.md).
 
 Optimized/processed formulas ranked empirically on random matrices are not
 treated as deterministic worst-case bounds for this instance. Adapting their
@@ -188,6 +190,19 @@ result and binds the human-readable report to the exact proof artifacts:
 - [SHA-256 manifest](issue128/artifacts/SHA256SUMS) covering the report,
   summaries, transcript, certificates, and exact sidecars.
 
+The following derived materials sit outside that frozen ten-file manifest and
+must be read as explanations or follow-up engineering, not as replacements for
+the exact certificate:
+
+| Material | Purpose | Claim status |
+|---|---|---|
+| [30-page research manuscript](issue128/docs/manuscript/output/pdf/issue128-proof-carrying-trotter-paper.pdf) | Full derivation, proofs, literature positioning, limitations, and appendices | Explains the frozen 4.050498× certificate |
+| [Manuscript source and build instructions](issue128/docs/manuscript/README.md) | Rebuild the PDF and all four vector figures | Derived, reproducible document |
+| [Citation audit](issue128/docs/manuscript/CITATION_AUDIT.md) | Validate all 23 references by DOI, arXiv ID, or official catalog | Bibliographic QA |
+| [10-minute talk script](issue128/docs/presentation/issue128-10-minute-talk.md) | Eight-slide presentation and Q&A boundaries | Reports only the certified 4.050498× result |
+| [Six-hour HPC log](issue128/docs/report/issue128-hpc-sprint-log.md) | Exact D8 shard/reducer follow-up | Exploratory; no fivefold certificate |
+| [Short-report erratum](issue128/docs/report/ERRATA.md) | Correct a legacy auxiliary recursive-order table | Main result unchanged |
+
 The fivefold follow-up includes an independently checked degree-five sidecar:
 605,832 canonical Pauli terms, 123,106 same-support pairwise-anticommuting
 groups, and site-density upper bound `11.23706750025696`. Conditional resource
@@ -223,6 +238,13 @@ Regenerate the certificate:
 PYTHONPATH=src python scripts/build_v3_certificate.py
 ```
 
+Build and validate the long-form paper:
+
+```bash
+cd docs/manuscript
+make pdf
+```
+
 The default test suite excludes explicitly marked research-reproduction tests.
 The deep verifier independently regenerates the expensive local algebra.
 
@@ -231,6 +253,10 @@ The deep verifier independently regenerates the expensive local algebra.
 ```text
 issue128/
 ├── certificates/       exact certificate and verification summaries
+├── artifacts/          reviewer summaries, transcript, and frozen manifest
+├── docs/manuscript/    30-page paper, source, figures, and citation audit
+├── docs/presentation/  10-minute presentation script
+├── docs/report/        short report, HPC log, and erratum
 ├── scripts/            certificate builder, verifier, dense cross-check
 ├── src/trottercert/    exact Pauli/Lie/interval/locality implementation
 ├── tests/              fast and marked slow regression tests

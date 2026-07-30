@@ -113,7 +113,17 @@ def _canonical_json_bytes(payload: object) -> bytes:
 def canonical_gzip_bytes(payload: object) -> bytes:
     """Return deterministic gzip bytes for a canonical JSON payload."""
 
-    return gzip.compress(_canonical_json_bytes(payload), compresslevel=9, mtime=0)
+    compressed = bytearray(
+        gzip.compress(_canonical_json_bytes(payload), compresslevel=9, mtime=0)
+    )
+    # CPython has changed how ``gzip.compress(..., mtime=0)`` chooses the
+    # RFC 1952 OS header byte.  Python 3.14 emits 0xff here, whereas the
+    # frozen schema-v3 sidecar was produced with 0x13 on macOS.  The byte has
+    # no effect on decompression, but it is part of the proof artifact's
+    # SHA-256.  Pin the historical canonical value explicitly so rebuilding
+    # remains byte-for-byte stable across Python and platform upgrades.
+    compressed[9] = 0x13
+    return bytes(compressed)
 
 
 def build_d5_payload(

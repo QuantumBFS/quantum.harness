@@ -87,11 +87,16 @@
 ```bash
 pytest -q
 PYTHONPATH=src python scripts/verify.py \
-  certificates/issue128-certificate.json --deep
+  certificates/issue128-certificate.json
 shasum -a 256 -c artifacts/SHA256SUMS
 ```
 
-先展示预期字段：`valid=true`、`deep_proof_regenerated=true`、`published_steps=393`、`candidate_steps=97`、`exact_improvement_ratio=11791/2911`。
+先展示预期字段：`valid=true`、`verification_level=fast`、
+`deep_proof_regenerated=false`、`published_steps=393`、
+`candidate_steps=97`、`exact_improvement_ratio=11791/2911`。
+
+现场快速命令的 `deep_proof_regenerated` 预期为 `false`；预先录制或单独运行的
+`--deep` 结果才应为 `true`。十分钟演讲不等待 deep regeneration 完成。
 
 讲稿：
 
@@ -111,12 +116,14 @@ shasum -a 256 -c artifacts/SHA256SUMS
 
 > 这项工作的结论不是“数值上看起来更好”，而是“同一问题上，把 4.050498 倍资源下降变成独立程序能够拒绝错误、重新生成关键量并复核整数边界的证书”。现有四倍结果已经闭环；五倍是一个有明确通过条件、不会提前宣传的后续研究问题。
 
-最后停在一页二维码/路径：PR、`issue128-certificate.json`、技术报告 PDF、验证命令。
+最后停在一页二维码/路径：PR、`issue128-certificate.json`、
+30 页长论文 PDF、技术报告 PDF、验证命令。
 
 ## 问答备忘
 
 - **为什么不是 5×？** 因为 `r≤78` 的完整全局误差账本尚未闭合；D5 或 D8 的单项改善不能代替总证书。
 - **启发式分组会不会不严谨？** 搜索可启发式，接受条件不是；verifier 精确检查每个成员、覆盖关系和每一对反对易。
 - **为什么可把无限格点密度用于 12×12？** 证书的平移规范化、支撑半径和有限尺寸条件由 verifier 检查；不靠未经检查的热力学极限外推。
-- **倍率是否改变了门数模型？** 否。对照与本工作使用同一 `31r` 合并规律、同一每步边界合并和同一 bond/CNOT 上界。
+- **倍率是否改变了门数模型？** 否。对照与本工作使用同一
+  `G(r)=30r+1` 合并规律和同一 bond/CNOT 上界。
 - **浮点数在哪里出现？** 只用于排序、显示和小型稠密 sanity check；接受/拒绝使用整数、有理数和向外区间。

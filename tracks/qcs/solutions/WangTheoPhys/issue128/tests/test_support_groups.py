@@ -9,6 +9,7 @@ from trottercert.support_groups import (
     build_d5_payload,
     canonical_gzip_bytes,
     certify_support_partition,
+    decode_d5_gzip,
     discover_support_partition,
     verify_d5_payload,
 )
@@ -77,7 +78,10 @@ def test_d5_sidecar_is_deterministic_and_rejects_missing_term() -> None:
     }
     first = build_d5_payload(coefficients)
     second = build_d5_payload(coefficients)
-    assert canonical_gzip_bytes(first) == canonical_gzip_bytes(second)
+    encoded = canonical_gzip_bytes(first)
+    assert encoded == canonical_gzip_bytes(second)
+    assert encoded[9] == 0x13
+    assert decode_d5_gzip(encoded) == first
     verify_d5_payload(first)
     groups = first["groups"]
     assert isinstance(groups, list)
