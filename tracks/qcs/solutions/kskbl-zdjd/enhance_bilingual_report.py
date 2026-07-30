@@ -4,7 +4,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parent
-REPORT = ROOT / "report.html"
+REPORT = ROOT / "report" / "report.html"
 
 EXTRA_STYLE = r"""
 <style id="bilingual-research-theme">
@@ -94,6 +94,7 @@ pre code{border:0;background:transparent;color:#b8f3ff;line-height:1.7}
   body{background:#fff;color:#111}.report-controls{display:none}.hero,section{background:#fff;color:#111;box-shadow:none;border-color:#ddd}
   .hero{min-height:0;padding:20px}.hero:before{display:none}.lede,.para,section>.note,ul.flat li,.verdict .why{color:#222}
   section{break-before:auto;padding:18px}.figbox{background:#fff}.card{background:#fff;border-color:#ddd}
+  section:nth-of-type(2){break-before:page}
 }
 </style>
 """

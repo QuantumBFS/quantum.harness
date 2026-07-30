@@ -53,6 +53,85 @@
       ]
     },
     {
+      "title": "⟦zh⟧任务 C+：新鲜噪声流中的六位函数恢复⟦en⟧Task C+: Six-bit Function Recovery from a Fresh-Noise Stream",
+      "note": "⟦zh⟧本页把原任务 C 扩展为在线学习问题。学习器不知道隐藏函数的语义，不读取现有 156 门电路，每一步只接收 100 个重新随机生成的输入及当批独立污染的十二位输出。完整无噪定义域只由隔离评估器读取。⟦en⟧This page extends Task C into an online-learning problem. The learner does not know the hidden function’s semantics and cannot read the existing 156-gate circuit. At every step it receives only 100 newly sampled inputs and twelve-bit outputs independently corrupted for that batch. Only an isolated evaluator may read the complete clean domain.",
+      "blocks": [
+        {
+          "kind": "verdict",
+          "status": "warn",
+          "label": "⟦zh⟧进行中：随机初始化能否穿过持续变化的标签噪声？⟦en⟧In progress: can random initialization overcome continuously changing label noise?",
+          "why": "⟦zh⟧固定错误无法被记忆，因为同一个输入下次出现时会得到新的独立噪声。稳定下降的干净定义域损失因此对应对隐藏规律的恢复，而不是对某一份污染表的拟合。⟦en⟧Fixed errors cannot be memorized because the next occurrence of an input receives fresh independent noise. A sustained decrease in clean-domain loss therefore tracks recovery of hidden structure rather than memorization of one corrupted table."
+        },
+        {
+          "kind": "equation",
+          "tex": "\\widetilde z_{t,i,b}=f_b(x_{t,i})\\oplus\\varepsilon_{t,i,b},\\qquad \\varepsilon_{t,i,b}\\sim\\operatorname{Bernoulli}(p),\\qquad |B_t|=100"
+        },
+        {
+          "kind": "card",
+          "title": "⟦zh⟧首轮预注册设置⟦en⟧First pre-registered setup",
+          "blocks": [
+            {
+              "kind": "kv",
+              "pairs": [
+                ["⟦zh⟧输入域⟦en⟧Input domain", "⟦zh⟧12 位，共 4,096 个可能输入⟦en⟧Twelve bits, 4,096 possible inputs"],
+                ["⟦zh⟧输出⟦en⟧Output", "⟦zh⟧12 个二进制位⟦en⟧Twelve binary bits"],
+                ["⟦zh⟧每步训练批量⟦en⟧Training batch per step", "100"],
+                ["⟦zh⟧主噪声率⟦en⟧Primary noise rate", "p = 0.25"],
+                ["⟦zh⟧标准评估⟦en⟧Clean evaluation", "⟦zh⟧每隔固定步数穷举全部 4,096 个输入，仅记录、不反馈⟦en⟧Exhaust all 4,096 inputs at fixed intervals for logging only, without feedback"],
+                ["⟦zh⟧初始化⟦en⟧Initialization", "⟦zh⟧独立随机权重或随机门图；禁止乘法器种子⟦en⟧Independent random weights or random gate graphs; multiplier seeds prohibited"]
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "text",
+          "text": "⟦zh⟧25% 位翻转使干净二进制信号缩小为 $1-2p=0.5$，理想化样本复杂度相对无噪声放大约 $1/(1-2p)^2=4$ 倍。它比 5% 更能显露收敛差异，同时仍远离不可辨认的 50% 极限。训练还将扫描 10%、20%、30% 和 40%，但主方法先在 25% 上冻结。⟦en⟧A 25% bit-flip rate attenuates the clean binary signal to $1-2p=0.5$ and inflates the idealized sample complexity by about $1/(1-2p)^2=4$ relative to clean data. It exposes convergence differences more clearly than 5% while remaining far from the unidentifiable 50% limit. Later runs will scan 10%, 20%, 30% and 40%, but the primary method is frozen first at 25%."
+        },
+        {
+          "kind": "heading",
+          "level": 3,
+          "text": "⟦zh⟧噪声感知训练目标⟦en⟧Noise-aware training objective"
+        },
+        {
+          "kind": "equation",
+          "tex": "r_{t,i,b}=p+(1-2p)s_{t,i,b},\\qquad \\mathcal L_{\\mathrm{noise}}=-\\sum_{i,b}\\left[\\widetilde z_{t,i,b}\\log r_{t,i,b}+(1-\\widetilde z_{t,i,b})\\log(1-r_{t,i,b})\\right]"
+        },
+        {
+          "kind": "text",
+          "text": "⟦zh⟧$s$ 表示模型对隐藏干净位为 1 的概率，$r$ 才是经过已知翻转通道后观测到 1 的概率。把通道放进似然可防止软模型把 25% 和 75% 当作最终干净输出。首个基线使用随机初始化的稠密神经网络验证在线数据流确实可恢复完整真值表；随后用可微布尔门网络和语义进化搜索把相同知识蒸馏为离散门图。⟦en⟧$s$ is the model probability that the hidden clean bit equals one, while $r$ is the probability of observing one after the known flip channel. Including the channel in the likelihood prevents a soft model from treating 25% and 75% as final clean outputs. The first baseline uses a randomly initialized dense neural network to test whether the online stream recovers the full truth table; differentiable Boolean gates and semantic evolutionary search then distill the same learned behavior into a discrete gate graph."
+        },
+        {
+          "kind": "heading",
+          "level": 3,
+          "text": "⟦zh⟧收敛与不确定性⟦en⟧Convergence and uncertainty"
+        },
+        {
+          "kind": "equation",
+          "tex": "q_b(x)=\\sum_j w_j C_{j,b}(x),\\qquad U_{\\mathrm{bit}}=\\frac{1}{4096}\\sum_x\\sum_{b=0}^{11}4q_b(x)(1-q_b(x))"
+        },
+        {
+          "kind": "equation",
+          "tex": "Z_j(x)=\\sum_{b=0}^{11}2^bC_{j,b}(x),\\qquad U_{\\mathrm{value}}=\\frac{1}{4095}\\sqrt{\\frac{1}{4096}\\sum_x\\operatorname{Var}_j[Z_j(x)]}"
+        },
+        {
+          "kind": "list",
+          "title": "⟦zh⟧固定检查点记录⟦en⟧Fixed-checkpoint record",
+          "items": [
+            "⟦zh⟧带噪训练损失的指数滑动平均，以及累计看过的随机样本数。⟦en⟧Exponentially smoothed noisy training loss and cumulative random examples seen.",
+            "⟦zh⟧无噪标准域上的逐位损失、逐位错误率、十二位整词准确率和归一化数值绝对误差。⟦en⟧Clean-domain bit loss, bit error, exact twelve-bit word accuracy and normalized numerical absolute error.",
+            "⟦zh⟧不同随机初始化之间的总位不确定性 $U_{\\mathrm{bit}}$。⟦en⟧Total bit uncertainty $U_{\\mathrm{bit}}$ across independent random initializations.",
+            "⟦zh⟧把不同二进制位按实际数值和相关性合并的 $U_{\\mathrm{value}}$；高位分歧会自然产生更大惩罚。⟦en⟧Value uncertainty $U_{\\mathrm{value}}$, which combines bit positions using their numerical significance and correlations so high-bit disagreement counts more.",
+            "⟦zh⟧每个近似电路的门数、深度、训练似然与完整定义域准确率；干净指标只用于报告。⟦en⟧Gate count, depth, training likelihood and full-domain accuracy for every approximate circuit; clean metrics are report-only."
+          ]
+        },
+        {
+          "kind": "code",
+          "title": "⟦zh⟧在线实验循环⟦en⟧Online experiment loop",
+          "text": "initialize_model_randomly()\nfor step in training_budget:\n    inputs = sample_100_fresh_inputs()\n    noisy_outputs = oracle_then_fresh_bit_flips(inputs, p=0.25)\n    update_only_from(inputs, noisy_outputs)\n    if step % evaluation_interval == 0:\n        record_without_feedback(evaluate_clean_full_domain())"
+        }
+      ]
+    },
+    {
       "title": "⟦zh⟧任务 A：八位加法⟦en⟧Task A: Eight-bit Addition",
       "note": "⟦zh⟧在测试的脉动进位结构和优化流程中，没有发现低于原始 37 门的候选。该结果不构成全局最优性证明。⟦en⟧No candidate below the original 37 gates was found within the tested ripple-carry structures and optimization flows. This result does not establish global optimality.",
       "blocks": [
