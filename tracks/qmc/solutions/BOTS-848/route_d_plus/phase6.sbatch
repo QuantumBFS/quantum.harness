@@ -59,6 +59,7 @@ cd "${repo_root}/tracks/qmc/solutions/BOTS-848"
   tests/route_d_plus/test_vmc.py \
   tests/route_d_plus/test_phase6_contract.py \
   tests/route_d_plus/test_phase6a_contract.py \
+  tests/route_d_plus/test_symmetry_contract.py \
   -q
 "${repo_root}/.venv/bin/python" -u \
   -m route_d_plus.certify_phase6 \

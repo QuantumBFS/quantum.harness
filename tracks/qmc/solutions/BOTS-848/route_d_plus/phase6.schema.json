@@ -114,7 +114,10 @@
           "selection",
           "architecture_sha256",
           "schema_path",
-          "schema_sha256"
+          "schema_sha256",
+          "symmetry_path",
+          "symmetry_sha256",
+          "symmetry_schema_sha256"
         ],
         "properties": {
           "seed": {"enum": [848, 1848, 2848]},
@@ -127,6 +130,15 @@
           },
           "schema_path": {"type": "string", "minLength": 1},
           "schema_sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "symmetry_path": {"type": "string", "minLength": 1},
+          "symmetry_sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "symmetry_schema_sha256": {
             "type": "string",
             "pattern": "^[0-9a-f]{64}$"
           }
@@ -145,6 +157,7 @@
         "effective_samples",
         "gap_precision",
         "rotation_invariance",
+        "checkpoint_symmetry",
         "blind_training",
         "shared_frozen_architecture",
         "combined_state_averaged_sr",
@@ -158,6 +171,7 @@
         "effective_samples": {"const": true},
         "gap_precision": {"const": true},
         "rotation_invariance": {"const": true},
+        "checkpoint_symmetry": {"const": true},
         "blind_training": {"const": true},
         "shared_frozen_architecture": {"const": true},
         "combined_state_averaged_sr": {"const": true},

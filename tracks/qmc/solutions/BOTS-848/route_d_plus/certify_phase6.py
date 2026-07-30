@@ -21,6 +21,7 @@ from typing import Any
 import jax
 import jsonschema
 
+from route_d_plus.symmetry import verify_checkpoint_symmetry
 from route_d_plus.train_dplus0 import (
     calibrate_architecture,
     train_seed,
@@ -214,6 +215,9 @@ def collect_certificate(
         checkpoint_schema_path = Path(__file__).with_name(
             "checkpoint.schema.json"
         )
+        symmetry_schema_path = Path(__file__).with_name(
+            "symmetry.schema.json"
+        )
         validate_against_schema(
             architecture,
             architecture_schema_path,
@@ -235,6 +239,13 @@ def collect_certificate(
             seed_dir = output_path.parent / "seeds" / f"seed-{seed}"
             checkpoint_path = seed_dir / "checkpoint.json"
             write_checkpoint(checkpoint_path, checkpoint)
+            symmetry = verify_checkpoint_symmetry(
+                architecture,
+                checkpoint,
+            )
+            validate_against_schema(symmetry, symmetry_schema_path)
+            symmetry_path = seed_dir / "symmetry-certificate.json"
+            write_json_atomic(symmetry_path, symmetry)
             checkpoints.append(
                 {
                     "seed": seed,
@@ -245,6 +256,11 @@ def collect_certificate(
                     "schema_path": str(checkpoint_schema_path.resolve()),
                     "schema_sha256": sha256_file(
                         checkpoint_schema_path
+                    ),
+                    "symmetry_path": str(symmetry_path.resolve()),
+                    "symmetry_sha256": sha256_file(symmetry_path),
+                    "symmetry_schema_sha256": sha256_file(
+                        symmetry_schema_path
                     ),
                 }
             )
@@ -303,6 +319,11 @@ def collect_certificate(
             result[sector]["global_rotation_residual"] < 1.0e-7
             for result in seed_results
             for sector in ("final_ground", "final_tower")
+        ),
+        "checkpoint_symmetry": all(
+            checkpoint["symmetry_sha256"]
+            and checkpoint["symmetry_schema_sha256"]
+            for checkpoint in checkpoints
         ),
         "blind_training": (
             not source_findings
