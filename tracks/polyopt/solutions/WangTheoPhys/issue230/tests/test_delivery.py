@@ -80,4 +80,7 @@ def test_delivery_bundle_writes_stable_machine_readable_artifacts(tmp_path):
     manifest = (tmp_path / "DATA_MANIFEST.txt").read_text()
     assert "level_47_rg_d6_mps_d32_block_1000.json" in manifest
     assert "upper-contraction-frontier.csv" in manifest
+    assert "SPRINT_EXTENSION_PROVENANCE.txt" in manifest
+    assert "custom four-column manifest" in manifest
+    assert "pytest tests/test_delivery.py -q" in manifest
     assert str(PROJECT_ROOT) not in manifest

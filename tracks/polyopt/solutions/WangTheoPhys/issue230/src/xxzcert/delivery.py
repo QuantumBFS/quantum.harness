@@ -246,6 +246,8 @@ def _write_manifest(
         "Model: spin-1/2 XXZ chain, h_Delta=(XX+YY+Delta ZZ)/4",
         "Trust boundary: Bethe data is used only by independent verification.",
         f"Selected certificate payloads: {len(bundle.rows)}",
+        "Format: SHA256  BYTES  ROLE  PATH (custom four-column manifest).",
+        "Authoritative check: .venv/bin/pytest tests/test_delivery.py -q",
         "",
         "SHA256  BYTES  ROLE  PATH",
     ]
@@ -264,6 +266,10 @@ def _write_manifest(
         (
             "exact-upper-provenance",
             project_root / "outputs/final/UPPER_FRONTIER_PROVENANCE.txt",
+        ),
+        (
+            "sprint-extension-provenance",
+            project_root / "outputs/final/SPRINT_EXTENSION_PROVENANCE.txt",
         ),
     ):
         if not path.exists():
