@@ -1,0 +1,10 @@
+degate PASS 2026-07-30T14:18:03.227
+V1 Γ_{2,B_bond_edge+B_bond_half+B_half+B_pair_edge}: sym-res 0.0e+00 eigmin +2.43e-01 PASS
+V1 ω_4^1: herm 1.4e-17 eigmin -1.43e-16 PASS
+V1 ω_4^2: herm 2.1e-17 eigmin -1.92e-16 PASS
+V1 ω_5^1: herm 1.4e-17 eigmin -6.55e-17 PASS
+V1 ω_5^2: herm 1.6e-17 eigmin -7.38e-17 PASS
+V1 ω_6^1: herm 1.6e-17 eigmin +1.15e-12 PASS
+V1 ω_6^2: herm 2.1e-17 eigmin +1.15e-12 PASS
+V1 links: worst row residual 1.7e-15 over 768 rows PASS
+mutation: mutated-E=0.5629454842420379 vs E14/site=-0.447396395253 -> RED

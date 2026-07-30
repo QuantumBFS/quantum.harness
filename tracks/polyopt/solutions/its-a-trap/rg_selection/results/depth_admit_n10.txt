@@ -1,0 +1,17 @@
+depth_admit n=10 @N=14 PASS 2026-07-30T14:33:52.156
+V1 Γ_{2,}: sym-res 0.0e+00 eigmin +4.03e-01 PASS
+V1 ω_4^1: herm 1.4e-17 eigmin -1.43e-16 PASS
+V1 ω_4^2: herm 2.1e-17 eigmin -1.92e-16 PASS
+V1 ω_5^1: herm 1.4e-17 eigmin -6.55e-17 PASS
+V1 ω_5^2: herm 1.6e-17 eigmin -7.38e-17 PASS
+V1 ω_6^1: herm 1.6e-17 eigmin +1.15e-12 PASS
+V1 ω_6^2: herm 2.1e-17 eigmin +1.15e-12 PASS
+V1 ω_7^1: herm 2.1e-17 eigmin +1.37e-16 PASS
+V1 ω_7^2: herm 3.5e-17 eigmin +1.40e-16 PASS
+V1 ω_8^1: herm 3.1e-17 eigmin +1.85e-12 PASS
+V1 ω_8^2: herm 2.2e-17 eigmin +1.85e-12 PASS
+V1 ω_9^1: herm 1.8e-17 eigmin -2.99e-17 PASS
+V1 ω_9^2: herm 2.1e-17 eigmin -5.33e-17 PASS
+V1 ω_10^1: herm 3.1e-17 eigmin -5.79e-17 PASS
+V1 ω_10^2: herm 2.1e-17 eigmin -9.61e-17 PASS
+V1 links: worst row residual 1.7e-15 over 1792 rows PASS

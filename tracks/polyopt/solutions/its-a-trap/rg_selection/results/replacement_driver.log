@@ -1,0 +1,68 @@
+2026-07-30T13:33:17+08:00 build B@14 rc=0
+2026-07-30T13:33:52+08:00 build C6@14 rc=0
+2026-07-30T13:34:27+08:00 build D@14 rc=0
+2026-07-30T13:34:52+08:00 build A@14 rc=0
+2026-07-30T13:35:15+08:00 build B@20 rc=0
+2026-07-30T13:35:48+08:00 build C6@20 rc=0
+2026-07-30T13:36:23+08:00 build D@20 rc=0
+2026-07-30T13:36:47+08:00 build A@20 rc=0
+2026-07-30T13:36:47+08:00 P2a build rows done
+2026-07-30T13:45:08+08:00 degate DE_OK=0
+2026-07-30T13:45:36+08:00 solve B@14 rc=0
+2026-07-30T13:50:07+08:00 solve C6@14 rc=0
+2026-07-30T13:50:07+08:00 D@14 blocked by degate
+2026-07-30T13:50:40+08:00 solve A@14 rc=0
+2026-07-30T13:51:10+08:00 solve B@20 rc=0
+2026-07-30T13:55:49+08:00 solve C6@20 rc=0
+2026-07-30T13:55:49+08:00 D@20 blocked by degate
+2026-07-30T13:56:26+08:00 solve A@20 rc=0
+2026-07-30T13:56:26+08:00 MANDATORY EIGHT ROWS COMPLETE (or recorded)
+2026-07-30T13:56:51+08:00 build B@26 rc=0
+2026-07-30T13:57:24+08:00 build C6@26 rc=0
+2026-07-30T13:57:55+08:00 build D@26 rc=0
+2026-07-30T13:58:21+08:00 build A@26 rc=0
+2026-07-30T13:58:48+08:00 build B@30 rc=0
+2026-07-30T13:59:21+08:00 build C6@30 rc=0
+2026-07-30T13:59:52+08:00 build D@30 rc=0
+2026-07-30T14:00:18+08:00 build A@30 rc=0
+2026-07-30T14:00:18+08:00 P2b build rows done
+2026-07-30T14:00:53+08:00 build C10@20 rc=0
+2026-07-30T14:09:24+08:00 solve C10@20 rc=0
+2026-07-30T14:09:24+08:00 C10@20 not OPTIMAL -> C14@20 stays UNAVAILABLE (patch §2)
+2026-07-30T14:09:24+08:00 DRIVER COMPLETE
+2026-07-30T14:18:31+08:00 degate re-run PASS after scope-bug fix (mechanical, <=10min law); DEGATE_BLOCKED/SKIPPED rows cleared for resume
+2026-07-30T14:18:31+08:00 skip build B@14 (resume)
+2026-07-30T14:18:31+08:00 skip build C6@14 (resume)
+2026-07-30T14:18:31+08:00 skip build D@14 (resume)
+2026-07-30T14:18:31+08:00 skip build A@14 (resume)
+2026-07-30T14:18:31+08:00 skip build B@20 (resume)
+2026-07-30T14:18:31+08:00 skip build C6@20 (resume)
+2026-07-30T14:18:31+08:00 skip build D@20 (resume)
+2026-07-30T14:18:31+08:00 skip build A@20 (resume)
+2026-07-30T14:18:31+08:00 P2a build rows done
+2026-07-30T14:18:31+08:00 degate cached PASS
+2026-07-30T14:18:31+08:00 skip solve B@14 (resume)
+2026-07-30T14:18:31+08:00 skip solve C6@14 (resume)
+2026-07-30T14:22:28+08:00 solve D@14 rc=0
+2026-07-30T14:22:28+08:00 skip solve A@14 (resume)
+2026-07-30T14:22:28+08:00 skip solve B@20 (resume)
+2026-07-30T14:22:28+08:00 skip solve C6@20 (resume)
+2026-07-30T14:27:02+08:00 solve D@20 rc=0
+2026-07-30T14:27:02+08:00 skip solve A@20 (resume)
+2026-07-30T14:27:02+08:00 MANDATORY EIGHT ROWS COMPLETE (or recorded)
+2026-07-30T14:27:02+08:00 skip build B@26 (resume)
+2026-07-30T14:27:02+08:00 skip build C6@26 (resume)
+2026-07-30T14:27:02+08:00 skip build D@26 (resume)
+2026-07-30T14:27:02+08:00 skip build A@26 (resume)
+2026-07-30T14:27:02+08:00 skip build B@30 (resume)
+2026-07-30T14:27:02+08:00 skip build C6@30 (resume)
+2026-07-30T14:27:02+08:00 skip build D@30 (resume)
+2026-07-30T14:27:02+08:00 skip build A@30 (resume)
+2026-07-30T14:27:02+08:00 P2b build rows done
+2026-07-30T14:27:02+08:00 skip build C10@20 (resume)
+2026-07-30T14:33:52+08:00 skip solve C10@20 (resume)
+2026-07-30T14:33:52+08:00 C10@20 not OPTIMAL -> C14@20 stays UNAVAILABLE (patch §2)
+2026-07-30T14:37:36+08:00 solve E@14 rc=0
+2026-07-30T14:41:45+08:00 solve E@20 rc=0
+2026-07-30T14:41:45+08:00 DRIVER COMPLETE
+2026-07-30T14:43:13+08:00 D14/D20/E14/E20/C10@20 statuses annotated OOM_18G_CAP per journalctl oom-kill evidence (no-retry law)

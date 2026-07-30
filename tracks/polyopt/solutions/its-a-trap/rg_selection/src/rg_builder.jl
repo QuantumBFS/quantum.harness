@@ -11,8 +11,9 @@ const SUPP = [[1, 4]]; const COE = [3 / 4]
 
 function build_rg_selection_model(N::Int; S::Vector{String} = String[],
         rg = nothing, vspace::Symbol = :auto, rdm = 8, pso = 0, lso = true,
-        keeplog::Union{Nothing,String} = nothing)
-    extra = r_of(N) - 1
+        keeplog::Union{Nothing,String} = nothing,
+        extra::Union{Nothing,Int} = nothing)   # nothing → frozen r_of(N)-1
+    extra = extra === nothing ? r_of(N) - 1 : extra
     counters = Dict{String,Int}()
     ext = nothing
     if !(vspace == :stock && isempty(S) && rg === nothing)
