@@ -302,7 +302,7 @@ On the matched RTX 3090 workload, VQETape spatial transfer is **{d['objective_wi
 
 | Result area | Status | Evidence |
 |---|---|---|
-| Auto-iteratable and auto-evaluatable harness | Demonstrated result | Candidate search, isolated workers, exact value-gradient gates, JSON reports, 395-test regression |
+| Auto-iteratable and auto-evaluatable harness | Demonstrated result | Candidate search, isolated workers, exact value-gradient gates, JSON reports, 406-test regression |
 | First-time / amortized time efficiency | Demonstrated result | {tc.objective_s:.4f} s TensorCircuit-NG vs {spatial.objective_s:.4f} s VQETape spatial |
 | Host space efficiency | Demonstrated result | {tc.host_rss_mib:.1f} MiB vs {spatial.host_rss_mib:.1f} MiB |
 | Subsequent warm runtime | Next optimization frontier | {tc.warm_ms:.4f} ms TensorCircuit-NG reference vs {statevector.warm_ms:.4f} ms VQETape statevector |
@@ -348,7 +348,7 @@ The separate Fig. 2 runner encodes the paper's SU(4) ladder ansatz, `15 * L * (N
 
 ## Verification and provenance
 
-- Full regression before the incremental Fig. 2 runner: `395 passed, 6 declared structural cases in 1582.14s`.
+- Fresh full regression: `406 passed, 6 declared structural cases in 2069.58s`.
 - Targeted matched-baseline and Fig. 2 suite: `17 passed`.
 - All 27 committed JSON reports parse; all `src/vqetape` Python modules compile; `git diff --check` passes.
 - TensorCircuit-NG job `23020496` completed on `c05r05`, reported `cuda:0`, passed strict energy/gradient tolerances, and passed SHA256 provenance checks.
@@ -510,7 +510,7 @@ code{{background:var(--pale);padding:.15em .35em;border-radius:4px}} pre{{white-
 <section><h2>Matched RTX 3090 evidence</h2><p>Open TFIM, n=10, L=4, plus state, RZZ then RX, seed 33, complex64, five synchronized warm repeats. Objective = compile + first + 100 warm.</p>
 <table><thead><tr><th>Implementation</th><th>Compile s</th><th>First s</th><th>Warm ms</th><th>Objective s</th><th>RSS MiB</th><th>NVML MiB</th><th>Correct</th></tr></thead><tbody>{table}</tbody></table></section>
 <section><h2>What was built</h2><div class="cards"><div class="card"><b>Differentiated programs</b><br>Forward path, algebraic transpose, live residuals, and checkpoint schedules.</div><div class="card"><b>Exact spatial lowering</b><br>First/bulk/tail/last recurrence with a compact exact boundary.</div><div class="card"><b>Adaptive ansatz compiler</b><br>Commutator-complete candidates ranked by physics signal and contraction cost.</div></div></section>
-<section><h2>Verification</h2><ul><li>395 tests passed; six declared structural cases.</li><li>17 targeted TensorCircuit-NG baseline/Fig. 2 tests passed.</li><li>All 27 evidence JSON files parse; source modules compile.</li><li>TensorCircuit-NG job 23020496 and Fig. 2 job 23027373 completed with validated correctness.</li></ul></section>
+<section><h2>Verification</h2><ul><li>406 tests passed; six declared structural cases.</li><li>17 targeted TensorCircuit-NG baseline/Fig. 2 tests passed.</li><li>All 27 evidence JSON files parse; source modules compile.</li><li>TensorCircuit-NG job 23020496 and Fig. 2 job 23027373 completed with validated correctness.</li></ul></section>
 <section><h2>Reproduce</h2><pre>python3.12 -m venv .venv
 .venv/bin/python -m pip install -e '.[test,baseline]'
 .venv/bin/python -m pytest -q
@@ -714,7 +714,7 @@ def build_pdf(path: Path, rows: list[BenchmarkRow], d: dict[str, Any]) -> None:
     verification_data = [
         ["Gate", "Evidence", "Result"],
         ["Matched correctness", "Energy + complete gradient; 1e-5 tolerance", "VALIDATED"],
-        ["Full regression", "395 tests; 6 declared structural cases", "VALIDATED"],
+        ["Full regression", "406 tests; 6 declared structural cases", "VALIDATED"],
         ["Incremental suite", "17 baseline and Fig. 2 tests", "VALIDATED"],
         ["Static artifacts", "27 JSON parse; Python compile; diff check", "VALIDATED"],
         ["TC-NG GPU run", "Slurm 23020496; cuda:0; SHA256 audit", "VALIDATED"],

@@ -245,7 +245,7 @@ Memory fields retain distinct semantics throughout collection and reporting.
 
 ## Verification
 
-- Full recorded regression: **395 tests passed**, with six declared structural cases.
+- Fresh full regression: **406 tests passed**, with six declared structural cases.
 - Targeted TensorCircuit-NG baseline and Fig. 2 suite: **17 tests passed**.
 - All 27 committed evidence JSON files parse.
 - All `src/vqetape` Python modules compile.

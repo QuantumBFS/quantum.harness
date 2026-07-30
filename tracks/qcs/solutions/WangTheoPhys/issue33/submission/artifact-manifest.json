@@ -18,8 +18,8 @@
     },
     {
       "path": "submission/vqetape-technical-report.md",
-      "bytes": 7707,
-      "sha256": "81d4a324deec9c95ae41ed9927a220cd7cbb54ce48c806435c47ad9f464d6184"
+      "bytes": 7676,
+      "sha256": "450716da50b128ffdcacec93299a0d13bd575f38b1aa11f1ff419efc58e9e9e5"
     },
     {
       "path": "submission/report.json",
@@ -29,12 +29,12 @@
     {
       "path": "submission/report.html",
       "bytes": 5497,
-      "sha256": "cb019be7698bc91eab054aa991b495f469ea6ae5a60247221e90a4fdb94adf47"
+      "sha256": "e27471d2ab5dfd6b2da25e12a6c8f3578e7a8ffe21a600ae31378f3942688e75"
     },
     {
       "path": "submission/output/pdf/vqetape-technical-report.pdf",
       "bytes": 79020,
-      "sha256": "d6d076a03757c3626e927780e627a07eac46e4834585a4631a40e0a3a44955f2"
+      "sha256": "0e902d921f233901abec51e0c1304bdfac16e00b99c6f94cbf99659570959b0e"
     }
   ],
   "canonical_evidence": [

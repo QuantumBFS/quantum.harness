@@ -22,7 +22,7 @@ On the matched RTX 3090 workload, VQETape spatial transfer is **8.2% faster** fo
 
 | Result area | Status | Evidence |
 |---|---|---|
-| Auto-iteratable and auto-evaluatable harness | Demonstrated result | Candidate search, isolated workers, exact value-gradient gates, JSON reports, 395-test regression |
+| Auto-iteratable and auto-evaluatable harness | Demonstrated result | Candidate search, isolated workers, exact value-gradient gates, JSON reports, 406-test regression |
 | First-time / amortized time efficiency | Demonstrated result | 18.2720 s TensorCircuit-NG vs 16.7781 s VQETape spatial |
 | Host space efficiency | Demonstrated result | 661.3 MiB vs 473.9 MiB |
 | Subsequent warm runtime | Next optimization frontier | 2.6577 ms TensorCircuit-NG reference vs 3.3785 ms VQETape statevector |
@@ -71,7 +71,7 @@ The separate Fig. 2 runner encodes the paper's SU(4) ladder ansatz, `15 * L * (N
 
 ## Verification and provenance
 
-- Full regression before the incremental Fig. 2 runner: `395 passed, 6 declared structural cases in 1582.14s`.
+- Fresh full regression: `406 passed, 6 declared structural cases in 2069.58s`.
 - Targeted matched-baseline and Fig. 2 suite: `17 passed`.
 - All 27 committed JSON reports parse; all `src/vqetape` Python modules compile; `git diff --check` passes.
 - TensorCircuit-NG job `23020496` completed on `c05r05`, reported `cuda:0`, passed strict energy/gradient tolerances, and passed SHA256 provenance checks.
