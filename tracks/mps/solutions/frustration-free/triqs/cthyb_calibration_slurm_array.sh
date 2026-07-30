@@ -20,7 +20,7 @@ for name in SLURM_NTASKS SLURM_CPUS_PER_TASK OMP_NUM_THREADS OPENBLAS_NUM_THREAD
   fi
 done
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
-exec "$CTHYB_MICROMAMBA" run --offline --prefix "$CTHYB_ENV" \
+exec "$CTHYB_MICROMAMBA" --offline run --prefix "$CTHYB_ENV" \
   python "$SCRIPT_DIR/calibrate.py" run-cell \
   --plan "$CTHYB_CAL_PLAN" --run-directory "$CTHYB_CAL_RUN" \
   --cell-index "$SLURM_ARRAY_TASK_ID"

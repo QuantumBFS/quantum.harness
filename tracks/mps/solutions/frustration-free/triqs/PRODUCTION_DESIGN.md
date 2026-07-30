@@ -672,7 +672,7 @@ export MAMBA_ROOT_PREFIX="$SCRATCH/challenge81-cthyb/mamba-root"
 export CTHYB_ENV="$SCRATCH/challenge81-cthyb/triqs-4.0.0"
 ./micromamba create --offline --yes --prefix "$CTHYB_ENV" \
   --file tracks/mps/solutions/frustration-free/triqs/conda-linux-64.lock
-./micromamba run --offline --prefix "$CTHYB_ENV" \
+./micromamba --offline run --prefix "$CTHYB_ENV" \
   python tracks/mps/solutions/frustration-free/triqs/smoke_test.py
 ```
 
@@ -681,13 +681,13 @@ After implementation, generate the exact 60-cell calibration plan (12 warmup,
 
 ```bash
 export CAL_ROOT="$SCRATCH/challenge81-cthyb/calibration-beta16"
-./micromamba run --offline --prefix "$CTHYB_ENV" \
+./micromamba --offline run --prefix "$CTHYB_ENV" \
   python tracks/mps/solutions/frustration-free/triqs/calibrate.py plan \
   --output-root "$CAL_ROOT"
 export CAL_RUN="$(python3 -c \
   'import json,os,sys; p=json.load(open(sys.argv[1])); print(os.path.join(sys.argv[2],p["relative_path"]))' \
   "$CAL_ROOT/current.json" "$CAL_ROOT")"
-./micromamba run --offline --prefix "$CTHYB_ENV" \
+./micromamba --offline run --prefix "$CTHYB_ENV" \
   python tracks/mps/solutions/frustration-free/triqs/calibrate.py \
   validate-plan --plan "$CAL_RUN/calibration-plan.json"
 sbatch --array=0-59 --ntasks=1 --cpus-per-task=1 --mem=4G --time=04:00:00 \
@@ -698,10 +698,10 @@ sbatch --array=0-59 --ntasks=1 --cpus-per-task=1 --mem=4G --time=04:00:00 \
 After all 60 array cells finish, reduction is exactly:
 
 ```bash
-./micromamba run --offline --prefix "$CTHYB_ENV" \
+./micromamba --offline run --prefix "$CTHYB_ENV" \
   python tracks/mps/solutions/frustration-free/triqs/calibrate.py analyze \
   --plan "$CAL_RUN/calibration-plan.json" --run-directory "$CAL_RUN"
-./micromamba run --offline --prefix "$CTHYB_ENV" \
+./micromamba --offline run --prefix "$CTHYB_ENV" \
   python tracks/mps/solutions/frustration-free/triqs/calibrate.py \
   validate-existing --plan "$CAL_RUN/calibration-plan.json" \
   --run-directory "$CAL_RUN" \
@@ -722,7 +722,7 @@ submit the four-chain array with one rank and one thread per chain:
 
 ```bash
 export CTHYB_ROOT="$SCRATCH/challenge81-cthyb/production-beta16"
-./micromamba run --offline --prefix "$CTHYB_ENV" \
+./micromamba --offline run --prefix "$CTHYB_ENV" \
   python tracks/mps/solutions/frustration-free/triqs/make_input.py \
   --calibration "$CAL_RUN/calibration.json" \
   --expected-calibration-sha256 "$CALIBRATION_SHA256" \
@@ -736,10 +736,10 @@ Site-specific account and partition flags may be prepended without changing
 the scientific input. Once all array jobs finish:
 
 ```bash
-./micromamba run --offline --prefix "$CTHYB_ENV" \
+./micromamba --offline run --prefix "$CTHYB_ENV" \
   python tracks/mps/solutions/frustration-free/triqs/reduce.py \
   --input "$CTHYB_ROOT/cthyb-input.json" --output-root "$CTHYB_ROOT"
-./micromamba run --offline --prefix "$CTHYB_ENV" \
+./micromamba --offline run --prefix "$CTHYB_ENV" \
   python tracks/mps/solutions/frustration-free/triqs/validate_existing.py \
   --output-root "$CTHYB_ROOT"
 ```

@@ -255,7 +255,7 @@ def test_calibration_cluster_commands_and_wrapper_are_serial_offline(tmp_path):
     wrapper = TRIQS_DIR / "cthyb_calibration_slurm_array.sh"
     subprocess.run([str(wrapper)], env=env, check=True)
     args = log.read_text().splitlines()
-    assert args[:5] == ["run", "--offline", "--prefix", "/opt/triqs", "python"]
+    assert args[:5] == ["--offline", "run", "--prefix", "/opt/triqs", "python"]
     assert args[-2:] == ["--cell-index", "7"]
     for name, value in (
         ("SLURM_ARRAY_TASK_ID", "60"),

@@ -30,8 +30,8 @@ def test_wrapper_executes_exact_serial_offline_chain(tmp_path):
     script = TRIQS_DIR / "cthyb_slurm_array.sh"
     subprocess.run([str(script)], env=env, check=True)
     assert log.read_text().splitlines() == [
-        "run",
         "--offline",
+        "run",
         "--prefix",
         "/opt/triqs",
         "python",

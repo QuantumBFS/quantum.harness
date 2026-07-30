@@ -413,7 +413,7 @@ def calibration_cluster_commands(
     script = Path(__file__).resolve()
     wrapper = script.with_name("cthyb_calibration_slurm_array.sh")
     base = (
-        f"{shlex.quote(str(micromamba))} run --offline --prefix "
+        f"{shlex.quote(str(micromamba))} --offline run --prefix "
         f"{shlex.quote(str(prefix))} python {shlex.quote(str(script))}"
     )
     export = (
