@@ -14,6 +14,8 @@ import pytest
 
 import long_range_percolation.pilot_analysis as analysis
 from long_range_percolation import pilot
+from long_range_percolation.pilot import PilotCell
+from long_range_percolation.pilot_extension import EXTENSION_ANALYSIS_SCHEMA
 from long_range_percolation.trajectory import TrajectoryResult
 
 OBSERVABLE_COLUMNS = {
@@ -139,12 +141,479 @@ def _tiny_complete_pilot(
 
     monkeypatch.setattr(pilot, "run_poisson_numba", deterministic_trajectory)
     spec = pilot._load_pilot_spec(
-        path, verify_current_environment=False, production=False
+        path,
+        verify_current_environment=False,
+        expected_schema=pilot.TEST_RUN_SPEC_SCHEMA,
     )
     for cell_index in range(len(spec["cells"])):
         pilot._run_test_pilot_cell(path, cell_index)
     pilot._merge_test_pilot_progress(path)
     return path, spec
+
+
+def _tiny_complete_p0_extension(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    *,
+    name: str = "extension",
+    value_offset: float = 0.0,
+) -> tuple[Path, dict[str, object], dict[str, object]]:
+    sigmas = (0.9, 1.0)
+    lengths = (8, 16, 32)
+    replicas = (24, 25)
+    sigma_kappas = {
+        0.9: (0.25, 0.5, 0.75),
+        1.0: (1.0, 1.5, 2.0),
+    }
+    document = pilot._build_test_pilot_run_spec(
+        tmp_path / name,
+        lengths=lengths,
+        sigmas=sigmas,
+        replicas=replicas,
+        kappas=sigma_kappas[0.9],
+    )
+    document["schema_version"] = pilot.TEST_EXTENSION_RUN_SPEC_SCHEMA
+    assignments: list[dict[str, object]] = []
+    cells: list[dict[str, object]] = []
+    for raw in document["cells"]:
+        cell = dict(raw)
+        sigma = float.fromhex(cell["sigma"])
+        kappas = sigma_kappas[sigma]
+        cell["sigma_grid_id"] = (
+            f"pilot-p0-extension-test-v1|sigma-f64={sigma.hex()}"
+        )
+        cell["kappas"] = [value.hex() for value in kappas]
+        provisional = PilotCell.from_document(cell)
+        request = provisional.request(
+            master_seed=pilot.TEST_EXTENSION_CONTRACT.master_seed,
+            phase=pilot.TEST_EXTENSION_CONTRACT.phase,
+        )
+        cell["request_sha256"] = pilot.request_digest(request)
+        cell["rng_material_sha256"] = list(
+            pilot._stream_hashes(
+                provisional.length,
+                provisional.sigma_grid_id,
+                provisional.replica,
+                master_seed=pilot.TEST_EXTENSION_CONTRACT.master_seed,
+                phase=pilot.TEST_EXTENSION_CONTRACT.phase,
+            )
+        )
+        identity = {
+            "cell_index": cell["cell_index"],
+            "sigma": cell["sigma"],
+            "length": cell["length"],
+            "replica": cell["replica"],
+            "request_sha256": cell["request_sha256"],
+        }
+        cell_id = (
+            f"{cell['cell_index']:03d}-"
+            f"{hashlib.sha256(_canonical_bytes(identity)).hexdigest()[:16]}"
+        )
+        cell_path = f"cells/{cell_id}"
+        cell.update(
+            {
+                "cell_id": cell_id,
+                "cell_path": cell_path,
+                "run_path": f"{cell_path}/run",
+                "manifest_path": f"{cell_path}/manifest.json",
+            }
+        )
+        cells.append(cell)
+        assignments.append(
+            {
+                "cell_index": cell["cell_index"],
+                "request_sha256": cell["request_sha256"],
+                "streams": cell["rng_material_sha256"],
+            }
+        )
+    document["cells"] = cells
+    document["rng_assignment_sha256"] = hashlib.sha256(
+        _canonical_bytes({"assignments": assignments})
+    ).hexdigest()
+    document["run_spec_sha256"] = pilot._document_hash(
+        document, "run_spec_sha256"
+    )
+    pilot._validate_pilot_spec(
+        document,
+        contract=pilot.TEST_EXTENSION_CONTRACT,
+    )
+    path = tmp_path / name / pilot.RUN_SPEC_NAME
+    pilot._publish_once(path, document)
+
+    protocol: dict[str, object] = {
+        "loop_order": ["sigma", "length", "replica"],
+        "lengths": list(lengths),
+        "replicas": list(replicas),
+        "sigma_entries": [
+            {
+                "sigma_hex": sigma.hex(),
+                "kappas": [value.hex() for value in sigma_kappas[sigma]],
+            }
+            for sigma in sigmas
+        ],
+    }
+    protocol["protocol_sha256"] = hashlib.sha256(
+        _canonical_bytes(protocol)
+    ).hexdigest()
+
+    def deterministic_trajectory(
+        request: object, _kernel: np.ndarray, _alias: object
+    ) -> TrajectoryResult:
+        rows = np.zeros((3, 10), dtype=np.float64)
+        for kappa_index in range(3):
+            base = (
+                request.length / 8
+                + 2 * (request.replica - replicas[0])
+                + kappa_index
+                + 10 * request.sigma
+                + value_offset
+            )
+            rows[kappa_index, 4] = base
+            rows[kappa_index, 5] = base + 10
+            rows[kappa_index, 8] = base + 20
+            rows[kappa_index, 9] = (request.replica + kappa_index) % 2
+        return TrajectoryResult(
+            request_sha256=pilot.request_digest(request),
+            observables=rows,
+            terminal_counters=np.zeros((4, 4), dtype=np.uint32),
+            draw_counts=np.zeros((4, 3), dtype=np.uint64),
+            event_count=0,
+            duplicate_count=0,
+            hash_diagnostics=np.zeros(5, dtype=np.uint64),
+        )
+
+    monkeypatch.setattr(pilot, "run_poisson_numba", deterministic_trajectory)
+    for cell_index in range(len(cells)):
+        pilot._run_test_registered_pilot_cell(path, cell_index)
+    pilot._merge_test_registered_pilot_progress(path)
+    return path, document, protocol
+
+
+def test_aggregate_p0_extension_groups_sigma_grids_with_bounded_retention(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+):
+    path, spec, protocol = _tiny_complete_p0_extension(tmp_path, monkeypatch)
+    original_loader = pilot._load_analysis_trajectory
+    original_grouper = analysis._group_estimates
+    previous_trajectory: weakref.ReferenceType[TrajectoryResult] | None = None
+    previous_group: weakref.ReferenceType[np.ndarray] | None = None
+    observed_group_shapes: list[tuple[int, ...]] = []
+
+    def tracking_loader(
+        trajectory: Path,
+        expected: dict[str, str],
+        required_digest: str,
+    ) -> TrajectoryResult:
+        nonlocal previous_trajectory
+        if previous_trajectory is not None:
+            assert previous_trajectory() is None, "more than one trajectory was retained"
+        result = original_loader(trajectory, expected, required_digest)
+        previous_trajectory = weakref.ref(result)
+        return result
+
+    def tracking_grouper(
+        sigma: float,
+        length: int,
+        kappas: tuple[float, ...],
+        values: np.ndarray,
+        request_sha256: tuple[str, ...],
+    ) -> list[analysis.PilotEstimate]:
+        nonlocal previous_group
+        if previous_group is not None:
+            assert previous_group() is None, "more than one group array was retained"
+        observed_group_shapes.append(values.shape)
+        previous_group = weakref.ref(values)
+        return original_grouper(
+            sigma, length, kappas, values, request_sha256
+        )
+
+    monkeypatch.setattr(pilot, "_load_analysis_trajectory", tracking_loader)
+    monkeypatch.setattr(analysis, "_group_estimates", tracking_grouper)
+    document = analysis._aggregate_test_p0_extension(path, protocol)
+
+    assert observed_group_shapes == [(2, 3, 4)] * 6
+    assert len(document["estimates"]) == 2 * 3 * 3
+    assert [
+        (
+            estimate["sigma_hex"],
+            estimate["length"],
+            estimate["kappa_hex"],
+        )
+        for estimate in document["estimates"]
+    ] == [
+        (entry["sigma_hex"], length, kappa)
+        for entry in protocol["sigma_entries"]
+        for length in (8, 16, 32)
+        for kappa in entry["kappas"]
+    ]
+    first = document["estimates"][0]
+    assert first["request_sha256"] == [
+        spec["cells"][0]["request_sha256"],
+        spec["cells"][1]["request_sha256"],
+    ]
+    assert first["means"]["q_g"] == 31.0
+    assert first["standard_errors"]["q_g"] == 1.0
+
+
+def test_aggregate_p0_extension_binds_exact_sources_and_document_hash(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+):
+    path, spec, protocol = _tiny_complete_p0_extension(tmp_path, monkeypatch)
+
+    document = analysis._aggregate_test_p0_extension(path, protocol)
+    unsigned = dict(document)
+    digest = unsigned.pop("analysis_document_sha256")
+
+    assert document["schema_version"] == EXTENSION_ANALYSIS_SCHEMA
+    assert (
+        document["source_extension_protocol_sha256"]
+        == protocol["protocol_sha256"]
+    )
+    assert (
+        document["extension_run_spec_sha256"]
+        == hashlib.sha256(path.read_bytes()).hexdigest()
+    )
+    assert (
+        document["extension_progress_sha256"]
+        == hashlib.sha256((path.parent / "progress.json").read_bytes()).hexdigest()
+    )
+    assert document["source_revision"] == spec["orchestration_revision"]
+    assert document["analysis_plan_sha256"] == spec["analysis_plan_sha256"]
+    assert digest == hashlib.sha256(_canonical_bytes(unsigned)).hexdigest()
+
+
+@pytest.mark.parametrize(
+    "defect",
+    ("merged-trajectory-digest", "outer-manifest", "inner-progress"),
+)
+def test_aggregate_p0_extension_rejects_forged_verified_evidence(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    defect: str,
+):
+    path, spec, protocol = _tiny_complete_p0_extension(tmp_path, monkeypatch)
+    root = path.parent
+    first = spec["cells"][0]
+    if defect == "merged-trajectory-digest":
+        target = root / "progress.json"
+        document = json.loads(target.read_text(encoding="utf-8"))
+        document["cells"][0]["trajectory_sha256"] = "0" * 64
+    elif defect == "outer-manifest":
+        target = root / first["manifest_path"]
+        document = json.loads(target.read_text(encoding="utf-8"))
+        document["trajectory_sha256"] = "0" * 64
+    else:
+        target = root / first["run_path"] / "progress.json"
+        document = {"schema_version": "forged-progress"}
+    target.write_bytes(_canonical_bytes(document))
+
+    with pytest.raises(RuntimeError, match="stale|corrupt|mismatch|progress"):
+        analysis._aggregate_test_p0_extension(path, protocol)
+
+
+@pytest.mark.parametrize("swap", ("root", "progress"))
+def test_aggregate_p0_extension_uses_retained_descriptors_during_swap(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    swap: str,
+):
+    original, _, protocol = _tiny_complete_p0_extension(
+        tmp_path, monkeypatch, name="original", value_offset=0.0
+    )
+    alternate, _, _ = _tiny_complete_p0_extension(
+        tmp_path, monkeypatch, name="alternate", value_offset=1000.0
+    )
+    baseline = analysis._aggregate_test_p0_extension(original, protocol)
+    original_root = original.parent
+    alternate_root = alternate.parent
+    saved = tmp_path / "saved"
+    events: list[str] = []
+
+    def swap_and_restore(stage: str) -> None:
+        if stage == "snapshot-verified":
+            events.append(stage)
+            if swap == "root":
+                original_root.rename(saved)
+                alternate_root.rename(original_root)
+            else:
+                progress = original_root / "progress.json"
+                progress.rename(saved)
+                shutil.copyfile(alternate_root / "progress.json", progress)
+        elif stage == "snapshot-closed":
+            events.append(stage)
+            if swap == "root":
+                original_root.rename(alternate_root)
+                saved.rename(original_root)
+            else:
+                progress = original_root / "progress.json"
+                progress.unlink()
+                saved.rename(progress)
+
+    observed = analysis._aggregate_test_p0_extension(
+        original,
+        protocol,
+        _snapshot_hook=swap_and_restore,
+    )
+
+    assert observed == baseline
+    assert events == ["snapshot-verified", "snapshot-closed"]
+
+
+def test_p0_extension_snapshot_is_bounded_named_and_cleaned(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+):
+    path, _, protocol = _tiny_complete_p0_extension(tmp_path, monkeypatch)
+    parent = _private_snapshot_parent(tmp_path)
+    observed_names: list[str] = []
+
+    def capture(stage: str) -> None:
+        if stage == "snapshot-copy-start":
+            observed_names.extend(entry.name for entry in parent.iterdir())
+
+    analysis._aggregate_test_p0_extension(
+        path,
+        protocol,
+        snapshot_parent=parent,
+        _snapshot_hook=capture,
+    )
+
+    assert len(observed_names) == 1
+    assert "test-p0-extension-v1" in observed_names[0]
+    assert list(parent.iterdir()) == []
+
+
+def test_p0_extension_snapshot_preflight_fails_before_copy(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+):
+    path, spec, protocol = _tiny_complete_p0_extension(tmp_path, monkeypatch)
+    (path.parent / spec["cells"][0]["cell_path"] / "unknown.bin").write_bytes(b"x")
+    copy_calls: list[str] = []
+
+    def forbid_copy(*_args: object, **_kwargs: object) -> None:
+        copy_calls.append("called")
+        raise AssertionError("payload copy started before bounded preflight")
+
+    monkeypatch.setattr(pilot, "_copy_regular_snapshot_at", forbid_copy)
+    with pytest.raises(RuntimeError, match="unknown snapshot layout entry"):
+        analysis._aggregate_test_p0_extension(
+            path,
+            protocol,
+            snapshot_parent=_private_snapshot_parent(tmp_path),
+        )
+    assert copy_calls == []
+
+
+def test_aggregate_p0_extension_requires_exact_production_cardinality(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+):
+    sigmas = (0.9, 1.0)
+    lengths = (2**10, 2**14, 2**18)
+    replicas = tuple(range(24, 40))
+    grids = {
+        sigma: tuple(sigma + 0.125 * index for index in range(17))
+        for sigma in sigmas
+    }
+    protocol: dict[str, object] = {
+        "loop_order": ["sigma", "length", "replica"],
+        "lengths": list(lengths),
+        "replicas": list(replicas),
+        "sigma_entries": [
+            {
+                "sigma_hex": sigma.hex(),
+                "kappas": [value.hex() for value in grids[sigma]],
+            }
+            for sigma in sigmas
+        ],
+    }
+    protocol["protocol_sha256"] = hashlib.sha256(
+        _canonical_bytes(protocol)
+    ).hexdigest()
+    cells: list[dict[str, object]] = []
+    for sigma in sigmas:
+        for length in lengths:
+            for replica in replicas:
+                index = len(cells)
+                cell_path = f"cells/{index:03d}"
+                cells.append(
+                    {
+                        "cell_index": index,
+                        "cell_id": f"{index:03d}",
+                        "sigma": sigma.hex(),
+                        "length": length,
+                        "replica": replica,
+                        "sigma_grid_id": f"production|{sigma.hex()}",
+                        "kappas": [value.hex() for value in grids[sigma]],
+                        "kernel_sha256": "1" * 64,
+                        "request_sha256": f"{index:064x}",
+                        "rng_material_sha256": ["2" * 64] * 4,
+                        "cell_path": cell_path,
+                        "run_path": f"{cell_path}/run",
+                        "manifest_path": f"{cell_path}/manifest.json",
+                    }
+                )
+
+    class FakeSnapshot:
+        run_spec_payload = b"production extension run spec\n"
+        progress_payload = b"production extension progress\n"
+
+        def __init__(self) -> None:
+            self.spec = {
+                "source_extension_protocol_sha256": protocol["protocol_sha256"],
+                "orchestration_revision": "3" * 40,
+                "analysis_plan_sha256": "4" * 64,
+                "cells": cells,
+            }
+
+        def load_trajectory(self, cell_index: int) -> TrajectoryResult:
+            rows = np.zeros((17, 10), dtype=np.float64)
+            rows[:, 4] = cell_index
+            rows[:, 5] = cell_index + 1
+            rows[:, 8] = cell_index + 2
+            rows[:, 9] = cell_index % 2
+            return TrajectoryResult(
+                request_sha256=cells[cell_index]["request_sha256"],
+                observables=rows,
+                terminal_counters=np.zeros((4, 4), dtype=np.uint32),
+                draw_counts=np.zeros((4, 3), dtype=np.uint64),
+                event_count=0,
+                duplicate_count=0,
+                hash_diagnostics=np.zeros(5, dtype=np.uint64),
+            )
+
+    class FakeSnapshotContext:
+        def __enter__(self) -> FakeSnapshot:
+            return FakeSnapshot()
+
+        def __exit__(self, *_args: object) -> None:
+            return None
+
+    monkeypatch.setattr(
+        pilot,
+        "_open_verified_pilot_analysis_snapshot",
+        lambda *_args, **_kwargs: FakeSnapshotContext(),
+    )
+
+    document = analysis.aggregate_p0_extension(
+        (tmp_path / "run_spec.json").resolve(),
+        protocol,
+    )
+
+    assert len(cells) == 2 * 3 * 16
+    assert len(document["estimates"]) == 102
+    assert all(estimate["replica_count"] == 16 for estimate in document["estimates"])
+
+    malformed = json.loads(json.dumps(protocol))
+    malformed["replicas"].pop()
+    unsigned = dict(malformed)
+    unsigned.pop("protocol_sha256")
+    malformed["protocol_sha256"] = hashlib.sha256(
+        _canonical_bytes(unsigned)
+    ).hexdigest()
+    with pytest.raises(RuntimeError, match="2x3x16x17"):
+        analysis.aggregate_p0_extension(
+            (tmp_path / "run_spec.json").resolve(),
+            malformed,
+        )
 
 
 def test_aggregate_p0_groups_whole_replicas_in_canonical_order(

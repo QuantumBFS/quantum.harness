@@ -19,6 +19,7 @@ from .pilot import PilotCell
 from .trajectory import TrajectoryRequest, request_digest
 
 ANALYSIS_SCHEMA = "challenge-194-p0-analysis-v1"
+EXTENSION_ANALYSIS_SCHEMA = "challenge-194-p0-extension-analysis-v1"
 BRACKET_SCHEMA = "challenge-194-p1-brackets-v1"
 P1_PROTOCOL_SCHEMA = "challenge-194-p1-protocol-v1"
 P1_MASTER_SEED = 19_420_261_729
@@ -296,6 +297,210 @@ def _aggregate_test_p0(
 ) -> dict[str, object]:
     return _aggregate_p0(
         run_spec,
+        production=False,
+        snapshot_parent=snapshot_parent,
+        _snapshot_hook=_snapshot_hook,
+    )
+
+
+def _validated_extension_axes(
+    protocol: Mapping[str, object],
+    *,
+    production: bool,
+) -> tuple[tuple[float, ...], tuple[int, ...], tuple[int, ...], tuple[tuple[float, ...], ...]]:
+    digest = protocol.get("protocol_sha256")
+    if not isinstance(digest, str):
+        _malformed("extension protocol digest is malformed")
+    unsigned = dict(protocol)
+    unsigned.pop("protocol_sha256", None)
+    if _sha256(_canonical_bytes(unsigned)) != digest:
+        raise RuntimeError("extension protocol hash mismatch")
+    if protocol.get("loop_order") != ["sigma", "length", "replica"]:
+        raise RuntimeError("extension protocol loop order is not canonical")
+    try:
+        lengths = tuple(int(value) for value in _protocol_axis(protocol, "lengths"))
+        replicas = tuple(int(value) for value in _protocol_axis(protocol, "replicas"))
+    except (TypeError, ValueError) as error:
+        raise RuntimeError("extension protocol axes are malformed") from error
+    raw_entries = protocol.get("sigma_entries")
+    if isinstance(raw_entries, (str, bytes)) or not isinstance(
+        raw_entries, Sequence
+    ):
+        _malformed("extension sigma entries are malformed")
+    sigmas: list[float] = []
+    grids: list[tuple[float, ...]] = []
+    for raw in raw_entries:
+        if not isinstance(raw, Mapping):
+            _malformed("extension sigma entry is malformed")
+        try:
+            sigma = float.fromhex(str(raw.get("sigma_hex")))
+            kappas = tuple(
+                float.fromhex(str(value))
+                for value in _protocol_axis(raw, "kappas")
+            )
+        except (TypeError, ValueError) as error:
+            raise RuntimeError("extension sigma grid is malformed") from error
+        if (
+            not math.isfinite(sigma)
+            or sigma.hex() != raw.get("sigma_hex")
+            or not kappas
+            or any(not math.isfinite(value) for value in kappas)
+            or [value.hex() for value in kappas] != raw.get("kappas")
+            or len(set(kappas)) != len(kappas)
+        ):
+            raise RuntimeError("extension sigma grid is not canonical finite binary64")
+        sigmas.append(sigma)
+        grids.append(kappas)
+    if (
+        not lengths
+        or len(set(lengths)) != len(lengths)
+        or len(replicas) < 2
+        or len(set(replicas)) != len(replicas)
+        or not sigmas
+        or len(set(sigmas)) != len(sigmas)
+    ):
+        raise RuntimeError("extension protocol axes are empty or duplicate")
+    if production and (
+        len(sigmas) != 2
+        or len(lengths) != 3
+        or len(replicas) != 16
+        or any(len(grid) != 17 for grid in grids)
+    ):
+        raise RuntimeError("extension production cardinality is not exactly 2x3x16x17")
+    return tuple(sigmas), lengths, replicas, tuple(grids)
+
+
+def _aggregate_p0_extension(
+    run_spec: Path,
+    protocol: Mapping[str, object],
+    *,
+    production: bool,
+    snapshot_parent: Path | None = None,
+    _snapshot_hook: Callable[[str], None] | None = None,
+) -> dict[str, object]:
+    if not isinstance(run_spec, Path) or not run_spec.is_absolute():
+        raise RuntimeError("P0 extension run spec path must be absolute")
+    if not isinstance(protocol, Mapping):
+        _malformed("extension protocol is malformed")
+    sigmas, lengths, replicas, grids = _validated_extension_axes(
+        protocol,
+        production=production,
+    )
+    expected_schema = (
+        _pilot.EXTENSION_CONTRACT.run_spec_schema
+        if production
+        else _pilot.TEST_EXTENSION_RUN_SPEC_SCHEMA
+    )
+    with _pilot._open_verified_pilot_analysis_snapshot(
+        run_spec,
+        production=production,
+        snapshot_parent=snapshot_parent,
+        _snapshot_hook=_snapshot_hook,
+        _expected_schema=expected_schema,
+    ) as snapshot:
+        spec = snapshot.spec
+        source_protocol_sha256 = protocol["protocol_sha256"]
+        if production and spec.get(
+            "source_extension_protocol_sha256"
+        ) != source_protocol_sha256:
+            raise RuntimeError("extension run spec is not bound to the protocol")
+        raw_cells = spec.get("cells")
+        expected_cell_count = len(sigmas) * len(lengths) * len(replicas)
+        if (
+            not isinstance(raw_cells, Sequence)
+            or isinstance(raw_cells, (str, bytes))
+            or len(raw_cells) != expected_cell_count
+        ):
+            raise RuntimeError("extension cell cardinality is incomplete")
+
+        estimates: list[dict[str, object]] = []
+        cell_index = 0
+        for sigma, kappas in zip(sigmas, grids, strict=True):
+            for length in lengths:
+                values = np.empty(
+                    (len(replicas), len(kappas), len(OBSERVABLE_COLUMNS)),
+                    dtype=np.float64,
+                )
+                request_hashes: list[str] = []
+                for replica_index, replica in enumerate(replicas):
+                    raw_cell = raw_cells[cell_index]
+                    if not isinstance(raw_cell, Mapping):
+                        _malformed("extension cell is malformed")
+                    cell = PilotCell.from_document(raw_cell)
+                    if (
+                        cell.cell_index != cell_index
+                        or (cell.sigma, cell.length, cell.replica)
+                        != (sigma, length, replica)
+                        or cell.kappas != kappas
+                    ):
+                        raise RuntimeError(
+                            "extension cells are not in canonical protocol order"
+                        )
+                    result = snapshot.load_trajectory(cell_index)
+                    if (
+                        result.observables.shape != (len(kappas), 10)
+                        or not np.isfinite(result.observables).all()
+                    ):
+                        raise RuntimeError(
+                            "verified extension trajectory observables are malformed"
+                        )
+                    values[replica_index, :, :] = result.observables[
+                        :, _OBSERVABLE_INDICES
+                    ]
+                    request_hashes.append(cell.request_sha256)
+                    cell_index += 1
+                    del result
+                grouped = _group_estimates(
+                    sigma,
+                    length,
+                    kappas,
+                    values,
+                    tuple(request_hashes),
+                )
+                estimates.extend(estimate.to_document() for estimate in grouped)
+                del grouped
+                del values
+
+        expected_estimates = sum(len(grid) for grid in grids) * len(lengths)
+        if len(estimates) != expected_estimates or (
+            production and len(estimates) != 102
+        ):
+            raise RuntimeError("extension estimate cardinality is invalid")
+        document: dict[str, object] = {
+            "schema_version": EXTENSION_ANALYSIS_SCHEMA,
+            "source_extension_protocol_sha256": source_protocol_sha256,
+            "extension_run_spec_sha256": _sha256(snapshot.run_spec_payload),
+            "extension_progress_sha256": _sha256(snapshot.progress_payload),
+            "source_revision": spec["orchestration_revision"],
+            "analysis_plan_sha256": spec["analysis_plan_sha256"],
+            "observable_columns": dict(OBSERVABLE_COLUMNS),
+            "estimates": estimates,
+        }
+        document["analysis_document_sha256"] = _sha256(_canonical_bytes(document))
+        return document
+
+
+def aggregate_p0_extension(
+    run_spec: Path,
+    protocol: Mapping[str, object],
+) -> dict[str, object]:
+    return _aggregate_p0_extension(
+        run_spec,
+        protocol,
+        production=True,
+    )
+
+
+def _aggregate_test_p0_extension(
+    run_spec: Path,
+    protocol: Mapping[str, object],
+    *,
+    snapshot_parent: Path | None = None,
+    _snapshot_hook: Callable[[str], None] | None = None,
+) -> dict[str, object]:
+    return _aggregate_p0_extension(
+        run_spec,
+        protocol,
         production=False,
         snapshot_parent=snapshot_parent,
         _snapshot_hook=_snapshot_hook,

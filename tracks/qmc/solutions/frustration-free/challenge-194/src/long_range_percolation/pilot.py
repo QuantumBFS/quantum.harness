@@ -2489,6 +2489,7 @@ def _snapshot_birth_name(token: str | None) -> str:
 def _snapshot_directory_name(
     process_identity: SnapshotProcessIdentity,
     uniqueness: str,
+    run_kind: str | None = None,
 ) -> str:
     pid, birth_token = process_identity
     if (
@@ -2496,10 +2497,16 @@ def _snapshot_directory_name(
         or not isinstance(pid, int)
         or pid <= 0
         or re.fullmatch(r"[0-9a-f]{32}", uniqueness) is None
+        or (
+            run_kind is not None
+            and re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", run_kind) is None
+        )
     ):
         raise RuntimeError("pilot snapshot directory identity is malformed")
+    kind_component = "" if run_kind is None else f"{run_kind}-"
     return (
-        f"{PILOT_SNAPSHOT_PREFIX}{pid}-{_snapshot_birth_name(birth_token)}-{uniqueness}"
+        f"{PILOT_SNAPSHOT_PREFIX}{kind_component}{pid}-"
+        f"{_snapshot_birth_name(birth_token)}-{uniqueness}"
     )
 
 
@@ -2508,6 +2515,7 @@ def _parse_snapshot_directory_name(
 ) -> tuple[SnapshotProcessIdentity, str] | None:
     match = re.fullmatch(
         re.escape(PILOT_SNAPSHOT_PREFIX)
+        + r"(?:[a-z0-9]+(?:-[a-z0-9]+)*-)?"
         + r"([1-9][0-9]*)-"
         + r"(linux-[0-9a-f]{32}-[1-9][0-9]*|unverifiable)-"
         + r"([0-9a-f]{32})",
@@ -2789,13 +2797,17 @@ def _restore_snapshot_signal_handlers(previous: Mapping[int, object]) -> None:
 
 
 @contextmanager
-def _owned_pilot_snapshot_directory(parent: Path) -> Iterator[Path]:
+def _owned_pilot_snapshot_directory(
+    parent: Path,
+    *,
+    run_kind: str,
+) -> Iterator[Path]:
     parent_fd = _open_validated_snapshot_parent(parent)
     try:
         _cleanup_stale_owned_snapshots(parent_fd)
         token = uuid.uuid4().hex
         process_identity = _snapshot_process_identity()
-        name = _snapshot_directory_name(process_identity, token)
+        name = _snapshot_directory_name(process_identity, token, run_kind)
         marker = _snapshot_marker_document(name, token, process_identity)
         directory_fd: int | None = None
         directory_created = False
@@ -2914,7 +2926,7 @@ def _open_verified_pilot_analysis_snapshot(
     expected_schema = (
         RUN_SPEC_SCHEMA if production else TEST_RUN_SPEC_SCHEMA
     ) if _expected_schema is None else _expected_schema
-    _contract_for_schema(expected_schema)
+    contract = _contract_for_schema(expected_schema)
     if (
         not isinstance(run_spec_path, Path)
         or not run_spec_path.is_absolute()
@@ -2987,7 +2999,10 @@ def _open_verified_pilot_analysis_snapshot(
         if _snapshot_hook is not None:
             _snapshot_hook("snapshot-preflighted")
 
-        with _owned_pilot_snapshot_directory(parent) as snapshot_root:
+        with _owned_pilot_snapshot_directory(
+            parent,
+            run_kind=contract.production_kind,
+        ) as snapshot_root:
             if _snapshot_hook is not None:
                 _snapshot_hook("snapshot-copy-start")
             global_counter = [0]
