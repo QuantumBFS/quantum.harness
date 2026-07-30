@@ -1,0 +1,590 @@
+{
+  "eyebrow": "Quantum Harness Issue #92 \u00b7 PolyOpt Track",
+  "lede": "A complete Julia/JuMP hierarchy implementation with exact certificate checking produces 9 certified hard-core finite-level gap upper statements and 2 accepted observable intervals; the full cutoff and nested Target 2 campaign remains incomplete.",
+  "sections": [
+    {
+      "blocks": [
+        {
+          "kind": "text",
+          "text": "Issue #92 asks whether the thermodynamic state-polynomial hierarchy of Xu et al. can be extended from spin systems to occupation-truncated bosons, then used to bound the bulk gap and local Mott diagnostics on three infinite hyperbolic graphs. The challenge is not to diagonalize a finite patch: it is to exclude an assumed thermodynamic gap using a finite, independently checkable semidefinite certificate."
+        },
+        {
+          "blocks": [
+            {
+              "kind": "text",
+              "text": "Certified thermodynamic statements avoid the uncontrolled finite-size extrapolation that is especially delicate on hyperbolic lattices. The truncated-boson extension also supplies a reusable finite-matrix route for bosonic models while stating explicitly that no cutoff result certifies the untruncated Bose\u2013Hubbard model."
+            }
+          ],
+          "kind": "card",
+          "title": "Significance"
+        },
+        {
+          "kind": "equation",
+          "tex": "H=-t\\sum_{\\langle i,j\\rangle}(b_i^\\dagger b_j+b_j^\\dagger b_i)+\\frac{U}{2}\\sum_i n_i(n_i-1)-\\mu\\sum_i n_i,\\qquad U=1"
+        },
+        {
+          "kind": "kv",
+          "pairs": [
+            [
+              "Graphs",
+              "{8,3}; {12,4}; line graph L({8,3})"
+            ],
+            [
+              "Target points",
+              "P1\u2013P5: five distinct (t/U, \u03bc/U) values near unit filling"
+            ],
+            [
+              "Requested cutoffs",
+              "nmax=1,2; nmax=3 when computationally feasible"
+            ],
+            [
+              "Primary sector",
+              "U1_INVARIANT_KMS_STATES"
+            ],
+            [
+              "Primary finite level reported",
+              "complete matrix basis, (L,d)=(1,2), nmax=1"
+            ],
+            [
+              "Campaign status",
+              "Partial: core complete; baseline subset certified; nested/cutoff expansion incomplete"
+            ]
+          ]
+        },
+        {
+          "kind": "note",
+          "label": "Claim boundary",
+          "style": "info",
+          "text": "Every \u0393 value below is an upper statement from one finite hierarchy level in the U(1)-invariant sector. A FEASIBLE sample proves no positive gap; ED is diagnostic only; and numerical ordering of finite-level upper statements is not an ordering of the unknown true gaps."
+        }
+      ],
+      "note": "The physical question and the precise scope of the claims.",
+      "title": "Challenge"
+    },
+    {
+      "blocks": [
+        {
+          "kind": "badge",
+          "style": "good",
+          "text": "Rigorous exclusions at a finite relaxation"
+        },
+        {
+          "kind": "kv",
+          "pairs": [
+            [
+              "Local algebra",
+              "Independent charge-adapted basis of M_(nmax+1), exact Q(\u221a2,\u221a3) coefficients"
+            ],
+            [
+              "Thermodynamic window",
+              "\u039b_G(L), interaction buffer one, excitations/stationarity in \u039b_G(L\u22121)"
+            ],
+            [
+              "Encodings",
+              "Matrix degree (primary) and exact ladder-word filtration (cross-check)"
+            ],
+            [
+              "PSD reduction",
+              "Exact U(1)-charge blocks; deterministic nested TS2 support closure"
+            ],
+            [
+              "Solvers",
+              "Clarabel for available campaign runs; Mosek interface present but license unavailable"
+            ],
+            [
+              "Exclusion checker",
+              "Exact affine projection, 256-bit Arb intervals, rigorous PSD LDL, normalized Farkas margin"
+            ],
+            [
+              "Execution",
+              "Resumable per-cell manifests on SCNet; raw primal/dual data retained"
+            ]
+          ]
+        },
+        {
+          "kind": "text",
+          "text": "The same canonical multiplication and adjoint engine serves both degree encodings. For each level, the code enumerates the complete state-polynomial moment basis, stationarity identities, covariance-corrected gap matrix, and the \u03c1\u2080, F\u2080, K\u2080 objectives. Solver infeasibility remains UNKNOWN until the separately implemented checker reconstructs the exact coefficient identity and verifies every cone."
+        },
+        {
+          "kind": "equation",
+          "tex": "\\Gamma_{L,d}\\searrow\\Delta_{\\mathrm{bulk}},\\qquad \\gamma\\geq\\Gamma_{L,d}\\;\\Rightarrow\\;\\mathcal F_{L,d}(\\gamma)=\\varnothing"
+        },
+        {
+          "columns": [
+            "Acceptance gate",
+            "Evidence",
+            "Status"
+          ],
+          "kind": "table",
+          "numeric": [
+            false,
+            false,
+            false
+          ],
+          "rows": [
+            [
+              "Exact algebra and degree filtrations",
+              "nmax=1,2,3; adjoint, charge, cutoff commutator",
+              "PASS"
+            ],
+            [
+              "Julia hierarchy/certificate suite",
+              "575 assertions; includes corrupted-certificate rejection",
+              "PASS"
+            ],
+            [
+              "Python graph/report suite",
+              "21 tests",
+              "PASS"
+            ],
+            [
+              "Atomic limit",
+              "\u0394/U=0.5, \u03c1=1, F=K=0 without special physics constraints",
+              "PASS"
+            ],
+            [
+              "Pinned upstream Ising reproduction",
+              "SpectralGap a1171c9; no SCNet/local Mosek license",
+              "BLOCKED"
+            ],
+            [
+              "Nested numerical monotonicity",
+              "Both larger complete hard-core solves exhausted memory",
+              "UNKNOWN"
+            ]
+          ]
+        },
+        {
+          "columns": [
+            "Representative {8,3} level",
+            "Family",
+            "Moment basis",
+            "Gap basis",
+            "Equalities",
+            "Peak RSS (GiB)"
+          ],
+          "kind": "table",
+          "numeric": [
+            false,
+            false,
+            true,
+            true,
+            true,
+            true
+          ],
+          "rows": [
+            [
+              "nmax=1",
+              "(1,2)",
+              "complete",
+              "147",
+              "5",
+              "3",
+              "7.012871"
+            ],
+            [
+              "nmax=1",
+              "(1,3)",
+              "complete",
+              "927",
+              "9",
+              "5",
+              "88.60851"
+            ],
+            [
+              "nmax=1",
+              "(2,2)",
+              "complete",
+              "936",
+              "17",
+              "51",
+              "74.34607"
+            ],
+            [
+              "nmax=2",
+              "(1,2)",
+              "complete",
+              "801",
+              "11",
+              "7",
+              "229.1583"
+            ]
+          ]
+        }
+      ],
+      "note": "Paper-faithful hierarchy, exact algebra, solver layer, and independent checker.",
+      "title": "Approach"
+    },
+    {
+      "blocks": [
+        {
+          "kind": "verdict",
+          "label": "Partial Target 2 campaign",
+          "status": "warn",
+          "why": "9 hard-core finite-level gap upper statements are certified; cutoff-two, nested-level, ladder, unrestricted, and optional cutoff-three coverage does not yet satisfy the full issue grid."
+        },
+        {
+          "kind": "heading",
+          "level": 2,
+          "text": "Certified gap upper statements"
+        },
+        {
+          "columns": [
+            "Graph",
+            "Point",
+            "(t/U, \u03bc/U)",
+            "(L,d)",
+            "last FEASIBLE",
+            "first EXCLUDED",
+            "span",
+            "unknown inside",
+            "clean 0.005"
+          ],
+          "kind": "table",
+          "numeric": [
+            false,
+            false,
+            false,
+            false,
+            true,
+            true,
+            true,
+            true,
+            false
+          ],
+          "rows": [
+            [
+              "{12,4}",
+              "P2",
+              "(0.05, 0.5)",
+              "(1,2)",
+              "0.51",
+              "0.52",
+              "0.01",
+              "1",
+              "no"
+            ],
+            [
+              "{12,4}",
+              "P4",
+              "(0.03, 0.15)",
+              "(1,2)",
+              "\u2014",
+              "0.3",
+              "\u2014",
+              "0",
+              "no"
+            ],
+            [
+              "{12,4}",
+              "P5",
+              "(0.03, 0.75)",
+              "(1,2)",
+              "\u2014",
+              "1",
+              "\u2014",
+              "0",
+              "no"
+            ],
+            [
+              "{8,3}",
+              "P1",
+              "(0.03, 0.5)",
+              "(1,2)",
+              "0.5",
+              "0.505",
+              "0.005",
+              "0",
+              "yes"
+            ],
+            [
+              "{8,3}",
+              "P2",
+              "(0.05, 0.5)",
+              "(1,2)",
+              "0.509",
+              "0.511",
+              "0.002",
+              "1",
+              "no"
+            ],
+            [
+              "{8,3}",
+              "P3",
+              "(0.06, 0.5)",
+              "(1,2)",
+              "0.514",
+              "0.518",
+              "0.004",
+              "2",
+              "no"
+            ],
+            [
+              "{8,3}",
+              "P4",
+              "(0.03, 0.15)",
+              "(1,2)",
+              "0.16",
+              "0.165",
+              "0.005",
+              "0",
+              "yes"
+            ],
+            [
+              "{8,3}",
+              "P5",
+              "(0.03, 0.75)",
+              "(1,2)",
+              "0.75",
+              "0.755",
+              "0.005",
+              "0",
+              "yes"
+            ],
+            [
+              "L({8,3})",
+              "P2",
+              "(0.05, 0.5)",
+              "(1,2)",
+              "0.51",
+              "0.53",
+              "0.02",
+              "1",
+              "no"
+            ]
+          ]
+        },
+        {
+          "kind": "text",
+          "text": "All 9 EXCLUDED endpoints have exact affine residual zero, 256-bit coefficient checks, rigorous PSD verification, and normalized Farkas margin at least one. 3 transitions have a clean 0.005U search span. Rows containing unresolved samples are search spans, not numerical brackets."
+        },
+        {
+          "items": [
+            {
+              "caption": "Checked fixed-gap hierarchy outcomes. Circles are FEASIBLE non-exclusions, crosses are exact-certificate EXCLUDED trials, and squares are UNKNOWN. The map separates scientific classification from scheduler completion.",
+              "src": "assets/fixed_gamma_status.png"
+            }
+          ],
+          "kind": "figures"
+        },
+        {
+          "kind": "heading",
+          "level": 2,
+          "text": "Certified observable information"
+        },
+        {
+          "columns": [
+            "Graph",
+            "Point",
+            "\u03b3/U",
+            "Observable",
+            "Accepted interval",
+            "(L,d)"
+          ],
+          "kind": "table",
+          "numeric": [
+            false,
+            false,
+            true,
+            false,
+            false,
+            false
+          ],
+          "rows": [
+            [
+              "{8,3}",
+              "P5",
+              "0.05",
+              "F0",
+              "[4.879816e-07, 0.005592673]",
+              "(1,2)"
+            ],
+            [
+              "{8,3}",
+              "P5",
+              "0.05",
+              "rho0",
+              "[0.9944073, 0.9999995]",
+              "(1,2)"
+            ]
+          ]
+        },
+        {
+          "columns": [
+            "Graph",
+            "Point",
+            "\u03b3/U",
+            "Observable",
+            "Sense",
+            "Certified endpoint",
+            "Certificate"
+          ],
+          "kind": "table",
+          "numeric": [
+            false,
+            false,
+            true,
+            false,
+            false,
+            true,
+            false
+          ],
+          "rows": [
+            [
+              "{8,3}",
+              "P4",
+              "0.1",
+              "F0",
+              "\u2264",
+              "0.05446525",
+              "DERIVED_EXACT_AFFINE_FROM_VERIFIED_EXACT_PROJECTED_BOUND"
+            ],
+            [
+              "{8,3}",
+              "P4",
+              "0.1",
+              "K0",
+              "\u2264",
+              "0.3025838",
+              "VERIFIED_EXACT_PROJECTED_BOUND"
+            ],
+            [
+              "{8,3}",
+              "P4",
+              "0.1",
+              "rho0",
+              "\u2265",
+              "0.9455347",
+              "VERIFIED_EXACT_PROJECTED_BOUND"
+            ]
+          ]
+        },
+        {
+          "kind": "text",
+          "text": "The accepted two-sided result is the {8,3} P5 cell at \u03b3/U=0.05: 0.9944073 \u2264 \u03c1\u2080 \u2264 0.9999995 and 4.879816\u00d710\u207b\u2077 \u2264 F\u2080 \u2264 0.005592673. At hard-core cutoff F\u2080=1\u2212\u03c1\u2080 exactly. The representative P4, \u03b3/U=0.10 exact-projection run additionally certifies \u03c1\u2080\u22650.9455347492, F\u2080\u22640.0544652508, and K\u2080\u22640.3025838233."
+        },
+        {
+          "items": [
+            {
+              "caption": "Accepted and floating one-sided endpoints for {8,3} P2. Increasing the assumed \u03b3 tightens the conditional feasible set; it does not tune the Hamiltonian or measure how the physical gap changes.",
+              "src": "assets/working_endpoints_83_p2.png"
+            }
+          ],
+          "kind": "figures"
+        },
+        {
+          "kind": "heading",
+          "level": 2,
+          "text": "Coverage and computational boundary"
+        },
+        {
+          "columns": [
+            "Evidence class",
+            "Count",
+            "Interpretation"
+          ],
+          "kind": "table",
+          "numeric": [
+            false,
+            true,
+            false
+          ],
+          "rows": [
+            [
+              "Accepted one-sided objectives",
+              "26",
+              "Passed independent residual/PSD/objective-gap checks"
+            ],
+            [
+              "Floating objectives",
+              "100",
+              "Numerical values retained, not certified bounds"
+            ],
+            [
+              "Accepted intervals",
+              "2 / 69",
+              "Both endpoints accepted and ordered"
+            ],
+            [
+              "Fixed-\u03b3 records",
+              "146 / 205",
+              "Durable solver/checker result exists"
+            ],
+            [
+              "Verified excluded trial rows",
+              "48",
+              "Exact-projected Farkas certificates"
+            ],
+            [
+              "Unknown fixed-\u03b3 rows",
+              "93",
+              "Missing, numerical, unfinished, or resource-limited"
+            ]
+          ]
+        },
+        {
+          "kind": "note",
+          "label": "Resource result",
+          "style": "pending",
+          "text": "Complete nmax=2 (L,d)=(1,2) assembled but exhausted 192\u2013237 GiB in every Clarabel factorization route (MKL and QDLDL). Complete hard-core (1,3) and (2,2) solves also exhausted 192 GiB. These are explicit UNKNOWN outcomes, not missing rows. Optimized TS2 dry assemblies and unfinished extended-geometry cells were still running at this snapshot. Only fetched rows that already passed the independent checker are included in the claims above."
+        }
+      ],
+      "note": "Snapshot 2026-07-30T16:47:41+08:00; only independently accepted statements appear as results.",
+      "title": "Results"
+    },
+    {
+      "blocks": [
+        {
+          "blocks": [
+            {
+              "kind": "text",
+              "text": "The implementation specializes the thermodynamic hierarchy to finite truncated-boson matrix algebras without using infinite-dimensional CCR relations. It combines a shared exact algebra engine, two auditable degree filtrations, exact charge blocks, deterministic nested TS2 sparsity, and an independent Q(\u221a2,\u221a3)/Arb certificate checker in one reusable Julia/JuMP core."
+            }
+          ],
+          "kind": "card",
+          "title": "What's innovative"
+        },
+        {
+          "blocks": [
+            {
+              "kind": "text",
+              "text": "The attempt advances beyond a solver-only demonstration: every reported gap exclusion can be replayed as an exact coefficient identity with rigorous cone checks. It establishes a certified hard-core baseline on all five {8,3} points and a P2 comparison on all three geometries, while making the remaining computational limits explicit."
+            }
+          ],
+          "kind": "card",
+          "title": "Significance of the output"
+        },
+        {
+          "blocks": [
+            {
+              "kind": "text",
+              "text": "The algebra, hierarchy assembly, and checker are graph- and cutoff-aware rather than tied to one lattice. They provide a foundation for certified thermodynamic studies of other finite-cutoff bosonic Hamiltonians and a clear interface for stronger sparsity or commercial conic solvers."
+            }
+          ],
+          "kind": "card",
+          "title": "Broader impact"
+        },
+        {
+          "items": [
+            "Complete the nested hard-core (1,3) and (2,2) numerical levels or introduce a formally justified stronger reduction.",
+            "Finish the mandatory cutoff-two complete/TS2 grid; run cutoff three only if its recorded resource gate passes.",
+            "Add the prescribed ladder-encoding and unrestricted-state comparisons.",
+            "Run the pinned upstream Ising reference when a Mosek license becomes available.",
+            "Re-run the aggregate and this submission builder after every fetched HPC checkpoint; never promote floating values silently."
+          ],
+          "kind": "list",
+          "title": "What is still required for full acceptance"
+        },
+        {
+          "kind": "code",
+          "text": "make final-report",
+          "title": "Rebuild the audited report"
+        }
+      ],
+      "note": "What this attempt contributes, and what remains before the issue is complete.",
+      "title": "Highlight"
+    }
+  ],
+  "title": "Certified bulk-gap bounds for truncated Bose\u2013Hubbard models",
+  "url": "https://github.com/QuantumBFS/quantum.harness/issues/92"
+}

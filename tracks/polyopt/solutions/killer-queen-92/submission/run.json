@@ -1,0 +1,108 @@
+{
+  "estimate": [
+    {
+      "memory": "64 GiB allocation",
+      "run_point": "hard-core complete (1,2)",
+      "wall_time": "minutes per \u03b3 trial"
+    },
+    {
+      "memory": "192 GiB; OOM",
+      "run_point": "hard-core nested levels",
+      "wall_time": "attempted"
+    },
+    {
+      "memory": "192\u2013237 GiB; OOM",
+      "run_point": "cutoff-two complete (1,2)",
+      "wall_time": "assembled in ~160 s"
+    }
+  ],
+  "figures": [
+    {
+      "id": "fixed-gap-map",
+      "plots": "Fixed-\u03b3 classifications across available Target-2 cells",
+      "results": {
+        "figure": "assets/fixed_gamma_status.png",
+        "match": "partial",
+        "numbers": {
+          "accepted_intervals": 2,
+          "accepted_one_sided_objectives": 26,
+          "certified_gap_upper_statements": 9,
+          "durable_fixed_gamma_rows": 146,
+          "exact_projected_observable_bounds": 3,
+          "feasible_fixed_gamma_rows": 64,
+          "fixed_gamma_rows": 205,
+          "floating_objectives": 100,
+          "interval_rows": 69,
+          "objective_errors": 8,
+          "observable_rows": 138,
+          "unknown_fixed_gamma_rows": 93,
+          "verified_excluded_fixed_gamma_rows": 48
+        },
+        "why": "Certified hard-core baseline subset; mandatory larger-cutoff/nested grid incomplete."
+      }
+    },
+    {
+      "id": "observable-endpoints",
+      "plots": "Accepted versus floating observable endpoints",
+      "results": {
+        "figure": "assets/working_endpoints_83_p2.png",
+        "match": "partial",
+        "numbers": {
+          "accepted_intervals": 2,
+          "accepted_objectives": 26
+        },
+        "why": "Two accepted intervals and 26 accepted one-sided endpoints; most numerical endpoints remain floating."
+      }
+    }
+  ],
+  "generated": "2026-07-30T16:47:41+08:00",
+  "issue": 92,
+  "method": {
+    "exact": "Exact-checked exclusions; finite hierarchy relaxation",
+    "name": "thermodynamic state-polynomial gap hierarchy",
+    "note": "The same canonical multiplication and adjoint engine serves both degree encodings. For each level, the code enumerates the complete state-polynomial moment basis, stationarity identities, covariance-corrected gap matrix, and the \u03c1\u2080, F\u2080, K\u2080 objectives. Solver infeasibility remains UNKNOWN until the separately implemented checker reconstructs the exact coefficient identity and verifies every cone.",
+    "settings": "matrix encoding, complete basis, U(1)-invariant states; headline level nmax=1, (L,d)=(1,2)",
+    "tool": "Julia/JuMP with Clarabel/Mosek interfaces and an independent exact checker"
+  },
+  "model": {
+    "U": 1,
+    "cutoffs_requested": [
+      1,
+      2,
+      3
+    ],
+    "graphs": [
+      "{8,3}",
+      "{12,4}",
+      "L({8,3})"
+    ],
+    "name": "occupation-truncated Bose-Hubbard model",
+    "points": {
+      "P1": {
+        "mu_over_U": 0.5,
+        "t_over_U": 0.03
+      },
+      "P2": {
+        "mu_over_U": 0.5,
+        "t_over_U": 0.05
+      },
+      "P3": {
+        "mu_over_U": 0.5,
+        "t_over_U": 0.06
+      },
+      "P4": {
+        "mu_over_U": 0.15,
+        "t_over_U": 0.03
+      },
+      "P5": {
+        "mu_over_U": 0.75,
+        "t_over_U": 0.03
+      }
+    },
+    "primary_symmetry": "U1_INVARIANT_KMS_STATES"
+  },
+  "schema": "quantum-harness-challenge-run-v1",
+  "source_manifest": "data_manifest.json",
+  "title": "Certified bulk-gap bounds for truncated Bose\u2013Hubbard models",
+  "url": "https://github.com/QuantumBFS/quantum.harness/issues/92"
+}

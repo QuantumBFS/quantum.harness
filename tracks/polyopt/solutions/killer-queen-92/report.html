@@ -1,0 +1,1053 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Issue 92 — Detailed Bulk-Gap SDP Research Report</title>
+  <style>
+    :root {
+      --ink: #18212b;
+      --muted: #5b6877;
+      --paper: #f6f3ec;
+      --panel: #fffdf8;
+      --line: #d9d3c7;
+      --navy: #183a56;
+      --teal: #0c7c78;
+      --teal-soft: #dff3f0;
+      --orange: #d66b2c;
+      --orange-soft: #fae7d9;
+      --gold: #a66a00;
+      --gold-soft: #fff1c9;
+      --red: #a53838;
+      --red-soft: #fae0df;
+      --purple: #634e9c;
+      --purple-soft: #eee8fb;
+      --green: #2f754f;
+      --green-soft: #e1f2e7;
+      --shadow: 0 10px 28px rgba(24, 33, 43, 0.08);
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      --sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+      --serif: Charter, "Bitstream Charter", Georgia, serif;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(12,124,120,.10), transparent 34rem),
+        linear-gradient(180deg, #f9f7f1 0, var(--paper) 45rem);
+      font-family: var(--sans);
+      line-height: 1.62;
+    }
+    a { color: #075e79; text-decoration-thickness: .08em; text-underline-offset: .16em; }
+    a:hover { color: var(--orange); }
+    code, pre { font-family: var(--mono); }
+    code { font-size: .91em; }
+    pre {
+      margin: 1rem 0;
+      padding: 1rem 1.1rem;
+      overflow: auto;
+      color: #eaf5f3;
+      background: #142633;
+      border-radius: .65rem;
+      border: 1px solid #284454;
+    }
+    h1, h2, h3, h4 { line-height: 1.18; color: var(--navy); }
+    h1 { font-family: var(--serif); font-size: clamp(2.35rem, 5vw, 4.7rem); margin: .2rem 0 1rem; }
+    h2 { font-family: var(--serif); font-size: clamp(1.8rem, 3vw, 2.65rem); margin: 0 0 1.2rem; }
+    h3 { font-size: 1.25rem; margin: 1.8rem 0 .65rem; }
+    h4 { margin: 1.15rem 0 .45rem; }
+    p { margin: .7rem 0 1rem; }
+    ul, ol { padding-left: 1.35rem; }
+    li + li { margin-top: .32rem; }
+    strong { color: #102f45; }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 17rem minmax(0, 1fr);
+      min-height: 100vh;
+    }
+    .sidebar {
+      position: sticky;
+      top: 0;
+      align-self: start;
+      height: 100vh;
+      padding: 1.5rem 1.2rem;
+      overflow-y: auto;
+      color: #eaf4f3;
+      background: linear-gradient(165deg, #17384e, #102633 68%, #173f45);
+      border-right: 1px solid rgba(255,255,255,.09);
+    }
+    .sidebar .mark {
+      width: 2.8rem;
+      height: 2.8rem;
+      display: grid;
+      place-items: center;
+      margin-bottom: .8rem;
+      border-radius: 50%;
+      font-family: var(--serif);
+      font-size: 1.2rem;
+      font-weight: 700;
+      background: var(--orange);
+      box-shadow: 0 0 0 .35rem rgba(214,107,44,.18);
+    }
+    .sidebar h2 { margin: 0; color: white; font-family: var(--sans); font-size: 1rem; }
+    .sidebar p { color: #b9cecf; font-size: .82rem; }
+    .sidebar nav { margin-top: 1.2rem; }
+    .sidebar nav a {
+      display: block;
+      padding: .44rem .65rem;
+      color: #d9e8e7;
+      border-left: 2px solid transparent;
+      text-decoration: none;
+      font-size: .87rem;
+      border-radius: 0 .35rem .35rem 0;
+    }
+    .sidebar nav a:hover {
+      color: white;
+      background: rgba(255,255,255,.07);
+      border-left-color: var(--orange);
+    }
+    .sidebar .mini-links { margin-top: 1.4rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,.12); }
+    .sidebar .mini-links a { display: inline-block; margin: .2rem .35rem .2rem 0; color: #9fe0d7; font-size: .76rem; }
+
+    main { min-width: 0; }
+    .hero {
+      min-height: 40rem;
+      display: grid;
+      align-content: center;
+      padding: 5rem clamp(1.3rem, 5vw, 5rem) 4rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::after {
+      content: "";
+      position: absolute;
+      right: -10rem;
+      top: 4rem;
+      width: 30rem;
+      height: 30rem;
+      border: 1px solid rgba(12,124,120,.22);
+      border-radius: 50%;
+      box-shadow:
+        0 0 0 3rem rgba(12,124,120,.035),
+        0 0 0 7rem rgba(214,107,44,.025);
+      pointer-events: none;
+    }
+    .eyebrow {
+      color: var(--teal);
+      font-size: .78rem;
+      font-weight: 800;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+    .hero .subtitle { max-width: 54rem; color: var(--muted); font-family: var(--serif); font-size: 1.3rem; }
+    .badges { display: flex; flex-wrap: wrap; gap: .55rem; margin: 1.4rem 0 1.6rem; }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: .38rem;
+      padding: .34rem .68rem;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      font-size: .78rem;
+      font-weight: 750;
+      background: rgba(255,255,255,.72);
+    }
+    .badge::before { content: ""; width: .52rem; height: .52rem; border-radius: 50%; background: var(--teal); }
+    .badge.warn::before { background: var(--gold); }
+    .badge.diag::before { background: var(--purple); }
+    .hero-actions { display: flex; flex-wrap: wrap; gap: .75rem; }
+    .button {
+      display: inline-block;
+      padding: .7rem 1rem;
+      border-radius: .5rem;
+      font-weight: 750;
+      text-decoration: none;
+      color: white;
+      background: var(--navy);
+      box-shadow: var(--shadow);
+    }
+    .button.secondary { color: var(--navy); background: white; border: 1px solid var(--line); }
+
+    .section {
+      padding: 4.2rem clamp(1.3rem, 5vw, 5rem);
+      border-top: 1px solid rgba(117,109,95,.16);
+    }
+    .section.alt { background: rgba(255,255,255,.42); }
+    .section-intro { max-width: 57rem; color: var(--muted); font-size: 1.06rem; }
+    .kicker { margin-bottom: .55rem; color: var(--orange); font-size: .76rem; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: .85rem;
+      margin-top: 2rem;
+    }
+    .metric {
+      padding: 1.1rem;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: .7rem;
+      box-shadow: 0 4px 15px rgba(24,33,43,.04);
+    }
+    .metric .value { display: block; color: var(--navy); font-family: var(--serif); font-size: 2rem; font-weight: 750; line-height: 1; }
+    .metric .label { display: block; margin-top: .45rem; color: var(--muted); font-size: .78rem; }
+
+    .callout {
+      margin: 1.2rem 0;
+      padding: 1rem 1.15rem;
+      border-left: .3rem solid var(--teal);
+      background: var(--teal-soft);
+      border-radius: 0 .55rem .55rem 0;
+    }
+    .callout.warning { border-left-color: var(--gold); background: var(--gold-soft); }
+    .callout.danger { border-left-color: var(--red); background: var(--red-soft); }
+    .callout.diagnostic { border-left-color: var(--purple); background: var(--purple-soft); }
+    .callout p:last-child { margin-bottom: 0; }
+
+    .equation {
+      margin: 1.4rem 0;
+      padding: 1.2rem;
+      overflow-x: auto;
+      text-align: center;
+      font-family: var(--serif);
+      font-size: clamp(1rem, 2vw, 1.3rem);
+      background: #fffdf9;
+      border: 1px solid var(--line);
+      border-radius: .6rem;
+    }
+    .equation small { display: block; margin-top: .55rem; color: var(--muted); font-family: var(--sans); font-size: .72rem; }
+
+    .grid-2, .grid-3 {
+      display: grid;
+      gap: 1rem;
+    }
+    .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .card {
+      min-width: 0;
+      padding: 1.15rem;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: .72rem;
+      box-shadow: 0 5px 18px rgba(24,33,43,.04);
+    }
+    .card h3 { margin-top: 0; }
+    .card .overline { color: var(--teal); font-size: .7rem; font-weight: 800; letter-spacing: .11em; text-transform: uppercase; }
+
+    .flow {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: .65rem;
+      align-items: stretch;
+      margin: 1.7rem 0;
+    }
+    .flow .step {
+      position: relative;
+      padding: 1rem .8rem;
+      text-align: center;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: .65rem;
+      font-size: .82rem;
+    }
+    .flow .step:not(:last-child)::after {
+      content: "→";
+      position: absolute;
+      right: -.58rem;
+      top: 42%;
+      z-index: 2;
+      color: var(--orange);
+      font-size: 1.15rem;
+      font-weight: 800;
+    }
+    .flow strong { display: block; margin-bottom: .3rem; }
+
+    .table-wrap { overflow-x: auto; margin: 1rem 0 1.5rem; border: 1px solid var(--line); border-radius: .65rem; background: var(--panel); }
+    table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+    th, td { padding: .68rem .72rem; text-align: left; border-bottom: 1px solid var(--line); vertical-align: top; }
+    th { color: #143b52; background: #eaf2f0; font-size: .74rem; letter-spacing: .035em; text-transform: uppercase; }
+    tr:last-child td { border-bottom: 0; }
+    tbody tr:hover { background: rgba(12,124,120,.035); }
+    td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+    .status {
+      display: inline-block;
+      white-space: nowrap;
+      padding: .18rem .48rem;
+      border-radius: 999px;
+      font-size: .69rem;
+      font-weight: 800;
+    }
+    .status.done, .status.clean { color: var(--green); background: var(--green-soft); }
+    .status.partial, .status.warn { color: #845700; background: var(--gold-soft); }
+    .status.unknown { color: var(--red); background: var(--red-soft); }
+    .status.diagnostic { color: var(--purple); background: var(--purple-soft); }
+
+    .lattice-card svg { width: 100%; height: 12rem; display: block; }
+    .edge { stroke: #526875; stroke-width: 3; }
+    .site { fill: #2c8b87; stroke: white; stroke-width: 3; }
+    .root { fill: var(--orange); stroke: white; stroke-width: 4; }
+    .lattice-card .caption { color: var(--muted); font-size: .81rem; }
+
+    .timeline { position: relative; margin: 1.5rem 0 0 1rem; padding-left: 2rem; border-left: 2px solid #a9c9c5; }
+    .timeline article { position: relative; margin: 0 0 1.5rem; padding: .1rem 0 .2rem; }
+    .timeline article::before {
+      content: "";
+      position: absolute;
+      left: -2.52rem;
+      top: .3rem;
+      width: .9rem;
+      height: .9rem;
+      border-radius: 50%;
+      background: var(--teal);
+      border: 3px solid var(--paper);
+    }
+    .timeline h3 { margin: 0 0 .3rem; font-size: 1rem; }
+    .timeline p { color: var(--muted); font-size: .88rem; margin: .3rem 0; }
+
+    .bar-row { display: grid; grid-template-columns: 8rem 1fr 4rem; gap: .7rem; align-items: center; margin: .55rem 0; font-size: .82rem; }
+    .bar-track { display: flex; height: 1.05rem; overflow: hidden; border-radius: 999px; background: #ece8de; }
+    .bar { height: 100%; }
+    .bar.opt { background: var(--green); }
+    .bar.inacc { background: #e4a632; }
+    .bar.err { background: #c34d4d; }
+
+    figure { margin: 1.2rem 0; }
+    figure img { width: 100%; display: block; border: 1px solid var(--line); border-radius: .7rem; background: white; box-shadow: var(--shadow); }
+    figcaption { margin-top: .55rem; color: var(--muted); font-size: .78rem; }
+
+    details { margin: .7rem 0; background: var(--panel); border: 1px solid var(--line); border-radius: .55rem; }
+    summary { cursor: pointer; padding: .75rem .9rem; color: var(--navy); font-weight: 750; }
+    details > div { padding: 0 .9rem .9rem; }
+
+    .artifact-list { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: .6rem; padding: 0; list-style: none; }
+    .artifact-list a { display: block; padding: .7rem .8rem; background: var(--panel); border: 1px solid var(--line); border-radius: .5rem; text-decoration: none; }
+
+    .footer { padding: 3rem clamp(1.3rem, 5vw, 5rem); color: #c5d6d6; background: #132b38; }
+    .footer a { color: #8eddd2; }
+    .footer p { max-width: 55rem; }
+
+    @media (max-width: 1050px) {
+      .layout { grid-template-columns: 1fr; }
+      .sidebar { position: relative; height: auto; }
+      .sidebar nav { columns: 2; }
+      .metrics { grid-template-columns: repeat(2, minmax(0,1fr)); }
+      .flow { grid-template-columns: 1fr; }
+      .flow .step:not(:last-child)::after { content: "↓"; right: 50%; top: auto; bottom: -.72rem; }
+    }
+    @media (max-width: 720px) {
+      .grid-2, .grid-3, .metrics, .artifact-list { grid-template-columns: 1fr; }
+      .sidebar nav { columns: 1; }
+      .section { padding-top: 3rem; padding-bottom: 3rem; }
+      .hero { min-height: auto; padding-top: 3rem; }
+      .bar-row { grid-template-columns: 5.5rem 1fr 3rem; }
+    }
+    @media print {
+      .layout { display: block; }
+      .sidebar { display: none; }
+      .hero, .section { padding: 1.2rem 0; }
+      body { background: white; }
+      .card, .metric, figure img { box-shadow: none; break-inside: avoid; }
+      a { color: inherit; }
+    }
+  </style>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="mark">92</div>
+    <h2>Bulk-gap SDP study</h2>
+    <p>Truncated Bose–Hubbard models on hyperbolic lattices · detailed research record · updated 29 July 2026</p>
+    <nav aria-label="Report sections">
+      <a href="#summary">Executive summary</a>
+      <a href="#question">Scientific question</a>
+      <a href="#method">Algorithm</a>
+      <a href="#lattices">Lattices</a>
+      <a href="#progress">Progress ledger</a>
+      <a href="#software">Software survey</a>
+      <a href="#implementation">Implementation</a>
+      <a href="#validation">Validation</a>
+      <a href="#atomic">Atomic result</a>
+      <a href="#thermodynamic">Thermodynamic SDP</a>
+      <a href="#observables">Observable bounds</a>
+      <a href="#ed">Finite ED</a>
+      <a href="#numerics">Numerical audit</a>
+      <a href="#roadmap">Roadmap</a>
+      <a href="#reproduce">Reproduce</a>
+      <a href="#sources">Sources</a>
+    </nav>
+    <div class="mini-links">
+      <a href="PHYSICS_TALK.html">physics talk</a>
+      <a href="status.md">central status</a>
+      <a href="agent.md">agent.md</a>
+      <a href="ALGORITHM.md">algorithm</a>
+      <a href="SURVEY.md">survey</a>
+      <a href="REPORT.md">Markdown report</a>
+    </div>
+  </aside>
+
+  <main>
+    <header class="hero" id="summary">
+      <div class="eyebrow">Quantum Harness · issue #92 · research stage I</div>
+      <h1>Certified bulk-gap bounds<br>for truncated bosons</h1>
+      <p class="subtitle">
+        A detailed account of the algorithm, software landscape, exact cutoff
+        algebra, hyperbolic graph construction, first thermodynamic
+        state-polynomial relaxation, finite-patch diagnostics, numerical audit,
+        the implemented Julia hierarchy, finite-patch diagnostics, numerical
+        audit, and the remaining path to verified production results.
+      </p>
+      <div class="badges">
+        <span class="badge">8 Python + 45 Julia checks pass</span>
+        <span class="badge">90-gap / 1,620-observable manifest</span>
+        <span class="badge warn">U(1)-restricted SDP</span>
+        <span class="badge warn">production certificates pending</span>
+        <span class="badge diag">54 finite ED diagnostics</span>
+      </div>
+      <div class="hero-actions">
+        <a class="button" href="PHYSICS_TALK.html">Start with the physics talk</a>
+        <a class="button secondary" href="agent.md">Open progress ledger</a>
+        <a class="button secondary" href="REPORT.md">Read technical Markdown</a>
+        <a class="button secondary" href="https://github.com/QuantumBFS/quantum.harness/issues/92">Open issue #92</a>
+      </div>
+
+      <div class="metrics">
+        <div class="metric"><span class="value">0.5</span><span class="label">exact atomic gap reproduced</span></div>
+        <div class="metric"><span class="value">90</span><span class="label">mandatory primary Γ endpoints manifested</span></div>
+        <div class="metric"><span class="value">1,620</span><span class="label">mandatory primary observable optima manifested</span></div>
+        <div class="metric"><span class="value">54</span><span class="label">exact finite-patch ED rows</span></div>
+      </div>
+    </header>
+
+    <section class="section alt" id="question">
+      <div class="kicker">The question</div>
+      <h2>What did we actually try to certify?</h2>
+      <p class="section-intro">
+        The target is not a lower bound on the ground-state energy of a finite
+        Hamiltonian. It is a decreasing sequence of upper bounds on a locally
+        non-degenerate spectral gap in the infinite lattice, obtained by
+        excluding hypothesized gaps with state-polynomial SDP infeasibility.
+      </p>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="overline">Ordinary moment SDP</div>
+          <h3>Finite ground-energy relaxation</h3>
+          <div class="equation">min ℒ(H) &nbsp; subject to &nbsp; ℒ(1)=1, M<sub>d</sub>(ℒ) ⪰ 0</div>
+          <p>Every physical state is feasible, so the objective gives a lower bound on the modeled ground energy.</p>
+          <span class="status diagnostic">not the target method</span>
+        </div>
+        <div class="card">
+          <div class="overline">Issue #92 method</div>
+          <h3>Infinite-volume assumed-gap feasibility</h3>
+          <div class="equation">ω(a†[H,a]) ≥ γ [ ω(a†a) − |ω(a)|² ]</div>
+          <p>At fixed γ, exact infeasibility excludes an infinite-volume state with gap at least γ.</p>
+          <span class="status clean">thermodynamic upper-bound direction</span>
+        </div>
+      </div>
+
+      <div class="callout warning">
+        <strong>The one-way rule:</strong> infeasible means “γ is excluded”; feasible means only
+        “not excluded at this finite relaxation.” A feasible point is never reported as a gap lower bound.
+      </div>
+    </section>
+
+    <section class="section" id="method">
+      <div class="kicker">Algorithm</div>
+      <h2>From a local commutator to an SDP</h2>
+      <p class="section-intro">
+        For local <em>a</em>, only finitely many Hamiltonian terms fail to commute
+        with it. The finite region is therefore a commutator window with a
+        buffer, not a finite sample whose boundary spectrum is extrapolated.
+      </p>
+
+      <div class="equation">
+        [H,a] = ∑<sub>X : X∩supp(a)≠∅</sub> [h<sub>X</sub>,a]
+        <small>The sum is finite for every local excitation, even though H is an infinite formal sum.</small>
+      </div>
+
+      <div class="flow" aria-label="Algorithm flow">
+        <div class="step"><strong>1 · Window</strong>rooted excitation support plus one interaction shell</div>
+        <div class="step"><strong>2 · Algebra</strong>exact finite matrix-unit canonicalization</div>
+        <div class="step"><strong>3 · Lift</strong>state symbols σ(w) and products of expectations</div>
+        <div class="step"><strong>4 · SDP</strong>moment, stationarity, covariance, and gap PSD blocks</div>
+        <div class="step"><strong>5 · Exclude</strong>fixed-γ infeasibility gives an upper-bound candidate</div>
+      </div>
+
+      <div class="grid-2">
+        <div>
+          <h3>Why state polynomials are necessary</h3>
+          <p>The variance contains the nonlinear quantity |ω(a)|². Introduce a commuting symbol σ(w) for each operator expectation and let a second linear functional act on products σ(u)σ(v). At fixed γ, the lifted entries are affine.</p>
+        </div>
+        <div>
+          <h3>Finite-level certificate direction</h3>
+          <p>Every genuine gapped infinite-volume state maps to a feasible pseudo-moment point. Omitting higher constraints only enlarges the feasible set. Therefore exact infeasibility remains sound even for a weak outer relaxation.</p>
+        </div>
+      </div>
+
+      <div class="callout danger">
+        <strong>Numerical caveat:</strong> the mathematical implication of exact
+        SDP infeasibility is rigorous. A floating Clarabel status is not yet a
+        machine-checkable proof; the project does not hide that distinction.
+      </div>
+    </section>
+
+    <section class="section alt" id="lattices">
+      <div class="kicker">Geometry</div>
+      <h2>The three hyperbolic lattice windows</h2>
+      <p class="section-intro">
+        The exact radius-one templates were checked against genuine graphs
+        generated with <code>hypertiling</code>. The site graph of {p,q} is
+        obtained as the cell-adjacency graph of its dual {q,p}.
+      </p>
+
+      <div class="grid-3">
+        <div class="card lattice-card">
+          <div class="overline">degree 3 · no local triangle</div>
+          <h3>{8,3}</h3>
+          <svg viewBox="0 0 220 180" role="img" aria-label="Radius-one star of the 8,3 tiling">
+            <line class="edge" x1="110" y1="88" x2="110" y2="25"/>
+            <line class="edge" x1="110" y1="88" x2="43" y2="132"/>
+            <line class="edge" x1="110" y1="88" x2="177" y2="132"/>
+            <circle class="root" cx="110" cy="88" r="15"/>
+            <circle class="site" cx="110" cy="25" r="12"/>
+            <circle class="site" cx="43" cy="132" r="12"/>
+            <circle class="site" cx="177" cy="132" r="12"/>
+          </svg>
+          <p class="caption">4 sites, 3 edges, girth 8 in the infinite graph.</p>
+        </div>
+
+        <div class="card lattice-card">
+          <div class="overline">degree 4 · no local triangle</div>
+          <h3>{12,4}</h3>
+          <svg viewBox="0 0 220 180" role="img" aria-label="Radius-one star of the 12,4 tiling">
+            <line class="edge" x1="110" y1="90" x2="110" y2="25"/>
+            <line class="edge" x1="110" y1="90" x2="110" y2="155"/>
+            <line class="edge" x1="110" y1="90" x2="42" y2="90"/>
+            <line class="edge" x1="110" y1="90" x2="178" y2="90"/>
+            <circle class="root" cx="110" cy="90" r="15"/>
+            <circle class="site" cx="110" cy="25" r="12"/>
+            <circle class="site" cx="110" cy="155" r="12"/>
+            <circle class="site" cx="42" cy="90" r="12"/>
+            <circle class="site" cx="178" cy="90" r="12"/>
+          </svg>
+          <p class="caption">5 sites, 4 edges, girth 12 in the infinite graph.</p>
+        </div>
+
+        <div class="card lattice-card">
+          <div class="overline">degree 4 · two root triangles</div>
+          <h3>L({8,3})</h3>
+          <svg viewBox="0 0 220 180" role="img" aria-label="Radius-one window of the line graph of the 8,3 tiling">
+            <line class="edge" x1="110" y1="90" x2="55" y2="40"/>
+            <line class="edge" x1="110" y1="90" x2="35" y2="105"/>
+            <line class="edge" x1="55" y1="40" x2="35" y2="105"/>
+            <line class="edge" x1="110" y1="90" x2="165" y2="40"/>
+            <line class="edge" x1="110" y1="90" x2="185" y2="105"/>
+            <line class="edge" x1="165" y1="40" x2="185" y2="105"/>
+            <circle class="root" cx="110" cy="90" r="15"/>
+            <circle class="site" cx="55" cy="40" r="12"/>
+            <circle class="site" cx="35" cy="105" r="12"/>
+            <circle class="site" cx="165" cy="40" r="12"/>
+            <circle class="site" cx="185" cy="105" r="12"/>
+          </svg>
+          <p class="caption">5 sites, 6 edges; line-graph construction creates two local triangles.</p>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>radius</th><th class="num">{8,3} nodes</th><th class="num">{12,4} nodes</th><th class="num">L({8,3}) nodes</th><th>interpretation</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td class="num">4</td><td class="num">5</td><td class="num">5</td><td>exact local templates used for SDP and ED</td></tr>
+            <tr><td>2</td><td class="num">10</td><td class="num">17</td><td class="num">13</td><td>first larger geometry/scaling level</td></tr>
+            <tr><td>3</td><td class="num">22</td><td class="num">53</td><td class="num">29</td><td>outer shell already contains a majority of sites</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout diagnostic">
+        <strong>Why open ED is especially limited here:</strong> at radius three,
+        the outer shell contains 12/22, 36/53, and 16/29 sites. Boundary effects
+        are extensive at these sizes, whereas the local-commutator SDP never
+        inserts a physical boundary condition.
+      </div>
+    </section>
+
+    <section class="section" id="progress">
+      <div class="kicker">Tracking</div>
+      <h2>What has been completed, step by step</h2>
+      <p class="section-intro">The living version of this record is <a href="agent.md"><code>agent.md</code></a>. Each stage below has an explicit evidence artifact and claim boundary.</p>
+
+      <div class="timeline">
+        <article><h3>M1 · Certificate direction <span class="status done">done</span></h3><p>Separated bulk-gap infeasibility from finite ground-energy minimization; wrote the derivation and convergence logic.</p></article>
+        <article><h3>M2 · Software survey <span class="status done">done</span></h3><p>Inspected released spectral-gap/state-polynomial code and mature component tools; no end-to-end cutoff-boson package found.</p></article>
+        <article><h3>M3 · Exact cutoff algebra <span class="status done">done</span></h3><p>Implemented matrix units, corrected commutator, nilpotency, and observables for nmax 1–3.</p></article>
+        <article><h3>M4 · Hyperbolic graphs <span class="status done">done</span></h3><p>Implemented exact local templates, dual-tiling generation, line graph, and scaling summaries.</p></article>
+        <article><h3>M5 · Atomic state SDP <span class="status done">done</span></h3><p>Built the smallest genuine lifted variance SDP and recovered the exact atomic threshold.</p></article>
+        <article><h3>M6 · Rooted thermodynamic SDP <span class="status diagnostic">diagnostic</span></h3><p>Implemented a valid root-excitation outer test and retained it as a regression diagnostic; it is not labelled as a complete hierarchy level.</p></article>
+        <article><h3>M7 · Finite ED <span class="status diagnostic">diagnostic</span></h3><p>Ran exact number-sector radius-one spectra for signs, cutoffs, and observables only.</p></article>
+        <article><h3>M8 · Requested scans <span class="status done">done at level 1</span></h3><p>Completed 135 fixed-gap rooted models and 54 ED rows across both parameter scans.</p></article>
+        <article><h3>M9 · Numerical audit <span class="status done">done</span></h3><p>Added covariance positivity after nestedness review, regenerated all rooted results, and preserved unknown/inaccurate rows.</p></article>
+        <article><h3>M10 · Complete matrix hierarchy engine <span class="status done">implemented</span></h3><p>Added exact Q(√2,√3) algebra, complete Definition 2.4 state monomials, charge blocks, stationarity and gap matrices, TS2, and JuMP interfaces.</p></article>
+        <article><h3>M11 · Campaign and certificate infrastructure <span class="status done">implemented</span></h3><p>Generated the 90-gap/1,620-observable primary manifest, resumable SCNet cells, and disjoint exact exclusion/lower/upper round-project checks with 256-bit Arb signs.</p></article>
+        <article><h3>N1 · SCNet resource gate and production run <span class="status warn">active</span></h3><p>All nine hard-core expression levels, eight hard-core JuMP models, and the exact atomic certificates are complete. A baseline Clarabel gap pilot remained UNKNOWN at γ=1; the pinned reference and production campaign remain blocked on a valid Mosek license.</p></article>
+      </div>
+    </section>
+
+    <section class="section alt" id="software">
+      <div class="kicker">Survey</div>
+      <h2>Mature pieces, no mature complete tool</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>layer</th><th>tool</th><th>usable now</th><th>missing for issue #92</th><th>assessment</th></tr></thead>
+          <tbody>
+            <tr><td>bulk-gap hierarchy</td><td><a href="https://github.com/wangjie212/SpectralGap">SpectralGap.jl 0.3</a></td><td>state-polynomial gap blocks, fixed-γ tests, spin symmetries</td><td>finite-matrix boson backend, robust status/certificate API</td><td><span class="status partial">closest research code</span></td></tr>
+            <tr><td>state polynomials</td><td><a href="https://github.com/QuantumSOS/NCTSSoS.jl">NCTSSoS.jl 0.1</a></td><td>typed algebras, state/trace polynomials, JuMP/Clarabel</td><td>inspected state optimizer admits monoid rather than required quotient/PBW algebra</td><td><span class="status partial">promising extension point</span></td></tr>
+            <tr><td>ordinary NC SDP</td><td><a href="https://github.com/peterwittek/ncpol2sdpa">ncpol2sdpa</a></td><td>mature noncommutative moment relaxation generator</td><td>nonlinear state-symbol lifting and thermodynamic gap localizer</td><td><span class="status diagnostic">different SDP</span></td></tr>
+            <tr><td>geometry</td><td><a href="https://git.physik.uni-wuerzburg.de/hypertiling/hypertiling">hypertiling</a></td><td>regular hyperbolic tilings and adjacency at scale</td><td>rooted canonicalization and line-graph conversion</td><td><span class="status clean">mature component</span></td></tr>
+            <tr><td>finite ED</td><td><a href="https://quspin.github.io/QuSpin/generated/quspin.basis.boson_basis_general.html">QuSpin</a> / local SciPy code</td><td>cutoff bosons, sectors, sparse diagonalization</td><td>thermodynamic certificate direction</td><td><span class="status clean">mature diagnostic</span></td></tr>
+            <tr><td>SDP infrastructure</td><td>CVXPY/JuMP + Clarabel/Mosek</td><td>PSD modeling and numerical solution</td><td>problem generator and verified infeasibility checker</td><td><span class="status clean">mature infrastructure</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout">
+        <strong>Slides/tutorial search:</strong> no public copy of Jie Wang's 28
+        July 2026 slides was found. The closest public short tutorial is the
+        <a href="https://wangjie212.github.io/NCTSSOS/dev/state/">NCTSSOS state-polynomial example</a>;
+        the paper's Supplementary §2 remains the authoritative algorithm source.
+      </div>
+    </section>
+
+    <section class="section" id="implementation">
+      <div class="kicker">Code</div>
+      <h2>Implementation architecture and scientific boundaries</h2>
+
+      <div class="grid-3">
+        <div class="card">
+          <div class="overline">thermodynamic · paper-defined</div>
+          <h3>Julia hierarchy</h3>
+          <p>Complete matrix-degree state-polynomial levels, U(1) charge blocks, TS2 sparse levels, observables, bisection, and dual checking.</p>
+          <p><a href="julia/src/QuantumGapHierarchy.jl"><code>julia/src/</code></a></p>
+        </div>
+        <div class="card">
+          <div class="overline">thermodynamic · exact benchmark</div>
+          <h3>Atomic SDP</h3>
+          <p>Occupation probabilities p, lifted products P, state moment PSD, diagonal variance PSD, and charged matrix-unit excitation inequalities.</p>
+          <p><a href="src/issue92/atomic_sdp.py"><code>atomic_sdp.py</code></a></p>
+        </div>
+        <div class="card">
+          <div class="overline">thermodynamic · first outer level</div>
+          <h3>Root-local outer test</h3>
+          <p>Exact root commutator, operator moments, stationarity, state lift, covariance PSD, gap PSD, and observable optimization.</p>
+          <p><a href="src/issue92/rooted_sdp.py"><code>rooted_sdp.py</code></a></p>
+        </div>
+        <div class="card">
+          <div class="overline">finite-open diagnostic</div>
+          <h3>Number-sector ED</h3>
+          <p>Exact cutoff Hamiltonian in every total-number sector, global two-level search, and root observables.</p>
+          <p><a href="src/issue92/ed.py"><code>ed.py</code></a></p>
+        </div>
+      </div>
+
+      <h3>The cutoff algebra trap</h3>
+      <div class="callout">
+        <strong>Formal versus practical levels:</strong> <code>COMPLETE</code>
+        contains every Definition 2.4 monomial in the declared matrix-degree
+        truncation. <code>TS2</code> performs two deterministic support/chordal
+        closure iterations and retains lower-level edges; it is a practical
+        sparse principal-submatrix relaxation, not formal completeness. An
+        excluded γ would rule out a U(1)-invariant KMS ground state with gap at
+        least γ. A feasible row proves no gap, and an unchecked floating
+        infeasibility remains <code>UNKNOWN</code>.
+      </div>
+      <div class="equation">
+        [b,b†] = I − (n<sub>max</sub>+1)|n<sub>max</sub>⟩⟨n<sub>max</sub>| &nbsp; ≠ &nbsp; I
+        <small>An infinite CCR simplifier models the wrong problem at the cutoff boundary.</small>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>module</th><th>responsibility</th><th>claim type</th><th>current limitation</th></tr></thead>
+          <tbody>
+            <tr><td><a href="src/issue92/local_algebra.py">local_algebra.py</a></td><td>one-site matrices and exact cutoff identities</td><td>algebra validation</td><td>none at nmax ≤ 3</td></tr>
+            <tr><td><a href="src/issue92/graphs.py">graphs.py</a></td><td>exact local templates and genuine hyperbolic balls</td><td>geometry</td><td>boundary nodes incomplete by construction</td></tr>
+            <tr><td><a href="src/issue92/atomic_sdp.py">atomic_sdp.py</a></td><td>smallest lifted gap SDP</td><td>U(1)-restricted atomic thermodynamic test</td><td>no hopping/lattice</td></tr>
+            <tr><td><a href="src/issue92/rooted_sdp.py">rooted_sdp.py</a></td><td>root commutator thermodynamic outer SDP</td><td>U(1)-restricted thermodynamic exclusion</td><td>weak subset, radius one, floating certificate</td></tr>
+            <tr><td><a href="src/issue92/ed.py">ed.py</a></td><td>finite spectra and observables</td><td>exact open-patch diagnostic</td><td>not thermodynamic</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="section alt" id="validation">
+      <div class="kicker">Verification</div>
+      <h2>Seventeen Python tests, 546 Julia assertions, and a correction caught by nestedness</h2>
+      <div class="grid-2">
+        <div class="card">
+          <h3>Last accepted suite <span class="status done">563/563 pass</span></h3>
+          <ol>
+            <li>cutoff commutator and nilpotency;</li>
+            <li>exact radius-one graph combinatorics;</li>
+            <li><code>hypertiling</code> radius-one isomorphism;</li>
+            <li>hopping sign and Hamiltonian Hermiticity;</li>
+            <li>atomic finite-patch benchmark;</li>
+            <li>atomic SDP transition around γ=0.5;</li>
+            <li>atomic SDP bisection;</li>
+            <li>root-local thermodynamic atomic threshold.</li>
+          </ol>
+          <p>The Python suite additionally checks stable larger graph balls, mandatory campaign and resource-tier counts, strict result classifications, and Slurm allocation parsing. The Julia assertions cover exact algebraic-field arithmetic, both declared degree encodings through cutoff three, complete state-monomial counts, charge blocks, commutator buffers, structural level embedding, geometry-sensitive fingerprints, resumable bisection, Clarabel primal/dual checks, pinned NCTSSoS toy counts, disjoint exact exclusion/lower/upper certificates, and corrupted-certificate rejection.</p>
+        </div>
+        <div class="card">
+          <h3>Consistency correction</h3>
+          <p>The first rooted draft placed lifted covariance inside the gap expression but did not impose covariance as a standalone PSD block.</p>
+          <p>A nestedness audit exposed the omission. The covariance PSD constraint and its minimum-eigenvalue diagnostic were added, and every rooted table was regenerated.</p>
+          <span class="status clean">corrected before final report</span>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>nmax</th><th class="num">commutator residual</th><th class="num">atomic ED gap</th><th class="num">atomic SDP threshold</th><th>outcome</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td class="num">0</td><td class="num">0.5</td><td class="num">[0.5, 0.5000009537)</td><td><span class="status done">pass</span></td></tr>
+            <tr><td>2</td><td class="num">4.44×10<sup>−16</sup></td><td class="num">0.5</td><td class="num">[0.5, 0.5000009537)</td><td><span class="status done">pass</span></td></tr>
+            <tr><td>3</td><td class="num">8.88×10<sup>−16</sup></td><td class="num">0.5</td><td class="num">[0.5, 0.5000009537)</td><td><span class="status done">pass</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="section" id="atomic">
+      <div class="kicker">Result 1</div>
+      <h2>Atomic state-polynomial SDP reproduces the exact gap</h2>
+      <p class="section-intro">At t=0, U=1, μ=0.5, the unique local ground occupation is n=1. The exact particle and hole excitation costs are both 0.5 for cutoffs at least two; the hard-core hole gap is also 0.5.</p>
+
+      <div class="equation">
+        0.5000000000 ≤ Γ<sub>atomic</sub> &lt; 0.5000009537
+        <small>same bracket for nmax = 1, 2, 3; width 9.54×10⁻⁷</small>
+      </div>
+
+      <div class="grid-3">
+        <div class="card"><div class="overline">density</div><h3>ρ<sub>0</sub> = 1</h3><p>Recovered for every cutoff and independent of geometry.</p></div>
+        <div class="card"><div class="overline">fluctuation</div><h3>F<sub>0</sub> = 0</h3><p>The occupation is exactly pinned to n=1 in the atomic ground state.</p></div>
+        <div class="card"><div class="overline">kinetic</div><h3>K<sub>0</sub> = 0</h3><p>No hopping is present in the atomic limit.</p></div>
+      </div>
+
+      <p>All atomic normalization residuals are below 4×10<sup>−11</sup>. Raw rows: <a href="results/atomic_sdp_runs.csv">atomic_sdp_runs.csv</a>; brackets: <a href="results/atomic_gap_brackets.csv">atomic_gap_brackets.csv</a>.</p>
+    </section>
+
+    <section class="section alt" id="thermodynamic">
+      <div class="kicker">Result 2</div>
+      <h2>Root-local thermodynamic outer test: complete grid, weak custom level</h2>
+      <p class="section-intro">
+        The requested fixed-gap scan comprises 3 geometries × 3 cutoffs × 5
+        distinct parameter points × 3 assumed gaps = 135 models. All statements
+        below refer to a U(1)-invariant state and floating solver evidence.
+      </p>
+
+      <div class="grid-2">
+        <div class="card">
+          <h3>Fixed γ = 0, 0.05, 0.10</h3>
+          <div class="bar-row"><span>nmax 1</span><div class="bar-track"><span class="bar opt" style="width:73.33%"></span><span class="bar inacc" style="width:26.67%"></span></div><strong>45</strong></div>
+          <div class="bar-row"><span>nmax 2</span><div class="bar-track"><span class="bar opt" style="width:37.78%"></span><span class="bar inacc" style="width:48.89%"></span><span class="bar err" style="width:13.33%"></span></div><strong>45</strong></div>
+          <div class="bar-row"><span>nmax 3</span><div class="bar-track"><span class="bar opt" style="width:15.56%"></span><span class="bar inacc" style="width:44.44%"></span><span class="bar err" style="width:40%"></span></div><strong>45</strong></div>
+          <p><span class="status clean">optimal 57</span> <span class="status warn">optimal_inaccurate 54</span> <span class="status unknown">unknown 24</span></p>
+        </div>
+        <div class="card">
+          <h3>Correct interpretation</h3>
+          <p>No usable fixed-gap row is infeasible at γ≤0.10. Therefore those assumed gaps are <strong>not excluded at this weak level</strong>.</p>
+          <p>This does not show that the physical gap exceeds 0.10. Two high-cutoff z=4 rows also have a material operator-moment violation of −3.73×10<sup>−6</sup> and are treated as unresolved.</p>
+          <a href="results/rooted_issue_fixed_gamma_scan.csv">Open all 135 rows</a>
+        </div>
+      </div>
+
+      <h3>Coarse higher-γ probe at t=0.06, μ=0.5</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>geometry</th><th>cutoff</th><th class="num">last sampled feasible</th><th class="num">first clean sampled infeasible</th><th>claim</th></tr></thead>
+          <tbody>
+            <tr><td>{8,3}</td><td>1</td><td class="num">0.5</td><td class="num">0.6</td><td><span class="status warn">floating Δ<sub>U(1)</sub> &lt; 0.6 candidate</span></td></tr>
+            <tr><td>{12,4}</td><td>1</td><td class="num">0.5</td><td class="num">0.8</td><td><span class="status warn">floating Δ<sub>U(1)</sub> &lt; 0.8 candidate</span></td></tr>
+            <tr><td>L({8,3})</td><td>1</td><td class="num">0.5</td><td class="num">0.8</td><td><span class="status warn">floating Δ<sub>U(1)</sub> &lt; 0.8 candidate</span></td></tr>
+            <tr><td>all</td><td>2, 3</td><td class="num">—</td><td class="num">—</td><td><span class="status unknown">no dependable clean bracket</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout warning">
+        The two z=4 hard-core models already return <code>infeasible_inaccurate</code>
+        at γ=0.6, but that endpoint is not promoted. Even the clean endpoints
+        above need a saved and independently verified dual certificate before
+        being called computer-certified bounds.
+      </div>
+    </section>
+
+    <section class="section" id="observables">
+      <div class="kicker">Result 3</div>
+      <h2>Local observable outer intervals</h2>
+      <p class="section-intro">At (t, μ, γ) = (0.06, 0.5, 0.1), optimizing over the same hard-core rooted relaxation gives the following floating outer intervals.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>geometry</th><th>ρ<sub>0</sub></th><th>F<sub>0</sub></th><th>K<sub>0</sub></th><th>quality note</th></tr></thead>
+          <tbody>
+            <tr><td>{8,3}</td><td>[0.9550, 1.0000]</td><td>[0, 0.0450]</td><td>[0, 0.3000]</td><td>some endpoints <code>optimal_inaccurate</code></td></tr>
+            <tr><td>{12,4}</td><td>[0.9200, 1.0000]</td><td>[0, 0.0800]</td><td>[0, 0.4000]</td><td>all endpoints <code>optimal</code></td></tr>
+            <tr><td>L({8,3})</td><td>[0.9200, 1.0000]</td><td>[0, 0.0800]</td><td>[0, 0.4000]</td><td>identical at radius one</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>The nmax=2 intervals are substantially looser; for example, {8,3} gives ρ<sub>0</sub>∈[0.9392,1.1611]. No nmax=3 objective interval is reported because the open-source solves are not dependable enough.</p>
+    </section>
+
+    <section class="section alt" id="ed">
+      <div class="kicker">Diagnostic result</div>
+      <h2>Exact finite radius-one spectra</h2>
+      <div class="callout diagnostic">
+        Every number in this section is an exact spectrum or expectation for a
+        finite open patch. It validates signs and trends; it is not a
+        thermodynamic bulk-gap certificate.
+      </div>
+
+      <div class="grid-2">
+        <figure>
+          <img src=".figures/finite_patch_gap_vs_t.png" alt="Finite open radius-one gaps versus hopping for three geometries and cutoffs">
+          <figcaption>Fixed μ=0.5. Increasing hopping reduces the finite-patch gap; the line-graph window is lowest at each soft-core point.</figcaption>
+        </figure>
+        <figure>
+          <img src=".figures/finite_patch_gap_vs_mu.png" alt="Finite open radius-one gaps versus chemical potential for three geometries and cutoffs">
+          <figcaption>Fixed t=0.03. The smaller endpoint gaps correspond to the nearer particle/hole boundary of the unit-filling lobe.</figcaption>
+        </figure>
+      </div>
+
+      <h3>nmax=3 finite gaps</h3>
+      <div class="grid-2">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>t at μ=0.5</th><th class="num">{8,3}</th><th class="num">{12,4}</th><th class="num">line graph</th></tr></thead>
+            <tbody>
+              <tr><td>0.03</td><td class="num">0.399100</td><td class="num">0.383430</td><td class="num">0.347447</td></tr>
+              <tr><td>0.05</td><td class="num">0.335728</td><td class="num">0.310382</td><td class="num">0.250538</td></tr>
+              <tr><td>0.06</td><td class="num">0.305373</td><td class="num">0.275531</td><td class="num">0.204805</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>μ at t=0.03</th><th class="num">{8,3}</th><th class="num">{12,4}</th><th class="num">line graph</th></tr></thead>
+            <tbody>
+              <tr><td>0.15</td><td class="num">0.103434</td><td class="num">0.096235</td><td class="num">0.077882</td></tr>
+              <tr><td>0.50</td><td class="num">0.399100</td><td class="num">0.383430</td><td class="num">0.347447</td></tr>
+              <tr><td>0.75</td><td class="num">0.149100</td><td class="num">0.133430</td><td class="num">0.097447</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <h3>Cutoff sensitivity: nmax 2 → 3</h3>
+      <div class="metrics">
+        <div class="metric"><span class="value">0.01939</span><span class="label">maximum finite-gap change</span></div>
+        <div class="metric"><span class="value">0.00199</span><span class="label">maximum density change</span></div>
+        <div class="metric"><span class="value">0.00377</span><span class="label">maximum F0 change</span></div>
+        <div class="metric"><span class="value">0.02072</span><span class="label">maximum K0 change</span></div>
+      </div>
+    </section>
+
+    <section class="section" id="numerics">
+      <div class="kicker">Numerical audit</div>
+      <h2>Status, residuals, and the present bottleneck</h2>
+      <div class="grid-2">
+        <div class="card">
+          <h3>117 rooted coarse/observable models</h3>
+          <ul>
+            <li>36 <code>optimal</code></li>
+            <li>40 <code>optimal_inaccurate</code></li>
+            <li>7 <code>infeasible</code></li>
+            <li>13 <code>infeasible_inaccurate</code></li>
+            <li>21 <code>solver_error</code> → <strong>UNKNOWN</strong></li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Recorded PSD diagnostics</h3>
+          <ul>
+            <li>operator moment minimum eigenvalue;</li>
+            <li>state-symbol moment minimum eigenvalue;</li>
+            <li>covariance minimum eigenvalue;</li>
+            <li>gap-localizer minimum eigenvalue.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>observed problem</th><th>evidence</th><th>scientific consequence</th><th>planned fix</th></tr></thead>
+          <tbody>
+            <tr><td>redundant matrix-unit basis</td><td>singular PSD faces and nmax=3 errors</td><td>no dependable soft-core upper bracket</td><td>independent Hermitian/traceless basis</td></tr>
+            <tr><td>implicit charge sparsity</td><td>large dense expression graphs with exact zeros</td><td>unnecessary canonicalization and cone cost</td><td>explicit U(1) block assembly</td></tr>
+            <tr><td>model rebuilt per point</td><td>wall time much larger than solver-reported time</td><td>slow parameter scans</td><td>parameterized cached SDP template</td></tr>
+            <tr><td>floating infeasibility only</td><td>no saved checked dual ray</td><td>candidate, not computer theorem</td><td>dual export plus interval/rational verifier</td></tr>
+            <tr><td>radius-one excitation support</td><td>degree-four lattices give identical SDP</td><td>loop physics absent</td><td>radius-two excitation/window level</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout danger">
+        <strong>Do not collapse status categories.</strong> A solver error is not
+        infeasibility. An inaccurate feasible point with a material PSD
+        violation is not accepted. An inaccurate infeasibility is not used as a
+        clean upper-bound endpoint.
+      </div>
+    </section>
+
+    <section class="section alt" id="roadmap">
+      <div class="kicker">Next stage</div>
+      <h2>Roadmap to a complete issue #92 certificate</h2>
+      <div class="grid-2">
+        <div class="card">
+          <h3>N1 · Finish the live solver cache</h3>
+          <ol>
+            <li>retain the assembled JuMP constraint graph;</li>
+            <li>update t, U, μ, γ in place;</li>
+            <li>dry-assemble every requested complete/TS2 level;</li>
+            <li>run hard-core complete cells first.</li>
+          </ol>
+          <p><strong>Acceptance:</strong> no nmax≤3 solver errors, PSD residuals ≥−10<sup>−8</sup>, monotone γ grid, ≥3× wall-time speedup.</p>
+        </div>
+        <div class="card">
+          <h3>N2 · Reproduce released spin reference</h3>
+          <ol>
+            <li>run one small SpectralGap.jl Ising example;</li>
+            <li>match block sizes and statuses;</li>
+            <li>compare SDP entries term by term.</li>
+          </ol>
+          <p><strong>Acceptance:</strong> agreement within stated tolerances and all convention differences documented.</p>
+        </div>
+        <div class="card">
+          <h3>N3 · Run the nested matrix levels</h3>
+          <ol>
+            <li>run (1,2), (2,2), and (1,3) separately;</li>
+            <li>plot L- and d-tightening separately;</li>
+            <li>verify Γ does not increase;</li>
+            <li>verify every observable interval nests.</li>
+          </ol>
+        </div>
+        <div class="card">
+          <h3>N4 · Radius-two geometry-sensitive study</h3>
+          <ol>
+            <li>add radius-two excitations and buffer;</li>
+            <li>orbit-reduce rooted automorphisms;</li>
+            <li>distinguish {12,4} from the line graph;</li>
+            <li>start with nmax 1–2.</li>
+          </ol>
+        </div>
+        <div class="card">
+          <h3>N5 · Verified numerical certificate</h3>
+          <ol>
+            <li>save a dual infeasibility ray;</li>
+            <li>reconstruct at higher precision;</li>
+            <li>check affine and cone residuals independently;</li>
+            <li>publish certificate plus checker.</li>
+          </ol>
+        </div>
+        <div class="card">
+          <h3>What not to do next</h3>
+          <p>Do not spend the next stage on a much larger open-ball ED run. The demonstrated blocker is the conditioning and completeness of the thermodynamic state-polynomial SDP, not a shortage of finite-patch spectra.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="reproduce">
+      <div class="kicker">Reproducibility</div>
+      <h2>Commands, environment, and artifacts</h2>
+      <pre><code>make setup
+make julia-setup
+make test
+make graphs
+make campaign
+make study
+make rooted-study
+make rooted-issue-scan</code></pre>
+
+      <div class="grid-2">
+        <div>
+          <h3>Environment</h3>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>component</th><th>version</th></tr></thead>
+              <tbody>
+                <tr><td>Python</td><td>3.12.3</td></tr>
+                <tr><td>CVXPY</td><td>1.9.2</td></tr>
+                <tr><td>Clarabel</td><td>0.11.1</td></tr>
+                <tr><td>hypertiling</td><td>1.5.1</td></tr>
+                <tr><td>NetworkX</td><td>3.6.1</td></tr>
+                <tr><td>NumPy</td><td>2.5.1</td></tr>
+                <tr><td>SciPy</td><td>1.18.0</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div>
+          <h3>Output row counts</h3>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>dataset</th><th class="num">rows</th></tr></thead>
+              <tbody>
+                <tr><td>atomic SDP runs</td><td class="num">120</td></tr>
+                <tr><td>atomic brackets</td><td class="num">3</td></tr>
+                <tr><td>rooted coarse/observables</td><td class="num">117</td></tr>
+                <tr><td>rooted fixed-gap scan</td><td class="num">135</td></tr>
+                <tr><td>finite-patch ED</td><td class="num">54</td></tr>
+                <tr><td>graph summaries</td><td class="num">12</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <h3>Direct artifacts</h3>
+      <ul class="artifact-list">
+        <li><a href="PHYSICS_TALK.html"><strong>PHYSICS_TALK.html</strong><br><small>professor-style explanation for a many-body physics audience</small></a></li>
+        <li><a href="status.md"><strong>status.md</strong><br><small>authoritative paper-algorithm and Target 2 completion checklist</small></a></li>
+        <li><a href="agent.md"><strong>agent.md</strong><br><small>compact handoff, decisions, corrections, and blockers</small></a></li>
+        <li><a href="ALGORITHM.md"><strong>ALGORITHM.md</strong><br><small>derivation and certificate direction</small></a></li>
+        <li><a href="SURVEY.md"><strong>SURVEY.md</strong><br><small>software maturity assessment</small></a></li>
+        <li><a href="REPORT.md"><strong>REPORT.md</strong><br><small>technical Markdown report</small></a></li>
+        <li><a href="results/rooted_issue_fixed_gamma_scan.csv"><strong>rooted fixed-gap CSV</strong><br><small>all 135 requested thermodynamic rows</small></a></li>
+        <li><a href="results/rooted_thermodynamic_sdp.csv"><strong>rooted probe CSV</strong><br><small>coarse gap and observable models</small></a></li>
+        <li><a href="results/finite_patch_ed.csv"><strong>finite ED CSV</strong><br><small>54 explicitly diagnostic rows</small></a></li>
+        <li><a href="results/metadata.json"><strong>metadata.json</strong><br><small>environment and claim boundaries</small></a></li>
+      </ul>
+    </section>
+
+    <section class="section alt" id="sources">
+      <div class="kicker">References</div>
+      <h2>Primary sources and tutorials</h2>
+      <ol>
+        <li>X. Xu et al., <a href="https://arxiv.org/html/2606.03836"><em>The bulk spectral gap is semi-decidable: a convergent family of certified upper bounds</em></a>, 2026.</li>
+        <li>I. Klep et al., <a href="https://arxiv.org/abs/2301.12513"><em>State polynomials: positivity, optimization and nonlinear Bell inequalities</em></a>, 2024.</li>
+        <li>J. Wang, <a href="https://github.com/wangjie212/SpectralGap">SpectralGap.jl</a> and <a href="https://wangjie212.github.io/NCTSSOS/dev/state/">NCTSSOS state-polynomial tutorial</a>.</li>
+        <li>X. Zhu et al., <a href="https://arxiv.org/abs/2103.15274"><em>Quantum phase transitions of interacting bosons on hyperbolic lattices</em></a>, 2021.</li>
+        <li>A. J. Kollár et al., <a href="https://arxiv.org/abs/1902.02794"><em>Line-Graph Lattices: Euclidean and Non-Euclidean Flat Bands</em></a>, 2019.</li>
+        <li>M. Schrauth et al., <a href="https://arxiv.org/abs/2309.10844"><em>HYPERTILING</em></a>, 2023.</li>
+      </ol>
+
+      <details>
+        <summary>Final claim boundary in one paragraph</summary>
+        <div>
+          <p>We have a tested exact cutoff algebra, validated hyperbolic graph construction, the complete matrix-algebra hierarchy engine, and a complete-level atomic check whose γ=0.51 exclusion passed exact projection, 256-bit algebraic sign checks, PSD verification, and a positive normalized Farkas margin. Its ρ<sub>0</sub> lower and upper duals also pass separate exact projection and PSD checks. We retain the older weak U(1)-restricted radius-one thermodynamic outer SDP and exact finite-open-patch diagnostics. We do not yet have a geometry-sensitive nested numerical comparison, the unrestricted production comparison, or independently verified non-atomic exclusions. Consequently, the non-atomic gap numbers remain floating candidates or unresolved outcomes, never final certified theorems.</p>
+        </div>
+      </details>
+    </section>
+
+    <footer class="footer">
+      <p><strong>Issue #92 research stage I.</strong> Updated from verified local and SCNet artifacts on 29 July 2026. Continue from <a href="agent.md">agent.md</a>; finish the resource-gated hierarchy campaign, not larger finite-patch ED.</p>
+    </footer>
+  </main>
+</div>
+</body>
+</html>
