@@ -7,5 +7,6 @@ pub mod gaussian;
 pub mod lyapunov;
 pub mod oracles;
 pub mod rng;
+pub mod runner;
 pub mod sampler;
 pub mod schema;

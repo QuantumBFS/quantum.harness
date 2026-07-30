@@ -1,7 +1,11 @@
-use anyhow::{bail, Result};
+use anyhow::Result;
 use clap::{Parser, Subcommand};
+use learning_mit::circuit::SamplingMode;
 use learning_mit::config::RunConfig;
 use learning_mit::oracles::write_oracle_artifact;
+use learning_mit::runner::{
+    run_benchmark, run_negative_control, run_requested_tasks, run_simulation,
+};
 use std::path::PathBuf;
 
 #[derive(Debug, Parser)]
@@ -49,17 +53,35 @@ fn main() -> Result<()> {
             println!("scientific oracles passed: {}", artifact.display());
             Ok(())
         }
-        Commands::Benchmark { config, run_dir } | Commands::NegativeControl { config, run_dir } => {
-            let _ = (config, run_dir);
-            bail!("runner is unavailable before the Gaussian core is validated")
+        Commands::Benchmark { config, run_dir } => {
+            let forecast = run_benchmark(&config, &run_dir)?;
+            println!(
+                "benchmark forecast: {:.3} seconds for configured grid",
+                forecast.forecast_seconds
+            );
+            Ok(())
+        }
+        Commands::NegativeControl { config, run_dir } => {
+            run_negative_control(&config, &run_dir)?;
+            println!("nonphysical IID negative control completed");
+            Ok(())
         }
         Commands::Simulate {
             config,
             run_dir,
             task_request,
         } => {
-            let _ = (config, run_dir, task_request);
-            bail!("runner is unavailable before the Gaussian core is validated")
+            let manifest = if let Some(request) = task_request {
+                run_requested_tasks(&config, &run_dir, &request)?
+            } else {
+                run_simulation(&config, &run_dir, SamplingMode::Born)?
+            };
+            println!(
+                "simulation ledger: {} tasks, {:.3} seconds",
+                manifest.tasks.len(),
+                manifest.elapsed_s
+            );
+            Ok(())
         }
     }
 }
