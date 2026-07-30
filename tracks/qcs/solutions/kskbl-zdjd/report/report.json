@@ -737,7 +737,7 @@
         {
           "kind": "heading",
           "level": 3,
-          "text": "⟦zh⟧当前最快未知阶数方法：自归一化区间把总成本降到 11,276 词⟦en⟧Fastest unknown-degree method: self-normalized intervals reduce total cost to 11,276 words"
+          "text": "⟦zh⟧区间层面加速：自归一化方法把总成本降到 11,276 词⟦en⟧Interval-level acceleration: self-normalization reduces total cost to 11,276 words"
         },
         {
           "kind": "verdict",
@@ -773,8 +773,51 @@
         },
         {
           "kind": "note",
-          "label": "⟦zh⟧方法定位：独立噪声的实用最快版；相关性出现时必须退回整词单位⟦en⟧Method position: fastest practical independent-noise variant; correlation requires falling back to word clusters",
+          "label": "⟦zh⟧方法定位：独立噪声的快速区间版；相关性出现时必须退回整词单位⟦en⟧Method position: fast interval variant for independent noise; correlation requires falling back to word clusters",
           "text": "⟦zh⟧部署时使用的单区间失败概率比 99% 模拟层级更小，50,000 次模拟仍无法直接验证极端尾部；因此它不替代 Bernstein 的有限样本护栏。更重要的是，若同一输出词的位相关，逐位自归一化也会过度自信；后续相关噪声实验始终改用整词方差。当前独立噪声下追求速度选择本方法，风险敏感选择 Bernstein。可复核记录为 independent_normal_summary.json。⟦en⟧The deployed per-interval failure probability is smaller than the 99% simulation level, and 50,000 trials still cannot verify its extreme tail directly, so this does not replace the finite-sample Bernstein guardrail. More importantly, bitwise self-normalization is also overconfident when bits within an output word are correlated; subsequent correlated-noise experiments always use variance across whole words. Choose this method for speed under independent noise and Bernstein for risk-sensitive use. The auditable record is independent_normal_summary.json."
+        },
+        {
+          "kind": "heading",
+          "level": 3,
+          "text": "⟦zh⟧当前最快未知阶数方法：按候选维度分配热身，总成本降到 8,860 词⟦en⟧Fastest unknown-degree method: dimension-normalized warmup reduces total cost to 8,860 words"
+        },
+        {
+          "kind": "verdict",
+          "status": "good",
+          "label": "⟦zh⟧一次模型提前 20 批被淘汰，八个配对种子全部精确且再少 1.27 倍成本⟦en⟧The linear model is eliminated twenty batches earlier; all eight paired seeds remain exact at another 1.27x lower cost",
+          "why": "⟦zh⟧固定 30 批热身忽略了候选空间大小：一次模型只有 13 个 D-optimal 点，二次模型有 79 个。新规则只要求每个设计点平均获得 50 次噪声观察，因此一次空间从第 7 批起可判定，二次空间从第 40 批起可判定；规则不读取输出或正确阶数。八次一次模型都在第 20 批被置信拒绝，二次模型仍在第 50–65 批接受；平均训练词由 9,500 降到 7,500，留出词由 1,776 降到 1,360，总词由 11,276 降到 8,860。⟦en⟧A fixed 30-batch warmup ignores candidate-space size: the linear model has only 13 D-optimal points while the quadratic model has 79. The new rule asks for a mean of 50 noisy observations per design point, making linear eligible at batch 7 and quadratic at batch 40 without reading outputs or the correct degree. All eight linear models are confidence-rejected at batch 20, while quadratic models are still accepted between batches 50 and 65. Mean training words fall from 9,500 to 7,500, holdout words from 1,776 to 1,360, and total words from 11,276 to 8,860."
+        },
+        {
+          "kind": "table",
+          "columns": [
+            "⟦zh⟧热身规则⟦en⟧Warmup rule",
+            "⟦zh⟧一次最早判定批次⟦en⟧Linear earliest eligible batch",
+            "⟦zh⟧二次最早判定批次⟦en⟧Quadratic earliest eligible batch",
+            "⟦zh⟧一次实际拒绝⟦en⟧Actual linear rejection",
+            "⟦zh⟧平均训练词⟦en⟧Mean training words",
+            "⟦zh⟧平均总噪声词⟦en⟧Mean total noisy words",
+            "⟦zh⟧最终精确⟦en⟧Final exact"
+          ],
+          "rows": [
+            ["⟦zh⟧所有阶数固定 30 批⟦en⟧Fixed 30 batches for every degree", "30", "30", "40", "9,500", "11,276", "8 / 8"],
+            ["⟦zh⟧每个设计点平均 50 次⟦en⟧Mean 50 observations per design point", "7", "40", "20", "7,500", "8,860", "8 / 8"],
+            ["⟦zh⟧已知二次空间的 D-optimal⟦en⟧D-optimal with quadratic space known", "⟦zh⟧不适用⟦en⟧N/A", "⟦zh⟧不适用⟦en⟧N/A", "⟦zh⟧不适用⟦en⟧N/A", "4,125", "4,125", "4 / 4"]
+          ],
+          "numeric": [false, true, true, true, true, true, true]
+        },
+        {
+          "kind": "figures",
+          "items": [
+            {
+              "src": "noisy-c-normalized-warmup.png",
+              "caption": "⟦zh⟧左：固定热身对大小模型一视同仁；信息归一化让 13 点一次空间更早可判，同时给 79 点二次空间更多学习时间。中：八个配对种子全部进一步下降。右：主要收益是提前拒绝一次空间，平均直接省去 2,000 个训练词；验证也略有减少。⟦en⟧Left: fixed warmup treats small and large models alike; information normalization makes the 13-point linear space eligible earlier while giving the 79-point quadratic space more learning time. Middle: all eight paired seeds improve further. Right: most of the gain comes from rejecting the linear space earlier, directly saving 2,000 training words on average; validation also decreases slightly."
+            }
+          ]
+        },
+        {
+          "kind": "note",
+          "label": "⟦zh⟧边界：50 次是当前 25% 噪声的经验预算，不是跨噪声率常数⟦en⟧Boundary: fifty observations is an empirical budget for current 25% noise, not a universal constant",
+          "text": "⟦zh⟧热身公式本身按候选维度归一化，但每点 50 次仍由当前噪声强度和整数投影收敛速度决定。更高噪声需要按净标签信号强度平方的倒数增加预算，低噪声则可能继续减少。当前证据是八个独立种子全部精确；下一步应把每点预算也改成由在线噪声估计自动缩放。可复核记录为 normalized_warmup_summary.json。⟦en⟧The warmup formula is normalized by candidate dimension, but fifty observations per point still depends on the current noise level and integer-projection convergence. Higher noise should increase the budget roughly with inverse squared net-label signal, while lower noise may reduce it further. Current evidence is eight exact independent seeds; the next step should scale the per-point budget automatically from the online noise estimate. The auditable record is normalized_warmup_summary.json."
         },
         {
           "kind": "heading",

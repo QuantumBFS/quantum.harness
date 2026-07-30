@@ -52,6 +52,15 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--degrees", default="1,2,3")
     parser.add_argument("--max-stage-steps", type=int, default=150)
     parser.add_argument("--min-stage-steps", type=int, default=30)
+    parser.add_argument(
+        "--min-observations-per-design-point",
+        type=float,
+        default=0.0,
+        help=(
+            "if positive, replace the fixed stage warmup with the number "
+            "of steps needed to observe each design point this many times"
+        ),
+    )
     parser.add_argument("--eval-every", type=int, default=5)
     parser.add_argument("--batch-size", type=int, default=100)
     parser.add_argument("--holdout-look-sizes", default="128,256,512,1024,2048,4096,8192")
@@ -549,6 +558,16 @@ def main() -> None:
     for stage_index, degree in enumerate(degrees):
         features, effect_features, metadata = polynomial_features(degree)
         design_ids, design = d_optimal_ids(effect_features)
+        stage_min_steps = args.min_stage_steps
+        if args.min_observations_per_design_point > 0.0:
+            stage_min_steps = max(
+                args.eval_every,
+                math.ceil(
+                    args.min_observations_per_design_point
+                    * len(design_ids)
+                    / args.batch_size
+                ),
+            )
         if args.noise_mode == "common-xor":
             stream = CommonXorFixedDesignFreshNoiseStream(
                 batch_size=args.batch_size,
@@ -608,7 +627,7 @@ def main() -> None:
             cumulative_training_examples += args.batch_size
             if step % args.eval_every != 0 and step != args.max_stage_steps:
                 continue
-            if step < args.min_stage_steps:
+            if step < stage_min_steps:
                 continue
 
             probabilities = learner.probabilities().cpu().numpy()
@@ -733,6 +752,7 @@ def main() -> None:
             "candidate_count": int(features.shape[1]),
             "design": design,
             "decision": decision,
+            "minimum_stage_steps": stage_min_steps,
             "decision_uses_clean_labels": False,
             "checks": checks,
             "final_integer_coefficients": coefficient_rows,
@@ -782,6 +802,9 @@ def main() -> None:
             "degrees": degrees,
             "max_stage_steps": args.max_stage_steps,
             "min_stage_steps": args.min_stage_steps,
+            "min_observations_per_design_point": (
+                args.min_observations_per_design_point
+            ),
             "eval_every": args.eval_every,
             "batch_size": args.batch_size,
             "holdout_look_sizes": look_sizes,
