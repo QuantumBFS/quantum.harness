@@ -1601,3 +1601,12 @@ congruence without imposing state symmetry. The job had no optimizer and is
 not feasibility or gap evidence. It authorizes the changed next action: the
 L=2 truth-only audit over 12 blocks / 940,050 target triangle entries before
 any cone removal.
+
+The L=2 coefficient audit is beyond the local threshold: it has 940,050 target
+triangle comparisons in addition to the prior exact stabilizer replay, while
+the earlier L=2 structural route used only about 2 GB but ran for minutes.
+SCNet therefore remains the appropriate compute venue. Slurm test-only
+accepted 32 CPUs / 64000 MiB / 2 hours and truth-only job `118196521` was
+submitted from immutable commit `6dd911f`. The job cannot invoke an optimizer
+or delete cones. Preserve the checkout; an exact pass authorizes only a new
+deduplicated build/hash before any numerical decision solve.

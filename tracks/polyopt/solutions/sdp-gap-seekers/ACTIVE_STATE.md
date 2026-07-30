@@ -933,3 +933,9 @@ Updated: 2026-07-29 UTC.
   over all 15,822 entries. This is full PSD-cone congruence, not a restricted
   state, and authorizes only the separate L=2 coefficient truth audit. No
   optimizer ran and no physics result was produced.
+- L=2 truth-only job `118196521` was submitted on SCNet from immutable commit
+  `6dd911f` after Slurm test-only admission. It requests 32 CPUs / 64000 MiB /
+  2 hours and performs the 12-block / 940,050-entry congruence audit plus the
+  established cross-zero replay; it has no optimizer and no cone-removal
+  flag. Preserve the checkout. Only an exact pass authorizes the separate
+  deduplicated build and new coefficient hash.
