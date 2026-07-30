@@ -17,15 +17,16 @@ categorical VMC sampling is used for the reported estimator.
 
 | Quantity | Candidate | Exact diagonalization |
 | --- | ---: | ---: |
-| `E(L=0)` | `3.871634914021247` | `3.8716349140212483` |
-| `E(L=2)` | `4.003323325986339` | `4.003323325986341` |
-| `Delta_2` | `0.1316884119650923` | `0.13168841196509273` |
+| `E(L=0)` | `3.871634914021250 +/- 1.0000000013e-12` | `3.871634914021243` |
+| `E(L=2)` | `4.003323325986342 +/- 1.0000000023e-12` | `4.003323325986342` |
+| `Delta_2` | `0.13168841196509184 +/- 1.4142135649e-12` | `0.13168841196509895` |
 
-The absolute gap discrepancy is `4.44e-16`. The reported total gap uncertainty
-is `1.414e-12`; it combines the independently sampled MC standard error with
-the floating-point projection floor. Each of the ground component and five
-excited components uses `20,000` independent samples, with ESS equal to the
-sample count.
+The absolute gap discrepancy is `7.11e-15`. The quoted uncertainties combine
+the independently sampled MC standard error with the `1e-12` floating-point
+projection floor. Each of the ground component and five excited components
+uses `20,000` independent samples, with ESS equal to the sample count. The
+complete per-`M` errors are in the
+[final result report](docs/benchmark-v0-final-result.md).
 
 ## Acceptance checklist
 
@@ -33,10 +34,10 @@ sample count.
 | --- | --- | --- |
 | Exchange-antisymmetric, SO(3)-equivariant NQS | Shared neural trunk; strict-LLL Slater basis; exact `L` projection; scalar and `D^(2)` finite-rotation tests | Pass |
 | `E0`, `E2`, `Delta` with statistical errors | Table above, machine-readable summary, and Attempt 02 journal | Pass |
-| `L=2` Casimir | Maximum `|<L^2>-6| = 2.85e-15`; maximum `Var(L^2) = 1.42e-14` | Pass |
-| Fivefold `M=-2,...,2` multiplet | Ladder-generated tower; splitting `4.44e-15` | Pass |
-| Numerical equivariance check | Particle-swap residual `0`; random SO(3) residual `3.69e-14` | Pass |
-| Small-N ED cross-check | Same Hamiltonian and normalization; gap discrepancy `4.44e-16` | Pass |
+| `L=2` Casimir | Maximum `|<L^2>-6| = 4.38e-15`; maximum `Var(L^2) = 4.69e-26` | Pass |
+| Fivefold `M=-2,...,2` multiplet | Ladder-generated tower; splitting `2.66e-15` | Pass |
+| Numerical equivariance check | Particle-swap residual `0`; random SO(3) residual `2.89e-14` | Pass |
+| Small-N ED cross-check | Same Hamiltonian and normalization; gap discrepancy `7.11e-15` | Pass |
 | Documented code and short report | This file, [Benchmark v0](docs/benchmark-v0.md), source, tests, and journals | Pass |
 | Strong-version thermodynamic/chirality result | Not claimed | Extension |
 
@@ -47,7 +48,14 @@ All frozen gates are true: `lll_valid`, `antisymmetry_valid`,
 
 ## Reproduce the accepted benchmark
 
-Requirements are Python, NumPy, and SciPy. From a clean repository checkout:
+Create a Python 3.11 environment and install the pinned minimal dependencies:
+
+```bash
+python3.11 -m pip install \
+  -r tracks/qmc/solutions/BOTS-848/benchmark_v0/requirements.txt
+```
+
+Then, from a clean repository checkout:
 
 ```bash
 python tracks/qmc/solutions/BOTS-848/run_nqs_benchmark.py \
@@ -61,11 +69,13 @@ The scoped verification suite is:
 python -m pytest tracks/qmc/solutions/BOTS-848/tests -q
 ```
 
-The benchmark implementation entered at commit `e04bc5d`. Its recorded clean
-verification was `31 passed in 29.12s`, the CLI exited `0`, the JSON structural
-check passed, and stderr was empty. See
-[Attempt 02](logs/attempt-02.md) for the full command journal and
-[result-summary.json](submission/result-summary.json) for the portable result.
+The benchmark implementation entered the integrated repository at commit
+`25582f94364957165916a62265a9755cc72b7add`. The final clean GPU reproduction
+at `557cb896ba55def10c1b34bf9eba122ca30eddb7` passed 31 focused tests and all
+eight gates on Slurm job `23033264`. See the
+[final result](docs/benchmark-v0-final-result.md),
+[Attempt 02](logs/attempt-02.md), and
+[result-summary.json](submission/result-summary.json).
 
 ## Ansatz design
 
@@ -120,6 +130,8 @@ machine-readable certificates in [`submission/`](submission/).
 
 - `SUBMISSION.md`: evaluator-facing report and acceptance matrix.
 - `submission/result-summary.json`: portable machine-readable headline result.
+- `submission/FINAL_CHECKLIST.md`: exact final PR handoff and claim boundary.
+- `submission/PR_BODY.md`: prepared final body for the existing registration PR.
 - `benchmark_v0/`: Hamiltonian, exact oracle, projected NQS, VMC, and symmetry
   implementation.
 - `run_nqs_benchmark.py`: one-command benchmark entry point.

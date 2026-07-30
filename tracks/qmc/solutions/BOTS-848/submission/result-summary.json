@@ -1,5 +1,5 @@
 {
-  "schema_version": "challenge-15-bots-848-submission-v1",
+  "schema_version": "challenge-15-bots-848-submission-v2",
   "challenge_issue": "https://github.com/QuantumBFS/quantum.harness/issues/15",
   "team": {
     "name": "BOTS:848",
@@ -17,28 +17,46 @@
     "units": "e^2/(epsilon*l_B)",
     "hamiltonian": "lowest-Landau-level pair-only chord-distance Coulomb",
     "candidate": {
-      "ground_energy": 3.871634914021247,
-      "tower_energy": 4.003323325986339,
-      "gap": 0.1316884119650923,
-      "gap_total_uncertainty": 1.414e-12,
+      "ground": {
+        "mean": 3.87163491402125,
+        "standard_error": 5.033224660201993e-17,
+        "total_uncertainty": 1.0000000012666675e-12
+      },
+      "tower": {
+        "mean": 4.003323325986342,
+        "standard_error": 6.773823444552335e-17,
+        "total_uncertainty": 1.0000000022942343e-12
+      },
+      "gap": {
+        "mean": 0.13168841196509184,
+        "standard_error": 8.439077825096314e-17,
+        "total_uncertainty": 1.414213564891033e-12
+      },
+      "tower_by_m": {
+        "-2": {"mean": 4.003323325986342, "standard_error": 2.240016663076679e-16, "total_uncertainty": 1.000000025088373e-12},
+        "-1": {"mean": 4.003323325986341, "standard_error": 5.562425111748572e-17, "total_uncertainty": 1.0000000015470287e-12},
+        "0": {"mean": 4.00332332598634, "standard_error": 6.166429990191696e-17, "total_uncertainty": 1.000000001901243e-12},
+        "1": {"mean": 4.003323325986342, "standard_error": 5.976453452072188e-17, "total_uncertainty": 1.0000000017858997e-12},
+        "2": {"mean": 4.003323325986343, "standard_error": 2.3252230184447287e-16, "total_uncertainty": 1.0000000270333101e-12}
+      },
       "samples_per_component": 20000,
       "effective_sample_size_per_component": 20000
     },
     "exact_diagonalization": {
-      "ground_energy": 3.8716349140212483,
-      "tower_energy": 4.003323325986341,
-      "gap": 0.13168841196509273
+      "ground_energy": 3.871634914021243,
+      "tower_energy": 4.003323325986342,
+      "gap": 0.13168841196509895
     },
     "residuals": {
-      "absolute_gap_error": 4.44e-16,
-      "lll_projection": 9.92e-16,
+      "absolute_gap_error": 7.105427357601002e-15,
+      "lll_projection": 2.0640139594466865e-15,
       "particle_swap": 0.0,
-      "tower_ladder": 1.12e-12,
-      "finite_random_rotation": 3.69e-14,
-      "multiplet_splitting": 4.44e-15,
-      "maximum_l2_error": 2.85e-15,
-      "maximum_l2_variance": 1.42e-14,
-      "maximum_imaginary_local_energy": 8.67e-17
+      "tower_ladder": 8.878178812207335e-13,
+      "finite_random_rotation": 2.889375857381609e-14,
+      "multiplet_splitting": 2.6645352591003757e-15,
+      "maximum_l2_error": 4.376070323422569e-15,
+      "maximum_l2_variance": 4.687902525436622e-26,
+      "maximum_imaginary_local_energy": 3.229622282284774e-17
     },
     "gates": {
       "lll_valid": true,
@@ -51,7 +69,35 @@
       "reproducible_run_valid": true,
       "benchmark_v0_pass": true
     },
-    "implementation_commit": "e04bc5d"
+    "implementation_commit": "25582f94364957165916a62265a9755cc72b7add",
+    "final_run": {
+      "source_revision": "557cb896ba55def10c1b34bf9eba122ca30eddb7",
+      "slurm_job_id": "23033264",
+      "slurm_state": "COMPLETED",
+      "slurm_exit_code": "0:0",
+      "node": "e05r03",
+      "gpu": "NVIDIA GeForce RTX 3080",
+      "allocated_cpus": 4,
+      "requested_memory": "12G",
+      "allocation_elapsed_seconds": 46,
+      "benchmark_elapsed_seconds": 4.331991117447615,
+      "focused_tests": "31 passed in 34.14s",
+      "python_version": "3.11.15",
+      "numpy_version": "2.0.2",
+      "scipy_version": "1.16.3",
+      "run_json_sha256": "62a6d0eec15b34f12563076d9f18b055a6831856009cee1fadfa2c4b7be8298d",
+      "stdout_sha256": "8774646815cbe19740c07cc59614526aef6f534d93d8b84b7e211f12347f6192",
+      "stderr_sha256": "956c70518ba64f566516d055a51cb9dc8fdc8942ab6340a3660ecd4f57fe8b09",
+      "sacct_sha256": "4b32eda0486cff0ba48f6518fa4c5b903d61b0e5e93907be3a41ae305e611d3f",
+      "clean_status_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "challenge_report": {
+        "slurm_job_id": "23033430",
+        "slurm_state": "COMPLETED",
+        "slurm_exit_code": "0:0",
+        "report_json_sha256": "01bd8fd479f53366ad2d82a921a0224c21a481375f6f077da244e1288cc5e39d",
+        "report_html_sha256": "cb97ce0b030d79d7a696a9e200b2e20d08166355ad518c445bd34001416d5501"
+      }
+    }
   },
   "route_d_plus": {
     "status": "research_candidate_not_used_for_acceptance_claim",

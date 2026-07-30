@@ -49,7 +49,10 @@ Larger systems, thermodynamic extrapolation, chiral-metric response, and Landau-
 - Challenge registration metadata is present.
 - Benchmark scope and paper-gap analysis are archived.
 - Benchmark implementation is capped at five short, worktree-isolated attempts. Attempt 01 closed as an ED-oracle `slice-pass`; Attempt 02 closed as `benchmark-pass`, so Attempts 03-05 were not started.
-- The projected random-feature NQS candidate gives raw `E0=3.871634914021247`, `E2=4.003323325986339`, and `Delta2=0.1316884119650923`, with a gap discrepancy of `4.44e-16` from ED and a reported total uncertainty of `1.414e-12`.
+- The final clean GPU reproduction of the projected random-feature NQS gives
+  raw `E0=3.871634914021250`, `E2=4.003323325986342`, and
+  `Delta2=0.13168841196509184`, with a gap discrepancy of `7.11e-15` from ED
+  and a reported total uncertainty of `1.4142135649e-12`.
 - Every frozen Benchmark v0 gate passes. The candidate uses ED-sized exact `L^2` projection and Ritz optimization, so larger-N scalability and the final challenge research contribution remain future work rather than part of the v0 claim.
 - Scalable v1 Step 1 is complete: the audit-first evaluator is available through [run_scalable_evaluator.py](run_scalable_evaluator.py).
 - The scalable Route D+ candidate is implemented through continuous-coordinate
