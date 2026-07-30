@@ -14,3 +14,27 @@
 2026-07-30T15:56:16+08:00 stage solve 8 B rc=0
 2026-07-30T15:56:45+08:00 stage solve 8 C rc=0
 2026-07-30T15:56:45+08:00 DIRECT MVP DRIVER COMPLETE
+2026-07-30T17:05:05+08:00 stage gateN 14 D2 rc=0
+2026-07-30T17:05:05+08:00 C14 blocked by gates
+2026-07-30T17:05:30+08:00 stage wbundle rc=0
+2026-07-30T17:05:52+08:00 stage gateN 20 D2 rc=0
+2026-07-30T17:06:23+08:00 stage solve 20 C rc=0
+2026-07-30T17:06:47+08:00 stage dgate 20 rc=0
+2026-07-30T17:07:16+08:00 stage gateN 14 D4 rc=0
+2026-07-30T17:07:16+08:00 C4 blocked by gates
+2026-07-30T17:07:43+08:00 stage buildarm 14 C4 rc=0
+2026-07-30T17:08:19+08:00 stage gateN 12 D2 rc=0
+2026-07-30T17:08:47+08:00 stage solve 12 B rc=0
+2026-07-30T17:09:18+08:00 stage solve 12 C rc=0
+2026-07-30T17:09:46+08:00 stage solve 12 A rc=0
+2026-07-30T17:10:07+08:00 stage dgate 12 rc=0
+2026-07-30T17:10:30+08:00 stage buildarm 12 A rc=0
+2026-07-30T17:10:53+08:00 stage buildarm 12 B rc=0
+2026-07-30T17:11:20+08:00 stage buildarm 12 C rc=0
+2026-07-30T17:11:50+08:00 stage buildarm 12 D rc=0
+2026-07-30T17:12:17+08:00 stage buildarm 26 C rc=0
+2026-07-30T17:12:41+08:00 stage buildarm 26 D rc=0
+2026-07-30T17:13:04+08:00 stage buildarm 30 C rc=0
+2026-07-30T17:13:27+08:00 stage buildarm 30 D rc=0
+2026-07-30T17:13:27+08:00 EXT DRIVER COMPLETE
+2026-07-30T17:34:19+08:00 D14 relabeled STRUCTURALLY_ABSORBED (wbundle=0 evidence; C14 now solved — original skip reason was the gate-harness bug)
