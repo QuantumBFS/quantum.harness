@@ -47,7 +47,7 @@
 | [#71](https://github.com/QuantumBFS/quantum.harness/issues/71) | Occam's Circuit | qcs | score=0.9960 | 接近满分，score 悬崖效应 |
 | [#117](https://github.com/QuantumBFS/quantum.harness/issues/117) | Lennard-Jones 团簇 | globalopt | E=−173.13 | 困在同一能量盆地 |
 | [#34](https://github.com/QuantumBFS/quantum.harness/issues/34) | N-Queens 计数 | peps | max_n=14 | N=16 壁垒，42 候选无突破 |
-| [#233](https://github.com/QuantumBFS/quantum.harness/issues/233) | PXP 谱间隙证书 | polyopt | score=0.0 | 数学层面不可能 |
+| [#233](https://github.com/QuantumBFS/quantum.harness/issues/233) | PXP 谱间隙证书 | polyopt | score=0.0 | 数学层面存在结构性困难 |
 
 **投入**：69+ 实验 DB，600+ 候选，1300+ LLM 调用，~10M tokens
 
