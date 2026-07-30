@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "challenge-15-route-d-plus-future-aggregate-v1",
+  "title": "Route D+ single future-stage aggregate certificate",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "stage",
+    "created_at_utc",
+    "source_revision",
+    "dispatch",
+    "stage_gate",
+    "task_certificates",
+    "gates",
+    "passed",
+    "slurm_job_id",
+    "slurm_cluster_name"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "challenge-15-route-d-plus-future-aggregate-v1"
+    },
+    "stage": {
+      "enum": ["phase7", "phase8", "phase9", "phase10", "phase11"]
+    },
+    "created_at_utc": {"type": "string", "format": "date-time"},
+    "source_revision": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "dispatch": {"$ref": "#/$defs/artifact"},
+    "stage_gate": {"$ref": "#/$defs/artifact"},
+    "task_certificates": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["task_id", "path", "sha256"],
+        "properties": {
+          "task_id": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9._-]{1,63}$"
+          },
+          "path": {"type": "string", "minLength": 1},
+          "sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          }
+        }
+      }
+    },
+    "gates": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "dispatch_schema_valid",
+        "prerequisite_hashes_valid",
+        "exact_task_set",
+        "isolated_run_directories",
+        "all_task_schemas_valid",
+        "all_artifact_hashes_valid",
+        "clean_consistent_source_revision",
+        "gpu_slurm_evidence",
+        "stage_gate_schema_valid",
+        "stage_gate_matches_tasks"
+      ],
+      "properties": {
+        "dispatch_schema_valid": {"const": true},
+        "prerequisite_hashes_valid": {"const": true},
+        "exact_task_set": {"const": true},
+        "isolated_run_directories": {"const": true},
+        "all_task_schemas_valid": {"const": true},
+        "all_artifact_hashes_valid": {"const": true},
+        "clean_consistent_source_revision": {"const": true},
+        "gpu_slurm_evidence": {"const": true},
+        "stage_gate_schema_valid": {"const": true},
+        "stage_gate_matches_tasks": {"const": true}
+      }
+    },
+    "passed": {"const": true},
+    "slurm_job_id": {"type": "string", "minLength": 1},
+    "slurm_cluster_name": {"type": "string", "minLength": 1}
+  },
+  "$defs": {
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256"],
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      }
+    }
+  }
+}

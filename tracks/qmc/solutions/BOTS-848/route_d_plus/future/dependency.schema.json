@@ -1,0 +1,173 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "challenge-15-route-d-plus-future-dependency-v1",
+  "title": "Route D+ immutable future-stage dependency",
+  "oneOf": [
+    {"$ref": "#/$defs/phase6_freeze"},
+    {"$ref": "#/$defs/phase7_gate"},
+    {"$ref": "#/$defs/architecture_freeze"},
+    {"$ref": "#/$defs/protocol_registration"}
+  ],
+  "$defs": {
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256"],
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      }
+    },
+    "phase6_freeze": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "kind",
+        "created_at_utc",
+        "source_revision",
+        "phase6_certificate",
+        "checkpoints",
+        "architecture_protocol",
+        "capacity_protocol",
+        "architecture_status",
+        "ed_accessed",
+        "heldout_accessed",
+        "beyond_ed_accessed",
+        "passed"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "challenge-15-route-d-plus-future-dependency-v1"
+        },
+        "kind": {"const": "phase6-frozen-checkpoint-gate"},
+        "created_at_utc": {"type": "string", "format": "date-time"},
+        "source_revision": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "phase6_certificate": {"$ref": "#/$defs/artifact"},
+        "checkpoints": {
+          "type": "array",
+          "minItems": 3,
+          "items": {"$ref": "#/$defs/artifact"}
+        },
+        "architecture_protocol": {"$ref": "#/$defs/artifact"},
+        "capacity_protocol": {"$ref": "#/$defs/artifact"},
+        "architecture_status": {"const": "D+0-frozen-for-Phase7"},
+        "ed_accessed": {"const": false},
+        "heldout_accessed": {"const": false},
+        "beyond_ed_accessed": {"const": false},
+        "passed": {"const": true}
+      }
+    },
+    "phase7_gate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "kind",
+        "created_at_utc",
+        "source_revision",
+        "phase7_aggregate",
+        "capacity_protocol",
+        "capacity_action",
+        "capacity_protocol_modified",
+        "checkpoint_modified",
+        "passed"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "challenge-15-route-d-plus-future-dependency-v1"
+        },
+        "kind": {"const": "phase7-capacity-gate"},
+        "created_at_utc": {"type": "string", "format": "date-time"},
+        "source_revision": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "phase7_aggregate": {"$ref": "#/$defs/artifact"},
+        "capacity_protocol": {"$ref": "#/$defs/artifact"},
+        "capacity_action": {
+          "enum": ["keep-D+0", "trigger-preregistered-D+1-D+2"]
+        },
+        "capacity_protocol_modified": {"const": false},
+        "checkpoint_modified": {"const": false},
+        "passed": {"const": true}
+      }
+    },
+    "architecture_freeze": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "kind",
+        "created_at_utc",
+        "source_revision",
+        "selection_aggregate",
+        "selection_stage",
+        "selection_protocol",
+        "selected_capacity",
+        "architecture",
+        "checkpoints",
+        "heldout_accessed",
+        "beyond_ed_accessed",
+        "passed"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "challenge-15-route-d-plus-future-dependency-v1"
+        },
+        "kind": {"const": "architecture-freeze"},
+        "created_at_utc": {"type": "string", "format": "date-time"},
+        "source_revision": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "selection_aggregate": {"$ref": "#/$defs/artifact"},
+        "selection_stage": {"enum": ["phase7", "phase8"]},
+        "selection_protocol": {"$ref": "#/$defs/artifact"},
+        "selected_capacity": {"enum": ["D+0", "D+1", "D+2"]},
+        "architecture": {"$ref": "#/$defs/artifact"},
+        "checkpoints": {
+          "type": "array",
+          "minItems": 3,
+          "items": {"$ref": "#/$defs/artifact"}
+        },
+        "heldout_accessed": {"const": false},
+        "beyond_ed_accessed": {"const": false},
+        "passed": {"const": true}
+      }
+    },
+    "protocol_registration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "kind",
+        "created_at_utc",
+        "source_revision",
+        "protocol_name",
+        "protocol_artifact",
+        "passed"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "challenge-15-route-d-plus-future-dependency-v1"
+        },
+        "kind": {"const": "protocol-registration"},
+        "created_at_utc": {"type": "string", "format": "date-time"},
+        "source_revision": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "protocol_name": {"type": "string", "minLength": 3},
+        "protocol_artifact": {"$ref": "#/$defs/artifact"},
+        "passed": {"const": true}
+      }
+    }
+  }
+}
