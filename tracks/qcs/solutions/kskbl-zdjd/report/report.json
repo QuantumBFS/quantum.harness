@@ -128,6 +128,52 @@
           "kind": "code",
           "title": "⟦zh⟧在线实验循环⟦en⟧Online experiment loop",
           "text": "initialize_model_randomly()\nfor step in training_budget:\n    inputs = sample_100_fresh_inputs()\n    noisy_outputs = oracle_then_fresh_bit_flips(inputs, p=0.25)\n    update_only_from(inputs, noisy_outputs)\n    if step % evaluation_interval == 0:\n        record_without_feedback(evaluate_clean_full_domain())"
+        },
+        {
+          "kind": "heading",
+          "level": 3,
+          "text": "⟦zh⟧方法 1：共享稠密神经网络⟦en⟧Method 1: Shared dense neural network"
+        },
+        {
+          "kind": "verdict",
+          "status": "good",
+          "label": "⟦zh⟧首个基线：98.22% 整词准确率⟦en⟧First baseline: 98.22% exact-word accuracy",
+          "why": "⟦zh⟧四个完全随机初始化、共享隐藏层的模型仅从 25% 新鲜翻转噪声流训练。30,000 步后，硬投票在全部 4,096 个干净输入上达到 99.8494% 逐位准确率和 98.2178% 十二位整词准确率。训练从未读取干净评估标签。⟦en⟧Four independently and randomly initialized models with shared hidden layers trained only on a fresh 25%-flip stream. After 30,000 steps, hard voting reached 99.8494% bit accuracy and 98.2178% exact twelve-bit word accuracy on all 4,096 clean inputs. Training never read clean evaluation labels."
+        },
+        {
+          "kind": "card",
+          "title": "⟦zh⟧基准结果与样本效率⟦en⟧Baseline result and sample efficiency",
+          "blocks": [
+            {
+              "kind": "kv",
+              "pairs": [
+                ["⟦zh⟧模型⟦en⟧Model", "⟦zh⟧四成员共享 MLP；每个模型四层、隐藏宽度 192⟦en⟧Four-member shared MLP; four layers per model, hidden width 192"],
+                ["⟦zh⟧训练预算⟦en⟧Training budget", "⟦zh⟧30,000 步，共 3,000,000 个随机样本⟦en⟧30,000 steps, 3,000,000 random examples"],
+                ["⟦zh⟧本机墙钟时间⟦en⟧Local wall time", "233.2 s"],
+                ["⟦zh⟧最终干净逐位准确率⟦en⟧Final clean bit accuracy", "99.8494%"],
+                ["⟦zh⟧最终干净整词准确率⟦en⟧Final clean exact-word accuracy", "98.2178%"],
+                ["⟦zh⟧归一化数值 MAE⟦en⟧Normalized numeric MAE", "0.0001474"],
+                ["⟦zh⟧最终位不确定性⟦en⟧Final bit uncertainty", "U_bit = 0.1552"],
+                ["⟦zh⟧最终数值不确定性⟦en⟧Final value uncertainty", "U_value = 0.01031"],
+                ["⟦zh⟧首次达到 90% / 95% / 98% 整词准确率⟦en⟧First 90% / 95% / 98% exact-word accuracy", "7,500 / 8,500 / 15,000 steps"],
+                ["⟦zh⟧仅作事后报告的最佳检查点⟦en⟧Best post-hoc checkpoint, reporting only", "⟦zh⟧第 27,500 步，98.2666% 整词准确率⟦en⟧Step 27,500, 98.2666% exact-word accuracy"]
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "figures",
+          "items": [
+            {
+              "src": "noisy-c-shared-mlp-p25.png",
+              "caption": "⟦zh⟧共享 MLP 在 25% 新鲜位翻转下的在线收敛。每个检查点都在完整干净定义域上隔离评估，仅用于绘图和事后分析，不参与梯度、提前停止或模型选择。⟦en⟧Online convergence of the shared MLP under fresh 25% bit flips. Every checkpoint is evaluated in isolation on the complete clean domain solely for plotting and post-hoc analysis; it does not affect gradients, early stopping or model selection."
+            }
+          ]
+        },
+        {
+          "kind": "note",
+          "label": "⟦zh⟧瓶颈与下一步⟦en⟧Bottleneck and next step",
+          "text": "⟦zh⟧第 0、1、2、9、10、11 位已经完全恢复，但第 3 位最终仍只有 98.8525% 准确率。共享表示已经证明随机噪声流足以恢复几乎全部规律，但它在少数进位型边界上形成平台。下一轮将保持数据、噪声和预算不变，比较十二个独立位网络、乘性交互/谱特征网络、可微布尔门网络、语义进化以及神经教师到符号学生的混合方法。⟦en⟧Bits 0, 1, 2, 9, 10 and 11 are fully recovered, but bit 3 ends at only 98.8525% accuracy. The shared representation establishes that the random noisy stream is sufficient to recover nearly all of the rule, yet it plateaus on a few carry-like boundaries. The next round keeps data, noise and budget fixed while comparing twelve independent bit networks, multiplicative-interaction/spectral features, differentiable Boolean gates, semantic evolution and a neural-teacher-to-symbolic-student hybrid."
         }
       ]
     },
