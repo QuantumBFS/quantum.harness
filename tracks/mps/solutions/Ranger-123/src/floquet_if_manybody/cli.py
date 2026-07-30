@@ -27,8 +27,10 @@ from .plotting import (
     plot_model_variants,
     plot_n2,
     plot_n3,
+    plot_n3_error_maps,
     plot_n3_pt_dynamics,
     plot_n3_sector_heat,
+    plot_n4_pilot_comparison,
     plot_odd_sector_difference,
 )
 
@@ -137,6 +139,37 @@ def generate_error_map(
     manifest = run_error_grid(output, cache, exact_backend=exact_backend)
     plot_error_maps(manifest, figures / "error_maps")
     return 0
+
+
+def generate_n3_error_map(
+    exact_manifest: Path,
+    output: Path,
+    figures: Path,
+) -> int:
+    from .paper_extension import run_n3_error_map
+
+    manifest = run_n3_error_map(exact_manifest, output)
+    plot_n3_error_maps(manifest, figures / "n3_error_maps")
+    return 0 if manifest["converged"] else 1
+
+
+def generate_n4_pilot(
+    output: Path,
+    cache: Path,
+    figures: Path,
+    sector: Literal["even", "odd"],
+    j: float,
+) -> int:
+    from .paper_extension import run_n4_pilot
+
+    result = run_n4_pilot(output, cache, sector=sector, j=j)
+    if result["converged"]:
+        j_label = f"{j:.2f}".replace(".", "p")
+        plot_n4_pilot_comparison(
+            result,
+            figures / f"n4_{sector}_j{j_label}_comparison",
+        )
+    return 0 if result["converged"] else 1
 
 
 def generate_model_comparison(
@@ -291,6 +324,24 @@ def build_parser() -> argparse.ArgumentParser:
                 action="store_true",
                 help="run cluster-scale timestep and phase refinement for Kac variants",
             )
+    n3_error = subparsers.add_parser("n3-error-map")
+    n3_error.add_argument(
+        "--exact-manifest",
+        type=Path,
+        default=Path("results/paper/n3_heat_manifest.json"),
+    )
+    n3_error.add_argument("--output", type=Path, default=Path("results/paper"))
+    n3_error.add_argument("--figures", type=Path, default=Path("figures/paper"))
+    n4_pilot = subparsers.add_parser("n4-pilot")
+    n4_pilot.add_argument("--output", type=Path, default=Path("results/paper"))
+    n4_pilot.add_argument(
+        "--cache",
+        type=Path,
+        default=Path("results/cache/n4_uniform_tempo"),
+    )
+    n4_pilot.add_argument("--figures", type=Path, default=Path("figures/paper"))
+    n4_pilot.add_argument("--sector", choices=("even", "odd"), default="odd")
+    n4_pilot.add_argument("--j", type=float, default=0.25)
     paper_check = subparsers.add_parser("paper-audit")
     paper_check.add_argument("directory", type=Path, default=Path("results/paper"))
     heat_valve = subparsers.add_parser("heat-valve")
@@ -338,6 +389,20 @@ def main(argv: list[str] | None = None) -> int:
             arguments.cache,
             arguments.figures,
             arguments.exact_backend,
+        )
+    if arguments.command == "n3-error-map":
+        return generate_n3_error_map(
+            arguments.exact_manifest,
+            arguments.output,
+            arguments.figures,
+        )
+    if arguments.command == "n4-pilot":
+        return generate_n4_pilot(
+            arguments.output,
+            arguments.cache,
+            arguments.figures,
+            arguments.sector,
+            arguments.j,
         )
     if arguments.command == "model-comparison":
         return generate_model_comparison(

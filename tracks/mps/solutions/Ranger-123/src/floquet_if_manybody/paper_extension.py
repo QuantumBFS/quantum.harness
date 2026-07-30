@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import copy
+import json
 import math
 from dataclasses import asdict, replace
 from pathlib import Path
@@ -84,6 +85,21 @@ def uniform_error_schedule() -> UniformAdaptiveSchedule:
     return replace(
         uniform_publication_schedule(),
         tolerances=(3e-7, 1e-7, 3e-8, 1e-8, 3e-9),
+    )
+
+
+def n4_pilot_schedule() -> UniformAdaptiveSchedule:
+    """A bounded two-rung gate before spending publication-scale N=4 resources."""
+    return UniformAdaptiveSchedule(
+        steps_per_period=(30, 60),
+        tolerances=(1e-5, 3e-6),
+        phase_samples=(3, 15),
+        state_threshold=8e-2,
+        correlation_threshold=1e-1,
+        heat_threshold=1e-1,
+        phase_threshold=2e-3,
+        trace_threshold=5e-3,
+        hermiticity_threshold=5e-3,
     )
 
 
@@ -489,6 +505,111 @@ def run_n3_heat_grid(
     }
     atomic_write_result(output / "n3_heat_manifest.json", manifest)
     return manifest
+
+
+def run_n3_error_map(
+    exact_manifest: Path,
+    output: Path,
+) -> dict[str, Any]:
+    """Compare every converged N=3 production point to the same-model Markov result."""
+    source = json.loads(exact_manifest.read_text(encoding="utf-8"))
+    if not isinstance(source, dict):
+        raise ValueError("N=3 exact manifest must be a JSON object")
+    records: list[dict[str, Any]] = []
+    for exact in source.get("points", []):
+        j = float(exact["model"]["j"])
+        sector = str(exact["sector"])
+        if not bool(exact.get("adaptive_converged", exact.get("converged", False))):
+            records.append(
+                {
+                    "j": j,
+                    "sector": sector,
+                    "status": "resource_ceiling",
+                    "metrics": None,
+                }
+            )
+            continue
+        point = N3HeatPoint(**exact["final_point"])
+        markov = _markov_result(point, str(exact["model_hash"]))
+        compatible_exact = {**exact, "converged": True}
+        comparison = build_error_record(compatible_exact, markov)
+        record = {"j": j, "sector": sector, **comparison}
+        records.append(record)
+        atomic_write_result(
+            output / f"n3_error_{sector}_j{j:.2f}.json",
+            {
+                "exact_fingerprint": exact.get("fingerprint"),
+                "exact": compatible_exact,
+                "markov": markov,
+                "comparison": record,
+            },
+        )
+    manifest = {
+        "method": "n3_uniform_tempo_vs_floquet_markov_qr",
+        "exact_backend": source.get("exact_backend"),
+        "model_scope": "same N=3 sector, Hamiltonian, drive and bath parameters",
+        "source_manifest": str(exact_manifest),
+        "converged": bool(records) and all(
+            item["status"] == "converged" for item in records
+        ),
+        "points": records,
+    }
+    atomic_write_result(output / "n3_error_map_manifest.json", manifest)
+    return manifest
+
+
+def run_n4_pilot(
+    output: Path,
+    cache_directory: Path,
+    *,
+    sector: Literal["even", "odd"],
+    j: float = 0.25,
+) -> dict[str, Any]:
+    """Run a convergence-gated N=4 sector point and a same-model Markov check."""
+    schedule = n4_pilot_schedule()
+    point = N3HeatPoint(
+        n=4,
+        j=j,
+        sector=sector,
+        backend="uniform_tempo",
+        alpha=0.05,
+        steps_per_period=schedule.steps_per_period[0],
+        epsrel=schedule.tolerances[0],
+        phase_samples=schedule.phase_samples[0],
+        delay_periods=6 if sector == "even" else 3,
+        uniform_low_rank_svd=True,
+        uniform_truncation="abs",
+        uniform_cap_rank=5_000,
+        uniform_max_rank=10_000,
+    )
+    adaptive = run_uniform_adaptive(
+        point,
+        schedule,
+        _runner,
+        ConvergenceCache(cache_directory),
+    )
+    exact = _adaptive_payload(adaptive)
+    exact["converged"] = adaptive.converged
+    payload: dict[str, Any] = {
+        "method": "n4_uniform_tempo_convergence_pilot",
+        "n": 4,
+        "sector": sector,
+        "j": j,
+        "schedule": asdict(schedule),
+        "adaptive_status": adaptive.status,
+        "converged": adaptive.converged,
+        "failed_parameter": adaptive.failed_parameter,
+        "exact": exact,
+        "markov": None,
+        "comparison": None,
+    }
+    if adaptive.converged:
+        final_point = adaptive.final_point
+        markov = _markov_result(final_point, str(exact["model_hash"]))
+        payload["markov"] = markov
+        payload["comparison"] = build_error_record(exact, markov)
+    atomic_write_result(output / f"n4_{sector}_j{j:.2f}.json", payload)
+    return payload
 
 
 def run_error_grid(

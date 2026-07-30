@@ -19,13 +19,19 @@ revision `b76a018c32e5415989761d902b1b0e95f1a337da`；OQuPy 只作为独立粗�
 4. bounded normalization 的有/无 counterterm 两个模型全部收敛。
 5. Kac normalization 的两个模型已通过压缩收敛，但完整 timestep/phase
    认证需要集群；结果明确标成 `local_resource_ceiling`。
+6. 论文 Fig. 3 底图的三个横向驱动频率全部由独立 UniformTEMPO 计算通过
+   物理门槛，并与作者公开数据做了定量谱形和面积比较。
+7. \(N=4\) reflection-odd 点通过完整收敛阶梯，并完成同模型
+   Floquet-Markov/QRT 对照；heat error 为 3.405。
+8. \(N=4\) reflection-even 点在不放宽尾门槛的情况下将关联窗从三周期
+   扩展到六周期并收敛；heat error 为 5.494。
 
 所以，对“需要提交集群吗”的答案是：
 
 - 核心 \(N=2,N=3\) 结论不需要，已经在本地完成；
 - 只有可选的 Kac 全收敛扩展需要集群；
-- \(N=4\)、热力学连续谱和临界幂律不属于这次完成范围，也没有被暗示为
-  已解决。
+- \(N=4\) odd-sector 的有限尺寸试算已经完成；热力学连续谱和临界幂律
+  不属于这次完成范围，也没有被暗示为已解决。
 
 ## 2. 模型与数值方法
 
@@ -193,6 +199,16 @@ D_\rho=0.9968\text{--}0.9997,
 
 ![Converged exact-vs-Markov error map](../figures/paper/error_maps.png)
 
+为消除“Tier 2 是 \(N=3\)，但误差图只在 \(N=2\)”的尺寸错位，现进一步
+对六个已经收敛的 \(N=3\) sector 点逐一运行完全相同模型和参数的
+Floquet-Markov/QRT。六点全部完成：even sector 的
+\(D_\rho=0.9921\text{--}0.9999\)、\(\epsilon_C=1.024\text{--}1.153\)、
+\(\epsilon_j=9.02\text{--}11.72\)；odd sector 因投影模型严格
+\(J\)-不变，三点均给出 \(D_\rho=0.4753\)、\(\epsilon_C=0.5666\)、
+\(\epsilon_j=0.3920\)。这构成 Tier 3 所要求的 same-model 定量闭环。
+
+![N=3 same-model exact-vs-Markov map](../figures/paper/n3_error_maps.png)
+
 ## 6. 暗通道与模型定义
 
 Floquet matrix elements 计算到 \(|m|\le40\)，Parseval 残差保持在机器精度。
@@ -227,6 +243,14 @@ Kac 曲线仍以虚线显示，表示 timestep/phase 未完成，而不是表示
 
 ## 7. 独立验证
 
+对于原论文 Fig. 3 底图，脚本先校验 Zenodo 归档 MD5，再在
+\(\omega_d/\Omega=1,1.5,2\) 上独立运行。三个点的归一化谱形 \(L^1\) 误差
+分别为 0.0562、0.2736、0.3718，积分强度比分别为 1.0268、1.1622、
+1.3119；全部通过 fixed-point、迹、厄米性、正定性和关联尾门槛。这是
+定量结构复现，而不是逐点完全相同的声明。
+
+![Fig. 3 bottom independent reproduction](../figures/validation/fig3_transversal_summary.png)
+
 单自旋 UniformTEMPO smoke test 的 bond 为 19，fixed-point residual 为
 \(1.40\times10^{-4}\)，关联尾为 0.00555，全部通过物理门槛。
 
@@ -236,7 +260,24 @@ Kac 曲线仍以虚线显示，表示 timestep/phase 未完成，而不是表示
 两种 backend 已收敛一致的声明。投影后的 odd-sector \(J\) 不变性在该检查中
 仍精确成立。
 
-## 8. 如何彻底续跑
+## 8. \(N=4\) 收敛门控结果
+
+通用 reflection projector 将 \(N=4\) 分成 even 10 维和 odd 6 维子空间。
+在 \(J/\Omega=0.25\) 上，odd sector 通过 compression、30→60 步时间网格、
+3→15 相位和全部物理门槛；最终 bond 为 8，关联尾为 0.0368。同模型
+Floquet-Markov/QRT 的 \(\epsilon_j=3.405\)。连续谱三个最强峰位于
+0.4725、0.9600、1.4400 \(\Omega\)，相对于 0.9256 \(\Omega\) 驱动呈现
+多峰 collective structure。
+
+even sector 的三周期计算仅关联尾 0.0552 未过 0.05 门槛。保持原门槛并将
+关联窗扩展到六周期后，最终 bond 为 13、尾幅为 0.0213，全部自适应证据
+通过；同模型 \(\epsilon_j=5.494\)。
+
+![N=4 odd same-model comparison](../figures/paper/n4_odd_j0p25_comparison.png)
+
+![N=4 even same-model comparison](../figures/paper/n4_even_j0p25_comparison.png)
+
+## 9. 如何彻底续跑
 
 本地默认命令已经完成论文主网格。若有集群，只需继续 Kac 阶梯：
 

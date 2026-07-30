@@ -127,6 +127,17 @@ Across the grid, \(D_\rho=0.9968\)–\(0.9997\),
 convergence failure: the uniform-TEMPO reference points themselves are
 converged.
 
+### \(N=3\) same-model exact-vs-Markov grid
+
+The six converged \(N=3\) sector points are also compared to
+Floquet-Markov/QRT without changing the Hamiltonian, drive, bath, sector, or
+frequency and delay grids. In the even sector, the heat-spectrum error is
+9.02–11.72 and the trace distance is 0.992–1.000. In the exactly
+\(J\)-independent odd sector, all three rows reproduce the same errors:
+\(D_\rho=0.4753\), \(\epsilon_C=0.5666\), and \(\epsilon_j=0.3920\).
+This closes the same-model comparison required by Tier 3 rather than using the
+\(N=2\) calibration as a proxy.
+
 ### Model-definition variants
 
 At \(N=3,J/\Omega=0.5,\alpha=0.1\), the bounded variants
@@ -146,6 +157,14 @@ They are labeled `local_resource_ceiling`, not converged. `--full-kac`
 continues the same auditable ladder on a cluster.
 
 ## Independent validation
+
+`scripts/run_fig3_validation.py` downloads the immutable author archive from
+Zenodo, verifies MD5 `0f3f9d9d8538aa96aee089973df7d9c2`, and independently
+recomputes all three transversal-drive curves in Fig. 3 (bottom) at
+\(\omega_d/\Omega=1,1.5,2\). All three points pass the same density, fixed-point,
+Hermiticity, trace, and correlation-tail gates. The normalized shape
+\(L^1\) discrepancies are 0.0562, 0.2736, and 0.3718 respectively; these are
+reported as quantitative structural reproduction, not bitwise identity.
 
 `scripts/run_uniform_validation.py` performs:
 
@@ -167,3 +186,18 @@ The in-repository finite-memory QUAPI code exposes the exponential
 \(O[(d^2)^{K+1}]\) wall and is used for regression tests. OQuPy 0.5.0 remains
 available as an independent PT-TEMPO validation backend. Neither supplies the
 production values in `results/paper`.
+
+## N=4 convergence-gated extension
+
+The generic reflection projector produces \(10\oplus6\) blocks for \(N=4\).
+At \(J/\Omega=0.25\), the odd-sector point passes nested compression,
+timestep, phase, and physical gates at 60 steps per period, tolerance
+\(3\times10^{-6}\), and 15 phases (bond 8, connected tail 0.0368). Its same-model
+Floquet-Markov/QRT heat-spectrum error is 3.405. The exact continuous spectrum
+has its three largest peaks at 0.4725, 0.9600, and 1.4400 \(\Omega\), whereas
+the selected drive frequency is 0.9256 \(\Omega\).
+
+The even-sector three-period endpoint missed only the connected-tail gate
+(0.0552 against 0.05). Without weakening the gate, the production point was
+rerun with six delay periods. It then passed every layer at bond 13 with tail
+0.0213; its same-model heat-spectrum error is 5.494.

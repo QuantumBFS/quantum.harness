@@ -18,6 +18,7 @@
 | Odd-sector spectral invariance | relative maximum difference 0 | Complete |
 | \(N=2\) exact-vs-Markov grid | `error_map_manifest.json` | 9/9 converged |
 | Three Markov-error metrics | all nine cells | Complete |
+| \(N=3\) same-model exact-vs-Markov grid | `validation/n3_same_model_error_map.json`, `figures/paper/n3_error_maps.*` | 6/6 converged |
 | Floquet dark-channel diagnostics | \(|m|\le40\), Parseval tests | Complete diagnostic |
 | Independent drive/bath normalization | model and projected-sector regression tests | Complete |
 | Floquet transfer eigenvalues and residuals | Julia Krylov extraction plus real \(N=1\) smoke | Complete |
@@ -28,12 +29,16 @@
 | Bounded normalization/counterterm variants | full adaptive evidence | 2/2 converged |
 | Kac normalization/counterterm variants | passed compression evidence | Local endpoint complete; full timestep/phase requires cluster |
 | Independent single-spin validation | `validation/uniform_tempo_single_spin.json` | Passed |
+| Published Fig. 3 bottom-panel reproduction | `validation/fig3_transversal_summary.json`, `figures/validation/fig3_transversal_summary.*` | 3/3 physical gates passed |
 | Independent OQuPy cross-check | `validation/uniform_tempo_oqupy_crosscheck.json` | Diagnostic, not convergence |
 | Publication PNG/PDF figures | `figures/paper` | Visually checked |
 | Pole-resolved hero figure | `figures/heat-valve/heat_valve_hero.{png,pdf}` | Visually checked; labeled candidate/rejected |
 | Chinese report | `docs/report-zh.md` | Complete |
 | Heat-valve negative-result report | `docs/heat-valve-result-zh.md` | Complete |
-| \(N=4\), continuum, critical exponent | Outside approved \(N=2,3\) scope | Not claimed |
+| \(N=4\) reflection implementation | `tests/test_symmetry_n4.py`, convergence-gated `n4-pilot` command | Complete, \(10\oplus6\) blocks |
+| \(N=4\) reflection-odd pilot and same-model benchmark | `figures/paper/n4_odd_j0p25_comparison.*` | Converged; \(\epsilon_j=3.405\) |
+| \(N=4\) reflection-even pilot and same-model benchmark | six-period tail-window evidence, comparison figure | Converged; \(\epsilon_j=5.494\) |
+| Continuum and critical exponent | Outside finite-system scope | Not claimed |
 
 ## Final gates
 

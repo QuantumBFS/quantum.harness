@@ -1,0 +1,47 @@
+Quantum Harness Issue #123 - Ranger machine-readable summary companion
+Generated: 2026-07-30 Asia/Shanghai
+UniformTEMPO revision: b76a018c32e5415989761d902b1b0e95f1a337da
+
+TIER 1 - PUBLISHED FIG. 3 BOTTOM REPRODUCTION
+Reference: https://zenodo.org/records/19593671
+Archive MD5: 0f3f9d9d8538aa96aee089973df7d9c2
+All points use dt = pi/60 and delay_periods = 12.
+
+wd/Omega  converged  bond  tolerance  phases  tail_amplitude  fixed_point_residual  hermiticity_error  shape_L1  area_ratio
+1.0       true       26    1e-7       15      0.0016272564    0.0000808715          0.0036099263       0.0562435 1.0267712
+1.5       true       14    1e-6       4       0.0023604904    0.0005313577          0.0042726147       0.2735650 1.1622298
+2.0       true       14    1e-6       4       0.0156057456    0.0003084472          0.0032007799       0.3718315 1.3118951
+
+TIER 2 - N=3 COLLECTIVE HEAT GRID
+Six of six reflection-sector points converged for J/Omega = 0.25, 0.5, 1.0.
+The reflection-odd projected model and heat curve are exactly J-independent.
+
+TIER 3 - N=3 SAME-MODEL UNIFORMTEMPO VS FLOQUET-MARKOV/QRT
+sector  J/Omega  trace_distance  correlation_error  heat_error
+even    0.25     0.9996997       1.1529658          9.0167068
+even    0.50     0.9999011       1.0341251          11.7157802
+even    1.00     0.9920892       1.0243259          9.0772348
+odd     0.25     0.4752510       0.5666192          0.3920114
+odd     0.50     0.4752510       0.5666192          0.3920114
+odd     1.00     0.4752510       0.5666192          0.3920114
+
+N=4 CONVERGENCE-GATED EXTENSION AT J/OMEGA=0.25
+sector  dimension  status       bond  tail_amplitude  markov_heat_error
+odd     6          converged    8     0.0367791       3.4047954
+even    10         converged    13    0.0213318       5.4937769
+
+N=4 odd largest continuous-spectrum peaks (omega/Omega, jbar):
+(0.4725, 0.00176277), (0.9600, 0.01938817), (1.4400, 0.00510966)
+Selected drive frequency: 0.9256058858 Omega
+
+Verification at this snapshot:
+pytest: 110 passed
+ruff: passed
+mypy: passed
+root result audit: passed (6 files)
+paper audit: passed
+
+Compact JSON evidence:
+validation/fig3_transversal_summary.json
+validation/n3_same_model_error_map.json
+validation/ARTIFACT_PROVENANCE.json

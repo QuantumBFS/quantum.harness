@@ -6,7 +6,7 @@
   "heat_valve_source_snapshot_commit": "b42725363a01e2ca88b951c3d28026df8104aa40",
   "uniform_tempo_revision": "b76a018c32e5415989761d902b1b0e95f1a337da",
   "verification": {
-    "pytest": "105 passed",
+    "pytest": "110 passed",
     "ruff": "passed",
     "mypy": "passed",
     "result_audit": "passed: 6 result files",
@@ -34,6 +34,25 @@
     "results/heat-valve/isolated_scan.json": "629a7fc00fad22912de6f2ed3ce0197b4aa467334791e1b7b9ff54baa3a9eb40",
     "results/heat-valve/heat_valve_manifest.json": "d7bb70e257089a4b7f88ba278a85e5533f1ac3fb8e5a6a7f637e98c714693303",
     "figures/heat-valve/heat_valve_hero.png": "fd203c4bab0f6a95da7b13139339f7e4a124c26a494e20d249ef1c77f6d56134",
-    "figures/heat-valve/heat_valve_hero.pdf": "ebc15ff891106b3592f41e3b1770a2dfae7d8b02533e1793d24a725f1a2a86d4"
+    "figures/heat-valve/heat_valve_hero.pdf": "ebc15ff891106b3592f41e3b1770a2dfae7d8b02533e1793d24a725f1a2a86d4",
+    "results/validation/fig3_transversal_wd1.json": "5747407d5c19494d826d1bc8a52cd29a654dc774dc2fc69dfa30d8c19ec5cd1e",
+    "results/validation/fig3_transversal_wd1p5.json": "531b1705c89a42bdb2fa7f8a707f99f42e162ee9c72958f15e2acb806fa15464",
+    "results/validation/fig3_transversal_wd2.json": "a45949df0bde3cf7688cbd7863035950203f0aace7ea790975f40ebb5e0a4494",
+    "validation/fig3_transversal_summary.json": "5aef6a8c161dd18d8c434c33544786589bb8c4b4344d5d0e54c5405f2b68d9e3",
+    "validation/fig3_transversal_wd2.json": "3bac6b1566f7f97b74132797b2bf64cecf40debd480fc5d4e1f5de3688948fbf",
+    "figures/validation/fig3_transversal_summary.pdf": "b61fff7fcfb3743720891a0d85614039c280438d1c00507d45cbe29dedce3c15",
+    "figures/validation/fig3_transversal_summary.png": "c51e6280b5e48a332753174ef2d74c1c5f6e2948f49f9ffbb0604bdf6d8347ef",
+    "validation/n3_same_model_error_map.json": "a9588ee808b66f984e45f724e7f201dfd9e617c611a68068a8452c4df6158320",
+    "figures/paper/n3_error_maps.pdf": "958ecd31b08da93d168942ef7fc61e7d22ac21ecc7a8fed6aae9b045af622dd7",
+    "figures/paper/n3_error_maps.png": "07c5d5444285c07a0c2a47c4d988702189a18bd8cca603191cb0b4515c2c883c",
+    "results/paper/n4_even_j0.25.json": "cdd9d5c2694d788e807568f101be31924b2d829c83fcab7bd58e58ad00516cb5",
+    "results/paper/n4_odd_j0.25.json": "e7f97894653ac16e9ec937e61e332862d05684a454b9adc01798b83d9f713096",
+    "validation/n4_pilot.json": "b32fa3f65c4128b46d827272450c83b7547a16a951600f40aa7890f70a53cba6",
+    "figures/paper/n4_even_j0p25_comparison.pdf": "a616fb969ba5c3493cec393f18794670b121b8567b34901766cc8fd06b09cccd",
+    "figures/paper/n4_even_j0p25_comparison.png": "b09f1efd0997a4de43f7ec3994e4b4f9250c323dfd29e5abc39c204d322a3013",
+    "figures/paper/n4_odd_j0p25_comparison.pdf": "f92914262b4b9acc7ef96b6e65e2dc19e10338f612c9b87fe3210fe626c3b529",
+    "figures/paper/n4_odd_j0p25_comparison.png": "e6a59cf9d95593b8ce5d2637b01909215f39caa72502acdb206cb639decaa391",
+    "report/data-summary.txt": "680d05b2243e07038dcca60cef09d2264ba15284fb108fe2fefc8210bb6c542e",
+    "output/pdf/Ranger-123-technical-report.pdf": "69447a7643c9e145e9507601af4af48c77bc0c1c9e93bf0ceafd6709a60035b8"
   }
 }

@@ -18,13 +18,14 @@ from .heat_current import heat_current_spectrum
 from .models import coupling_operator, drive_operator, ising_hamiltonian
 from .operators import ComplexMatrix
 from .spectra import diagonalize, transitions
-from .symmetry import Sector, n3_reflection_sectors, project
+from .symmetry import Sector, project, reflection_sectors
 
 
 @dataclass(frozen=True)
 class N3HeatPoint:
-    """Complete physical and numerical controls for one N=3 calculation."""
+    """Complete controls for one reflection-resolved N=3 or N=4 calculation."""
 
+    n: Literal[3, 4] = 3
     j: float = 0.5
     sector: Literal["even", "odd"] = "even"
     backend: Literal["oqupy", "uniform_tempo"] = "oqupy"
@@ -54,6 +55,8 @@ class N3HeatPoint:
     uniform_max_rank: int = 100_000
 
     def __post_init__(self) -> None:
+        if self.n not in (3, 4):
+            raise ValueError("n must be 3 or 4")
         if self.sector not in ("even", "odd"):
             raise ValueError("sector must be 'even' or 'odd'")
         if self.backend not in ("oqupy", "uniform_tempo"):
@@ -122,7 +125,7 @@ def _primary_bright_gap(
 def prepare_n3_sector(point: N3HeatPoint) -> PreparedN3:
     """Project the model exactly and select its primary bright resonance."""
     provisional = ModelConfig(
-        n=3,
+        n=point.n,
         j=point.j,
         omega=point.omega,
         drive_amplitude=point.drive_amplitude,
@@ -134,7 +137,7 @@ def prepare_n3_sector(point: N3HeatPoint) -> PreparedN3:
             point.alpha * point.cutoff if point.counterterm else 0.0
         ),
     )
-    odd, even = n3_reflection_sectors()
+    odd, even = reflection_sectors(point.n)
     sector = even if point.sector == "even" else odd
     h0 = project(ising_hamiltonian(provisional), sector)
     coupling = project(coupling_operator(provisional), sector)
@@ -146,7 +149,7 @@ def prepare_n3_sector(point: N3HeatPoint) -> PreparedN3:
         else point.drive_ratio * bright_gap
     )
     model = ModelConfig(
-        n=3,
+        n=point.n,
         j=point.j,
         omega=point.omega,
         drive_amplitude=point.drive_amplitude,
@@ -189,7 +192,7 @@ def run_n3_heat_point(
     revision = _git_commit() if commit is None else commit
     key = fingerprint(
         {
-            "experiment": f"n3_{point.backend}_heat",
+            "experiment": f"n{point.n}_{point.backend}_heat",
             "point": asdict(point),
             "model": asdict(prepared.model),
             "bath": asdict(prepared.bath),

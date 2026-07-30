@@ -1,4 +1,4 @@
-"""Exact Hilbert-space symmetry sectors for N=2 and N=3."""
+"""Exact Hilbert-space symmetry sectors for short open spin chains."""
 
 from __future__ import annotations
 
@@ -39,10 +39,23 @@ def n2_sectors() -> tuple[Sector, Sector]:
 
 
 def n3_reflection_sectors() -> tuple[Sector, Sector]:
-    reflection = swap_operator(0, 2, 3)
+    return reflection_sectors(3)
+
+
+def reflection_sectors(n: int) -> tuple[Sector, Sector]:
+    """Return odd/even sectors of full spatial reflection for an open chain."""
+    if n < 2:
+        raise ValueError("reflection sectors require at least two sites")
+    reflection = np.eye(2**n, dtype=np.complex128)
+    for site in range(n // 2):
+        reflection = swap_operator(site, n - 1 - site, n) @ reflection
     odd = _eigenspace(reflection, -1, "odd")
     even = _eigenspace(reflection, +1, "even")
     return odd, even
+
+
+def n4_reflection_sectors() -> tuple[Sector, Sector]:
+    return reflection_sectors(4)
 
 
 def project(operator: ComplexMatrix, sector: Sector) -> ComplexMatrix:

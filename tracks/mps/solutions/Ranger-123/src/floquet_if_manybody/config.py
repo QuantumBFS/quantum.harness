@@ -25,8 +25,8 @@ class ModelConfig:
     counterterm_strength: float = 0.0
 
     def __post_init__(self) -> None:
-        if self.n not in (1, 2, 3):
-            raise ValueError("n must be one of 1, 2, 3")
+        if self.n not in (1, 2, 3, 4):
+            raise ValueError("n must be one of 1, 2, 3, 4")
         if self.j < 0:
             raise ValueError("j must be nonnegative")
         if self.omega <= 0:

@@ -1,4 +1,4 @@
-# Floquet-IF Many-body: N=2,3
+# Floquet-IF Many-body: N=1--4 validation and N=2,3 production
 
 ## Submission
 
@@ -6,8 +6,9 @@
 - Members: Chenxi Wan, Yedi Shen, Junkai Wang
 - Challenge: #123
 - Track: MPS
-- Completed scope: reproducible collective common-bath calculations for
-  \(N=2,3\), plus a quantitative non-Markovian–Floquet-Markov benchmark.
+- Completed scope: published single-spin validation, reproducible collective
+  common-bath calculations for \(N=2,3\), a convergence-gated \(N=4\) point,
+  and quantitative non-Markovian--Floquet-Markov benchmarks.
 
 This repository is a reproducible implementation of the two- and three-spin
 part of [QuantumBFS/quantum.harness issue #123](https://github.com/QuantumBFS/quantum.harness/issues/123).
@@ -32,13 +33,20 @@ records every convergence comparison in JSON.
   \(J/\Omega=0.25,0.5,1\) in both reflection sectors.
 - A converged \(3\times3\) \(N=2\) calibration grid comparing uniform TEMPO
   with Floquet-Markov/QRT using state, correlation, and heat-spectrum errors.
+- A converged 6/6 same-model \(N=3\) benchmark comparing each existing
+  reflection-sector UniformTEMPO point directly to Floquet-Markov/QRT.
 - Floquet matrix-element, collective-variance, counterterm, and normalization
   diagnostics.
 - Full convergence of the two bounded-normalization model variants.
 - Compression convergence of both Kac-normalized variants, with their
   remaining timestep/phase refinement explicitly marked as cluster work.
-- An independent single-spin smoke test and a coarse UniformTEMPO–OQuPy
-  cross-check.
+- An independent 3/3 reproduction of the published transversal-drive Fig. 3
+  bottom panel, plus a coarse UniformTEMPO--OQuPy cross-check.
+- A converged reflection-odd \(N=4\) pilot with a same-model
+  Floquet-Markov/QRT heat-spectrum error of 3.405 and resolved collective
+  spectral peaks.
+- A converged reflection-even \(N=4\) pilot using an automatically extended
+  six-period correlation window; its same-model heat-spectrum error is 5.494.
 - A pole-resolved, fixed-frequency \(N=1,2,3\) heat-valve pre-scan and
   three-point \(N=3\) UniformTEMPO go/no-go pilot. The pilot rejects—not
   confirms—the dark-channel hypothesis: the quasienergy gap collapses while
@@ -46,8 +54,11 @@ records every convergence comparison in JSON.
 
 The main \(N=2\) and \(N=3\) results do **not** require a cluster. The failed
 heat-valve pilot does not justify a cluster-scale nine-point continuation.
-Only the optional full Kac refinement does. The project makes no \(N=4\),
-thermodynamic-limit, continuum, or critical-exponent claim.
+Only the optional full Kac refinement does. Reflection-resolved \(N=4\)
+support is implemented and both sector pilots pass all declared gates; the
+even sector records the required six-period tail-window extension explicitly.
+The project makes no thermodynamic-limit, continuum, or critical-exponent
+claim.
 
 ## Reproduce
 
@@ -67,11 +78,19 @@ PYTHON_BIN=.venv/bin/python scripts/run_paper_extension.sh all
 
 # Independent backend checks
 .venv/bin/python scripts/run_uniform_validation.py
+.venv/bin/python scripts/run_fig3_validation.py --drive-frequency 1
+.venv/bin/python scripts/run_fig3_validation.py --drive-frequency 1.5
+.venv/bin/python scripts/run_fig3_validation.py --drive-frequency 2
+.venv/bin/python scripts/run_fig3_validation.py --plot-summary
+
+# Convergence-gated N=4 sector points
+.venv/bin/python -m floquet_if_manybody.cli n4-pilot --sector odd --j 0.25
+.venv/bin/python -m floquet_if_manybody.cli n4-pilot --sector even --j 0.25
 
 # Software and result verification
 .venv/bin/python -m pytest -q
-.venv/bin/ruff check src tests scripts/run_uniform_validation.py
-.venv/bin/mypy src
+.venv/bin/python -m ruff check src tests scripts/run_uniform_validation.py scripts/run_fig3_validation.py
+.venv/bin/python -m mypy src scripts/run_fig3_validation.py
 .venv/bin/python -m floquet_if_manybody.cli audit results
 .venv/bin/python -m floquet_if_manybody.cli paper-audit results/paper
 
@@ -108,6 +127,10 @@ FULL_KAC=1 PYTHON_BIN=.venv/bin/python \
 | `figures/paper/n3_sector_heat.*` | \(N=3\) even/odd heat spectra | 6/6 converged |
 | `figures/paper/n3_odd_difference.*` | Odd-sector \(J\)-invariance residual | Exact zero on the projected grid |
 | `figures/paper/error_maps.*` | Uniform TEMPO vs Floquet-Markov/QRT | 9/9 converged |
+| `figures/paper/n3_error_maps.*` | Same-parameter \(N=3\) UniformTEMPO vs Floquet-Markov/QRT | 6/6 converged |
+| `figures/validation/fig3_transversal_summary.*` | Published Fig. 3 bottom data vs independent calculation | 3/3 physical gates passed |
+| `figures/paper/n4_odd_j0p25_comparison.*` | Same-model \(N=4\) odd-sector comparison | Converged; heat error 3.405 |
+| `figures/paper/n4_even_j0p25_comparison.*` | Same-model \(N=4\) even-sector comparison | Converged; heat error 5.494 |
 | `figures/paper/dark_diagnostics.*` | Floquet matrix elements, heat, and \(\mathrm{Var}(S)\) | Converged heat plus exact Floquet diagnostic |
 | `figures/paper/model_variants.*` | Bounded/Kac and counterterm comparison | Bounded converged; Kac compression-audited |
 | `figures/heat-valve/heat_valve_hero.*` | Quasienergy collapse tested against exact transfer-pole residues | Pilot complete; dark-channel claim rejected |

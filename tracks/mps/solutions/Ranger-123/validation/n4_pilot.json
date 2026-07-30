@@ -1,0 +1,49 @@
+{
+  "method": "n4_uniform_tempo_convergence_pilot",
+  "complete": true,
+  "converged_points": 2,
+  "model_scope": "same N=4 Hamiltonian and bath at J/Omega=0.25, resolved by reflection sector",
+  "points": [
+    {
+      "sector": "even",
+      "dimension": 10,
+      "delay_periods": 6,
+      "bond_dimension": 13,
+      "connected_tail_amplitude": 0.02133175984671692,
+      "fixed_point_residual": 0.00035886128826079347,
+      "hermiticity_error": 0.0008819593032858546,
+      "trace_error": 0.0003388881943872353,
+      "minimum_density_eigenvalue": -0.00046822521586976576,
+      "markov_metrics": {
+        "trace_distance_raw": 1.0008536447854561,
+        "correlation_error": 1.6286041909228848,
+        "heat_error": 5.493776886006749
+      }
+    },
+    {
+      "sector": "odd",
+      "dimension": 6,
+      "delay_periods": 3,
+      "bond_dimension": 8,
+      "connected_tail_amplitude": 0.036779095635906804,
+      "fixed_point_residual": 0.00037773511660346736,
+      "hermiticity_error": 0.00009174537985208175,
+      "trace_error": 0.0003542407259329822,
+      "minimum_density_eigenvalue": -0.003262969712857272,
+      "markov_metrics": {
+        "trace_distance_raw": 1.0043613609854345,
+        "correlation_error": 1.601339921831332,
+        "heat_error": 3.4047954293441243
+      }
+    }
+  ],
+  "note": "Raw trace-norm diagnostics can exceed one slightly because the accepted UniformTEMPO density matrices retain small negative eigenvalues within the preregistered -0.005 gate.",
+  "artifact_sha256": {
+    "results/paper/n4_even_j0.25.json": "cdd9d5c2694d788e807568f101be31924b2d829c83fcab7bd58e58ad00516cb5",
+    "results/paper/n4_odd_j0.25.json": "e7f97894653ac16e9ec937e61e332862d05684a454b9adc01798b83d9f713096",
+    "figures/paper/n4_even_j0p25_comparison.pdf": "a616fb969ba5c3493cec393f18794670b121b8567b34901766cc8fd06b09cccd",
+    "figures/paper/n4_even_j0p25_comparison.png": "b09f1efd0997a4de43f7ec3994e4b4f9250c323dfd29e5abc39c204d322a3013",
+    "figures/paper/n4_odd_j0p25_comparison.pdf": "f92914262b4b9acc7ef96b6e65e2dc19e10338f612c9b87fe3210fe626c3b529",
+    "figures/paper/n4_odd_j0p25_comparison.png": "e6a59cf9d95593b8ce5d2637b01909215f39caa72502acdb206cb639decaa391"
+  }
+}

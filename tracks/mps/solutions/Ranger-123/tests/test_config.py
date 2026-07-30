@@ -19,3 +19,7 @@ def test_normalizations():
 def test_invalid_parameters_rejected():
     with pytest.raises(ValueError, match="omega"):
         ModelConfig(omega=0)
+
+
+def test_model_config_accepts_n4():
+    assert ModelConfig(n=4).n == 4

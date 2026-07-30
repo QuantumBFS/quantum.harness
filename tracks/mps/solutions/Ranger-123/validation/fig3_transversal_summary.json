@@ -1,0 +1,41 @@
+{
+  "method": "uniform_tempo_fig3_transversal_reproduction",
+  "complete": true,
+  "converged_points": 3,
+  "scope": "independent N=1 reproduction of all three published Fig. 3 bottom-panel curves",
+  "reference": {
+    "record": "https://zenodo.org/records/19593671",
+    "archive_md5": "0f3f9d9d8538aa96aee089973df7d9c2",
+    "panel": "Fig. 3 bottom"
+  },
+  "points": [
+    {
+      "drive_frequency": 1.0,
+      "converged": true,
+      "controls": {"steps_per_period": 120, "tolerance": 1e-7, "phase_samples": 15, "delay_periods": 12},
+      "diagnostics": {"bond_dimension": 26, "connected_tail_amplitude": 0.001627256392104337, "fixed_point_residual": 0.00008087148135240392, "hermiticity_error": 0.0036099263191221318, "trace_error": 0.0000749222438648638, "minimum_density_eigenvalue": 0.2358702724786363},
+      "metrics": {"continuous_relative_l1": 0.06333707191194522, "normalized_shape_relative_l1": 0.056243489156938865, "integrated_magnitude_ratio": 1.026771197996517}
+    },
+    {
+      "drive_frequency": 1.5,
+      "converged": true,
+      "controls": {"steps_per_period": 80, "tolerance": 1e-6, "phase_samples": 4, "delay_periods": 12},
+      "diagnostics": {"bond_dimension": 14, "connected_tail_amplitude": 0.0023604904459384114, "fixed_point_residual": 0.0005313576529202555, "hermiticity_error": 0.004272614695140364, "trace_error": 0.0003929538774845975, "minimum_density_eigenvalue": 0.15004045531920804},
+      "metrics": {"continuous_relative_l1": 0.23826748531590006, "normalized_shape_relative_l1": 0.2735649534808351, "integrated_magnitude_ratio": 1.1622298099461896}
+    },
+    {
+      "drive_frequency": 2.0,
+      "converged": true,
+      "controls": {"steps_per_period": 60, "tolerance": 1e-6, "phase_samples": 4, "delay_periods": 12},
+      "diagnostics": {"bond_dimension": 14, "connected_tail_amplitude": 0.015605745626824328, "fixed_point_residual": 0.0003084472032725321, "hermiticity_error": 0.00320077988078783, "trace_error": 0.00022911934882153764, "minimum_density_eigenvalue": 0.05449589091447455},
+      "metrics": {"continuous_relative_l1": 0.3455071050704775, "normalized_shape_relative_l1": 0.37183146692817987, "integrated_magnitude_ratio": 1.3118951143348248}
+    }
+  ],
+  "artifact_sha256": {
+    "results/validation/fig3_transversal_wd1.json": "5747407d5c19494d826d1bc8a52cd29a654dc774dc2fc69dfa30d8c19ec5cd1e",
+    "results/validation/fig3_transversal_wd1p5.json": "531b1705c89a42bdb2fa7f8a707f99f42e162ee9c72958f15e2acb806fa15464",
+    "results/validation/fig3_transversal_wd2.json": "a45949df0bde3cf7688cbd7863035950203f0aace7ea790975f40ebb5e0a4494",
+    "figures/validation/fig3_transversal_summary.pdf": "b61fff7fcfb3743720891a0d85614039c280438d1c00507d45cbe29dedce3c15",
+    "figures/validation/fig3_transversal_summary.png": "c51e6280b5e48a332753174ef2d74c1c5f6e2948f49f9ffbb0604bdf6d8347ef"
+  }
+}

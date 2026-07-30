@@ -265,6 +265,87 @@ def plot_error_maps(manifest: dict[str, Any], stem: Path) -> None:
     _save(figure, stem)
 
 
+def plot_n3_error_maps(manifest: dict[str, Any], stem: Path) -> None:
+    """Plot same-parameter N=3 exact-versus-Markov errors by sector and J."""
+    sectors = ("even", "odd")
+    couplings = (0.25, 0.5, 1.0)
+    names = (
+        ("trace_distance", r"$D_\rho$"),
+        ("correlation", r"$\epsilon_C$"),
+        ("heat", r"$\epsilon_j$"),
+    )
+    figure, axes = plt.subplots(1, 3, figsize=(11.5, 3.5))
+    for axis, (name, label) in zip(axes, names, strict=True):
+        values = np.full((len(sectors), len(couplings)), np.nan)
+        for point in manifest["points"]:
+            if point["status"] != "converged":
+                continue
+            row = sectors.index(str(point["sector"]))
+            column = couplings.index(float(point["j"]))
+            values[row, column] = point["metrics"][name]
+        image = axis.imshow(values, origin="upper", aspect="auto", cmap="magma")
+        axis.set_xticks(range(len(couplings)), labels=couplings)
+        axis.set_yticks(range(len(sectors)), labels=sectors)
+        axis.set(xlabel=r"$J/\Omega$", ylabel="reflection sector", title=label)
+        for row in range(len(sectors)):
+            for column in range(len(couplings)):
+                value = values[row, column]
+                axis.text(
+                    column,
+                    row,
+                    "masked" if np.isnan(value) else f"{value:.2g}",
+                    ha="center",
+                    va="center",
+                    color="white",
+                    fontsize=8,
+                )
+        figure.colorbar(image, ax=axis, fraction=0.046, pad=0.04)
+    figure.suptitle("N=3 same-model UniformTEMPO versus Floquet-Markov/QRT")
+    figure.tight_layout()
+    _save(figure, stem)
+
+
+def plot_n4_pilot_comparison(result: dict[str, Any], stem: Path) -> None:
+    """Plot one convergence-gated N=4 spectrum against its same-model benchmark."""
+    if not result.get("converged") or result.get("markov") is None:
+        raise ValueError("N=4 pilot must converge before plotting a comparison")
+    exact = result["exact"]
+    markov = result["markov"]
+    metrics = result["comparison"]["metrics"]
+    figure, axis = plt.subplots(figsize=(6.5, 3.9))
+    axis.plot(
+        exact["frequency"],
+        exact["continuous"],
+        label="UniformTEMPO",
+        color="#0072B2",
+    )
+    axis.plot(
+        markov["frequency"],
+        markov["continuous"],
+        "--",
+        label="Floquet-Markov/QRT",
+        color="#D55E00",
+    )
+    for peak in exact["delta_peaks"]:
+        frequency = float(peak["frequency"])
+        if frequency <= 3:
+            axis.axvline(frequency, color="black", alpha=0.25, lw=0.7)
+    axis.set(
+        xlim=(0, 3),
+        xlabel=r"bath frequency $\omega/\Omega$",
+        ylabel=r"continuous $\bar j(\omega)$",
+        title=(
+            rf"$N=4$ reflection-{result['sector']}, $J/\Omega={result['j']:g}$"
+            "\n"
+            rf"same-model heat error $\epsilon_j={metrics['heat']:.3g}$"
+        ),
+    )
+    axis.grid(alpha=0.2)
+    axis.legend(frameon=False)
+    figure.tight_layout()
+    _save(figure, stem)
+
+
 def plot_dark_diagnostics(manifest: dict[str, Any], stem: Path) -> None:
     diagnostics = sorted(
         [
