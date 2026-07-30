@@ -6,9 +6,9 @@
   ],
   "aggregate_sources": [
     {
-      "bytes": 64620,
+      "bytes": 65030,
       "path": "results/deadline_analysis/gap_scan_trials.csv",
-      "sha256": "29fa7887c519ba10efccc6d0a890d52705bfcc73027f215eb8f69e8e256beeeb"
+      "sha256": "4196145cc3a5bc1696ef9fe582c666e93cee3a854a70932d5e640ac545282732"
     },
     {
       "bytes": 63137,
@@ -40,15 +40,15 @@
     "accepted_intervals": 2,
     "accepted_one_sided_objectives": 26,
     "certified_gap_upper_statements": 9,
-    "durable_fixed_gamma_rows": 146,
+    "durable_fixed_gamma_rows": 150,
     "exact_projected_observable_bounds": 3,
-    "feasible_fixed_gamma_rows": 64,
+    "feasible_fixed_gamma_rows": 67,
     "fixed_gamma_rows": 205,
     "floating_objectives": 100,
     "interval_rows": 69,
     "objective_errors": 8,
     "observable_rows": 138,
-    "unknown_fixed_gamma_rows": 93,
+    "unknown_fixed_gamma_rows": 90,
     "verified_excluded_fixed_gamma_rows": 48
   },
   "raw_campaign_directories": [
@@ -67,7 +67,7 @@
       "role": "diagnostic"
     },
     {
-      "bytes": 513811,
+      "bytes": 523804,
       "description": "Canonical merged tables, plots, and live calculation report.",
       "directory": "deadline_analysis",
       "files": 11,
@@ -144,10 +144,10 @@
       "role": "production"
     },
     {
-      "bytes": 68343240,
+      "bytes": 64035998,
       "description": "Extended Target-2 geometry grid; may be updated by SCNet.",
       "directory": "deadline_geometry_grid",
-      "files": 9,
+      "files": 14,
       "role": "production-live"
     },
     {
@@ -249,10 +249,10 @@
       "role": "validation"
     },
     {
-      "bytes": 182359,
+      "bytes": 185129,
       "description": "Scheduler logs; not scientific evidence by themselves.",
       "directory": "slurm",
-      "files": 228,
+      "files": 232,
       "role": "operations"
     },
     {
@@ -277,5 +277,5 @@
     "primary_encoding": "matrix",
     "primary_symmetry": "U1_INVARIANT_KMS_STATES"
   },
-  "snapshot_generated": "2026-07-30T16:47:41+08:00"
+  "snapshot_generated": "2026-07-30T16:54:57+08:00"
 }

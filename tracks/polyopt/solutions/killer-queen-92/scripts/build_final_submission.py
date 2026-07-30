@@ -772,7 +772,7 @@ def build() -> None:
             f"- **Issue:** [Quantum Harness #92]({ISSUE_URL})",
             f"- **Method:** [Xu et al., thermodynamic bulk-gap hierarchy]({PAPER_URL})",
             f"- **Snapshot:** {generated}",
-            "**Verdict:** Partial challenge result—core implementation complete, certified hard-core baseline subset, mandatory larger-level/cutoff campaign incomplete.",
+            "- **Verdict:** Partial challenge result—core implementation complete, certified hard-core baseline subset, mandatory larger-level/cutoff campaign incomplete.",
             "",
             "## Executive result",
             "",

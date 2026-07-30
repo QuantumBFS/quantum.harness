@@ -1,6 +1,6 @@
 # Issue #92 central algorithm and calculation status
 
-Last updated: **2026-07-30 16:46 CST**
+Last updated: **2026-07-30 16:55 CST**
 Source of truth: [Quantum Harness issue #92](https://github.com/QuantumBFS/quantum.harness/issues/92)
 Primary method: Xu *et al.*, [*The bulk spectral gap is semi-decidable: a
 convergent family of certified upper bounds*](https://arxiv.org/abs/2606.03836)
@@ -110,10 +110,11 @@ exact-projected EXCLUDED `0.518`; the interior `0.515` and `0.516` trials remain
 numerical `UNKNOWN`, so the `0.004U` search span is not called a clean bracket.  The
 `{12,4}` now has exact-projected exclusion at `0.520` above checked FEASIBLE
 `0.510`, while the line graph now has exact exclusion `0.530` and checked
-FEASIBLE `0.510`; their remaining transition samples are active.  The extended
-geometry grid has additionally exact-certified coarse `{12,4}` upper statements
-`Gamma/U<=0.300` at P4 and `<=1.000` at P5.  Their zero-gap probes are still
-running, so neither has a FEASIBLE-side search span yet.  P5 at
+FEASIBLE `0.510`; unresolved interior transition samples remain visible.  The
+extended geometry grid additionally exact-certified coarse `{12,4}` upper
+statements `Gamma/U<=0.300` at P4 and `<=1.000` at P5.  Both now have
+primal-checked `gamma/U=0` anchors, giving coarse `0.300U` and `1.000U` search
+spans rather than requested-precision endpoints.  P5 at
 `gamma/U=0.050` has the first two accepted two-sided
 intervals: `0.9944073 <= rho0 <= 0.9999995` and, by the exact hard-core
 identity, `4.879816e-7 <= F0 <= 0.005592673`.  No accepted `K0` interval or
@@ -1088,3 +1089,12 @@ maximum simultaneous issue-92 request at 448 GB.
   projection, so it remains `UNKNOWN`.  Scheduler-tested recovery `41546113`
   is dependency-held after the full geometry array and excludes that node plus
   the four earlier suspect nodes, preserving the 450-GiB issue cap.
+- Geometry tasks `41543225_1` and `_2` completed normally.  `{12,4}` P3 adds
+  only primal-checked `FEASIBLE(0)` plus numerical `UNKNOWN(0.600)`, so it gives
+  no upper statement.  P4 combines `FEASIBLE(0)` with the exact-projected
+  `EXCLUDED(0.300)` row; this is a certified coarse search span, not a refined
+  endpoint.  The refreshed aggregate has 150/205 durable rows: 67 FEASIBLE,
+  48 EXCLUDED, and 90 UNKNOWN.
+- Published the deadline-safe baseline as commit `d1ebd7d` and opened Harness
+  PR #267.  The PR contains only `tracks/polyopt/solutions/killer-queen-92/`;
+  subsequent SCNet evidence is added only after the same independent checks.

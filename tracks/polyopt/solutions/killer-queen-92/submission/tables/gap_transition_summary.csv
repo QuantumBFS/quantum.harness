@@ -1,7 +1,7 @@
 geometry,graph,point,t,mu,nmax,L,d,last_feasible,verified_excluded,search_span,unresolved_inside,clean_0p005,certificate_class,precision_bits,affine_residual,psd_verified,farkas_margin_lower
 124,"{12,4}",P2,0.05,0.5,1,1,2,0.51,0.52,0.010000000000000009,1,False,VERIFIED_EXACT_PROJECTED,256,0,True,1
-124,"{12,4}",P4,0.03,0.15,1,1,2,,0.3,,0,False,VERIFIED_EXACT_PROJECTED,256,0,True,1
-124,"{12,4}",P5,0.03,0.75,1,1,2,,1.0,,0,False,VERIFIED_EXACT_PROJECTED,256,0,True,1
+124,"{12,4}",P4,0.03,0.15,1,1,2,0.0,0.3,0.3,0,False,VERIFIED_EXACT_PROJECTED,256,0,True,1
+124,"{12,4}",P5,0.03,0.75,1,1,2,0.0,1.0,1.0,0,False,VERIFIED_EXACT_PROJECTED,256,0,True,1
 83,"{8,3}",P1,0.03,0.5,1,1,2,0.5,0.505,0.0050000000000000044,0,True,VERIFIED_EXACT_PROJECTED,256,0,True,1
 83,"{8,3}",P2,0.05,0.5,1,1,2,0.509,0.511,0.0020000000000000018,1,False,VERIFIED_EXACT_PROJECTED,256,0,True,1
 83,"{8,3}",P3,0.06,0.5,1,1,2,0.514,0.518,0.0040000000000000036,2,False,VERIFIED_EXACT_PROJECTED,256,0,True,1

@@ -1,9 +1,9 @@
 # Certified bulk-gap bounds for truncated Bose–Hubbard models
 
-**Issue:** [Quantum Harness #92](https://github.com/QuantumBFS/quantum.harness/issues/92)
-**Method:** [Xu et al., thermodynamic bulk-gap hierarchy](https://arxiv.org/abs/2606.03836)
-**Snapshot:** 2026-07-30T16:47:41+08:00
-**Verdict:** Partial challenge result—core implementation complete, certified hard-core baseline subset, mandatory larger-level/cutoff campaign incomplete.
+- **Issue:** [Quantum Harness #92](https://github.com/QuantumBFS/quantum.harness/issues/92)
+- **Method:** [Xu et al., thermodynamic bulk-gap hierarchy](https://arxiv.org/abs/2606.03836)
+- **Snapshot:** 2026-07-30T16:54:57+08:00
+- **Verdict:** Partial challenge result—core implementation complete, certified hard-core baseline subset, mandatory larger-level/cutoff campaign incomplete.
 
 ## Executive result
 
@@ -14,8 +14,8 @@ The independently checked hierarchy gives **9 hard-core finite-level gap upper s
 | graph | point | (t/U,μ/U) | (L,d) | last FEASIBLE | first EXCLUDED | span | unknown inside | 0.005 clean |
 |---|---|---|---|---|---|---|---|---|
 | {12,4} | P2 | (0.05,0.5) | (1,2) | 0.51 | 0.52 | 0.01 | 1 | open |
-| {12,4} | P4 | (0.03,0.15) | (1,2) | — | 0.3 | — | 0 | open |
-| {12,4} | P5 | (0.03,0.75) | (1,2) | — | 1 | — | 0 | open |
+| {12,4} | P4 | (0.03,0.15) | (1,2) | 0 | 0.3 | 0.3 | 0 | open |
+| {12,4} | P5 | (0.03,0.75) | (1,2) | 0 | 1 | 1 | 0 | open |
 | {8,3} | P1 | (0.03,0.5) | (1,2) | 0.5 | 0.505 | 0.005 | 0 | PASS |
 | {8,3} | P2 | (0.05,0.5) | (1,2) | 0.509 | 0.511 | 0.002 | 1 | open |
 | {8,3} | P3 | (0.06,0.5) | (1,2) | 0.514 | 0.518 | 0.004 | 2 | open |
@@ -38,9 +38,9 @@ At `{8,3}` P4 and `γ/U=0.10`, exact projection certifies `ρ0≥0.9455347492001
 | accepted one-sided objectives | 26 |
 | floating objectives (not certified) | 100 |
 | accepted intervals | 2 / 69 |
-| durable fixed-γ rows | 146 / 205 |
+| durable fixed-γ rows | 150 / 205 |
 | verified EXCLUDED trial rows | 48 |
-| UNKNOWN fixed-γ rows | 93 |
+| UNKNOWN fixed-γ rows | 90 |
 
 ## Implementation and verification
 

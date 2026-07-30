@@ -1,6 +1,6 @@
 # Agent handoff and decision log — issue #92
 
-Last updated: **2026-07-30 16:46 CST**
+Last updated: **2026-07-30 16:55 CST**
 Active workflow: [`status.md`](status.md) — **Gate 3 nested lattice levels**,
 with `W0.5` blocked on a Mosek license
 Issue: [certified bulk spectral-gap bounds for truncated Bose--Hubbard models
@@ -66,7 +66,7 @@ Current completion against that finish line:
 | item | state |
 |---|---|
 | active gate | Gate 3 — nested, geometry-sensitive lattice levels |
-| active work item | monitor optimized cutoff-two TS2 `(1,3)` dry job `41542822` followed by serial `(2,2)` guard `41544379`; geometry grid `41543225` has exact `{12,4}` P4/P5 coarse exclusions while its remaining trials/cells run; task 0 failed with node-level `SIGBUS` and dependency-safe recovery `41546113` is queued after the full array; synchronize every durable checkpoint and freeze the report before 20:00 CST |
+| active work item | monitor optimized cutoff-two TS2 `(1,3)` dry job `41542822` followed by serial `(2,2)` guard `41544379`; geometry tasks 1/2 completed, tasks 3--6 run, and task 7 waits; task 0 failed with node-level `SIGBUS` and dependency-safe recovery `41546113` is queued after the full array; synchronize every durable checkpoint and freeze the report before 20:00 CST |
 | carried blocker | `W0.5` — SCNet is configured, but the pinned upstream Ising solve still lacks a Mosek license |
 | central implementation | `julia/src/` plus Python graph/campaign bridge |
 | work that must wait | required-width endpoint and full-grid claims until unresolved scans and mandatory cells finish; nested comparisons until memory is redesigned |
@@ -423,10 +423,15 @@ Detailed tables belong in `status.md` and `REPORT.md`, not here.
   become a report endpoint or a decisive interior sample; 21 Python tests and
   575 Julia assertions pass.
 - Extended-grid `{12,4}` P4 `gamma/U=0.300` and P5 `1.000` are exact-verified
-  coarse upper statements; their zero-gap trials are active, so neither has a
-  FEASIBLE-side span.  P1 task 0 died with `SIGBUS` on `b10r4n25` during exact
-  projection and remains `UNKNOWN`; dependency-safe recovery `41546113` runs
-  only after array `41543225` and excludes all five suspect nodes.
+  coarse upper statements.  P1 task 0 died with `SIGBUS` on `b10r4n25` during
+  exact projection and remains `UNKNOWN`; dependency-safe recovery `41546113`
+  runs only after array `41543225` and excludes all five suspect nodes.
+- Geometry tasks 1/2 completed: `{12,4}` P3 is `FEASIBLE(0)` plus
+  `UNKNOWN(0.600)` and therefore produces no gap statement; P4 is
+  `FEASIBLE(0)` plus exact `EXCLUDED(0.300)`, a coarse certified span.  The
+  refreshed snapshot has 150/205 durable rows (67 FEASIBLE, 48 EXCLUDED,
+  90 UNKNOWN).  Submission commit `d1ebd7d` is public in Harness PR #267;
+  only independently accepted follow-up evidence may update it.
 
 ## 10. Handoff protocol
 
