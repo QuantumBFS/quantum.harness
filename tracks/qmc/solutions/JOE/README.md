@@ -17,13 +17,13 @@
 
 ## Working repository
 
-- Repository: https://github.com/Joe-Nor/JOE-Harnessing-Quantum-2026
-- Immutable source snapshot:
-  https://github.com/Joe-Nor/JOE-Harnessing-Quantum-2026/tree/e98148a54b35b9bdb7ad0b2672f027790a0f1603
-- [Human-readable reviewer guide](https://github.com/Joe-Nor/JOE-Harnessing-Quantum-2026/blob/e98148a54b35b9bdb7ad0b2672f027790a0f1603/challenges/15-chiral-graviton/REVIEWER_GUIDE.md)
-- [Reproduction guide](https://github.com/Joe-Nor/JOE-Harnessing-Quantum-2026/blob/e98148a54b35b9bdb7ad0b2672f027790a0f1603/challenges/15-chiral-graviton/REPRODUCIBILITY.md)
+- [Immutable reviewer-ready snapshot `a74b92a`](https://github.com/Joe-Nor/JOE-Harnessing-Quantum-2026/tree/a74b92a7da96f1eaceebd57f550e0405cf6c04f5)
+- [Concise Challenge 15 review](https://github.com/Joe-Nor/JOE-Harnessing-Quantum-2026/blob/a74b92a7da96f1eaceebd57f550e0405cf6c04f5/challenges/15-chiral-graviton/CHALLENGE15_REVIEW.md)
+- [Projected-CF Pfaffian derivation and implementation scope](https://github.com/Joe-Nor/JOE-Harnessing-Quantum-2026/blob/a74b92a7da96f1eaceebd57f550e0405cf6c04f5/challenges/15-chiral-graviton/PROJECTED_CF_PFAFFIAN.md)
+- [Reproduction guide](https://github.com/Joe-Nor/JOE-Harnessing-Quantum-2026/blob/a74b92a7da96f1eaceebd57f550e0405cf6c04f5/challenges/15-chiral-graviton/REPRODUCIBILITY.md)
+- [Machine-readable \(N=4\) Pfaffian oracle](https://github.com/Joe-Nor/JOE-Harnessing-Quantum-2026/blob/a74b92a7da96f1eaceebd57f550e0405cf6c04f5/challenges/15-chiral-graviton/results/projected_cf_pfaffian_N4_oracle.json)
 
-## Verified finite-size result
+## Verified finite-size results
 
 For \(N=4\), the joint VMC calculation gives
 
@@ -49,6 +49,33 @@ so the VMC and ED gaps differ by \(0.24\) Monte Carlo standard errors. This
 closes the small-system validation loop; it is not a thermodynamic-limit gap
 claim. The snapshot contains 84 project tests and 61 independent Stage-1
 Fock-oracle tests.
+
+The newer projected-CF route constructs the pure rank-two broken-pair tangent
+
+```math
+\Psi_{2,M}(X)
+=(-1)^P
+\left.
+\frac{d}{d\epsilon}
+\operatorname{Pf}\!\left(G+\epsilon B^M\right)
+\right|_{\epsilon=0}.
+```
+
+At \(N=4\), its two active channels span the complete
+\(\mu_2=2\) multiplicity space. The deterministic certificate reports
+
+```text
+|E₂(Pfaffian) − E₂(ED)| = 4.44×10⁻¹⁶
+maximum fivefold splitting = 4.44×10⁻¹⁶
+maximum coordinate-symmetry residual = 2.83×10⁻¹⁵
+maximum ‖(L²−6)ψ‖ residual = 1.31×10⁻¹³
+```
+
+This Pfaffian result is a deterministic small-system oracle, not a Monte Carlo
+error bar. It does not establish a large-\(N\) neural state, a thermodynamic
+gap, or chirality. Production coordinate evaluation is polynomial and does
+not enumerate Fock determinants, but the current large-\(N\) VMC extrapolation
+remains unfinished.
 
 Challenge 121 is intentionally absent from this branch and PR. It is submitted
 separately by team 格格巫.
