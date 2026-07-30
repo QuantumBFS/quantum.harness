@@ -2930,3 +2930,240 @@ recovered.  The five-commit range from `f2b7fc2` through `bf8f326` was
 pushed to `shared/work/zibo/representation-cones`; an independent
 `git ls-remote` returned the same full `bf8f326...` SHA as local HEAD, and
 the local branch was clean and no longer ahead.
+
+## 2026-07-30 — Oddcycle local-H first batch
+
+The frozen first batch completed all 40 length-one through length-four cells
+at clean source
+`bebab46956baf3c672f68349a76e49879f6be483`. The source archive SHA-256 was
+`be546b877bcd86fac98705b1417183dd204647095746692a7c92ec7af59c1f25`;
+the settings SHA-256 was
+`c2ba0297dc3c59e74db52cfbebc3858c8a04d57b0867e3bb088d5f2776dc30ae`.
+The accepted exact-SHA WSL regression was `41 passed in 31.88s` and was not
+repeated.
+
+Its precompute working directory and exact command were:
+
+```bash
+cd /home/zibojin/code/nnv-task1-oddcycle-word/tracks/qmc/solutions/no-negative-vibes
+env OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 \
+  NUMEXPR_NUM_THREADS=1 PYTHONHASHSEED=0 \
+  /home/zibojin/miniforge3/envs/quantum_harness/bin/python -m pytest -q \
+  tests/test_oddcycle_local_hs_runner.py \
+  tests/test_oddcycle_word_operator.py \
+  tests/test_oddcycle_local_hs_scan.py \
+  tests/test_oddcycle_local_hs_exact.py \
+  tests/test_oddcycle_local_targets.py \
+  tests/test_oddcycle_transfer_portfolio.py \
+  tests/test_oddcycle_path_metric.py \
+  tests/test_oddcycle_pair_physical.py \
+  tests/test_oddcycle_final_certificate.py \
+  tests/test_oddcycle_robust_certificate.py
+```
+
+The clean WSL worktree
+`/home/zibojin/code/nnv-local-h-dev` was detached at the exact SHA. CPU source
+provenance was:
+
+```text
+archive:
+  /home/jzb/nnv-local-h-bebab46956baf3c672f68349a76e49879f6be483-source.tar
+archive SHA list:
+  /home/jzb/nnv-local-h-bebab46956baf3c672f68349a76e49879f6be483-source.tar.sha256
+source SHA file:
+  /home/jzb/nnv-local-h-bebab46956baf3c672f68349a76e49879f6be483.source-sha
+extracted source:
+  /home/jzb/code/nnv-local-h-bebab46956baf3c672f68349a76e49879f6be483
+```
+
+The CPU host `frankzhangyi-dell` derived 62 workers from 64 logical cores.
+WSL derived 14 workers from 16 logical cores. Numerical-library thread limits
+were one, `PYTHONHASHSEED=0`, the scientific seed was `20260730`, and output
+was resumable. PID `2350951` stopped normally after `923.805` seconds.
+The launch started at `2026-07-30T15:07:20+08:00`. The wrapper did not
+persist an end timestamp, so `ended_at` remains null; normal stop and elapsed
+time come from the final log.
+
+Launch provenance:
+
+```text
+launch JSON:
+  /home/jzb/runs/nnv-local-h-bebab46956baf3c672f68349a76e49879f6be483/length4-launch.json
+command file:
+  /home/jzb/runs/nnv-local-h-bebab46956baf3c672f68349a76e49879f6be483/length4-command.txt
+runner:
+  /home/jzb/runs/nnv-local-h-bebab46956baf3c672f68349a76e49879f6be483/length4-runner.sh
+PID file:
+  /home/jzb/runs/nnv-local-h-bebab46956baf3c672f68349a76e49879f6be483/length4.pid
+manifest:
+  /home/jzb/runs/nnv-local-h-bebab46956baf3c672f68349a76e49879f6be483/length4/manifest.jsonl
+```
+
+The CPU command was:
+
+```bash
+cd /home/jzb/code/nnv-local-h-bebab46956baf3c672f68349a76e49879f6be483/tracks/qmc/solutions/no-negative-vibes
+env OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 \
+  NUMEXPR_NUM_THREADS=1 PYTHONHASHSEED=0 \
+  /home/jzb/miniforge3/envs/quantum-harness/bin/python -u \
+  -m oracle.oddcycle_local_hs_runner \
+  --settings \
+  /home/jzb/code/nnv-local-h-bebab46956baf3c672f68349a76e49879f6be483/tracks/qmc/solutions/no-negative-vibes/protocols/oddcycle-local-hs-v1/settings.json \
+  --output \
+  /home/jzb/runs/nnv-local-h-bebab46956baf3c672f68349a76e49879f6be483/length4 \
+  --workers 62 --resume
+```
+
+The retained `length4-command.txt` stores the `env ... python` line; the
+retained runner supplies the `cd` to the exact working directory shown above.
+
+The frozen axes were dictionary lengths 1–4; free localities `path-edge`,
+`ring-edge`, `path-arc3`, `ring-arc3`, and `cluster-two-body`; target families
+`path-correlated-hop`, `path-pair-hop`, `path-t-v`, and
+`ring-frustrated-t-v`; 256 portfolio samples per cell; active tolerance
+`1e-10`; residual tolerance `1e-9`; and promotion limit 32.
+
+Promotion was not invoked because no free-search cell contained a
+`numerical-survivor`. The corrected eligible input is
+`/home/zibojin/code/nnv-local-h-runs/bebab46956baf3c672f68349a76e49879f6be483/incoming-free`
+and the exact output is
+`/home/zibojin/code/nnv-local-h-runs/bebab46956baf3c672f68349a76e49879f6be483/exact-promotions`.
+The legacy
+`/home/zibojin/code/nnv-local-h-runs/bebab46956baf3c672f68349a76e49879f6be483/incoming`
+preserves the initially rejected `portfolio-l1` copy and was never the
+corrected free-promotion input. Non-free payloads remain under
+`incoming-other`.
+
+| mode | survivor | infeasible | inconclusive |
+|---|---:|---:|---:|
+| free | 0 | 20 | 0 |
+| target | 0 | 16 | 0 |
+| portfolio | 4 | 0 | 0 |
+| total | 4 | 36 | 0 |
+
+All 40 cell IDs were unique: zero duplicates, missing cells, or hash
+conflicts. The 16 target IDs are the Cartesian product of lengths 1–4 with
+the four target families above; all 16 were terminal infeasible. Route A was
+20/20 terminal infeasible, Route B 16/16 terminal infeasible, and Route D
+4/4 terminal survivor.
+
+The survivor IDs were `portfolio-l1`, `portfolio-l2`, `portfolio-l3`, and
+`portfolio-l4`. There was no exact local/free survivor and no exact promotion
+record was due. The free and target outcomes establish only
+dictionary/target-scoped numerical infeasibility through maximum word length
+four; the runner retained no exact dual vectors, so they are not exact no-go
+certificates.
+
+Route D produced exact strictly positive discrete transfers with numerical
+interacting/non-Gaussian Hamiltonian profiles. Survivor A is `portfolio-l2`
+sample 122. Its source payload SHA-256 is
+`b93465d16f4c9d796bac26104b035ae74f85c1e1e297cc94ff2cb8e4373e2c42`;
+its exact shift, vacuum value, and row margin are `42`, `44`, and
+`12213/15625`. Its numerical cluster-two-body leakage is
+`0.5411019488203146`, interaction norm is `0.7721245374285716`, and
+Gaussian-grade distance is `7.973697906947008`.
+
+The final `portfolio-l4` payload SHA-256 is
+`d99c8c45bea6c90e75c1c00a9a591106d06c0844125b71a18e910c5e37ccac3c`.
+It compiled 180 columns and all 256 samples were conclusive. Sample 206 led
+that cell with exact shift `14219`, exact row margin
+`6660970905617/12179687500000`, numerical interaction norm
+`1.0788673738422012`, and cluster-two-body leakage
+`1.0782559100784923`; it did not displace Survivor A.
+
+Every portfolio cell had 256 conclusive and zero inconclusive samples:
+
+| cell | best sample | payload SHA-256 | raw file SHA-256 |
+|---|---:|---|---|
+| `portfolio-l1` | 142 | `c52374feaf2e81a7c6e7aff69d4165594d4595cecc3b884ce4b5aa1f5fb270e8` | `3abcff81413d479801aa54e4d55e33464613813d5ee23d21249b3626f442b36f` |
+| `portfolio-l2` | 122 | `b93465d16f4c9d796bac26104b035ae74f85c1e1e297cc94ff2cb8e4373e2c42` | `c16d32355448d9bd89e282323fbaa64852a408edc8439404feb82ff5bc21cae7` |
+| `portfolio-l3` | 89 | `ce065bb507cc0c073f62b8f45a132b9aa0b5d420480368c4fecc184eb0359a81` | `f116c5e4bede6fb7f334d0ae193f3d7bc16de283934fd4a167a3ef04a7d9d4f0` |
+| `portfolio-l4` | 206 | `d99c8c45bea6c90e75c1c00a9a591106d06c0844125b71a18e910c5e37ccac3c` | `4a48d182f44139ace3946a66bc1bc7b11828b540a938a1bf18779ce73aa2850b` |
+
+Survivor A is deterministic selection rank 1 among all 1,024 conclusive
+portfolio samples by minimum `cluster-two-body` forbidden-support norm.
+
+One generic promotion attempt on `portfolio-l1` correctly failed with
+`promotion source 'portfolio-l1' is not a free-search cell`. No payload was
+lost. Dispatch was corrected to send only free-search numerical survivors to
+the promotion input and preserve target/portfolio payloads under
+`incoming-other`. This was an operational routing failure, not a scientific
+failure.
+
+Raw evidence:
+
+- CPU output:
+  `/home/jzb/runs/nnv-local-h-bebab46956baf3c672f68349a76e49879f6be483/length4`;
+- CPU log SHA-256:
+  `0d6e0533bbb7625b4615d96bcd6a59d103aab3994a02c723ae6600971029917f`;
+- manifest SHA-256:
+  `c5d8a3632d4a53d79148250fcd03fb422192de91c36bf75820df005d0e5f0b16`;
+- WSL archive:
+  `/home/zibojin/code/nnv-local-h-runs/bebab46956baf3c672f68349a76e49879f6be483/archive/cpu-final-20260730T072536Z`;
+- files-list SHA-256:
+  `ea6a9a589f22afd31a3f6be2312ddde5ca9078e8988dae65b7f5b822a8266f98`;
+- archive-list SHA-256:
+  `eb3c94112a6816b0baddbc2bad611af2af9ac5a175359501f3aba00fff1f508c`;
+- run-root list SHA-256:
+  `6542e7505e37322127356b6fbf48abf6acf998833de59bfe6e2247aea26d97fa`;
+- `incoming-other` list SHA-256:
+  `7bbe92d5925a2b6f228760a6cee7e540dd7f47e737bd6b7385da57eacc3edf22`;
+- complete compact summary:
+  `/home/zibojin/code/nnv-local-h-runs/bebab46956baf3c672f68349a76e49879f6be483/portfolio-partial-summary.json`;
+- compact summary SHA-256:
+  `5279b37038d75a81a001f1583041612c9e272cd19007b5a9a048ee04e6b940ee`.
+
+The summary's historical filename says `partial`, but the hashed file contains
+all four portfolio cells.
+
+Fresh final WSL verification at the exact clean source returned
+`42 passed in 32.14s` across the eleven Task 8 files:
+
+```text
+env OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1
+    NUMEXPR_NUM_THREADS=1 PYTHONHASHSEED=0
+    /home/zibojin/miniforge3/envs/quantum_harness/bin/python -m pytest -q
+```
+
+```text
+tests/test_oddcycle_word_operator.py
+tests/test_oddcycle_local_hs_scan.py
+tests/test_oddcycle_local_hs_exact.py
+tests/test_oddcycle_local_targets.py
+tests/test_oddcycle_transfer_portfolio.py
+tests/test_oddcycle_local_hs_runner.py
+tests/test_oddcycle_path_metric.py
+tests/test_oddcycle_pair_physical.py
+tests/test_oddcycle_final_certificate.py
+tests/test_oddcycle_robust_certificate.py
+tests/test_oddcycle_majorana_wei_audit.py
+```
+
+The command fixed `OMP_NUM_THREADS`, `OPENBLAS_NUM_THREADS`,
+`MKL_NUM_THREADS`, and `NUMEXPR_NUM_THREADS` to one and
+`PYTHONHASHSEED=0`. This was an exact-SHA code regression; it did not cover
+the newly tracked result JSON. That JSON was parsed separately on local
+Windows.
+
+Interpretation: this batch reaches `L1`, a ranked same-alphabet batch of exact
+positive discrete transfers. It does not reach exact-local `L2`,
+non-stoquastic local `L3`, or scalable-lattice `L4`. A connected five-mode
+cluster is not a scalable lattice family.
+
+Closure state:
+`complete_with_documented_plan_deviation`. The frozen runner retained no
+exact dual or residual vectors required by the planned residual-prioritized
+length-six amendment. Freezing a length-six command now would fabricate its
+prioritization. Under user-delegated success-first autonomy, the controller
+defers that amendment and prioritizes a separately designed Survivor-A
+Hamiltonian reverse-construction protocol: reconstruct its transfer exactly,
+refine `H_A=-log(T_A/44)`, use its dominant normal-ordered terms and leakage
+to define the next target/extensions, and require exact positive weights plus
+exact forbidden-coordinate cancellation before any `L2` promotion.
+
+Neither scientific route may launch until its protocol is frozen and
+committed. Task 8 execution and results are closed, but the planned exact
+next-scientific-command interface is intentionally unsatisfied and carried to
+the next protocol task. The exact recovery command is the CPU command above.
+All source, worktree, environment, runner, log, result, and transfer artifacts
+remain preserved.

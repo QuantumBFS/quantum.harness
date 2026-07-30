@@ -225,3 +225,18 @@ An experiment is not closed when the program exits. It is closed after:
 - A raw-pair match does not prove that a compact tracked fixture came from that
   pair. Mechanically project the common raw anchors through the documented
   schema conversion and require exact equality with the fixture anchors.
+
+## Mode-aware survivor dispatch
+
+- A shared terminal label such as `survivor` is not a downstream type
+  contract. Validate payload schema and mode before promotion, route only
+  eligible records to a dedicated incoming directory, retain non-applicable
+  payloads in a separate preserved directory, and hash-check both streams.
+  A downstream type rejection is operational routing evidence, not a
+  scientific failure.
+- When one heterogeneous cell contains a long serial sample axis, top-level
+  cell parallelism can leave that cell as the sole straggler after every other
+  worker becomes idle. Freeze deterministic sample identities and exact input
+  weights, shard by disjoint sample-index ranges, and merge with the original
+  stable ranking key. Do not change the seeded sample stream merely to obtain
+  better load balance.
