@@ -69,6 +69,32 @@ relative error. This closes the protocol-construction gate, not the formal
 `N=32,L=16` H200-scale gate. See
 [`outputs/tensorcircuit-ng-fig2-smoke-findings.md`](outputs/tensorcircuit-ng-fig2-smoke-findings.md).
 
+## Reviewer Package
+
+Start with the compact submission bundle rather than reconstructing the result
+from individual experiment logs:
+
+| Artifact | Purpose |
+|---|---|
+| [Technical report (PDF)](submission/output/pdf/vqetape-technical-report.pdf) | Seven-page visual report with protocol, performance plots, correctness, limitations, and reproduction |
+| [Technical report (Markdown)](submission/vqetape-technical-report.md) | Searchable full narrative and exact commands |
+| [Standalone HTML report](submission/report.html) | Browser-friendly executive review |
+| [Matched benchmark TSV](submission/vqetape-matched-benchmark.tsv) | Four exact RTX 3090 comparison rows for downstream analysis |
+| [Literal status text](submission/submission-status.txt) | Pass/fail/open statement with no implied claims |
+| [Artifact manifest](submission/artifact-manifest.json) | SHA256 binding for the review artifacts and canonical evidence |
+
+The matched result is deliberately split by criterion: VQETape spatial is
+**8.2% faster** for `compile + first + 100 warm` and uses **28.3% less host
+peak RSS**, but TensorCircuit-NG has the faster subsequent warm call and the
+sampled GPU-memory peaks are tied. The literal challenge is therefore
+partially, not fully, met.
+
+Rebuild the complete package reproducibly from the committed JSON:
+
+```bash
+python scripts/build_submission_report.py
+```
+
 ## Installation
 
 Use Python 3.12:
