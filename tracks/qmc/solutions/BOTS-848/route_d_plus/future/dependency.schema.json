@@ -4,6 +4,7 @@
   "title": "Route D+ immutable future-stage dependency",
   "oneOf": [
     {"$ref": "#/$defs/phase6_freeze"},
+    {"$ref": "#/$defs/user_authorized_phase7"},
     {"$ref": "#/$defs/phase7_gate"},
     {"$ref": "#/$defs/architecture_freeze"},
     {"$ref": "#/$defs/protocol_registration"}
@@ -59,6 +60,52 @@
         "capacity_protocol": {"$ref": "#/$defs/artifact"},
         "architecture_status": {"const": "D+0-frozen-for-Phase7"},
         "ed_accessed": {"const": false},
+        "heldout_accessed": {"const": false},
+        "beyond_ed_accessed": {"const": false},
+        "passed": {"const": true}
+      }
+    },
+    "user_authorized_phase7": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "kind",
+        "created_at_utc",
+        "source_revision",
+        "authorization",
+        "architecture",
+        "checkpoints",
+        "capacity_protocol",
+        "phase6_frozen",
+        "capacity_protocol_modified",
+        "checkpoint_modified",
+        "heldout_accessed",
+        "beyond_ed_accessed",
+        "passed"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "challenge-15-route-d-plus-future-dependency-v1"
+        },
+        "kind": {"const": "user-authorized-phase7-reveal"},
+        "created_at_utc": {"type": "string", "format": "date-time"},
+        "source_revision": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "authorization": {"$ref": "#/$defs/artifact"},
+        "architecture": {"$ref": "#/$defs/artifact"},
+        "checkpoints": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": {"$ref": "#/$defs/artifact"}
+        },
+        "capacity_protocol": {"$ref": "#/$defs/artifact"},
+        "phase6_frozen": {"const": false},
+        "capacity_protocol_modified": {"const": false},
+        "checkpoint_modified": {"const": false},
         "heldout_accessed": {"const": false},
         "beyond_ed_accessed": {"const": false},
         "passed": {"const": true}

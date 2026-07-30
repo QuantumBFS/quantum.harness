@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "challenge-15-route-d-plus-phase7-domain-v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "task_id",
+    "kind",
+    "source_revision",
+    "n_electrons",
+    "two_q",
+    "hamiltonian_convention",
+    "results",
+    "diagnostics",
+    "gates",
+    "passed"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "challenge-15-route-d-plus-phase7-domain-v1"
+    },
+    "task_id": {"type": "string", "minLength": 2},
+    "kind": {"enum": ["ed-sector", "overlap", "span-ceiling"]},
+    "source_revision": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "n_electrons": {"const": 6},
+    "two_q": {"const": 15},
+    "hamiltonian_convention": {"const": "pair_only_chord-route_d_plus_orbital_gauge"},
+    "results": {"type": "object", "minProperties": 1},
+    "diagnostics": {"type": "object", "minProperties": 1},
+    "gates": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {"type": "boolean"}
+    },
+    "passed": {"const": true}
+  }
+}

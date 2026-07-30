@@ -50,7 +50,12 @@
           "prerequisites": {
             "contains": {
               "properties": {
-                "kind": {"const": "phase6-frozen-checkpoint-gate"}
+                "kind": {
+                  "enum": [
+                    "phase6-frozen-checkpoint-gate",
+                    "user-authorized-phase7-reveal"
+                  ]
+                }
               },
               "required": ["kind"]
             }
@@ -108,6 +113,7 @@
         "kind": {
           "enum": [
             "phase6-frozen-checkpoint-gate",
+            "user-authorized-phase7-reveal",
             "phase7-capacity-gate",
             "architecture-freeze",
             "protocol-registration"

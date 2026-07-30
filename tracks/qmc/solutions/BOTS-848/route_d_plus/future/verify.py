@@ -34,7 +34,10 @@ STAGE_DECISIONS = {
     "phase11": "phase11-beyond-ed-summary",
 }
 STAGE_PREREQUISITES = {
-    "phase7": "phase6-frozen-checkpoint-gate",
+    "phase7": {
+        "phase6-frozen-checkpoint-gate",
+        "user-authorized-phase7-reveal",
+    },
     "phase8": "phase7-capacity-gate",
     "phase9": "architecture-freeze",
     "phase10": "architecture-freeze",
@@ -177,15 +180,19 @@ def validate_dispatch(
     dependencies = {
         item["kind"]: item for item in payload["prerequisites"]
     }
-    if expected not in dependencies:
-        raise ValueError(f"{stage} requires {expected}")
+    expected_kinds = expected if isinstance(expected, set) else {expected}
+    present = expected_kinds.intersection(dependencies)
+    if len(present) != 1:
+        raise ValueError(
+            f"{stage} requires exactly one of {sorted(expected_kinds)}"
+        )
     if verify_prerequisites:
         resolved = {
             kind: validate_dependency(reference)
             for kind, reference in dependencies.items()
         }
         if stage == "phase8":
-            action = resolved[expected]["capacity_action"]
+            action = resolved[next(iter(present))]["capacity_action"]
             if action != "trigger-preregistered-D+1-D+2":
                 raise ValueError("Phase 8 was not triggered by the Phase 7 gate")
 
