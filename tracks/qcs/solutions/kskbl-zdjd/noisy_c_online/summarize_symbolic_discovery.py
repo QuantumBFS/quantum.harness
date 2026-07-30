@@ -32,6 +32,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--replicate-run", type=Path, required=True)
     parser.add_argument("--anf-run", type=Path, required=True)
     parser.add_argument("--bdd-network", type=Path, required=True)
+    parser.add_argument("--optimized-network", type=Path, required=True)
     parser.add_argument("--output-summary", type=Path, required=True)
     parser.add_argument("--output-network", type=Path, required=True)
     parser.add_argument("--output-figure", type=Path, required=True)
@@ -171,10 +172,11 @@ def plot_summary(summary: dict[str, Any], output: Path) -> None:
     axes[0, 1].legend(loc="upper right", fontsize=8.2)
 
     methods = [
-        "Direct ANF\n+ prefix/CSE",
+        "ANF\n+ CSE",
         "Shared\nROBDD",
-        "Quadratic\n+ Wallace",
-        "Learned terms\n+ generic MDFA",
+        "Quadratic\nWallace",
+        "Generic\nMDFA",
+        "Blind semantic\nrewrite",
         "Page-one\nreference",
     ]
     gate_counts = [
@@ -182,9 +184,17 @@ def plot_summary(summary: dict[str, Any], output: Path) -> None:
         summary["representations"]["bdd_two_input_gates"],
         summary["representations"]["wallace_two_input_gates"],
         summary["representations"]["mdfa_two_input_gates"],
+        summary["representations"]["blind_resubstitution_two_input_gates"],
         156,
     ]
-    bar_colors = ["#ea580c", "#9333ea", "#2563eb", "#0f9f78", "#64748b"]
+    bar_colors = [
+        "#ea580c",
+        "#9333ea",
+        "#2563eb",
+        "#0891b2",
+        "#0f9f78",
+        "#64748b",
+    ]
     bars = axes[1, 0].bar(
         methods,
         gate_counts,
@@ -241,7 +251,7 @@ def plot_summary(summary: dict[str, Any], output: Path) -> None:
     )
 
     figure.suptitle(
-        "Formula-agnostic quadratic discovery yields a verified 158-gate network",
+        "Formula-agnostic discovery and blind resubstitution yield a verified 156-gate network",
         fontsize=16.5,
         fontweight="bold",
     )
@@ -281,6 +291,13 @@ def main() -> None:
     if anf_run["final"]["word_accuracy"] != 1.0:
         raise ValueError("ANF comparison run is not exact")
     bdd = load_json(args.bdd_network)
+    optimized = load_json(args.optimized_network)
+    if optimized["stats"]["two_input_gates"] != 156:
+        raise ValueError("blind resubstitution did not produce 156 gates")
+    if optimized["provenance"].get("page_one_network_read") is not False:
+        raise ValueError("page-one isolation is not verified")
+    if optimized["provenance"].get("rewrite_template_seeded") is not False:
+        raise ValueError("rewrite-template isolation is not verified")
     summary = {
         "kind": "formula-agnostic-symbolic-gate-discovery-summary",
         "protocol": {
@@ -304,10 +321,12 @@ def main() -> None:
                 replicate["first_full_recovery_step"]
             ),
             "learned_active_integer_terms": 36,
-            "learned_gate_count": 158,
-            "distance_to_page_one_156_gate_reference": 2,
+            "learned_gate_count_before_blind_resubstitution": 158,
+            "learned_gate_count_after_blind_resubstitution": 156,
+            "matches_page_one_gate_count_without_reading_page_one": True,
             "compressor_schedule_seeded": False,
             "compressor_schedule_derived_only_from_learned_term_counts": True,
+            "blind_rewrite_template_seeded": False,
             "both_networks_reloaded_and_exhaustively_verified": True,
         },
         "primary": primary,
@@ -327,6 +346,9 @@ def main() -> None:
             "mdfa_two_input_gates": (
                 primary["mdfa_synthesis"]["two_input_gates"]
             ),
+            "blind_resubstitution_two_input_gates": (
+                optimized["stats"]["two_input_gates"]
+            ),
         },
         "comparison_hashes": {
             "anf_run_sha256": sha256(args.anf_run / "run.json"),
@@ -334,6 +356,7 @@ def main() -> None:
                 args.anf_run / "boolean_network.json"
             ),
             "bdd_network_sha256": sha256(args.bdd_network),
+            "optimized_network_sha256": sha256(args.optimized_network),
         },
     }
     args.output_summary.parent.mkdir(parents=True, exist_ok=True)

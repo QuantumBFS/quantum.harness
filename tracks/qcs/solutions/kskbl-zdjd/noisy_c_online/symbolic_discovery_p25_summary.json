@@ -15,10 +15,12 @@
     "primary_first_exact_step": 2800,
     "replicate_first_exact_step": 2400,
     "learned_active_integer_terms": 36,
-    "learned_gate_count": 158,
-    "distance_to_page_one_156_gate_reference": 2,
+    "learned_gate_count_before_blind_resubstitution": 158,
+    "learned_gate_count_after_blind_resubstitution": 156,
+    "matches_page_one_gate_count_without_reading_page_one": true,
     "compressor_schedule_seeded": false,
     "compressor_schedule_derived_only_from_learned_term_counts": true,
+    "blind_rewrite_template_seeded": false,
     "both_networks_reloaded_and_exhaustively_verified": true
   },
   "primary": {
@@ -1351,11 +1353,13 @@
     "anf_two_input_gates": 5046,
     "bdd_two_input_gates": 3343,
     "wallace_two_input_gates": 168,
-    "mdfa_two_input_gates": 158
+    "mdfa_two_input_gates": 158,
+    "blind_resubstitution_two_input_gates": 156
   },
   "comparison_hashes": {
     "anf_run_sha256": "8a0e57556f661a1a146e7d7c529689930904f3c4007a6882b3a9fd0fe92de227",
     "anf_network_sha256": "be05bbb7e3e7a78ca47450fb4779a764a4a1130044af358463b4946b9a208a91",
-    "bdd_network_sha256": "3c527b12c2c83673ed61be660261d46776572037737fe371776a764743d48775"
+    "bdd_network_sha256": "3c527b12c2c83673ed61be660261d46776572037737fe371776a764743d48775",
+    "optimized_network_sha256": "9a360ab72594ea1fafb2b1d78eb2d09202b0e1c5577aa58f33c2af07025f739f"
   }
 }
