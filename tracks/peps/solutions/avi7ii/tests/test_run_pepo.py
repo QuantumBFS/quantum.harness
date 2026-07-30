@@ -10,6 +10,11 @@ from qh147.run import load_production_config, main
 
 CONFIG = Path(__file__).parents[1] / "configs" / "pepo-h3-d4.json"
 PROBE_CONFIG = Path(__file__).parents[1] / "configs" / "pepo-h3-d4-probe.json"
+TWO_STEP_PROBE_CONFIG = (
+    Path(__file__).parents[1]
+    / "configs"
+    / "pepo-h3-d4-probe-two-step.json"
+)
 
 
 def test_production_configuration_is_the_ratified_setup():
@@ -45,6 +50,14 @@ def test_probe_configuration_is_isolated_and_bounded():
     assert (probe.chain.delta_beta, probe.chain.beta_stop) == (0.025, 0.025)
     assert (probe.chain.max_bond, probe.chain.teacher_bond) == (4, 16)
     assert probe.chain.chi == 16
+    assert probe.chain.max_iterations == 1
+
+
+def test_two_step_probe_reaches_first_nontrivial_compression():
+    probe = load_production_config(TWO_STEP_PROBE_CONFIG)
+
+    assert probe.chain.steps == 2
+    assert probe.chain.beta_stop == 0.05
     assert probe.chain.max_iterations == 1
 
 

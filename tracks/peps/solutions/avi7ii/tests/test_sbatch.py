@@ -42,3 +42,12 @@ def test_pepo_probe_is_one_thermodynamic_step_on_the_production_source():
     assert "--stop-after-steps 1" in probe
     assert "configs/pepo-h3-d4-probe.json" in probe
     assert "issue147-pepo-probe-fixed-rank" in probe
+
+
+def test_two_step_pepo_probe_is_isolated_and_bounded():
+    probe = _read("issue147-pepo-two-step-probe.sbatch")
+
+    assert "#SBATCH --time=04:00:00" in probe
+    assert "pepo-h3-d4-probe-two-step.json" in probe
+    assert "issue147-pepo-two-step-probe" in probe
+    assert "--stop-after-steps 2" in probe
