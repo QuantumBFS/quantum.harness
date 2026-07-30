@@ -135,11 +135,17 @@ class BoundaryContractor:
             Ly=pepo.ly,
         )
 
-    def _contract(self, network: qtn.TensorNetwork2D):
+    def _contract(
+        self,
+        network: qtn.TensorNetwork2D,
+        *,
+        layer_tags: tuple[str, ...] | None = None,
+    ):
         return network.contract_boundary(
             max_bond=self.chi,
             cutoff=self.cutoff,
             canonize=True,
+            layer_tags=layer_tags,
             final_contract_opts={"optimize": "greedy"},
         )
 
@@ -175,27 +181,50 @@ class BoundaryContractor:
                 )
                 if conjugate_bra:
                     bra_data = ar.do("conj", bra_data)
-                bra_labels = self._einsum_labels(len(bra_virtual))
-                ket_labels = self._einsum_labels(
-                    len(bra_virtual) + len(ket_virtual)
-                )[len(bra_virtual) :]
-                left_virtual = "".join(bra_labels)
-                right_virtual = "".join(ket_labels)
-                right_physical = "io" if swap_ket_physical else "oi"
-                data = ar.do(
-                    "einsum",
-                    (
-                        f"oi{left_virtual},{right_physical}{right_virtual}"
-                        f"->{left_virtual}{right_virtual}"
-                    ),
-                    bra_data,
-                    ket_data,
+                bra_physical_shape = tuple(bra_data.shape[:2])
+                ket_physical_shape = tuple(ket_data.shape[:2])
+                expected_ket_shape = (
+                    bra_physical_shape[::-1]
+                    if swap_ket_physical
+                    else bra_physical_shape
                 )
-                inds = (
-                    *(f"bra:{ind}" for ind in bra_virtual),
-                    *(f"ket:{ind}" for ind in ket_virtual),
+                if ket_physical_shape != expected_ket_shape:
+                    raise ValueError(
+                        "physical dimensions do not match at "
+                        f"site ({x}, {y}): bra={bra_physical_shape}, "
+                        f"ket={ket_physical_shape}, "
+                        f"swap_ket_physical={swap_ket_physical}"
+                    )
+
+                out_ind = f"double:o{x},{y}"
+                in_ind = f"double:i{x},{y}"
+                site_tags = {f"I{x},{y}", f"X{x}", f"Y{y}"}
+                tensors.append(
+                    qtn.Tensor(
+                        bra_data,
+                        inds=(
+                            out_ind,
+                            in_ind,
+                            *(f"bra:{ind}" for ind in bra_virtual),
+                        ),
+                        tags={*site_tags, "BRA"},
+                    )
                 )
-                tensors.append(qtn.Tensor(data, inds=inds, tags={f"I{x},{y}"}))
+                ket_physical = (
+                    (in_ind, out_ind)
+                    if swap_ket_physical
+                    else (out_ind, in_ind)
+                )
+                tensors.append(
+                    qtn.Tensor(
+                        ket_data,
+                        inds=(
+                            *ket_physical,
+                            *(f"ket:{ind}" for ind in ket_virtual),
+                        ),
+                        tags={*site_tags, "KET"},
+                    )
+                )
 
         network = qtn.TensorNetwork(tensors)
         return qtn.TensorNetwork2D.from_TN(
@@ -214,7 +243,7 @@ class BoundaryContractor:
             conjugate_bra=True,
             swap_ket_physical=False,
         )
-        return self._contract(network)
+        return self._contract(network, layer_tags=("BRA", "KET"))
 
     def _trace_operator_product(self, left: FinitePEPO, right: FinitePEPO):
         network = self._double_layer_network(
@@ -223,7 +252,7 @@ class BoundaryContractor:
             conjugate_bra=False,
             swap_ket_physical=True,
         )
-        return self._contract(network)
+        return self._contract(network, layer_tags=("BRA", "KET"))
 
     def _direct_energy_expectation(
         self,
