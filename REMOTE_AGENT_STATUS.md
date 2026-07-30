@@ -1,6 +1,6 @@
 # Quantum Harness Issue #88 — remote research agent status
 
-Updated: 2026-07-30T00:32:10Z
+Updated: 2026-07-30T00:51:40Z
 
 - Objective: obtain a new reproducible numerical certificate for an
   unrestricted frustrated spin-1/2 model, prioritizing the Shastry--Sutherland
@@ -315,5 +315,11 @@ Updated: 2026-07-30T00:32:10Z
   submitted from that immutable commit on 8 CPUs / 16000 MiB / 30 minutes.
   It cannot invoke an optimizer or remove cones. Keep the checkout unchanged;
   correct any mapping failure before launching the separate L=2 truth gate.
+- Job `118194879` closed after 15:09 at 2,598,132 KiB peak. All 12 row maps
+  were bijective and all centered entries matched, but scalar blocks produced
+  1,107 unit-scaling mismatches with no sign-only cases. This is a
+  normalization diagnostic, not a congruence disproof. The revised L=1 gate
+  uses expanded integer row norms to test the exact positive diagonal
+  congruence before any L=2 job or cone removal.
 
 No user input or new credential is currently required.

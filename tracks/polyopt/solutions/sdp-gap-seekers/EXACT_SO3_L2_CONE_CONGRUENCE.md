@@ -24,13 +24,28 @@ For each positive family and spatial parity, the implementation:
    the S3-standard multiplicity row with the same spin-blind signature;
 3. reconstructs both affine matrix entries exactly;
 4. applies `T_xxxx = T_xxyy + T_xyxy + T_xyyx` entrywise; and
-5. compares every mapped upper-triangle polynomial exactly.
+5. expands each row into the common integer source basis and computes its
+   exact squared norm; and
+6. verifies the positive diagonal congruence
+   `T_ij = sqrt(n_i n_j / m_i m_j) R_ij` entrywise.
 
-There are 12 target blocks and 940,050 mapped triangle entries at `L=2,d=2`.
-Equal, sign-opposite, and unmatched entries are counted separately. Only
-940,050 equal entries with zero opposite and zero unmatched entries set the
-truth result to exact. Cone removal is guarded by that exact result and is
-disabled in the truth-only jobs.
+If a scale product is irrational, both rational polynomial entries must be
+exactly zero. Unit-equal, nonunit-scaled, irrational-zero, sign-opposite, and
+unmatched entries are counted separately. Only zero opposite and zero
+unmatched entries set the truth result to exact. There are 12 target blocks
+and 940,050 mapped triangle entries at `L=2,d=2`. Cone removal is guarded by
+the exact result and is disabled in the truth-only jobs.
+
+## L=1 normalization diagnostic
+
+SCNet job `118194879`, source commit `81a1875`, proved all 12 spin-blind row
+maps bijective. All six centered target blocks were entrywise equal after the
+SO(3) projection. The six scalar blocks had 1,107 entries that were neither
+equal nor sign-opposite under unit scaling. This disproves naïve equality but
+does not disprove congruence: scalar stabilizer rows can be singleton or
+two-row combinations and therefore carry different exact integer norms. The
+next control uses the norm-derived positive diagonal congruence above; no cone
+was removed by `118194879`.
 
 If the gate passes, removing the three duplicate `l=2` copies per group would
 change the retained inventory from 2,540,067 to 1,600,017 packed entries while

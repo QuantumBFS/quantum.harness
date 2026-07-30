@@ -124,7 +124,9 @@ function spin_l2_congruence_truth_dict(truth)
         "exact" => truth.exact,
         "target_block_count" => truth.target_block_count,
         "entry_count" => truth.entry_count,
-        "equal_count" => truth.equal_count,
+        "unit_equal_count" => truth.unit_equal_count,
+        "scaled_count" => truth.scaled_count,
+        "zero_irrational_count" => truth.zero_irrational_count,
         "opposite_count" => truth.opposite_count,
         "unmatched_count" => truth.unmatched_count,
         "records" => [

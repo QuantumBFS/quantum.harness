@@ -2,6 +2,7 @@ module ShastryFullStateSpinIsotypicReduction
 
 using SHA
 using ..PrimalGapSymbolics:
+    ExactRational,
     ExactLinearPolynomial,
     MomentKey,
     add_term!,
@@ -554,6 +555,36 @@ function spin_l2_multiplicity_signature(
     return only(signatures)
 end
 
+function spin_isotypic_row_norm_squared(
+    block::ShastrySpinIsotypicPSDBlock,
+    row::ShastrySpinIsotypicRow,
+)
+    expanded = Dict{Int,Int}()
+    for (spatial_index, spin_coefficient) in
+        zip(row.source_indices, row.coefficients)
+        spatial_row = block.source_block.rows[spatial_index]
+        for (source_index, spatial_coefficient) in
+            zip(spatial_row.source_indices, spatial_row.coefficients)
+            expanded[source_index] =
+                get(expanded, source_index, 0) +
+                spin_coefficient * spatial_coefficient
+        end
+    end
+    filter!(pair -> !iszero(last(pair)), expanded)
+    norm_squared = sum(coefficient^2 for coefficient in values(expanded))
+    norm_squared > 0 || error("spin-isotypic row has zero exact norm")
+    return norm_squared
+end
+
+function exact_positive_rational_square_root(value::ExactRational)
+    value > 0 || error("row-norm ratio must be positive")
+    numerator_root = isqrt(numerator(value))
+    denominator_root = isqrt(denominator(value))
+    numerator_root^2 == numerator(value) || return nothing
+    denominator_root^2 == denominator(value) || return nothing
+    return ExactRational(numerator_root, denominator_root)
+end
+
 function spin_l2_congruence_groups(assembly)
     blocks = [assembly.positive_blocks; assembly.gap_blocks]
     references = Dict{Tuple{Symbol,Symbol,Symbol},Any}()
@@ -651,9 +682,11 @@ end
 """
 Compare every mapped l=2 coefficient after an optional exact projection.
 
-The comparison is deliberately diagnostic: only entrywise equality sets
-`exact=true`. Opposite-sign matches are counted separately so a later exact
-row-gauge proof can be added without silently accepting it here.
+The target and reference rows may have different exact integer norms. The
+tested diagonal congruence uses the positive row scale
+`sqrt(target_norm_squared / reference_norm_squared)`. When a scale product is
+irrational, the corresponding rational polynomial entries must both vanish.
+Opposite-sign matches remain diagnostic only and are never accepted.
 """
 function shastry_spin_l2_congruence_truth(
     assembly;
@@ -665,12 +698,39 @@ function shastry_spin_l2_congruence_truth(
     exact = true
     for group in groups
         dimension = length(group.mapping)
+        norm_ratios = ExactRational[
+            ExactRational(
+                spin_isotypic_row_norm_squared(
+                    group.target,
+                    group.target.rows[row],
+                ),
+                spin_isotypic_row_norm_squared(
+                    group.reference,
+                    group.reference.rows[group.mapping[row]],
+                ),
+            )
+            for row in 1:dimension
+        ]
+        ratio_counts = Dict{String,Int}()
+        for ratio in norm_ratios
+            label = string(ratio)
+            ratio_counts[label] = get(ratio_counts, label, 0) + 1
+        end
+        ratio_inventory = join(
+            (
+                label * ":" * string(ratio_counts[label])
+                for label in sort!(collect(keys(ratio_counts)))
+            ),
+            ",",
+        )
         row_results = Vector{NamedTuple{
-            (:equal, :opposite, :unmatched),
-            Tuple{Int,Int,Int},
+            (:unit_equal, :scaled, :zero_irrational, :opposite, :unmatched),
+            Tuple{Int,Int,Int,Int,Int},
         }}(undef, dimension)
         Threads.@threads :dynamic for row in 1:dimension
-            equal = 0
+            unit_equal = 0
+            scaled = 0
+            zero_irrational = 0
             opposite = 0
             unmatched = 0
             reference_row = group.mapping[row]
@@ -691,24 +751,48 @@ function shastry_spin_l2_congruence_truth(
                         group.reference.rows[group.mapping[column]],
                     ),
                 )
-                if target_entry == reference_entry
-                    equal += 1
-                elseif target_entry == -1 * reference_entry
-                    opposite += 1
+                factor = exact_positive_rational_square_root(
+                    norm_ratios[row] * norm_ratios[column],
+                )
+                if isnothing(factor)
+                    if iszero(target_entry) && iszero(reference_entry)
+                        zero_irrational += 1
+                    else
+                        unmatched += 1
+                    end
                 else
-                    unmatched += 1
+                    expected = something(factor) * reference_entry
+                    if target_entry == expected
+                        if something(factor) == 1
+                            unit_equal += 1
+                        else
+                            scaled += 1
+                        end
+                    elseif target_entry == -1 * expected
+                        opposite += 1
+                    else
+                        unmatched += 1
+                    end
                 end
             end
             row_results[row] = (
-                equal=equal,
+                unit_equal=unit_equal,
+                scaled=scaled,
+                zero_irrational=zero_irrational,
                 opposite=opposite,
                 unmatched=unmatched,
             )
         end
-        equal_count = sum(result.equal for result in row_results)
+        unit_equal_count =
+            sum(result.unit_equal for result in row_results)
+        scaled_count = sum(result.scaled for result in row_results)
+        zero_irrational_count =
+            sum(result.zero_irrational for result in row_results)
         opposite_count = sum(result.opposite for result in row_results)
         unmatched_count = sum(result.unmatched for result in row_results)
-        entry_count = equal_count + opposite_count + unmatched_count
+        entry_count = unit_equal_count + scaled_count +
+                      zero_irrational_count + opposite_count +
+                      unmatched_count
         block_exact = opposite_count == 0 && unmatched_count == 0
         exact &= block_exact
         push!(records, (
@@ -718,15 +802,19 @@ function shastry_spin_l2_congruence_truth(
             character_rx=group.character_rx,
             character_ry=group.character_ry,
             dimension=dimension,
+            row_norm_ratio_inventory=ratio_inventory,
             exact=block_exact,
             entry_count=entry_count,
-            equal_count=equal_count,
+            unit_equal_count=unit_equal_count,
+            scaled_count=scaled_count,
+            zero_irrational_count=zero_irrational_count,
             opposite_count=opposite_count,
             unmatched_count=unmatched_count,
         ))
         progress_callback(
             "SO(3) l2 congruence block $(length(records))/$(length(groups)); " *
-            "dimension=$dimension, equal=$equal_count, " *
+            "dimension=$dimension, unit_equal=$unit_equal_count, " *
+            "scaled=$scaled_count, zero_irrational=$zero_irrational_count, " *
             "opposite=$opposite_count, unmatched=$unmatched_count",
         )
     end
@@ -734,7 +822,11 @@ function shastry_spin_l2_congruence_truth(
         exact=exact && !isempty(records),
         target_block_count=length(records),
         entry_count=sum(record.entry_count for record in records),
-        equal_count=sum(record.equal_count for record in records),
+        unit_equal_count=
+            sum(record.unit_equal_count for record in records),
+        scaled_count=sum(record.scaled_count for record in records),
+        zero_irrational_count=
+            sum(record.zero_irrational_count for record in records),
         opposite_count=sum(record.opposite_count for record in records),
         unmatched_count=sum(record.unmatched_count for record in records),
         records=records,

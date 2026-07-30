@@ -1532,3 +1532,15 @@ inventory to 1,600,017 only if it passes. SCNet L=1 control job `118194879`
 was submitted from immutable commit `81a1875` on 8 CPUs / 16000 MiB / 30
 minutes after Slurm test-only accepted it. It is a code/identity control, not
 physics evidence and not authorization for the L=2 deletion.
+
+L=1 control `118194879` ended after 15:09 at 2,598,132 KiB peak RSS with a
+deliberate gate failure. All 12 row maps were bijective. The six centered
+blocks were exactly equal after projection. Each scalar-minus character had
+465 equal and 96 unmatched entries; each scalar-plus character had 903 equal
+and 273 unmatched entries. There were zero opposite-sign matches, for 14,715
+equal and 1,107 unmatched entries overall. This localizes the issue to row
+normalization: scalar stabilizer eigenspaces include differently sized
+integer combinations. The next changed action is not an L=2 run. First rerun
+L=1 with the exact positive diagonal congruence obtained from expanded source-
+row norms. An irrational scale product is accepted only when both entries are
+exact zero; any opposite or unmatched entry still fails closed.

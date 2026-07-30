@@ -888,3 +888,10 @@ Updated: 2026-07-29 UTC.
   job `118194879` was submitted on SCNet from this immutable commit using 8
   CPUs / 16000 MiB / 30 minutes. Preserve the checkout until it closes; use
   its result to correct the mapping or authorize the separate L=2 truth job.
+- L=1 control `118194879` closed after 15:09 with 2,598,132 KiB peak RSS. Its
+  12 spin-blind maps were all bijective. The six centered blocks matched every
+  projected entry exactly, while the scalar blocks had 1,107 unit-scaling
+  mismatches and zero sign-only mismatches. This disproves naïve equality,
+  not congruence: scalar l=2 rows have different exact integer norms. The
+  changed control compares the exact positive diagonal congruence determined
+  by expanded row norms; cone deletion remains disabled until it passes.
