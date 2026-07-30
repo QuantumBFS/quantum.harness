@@ -80,6 +80,21 @@ solver and audit.
 | Recorded cost | USD 25.53 |
 | Agent solve wall time | 197.70 min |
 
+![GPT-5.5 high versus GPT-5.6 Sol high benchmark outcomes](figures/gpt55-vs-gpt56-comparison.png)
+
+The benchmark view reproduces the ORBIT-Q agent-axis presentation. Panel (a)
+places final validity beside the geometric-mean slowdown of valid artifacts;
+panel (b) shows every task-level candidate/reference runtime ratio and marks
+failed rewards explicitly. GPT-5.5 high and GPT-5.6 Sol high both reached
+10/12, while the slowdown moved from 2.197x to 1.428x.
+
+![GPT-5.6 Sol high agent-side resource use](figures/gpt56sol-high-agent-resource-use.png)
+
+The resource view reports per-task agent wall time, prompt/cache/output token
+composition, and cost versus solve time per valid solution. GPT-5.6 Sol high
+used 197.70 minutes, 26.071 million solving-side tokens, and USD 25.53 in
+recorded solver cost.
+
 GPT-5.5 high and GPT-5.6 Sol high both produced ten valid solutions. The
 paper's GPT-5.5 high row had a 2.197x passed-task geometric-mean slowdown,
 versus 1.428x for GPT-5.6 Sol high. Under this normalized but not fully
@@ -99,16 +114,60 @@ retains the original 10/12 audit output; the table below reports the final
 11/12 result after the Task 07 source-level adjudication documented here and
 in the later reduction study.
 
-| Outcome | High | Ultra |
-|---|---:|---:|
-| Valid solutions | **10/12** | **11/12** |
-| Additional ultra pass | — | Task 08 |
-| Shared failure | Task 01 | Task 01 |
-| Agent solve wall time | 197.70 min | 182.80 min |
-| Solving-side tokens | 26.071 M | 33.048 M |
-| Recorded cost | USD 25.53 | USD 30.02 |
+#### Task-level validity and artifact runtime
 
-![GPT-5.6 Sol high versus ultra](figures/gpt56-high-vs-ultra-outcomes.png)
+| Task | High final | Ultra final | High runtime (s) | Ultra runtime (s) |
+|---:|---:|---:|---:|---:|
+| 01 | Fail | Fail | 107.51 | 127.87 |
+| 02 | Pass | Pass | 10.65 | 14.32 |
+| 03 | Pass | Pass | 9.84 | 18.45 |
+| 04 | Pass | Pass | 14.14 | 4.96 |
+| 05 | Pass | Pass | 124.92 | 75.51 |
+| 06 | Pass | Pass | 23.39 | 152.16 |
+| 07 | Pass | **Pass†** | 155.52 | 84.99 |
+| 08 | Fail | Pass | 55.48 | 60.94 |
+| 09 | Pass | Pass | 87.31 | 7.18 |
+| 10 | Pass | Pass | 68.68 | 71.27 |
+| 11 | Pass | Pass | 100.41 | 120.07 |
+| 12 | Pass | Pass | 12.85 | 8.61 |
+| **Final validity / mean runtime** | **10/12** | **11/12** | **64.23 mean** | **62.19 mean** |
+
+† Post-hoc source adjudication; the original Ultra reward and audit artifacts
+remain unchanged.
+
+![GPT-5.6 Sol high versus ultra validity and artifact efficiency](figures/gpt56sol-high-vs-ultra-outcomes.png)
+
+The detailed outcome view shows all twelve pass/fail decisions, both raw
+artifact runtimes, and same-reference efficiency on the ten tasks passed by
+both efforts. Ultra contains every High pass, adds Task 08, and shares only
+the Task 01 failure.
+
+#### Solver-resource comparison
+
+| Metric | High | Ultra | Ultra − High |
+|---|---:|---:|---:|
+| Final valid solutions | 10 | 11 | +1 |
+| Agent solve wall time | 197.70 min | 182.80 min | -7.5% |
+| Non-cache-read input tokens | 1.709 M | 1.312 M | -23.2% |
+| Cache-read input tokens | 24.199 M | 31.478 M | +30.1% |
+| Output tokens | 0.163 M | 0.257 M | +58.1% |
+| Total solving-side tokens | 26.071 M | 33.048 M | +26.8% |
+| Recorded solver cost | USD 25.53 | USD 30.02 | +17.6% |
+| Cost per valid solution | USD 2.55 | USD 2.73 | +6.9% |
+| Solve time per valid solution | 19.77 min | 16.62 min | -15.9% |
+| All-artifact runtime total | 770.70 s | 746.33 s | -3.2% |
+
+![GPT-5.6 Sol high versus ultra per-task solver resources](figures/gpt56sol-high-vs-ultra-resources.png)
+
+This view exposes where the aggregate changes came from: per-task agent wall
+time, solving-side tokens, and recorded solver cost do not move uniformly
+with reasoning effort.
+
+![GPT-5.6 Sol ultra agent-side resource use](figures/gpt56sol-ultra-agent-resource-use.png)
+
+The standalone Ultra view uses the same resource accounting as the High
+figure. It records 182.80 agent minutes, 33.048 million solving-side tokens,
+USD 30.02 total cost, and the final 11/12 adjudicated validity.
 
 Ultra used **26.8% more tokens** and cost **17.6% more**, while its agent wall
 time was **7.5% shorter** and it produced one additional valid solution.
@@ -281,21 +340,6 @@ original audit artifacts.
 The lesson is not to remove semantic audit, but to make adjudication
 reproducible: retain the original decision, record the exact package version,
 and support a correction with direct API-level evidence.
-
-### OOM is an experimental result, not an algorithmic verdict
-
-Task 08 was initially described as though the expert implementation could not
-run. The correct statement was allocation-specific: it could not fit the
-available container. The later 64-GiB session produced ten valid cells and
-closed the feasibility question.
-
-Resource failures should therefore be reported as:
-
-```text
-implementation + workload + software stack + allocation -> outcome
-```
-
-not as a context-free property of the algorithm.
 
 ### Task 07 exposes a real loophole
 
