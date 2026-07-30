@@ -2,5 +2,6 @@
 
 pub mod angles;
 pub mod config;
+pub mod gaussian;
 pub mod rng;
 pub mod schema;
