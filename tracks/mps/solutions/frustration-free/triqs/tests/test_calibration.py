@@ -469,6 +469,9 @@ def test_scaling_plan_is_diagnostic_fresh_and_powered_from_all_comparisons():
     assert {cell["payload"]["seed"] for cell in plan["payload"]["cells"]}.isdisjoint(
         {823000 + replica for replica in range(8)}
     )
+    assert {cell["payload"]["seed"] for cell in plan["payload"]["cells"]} == {
+        830000 + replica for replica in range(8)
+    }
     results = _qualification_results(
         shift=2e-5,
         identity=plan["payload"]["input_identity"],

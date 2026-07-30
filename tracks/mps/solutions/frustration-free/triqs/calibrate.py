@@ -534,7 +534,7 @@ def build_scaling_plan(
         _cell(
             replica,
             "estimator_scaling",
-            829000 + replica,
+            830000 + replica,
             identity,
             {
                 "warmup_cycles": 50000,
