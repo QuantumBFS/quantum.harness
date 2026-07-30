@@ -1,0 +1,11 @@
+{
+  "curve": [
+    {"id": "tau0.1_dc100_b5", "tau": 0.1, "Dc": 100, "beta_max": 5.0},
+    {"id": "tau0.05_dc50_b120", "tau": 0.05, "Dc": 50, "beta_max": 120.0},
+    {"id": "tau0.05_dc100_b120", "tau": 0.05, "Dc": 100, "beta_max": 120.0},
+    {"id": "tau0.05_dc150_b120", "tau": 0.05, "Dc": 150, "beta_max": 120.0},
+    {"id": "tau0.02_dc100_b5", "tau": 0.02, "Dc": 100, "beta_max": 5.0},
+    {"id": "tau0.02_dc150_b5", "tau": 0.02, "Dc": 150, "beta_max": 5.0},
+    {"id": "tau0.01_dc150_b5", "tau": 0.01, "Dc": 150, "beta_max": 5.0}
+  ]
+}

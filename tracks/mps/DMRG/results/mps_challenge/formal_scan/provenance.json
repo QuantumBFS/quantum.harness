@@ -1,0 +1,7 @@
+{
+  "challenge_issue": 28,
+  "paper": "Phys. Rev. Lett. 119, 220602 (2017); arXiv:1707.08683",
+  "patch_order": "row-major offsets from (-1,-1) through (1,1)",
+  "protocol": "traditional 13-operator Stage A followed by centered D4xZ2 shared patch-MPS Stage B",
+  "team": "LULU"
+}

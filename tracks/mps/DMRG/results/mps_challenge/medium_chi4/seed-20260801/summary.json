@@ -1,0 +1,218 @@
+{
+  "baseline": {
+    "elapsed_seconds": 0.5231384360004085,
+    "linear_bias": [
+      -0.15559407739474354,
+      -0.06886378801402163,
+      -0.01471380949261281,
+      0.0012969895780209244,
+      0.0012283288151682392,
+      0.003126302876903688,
+      0.006844827923899771,
+      -0.021657609317582743,
+      0.0013635884454745427,
+      -0.00837316558398357,
+      -0.035645144013167825,
+      -0.026641658893547478,
+      0.005410994228693475
+    ]
+  },
+  "chi": 4,
+  "coarse_length": 9,
+  "coupling": 0.436,
+  "evaluation": {
+    "traditional": {
+      "acceptance_rate": 0.31917342739564963,
+      "autocorrelation": {
+        "elapsed_seconds": 2.620469714999672,
+        "ess": 445.65759759433655,
+        "ess_per_second": 170.06782984110632,
+        "samples": 3000,
+        "tau_int": 3.3658126958835943,
+        "window": 17,
+        "window_rule": "sokal_c5_with_initial_positive_fallback"
+      },
+      "block_nn_correlation": 0.15065020576131685,
+      "coarse_magnetization": 0.014222222222222225,
+      "elapsed_seconds": 2.620469714999672,
+      "energy_per_site": -0.4614112043895748,
+      "held_out_multispin": {
+        "four": {
+          "mean": 0.01614814814814815,
+          "stderr": 0.0020623120107998096
+        },
+        "parity9": {
+          "mean": -0.001366255144032921,
+          "stderr": 0.0020578049603447958
+        },
+        "six": {
+          "mean": -0.01586831275720164,
+          "stderr": 0.002048036620182144
+        }
+      },
+      "patch_distances": {
+        "jensen_shannon": 0.04001816961974421,
+        "kl_smoothed": 0.15626709719113696,
+        "pseudocount": 0.5,
+        "total_variation": 0.2291389531893004
+      },
+      "samples": 3000,
+      "sweep_seconds": 0.0008734899049998906,
+      "two_point_correlations": {
+        "10": {
+          "mean": 0.14676543209876544,
+          "stderr": 0.0018364275258883418
+        },
+        "11": {
+          "mean": 0.0425843621399177,
+          "stderr": 0.0020015453748762893
+        },
+        "20": {
+          "mean": -0.02457613168724279,
+          "stderr": 0.0020105873407160082
+        }
+      }
+    },
+    "traditional_mps": {
+      "acceptance_rate": 0.3222010582010582,
+      "autocorrelation": {
+        "elapsed_seconds": 2.6181947449999825,
+        "ess": 399.7855243959204,
+        "ess_per_second": 152.69510610675488,
+        "samples": 3000,
+        "tau_int": 3.7520117874865875,
+        "window": 19,
+        "window_rule": "sokal_c5_with_initial_positive_fallback"
+      },
+      "block_nn_correlation": 0.12320987654320989,
+      "coarse_magnetization": -0.033251028806584364,
+      "elapsed_seconds": 2.6181947449999825,
+      "energy_per_site": -0.45716962414266116,
+      "held_out_multispin": {
+        "four": {
+          "mean": -0.009497942386831272,
+          "stderr": 0.0020166474542454107
+        },
+        "parity9": {
+          "mean": 0.0038683127572016456,
+          "stderr": 0.0020068163418529216
+        },
+        "six": {
+          "mean": -0.023341563786008223,
+          "stderr": 0.002045290164009779
+        }
+      },
+      "patch_distances": {
+        "jensen_shannon": 0.029076583700724298,
+        "kl_smoothed": 0.11325417961165182,
+        "pseudocount": 0.5,
+        "total_variation": 0.19411156121399176
+      },
+      "samples": 3000,
+      "sweep_seconds": 0.0008727315816666609,
+      "two_point_correlations": {
+        "10": {
+          "mean": 0.12595884773662555,
+          "stderr": 0.001834260305822768
+        },
+        "11": {
+          "mean": 0.048131687242798364,
+          "stderr": 0.0019533254401428285
+        },
+        "20": {
+          "mean": -0.013448559670781887,
+          "stderr": 0.0021262026475145127
+        }
+      }
+    },
+    "unbiased": {
+      "acceptance_rate": 0.2136586321771507,
+      "autocorrelation": {
+        "elapsed_seconds": 2.450326053000026,
+        "ess": 24.78013453529241,
+        "ess_per_second": 10.11299476041287,
+        "samples": 3000,
+        "tau_int": 60.53235900974093,
+        "window": 157,
+        "window_rule": "sokal_c5_with_initial_positive_fallback"
+      },
+      "block_nn_correlation": 0.7159423868312758,
+      "coarse_magnetization": 0.7050864197530865,
+      "elapsed_seconds": 2.450326053000026,
+      "energy_per_site": -0.6099103721993598,
+      "held_out_multispin": {
+        "four": {
+          "mean": 0.598716049382716,
+          "stderr": 0.003507428660327449
+        },
+        "parity9": {
+          "mean": 0.3729711934156379,
+          "stderr": 0.004584385280020908
+        },
+        "six": {
+          "mean": 0.49232921810699587,
+          "stderr": 0.004089858169541951
+        }
+      },
+      "patch_distances": {
+        "jensen_shannon": 0.41392535467444524,
+        "kl_smoothed": 3.2439795970848087,
+        "pseudocount": 0.5,
+        "total_variation": 0.7567597736625514
+      },
+      "samples": 3000,
+      "sweep_seconds": 0.0008167753510000087,
+      "two_point_correlations": {
+        "10": {
+          "mean": 0.7178930041152263,
+          "stderr": 0.002732386489719911
+        },
+        "11": {
+          "mean": 0.6571687242798353,
+          "stderr": 0.0035295631670716606
+        },
+        "20": {
+          "mean": 0.6154238683127572,
+          "stderr": 0.004036843341743264
+        }
+      }
+    }
+  },
+  "length": 27,
+  "rg_levels": 1,
+  "scientific_sufficiency": false,
+  "seed": 20260801,
+  "status": "SMOKE_COMPLETE",
+  "total_seconds": 15.065097327999865,
+  "training": {
+    "alpha": -1.2326682596142398,
+    "final_record": {
+      "acceptance_rate": 0.3365912208504801,
+      "alpha": -1.2326682596142398,
+      "alpha_gradient": 0.012182738260617358,
+      "block_nn_correlation": 0.12962962962962962,
+      "core_gradient_norm": 0.0415552481655338,
+      "gradient_norm": 0.04330424646181723,
+      "linear_gradient_norm": 0.47798668352113427,
+      "objective": -1.1307095507375031,
+      "objective_change": -0.051606621955108706,
+      "output_max": 0.04580321215049878,
+      "output_min": -0.1008902758927479,
+      "parameter_norm": 5.5872375914471135,
+      "patch_jensen_shannon": 0.28036984086856265,
+      "patch_kl_smoothed": 0.055105742145663716,
+      "patch_total_variation": 0.580078125,
+      "step": 149,
+      "sweep_seconds": 0.002055940999980521,
+      "total_seconds": 5.340594399000111
+    },
+    "model_diagnostics": {
+      "chi": 4,
+      "output_max": 0.04580321215049878,
+      "output_mean": -0.01920803063256113,
+      "output_min": -0.1008902758927479,
+      "parameter_count": 240,
+      "parameter_norm": 5.5872375914471135
+    }
+  }
+}

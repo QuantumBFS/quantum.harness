@@ -1,0 +1,18 @@
+{
+  "paper": "arXiv:1011.0155",
+  "doi": "10.1103/PhysRevLett.106.127202",
+  "paper_markdown_sha256": "f56b9c25dcff102e4734cf02e6ad21ea7f8eb89e55068998798595c4066ba78c",
+  "method_skill_sha256": "2d57801a0c812692c319266910fa22cb2b1ba94b75900e76114b7e7146d02fe1",
+  "method_reference_sha256": "692c3b890915a754d870f70f03ae905499b46836ce570268ea97f345dae99a34",
+  "sources": [
+    ".knowledge/literature/ltrg/1011.0155_linearized-tensor-renormalization-group-algorithm-for-the-ca.md",
+    "tracks/mps/README.md",
+    "skills/method-ltrg/references/ltrg-methodology.md",
+    ".knowledge/solvable/xy-chain/ORACLE.md"
+  ],
+  "claims": [
+    "Fig. 4 high-temperature free-energy error",
+    "Fig. 5 low-temperature free energy and energy",
+    "Fig. 6a specific heat"
+  ]
+}

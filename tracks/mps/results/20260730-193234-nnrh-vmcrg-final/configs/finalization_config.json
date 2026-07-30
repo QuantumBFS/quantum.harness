@@ -1,0 +1,1 @@
+{"project":"NNRH-VMCRG","evidence_precedence":["run/manifest/final_status/selection","config/hash/test","dated status","plan"],"easy_operator_gate":0.02,"easy_patch_tv_gate":0.02,"hard_acceptance_gate":[0.2,0.5],"hard_min_round_trips":1,"new_compute":false}

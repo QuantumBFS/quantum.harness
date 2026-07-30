@@ -1,0 +1,12 @@
+{
+  "model": "spin-1/2 XY chain",
+  "spin_convention": "S=sigma/2",
+  "J": 1.0,
+  "field": 0.0,
+  "boundary": "periodic thermodynamic limit",
+  "method": "single-layer two-site LTRG",
+  "trotter_product": "alternating even/odd first order",
+  "svd_cutoff": 0.0,
+  "julia_threads": 1,
+  "blas_threads": 1
+}

@@ -1,0 +1,158 @@
+{
+  "traditional": {
+    "acceptance_rate": 0.3190797570056829,
+    "autocorrelation": {
+      "elapsed_seconds": 2.57452089599974,
+      "ess": 506.5515462291124,
+      "ess_per_second": 196.75565539832525,
+      "samples": 3000,
+      "tau_int": 2.9611991339605006,
+      "window": 12,
+      "window_rule": "sokal_c5_with_initial_positive_fallback"
+    },
+    "block_nn_correlation": 0.15979423868312756,
+    "coarse_magnetization": 0.00013168724279835538,
+    "elapsed_seconds": 2.57452089599974,
+    "energy_per_site": -0.46407465203475085,
+    "held_out_multispin": {
+      "four": {
+        "mean": 0.024823045267489713,
+        "stderr": 0.0021120031799877533
+      },
+      "parity9": {
+        "mean": -0.0021069958847736623,
+        "stderr": 0.001991015420620525
+      },
+      "six": {
+        "mean": -0.012806584362139915,
+        "stderr": 0.0020793621063194324
+      }
+    },
+    "patch_distances": {
+      "jensen_shannon": 0.04303973818755673,
+      "kl_smoothed": 0.1691707101539781,
+      "pseudocount": 0.5,
+      "total_variation": 0.23797292952674898
+    },
+    "samples": 3000,
+    "sweep_seconds": 0.0008581736319999133,
+    "two_point_correlations": {
+      "10": {
+        "mean": 0.16814814814814816,
+        "stderr": 0.001834860628612695
+      },
+      "11": {
+        "mean": 0.04656790123456791,
+        "stderr": 0.0019997915333946886
+      },
+      "20": {
+        "mean": -0.0029465020576131622,
+        "stderr": 0.00222029388231704
+      }
+    }
+  },
+  "traditional_mps": {
+    "acceptance_rate": 0.31919537526944936,
+    "autocorrelation": {
+      "elapsed_seconds": 2.5791051749997678,
+      "ess": 376.8530095900703,
+      "ess_per_second": 146.11773619899168,
+      "samples": 3000,
+      "tau_int": 3.9803317522438157,
+      "window": 20,
+      "window_rule": "sokal_c5_with_initial_positive_fallback"
+    },
+    "block_nn_correlation": 0.1539341563786008,
+    "coarse_magnetization": 0.011670781893004113,
+    "elapsed_seconds": 2.5791051749997678,
+    "energy_per_site": -0.4631496223136717,
+    "held_out_multispin": {
+      "four": {
+        "mean": 0.005399176954732513,
+        "stderr": 0.002142719707922605
+      },
+      "parity9": {
+        "mean": -0.0004444444444444442,
+        "stderr": 0.0019922551333555086
+      },
+      "six": {
+        "mean": -0.014551440329218105,
+        "stderr": 0.0020672217957817154
+      }
+    },
+    "patch_distances": {
+      "jensen_shannon": 0.040791454183646644,
+      "kl_smoothed": 0.15936575613148624,
+      "pseudocount": 0.5,
+      "total_variation": 0.23015721450617285
+    },
+    "samples": 3000,
+    "sweep_seconds": 0.0008597017249999226,
+    "two_point_correlations": {
+      "10": {
+        "mean": 0.15013991769547327,
+        "stderr": 0.0018503208261904012
+      },
+      "11": {
+        "mean": 0.04561316872427984,
+        "stderr": 0.0020674515688059243
+      },
+      "20": {
+        "mean": -0.012263374485596704,
+        "stderr": 0.0021634508211548814
+      }
+    }
+  },
+  "unbiased": {
+    "acceptance_rate": 0.20586831275720163,
+    "autocorrelation": {
+      "elapsed_seconds": 2.436992033000024,
+      "ess": 13.745348438906676,
+      "ess_per_second": 5.640292726761877,
+      "samples": 3000,
+      "tau_int": 109.12782652742357,
+      "window": 368,
+      "window_rule": "sokal_c5_with_initial_positive_fallback"
+    },
+    "block_nn_correlation": 0.72880658436214,
+    "coarse_magnetization": 0.6973415637860082,
+    "elapsed_seconds": 2.436992033000024,
+    "energy_per_site": -0.6110897850937357,
+    "held_out_multispin": {
+      "four": {
+        "mean": 0.611753086419753,
+        "stderr": 0.0038853818016840896
+      },
+      "parity9": {
+        "mean": 0.38104526748971196,
+        "stderr": 0.005259983129509209
+      },
+      "six": {
+        "mean": 0.5050370370370371,
+        "stderr": 0.004542040522580369
+      }
+    },
+    "patch_distances": {
+      "jensen_shannon": 0.4207437126200595,
+      "kl_smoothed": 3.3103813237229214,
+      "pseudocount": 0.5,
+      "total_variation": 0.7636726466049382
+    },
+    "samples": 3000,
+    "sweep_seconds": 0.0008123306776666747,
+    "two_point_correlations": {
+      "10": {
+        "mean": 0.7306172839506174,
+        "stderr": 0.0030394913565042407
+      },
+      "11": {
+        "mean": 0.6720658436213992,
+        "stderr": 0.003978301788016763
+      },
+      "20": {
+        "mean": 0.6403786008230452,
+        "stderr": 0.004602521031349474
+      }
+    }
+  }
+}

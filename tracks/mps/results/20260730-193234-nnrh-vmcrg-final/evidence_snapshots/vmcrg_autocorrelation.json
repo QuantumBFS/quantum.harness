@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "artifact_type": "sanitized_evidence_snapshot",
+  "source_path": "DMRG/output/reproduction/paper_fig2_L90_map_v1/rg2_continuation1/paper_autocorrelation.json",
+  "source_sha256": "29e14caac1c9e8106a0cad34343895e019f31a192920e10c264940ab144ae65a",
+  "status": "PASS",
+  "observable": "normalized_S0_micro_times_S0_block",
+  "correlation_definition": "connected_normalized_autocovariance",
+  "length": 90,
+  "thermalization_sweeps": 5000,
+  "measurements_per_chain": 100000,
+  "independent_paired_chains": 8,
+  "seed": 20269600,
+  "paired_ratio_mean": 0.010685802059865877,
+  "paired_ratio_standard_error": 0.0005902163989043452,
+  "biased_tau_mean": 4.980871202096628,
+  "unbiased_tau_mean": 475.5463125953649,
+  "sanitization": "Local absolute input path removed; aggregate statistics and original SHA-256 retained."
+}

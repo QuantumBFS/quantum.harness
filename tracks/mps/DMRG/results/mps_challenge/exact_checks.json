@@ -1,0 +1,35 @@
+{
+  "exact_ising_critical_coupling": 0.44068679350977147,
+  "paper_operational_coupling": 0.436,
+  "patch_states": 512,
+  "results": [
+    {
+      "centered_mean": 1.9852334701272664e-23,
+      "chi": 2,
+      "d4_error": 6.776263578034403e-21,
+      "lookup_error": 2.6469779601696886e-23,
+      "parameter_count": 64,
+      "parameter_norm": 4.000000016253962,
+      "z2_error": 3.3881317890172014e-21
+    },
+    {
+      "centered_mean": 3.1763735522036263e-22,
+      "chi": 4,
+      "d4_error": 2.0328790734103208e-20,
+      "lookup_error": 4.235164736271502e-22,
+      "parameter_count": 240,
+      "parameter_norm": 5.477225955777712,
+      "z2_error": 1.3552527156068805e-20
+    },
+    {
+      "centered_mean": 1.5881867761018131e-22,
+      "chi": 8,
+      "d4_error": 6.776263578034403e-21,
+      "lookup_error": 2.117582368135751e-22,
+      "parameter_count": 928,
+      "parameter_norm": 7.615773129286039,
+      "z2_error": 6.776263578034403e-21
+    }
+  ],
+  "status": "PASS"
+}

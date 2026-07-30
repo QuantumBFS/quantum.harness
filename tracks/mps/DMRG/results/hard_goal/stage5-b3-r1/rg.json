@@ -1,0 +1,1 @@
+{"bias_cache_proposals":20,"incremental_cache_error":0,"maximum_bias_delta_error":1.1102230246251565e-16,"maximum_origin_error":0,"maximum_symmetry_error":3.469446951953614e-18,"origin_count":27,"passed":true,"scope":"one 3x3x3 majority RG only","second_rg_enabled":false,"token_action_errors":0}

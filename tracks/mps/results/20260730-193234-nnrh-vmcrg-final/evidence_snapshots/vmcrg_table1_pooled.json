@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "artifact_type": "sanitized_evidence_snapshot",
+  "source_path": "DMRG/output/reproduction/paper_table1_map_repeats/pooled_assessment.json",
+  "source_sha256": "28d49a3200a022242f87ba9f3e7e73330cd3a27fdfed200efa97ec336871e381",
+  "status": "PASS_PAPER_VALUES_INSIDE_POOLED_HIERARCHICAL_CI95",
+  "scope": "three_independent_direct_paper_RG2_maps",
+  "method": "hierarchical bootstrap resampling RG2 maps then independent MC runs",
+  "bootstrap_replicates": 10000,
+  "bootstrap_seed": 202617901,
+  "point_estimate": {
+    "lambda_even": 3.0143032544548776,
+    "lambda_odd": 7.845998709591834
+  },
+  "hierarchical_ci95": {
+    "lambda_even": [2.9383733985521414, 3.053565925370385],
+    "lambda_odd": [7.763790389997176, 7.902479396096317]
+  },
+  "paper_L45_biased_values": {
+    "lambda_even": 3.045,
+    "lambda_odd": 7.858
+  },
+  "paper_values_inside_hierarchical_ci95": {
+    "lambda_even": true,
+    "lambda_odd": true
+  },
+  "sanitization": "Local absolute source path removed; numerical content and original SHA-256 retained."
+}

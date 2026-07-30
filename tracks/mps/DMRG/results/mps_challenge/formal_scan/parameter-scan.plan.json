@@ -1,0 +1,81 @@
+{
+  "run_id": "challenge28-mps-formal",
+  "run_dir": "results/mps_challenge/formal_scan",
+  "axes": {
+    "chi": [
+      2,
+      4,
+      8
+    ],
+    "seed": [
+      20260801,
+      20260802,
+      20260803
+    ]
+  },
+  "cells": [
+    {
+      "cell_id": "cell-0001",
+      "params": {
+        "chi": 2,
+        "seed": 20260801
+      }
+    },
+    {
+      "cell_id": "cell-0002",
+      "params": {
+        "chi": 2,
+        "seed": 20260802
+      }
+    },
+    {
+      "cell_id": "cell-0003",
+      "params": {
+        "chi": 2,
+        "seed": 20260803
+      }
+    },
+    {
+      "cell_id": "cell-0004",
+      "params": {
+        "chi": 4,
+        "seed": 20260801
+      }
+    },
+    {
+      "cell_id": "cell-0005",
+      "params": {
+        "chi": 4,
+        "seed": 20260802
+      }
+    },
+    {
+      "cell_id": "cell-0006",
+      "params": {
+        "chi": 4,
+        "seed": 20260803
+      }
+    },
+    {
+      "cell_id": "cell-0007",
+      "params": {
+        "chi": 8,
+        "seed": 20260801
+      }
+    },
+    {
+      "cell_id": "cell-0008",
+      "params": {
+        "chi": 8,
+        "seed": 20260802
+      }
+    },
+    {
+      "cell_id": "cell-0009",
+      "params": {
+        "chi": 8,
+        "seed": 20260803
+      }
+    }
+  ]
+}

@@ -1,0 +1,158 @@
+{
+  "traditional": {
+    "acceptance_rate": 0.14433221099887766,
+    "autocorrelation": {
+      "elapsed_seconds": 0.01364314500006003,
+      "ess": 31.273112414586357,
+      "ess_per_second": 2292.2216552304294,
+      "samples": 100,
+      "tau_int": 1.5988175189329437,
+      "window": 5,
+      "window_rule": "sokal_c5_with_initial_positive_fallback"
+    },
+    "block_nn_correlation": 0.9466666666666665,
+    "coarse_magnetization": -0.9733333333333332,
+    "elapsed_seconds": 0.01364314500006003,
+    "energy_per_site": -0.7023367901234566,
+    "held_out_multispin": {
+      "four": {
+        "mean": 0.8933333333333333,
+        "stderr": 0.029030989544096924
+      },
+      "parity9": {
+        "mean": -0.76,
+        "stderr": 0.06531972647421808
+      },
+      "six": {
+        "mean": 0.8400000000000002,
+        "stderr": 0.04354648431614539
+      }
+    },
+    "patch_distances": {
+      "jensen_shannon": 0.6599164281302681,
+      "kl_smoothed": 3.8571040870287647,
+      "pseudocount": 0.5,
+      "total_variation": 0.98046875
+    },
+    "samples": 100,
+    "sweep_seconds": 0.0001364314500006003,
+    "two_point_correlations": {
+      "10": {
+        "mean": 0.9466666666666665,
+        "stderr": 0.014515494772048462
+      },
+      "11": {
+        "mean": 0.9466666666666665,
+        "stderr": 0.014515494772048462
+      },
+      "20": {
+        "mean": 0.9466666666666665,
+        "stderr": 0.014515494772048462
+      }
+    }
+  },
+  "traditional_mps": {
+    "acceptance_rate": 0.14433221099887766,
+    "autocorrelation": {
+      "elapsed_seconds": 0.013538250999772572,
+      "ess": 31.273112414586357,
+      "ess_per_second": 2309.981726229755,
+      "samples": 100,
+      "tau_int": 1.5988175189329437,
+      "window": 5,
+      "window_rule": "sokal_c5_with_initial_positive_fallback"
+    },
+    "block_nn_correlation": 0.9466666666666665,
+    "coarse_magnetization": -0.9733333333333332,
+    "elapsed_seconds": 0.013538250999772572,
+    "energy_per_site": -0.7023367901234566,
+    "held_out_multispin": {
+      "four": {
+        "mean": 0.8933333333333333,
+        "stderr": 0.029030989544096924
+      },
+      "parity9": {
+        "mean": -0.76,
+        "stderr": 0.06531972647421808
+      },
+      "six": {
+        "mean": 0.8400000000000002,
+        "stderr": 0.04354648431614539
+      }
+    },
+    "patch_distances": {
+      "jensen_shannon": 0.6599164281302681,
+      "kl_smoothed": 3.8571040870287647,
+      "pseudocount": 0.5,
+      "total_variation": 0.98046875
+    },
+    "samples": 100,
+    "sweep_seconds": 0.00013538250999772572,
+    "two_point_correlations": {
+      "10": {
+        "mean": 0.9466666666666665,
+        "stderr": 0.014515494772048462
+      },
+      "11": {
+        "mean": 0.9466666666666665,
+        "stderr": 0.014515494772048462
+      },
+      "20": {
+        "mean": 0.9466666666666665,
+        "stderr": 0.014515494772048462
+      }
+    }
+  },
+  "unbiased": {
+    "acceptance_rate": 0.14433221099887766,
+    "autocorrelation": {
+      "elapsed_seconds": 0.014749614999800542,
+      "ess": 31.273112414586357,
+      "ess_per_second": 2120.266353732573,
+      "samples": 100,
+      "tau_int": 1.5988175189329437,
+      "window": 5,
+      "window_rule": "sokal_c5_with_initial_positive_fallback"
+    },
+    "block_nn_correlation": 0.9466666666666665,
+    "coarse_magnetization": -0.9733333333333332,
+    "elapsed_seconds": 0.014749614999800542,
+    "energy_per_site": -0.7023367901234566,
+    "held_out_multispin": {
+      "four": {
+        "mean": 0.8933333333333333,
+        "stderr": 0.029030989544096924
+      },
+      "parity9": {
+        "mean": -0.76,
+        "stderr": 0.06531972647421808
+      },
+      "six": {
+        "mean": 0.8400000000000002,
+        "stderr": 0.04354648431614539
+      }
+    },
+    "patch_distances": {
+      "jensen_shannon": 0.6599164281302681,
+      "kl_smoothed": 3.8571040870287647,
+      "pseudocount": 0.5,
+      "total_variation": 0.98046875
+    },
+    "samples": 100,
+    "sweep_seconds": 0.00014749614999800542,
+    "two_point_correlations": {
+      "10": {
+        "mean": 0.9466666666666665,
+        "stderr": 0.014515494772048462
+      },
+      "11": {
+        "mean": 0.9466666666666665,
+        "stderr": 0.014515494772048462
+      },
+      "20": {
+        "mean": 0.9466666666666665,
+        "stderr": 0.014515494772048462
+      }
+    }
+  }
+}

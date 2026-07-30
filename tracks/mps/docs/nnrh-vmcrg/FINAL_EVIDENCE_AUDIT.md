@@ -15,8 +15,8 @@
 | Area | Status | Primary evidence |
 |---|---|---|
 | XY LTRG Figs. 4-6a | `REPRODUCTION_COMPLETE` | `tracks/mps/results/20260727-131302-li2011-xy-ltrg/run.json` |
-| 2D VMCRG Table I | `REPRODUCTION_COMPLETE` | `tracks/mps/DMRG/output/reproduction/paper_table1_map_repeats/pooled_assessment.json` |
-| 2D autocorrelation | PASS | `tracks/mps/DMRG/output/reproduction/paper_fig2_L90_map_v1/rg2_continuation1/paper_autocorrelation.json` |
+| 2D VMCRG Table I | `REPRODUCTION_COMPLETE` | `tracks/mps/results/20260730-193234-nnrh-vmcrg-final/evidence_snapshots/vmcrg_table1_pooled.json` |
+| 2D autocorrelation | PASS | `tracks/mps/results/20260730-193234-nnrh-vmcrg-final/evidence_snapshots/vmcrg_autocorrelation.json` |
 | Easy Goal | `PROTOCOL_INCOMPLETE` | corrected N3 result and invalid-gate incident |
 | MPS/TT | `SUPPORTING_EVIDENCE` | `tracks/mps/DMRG/results/mps_challenge/` |
 | Hard Goal | `STAGE_6_NO_GO` | Stage 6 selections and terminal submission manifest |

@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "reproduction_status": "REPRODUCTION_COMPLETE",
+  "easy_goal_status": "PROTOCOL_INCOMPLETE",
+  "mps_tt_support_status": "SUPPORTING_EVIDENCE",
+  "hard_goal_status": "STAGE_6_NO_GO",
+  "observations": {
+    "ltrg_result_blocks": 3,
+    "lambda_even": 3.0143032544548776,
+    "lambda_odd": 7.845998709591834,
+    "legacy_n3_published_rounds": 3,
+    "corrected_n3_published_rounds": 1,
+    "hard_terminal_classification": "RESOURCE_NO_GO",
+    "hard_stage6_decision": "RECALIBRATE"
+  },
+  "sources": [
+    {
+      "path": "results/20260727-131302-li2011-xy-ltrg/run.json",
+      "sha256": "cf51b10653ad54b060b73137a5611243fc50e943a9e0c78ed5204e1f811ac8ad"
+    },
+    {
+      "path": "results/20260730-193234-nnrh-vmcrg-final/evidence_snapshots/vmcrg_table1_pooled.json",
+      "sha256": "1254a6b58df42e91437848b4a71762cc5a6c7a2d4f7ebf184b33d5774799315c"
+    },
+    {
+      "path": "results/20260730-193234-nnrh-vmcrg-final/evidence_snapshots/vmcrg_autocorrelation.json",
+      "sha256": "3c527031f84130f8f80da3cbeffa4c77664a83cdd3e00eb569b355c20a60e36c"
+    },
+    {
+      "path": "DMRG/results/hard_goal/submission-20260730/manifest.json",
+      "sha256": "8a62bb2a8656a770c423cbacbde9f04fc3a81d47324c48465fe5b9c0952509bd"
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "mode": "paper reproduction",
+  "beta_endpoint": {
+    "50": {
+      "beta": 119.99999999999532,
+      "relative_free_energy_error": 0.000292292906137053,
+      "energy": -0.31813663230138894,
+      "relative_ground_energy_error": 0.0005442931241592386
+    },
+    "100": {
+      "beta": 119.99999999999532,
+      "relative_free_energy_error": 3.085989919429866e-05,
+      "energy": -0.3182499305438568,
+      "relative_ground_energy_error": 0.00018835619795756506
+    },
+    "150": {
+      "beta": 119.99999999999532,
+      "relative_free_energy_error": 4.436497556530524e-06,
+      "energy": -0.318270434033252,
+      "relative_ground_energy_error": 0.0001239425863006608
+    }
+  },
+  "specific_heat_peak": {
+    "Dc": 150,
+    "temperature": 0.3174603174603178,
+    "value": 0.32600877765534475
+  },
+  "diagnostics": {
+    "max_truncerr": 1.9645221252022288e-07,
+    "cell_wall_seconds": 611.0866980552673,
+    "peak_rss_bytes": 998592512
+  },
+  "julia_peak_rss_bytes": 998592512,
+  "julia_wall_seconds": 612.7250950336456,
+  "negative_control": {
+    "Dc": 20,
+    "beta_max": 2.0,
+    "caught": true,
+    "expected_spin_convention": "S=sigma/2",
+    "relative_free_energy_error": 1.8527304588852493,
+    "spin_convention": "Pauli bilinears",
+    "tau": 0.1
+  }
+}

@@ -16,7 +16,7 @@
 
 ## Global Constraints
 
-- Work only in `/home/asus/code/quantum.harness/tracks/mps/DMRG` and preserve all pre-existing files and results.
+- Work only in `tracks/mps/DMRG` and preserve all pre-existing files and results.
 - The local checkout is currently on `main`; PR #154 has head `challenge/mps/neural-renormalized-hamiltonians`. Do not switch branches in the dirty shared worktree.
 - Physical convention: `H(sigma) = -K sum_<ij> sigma_i sigma_j = K S_nn(sigma)` with `S_nn = -sum_<ij> sigma_i sigma_j` and acceptance `min(1, exp[-Delta(H+V)])`.
 - Main paper-matched point: `L=45`, periodic square lattice, `K=0.436`, 3x3 non-overlapping majority blocks, uniform independent block-spin target.

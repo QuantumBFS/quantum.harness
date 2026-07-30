@@ -1,0 +1,87 @@
+{
+  "run_id": "challenge28-mps-formal",
+  "run_dir": "results/mps_challenge/formal_scan",
+  "settings": {
+    "baseline_steps": 3000,
+    "coupling": 0.436,
+    "length": 45,
+    "measurement_sweeps": 20000,
+    "operator_count": 13,
+    "residual_steps": 3000,
+    "rg_levels": 1,
+    "sweeps_per_step": 20,
+    "walkers": 16
+  },
+  "provenance": {
+    "challenge_issue": 28,
+    "paper": "Phys. Rev. Lett. 119, 220602 (2017); arXiv:1707.08683",
+    "patch_order": "row-major offsets from (-1,-1) through (1,1)",
+    "protocol": "traditional 13-operator Stage A followed by centered D4xZ2 shared patch-MPS Stage B",
+    "team": "LULU"
+  },
+  "cells": [
+    {
+      "cell_id": "cell-0001",
+      "params": {
+        "chi": 2,
+        "seed": 20260801
+      }
+    },
+    {
+      "cell_id": "cell-0002",
+      "params": {
+        "chi": 2,
+        "seed": 20260802
+      }
+    },
+    {
+      "cell_id": "cell-0003",
+      "params": {
+        "chi": 2,
+        "seed": 20260803
+      }
+    },
+    {
+      "cell_id": "cell-0004",
+      "params": {
+        "chi": 4,
+        "seed": 20260801
+      }
+    },
+    {
+      "cell_id": "cell-0005",
+      "params": {
+        "chi": 4,
+        "seed": 20260802
+      }
+    },
+    {
+      "cell_id": "cell-0006",
+      "params": {
+        "chi": 4,
+        "seed": 20260803
+      }
+    },
+    {
+      "cell_id": "cell-0007",
+      "params": {
+        "chi": 8,
+        "seed": 20260801
+      }
+    },
+    {
+      "cell_id": "cell-0008",
+      "params": {
+        "chi": 8,
+        "seed": 20260802
+      }
+    },
+    {
+      "cell_id": "cell-0009",
+      "params": {
+        "chi": 8,
+        "seed": 20260803
+      }
+    }
+  ]
+}
