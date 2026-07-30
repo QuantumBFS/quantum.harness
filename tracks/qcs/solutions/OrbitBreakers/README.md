@@ -4,7 +4,7 @@
 |---|---|
 | **Team name** | OrbitBreakers |
 | **Members** | Qingyun Qian, Muchu Chen, Huaiming Yu |
-| **Repository** | [hmyuuu/OrbitBreakersExpertBenchmarks](https://github.com/hmyuuu/OrbitBreakersExpertBenchmarks) |
+| **Repository** | [hmyuuu/OrbitBreakersBench](https://github.com/hmyuuu/OrbitBreakersBench) |
 
 ## Challenge
 
