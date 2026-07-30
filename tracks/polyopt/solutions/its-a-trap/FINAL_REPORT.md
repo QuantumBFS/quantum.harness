@@ -123,6 +123,32 @@ that seam (`rg_selection/src/local_cone_adapter.jl`).
   (bit-identical bounds, equal block hashes). The N=200 adaptive
   deployment built on these gates was cancelled before submission.
 
+## Fine-variable elimination: operational replacement prototype (revision)
+
+A four-hour pre-registered test of the Sec. III-D-2 replacement direction
+(x_fine → x_retained ⊕ x_coarse), run on the deadline afternoon. Arms on
+the stripped chassis (rdm=false, pso=0, lso=false): A = fine-rich reach
+comparator (r=N/2); B = truncated core (r=r_of(N)); C6 = B + depth-6
+ω-tower; D/E = C6 + moment bundles. All numbers from
+`rg_selection/results/replacement_{build,solve,summary}.csv` (hashes in
+`SHA256SUMS`); full narrative in `rg_selection/results/SUMMARY.md`.
+
+| finding | numbers |
+|---|---|
+| structural-cost crossover (pre-registered) confirmed | PSD-scalar ratio C6/A: 1.447 (N=14) → 0.848 (N=20) → 0.610 (N=26) → 0.530 (N=30); nnz ratio 0.35 at N=30 |
+| realized solver cost still favors A at tested sizes | wall ratio C6/A ≈ 10.7 / 9.0; RSS ratio 11.8 / 5.7 (N=14 / 20), both decreasing with N |
+| reach gap resolves; depth-6 tower does not close it | d = L_A − L_B = +4.679e-05 (N=14), +1.566e-04 (N=20), both resolved-positive; eta_CG(6) = +0.0013 / +0.0003 (measured negative — no resolved recovery) |
+| bundle marginals unmeasurable under the 18 GiB local law | D, E OOM at both sizes; C10@N=20 admission PASS (1792 link rows ≤ 1.7e-15) but solve OOM; frontier rows retained |
+| validity | every accepted row ≤ E_Bethe + 5e-7; L_B ≤ L_A and L_B ≤ L_C6 within ε_cmp at both sizes |
+
+The supported statement is deliberately narrow: the structural size of the
+coarse representation crosses below the fine-rich reach basis between
+N=14 and N=20 and keeps improving, but at depth 6 it carries essentially
+no additional spectral information on this chassis, and its dual blocks
+are expensive in realized solver terms at N ≤ 20. No cost-at-matched-
+accuracy claim is made. This is an operational prototype, not a completed
+coarse replacement.
+
 ## Reproducibility
 
 `RESULTS.md` documents the paper-reproduction protocol (CONFIG A knob

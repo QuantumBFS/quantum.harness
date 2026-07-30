@@ -20,3 +20,11 @@ Banned-term compliance: "certified" nowhere in outward text; no "scalable",
 no "first implementation", no "CONFIG-A-equivalent" for 2D cells; the tower
 is described at most under the "constraint-family complementarity
 hypothesis" phrase.
+
+## Revision additions (replacement prototype, 2026-07-30 afternoon)
+
+| # | claim | evidence | classification |
+|---|---|---|---|
+| C13 | Structural-cost crossover of the coarse representation vs fine-rich reach: PSD-scalar ratio C6/A = 1.447/0.848/0.610/0.530 at N=14/20/26/30 (build-only, code-generated counts) | rg_selection/results/replacement_build.csv | resolved (counts exact) |
+| C14 | The depth-6 tower recovers no resolved fraction of the truncated-reach gap: d(A−B) resolved-positive at both sizes; eta_CG(6) = +0.0013/+0.0003 with C6−B inside ε_cmp | rg_selection/results/replacement_solve.csv + replacement_summary.csv | measured negative |
+| C15 | Bundle/deeper-tower marginals (D, E, C10) are unmeasurable under the 18 GiB single-process law at N=14/20: OOM frontier rows; C10 admission itself PASSED (ED substitution, 1792 rows ≤ 1.7e-15) | replacement_solve.csv OOM rows; depth_admit_n10.txt; journalctl record in replacement_driver.log | status/frontier, not result |
