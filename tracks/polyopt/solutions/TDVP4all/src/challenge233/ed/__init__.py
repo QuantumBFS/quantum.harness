@@ -1,0 +1,1 @@
+"""Exact-diagonalization oracles."""
