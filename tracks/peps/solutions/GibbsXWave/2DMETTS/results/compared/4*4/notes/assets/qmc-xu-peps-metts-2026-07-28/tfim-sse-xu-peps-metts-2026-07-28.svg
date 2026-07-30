@@ -1,0 +1,208 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900" role="img" aria-labelledby="title desc">
+<title id="title">SSE benchmark of finite PEPS-METTS energy</title>
+<desc id="desc">Energy comparisons for two by two and four by four open-boundary transverse-field Ising models, plus logarithmic absolute discrepancies.</desc>
+<style>
+    text { font-family: "Noto Sans CJK SC", "Noto Sans", sans-serif; fill: #20242b; }
+    .background { fill: #ffffff; }
+    .panel-title { font-size: 19px; font-weight: 600; }
+    .axis-label { font-size: 16px; }
+    .tick { font-size: 13px; fill: #505968; }
+    .legend { font-size: 15px; }
+    .grid { stroke: #d9dee7; stroke-width: 1; }
+    .axis { stroke: #596273; stroke-width: 1.4; }
+    .reference-line { fill: none; stroke: #2364aa; stroke-width: 2.4; }
+    .reference-dot { fill: #2364aa; }
+    .metts-line { fill: none; stroke: #d1495b; stroke-width: 2.2; }
+    .metts-dot { fill: #d1495b; }
+    .delta-2-line { fill: none; stroke: #7a5195; stroke-width: 2.3; }
+    .delta-2-dot { fill: #7a5195; }
+    .error-2-line { fill: none; stroke: #7a5195; stroke-width: 1.7; stroke-dasharray: 6 5; }
+    .delta-4-line { fill: none; stroke: #ef8a17; stroke-width: 2.3; }
+    .delta-4-dot { fill: #ef8a17; }
+    .error-4-line { fill: none; stroke: #ef8a17; stroke-width: 1.7; stroke-dasharray: 6 5; }
+</style>
+<rect width="1200" height="900" class="background"/>
+<text x="600" y="38" text-anchor="middle" style="font-size:24px;font-weight:600">有限 PEPS-METTS 与 SSE/ED：二维 TFIM 能量</text>
+<text x="600" y="65" text-anchor="middle" class="legend">OBC，J=1，h=0.5；METTS: D=2, χ=16, τ=0.05, 100 samples；QMC: 20 × 2¹⁸ sweeps</text>
+<text x="110" y="106" class="panel-title">2×2：ED/SSE reference 与 METTS</text>
+<line x1="110" y1="120.0" x2="530" y2="120.0" class="grid"/>
+<text x="101" y="124.0" text-anchor="end" class="tick">-3.821</text>
+<line x1="110" y1="185.0" x2="530" y2="185.0" class="grid"/>
+<text x="101" y="189.0" text-anchor="end" class="tick">-3.938</text>
+<line x1="110" y1="250.0" x2="530" y2="250.0" class="grid"/>
+<text x="101" y="254.0" text-anchor="end" class="tick">-4.056</text>
+<line x1="110" y1="315.0" x2="530" y2="315.0" class="grid"/>
+<text x="101" y="319.0" text-anchor="end" class="tick">-4.173</text>
+<line x1="110" y1="380.0" x2="530" y2="380.0" class="grid"/>
+<text x="101" y="384.0" text-anchor="end" class="tick">-4.29</text>
+<line x1="110" y1="380" x2="530" y2="380" class="axis"/>
+<line x1="110" y1="120" x2="110" y2="380" class="axis"/>
+<line x1="110.0" y1="380" x2="110.0" y2="385" class="axis"/>
+<text x="110.0" y="400" text-anchor="middle" class="tick">1</text>
+<line x1="156.66666666666666" y1="380" x2="156.66666666666666" y2="385" class="axis"/>
+<text x="156.66666666666666" y="400" text-anchor="middle" class="tick">2</text>
+<line x1="203.33333333333331" y1="380" x2="203.33333333333331" y2="385" class="axis"/>
+<text x="203.33333333333331" y="400" text-anchor="middle" class="tick">3</text>
+<line x1="250.0" y1="380" x2="250.0" y2="385" class="axis"/>
+<text x="250.0" y="400" text-anchor="middle" class="tick">4</text>
+<line x1="296.66666666666663" y1="380" x2="296.66666666666663" y2="385" class="axis"/>
+<text x="296.66666666666663" y="400" text-anchor="middle" class="tick">5</text>
+<line x1="343.33333333333337" y1="380" x2="343.33333333333337" y2="385" class="axis"/>
+<text x="343.33333333333337" y="400" text-anchor="middle" class="tick">6</text>
+<line x1="390.0" y1="380" x2="390.0" y2="385" class="axis"/>
+<text x="390.0" y="400" text-anchor="middle" class="tick">7</text>
+<line x1="436.6666666666667" y1="380" x2="436.6666666666667" y2="385" class="axis"/>
+<text x="436.6666666666667" y="400" text-anchor="middle" class="tick">8</text>
+<line x1="483.3333333333333" y1="380" x2="483.3333333333333" y2="385" class="axis"/>
+<text x="483.3333333333333" y="400" text-anchor="middle" class="tick">9</text>
+<line x1="530.0" y1="380" x2="530.0" y2="385" class="axis"/>
+<text x="530.0" y="400" text-anchor="middle" class="tick">10</text>
+<polyline points="110.0,148.56 156.67,353.55 203.33,360.03 250.0,360.44 296.67,360.62 343.33,360.79 390.0,360.97 436.67,361.14 483.33,361.31 530.0,361.48" class="reference-line"/>
+<polyline points="110.0,137.93 156.67,353.91 203.33,359.12 250.0,359.97 296.67,358.62 343.33,360.37 390.0,359.05 436.67,359.21 483.33,358.71 530.0,359.2" class="metts-line"/>
+<circle cx="110.0" cy="148.56420907764408" r="4" class="reference-dot"/>
+<rect x="106.5" y="134.4310344827586" width="7" height="7" class="metts-dot"/>
+<circle cx="156.66666666666666" cy="353.55491606085883" r="4" class="reference-dot"/>
+<rect x="153.16666666666666" y="350.4058002386305" width="7" height="7" class="metts-dot"/>
+<circle cx="203.33333333333331" cy="360.0258872868019" r="4" class="reference-dot"/>
+<rect x="199.83333333333331" y="355.61849354909145" width="7" height="7" class="metts-dot"/>
+<circle cx="250.0" cy="360.43809230247285" r="4" class="reference-dot"/>
+<rect x="246.5" y="356.470738016882" width="7" height="7" class="metts-dot"/>
+<circle cx="296.66666666666663" cy="360.62175894203403" r="4" class="reference-dot"/>
+<rect x="293.16666666666663" y="355.1215453928219" width="7" height="7" class="metts-dot"/>
+<circle cx="343.33333333333337" cy="360.7949546422344" r="4" class="reference-dot"/>
+<rect x="339.83333333333337" y="356.8734592570513" width="7" height="7" class="metts-dot"/>
+<circle cx="390.0" cy="360.9670386337501" r="4" class="reference-dot"/>
+<rect x="386.5" y="355.5521915641236" width="7" height="7" class="metts-dot"/>
+<circle cx="436.6666666666667" cy="361.13834731069176" r="4" class="reference-dot"/>
+<rect x="433.1666666666667" y="355.7052125010188" width="7" height="7" class="metts-dot"/>
+<circle cx="483.3333333333333" cy="361.30879976314657" r="4" class="reference-dot"/>
+<rect x="479.8333333333333" y="355.2127932656849" width="7" height="7" class="metts-dot"/>
+<circle cx="530.0" cy="361.47829693958863" r="4" class="reference-dot"/>
+<rect x="526.5" y="355.69941167258906" width="7" height="7" class="metts-dot"/>
+<text x="320.0" y="422" text-anchor="middle" class="axis-label">β</text>
+<text x="48" y="250.0" transform="rotate(-90 48 250.0)" text-anchor="middle" class="axis-label">总能量 E</text>
+<text x="680" y="106" class="panel-title">4×4：SSE reference 与 METTS</text>
+<line x1="680" y1="120.0" x2="1100" y2="120.0" class="grid"/>
+<text x="671" y="124.0" text-anchor="end" class="tick">-23.992</text>
+<line x1="680" y1="185.0" x2="1100" y2="185.0" class="grid"/>
+<text x="671" y="189.0" text-anchor="end" class="tick">-24.185</text>
+<line x1="680" y1="250.0" x2="1100" y2="250.0" class="grid"/>
+<text x="671" y="254.0" text-anchor="end" class="tick">-24.378</text>
+<line x1="680" y1="315.0" x2="1100" y2="315.0" class="grid"/>
+<text x="671" y="319.0" text-anchor="end" class="tick">-24.571</text>
+<line x1="680" y1="380.0" x2="1100" y2="380.0" class="grid"/>
+<text x="671" y="384.0" text-anchor="end" class="tick">-24.764</text>
+<line x1="680" y1="380" x2="1100" y2="380" class="axis"/>
+<line x1="680" y1="120" x2="680" y2="380" class="axis"/>
+<line x1="680.0" y1="380" x2="680.0" y2="385" class="axis"/>
+<text x="680.0" y="400" text-anchor="middle" class="tick">1</text>
+<line x1="726.6666666666666" y1="380" x2="726.6666666666666" y2="385" class="axis"/>
+<text x="726.6666666666666" y="400" text-anchor="middle" class="tick">2</text>
+<line x1="773.3333333333334" y1="380" x2="773.3333333333334" y2="385" class="axis"/>
+<text x="773.3333333333334" y="400" text-anchor="middle" class="tick">3</text>
+<line x1="820.0" y1="380" x2="820.0" y2="385" class="axis"/>
+<text x="820.0" y="400" text-anchor="middle" class="tick">4</text>
+<line x1="866.6666666666666" y1="380" x2="866.6666666666666" y2="385" class="axis"/>
+<text x="866.6666666666666" y="400" text-anchor="middle" class="tick">5</text>
+<line x1="913.3333333333334" y1="380" x2="913.3333333333334" y2="385" class="axis"/>
+<text x="913.3333333333334" y="400" text-anchor="middle" class="tick">6</text>
+<line x1="960.0" y1="380" x2="960.0" y2="385" class="axis"/>
+<text x="960.0" y="400" text-anchor="middle" class="tick">7</text>
+<line x1="1006.6666666666667" y1="380" x2="1006.6666666666667" y2="385" class="axis"/>
+<text x="1006.6666666666667" y="400" text-anchor="middle" class="tick">8</text>
+<line x1="1053.3333333333333" y1="380" x2="1053.3333333333333" y2="385" class="axis"/>
+<text x="1053.3333333333333" y="400" text-anchor="middle" class="tick">9</text>
+<line x1="1100.0" y1="380" x2="1100.0" y2="385" class="axis"/>
+<text x="1100.0" y="400" text-anchor="middle" class="tick">10</text>
+<polyline points="680.0,137.93 726.67,360.84 773.33,362.02 820.0,361.06 866.67,361.93 913.33,361.64 960.0,361.62 1006.67,361.52 1053.33,362.07 1100.0,361.61" class="reference-line"/>
+<polyline points="680.0,167.23 726.67,358.62 773.33,361.8 820.0,361.85 866.67,361.85 913.33,361.85 960.0,361.85 1006.67,361.85 1053.33,361.85 1100.0,361.85" class="metts-line"/>
+<circle cx="680.0" cy="137.93103448275883" r="4" class="reference-dot"/>
+<rect x="676.5" y="163.73122832185217" width="7" height="7" class="metts-dot"/>
+<circle cx="726.6666666666666" cy="360.8400903484805" r="4" class="reference-dot"/>
+<rect x="723.1666666666666" y="355.1180444860486" width="7" height="7" class="metts-dot"/>
+<circle cx="773.3333333333334" cy="362.021252611606" r="4" class="reference-dot"/>
+<rect x="769.8333333333334" y="358.29582518943675" width="7" height="7" class="metts-dot"/>
+<circle cx="820.0" cy="361.05912151292085" r="4" class="reference-dot"/>
+<rect x="816.5" y="358.34974399173126" width="7" height="7" class="metts-dot"/>
+<circle cx="866.6666666666666" cy="361.9325494631014" r="4" class="reference-dot"/>
+<rect x="863.1666666666666" y="358.3503661537945" width="7" height="7" class="metts-dot"/>
+<circle cx="913.3333333333334" cy="361.63819583447525" r="4" class="reference-dot"/>
+<rect x="909.8333333333334" y="358.3503816572913" width="7" height="7" class="metts-dot"/>
+<circle cx="960.0" cy="361.61871017360033" r="4" class="reference-dot"/>
+<rect x="956.5" y="358.35038199432387" width="7" height="7" class="metts-dot"/>
+<circle cx="1006.6666666666667" cy="361.5169511272469" r="4" class="reference-dot"/>
+<rect x="1003.1666666666667" y="358.35038199432387" width="7" height="7" class="metts-dot"/>
+<circle cx="1053.3333333333333" cy="362.06896551724117" r="4" class="reference-dot"/>
+<rect x="1049.8333333333333" y="358.35038199432387" width="7" height="7" class="metts-dot"/>
+<circle cx="1100.0" cy="361.614125816425" r="4" class="reference-dot"/>
+<rect x="1096.5" y="358.35038199432387" width="7" height="7" class="metts-dot"/>
+<text x="890.0" y="422" text-anchor="middle" class="axis-label">β</text>
+<text x="618" y="250.0" transform="rotate(-90 618 250.0)" text-anchor="middle" class="axis-label">总能量 E</text>
+<text x="110" y="496" class="panel-title">绝对偏差与合并统计误差（log₁₀）</text>
+<line x1="110" y1="795.0" x2="1100" y2="795.0" class="grid"/>
+<text x="101" y="799.0" text-anchor="end" class="tick">10<tspan baseline-shift="super">-14</tspan></text>
+<line x1="110" y1="751.1538461538462" x2="1100" y2="751.1538461538462" class="grid"/>
+<text x="101" y="755.1538461538462" text-anchor="end" class="tick">10<tspan baseline-shift="super">-12</tspan></text>
+<line x1="110" y1="707.3076923076923" x2="1100" y2="707.3076923076923" class="grid"/>
+<text x="101" y="711.3076923076923" text-anchor="end" class="tick">10<tspan baseline-shift="super">-10</tspan></text>
+<line x1="110" y1="663.4615384615385" x2="1100" y2="663.4615384615385" class="grid"/>
+<text x="101" y="667.4615384615385" text-anchor="end" class="tick">10<tspan baseline-shift="super">-8</tspan></text>
+<line x1="110" y1="619.6153846153846" x2="1100" y2="619.6153846153846" class="grid"/>
+<text x="101" y="623.6153846153846" text-anchor="end" class="tick">10<tspan baseline-shift="super">-6</tspan></text>
+<line x1="110" y1="575.7692307692307" x2="1100" y2="575.7692307692307" class="grid"/>
+<text x="101" y="579.7692307692307" text-anchor="end" class="tick">10<tspan baseline-shift="super">-4</tspan></text>
+<line x1="110" y1="531.9230769230769" x2="1100" y2="531.9230769230769" class="grid"/>
+<text x="101" y="535.9230769230769" text-anchor="end" class="tick">10<tspan baseline-shift="super">-2</tspan></text>
+<line x1="110" y1="795" x2="1100" y2="795" class="axis"/>
+<line x1="110" y1="510" x2="110" y2="795" class="axis"/>
+<line x1="110.0" y1="795" x2="110.0" y2="800" class="axis"/>
+<text x="110.0" y="815" text-anchor="middle" class="tick">1</text>
+<line x1="220.0" y1="795" x2="220.0" y2="800" class="axis"/>
+<text x="220.0" y="815" text-anchor="middle" class="tick">2</text>
+<line x1="330.0" y1="795" x2="330.0" y2="800" class="axis"/>
+<text x="330.0" y="815" text-anchor="middle" class="tick">3</text>
+<line x1="440.0" y1="795" x2="440.0" y2="800" class="axis"/>
+<text x="440.0" y="815" text-anchor="middle" class="tick">4</text>
+<line x1="550.0" y1="795" x2="550.0" y2="800" class="axis"/>
+<text x="550.0" y="815" text-anchor="middle" class="tick">5</text>
+<line x1="660.0" y1="795" x2="660.0" y2="800" class="axis"/>
+<text x="660.0" y="815" text-anchor="middle" class="tick">6</text>
+<line x1="770.0" y1="795" x2="770.0" y2="800" class="axis"/>
+<text x="770.0" y="815" text-anchor="middle" class="tick">7</text>
+<line x1="880.0" y1="795" x2="880.0" y2="800" class="axis"/>
+<text x="880.0" y="815" text-anchor="middle" class="tick">8</text>
+<line x1="990.0" y1="795" x2="990.0" y2="800" class="axis"/>
+<text x="990.0" y="815" text-anchor="middle" class="tick">9</text>
+<line x1="1100.0" y1="795" x2="1100.0" y2="800" class="axis"/>
+<text x="1100.0" y="815" text-anchor="middle" class="tick">10</text>
+<polyline points="110.0,525.71 220.0,558.19 330.0,549.14 440.0,555.46 550.0,541.62 660.0,556.44 770.0,542.03 880.0,541.94 990.0,539.14 1100.0,540.38" class="delta-2-line"/>
+<polyline points="110.0,514.22 220.0,544.08 330.0,552.52 440.0,553.11 550.0,553.03 660.0,554.03 770.0,553.2 880.0,553.29 990.0,553.11 1100.0,553.38" class="error-2-line"/>
+<circle cx="110.0" cy="525.7107693824777" r="4" class="delta-2-dot"/>
+<circle cx="220.0" cy="558.1897894225466" r="4" class="delta-2-dot"/>
+<circle cx="330.0" cy="549.1436265112325" r="4" class="delta-2-dot"/>
+<circle cx="440.0" cy="555.4607512221966" r="4" class="delta-2-dot"/>
+<circle cx="550.0" cy="541.6178597937884" r="4" class="delta-2-dot"/>
+<circle cx="660.0" cy="556.4440758799877" r="4" class="delta-2-dot"/>
+<circle cx="770.0" cy="542.0331326427198" r="4" class="delta-2-dot"/>
+<circle cx="880.0" cy="541.9426331580929" r="4" class="delta-2-dot"/>
+<circle cx="990.0" cy="539.1355227218106" r="4" class="delta-2-dot"/>
+<circle cx="1100.0" cy="540.3760030763361" r="4" class="delta-2-dot"/>
+<polyline points="110.0,511.33 220.0,535.89 330.0,557.68 440.0,545.73 550.0,567.28 660.0,558.25 770.0,557.42 880.0,553.95 990.0,557.97 1100.0,557.23" class="delta-4-line"/>
+<polyline points="110.0,512.87 220.0,543.35 330.0,546.65 440.0,547.25 550.0,547.03 660.0,546.45 770.0,549.4 880.0,549.4 990.0,549.95 1100.0,549.75" class="error-4-line"/>
+<circle cx="110.0" cy="511.3329523656743" r="4" class="delta-4-dot"/>
+<circle cx="220.0" cy="535.8893739345999" r="4" class="delta-4-dot"/>
+<circle cx="330.0" cy="557.6753499337663" r="4" class="delta-4-dot"/>
+<circle cx="440.0" cy="545.7280970294806" r="4" class="delta-4-dot"/>
+<circle cx="550.0" cy="567.2825490940576" r="4" class="delta-4-dot"/>
+<circle cx="660.0" cy="558.2517159919212" r="4" class="delta-4-dot"/>
+<circle cx="770.0" cy="557.4152004637114" r="4" class="delta-4-dot"/>
+<circle cx="880.0" cy="553.9484475298734" r="4" class="delta-4-dot"/>
+<circle cx="990.0" cy="557.9688851039801" r="4" class="delta-4-dot"/>
+<circle cx="1100.0" cy="557.2286359136134" r="4" class="delta-4-dot"/>
+<text x="605.0" y="837" text-anchor="middle" class="axis-label">β</text>
+<text x="43" y="652.5" transform="rotate(-90 43 652.5)" text-anchor="middle" class="axis-label">|E<tspan baseline-shift="sub">METTS</tspan>−E<tspan baseline-shift="sub">ref</tspan>|</text>
+<line x1="135" y1="840" x2="170" y2="840" class="delta-2-line"/><circle cx="152" cy="840" r="4" class="delta-2-dot"/><text x="180" y="845" class="legend">2×2 |METTS−ED|</text>
+<line x1="355" y1="840" x2="390" y2="840" class="error-2-line"/><text x="400" y="845" class="legend">2×2 METTS SE</text>
+<line x1="575" y1="840" x2="610" y2="840" class="delta-4-line"/><circle cx="592" cy="840" r="4" class="delta-4-dot"/><text x="620" y="845" class="legend">4×4 |METTS−SSE|</text>
+<line x1="840" y1="840" x2="875" y2="840" class="error-4-line"/><text x="885" y="845" class="legend">4×4 combined SE</text>
+</svg>
