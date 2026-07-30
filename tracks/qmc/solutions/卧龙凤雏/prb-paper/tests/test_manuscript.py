@@ -9,7 +9,7 @@ def test_prb_front_matter_is_exact(paper_dir):
     text = _paper(paper_dir)
 
     assert (
-        r"\documentclass[aps,prb,reprint,superscriptaddress,longbibliography]"
+        r"\documentclass[aps,prb,reprint,superscriptaddress,longbibliography,floatfix]"
         r"{revtex4-2}"
     ) in text
     assert r"\author{Xu Tian}" in text

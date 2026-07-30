@@ -67,3 +67,9 @@ def test_every_manuscript_citation_has_a_bibliography_entry(paper_dir):
 
     assert cited <= available
     assert available <= cited
+
+
+def test_unpublished_challenge_manuscript_is_a_preprint_entry(paper_dir):
+    bibliography = (paper_dir / "references.bib").read_text(encoding="utf-8")
+
+    assert "@misc{WangVasseurTrebstLudwigZhu2025," in bibliography

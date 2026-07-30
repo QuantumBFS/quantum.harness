@@ -1,4 +1,4 @@
-\documentclass[aps,prb,reprint,superscriptaddress,longbibliography]{revtex4-2}
+\documentclass[aps,prb,reprint,superscriptaddress,longbibliography,floatfix]{revtex4-2}
 
 \usepackage{amsmath,amssymb,bm}
 \usepackage{booktabs}
@@ -151,7 +151,7 @@ the lattice aspect ratio with an anisotropy factor $\alpha$.  Agreement of
 these two estimates is a necessary internal consistency test; it is not
 imposed as a fitting constraint.
 
-\begin{table}[b]
+\begin{table*}[t]
 \caption{The four calculations and the additional controls required as model
 complexity increases.}
 \label{tab:01-models}
@@ -165,7 +165,7 @@ Weak self-dual & Quenched Casimir term & Common disorder\\
 Monitored DIII & Entanglement/Casimir & Claim gates\\
 \end{tabular}
 \end{ruledtabular}
-\end{table}
+\end{table*}
 
 \section{Numerical methods and validation hierarchy}
 \label{sec:methods}
@@ -270,10 +270,10 @@ the accumulated logarithmic norms into the quenched free-energy density.
 
 The joint-width fit and hierarchical bootstrap in
 Fig.~\ref{fig:03-nishimori} give
-\begin{equation}
- c_{\rm eff}=\NishimoriCharge\pm\NishimoriSE,\qquad
- {\rm CI}_{95\%}=[\NishimoriCILow,\NishimoriCIHigh].
-\end{equation}
+\begin{align}
+ c_{\rm eff}&=\NishimoriCharge\pm\NishimoriSE,\nonumber\\
+ {\rm CI}_{95\%}&=[\NishimoriCILow,\NishimoriCIHigh].
+\end{align}
 This interval contains the reference value $0.464$
 \cite{HoneckerJacobsenPiccoPujol2001}.  Removing $L=4$ shifts the center from
 $0.456484$ to $0.461475$; a paired bootstrap of the difference contains zero.
@@ -315,10 +315,10 @@ This Gaussian-state representation is consistent with standard efficient
 fermionic simulation methods \cite{Bravyi2005}.
 
 The result,
-\begin{equation}
- c_{\rm eff}=\WeakCharge\pm\WeakSE,\qquad
- {\rm CI}_{95\%}=[\WeakCILow,\WeakCIHigh],
-\end{equation}
+\begin{align}
+ c_{\rm eff}&=\WeakCharge\pm\WeakSE,\nonumber\\
+ {\rm CI}_{95\%}&=[\WeakCILow,\WeakCIHigh],
+\end{align}
 contains the reference $0.447$.  As shown in
 Fig.~\ref{fig:04-weak}, the maximum studentized residual is $1.772$, its
 correlation with $1/L$ is $-0.056$, the minimum effective sample size is
@@ -361,12 +361,13 @@ visible: all three stochastic intervals cover their predeclared references,
 but the meaning of the coefficient changes from a unitary central charge to a
 quenched or Born-weighted effective central charge.
 
-\begin{figure}[t]
-  \includegraphics[width=\columnwidth]{generated/fig05-benchmark-comparison.pdf}
+\begin{figure*}[t]
+  \centering
+  \includegraphics[width=0.48\textwidth]{generated/fig05-benchmark-comparison.pdf}
   \caption{Cross-benchmark comparison.  Circles and horizontal bars show
   estimates and 95\% intervals; crosses are reference values.}
   \label{fig:05-benchmarks}
-\end{figure}
+\end{figure*}
 
 \section{Exploratory learning-induced metal--insulator transition}
 \label{sec:learning}
@@ -407,12 +408,12 @@ are then extrapolated using a prespecified model set; model weights are carried
 into the uncertainty rather than choosing the visually most favorable curve.
 Figure~\ref{fig:07-entanglement} shows both stages.  The resulting conditional
 estimate is
-\begin{equation}
- c_{\rm eff}^{(S)}=\LearningEntanglementCharge
- \pm\LearningEntanglementSE,\quad
- {\rm CI}_{95\%}=[\LearningEntanglementCILow,
- \LearningEntanglementCIHigh].
-\end{equation}
+\begin{align}
+ c_{\rm eff}^{(S)}
+ &=\LearningEntanglementCharge\pm\LearningEntanglementSE,\nonumber\\
+ {\rm CI}_{95\%}
+ &=[\LearningEntanglementCILow,\LearningEntanglementCIHigh].
+\end{align}
 The fit has $\chi^2/{\rm dof}=0.370$ and remains available after removing the
 smallest width, but the covariance condition number is
 $6.9\times10^4$.  The wide interval correctly reflects noisy per-width
@@ -438,12 +439,12 @@ anisotropy calibration is unstable even though a single-window regression
 error is small.
 
 Using the nominal $\alpha$ gives the conditional Casimir value
-\begin{equation}
- c_{\rm eff}^{(F)}=\LearningCasimirCharge
- \pm\LearningCasimirSE,\quad
- {\rm CI}_{95\%}=[\LearningCasimirCILow,
- \LearningCasimirCIHigh].
-\end{equation}
+\begin{align}
+ c_{\rm eff}^{(F)}
+ &=\LearningCasimirCharge\pm\LearningCasimirSE,\nonumber\\
+ {\rm CI}_{95\%}
+ &=[\LearningCasimirCILow,\LearningCasimirCIHigh].
+\end{align}
 The difference
 $|c_{\rm eff}^{(F)}-c_{\rm eff}^{(S)}|=9.519$ exceeds the combined 95\%
 compatibility threshold $2.446$: the estimators disagree.  Figure
@@ -685,6 +686,20 @@ The manuscript values are generated from those adapters rather than copied by
 hand.  The complete workflow is invoked by the package Makefile, which runs
 tests, regenerates figures and TeX macros, compiles the RevTeX source, and
 verifies the resulting PDF.
+
+\section*{Data Availability}
+
+All numerical results used in this article are retained in the accompanying
+repository as hash-identified result artifacts.  Each artifact contains its
+configuration, manifest, raw or block-level records, processed summary, and
+analysis figures.  No external proprietary data are required.
+
+\section*{Author Contributions}
+
+Xu Tian designed and implemented the numerical calculations, performed the
+analysis, and drafted the manuscript.  Huidan Tan contributed to the physical
+interpretation, validation strategy, and revision of the manuscript.  Both
+authors reviewed and approved the final paper.
 
 \begin{acknowledgments}
 The authors thank the Quantum Harness challenge organizers for providing the
