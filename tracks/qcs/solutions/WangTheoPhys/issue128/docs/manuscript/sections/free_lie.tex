@@ -1,0 +1,106 @@
+\section{Complete-Formula Free-Lie Extraction}
+\label{sec:free-lie}
+
+The first source of slack in a generic product-formula estimate is often not
+the inequality used at the end, but the loss of cancellation before the
+inequality is applied.  We therefore expand the \emph{complete} 31-stage
+formula as one formal object.  This section describes the representation and
+the identities checked by the implementation.
+
+\subsection{Sparse truncated words}
+
+Let $\mathbb{K}\langle A_1,\ldots,A_m\rangle$ denote the free associative
+algebra over a coefficient field $\mathbb K$.  A homogeneous word
+$w=(j_1,\ldots,j_d)$ represents $A_{j_1}\cdots A_{j_d}$.  Up to degree $q$,
+we store a series as the sparse map
+\begin{equation}
+  P(t)=1+\sum_{d=1}^{q}t^d\sum_{|w|=d}p_w w+O(t^{q+1}).
+  \label{eq:sparse-word-series}
+\end{equation}
+Multiplication is truncated convolution.  An exponential stage is generated
+by
+\begin{equation}
+  \exp(a t A_j)=\sum_{k=0}^{q}\frac{(a t)^k}{k!}A_j^k+O(t^{q+1}),
+\end{equation}
+and all 31 stages are multiplied in their actual execution order.  The
+coefficients $a$ are held as outward rational intervals.  Thus every stored
+coefficient encloses the corresponding real algebraic coefficient, including
+the fourth-order Suzuki coefficient involving $4^{1/3}$.
+
+For $X=P-1$, the formal logarithm is
+\begin{equation}
+  \log P=\sum_{k=1}^{q}\frac{(-1)^{k+1}}{k}X^k+O(t^{q+1}).
+  \label{eq:formal-log}
+\end{equation}
+No matrices and no floating-point eigensolvers enter this computation.  The
+calculation is universal in the letters; only after the Lie defect is known do
+we substitute the concrete Heisenberg fragments.
+
+\subsection{Order, symmetry, and the full-stage cancellation budget}
+
+Write the ideal generator as $A=\sum_{j=1}^{4}A_j$ and the logarithm of a
+single formula step as
+\begin{equation}
+  \log S_4(t)=tA+t^5E_5+t^7E_7+O(t^9).
+  \label{eq:symmetric-log}
+\end{equation}
+Fourth order requires the degree-two through degree-four defects to vanish.
+Time symmetry, $S_4(-t)=S_4(t)^{-1}$, implies that the logarithm is odd, so its
+even homogeneous components vanish.  The compiler checks these statements
+coefficient by coefficient in the word IR; it does not infer them merely from
+the name of the formula.
+
+This global construction matters.  If a bound is applied to each stage or to
+each recursive subformula before the product is assembled, opposite
+coefficients and Jacobi-related terms can no longer cancel.  In our pipeline,
+absolute values first appear only after the complete formula has been
+projected, evaluated, translated, and aggregated.  This ordering of
+operations is the main methodological distinction from a direct
+``expand--triangle-inequality'' instantiation of a general commutator theorem.
+
+\subsection{Dynkin--Specht--Wever projection}
+
+The homogeneous component $L_d$ of a logarithm of group-like series is a Lie
+element.  We use the Dynkin--Specht--Wever (DSW) map to expose that structure.
+For a word $w=x_1\cdots x_d$, define
+\begin{equation}
+  D(w)=[x_1,[x_2,\ldots,[x_{d-1},x_d]\ldots]].
+\end{equation}
+The DSW theorem gives $D(L_d)=dL_d$ for homogeneous Lie elements
+\citep{reutenauer1993free}.  Consequently,
+\begin{equation}
+  E_d=L_d=\frac{1}{d}\sum_{|w|=d}\ell_w D(w),
+  \label{eq:dsw}
+\end{equation}
+where $\ell_w$ are the word coefficients obtained from \cref{eq:formal-log}.
+Equation~\eqref{eq:dsw} is used as a projection and as an independently
+checkable identity: expanding its right-hand side back into words must recover
+$L_d$ interval-wise.
+
+\begin{proposition}[Semantic preservation of the Lie lowering pass]
+\label{prop:lie-pass}
+Assume the input interval map encloses every coefficient of the degree-$d$
+homogeneous formal logarithm and the DSW reconstruction check succeeds.  Then
+the emitted nested-commutator interval map encloses the exact homogeneous Lie
+defect $E_d$.
+\end{proposition}
+
+\begin{proof}
+The DSW map is linear over the coefficient field.  Interval scalar
+multiplication and addition are inclusion isotone, so applying $D/d$ to the
+input enclosures contains its application to the exact coefficients.  The DSW
+identity fixes the exact image to $E_d$.  The reconstruction check additionally
+guards against word-order, sign, and truncation errors in the implementation.
+\end{proof}
+
+\subsection{Why this is an algorithmic improvement}
+
+The free-Lie stage is not a new product formula: it is a better compiler for a
+fixed formula.  Its improvement is threefold.  First, it preserves
+cross-stage cancellations.  Second, it replaces derivation histories by a
+canonical operator expression.  Third, it makes the later model substitution
+sparse: nested commutators that vanish under the local Pauli representation
+are removed exactly rather than charged by a worst-case commutator factor.
+The cost is an offline symbolic calculation whose size grows rapidly with
+degree.  That cost is acceptable here because the certificate is generated
+once and verified much more cheaply than it is discovered.

@@ -1,0 +1,34 @@
+\begin{abstract}
+Rigorous product-formula resource estimates often lose most of their useful
+model structure before the final norm is evaluated.  We introduce a
+proof-carrying, model-aware compiler that delays norm inequalities while
+translating a product formula through four intermediate representations:
+sparse free associative words, homogeneous free-Lie defects, concrete
+symplectic Pauli ledgers, and exact rational norm certificates.  The compiler
+combines identical translated Pauli strings before taking norms and replaces
+termwise Pauli-$\ell_1$ estimates by independently verified
+pairwise-anticommuting groups whenever possible.  A finite right-logarithmic
+generator expansion and an outward-rational geometric tail then convert the
+local certificate into a nonasymptotic global error bound and an integer gate
+count.
+
+For the periodic $12\times12$ spin-$1/2$ isotropic Heisenberg model at
+$T=1$ and global operator-norm tolerance $10^{-6}$, we compare the same four
+matching fragments, the same 31-stage five-copy fourth-order Suzuki formula,
+and the same compilation cost on both sides.  A pinned interval instantiation
+of the Childs--Su--Tran--Wiebe--Zhu high-order commutator theorem requires 393
+steps and 11,791 merged group exponentials.  Our certificate accepts 97 steps
+and rejects 96, requiring 2,911 groups.  The exact improvement is
+$11791/2911=4.050498110614909\ldots$, a 75.3117\% reduction.  The leading D4
+sidecar contains 75,324 canonical Pauli terms partitioned into 7,576 verified
+anticommuting groups.  The search procedure is outside the trusted computing
+base: a smaller verifier rechecks coverage, every anticommutation relation,
+outward square-root bounds, the finite-step ledger, the adjacent integer
+boundary, and all resource arithmetic.  An exact D5 side study and a
+quantitative fivefold feasibility audit are reported separately; no 78-step
+global certificate is claimed.
+\end{abstract}
+
+\noindent\textbf{Keywords:} Hamiltonian simulation; Trotter--Suzuki product
+formulas; rigorous error bounds; Pauli algebra; computer-assisted proof;
+quantum resource estimation.

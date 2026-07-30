@@ -1,0 +1,156 @@
+\section{Certified Results}
+\label{sec:results}
+
+This section reports only values bound to the checked-in certificate.  The
+primary metric is the compiled CNOT upper bound; merged fragment
+exponentials and bond propagators are reported because they make the integer
+cost model transparent.
+
+\subsection{Headline resource reduction}
+
+The candidate certificate accepts $r=97$ steps.  Adjacent identical fragment
+exponentials merge across recursive boundaries, so a 31-stage step sequence
+contains
+\begin{equation}
+  G(r)=30r+1
+  \label{eq:merged-groups}
+\end{equation}
+merged group exponentials.  Each group is one perfect matching with 72 bonds.
+The selected two-qubit bond-propagator compilation is charged at three CNOTs.
+Therefore
+\begin{equation}
+  B(r)=72G(r),\qquad C(r)=3B(r)=216G(r).
+  \label{eq:resource-map}
+\end{equation}
+
+\begin{table}[t]
+\centering
+\caption{Certified resource comparison under the common compilation model.}
+\label{tab:headline-results}
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+Method & Steps & Merged groups & Bond propagators & CNOT upper \\
+\midrule
+Pinned published-theorem control & 393 & 11,791 & 848,952 & 2,546,856 \\
+Proof-carrying model-aware bound & 97 & 2,911 & 209,592 & 628,776 \\
+\midrule
+Candidate/control & 0.2468 & 0.2469 & 0.2469 & 0.2469 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Because the last three resource measures are proportional under
+\cref{eq:resource-map}, their exact improvement factor is
+\begin{equation}
+  \frac{11{,}791}{2{,}911}=4.050498110614909\ldots.
+  \label{eq:exact-ratio}
+\end{equation}
+Equivalently, 8,880 of 11,791 merged groups are removed, a reduction of
+75.31167839877873\%.  The claimed multiplier is an exact rational comparison;
+the decimal is for readability.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.94\textwidth]{figures/resources.pdf}
+  \caption{Resources for the pinned theorem instantiation and the certified
+  model-aware result.  Values are exact integers; axes are scaled separately
+  to keep the three compiled metrics readable.}
+  \label{fig:resources}
+\end{figure}
+
+\subsection{Finite-step error ledger}
+
+At 97 steps the global upper bound is the sum of five outward rational
+contributions shown in \cref{tab:error-ledger}.  The leading D4 term is only
+about half the final value; D5--D7 and the tail are quantitatively material.
+This demonstrates why a leading-order-only prediction would not be an
+adequate certificate at the boundary.
+
+\begin{table}[t]
+\centering
+\caption{Outward decimal summaries of exact rational contributions at
+$r=97$.}
+\label{tab:error-ledger}
+\begin{tabular}{@{}lrr@{}}
+\toprule
+Contribution & Global error upper & Fraction of total (approx.) \\
+\midrule
+D4 & $5.264367936822258\times10^{-7}$ & 52.86\% \\
+D5 & $1.383487536744612\times10^{-7}$ & 13.89\% \\
+D6 & $1.579057000594836\times10^{-7}$ & 15.86\% \\
+D7 & $1.894657080691470\times10^{-8}$ & 1.90\% \\
+Tail & $1.542560312083473\times10^{-7}$ & 15.49\% \\
+\midrule
+Total & $9.958938494314325\times10^{-7}$ & 100\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.72\textwidth]{figures/error_ledger.pdf}
+  \caption{Finite-step error ledger at the accepted integer.  The dashed line
+  marks the total tolerance, not an independent allowance for each term.}
+  \label{fig:error-ledger}
+\end{figure}
+
+The adjacent-step evidence is decisive for the integer search:
+97 is accepted at $9.958938494314325\times10^{-7}$, whereas the same bound at
+96 evaluates to $1.050565873970784\times10^{-6}$.  The margin at 97 is about
+$4.11\times10^{-9}$, so outward arithmetic and tail closure are not cosmetic;
+ordinary double-precision summaries are not the source of the comparison.
+
+\subsection{Algebraic compression statistics}
+
+The D4 group sidecar contains 75,324 coefficient-bearing Pauli terms divided
+into 7,576 verified groups.  The largest group has ten members.  The grouped
+translation-cell norm $6.472926505087888$ replaces a post-aggregation direct
+Pauli-$\ell_1$ value $20.160968407335066$, giving the local factor
+$3.114660484942633$.  This local factor and the final resource factor need not
+coincide: the latter also reflects the nonlinear inversion of the step bound,
+the subleading terms, the tail, and the integer merge rule.
+
+An auxiliary exact D5 computation produces 605,832 terms, 123,106 groups, and
+a per-site upper bound $11.23706750025697$.  It is retained as evidence for a
+future tightening effort.  It does not replace the complete D4--D7 global
+ledger and is not used to claim a lower accepted step count.
+
+\subsection{Small-system structural cross-check}
+
+On a degenerate periodic $2\times2$ instance at the same 97-step count, direct
+dense evaluation gives operator-norm error
+$9.128277711816321\times10^{-10}$.  The schema-v3 certificate specialization
+gives the upper bound $2.7666666666666666\times10^{-8}$.  The latter dominates
+the measured error and remains below $10^{-6}$.  This calculation checks stage
+order, normalization, periodic bookkeeping, and the direction of the
+inequality using an independent dense route.  It is not an empirical proof of
+the $12\times12$ result.
+
+\subsection{Recursive Suzuki audit}
+
+For context, the main certificate records a separate audit of standard
+recursive Suzuki orders under its declared audit assumptions.  The values in
+\cref{tab:recursive-audit} are taken from the manifest-bound schema-v3 JSON;
+they are not used in the primary 4.05$\times$ comparison.
+
+\begin{table}[t]
+\centering
+\caption{Auxiliary recursive-order audit stored in the authoritative main
+certificate.}
+\label{tab:recursive-audit}
+\begin{tabular}{@{}rrrrr@{}}
+\toprule
+Order & Steps & Stages/step & Merged groups & Error upper summary \\
+\midrule
+2 & 29,964 & 7 & 179,785 & $9.9999203748666826\times10^{-7}$ \\
+4 & 808 & 31 & 24,241 & $9.9682621337975879\times10^{-7}$ \\
+6 & 370 & 151 & 55,501 & $9.8463753882538689\times10^{-7}$ \\
+8 & 335 & 751 & 251,251 & $9.9829085642259163\times10^{-7}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+This audit illustrates that increasing formal order does not monotonically
+reduce compiled cost at a fixed precision: the recursive stage multiplier can
+outgrow the reduction in steps.  It should not be confused with a literature-
+wide optimal-formula search.
