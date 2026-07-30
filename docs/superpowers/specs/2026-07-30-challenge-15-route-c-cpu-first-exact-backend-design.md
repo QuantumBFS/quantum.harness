@@ -1,6 +1,7 @@
-# Challenge #15 Route C CPU-First Exact Backend Design
+# Challenge #15 Route C Fast Exact Admission Backend Design
 
-> Status: architecture approved; written-spec review pending
+> Status: fast-path revision approved by the request to continue Route C faster;
+> written-spec review pending
 >
 > Date: 2026-07-30
 >
@@ -17,10 +18,18 @@ failed exact coordinate-action backend. The production path is:
 
 ```text
 division-free analytic JK cofactor reduction
-    -> fixed 225-coefficient pair jets
-    -> whole-chunk JAX/XLA kernel on CPU
+    -> explicit six-component seed polynomial
+    -> nested JAX JVP pair-Casimir action
+    -> whole-batch JAX/XLA kernel on CPU
     -> optional use of the same kernel on a validated GPU
 ```
+
+This is a 90-minute backend-admission spike, not an open-ended rewrite. It
+tests the shortest exact implementation first. The previously designed fixed
+225-coefficient dense-jet backend remains a mathematically valid future R&D
+fallback, but it is not implemented during this deadline sprint. If the JAX
+JVP path does not pass the unchanged N=6 batch-512 gate inside the timebox,
+Route C is classified as not salvageable within the remaining Challenge time.
 
 CPU execution is the required path. GPU execution is an optional placement
 optimization and is not a correctness dependency. A missing or queued GPU may
@@ -77,29 +86,41 @@ old object graph is not an admissible redesign.
 
 ## 3. Approaches considered
 
-### 3.1 Selected: analytic cofactor reduction plus fixed dense jets
+### 3.1 Selected: analytic cofactor reduction plus nested JAX JVP
 
 Exploit the exact Jastrow-times-homogeneous-Vandermonde structure of the
 filled JK `n=0` matrix. Rewrite every particle-hole column replacement as a
-sum of explicit, division-free cofactors. Evaluate the resulting polynomial
-with fixed-size dense pair jets and compile the whole batch chunk with JAX.
+sum of explicit, division-free cofactors. Apply `J_i dot J_j` to the resulting
+six-component polynomial by nested JAX directional derivatives and compile
+the whole batch with XLA.
 
-This removes determinant-jet evaluation, shares the five `L=2` components,
-has static shapes, and provides one array contract for CPU and future GPU
-execution.
+This removes determinant-jet evaluation and all 225-coefficient jet plumbing,
+shares derivative traces across the five `L=2` components, has static shapes,
+and provides one array contract for CPU and future GPU execution. It is the
+only exact backend with a realistic admission answer inside 90 minutes.
 
-### 3.2 Rejected as production: compiled subset-DP determinant
+### 3.2 Deferred beyond the deadline: fixed 225-coefficient dense jets
+
+The fixed dense-jet design avoids autodiff graph growth and remains the most
+controlled long-term exact backend. It also requires coefficient tables,
+truncated products, derivative maps, and a separate JAX implementation. That
+engineering cost consumes too much of the seven-hour deadline before the
+actual resource gate or training can start. It is retained as post-deadline
+R&D only, not as an automatic fallback from a failed spike.
+
+### 3.3 Rejected as production: compiled subset-DP determinant
 
 Replacing dictionaries by dense arrays would reduce Python overhead, but it
 would retain determinant recurrence for every pair and particle-hole term.
 It is useful as a reduced correctness reference, not as the primary N=8
 scaling strategy.
 
-### 3.3 Rejected as the redesign: direct JAX translation of a02
+### 3.4 Rejected as the redesign: direct JAX translation of a02
 
 JIT-compiling the existing algorithm would preserve its repeated determinant
-and seed-construction complexity. JAX is selected only after the analytic
-cofactor reduction, as the execution layer for a fixed-shape kernel.
+and seed-construction complexity. JAX acts only on the explicit analytic
+cofactor polynomial; the a02 determinant is retained only as a reduced
+correctness reference.
 
 ## 4. Exact analytic reduction
 
@@ -165,59 +186,58 @@ All five `M` values are contracted from the same cofactor and projected-column
 tensors in one call. The `L=0` seed remains the existing direct
 `product Delta_ij^3` polynomial.
 
-## 5. Dense pair-jet contract
+## 5. Exact JVP action contract
 
-The action ranks are `2,3,4`, so each active particle needs derivative degree
-at most four. The coefficient index set is
+Let `F(x)` return the six seed amplitudes from one spinor configuration `x` in
+the order `(L0M0,L2M-2,L2M-1,L2M0,L2M1,L2M2)`. For particle `i`, define the
+three coordinate vector fields
 
 ```text
-I = {(a,b,c,d): a+b <= 4 and c+d <= 4}.
+Z_i F = (u_i d/du_i - v_i d/dv_i) F / 2,
+P_i F = u_i dF/dv_i,
+M_i F = v_i dF/du_i.
 ```
 
-There are 15 bivariate indices for each particle and `15*15 = 225` pair-jet
-coefficients. Every jet is a `complex128` array with a final axis of length
-225. No Python dictionary, object array, or data-dependent coefficient set is
-allowed in the production kernel.
+Each field is evaluated as one JAX JVP whose tangent is constructed from the
+current coordinates. Nested JVPs therefore differentiate both the inner
+function and its coordinate-dependent tangent, giving the exact composition
 
-Static tables, cached by `(N,two_q,density_ranks)`, define:
+```text
+(J_i dot J_j) F
+  = Z_j(Z_i F) + [M_j(P_i F) + P_j(M_i F)] / 2.
+```
 
-- coefficient-index encoding and decoding;
-- valid truncated multiplication gathers and output segments;
-- derivative maps for the four active spinor axes;
-- multiplication by the four affine coordinate jets;
-- the sparse linear action of `J_i dot J_j`;
-- pair-Casimir coefficients for ranks `2,3,4`;
-- particle-pair indices, particle-hole couplings, cofactor signs, and orbital
-  normalizations.
+For every unordered pair, the kernel recursively constructs scaled powers
+`F, X_ij F, ..., X_ij^4 F`, where `X_ij=(J_i dot J_j)/scale`. The three fixed
+pair-Casimir coefficient vectors contract the same powers for ranks `2,3,4`.
+The one-body constants are added after summing all unordered pairs.
 
-The ordinary Taylor-coefficient convention matches the validated a02
-`PairJet`: differentiation multiplies by the source exponent, and terms above
-degree four on either active particle are discarded only because no approved
-operator can consume them.
+The production kernel uses only `complex128`, static `N`, static ranks, and
+the explicit cofactor seed. It vectorizes across configurations and all six
+sectors; it may use `vmap`, `lax.map`, or a fixed chunk size only as measured
+execution choices. It contains no determinant, Python object array, ED basis,
+finite difference, stochastic derivative, or silent precision fallback.
 
 ## 6. Component boundaries
 
 ### `cofactor_seed.py`
 
 - Implements the division-free JK cofactor formula.
-- Provides a small NumPy/ring-generic reference path for correctness tests.
+- Provides an array-namespace-compatible polynomial used by NumPy tests and
+  by the JAX executor without importing JAX itself.
 - Produces all six sector components in the order
   `(L0M0,L2M-2,L2M-1,L2M0,L2M1,L2M2)`.
 - Contains no JAX import and no ED/full-basis dependency.
 
-### `dense_jets.py`
-
-- Owns the 225-coefficient layout and immutable static tables.
-- Provides small NumPy reference operations and JAX array forms of the same
-  tables.
-- Contains no JK coupling or training logic.
-
 ### `jax_action.py`
 
 - Enables `jax_enable_x64` before kernel construction.
-- JIT-compiles one whole chunk kernel rather than many small primitives.
-- Vectorizes over configuration and particle-pair axes and contracts all six
-  sector components before returning to Python.
+- Implements `Z`, `P`, and `M` as exact directional JVPs and composes the
+  pair-Casimir powers through degree four.
+- JIT-compiles one whole-batch or fixed-chunk kernel rather than dispatching
+  individual derivatives from Python.
+- Vectorizes over configurations and contracts all particle pairs, ranks, and
+  six sector components before returning to Python.
 - Accepts an explicit platform. `cpu` may not fall through to GPU, and `gpu`
   may not fall through to CPU.
 - Records compile time separately from post-compile execution time.
@@ -226,8 +246,8 @@ operator can consume them.
 
 - Retains the validated public `evaluate_seed_and_actions(state, configs,
   ells=...)` compatibility surface.
-- Adds a family-level production entry point returning seed values of shape
-  `(B,6)` and actions of shape `(B,6,3)`.
+- Adds the family-level production entry point only after admission, returning
+  seed values of shape `(B,6)` and actions of shape `(B,6,3)`.
 - Validates inputs before dispatch, pads only the final chunk to a static
   shape, masks padded outputs, and rejects non-finite results.
 - Never selects the slow reference path implicitly.
@@ -245,15 +265,15 @@ operator can consume them.
 For one static-size chunk:
 
 1. validate finite normalized spinors and place them on the selected device;
-2. lift every active particle pair into a dense 225-coefficient jet;
-3. compute pair factors, all-except-one products, elementary polynomials, and
+2. compute pair factors, all-except-one products, elementary polynomials, and
    projected `n=1` columns;
-4. contract the explicit cofactors into all five `L=2` seed jets while
-   evaluating the direct `L=0` jet;
-5. apply scaled powers of `J_i dot J_j` through degree four;
-6. contract the three pair-Casimir polynomials and sum unordered pairs;
-7. add the one-body constants and return all seed/action components;
-8. apply the final-chunk mask and transfer only the compact result arrays to
+3. contract the explicit cofactors into all five `L=2` seed amplitudes while
+   evaluating the direct `L=0` amplitude;
+4. use nested directional JVPs to apply scaled powers of `J_i dot J_j`
+   through degree four to the shared six-component seed function;
+5. contract the three pair-Casimir polynomials and sum unordered pairs;
+6. add the one-body constants and return all seed/action components;
+7. apply the final-chunk mask and transfer only the compact result arrays to
    the caller.
 
 Chunk size is a measured execution knob, not a physics parameter. The
@@ -271,7 +291,7 @@ make install jax EXTRA=cpu
 ```
 
 The CPU smoke records `jax.devices()`, confirms the CPU platform, enables
-`complex128`, and runs one compiled dense-jet contraction before the resource
+`complex128`, and runs one compiled N=2 JVP contraction before the resource
 benchmark.
 
 GPU placement uses the same source kernel and tables. It is accepted only
@@ -294,11 +314,11 @@ The new backend must pass all of these before resource timing is classified:
 1. Cofactor values agree with direct complex column-replacement determinants
    for `N=2..8`, every hole column, and deterministic non-node probes, with
    relative residual at most `1e-12`.
-2. Ring-generic cofactor jets agree coefficient-by-coefficient with the a02
-   division-free determinant reference on reduced `N=2,3` fixtures.
-3. Seed values and `S_ell` actions agree with the a02 reference for `N=2` and
-   tractable `N=6` single-configuration probes, with relative residual at most
-   `1e-10`.
+2. NumPy and JAX cofactor seed values agree with the existing direct complex
+   determinant path for `N=2..8`, with relative residual at most `1e-12`.
+3. JVP pair-dot powers and final `S_ell` actions agree with the a02 PairJet
+   reference for `N=2,3` and tractable N=6 single-configuration probes, with
+   relative residual at most `1e-10`.
 4. All five `L=2` components use one shared kernel and retain the existing
    exchange, rotation, ladder, and strict-LLL residual thresholds.
 5. The nontrivial-dressing rank test remains GREEN for both `L=0` and `L=2`.
@@ -358,18 +378,28 @@ cannot pass this gate. Training work remains blocked until the gate is GREEN.
 
 ## 12. Attempt and stop boundaries
 
-This design commit does not allocate a03. The implementation plan must begin
-with a bounded backend-admission slice on a clean descendant of the a02 close
-commit:
+This design commit does not allocate a03. The implementation plan begins with
+a 90-minute backend-admission slice on the current clean descendant of the a02
+close commit:
 
-- prove the cofactor identity in complex and reduced jet fixtures;
-- compile one CPU dense-jet chunk;
+- prove the cofactor identity against direct complex determinants;
+- compile the N=2 CPU JVP correctness fixture, then an N=6 single-config
+  probe;
 - run the unchanged N=6 batch `512` shape with two warmups and five measured
   repetitions for the `L=0` and reduced `L=2` sector views;
 - satisfy the exact N=6 CPU admission inequalities
   `compile_seconds + 2*2048*median_action_seconds <= 3600` and
   `peak_RSS <= 51539607552`, without changing the workload algebra,
   precision, or chunk outputs.
+
+The spike uses three elapsed-time checkpoints from the first implementation
+edit: cofactor correctness by 30 minutes, JVP small-exact correctness plus an
+N=6 compile probe by 60 minutes, and the unchanged batch-512 classification by
+90 minutes. A single full-shape warmup may trigger an early RED only when its
+measured lower bound already makes the frozen inequality impossible. A GREEN
+classification always requires the complete two-warmup, five-measurement
+gate. Failure or non-classification at 90 minutes stops deadline work on Route
+C; the dense-jet backend is not started automatically.
 
 Only after that N=6 slice is GREEN may the plan label the work `s02c-a03`, run
 the actual N=8 batch `256` gate, and begin production integration. This
@@ -397,13 +427,13 @@ that count.
 The next implementation plan must produce, in order:
 
 1. cofactor derivation tests and the pure NumPy reference;
-2. fixed dense-jet tables and reduced reference tests;
-3. the JAX CPU family kernel and explicit backend contract;
-4. compatibility and symmetry regressions;
-5. compile/steady-state microbenchmark machinery;
-6. full N=6 batch-512 backend-admission evidence;
-7. only after admission, an a03 allocation record and the actual N=8 gate;
-8. an updated attempt journal stating exactly what passed, failed, or remains
+2. the JAX CPU JVP kernel and reduced exact-action tests;
+3. compile/steady-state microbenchmark machinery with the 90-minute stop;
+4. full N=6 batch-512 backend-admission evidence;
+5. only after admission, compatibility and symmetry integration;
+6. only after integration remains GREEN, an a03 allocation record and the
+   actual N=8 gate;
+7. an updated attempt journal stating exactly what passed, failed, or remains
    blocked.
 
-No implementation task may start trainer or ED work before item 7 is GREEN.
+No implementation task may start trainer or ED work before item 6 is GREEN.
