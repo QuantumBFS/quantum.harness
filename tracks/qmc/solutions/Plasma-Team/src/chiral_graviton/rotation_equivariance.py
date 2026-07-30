@@ -1,14 +1,12 @@
 """Genuine SO(3) rotation-equivariance verification for quantum states.
 
-This module tests whether a quantum state transforms under SO(3) rotations
-according to the correct irreducible representation. Unlike the per-sector
-irrep label check (``irrep_error`` in ``nqs.py``), these functions verify
-that finite rotations applied to the many-body state produce the same result
-as the expected spin-L Wigner D-matrix transformation.
+*Output-state tests* — verify that the resulting quantum state transforms
+  correctly under many-body rotations (``rotation_equivariance_error``,
+  ``scalar_invariance_error``, ``nqs_multiplet_rotation_error``).
 
-For an L=0 state this means the state is invariant under all rotations
-(a scalar). For an L=2 state this means the full five-member multiplet
-transforms as the spin-2 representation.
+*Architectural alignment test* — measures how naturally the raw network
+  output aligns with the SO(3) symmetry sector before projection
+  (``projection_alignment_quality``).
 """
 
 from __future__ import annotations
@@ -207,3 +205,31 @@ def nqs_multiplet_rotation_error(
         basis = target
 
     return rotation_equivariance_error(bases, vectors, total_l, axis=axis, angle=angle)
+
+
+# ---------------------------------------------------------------------------
+# Architectural projection-alignment diagnostic
+# ---------------------------------------------------------------------------
+
+
+def projection_alignment_quality(
+    nqs,  # SO3EquivariantNQS
+    parameters: np.ndarray,
+) -> dict[int, float]:
+    """Measure how naturally the raw MLP output aligns with the SO(3) sector.
+
+    Returns ``{total_l: alignment_ratio}`` where each ratio is
+    ``||P v_raw|| / ||v_raw||`` in [0, 1].  Higher values mean the
+    CG-tensor-square architecture produces states already close to the
+    correct symmetry sector, needing less correction from projection.
+
+    This replaces the physically-incorrect "input rotation invariance"
+    test — occupation numbers of a Fock state do not transform cleanly
+    under single-particle rotations, so feature-level invariance is not
+    the right diagnostic.  The projection-alignment metric directly
+    measures what matters: how much the architecture helps the symmetry.
+    """
+    return {
+        total_l: nqs.projection_alignment(parameters, total_l)
+        for total_l in (0, 2)
+    }
