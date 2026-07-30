@@ -17,11 +17,16 @@ top-level soft-scope harness bug — same class as the two earlier incidents
 | 26 | 0.345 (build-only) | — | — | — | — | — |
 | 30 | 0.336 (build-only) | — | — | — | — | — |
 
-N=20 is the first configuration in the campaign where replacement is
-cheaper on BOTH axes (structural 0.383, wall 0.75, RSS 0.51) — at a still
-unresolved recovery. All tripwires pass; every d resolved-positive.
+HEADLINE: at N=20, R_struct, R_wall and R_RSS are all < 1 (0.383 / 0.75 /
+0.51) — the campaign's first double-axis saving. Scope notes: the
+structural decrease is monotone over N=10–30, but the realized wall/RSS
+trend is measured from N=14 to N=20 ONLY (26/30 are BUILD-ONLY, no solve
+rows; N=10/12 walls are load-dominated parity). Recovery is unresolved at
+all four solved N (centrals ≤ 0.02%); the bounds are eps_cmp-limited and
+the bound sequence is NOT a trend. All tripwires pass; every d
+resolved-positive.
 
-## C4 — the block-dimension isolation (settles the C13 mechanism)
+## C4 — D-package controlled comparison (the C13 mechanism)
 
 Same N (14), same retained basis (allowlist r_of(14)), same level count
 (one), same link-family generator; ONLY the map package changes
@@ -34,15 +39,17 @@ blocks, 256 link rows). Own map certificate (isometry 1.54e-15, flow
 | C (D=2) | 0.542 | 0.87 | 0.90 |
 | C4 (D=4) | 0.830 (44470/53563) | 2.37 | 6.80 |
 
-Realized cost jumps 2.7x (wall) / 7.6x (RSS) relative to C from the map
-package change alone, while the structural ratio stays below 1. Claim
-boundary honoured: attribution is to the D=4 one-level PACKAGE
-(block dimension + its dω-scaled row count); within that boundary the
-result localizes the additive tower's realized cost (14 such blocks,
-16.3 G; one level already 9.4 G) to PSD block dimension rather than model
-size or level count.
+The D=4 one-level coarse-map package (block dimension together with its
+dω-scaled link rows) is a MAJOR CONTROLLED DRIVER of realized IPM cost:
+realized cost moves 0.87x/0.90x → 2.37x/6.80x from the package change
+alone, structural < 1 throughout. Two-factor decomposition of the
+additive tower's 10.7x/11.8x at the same N=14: package factor 2.37x/6.80x
+measured at one level; residual ≈ 4.5x/1.7x attributable to level
+count/depth (14 such blocks vs 2; tower 16.3 G, one level 9.4 G). The
+decomposition carries the package caveat — block dimension alone is not
+proved causal.
 
-## Bundle channel — pre-registration FALSIFIED
+## Bundle channel — word-space non-collapse hypothesis FALSIFIED
 
 wbundle_table.csv: W_bundle = 0 for ALL four pool bundles at ALL
 N ∈ {10,12,14,20} (the T2 pre-registration expected B_half to become
@@ -51,9 +58,13 @@ Mechanism: the translation-quotiented Gram closure of the retained basis
 already contains every plain pair/bond product class at every tested N;
 W_D consists of other (extended/mixed) classes. Consequence recorded: D =
 STRUCTURALLY_ABSORBED at N=12/14/20 (label FIXED_B_HALF_CORRECTION_
-NO_SELECTION never yielded an independent test); a correction registry
-that reaches W_D must anchor on the enumerated W_D classes themselves
-(55 at N=10, BASIS_PARTITION_N10.json).
+NO_SELECTION never yielded an independent test). W_bundle = 0 excludes
+new coefficient-space variables, not new constraints; the tightening
+power of the bundle LMI is not settled by this enumeration. A
+W_D-anchored construction is recommended CONDITIONAL on enlarging the
+coefficient space (55 enumerated classes at N=10,
+BASIS_PARTITION_N10.json). Not claimed: that the existing bundles are
+ineffective, or that the JOINT e-9 scores are fully explained.
 
 ## Order-of-record notes
 
@@ -62,5 +73,10 @@ that reaches W_D must anchor on the enumerated W_D classes themselves
   gate-blocked by the harness bug at first pass and solved after the
   gate rerun (17:2x–17:3x), i.e. later than their slot — with gates green
   before each solve, per the size-specific gate law.
-- N=12 C solve preceded its Ged_D2_N12 row (harness bug window); the gate
-  passed post hoc (residual 1.4e-16). Deviation recorded here; row valid.
+- Top-level soft-scope harness bug: RECURRENCE #3 today (degate, direct
+  G4, gateN). Each instance failed CLOSED (verdict defaulted to FAIL /
+  block); the live risk is a variant that fails OPEN — design post-mortem
+  item for the harness pattern, recorded here.
+- N=12: the C solve preceded its Ged_D2_N12 row (harness-bug window); the
+  gate is RETROACTIVE (passed post hoc, residual 1.4e-16). Deviation
+  recorded; row valid.
