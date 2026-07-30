@@ -132,7 +132,7 @@ def test_materialization_cardinality_hashes_and_frozen_manifests(
     ]
     assert len(production) == 4
     assert [entry["seed"] for entry in production] == [
-        221060020, 221060021, 221060022, 221060023
+        321060020, 321060021, 321060022, 321060023
     ]
     manifests = [
         protocol.load_json(root / entry["manifest"])
@@ -270,6 +270,8 @@ def fake_result(offset: float) -> dict:
             "count": length,
             "primary_traces": traces,
             "momentum": {},
+            "store_momentum_traces": True,
+            "momentum_traces": {},
             "store_real_space_traces": True,
             "real_space_traces": {},
         },
@@ -472,6 +474,14 @@ def _write_chain_fixture(root: Path, entry: dict) -> dict:
         "measurements": manifest["measurements"],
         "observables": {
             "count": 1,
+            "store_momentum_traces": entry["N"] <= 9,
+            "momentum_traces": {
+                f"{kx},{ky}": {
+                    name: {"real": [0.0], "imag": [0.0]}
+                    for name in ("one_body", "density_raw", "density_mode")
+                }
+                for kx, ky in manifest["measurements"]["momenta"]
+            } if entry["N"] <= 9 else {},
             "store_real_space_traces": entry["N"] <= 9,
             "real_space_traces": {
                 f"{dx},{dy}": {"real": [0.0], "imag": [0.0]}
@@ -1037,3 +1047,31 @@ def test_real_space_without_trace_storage_keeps_production_summary() -> None:
     sampled = protocol._real_space(results)
     assert sampled["1,0"]["one_body"]["mean"] == pytest.approx([0.25, 0.0])
     assert "correlated_diagnostics" not in sampled["1,0"]["one_body"]
+
+
+def test_autocorrelated_momentum_trace_inflates_mcse() -> None:
+    block_trace = np.tile(np.repeat([-1.0, 1.0], 16), 8)
+    results = [fake_result(offset) for offset in (0.0, 0.2, 0.4, 0.6)]
+    for result in results:
+        summary = {
+            name: {
+                "mean": [0.0, 0.0],
+                "naive_stderr_abs": float(
+                    np.std(block_trace, ddof=1) / math.sqrt(len(block_trace))
+                ),
+            }
+            for name in ("one_body", "density_raw", "density_mode")
+        }
+        result["observables"]["momentum"] = {"1,0": summary}
+        result["observables"]["momentum_traces"] = {
+            "1,0": {
+                name: {"real": block_trace.tolist(),
+                       "imag": [0.0] * len(block_trace)}
+                for name in ("one_body", "density_raw", "density_mode")
+            }
+        }
+        result["observables"]["count"] = len(block_trace)
+    sampled = protocol._momentum(results)["1,0"]["one_body"]
+    components = protocol._complex_mcse_components(sampled)
+    assert components["correlated"] > components["naive"]
+    assert sampled["correlated_diagnostics"]["real"]["bulk_ess"] > 0

@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang=zh-CN>
+<head>
+<meta charset=utf-8>
+<meta name=viewport content=width=device-width,initial-scale=1>
+<title>二维多面体无符号费米子系统｜Genshin_Impact</title>
+<style>
+:root{--ink:#132238;--muted:#5b6b7f;--paper:#f7f4ed;--card:#fffdf8;--orange:#e85d3f;--blue:#246b8e;--teal:#238477;--gold:#d7a83c;--red:#b83a3a;--line:#d9d4c8}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif;line-height:1.72}main{max-width:1180px;margin:auto;padding:32px 24px 72px}.hero{position:relative;overflow:hidden;padding:54px;border-radius:28px;background:linear-gradient(135deg,#102a43,#174d63 58%,#238477);color:white;box-shadow:0 24px 70px #102a4330}.hero:after{content:"∞";position:absolute;right:24px;top:-86px;font-size:260px;color:#ffffff10;font-weight:800}.eyebrow{font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:#a8e6dc;font-weight:700}.hero h1{font-size:clamp(36px,6vw,70px);line-height:1.05;margin:14px 0 18px;max-width:900px}.hero p{max-width:850px;font-size:19px;color:#e6f3f5}.badge{display:inline-block;margin:8px 8px 0 0;padding:7px 12px;border:1px solid #ffffff40;border-radius:999px;background:#ffffff12;font-size:13px}.section{margin-top:54px}.section h2{font-size:32px;line-height:1.2;margin:0 0 12px}.lead{font-size:18px;color:var(--muted);max-width:920px}.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:18px;margin-top:22px}.card{grid-column:span 4;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:24px;box-shadow:0 8px 30px #24364b0b}.wide{grid-column:span 8}.full{grid-column:1/-1}.half{grid-column:span 6}.card h3{margin:0 0 10px;font-size:20px}.kpi{font-size:36px;font-weight:800;line-height:1;color:var(--blue)}.kpi small{font-size:15px;color:var(--muted);font-weight:600}.note{padding:16px 18px;border-left:4px solid var(--gold);background:#fff7dc;border-radius:8px}.ok{color:var(--teal);font-weight:750}.warn{color:#aa6b00;font-weight:750}.bad{color:var(--red);font-weight:750}.formula{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;background:#102a43;color:#e8fbff;padding:18px;border-radius:14px;overflow:auto;font-size:15px}.flow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.pill{padding:10px 14px;border-radius:12px;background:#e7f1f5;color:#174d63;font-weight:700}.arrow{color:var(--orange);font-size:25px;font-weight:900}table{width:100%;border-collapse:collapse;font-size:14px}th,td{text-align:left;padding:11px 10px;border-bottom:1px solid var(--line);vertical-align:top}th{color:var(--muted);font-size:12px;letter-spacing:.06em;text-transform:uppercase}.status{display:inline-block;padding:4px 9px;border-radius:999px;font-size:12px;font-weight:800}.pass{background:#dcf4eb;color:#146b5f}.inc{background:#fff0c7;color:#865800}.open{background:#fde3df;color:#9d332c}.legend{display:flex;gap:18px;flex-wrap:wrap;font-size:13px;color:var(--muted)}.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px}.timeline{border-left:3px solid #b9ced8;padding-left:24px}.event{position:relative;margin:0 0 24px}.event:before{content:"";position:absolute;left:-32px;top:8px;width:13px;height:13px;border-radius:50%;background:var(--orange);border:3px solid var(--paper)}.event h3{margin:0}.caption{font-size:13px;color:var(--muted);margin-top:8px}.footer{margin-top:60px;padding-top:24px;border-top:1px solid var(--line);font-size:13px;color:var(--muted)}svg{width:100%;height:auto}.edge{stroke:#8bb6c4;stroke-width:4}.edge2{stroke:#e85d3f;stroke-width:5}.site{fill:#fffdf8;stroke:#174d63;stroke-width:4}.triA{fill:#e85d3f22;stroke:#e85d3f;stroke-width:3}.triB{fill:#23847722;stroke:#238477;stroke-width:3}.svgtext{font-family:Inter,system-ui;font-size:16px;fill:#132238}.axis{stroke:#94a3b8;stroke-width:2}.bar1{fill:#d7a83c}.bar2{fill:#238477}.limit{stroke:#b83a3a;stroke-width:3;stroke-dasharray:8,6}.small{font-size:12px}.sources li{margin:8px 0}a{color:#176c91}code{background:#e8edf0;padding:2px 5px;border-radius:5px}@media(max-width:800px){.hero{padding:34px 26px}.card,.wide,.half{grid-column:1/-1}.grid{gap:14px}main{padding:18px 14px 50px}}@media print{body{background:white}.hero{box-shadow:none}.card{break-inside:avoid;box-shadow:none}}
+</style>
+</head>
+<body><main>
+<header class=hero>
+<div class=eyebrow>QuantumBFS issue 121 · Team Genshin_Impact</div>
+<h1>从一个 3×3 李代数生成元，到二维无符号费米子多体系统</h1>
+<p>这是一个把多面体收缩、费米子 Fock 空间、S₃ 群平均和连续时间行列式蒙特卡洛连接起来的模型。它已经不再是孤立三体玩具：局域相互作用铺满周期三角晶格，并在任意系统尺度上保留严格正的配置权重。</p>
+<span class=badge>二维三角晶格</span><span class=badge>无自旋费米子</span><span class=badge>粒子数守恒</span><span class=badge>相互作用</span><span class=badge>det(I+T)&gt;0</span>
+</header>
+<section class=section>
+<h2>一眼看懂：我们构造了什么？</h2>
+<p class=lead>每个格点只有一个费米子轨道。每个向上、向下的基本三角形都承载 A/B 两类局域顶点；不同三角形共享格点，因此体系是一个真正的二维、重叠、广延多体系统。</p>
+<div class=grid>
+<article class=card wide>
+<svg viewBox=0,0,760,330 role=img aria-label=周期三角晶格上的重叠三角形顶点>
+<polygon class=triA points=90,245,190,75,290,245></polygon><polygon class=triB points=190,75,290,245,390,75></polygon><polygon class=triA points=290,245,390,75,490,245></polygon><polygon class=triB points=390,75,490,245,590,75></polygon><polygon class=triA points=490,245,590,75,690,245></polygon>
+<line class=edge x1=90 y1=245 x2=190 y2=75></line><line class=edge x1=190 y1=75 x2=290 y2=245></line><line class=edge x1=90 y1=245 x2=290 y2=245></line><line class=edge x1=190 y1=75 x2=390 y2=75></line><line class=edge x1=290 y1=245 x2=390 y2=75></line><line class=edge x1=290 y1=245 x2=490 y2=245></line><line class=edge x1=390 y1=75 x2=490 y2=245></line><line class=edge x1=390 y1=75 x2=590 y2=75></line><line class=edge x1=490 y1=245 x2=590 y2=75></line><line class=edge x1=490 y1=245 x2=690 y2=245></line><line class=edge x1=590 y1=75 x2=690 y2=245></line>
+<circle class=site cx=90 cy=245 r=13></circle><circle class=site cx=190 cy=75 r=13></circle><circle class=site cx=290 cy=245 r=13></circle><circle class=site cx=390 cy=75 r=13></circle><circle class=site cx=490 cy=245 r=13></circle><circle class=site cx=590 cy=75 r=13></circle><circle class=site cx=690 cy=245 r=13></circle>
+<text class=svgtext x=115 y=305>橙色：A 型三角形顶点</text><text class=svgtext x=410 y=305>绿色：B 型三角形顶点</text>
+</svg>
+<p class=caption>示意图只画出一条条带；实际体系在两个原胞方向周期延拓。L×L 晶格有 N=L² 个格点和 2N 个相互重叠的三角形顶点。</p>
+</article>
+<article class=card>
+<h3>局域自由度</h3><div class=kpi>1 <small>orbital / site</small></div><p>无自旋、粒子数守恒费米子。Fock 空间维数随 N 变为 2ᴺ。</p>
+</article>
+<article class=card>
+<h3>二维广延性</h3><div class=kpi>2N <small>triangle vertices</small></div><p>每个格点同时属于多个局域项，不能分解成互不相干的三体块。</p>
+</article>
+<article class=card>
+<h3>验证尺度</h3><div class=kpi>N=256</div><p>预注册完整网格到 L=16；小尺度 ED 使用 N=4、9。</p>
+</article>
+</div>
+</section>
+<section class=section>
+<h2>数学核心：为什么每个蒙特卡洛权重都为正？</h2>
+<div class=grid>
+<article class=card half><h3>生成元家族</h3><div class=formula>A(ε,κ) = [[−1−ε−κ, 1, −ε],<br>          [0, −1−κ, 1],<br>          [2, 0, −2−κ]]<br><br>B = S A S,　S = diag(1,1,−1)<br>再取 A、B 的全部 S₃ 置换轨道。</div></article>
+<article class=card half><h3>开放参数区域</h3><div class=formula>ε &gt; 0,　κ &gt; 0,<br>40ε + 59κ &lt; 2<br><br>μ∞(X) = −κ &lt; 0<br>∥exp(sX)∥∞ ≤ exp(−κs) &lt; 1</div><p>这不是某一组偶然数值，而是一个非零体积的连续参数区域。</p></article>
+<article class=card full><h3>从李代数到任意深度行列式</h3><div class=flow><span class=pill>X₁,…,Xₘ 属于生成元集合</span><span class=arrow>→</span><span class=pill>Bₜ=exp(sXₜ)</span><span class=arrow>→</span><span class=pill>T=Bₘ⋯B₁</span><span class=arrow>→</span><span class=pill>ρ(T)&lt;1</span><span class=arrow>→</span><span class=pill>det(I+T)&gt;0</span></div><p>实特征值满足 1+λ&gt;0；复特征值成共轭对，贡献 |1+λ|²。局域顶点任意重叠时，最后触碰每一行的因子仍给出同一个 ∞-范数收缩界，因此证明不依赖格点数和展开阶数。</p></article>
+<article class=card half><h3>条件数也被控制</h3><div class=formula>q = exp(−κs) = exp(−1/200)<br>∥(I+T)⁻¹∥∞ ≤ 1/(1−q)<br>cond∞(I+T) ≤ (1+q)/(1−q) ≈ 400</div></article>
+<article class=card half><h3>它不属于什么</h3><p>精确证书排除了共同二次型收缩度量；生成元张成 M₃(ℝ)，并与所比较的固定、同维复 CAR/Wei 类分离。新意不是发明收缩半群，而是把普通 ℓ∞ 多面体证书、真实单味费米子、S₃ 厄米化与任意重叠组合起来。</p></article>
+</div>
+</section>
+<section class=section>
+<h2>物理哈密顿量：为什么它确实有相互作用？</h2>
+<p class=lead>单个高斯顶点 exp[s c†Xc] 可以不是厄米的；对 S₃ 的六个置换做等权平均后，局域算符 Mₓ 变成厄米。把 I−Mₓ 铺到所有三角形得到 H̄。</p>
+<div class=grid>
+<article class=card full><div class=formula>Mₓ(s) = (1/6) ∑σ∈S₃ exp[s c†(Pσ X Pσᵀ)c]<br><br>H̄ = ∑Δ,X gΔ,X [ I − MΔ,X ]<br><br>TrFock ∏ₜ exp(c†Aₜc) = det(I + ∏ₜ exp(Aₜ))</div></article>
+<article class=card><h3>单体部分</h3><p>包含数密度 N 与对称跃迁 K，描述粒子在三角形内部传播。</p><div class=kpi>−0.0199 <small>K coefficient</small></div></article>
+<article class=card><h3>二体部分</h3><p>包含 Q₂ 与 Pₛ†Pₛ 等四费米子项；它们不能被任何最佳二次哈密顿量完全吸收。</p><div class=kpi>2.50% <small>quadratic residual</small></div></article>
+<article class=card><h3>三体部分</h3><p>还存在 n₁n₂n₃ 项，但整个二维模型不是孤立三体系统：这些局域项在共享格点上广泛重叠。</p><div class=kpi>6.81×10⁻⁴</div></article>
+</div>
+</section>
+<section class=section>
+<h2>数值证据：哪些已经通过，哪些还没有？</h2>
+<div class=grid>
+<article class=card><h3>v2 独立链</h3><div class=kpi>32/32</div><p>每条 300000 步，四链冷热启动，全部产生哈希绑定完成哨兵。</p></article>
+<article class=card><h3>权重正性</h3><div class=kpi>8/8</div><p class=ok>负行列式 0；零权重 0。</p></article>
+<article class=card><h3>严格门状态</h3><div class=kpi style=color:#aa6b00>INCONCLUSIVE</div><p>仅一个动量 one-body 叶节点略超旧式误差阈值。</p></article>
+<article class=card wide><h3>误差条为何必须包含自相关？</h3><svg viewBox=0,0,760,310 role=img aria-label=v2失败分量的误差与允许值比较><line class=axis x1=90 y1=260 x2=710 y2=260></line><line class=axis x1=90 y1=35 x2=90 y2=260></line><rect class=bar1 x=170 y=148 width=120 height=112></rect><rect class=bar2 x=440 y=35 width=120 height=225></rect><line class=limit x1=90 y1=202 x2=710 y2=202></line><text class=svgtext x=172 y=285>v2 naive MCSE</text><text class=svgtext x=420 y=285>由轨迹重构的相关 MCSE</text><text class=svgtext small x=105 y=195>观测误差 1.884×10⁻⁴</text><text class=svgtext x=183 y=138>3.609×10⁻⁵</text><text class=svgtext x=451 y=28>3.638×10⁻⁴</text></svg><p class=caption>唯一失败：L=2、β=4、q=(1,0) 的 one-body。v2 冻结规则只给实空间量使用相关 MCSE，所以不能事后改判；但完整实空间轨迹可精确傅里叶重构该动量轨迹，得到 τint≈42.5–46.3。这直接促成 v3 的统一误差协议。</p></article>
+<article class=card><h3>旧偏差已消失</h3><p>v1 的 L=3、β=1/2、G(1,0)：</p><div class=kpi>2.97×10⁻⁶</div><p>v2 绝对误差，远小于允许值 2.83×10⁻⁴。</p></article>
+<article class=card full><h3>严格状态表</h3><table><thead><tr><th>协议</th><th>数据</th><th>正性</th><th>ED/统计</th><th>结论</th></tr></thead><tbody><tr><td>v1 · commit 382e64e</td><td>32×30000 steps</td><td><span class=status pass>8/8 PASS</span></td><td>1 个实空间偏差；3 个高接受率门</td><td><span class=status inc>INCONCLUSIVE</span></td></tr><tr><td>v2 · commit 5bf5905</td><td>32×300000 steps</td><td><span class=status pass>8/8 PASS</span></td><td>旧偏差通过；1 个动量量漏计相关误差</td><td><span class=status inc>INCONCLUSIVE</span></td></tr><tr><td>v3 · 全观测量相关误差</td><td>全新种子 321000000+</td><td>待运行</td><td>所有复观测量统一 R̂/ESS/τint</td><td><span class=status open>前瞻验证</span></td></tr></tbody></table></article>
+</div>
+</section>
+<section class=section>
+<h2>从小体系走向大体系</h2>
+<div class=grid>
+<article class=card wide><svg viewBox=0,0,760,270 role=img aria-label=预注册系统尺寸网格><line class=axis x1=70 y1=210 x2=710 y2=210></line><circle class=site cx=140 cy=210 r=15></circle><circle class=site cx=250 cy=185 r=18></circle><circle class=site cx=365 cy=155 r=22></circle><circle class=site cx=505 cy=100 r=29></circle><circle class=site cx=655 cy=45 r=38></circle><text class=svgtext x=118 y=246>L=4</text><text class=svgtext x=225 y=246>L=6</text><text class=svgtext x=338 y=246>L=8</text><text class=svgtext x=475 y=246>L=12</text><text class=svgtext x=625 y=246>L=16</text><text class=svgtext small x=120 y=190>N=16</text><text class=svgtext small x=225 y=160>N=36</text><text class=svgtext small x=337 y=125>N=64</text><text class=svgtext small x=470 y=62>N=144</text><text class=svgtext small x=620 y=105>N=256</text></svg><p class=caption>完整生产网格还交叉 β∈{1/2,1,2,4}，每格点四条固定种子链。必须依次通过 G1 小体系正确性、G2 资源与自相关 pilot、G3 全网格、G4 provenance 审计。</p></article>
+<article class=card><h3>为什么 QMC 有意义？</h3><p>ED 的 Hilbert 空间维数是 2ᴺ，N=256 不可能直接对角化；行列式 QMC 只操作 N×N 单粒子矩阵，才有机会研究有限温度大系统。</p></article>
+<article class=card full><div class=flow><span class=pill>G0 代数与代码</span><span class=arrow>→</span><span class=pill>G1 N=4,9 对 ED</span><span class=arrow>→</span><span class=pill>G2 N=16,64,144 pilot</span><span class=arrow>→</span><span class=pill>G3 N≤256 全网格</span><span class=arrow>→</span><span class=pill>G4 独立 provenance</span></div></article>
+</div>
+</section>
+<section class=section>
+<h2>物理解释与诚实边界</h2>
+<div class=grid>
+<article class=card half><h3 class=ok>已经成立</h3><ul><li>一个开放参数区域，而非孤立 A 数值。</li><li>任意深度、任意局域重叠下 det(I+T)&gt;0。</li><li>二维三角晶格上的广延、相互作用、粒子数守恒模型。</li><li>连续时间高斯顶点展开可直接用于行列式 QMC。</li><li>N=4、9 上所有配置均无负权重。</li></ul></article>
+<article class=card half><h3 class=bad>尚未成立</h3><ul><li>μ=0 的零温基态是真空；非平凡有限密度仍未解决。</li><li>尚无快速混合证明。</li><li>v2 G1 严格状态仍为 INCONCLUSIVE。</li><li>N=256 的完整生产数据尚未完成。</li><li>没有证明文献优先权或达到论文接收标准。</li></ul></article>
+<article class=card full><div class=note><b>最准确的一句话：</b>我们已经找到并实现了一个数学上严格无符号、物理上真正二维且相互作用的有限温度费米子系统；当前最后障碍不是符号问题，而是把所有观测量的蒙特卡洛自相关误差统一纳入前瞻验证，并通过大尺度性能门。</div></article>
+</div>
+</section>
+<section class=section>
+<h2>研究时间线</h2><div class=timeline>
+<div class=event><h3>解析构造</h3><p>找到 A/B 两轨道多面体收缩类、开放参数锥、任意重叠最后触碰引理与条件数界。</p></div>
+<div class=event><h3>物理化</h3><p>通过 S₃ 群平均恢复厄米性，Fock 展开出现不可约四费米子和三体局域项。</p></div>
+<div class=event><h3>v1：发现误差条缺口</h3><p>正性完全通过，但实空间 G(1,0) 的 naive MCSE 低估且高接受率被误当成失败。</p></div>
+<div class=event><h3>v2：实空间修复成功</h3><p>旧偏差消失；一个傅里叶后的动量观测量暴露同一统计缺口。</p></div>
+<div class=event><h3>v3：统一全观测量协议</h3><p>全新随机种子；所有 ED 复观测量保存逐测量实/虚轨迹，并统一采用相关、链间、naive 三者最大 MCSE。</p></div>
+</div>
+</section>
+<section class=section>
+<h2>复现入口</h2><div class=card full><ul class=sources><li><code>main_theorem.md</code>：开放 A/B 家族、任意深度证明与分离证书。</li><li><code>physical_realization.md</code>：S₃ twirl、局域相互作用与连续时间展开。</li><li><code>g1_v2_preregistration.md</code>：v1→v2 的不可追溯修正规则。</li><li><code>g1_v3_preregistration.md</code>：v2→v3 的全观测量相关误差规则。</li><li><code>large_lattice_ctqmc.py</code>：密集矩阵 CTQMC 参考实现。</li><li><code>large_lattice_protocol.py</code>：哈希绑定、R̂/ESS/τint、ED 和 Slurm gates。</li><li><code>tracks/qmc/results/Genshin_Impact-121/20260730-large-lattice-5bf5905/gates/G1.json</code>：v2 不可变审计记录。</li></ul></div></section>
+<footer class=footer><b>Genshin_Impact · QuantumBFS issue #121</b><br>报告生成于 2026-07-30，证据截至 commit 5bf5905 与 v2 G1 SHA256 d865048b10a88b51d9caefff158c80961c19bce9b5b453c86074a20084c7db73。本文区分解析定理、已完成数值证据、事后诊断与尚未完成的前瞻验证。</footer>
+</main></body></html>

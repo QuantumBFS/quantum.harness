@@ -23,7 +23,7 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, List, Mapping, Optional, Sequence, Tuple
 import numpy as np
 
-PROTOCOL_ID = "issue121-triangular-large-lattice-v2"
+PROTOCOL_ID = "issue121-triangular-large-lattice-v3"
 CORE_ALGORITHM_ID = "triangular-ab-ctqmc-direct-lu-v1"
 ED_ALGORITHM_ID = "triangular-ab-full-fock-ed-oracle-v1"
 BENCHMARK_ALGORITHM_ID = "rank3-vs-full-word-rebuild-v1"
@@ -36,6 +36,7 @@ SOURCE_FILES = (
     "large_lattice_kernel_benchmark.py",
     "test_large_lattice_kernel_benchmark.py",
     "g1_v2_preregistration.md",
+    "g1_v3_preregistration.md",
 )
 SIZES = ((4,16),(6,36),(8,64),(12,144),(16,256))
 BETAS = (0.5,1.0,2.0,4.0)
@@ -131,7 +132,7 @@ def validate_meta(meta: Mapping[str,Any]) -> None:
           "document_type drift")
     _need(meta.get("issue")==121 and meta.get("team")=="Genshin_Impact",
           "issue/team drift")
-    _need(meta.get('amendment_document')=='g1_v2_preregistration.md',
+    _need(meta.get('amendment_document')=='g1_v3_preregistration.md',
           'amendment document drift')
     rat=meta.get("ratification")
     _need(isinstance(rat,Mapping) and rat.get("required_before_any_compute") is True,
@@ -171,7 +172,7 @@ def validate_meta(meta: Mapping[str,Any]) -> None:
     _need(isinstance(random,Mapping) and random.get("chains_per_cell")==4,
           "chain count drift")
     _need(random.get("seed_rule")==
-          "221000000 + 10000*L + 10*beta_index + chain_id","seed rule drift")
+          "321000000 + 10000*L + 10*beta_index + chain_id","seed rule drift")
     _need(random.get("beta_index")=={"1/2":0,"1":1,"2":2,"4":3},
           "beta index drift")
     seen=tuple((x.get("chain_id"),x.get("start"),x.get("initial_order"))
@@ -235,7 +236,7 @@ def validate_execution(execution: Mapping[str,Any]) -> None:
           "rotation asymmetry")
 
 def seed_for(L: int, beta_index: int, chain_id: int) -> int:
-    return 221000000+10000*L+10*beta_index+chain_id
+    return 321000000+10000*L+10*beta_index+chain_id
 
 def _unique(points: Iterable[Tuple[int,int]], L: int) -> List[List[int]]:
     out=[]; seen=set()
@@ -706,6 +707,26 @@ def _load_chain(root: Path, entry: Mapping[str,Any]) -> Mapping[str,Any]:
     observables=result.get("observables",{})
     count=observables.get("count",0)
     _need(isinstance(count,int) and count>0,"no measurements")
+    store_momentum=entry["N"]<=9
+    momentum_traces=observables.get("momentum_traces")
+    expected_momentum={f"{x},{y}" for x,y in manifest["measurements"]["momenta"]}
+    expected_names={"one_body","density_raw","density_mode"}
+    _need(observables.get("store_momentum_traces") is store_momentum and
+          isinstance(momentum_traces,Mapping),"result momentum trace mode")
+    if store_momentum:
+        _need(set(momentum_traces)==expected_momentum,"result momentum trace set")
+        for key,item in momentum_traces.items():
+            _need(isinstance(item,Mapping) and set(item)==expected_names,
+                  f"result momentum trace names: {key}")
+            for name,trace in item.items():
+                _need(isinstance(trace,Mapping) and set(trace)=={"real","imag"},
+                      f"result momentum trace components: {key}/{name}")
+                for component,values in trace.items():
+                    _need(isinstance(values,list) and len(values)==count and
+                          all(math.isfinite(float(value)) for value in values),
+                          f"result momentum trace length: {key}/{name}/{component}")
+    else:
+        _need(not momentum_traces,"unexpected result momentum traces")
     store_real=entry["N"]<=9
     real_traces=observables.get("real_space_traces")
     expected_real={f"{x},{y}" for x,y in manifest["measurements"]["displacements"]}
@@ -745,13 +766,29 @@ def _aggregate_complex(results: Sequence[Mapping[str,Any]], section: str,
     return out
 
 def _momentum(results: Sequence[Mapping[str,Any]]) -> Mapping[str,Any]:
-    out=_aggregate_complex(results,"momentum",
-                           ("one_body","density_raw","density_mode"))
+    names=("one_body","density_raw","density_mode")
+    out=_aggregate_complex(results,"momentum",names)
     for momentum in out:
         raw=out[momentum]["density_raw"]["mean"]
         mode=out[momentum]["density_mode"]["mean"]
         out[momentum]["density_connected_from_means"]=[
             raw[0]-mode[0]**2-mode[1]**2,raw[1]]
+    if not bool(results[0]["observables"]["store_momentum_traces"]):
+        return out
+    for momentum,item in out.items():
+        for name in names:
+            diagnostics={}
+            for component in ("real","imag"):
+                chains=[]
+                for result in results:
+                    traces=result["observables"]["momentum_traces"]
+                    _need(momentum in traces and name in traces[momentum] and
+                          component in traces[momentum][name],
+                          f"missing momentum trace: {momentum}/{name}/{component}")
+                    chains.append([float(value) for value in
+                                   traces[momentum][name][component]])
+                diagnostics[component]=_correlated_trace_diagnostics(chains)
+            item[name]["correlated_diagnostics"]=diagnostics
     return out
 
 def _correlated_trace_diagnostics(
@@ -1367,25 +1404,25 @@ def audit(root: Path, stage: str, write_complete: bool=False) -> Mapping[str,Any
         name="G3"; arange=thresholds["full_acceptance_hard_range"]
     else:
         raise ProtocolError("bad audit stage")
-    grouped={}; metadata={}; cell_entries={}
+    grouped_entries={}
     for entry in entries:
-        grouped.setdefault(entry["cell_id"],[]).append(_load_chain(root,entry))
-        metadata.setdefault(entry["cell_id"],entry)
-        cell_entries.setdefault(entry["cell_id"],[]).append(entry)
+        grouped_entries.setdefault(entry["cell_id"],[]).append(entry)
     cells={}
-    for cell_id,results in grouped.items():
-        first=metadata[cell_id]
+    for cell_id,entries_for_cell in grouped_entries.items():
+        first=entries_for_cell[0]
+        results=[_load_chain(root,entry) for entry in entries_for_cell]
         cell=summarize_cell(results,float(first["beta"]),int(first["N"]),
                             thresholds,arange)
         if stage=="g1":
             exact_path=root/"exact"/"g1"/f"{cell_id}.json"
             _need(exact_path.is_file(),f"missing ED {exact_path}")
             exact=load_json(exact_path)
-            validate_ed_binding(root,cell_entries[cell_id],exact)
+            validate_ed_binding(root,entries_for_cell,exact)
             cell["exact_ed_sha256"]=sha_file(exact_path)
             cell["ed"]=compare_ed(cell,exact,float(thresholds["ed_z_score_max"]))
             cell["pass"]=cell["pass"] and cell["ed"]["pass"]
         cells[cell_id]=cell
+        del results
     chain_cells_pass=bool(cells) and all(x["pass"] for x in cells.values())
     passed=chain_cells_pass; limits=[]; benchmark=None; resources=None
     if stage=="pilot":

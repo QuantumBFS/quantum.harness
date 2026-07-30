@@ -3,7 +3,7 @@
   "document_type": "preregistered_large_lattice_run",
   "issue": 121,
   "team": "Genshin_Impact",
-  "amendment_document": "g1_v2_preregistration.md",
+  "amendment_document": "g1_v3_preregistration.md",
   "status": "ratified_setup_frozen_pending_gates",
   "ratification": {
     "required_before_any_compute": true,
@@ -62,7 +62,7 @@
   "randomness": {
     "engine": "NumPy PCG64DXSM; exact package version frozen in run snapshot",
     "chains_per_cell": 4,
-    "seed_rule": "221000000 + 10000*L + 10*beta_index + chain_id",
+    "seed_rule": "321000000 + 10000*L + 10*beta_index + chain_id",
     "beta_index": {"1/2": 0, "1": 1, "2": 2, "4": 3},
     "chains": [
       {"chain_id": 0, "start": "cold", "initial_order": 0},

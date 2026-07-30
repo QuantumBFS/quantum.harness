@@ -277,6 +277,8 @@ class ObservableAccumulator:
         self.scalar={k:{"sum":0.0,"sum_sq":0.0} for k in self.KEYS}
         self.primary_traces={k:[] for k in self.KEYS}
         self.momentum:Dict[str,Any]={}
+        self.store_momentum_traces=self.store_real_space_traces
+        self.momentum_traces:Dict[str,Any]={}
         self.real_space:Dict[str,Any]={}
         self.real_space_traces:Dict[str,Any]={}
     @staticmethod
@@ -295,6 +297,11 @@ class ObservableAccumulator:
         for momentum,values in obs["momenta"].items():
             for name,pair in values.items():
                 self._add_complex(self.momentum,momentum,name,pair)
+                if self.store_momentum_traces:
+                    trace=self.momentum_traces.setdefault(momentum,{}).setdefault(
+                        name,{"real":[],"imag":[]})
+                    trace["real"].append(float(pair[0]))
+                    trace["imag"].append(float(pair[1]))
         for displacement,pair in obs.get("real_space_green",{}).items():
             self._add_complex(self.real_space,displacement,"one_body",pair)
             if self.store_real_space_traces:
@@ -305,7 +312,9 @@ class ObservableAccumulator:
     def state(self)->Mapping[str,Any]:
         return {"count":self.count,"scalar":self.scalar,
                 "primary_traces":self.primary_traces,
-                "momentum":self.momentum,"real_space_green":self.real_space,
+                "momentum":self.momentum,"momentum_traces":self.momentum_traces,
+                "store_momentum_traces":self.store_momentum_traces,
+                "real_space_green":self.real_space,
                 "store_real_space_traces":self.store_real_space_traces,
                 "real_space_traces":self.real_space_traces}
     @classmethod
@@ -315,6 +324,8 @@ class ObservableAccumulator:
         obj.scalar=state.get("scalar",obj.scalar)
         obj.primary_traces=state.get("primary_traces",obj.primary_traces)
         obj.momentum=state.get("momentum",{})
+        obj.momentum_traces=state.get("momentum_traces",{})
+        obj.store_momentum_traces=store_real_space_traces
         obj.real_space=state.get("real_space_green",{})
         obj.real_space_traces=state.get("real_space_traces",{})
         return obj
@@ -352,7 +363,9 @@ class ObservableAccumulator:
         return {"count":self.count,"scalar":scalar,
                 "compressibility":compressibility,
                 "primary_traces":self.primary_traces,
-                "momentum":momentum,"real_space_green":real_space,
+                "momentum":momentum,"momentum_traces":self.momentum_traces,
+                "store_momentum_traces":self.store_momentum_traces,
+                "real_space_green":real_space,
                 "store_real_space_traces":self.store_real_space_traces,
                 "real_space_traces":self.real_space_traces,
                 "error_note":"naive iid errors; use primary_traces for tau_int/ESS/R-hat"}
@@ -638,6 +651,24 @@ class CTQMC:
                 not isinstance(trace,list) or len(trace)!=expected_count
                 for trace in traces.values()):
             raise ManifestError("checkpoint primary trace length mismatch")
+        expected_momentum={f"{kx},{ky}" for kx,ky in self.momenta}
+        momentum_traces=accumulator.get("momentum_traces")
+        store_momentum=self.geometry.n_sites<=9
+        expected_names={"one_body","density_raw","density_mode"}
+        if accumulator.get("store_momentum_traces") is not store_momentum or not isinstance(
+                momentum_traces,Mapping):
+            raise ManifestError("checkpoint momentum trace mode mismatch")
+        if store_momentum:
+            if set(momentum_traces)!=expected_momentum or any(
+                    not isinstance(item,Mapping) or set(item)!=expected_names or any(
+                        not isinstance(trace,Mapping) or set(trace)!={"real","imag"} or any(
+                            not isinstance(values,list) or len(values)!=expected_count
+                            for values in trace.values())
+                        for trace in item.values())
+                    for item in momentum_traces.values()):
+                raise ManifestError("checkpoint momentum trace length mismatch")
+        elif momentum_traces:
+            raise ManifestError("unexpected checkpoint momentum traces")
         expected_real={f"{dx},{dy}" for dx,dy in self.displacements}
         real_traces=accumulator.get("real_space_traces")
         store_real=self.geometry.n_sites<=9
