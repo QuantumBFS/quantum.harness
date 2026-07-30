@@ -1,10 +1,11 @@
 <!--
-Registering a challenge? Fill in the digest below — one PR per team.
+Registering a challenge? Fill in the digest below — one PR per team per challenge.
+A team may register multiple challenges, each in its own PR.
 Maintenance PR (skills, docs, infrastructure)? Delete the whole template and
 describe your change in a sentence or two instead.
 
 Title format: [<track>] <team-name>: <one-line pitch>
-Commit only under tracks/<track>/solutions/<team-name>/ — results/ stays out of git.
+Commit only under tracks/<track>/solutions/<team-name>-<issue-number>/ — results/ stays out of git.
 Open from a branch, never main. Submit for review — a draft does not register the claim.
 -->
 
