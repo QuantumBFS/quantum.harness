@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable, Optional, Sequence, Tuple, Union
 
-from analysis.sources import ModelResult
+from analysis.sources import LearningMitResult, ModelResult
 
 
 @dataclass(frozen=True)
@@ -107,7 +107,9 @@ class ReportDocument:
         return "\n".join(parts)
 
 
-def build_report(models: Sequence[ModelResult]) -> ReportDocument:
+def build_report(
+    models: Sequence[ModelResult], learning_mit: LearningMitResult
+) -> ReportDocument:
     indexed = {model.slug: model for model in models}
     required = {"clean-ising", "nishimori-ising", "weak-self-dual"}
     if set(indexed) != required:
@@ -143,6 +145,7 @@ def build_report(models: Sequence[ModelResult]) -> ReportDocument:
             _comparison(clean, nishimori, weak),
             _errors(clean, nishimori, weak),
             _implementation(),
+            _open_research(learning_mit),
             _conclusions(clean, nishimori, weak),
             _appendices(clean, nishimori, weak),
         ),
@@ -1011,6 +1014,144 @@ def _implementation() -> Section:
                 "processing and visualization. The integrated report generator performs no "
                 "Monte Carlo sampling, so rebuilding HTML or PDF cannot change a scientific "
                 "estimate.",
+                "principle",
+            ),
+        ),
+    )
+
+
+def _open_research(result: LearningMitResult) -> Section:
+    evidence_rows = tuple(
+        (f"{phi:.2f}", f"{score:.6f}", "exploratory")
+        for phi, score in result.diii_evidence
+    )
+    return Section(
+        "Open Research: Learning-Induced Metal-Insulator Transition",
+        "learning-induced-mit",
+        (
+            PageBreak(),
+            Callout(
+                "Exploratory result—not a fourth benchmark card",
+                "This chapter is deliberately separated from the three verified central-"
+                "charge benchmarks. Its frozen status is "
+                f"{result.status}. The XY validation gate passed, but the generic DIII "
+                "scan was inconclusive under the predeclared phase-persistence rule.",
+                "warning",
+            ),
+            Paragraph(
+                "The open question is whether changing the physical measurement axis in "
+                "a monitored surface-code tensor network drives a transition between "
+                "extended, metal-like Majorana correlations and localized, insulator-like "
+                "correlations. Unlike the preceding benchmark chapters, no target DIII "
+                "central charge was supplied. The calculation must first reproduce a known "
+                "transition on the special XY line and only then search a generic symmetry-"
+                "class-DIII cut without selecting a favorable point after seeing the data."
+            ),
+            Equation(
+                "sigma(theta,phi) = sin(theta) cos(phi) X + sin(theta) sin(phi) Y + cos(theta) Z",
+                "The XY validation line fixes theta/pi=0.5. The exploratory generic cut "
+                f"fixes theta/pi={result.diii_theta_pi:.2f}; nonzero polar and azimuthal "
+                "components remove the special class-D block decomposition.",
+                "25",
+            ),
+            Paragraph(
+                "Rust generated every conditional Born outcome with Xoshiro256++ and "
+                "evolved a real antisymmetric Gaussian covariance matrix. Rational "
+                "measurement updates were followed by outcome-dependent orthogonal "
+                "rotations. An orthogonal polar projection after each period removed "
+                "floating-point drift in Gamma^2=-I. Python read only frozen block data, "
+                "compared entanglement-arc models, evaluated phase evidence, and rendered "
+                "the reports; it performed no Monte Carlo evolution."
+            ),
+            CodeBlock(
+                "Predeclared two-stage decision",
+                "run_xy_validation(theta_pi=0.50)\n"
+                "if xy_bracket overlaps reference_window:\n"
+                "    scan_generic_diii(theta_pi=0.45)\n"
+                "    publish_candidate_only_if_adjacent_phase_evidence_persists\n"
+                "else:\n"
+                "    status = validation_failed",
+                "The branch structure prevents a generic-DIII claim when the known XY "
+                "transition is not reproduced. A missing DIII bracket is retained as an "
+                "inconclusive exploratory result rather than repaired by post hoc scans.",
+            ),
+            Table(
+                "Frozen open-research decision",
+                ("Quantity", "Frozen value", "Claim class"),
+                (
+                    (
+                        "XY bracket phi/pi",
+                        f"[{result.xy_bracket[0]:.2f}, {result.xy_bracket[1]:.2f}]",
+                        "validation",
+                    ),
+                    (
+                        "XY reference window",
+                        f"[{result.xy_reference_window[0]:.2f}, "
+                        f"{result.xy_reference_window[1]:.2f}]",
+                        "predeclared validation",
+                    ),
+                    ("DIII bracket", "none", "exploratory / inconclusive"),
+                    (
+                        "Casimir c_eff alpha",
+                        "not fitted",
+                        "exploratory / not published",
+                    ),
+                    ("anisotropy alpha", "unstable", "exploratory / not published"),
+                    (
+                        "DIII central charge",
+                        "not published",
+                        "exploratory / not published",
+                    ),
+                    (
+                        "runtime",
+                        f"{result.elapsed_s:.3f} s",
+                        f"within {result.ordinary_stop_s:.0f} s ordinary limit",
+                    ),
+                ),
+                "Every DIII entry is exploratory. Null estimates are scientific outcomes "
+                "of the claim gates, not missing report fields.",
+            ),
+            Figure(
+                result.figures["en"][0],
+                "XY-line finite-size phase evidence across the approved azimuthal scan.",
+                "Validation scan: the frozen XY bracket is "
+                f"[{result.xy_bracket[0]:.2f}, {result.xy_bracket[1]:.2f}], inside the "
+                "declared reference window.",
+                "This figure validates the implementation on a special class-D line; it "
+                "does not establish a generic-DIII transition.",
+            ),
+            Figure(
+                result.figures["en"][1],
+                "Exploratory DIII phase-evidence score across eight azimuthal points.",
+                "Exploratory generic-DIII scan. Scores evolve smoothly across the grid, "
+                "but no adjacent pair satisfies the full persistent opposite-phase rule.",
+                "The score is a composite finite-size diagnostic, not a central charge or "
+                "a standalone order parameter with a universal zero.",
+            ),
+            Table(
+                "Exploratory DIII evidence scan",
+                ("phi/pi (exploratory)", "evidence score (exploratory)", "label"),
+                evidence_rows,
+                "All values in this table are exploratory diagnostics. They are not "
+                "published transition coordinates or universal quantities.",
+            ),
+            Paragraph(
+                "The physical Born and deliberately nonphysical IID-sign controls differ "
+                f"strongly: their frozen means are {result.born_mean:.6f} and "
+                f"{result.iid_mean:.6f}, with z={result.negative_control_z:.2f}. This "
+                "confirms that unconditional random signs cannot replace state-conditioned "
+                "Born draws. Scientific oracles passed, all "
+                f"{len(result.widths)} widths {result.widths} and {result.streams} streams "
+                "per point completed, and no runtime reserve was needed."
+            ),
+            Callout(
+                "What remains unresolved",
+                "The present data do not publish a DIII transition, Casimir amplitude, "
+                "anisotropy, or central charge. A future study should add independent "
+                "streams and widths around the low-phi crossover, predeclare a sharper "
+                "refinement grid, and test whether phase labels persist under alternative "
+                "finite-size windows. Inconclusive does not mean that a transition is "
+                "absent.",
                 "principle",
             ),
         ),

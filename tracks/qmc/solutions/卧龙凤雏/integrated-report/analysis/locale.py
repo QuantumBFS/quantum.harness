@@ -29,6 +29,7 @@ EN_SECTION_TITLES = (
     "Cross-Model Comparison",
     "Error and Sensitivity Analysis",
     "Implementation and Reproducibility",
+    "Open Research: Learning-Induced Metal-Insulator Transition",
     "Conclusions",
     "Appendices",
 )
@@ -43,6 +44,7 @@ ZH_SECTION_TITLES = (
     "跨模型比较",
     "误差与敏感性分析",
     "实现与可复现性",
+    "开放研究：学习诱导的金属—绝缘体转变",
     "结论",
     "附录",
 )
