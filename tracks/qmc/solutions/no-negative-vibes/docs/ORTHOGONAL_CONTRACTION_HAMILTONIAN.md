@@ -194,3 +194,66 @@ leaves: IXIX, IYIY, XIXI.
   <https://arxiv.org/abs/0804.4050>
 - Brod, *Efficient classical simulation of matchgate circuits with generalized inputs
   and measurements*, <https://arxiv.org/abs/1602.03539>
+
+## 第三轮：Majorana square 边界与双 plaquette 检查
+
+### 正性机制确实是已知 double-copy
+
+对实数守恒 rotation `c -> O c`，Majoranas 的 `x`、`y` components 都按同一个
+`O` 变换，所以 Majorana 一粒子传播子为
+
+```text
+R = O direct-sum O.
+```
+
+对任意 oriented word `D`，已有 Spin oracle 精确给出
+
+```text
+SpinTrace(R_word) = det(I+D),
+SpinTrace(R_word)^2 = det(I + D direct-sum D) = det(I+D)^2.
+```
+
+五个代表非对易 words 的 trace residual `<1e-12`、square residual `<1e-11`。
+因此 R3b 的**正性机制**属于已知 doubled-Majorana/even-copy square，不主张新的
+positivity theorem。
+
+按照本项目修订后的标准，这一事实不自动关闭模型：单个 vertex 是 Gaussian unitary，
+但完整 Hamiltonian 是重叠局域 vertices 的算符和，仍有四体项、induced claw 和
+stoquastic sign frustration。真正待判断的是该 interacting sum 是否已有专门 solver
+或已研究物理，而不是 square identity 是否新。
+
+### 两个重叠 plaquettes 不是单块偶然
+
+在六模式链上取
+
+```text
+p_0=(0,1,2,3),  p_1=(2,3,4,5),
+```
+
+每个 plaquette 放同样两个 atoms。完整 `64 x 64` 锚点满足：
+
+- 最大 density body order 仍为 `4`，六体 coefficient 为零，确认局域性；
+- occupation graph components 恰为粒子数 sectors
+  `1,6,15,20,15,6,1`，无额外对角静态 sectors；
+- 单 plaquette frustrated cycle `8->1->2->4->8` 原样保留；
+- 深度 `1–3` 的 584 个八分支 words 全部严格正，
+  trace residual `<3e-14`。
+
+所以 locality、extensivity、sign frustration 和 QMC positivity 可以同时跨越重叠
+plaquettes；不是孤立四模式玩具。
+
+## 更新后的判断
+
+R3b 当前是：
+
+```text
+known positivity mechanism
++ explicit local interacting Hamiltonian
++ no diagonal stoquastic gauge
++ no common orbital split
++ outside the claw-free generalized-JW class
++ overlapping-lattice MWE
+```
+
+它仍需排查专门的 Pfaffian/group-algebra solver，并完成物理 observable 与模型级文献
+检索；在此之前保持 `active-model-survivor-known-square`，不升级为最终 QNC。
