@@ -1,0 +1,38 @@
+{
+  "status": "pass",
+  "inputs": {
+    "up": "/Users/thomasjwang/Documents/GitHub/Projects/Jin-Peng/Hydrodynamics/kharkov_B2_validation/results_research_program/tenpy_smoke/fcs_up_smoke.npz",
+    "down": "/Users/thomasjwang/Documents/GitHub/Projects/Jin-Peng/Hydrodynamics/kharkov_B2_validation/results_research_program/tenpy_smoke/fcs_down_smoke.npz"
+  },
+  "definition": "Z(gamma,t)=Tr[rho0 U^dagger exp(i gamma Q_R) U exp(-i gamma Q_R)]",
+  "thresholds": {
+    "algebraic_absolute": 1e-10,
+    "fcs_mean_relative": 0.02,
+    "current_integral_relative": 0.002
+  },
+  "checks": {
+    "characteristic_function_hermiticity": true,
+    "spin_flip_counting_field_reversal": true,
+    "zero_counting_field_normalization": true,
+    "initial_transfer_is_zero": true,
+    "fcs_first_cumulant_matches_charge_transfer": true,
+    "integrated_current_matches_charge_transfer": true
+  },
+  "metrics": {
+    "hermiticity_up_max_abs": 6.678180877752496e-16,
+    "hermiticity_down_max_abs": 1.3886614931748958e-15,
+    "spin_flip_max_abs": 2.0015963196732324e-15,
+    "zero_gamma_max_abs": 0.0,
+    "initial_logZ_max_abs": 6.67293462781355e-16,
+    "fcs_mean_vs_charge_relative": 0.006628631733933394,
+    "integrated_current_vs_charge_relative": 0.00017180143855090242,
+    "endpoint": {
+      "fcs_mean_up": -3.036645059389033e-05,
+      "charge_transfer_up": -3.056908177859197e-05,
+      "integrated_current_up": -3.0563829966367224e-05,
+      "fcs_mean_down": 3.0366450592468198e-05,
+      "charge_transfer_down": 3.056908177802298e-05,
+      "integrated_current_down": 3.05638299663597e-05
+    }
+  }
+}

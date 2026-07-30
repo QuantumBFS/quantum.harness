@@ -1,0 +1,18 @@
+{
+  "status": "pass",
+  "resumed": "/Users/thomasjwang/Documents/GitHub/Projects/Jin-Peng/Hydrodynamics/kharkov_B2_validation/results_research_program/tenpy_smoke/resume_validation.npz",
+  "uninterrupted": "/Users/thomasjwang/Documents/GitHub/Projects/Jin-Peng/Hydrodynamics/kharkov_B2_validation/results_research_program/tenpy_smoke/resume_validation_uninterrupted.npz",
+  "interruption_after_saved_time": 0.25,
+  "fcs_checkpoint_loaded": true,
+  "threshold": 1e-13,
+  "metrics": {
+    "u_max_abs": 0.0,
+    "m_max_abs": 0.0,
+    "current_max_abs": 0.0,
+    "fcs_m_max_abs": 0.0,
+    "fcs_u_max_abs": 0.0,
+    "fcs_current_max_abs": 0.0,
+    "fcs_czz_max_abs": 0.0,
+    "fcs_fcs_logZ_max_abs": 0.0
+  }
+}

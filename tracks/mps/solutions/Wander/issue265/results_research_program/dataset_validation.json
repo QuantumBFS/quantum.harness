@@ -1,0 +1,428 @@
+{
+  "schema_version": 1,
+  "manifest_path": "./results_research_program/manifest.json",
+  "rules_path": "./configs/burgers_decision_rules.json",
+  "include_blinded": false,
+  "complete": false,
+  "counts": {
+    "missing": 43,
+    "blinded_not_opened": 31
+  },
+  "convergence": {
+    "accepted": false,
+    "records": [
+      {
+        "condition_id": "amp_mu005_down",
+        "status": "simulation_missing",
+        "accepted": false,
+        "unavailable_job_ids": [
+          "amp_mu005_down__convergence__coarse",
+          "amp_mu005_down__convergence__medium",
+          "amp_mu005_down__convergence__fine"
+        ]
+      },
+      {
+        "condition_id": "amp_mu005_up",
+        "status": "simulation_missing",
+        "accepted": false,
+        "unavailable_job_ids": [
+          "amp_mu005_up__convergence__coarse",
+          "amp_mu005_up__convergence__medium",
+          "amp_mu005_up__convergence__fine"
+        ]
+      },
+      {
+        "condition_id": "background_p005_up",
+        "status": "simulation_missing",
+        "accepted": false,
+        "unavailable_job_ids": [
+          "background_p005_up__convergence__coarse",
+          "background_p005_up__convergence__medium",
+          "background_p005_up__convergence__fine"
+        ]
+      },
+      {
+        "condition_id": "shape_double_wall",
+        "status": "simulation_missing",
+        "accepted": false,
+        "unavailable_job_ids": [
+          "shape_double_wall__convergence__coarse",
+          "shape_double_wall__convergence__medium",
+          "shape_double_wall__convergence__fine"
+        ]
+      }
+    ]
+  },
+  "records": [
+    {
+      "job_id": "amp_mu005_up__convergence__coarse",
+      "status": "missing",
+      "path": "./data/research/raw/convergence/amp_mu005_up__convergence__coarse.npz"
+    },
+    {
+      "job_id": "amp_mu005_up__convergence__medium",
+      "status": "missing",
+      "path": "./data/research/raw/convergence/amp_mu005_up__convergence__medium.npz"
+    },
+    {
+      "job_id": "amp_mu005_up__convergence__fine",
+      "status": "missing",
+      "path": "./data/research/raw/convergence/amp_mu005_up__convergence__fine.npz"
+    },
+    {
+      "job_id": "amp_mu005_down__convergence__coarse",
+      "status": "missing",
+      "path": "./data/research/raw/convergence/amp_mu005_down__convergence__coarse.npz"
+    },
+    {
+      "job_id": "amp_mu005_down__convergence__medium",
+      "status": "missing",
+      "path": "./data/research/raw/convergence/amp_mu005_down__convergence__medium.npz"
+    },
+    {
+      "job_id": "amp_mu005_down__convergence__fine",
+      "status": "missing",
+      "path": "./data/research/raw/convergence/amp_mu005_down__convergence__fine.npz"
+    },
+    {
+      "job_id": "shape_double_wall__convergence__coarse",
+      "status": "missing",
+      "path": "./data/research/raw/convergence/shape_double_wall__convergence__coarse.npz"
+    },
+    {
+      "job_id": "shape_double_wall__convergence__medium",
+      "status": "missing",
+      "path": "./data/research/raw/convergence/shape_double_wall__convergence__medium.npz"
+    },
+    {
+      "job_id": "shape_double_wall__convergence__fine",
+      "status": "missing",
+      "path": "./data/research/raw/convergence/shape_double_wall__convergence__fine.npz"
+    },
+    {
+      "job_id": "background_p005_up__convergence__coarse",
+      "status": "missing",
+      "path": "./data/research/raw/convergence/background_p005_up__convergence__coarse.npz"
+    },
+    {
+      "job_id": "background_p005_up__convergence__medium",
+      "status": "missing",
+      "path": "./data/research/raw/convergence/background_p005_up__convergence__medium.npz"
+    },
+    {
+      "job_id": "background_p005_up__convergence__fine",
+      "status": "missing",
+      "path": "./data/research/raw/convergence/background_p005_up__convergence__fine.npz"
+    },
+    {
+      "job_id": "amp_mu002_up__production_a",
+      "status": "missing",
+      "path": "./data/research/raw/production_a/amp_mu002_up__production_a.npz"
+    },
+    {
+      "job_id": "amp_mu002_up__production_b",
+      "status": "blinded_not_opened",
+      "path": "./data/research/raw/production_b/amp_mu002_up__production_b.npz"
+    },
+    {
+      "job_id": "amp_mu002_down__production_a",
+      "status": "missing",
+      "path": "./data/research/raw/production_a/amp_mu002_down__production_a.npz"
+    },
+    {
+      "job_id": "amp_mu002_down__production_b",
+      "status": "blinded_not_opened",
+      "path": "./data/research/raw/production_b/amp_mu002_down__production_b.npz"
+    },
+    {
+      "job_id": "amp_mu005_up__production_a",
+      "status": "missing",
+      "path": "./data/research/raw/production_a/amp_mu005_up__production_a.npz"
+    },
+    {
+      "job_id": "amp_mu005_up__production_b",
+      "status": "blinded_not_opened",
+      "path": "./data/research/raw/production_b/amp_mu005_up__production_b.npz"
+    },
+    {
+      "job_id": "amp_mu005_down__production_a",
+      "status": "missing",
+      "path": "./data/research/raw/production_a/amp_mu005_down__production_a.npz"
+    },
+    {
+      "job_id": "amp_mu005_down__production_b",
+      "status": "blinded_not_opened",
+      "path": "./data/research/raw/production_b/amp_mu005_down__production_b.npz"
+    },
+    {
+      "job_id": "amp_mu010_up__production_a",
+      "status": "missing",
+      "path": "./data/research/raw/production_a/amp_mu010_up__production_a.npz"
+    },
+    {
+      "job_id": "amp_mu010_up__production_b",
+      "status": "blinded_not_opened",
+      "path": "./data/research/raw/production_b/amp_mu010_up__production_b.npz"
+    },
+    {
+      "job_id": "amp_mu010_down__production_a",
+      "status": "missing",
+      "path": "./data/research/raw/production_a/amp_mu010_down__production_a.npz"
+    },
+    {
+      "job_id": "amp_mu010_down__production_b",
+      "status": "blinded_not_opened",
+      "path": "./data/research/raw/production_b/amp_mu010_down__production_b.npz"
+    },
+    {
+      "job_id": "amp_mu020_up__production_a",
+      "status": "missing",
+      "path": "./data/research/raw/production_a/amp_mu020_up__production_a.npz"
+    },
+    {
+      "job_id": "amp_mu020_up__production_b",
+      "status": "blinded_not_opened",
+      "path": "./data/research/raw/production_b/amp_mu020_up__production_b.npz"
+    },
+    {
+      "job_id": "amp_mu020_down__production_a",
+      "status": "missing",
+      "path": "./data/research/raw/production_a/amp_mu020_down__production_a.npz"
+    },
+    {
+      "job_id": "amp_mu020_down__production_b",
+      "status": "blinded_not_opened",
+      "path": "./data/research/raw/production_b/amp_mu020_down__production_b.npz"
+    },
+    {
+      "job_id": "width_w1_up__production_a",
+      "status": "missing",
+      "path": "./data/research/raw/production_a/width_w1_up__production_a.npz"
+    },
+    {
+      "job_id": "width_w1_up__production_b",
+      "status": "blinded_not_opened",
+      "path": "./data/research/raw/production_b/width_w1_up__production_b.npz"
+    },
+    {
+      "job_id": "width_w1_down__production_a",
+      "status": "missing",
+      "path": "./data/research/raw/production_a/width_w1_down__production_a.npz"
+    },
+    {
+      "job_id": "width_w1_down__production_b",
+      "status": "blinded_not_opened",
+      "path": "./data/research/raw/production_b/width_w1_down__production_b.npz"
+    },
+    {
+      "job_id": "width_w4_up__production_a",
+      "status": "missing",
+      "path": "./data/research/raw/production_a/width_w4_up__production_a.npz"
+    },
+    {
+      "job_id": "width_w4_up__production_b",
+      "status": "blinded_not_opened",
+      "path": "./data/research/raw/production_b/width_w4_up__production_b.npz"
+    },
+    {
+      "job_id": "width_w4_down__production_a",
+      "status": "missing",
+      "path": "./data/research/raw/production_a/width_w4_down__production_a.npz"
+    },
+    {
+      "job_id": "width_w4_down__production_b",
+      "status": "blinded_not_opened",
+      "path": "./data/research/raw/production_b/width_w4_down__production_b.npz"
+    },
+    {
+      "job_id": "width_w8_up__production_a",
+      "status": "missing",
+      "path": "./data/research/raw/production_a/width_w8_up__production_a.npz"
+    },
+    {
+      "job_id": "width_w8_up__production_b",
+      "status": "blinded_not_opened",
+      "path": "./data/research/raw/production_b/width_w8_up__production_b.npz"
+    },
+    {
+      "job_id": "width_w8_down__production_a",
+      "status": "missing",
+      "path": "./data/research/raw/production_a/width_w8_down__production_a.npz"
+    },
+    {
+      "job_id": "width_w8_down__production_b",
+      "status": "blinded_not_opened",
+      "path": "./data/research/raw/production_b/width_w8_down__production_b.npz"
+    },
+    {
+      "job_id": "shape_erf_up__production_a",
+      "status": "missing",
+      "path": "./data/research/raw/production_a/shape_erf_up__production_a.npz"
+    },
+    {
+      "job_id": "shape_erf_up__production_b",
+      "status": "blinded_not_opened",
+      "path": "./data/research/raw/production_b/shape_erf_up__production_b.npz"
+    },
+    {
+      "job_id": "shape_erf_down__production_a",
+      "status": "missing",
+      "path": "./data/research/raw/production_a/shape_erf_down__production_a.npz"
+    },
+    {
+      "job_id": "shape_erf_down__production_b",
+      "status": "blinded_not_opened",
+      "path": "./data/research/raw/production_b/shape_erf_down__production_b.npz"
+    },
+    {
+      "job_id": "shape_double_wall__production_a",
+      "status": "missing",
+      "path": "./data/research/raw/production_a/shape_double_wall__production_a.npz"
+    },
+    {
+      "job_id": "shape_double_wall__production_b",
+      "status": "blinded_not_opened",
+      "path": "./data/research/raw/production_b/shape_double_wall__production_b.npz"
+    },
+    {
+      "job_id": "shape_gaussian_pos__production_a",
+      "status": "missing",
+      "path": "./data/research/raw/production_a/shape_gaussian_pos__production_a.npz"
+    },
+    {
+      "job_id": "shape_gaussian_pos__production_b",
+      "status": "blinded_not_opened",
+      "path": "./data/research/raw/production_b/shape_gaussian_pos__production_b.npz"
+    },
+    {
+      "job_id": "shape_gaussian_neg__production_a",
+      "status": "missing",
+      "path": "./data/research/raw/production_a/shape_gaussian_neg__production_a.npz"
+    },
+    {
+      "job_id": "shape_gaussian_neg__production_b",
+      "status": "blinded_not_opened",
+      "path": "./data/research/raw/production_b/shape_gaussian_neg__production_b.npz"
+    },
+    {
+      "job_id": "shape_sinusoid_32__production_a",
+      "status": "missing",
+      "path": "./data/research/raw/production_a/shape_sinusoid_32__production_a.npz"
+    },
+    {
+      "job_id": "shape_sinusoid_32__production_b",
+      "status": "blinded_not_opened",
+      "path": "./data/research/raw/production_b/shape_sinusoid_32__production_b.npz"
+    },
+    {
+      "job_id": "shape_sinusoid_64__production_a",
+      "status": "missing",
+      "path": "./data/research/raw/production_a/shape_sinusoid_64__production_a.npz"
+    },
+    {
+      "job_id": "shape_sinusoid_64__production_b",
+      "status": "blinded_not_opened",
+      "path": "./data/research/raw/production_b/shape_sinusoid_64__production_b.npz"
+    },
+    {
+      "job_id": "background_p005_up__production_a",
+      "status": "missing",
+      "path": "./data/research/raw/production_a/background_p005_up__production_a.npz"
+    },
+    {
+      "job_id": "background_p005_up__production_b",
+      "status": "blinded_not_opened",
+      "path": "./data/research/raw/production_b/background_p005_up__production_b.npz"
+    },
+    {
+      "job_id": "background_p005_down__production_a",
+      "status": "missing",
+      "path": "./data/research/raw/production_a/background_p005_down__production_a.npz"
+    },
+    {
+      "job_id": "background_p005_down__production_b",
+      "status": "blinded_not_opened",
+      "path": "./data/research/raw/production_b/background_p005_down__production_b.npz"
+    },
+    {
+      "job_id": "background_m005_up__production_a",
+      "status": "missing",
+      "path": "./data/research/raw/production_a/background_m005_up__production_a.npz"
+    },
+    {
+      "job_id": "background_m005_up__production_b",
+      "status": "blinded_not_opened",
+      "path": "./data/research/raw/production_b/background_m005_up__production_b.npz"
+    },
+    {
+      "job_id": "background_m005_down__production_a",
+      "status": "missing",
+      "path": "./data/research/raw/production_a/background_m005_down__production_a.npz"
+    },
+    {
+      "job_id": "background_m005_down__production_b",
+      "status": "blinded_not_opened",
+      "path": "./data/research/raw/production_b/background_m005_down__production_b.npz"
+    },
+    {
+      "job_id": "control_delta08_up__production_a",
+      "status": "missing",
+      "path": "./data/research/raw/production_a/control_delta08_up__production_a.npz"
+    },
+    {
+      "job_id": "control_delta08_up__production_b",
+      "status": "blinded_not_opened",
+      "path": "./data/research/raw/production_b/control_delta08_up__production_b.npz"
+    },
+    {
+      "job_id": "control_delta08_down__production_a",
+      "status": "missing",
+      "path": "./data/research/raw/production_a/control_delta08_down__production_a.npz"
+    },
+    {
+      "job_id": "control_delta08_down__production_b",
+      "status": "blinded_not_opened",
+      "path": "./data/research/raw/production_b/control_delta08_down__production_b.npz"
+    },
+    {
+      "job_id": "control_delta12_up__production_a",
+      "status": "missing",
+      "path": "./data/research/raw/production_a/control_delta12_up__production_a.npz"
+    },
+    {
+      "job_id": "control_delta12_up__production_b",
+      "status": "blinded_not_opened",
+      "path": "./data/research/raw/production_b/control_delta12_up__production_b.npz"
+    },
+    {
+      "job_id": "control_delta12_down__production_a",
+      "status": "missing",
+      "path": "./data/research/raw/production_a/control_delta12_down__production_a.npz"
+    },
+    {
+      "job_id": "control_delta12_down__production_b",
+      "status": "blinded_not_opened",
+      "path": "./data/research/raw/production_b/control_delta12_down__production_b.npz"
+    },
+    {
+      "job_id": "control_j2_up__production_a",
+      "status": "missing",
+      "path": "./data/research/raw/production_a/control_j2_up__production_a.npz"
+    },
+    {
+      "job_id": "control_j2_up__production_b",
+      "status": "blinded_not_opened",
+      "path": "./data/research/raw/production_b/control_j2_up__production_b.npz"
+    },
+    {
+      "job_id": "control_j2_down__production_a",
+      "status": "missing",
+      "path": "./data/research/raw/production_a/control_j2_down__production_a.npz"
+    },
+    {
+      "job_id": "control_j2_down__production_b",
+      "status": "blinded_not_opened",
+      "path": "./data/research/raw/production_b/control_j2_down__production_b.npz"
+    }
+  ]
+}
