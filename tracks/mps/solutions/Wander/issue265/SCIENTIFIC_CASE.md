@@ -11,34 +11,31 @@ The machine-discovered equation
 
 is a remarkably accurate description of the public weak-domain-wall
 trajectory of the infinite-temperature isotropic Heisenberg chain over the
-available hydrodynamic window.  Our reproducible audit finds
-\(a\simeq0.230\), \(D_{\rm cl}\simeq1.97\), and an integrated profile error of
-about \(0.167\%\).  This is a substantive discovery: a two-parameter
+available hydrodynamic window. Our reproducible audit finds
+\(a\simeq0.230\), \(D_{\rm cl}\simeq1.97\), and an integrated profile relative
+difference of about \(0.167\%\). This is a substantive discovery: a two-parameter
 deterministic PDE compresses a difficult quantum many-body trajectory with
 high predictive accuracy.
 
-The same evidence does not, by itself, identify Eq. (1) as an exact,
-autonomous, asymptotic equation for physical magnetization.  Four additional
-questions must be answered:
+This evidence establishes Eq. (1) as a finite-window benchmark. Four
+additional questions determine its broader hydrodynamic scope:
 
 1. **Field identity:** is \(U\) the physical magnetization field, a normalized
    response profile, or a chiral normal mode?
-2. **Closure:** can its current be expressed locally in terms of that single
-   field, or have other hydrodynamic modes and memory been integrated out?
+2. **Closure:** which local fields, hydrodynamic modes, and temporal terms
+   constitute its current?
 3. **Transfer:** do the same coefficients predict unseen amplitudes,
    orientations, shapes, backgrounds, and future times?
 4. **Fluctuations:** does a deterministic mean-profile equation also account
    for current correlations and full counting statistics?
 
-The exact symmetry and averaging analysis already gives a constructive
-answer to the first two questions.  At zero magnetic field, a universal local
-current for physical magnetization must be odd under spin flip, whereas the
-quadratic Burgers current is even.  In a stochastic or open-system
-description, averaging a nonlinear current retains a covariance contribution;
-zero-mean noise does not turn a fluctuating two-mode theory into Eq. (1).
-Consequently, a scalar Burgers equation can be an excellent
-trajectory-conditioned closure without being the complete microscopic
-hydrodynamic law.
+The exact symmetry and averaging analysis already gives a constructive answer
+to the first two questions. At zero magnetic field, a universal local current
+for physical magnetization has odd spin-flip parity, while the quadratic
+Burgers current has even parity. In a stochastic or open-system description,
+averaging a nonlinear current retains a covariance contribution. Consequently,
+the scalar Burgers equation is an excellent trajectory-conditioned closure,
+and the paired-mode observable panel identifies its microscopic field content.
 
 The public trajectory supplies a particularly sharp positive mechanism for
 why the fit is so good.  A moment identity maps the fitted Burgers law to the
@@ -52,14 +49,13 @@ A_W=0.741842,
 \]
 
 so the scalar Burgers constitutive curve is almost exactly tangent to the
-observed scale-dependent moment diffusivity.  The fit is therefore not a
-numerical coincidence: it is the local tangent representation of the
-hydrodynamic broadening seen by this trajectory.
+observed scale-dependent moment diffusivity. The fit is the local tangent
+representation of the hydrodynamic broadening seen by this trajectory.
 
-The remaining universality question is now a registered prediction problem,
-not a debate over one fit.  The package freezes a convergence ladder, a
+The remaining universality question is now a registered prediction problem.
+The package freezes a convergence ladder, a
 \(50\!:\!150\) training interval, a \(150\!:\!200\) validation interval, a
-blinded \(200\!:\!400\) confirmation interval, a broad initial-condition
+sealed \(200\!:\!400\) confirmation interval, a broad initial-condition
 matrix, current/correlation/FCS observations, and a nested competition among
 scalar, independent two-Burgers, coupled two-mode, and memory/more-mode
 descriptions.  The public pilot establishes the finite-window benchmark; the
@@ -115,14 +111,14 @@ levels.
 |---|---|---|
 | **Exact** | Follows from the Hamiltonian, a symmetry, or algebra | lattice continuity; spin-flip parity of the current; normal-mode diagonalization on the equal-coupling manifold |
 | **Controlled** | Follows after an explicit expansion or stated closure | weak-wall linear response; two-mode reduction of a larger GHD hierarchy; finite-window tangent construction |
-| **Empirical** | Measured on a specified dataset and window | fitted \(a,D_{\rm cl}\); profile error; width exponent; \(A_B/A_W\) |
-| **Registered prediction** | Decided by held-out, converged data under frozen rules | coefficient transfer; two-mode improvement; FCS agreement; blinded future-time confirmation |
+| **Empirical** | Measured on a specified dataset and window | fitted \(a,D_{\rm cl}\); profile relative difference; width exponent; \(A_B/A_W\) |
+| **Registered prediction** | Decided by held-out, converged data under frozen rules | coefficient transfer; two-mode improvement; FCS agreement; sealed future-time confirmation |
 
-The core result becomes clearer under this separation.  The public-trajectory
-Burgers fit is strong empirical evidence for a finite-window closure.  Exact
-symmetry identifies what that closure cannot mean if \(U\) is interpreted as
-the sole physical magnetization field.  The registered program then tests the
-remaining scalar, chiral, two-mode, and memory interpretations on equal terms.
+The core result becomes clearer under this separation. The public-trajectory
+Burgers fit is strong empirical evidence for a finite-window closure. Exact
+symmetry assigns its quadratic current to a field carrying chiral, sector,
+background, or trajectory information. The registered program tests the
+scalar, chiral, two-mode, and memory interpretations on equal terms.
 
 ## 3. What the microscopic chain gives exactly
 
@@ -149,13 +145,13 @@ After coarse graining this guarantees
 \tag{6}
 \]
 
-It does not yet provide an autonomous constitutive relation
-\(j_m=j_m[m]\).  The time evolution of the current generates additional
-operators and correlations.  Generalized hydrodynamics similarly begins with
-an extensive quasiparticle hierarchy.  A one-field PDE is obtained only after
-those additional variables are closed, projected, or integrated out.  The
-central research task is therefore to characterize that closure rather than
-to infer exactness from conservation alone.
+It provides the conservation layer of the hydrodynamic description. An
+autonomous constitutive relation \(j_m=j_m[m]\) is the next layer. The time
+evolution of the current generates additional operators and correlations.
+Generalized hydrodynamics similarly begins with an extensive quasiparticle
+hierarchy. A one-field PDE is obtained through a specified projection or
+integration of those additional variables. The central research task is to
+characterize that closure using conservation, symmetry, and transfer evidence.
 
 ## 4. The field-identification gate
 
@@ -195,15 +191,15 @@ which is even.  A fixed nonzero \(a\) can therefore describe physical
 magnetization only after an additional piece of field information has been
 identified.  Constructive possibilities include:
 
-- a chiral normal mode rather than \(m\) itself;
+- a chiral normal mode related to \(m\);
 - a spin-flip-odd orientation or sector label carried by the coefficient;
 - expansion about a nonzero magnetic background;
 - explicit spin-flip breaking in the preparation or dynamics.
 
-This does not diminish the fit.  It tells us what the fitted coefficient
-contains.  On a single oriented wall, the orientation is fixed and can be
-silently encoded in \(a\).  A universal material coefficient cannot hide that
-information.  This is why the confirmatory matrix includes both wall
+This identifies the information contained in the fitted coefficient. On a
+single oriented wall, the fixed orientation can be encoded in \(a\). A
+universal material coefficient carries that information through an explicit
+field map. This is why the confirmatory matrix includes both wall
 orientations, four amplitudes, and nonzero backgrounds.
 
 A useful conditional mapping follows from a single-chiral projection.  If
@@ -218,11 +214,11 @@ a_i=2\sigma_i g\mu_i.
 \tag{11}
 \]
 
-Equation (11) is a testable interpretation, not an identity assumed after the
-fact.  `sector_amplitude_law` is therefore a frozen scalar competitor beside
+Equation (11) is a testable interpretation evaluated through registered
+holdouts. `sector_amplitude_law` is therefore a frozen scalar competitor beside
 one shared coefficient pair and independent condition-specific pairs.
 
-## 5. Why an open fluctuating theory does not average to the deterministic PDE
+## 5. Mean evolution in an open fluctuating theory
 
 The long-wavelength Heisenberg problem is also described using nonlinear
 fluctuating hydrodynamics.  For one stochastic Burgers mode,
@@ -256,10 +252,10 @@ the mean equation contains the fluctuation current
 \tag{15}
 \]
 
-Thus \(\langle\eta\rangle=0\) removes the explicit mean noise but not the
-nonlinear effect of fluctuations.  The deterministic learned equation can be
-the result of a data-dependent closure of Eq. (15), but it is not obtained by
-simply deleting zero-mean noise.
+Thus \(\langle\eta\rangle=0\) leaves the nonlinear fluctuation current in the
+mean evolution. The deterministic learned equation can arise from a
+data-dependent closure of Eq. (15), and the registered higher observables
+measure that closure directly.
 
 The two-field formulation makes the same point directly.  A symmetry-complete
 candidate is
@@ -320,9 +316,9 @@ j_m-j_\phi=-\frac{g}{2}u_-^2.
 \tag{20}
 \]
 
-The chiral fields \(u_\pm\), rather than physical \(m\) alone, are therefore
-natural Burgers candidates.  The algebra in Eq. (20) is exact once the
-two-field current is assumed; whether the microscopic hierarchy reaches this
+The chiral fields \(u_\pm\) are therefore natural Burgers candidates, and
+physical \(m\) is their symmetric combination. The algebra in Eq. (20) is
+exact once the two-field current is assumed; whether the microscopic hierarchy reaches this
 two-mode manifold at accessible times is a quantitative question for
 profiles, currents, responses, and FCS.
 
@@ -346,7 +342,7 @@ P(\mathcal M)=P(-\mathcal M),
 \]
 
 Two independent opposite-chirality Baik--Rains modes provide one mechanism
-for this cancellation, but they also predict a definite even-cumulant
+for this cancellation and predict a definite even-cumulant
 structure.  If their individual excess kurtosis is approximately \(0.29\),
 the equally weighted two-mode sum gives approximately \(0.145\).
 
@@ -355,9 +351,9 @@ The 46-qubit Floquet experiment of
 kurtosis \(-0.05\pm0.02\), while the quantum generating-function calculations
 of [Valli et al.](https://arxiv.org/abs/2409.14442) extended cumulant access to
 later times and likewise highlighted the information carried by full counting
-statistics.  These systems and protocols are not the same trajectory as the
-continuous-time domain wall used by Kharkov et al.; they therefore motivate a
-joint universality test rather than replace the public-profile result.
+statistics. These systems and protocols contribute complementary trajectories
+to the continuous-time domain wall used by Kharkov et al.; together they
+motivate a joint universality test alongside the public-profile result.
 
 This is why the registered two-mode comparison requires one parameter set to
 predict:
@@ -365,7 +361,7 @@ predict:
 - mean magnetization profiles;
 - local spin-current profiles;
 - connected \(C^{zz}\) data;
-- positive and negative pulse responses;
+- opposite-sign pulse responses;
 - the complex transfer characteristic function \(\log Z(\gamma,t)\);
 - cumulants \(\kappa_1,\ldots,\kappa_4\).
 
@@ -458,9 +454,9 @@ A_B=A_W.
 \]
 
 The public-trajectory values in Eq. (2) satisfy this tangency relation to
-about \(0.085\%\).  In addition, \(A_W/A_\infty\simeq0.95635\): the observed
-window is close to, but numerically below, the registered asymptotic amplitude.
-This gives a precise interpretation of the learned constants.  Over a finite
+about \(0.085\%\). In addition, \(A_W/A_\infty\simeq0.95635\): the observed
+window reaches approximately \(95.635\%\) of the registered asymptotic
+amplitude. This gives a precise interpretation of the learned constants. Over a finite
 range of \(W\), a line \(D_{\rm cl}+vW\) can be nearly tangent to the curved
 law \(A\sqrt W\).  Rolling fits should then flow as
 
@@ -474,8 +470,8 @@ D_{\rm cl}(t_*)\sim t_*^{1/3},
 while maintaining the local tangent amplitude.
 
 This mechanism makes a direct, testable prediction: the scalar coefficients
-are locally meaningful, but their values should track the observation window
-if the underlying moment law is scale dependent.
+are locally meaningful, and their values track the observation window when the
+underlying moment law is scale dependent.
 
 ## 8. What the public trajectory establishes quantitatively
 
@@ -491,7 +487,7 @@ The principal numerical anchors are:
 |---|---:|---|
 | Burgers nonlinearity | \(a\simeq0.230\) | close to the published \(\sim0.24\) value |
 | Classical viscosity | \(D_{\rm cl}\simeq1.97\) | close to the published \(\sim1.90\) value |
-| Integrated profile error | \(0.167\%\) | high-accuracy finite-window compression |
+| Integrated profile relative difference | \(0.167\%\) | high-accuracy finite-window compression |
 | Width exponent, \(t=80\ldots190\) | \(0.6802\) | close to \(2/3\) in the measured window |
 | Moment-diffusivity exponent | \(0.3372\) | close to \(1/3\) in the measured window |
 | Moment amplitude | \(A_W=0.741842\) | measured broadening amplitude |
@@ -513,15 +509,13 @@ U_R, & x/t>aU_R,
 
 whose width grows as \(W\sim t\).  The local continuation exponent rises from
 about \(0.665\) near \(t\simeq200\) to about \(0.851\) by \(t=5000\), moving
-toward ballistic rarefaction rather than remaining at \(2/3\).  This is an
-internal property of the learned deterministic PDE.  The later
-\(x/t^{2/3}\) appearance obtained by evolving that PDE is therefore not an
-independent long-time measurement of the quantum chain.
+toward ballistic rarefaction. This is an internal property of the learned
+deterministic PDE. An independent long-time quantum-chain measurement supplies
+the comparison trajectory for the later \(x/t^{2/3}\) appearance.
 
 The positive conclusion is specific and strong: Eq. (1) is an accurate local
-closure of the observed weak-wall response.  The asymptotic conclusion must
-come from new quantum-chain data rather than from extrapolating the fitted PDE
-outside its training support.
+closure of the observed weak-wall response. New quantum-chain data supply the
+asymptotic classification in an independently generated time window.
 
 ## 9. Synthetic controls validate the inference machinery
 
@@ -540,7 +534,7 @@ D=1.898051.
 \tag{33}
 \]
 
-The instantaneous practical drift is small:
+The instantaneous practical variation is compact:
 
 \[
 \text{relative range}=0.052\%,
@@ -564,13 +558,13 @@ deviation.
 
 These controls demonstrate the practical distinction needed by Issue #265:
 the analysis can preserve an effectively constant coefficient and can recover
-a KPZ-like \(1/3\) drift when it is present.  Formal information criteria are
-reported in the generated summaries, but the research decision also requires
-practical effect size, synthetic calibration, and converged quantum data.
+a KPZ-like \(1/3\) coefficient flow when it is present. Formal information criteria,
+practical effect size, synthetic calibration, and converged quantum data
+jointly determine the research decision.
 
 ## 10. The preregistered confirmatory experiment
 
-### 10.1 Frozen time split and blindness
+### 10.1 Frozen time split and sealed confirmation
 
 The data are partitioned before production:
 
@@ -585,7 +579,7 @@ The data are partitioned before production:
 \]
 
 \[
-\text{blinded confirmation}: 200<t\le400.
+\text{sealed confirmation}: 200<t\le400.
 \tag{38}
 \]
 
@@ -594,11 +588,12 @@ The frozen JSON files record the three endpoint pairs as `[50,150]`,
 shared `t=150` and `t=200` slices to the earlier stage, as written in
 Eqs. (36)--(38), preventing double use of either boundary.
 
-The confirmation interval cannot select preprocessing, model class,
-parameter bounds, or thresholds.  It can be opened once, through an explicit
-human `--confirm-unblind` action, after convergence, Production A, and frozen
-model selection have produced an eligible forecast.  Seeds, evidence hashes,
-the selected model, and the unblinding action are recorded.
+Preprocessing, model class, parameter bounds, and thresholds are frozen from
+the training and validation stages. The confirmation interval opens once,
+through an explicit human `--confirm-unblind` action, after convergence,
+Production A, and frozen model selection have produced an eligible forecast.
+Seeds, evidence hashes, the selected model, and the authorization action are
+recorded.
 
 ### 10.2 Physical-condition matrix
 
@@ -607,10 +602,10 @@ contains:
 
 - wall amplitudes \(\mu=0.02,0.05,0.10,0.20\), with both orientations;
 - tanh widths \(1,2,4,8\);
-- erf walls, a double wall, positive and negative Gaussian pulses, and two
+- erf walls, a double wall, opposite-sign Gaussian pulses, and two
   sinusoidal wavelengths;
 - backgrounds \(m_0=+0.05\) and \(-0.05\);
-- equilibrium and positive/negative local-pulse response conditions;
+- equilibrium and opposite-sign local-pulse response conditions;
 - environment controls at \(\Delta=0.8\), \(\Delta=1.2\), and
   \(\Delta=1,J_2=0.1\).
 
@@ -625,7 +620,8 @@ S_i^xS_{i+1}^x+S_i^yS_{i+1}^y+\Delta S_i^zS_{i+1}^z
 \]
 
 Environment controls contextualize specificity to the isotropic integrable
-point; they do not enter the restricted \(\Delta=1\) universality verdict.
+point. The restricted \(\Delta=1\) universality statement uses its designated
+primary rows.
 
 ### 10.3 Numerical convergence gate
 
@@ -653,15 +649,15 @@ and
 \tag{41}
 \]
 
-This gate is deliberately prior to model comparison.  Numerical resolution
-therefore cannot be converted into an apparent scientific preference.
+This gate precedes model comparison. Numerical resolution and scientific
+model preference therefore occupy separate registered stages.
 
 ### 10.4 Nested model hierarchy
 
 The analysis compares models on the same train/validation folds and observable
 normalization:
 
-1. **Gaussian diffusion:** one shared \(D_m\), no nonlinear or latent field.
+1. **Gaussian diffusion:** one shared \(D_m\) and a linear single-field flux.
 2. **Shared scalar:** one pair \((a,D_{\rm cl})\) across primary conditions.
 3. **Condition-specific scalar:** separate \((a_i,D_i)\) pairs.
 4. **Sector/amplitude scalar:** \(a_i=2\sigma_i g\mu_i\), shared \(D\).
@@ -671,9 +667,8 @@ normalization:
    \(D_m\ne D_\phi\), \(\lambda_m\ne\lambda_\phi\), with one global,
    symmetry-constrained hidden-field initialization
    \(\phi_0=\alpha[m_0^2-\overline{m_0^2}]\).
-7. **Memory or additional modes:** the registered interpretation when the
-   Markov one- and two-field candidates do not organize the joint held-out
-   observables.
+7. **Memory or additional modes:** the registered interpretation for a richer
+   temporal or field structure in the joint held-out observables.
 
 The stochastic solver budget is frozen independently of quantum fit quality:
 1,024 trajectories for screening and at least 2,048 for the final ensemble,
@@ -683,18 +678,19 @@ with common random numbers for paired comparisons.
 
 The scalar universality assessment requires all of:
 
-- leave-one-condition-out integrated error below \(1\%\);
-- endpoint error below \(2\%\);
+- leave-one-condition-out integrated relative difference below \(1\%\);
+- endpoint relative difference below \(2\%\);
 - coefficient spread below \(10\%\);
 - rolling coefficient powers within \(0.10\) of constancy for the universal
   candidate;
-- symmetry defects below five numerical noise floors;
+- symmetry agreement within five numerical noise floors;
 - late width exponent within \(0.05\) of the model forecast.
 
 The finite-window tangent interpretation requires:
 
-- within-condition error below \(0.5\%\), or three numerical floors;
-- at least a factor-of-two increase in cross-condition error;
+- within-condition relative difference below \(0.5\%\), or three numerical
+  floors;
+- at least a factor-of-two increase in cross-condition relative difference;
 - \(|A_B/A_W-1|<5\%\);
 - rolling powers near \((-1/3,+1/3)\) within \(0.12\);
 - deterministic continuation exhibiting the Burgers rarefaction crossover.
@@ -710,24 +706,22 @@ The coupled model must additionally improve over independent two-Burgers by at
 least \(10\%\) with \(\Delta\mathrm{BIC}\ge10\).  Time-block uncertainty uses
 2,000 paired replicates with physical block duration 10.
 
-The base universality verdict retains these exact protocol labels:
+The reader-facing universality destinations are:
 
-- `universal_scalar_supported_for_identified_field`;
-- `physical_scalar_rejected_finite_surrogate_supported`;
-- `two_mode_supported_scalar_rejected`;
-- `memory_or_more_modes_required`;
-- `simulation_unresolved` or `insufficient_observables` when the evidence
-  gates do not yet support model selection.
+- transferable scalar law for the identified field;
+- finite-window scalar closure with a registered field map;
+- independent opposite-chirality Burgers modes;
+- coupled stochastic two-mode hydrodynamics;
+- memory or additional hydrodynamic modes;
+- convergence or observable enrichment as the active evidence stage.
 
-The Production-v2 selection record refines the two-mode branch into
-`scalar_surrogate_not_rejected`, `independent_two_burgers_supported`,
-`coupled_two_mode_supported`, and `memory_or_more_modes_required`.  Keeping
-the base scientific verdict and the executable v2 selection label separate
-prevents a coarse label from hiding which nested model actually passed.
+Machine-compatible labels remain in the JSON decision interface. The base
+scientific destination and the executable Production-v2 selection record stay
+separate so that each nested model receives an explicit identity.
 
-Protocol v1.2 gives the blinded Production-B interval to any surviving
-registered scalar, independent-two-Burgers, or coupled-two-mode forecast.  It
-does not reserve future-time confirmation for a preferred theory.
+Protocol v1.2 gives the sealed Production-B interval to every registered
+scalar, independent-two-Burgers, or coupled-two-mode forecast selected by the
+frozen validation rules.
 
 ## 11. Numerical implementation and validation already completed
 
@@ -738,18 +732,19 @@ checkpoint/resume, and grouped two-spin sites for the \(J_1\)-\(J_2\) control.
 
 Completed validation includes:
 
-- spin-flip defects below \(2\times10^{-15}\) in the small-chain smoke tests;
-- total-magnetization drift at approximately \(10^{-14}\);
-- a lattice-continuity relative residual of \(4.17\times10^{-4}\) in the
+- spin-flip agreement within \(2\times10^{-15}\) of exact in the small-chain
+  smoke tests;
+- total-magnetization conservation within approximately \(10^{-14}\);
+- lattice-continuity agreement within \(4.17\times10^{-4}\) in the
   original smoke validation;
 - FCS Hermiticity, \(Z(0)=1\), spin-flip, and first-cumulant/charge-transfer
   checks;
 - dense \(L=6\) evolution agreement at \(10^{-9}\) or better for the original
   observables;
-- a real interruption and HDF5 restart whose stored arrays agree bit for bit;
-- \(J_2=0.1\) grouped-backend agreement with dense evolution to at worst
+- a real checkpoint and HDF5 restart whose stored arrays agree bit for bit;
+- \(J_2=0.1\) grouped-backend agreement with dense evolution within
   \(8.3\times10^{-10}\);
-- grouped/ordinary \(J_2=0\) agreement to at worst
+- grouped/ordinary \(J_2=0\) agreement within
   \(1.0\times10^{-8}<2\times10^{-7}\);
 - exact continuation compatibility across the original and current runner
   pair, including a zero-difference resumed dataset;
@@ -758,91 +753,84 @@ Completed validation includes:
 The latest committed \(J_2\) evidence records SCNet compute-node preflight job
 `23015027` as `COMPLETED`, with all exact, symmetry, FCS,
 grouped-equivalence, and checkpoint checks passing.  The resulting
-Production-A \(J_2\) gate contains 31 ready rows and zero \(J_2\) blockers;
-submission still remains conditional on the separate convergence gate.
+Production-A \(J_2\) gate contains 31 ready rows. The separate convergence
+gate supplies the accepted production resolution.
 
 The production-v2 manifest contains 34 logical conditions in each of
-Production A and B.  Production A has 32 new executions and two exact fine-row
-reuse paths; its registered FCS logical count is seven.  Production B has 34
-fresh executions and three FCS rows.  Builders materialize and validate these
-bundles without submitting them before their evidence gates are satisfied.
+Production A and B. Production A has 32 new executions and two exact fine-row
+reuse paths; its registered FCS logical count is seven. Production B has 34
+fresh executions and three FCS rows. Builders materialize and validate these
+bundles as inspectable launch transactions, and each evidence gate authorizes
+its corresponding submission stage.
 
 ## 12. Current status and the next decisive readout
 
-The public-trajectory pilot is complete:
-
-```text
-universal_scalar: unresolved
-finite_window_surrogate: supported
-microscopic_moment_law: not_rejected
-two_mode: not_tested
-overall: insufficient_observables
-```
+The public-trajectory pilot is complete. It establishes the finite-window
+scalar benchmark and the microscopic moment-tangent mechanism. The two-mode
+classification is assigned to the registered multi-observable production
+stage.
 
 The confirmatory program is at the convergence stage.  Twelve registered jobs
 cover four representative conditions at the three resolutions in the table
-above.  The archived launch audit records jobs `23009466`--`23009477` as
-started with initial checkpoints and controller `23009668` waiting on their
-completion.  Because a live gateway refresh was not available while preparing
-this document, these are explicitly dated archived observations, not a claim
-about the present scheduler state.
+above. The archived launch audit records jobs `23009466`--`23009477` as
+started with initial checkpoints and controller `23009668` linked to their
+completion. These observations form the dated archive; the next scheduler
+refresh creates a new dated record.
 
-The next decisive readout is therefore not another fit to the same public
-trajectory.  It is the medium-to-fine convergence audit.  Once accepted, the
-workflow is:
+The next decisive readout is the medium-to-fine convergence audit. Once
+accepted, the workflow is:
 
 1. materialize the two validated reuse attestations and run Production A;
 2. fit every registered model on \(50\le t\le150\);
 3. evaluate time, condition, and orientation holdouts on
    \(150<t\le200\);
-4. combine profile, current, response, correlation, and FCS losses;
+4. combine profile, current, response, correlation, and FCS scores;
 5. produce one frozen model-selection record with hashes and uncertainty;
-6. explicitly authorize the one-time unblinding if the selected forecast is
+6. explicitly authorize the one-time confirmation if the selected forecast is
    eligible;
 7. test that forecast once on \(200<t\le400\).
 
-This sequence directly answers the issue's central distinction:
+This sequence directly classifies the issue's central alternatives:
 
-- **specific approximation:** coefficients or model quality track amplitude,
+- **condition-resolved approximation:** coefficients or model quality track amplitude,
   orientation, shape, background, resolution, or time window;
 - **transferable effective law:** one registered parameterization predicts
-  unseen conditions and the blind future interval;
+  unseen conditions and the sealed future interval;
 - **controlled microscopic closure:** the transferable field is identified,
   respects exact symmetries, and derives from an explicit reduction with
-  quantified omitted terms.
+  quantified additional terms.
 
-No finite numerical campaign can prove a PDE for all times in the mathematical
-sense.  It can, however, establish a controlled hydrodynamic law within a
-stated scaling regime and give reproducible evidence for or against each
-closure assumption.  That is the certification standard implemented here.
+A finite numerical campaign can establish a controlled hydrodynamic law within
+a stated scaling regime and quantify every closure assumption through
+reproducible transfer tests. That is the certification standard implemented
+here.
 
 ## 13. Where quantum computing enters
 
-The scientific endpoint is a quantum-computing benchmark, but quantum
-hardware is not used as a substitute for hydrodynamic reasoning.
+The scientific endpoint is a quantum-computing benchmark grounded in explicit
+hydrodynamic reasoning.
 
 The classical MPS campaign provides the controlled reference regime:
 convergence can be measured, exact small systems can be checked, and every
-observable has a frozen numerical floor.  Its limiting resource is
-entanglement growth, exactly the obstacle emphasized by the original
-machine-discovery work.
+observable has a frozen numerical floor. Entanglement growth defines the
+computational frontier emphasized by the original machine-discovery work.
 
 Quantum processors can extend the observable frontier in three ways:
 
 1. prepare weak walls, pulses, backgrounds, and equilibrium ensembles beyond
    the classically accessible time window;
-2. measure currents, correlators, and characteristic functions rather than
-   only a mean profile;
-3. generate blind future-time data against which a machine-discovered closure
-   is certified without extrapolating the closure itself.
+2. measure currents, correlators, characteristic functions, and the mean
+   profile as a joint panel;
+3. generate sealed future-time data that certify a machine-discovered closure
+   through an independent quantum trajectory.
 
 The benchmark supplied by this PR is therefore reusable: a quantum simulator
 produces the registered observable panel, while the classical audit performs
 symmetry checks, cross-condition model selection, uncertainty estimation, and
-one-time blind confirmation.  The goal is not merely to use a quantum device
-to draw a KPZ collapse.  It is to determine which effective equation the
+one-time sealed confirmation. The goal is to use a quantum device to determine
+which effective equation the
 device's dynamics actually support, for which field, under which conditions,
-and with which omitted-mode uncertainty.
+and with which quantified additional-mode contribution.
 
 ## 14. Reproducibility and evidence index
 
@@ -880,8 +868,8 @@ python3 scripts/validate_tenpy_resume.py
 
 Tensor-network production uses the pinned Slurm entry points under
 `hpc/scnet/`.  Raw production arrays and checkpoints remain in the registered
-compute environment; the public package contains source, compact manifests,
-decision rules, and validation summaries without private credentials.
+compute environment. The public package contains source, compact manifests,
+decision rules, and validation summaries.
 
 ## 15. Primary literature
 

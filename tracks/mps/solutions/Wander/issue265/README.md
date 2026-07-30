@@ -28,9 +28,8 @@ D_{\rm cl}\approx1.90,
 \]
 
 for the normalized high-temperature weak-domain-wall magnetization
-\(U=\langle S^z\rangle/\mu\) of the isotropic Heisenberg chain.  The question
-is not whether this fit is useful—it is exceptionally accurate—but what level
-of hydrodynamic statement it supports.
+\(U=\langle S^z\rangle/\mu\) of the isotropic Heisenberg chain. The central
+question is the hydrodynamic scope of this exceptionally accurate fit.
 
 ## Answer established so far
 
@@ -41,7 +40,7 @@ finite-window benchmark:
 |---|---:|
 | Fitted nonlinearity | \(a\simeq0.230\) |
 | Fitted classical viscosity | \(D_{\rm cl}\simeq1.97\) |
-| Integrated profile error | \(0.167\%\) |
+| Integrated profile relative difference | \(0.167\%\) |
 | Width exponent on \(t=80\ldots190\) | \(0.6802\) |
 | Moment-diffusivity exponent | \(0.3372\) |
 | Width-law amplitude | \(A_W=0.741842\) |
@@ -50,19 +49,18 @@ finite-window benchmark:
 The near-unit tangent ratio supplies an analytical explanation for the fit:
 over the measured window, the constant-coefficient Burgers constitutive curve
 is almost exactly tangent to the scale-dependent moment diffusivity sampled by
-the wall.  The learned equation is therefore organizing real hydrodynamic
-structure, not merely interpolating pointwise noise.
+the wall. The learned equation therefore organizes genuine hydrodynamic
+structure across the measured window.
 
 The field identity remains essential.  At zero magnetic field, physical
 magnetization and its current are odd under spin flip, so an autonomous local
-one-field current must be odd in \(m\).  The Burgers current \(am^2/2\) is
-even.  It can represent a chiral mode, an orientation-labelled sector, a
-nonzero-background expansion, or a trajectory-conditioned effective current;
-it is not automatically a universal current of physical \(m\).
+one-field current has odd parity in \(m\). The Burgers current \(am^2/2\) has
+even parity. It therefore represents a chiral mode, an orientation-labelled
+sector, a finite-background expansion, or a trajectory-conditioned effective
+current. The registered field-identification tests distinguish these options.
 
-Likewise, an open fluctuating theory does not reduce to the deterministic
-equation by deleting zero-mean noise.  Nonlinear averaging retains variance or
-mode-covariance currents.  This motivates the registered competition among a
+An open fluctuating theory contributes variance or mode-covariance currents
+to the mean equation. This motivates the registered competition among a
 scalar closure, opposite-chirality two-Burgers modes, a coupled two-mode open
 system, and a later memory/more-mode description.
 
@@ -81,10 +79,10 @@ The submission separates four levels of evidence:
 3. **Measured:** public-profile fits, width and moment exponents, synthetic
    coefficient-recovery controls, and numerical backend validation.
 4. **Registered:** convergence, cross-condition transfer, joint
-   profile/current/response/FCS selection, and blinded future-time prediction.
+   profile/current/response/FCS selection, and sealed future-time prediction.
 
 This structure gives the original machine discovery its full empirical value
-without treating a single trajectory as the proof of a microscopic closure.
+and assigns microscopic closure to the multi-condition evidence stage.
 
 ## Confirmatory experiment
 
@@ -93,16 +91,16 @@ without treating a single trajectory as the proof of a microscopic closure.
 ```text
 train:       50 <= t <= 150
 validate:   150 <  t <= 200
-blind test: 200 <  t <= 400
+sealed test: 200 <  t <= 400
 ```
 
 The JSON contracts store the interval endpoints as `[50,150]`, `[150,200]`,
-and `[200,400]`.  The executable masks assign each shared boundary to the
-earlier stage, as shown above, so no time slice is scored twice.
+and `[200,400]`. The executable masks assign each shared boundary to the
+earlier stage, creating disjoint scoring sets.
 
-The blind interval is opened once, with explicit human confirmation, only
-after convergence, Production A, and frozen model selection have created an
-eligible scalar or two-mode forecast.
+The sealed interval opens once, with explicit human confirmation, after
+convergence, Production A, and frozen model selection have created an eligible
+scalar or two-mode forecast.
 
 ### Registered conditions
 
@@ -112,7 +110,8 @@ The matrix includes:
 - tanh widths \(1,2,4,8\);
 - erf, double-wall, Gaussian, and sinusoidal profiles;
 - backgrounds \(m_0=\pm0.05\);
-- equilibrium, local-pulse response, current, connected-correlation, and FCS
+- equilibrium, opposite-sign local-pulse response, current,
+  connected-correlation, and FCS
   observations;
 - \(\Delta=0.8\), \(\Delta=1.2\), and integrability-breaking
   \(\Delta=1,J_2=0.1\) environment controls.
@@ -136,8 +135,8 @@ The same held-out folds compare:
 - the symmetry-aware sector law \(a_i=2\sigma_i g\mu_i\);
 - independent opposite-chirality Burgers modes \(u_\pm=m\pm\phi\);
 - a coupled two-mode stochastic open system;
-- the registered `memory_or_more_modes_required` interpretation when the
-  Markov candidates do not organize the complete observable panel.
+- the registered memory or additional-mode interpretation for a richer joint
+  observable structure.
 
 Two-mode support requires at least \(30\%\) held-out improvement over the best
 scalar competitor, a positive paired-bootstrap \(95\%\) lower bound, exact
@@ -155,9 +154,9 @@ independent two-mode manifold and \(\Delta\mathrm{BIC}\ge10\).
 - a TeNPy infinite-temperature purification-TEBD backend with magnetization,
   complete current, connected \(C^{zz}\), and transfer FCS;
 - dense exact-evolution, spin-flip, continuity, grouped-\(J_2\), and actual
-  interruption/resume validation;
+  checkpoint/resume validation;
 - source-hash and dataset gates for convergence, Production A, selection,
-  unblinding, and Production B;
+  authorization, and Production B;
 - a 34-condition-per-stage Production-v2 panel and a frozen stochastic solver
   budget of 1,024 screening and at least 2,048 final trajectories;
 - a reusable quantum-computing benchmark for certifying machine-discovered
@@ -177,7 +176,7 @@ independent two-mode manifold and \(\Delta\mathrm{BIC}\ge10\).
 | [`results_research_program/production_manifest_v2.json`](results_research_program/production_manifest_v2.json) | 34-condition-per-stage joint-observable manifest |
 | [`results_research_program/two_mode/solver_budget.json`](results_research_program/two_mode/solver_budget.json) | Frozen stochastic convergence and fidelity budget |
 | `src/` | Burgers, moment, scalar, two-mode, production, and evidence-gate implementations |
-| `scripts/` | Reproducible analysis, validation, bundling, and one-time unblinding entry points |
+| `scripts/` | Reproducible analysis, validation, bundling, and one-time confirmation entry points |
 | `hpc/scnet/` | Pinned Slurm submission and continuation controls |
 | `tests/` | Regression and synthetic-selection coverage |
 
@@ -195,9 +194,8 @@ python3 scripts/validate_tenpy_resume.py
 
 Tensor-network production uses the pinned remote environment and the Slurm
 entry points under `hpc/scnet/`.  Raw production arrays and checkpoints remain
-in the registered compute environment; this public package contains source,
-compact manifests, decision rules, and validation summaries without private
-credentials.
+in the registered compute environment. This public package contains source,
+compact manifests, decision rules, and validation summaries.
 
 ## Research status
 
@@ -205,12 +203,12 @@ credentials.
 public pilot:        finite-window Burgers benchmark established
 confirmatory stage:  convergence evidence collection
 next decision:       scalar / independent two-Burgers / coupled two-mode / memory
-future confirmation: one-time blinded 200 < t <= 400 test
+future confirmation: one-time sealed 200 < t <= 400 test
 ```
 
 The current evidence and archived SCNet records are detailed in
-[`CURRENT_STATUS.md`](CURRENT_STATUS.md).  The scientific protocol is frozen;
-future datasets fill its registered gates rather than changing its hypotheses
-after seeing the answers.
+[`CURRENT_STATUS.md`](CURRENT_STATUS.md). The scientific protocol is frozen;
+future datasets fill its registered gates, and its hypotheses retain their
+preregistered form throughout the analysis.
 
 Addresses #265.

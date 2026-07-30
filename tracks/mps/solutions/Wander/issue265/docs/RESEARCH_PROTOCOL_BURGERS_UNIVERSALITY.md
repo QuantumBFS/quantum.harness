@@ -1,335 +1,306 @@
-# Burgers universality: preregistered proof-or-falsification protocol
+# Burgers Universality: Preregistered Confirmation Protocol
 
-**Protocol version:** 1.2  
-**Frozen:** 2026-07-29; v1.2 eligibility amendment frozen 2026-07-30,
-before Production-A results  
-**Primary system:** \(\Delta=1\), \(T=\infty\), \(J=1\), zero background
-magnetization  
-**Machine-readable matrix:** `configs/burgers_research_matrix.json`  
-**Machine-readable rules:** `configs/burgers_decision_rules.json`
+**Protocol version:** 1.2
 
-## 1. Question
+**Freeze date:** 2026-07-30
 
-The public high-temperature Heisenberg domain wall is reproduced with very
-high accuracy on \(t\simeq50\!-\!200\) by
+**Target system:** high-temperature spin transport in the isotropic
+Heisenberg chain
+
+**Primary question:** which hydrodynamic field and model class carry the
+machine-discovered Burgers structure across conditions, observables, and
+future times?
+
+## 1. Registered scientific claims
+
+### H1 — Transferable scalar closure
+
+A single scalar field \(U\) follows
 
 \[
-U_t+aUU_x=D_{\rm cl}U_{xx}.
+\partial_tU+aU\partial_xU=D\partial_x^2U
 \]
 
-This protocol distinguishes:
+with a shared coefficient law across registered wall amplitudes,
+orientations, widths, shapes, and backgrounds. The law predicts held-out
+profiles, physical currents, local-pulse responses, connected correlations,
+and transfer statistics through one coherent observable map.
 
-1. a universal deterministic scalar equation for an identified physical
-   hydrodynamic field;
-2. a trajectory- and window-conditioned scalar surrogate;
-3. a microscopic GHD moment law;
-4. a symmetry-complete two-mode fluctuating theory.
+### H2 — Independent chiral Burgers modes
 
-Training residuals are secondary evidence. The primary evidence is prediction
-on unseen initial conditions and future times, together with exact symmetry
-tests.
-
-## 2. Frozen hypotheses
-
-### \(H_{\rm U}\): universal physical-magnetization scalar law
-
-One pair \(a,D_{\rm cl}\), depending only on the Hamiltonian and thermodynamic
-state, predicts all registered \(\Delta=1,T=\infty,m_0=0\) conditions.
-
-### \(H_{\rm F}\): finite-window scalar surrogate
-
-Condition- and window-dependent \(a_{\mathcal I,\mathcal W}\) and
-\(D_{\mathcal I,\mathcal W}\) predict one trajectory locally but do not
-transfer universally.
-
-### \(H_{\rm G}\): GHD moment law
+Two normal modes
 
 \[
-D_{\rm moment}(W)=A_\infty\sqrt W,\qquad
-A_\infty=\frac{20\pi}{81}=0.775701894\ldots.
-\]
-
-Equivalently,
-
-\[
-W(t)=1.106260504\ldots\,t^{2/3},\qquad
-D_{\rm moment}(t)=0.815874868\ldots\,t^{1/3},
-\]
-
-up to finite-time corrections.
-
-### \(H_2\): two-mode nonlinear fluctuating hydrodynamics
-
-\[
-\begin{aligned}
-m_t+\partial_x[m\phi-D_m m_x-\sqrt{2D_m\chi}\xi_m]&=0,\\
-\phi_t+\partial_x[\lambda_m m^2/2+\lambda_\phi\phi^2/2
--D_\phi\phi_x-\sqrt{2D_\phi\chi}\xi_\phi]&=0.
-\end{aligned}
-\]
-
-The chiral fields \(u_\pm=m\pm\phi\), rather than physical \(m\) alone, are the
-candidate Burgers modes.
-
-## 3. Exact field-identification gate
-
-At zero magnetic field, spin flip requires
-
-\[
-m\mapsto-m,\qquad j_m\mapsto-j_m.
-\]
-
-Consequently a local one-field physical-magnetization current must be odd:
-
-\[
-j_m(m)=c_1m+c_3m^3+\cdots.
-\]
-
-A fixed term \(a m^2/2\) is forbidden. A microscopic derivation of a nonzero
-quadratic current must identify at least one of:
-
-- a chiral mode \(u_\pm\);
-- a spin-flip-odd sector label;
-- a nonzero background about which the current is expanded;
-- explicitly broken spin-flip symmetry.
-
-Passing profile fits cannot override this exact gate.
-
-## 4. Moment-level bridge
-
-For a rising wall with plateaus \(\pm U_0\),
-
-\[
-p=\frac{U_x}{2U_0},\qquad
-W^2=\int(x-\bar x)^2p\,dx,
+u_+=m+\phi,
 \qquad
-D_{\rm moment}=\frac12\frac{dW^2}{dt}.
+u_-=m-\phi
 \]
 
-The deterministic scalar Burgers equation obeys
+follow opposite-chirality Burgers flows with shared constitutive parameters.
+Their recombination predicts physical magnetization and current while
+respecting spin-flip and wall-orientation transformations.
+
+### H3 — Coupled stochastic two-mode hydrodynamics
+
+A coupled two-field open system, with one shared parameter set, predicts the
+joint profile, current, response, correlation, and FCS panel. Fluctuation and
+mode-covariance currents provide the distinction from the deterministic
+independent-mode manifold.
+
+### H4 — Memory or additional hydrodynamic modes
+
+The registered observable panel selects a richer description with temporal
+memory or additional slow fields. This outcome specifies the next model class
+for a separately frozen extension study.
+
+## 2. Exact field-identification gate
+
+At zero magnetic field, spin flip maps physical magnetization and current as
 
 \[
-D_{\rm moment}
-=D_{\rm cl}
-+\frac{a}{4U_0}\int(U_0^2-U^2)\,dx.
-\]
-
-With
-
-\[
-c_f=\frac{\int(U_0^2-U^2)\,dx}{U_0^2W},
+m\mapsto-m,
 \qquad
-v=\frac{aU_0c_f}{4},
+j_m\mapsto-j_m.
 \]
 
-this becomes
+Accordingly, a scalar model written directly for physical \(m\) uses an odd
+local constitutive current. A quadratic Burgers current naturally belongs to
+a chiral field, an orientation-labelled sector, a background expansion, or a
+trajectory-conditioned effective field. The protocol estimates these field
+maps explicitly and scores their transformed predictions.
+
+For orientation label \(\sigma_i\) and wall amplitude \(\mu_i\), the
+symmetry-aware scalar law is
 
 \[
-D_{\rm moment}=D_{\rm cl}+vW,\qquad
-\dot W=\frac{D_{\rm cl}}W+v.
+a_i=2\sigma_i g\mu_i.
 \]
 
-The GHD and Burgers constitutive laws are compared through
+The parameter \(g\) is shared across registered conditions. Orientation and
+amplitude holdouts test this relation directly.
+
+## 3. Open-system observable map
+
+For a fluctuating mode, ensemble averaging retains the second-moment flux:
 
 \[
-A_W=\frac23\frac{dW^{3/2}}{dt},
-\qquad
-A_B=2\sqrt{D_{\rm cl}v}.
+\partial_t\bar u
++a\bar u\partial_x\bar u
++\frac{a}{2}\partial_x\operatorname{Var}(u)
+=D\partial_x^2\bar u.
 \]
 
-The finite-window tangent hypothesis predicts
+For paired fields, mode covariance enters the physical current. The
+confirmatory dataset therefore includes mean profiles and the additional
+observables that resolve this structure:
 
-\[
-D_{\rm cl}=vW_*,\qquad A_B=A_W,
-\]
+- complete-cut current;
+- opposite-sign local-pulse response;
+- equilibrium connected \(C^{zz}\);
+- two-measurement transfer full counting statistics;
+- second and fourth cumulants over registered cuts.
 
-and rolling coefficient powers
+## 4. Frozen time partition
 
-\[
-a(t_*)\sim t_*^{-1/3},\qquad
-D_{\rm cl}(t_*)\sim t_*^{1/3}.
-\]
+```text
+training:             50 <= t <= 150
+validation:          150 <  t <= 200
+sealed confirmation: 200 <  t <= 400
+```
 
-## 5. Registered physical conditions
+The machine-readable interval pairs are `[50,150]`, `[150,200]`, and
+`[200,400]`. Executable masks assign shared boundaries to the earlier stage,
+creating three disjoint scoring sets.
 
-The machine-readable configuration is authoritative. It contains:
+Training estimates model parameters. Validation performs model selection and
+coefficient-transfer tests. Sealed confirmation scores one hash-bound
+future-time forecast after explicit human authorization.
 
-- \(\mu=0.02,0.05,0.10,0.20\), both orientations;
-- tanh widths \(1,2,4,8\);
-- erf, double-wall, Gaussian, and two sinusoidal profiles;
+## 5. Condition matrix
+
+### Core isotropic panel
+
+- amplitudes \(\mu=0.02,0.05,0.10,0.20\);
+- both wall orientations;
+- tanh widths \(w=1,2,4,8\);
+- erf and double-wall profiles;
 - backgrounds \(m_0=\pm0.05\);
-- environment controls \(\Delta=0.8\), \(\Delta=1.2\), and
-  \(\Delta=1,J_2=0.1\).
+- equilibrium states;
+- opposite-sign local pulses;
+- Gaussian and sinusoidal perturbations for response and mode separation.
 
-Environment controls do not enter the restricted \(\Delta=1\) universality
-verdict.
+### Environment panel
 
-For avoidance of ambiguity, the registered \(J_2\) control means
+- easy-plane control \(\Delta=0.8\);
+- easy-axis control \(\Delta=1.2\);
+- integrability-breaking control \(\Delta=1,J_2=0.1\).
 
-\[
-H=-J\sum_i\left(S_i^xS_{i+1}^x+S_i^yS_{i+1}^y+
-\Delta S_i^zS_{i+1}^z\right)
--J_2\sum_i\mathbf S_i\cdot\mathbf S_{i+2}.
-\]
+The environment panel measures scope and mechanism. The restricted isotropic
+claim uses the \(\Delta=1,J_2=0\) rows; the controls provide comparative
+transport signatures.
 
-This convention was made machine-readable before any confirmatory simulation
-was generated; see `docs/PROTOCOL_AMENDMENTS.md`.
+## 6. Numerical convergence
 
-## 6. Frozen data split
+Four representative conditions run at three registered resolutions:
 
-\[
-\text{training}:50\le t\le150,
-\]
-
-\[
-\text{validation}:150\le t\le200,
-\]
-
-\[
-\text{blinded test}:200\le t\le400.
-\]
-
-Rolling windows are stored in the matrix configuration. No test interval may
-be used to select preprocessing, model class, parameter priors, or error
-thresholds.
-
-## 7. Numerical convergence gate
-
-The registered nested ladder is:
-
-| level | \(L\) | \(\Delta t\) | \(\chi_{\max}\) | cutoff |
+| Level | \(L\) | \(\Delta t\) | \(\chi_{\max}\) | cutoff |
 |---|---:|---:|---:|---:|
 | coarse | 256 | 0.05 | 256 | \(10^{-8}\) |
 | medium | 384 | 0.025 | 512 | \(10^{-10}\) |
 | fine | 512 | 0.0125 | 1024 | \(10^{-11}\) |
 
-A condition enters confirmatory testing only if
+The accepted resolution satisfies the medium-to-fine gates
 
 \[
-\frac{\|U_{\rm fine}-U_{\rm medium}\|_2}{\|U_{\rm fine}\|_2}<0.002
+\delta_{L^2}<0.002,
+\qquad
+\delta_W<0.003.
 \]
 
-and
+Resolution selection uses these observables before hydrodynamic model scores.
+The convergence record binds dataset hashes, source hashes, and the chosen
+production settings.
 
-\[
-\max_t\frac{|W_{\rm fine}-W_{\rm medium}|}{W_{\rm fine}}<0.003.
-\]
+## 7. Production stages
 
-Failure produces `simulation_unresolved`, not a physics verdict.
+### Production A
 
-## 8. Registered scalar competitors
+Production A evolves the complete registered training and validation panel
+through \(t=200\). It produces the data for:
 
-1. `shared_constant`: one \(a,D_{\rm cl}\) for all primary conditions.
-2. `condition_specific`: independent \(a_i,D_i\).
-3. `sector_amplitude_law`:
+- rolling coefficient estimation;
+- condition and orientation transfer;
+- current and continuity scoring;
+- connected-response prediction;
+- FCS and cumulant comparison;
+- scalar and two-mode cross-validation;
+- frozen model-family selection.
 
-   \[
-   a_i=2\sigma_i g\mu_i,\qquad D_i=D.
-   \]
+### Production B
 
-The third competitor is required by the single-chiral projection and may not
-be replaced post hoc by a different amplitude law.
+Production B evolves the selected registered predictive family through
+\(t=400\). The stage is opened once from a previewed, hash-bound transaction.
+The record captures the model, parameters, datasets, code, seeds, and human
+authorization.
 
-## 9. Primary metrics
+## 8. Model hierarchy
 
-- integrated and endpoint profile relative \(L^2\);
-- width and center forecast error;
-- spin-flip and parity equivariance defects;
-- weak-amplitude superposition defect;
-- joint \((a,D_{\rm cl})\) bootstrap region and feature condition number;
-- rolling \(A_W,A_B,W_*,a,D_{\rm cl},c_f\);
-- structure-factor and current/FCS errors for the two-mode comparison.
+The validation folds compare:
 
-Time-block bootstrap uses physical duration 10 and 2000 replicates.
+1. Gaussian diffusion with shared \(D_m\);
+2. constant-coefficient scalar Burgers;
+3. condition-specific scalar Burgers;
+4. symmetry-aware scalar Burgers with \(a_i=2\sigma_i g\mu_i\);
+5. independent opposite-chirality Burgers modes;
+6. coupled stochastic two-mode hydrodynamics;
+7. memory or additional hydrodynamic modes.
 
-## 10. Frozen decision logic
+All predictive classes use the same held-out times, conditions, orientations,
+and observable weights.
 
-### Universal scalar survival
+## 9. Selection thresholds
 
-All must pass:
+### Shared scalar transfer
 
-- leave-one-condition-out integrated error \(<1\%\);
-- endpoint error \(<2\%\);
-- coefficient spread \(<10\%\);
-- \(|\eta_a|,|\eta_D|<0.10\);
-- exact symmetry defects below five numerical noise floors;
-- late width exponent within 0.05 of the scalar forecast.
+The shared scalar description advances when:
 
-### Finite-window surrogate support
+- its held-out score improves over Gaussian diffusion;
+- fitted coefficient spread stays within the frozen transfer threshold;
+- orientation and amplitude transformations match the registered field map;
+- profile and current predictions share one coefficient set.
 
-All must pass:
+### Independent chiral modes
 
-- within-condition forecast error \(<0.5\%\) or three numerical floors;
-- cross-condition error degrades by at least a factor of two;
-- \(|A_B/A_W-1|<5\%\);
-- rolling powers agree with \((-1/3,+1/3)\) within 0.12;
-- deterministic continuation exposes crossover toward \(W\sim t\).
+The independent two-mode description advances when:
 
-### Two-mode support
+- held-out improvement over the leading scalar competitor reaches at least
+  \(30\%\);
+- the paired-bootstrap \(95\%\) lower endpoint is positive;
+- exact symmetry checks reach their registered tolerance;
+- one parameter set predicts profiles, currents, responses, and FCS.
 
-All must pass:
+### Coupled stochastic modes
 
-- cross-condition error improves by at least 30%;
-- the paired-bootstrap 95% interval of the improvement is positive;
-- spin-flip and parity are respected;
-- one parameter set describes profile, current correlations, and registered
-  current cumulants.
+The coupled model advances when:
 
-## 11. Allowed final outcomes
+- it meets the two-mode gates above;
+- improvement over the independent manifold reaches at least \(10\%\);
+- \(\Delta\mathrm{BIC}\ge10\);
+- stochastic convergence reaches the frozen trajectory budget.
 
-- `universal_scalar_supported_for_identified_field`
-- `physical_scalar_rejected_finite_surrogate_supported`
-- `two_mode_supported_scalar_rejected`
-- `memory_or_more_modes_required`
-- `simulation_unresolved`
-- `insufficient_observables`
+The stochastic budget uses 1,024 screening trajectories and at least 2,048
+final trajectories. Seed lists and solver tolerances are frozen in
+`results_research_program/two_mode/solver_budget.json`.
 
-On the existing single public trajectory, the only admissible pilot result is
+### Richer hydrodynamic extension
 
-```json
-{
-  "universal_scalar": "unresolved",
-  "finite_window_surrogate": "supported",
-  "microscopic_moment_law": "not_rejected",
-  "two_mode": "not_tested",
-  "overall": "insufficient_observables"
-}
-```
+The memory or additional-mode destination is selected by a coherent residual
+signature across time and observables. Its selection creates a new
+preregistration centered on the identified temporal kernel or additional slow
+field.
 
-## 12. Unblinding rule
+## 10. Cross-validation and uncertainty
 
-Production B is an independent long-window confirmation of a registered
-forecast that survived Production A. It is eligible for exactly these frozen
-validation outcomes:
+The protocol uses:
 
-- `scalar_surrogate_not_rejected`;
-- `independent_two_burgers_supported`;
-- `coupled_two_mode_supported`.
+- rolling time windows;
+- leave-one-condition-out folds;
+- leave-one-orientation-out folds;
+- 2,000 paired bootstrap replicates;
+- 10-time-unit bootstrap blocks;
+- frozen observable normalization and weighting;
+- coefficient and score confidence intervals;
+- source and dataset hash attestation.
 
-`memory_or_more_modes_required`, unresolved, missing, malformed, or
-contradictory outcomes do not open Production B. The first case means that the
-registered candidate family failed; more calculation of those same forecasts
-would not be confirmatory.
+These elements make transfer, symmetry, and future prediction separately
+measurable.
 
-Before opening \(t>200\), the one-time human confirmation must record:
+## 11. Registered readouts
 
-- protocol and configuration hashes;
-- source-tree hash;
-- convergence, Production-A, and frozen-analysis evidence hashes;
-- validation-selection and analysis hashes;
-- analysis command;
-- random seeds;
-- timestamp.
+The final report presents:
 
-The test interval is unblinded once, only through the explicit
-`--confirm-unblind` command. Analysis completion alone must not open or submit
-Production B. Any subsequent model changes are exploratory and must be labeled
-as such.
+1. convergence tables for every three-resolution group;
+2. rolling \(a(t)\), \(D_{\rm cl}(t)\), \(A_W(t)\), \(A_B(t)\), and
+   crossover width \(W_*(t)\);
+3. coefficient variation across amplitudes, orientations, widths, shapes, and
+   backgrounds;
+4. held-out profile and current scores;
+5. connected-response and correlation scores;
+6. FCS distribution and cumulant scores;
+7. bootstrap intervals and model-complexity comparison;
+8. the sealed future-time forecast score;
+9. the selected field identity and hydrodynamic scope.
 
-## 13. Amendment log
+## 12. Reproducibility contract
 
-| date | version | amendment | status |
+Every decision artifact includes:
+
+- canonical condition and job identifiers;
+- code, configuration, and manifest hashes;
+- dataset hashes;
+- numerical resolution and solver version;
+- seeds and stochastic trajectory counts;
+- training, validation, and confirmation masks;
+- model identity and parameter vector;
+- timestamp and authorization record.
+
+The public repository contains source, compact evidence records, frozen
+configuration, and validation summaries. Production arrays and checkpoints
+reside in the registered compute environment.
+
+## 13. Version ledger
+
+| Date | Version | Refinement | Scope |
 |---|---:|---|---|
-| 2026-07-29 | 1 | Initial freeze for Phase 0 and future production data | confirmatory |
-| 2026-07-29 | 1.1 | Recorded executable manifest, convergence, cross-condition, two-mode and one-time unblinding paths; no hypothesis, condition, split, or threshold changed | confirmatory |
-| 2026-07-30 | 1.2 | Corrected Production-B eligibility: any surviving registered scalar, independent-two-Burgers, or coupled-two-mode forecast receives the independent long-window test; candidate-family failure and unresolved states stop | confirmatory; frozen before Production-A results |
+| 2026-07-28 | 1.0 | initial hypotheses, matrix, splits, thresholds, and quantum backend | confirmatory |
+| 2026-07-29 | 1.1 | executable manifest, convergence, cross-condition, two-mode, and one-time confirmation paths | confirmatory |
+| 2026-07-30 | 1.2 | Production-B eligibility for every registered predictive family selected in Production A | confirmatory |
+
+## 14. Completion condition
+
+The protocol completes when the converged Production-A record has selected a
+registered predictive family or a richer hydrodynamic extension, and the
+eligible predictive family has received its one-time \(200<t\le400\)
+confirmation score. The resulting statement identifies the field, scope,
+observable coverage, and future-time transfer of the machine-discovered
+Burgers structure.

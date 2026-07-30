@@ -6,13 +6,11 @@
 
 ## Purpose
 
-Issue #265 asks a sharper question than whether a Burgers curve fits one
-domain-wall trajectory.  It asks whether the machine-discovered,
-constant-coefficient equation is a controlled asymptotic hydrodynamic law of
-the isotropic Heisenberg chain or a finite-time, finite-resolution closure.
-The public pull request therefore needs to expose the full scientific
-argument, the evidentiary limits of the pilot, and the preregistered route to
-a decisive answer.
+Issue #265 asks which hydrodynamic scope belongs to the machine-discovered
+constant-coefficient Burgers equation: a transferable asymptotic law, a
+chiral-mode law, or a finite-window effective closure.  The public pull
+request presents the full scientific argument, the demonstrated scope of the
+pilot, and the preregistered route to a decisive classification.
 
 ## Chosen structure
 
@@ -31,7 +29,7 @@ The approved design is a layered research package:
 
 ## Scientific organization
 
-The narrative is organized by claim strength rather than chronology:
+The narrative is organized by claim strength:
 
 - **Exact:** microscopic continuity, spin-flip constraints on a one-field
   current, and algebraic diagonalization of the equal-coupling two-mode flux.
@@ -39,28 +37,35 @@ The narrative is organized by claim strength rather than chronology:
   and the equilibrium spin propagator; deterministic rarefaction of the
   fitted scalar equation; nonlinear averaging terms retained by an open
   fluctuating description.
-- **Measured pilot evidence:** public-trajectory coefficients, profile error,
+- **Measured pilot evidence:** public-trajectory coefficients, profile relative difference,
   width and moment exponents, and the moment-tangent ratio.
 - **Registered confirmatory evidence:** convergence, cross-condition
-  transfer, current/correlation/FCS observations, model hierarchy, and blind
+   transfer, current/correlation/FCS observations, model hierarchy, and sealed
   future-time confirmation.
 
-This ordering prevents a high-quality fit from being presented as a
-microscopic derivation, while also giving the successful finite-window result
-its full positive scientific value.
+This ordering gives the successful finite-window result its full scientific
+value and assigns every broader statement to its own evidence gate.
 
 ## Tone and claim boundary
 
-The writing uses constructive comparisons: models are described by the
-observables and regimes they organize, and distinctions are stated as
-non-equivalence or as registered selection criteria.  The current result is
-presented as an established finite-window benchmark.  Confirmatory outcomes
-are described as the next evidence-producing stages, without converting
-pending simulations into a physics verdict.
+The writing uses constructive comparisons.  Models are described by the
+observables and regimes they organize, while distinctions appear as
+registered selection criteria.  The current result is an established
+finite-window benchmark.  Confirmatory outcomes appear as the next
+evidence-producing stages.
 
 ## Evidence policy
 
-Every numerical statement must be traceable to a committed report, JSON
-record, frozen configuration, or test.  Primary-literature statements link to
-the relevant arXiv record.  Cluster status is dated and attributed to the
-latest archived evidence; it is not described as live unless refreshed.
+Every numerical statement is traceable to a committed report, JSON record,
+frozen configuration, or test.  Primary-literature statements link to the
+relevant arXiv record.  Cluster status is dated and attributed to the latest
+archived evidence.  A refreshed scheduler readout becomes a new dated record.
+
+## Positive-language policy
+
+Public prose uses three sentence types: established evidence, current research
+stage, and the next action that creates evidence.  Scientific distinctions are
+expressed through field identity, domain of validity, registered eligibility,
+and quantitative thresholds.  Machine-compatible internal status labels stay
+inside JSON records and source interfaces; reader-facing Markdown translates
+them into stage descriptions.
