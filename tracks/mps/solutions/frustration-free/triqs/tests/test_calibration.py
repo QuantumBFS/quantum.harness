@@ -398,6 +398,15 @@ def test_legendre_raw_state_does_not_require_unmeasured_g_tau(monkeypatch):
     assert "G_iw" not in state
 
 
+def test_cell_truncations_do_not_evaluate_absent_fallback():
+    assert calibrate._cell_truncations({"truncations": [60, 80, 100]}) == [
+        60,
+        80,
+        100,
+    ]
+    assert calibrate._cell_truncations({"truncation": 100}) == [100]
+
+
 def test_calibration_cluster_commands_and_wrapper_are_serial_offline(tmp_path):
     commands = calibration_cluster_commands(
         Path("/opt/micromamba"),

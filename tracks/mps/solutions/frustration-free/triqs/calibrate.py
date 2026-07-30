@@ -891,6 +891,22 @@ def _write_calibration_raw(path: Path, state: dict[str, object]) -> None:
             archive[name] = value
 
 
+def _cell_truncations(cell: dict[str, object]) -> list[int]:
+    if "truncations" in cell:
+        truncations = cell["truncations"]
+    elif "truncation" in cell:
+        truncations = [cell["truncation"]]
+    else:
+        raise ValueError("cell has no Legendre truncation controls")
+    if (
+        not isinstance(truncations, list)
+        or not truncations
+        or any(isinstance(value, bool) or not isinstance(value, int) for value in truncations)
+    ):
+        raise ValueError("cell Legendre truncations are invalid")
+    return list(truncations)
+
+
 def run_cell(plan: dict[str, object], cell_index: int, run_directory: Path) -> Path:
     plan_type = plan.get("payload", {}).get("artifact_type")
     if plan_type == "cthyb_estimator_plan":
@@ -949,7 +965,7 @@ def run_cell(plan: dict[str, object], cell_index: int, run_directory: Path) -> P
         parameters,
     )
     _write_calibration_raw(raw_path, raw_state)
-    truncations = cell.get("truncations", [cell["truncation"]])
+    truncations = _cell_truncations(cell)
     extracted = _result_values(solver, payload, truncations)
     result_payload = {
         **{
