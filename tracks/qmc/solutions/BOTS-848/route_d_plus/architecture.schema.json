@@ -13,6 +13,7 @@
     "calibration_seed",
     "chains",
     "samples_per_chain",
+    "raw_amplitude_workers",
     "sector_weights",
     "relative_covariance_cutoff",
     "centering_mean",
@@ -40,6 +41,7 @@
     "calibration_seed": {"const": 60860},
     "chains": {"const": 4},
     "samples_per_chain": {"const": 32},
+    "raw_amplitude_workers": {"const": 4},
     "sector_weights": {
       "type": "object",
       "additionalProperties": false,

@@ -49,6 +49,8 @@ def test_phase6_batch_requires_phase5_and_gpu_certificate() -> None:
     )
     assert "mother_evaluator=ground_mother_channels" in training
     assert "ground_mother_channels,\n            tower_mother_channels" in training
+    assert "executor.map(tower_raw_channels, tower_samples)" in training
+    assert 'multiprocessing.get_context("spawn")' in training
     assert "validate_certificate(collected)" in certificate
     assert "phase6-attempt.json" in certificate
     assert "validate_attempt(attempt)" in certificate

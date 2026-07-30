@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import concurrent.futures
 import json
+import multiprocessing
 import time
 from collections.abc import Callable
 from pathlib import Path
@@ -335,7 +337,12 @@ def _run_combined_update(
     )
 
 
-def _pilot_samples(seed: int, chains: int, samples_per_chain: int) -> tuple[
+def _pilot_samples(
+    seed: int,
+    chains: int,
+    samples_per_chain: int,
+    raw_amplitude_workers: int,
+) -> tuple[
     np.ndarray, np.ndarray, list[np.ndarray], list[np.ndarray]
 ]:
     ground_results = [
@@ -375,9 +382,14 @@ def _pilot_samples(seed: int, chains: int, samples_per_chain: int) -> tuple[
         ],
         axis=0,
     )
+    with concurrent.futures.ProcessPoolExecutor(
+        max_workers=raw_amplitude_workers,
+        mp_context=multiprocessing.get_context("spawn"),
+    ) as executor:
+        tower_raw = list(executor.map(tower_raw_channels, tower_samples))
     return (
         np.asarray([ground_raw_channels(item) for item in ground_samples]),
-        np.asarray([tower_raw_channels(item) for item in tower_samples]),
+        np.asarray(tower_raw),
         [result.samples[-1] for result in ground_results],
         [result.samples[-1] for result in tower_results],
     )
@@ -389,6 +401,7 @@ def calibrate_architecture(
     source_revision: str,
     chains: int = 4,
     samples_per_chain: int = 32,
+    raw_amplitude_workers: int = 4,
     relative_cutoff: float = 1.0e-12,
 ) -> dict[str, Any]:
     """Calibrate one shared N=6 architecture before any training seed."""
@@ -398,8 +411,13 @@ def calibrate_architecture(
         for character in source_revision
     ):
         raise ValueError("source_revision must be a 40-character Git SHA")
+    if raw_amplitude_workers <= 0:
+        raise ValueError("raw_amplitude_workers must be positive")
     pilot_ground, pilot_tower, _, _ = _pilot_samples(
-        seed, chains, samples_per_chain
+        seed,
+        chains,
+        samples_per_chain,
+        raw_amplitude_workers,
     )
     mean, covariance, whitening = estimate_centering_whitening(
         pilot_ground,
@@ -415,6 +433,7 @@ def calibrate_architecture(
         "calibration_seed": seed,
         "chains": chains,
         "samples_per_chain": samples_per_chain,
+        "raw_amplitude_workers": raw_amplitude_workers,
         "sector_weights": {"ground": 0.5, "tower": 0.5},
         "relative_covariance_cutoff": relative_cutoff,
         "centering_mean": mean.tolist(),
