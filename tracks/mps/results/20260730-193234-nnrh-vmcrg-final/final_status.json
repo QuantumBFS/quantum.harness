@@ -27,5 +27,5 @@
   "engineering_tests": {"status": "SKIPPED_BY_PROJECT_ADMINISTRATOR", "baseline_repo": "197 passed", "issue28_shard": {"passed": 95, "failed": 8, "cause": "PR-base cluster_guardrail lacks the directive subcommand expected by track tests"}, "other_shards": "cancelled on administrator instruction", "static_checks": "PASS"},
   "cleanup_summary": {"original_size": "472 MB", "original_files": 4191, "original_files_deleted": 0, "submission_mode": "selective compact migration"},
   "resource_summary": {"new_compute": false, "hard_goal_local_projection_hours": 188.4},
-  "submission_status": "SUBMIT_WITH_TESTS_SKIPPED"
+  "submission_status": "PR_READY_WITH_TESTS_SKIPPED"
 }

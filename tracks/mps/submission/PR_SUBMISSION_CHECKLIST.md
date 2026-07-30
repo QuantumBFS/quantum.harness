@@ -7,4 +7,5 @@
 - [x] Secret and large-file scans pass
 - [x] `git diff --check` passes
 - [x] Cached paths are all under `tracks/mps/`
-- [ ] PR title/body updated and PR marked ready
+- [x] PR title/body updated and PR marked ready
+- [x] GitHub reports no branch checks; PR is mergeable and Ready
