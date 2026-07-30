@@ -3,7 +3,12 @@ import json
 import numpy as np
 import pytest
 
-from qh147.qmc_pilot_analysis import _load_run, analyze_bins
+from qh147.qmc_pilot_analysis import (
+    _block_means,
+    _load_run,
+    _rhat,
+    analyze_bins,
+)
 
 
 def _stable_bins(*, drift=0.0):
@@ -43,6 +48,33 @@ def test_split_half_drift_rejects_pilot():
 
     assert not result["accepted"]
     assert not result["gates"]["split_half"]
+
+
+def test_rhat_uses_all_saved_bins_instead_of_ten_bootstrap_blocks():
+    beta = 0.5
+    m_values = np.asarray([32, 64, 128], dtype=float)
+    rng = np.random.default_rng(1)
+    offsets = np.asarray([-0.225, -0.075, 0.075, 0.225])
+    bins = np.stack(
+        [
+            np.stack(
+                [rng.normal(-3.0, 1.0, size=80) + offset for offset in offsets]
+            )
+            for _ in m_values
+        ]
+    )
+    bin_rhat = _rhat(bins[0])
+    block_rhat = _rhat(np.stack([_block_means(chain) for chain in bins[0]]))
+
+    result = analyze_bins(
+        beta, m_values, bins, bootstrap_samples=20, seed=147
+    )
+
+    assert bin_rhat <= 1.05 < block_rhat
+    assert result["diagnostics"][0]["rhat"] == pytest.approx(bin_rhat)
+    assert result["diagnostics"][0]["rhat_input"] == (
+        "80 saved bin means per chain"
+    )
 
 
 def test_loader_rejects_a_runtime_measurement_mismatch(tmp_path):

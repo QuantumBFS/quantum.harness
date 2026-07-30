@@ -160,7 +160,8 @@ def analyze_bins(
         diagnostics.append(
             {
                 "M": int(m_value),
-                "rhat": _rhat(blocks[m_index]),
+                "rhat": _rhat(bins[m_index]),
+                "rhat_input": "80 saved bin means per chain",
                 "max_abs_split_half_difference": max(abs(item[0]) for item in split),
                 "max_split_half_z": max(item[1] for item in split),
                 "lag_one": [
