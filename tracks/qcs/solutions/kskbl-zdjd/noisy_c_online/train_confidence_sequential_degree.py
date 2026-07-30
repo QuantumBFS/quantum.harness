@@ -16,6 +16,7 @@ import math
 import time
 from dataclasses import dataclass
 from pathlib import Path
+from statistics import NormalDist
 from typing import Any
 
 import numpy as np
@@ -55,6 +56,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--batch-size", type=int, default=100)
     parser.add_argument("--holdout-look-sizes", default="128,256,512,1024,2048,4096,8192")
     parser.add_argument("--global-failure-probability", type=float, default=0.05)
+    parser.add_argument(
+        "--confidence-interval-method",
+        choices=("empirical-bernstein", "cluster-normal"),
+        default="empirical-bernstein",
+    )
     parser.add_argument("--noise-rate", type=float, default=0.25)
     parser.add_argument(
         "--noise-mode",
@@ -292,6 +298,28 @@ def empirical_bernstein_interval(
     )
 
 
+def bounded_interval(
+    accumulator: BoundedAccumulator,
+    delta: float,
+    method: str,
+) -> tuple[float, float, float]:
+    if method == "empirical-bernstein":
+        return empirical_bernstein_interval(accumulator, delta)
+    if method != "cluster-normal":
+        raise ValueError(f"unknown confidence interval method: {method}")
+    if accumulator.count < 2:
+        return 0.0, 1.0, 1.0
+    z_value = NormalDist().inv_cdf(1.0 - delta / 2.0)
+    radius = z_value * math.sqrt(
+        accumulator.sample_variance / accumulator.count
+    )
+    return (
+        max(0.0, accumulator.mean - radius),
+        min(1.0, accumulator.mean + radius),
+        radius,
+    )
+
+
 def disagreement_to_noise(disagreement: float) -> float:
     clipped = min(max(disagreement, 0.0), 0.5)
     return 0.5 * (1.0 - math.sqrt(max(1.0 - 2.0 * clipped, 0.0)))
@@ -300,10 +328,12 @@ def disagreement_to_noise(disagreement: float) -> float:
 def noise_interval(
     estimator: DisjointPairNoiseEstimator,
     delta: float,
+    method: str,
 ) -> tuple[float, float, float, float]:
-    lower_d, upper_d, _ = empirical_bernstein_interval(
+    lower_d, upper_d, _ = bounded_interval(
         estimator.disagreement,
         delta,
+        method,
     )
     lower_p = disagreement_to_noise(lower_d)
     upper_p = disagreement_to_noise(upper_d)
@@ -334,14 +364,17 @@ def interval_record(
     accumulator: BoundedAccumulator,
     estimator: DisjointPairNoiseEstimator,
     delta: float,
+    method: str,
 ) -> dict[str, float | int]:
-    q_lower, q_upper, q_radius = empirical_bernstein_interval(
+    q_lower, q_upper, q_radius = bounded_interval(
         accumulator,
         delta,
+        method,
     )
     p_lower, p_upper, p_estimate, p_width = noise_interval(
         estimator,
         delta,
+        method,
     )
     return {
         "holdout_words": accumulator.count,
@@ -380,10 +413,16 @@ def sequential_evidence(
     accept_gap: float,
     reject_gap: float,
     unstable_words_per_check: int,
+    interval_method: str,
     device: torch.device,
 ) -> tuple[str, dict[str, float | int], int]:
     words_before = accumulator.count
-    last = interval_record(accumulator, noise_estimator, delta)
+    last = interval_record(
+        accumulator,
+        noise_estimator,
+        delta,
+        interval_method,
+    )
     if accumulator.count >= look_sizes[0]:
         if last["holdout_excess_lower"] > reject_gap:
             return "reject", last, 0
@@ -415,7 +454,12 @@ def sequential_evidence(
             target_size - accumulator.count,
             device,
         )
-        last = interval_record(accumulator, noise_estimator, delta)
+        last = interval_record(
+            accumulator,
+            noise_estimator,
+            delta,
+            interval_method,
+        )
         if last["holdout_excess_lower"] > reject_gap:
             return "reject", last, accumulator.count - words_before
         if accept_ready and (
@@ -610,6 +654,7 @@ def main() -> None:
                 args.accept_gap,
                 args.reject_gap,
                 args.unstable_holdout_words_per_check,
+                args.confidence_interval_method,
                 device,
             )
             if evidence == "reject":
@@ -742,6 +787,9 @@ def main() -> None:
             "holdout_look_sizes": look_sizes,
             "global_failure_probability": (
                 args.global_failure_probability
+            ),
+            "confidence_interval_method": (
+                args.confidence_interval_method
             ),
             "interval_query_bound": interval_query_bound,
             "per_interval_failure_probability": interval_delta,

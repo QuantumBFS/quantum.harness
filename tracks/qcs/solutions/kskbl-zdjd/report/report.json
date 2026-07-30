@@ -823,6 +823,48 @@
         {
           "kind": "heading",
           "level": 3,
+          "text": "⟦zh⟧相关噪声加速：聚类正态区间把诚实 oracle 成本近乎减半⟦en⟧Correlated-noise acceleration: cluster-normal intervals nearly halve the honest oracle cost"
+        },
+        {
+          "kind": "verdict",
+          "status": "good",
+          "label": "⟦zh⟧十二个配对种子全部精确，平均总噪声词从 92,803 降到 47,290，少 1.96 倍⟦en⟧All twelve paired seeds remain exact while mean total noisy words fall 1.96x, from 92,803 to 47,290",
+          "why": "⟦zh⟧仍以独立整词对为统计单位、仍用整词间经验方差，但把分布无关经验 Bernstein 半径替换为自归一化聚类正态半径。与前一节完全相同的十二个相关噪声种子逐一配对：两种方法都 12 / 12 选择二次、恢复同一 36 项和 156 门网络，且接受时 12 / 12 噪声率区间包含真实 25%；聚类正态版在每个种子上都更省，平均训练词由 21,667 降到 13,125，留出与校准词由 71,136 降到 34,165。⟦en⟧The statistical unit remains an independent word pair and variance is still estimated across words, but the distribution-free empirical-Bernstein radius is replaced by a self-normalized cluster-normal radius. On the exact same twelve correlated-noise seeds, both methods select quadratic in 12 / 12 runs, recover the same 36-term and 156-gate network, and contain the true 25% noise rate at acceptance in 12 / 12 runs. Cluster-normal is cheaper on every seed: mean training words fall from 21,667 to 13,125 and holdout-plus-calibration words from 71,136 to 34,165."
+        },
+        {
+          "kind": "table",
+          "columns": [
+            "⟦zh⟧整词区间方法⟦en⟧Word-cluster interval method",
+            "⟦zh⟧平均接受批次⟦en⟧Mean acceptance batch",
+            "⟦zh⟧平均训练词⟦en⟧Mean training words",
+            "⟦zh⟧平均留出与校准词⟦en⟧Mean holdout and calibration words",
+            "⟦zh⟧平均总噪声词⟦en⟧Mean total noisy words",
+            "⟦zh⟧真实 p 被覆盖⟦en⟧True p covered",
+            "⟦zh⟧最终精确⟦en⟧Final exact"
+          ],
+          "rows": [
+            ["⟦zh⟧经验 Bernstein，分布无关护栏⟦en⟧Empirical Bernstein, distribution-free guardrail", "156.2", "21,667", "71,136", "92,803", "12 / 12", "12 / 12"],
+            ["⟦zh⟧聚类正态，自归一化实用版⟦en⟧Cluster-normal, self-normalized practical version", "90.4", "13,125", "34,165", "47,290", "12 / 12", "12 / 12"]
+          ],
+          "numeric": [false, true, true, true, true, true, true]
+        },
+        {
+          "kind": "figures",
+          "items": [
+            {
+              "src": "noisy-c-cluster-normal.png",
+              "caption": "⟦zh⟧左：十二个配对点全部位于对角线下方，说明每个种子都减少总 oracle 词。中：另做每档 20,000 次的 99% 层级模拟审计；聚类正态覆盖率为 98.83%–99.06%，接近名义 99%，Bernstein 为 99.985%–100%。右：聚类正态区间显著更窄，正是速度来源。⟦en⟧Left: all twelve paired points lie below the diagonal, so every seed reduces total oracle words. Middle: a separate 20,000-trial audit at the 99% level gives 98.83%–99.06% coverage for cluster-normal, close to nominal 99%, versus 99.985%–100% for Bernstein. Right: cluster-normal intervals are substantially narrower, which is exactly where the speedup comes from."
+            }
+          ]
+        },
+        {
+          "kind": "note",
+          "label": "⟦zh⟧方法定位：更快的实用相关性版本，不替代 Bernstein 安全护栏⟦en⟧Method position: a faster practical correlated-noise variant, not a replacement for the Bernstein guardrail",
+          "text": "⟦zh⟧部署训练使用的单区间失败概率约为 2.31×10⁻⁵，比 99% 模拟审计更严格；20,000 次模拟无法直接分辨如此稀有的尾部事件。因此聚类正态版拥有配对训练证据和常规 99% 校准证据，但没有经验 Bernstein 的有限样本分布无关保证。风险敏感任务继续选 Bernstein；当前共同翻转模型下追求速度则选聚类正态。可复核记录为 cluster_normal_summary.json。⟦en⟧The deployed per-interval failure probability is about 2.31×10⁻⁵, more stringent than the 99% simulation audit, and 20,000 trials cannot resolve such rare tails directly. Cluster-normal therefore has paired training evidence and conventional 99% calibration evidence, but not the finite-sample distribution-free guarantee of empirical Bernstein. Risk-sensitive use should retain Bernstein; speed under the current common-flip model favors cluster-normal. The auditable record is cluster_normal_summary.json."
+        },
+        {
+          "kind": "heading",
+          "level": 3,
           "text": "⟦zh⟧自动相关性诊断：训练器自行决定能否逐位相加不确定性⟦en⟧Automatic correlation diagnosis: the learner decides whether bitwise uncertainty may be added"
         },
         {
