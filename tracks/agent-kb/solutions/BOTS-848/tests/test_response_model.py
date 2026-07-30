@@ -84,10 +84,13 @@ class ResponseModelTests(unittest.TestCase):
             ([[1, 2], [3]], [[1, 2], [3, 4]], 0.0),
             ([[1, "bad"]], [[1, 2]], 0.0),
             ([[{"real": "bad", "imag": 0}, 0]], [[1, 2]], 0.0),
+            ([[10**400]], [[1]], 0.0),
+            ([[{"real": 10**400, "imag": 0}]], [[1]], 0.0),
             ([[1, 0]], [[1, 0], [0, 1]], 0.0),
             ([[1, 0]], [[1]], 0.0),
             ([[1, 0]], [[1, 0]], -1.0),
             ([[1, 0]], [[1, 0]], "bad"),
+            ([[1]], [[1]], 10**400),
             ([[1, 0], [0, 1]], [[1, 0], [0, 1]], True),
         )
 
@@ -141,12 +144,76 @@ class ResponseModelTests(unittest.TestCase):
 
         assert_matrix_close(self, model["response_matrix"], [[2.0, 1.0], [0.5, 3.0]])
 
+    def test_small_nonzero_response_is_not_truncated_before_prediction(self):
+        fit_response_matrix, predict_coefficients, _ = self.load_api()
+        model = fit_response_matrix([[1.0e15]], [[5.0]])
+
+        encoded = model["response_matrix"][0][0]
+        self.assertNotEqual(encoded, 0.0)
+        self.assertAlmostEqual(decode_number(encoded).real, 5.0e-15, places=28)
+        self.assertAlmostEqual(
+            predict_coefficients(model, [[1.0e15]])[0][0].real,
+            5.0,
+            places=12,
+        )
+        self.assertAlmostEqual(model["training_metrics"]["rmse"], 0.0, places=12)
+
+    def test_boolean_coefficients_are_rejected(self):
+        fit_response_matrix, _, error_metrics = self.load_api()
+
+        with self.assertRaises(ValueError):
+            fit_response_matrix([[True]], [[1.0]])
+        with self.assertRaises(ValueError):
+            fit_response_matrix([[1.0]], [[False]])
+        with self.assertRaises(ValueError):
+            error_metrics([[True]], [[1.0]])
+
     def test_prediction_shape_must_match_fitted_channels(self):
         fit_response_matrix, predict_coefficients, _ = self.load_api()
         model = fit_response_matrix([[1, 0], [0, 1]], [[1, 0], [0, 1]])
 
         with self.assertRaisesRegex(ValueError, "channel"):
             predict_coefficients(model, [[1, 2, 3]])
+
+    def test_prediction_rejects_nonfinite_derived_output(self):
+        _, predict_coefficients, _ = self.load_api()
+        model = {"channel_count": 1, "response_matrix": [[2.0]]}
+
+        with self.assertRaisesRegex(ValueError, "finite"):
+            predict_coefficients(model, [[1.0e308]])
+
+    def test_large_finite_fit_uses_a_stable_input_norm(self):
+        fit_response_matrix, predict_coefficients, _ = self.load_api()
+        model = fit_response_matrix([[1.0e308]], [[1.0e308]])
+
+        assert_matrix_close(self, model["response_matrix"], [[1.0]])
+        assert_matrix_close(
+            self,
+            predict_coefficients(model, [[1.0e308]]),
+            [[1.0e308]],
+            places=0,
+        )
+
+    def test_error_metrics_are_stable_for_large_finite_values(self):
+        _, _, error_metrics = self.load_api()
+        metrics = error_metrics([[9.0e307]], [[1.0e308]])
+
+        self.assertAlmostEqual(metrics["rmse"] / 1.0e307, 1.0)
+        self.assertAlmostEqual(metrics["relative_rmse"], 0.1)
+        self.assertAlmostEqual(metrics["max_abs_error"] / 1.0e307, 1.0)
+
+        with self.assertRaisesRegex(ValueError, "finite"):
+            error_metrics([[1.0e308]], [[1.0e-308]])
+
+    def test_model_channel_count_must_be_a_positive_integer(self):
+        _, predict_coefficients, _ = self.load_api()
+        for invalid in (True, 0, -1, 1.5, "1"):
+            with self.subTest(invalid=invalid):
+                with self.assertRaisesRegex(ValueError, "channel_count"):
+                    predict_coefficients(
+                        {"channel_count": invalid, "response_matrix": [[1.0]]},
+                        [[1.0]],
+                    )
 
 
 if __name__ == "__main__":

@@ -1,5 +1,9 @@
 # DFPT Channel Research Agent Design
 
+> Historical design record. The current four-channel and finite-q contract is
+> defined by `2026-07-30-final-audit-fixes-design.md`, which supersedes the
+> original three-channel decomposition below.
+
 ## Objective
 
 Turn the BOTS:848 literature study into a reviewable AI-for-science artifact. The submission must do more than present a physics report: it must give an agent a traceable knowledge base, an explicit scientific decision procedure, a small executable prediction prototype, and an evaluation that exposes unsupported conclusions.

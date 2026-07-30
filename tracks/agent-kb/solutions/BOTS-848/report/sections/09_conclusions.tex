@@ -8,16 +8,18 @@ beyond-Kohn--Sham self-energy.  That derivative can be small for one perturbatio
 and large for another even when the equilibrium self-energy and mass enhancement
 are large.
 
-The clearest physical anchor is a uniform common potential coupled to conserved
-total charge: it only changes the energy zero, so interactions cannot arbitrarily
-renormalize it.  The Ward identity states this constraint precisely, but its
+The clearest physical anchor is an unprojected, full-space uniform common
+potential coupled to conserved total charge: it only changes the energy zero, so
+interactions cannot arbitrarily renormalize it.  A projected identity component
+alone is not sufficient.  The Ward identity states this constraint precisely, but its
 dynamic and static limits must not be confused.  The UEG extends the picture with
 strong numerical evidence that a static density kernel remains accurate over
 finite momenta up to $2k_F$ in the tested regime.  Because the UEG contains only
 the density channel, this result suggests a compression principle rather than a
 universal proof.
 
-Real crystals add internal orbital, bond, hopping, hybridization, spin, and
+Real crystals add relative \texttt{site\_charge}, block-internal
+\texttt{internal}, inter-block \texttt{nonlocal}, spin, and separate two-body
 interaction-modulation operators.  Existing DFT+DMFT, DFPT+$U$, and GWPT results
 show that their corrections can be strongly mode-selective.  This motivates the
 proposal's central hypothesis: the useful small parameter is not ``correlation
@@ -43,11 +45,19 @@ are synthetic and its costs are normalized assumptions.  These results establish
 reproducible software behavior, not material accuracy or a measured runtime
 speedup.
 
+The executable one-body decomposition is presently Hermitian and therefore
+limited to real-space derivatives, Gamma, or real $q/-q$ standing waves.  General
+fixed-$q$ pairs and a separate two-body interaction-vertex space remain future
+interfaces.  The fitted target is a fixed-basis inverse-Green-function vertex;
+external-leg $Z^{1/2}$ factors and quasiparticle-state rotations are separate.
+
 \begin{keypoint}[First decision after submission]
 The first research milestone should test one sharp statement: in SrVO$_3$, does a
-basis-robust measure of traceless orbital-channel weight separate the strongly
-enhanced Jahn--Teller mode from the weakly corrected breathing mode, while the UEG
-density relation supplies the charge-channel control?  A positive result justifies
+basis-robust measure of \texttt{internal} weight separate the strongly enhanced
+Jahn--Teller mode from the weakly corrected finite-$q$
+\texttt{site\_charge}-like breathing mode when both are represented in the
+phase-correct real supercell/standing-wave basis, while the complete UEG ratio supplies
+a scalar-density control?  A positive result justifies
 building the static prototype; a negative result forces the hypothesis to be
 revised before software expansion.
 \end{keypoint}

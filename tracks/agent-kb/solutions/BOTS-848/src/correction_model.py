@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
-from numbers import Number
+import math
+from numbers import Number, Real
 
 from .channel_decomposition import CHANNELS, decompose_operator
 
@@ -15,21 +16,27 @@ def correct_operator(
 ) -> list[list[complex]]:
     """Scale each operator channel and reconstruct the corrected perturbation.
 
-    This minimum model uses one scalar kernel per channel. It does not fit or
+    This minimum model uses one finite real scalar kernel per channel, so a
+    Hermitian input remains Hermitian. It does not fit or
     infer those kernels; they must come from a source-traceable comparison or a
     higher-level many-body calculation.
     """
 
     if set(kernels) != set(CHANNELS):
         raise ValueError(f"kernels must contain exactly {', '.join(CHANNELS)}")
-    try:
-        numeric_kernels = {name: complex(kernels[name]) for name in CHANNELS}
-    except (TypeError, ValueError) as exc:
-        raise ValueError("kernels must be numeric") from exc
+    numeric_kernels = {}
+    for name in CHANNELS:
+        value = kernels[name]
+        if isinstance(value, bool) or not isinstance(value, Real):
+            raise ValueError("kernels must be finite real scalars and not booleans")
+        numeric_value = float(value)
+        if not math.isfinite(numeric_value):
+            raise ValueError("kernels must be finite real scalars and not booleans")
+        numeric_kernels[name] = numeric_value
 
     channels = decompose_operator(dfpt_operator, site_blocks)
-    size = len(channels["charge"])
-    return [
+    size = len(channels["global_charge"])
+    corrected = [
         [
             sum(
                 numeric_kernels[name] * channels[name][row][column]
@@ -39,3 +46,10 @@ def correct_operator(
         ]
         for row in range(size)
     ]
+    if any(
+        not math.isfinite(value.real) or not math.isfinite(value.imag)
+        for row in corrected
+        for value in row
+    ):
+        raise ValueError("corrected operator entries must remain finite")
+    return corrected

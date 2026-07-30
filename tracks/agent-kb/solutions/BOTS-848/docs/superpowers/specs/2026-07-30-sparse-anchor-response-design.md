@@ -1,5 +1,9 @@
 # Sparse-Anchor Channel Response Design
 
+> Historical design record. The current channel names and physical scope are
+> defined by `2026-07-30-final-audit-fixes-design.md`; the three-coefficient
+> synthetic example now uses `global_charge` and omits `site_charge` by design.
+
 ## Objective
 
 Extend the BOTS:848 channel-resolved DFPT prototype into an honest quantitative

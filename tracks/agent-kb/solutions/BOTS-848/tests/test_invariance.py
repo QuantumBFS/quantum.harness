@@ -48,7 +48,7 @@ class LocalUnitaryInvarianceTests(unittest.TestCase):
         before = module.channel_weights(module.decompose_operator(operator, blocks))
         after = module.channel_weights(module.decompose_operator(rotated, blocks))
 
-        for channel in ("charge", "internal", "nonlocal"):
+        for channel in ("global_charge", "site_charge", "internal", "nonlocal"):
             self.assertAlmostEqual(before[channel], after[channel], places=12)
 
 

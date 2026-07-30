@@ -1,5 +1,8 @@
 # Sparse-Anchor Channel Response Implementation Plan
 
+> Historical completed plan. The current channel names and scientific
+> limitations are superseded by `../specs/2026-07-30-final-audit-fixes-design.md`.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Add a tested sparse-anchor channel-response fitter, held-out scorer, and cost comparison against DFPT-only and dense higher-level baselines without overstating physical validation or speed.

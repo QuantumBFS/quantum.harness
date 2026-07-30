@@ -17,10 +17,13 @@ auditable loop.
   definition and normalization of $g$, frequency at which the vertex is evaluated,
   and reported uncertainty.
   \item \textbf{Classify the perturbation.}  Project the DFPT perturbation,
-  compute the charge, internal, and nonlocal channel weights of
+  compute the \texttt{global\_charge}, \texttt{site\_charge},
+  \texttt{internal}, and \texttt{nonlocal} one-body weights of
   \cref{eq:channelstrength}, and attach a human-readable physical interpretation.
+  Record interaction derivatives in a separate two-body space.
   \item \textbf{Select a benchmark.}  Choose the least expensive many-body method
-  able to represent the active channel: UEG/vertex Monte Carlo for density,
+  able to represent the active object: UEG/vertex Monte Carlo for the complete
+  scalar-density comparison,
   DFT+DMFT for local correlated channels, GW perturbation theory for nonlocal
   quasiparticle response, or an explicit model when interaction derivatives are
   central.
@@ -58,8 +61,9 @@ System & Active contrast & Reference level & Question answered \\
 Uniform electron gas & $q=0$ anchor versus $0<q\le2k_F$ density response &
 Vertex diagrammatic Monte Carlo & Is the finite-$q$ density prior accurate and
 what controls its residual? \\
-SrVO$_3$ & Jahn--Teller versus breathing modes & DFT+DMFT & Does traceless orbital
-weight predict the large mode-selective correction? \\
+SrVO$_3$ & Jahn--Teller versus breathing modes in a phase-correct real supercell
+or standing wave & DFT+DMFT & Does traceless orbital weight predict the large
+mode-selective correction? \\
 Doped CaCuO$_2$ & Half- versus full-breathing, static versus dynamic vertex &
 DFT+DMFT & Can the dynamic-risk indicator detect failure of a static correction? \\
 CoO & Correlated insulator and polar coupling & DFPT+$U$ / experiment & Does the
@@ -73,7 +77,9 @@ correction? \\
 
 The UEG is the first diagnostic object because it isolates density physics.  It
 must not be the only validation object, because success there cannot test internal
-crystal channels.
+crystal channels.  Continuous fixed-$q$ UEG comparison is presently a
+literature/theory calibration; the Hermitian executable does not claim that
+interface until a paired $q/-q$ or real-space implementation exists.
 
 \subsection{Accuracy, speed, and transparency metrics}
 
@@ -155,3 +161,6 @@ use.  It fits and applies \cref{eq:responsematrix}, scores synthetic held-out
 coefficient vectors, and evaluates \cref{eq:costmodel}.  The supplied exact
 synthetic result tests the software path only; real-material fitting, measured
 timing, uncertainty calibration, and transfer across modes remain open gates.
+The recorded unit-test/evaluation counts, synthetic RMSE, and normalized cost
+ratio are all software-contract outputs; none is a measured material vertex,
+physical accuracy result, or speedup.

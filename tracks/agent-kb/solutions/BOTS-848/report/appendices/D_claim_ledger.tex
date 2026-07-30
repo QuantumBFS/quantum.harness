@@ -14,7 +14,7 @@ Status & Statement & Main support \\
 \endhead
 \bottomrule
 \endfoot
-\claimstatus{Established} & Standard adiabatic DFPT is a self-consistent static
+\claimstatus{Established theory} & Standard adiabatic DFPT is a self-consistent static
 Kohn--Sham response and computes the matrix element of
 $\partial_{\nu\vq}V_{\ks}$. & \citet{Gonze1995,Baroni2001,Giustino2017} \\
 
@@ -22,8 +22,8 @@ $\partial_{\nu\vq}V_{\ks}$. & \citet{Gonze1995,Baroni2001,Giustino2017} \\
 polarization, self-energy, and a vertex; they are not three arbitrary independent
 factors. & \citet{Hedin1965} \\
 
-\claimstatus{Exact limit} & A strict uniform common scalar potential coupled to
-total charge is an energy-zero shift; the corresponding dynamic Ward limit gives
+\claimstatus{Exact limit} & A strict unprojected full-space uniform common scalar
+potential coupled to total charge is an energy-zero shift; the corresponding dynamic Ward limit gives
 $z\Gamma^0_\omega=1$. & \citet{Nambu1960} and
 \cref{app:derivations} \\
 
@@ -31,17 +31,25 @@ $z\Gamma^0_\omega=1$. & \citet{Nambu1960} and
 $z\Gamma=1$ alone; finite-$q$ density is not a conserved operator. & Ward limit
 ordering and Fermi-liquid compressibility \\
 
-\claimstatus{Numerical evidence} & In the tested UEG regime, a DFPT-like static
-density-kernel vertex agrees accurately with a high-level vertex over momenta up
-to $2k_F$. & \citet{Cai2025}; recent preprint \\
+\claimstatus{Exact algebra} & In the declared scalar convention,
+$K_{\mathrm{total}}=z\Gamma_\rho[1-(v+f_{\mathrm{xc}})\chi_s]/
+[1-vP_{\mathrm{MB}}]$; if both stated matching relations are assumed,
+substitution gives $K_{\mathrm{total}}=1$. & \cref{eq:matchingcondition}; neither
+matching relation is an exact constraint and both require numerical evidence \\
+
+\claimstatus{Numerical evidence} & In the tested UEG regime, the complete
+DFPT-like screened vertex agrees accurately with a high-level vertex over momenta
+up to $2k_F$. & \citet{Cai2025}; recent preprint \\
 
 \claimstatus{Numerical evidence} & Beyond-DFPT corrections can differ strongly
 between phonons in the same correlated material and can be frequency dependent. &
 \citet{Abramovitch2025} \\
 
-\claimstatus{Working hypothesis} & Channel content times channel-resolved
-many-body amplification is a better predictor of DFPT error than $U$ or $z$
-alone. & Proposed here; to be tested on \cref{tab:benchmarks} \\
+\claimstatus{Working hypothesis} & The one-body
+\texttt{global\_charge}, \texttt{site\_charge}, \texttt{internal}, and
+\texttt{nonlocal} content times channel-resolved many-body amplification is a
+better predictor of DFPT error than $U$ or $z$ alone; two-body vertices are a
+separate space. & Proposed here; to be tested on \cref{tab:benchmarks} \\
 
 \claimstatus{Proposed method} & A small static/dynamic operator kernel can correct
 DFPT with substantially fewer high-level calculations than a full vertex grid. &

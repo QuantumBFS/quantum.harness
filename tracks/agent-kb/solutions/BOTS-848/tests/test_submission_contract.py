@@ -22,7 +22,7 @@ class SubmissionContractTests(unittest.TestCase):
             "python3 examples/run_example.py",
             "python3 examples/run_sparse_anchor.py",
             "make report-check",
-            "Ran 48 tests",
+            "Ran 82 tests",
             "14/14 cases passed",
             "held-out synthetic",
             "dense_high_level=600.000",
@@ -63,6 +63,20 @@ class SubmissionContractTests(unittest.TestCase):
         pdf_bytes = (SOLUTION_ROOT / "report" / "main.pdf").read_bytes()
         actual = hashlib.sha256(pdf_bytes).hexdigest()
         self.assertEqual(documented.group(0), actual)
+
+    def test_reviewer_report_build_does_not_overwrite_distributed_pdf(self):
+        report_makefile = (SOLUTION_ROOT / "report" / "Makefile").read_text(
+            encoding="utf-8"
+        )
+        reproduce = (SOLUTION_ROOT / "REPRODUCE.md").read_text(encoding="utf-8")
+
+        self.assertRegex(report_makefile, r"(?m)^BUILD_DIR\s*:?=\s*build$")
+        self.assertIn("BUILD_PDF := $(BUILD_DIR)/$(MAIN).pdf", report_makefile)
+        self.assertIn("all: $(BUILD_PDF)", report_makefile)
+        self.assertIn("check: $(BUILD_PDF)", report_makefile)
+        self.assertRegex(report_makefile, r"(?m)^dist: \$\(BUILD_PDF\)$")
+        self.assertIn("report/build/main.pdf", reproduce)
+        self.assertIn("does not overwrite `report/main.pdf`", reproduce)
 
     def test_readme_links_the_two_reviewer_entry_points(self):
         text = (SOLUTION_ROOT / "README.md").read_text(encoding="utf-8")

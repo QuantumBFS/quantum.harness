@@ -1,5 +1,9 @@
 # DFPT Channel Research Agent Implementation Plan
 
+> Historical completed plan. The current four-channel and finite-q contract is
+> specified by `../specs/2026-07-30-final-audit-fixes-design.md` and implemented
+> by `2026-07-30-final-audit-fixes-implementation-plan.md`.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** Build a self-contained, source-traceable research agent and executable channel-resolved DFPT correction prototype for BOTS:848.

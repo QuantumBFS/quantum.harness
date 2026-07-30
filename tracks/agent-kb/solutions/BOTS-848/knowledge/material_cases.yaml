@@ -10,8 +10,9 @@
       "observable": "screened quasiparticle electron-phonon vertex",
       "status": "numerical-evidence",
       "source_ids": ["Cai2025"],
+      "one_body_channels": [],
       "reported_values": [],
-      "channel_interpretation": "Scalar charge channel; no orbital, sublattice, or bond operators exist in the model.",
+      "channel_interpretation": "Only strict q=0 is global_charge. Finite-q UEG density is an unprotected scalar calibration outside the localized four-channel executable unless represented as a real q/-q standing wave.",
       "normalization_note": "Compare Eq. 34 objects in the paper; do not mix the vertex with lambda or add screening twice.",
       "limitations": "The paper reports the most difficult deviations near backscattering and does not prove transferability to multi-orbital crystals.",
       "verification_state": "primary-source-verified: arXiv:2512.19382v2 lines corresponding to Eqs. 34-35 and Fig. 8"
@@ -25,13 +26,14 @@
       "observable": "Wannier-local coupling g_loc",
       "status": "numerical-evidence",
       "source_ids": ["Abramovitch2025"],
+      "one_body_channels": ["internal"],
       "reported_values": [
         {"method": "DFPT", "value": 44, "unit": "meV", "source_id": "Abramovitch2025", "source_location": "Table I"},
         {"method": "DFT+DMFT", "value": 87, "unit": "meV", "source_id": "Abramovitch2025", "source_location": "Table I, omega=0"}
       ],
       "channel_interpretation": "Traceless orbital splitting diag(0,g,-g), therefore internal-channel dominated in the paper's Wannier basis.",
       "normalization_note": "Values are the paper's Wannier-local diagonal amplitude g, not a Brillouin-zone averaged lambda.",
-      "limitations": "U=4.5 eV and J=0.675 eV in the DFT+DMFT setup; cross-method projectors differ from the cited DFPT+U comparison.",
+      "limitations": "Same-paper setting control with U=4.5 eV and J=0.675 eV, fixed projector/normalization, and the paper's many-body choices; not an independent cross-code accuracy benchmark.",
       "verification_state": "primary-source-verified: arXiv:2505.03958v2 Table I"
     },
     {
@@ -43,13 +45,14 @@
       "observable": "Wannier-local coupling g_loc",
       "status": "numerical-evidence",
       "source_ids": ["Abramovitch2025"],
+      "one_body_channels": ["site_charge"],
       "reported_values": [
         {"method": "DFPT", "value": 58, "unit": "meV", "source_id": "Abramovitch2025", "source_location": "Table I"},
         {"method": "DFT+DMFT", "value": 50, "unit": "meV", "source_id": "Abramovitch2025", "source_location": "Table I, omega=0"}
       ],
-      "channel_interpretation": "Local diag(g,g,g) form, therefore charge-channel dominated in the paper's t2g Wannier subspace.",
-      "normalization_note": "Values are the paper's Wannier-local diagonal amplitude g.",
-      "limitations": "Charge-like does not mean exact protection at finite q; the observed change is small but nonzero.",
+      "channel_interpretation": "In the paper's 2x2x2 real-displacement supercell, equivalently a real R/-R standing wave, local diag(g,g,g) V-site blocks alternate in phase and are site_charge-like. A single primitive-cell block would look algebraically global_charge and is not the physical finite-R classification.",
+      "normalization_note": "Values are the paper's Wannier-local diagonal amplitude g; channel classification requires the phase-correct supercell/standing-wave representation.",
+      "limitations": "Same-paper fixed-setup control. Block identity at one primitive-cell site does not imply full-space global_charge protection; the observed finite-q change is small but nonzero.",
       "verification_state": "primary-source-verified: arXiv:2505.03958v2 Table I"
     },
     {
@@ -61,13 +64,14 @@
       "observable": "Wannier-local coupling g_loc",
       "status": "numerical-evidence",
       "source_ids": ["Abramovitch2025"],
+      "one_body_channels": ["site_charge", "nonlocal"],
       "reported_values": [
         {"method": "DFPT", "value": 70, "unit": "meV", "source_id": "Abramovitch2025", "source_location": "Table II"},
         {"method": "DFT+DMFT", "value": 76, "unit": "meV", "source_id": "Abramovitch2025", "source_location": "Table II, omega=0"}
       ],
-      "channel_interpretation": "Single-orbital local density response; use as a charge-channel candidate, not a theorem.",
+      "channel_interpretation": "Single-orbital finite-q density response; use as a site_charge/nonlocal candidate, not global_charge or a theorem.",
       "normalization_note": "Paper's Wannier-local amplitude at the stated doping and U.",
-      "limitations": "The coupling is strongly frequency dependent even where the omega=0 change is moderate.",
+      "limitations": "Same-paper fixed-setup control; the coupling is strongly frequency dependent even where the omega=0 change is moderate.",
       "verification_state": "primary-source-verified: arXiv:2505.03958v2 Table II"
     },
     {
@@ -79,13 +83,14 @@
       "observable": "Wannier-local coupling g_loc",
       "status": "numerical-evidence",
       "source_ids": ["Abramovitch2025"],
+      "one_body_channels": ["site_charge", "nonlocal"],
       "reported_values": [
         {"method": "DFPT", "value": 53, "unit": "meV", "source_id": "Abramovitch2025", "source_location": "Table II"},
         {"method": "DFT+DMFT", "value": 45, "unit": "meV", "source_id": "Abramovitch2025", "source_location": "Table II, omega=0"}
       ],
       "channel_interpretation": "Single-orbital local density response with a modest static correction in this setup.",
       "normalization_note": "Paper's Wannier-local amplitude at the stated doping and U.",
-      "limitations": "The result is not interchangeable with a linewidth, lambda, or a differently normalized matrix element.",
+      "limitations": "Same-paper fixed-setup control; the result is not interchangeable with a linewidth, lambda, or a differently normalized matrix element.",
       "verification_state": "primary-source-verified: arXiv:2505.03958v2 Table II"
     },
     {
@@ -97,13 +102,14 @@
       "observable": "frequency-dependent Wannier-local coupling g_loc(omega)",
       "status": "numerical-evidence",
       "source_ids": ["Abramovitch2025"],
+      "one_body_channels": ["site_charge", "nonlocal"],
       "reported_values": [
         {"method": "DFT+DMFT", "value": 70, "unit": "meV half-window", "source_id": "Abramovitch2025", "source_location": "Fig. 5 discussion"},
         {"method": "DFT+DMFT", "value": "0 to approximately 2 g_loc(0)", "unit": "relative coupling range", "source_id": "Abramovitch2025", "source_location": "Fig. 5 discussion"}
       ],
       "channel_interpretation": "Dynamic-risk case: a static kernel is insufficient even if the zero-frequency correction is moderate.",
       "normalization_note": "Relative variation of the paper's Wannier-local g within plus or minus one phonon energy.",
-      "limitations": "The prototype decision gate needs an independently defined electronic relaxation scale before assigning a universal ratio.",
+      "limitations": "Same-paper fixed-setup control. The prototype decision gate needs an independently defined electronic relaxation scale before assigning a universal ratio.",
       "verification_state": "primary-source-verified: arXiv:2505.03958v2 Fig. 5 discussion"
     },
     {
@@ -115,8 +121,9 @@
       "observable": "electron-phonon matrix elements and spectral functions",
       "status": "numerical-evidence",
       "source_ids": ["Zhou2021"],
+      "one_body_channels": [],
       "reported_values": [],
-      "channel_interpretation": "Reference-state and Hubbard-occupation response are both changed; this is not a scalar correction to a valid ordinary-DFPT result.",
+      "channel_interpretation": "Reference-state and Hubbard-occupation response are both changed; decompose the induced one-body vertex separately from any two-body interaction derivative.",
       "normalization_note": "No scalar number is encoded because the source comparison is mode- and momentum-resolved.",
       "limitations": "The case demonstrates a computable failure of standard DFPT but does not isolate a universal channel kernel.",
       "verification_state": "primary-source abstract and accepted manuscript verified for the qualitative claim"
@@ -130,6 +137,7 @@
       "observable": "GW-level electron-phonon coupling and superconducting properties",
       "status": "numerical-evidence",
       "source_ids": ["Li2019"],
+      "one_body_channels": ["nonlocal"],
       "reported_values": [],
       "channel_interpretation": "Nonlocal and energy-dependent self-energy derivative supplies a beyond-DFT correction route.",
       "normalization_note": "No isolated matrix-element number is copied into this compact card; consult the source before a quantitative comparison.",

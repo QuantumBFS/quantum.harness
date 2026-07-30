@@ -19,6 +19,7 @@ class AgentSkillContractTests(unittest.TestCase):
         self.assertTrue(skill.startswith("---\nname: dfpt-channel-research-agent\n"))
         self.assertIn("description: Use when", skill)
         for status in (
+            "established-theory",
             "exact-constraint",
             "numerical-evidence",
             "working-hypothesis",

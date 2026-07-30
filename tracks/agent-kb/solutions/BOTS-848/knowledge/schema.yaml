@@ -19,6 +19,7 @@
         "statement": {"type": "string"},
         "status": {
           "enum": [
+            "established-theory",
             "exact-constraint",
             "numerical-evidence",
             "working-hypothesis",
@@ -30,6 +31,20 @@
         "scope": {"type": "string"},
         "limitations": {"type": "string"}
       }
+    },
+    "one_body_channel": {
+      "enum": ["global_charge", "site_charge", "internal", "nonlocal"]
+    },
+    "one_body_channel_weights": {
+      "type": "object",
+      "required": ["global_charge", "site_charge", "internal", "nonlocal"],
+      "properties": {
+        "global_charge": {"type": "number", "minimum": 0},
+        "site_charge": {"type": "number", "minimum": 0},
+        "internal": {"type": "number", "minimum": 0},
+        "nonlocal": {"type": "number", "minimum": 0}
+      },
+      "additionalProperties": false
     },
     "reported_value": {
       "type": "object",
@@ -46,10 +61,17 @@
         "observable",
         "status",
         "source_ids",
+        "one_body_channels",
         "normalization_note",
         "limitations",
         "verification_state"
-      ]
+      ],
+      "properties": {
+        "one_body_channels": {
+          "type": "array",
+          "items": {"$ref": "#/definitions/one_body_channel"}
+        }
+      }
     }
   }
 }

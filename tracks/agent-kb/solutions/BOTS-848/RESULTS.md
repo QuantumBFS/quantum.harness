@@ -23,33 +23,51 @@ ionic displacement without resolving a frequency-dependent many-body vertex.
 That description can work well, but it does not guarantee that every phonon
 perturbation is renormalized in the same way.
 
-The prototype first represents the projected DFPT perturbation as a Hermitian
-operator `D` in a declared localized low-energy subspace and decomposes it as
+The prototype first represents a supported Hermitian DFPT perturbation as a
+one-body operator `D` in a declared localized low-energy subspace and decomposes
+it as
 
 ```text
-D = D_charge + D_internal + D_nonlocal.
+D = D_global_charge + D_site_charge + D_internal + D_nonlocal.
 ```
 
-- `D_charge` is proportional to the identity inside each local site block. It
-  changes the average local potential without splitting orbitals in that block.
+- `D_global_charge` is the single identity component across the complete declared
+  projection basis. It is an algebraic label, not by itself the full-system
+  conserved total-charge direction.
+- `D_site_charge` contains block-identity shifts relative to the global average.
+  It changes relative site or sublattice potentials without splitting orbitals
+  inside a block.
 - `D_internal` is the traceless part inside a site block. It changes relative
-  orbital or sublattice energies.
+  orbital energies within that block.
 - `D_nonlocal` contains matrix elements between site blocks. It changes bonds,
   hopping, or other inter-site structure.
 
-"Proportional to the local identity" does not mean that every Bloch band shifts
+The four components are mutually orthogonal in the Hilbert--Schmidt inner
+product. Only `global_charge` can be protected, and only when the original
+unprojected operator is independently verified as a strict uniform `q=0`
+full-space common shift under a fixed energy-zero/chemical-potential convention.
+The condition `P_c D P_c` proportional to identity is not sufficient because the
+discarded and cross-subspace blocks can differ. `site_charge`, `internal`, and `nonlocal` are all correction
+risk channels. "Proportional to a block identity" does not mean that every Bloch band shifts
 by the same number: different Bloch states have different local weights and
 phases. It only states which operator is applied inside the declared local
 subspace.
 
-The working hypothesis is that a charge-dominated, adiabatic perturbation is a
-better candidate for inexpensive static treatment, whereas appreciable
-internal, nonlocal, interaction-parameter, or dynamic content signals the need
-for a targeted correction or an abstention.
+The current Hermitian API applies to a real-space displacement derivative, a
+Gamma perturbation, or a real standing-wave combination of `q` and `-q`. For a
+general fixed momentum, `D(q)^dagger = D(-q)`; a continuous finite-`q` paired
+interface has not been implemented.
 
-The quantitative MVP assumes that a fixed localized, symmetry-adapted operator
-basis has already been declared. If `c_DFPT` and `c_reference` are coefficient
-vectors in that same basis, it fits a small response matrix `K`:
+The working hypothesis is that a verified full-space uniform `q=0`
+`global_charge` perturbation is the exact control, whereas appreciable `site_charge`, `internal`,
+`nonlocal`, or dynamic content signals the need for a targeted correction or an
+abstention. Derivatives such as `dU/du` and `dJ/du` are two-body vertices in a
+separate operator space, not extra pieces of this one-body decomposition.
+
+The quantitative MVP assumes that a fixed localized, symmetry-adapted one-body
+operator basis has already been declared. If `c_DFPT` and `c_reference` are
+coefficients of the DFPT and reference inverse-Green-function vertices in that
+same basis, it fits a small response matrix `K`:
 
 ```text
 c_reference = K c_DFPT + residual.
@@ -57,14 +75,19 @@ c_reference = K c_DFPT + residual.
 
 This is a coefficient-space hypothesis, not a claim that the complete
 electron-phonon matrix is low rank. Diagonal entries rescale a channel;
-off-diagonal entries allow channel mixing.
+off-diagonal entries allow channel mixing. External-leg factors `Z^(1/2)` and
+quasiparticle-state rotations are applied separately before comparing a physical
+scattering observable. Anchors from papers that use different vertex conventions
+cannot be mixed without an explicit conversion.
 
 ## Why This Is Useful
 
 The result turns a vague question—"is this material too correlated for
 DFPT?"—into a calculation-specific decision:
 
-1. classify the phonon perturbation by operator channel;
+1. classify the supported one-body perturbation as `global_charge`,
+   `site_charge`, `internal`, and `nonlocal`, while recording any separate
+   two-body vertex;
 2. verify that the electronic reference state and literature evidence are
    adequate;
 3. test whether the electronic relaxation scale is separated from the phonon
@@ -114,6 +137,8 @@ next.
 The tests verify that the implemented decomposition:
 
 - reconstructs the input operator exactly;
+- separates the global identity from relative block-identity shifts;
+- makes the four one-body channels mutually Hilbert--Schmidt orthogonal;
 - gives zero trace to every local internal block;
 - preserves Hermiticity;
 - gives channel weights invariant under local unitary basis rotations;
@@ -126,11 +151,14 @@ The tests verify that the implemented decomposition:
 - rejects malformed blocks, matrices, kernels, weights, and missing evidence.
 
 These properties establish that the code implements its stated finite-matrix
-model correctly. They do not establish that the model predicts every material.
+software model correctly. They do not establish a real-material response matrix
+or any physical prediction.
 
-The synthetic held-out example gives relative RMSE `2.711e-16` because its
-targets were generated exactly from a declared three-channel matrix. It verifies
-the fit-predict-score path and nothing about physical transferability.
+The synthetic held-out example gives relative RMSE `2.653e-16` because its
+targets were generated exactly from a declared synthetic matrix. It verifies
+the fit-predict-score path and nothing about physical transferability. Its three
+coefficients are `global_charge`, `internal`, and `nonlocal`;
+`site_charge` is not excited, so it is not a full four-channel physical test.
 
 ### 2. Primary-source numerical evidence
 
@@ -139,33 +167,37 @@ line up with the channel and frequency distinction:
 
 | Case | Same-paper comparison | What it supports | What it does not prove |
 |---|---|---|---|
-| uniform electron gas | close static DFPT-like and many-body vertices for `r_s = 1...5` and transfers through `2 k_F`, with the difficult region near backscattering | a scalar-density model can remain well described beyond the strict `q=0` conserved-charge limit | transferability to multi-orbital crystals |
+| uniform electron gas | close complete static DFPT-like and many-body vertices for `r_s = 1...5` and transfers through `2 k_F`, with backscattering the least-controlled exception | the total ratio `K_total = z Gamma_rho [1-(v+f_xc)chi_s]/[1-v P_MB]` is approximately one in that calibration domain | a second `P_MB/chi_s` correction to screened DFPT or transferability to multi-orbital crystals |
 | SrVO3 Jahn-Teller | 44 -> 87 meV | a traceless orbital-splitting mode can receive a large correction | that all internal modes behave identically |
-| SrVO3 breathing | 58 -> 50 meV | a charge-like mode in the same material changes much less | exact protection of a finite-q charge mode |
+| SrVO3 breathing | 58 -> 50 meV | in the cited 2x2x2 real-displacement supercell/standing-wave representation, the R-point phase alternation makes this a finite-q `site_charge`-like mode that changes much less | classification from a single primitive-cell `diag(g,g,g)` block, `global_charge` protection, or any general finite-q theorem |
 | CaCuO2 half breathing | 70 -> 76 meV at `U = 3.1 eV` | a moderate static correction is possible in a correlated system | absence of dynamical effects |
 | CaCuO2 full breathing | 53 -> 45 meV at `U = 3.1 eV` | the static value can remain close in the cited convention | a universal error bound |
 | CaCuO2 dynamic case | within roughly one phonon-energy window at `U = 4.7 eV`, the reported coupling spans about zero to twice its zero-frequency value | a static comparison can miss the physical-frequency dependence | a universal dynamic threshold |
 | CoO DFPT+U | ordinary DFPT and DFPT+U differ because the reference state and Hubbard occupation response change | the validity of the starting state must be checked before correcting its derivative | that one scalar kernel repairs a wrong reference state |
-| Ba1-xKxBiO3 GWPT | the self-energy derivative supplies a nonlocal, energy-dependent correction route | a concrete beyond-DFT route exists when a local static model is insufficient | reducibility to the current three scalar kernels |
+| Ba1-xKxBiO3 GWPT | the self-energy derivative supplies a nonlocal, energy-dependent correction route | a concrete beyond-DFT route exists when a local static model is insufficient | reducibility to the current four one-body channels |
 
-The values above retain the source observable and convention; they are not
+The Abramovitch rows are same-paper controls within its declared fixed basis and
+many-body setup; they are not independent cross-code accuracy benchmarks. The
+values above retain the source observable and convention; they are not
 silently converted into linewidths, mass-enhancement parameters, or differently
 normalized matrix elements. Exact tables, figures, caveats, and citations are
 recorded in `knowledge/material_cases.yaml` and `knowledge/references.bib`.
 
 ### 3. Scientific guardrails
 
-Every knowledge claim is labeled as an exact constraint, numerical evidence, a
-working hypothesis, or an open question. The decision gate abstains when the
+Every knowledge claim is labeled as established theory, an exact constraint,
+numerical evidence, working hypothesis, or open question. The decision gate abstains when the
 source is not traceable, the reference electronic state is invalid, the
-electronic relaxation scale is missing, or the perturbation signal is zero.
-The Ward identity is used only for the conserved long-wavelength charge vertex;
+electronic relaxation scale is missing, the perturbation signal is zero, or a
+`global_charge` input is not explicitly verified as a uniform `q=0` full-space
+common shift before projection. The Ward identity is used only for that strict conserved-charge control;
 it is not presented as a proof for generic finite-q orbital, bond, or phonon
 vertices.
 
-The recorded 14/14 evaluation checks this declared logic and its grounding. It
-is a deterministic contract test, not an external-agent benchmark and not a
-physical-accuracy measurement.
+The recorded 82 unit tests and 14/14 evaluation, the synthetic RMSE, and the
+normalized cost ratio check declared software logic and grounding. They are not
+external-agent or material benchmarks, do not determine a real-material `K`, and
+do not establish physical accuracy or measured acceleration.
 
 ## What Is Not Yet Proven
 
@@ -173,7 +205,8 @@ The submission does not yet provide:
 
 - a response matrix fitted to convention-matched real-material DFPT and
   beyond-DFPT anchors;
-- an explicit interaction-modulation channel such as `dU/du` or `dJ/du`;
+- a separate two-body operator-space implementation for `dU/du` or `dJ/du`;
+- a paired `q/-q` interface for a general finite-momentum perturbation;
 - a production parser for DFPT or Wannier outputs;
 - a universal value for the current decision thresholds;
 - a held-out material benchmark demonstrating no significant loss of accuracy;
@@ -189,18 +222,20 @@ convention-matched benchmark finds any of the following:
 
 1. channel weights do not correlate with the size or character of the
    beyond-DFPT correction;
-2. charge-dominated, adiabatic modes repeatedly show large corrections not
-   explained by the reference state or momentum path;
+2. `site_charge`-dominated or other nonuniform density modes repeatedly show
+   large corrections not captured by the fitted response;
 3. each matrix element needs an unrelated correction, so a small set of channel
    kernels has no predictive compression;
 4. frequency dependence dominates broadly enough that no useful static regime
    remains.
 
-The first final target is a held-out finite-momentum uniform-electron-gas test,
-including the approach to `2 k_F`. It cleanly tests the scalar charge channel
-before crystal-specific orbital, bond, and phonon-normalization complications
-are introduced. A positive result there is necessary calibration evidence, not
-sufficient proof for real materials.
+The first final target is a held-out finite-momentum uniform-electron-gas test of
+the complete physical-to-DFPT ratio, including the approach to `2 k_F`. It tests
+whether the complete screened DFPT vertex remains accurate in that scalar-density
+domain; it does not validate multiplying screened DFPT by a separate proper-vertex
+factor. Until a paired `q/-q` or real-space interface exists, this is a theory/data
+calibration rather than an executable continuous-fixed-`q` result. A positive
+result is necessary calibration evidence, not sufficient proof for real materials.
 
 ## Bottom Line
 

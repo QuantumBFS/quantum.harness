@@ -45,13 +45,13 @@ make check
 The important success lines are:
 
 ```text
-Ran 48 tests ... OK
+Ran 82 tests ... OK
 BOTS:848 evaluation: 14/14 cases passed
 decision_accuracy: 1.000
 claim_status_accuracy: 1.000
 citation_coverage: 1.000
 unsupported_claim_rate: 0.000
-held-out synthetic: rmse=3.116e-16, relative_rmse=2.711e-16, max_abs_error=6.661e-16
+held-out synthetic: rmse=3.049e-16, relative_rmse=2.653e-16, max_abs_error=6.661e-16
 declared cost model: dfpt_only=100.000, dense_high_level=600.000, corrected=122.000, speedup_vs_dense_high_level=4.918, is_faster_than_dense_high_level=True, is_faster_than_dfpt=False, measured_runtime=False
 physical_accuracy_established=False
 ```
@@ -75,7 +75,7 @@ The inputs and expected role of each command are:
 |---|---|---|
 | unit tests | `tests/`, `src/`, `knowledge/`, reviewer documents | algebraic invariants, decisions, grounding, and submission contract |
 | evaluation | `eval/cases.yaml` | 14 declared decision and claim-grounding cases |
-| channel examples | `examples/toy_common_shift.yaml`, `examples/toy_orbital_splitting.yaml` | charge-dominated and internal-channel toy classifications |
+| channel examples | `examples/toy_common_shift.yaml`, `examples/toy_orbital_splitting.yaml` | verified full-space strict-q=0 `global_charge` and `internal` toy classifications |
 | sparse-anchor example | `examples/sparse_anchor_response.yaml` | response-matrix fit, synthetic held-out error, and conditional cost accounting |
 | knowledge check | `knowledge/*.yaml`, `eval/cases.yaml`, `examples/*.yaml` | all machine-readable records parse as JSON-compatible YAML |
 
@@ -102,21 +102,23 @@ With the TeX requirements installed, run:
 make report-check
 ```
 
-The command builds `report/main.pdf`, rejects unresolved citations or
-references and overfull boxes, and prints PDF metadata. The supplied report has
-23 A4 pages. To run every executable and document check together:
+The command builds `report/build/main.pdf`, rejects unresolved citations or
+references and overfull boxes, and prints PDF metadata. It does not overwrite `report/main.pdf`,
+which is the distributed artifact. The supplied report has
+26 A4 pages. To run every executable and document check together:
 
 ```bash
 make check-all
 ```
 
-Open the report with `open report/main.pdf` on macOS or
-`xdg-open report/main.pdf` on Linux.
+Open the fresh build with `open report/build/main.pdf` on macOS or
+`xdg-open report/build/main.pdf` on Linux. Open `report/main.pdf` only when
+checking the artifact distributed by the repository.
 
 The SHA-256 digest of the PDF distributed with this submission is:
 
 ```text
-b421bea67d8b72cebac7f4a1bd00547cac47ef9022299ba5ae744741ccc6b870
+03f31b10478d778feb6ad5b529417b09422ae2db645e1c1298d4f2397f4868e2
 ```
 
 Verify it on macOS with:
@@ -131,10 +133,12 @@ or on Linux with:
 sha256sum report/main.pdf
 ```
 
-A locally rebuilt PDF can have a different byte hash because TeX versions or
-embedded metadata differ. In that case, use `make report-check`, confirm the
-23-page structure, and compare the rendered content rather than requiring
-byte-for-byte identity.
+This digest verifies the distributed artifact only. A locally rebuilt PDF can
+have a different byte hash because TeX versions or embedded metadata differ.
+In that case, use `make report-check`, confirm the 26-page structure, and
+compare the rendered content rather than requiring byte-for-byte identity. The
+maintainer-only `make -C report dist` target deliberately replaces the
+distributed PDF after an accepted source change; reviewer checks do not run it.
 
 ## 5. Reproduce the Evidence Audit
 

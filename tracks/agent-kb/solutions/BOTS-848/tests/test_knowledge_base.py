@@ -7,6 +7,7 @@ import unittest
 SOLUTION_ROOT = Path(__file__).resolve().parents[1]
 KNOWLEDGE_ROOT = SOLUTION_ROOT / "knowledge"
 ALLOWED_STATUSES = {
+    "established-theory",
     "exact-constraint",
     "numerical-evidence",
     "working-hypothesis",
@@ -36,6 +37,11 @@ class KnowledgeBaseTests(unittest.TestCase):
             self.assertTrue(claim["limitations"])
             if claim["source_traceable"]:
                 self.assertGreater(len(claim["source_ids"]), 0)
+        self.assertIn(
+            "established-theory",
+            {claim["status"] for claim in payload["claims"]},
+            "standard formalism must not be mislabeled as an exact constraint",
+        )
 
     def test_material_cases_cover_required_benchmarks(self):
         payload = load_json_yaml("material_cases.yaml")

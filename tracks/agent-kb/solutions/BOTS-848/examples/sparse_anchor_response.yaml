@@ -1,7 +1,8 @@
 {
-  "name": "three-channel sparse-anchor synthetic contract",
+  "name": "three-coefficient sparse-anchor synthetic contract",
   "validation_scope": "software-contract-only",
-  "channel_names": ["charge", "internal", "nonlocal"],
+  "channel_names": ["global_charge", "internal", "nonlocal"],
+  "omitted_channel": "site_charge is zero by construction; this is not a four-channel physical validation",
   "known_response_matrix_for_audit_only": [
     [1.0, 0.1, 0.0],
     [0.2, 1.5, 0.1],

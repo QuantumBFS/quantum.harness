@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from numbers import Number
+import math
+from numbers import Number, Real
 
 from .channel_decomposition import CHANNELS
 
@@ -18,10 +19,15 @@ DEFAULT_THRESHOLDS = {
 def _validated_weights(weights: Mapping[str, Number]) -> dict[str, float]:
     if set(weights) != set(CHANNELS):
         raise ValueError(f"weights must contain exactly {', '.join(CHANNELS)}")
-    try:
-        values = {name: float(weights[name]) for name in CHANNELS}
-    except (TypeError, ValueError) as exc:
-        raise ValueError("channel weights must be real numbers") from exc
+    values = {}
+    for name in CHANNELS:
+        value = weights[name]
+        if isinstance(value, bool) or not isinstance(value, Real):
+            raise ValueError("channel weights must be finite real numbers and not booleans")
+        numeric_value = float(value)
+        if not math.isfinite(numeric_value):
+            raise ValueError("channel weights must be finite real numbers and not booleans")
+        values[name] = numeric_value
     if any(value < 0.0 for value in values.values()):
         raise ValueError("channel weights must be nonnegative")
     total = sum(values.values())
@@ -36,10 +42,13 @@ def _validated_thresholds(thresholds: Mapping[str, Number] | None) -> dict[str, 
         unknown = set(thresholds) - set(DEFAULT_THRESHOLDS)
         if unknown:
             raise ValueError(f"unknown thresholds: {', '.join(sorted(unknown))}")
-        try:
-            values.update({name: float(value) for name, value in thresholds.items()})
-        except (TypeError, ValueError) as exc:
-            raise ValueError("thresholds must be real numbers") from exc
+        for name, value in thresholds.items():
+            if isinstance(value, bool) or not isinstance(value, Real):
+                raise ValueError("thresholds must be finite real numbers and not booleans")
+            numeric_value = float(value)
+            if not math.isfinite(numeric_value):
+                raise ValueError("thresholds must be finite real numbers and not booleans")
+            values[name] = numeric_value
     if any(value < 0.0 or value > 1.0 for value in values.values()):
         raise ValueError("thresholds must lie between zero and one")
     return values
@@ -64,12 +73,20 @@ def select_correction_level(
 
     ``adiabatic_ratio`` means phonon energy divided by the electronic relaxation
     energy scale. The thresholds are calibration parameters, not universal
-    constants or claims of predictive accuracy.
+    constants or claims of predictive accuracy. ``full_space_common_shift``
+    must describe the original unprojected perturbation under a fixed energy-zero
+    convention; projected global-charge weight alone cannot establish it.
     """
 
     values = _validated_weights(weights)
     limits = _validated_thresholds(thresholds)
-    required = ("source_traceable", "reference_valid", "adiabatic_ratio")
+    required = (
+        "source_traceable",
+        "reference_valid",
+        "adiabatic_ratio",
+        "uniform_q_zero",
+        "full_space_common_shift",
+    )
     missing = [name for name in required if name not in evidence]
     if missing:
         return _result(
@@ -78,6 +95,20 @@ def select_correction_level(
             values,
             evidence,
             limits,
+        )
+    if not isinstance(evidence["uniform_q_zero"], bool):
+        raise ValueError("uniform_q_zero must be a boolean")
+    if not isinstance(evidence["full_space_common_shift"], bool):
+        raise ValueError("full_space_common_shift must be a boolean")
+    ratio_value = evidence["adiabatic_ratio"]
+    if isinstance(ratio_value, bool) or not isinstance(ratio_value, Real):
+        raise ValueError(
+            "adiabatic_ratio must be a finite nonnegative real number and not a boolean"
+        )
+    adiabatic_ratio = float(ratio_value)
+    if not math.isfinite(adiabatic_ratio) or adiabatic_ratio < 0.0:
+        raise ValueError(
+            "adiabatic_ratio must be a finite nonnegative real number and not a boolean"
         )
     if evidence["source_traceable"] is not True:
         return _result(
@@ -95,12 +126,6 @@ def select_correction_level(
             evidence,
             limits,
         )
-    try:
-        adiabatic_ratio = float(evidence["adiabatic_ratio"])
-    except (TypeError, ValueError) as exc:
-        raise ValueError("adiabatic_ratio must be a nonnegative real number") from exc
-    if adiabatic_ratio < 0.0:
-        raise ValueError("adiabatic_ratio must be a nonnegative real number")
     if sum(values.values()) == 0.0:
         return _result(
             "abstain",
@@ -121,24 +146,43 @@ def select_correction_level(
             limits,
         )
 
-    correction_weight = values["internal"] + values["nonlocal"]
+    correction_weight = (
+        values["site_charge"] + values["internal"] + values["nonlocal"]
+    )
     if correction_weight > limits["correction_channel_weight"]:
         return _result(
             "static-correction",
             [
-                "the perturbation has appreciable internal or nonlocal weight",
-                "charge conservation does not constrain these channels",
+                "the perturbation has appreciable site-charge, internal, or nonlocal weight",
+                "global charge conservation does not constrain these channels",
             ],
             values,
             evidence,
             limits,
         )
-    if values["charge"] >= limits["charge_safe_weight"]:
+    if (
+        values["global_charge"] >= limits["charge_safe_weight"]
+        and evidence["uniform_q_zero"] is True
+        and evidence["full_space_common_shift"] is True
+    ):
         return _result(
             "dfpt-safe",
             [
-                "the validated low-energy perturbation is charge dominated",
+                "the validated low-energy perturbation is global-charge dominated",
+                "uniform_q_zero is explicitly established",
+                "full_space_common_shift is established before projection",
                 "this is a calibration candidate, not a universal accuracy guarantee",
+            ],
+            values,
+            evidence,
+            limits,
+        )
+    if values["global_charge"] >= limits["charge_safe_weight"]:
+        return _result(
+            "abstain",
+            [
+                "uniform_q_zero and full_space_common_shift must both be true "
+                "for a global-charge dfpt-safe classification"
             ],
             values,
             evidence,

@@ -109,6 +109,7 @@ class CostModelTests(unittest.TestCase):
             {"dfpt_cost_per_point": -1.0},
             {"dfpt_cost_per_point": 1.0, "inference_cost_per_point": -0.1},
             {"dfpt_cost_per_point": 1.0, "training_cost": float("inf")},
+            {"dfpt_cost_per_point": 1.0, "training_cost": 10**400},
             {"dfpt_cost_per_point": 1.0, "high_level_cost_per_point": "bad"},
         )
 
@@ -125,6 +126,25 @@ class CostModelTests(unittest.TestCase):
                         high_level_anchors=2,
                         **parameters,
                     )
+
+    def test_nonfinite_derived_cost_is_rejected(self):
+        compare_corrected_to_baselines = self.load_api()
+
+        with self.assertRaisesRegex(ValueError, "finite"):
+            compare_corrected_to_baselines(
+                full_points=2,
+                dfpt_cost_per_point=1.0e308,
+                high_level_anchors=1,
+                high_level_cost_per_point=1.0,
+            )
+
+        with self.assertRaisesRegex(ValueError, "finite"):
+            compare_corrected_to_baselines(
+                full_points=10**400,
+                dfpt_cost_per_point=1.0,
+                high_level_anchors=1,
+                high_level_cost_per_point=1.0,
+            )
 
 
 if __name__ == "__main__":

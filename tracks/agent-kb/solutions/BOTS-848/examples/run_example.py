@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run the two minimal channel-classification examples."""
+"""Run the two minimal four-channel classification examples."""
 
 from __future__ import annotations
 

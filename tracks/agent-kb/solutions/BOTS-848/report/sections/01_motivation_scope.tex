@@ -38,11 +38,15 @@ This formulation rules out two incomplete answers.
   states have different orbital weights and phases.
 \end{enumerate}
 
-The proposal instead treats the derivative of the electronic Hamiltonian as an
-operator.  It asks which part of that operator couples to total charge, which part
-splits or mixes internal orbitals, and which part changes hopping, hybridization,
-or interaction parameters.  Conservation laws constrain the first category in a
-special limit; they do not constrain all categories equally.
+The proposal instead treats the one-body derivative of the electronic Hamiltonian
+as an operator.  It separates the single global identity
+\texttt{global\_charge}, relative block-identity shifts
+\texttt{site\_charge}, block-internal traceless structure
+\texttt{internal}, and inter-block matrix elements \texttt{nonlocal}.
+Derivatives of interaction parameters are two-body vertices in a different
+operator space.  Conservation laws can constrain only the first one-body
+direction, and only when the original unprojected perturbation is independently
+verified as a strict uniform $\vq=0$ full-space common shift.
 
 \subsection{Target deliverable}
 
@@ -53,8 +57,9 @@ It should be:
 \begin{itemize}
   \item \textbf{simpler} than a full many-body calculation of every
   $g_{mn\nu}(\vk,\vq)$;
-  \item \textbf{faster} by focusing expensive calculations on risky modes and
-  low-dimensional operator channels;
+  \item \textbf{potentially cheaper than a dense beyond-DFPT vertex grid} by
+  focusing expensive calculations on risky modes and low-dimensional operator
+  channels, without claiming a measured speedup over DFPT;
   \item \textbf{transparent} because every correction is attached to a named
   physical operator and a documented validity test;
   \item \textbf{falsifiable} on materials for which DFPT succeeds for one mode

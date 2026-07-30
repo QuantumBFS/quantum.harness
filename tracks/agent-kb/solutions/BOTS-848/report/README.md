@@ -27,8 +27,10 @@ make check
 make render
 ```
 
-The submission artifact is `main.pdf`. Source provenance and claim-level source
-notes are in `provenance/sources.md` and Appendix D.
+These reviewer commands build and inspect `build/main.pdf` without overwriting
+the distributed artifact `main.pdf`.  Maintainers update the distributed PDF
+after an accepted source change with `make dist`. Source provenance and
+claim-level source notes are in `provenance/sources.md` and Appendix D.
 
 ## Project structure
 

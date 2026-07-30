@@ -8,19 +8,23 @@ from numbers import Number
 
 
 _PIVOT_RELATIVE_TOLERANCE = 1.0e-12
-_REAL_TOLERANCE = 1.0e-14
 
 
 def _decode_number(value: object, name: str) -> complex:
     if isinstance(value, Mapping):
         if set(value) != {"real", "imag"}:
             raise ValueError(f"{name} complex values require real and imag fields")
+        if isinstance(value["real"], bool) or isinstance(value["imag"], bool):
+            raise ValueError(f"{name} values must be numeric")
         try:
             value = complex(value["real"], value["imag"])
-        except (TypeError, ValueError) as exc:
+        except (TypeError, ValueError, OverflowError) as exc:
             raise ValueError(f"{name} values must be numeric") from exc
-    elif isinstance(value, Number):
-        value = complex(value)
+    elif isinstance(value, Number) and not isinstance(value, bool):
+        try:
+            value = complex(value)
+        except (TypeError, ValueError, OverflowError) as exc:
+            raise ValueError(f"{name} values must be numeric") from exc
     else:
         raise ValueError(f"{name} values must be numeric")
     if not math.isfinite(value.real) or not math.isfinite(value.imag):
@@ -29,8 +33,10 @@ def _decode_number(value: object, name: str) -> complex:
 
 
 def _encode_number(value: complex) -> float | dict[str, float]:
-    real = 0.0 if abs(value.real) <= _REAL_TOLERANCE else float(value.real)
-    imag = 0.0 if abs(value.imag) <= _REAL_TOLERANCE else float(value.imag)
+    if not math.isfinite(value.real) or not math.isfinite(value.imag):
+        raise ValueError("response values must remain finite")
+    real = float(value.real)
+    imag = float(value.imag)
     if imag == 0.0:
         return real
     return {"real": real, "imag": imag}
@@ -70,10 +76,39 @@ def _as_numeric_matrix(
     return matrix
 
 
+def _require_finite(value: complex, name: str) -> complex:
+    if not math.isfinite(value.real) or not math.isfinite(value.imag):
+        raise ValueError(f"{name} must remain finite")
+    return value
+
+
+def _finite_sum(values, name: str) -> complex:
+    total = 0.0j
+    try:
+        for value in values:
+            total = _require_finite(total + value, name)
+    except OverflowError as exc:
+        raise ValueError(f"{name} must remain finite") from exc
+    return total
+
+
+def _stable_norm(values, name: str) -> float:
+    try:
+        norm = math.hypot(*(abs(value) for value in values))
+    except OverflowError as exc:
+        raise ValueError(f"{name} must remain finite") from exc
+    if not math.isfinite(norm):
+        raise ValueError(f"{name} must remain finite")
+    return norm
+
+
 def _validate_ridge(ridge: object) -> float:
     if isinstance(ridge, bool) or not isinstance(ridge, Number):
         raise ValueError("ridge must be a nonnegative real number")
-    numeric = complex(ridge)
+    try:
+        numeric = complex(ridge)
+    except (TypeError, ValueError, OverflowError) as exc:
+        raise ValueError("ridge must be a nonnegative real number") from exc
     if numeric.imag != 0.0 or not math.isfinite(numeric.real) or numeric.real < 0.0:
         raise ValueError("ridge must be a nonnegative real number")
     return float(numeric.real)
@@ -99,17 +134,29 @@ def _solve_linear_system(
         augmented[column], augmented[pivot_row] = augmented[pivot_row], augmented[column]
 
         pivot = augmented[column][column]
-        augmented[column] = [value / pivot for value in augmented[column]]
+        try:
+            augmented[column] = [
+                _require_finite(value / pivot, "response fit intermediates")
+                for value in augmented[column]
+            ]
+        except OverflowError as exc:
+            raise ValueError("response fit intermediates must remain finite") from exc
         for row in range(size):
             if row == column:
                 continue
             factor = augmented[row][column]
             if factor == 0.0:
                 continue
-            augmented[row] = [
-                value - factor * pivot_value
-                for value, pivot_value in zip(augmented[row], augmented[column])
-            ]
+            try:
+                augmented[row] = [
+                    _require_finite(
+                        value - factor * pivot_value,
+                        "response fit intermediates",
+                    )
+                    for value, pivot_value in zip(augmented[row], augmented[column])
+                ]
+            except OverflowError as exc:
+                raise ValueError("response fit intermediates must remain finite") from exc
 
     return [row[size : size + output_count] for row in augmented]
 
@@ -135,13 +182,17 @@ def error_metrics(
         for predicted_value, reference_value in zip(predicted_row, reference_row)
     ]
     reference_values = [value for row in reference_matrix for value in row]
-    error_norm_squared = sum(abs(value) ** 2 for value in errors)
-    reference_norm_squared = sum(abs(value) ** 2 for value in reference_values)
-    rmse = math.sqrt(error_norm_squared / len(errors))
-    if reference_norm_squared == 0.0:
-        relative_rmse = 0.0 if error_norm_squared == 0.0 else None
+    for value in errors:
+        _require_finite(value, "derived errors")
+    error_norm = _stable_norm(errors, "error norm")
+    reference_norm = _stable_norm(reference_values, "reference norm")
+    rmse = error_norm / math.sqrt(len(errors))
+    if reference_norm == 0.0:
+        relative_rmse = 0.0 if error_norm == 0.0 else None
     else:
-        relative_rmse = math.sqrt(error_norm_squared / reference_norm_squared)
+        relative_rmse = error_norm / reference_norm
+        if not math.isfinite(relative_rmse):
+            raise ValueError("relative error metric must remain finite")
     return {
         "rmse": rmse,
         "relative_rmse": relative_rmse,
@@ -156,10 +207,16 @@ def predict_coefficients(
     """Apply a fitted channel-response matrix to coefficient vectors."""
 
     try:
-        channel_count = int(model["channel_count"])
+        channel_count = model["channel_count"]
         encoded_response = model["response_matrix"]
-    except (KeyError, TypeError, ValueError) as exc:
+    except KeyError as exc:
         raise ValueError("model is missing a valid channel response") from exc
+    if (
+        isinstance(channel_count, bool)
+        or not isinstance(channel_count, int)
+        or channel_count <= 0
+    ):
+        raise ValueError("model channel_count must be a positive integer")
     response = _as_numeric_matrix(
         encoded_response,
         "response_matrix",
@@ -170,7 +227,13 @@ def predict_coefficients(
     input_matrix = _as_numeric_matrix(inputs, "inputs", expected_columns=channel_count)
     return [
         [
-            sum(response[output][channel] * row[channel] for channel in range(channel_count))
+            _finite_sum(
+                (
+                    response[output][channel] * row[channel]
+                    for channel in range(channel_count)
+                ),
+                "predicted coefficients",
+            )
             for output in range(channel_count)
         ]
         for row in input_matrix
@@ -196,7 +259,10 @@ def fit_response_matrix(
         raise ValueError("inputs and targets must contain the same number of anchors")
 
     input_scales = [
-        math.sqrt(sum(abs(row[channel]) ** 2 for row in input_matrix))
+        _stable_norm(
+            (row[channel] for row in input_matrix),
+            "input channel norm",
+        )
         for channel in range(channel_count)
     ]
     if any(scale == 0.0 for scale in input_scales):
@@ -208,27 +274,49 @@ def fit_response_matrix(
 
     gram = [
         [
-            sum(row[left].conjugate() * row[right] for row in normalized_inputs)
-            + (ridge_value if left == right else 0.0)
+            _require_finite(
+                _finite_sum(
+                    (
+                        row[left].conjugate() * row[right]
+                        for row in normalized_inputs
+                    ),
+                    "response Gram matrix",
+                )
+                + (ridge_value if left == right else 0.0),
+                "response Gram matrix",
+            )
             for right in range(channel_count)
         ]
         for left in range(channel_count)
     ]
     right_hand_side = [
         [
-            sum(
-                input_row[channel].conjugate() * target_row[output]
-                for input_row, target_row in zip(normalized_inputs, target_matrix)
+            _finite_sum(
+                (
+                    input_row[channel].conjugate() * target_row[output]
+                    for input_row, target_row in zip(normalized_inputs, target_matrix)
+                ),
+                "response right-hand side",
             )
             for output in range(channel_count)
         ]
         for channel in range(channel_count)
     ]
     normalized_coefficients = _solve_linear_system(gram, right_hand_side)
-    coefficients = [
-        [value / input_scales[channel] for value in normalized_coefficients[channel]]
-        for channel in range(channel_count)
-    ]
+    coefficients = []
+    for channel in range(channel_count):
+        try:
+            coefficients.append(
+                [
+                    _require_finite(
+                        value / input_scales[channel],
+                        "response coefficients",
+                    )
+                    for value in normalized_coefficients[channel]
+                ]
+            )
+        except OverflowError as exc:
+            raise ValueError("response coefficients must remain finite") from exc
     response = [
         [coefficients[input_channel][output] for input_channel in range(channel_count)]
         for output in range(channel_count)

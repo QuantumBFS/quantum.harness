@@ -31,7 +31,10 @@ coupling to an external ionic perturbation is
   \label{eq:gphysical}
 \end{equation}
 where $z$ is the quasiparticle residue.  This equation is useful only after the
-vertex convention and screening factor have been stated.
+vertex convention and screening factor have been stated.  In this scalar
+expression $z\Gamma_\rho$ includes the quasiparticle external-leg residue
+appropriate to that convention.  It must not be identified without conversion
+with the fixed-basis inverse-Green-function vertex of \cref{eq:dmb}.
 
 \subsection{The Ward identity and its two limits}
 
@@ -108,8 +111,11 @@ for a common charge potential, not a proof at finite momentum and not a statemen
 about orbital splitting, bond modulation, or other internal operators.
 
 \begin{keypoint}[What conservation does for this project]
-Conservation laws identify a protected direction in the space of perturbation
-operators.  The research task is to measure how much of each real phonon lies
-along that direction and how strongly the remaining, unprotected directions are
-renormalized.
+Conservation laws identify one protected full-system direction: a strict uniform
+$\vq=0$ scalar potential coupled to total charge.  A projected
+\texttt{global\_charge} component may use this anchor only after the original
+unprojected perturbation is verified to be that full-space common shift.
+Relative site/block identities (\texttt{site\_charge}), block-internal
+traceless operators (\texttt{internal}), and inter-block operators
+(\texttt{nonlocal}) are not protected by this argument.
 \end{keypoint}

@@ -10,29 +10,55 @@ perturbation is
   D_{\nu\vq}=P_c\,\partial_{\nu\vq}V_{\ks}\,P_c.
   \label{eq:projectedD}
 \end{equation}
-For each correlated site $i$, split its on-site block into an orbital trace and a
-traceless remainder,
+For the current executable decomposition, $D_{\nu\vq}$ denotes a supported
+Hermitian representation: a real-space derivative, Gamma perturbation, or real
+$\vq/-\vq$ standing wave.  A general fixed-$\vq$ component instead satisfies
+\cref{eq:qpairhermiticity} and requires a future paired interface.
+
+Let site block $i$ have dimension $n_i$, let $N=\sum_i n_i$, and define
+$\bar d=\Tr D/N$ and $d_i=\Tr D_{ii}/n_i$.  The four one-body components are
 \begin{align}
-  D^{\mathrm{charge}}_{i}
-  &= \frac{\Tr_{\mathrm{orb}}D_{ii}}{N_{\mathrm{orb}}}\,I_i,
+  D^{\mathrm{global\_charge}}&=\bar d\,I_N,
   \label{eq:chargechannel}\\
-  D^{\mathrm{internal}}_{i}
-  &= D_{ii}-D^{\mathrm{charge}}_i.
+  D^{\mathrm{site\_charge}}_{ii}&=(d_i-\bar d)I_i,\\
+  D^{\mathrm{internal}}_{ii}&=D_{ii}-d_iI_i,\\
+  D^{\mathrm{nonlocal}}_{ij}&=D_{ij}\quad(i\ne j),
   \label{eq:internalchannel}
 \end{align}
-The off-site blocks $D_{ij}$, $i\ne j$, describe changes in hopping and
-hybridization.  If needed, extra channels represent derivatives of interaction
-parameters, such as $\partial U/\partial u$ and $\partial J/\partial u$.  Thus
+with all unspecified blocks zero.  Thus
 \begin{equation}
   D_{\nu\vq}
-  =D^{\mathrm{charge}}_{\nu\vq}
+  =D^{\mathrm{global\_charge}}_{\nu\vq}
+  +D^{\mathrm{site\_charge}}_{\nu\vq}
   +D^{\mathrm{internal}}_{\nu\vq}
-  +D^{\mathrm{nonlocal}}_{\nu\vq}
-  +D^{\mathrm{interaction}}_{\nu\vq}.
+  +D^{\mathrm{nonlocal}}_{\nu\vq}.
   \label{eq:channeldecomp}
 \end{equation}
-This decomposition is basis-dependent, so the project must state the Wannier or
-projector construction and test robustness against a reasonable basis change.
+The four components are mutually orthogonal under
+$\langle A,B\rangle_{\mathrm{HS}}=\Tr(A^\dagger B)$.  Here
+\texttt{global\_charge} is first an algebraic identity inside the projected
+space.  It is Ward protected only if the original unprojected perturbation is
+separately verified to be a strict uniform $\vq=0$ common scalar potential over
+the full electronic Hilbert space.  The condition $P_cDP_c\propto I_N$ alone is
+insufficient because complementary-space and cross-space blocks may differ.
+Moreover, adding a common $cI$ changes the reported channel weight, so the
+energy-zero and chemical-potential convention must be fixed or that gauge shift
+must be removed before comparing weights.  A relative block shift is
+\texttt{site\_charge} and is unprotected.  The decomposition is basis-dependent,
+so the project must state the Wannier or projector construction and test
+robustness against a reasonable basis change.
+
+Derivatives such as $\partial U/\partial u$ and $\partial J/\partial u$ do not
+belong in \cref{eq:channeldecomp}.  They multiply two-body operators, for example
+\begin{equation}
+  \delta H^{(2)}_u
+  =\frac{\partial U}{\partial u}\,
+   \hat n_{\uparrow}\hat n_{\downarrow}
+   +\frac{\partial J}{\partial u}\,\hat O_J+\cdots ,
+  \label{eq:twobodyvertex}
+\end{equation}
+and require a separate two-body operator basis and response model.  The present
+software does not implement that space.
 
 \subsection{Why a local common operator does not shift all bands equally}
 
@@ -63,12 +89,21 @@ reported zero-frequency coupling for an M-point Jahn--Teller mode increases from
 about $44$ meV in DFPT to $87$ meV in DFT+DMFT.  The corresponding R-point
 breathing-mode coupling changes from about $58$ meV to $50$ meV.  The same
 correlated material therefore contains a strongly corrected orbital-splitting
-mode and a comparatively stable charge-like breathing mode.
+mode and a comparatively stable block-identity density modulation.  The finite-R
+classification must be made in the paper's $2\times2\times2$ real-displacement
+supercell, equivalently a real $\vq/-\vq$ standing wave: the V-site identity
+blocks alternate in phase and therefore form a \texttt{site\_charge}-like
+pattern.  A single primitive-cell $\mathrm{diag}(g,g,g)$ block would instead look
+algebraically like \texttt{global\_charge} and is not a valid classification of
+the R-point mode.  In either representation, finite momentum excludes the Ward
+protected direction.
 
 For hole-doped CaCuO$_2$ at a representative interaction $U=3.1$ eV, the reported
 zero-frequency half- and full-breathing couplings change from approximately
 $70$ to $76$ meV and from $53$ to $45$ meV, respectively
-\citep{Abramovitch2025}.  These static changes are modest even though the
+\citep{Abramovitch2025}.  All Abramovitch numbers quoted here are comparisons
+within that paper's declared fixed-basis and many-body setup, not independent
+cross-code accuracy benchmarks.  These static changes are modest even though the
 quasiparticle weight is reduced.  At larger $U=4.7$ eV, however, the same study
 finds strong vertex frequency dependence on the phonon energy scale.  Agreement at
 $\omega=0$ is then insufficient to validate a dynamic scattering calculation.

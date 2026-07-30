@@ -11,9 +11,9 @@ Starting from \cref{eq:vksresponse,eq:chisresponse},
   \bigl[1-(v+f_{\mathrm{xc}})\chi_s\bigr]\delta V_{\ks}
   &=\delta V_{\mathrm{ion}}.
 \end{align}
-With $P=\chi_s/(1-f_{\mathrm{xc}}\chi_s)$,
+With $P_{\mathrm{MB}}=\chi_s/(1-f_{\mathrm{xc}}\chi_s)$,
 \begin{align}
-  (1-vP)(1-f_{\mathrm{xc}}\chi_s)
+  (1-vP_{\mathrm{MB}})(1-f_{\mathrm{xc}}\chi_s)
   &=1-f_{\mathrm{xc}}\chi_s
    -v\frac{\chi_s}{1-f_{\mathrm{xc}}\chi_s}
        (1-f_{\mathrm{xc}}\chi_s)\\
@@ -22,11 +22,23 @@ With $P=\chi_s/(1-f_{\mathrm{xc}}\chi_s)$,
 Thus
 \begin{equation}
   g^{\dfpt}
-  =\frac{g^0}{(1-vP)(1-f_{\mathrm{xc}}\chi_s)}.
+  =\frac{g^0}
+  {(1-vP_{\mathrm{MB}})(1-f_{\mathrm{xc}}\chi_s)}.
 \end{equation}
-Comparing with $g^{\mathrm{phys}}=g^0z\Gamma_\rho/(1-vP)$ yields
-$z\Gamma_\rho=P/\chi_s$.  This algebra establishes the matching condition under
-the scalar definitions; it does not establish that the condition is exact.
+Comparing with
+$g^{\mathrm{phys}}=g^0z\Gamma_\rho/(1-vP_{\mathrm{MB}})$ gives the complete
+ratio
+\begin{equation}
+  K_{\mathrm{total}}
+  =z\Gamma_\rho
+   \frac{1-(v+f_{\mathrm{xc}})\chi_s}{1-vP_{\mathrm{MB}}}
+  =z\Gamma_\rho(1-f_{\mathrm{xc}}\chi_s).
+\end{equation}
+If the separately tested proper-vertex matching is
+$z\Gamma_\rho=P_{\mathrm{MB}}/\chi_s
+=(1-f_{\mathrm{xc}}\chi_s)^{-1}$, then
+$K_{\mathrm{total}}\simeq1$.  The proper-vertex factor is therefore not an
+additional kernel to apply to $g^{\dfpt}$.
 
 \subsection{Uniform-potential cancellation at a quasiparticle pole}
 

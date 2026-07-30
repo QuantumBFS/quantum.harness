@@ -4,57 +4,57 @@
     {
       "case_id": "decision-common-shift",
       "kind": "decision",
-      "weights": {"charge": 1.0, "internal": 0.0, "nonlocal": 0.0},
-      "evidence": {"source_traceable": true, "reference_valid": true, "adiabatic_ratio": 0.01},
+      "weights": {"global_charge": 1.0, "site_charge": 0.0, "internal": 0.0, "nonlocal": 0.0},
+      "evidence": {"source_traceable": true, "reference_valid": true, "adiabatic_ratio": 0.01, "uniform_q_zero": true, "full_space_common_shift": true},
       "expected_decision": "dfpt-safe"
     },
     {
       "case_id": "decision-orbital-splitting",
       "kind": "decision",
-      "weights": {"charge": 0.0, "internal": 1.0, "nonlocal": 0.0},
-      "evidence": {"source_traceable": true, "reference_valid": true, "adiabatic_ratio": 0.01},
+      "weights": {"global_charge": 0.0, "site_charge": 0.0, "internal": 1.0, "nonlocal": 0.0},
+      "evidence": {"source_traceable": true, "reference_valid": true, "adiabatic_ratio": 0.01, "uniform_q_zero": false, "full_space_common_shift": false},
       "expected_decision": "static-correction"
     },
     {
       "case_id": "decision-hybridization",
       "kind": "decision",
-      "weights": {"charge": 0.70, "internal": 0.05, "nonlocal": 0.25},
-      "evidence": {"source_traceable": true, "reference_valid": true, "adiabatic_ratio": 0.02},
+      "weights": {"global_charge": 0.55, "site_charge": 0.15, "internal": 0.05, "nonlocal": 0.25},
+      "evidence": {"source_traceable": true, "reference_valid": true, "adiabatic_ratio": 0.02, "uniform_q_zero": false, "full_space_common_shift": false},
       "expected_decision": "static-correction"
     },
     {
       "case_id": "decision-nonadiabatic",
       "kind": "decision",
-      "weights": {"charge": 0.95, "internal": 0.03, "nonlocal": 0.02},
-      "evidence": {"source_traceable": true, "reference_valid": true, "adiabatic_ratio": 0.20},
+      "weights": {"global_charge": 0.95, "site_charge": 0.0, "internal": 0.03, "nonlocal": 0.02},
+      "evidence": {"source_traceable": true, "reference_valid": true, "adiabatic_ratio": 0.20, "uniform_q_zero": false, "full_space_common_shift": false},
       "expected_decision": "dynamic-correction"
     },
     {
       "case_id": "decision-missing-scale",
       "kind": "decision",
-      "weights": {"charge": 1.0, "internal": 0.0, "nonlocal": 0.0},
-      "evidence": {"source_traceable": true, "reference_valid": true},
+      "weights": {"global_charge": 1.0, "site_charge": 0.0, "internal": 0.0, "nonlocal": 0.0},
+      "evidence": {"source_traceable": true, "reference_valid": true, "uniform_q_zero": true, "full_space_common_shift": true},
       "expected_decision": "abstain"
     },
     {
       "case_id": "decision-invalid-reference",
       "kind": "decision",
-      "weights": {"charge": 1.0, "internal": 0.0, "nonlocal": 0.0},
-      "evidence": {"source_traceable": true, "reference_valid": false, "adiabatic_ratio": 0.01},
+      "weights": {"global_charge": 1.0, "site_charge": 0.0, "internal": 0.0, "nonlocal": 0.0},
+      "evidence": {"source_traceable": true, "reference_valid": false, "adiabatic_ratio": 0.01, "uniform_q_zero": true, "full_space_common_shift": true},
       "expected_decision": "abstain"
     },
     {
       "case_id": "decision-untraceable",
       "kind": "decision",
-      "weights": {"charge": 1.0, "internal": 0.0, "nonlocal": 0.0},
-      "evidence": {"source_traceable": false, "reference_valid": true, "adiabatic_ratio": 0.01},
+      "weights": {"global_charge": 1.0, "site_charge": 0.0, "internal": 0.0, "nonlocal": 0.0},
+      "evidence": {"source_traceable": false, "reference_valid": true, "adiabatic_ratio": 0.01, "uniform_q_zero": true, "full_space_common_shift": true},
       "expected_decision": "abstain"
     },
     {
       "case_id": "decision-zero-signal",
       "kind": "decision",
-      "weights": {"charge": 0.0, "internal": 0.0, "nonlocal": 0.0},
-      "evidence": {"source_traceable": true, "reference_valid": true, "adiabatic_ratio": 0.01},
+      "weights": {"global_charge": 0.0, "site_charge": 0.0, "internal": 0.0, "nonlocal": 0.0},
+      "evidence": {"source_traceable": true, "reference_valid": true, "adiabatic_ratio": 0.01, "uniform_q_zero": true, "full_space_common_shift": true},
       "expected_decision": "abstain"
     },
     {
@@ -78,7 +78,7 @@
       "asserted_as_fact": true
     },
     {
-      "case_id": "claim-static-matching",
+      "case_id": "claim-ueg-crystal-transfer",
       "kind": "claim",
       "candidate_status": "working-hypothesis",
       "expected_status": "working-hypothesis",

@@ -8,7 +8,8 @@ python3 eval/evaluate.py
 
 The 14 deterministic cases test four things:
 
-- decision accuracy for charge, internal, nonlocal, dynamic, invalid-reference, missing-evidence, and zero-signal inputs;
+- decision accuracy for a verified full-space strict-q=0 `global_charge`, `site_charge`, `internal`,
+  `nonlocal`, dynamic, invalid-reference, missing-evidence, and zero-signal inputs;
 - correct separation of exact constraints, numerical evidence, working hypotheses, and open questions;
 - citation coverage against `knowledge/references.bib`;
 - unsupported claim rate, where an unsupported statement counts as an error only if the agent asserts it as fact instead of labeling uncertainty.

@@ -23,7 +23,17 @@ The DFPT electron--phonon matrix element is
 \end{equation}
 The perturbation is a matrix in band, orbital, spin, and reciprocal-lattice
 indices.  Therefore standard DFPT does not assume that every electron sees the
-same scalar shift.
+same scalar shift.  For a general Fourier component the operator that transfers
+$\vk$ to $\vk+\vq$ is not Hermitian by itself; a real lattice displacement gives
+\begin{equation}
+  \left(D^{\ks}_{\nu\vq}\right)^\dagger
+  =D^{\ks}_{\nu,-\vq}.
+  \label{eq:qpairhermiticity}
+\end{equation}
+The executable Hermitian prototype below is therefore restricted to a real-space
+displacement derivative, a Gamma-point perturbation, or a real standing-wave
+combination of $\vq$ and $-\vq$.  It does not expose a general continuous
+fixed-$\vq$ matrix interface.
 
 The first-order orbital response is obtained from a Sternheimer equation of the
 schematic form
@@ -90,16 +100,19 @@ Choose the convention
 \end{equation}
 where $\Sigma^{\mathrm{corr}}$ is the self-energy correction beyond the chosen
 Kohn--Sham reference, with the corresponding double counting removed.  The
-many-body perturbation of the quasiparticle equation contains
+fixed-basis one-body inverse-Green-function vertex is
 \begin{equation}
-  D^{\mb}_{\nu\vq}(\omega)
+  \Lambda^{(1)}_{\nu\vq}(\omega)
+  \equiv-\partial_{\nu\vq}G^{-1}(\omega)
   = \partial_{\nu\vq}
-    \bigl[V_{\ks}+\Sigma^{\mathrm{corr}}(\omega)\bigr].
+    \bigl[V_{\ks}+\Sigma^{\mathrm{corr}}(\omega)\bigr],
   \label{eq:dmb}
 \end{equation}
 Thus the central vertex term absent from standard DFPT is
 $\partial_{\nu\vq}\Sigma^{\mathrm{corr}}$, together with its frequency
-dependence and consistent wavefunction renormalization.  A large equilibrium
+dependence.  Quasiparticle external-leg factors and state rotations are separate
+from the fixed-basis vertex in \cref{eq:dmb} and must be applied consistently
+when constructing an observable.  A large equilibrium
 self-energy does not logically imply a large derivative with respect to a
 particular phonon.  This distinction is the first reason why the label ``strongly
 correlated'' alone cannot predict the DFPT error.  A consistent separation between

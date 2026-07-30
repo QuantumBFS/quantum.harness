@@ -1,24 +1,28 @@
 LATEXMK ?= latexmk
 MAIN := main
+BUILD_DIR := build
+BUILD_PDF := $(BUILD_DIR)/$(MAIN).pdf
 TEX_SOURCES := $(wildcard sections/*.tex appendices/*.tex figures/*.tex)
 
-.PHONY: all clean check render
+.PHONY: all clean check dist render
 
-all: $(MAIN).pdf
+all: $(BUILD_PDF)
 
-$(MAIN).pdf: $(MAIN).tex references.bib $(TEX_SOURCES)
-	$(LATEXMK) -xelatex -interaction=nonstopmode -halt-on-error $(MAIN).tex
+$(BUILD_PDF): $(MAIN).tex references.bib $(TEX_SOURCES)
+	mkdir -p $(BUILD_DIR)
+	$(LATEXMK) -xelatex -outdir=$(BUILD_DIR) -interaction=nonstopmode -halt-on-error $(MAIN).tex
 
-check:
-	$(LATEXMK) -xelatex -interaction=nonstopmode -halt-on-error $(MAIN).tex
-	@test -f $(MAIN).log
-	@! grep -E "undefined references|Citation .* undefined|There were undefined|Overfull \\\\hbox|Overfull \\\\vbox" $(MAIN).log
-	@pdfinfo $(MAIN).pdf | grep -E "^(Pages|Page size|File size):"
+check: $(BUILD_PDF)
+	@test -f $(BUILD_DIR)/$(MAIN).log
+	@! grep -E "undefined references|Citation .* undefined|There were undefined|Overfull \\\\hbox|Overfull \\\\vbox" $(BUILD_DIR)/$(MAIN).log
+	@pdfinfo $(BUILD_PDF) | grep -E "^(Pages|Page size|File size):"
 
-render: $(MAIN).pdf
+dist: $(BUILD_PDF)
+	cp $(BUILD_PDF) $(MAIN).pdf
+
+render: $(BUILD_PDF)
 	mkdir -p .rendered
-	pdftoppm -png -r 144 $(MAIN).pdf .rendered/page
+	pdftoppm -png -r 144 $(BUILD_PDF) .rendered/page
 
 clean:
-	$(LATEXMK) -C $(MAIN).tex
-	rm -rf .rendered
+	rm -rf $(BUILD_DIR) .rendered

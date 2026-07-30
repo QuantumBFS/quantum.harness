@@ -1,4 +1,5 @@
 import importlib
+import json
 from pathlib import Path
 import subprocess
 import sys
@@ -18,8 +19,13 @@ class SparseAnchorExampleTests(unittest.TestCase):
 
     def test_synthetic_case_fits_and_scores_held_out_vectors(self):
         runner = self.load_runner()
+        case = json.loads(CASE_PATH.read_text(encoding="utf-8"))
         result = runner.run_case(CASE_PATH)
 
+        self.assertEqual(
+            case["channel_names"], ["global_charge", "internal", "nonlocal"]
+        )
+        self.assertNotIn("site_charge", case["channel_names"])
         self.assertEqual(result["validation_scope"], "software-contract-only")
         self.assertLess(result["held_out_metrics"]["relative_rmse"], 1.0e-10)
         self.assertGreater(abs(result["model"]["response_matrix"][0][1]), 0.05)

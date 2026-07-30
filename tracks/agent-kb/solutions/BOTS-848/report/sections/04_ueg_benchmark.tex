@@ -27,30 +27,41 @@ only at $q=0$ does not yet predict transport or pairing.
 
 \subsection{The quantitative DFPT--many-body matching condition}
 
-Using the scalar relations of \cref{sec:dfpt,sec:manybody}, define the
-interacting irreducible polarization through a static local kernel,
+Using the scalar relations of \cref{sec:dfpt,sec:manybody}, denote the
+many-body irreducible polarization by $P_{\mathrm{MB}}$ and match it to a static
+local kernel,
 \begin{equation}
-  P(q,0)=\frac{\chi_s(q,0)}{1-f_{\mathrm{xc}}(q,0)\chi_s(q,0)}.
+  P_{\mathrm{MB}}(q,0)=
+  \frac{\chi_s(q,0)}{1-f_{\mathrm{xc}}(q,0)\chi_s(q,0)}.
   \label{eq:pfromfxc}
 \end{equation}
 Then
 \begin{equation}
   1-(v+f_{\mathrm{xc}})\chi_s
-  = (1-vP)(1-f_{\mathrm{xc}}\chi_s).
+  = (1-vP_{\mathrm{MB}})(1-f_{\mathrm{xc}}\chi_s).
   \label{eq:factorization}
 \end{equation}
-Comparing \cref{eq:gdfptscalar,eq:gphysical} shows that equality between the
-two scalar vertices requires
+The correction applied to an already screened DFPT vertex must be the complete
+physical-to-DFPT ratio
 \begin{equation}
-  z\Gamma_\rho(q,0)
-  \simeq \frac{1}{1-f_{\mathrm{xc}}(q,0)\chi_s(q,0)}
-  = \frac{P(q,0)}{\chi_s(q,0)}.
+  K_{\mathrm{total}}(q,0)
+  \equiv \frac{g^{\mathrm{phys}}(q,0)}{g^{\dfpt}(q,0)}
+  =z\Gamma_\rho(q,0)
+   \frac{1-[v(q)+f_{\mathrm{xc}}(q,0)]\chi_s(q,0)}
+        {1-v(q)P_{\mathrm{MB}}(q,0)}.
   \label{eq:matchingcondition}
 \end{equation}
-This is the quantitative relationship among quasiparticle residue, vertex, and
-static response relevant to the cited electron-gas comparison.  It is not the
-same as setting $z\Gamma_\rho=1$, and it is not produced by the dynamic Ward
-identity alone.
+Under the scalar matching above and the corresponding proper-vertex relation
+\begin{equation}
+  z\Gamma_\rho(q,0)\simeq
+  \frac{P_{\mathrm{MB}}(q,0)}{\chi_s(q,0)},
+  \label{eq:propervertexmatching}
+\end{equation}
+the factors in \cref{eq:matchingcondition} cancel and
+$K_{\mathrm{total}}\simeq1$.  Thus $P_{\mathrm{MB}}/\chi_s$ is a relation for
+the proper vertex in this convention, not a second correction factor to multiply
+onto the already screened DFPT perturbation.  The matching is not produced by
+the dynamic Ward identity alone.
 
 Recent vertex-diagrammatic Monte Carlo calculations for the electron liquid at
 $r_s=1$--$5$ report that the fully interacting quasiparticle vertex and a
@@ -72,18 +83,19 @@ favorable setting for a density-kernel closure.
 This explains both the value and the limitation of the UEG result:
 
 \begin{itemize}
-  \item it provides a controlled baseline for the total-density channel and a
-  candidate finite-$q$ prior;
+  \item it provides evidence that the complete static DFPT vertex can be accurate
+  in the tested scalar-density domain, including finite $q$;
   \item it cannot determine the correction to orbital, bond, hopping, spin, or
-  interaction-modulation channels that do not exist in the model; and
+  separate two-body interaction vertices that do not exist in the model; and
   \item its finite-$q$ agreement must be tested, not assumed, when transferred to
   a crystal with local-field and multi-orbital structure.
 \end{itemize}
 
 \begin{keypoint}[UEG conclusion]
 The UEG does not show that real materials have only $q=0$ coupling.  It shows that
-when the perturbation space contains only density, the many-body problem may be
-compressed into an accurate static density kernel over a surprisingly wide
-momentum range.  The next-generation theory asks whether an analogous compression
-exists channel by channel in solids.
+when the perturbation space contains only density, the complete screened DFPT
+vertex can be accurate over a surprisingly wide momentum range.  It does not
+license a further $P_{\mathrm{MB}}/\chi_s$ multiplication.  Whether an analogous
+accuracy or compressible correction exists in solid-state one-body channels is a
+separate working hypothesis.
 \end{keypoint}

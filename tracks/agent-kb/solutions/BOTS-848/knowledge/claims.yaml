@@ -1,6 +1,7 @@
 {
   "schema_version": "1.0.0",
   "claim_statuses": [
+    "established-theory",
     "exact-constraint",
     "numerical-evidence",
     "working-hypothesis",
@@ -14,16 +15,16 @@
       "source_ids": ["Nambu1960", "Hedin1965"],
       "source_traceable": true,
       "scope": "Conserved charge vertex with the order of momentum and frequency limits stated explicitly.",
-      "limitations": "This does not constrain generic orbital, bond, spin, or finite-q phonon operators."
+      "limitations": "Only an original unprojected strict uniform q=0 full-space common shift is protected. A projected global_charge identity is insufficient by itself; site_charge, internal, nonlocal, and generic finite-q phonon operators are not protected."
     },
     {
       "claim_id": "adiabatic-dfpt-static",
       "statement": "Standard adiabatic DFPT computes a static self-consistent Kohn-Sham response around a chosen ground-state reference.",
-      "status": "exact-constraint",
+      "status": "established-theory",
       "source_ids": ["Gonze1995", "Baroni2001"],
       "source_traceable": true,
       "scope": "Adiabatic DFPT and its static linear-response construction.",
-      "limitations": "A correct static derivative does not by itself validate a vertex at the physical phonon frequency."
+      "limitations": "This sourced method definition is not an exact constraint on physical accuracy; a correct static derivative does not by itself validate a vertex at the physical phonon frequency."
     },
     {
       "claim_id": "ueg-finite-q-response",
@@ -36,25 +37,34 @@
     },
     {
       "claim_id": "ueg-dfpt-agreement",
-      "statement": "Variational diagrammatic Monte Carlo reports close agreement between the interacting UEG quasiparticle vertex and a DFPT-like static-kernel expression for r_s from 1 to 5 and momentum transfers up to 2 k_F.",
+      "statement": "Variational diagrammatic Monte Carlo reports approximate scalar matching of the proper response and vertex factors, giving agreement between the complete screened UEG physical vertex and DFPT-like static-kernel vertex with K_total approximately one for r_s from 1 to 5 and momentum transfers up to 2 k_F.",
       "status": "numerical-evidence",
       "source_ids": ["Cai2025"],
       "source_traceable": true,
       "scope": "UEG benchmark in arXiv:2512.19382v2, especially Eq. 34 and Fig. 8.",
-      "limitations": "This is numerical evidence in a scalar-density model, not an exact theorem for crystals."
+      "limitations": "This is numerical evidence in a scalar-density model, not an exact theorem for crystals and not a P_MB/chi_s factor to multiply onto screened DFPT."
     },
     {
-      "claim_id": "matching-not-ward-alone",
-      "statement": "The static comparison requires a quantitative matching among quasiparticle weight, charge vertex, and static density response; the dynamic Ward limit alone does not produce that matching.",
-      "status": "working-hypothesis",
+      "claim_id": "scalar-total-ratio",
+      "statement": "In the declared scalar convention, K_total = z Gamma_rho [1-(v+f_xc)chi_s]/[1-v P_MB]; if P_MB=chi_s/(1-f_xc chi_s) and z Gamma_rho=P_MB/chi_s are both assumed, substitution gives K_total=1 algebraically.",
+      "status": "exact-constraint",
       "source_ids": ["Cai2025", "Hedin1965"],
       "source_traceable": true,
-      "scope": "Interpretation of the scalar static DFPT-to-many-body comparison.",
-      "limitations": "Vertex and screening conventions must be checked before transferring the relation between papers."
+      "scope": "Conditional algebraic identity among screened scalar vertices after two separate matching relations have been supplied.",
+      "limitations": "Neither matching relation is an exact constraint: their approximate validity is numerical evidence from Cai2025. The identity cannot be transferred between vertex conventions without conversion."
+    },
+    {
+      "claim_id": "ueg-crystal-transfer",
+      "statement": "The complete finite-q UEG agreement may provide a useful calibration control for nonuniform density channels in crystals.",
+      "status": "working-hypothesis",
+      "source_ids": ["Cai2025"],
+      "source_traceable": true,
+      "scope": "Transfer from the tested scalar UEG domain to convention-matched crystal density perturbations.",
+      "limitations": "Crystal local fields, orbital structure, dimensionality, and the missing general q/-q executable interface must be tested."
     },
     {
       "claim_id": "common-operator-not-common-band-shift",
-      "statement": "An operator proportional to the identity inside a local subspace can produce different band matrix elements because Bloch states have different subspace weights and phases.",
+      "statement": "A site_charge operator proportional to each block identity can produce different band matrix elements because Bloch states have different subspace weights and phases.",
       "status": "exact-constraint",
       "source_ids": ["Giustino2017"],
       "source_traceable": true,
@@ -63,12 +73,12 @@
     },
     {
       "claim_id": "srvo3-mode-contrast",
-      "statement": "In one DFT+DMFT study of SrVO3, the orbital-splitting Jahn-Teller mode changes much more than the charge-like breathing mode relative to DFPT.",
+      "statement": "In one DFT+DMFT study of SrVO3, the internal Jahn-Teller mode changes much more than the finite-q site_charge-like breathing mode relative to DFPT.",
       "status": "numerical-evidence",
       "source_ids": ["Abramovitch2025"],
       "source_traceable": true,
       "scope": "Wannier-local coupling at omega=0 for the M Jahn-Teller and R breathing modes with the paper's stated U and J.",
-      "limitations": "This is one material and one projector/normalization convention."
+      "limitations": "This is a same-paper control within one fixed projector, normalization, and many-body setup, not an independent cross-code accuracy benchmark."
     },
     {
       "claim_id": "cacu2o-dynamic-risk",
@@ -77,7 +87,7 @@
       "source_ids": ["Abramovitch2025"],
       "source_traceable": true,
       "scope": "0.15-hole-doped CaCuO2, breathing modes, U up to 4.7 eV.",
-      "limitations": "A static omega=0 comparison cannot establish the physical-frequency scattering vertex."
+      "limitations": "These are same-paper fixed-setup controls; a static omega=0 comparison cannot establish the physical-frequency scattering vertex."
     },
     {
       "claim_id": "reference-state-gate",
@@ -90,7 +100,7 @@
     },
     {
       "claim_id": "channel-selective-protection",
-      "statement": "Static DFPT errors are controlled more directly by the phonon operator channel and its susceptibility than by a material-wide label of correlation strength.",
+      "statement": "Static DFPT errors may be organized by the one-body global_charge, site_charge, internal, and nonlocal content and susceptibilities, with two-body interaction vertices treated separately, rather than by a material-wide label of correlation strength.",
       "status": "working-hypothesis",
       "source_ids": ["Abramovitch2025", "Cai2025", "Zhou2021", "Li2019"],
       "source_traceable": true,
@@ -99,12 +109,12 @@
     },
     {
       "claim_id": "low-dimensional-response-matrix",
-      "statement": "Inside a fixed localized operator basis and calibration domain, beyond-DFPT coefficient corrections may be compressible into a small channel-response matrix fitted from sparse anchors.",
+      "statement": "Inside a fixed localized one-body operator basis and calibration domain, inverse-Green-function vertex coefficients may be compressible into a small response matrix fitted from sparse anchors.",
       "status": "working-hypothesis",
       "source_ids": ["Abramovitch2025", "Cai2025", "Li2019", "Nomura2015"],
       "source_traceable": true,
-      "scope": "Static convention-matched channel coefficients after separating analytic long-range fields from localized short-range operators.",
-      "limitations": "The bundled held-out case is synthetic. The executable model still needs DFPT coefficients at every prediction point, so no real-material transfer accuracy or speedup over DFPT has been established."
+      "scope": "Static convention-matched fixed-basis one-body inverse-Green-function vertex coefficients after separating analytic long-range fields.",
+      "limitations": "Quasiparticle external-leg Z^(1/2), state rotations, and two-body vertices are separate. The bundled held-out case is synthetic and omits site_charge by construction. No real-material K, transfer accuracy, or measured speedup has been established."
     },
     {
       "claim_id": "universal-dfpt-validity",
