@@ -219,6 +219,66 @@ The same schema-dispatched CLI reports pending cells, runs cells, merges all
 /absolute/offline/python scripts/run_pilot.py verify --run-spec /absolute/download/pilot-p0-extension-v1/run_spec.json
 ```
 
+After extension evidence exists and has been downloaded, run the immutable
+local analysis workflow below from this solution directory.
+Both source analyses must first be recomputed against their verified run roots.
+The two analysis commands must return `verified-existing` before `combine`; a
+newly `published` source analysis is not sufficient for that combine attempt.
+
+```bash
+uv run python scripts/run_pilot.py verify --run-spec \
+  /home/footman/code/quantum.harness-challenge-194/results/challenge-194/pilot-p0-739880d/run_spec.json
+
+uv run python scripts/analyze_pilot.py analyze --run-spec \
+  /home/footman/code/quantum.harness-challenge-194/results/challenge-194/pilot-p0-739880d/run_spec.json \
+  --output /home/footman/code/quantum.harness-challenge-194/results/challenge-194/p0_analysis.json
+
+uv run python scripts/run_pilot.py verify --run-spec \
+  /home/footman/code/quantum.harness-challenge-194/results/challenge-194/pilot-p0-extension-v1/run_spec.json
+
+uv run python scripts/analyze_pilot.py analyze-extension --run-spec \
+  /home/footman/code/quantum.harness-challenge-194/results/challenge-194/pilot-p0-extension-v1/run_spec.json \
+  --protocol /home/footman/code/quantum.harness-challenge-194/results/challenge-194/p0_extension_v1_protocol.json \
+  --output /home/footman/code/quantum.harness-challenge-194/results/challenge-194/p0_extension_v1_analysis.json
+```
+
+Only after both recomputations return `verified-existing`, combine and select
+the fully source-validated evidence:
+
+```bash
+uv run python scripts/analyze_pilot.py combine --p0-analysis \
+  /home/footman/code/quantum.harness-challenge-194/results/challenge-194/p0_analysis.json \
+  --extension-analysis /home/footman/code/quantum.harness-challenge-194/results/challenge-194/p0_extension_v1_analysis.json \
+  --output /home/footman/code/quantum.harness-challenge-194/results/challenge-194/p0_combined_analysis_v2.json
+
+uv run python scripts/analyze_pilot.py select --analysis \
+  /home/footman/code/quantum.harness-challenge-194/results/challenge-194/p0_combined_analysis_v2.json \
+  --p0-analysis /home/footman/code/quantum.harness-challenge-194/results/challenge-194/p0_analysis.json \
+  --extension-analysis /home/footman/code/quantum.harness-challenge-194/results/challenge-194/p0_extension_v1_analysis.json \
+  --output /home/footman/code/quantum.harness-challenge-194/results/challenge-194/p0_combined_brackets_v2.json
+```
+
+The combined-v2 selector and builder never trust combined JSON alone. Both
+commands require the exact P0 and extension analyses and recompute full source
+validation. If every combined bracket is selected, build P1 with the same
+three inputs:
+
+```bash
+uv run python scripts/analyze_pilot.py build-p1 --analysis \
+  /home/footman/code/quantum.harness-challenge-194/results/challenge-194/p0_combined_analysis_v2.json \
+  --p0-analysis /home/footman/code/quantum.harness-challenge-194/results/challenge-194/p0_analysis.json \
+  --extension-analysis /home/footman/code/quantum.harness-challenge-194/results/challenge-194/p0_extension_v1_analysis.json \
+  --output /home/footman/code/quantum.harness-challenge-194/results/challenge-194/p1_protocol.json
+```
+
+`analyze-extension`, `combine`, `select`, and `build-p1` use bounded canonical
+JSON reads and immutable no-clobber publication. A byte-identical retry returns
+`verified-existing`; changed installed bytes, malformed canonical input, or a
+scientific refusal exits nonzero without replacing or newly creating output.
+The legacy P0-analysis-v1 `build-p1 --analysis ... --output ...` form remains
+available only without either combined-source option. Mixed or extraneous
+source arguments fail closed.
+
 No P0 extension data exist yet, so there is no extension analysis or combined
 analysis to select from. `p1_protocol.json` does not exist and P1 remains
 blocked until the extension is executed, downloaded, verified, analyzed, and

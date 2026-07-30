@@ -161,6 +161,13 @@ def test_build_p1_command_refuses_extension_without_publication(
     output = tmp_path / "p1_protocol.json"
     extension = _extension_brackets(source)
     monkeypatch.setattr(CLI, "select_p1_brackets", lambda _source: extension)
+    monkeypatch.setattr(
+        CLI,
+        "build_p1_protocol",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(
+            RuntimeError("P0 extension required before P1 publication: 1.0")
+        ),
+    )
 
     assert (
         CLI.main(
@@ -307,3 +314,347 @@ def test_verify_command_accepts_bound_canonical_protocol(
         "protocol_sha256": protocol["protocol_sha256"],
         "status": "verified",
     }
+
+
+def _command_sources(tmp_path: Path, command: str) -> tuple[list[str], Path]:
+    output = tmp_path / f"{command}.json"
+    documents = {
+        "protocol": {"schema_version": extension.EXTENSION_PROTOCOL_SCHEMA},
+        "p0": {"schema_version": analysis.ANALYSIS_SCHEMA},
+        "extension": {"schema_version": analysis.EXTENSION_ANALYSIS_SCHEMA},
+        "combined": {"schema_version": analysis.COMBINED_ANALYSIS_SCHEMA},
+    }
+    paths: dict[str, Path] = {}
+    for name, document in documents.items():
+        path = tmp_path / f"{name}.json"
+        path.write_bytes(_canonical_bytes(document))
+        paths[name] = path
+    if command == "analyze-extension":
+        return (
+            [
+                command,
+                "--run-spec",
+                str(tmp_path / "run_spec.json"),
+                "--protocol",
+                str(paths["protocol"]),
+                "--output",
+                str(output),
+            ],
+            output,
+        )
+    if command == "combine":
+        return (
+            [
+                command,
+                "--p0-analysis",
+                str(paths["p0"]),
+                "--extension-analysis",
+                str(paths["extension"]),
+                "--output",
+                str(output),
+            ],
+            output,
+        )
+    return (
+        [
+            command,
+            "--analysis",
+            str(paths["combined"]),
+            "--p0-analysis",
+            str(paths["p0"]),
+            "--extension-analysis",
+            str(paths["extension"]),
+            "--output",
+            str(output),
+        ],
+        output,
+    )
+
+
+def _stub_command(
+    monkeypatch: pytest.MonkeyPatch,
+    command: str,
+    marker: str,
+    *,
+    fail: bool = False,
+) -> dict[str, object]:
+    schemas = {
+        "analyze-extension": analysis.EXTENSION_ANALYSIS_SCHEMA,
+        "combine": analysis.COMBINED_ANALYSIS_SCHEMA,
+        "select": analysis.COMBINED_BRACKET_SCHEMA,
+        "build-p1": analysis.P1_PROTOCOL_SCHEMA,
+    }
+    hash_fields = {
+        "analyze-extension": "analysis_document_sha256",
+        "combine": "analysis_document_sha256",
+        "select": "bracket_document_sha256",
+        "build-p1": "protocol_sha256",
+    }
+    document = {
+        "schema_version": schemas[command],
+        hash_fields[command]: marker * 64,
+    }
+
+    def result(*_args, **_kwargs):
+        if fail:
+            raise RuntimeError("scientific refusal")
+        return document
+
+    if command == "analyze-extension":
+        monkeypatch.setattr(CLI, "aggregate_p0_extension", result)
+    elif command == "combine":
+        monkeypatch.setattr(CLI, "combine_p0_evidence", result)
+    elif command == "select":
+        monkeypatch.setattr(CLI, "select_p1_brackets", result)
+    else:
+        monkeypatch.setattr(
+            CLI,
+            "select_p1_brackets",
+            lambda *_args, **_kwargs: {
+                "schema_version": analysis.COMBINED_BRACKET_SCHEMA,
+                "requires_p0_extension": False,
+            },
+        )
+        monkeypatch.setattr(CLI, "build_p1_protocol", result)
+    return document
+
+
+@pytest.mark.parametrize(
+    "command",
+    ("analyze-extension", "combine", "select", "build-p1"),
+)
+def test_immutable_commands_publish_verify_and_reject_changed_bytes(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    command: str,
+):
+    arguments, output = _command_sources(tmp_path, command)
+    _stub_command(monkeypatch, command, "a")
+
+    assert CLI.main(arguments) == 0
+    installed = output.read_bytes()
+    assert json.loads(capsys.readouterr().out)["publication"] == "published"
+
+    assert CLI.main(arguments) == 0
+    assert output.read_bytes() == installed
+    assert json.loads(capsys.readouterr().out)["publication"] == "verified-existing"
+
+    _stub_command(monkeypatch, command, "b")
+    assert CLI.main(arguments) == 1
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert "installed bytes mismatch" in captured.err
+    assert output.read_bytes() == installed
+
+
+@pytest.mark.parametrize(
+    ("command", "malformed_name"),
+    (
+        ("analyze-extension", "protocol"),
+        ("combine", "p0"),
+        ("select", "combined"),
+        ("build-p1", "combined"),
+    ),
+)
+def test_immutable_commands_reject_noncanonical_inputs_without_output(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    command: str,
+    malformed_name: str,
+):
+    arguments, output = _command_sources(tmp_path, command)
+    (tmp_path / f"{malformed_name}.json").write_text(
+        '{\n  "schema_version": "noncanonical"\n}\n',
+        encoding="utf-8",
+    )
+    _stub_command(monkeypatch, command, "a")
+
+    assert CLI.main(arguments) == 1
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert "not canonical JSON" in captured.err
+    assert not output.exists()
+
+
+@pytest.mark.parametrize(
+    "command",
+    ("analyze-extension", "combine", "select", "build-p1"),
+)
+def test_immutable_commands_leave_no_output_on_scientific_failure(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    command: str,
+):
+    arguments, output = _command_sources(tmp_path, command)
+    _stub_command(monkeypatch, command, "a", fail=True)
+
+    assert CLI.main(arguments) == 1
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert "scientific refusal" in captured.err
+    assert not output.exists()
+
+
+def test_combined_build_leaves_protocol_absent_when_selection_is_unresolved(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+):
+    arguments, output = _command_sources(tmp_path, "build-p1")
+    monkeypatch.setattr(
+        CLI,
+        "select_p1_brackets",
+        lambda *_args, **_kwargs: {
+            "schema_version": analysis.COMBINED_BRACKET_SCHEMA,
+            "requires_p0_extension": True,
+        },
+    )
+    monkeypatch.setattr(
+        CLI,
+        "build_p1_protocol",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(
+            RuntimeError("P0 extension required before P1 publication: 1.0")
+        ),
+    )
+
+    assert CLI.main(arguments) == 1
+    assert capsys.readouterr().out == ""
+    assert not output.exists()
+
+
+@pytest.mark.parametrize("command", ("select", "build-p1"))
+@pytest.mark.parametrize("sources", ((), ("p0",), ("extension",)))
+def test_combined_commands_fail_closed_without_both_explicit_sources(
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+    command: str,
+    sources: tuple[str, ...],
+):
+    _full_arguments, output = _command_sources(tmp_path, command)
+    arguments = [
+        command,
+        "--analysis",
+        str(tmp_path / "combined.json"),
+        "--output",
+        str(output),
+    ]
+    if "p0" in sources:
+        arguments.extend(["--p0-analysis", str(tmp_path / "p0.json")])
+    if "extension" in sources:
+        arguments.extend(["--extension-analysis", str(tmp_path / "extension.json")])
+
+    assert CLI.main(arguments) == 1
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert "requires explicit --p0-analysis and --extension-analysis" in captured.err
+    assert not output.exists()
+
+
+def test_v1_build_compatibility_is_allowed_only_without_source_arguments(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+):
+    source = _analysis_document(complete=True)
+    analysis_path = tmp_path / "p0.json"
+    analysis_path.write_bytes(_canonical_bytes(source))
+    output = tmp_path / "p1.json"
+    brackets = {"schema_version": analysis.BRACKET_SCHEMA}
+    protocol = {
+        "schema_version": analysis.P1_PROTOCOL_SCHEMA,
+        "protocol_sha256": "a" * 64,
+    }
+    calls: list[tuple[object, object]] = []
+    monkeypatch.setattr(
+        CLI,
+        "select_p1_brackets",
+        lambda _source: calls.append((None, None)) or brackets,
+    )
+    monkeypatch.setattr(CLI, "build_p1_protocol", lambda *_args, **_kwargs: protocol)
+    base = [
+        "build-p1",
+        "--analysis",
+        str(analysis_path),
+        "--output",
+        str(output),
+    ]
+
+    assert CLI.main(base) == 0
+    assert calls == [(None, None)]
+    capsys.readouterr()
+
+    for extra in (
+        ["--p0-analysis", str(analysis_path)],
+        [
+            "--p0-analysis",
+            str(analysis_path),
+            "--extension-analysis",
+            str(analysis_path),
+        ],
+    ):
+        other_output = tmp_path / f"rejected-{len(extra)}.json"
+        arguments = [*base[:-1], str(other_output), *extra]
+        assert CLI.main(arguments) == 1
+        captured = capsys.readouterr()
+        assert captured.out == ""
+        assert "v1 build-p1 does not accept combined source arguments" in captured.err
+        assert not other_output.exists()
+
+
+@pytest.mark.parametrize("command", ("select", "build-p1"))
+def test_cli_rejects_resigned_combined_provenance_bypass(
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+    command: str,
+):
+    from test_pilot_analysis import _combined_selector_document
+
+    p0, extension_analysis, combined = _combined_selector_document()
+    for field in (
+        "source_p0_analysis_document_sha256",
+        "source_extension_analysis_document_sha256",
+        "p0_run_spec_sha256",
+        "p0_progress_sha256",
+        "extension_run_spec_sha256",
+        "extension_progress_sha256",
+        "p0_source_revision",
+        "extension_source_revision",
+        "observable_columns",
+    ):
+        combined.pop(field)
+    unsigned = dict(combined)
+    unsigned.pop("analysis_document_sha256")
+    combined["analysis_document_sha256"] = hashlib.sha256(
+        _canonical_bytes(unsigned)
+    ).hexdigest()
+    for name, document in (
+        ("p0", p0),
+        ("extension", extension_analysis),
+        ("combined", combined),
+    ):
+        (tmp_path / f"{name}.json").write_bytes(_canonical_bytes(document))
+    output = tmp_path / f"{command}.json"
+
+    assert (
+        CLI.main(
+            [
+                command,
+                "--analysis",
+                str(tmp_path / "combined.json"),
+                "--p0-analysis",
+                str(tmp_path / "p0.json"),
+                "--extension-analysis",
+                str(tmp_path / "extension.json"),
+                "--output",
+                str(output),
+            ]
+        )
+        == 1
+    )
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert "combined analysis fields are invalid" in captured.err
+    assert not output.exists()

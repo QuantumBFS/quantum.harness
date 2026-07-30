@@ -260,6 +260,19 @@ def test_readme_documents_exact_p0_p1_collaborator_boundary():
         "p1_protocol.json does not exist",
         "P1 has not been published or executed",
         "verified-existing",
+        "scripts/analyze_pilot.py analyze-extension --run-spec",
+        "results/challenge-194/p0_extension_v1_protocol.json",
+        "results/challenge-194/pilot-p0-extension-v1/run_spec.json",
+        "results/challenge-194/p0_extension_v1_analysis.json",
+        "scripts/analyze_pilot.py combine --p0-analysis",
+        "results/challenge-194/p0_combined_analysis_v2.json",
+        "scripts/analyze_pilot.py select --analysis",
+        "--p0-analysis",
+        "--extension-analysis",
+        "results/challenge-194/p0_combined_brackets_v2.json",
+        "source analyses must first be recomputed",
+        "against their verified run roots",
+        "return `verified-existing` before `combine`",
     )
     for text in required:
         assert text in readme

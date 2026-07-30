@@ -14,8 +14,11 @@ from long_range_percolation.artifacts import (
 )
 from long_range_percolation.pilot_analysis import (
     ANALYSIS_SCHEMA,
+    COMBINED_ANALYSIS_SCHEMA,
+    EXTENSION_ANALYSIS_SCHEMA,
     P1_PROTOCOL_SCHEMA,
     aggregate_p0,
+    aggregate_p0_extension,
     build_p1_protocol,
     select_p1_brackets,
     validate_p1_protocol,
@@ -26,6 +29,7 @@ from long_range_percolation.pilot_analysis import (
 from long_range_percolation.pilot_extension import (
     EXTENSION_PROTOCOL_SCHEMA,
     build_p0_extension_protocol,
+    combine_p0_evidence,
 )
 
 
@@ -39,8 +43,26 @@ def _parser() -> argparse.ArgumentParser:
     analyze.add_argument("--run-spec", type=Path, required=True)
     analyze.add_argument("--output", type=Path, required=True)
 
+    analyze_extension = commands.add_parser("analyze-extension")
+    analyze_extension.add_argument("--run-spec", type=Path, required=True)
+    analyze_extension.add_argument("--protocol", type=Path, required=True)
+    analyze_extension.add_argument("--output", type=Path, required=True)
+
+    combine = commands.add_parser("combine")
+    combine.add_argument("--p0-analysis", type=Path, required=True)
+    combine.add_argument("--extension-analysis", type=Path, required=True)
+    combine.add_argument("--output", type=Path, required=True)
+
+    select = commands.add_parser("select")
+    select.add_argument("--analysis", type=Path, required=True)
+    select.add_argument("--p0-analysis", type=Path)
+    select.add_argument("--extension-analysis", type=Path)
+    select.add_argument("--output", type=Path, required=True)
+
     build = commands.add_parser("build-p1")
     build.add_argument("--analysis", type=Path, required=True)
+    build.add_argument("--p0-analysis", type=Path)
+    build.add_argument("--extension-analysis", type=Path)
     build.add_argument("--output", type=Path, required=True)
 
     extension = commands.add_parser("build-p0-extension")
@@ -78,6 +100,42 @@ def _publish_or_verify(
     return "published"
 
 
+def _combined_command_sources(
+    arguments: argparse.Namespace,
+    source: Mapping[str, object],
+) -> tuple[Mapping[str, object] | None, Mapping[str, object] | None]:
+    p0_path = arguments.p0_analysis
+    extension_path = arguments.extension_analysis
+    if source.get("schema_version") == COMBINED_ANALYSIS_SCHEMA:
+        if p0_path is None or extension_path is None:
+            raise RuntimeError(
+                "combined-v2 command requires explicit --p0-analysis and "
+                "--extension-analysis"
+            )
+        return (
+            _mapping_document(p0_path.resolve(), "P0 analysis document"),
+            _mapping_document(
+                extension_path.resolve(), "P0 extension analysis document"
+            ),
+        )
+    if source.get("schema_version") == ANALYSIS_SCHEMA:
+        if p0_path is not None or extension_path is not None:
+            raise RuntimeError(
+                f"v1 {arguments.command} does not accept combined source arguments"
+            )
+        return None, None
+    if p0_path is not None or extension_path is not None:
+        raise RuntimeError("analysis schema and source arguments are incompatible")
+    return None, None
+
+
+def _publication_schema(document: Mapping[str, object]) -> str:
+    schema = document.get("schema_version")
+    if not isinstance(schema, str):
+        raise RuntimeError("published document schema is malformed")
+    return schema
+
+
 def main(argv: list[str] | None = None) -> int:
     arguments = _parser().parse_args(argv)
     try:
@@ -93,6 +151,72 @@ def main(argv: list[str] | None = None) -> int:
                 "publication": publication,
                 "output": str(arguments.output.resolve()),
                 "analysis_document_sha256": document["analysis_document_sha256"],
+            }
+        elif arguments.command == "analyze-extension":
+            protocol = _mapping_document(
+                arguments.protocol.resolve(), "P0 extension protocol document"
+            )
+            document = aggregate_p0_extension(
+                arguments.run_spec.resolve(),
+                protocol,
+            )
+            publication = _publish_or_verify(
+                arguments.output.resolve(),
+                document,
+                EXTENSION_ANALYSIS_SCHEMA,
+            )
+            result = {
+                "status": "analyzed",
+                "publication": publication,
+                "output": str(arguments.output.resolve()),
+                "analysis_document_sha256": document["analysis_document_sha256"],
+            }
+        elif arguments.command == "combine":
+            p0_source = _mapping_document(
+                arguments.p0_analysis.resolve(), "P0 analysis document"
+            )
+            extension_source = _mapping_document(
+                arguments.extension_analysis.resolve(),
+                "P0 extension analysis document",
+            )
+            document = combine_p0_evidence(p0_source, extension_source)
+            publication = _publish_or_verify(
+                arguments.output.resolve(),
+                document,
+                COMBINED_ANALYSIS_SCHEMA,
+            )
+            result = {
+                "status": "combined",
+                "publication": publication,
+                "output": str(arguments.output.resolve()),
+                "analysis_document_sha256": document["analysis_document_sha256"],
+            }
+        elif arguments.command == "select":
+            source = _mapping_document(
+                arguments.analysis.resolve(), "P0 analysis document"
+            )
+            p0_source, extension_source = _combined_command_sources(
+                arguments,
+                source,
+            )
+            if p0_source is None:
+                document = select_p1_brackets(source)
+            else:
+                document = select_p1_brackets(
+                    source,
+                    p0_analysis=p0_source,
+                    extension_analysis=extension_source,
+                )
+            publication = _publish_or_verify(
+                arguments.output.resolve(),
+                document,
+                _publication_schema(document),
+            )
+            result = {
+                "status": "selected",
+                "publication": publication,
+                "output": str(arguments.output.resolve()),
+                "bracket_document_sha256": document["bracket_document_sha256"],
             }
         elif arguments.command == "build-p0-extension":
             source = _mapping_document(
@@ -117,8 +241,25 @@ def main(argv: list[str] | None = None) -> int:
             source = _mapping_document(
                 arguments.analysis.resolve(), "P0 analysis document"
             )
-            brackets = select_p1_brackets(source)
-            document = build_p1_protocol(source, brackets)
+            p0_source, extension_source = _combined_command_sources(
+                arguments,
+                source,
+            )
+            if p0_source is None:
+                brackets = select_p1_brackets(source)
+                document = build_p1_protocol(source, brackets)
+            else:
+                brackets = select_p1_brackets(
+                    source,
+                    p0_analysis=p0_source,
+                    extension_analysis=extension_source,
+                )
+                document = build_p1_protocol(
+                    source,
+                    brackets,
+                    p0_analysis=p0_source,
+                    extension_analysis=extension_source,
+                )
             publication = _publish_or_verify(
                 arguments.output.resolve(),
                 document,
