@@ -19,7 +19,7 @@ open-boundary 1D TFIM workloads and state-vector execution with JAX.
 | **Member** | Junkai Wang |
 | **Challenge** | [QuantumBFS/quantum.harness #33](https://github.com/QuantumBFS/quantum.harness/issues/33), released by Shi-Xin Zhang |
 | **Track** | Quantum circuit simulation (`qcs`) |
-| **Status** | Completed exact research prototype with audited RTX 3090 validation and a same-machine TensorCircuit-NG threshold; the paper Fig. 2 scale gate remains open |
+| **Status** | Completed exact research prototype with audited RTX 3090 validation, a same-machine TensorCircuit-NG threshold, and a correct Fig. 2 protocol/GPU smoke; the formal Fig. 2 scale run remains open |
 
 The audited implementation jointly searches over tensor representation,
 contraction path, reverse-mode program, checkpoint schedule, symmetry sector,
@@ -61,6 +61,13 @@ for the matched comparison and precision audit,
 for the complete GPU A/B evidence and
 [`docs/vqetape-completion-audit.md`](docs/vqetape-completion-audit.md) for the
 requirement-to-evidence matrix and interpretation boundaries.
+
+The paper's larger Fig. 2 protocol is also executable through a separate,
+safe-JSON find/execute CLI. An RTX 3080 `N=6,L=3` structural smoke passed a
+direct value-gradient check at `2.38e-7` energy error and `3.29e-7` gradient
+relative error. This closes the protocol-construction gate, not the formal
+`N=32,L=16` H200-scale gate. See
+[`outputs/tensorcircuit-ng-fig2-smoke-findings.md`](outputs/tensorcircuit-ng-fig2-smoke-findings.md).
 
 ## Installation
 
@@ -134,6 +141,13 @@ vqetape-tc-baseline \
   --contractor omeco \
   --reference outputs/vqetape-gpu-rtx3090-statevector-n10-d4.json \
   --output outputs/tensorcircuit-ng-rtx3090-matched-n10-d4.json
+```
+
+Declare the formal Fig. 2 SU(4) protocol with:
+
+```bash
+vqetape-tc-fig2 manifest \
+  --output outputs/tensorcircuit-ng-fig2-n32-l16-manifest.json
 ```
 
 Run the direct bra-operator-ket tensor-network search with:

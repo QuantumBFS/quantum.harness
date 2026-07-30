@@ -74,7 +74,10 @@ ansatz with `15 * L * (N - 1)` trainable parameters, reports `N=32, L=16` for
 the single-GPU case, searches with cotengra `max_repeats=640`, scores FLOPs
 plus `640 * WRITE`, and slices toward roughly `2^29` elements. Reproducing that
 protocol is the next scale gate; none of the numbers above should be relabeled
-as a Fig. 2 reproduction.
+as a Fig. 2 reproduction. The SU(4) protocol, safe JSON path artifact, and a
+passing `N=6,L=3` GPU smoke are now implemented and audited in
+[`tensorcircuit-ng-fig2-smoke-findings.md`](tensorcircuit-ng-fig2-smoke-findings.md).
+The formal `N=32,L=16,max_repeats=640` execution remains open.
 
 ## Reproduction and raw evidence
 

@@ -4,23 +4,27 @@
 
 The approved VQETape next-stage design is implemented and audited, including
 an RTX 3090 follow-up validation and a correct same-node TensorCircuit-NG
-threshold for the matched RZZ/RX workload.
+threshold for the matched RZZ/RX workload. The paper Fig. 2 SU(4) protocol is
+implemented with a passing small GPU correctness smoke; the formal
+`N=32,L=16` scale run remains open.
 
-Final repository regression:
+Last full repository regression before the incremental Fig. 2 runner:
 
 ```text
 395 passed, 6 skipped in 1582.14s (0:26:22)
 ```
 
-The six newly added TensorCircuit-NG baseline tests pass. The six skips are
-all the expected structural case
+The matched-baseline and Fig. 2 targeted suites subsequently pass
+`17 passed` together, including a real cotengra path search, JSON round-trip,
+and direct value-gradient control. The six skips in the full run are all the
+expected structural case
 `block wider than interior` in `tests/test_spatial_programs.py`; there are no
 failed tests. This final clean-room regression used Python 3.12 with JAX and
 jaxlib 0.11.0; the pinned RTX 3090 performance environment remains JAX 0.4.38.
 
 Static artifact checks also passed:
 
-- all 25 JSON reports parse with the standard JSON decoder;
+- all 27 JSON reports parse with the standard JSON decoder;
 - all `src/vqetape` modules compile;
 - `git diff --check` reports no whitespace errors;
 - the public API exposes compile, training, ansatz-growth, spatial, TFIM, and
@@ -41,7 +45,8 @@ Static artifact checks also passed:
 | Contraction-aware ansatz score | `ansatz_cost.py`, `ansatz_selection.py` | cut growth, cache keys, policy fixtures | ansatz report | Correct and non-harmful here, but selects the same three gates as gradient-only; no distinct speedup claim |
 | Holdout generality | `holdout.py`, `holdout_worker.py`, `holdout_report.py` | dense action/energy, finite-difference gradient, commutator | `vqetape-holdout-report.json` | Longitudinal-field/RZZ–RY–RX workload converges; TFIM Z2 compression is explicitly rejected |
 | Device/GPU evidence | `runtime_capabilities.py`, `subprocess_env.py` | JSON, memory-semantics, and worker-environment tests | `vqetape-gpu-rtx3090-findings.md` plus five raw JSON reports | RTX 3090 statevector/direct-TN/spatial jobs pass exactness with `highest` matmul precision; platform default fails a controlled spatial A/B comparison; an unset-parent-environment integration job confirms the worker default |
-| TensorCircuit-NG threshold | `tensorcircuit_baseline.py`, `tensorcircuit_baseline_cli.py` | parameter/protocol parity, strict value-gradient correctness, CLI defaults | `tensorcircuit-ng-baseline-findings.md` and matched JSON | On the same RTX 3090, VQETape spatial is 8.2% faster on `compile + first + 100 warm` and uses 28.3% less host RSS; sampled device memory is tied and the paper Fig. 2 scale gate remains open |
+| TensorCircuit-NG threshold | `tensorcircuit_baseline.py`, `tensorcircuit_baseline_cli.py` | parameter/protocol parity, strict value-gradient correctness, CLI defaults | `tensorcircuit-ng-baseline-findings.md` and matched JSON | On the same RTX 3090, VQETape spatial is 8.2% faster on `compile + first + 100 warm` and uses 28.3% less host RSS; sampled device memory is tied |
+| TensorCircuit-NG Fig. 2 protocol | `tensorcircuit_fig2.py`, `tensorcircuit_fig2_cli.py` | 7,440-parameter contract, score/slicing manifest, safe JSON round-trip, direct value-gradient control | `tensorcircuit-ng-fig2-smoke-findings.md` plus path/run JSON | RTX 3080 `N=6,L=3` smoke passes at `2.38e-7` energy and `3.29e-7` gradient error; this proves the protocol path, not formal `N=32,L=16` scale performance |
 
 ## Exactness invariants
 
@@ -67,9 +72,11 @@ The completed implementation preserves these invariants:
    checkpoint bytes, and genuine GPU peak memory remain separately labeled.
 10. Fresh JAX workers default to `highest` matmul precision; an explicit
     caller environment override is preserved.
-11. The TensorCircuit-NG runner applies that precision policy to both the
+11. The TensorCircuit-NG runners apply that precision policy to both the
     TensorCircuit backend and TensorNetwork's separately cached JAX backend;
     otherwise TensorNetwork explicitly selects reduced-precision GPU dots.
+12. Fig. 2 path artifacts are checksum-bound JSON, never executable pickle,
+    and preserve the exact `15 * L * (N - 1)` parameter count.
 
 ## What is novel in the completed prototype
 
@@ -123,7 +130,8 @@ out-of-scope work includes:
 - general Pauli-to-MPO compression;
 - approximate MPS/PEPS truncation;
 - two-dimensional or deep-circuit scaling;
-- Fig. 2-scale cotengra/cuTensorNet execution and slicing;
+- formal Fig. 2 `N=32,L=16,max_repeats=640` execution and slicing on
+  paper-comparable hardware;
 - larger-scale GPU peak-memory/performance sweeps and independent hardware
   replication;
 - multi-GPU distribution and host offload;
@@ -155,6 +163,8 @@ vqetape-tc-baseline \
   --contractor omeco \
   --reference outputs/vqetape-gpu-rtx3090-statevector-n10-d4.json \
   --output outputs/tensorcircuit-ng-rtx3090-matched-n10-d4.json
+vqetape-tc-fig2 manifest \
+  --output outputs/tensorcircuit-ng-fig2-n32-l16-manifest.json
 ```
 
 See the raw JSON and paired Markdown files under `outputs/` for the complete

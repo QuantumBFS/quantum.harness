@@ -30,6 +30,7 @@ vqetape = "vqetape.cli:main"
 vqetape-train = "vqetape.training_cli:main"
 vqetape-ansatz = "vqetape.ansatz_report:main"
 vqetape-tc-baseline = "vqetape.tensorcircuit_baseline_cli:main"
+vqetape-tc-fig2 = "vqetape.tensorcircuit_fig2_cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
