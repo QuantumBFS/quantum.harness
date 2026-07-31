@@ -1,0 +1,10 @@
+INPUTS 4
+w1 = OR x1 x2
+w2 = OR x3 x4
+w3 = OR x2 w2
+w4 = AND x1 x3
+w5 = OR x4 w4
+w6 = OR x2 x3
+w7 = AND x1 ~w6
+w8 = OR ~w5 w7
+OUTPUTS w1 w2 x1 w3 w8

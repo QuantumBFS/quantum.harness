@@ -55,3 +55,30 @@ fn checked_in_n2_control_minima_have_consistent_circuits_and_proof_hashes() {
         1,
     );
 }
+
+#[test]
+fn checked_in_n2_multiply_has_an_eight_gate_witness_and_seven_gate_proof() {
+    let root = repository_file("docs/inverse-certification/multiply-n2-symmetry");
+    let netlist = fs::read_to_string(root.join("circuit.txt")).unwrap();
+    let circuit = parse_netlist(&netlist).unwrap();
+    assert_eq!(circuit.gates.len(), 8);
+
+    let evidence = verify_inverse_relation(
+        &circuit,
+        InverseSpec::new(ArithmeticFamily::Multiply, 2).unwrap(),
+    )
+    .unwrap();
+    assert_eq!(evidence.rows, 16);
+    assert_eq!(evidence.valid_rows, 7);
+    assert_eq!(evidence.invalid_rows, 9);
+    assert_eq!(evidence.mismatches, 0);
+
+    let proof: RelationUnsatProofArtifact =
+        serde_json::from_str(&fs::read_to_string(root.join("proof-manifest.json")).unwrap())
+            .unwrap();
+    assert_eq!(proof.gate_bound, 7);
+    let cnf = fs::read(root.join("k-minus-1.cnf")).unwrap();
+    let drat = fs::read(root.join("k-minus-1.drat")).unwrap();
+    assert_eq!(proof.cnf_sha256, sha256_hex(&cnf));
+    assert_eq!(proof.drat_sha256, sha256_hex(&drat));
+}

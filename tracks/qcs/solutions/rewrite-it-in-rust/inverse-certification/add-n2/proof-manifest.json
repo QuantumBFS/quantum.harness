@@ -1,8 +1,8 @@
 {
   "gate_bound": 4,
   "variables": 302,
-  "clauses": 3495,
-  "literals": 10399,
-  "cnf_sha256": "75742722561a9362116f92e72c1f132b046253b9072118bba990cadc440b0590",
-  "drat_sha256": "b57c285b1eeacd70146eafa05ad3570965214d349410d1ba12746010e65088ed"
+  "clauses": 3649,
+  "literals": 10707,
+  "cnf_sha256": "5c722c504fa6443dcbf168dbe38ae322411d8a6964286ab0121dc9a8fe559a33",
+  "drat_sha256": "ab1f8edd7e1dd60cd66d6152a11ae4c75352fb0d35ee00ac63cffff3a94a3103"
 }

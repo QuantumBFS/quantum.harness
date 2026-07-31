@@ -8,6 +8,15 @@ use crate::{OccamError, RelationProblem, build_relation_problem};
 use super::{SynthesisLimits, cnf::encode_relation, solver::sha256_hex};
 
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+pub struct RelationCnfArtifact {
+    pub gate_bound: usize,
+    pub variables: usize,
+    pub clauses: usize,
+    pub literals: usize,
+    pub cnf_sha256: String,
+}
+
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub struct RelationUnsatProofArtifact {
     pub gate_bound: usize,
     pub variables: usize,
@@ -15,6 +24,38 @@ pub struct RelationUnsatProofArtifact {
     pub literals: usize,
     pub cnf_sha256: String,
     pub drat_sha256: String,
+}
+
+pub fn write_relation_cnf(
+    problem: &RelationProblem,
+    gate_bound: usize,
+    limits: &SynthesisLimits,
+    cnf_path: &Path,
+) -> Result<RelationCnfArtifact, OccamError> {
+    if problem != &build_relation_problem(problem.spec)? {
+        return Err(OccamError::Validation(
+            "CNF export requires the canonical complete inverse relation".into(),
+        ));
+    }
+    let encoded = encode_relation(problem, gate_bound, limits)?;
+    let statistics = encoded.statistics;
+    let mut cnf = Vec::new();
+    varisat_dimacs::write_dimacs(&mut cnf, &encoded.formula).map_err(|error| {
+        OccamError::Validation(format!("failed to render relation DIMACS: {error}"))
+    })?;
+    fs::write(cnf_path, &cnf).map_err(|error| {
+        OccamError::Validation(format!(
+            "failed to write relation DIMACS {}: {error}",
+            cnf_path.display()
+        ))
+    })?;
+    Ok(RelationCnfArtifact {
+        gate_bound,
+        variables: statistics.variables,
+        clauses: statistics.clauses,
+        literals: statistics.literals,
+        cnf_sha256: sha256_hex(&cnf),
+    })
 }
 
 pub fn write_relation_unsat_proof(

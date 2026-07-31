@@ -245,7 +245,7 @@ fn base_certificate(
     RelationSynthesisCertificate {
         schema_version: 1,
         solver: "varisat-0.2.2".into(),
-        encoding: "fanin2-six-op-relation-forbidden-tuples-v1".into(),
+        encoding: "fanin2-six-op-relation-forbidden-tuples-commutative-order-v2".into(),
         status,
         status_detail,
         problem_sha256: sha256_hex(&canonical_bytes(problem)),

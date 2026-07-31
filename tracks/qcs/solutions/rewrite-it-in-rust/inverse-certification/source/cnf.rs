@@ -119,6 +119,24 @@ impl<'a> FormulaBuilder<'a> {
         Ok(())
     }
 
+    fn ordered_commutative_pair(
+        &mut self,
+        lhs_selectors: &[Lit],
+        rhs_selectors: &[Lit],
+    ) -> Result<(), OccamError> {
+        if lhs_selectors.len() != rhs_selectors.len() {
+            return Err(OccamError::Validation(
+                "commutative selector groups must have equal length".into(),
+            ));
+        }
+        for (lhs_index, lhs_selector) in lhs_selectors.iter().enumerate() {
+            for rhs_selector in rhs_selectors.iter().take(lhs_index) {
+                self.add_clause(&[!*lhs_selector, !*rhs_selector])?;
+            }
+        }
+        Ok(())
+    }
+
     fn statistics(&self) -> EncodingStatistics {
         EncodingStatistics {
             variables: self.formula.var_count(),
@@ -148,6 +166,7 @@ pub(crate) fn encode(
         builder.exactly_one(&operations)?;
         builder.exactly_one(&lhs_selectors)?;
         builder.exactly_one(&rhs_selectors)?;
+        builder.ordered_commutative_pair(&lhs_selectors, &rhs_selectors)?;
 
         for (row_index, row) in problem.rows.iter().enumerate() {
             for (selector, candidate) in lhs_selectors.iter().zip(&candidates) {
@@ -232,6 +251,7 @@ pub(crate) fn encode_relation(
         builder.exactly_one(&operations)?;
         builder.exactly_one(&lhs_selectors)?;
         builder.exactly_one(&rhs_selectors)?;
+        builder.ordered_commutative_pair(&lhs_selectors, &rhs_selectors)?;
 
         for (row_index, row) in problem.rows.iter().enumerate() {
             for (selector, candidate) in lhs_selectors.iter().zip(&candidates) {
@@ -453,6 +473,27 @@ mod tests {
         multiple.add_clause(&[left]).unwrap();
         multiple.add_clause(&[right]).unwrap();
         assert!(!solve(&multiple.formula));
+    }
+
+    #[test]
+    fn commutative_operand_order_removes_only_swapped_selector_models() {
+        fn constrained_pair(lhs_index: usize, rhs_index: usize) -> CnfFormula {
+            let limits = SynthesisLimits::default();
+            let mut builder = FormulaBuilder::new(&limits);
+            let lhs = builder.new_lits(3).unwrap();
+            let rhs = builder.new_lits(3).unwrap();
+            builder.exactly_one(&lhs).unwrap();
+            builder.exactly_one(&rhs).unwrap();
+            builder.ordered_commutative_pair(&lhs, &rhs).unwrap();
+            builder.add_clause(&[lhs[lhs_index]]).unwrap();
+            builder.add_clause(&[rhs[rhs_index]]).unwrap();
+            builder.formula
+        }
+
+        let ordered = constrained_pair(0, 2);
+        assert!(solve(&ordered));
+        let swapped = constrained_pair(2, 0);
+        assert!(!solve(&swapped));
     }
 
     #[test]

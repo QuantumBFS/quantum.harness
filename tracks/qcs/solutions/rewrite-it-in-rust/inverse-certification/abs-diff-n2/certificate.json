@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "solver": "varisat-0.2.2",
-  "encoding": "fanin2-six-op-relation-forbidden-tuples-v1",
+  "encoding": "fanin2-six-op-relation-forbidden-tuples-commutative-order-v2",
   "status": "sat",
   "status_detail": "relation bounds 0 through 0 returned UNSAT in-process and bound 1 was SAT; this record is not a DRAT/LRAT proof object",
   "problem_sha256": "5d5a281b494d750e2ef2e7d4cba41e1ce7ab967d23edde638c9993790ab703c4",
@@ -17,15 +17,15 @@
       "variables": 40,
       "clauses": 227,
       "literals": 800,
-      "elapsed_ms": 3
+      "elapsed_ms": 0
     },
     {
       "gate_bound": 1,
       "status": "sat",
       "variables": 76,
-      "clauses": 510,
-      "literals": 1656,
-      "elapsed_ms": 15
+      "clauses": 516,
+      "literals": 1668,
+      "elapsed_ms": 0
     }
   ],
   "minimal_gate_count": 1,
