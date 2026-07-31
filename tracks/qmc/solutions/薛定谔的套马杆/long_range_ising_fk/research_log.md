@@ -133,6 +133,23 @@
 - Cutoff conclusion: finite-size reproduction successful; thermodynamic
   discrimination inconclusive at the completed accessible scales.
 
+## 2026-07-31 nearest-neighbor completion
+
+- Slurm array `23025326` finished the registered strict-NN numerical work for
+  all 28 cells: four seeds at each of
+  `L=64,128,256,512,1024,2048,4096`.
+- Every cell produced non-empty `summary.csv`, `blocks.csv`, and
+  `metadata.txt`. The array exit code was 1 because the Python 2.7 wrapper
+  raised a text/byte `TypeError` while writing `manifest.json` after Julia had
+  completed; this was classified as a packaging failure, not a simulation
+  failure.
+- `scripts/nn_repair_manifests.py` rebuilt all 28 manifests from the frozen
+  run specification and saved numerical evidence without recomputation.
+- Four-seed unweighted means at `L=2048` were `Qm=0.8558951` and
+  `Rp=0.0345500`; at `L=4096` they were `Qm=0.8517651` and `Rp=0.0094000`.
+  The `L=4096` seed scatter is larger under its registered 5,000-sweep
+  measurement budget and is retained without selection.
+
 ## 2026-07-30 public escrow and repository migration
 
 - Relocated the unchanged implementation into the registered team directory

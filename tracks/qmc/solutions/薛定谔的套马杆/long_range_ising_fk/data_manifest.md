@@ -1,12 +1,12 @@
 # Frozen-data escrow manifest
 
-**Freeze date:** 2026-07-30
+**Freeze date:** 2026-07-31
 
 **Generation-code revision:** [`26234d49bddd6005398d35361ff98b5efbba6b88`](https://github.com/Luka3519/quantum.harness/commit/26234d49bddd6005398d35361ff98b5efbba6b88)
 
 **Integrity file:** [`data_manifest.sha256`](data_manifest.sha256)
 
-**Integrity-file SHA-256:** `0e75176346026faa118cdd8abe0af53d0a555bf192d315c0f7c6040b5f6a8cac`
+**Integrity-file SHA-256:** `fd550c16724a23a6b2e2b767bc06da486ac470023570c2312d35fa4793905806`
 
 The generation revision is the first committed snapshot of the code used for
 the frozen runs. This submission only relocates that implementation into the
@@ -20,14 +20,14 @@ not alter the algorithms or frozen numerical values.
 | `track_a_20260727` | 489 | 158254 | `2b62aba4b833d677d62806f277bf409ed9740546fa026ee90bfed73393c2097b` |
 | `track_a_large_20260728` | 212 | 60586 | `3d8be845faf51dd49b9a89e0081b2f799c55e99fe7c27f892811d8b3ac7778da` |
 | `clock_production_20260729` | 82 | 47539 | `62adfbe29861a9b58fb919f1c141c449c2ab4710f9557356a3c3b68983648160` |
-| `nn_large_20260730` | 83 | 163120 | `b90c35fdab8d3bf9833e2933273a993273e4c572dee01f09bc758f14784bdfe4` |
+| `nn_large_20260730` | 115 | 224923 | `05d0f8b4ae576e185185a1495b40ad98d5aa2b18e06cab4935f7cc6780c96f48` |
 | `nn_v3_20260730` | 48 | 111568 | `6ee4e59197eb759149f961d340df7708f485ed2d9d777570719d08a9cb56bdde` |
 | `track_a_cutoff_analysis_20260730` | 4 | 18791 | `f6ea9fde0f546f9116da624f7c86209e366f499aaa2afd52e5908371e2b30dcb` |
-| **Total** | **918** | **559858** | See the integrity-file hash above |
+| **Total** | **950** | **621661** | See the integrity-file hash above |
 
 A dataset tree digest is the SHA-256 of its sorted
 `<file-sha256><two spaces><relative-path>\n` records. The integrity file
-contains all 918 records and uses paths relative to this solution directory.
+contains all 950 records and uses paths relative to this solution directory.
 From this directory, verify the escrow on a Unix-like system with:
 
 ```bash
@@ -45,11 +45,13 @@ sha256sum -c data_manifest.sha256
   extrapolated.
 - `clock_production_20260729` contains exactly 16 successful cell triplets
   and the frozen FK comparison tables.
-- `nn_large_20260730` is a completed partial nearest-neighbor control
-  snapshot with 20 cells: four seeds at each of
-  \(L=64,128,256,512,1024\). Every cell contains `summary.csv`, `blocks.csv`,
-  `metadata.txt`, and `manifest.json`; \(L=2048,4096\) were still running at
-  publication time.
+- `nn_large_20260730` is a complete seven-size nearest-neighbor control
+  dataset with 28 cells: four seeds at each of
+  \(L=64,128,256,512,1024,2048,4096\). Every cell contains `summary.csv`,
+  `blocks.csv`, `metadata.txt`, and a deterministically repaired
+  `manifest.json`. Slurm reports the cells as failed only because the
+  Python 2.7 wrapper raised a text/byte error after the numerical files had
+  already been written.
 - `nn_v3_20260730` is an independently added higher-statistics
   nearest-neighbor snapshot with 16 completed cell triplets: eight seeds at
   each of \(L=64,128\). Its registered \(L=256\) cells are not present in the
