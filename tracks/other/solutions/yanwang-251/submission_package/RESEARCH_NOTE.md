@@ -269,4 +269,4 @@ cannot supply the missing mechanism.
 - X. Huang, *On Negative Correlation of Arboreal Gas on Some Graphs*,
   arXiv:2311.00965.
 - QuantumBFS/quantum.harness#213, *Stable incident-edge marginals for
-  weighted forests*, complementary adjacent-edge result by @Osgood001.
+  weighted forests*, adjacent-edge theorem by @Osgood001.

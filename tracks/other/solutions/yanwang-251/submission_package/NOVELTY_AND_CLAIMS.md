@@ -50,11 +50,12 @@ single exposed monomial phase.
   A specialist MathSciNet/zbMATH search and expert review remain appropriate
   before external publication.
 
-## Relationship to PR #213
+## Position relative to PR #213
 
-PR #213 by @Osgood001 proves a universal theorem for adjacent edges via real
-stability of star marginals.  The present work is complementary: it concerns
-the disjoint-edge branch and locates the first interface width at which a
-nonlocal escape is algebraically possible.  Neither submission claims to
-settle the full disjoint-edge problem.  Feedback from the author of #213 on
-the interface formulation and claim boundary is explicitly invited.
+PR #213 by @Osgood001 establishes a universal theorem for adjacent edges via
+real stability of star marginals, closing the adjacent-edge branch.  This
+submission advances the unresolved disjoint-edge branch: it proves structural
+no-go results at interface widths two and three, demonstrates exact sign
+reversal at width four in the ambient signature cone, and isolates graphic
+realizability as the remaining barrier.  The two submissions address
+different parts of issue #251 and should be evaluated on their own claims.
