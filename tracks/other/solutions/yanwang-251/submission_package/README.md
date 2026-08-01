@@ -30,3 +30,8 @@ all exact interface certificates passed
 
 All sign conventions are stated in `RESEARCH_NOTE.md`.  In particular,
 `R = AD - BC > 0` is the counterexample sign requested by issue #251.
+
+`RESULTS_LEDGER.md` inventories the wider exact campaign.  It labels each
+item as a theorem, complete finite proposition, or mechanism observation so
+that the fast bundled verifier is not mistaken for verification of every
+large archival census.

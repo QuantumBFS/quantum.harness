@@ -12,7 +12,7 @@
 | Row | |
 |---|---|
 | **Challenge** | Identify structural mechanisms that can or cannot produce a finite weighted-forest counterexample to edge negative correlation. |
-| **Catalog issue** | A scoped research result related to #251. |
+| **Catalog issue** | Structural advances on the unresolved disjoint-edge core of #251. |
 | **Track** | `tracks/other`, following the issue's `Method: Other` field. |
 
 ## Result in one paragraph
@@ -31,11 +31,28 @@ counterexample cannot first appear on a single monomial asymptotic face.  It
 must use finite-scale interference between layers, with four terminals the
 first interface width at which the abstract sign obstruction disappears.
 
+## Results at a glance
+
+The contribution inventory contains **11 non-duplicate results**.  Failed
+optimizer runs and raw trial counts are not included in this number.
+
+| Class | Count | Principal content |
+|---|---:|---|
+| Theorem/lemma level | 4 | Two-terminal effective activity; single-face obstruction; three-terminal closure; symmetric-book theorem. |
+| Exact computer-assisted propositions | 4 | Complete HSW augmentations; two grouped HSW certificates; the `3^18` double-bridge tensor; the 337-seed tangent census. |
+| Mechanism and search-geometry results | 3 | Exact four-terminal ambient escape; numerical full-rank signature maps and their singular wall; bounded exact atlas reduction. |
+
+The precise statement, evidence type, scope, and limitation of every item are
+listed in `submission_package/RESULTS_LEDGER.md`.  This separation matters:
+theorems are not conflated with finite exhaustive results, and neither is
+conflated with numerical mechanism evidence.
+
 ## Submitted package
 
 | Path | Role |
 |---|---|
 | `submission_package/RESEARCH_NOTE.md` | Self-contained statements, proofs, exact certificates, and limitations. |
+| `submission_package/RESULTS_LEDGER.md` | Structured inventory of all 11 results and their evidence strength. |
 | `submission_package/NOVELTY_AND_CLAIMS.md` | Prior-art positioning and precise claim boundary. |
 | `submission_package/verify_interface_certificates.py` | Standard-library exact verifier for the finite claims. |
 | `submission_package/README.md` | Reproduction instructions. |
