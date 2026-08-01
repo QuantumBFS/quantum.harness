@@ -29,7 +29,7 @@ positive two-terminal replacement cannot reverse the Rayleigh sign.  The
 two-sum closure is prior art; the contribution here is its exact use as a
 no-go theorem for cardinality-amplifier constructions in #251.
 
-**Evidence:** algebraic proof in `RESEARCH_NOTE.md`, Section 2.  
+**Evidence:** algebraic proof in `RESEARCH_NOTE.md`, Section 2.
 **Boundary:** not claimed as a new proof of general two-sum closure.
 
 ### A2. A minor-minimal witness cannot live on one exposed face
@@ -43,7 +43,7 @@ Therefore a minor-minimal counterexample must use finite-scale interference
 between at least two adjacent layers; a single tropical phase cannot be its
 first positive mechanism.
 
-**Evidence:** matroid-face reduction in `RESEARCH_NOTE.md`, Section 3.  
+**Evidence:** matroid-face reduction in `RESEARCH_NOTE.md`, Section 3.
 **Boundary:** this does not prove the sum of several layers nonpositive.
 
 ### A3. Three-terminal parallel composition preserves nonpositivity
@@ -78,7 +78,7 @@ This includes disjoint edge pairs.  The proof treats all edge-pair orbits by
 a five-state transfer matrix and positive decompositions.
 
 **Evidence:** `SYMMETRIC_BOOK_THEOREM.md`; the fast verifier independently
-enumerates 222 exact edge pairs for `r=1,2,3,4`.  
+enumerates 222 exact edge pairs for `r=1,2,3,4`.
 **Boundary:** the theorem is a two-parameter slice, not the fully multivariate
 I-Rayleigh property of the topology.
 
@@ -94,7 +94,7 @@ nonpositive.  Among them, 49,768 are simple three-connected graphs and have
 labelled graphs in 11 symmetry classes; those 11 remain coefficientwise
 nonpositive when their five new edges receive independent activities.
 
-**Evidence type:** exhaustive exact polynomial census.  
+**Evidence type:** exhaustive exact polynomial census.
 **Boundary:** larger augmentations with fully independent new-edge activities
 are not all classified by this proposition.
 
@@ -107,7 +107,7 @@ The first tensor was independently reconstructed by modular Vandermonde
 interpolation and all `2^21` non-target subsets.  The second used the complete
 7,128-point interpolation grid with exact partition DP and off-grid checks.
 
-**Evidence type:** two independent exact tensor reconstructions.  
+**Evidence type:** two independent exact tensor reconstructions.
 **Boundary:** the certificates cover the stated grouped activities; a witness
 on either topology would have to break those symmetries.
 
@@ -135,9 +135,9 @@ pairs and 221,404 missing-edge triples has a coefficientwise nonpositive first
 nonzero tangent form.  Arbitrarily asymmetric positive ratios inside those
 two- or three-edge perturbations therefore cannot bifurcate to `R>0`.
 
-**Evidence type:** exact integer forest totals and complete tangent tensors.  
+**Evidence type:** exact integer forest totals and complete tangent tensors.
 **Seed-bank SHA-256:**
-`0f5b58898b963abbb8d808a54d1e19bcc5e98bcb8a065e235bcf1a7e1ef13339`.  
+`0f5b58898b963abbb8d808a54d1e19bcc5e98bcb8a065e235bcf1a7e1ef13339`.
 **Boundary:** this is a complete statement for the defined seed bank, not all
 zero points of the graphic-signature cone.
 
@@ -157,7 +157,7 @@ reduction at width two, nonpositive closure at width three, and exact ambient
 escape at width four.
 
 **Evidence:** exact standard-library verifier and `RESEARCH_NOTE.md`, Section
-5.  
+5.
 **Boundary:** the two signatures are not claimed graph-realizable.
 
 ### C2. Real graph signatures show numerical full local rank and a singular wall
@@ -169,7 +169,7 @@ obstruction.  Continuation toward the abstract positive signatures
 nevertheless encounters a rapidly ill-conditioned fold/caustic.
 
 **Evidence type:** exact enumeration of forest feature vectors, floating SVD
-rank diagnostics, and numerical continuation.  
+rank diagnostics, and numerical continuation.
 **Boundary:** neither the rank observation nor the singular wall on tested
 paths is promoted to a theorem.  An exact nonzero Jacobian minor would be
 needed to certify rank 14 algebraically.
@@ -187,7 +187,7 @@ three-connected layer, the complete positive-coefficient priority set is four
 cores and 23 target-pair orbits.
 
 **Evidence type:** exact nauty graph/isomorphism generation, automorphism
-quotients, and coefficient tensors.  
+quotients, and coefficient tensors.
 **Boundary:** the four-core/23-orbit statement concerns that minimal cubic
 layer, not every possible eight-vertex graph or every weight vector.
 
