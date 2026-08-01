@@ -1,0 +1,74 @@
+# Interface barriers for weighted random-forest edge correlation
+
+## Team
+
+| | |
+|---|---|
+| **Team name** | yanwang |
+| **Members** | W.W |
+
+## Challenge
+
+| Row | |
+|---|---|
+| **Challenge** | Identify structural mechanisms that can or cannot produce a finite weighted-forest counterexample to edge negative correlation. |
+| **Catalog issue** | A scoped research result related to #251. |
+| **Track** | `tracks/other`, following the issue's `Method: Other` field. |
+
+## Result in one paragraph
+
+Issue #251 asks for a positive-weight graph with
+`Z_ef Z > Z_e Z_f`.  This submission does **not** claim such a graph.
+Instead, it proves a hierarchy of interface obstructions.  Positive
+two-terminal replacements reduce exactly to an effective edge activity and
+cannot change the Rayleigh sign.  Parallel composition through three
+terminals preserves nonpositivity by an explicit five-state identity.  At
+four terminals that closure fails in the ambient partition-signature cone:
+two exact positive integer signatures that are individually nonpositive for
+all three disjoint target matchings compose to a strictly positive signature
+for all three.  A separate Newton-face argument shows why a minor-minimal
+counterexample cannot first appear on a single monomial asymptotic face.  It
+must use finite-scale interference between layers, with four terminals the
+first interface width at which the abstract sign obstruction disappears.
+
+## Submitted package
+
+| Path | Role |
+|---|---|
+| `submission_package/RESEARCH_NOTE.md` | Self-contained statements, proofs, exact certificates, and limitations. |
+| `submission_package/NOVELTY_AND_CLAIMS.md` | Prior-art positioning and precise claim boundary. |
+| `submission_package/verify_interface_certificates.py` | Standard-library exact verifier for the finite claims. |
+| `submission_package/README.md` | Reproduction instructions. |
+
+## Verification
+
+From the repository root:
+
+```bash
+python3 tracks/other/solutions/yanwang-251/submission_package/verify_interface_certificates.py
+```
+
+The verifier uses Python integers only for the terminal-signature identities
+and crossover.  Its symmetric-book regression enumerates every forest using
+integer activities.
+
+## Claim boundary
+
+This submission establishes:
+
+- an exact effective-activity reduction for positive two-terminal networks;
+- an exact nonpositivity-preserving formula for three-terminal parallel
+  composition;
+- an exact four-terminal crossover in the unrestricted positive
+  partition-signature cone;
+- a conditional single-exposed-face obstruction for a minor-minimal
+  counterexample; and
+- strict negative correlation for every edge-pair orbit on a symmetric
+  `K3 join independent(r)` activity slice.
+
+It explicitly does **not** establish:
+
+- a graph realization of the two abstract four-terminal signatures;
+- negative correlation for all disjoint edges;
+- the I-Rayleigh conjecture for all graphs; or
+- a verifier-accepted counterexample satisfying the success gate of #251.
