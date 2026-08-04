@@ -49,7 +49,7 @@ Both primary physical intervals are disjoint from both sealed prediction interva
 
 - Established: an independent supersymmetric protection mechanism, exact Hodge-resolved response identity, analytic controls, and finite-size $N=8$--$14$ response memory beyond both frozen separable covariance-null families.
 - Not established: asymptotic Geometric ETH, thermalization, real-time chaos, or a thermodynamic-limit theorem.
-- Null rejection, if selected, means memory beyond the frozen separable Hodge/collapsed covariance models; it does not prove non-Gaussianity relative to every possible entrywise covariance model.
+- The selected null-rejection branch means memory beyond the frozen separable Hodge/collapsed covariance models; it does not prove non-Gaussianity relative to every possible entrywise covariance model.
 
 ## Deliverables
 

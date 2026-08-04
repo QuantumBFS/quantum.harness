@@ -71,4 +71,4 @@ The script merges the pilot, generates the final result figure and report from f
 
 ## Interpretation Boundary
 
-The operational label `cohomological_non_gaussian_class`, if selected, means four-point response memory beyond the frozen separable collapsed and Hodge covariance nulls. It does not establish failure of every fully nonseparable Gaussian covariance model. No (N=8\)–(14) result is presented as asymptotic Geometric ETH.
+The selected label `cohomological_non_gaussian_class` means four-point response memory beyond the frozen separable collapsed and Hodge covariance nulls. It does not establish failure of every fully nonseparable Gaussian covariance model. No $N=8$--$14$ result is presented as asymptotic Geometric ETH.
