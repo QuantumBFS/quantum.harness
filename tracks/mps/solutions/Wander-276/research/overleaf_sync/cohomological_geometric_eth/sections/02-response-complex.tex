@@ -1,0 +1,59 @@
+\section{Hodge-resolved protected response}
+\label{sec:response-complex}
+
+The generic cubic \(\mathcal N=2\) SYK supercharge is
+\begin{equation}
+ \begin{split}
+ Q(C)&=\sum_{i<j<k}C_{ijk}\psi_i\psi_j\psi_k,\qquad Q^2=0,\\
+ H&=\{Q,Q^\dagger\}.
+ \end{split}
+ \label{eq:supercharge}
+\end{equation}
+In charge sector \(r\), the protected fiber is the harmonic cohomology
+\begin{equation}
+ \cH_{\mathrm{BPS},r}=\ker Q_r\cap\ker Q_{r-3}^\dagger.
+ \label{eq:harmonic-fiber}
+\end{equation}
+We use generic isotropic complex three-forms \(C\), rather than the decomposable locus, because the generic BPS states are fortuitous and concentrated near the central charge sectors \cite{fu2017susy,chang2024fortuity}.
+
+Let \(P\) project onto Eq.~\eqref{eq:harmonic-fiber}, and let \(H_\perp^+\) be the inverse of \(H\) on its positive-energy complement. For a real coupling tangent represented by \(\delta Q+\delta Q^\dagger\), the complement-to-fiber response is
+\begin{align}
+ X(\delta C)&=-H_\perp^+\left(Q\,\delta Q^\dagger+Q^\dagger\delta Q\right)P
+ \nonumber\\
+ &=X_-\oplus X_+,
+ \label{eq:hodge-response}\\
+ X_-&=-H_\perp^+Q\,\delta Q^\dagger P,
+ \qquad
+ X_+=-H_\perp^+Q^\dagger\delta QP.
+ \nonumber
+\end{align}
+Nilpotency implies \(\operatorname{im}Q\perp\operatorname{im}Q^\dagger\), hence \(X_-^\dagger X_+=0\). We verify Eq.~\eqref{eq:hodge-response} against the direct resolvent derivative and a centered finite difference of \(P\). This identity turns the qualitative distinction between constraint and cohomological protection into a measurable branch structure.
+
+The response is the quantum geometry, not an auxiliary diagnostic. In a local frame of the protected fiber, the matrix-valued quantum geometric tensor, metric, and Berry curvature are
+\begin{equation}
+ \begin{aligned}
+ \mathcal Q_{ab}&=X_a^\dagger X_b,\qquad
+ g_{ab}=\frac{\mathcal Q_{ab}+\mathcal Q_{ba}}{2},\\
+ F_{ab}&=i\left(\mathcal Q_{ab}-\mathcal Q_{ba}\right).
+ \end{aligned}
+ \label{eq:qgt-response}
+\end{equation}
+Thus all gauge-invariant contractions used below are correlations of the same complement-resolved amplitudes that generate \(g\) and \(F\). For a one-sided parent \(H=B^\dagger B\) with \(BP=0\), the corresponding derivative is \(X=-H_\perp^+B^\dagger\delta B P\) and lies in a single response branch. Equation~\eqref{eq:hodge-response} is therefore an independent, two-sided protection mechanism rather than a change of basis within the Laughlin construction.
+
+For an eight-channel tangent panel, define branch weights and Hodge balance by
+\begin{equation}
+ T_\pm=\sum_{a=1}^{8}\lVert X_{a,\pm}\rVert_F^2,
+ \qquad
+ \eta_H=\frac{4T_+T_-}{(T_++T_-)^2}.
+ \label{eq:hodge-balance}
+\end{equation}
+The pre-outcome signature also contains branch-resolved channel, target, and complement covariance spectra. The collapsed null discards the branch label, whereas the Hodge null samples the two branches independently and forms their orthogonal direct sum. Both are parameter-free once the safe two-point data are fixed.
+
+After complete channel whitening, the physical diagnostic is the gauge-invariant tensor
+\begin{equation}
+ \mathcal T_{abcd}=\frac{1}{D}\Tr\!\left(
+ \widehat X_a^\dagger\widehat X_b
+ \widehat X_c^\dagger\widehat X_d\right),
+ \label{eq:four-channel}
+\end{equation}
+and its normalized Frobenius distance from the registered Gaussian Wick contraction. Independent target and complement basis rotations leave Eq.~\eqref{eq:four-channel} unchanged. The label ``non-Gaussian class'' below refers operationally to rejection of these frozen separable covariance models; it does not assert that the complete entrywise covariance operator has been matched.

@@ -1,0 +1,35 @@
+{
+  "artifact_hashes": {
+    "figure_susy_hodge_geometric_eth_v7.pdf": "f081c5f162778e5e45a48adba1ea08c37e8521c725725922a0ec3a35bda74a54",
+    "main.log": "2824219cd62b920c6198485f423ed60eaf87506f801be1d2b3de92dc8448f4df",
+    "main.pdf": "9fe357a5bfce5e6efd60a3c8bf0a1b73a4eac4ee15f9bb8844f51d2f7e1252ee",
+    "main.tex": "a03ad4b46ae9431b509c025909dfc9a307e4709de3c2047980f346179a612ab5",
+    "response_complex_memory_supplement_v7.pdf": "e43a5a2f62494bb7595f790de5643d6244d782402478f36fdcc7c511176b79c5",
+    "response_complex_memory_v7.pdf": "9fe357a5bfce5e6efd60a3c8bf0a1b73a4eac4ee15f9bb8844f51d2f7e1252ee",
+    "results_v7.tex": "a1257d1744f1085ee518a36ca9ed2574dec608cb7f71c766a082745f3acc858d",
+    "supplement.log": "4a3bd359b9d5ed024bed900b9b1291fd789489aeff9a4d06d94cea4bc18ec4f8",
+    "supplement.pdf": "e43a5a2f62494bb7595f790de5643d6244d782402478f36fdcc7c511176b79c5",
+    "supplement.tex": "91a5edd3e299ca97348ffee8c25ac0049e3e169c42adbc59a5cb76e734d63a38",
+    "susy_hodge_manuscript_assets_v7.json": "ccf63b88ce4fe8a71bd87c3a4c97ee8b55645dad3a808a693f2daa044b8e3092"
+  },
+  "checks": {
+    "archived_pdf_exact": true,
+    "archived_supplement_exact": true,
+    "asset_manifest_passed": true,
+    "clean_latex_log": true,
+    "clean_supplement_log": true,
+    "compiled_pdf_structure": true,
+    "compiled_supplement_structure": true,
+    "figure_source_hash": true,
+    "heldout_result_enabled": true,
+    "main_uses_generated_results": true,
+    "result_source_hash": true,
+    "selected_branch_in_source": true,
+    "supplement_uses_generated_results": true
+  },
+  "generated_utc": "2026-08-04T01:54:04.257681+00:00",
+  "passed": true,
+  "prediction_sha256": "fc300dc7e4bdc1be157919e458ac868d3468533cce31108f23c9fba4f7e9f102",
+  "selected_branch": "cohomological_non_gaussian_class",
+  "version": "v7"
+}

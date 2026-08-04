@@ -1,0 +1,172 @@
+\documentclass[aps,prl,onecolumn,superscriptaddress,longbibliography,floatfix]{revtex4-2}
+
+\usepackage{amsmath,amssymb,bm}
+\usepackage{booktabs}
+\usepackage{microtype}
+\usepackage{xcolor}
+\usepackage[colorlinks=true,citecolor=blue!55!black,linkcolor=blue!55!black,urlcolor=blue!55!black]{hyperref}
+\hypersetup{pdftitle={Supplemental Material for Response-Complex Memory in Exactly Degenerate Quantum Matter},pdfauthor={Thomas J. Wang; OKongOYangO}}
+
+\input{generated/results_v7.tex}
+\newcommand{\Tr}{\operatorname{Tr}}
+\newcommand{\cH}{\mathcal H}
+
+\begin{document}
+
+\title{Supplemental Material for ``Response-Complex Memory in Exactly Degenerate Quantum Matter''}
+
+\author{Thomas J. Wang}
+\email{WangTheoPhys@outlook.com}
+\affiliation{Tsinghua University, Beijing 100084, China}
+
+\author{OKongOYangO}
+\affiliation{The Pennsylvania State University, University Park, Pennsylvania 16802, USA}
+
+\maketitle
+
+\section{Finite cochain complex and harmonic fiber}
+\label{sec:supp-cochain}
+
+Let \(V_r=\bigwedge^r\mathbb C^N\) be the fixed-charge sector with the occupation basis ordered lexicographically. A complex antisymmetric three-form \(C\) defines the degree-lowering maps
+\begin{equation}
+ Q_r(C):V_r\longrightarrow V_{r-3},\qquad Q_r(C)=\sum_{i<j<k}C_{ijk}\psi_i\psi_j\psi_k.
+ \label{eq:supp-qr}
+\end{equation}
+Fermionic antisymmetry gives \(Q_{r-3}Q_r=0\) exactly. The charge-resolved Hamiltonian and harmonic subspace are
+\begin{align}
+ H_r&=Q_r^\dagger Q_r+Q_{r-3}Q_{r-3}^\dagger,\label{eq:supp-hr}\\
+ \cH_{\mathrm{BPS},r}&=\ker Q_r\cap\ker Q_{r-3}^\dagger.
+ \label{eq:supp-harmonic}
+\end{align}
+The implementation constructs the sparse cochain matrices from the signed occupation action and obtains the harmonic frame from the numerical kernel of Eq.~\eqref{eq:supp-hr}. Every accepted realization passes nilpotency, Hermiticity, projector idempotency, harmonic-residual, and positive-gap gates. No zero-mode count is inferred from an energy histogram.
+
+The generic ensemble uses isotropic complex Gaussian coefficients followed by normalization. The decomposable control instead takes \(C=u\wedge v\wedge w\). It is analytically reducible to one occupied three-mode block and produces the registered exact curvature atoms and multiplicities. This separates the generic cohomological response from an algebraically structured locus without changing the cochain conventions.
+
+\section{Hodge-resolved projector derivative}
+\label{sec:supp-response}
+
+Let \(P\) be the harmonic projector, \(R=1-P\), and \(H_\perp^+=RH^+R\). Differentiating \(HP=0\), multiplying by \(R\) on the left, and imposing the parallel-frame convention \(P\,\delta P\,P=0\) gives
+\begin{equation}
+ X\equiv R\,\delta P\,P=-H_\perp^+\,\delta H\,P.
+ \label{eq:supp-resolvent}
+\end{equation}
+For a real coupling tangent \(\delta Q+\delta Q^\dagger\), the terms in \(\delta H\) that survive on the harmonic fiber yield
+\begin{equation}
+ X=-H_\perp^+\left(Q\delta Q^\dagger+Q^\dagger\delta Q\right)P=X_-+X_+.
+ \label{eq:supp-hodge}
+\end{equation}
+Here \(X_-\) lies in \(\operatorname{im}Q\), whereas \(X_+\) lies in \(\operatorname{im}Q^\dagger\). Since \(Q^2=0\),
+\begin{equation}
+ \langle Q a,Q^\dagger b\rangle=\langle Q^2a,b\rangle=0,
+ \qquad X_-^\dagger X_+=0.
+ \label{eq:supp-orthogonal}
+\end{equation}
+The code compares Eq.~\eqref{eq:supp-hodge} with Eq.~\eqref{eq:supp-resolvent} and with a centered finite difference of the full harmonic projector. These are independent numerical paths.
+
+For comparison, a one-sided positive parent \(H=B^\dagger B\) with \(BP=0\) has
+\begin{equation}
+ X=-H_\perp^+B^\dagger\delta B P,
+ \label{eq:supp-one-sided}
+\end{equation}
+because the \(\delta B^\dagger BP\) term vanishes. Equations~\eqref{eq:supp-hodge} and \eqref{eq:supp-one-sided} therefore distinguish protection complexes, not merely coordinate choices.
+
+\section{Quantum geometry and gauge-invariant higher response}
+\label{sec:supp-geometry}
+
+For tangent labels \(a,b\), the protected-fiber quantum geometric tensor is
+\begin{equation}
+ \mathcal Q_{ab}=X_a^\dagger X_b,
+ \label{eq:supp-qgt}
+\end{equation}
+whose symmetric and antisymmetric parts give the matrix-valued metric and non-Abelian Berry curvature. Under independent basis changes \(U\) in the protected fiber and \(V\) in its complement, \(X_a\mapsto VX_aU^\dagger\). Consequently \(\mathcal Q_{ab}\mapsto U\mathcal Q_{ab}U^\dagger\), and every trace contraction below is gauge invariant.
+
+An eight-channel panel has Gram matrix
+\begin{equation}
+ G_{ab}=\frac{1}{D}\Tr(X_a^\dagger X_b).
+ \label{eq:supp-gram}
+\end{equation}
+The accepted panels are projected away from the complex radial direction, orthonormalized in coupling space, and whitened on the numerical support of \(G\). The registered four-channel tensor is
+\begin{equation}
+ \mathcal T_{abcd}=\frac{1}{D}\Tr\!\left(
+ \widehat X_a^\dagger\widehat X_b
+ \widehat X_c^\dagger\widehat X_d\right).
+ \label{eq:supp-four-channel}
+\end{equation}
+The scalar outcome is the normalized Frobenius distance between Eq.~\eqref{eq:supp-four-channel} and its registered complex-Gaussian Wick contraction. Channel entries and tensor components are not treated as independent observations.
+
+\section{Safe Hodge signature and frozen nulls}
+\label{sec:supp-nulls}
+
+Before any four-channel outcome is opened, each panel writes a safe checkpoint containing the harmonic dimension, gap, residuals, branch weights, Hodge balance, covariance spectra, seeds, code hashes, and array hash. Outcome tokens are forbidden from the serialized safe checkpoint. The Hodge balance is
+\begin{equation}
+ \eta_H=\frac{4T_+T_-}{(T_++T_-)^2},\qquad
+ T_\pm=\sum_a\lVert X_{a,\pm}\rVert_F^2.
+ \label{eq:supp-balance}
+\end{equation}
+
+Two parameter-free nulls are frozen from safe information. The collapsed null matches the registered channel, target, and complement covariance spectra after forgetting the branch label. The Hodge null samples exact and coexact matrix-normal responses independently using their branch-resolved covariance spectra, then combines them as an orthogonal direct sum. Both nulls are separable covariance models. They do not match the complete nonseparable covariance operator of every response entry; rejection therefore establishes higher response memory beyond the registered null family, not the failure of every possible Gaussian model.
+
+Null draws are generated separately for each complete coupling realization. A group-level null replicate selects one precomputed draw for every realization and takes their median. Physical confidence intervals resample complete realizations and also take the median. This hierarchy preserves disorder dependence within all tangent channels and tensor components.
+
+\section{Sequential pilot and prediction seal}
+\label{sec:supp-seal}
+
+The sequential pilot contains the complete \(N=8,10,12\) grid, two charge sectors, and sparse-coordinate plus isotropic panels. It is used to freeze the qualitative branch definitions but not to read the held-out \(N=14\) outcome. The held-out workflow has four ordered states:
+\begin{enumerate}
+ \item response jobs write safe checkpoints and physically separate outcome sidecars;
+ \item safe covariance data generate all collapsed and Hodge null banks;
+ \item a prediction-only process aggregates the safe files, writes numerical prediction intervals, and seals the prediction JSON by SHA-256;
+ \item a separate explicit command validates the seal, opens the outcome sidecars, and scores the frozen branch.
+\end{enumerate}
+No scheduler dependency invokes step 4. The delivery audit also requires the prediction timestamp to precede the unseal timestamp, the unsealed aggregate to cite the exact prediction hash, and the selected branch to equal a fresh recomputation from the two primary sparse-sector records.
+
+\ifheldoutcomplete
+\HeldoutResultSentence The frozen decision selects the cohomological response-memory branch; the prediction-hash prefix is \texttt{\HeldoutSeal}.
+\begin{table}[h]
+\caption{Held-out sparse-panel statistic. Physical brackets are complete-realization 95\% bootstrap intervals; the remaining brackets are sealed 97.5\% prediction intervals.}
+\label{tab:supp-heldout}
+\begin{ruledtabular}
+\begin{tabular}{lcccc}
+Sector & Observed & Physical & Collapsed null & Hodge null \\
+\hline
+Adjacent & \HeldoutAdjacentObserved & \HeldoutAdjacentPhysical & \HeldoutAdjacentCollapsed & \HeldoutAdjacentHodge \\
+Central & \HeldoutCentralObserved & \HeldoutCentralPhysical & \HeldoutCentralCollapsed & \HeldoutCentralHodge \\
+\end{tabular}
+\end{ruledtabular}
+\end{table}
+\else
+The result paragraph remains disabled in the pre-unseal source state.
+\fi
+
+\section{Controls and falsification gates}
+\label{sec:supp-controls}
+
+The response and inference implementations are tested by four controls with distinct failure modes. First, the decomposable three-form admits an analytic unitary reduction and fixes the expected harmonic rank and curvature-atom multiplicities; this catches fermionic signs and charge-block errors. Second, a synthetic one-sided response is generated with a covariance law whose Wick contraction is known, and the collapsed null reproduces it. Third, independent protected-fiber and complement basis rotations leave the whitened tensor and scalar outcome invariant. Fourth, negative delivery tests alter a seal, remove a grid element, change an array hash, or introduce an outcome token into safe serialization; each modification must stop the workflow rather than select a scientific branch.
+
+The following compact artifacts are sufficient to audit the public result without retaining the large per-realization working tree:
+\begin{center}
+\begin{tabular}{@{}l@{\hspace{1.2em}}l@{}}
+\toprule
+Artifact & Audited role \\
+\midrule
+\texttt{susy\_hodge\_v7\_controls.json} & analytic and one-sided controls \\
+\texttt{susy\_hodge\_v7\_outcomes\_pilot\_combined.*} & complete \(N=8,10,12\) pilot \\
+\texttt{susy\_hodge\_v7\_N14\_prediction.*} & pre-outcome intervals and seal \\
+\texttt{susy\_hodge\_v7\_N14\_unsealed.*} & post-seal outcome aggregate \\
+\texttt{susy\_hodge\_v7\_N14\_inference.json} & recomputable frozen branch \\
+\texttt{susy\_hodge\_delivery\_audit\_v7.json} & end-to-end scientific hashes \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section{Reproducibility contract and claim boundary}
+\label{sec:supp-reproducibility}
+\mbox{}\par
+
+The release retains source hashes, safe and outcome array hashes, per-realization null-bank identities, the prediction seal, the unsealed aggregate, a machine-recomputed inference branch, figure hashes, and compiled-paper audits. The focused test suite covers cochain nilpotency, analytic cohomology controls, exact/coexact orthogonality, finite differences, covariance-spectrum identities, null-bank idempotence, safe-file leakage rejection, corrupted-seal rejection, complete-grid enforcement, generated-asset hashes, and fail-closed manuscript activation.
+
+The scientific statement is finite size. It does not establish conventional energy-resolved ETH, thermalization, a real-time Lyapunov exponent, a spatially local SUSY universality class, or an asymptotic concentration theorem. Berry-curvature randomness in generic \(\mathcal N=2\) SYK is prior art \cite{chen2026berry,chen2024bps}. The new comparison is the common, prospective four-channel response test across one-sided Laughlin and two-sided cohomological protection mechanisms.
+
+\bibliography{references}
+
+\end{document}

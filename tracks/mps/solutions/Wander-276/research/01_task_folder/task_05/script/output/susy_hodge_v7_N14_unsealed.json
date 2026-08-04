@@ -1,0 +1,973 @@
+{
+  "arrays_sha256": "b4e6be65cf594525a7a6bfe62f5fb2d3b1f940ebc7d9500acef354273c9c05b6",
+  "checks": {
+    "complete_requested_grid": true,
+    "finite_outcomes": true
+  },
+  "passed": true,
+  "prediction_sha256": "fc300dc7e4bdc1be157919e458ac868d3468533cce31108f23c9fba4f7e9f102",
+  "records": [
+    {
+      "N": 14,
+      "R4": 0.35738087103395144,
+      "panel_kind": "sparse",
+      "realization": 0,
+      "safe_arrays_sha256": "ccc702aa83f8021eb3aa2f67dc3949798abcb5a44efacf3dae527c696861fa90",
+      "safe_identity_hash": "44f17703002e5d8496af042ae29f3602f4c4998705aa400167d7ef572d12e12f",
+      "sector": "central",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.17784779903500372,
+      "panel_kind": "isotropic",
+      "realization": 0,
+      "safe_arrays_sha256": "19a0e93f9bb71ac87be3e6be0fffbeaf3f76ccfee8081d0dd7d0dd71710883ee",
+      "safe_identity_hash": "0d4791237862afc32e310c96a07fcfeeeeb7c2f8679f5e52f43725cae516c654",
+      "sector": "central",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.36156114676424866,
+      "panel_kind": "sparse",
+      "realization": 1,
+      "safe_arrays_sha256": "feba2e32a13c40c9cb74870eea11ec959326795370df60e6313affbc7a8649d4",
+      "safe_identity_hash": "914baba0c350a9536fd535e9c676f79c1779d0e3f39dd7b0dac175fb714c2c7b",
+      "sector": "central",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.17264436610862055,
+      "panel_kind": "isotropic",
+      "realization": 1,
+      "safe_arrays_sha256": "b1d6da391eae4575bfc3a5905469115b65d18151b77c85f30e2b8d849a5618c2",
+      "safe_identity_hash": "74f9a8d2563f8fa41a7ecf2fdc43fadad205567b3782a48a136136b6cdee95c6",
+      "sector": "central",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.3870282436850503,
+      "panel_kind": "sparse",
+      "realization": 2,
+      "safe_arrays_sha256": "dbd19fb49be1a0bf936701c66282ce2d47e49492034640a51486ce530a2b157c",
+      "safe_identity_hash": "5e32ddbe4b9b52b35a198165c3a028da71a9d2b5b0bd906c16b55a020b611f09",
+      "sector": "central",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.17962495188847405,
+      "panel_kind": "isotropic",
+      "realization": 2,
+      "safe_arrays_sha256": "aed0e71bed049cc5b90b39396759899eb9583b13f26ae5a92c67b863fde42dc7",
+      "safe_identity_hash": "ce6021aa7355d4b79ff7daef94ac1f6887e341672454b0780ba5456d27abaaa7",
+      "sector": "central",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.35335360962176876,
+      "panel_kind": "sparse",
+      "realization": 3,
+      "safe_arrays_sha256": "aef463ec47c52d828afca3104b76e5c7f0a6064eb2dfe6c04fe6da7efad3c36c",
+      "safe_identity_hash": "2fc8acde41f905e05791e66403e3cf3cd07404f23cb44318c51089d7b9f5fb83",
+      "sector": "central",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.17682737630018416,
+      "panel_kind": "isotropic",
+      "realization": 3,
+      "safe_arrays_sha256": "1d86d31d8ddad6ccacb79aad1403866ab8cd2508aced6a8b97061a538ee2dc60",
+      "safe_identity_hash": "7da6c3230714f0b4c4b0be849717242f14acddb52f068d67916a996886ae24a7",
+      "sector": "central",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.3733305321446736,
+      "panel_kind": "sparse",
+      "realization": 4,
+      "safe_arrays_sha256": "574efe54da3efc84c12d6d619fb6856a96a62dae488e1b1e62cf793a8b90e88a",
+      "safe_identity_hash": "dca1a9dffd70a04f941d436794a7f87f6ef19b5fc1b21e624d92bb15ddf826d3",
+      "sector": "central",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.17299753135963708,
+      "panel_kind": "isotropic",
+      "realization": 4,
+      "safe_arrays_sha256": "6925da0cf9a8843510093d3ddc61514c102584a61860e089dfb3a7326794a851",
+      "safe_identity_hash": "2d6699c85ed7a82c3b5874c359675b2f0448ceefe13b39ca5eb3111f4d4ebba7",
+      "sector": "central",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.3054741153801766,
+      "panel_kind": "sparse",
+      "realization": 5,
+      "safe_arrays_sha256": "3964e81032c90ed2d4fde3cdb92ece1fc5f1a406d1a7177409230d746cf9100f",
+      "safe_identity_hash": "1f80e37a3f63496451d5b8cbd8d89de55b4ac56f3af9e29071fdd19335997380",
+      "sector": "central",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.17202793561968174,
+      "panel_kind": "isotropic",
+      "realization": 5,
+      "safe_arrays_sha256": "09d13a31871ae32438d7ba976a0441f8c232e632470020fdccbfe0c4ac99e4d1",
+      "safe_identity_hash": "7c06fb69236dd498650adc8428e6f74adc1bcfd28dbdc8de66b808e93a1d4d75",
+      "sector": "central",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.39378886094784715,
+      "panel_kind": "sparse",
+      "realization": 6,
+      "safe_arrays_sha256": "771b4cf6f513e2e6cabe67632fd2f8c5f70174b7dbc765f49741be93c363f821",
+      "safe_identity_hash": "88450f458ab81c9b7c34da073b0ab606c9463406a381c05b02690bfb921b9bcd",
+      "sector": "central",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.17365048254574816,
+      "panel_kind": "isotropic",
+      "realization": 6,
+      "safe_arrays_sha256": "e7b5bee29e261c5ae67bc349d9c523c472d0d42a5b19d7c86ba8f7da3eb77d08",
+      "safe_identity_hash": "da060556f2c028fec37b4320ceeb6a021532044855e3157d95e4e2807e7d34dc",
+      "sector": "central",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.3829784311641927,
+      "panel_kind": "sparse",
+      "realization": 7,
+      "safe_arrays_sha256": "799c8449464256036f74c24b9b2765881874ecf7a476dadf3347c1fec534b0c3",
+      "safe_identity_hash": "b880feacc95eb699002cca3f738209a095bca28f3b0bc99fd929cb5d64e05e3b",
+      "sector": "central",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.17484069799632418,
+      "panel_kind": "isotropic",
+      "realization": 7,
+      "safe_arrays_sha256": "94db06daaa50b508200f064755f007b4210b8609570a3a74f462dba5b45278e1",
+      "safe_identity_hash": "4dce16ae33abb350f1e501d746a3a539e6de24eb260572f51d6b8645370fff96",
+      "sector": "central",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.3682406571219608,
+      "panel_kind": "sparse",
+      "realization": 8,
+      "safe_arrays_sha256": "b5f06e639d41c803952d6614128f8cc2d5b12206110ecbe1376743c9eb506570",
+      "safe_identity_hash": "36dd27e02b35a9fad7c1a3e1c128264e88635c619a4dd9869bd06ee31d15b42c",
+      "sector": "central",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.17557097557649112,
+      "panel_kind": "isotropic",
+      "realization": 8,
+      "safe_arrays_sha256": "d28ac8231ea6959e71b0417958e3070a1b25cf4e381ce1840674d933c211f7f3",
+      "safe_identity_hash": "fff54dad82bb0f4df72ebffa1d5b236528850dc5aca79c13e92199937d3657bc",
+      "sector": "central",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.3749339514508324,
+      "panel_kind": "sparse",
+      "realization": 9,
+      "safe_arrays_sha256": "c06b8a00e487cffc4da1d1bc69ea74932a63d0b1ff0601bdc1c191d1e9ff527a",
+      "safe_identity_hash": "38d3a582d5336b9f45e20df40a37e12ee1e37e9dc570a3ce1a6b1c847cfcc873",
+      "sector": "central",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.17565647148553196,
+      "panel_kind": "isotropic",
+      "realization": 9,
+      "safe_arrays_sha256": "4ced6e8f3de30f6642379b8c0ac9b89ab9110243c9691728e359fb3e97a857de",
+      "safe_identity_hash": "26ad28d2e0213f9817b4ee9e0c91f1cb972db23aefec6a7c9db8458583ac979b",
+      "sector": "central",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.3755985900897959,
+      "panel_kind": "sparse",
+      "realization": 10,
+      "safe_arrays_sha256": "83179c942410992dc9babd2e4918a755166f6e383612012f6a77b6269ca14cdb",
+      "safe_identity_hash": "c3b7a6f2cf411b58bdd851befe54253d0522dc5e8934e872836197923840d01f",
+      "sector": "central",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.17322059785557328,
+      "panel_kind": "isotropic",
+      "realization": 10,
+      "safe_arrays_sha256": "3bec147afdce729899c6d61351ea493f284e77ac6b05b85ce93bba10c0d2f443",
+      "safe_identity_hash": "e864c5e25743a171096f7084b4e08a01f210177dd04881f025ff3290dfa310e6",
+      "sector": "central",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.37505119177448815,
+      "panel_kind": "sparse",
+      "realization": 11,
+      "safe_arrays_sha256": "7e544be73528c578b85b20559d3ddc60aaf948c4169f5547b2aa1acc3fb49ddf",
+      "safe_identity_hash": "9a44375078698edff90fb0325d86edabe740419287b1ac1bc46a21099688799f",
+      "sector": "central",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.17361341459735252,
+      "panel_kind": "isotropic",
+      "realization": 11,
+      "safe_arrays_sha256": "095ede8d23cbae8515b113e5b095b198216ea083eab77f119718ad2df701020a",
+      "safe_identity_hash": "d3aa276ea9dc7fd630543ea2f63c9e60b942ffb267bb9762748e337e48a698b2",
+      "sector": "central",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.35560571487423864,
+      "panel_kind": "sparse",
+      "realization": 12,
+      "safe_arrays_sha256": "0dd3434b12a2cdfddb673c435ee62f550351c03a143c08b9ccae907809a8936f",
+      "safe_identity_hash": "3a60b9a64a8c35cdad445bb78206481946cec88d7ba63cf517689b1d8fb3631d",
+      "sector": "central",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.1728496666289138,
+      "panel_kind": "isotropic",
+      "realization": 12,
+      "safe_arrays_sha256": "d039a3d01eeb9628fdbf8dba1d5f1d0afdcb0597ae0988b596316152da1becd6",
+      "safe_identity_hash": "b2955973a9c0b568c60d3098d2d2f187e42aed278a82ca339cd4257abcf3ca5b",
+      "sector": "central",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.39262767708164387,
+      "panel_kind": "sparse",
+      "realization": 13,
+      "safe_arrays_sha256": "16bae4343be0cb4d87ad5d23754745fa62def1eded2eb40336ea75248b9e73a8",
+      "safe_identity_hash": "6fbb467efa51ffc94611e185b502b805a074c615b14556e09fb4cc5b6fba0dc6",
+      "sector": "central",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.17393288077805835,
+      "panel_kind": "isotropic",
+      "realization": 13,
+      "safe_arrays_sha256": "5607813687d360997450efb8e6f9c3e5c2af745af8f82c3fd7ee945c9a274859",
+      "safe_identity_hash": "8c53b56a65e6afbb3f6a79b280dff23ba76fd29cfc4362704c0ed5fb5f8f0b48",
+      "sector": "central",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.38292520124145757,
+      "panel_kind": "sparse",
+      "realization": 14,
+      "safe_arrays_sha256": "a05a3b11670077c04baf8e73bb7193051cd852a297dc3f8a9125cc7b74849f71",
+      "safe_identity_hash": "3413d476a0cabfcc3c3b95882c0a5b10014994cfe2e2788473f96ad522117967",
+      "sector": "central",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.1772420131813431,
+      "panel_kind": "isotropic",
+      "realization": 14,
+      "safe_arrays_sha256": "e2b109acfa1fabfedaa8563e43d6b182f9f7e53ee49aa5ba534eab8eefed09b4",
+      "safe_identity_hash": "fcebe564f4e8c7acb81d4b7f8364206824bcdc35928f16c36d8d1a96ba61f803",
+      "sector": "central",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.38047305142967947,
+      "panel_kind": "sparse",
+      "realization": 15,
+      "safe_arrays_sha256": "a54c3f7e9bd5317d372925f40a2b4d4926b121fd557a0727aac7fb8e2532a43e",
+      "safe_identity_hash": "bfdf67cdc972f9a2db7c95e40b2903c1233eac6405c58ef8958732a671d52a74",
+      "sector": "central",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.17321653150494515,
+      "panel_kind": "isotropic",
+      "realization": 15,
+      "safe_arrays_sha256": "265da19e69d3f44b36b0465c3e3b5a3d464dc3d51801a4162ad6abfe8424c776",
+      "safe_identity_hash": "557a356533f223d143ba112c30bea569dfdddb248cea3b6a4d382a1a6bc2bac8",
+      "sector": "central",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.3508410161962601,
+      "panel_kind": "sparse",
+      "realization": 16,
+      "safe_arrays_sha256": "daf0d346aef0e6ec7f3bca4aeb781e86b1741aea6b80da8b69b3a086ebd08040",
+      "safe_identity_hash": "b5e07ed713a2dae09b9206fd2df04bea90194c5469ebae36bd62c082fc086e4b",
+      "sector": "central",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.17299275662283617,
+      "panel_kind": "isotropic",
+      "realization": 16,
+      "safe_arrays_sha256": "b9de388f6cdf881025f184d7487cb90ba839c42fe7785320e14235e2e11ad2ef",
+      "safe_identity_hash": "c56b992771ab76f030b3bf31c68953fd195ad7051423ebec7c34d877a6318281",
+      "sector": "central",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.3689804933327322,
+      "panel_kind": "sparse",
+      "realization": 17,
+      "safe_arrays_sha256": "82edf8ccd3ebd61ac80d818e9b61e10db9613f81e60ae0eb52ae34cfb8a22523",
+      "safe_identity_hash": "cbf8b3416071dabecdb0b8b36ca5ffed52d2ee8371a5de5f61ec7e30ff03ee35",
+      "sector": "central",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.17772425219044896,
+      "panel_kind": "isotropic",
+      "realization": 17,
+      "safe_arrays_sha256": "f14dd2dc8f17d531fe2e385043d63c8c38dd9397a556e08e3bfd5287d2f4e570",
+      "safe_identity_hash": "48541a79d370895d4afa8f0fb6eb7e9c55583df9467f34f95c8539e08d6d0e69",
+      "sector": "central",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.38157147210305253,
+      "panel_kind": "sparse",
+      "realization": 18,
+      "safe_arrays_sha256": "9c052e3fa9d7a42a0b779fa31a37084afe2b9385b5fcdbab1150f20716a638e3",
+      "safe_identity_hash": "8e9b301ab9620784f9a2c920d578e9c5befdacaa25c1d2adedf1a7f9527cc11a",
+      "sector": "central",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.174837029906894,
+      "panel_kind": "isotropic",
+      "realization": 18,
+      "safe_arrays_sha256": "24b479ee88ae6094e7aecaa72b8d24ccb828871a9716a1c14edfc304f74febb4",
+      "safe_identity_hash": "c19e3beac0b79bedbbb3f99578076a32bed7adc42bcd5a9ed9a40117a3da3a20",
+      "sector": "central",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.3767635710505377,
+      "panel_kind": "sparse",
+      "realization": 19,
+      "safe_arrays_sha256": "431ff0499fb50eb9bf13cc21a6f47b1e2ba2a4a83143971bd1d6b30d9881ea29",
+      "safe_identity_hash": "52240d364e706821e0e65f0547da607e04d9fbb2f95c0e744ad81bfe8e565d30",
+      "sector": "central",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.17352036640016832,
+      "panel_kind": "isotropic",
+      "realization": 19,
+      "safe_arrays_sha256": "93bb2eb7035a2efff9ef0f9176e5c53f76b5d03a795df702df9586dff828de95",
+      "safe_identity_hash": "6da86d401f6d472eae3cf2b0ab0477715082288256568560af2f4c43e507efdc",
+      "sector": "central",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.3703837719348199,
+      "panel_kind": "sparse",
+      "realization": 20,
+      "safe_arrays_sha256": "2235f7438088a226e52a6bd88eda29bc1b38ce01514b885ef5e4169512a9e810",
+      "safe_identity_hash": "7068a89386e2feba5c88d977fbc07a41a2f1d85f5be3f072ed048ee7bcb1e1b3",
+      "sector": "central",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.1773061493829299,
+      "panel_kind": "isotropic",
+      "realization": 20,
+      "safe_arrays_sha256": "e265b8f79f897f206a5e3a497f5a6e35f52169b240a19e4a99d9e7c557399afe",
+      "safe_identity_hash": "b10de13986c72d8d70ae7f1cb6ebf2716a03e5e4fc1da47a80033942e2c39d82",
+      "sector": "central",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.3790791465470712,
+      "panel_kind": "sparse",
+      "realization": 21,
+      "safe_arrays_sha256": "9a93c2255885fbce993ca78639133e65a9053b7403c8d6c317d593119434d815",
+      "safe_identity_hash": "d7316df9a49721b9df80e7bf9f160cb6163977912b89d6bfa4af0ae58aa5e901",
+      "sector": "central",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.17389091844276466,
+      "panel_kind": "isotropic",
+      "realization": 21,
+      "safe_arrays_sha256": "412a43aa50155fafc1df631a2c22aecc40731ca19b9aa6e147e4c4cf90c01904",
+      "safe_identity_hash": "1ae86087f09e3f997b662b72fb25a7bc18d316d98e690f5a7f029ca096c97b61",
+      "sector": "central",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.37098275110500467,
+      "panel_kind": "sparse",
+      "realization": 22,
+      "safe_arrays_sha256": "5634dc72c342377a59fa8306527b02bd45c87530e08a079c5ae4e152728cecf9",
+      "safe_identity_hash": "2c3990ad5ae0bd9aa51700dac3c33d9d5262e5d38793161615d66fcef819db8d",
+      "sector": "central",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.17508357627544904,
+      "panel_kind": "isotropic",
+      "realization": 22,
+      "safe_arrays_sha256": "4359c53367c93a61d31135387b4b3dafa269c1d32f387c6fd3976c31d2d68790",
+      "safe_identity_hash": "5c5f8a113b1a6a8a0a5eae90ec3bfd3353e5a5e8ec1b4dcda9615bf327433da6",
+      "sector": "central",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.3908256350115379,
+      "panel_kind": "sparse",
+      "realization": 23,
+      "safe_arrays_sha256": "30343d38ada3cf85b92a28ddd27caf11f11fb9a10f77c6c8d9a5c35c87e1aeb7",
+      "safe_identity_hash": "2831e5bca71067320fff0d610c9d6db80ea27035c9e434dbb2f575112e02c28e",
+      "sector": "central",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.1758571701165521,
+      "panel_kind": "isotropic",
+      "realization": 23,
+      "safe_arrays_sha256": "9ffcb2ffeb5fdb343b2aa1e11a2a44d1a70b4f156ab47f461995d47292aaf4e8",
+      "safe_identity_hash": "9ee2222252809ab3c2fd0ea54358bb75aa92c12dcf92e110079258e36459bb3d",
+      "sector": "central",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.3093983768322815,
+      "panel_kind": "sparse",
+      "realization": 0,
+      "safe_arrays_sha256": "6fae6f46bc5e3dec9455a6d7517fe35c1f4d23fc90a0d3f2e2c7d5a5a3e3ff19",
+      "safe_identity_hash": "2beff8669c29f2697c9cb68894f593581fec373ea0ebe0e3c330a46f18fed468",
+      "sector": "adjacent",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.12560895160204338,
+      "panel_kind": "isotropic",
+      "realization": 0,
+      "safe_arrays_sha256": "d71471c76bb163238938ba6b5faf19440a7a402a713a59ff7878da0bc9dbb7c3",
+      "safe_identity_hash": "2d89a5dcbb5bc7a85e6e2fbb9948482bd32cec24296d8f318e170515a8a67822",
+      "sector": "adjacent",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.3036963440366127,
+      "panel_kind": "sparse",
+      "realization": 1,
+      "safe_arrays_sha256": "325730f24aa56c32929c27fee3fc2f38d87696805c11933840057f3cac4ae95f",
+      "safe_identity_hash": "3c462c55fa9d30e08df0d03da1ea90b11a4c9cc69a169bf06a359bf1663ed4d6",
+      "sector": "adjacent",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.1281428056843278,
+      "panel_kind": "isotropic",
+      "realization": 1,
+      "safe_arrays_sha256": "79ae7338595544da0699d5a56f96ce43d106f5fa262961f4dabf615e7c340284",
+      "safe_identity_hash": "aa6fd7c5cfeef794bca8776c8277fbdd67c87bcbc09b01120b5400b830168246",
+      "sector": "adjacent",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.3120611443736316,
+      "panel_kind": "sparse",
+      "realization": 2,
+      "safe_arrays_sha256": "d6e006d63e56e7bedd5c3fa5d4b9df431cc66fa47599f962e68756e8b7db367c",
+      "safe_identity_hash": "e337bc257a477640eec1d52544f23d5710acbd9e45965ed5d46d9c9f6dc100ac",
+      "sector": "adjacent",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.12635744038991573,
+      "panel_kind": "isotropic",
+      "realization": 2,
+      "safe_arrays_sha256": "e3d00d849297062b9d7f5ea37a68379be1f20a5e5fe1ee0cdc02646b147d2f22",
+      "safe_identity_hash": "f12792543f158476bef95769f73050ebfd4fffd45535f5556603bf750b7d56bd",
+      "sector": "adjacent",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.2915274750468075,
+      "panel_kind": "sparse",
+      "realization": 3,
+      "safe_arrays_sha256": "607c04a3c87fe709848b7310c877bce3d150e8aea4ce6290c5fd3bed6b21e8e0",
+      "safe_identity_hash": "2f051bc1a67fd43d7532054276199147fa13651233734b6a5077e995ce58ed4c",
+      "sector": "adjacent",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.12874957859834524,
+      "panel_kind": "isotropic",
+      "realization": 3,
+      "safe_arrays_sha256": "a5ae04f9b354f94c4086320e216801d6b3864ff4964cbdc153d4310fbadaff24",
+      "safe_identity_hash": "aacf15e112900c7f1524cf27b998d9aa40f2b693122e5ce8a97e5e03d4cdaec7",
+      "sector": "adjacent",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.31714774586224,
+      "panel_kind": "sparse",
+      "realization": 4,
+      "safe_arrays_sha256": "34501f71d63cb90035b11d45b8b833a16e104e4148dbbac3ede45ff004ab6f1e",
+      "safe_identity_hash": "5b07d375e30d6eb605a4b14bcc7c1a10a13fa440d0022b5f8e6c89b8b5e3e9cf",
+      "sector": "adjacent",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.12499854542884234,
+      "panel_kind": "isotropic",
+      "realization": 4,
+      "safe_arrays_sha256": "0b6c2ac6da00238376bb9f11637b3b634e111af945d98815243003f9a728e231",
+      "safe_identity_hash": "54ce746836b7dccba24fd6a2e2e84d2be1817fa0af47440de0582d24cd1189d0",
+      "sector": "adjacent",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.3131837409695154,
+      "panel_kind": "sparse",
+      "realization": 5,
+      "safe_arrays_sha256": "c890c1d5bf871e5f1c09c4bc6589167a0c1863758d88d608fd997b84fe2f2f33",
+      "safe_identity_hash": "e941f22f39c99aa8ee9bfb0a408ac6d57837ebb4ac984b796b1c39acaaed9db0",
+      "sector": "adjacent",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.12783158924560867,
+      "panel_kind": "isotropic",
+      "realization": 5,
+      "safe_arrays_sha256": "0e7e4554293776fa22d914699925fa271697dd0dcce5a695df2325d21fa80847",
+      "safe_identity_hash": "4575251dff194dd3e23dd35eb4666819ca7257781dc84dc4d83bdd3952d45b8e",
+      "sector": "adjacent",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.2830795039685373,
+      "panel_kind": "sparse",
+      "realization": 6,
+      "safe_arrays_sha256": "5e6f906e05ff39f09a187d1bbf6589c279d484dd6d3956fbf908ccd1045aa8fd",
+      "safe_identity_hash": "da7259da2a77705e3f6e8bba5072b9b6ae4fa2cc7666be0fe1b4b04b42820613",
+      "sector": "adjacent",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.12799475920263093,
+      "panel_kind": "isotropic",
+      "realization": 6,
+      "safe_arrays_sha256": "7fe89f0afd57163def66dbc90d01a41eb1d44c4cac3630dfeb11f47bc2507a34",
+      "safe_identity_hash": "df2b48fd815b22cbf84dc1043e26b50dd0afa4d4b0ef021108473f52bcb90a56",
+      "sector": "adjacent",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.29880270063952924,
+      "panel_kind": "sparse",
+      "realization": 7,
+      "safe_arrays_sha256": "af881008fda724be35af01f253f043a2486f3e6d44135c0f012ac97c28be91a8",
+      "safe_identity_hash": "e19eefced5a1b06fc9da78d048d25ae67814e25276faa84aa080fab0f824541f",
+      "sector": "adjacent",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.12722955479537765,
+      "panel_kind": "isotropic",
+      "realization": 7,
+      "safe_arrays_sha256": "cc5909f562cdef4fb36200948803d6b7e4e9d31838f4bae7fb337dec02829410",
+      "safe_identity_hash": "7e32cea818ad9c5e29886e8a251143969a8c39e73f760569054b40d5404bd397",
+      "sector": "adjacent",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.32416692946677433,
+      "panel_kind": "sparse",
+      "realization": 8,
+      "safe_arrays_sha256": "62936b121a82c939eb1101ddde4f5801e546a5681b5a12eb278b6a6801cd02c1",
+      "safe_identity_hash": "3c090da39c2eeace2503c7b02ef114986285a8fae44513f449eadd9256123a72",
+      "sector": "adjacent",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.12797032243588755,
+      "panel_kind": "isotropic",
+      "realization": 8,
+      "safe_arrays_sha256": "3893880f9170173b53e9451a95ef36aa097285f9842b08330dde1d9f760b06f2",
+      "safe_identity_hash": "a621a6e0ed82ef138a64d606aa770a674402c7e7175dc32175448e5af80481ee",
+      "sector": "adjacent",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.30160261885011713,
+      "panel_kind": "sparse",
+      "realization": 9,
+      "safe_arrays_sha256": "7af8e2ee528bd3359211e790a2920e30642aab9048f6f476287398c0f97c86fd",
+      "safe_identity_hash": "33661a9073ea94e3577aa6a623e73046632a3dc4db8599e6487ea8f277328f30",
+      "sector": "adjacent",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.12650077536750345,
+      "panel_kind": "isotropic",
+      "realization": 9,
+      "safe_arrays_sha256": "c0f86f1c4be5dc79e6bb0306fa525ffc737bb78ce73be3c3c09954185f6d5233",
+      "safe_identity_hash": "d967c99bf195ee6824ac3aa1e3d4e22658652fb4a665da437ab9fdd11f67c393",
+      "sector": "adjacent",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.31665150889008703,
+      "panel_kind": "sparse",
+      "realization": 10,
+      "safe_arrays_sha256": "44bf81fa40d371a7c3f1562c3c3c8dbad3dc70d9975221747f5dcfd337b093ae",
+      "safe_identity_hash": "418ca098e87d0788b3b0ac01f0719cbcb1b6a61e155bbc7d792d65ad3d333009",
+      "sector": "adjacent",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.12486718470697158,
+      "panel_kind": "isotropic",
+      "realization": 10,
+      "safe_arrays_sha256": "1aad9fc483ac613dfad8f24c8d7253d743bf031c84089704672d46112663661e",
+      "safe_identity_hash": "44235a21a4f4ee1dc44cfd23222a74ed0b46644cd12a85b3b3df0ccf8bbebe4b",
+      "sector": "adjacent",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.3150172274088173,
+      "panel_kind": "sparse",
+      "realization": 11,
+      "safe_arrays_sha256": "2fd122fca6ac2a7c5cacd6a0183316cd02c68d186b15a3b1920ab67c0df95a0a",
+      "safe_identity_hash": "755fc313c196d8a92647066b0737fb8a0927370de088d77b20342458a7c481fa",
+      "sector": "adjacent",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.12648186917582072,
+      "panel_kind": "isotropic",
+      "realization": 11,
+      "safe_arrays_sha256": "111d8a85916ca779bbed0856dafe1ce58e28b5f9166c00d4fcd02e66266bcbfc",
+      "safe_identity_hash": "59b47632041fed4897fdab7b1236547b1364efdb2cfecee21dfd78923b3a5602",
+      "sector": "adjacent",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.30930882837092594,
+      "panel_kind": "sparse",
+      "realization": 12,
+      "safe_arrays_sha256": "5dc325962da89f55953fa7f335408ab2f82de01c2726b29dc3f6050e51dd89c1",
+      "safe_identity_hash": "33e894bde09e178fa7d42c62a458ca59f5416a83c92872b4663b60b78f790cc6",
+      "sector": "adjacent",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.12473903801862468,
+      "panel_kind": "isotropic",
+      "realization": 12,
+      "safe_arrays_sha256": "3a1bca5f8e3d82f15f5e9f9803fe47385d4f1f16317961d920f96f3351a3a7a3",
+      "safe_identity_hash": "6ae762782e454b55ccff8d8a64443a289770fdd13d8b3c3d645d5e5eb2f90c04",
+      "sector": "adjacent",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.3187092233316881,
+      "panel_kind": "sparse",
+      "realization": 13,
+      "safe_arrays_sha256": "9b99686756fdbaba2353a305d6be4f30c90b64bb892cfc5336171e8d23e94dd0",
+      "safe_identity_hash": "1961c6c9a25f001e6e7fac755d13955cac497941fd775e03c682f3c3b1f1cd10",
+      "sector": "adjacent",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.12311679093164661,
+      "panel_kind": "isotropic",
+      "realization": 13,
+      "safe_arrays_sha256": "0a33d6948d3352028edbe114fb4a19c961d06edccacda83ca5e40ad163246e23",
+      "safe_identity_hash": "2859a133fef366e2c8ea47ca2d7d6f933640c8893d4d10f66f8e9c5c911645c5",
+      "sector": "adjacent",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.2869840786512777,
+      "panel_kind": "sparse",
+      "realization": 14,
+      "safe_arrays_sha256": "0c53f77fb2db84baa9667a0be69a13db4a22dd00fb35fac11b01d59c81fe3546",
+      "safe_identity_hash": "21ef98bfcfb34b3c82b5839a6d48788011d8e9e1658984fc442e32eb299b6cf9",
+      "sector": "adjacent",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.12546110242529254,
+      "panel_kind": "isotropic",
+      "realization": 14,
+      "safe_arrays_sha256": "85102b350476e4fd23ed8cd2e11e9c67ee42725787ee6c1a106c5070168162c2",
+      "safe_identity_hash": "947269efd7e8d47f59105a0172608db4de990a2c15ed5237cf874357d932b05b",
+      "sector": "adjacent",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.30145482021488623,
+      "panel_kind": "sparse",
+      "realization": 15,
+      "safe_arrays_sha256": "da21597f44e09f1dc9033f92c2d910c3f3900912f73b16a1d2881a3549fec209",
+      "safe_identity_hash": "0ef6e4a0ccd858638d4f86c2e298844b52513d60cbdfd712b709f5a8ae423fcd",
+      "sector": "adjacent",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.12410893255261685,
+      "panel_kind": "isotropic",
+      "realization": 15,
+      "safe_arrays_sha256": "01255a1f131e778598f7b26464a7dd903f4515abdca05690d13dc811d31b125f",
+      "safe_identity_hash": "a1cff0e9e6f52f1eb39abe0a7c53492ff4ab068a03487d04a1cd723998a8636e",
+      "sector": "adjacent",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.2818005333067515,
+      "panel_kind": "sparse",
+      "realization": 16,
+      "safe_arrays_sha256": "f89c1175dae34a10ee5446eb14ad6a61118da786f7a1e2a9f86aa6f544b8414f",
+      "safe_identity_hash": "e8a3b9c2ec197ee4953a218f2147661365667f1c9c31deb3ef90f0d8cae874a0",
+      "sector": "adjacent",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.12906197590591661,
+      "panel_kind": "isotropic",
+      "realization": 16,
+      "safe_arrays_sha256": "39631d2ab6c32ded74fe17dfb1e0610711e30f4ea98917975ed54453f87efb6c",
+      "safe_identity_hash": "2f00a3bda2a87dda2e88560a3952c97d71b156557accc41c4d193f0f5fd15993",
+      "sector": "adjacent",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.2896988545076108,
+      "panel_kind": "sparse",
+      "realization": 17,
+      "safe_arrays_sha256": "2f79a2c3f65b7763add919b47631485952dfdf3fd867c8b1a3be60103dc126e7",
+      "safe_identity_hash": "5db473f83a16417728c909162b9fc6cbd1310918dacd67d3ab8262b27059e27d",
+      "sector": "adjacent",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.12991968510069635,
+      "panel_kind": "isotropic",
+      "realization": 17,
+      "safe_arrays_sha256": "98535b4710a8a2bb246219e1b3546a284fadf58ac8207e5d4fedbd906c801939",
+      "safe_identity_hash": "7679325f5b4810adb8f5b9671705c70128fe9df8df560b6b7cdfd463cb5defb5",
+      "sector": "adjacent",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.28449340190852845,
+      "panel_kind": "sparse",
+      "realization": 18,
+      "safe_arrays_sha256": "521a0c5bd527528ef4fa178591b5373e424de7c771d120b6b6f244b70773fcdd",
+      "safe_identity_hash": "e32c8cd0c34e53a21dca84e140eaaa914c34cf02e03f7b2e87fd4a43689af857",
+      "sector": "adjacent",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.1288786398203198,
+      "panel_kind": "isotropic",
+      "realization": 18,
+      "safe_arrays_sha256": "177f89a2b0b90e6dc53fac068250c78a2002aabc3d1cc0969d0d9cb7e6ac6060",
+      "safe_identity_hash": "5d57840828c0517a68cdc5d20c2355ecb014d3990a91c9995999bddcfe2e81b3",
+      "sector": "adjacent",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.29311383113002976,
+      "panel_kind": "sparse",
+      "realization": 19,
+      "safe_arrays_sha256": "a83dcc6d56d737dfe3e3fa7798c132e48f36a33f152bee5bd4a1e0a414201d3a",
+      "safe_identity_hash": "947a8114b86536753bca9de87b15e500b355a02719b9248203b0c775004e96ab",
+      "sector": "adjacent",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.12593911102405952,
+      "panel_kind": "isotropic",
+      "realization": 19,
+      "safe_arrays_sha256": "9e6def7b6e7b0030fd44b7b36b908560c07d8b5d73007a141ab5899e0ed24129",
+      "safe_identity_hash": "a91ad6776d7a5aa3b399603e9fdf7bba53b1fc1c27780c17bd6f28bbb5a9a3bd",
+      "sector": "adjacent",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.285266176958073,
+      "panel_kind": "sparse",
+      "realization": 20,
+      "safe_arrays_sha256": "09ab8aca3eeb3d3a3cff610d194d54bcb2f2dc76abb82848d759ed5222535511",
+      "safe_identity_hash": "91e38e992c88d0f9dc51c205f122436c048af7765b03202b0691127de30ec851",
+      "sector": "adjacent",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.1264565795005598,
+      "panel_kind": "isotropic",
+      "realization": 20,
+      "safe_arrays_sha256": "e5302abb0f43102845a0960bbfdf27bb6bd082a5cc99ba92b5ffea772bc0074a",
+      "safe_identity_hash": "e5f175ef8a712bf1a0f375bd8dbc64bd7710f0a956af401b55498845eba7b31c",
+      "sector": "adjacent",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.31760948481702245,
+      "panel_kind": "sparse",
+      "realization": 21,
+      "safe_arrays_sha256": "d2ba36cb89e27471c0f320009a634556450fb02ffcb76bca839556a2edb698cb",
+      "safe_identity_hash": "84815ba140a3529e9853686c04bee86607b31b0112783fe99ecedfaa6782884a",
+      "sector": "adjacent",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.1273439972529156,
+      "panel_kind": "isotropic",
+      "realization": 21,
+      "safe_arrays_sha256": "4688ace5caa4696cf663ffa681e026c177c0710f2c6f7700a025071e55d559ae",
+      "safe_identity_hash": "a928ce8f3dae52e54f4949a32386bb131943f7f842f39f22fb82a62051604eaa",
+      "sector": "adjacent",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.2933414888869676,
+      "panel_kind": "sparse",
+      "realization": 22,
+      "safe_arrays_sha256": "4ba6f1a823c9e00e2220b4c7ba38013a0c07aef290ce4b9cbca343d7cdbfc7a3",
+      "safe_identity_hash": "855d38cfc708aefc6279e9cbd7662fa7c2a7a8182c11175284cd82e2cf269f0a",
+      "sector": "adjacent",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.12410061262322138,
+      "panel_kind": "isotropic",
+      "realization": 22,
+      "safe_arrays_sha256": "8131af64da5a200c301d1b19a7d9a98798261217eeaa9d5ada2ef846864ddae3",
+      "safe_identity_hash": "5dacb97ad31e24930af4262f6ddd7e2307101a0fc5de6b807c795b66c779640f",
+      "sector": "adjacent",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.2914180000397658,
+      "panel_kind": "sparse",
+      "realization": 23,
+      "safe_arrays_sha256": "79be6be1d02f72821ad761cc7327f17f206fed4aae3ba1a74abe00016624fd28",
+      "safe_identity_hash": "eda4fff0f68cd8fb9bedcff161e988d4748f8c5a67dfc5fe2cd4e45a9b8f7938",
+      "sector": "adjacent",
+      "version": "v7"
+    },
+    {
+      "N": 14,
+      "R4": 0.12704309933319832,
+      "panel_kind": "isotropic",
+      "realization": 23,
+      "safe_arrays_sha256": "cad00b6d5a6d292790f2935cabcda313cc892f37fdce08891c2c9d7d594b631d",
+      "safe_identity_hash": "7f15fc8450ea436c6df0c45f95c49eab7e06a83559af7cabc1bde9811f594591",
+      "sector": "adjacent",
+      "version": "v7"
+    }
+  ],
+  "unsealed_utc": "2026-08-04T01:18:16.227834+00:00",
+  "version": "v7"
+}
