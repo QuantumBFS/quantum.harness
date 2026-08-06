@@ -76,7 +76,7 @@ Rendered: `./10-1063-1-3193710.md` _(downloaded — abstract only; no open-acces
 
 **Owning skill:** `/method-ed` (primary), with tool skills `/using-xdiag` (lattice FCI / Hubbard) and `/using-quspin` (fermionic lattice models in the site basis).
 
-For quantum-chemistry FCI (molecular orbital basis), standard codes are PySCF (`pyscf.fci.FCI`), OpenMolcas, or FCIQMC codes (NECI, `dice` for heat-bath CI).
+For quantum-chemistry FCI (molecular orbital basis), standard codes are PySCF (`pyscf.fci.FCI`), OpenMolcas, or FCIQMC codes (NECI, `dice` for heat-bath CI); for molecular integrals, FCIDUMP export, active spaces, or reference HF/FCI/CCSD/CASCI energies, route to `/using-pyscf`.
 
 **Default workflow:**
 1. Define the active space: select `N_orb` spatial orbitals and `N_e` electrons (CASSCF orbital selection if needed).
