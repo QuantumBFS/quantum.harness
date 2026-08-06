@@ -1,0 +1,13 @@
+{
+  "schema_version": "wangtheophys.tn-energy-reference.v1",
+  "reference_id": "infinite-heisenberg-delta1-bethe-ansatz",
+  "capability_id": "tenpy.infinite_1d.vumps",
+  "physics_digest": "sha256:877bcf8045fe0aa5dcebbb6aa310eeab144da3a2aea21ddd8bdc591bcab649bf",
+  "observable": "energy",
+  "value": -0.4431471805599453,
+  "units": "J",
+  "normalization": "per-site",
+  "method": "analytic_bethe_ansatz",
+  "citation": "Thermodynamic-limit spin-1/2 antiferromagnetic Heisenberg-chain ground-state energy per site, 1/4-ln(2).",
+  "result_digest": "sha256:a509283a89f7e508f3f8755f7bb34582bcacff7ec53362541e56e30f4ec59ce2"
+}

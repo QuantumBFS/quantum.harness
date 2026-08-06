@@ -1,0 +1,13 @@
+{
+  "schema_version": "wangtheophys.tn-energy-reference.v1",
+  "reference_id": "finite-tfim-l8-open-j1-g0.8-ed",
+  "capability_id": "tenpy.finite_1d.dmrg",
+  "physics_digest": "sha256:71a128d84ecddd84a686a13d971d4bf097a320e1f7eccd7115b3319cf9514a71",
+  "observable": "energy",
+  "value": -8.749171017567908,
+  "units": "J",
+  "normalization": "total",
+  "method": "exact_diagonalization",
+  "citation": "Exact diagonalization anchor for the preregistered open L=8 TFIM Hamiltonian with J=1 and g=0.8.",
+  "result_digest": "sha256:2de6cfa917e8f4cb7819f60df1135dbed44c60c50d0e39d1cdfe015cce0ec819"
+}

@@ -1,0 +1,33 @@
+{
+  "challenge_id": "issue133.new-03-transfer-gap",
+  "digest": "sha256:05ffc2b55fae676ce957a6c6b5dcd73d6fa9819a9fc072d730dd7b8c53eabf59",
+  "frozen_at": "2026-07-30T12:20:00Z",
+  "input": {
+    "matrix": [
+      [
+        3,
+        1,
+        0
+      ],
+      [
+        1,
+        3,
+        0
+      ],
+      [
+        0,
+        0,
+        1
+      ]
+    ]
+  },
+  "kind": "transfer-spectral-gap",
+  "novelty_statement": "New live campaign item; not a #124-#128 calibration problem.",
+  "preregistered_gate": {
+    "eigenvalue_order": "descending",
+    "required_positive_gap": true,
+    "requires_complete_eigenbasis": true
+  },
+  "schema_version": "wangtheophys.issue133.challenge.v1",
+  "title": "Exact spectral gap of a frozen transfer matrix"
+}

@@ -1,0 +1,60 @@
+{
+  "calibration_id": "calibration.quantumbfs-124-128",
+  "candidate_digests": [
+    "sha256:4fadcd94dbc40a54d07c4b93ec4ef3ac419727cd9b7c6066877debeadeb13738",
+    "sha256:7dfe5ea4bce9f6be2de5d1f81b24da03b3bc2ccdd7afd0e736ad9033195194af",
+    "sha256:06d76126a33796248ab9de37542ec3a77d462561898a6df21e756e3a049c89ae",
+    "sha256:0868427c8d4ccefbf949b9cbd6502cc7bfcb55e0e4a82a94f969f5e3e239aae5",
+    "sha256:95b887d585665a7ab54960b8738d0e922a8afb7655995f751a2fe60124d62c43"
+  ],
+  "digest": "sha256:ee4acc0b035c0678d05997fa6d6a5991a99e708d42e30d4c5caea90fb519e85f",
+  "failure_codes": [],
+  "manifest_digest": "sha256:c6288ad94f77779acac9de5cf9488252ff5e4461180f94d479a7f7d98193f4ae",
+  "matches": [
+    {
+      "candidate_id": "calibration.candidate.kagome_certified_bracket",
+      "matched": true,
+      "similarity": 1.0,
+      "target_id": "quantumbfs.issue-124"
+    },
+    {
+      "candidate_id": null,
+      "matched": false,
+      "similarity": 0.6666666666666666,
+      "target_id": "quantumbfs.issue-125"
+    },
+    {
+      "candidate_id": "calibration.candidate.aklt_gap_certificate",
+      "matched": true,
+      "similarity": 1.0,
+      "target_id": "quantumbfs.issue-126"
+    },
+    {
+      "candidate_id": "calibration.candidate.xeb_auditable_contraction",
+      "matched": true,
+      "similarity": 1.0,
+      "target_id": "quantumbfs.issue-127"
+    },
+    {
+      "candidate_id": "calibration.candidate.trotter_tn_witness",
+      "matched": true,
+      "similarity": 1.0,
+      "target_id": "quantumbfs.issue-128"
+    }
+  ],
+  "passed": true,
+  "schema_version": "tn-agent.factory-calibration-report.v1",
+  "scores": {
+    "executable_gate": 1.0,
+    "hidden_target_match": 0.8,
+    "meaningful_gap_recovery": 1.0,
+    "strong_weak_separation": 0.7876666666666667
+  },
+  "sealed_target_digests": [
+    "sha256:94d4fa4fe643a74c6fe1f73149bf7fd604e0100a8fe7b555e5dcb2ccf65bd323",
+    "sha256:7886d909291de6820e5fabe974a6cb2af478a080f18e1695855ca57ca2ed4abc",
+    "sha256:1605f6d8e5daa453cc290532b2be74176bbcab81f31c133fea7f28ccfe126841",
+    "sha256:19e785a54729eded1fcd7bcf6f1fce7f28b1f714c1c9fe69d52adf96704d8890",
+    "sha256:fe900176456fce9abcd4448d6d29fc47e3a42bdf353338d04a131b6bd62acdee"
+  ]
+}

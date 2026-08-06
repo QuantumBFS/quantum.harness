@@ -1,0 +1,207 @@
+{
+  "schema_version": "wangtheophys.tn-evidence.v1",
+  "experiment_digest": "sha256:fee6d1d1cd7181b1f4c1f28ce379cce2e756ebcfd806717c13260467485e98f8",
+  "binding": {
+    "schema_version": "tn-agent.backend-binding.v1",
+    "capability_id": "tenpy.finite_1d.dmrg",
+    "adapter_id": "tenpy.v1",
+    "backend_id": "tenpy",
+    "request_schema": "tn-agent.tenpy.finite-tfim-dmrg.v1",
+    "result_schema": "tn-agent.backend-result.v1"
+  },
+  "execution": {
+    "schema_version": "tn-agent.execution-evidence.v1",
+    "status": "succeeded",
+    "return_code": 0,
+    "execution_handle": "fixture:finite:primary",
+    "retryable": false,
+    "stdout_digest": "sha256:78158f80ea32f0956900cb20ee54117b4c2731b15f2cbc1c44f736343ead468c",
+    "stderr_digest": "sha256:78bbf8e1c6ab4d84f8d34341d54f7c86eb30bb9ca6a3aeafd8d4d9c5e02ee61f",
+    "stdout_truncated": false,
+    "stderr_truncated": false
+  },
+  "repeat_execution": {
+    "schema_version": "tn-agent.execution-evidence.v1",
+    "status": "succeeded",
+    "return_code": 0,
+    "execution_handle": "fixture:finite:repeat",
+    "retryable": false,
+    "stdout_digest": "sha256:91cae5519e57dcb3300e0e8934d67448f2ffdc7f45e330bb0b270f4c60ebab8a",
+    "stderr_digest": "sha256:153ad8c471de56801462ca68e862cd9eb1e40a04cfbf7db67335f0c679c164ec",
+    "stdout_truncated": false,
+    "stderr_truncated": false
+  },
+  "artifacts": [
+    {
+      "relative_path": "backend-request.json",
+      "digest": "sha256:3639a40e34163739de378171c1ad8887749aafa75c397848689a46ca603d83ef",
+      "size_bytes": 1635,
+      "media_type": "application/json",
+      "role": "backend_request"
+    },
+    {
+      "relative_path": "backend-raw-result.json",
+      "digest": "sha256:bfe7ad8e9de5ad80a643f0a663bdff4301a61564146c44d54814bfe14b82b7d5",
+      "size_bytes": 2188,
+      "media_type": "application/json",
+      "role": "backend_raw_result"
+    },
+    {
+      "relative_path": "backend-result.json",
+      "digest": "sha256:6976445e93f30c4d0132a9bf4d5d3c1c882639a706f3c281432407d8a3e1c586",
+      "size_bytes": 4159,
+      "media_type": "application/json",
+      "role": "backend_result"
+    },
+    {
+      "relative_path": "backend-repeat-raw-result.json",
+      "digest": "sha256:339d2baf5209c7ce0c50ddb84ee0efabaa000ddad1003725235025acdfb07778",
+      "size_bytes": 2188,
+      "media_type": "application/json",
+      "role": "backend_repeat_raw_result"
+    },
+    {
+      "relative_path": "backend-repeat-result.json",
+      "digest": "sha256:7414dbd6d0478f4614a7ae1fc08a305c49560c0886dc293264fe22e853fc1b29",
+      "size_bytes": 4172,
+      "media_type": "application/json",
+      "role": "backend_repeat_result"
+    },
+    {
+      "relative_path": "energy-reference.json",
+      "digest": "sha256:4555531abc00ffe7d9c7f0f907ab2def5e5a7c05348a8785a10555ff34e9c134",
+      "size_bytes": 598,
+      "media_type": "application/json",
+      "role": "energy_reference"
+    },
+    {
+      "relative_path": "validator-evidence.json",
+      "digest": "sha256:10e2a4836f40594d3228f3db4feefd9a040a1936b8010da9433f8a036e8df181",
+      "size_bytes": 1901,
+      "media_type": "application/json",
+      "role": "validator_evidence"
+    },
+    {
+      "relative_path": "backend-stdout.log",
+      "digest": "sha256:78158f80ea32f0956900cb20ee54117b4c2731b15f2cbc1c44f736343ead468c",
+      "size_bytes": 24,
+      "media_type": "text/plain",
+      "role": "backend_stdout"
+    },
+    {
+      "relative_path": "backend-stderr.log",
+      "digest": "sha256:78bbf8e1c6ab4d84f8d34341d54f7c86eb30bb9ca6a3aeafd8d4d9c5e02ee61f",
+      "size_bytes": 25,
+      "media_type": "text/plain",
+      "role": "backend_stderr"
+    },
+    {
+      "relative_path": "backend-repeat-stdout.log",
+      "digest": "sha256:91cae5519e57dcb3300e0e8934d67448f2ffdc7f45e330bb0b270f4c60ebab8a",
+      "size_bytes": 23,
+      "media_type": "text/plain",
+      "role": "backend_repeat_stdout"
+    },
+    {
+      "relative_path": "backend-repeat-stderr.log",
+      "digest": "sha256:153ad8c471de56801462ca68e862cd9eb1e40a04cfbf7db67335f0c679c164ec",
+      "size_bytes": 24,
+      "media_type": "text/plain",
+      "role": "backend_repeat_stderr"
+    }
+  ],
+  "observables": [
+    {
+      "name": "energy",
+      "status": "measured",
+      "evidence_digest": "sha256:6976445e93f30c4d0132a9bf4d5d3c1c882639a706f3c281432407d8a3e1c586"
+    },
+    {
+      "name": "variance",
+      "status": "measured",
+      "evidence_digest": "sha256:6976445e93f30c4d0132a9bf4d5d3c1c882639a706f3c281432407d8a3e1c586"
+    },
+    {
+      "name": "magnetization_z",
+      "status": "measured",
+      "evidence_digest": "sha256:6976445e93f30c4d0132a9bf4d5d3c1c882639a706f3c281432407d8a3e1c586"
+    },
+    {
+      "name": "entanglement_entropy",
+      "status": "measured",
+      "evidence_digest": "sha256:6976445e93f30c4d0132a9bf4d5d3c1c882639a706f3c281432407d8a3e1c586"
+    },
+    {
+      "name": "correlator_sigma_x",
+      "status": "measured",
+      "evidence_digest": "sha256:6976445e93f30c4d0132a9bf4d5d3c1c882639a706f3c281432407d8a3e1c586"
+    }
+  ],
+  "validator_results": [
+    {
+      "id": "parse_consistency",
+      "status": "pass",
+      "reason_code": "VALIDATOR_PASS",
+      "metric_value": null,
+      "evidence_digest": "sha256:10e2a4836f40594d3228f3db4feefd9a040a1936b8010da9433f8a036e8df181"
+    },
+    {
+      "id": "convergence",
+      "status": "pass",
+      "reason_code": "VALIDATOR_PASS",
+      "metric_value": 1.000000082740371e-08,
+      "evidence_digest": "sha256:10e2a4836f40594d3228f3db4feefd9a040a1936b8010da9433f8a036e8df181"
+    },
+    {
+      "id": "variance",
+      "status": "reported_only",
+      "reason_code": "REPORTED_ONLY",
+      "metric_value": 1e-10,
+      "evidence_digest": "sha256:10e2a4836f40594d3228f3db4feefd9a040a1936b8010da9433f8a036e8df181"
+    },
+    {
+      "id": "canonical_form",
+      "status": "reported_only",
+      "reason_code": "REPORTED_ONLY",
+      "metric_value": 1e-10,
+      "evidence_digest": "sha256:10e2a4836f40594d3228f3db4feefd9a040a1936b8010da9433f8a036e8df181"
+    },
+    {
+      "id": "symmetry_check",
+      "status": "reported_only",
+      "reason_code": "REPORTED_ONLY",
+      "metric_value": 1e-12,
+      "evidence_digest": "sha256:10e2a4836f40594d3228f3db4feefd9a040a1936b8010da9433f8a036e8df181"
+    },
+    {
+      "id": "benchmark_compare",
+      "status": "pass",
+      "reason_code": "VALIDATOR_PASS",
+      "metric_value": 0.0,
+      "evidence_digest": "sha256:10e2a4836f40594d3228f3db4feefd9a040a1936b8010da9433f8a036e8df181"
+    },
+    {
+      "id": "reproducibility",
+      "status": "reported_only",
+      "reason_code": "REPORTED_ONLY",
+      "metric_value": 1.999999987845058e-08,
+      "evidence_digest": "sha256:10e2a4836f40594d3228f3db4feefd9a040a1936b8010da9433f8a036e8df181"
+    },
+    {
+      "id": "artifact_completeness",
+      "status": "pass",
+      "reason_code": "VALIDATOR_PASS",
+      "metric_value": 0,
+      "evidence_digest": "sha256:10e2a4836f40594d3228f3db4feefd9a040a1936b8010da9433f8a036e8df181"
+    }
+  ],
+  "provenance": {
+    "plan_id": "sha256:56217e253c4f5e13e66b9939c8ff5f56d26ee77023869288be54c2fe2c0ae307",
+    "request_digest": "sha256:247d02d04c82677698405851fe340c440a23b01620870591de0b785a60847a5d",
+    "backend_result_digest": "sha256:6976445e93f30c4d0132a9bf4d5d3c1c882639a706f3c281432407d8a3e1c586",
+    "repeat_backend_result_digest": "sha256:7414dbd6d0478f4614a7ae1fc08a305c49560c0886dc293264fe22e853fc1b29",
+    "generated_by": "fixtures/regenerate.py",
+    "generated_at": "2026-07-29T00:01:00Z"
+  },
+  "result_digest": "sha256:f7f261e1ae0222ea64ceaa6a295dfea9cda283d14eb86c78deab750c0d819b76"
+}

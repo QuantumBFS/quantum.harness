@@ -1,0 +1,90 @@
+{
+  "schema_version": "tn-agent.tenpy.raw-result.v1",
+  "request_digest": "sha256:247d02d04c82677698405851fe340c440a23b01620870591de0b785a60847a5d",
+  "plan_id": "sha256:56217e253c4f5e13e66b9939c8ff5f56d26ee77023869288be54c2fe2c0ae307",
+  "capability_id": "tenpy.finite_1d.dmrg",
+  "backend_id": "tenpy",
+  "backend_version": "1.1.0",
+  "adapter_id": "tenpy.v1",
+  "adapter_version": "1.0.0",
+  "status": "succeeded",
+  "environment": {
+    "schema_version": "tn-agent.tenpy.environment.v1",
+    "environment_digest": "sha256:33f97f66d496d52d7a68f6a05160f07f90b1d928cea8481f892db7dac132a756",
+    "runtime_id": "python",
+    "runtime_version": "3.12.4",
+    "dependencies": {
+      "numpy": "2.0.1",
+      "tenpy": "1.1.0"
+    }
+  },
+  "observables": {
+    "energy": {
+      "status": "measured",
+      "value": -8.749171017567908,
+      "units": "J",
+      "normalization": "total",
+      "reason": null
+    },
+    "variance": {
+      "status": "measured",
+      "value": 1e-10,
+      "units": "J^2",
+      "normalization": "total",
+      "reason": null
+    },
+    "magnetization_z": {
+      "status": "measured",
+      "value": 0.24931,
+      "units": "dimensionless",
+      "normalization": "per-site",
+      "reason": null
+    },
+    "entanglement_entropy": {
+      "status": "measured",
+      "value": [
+        0.132,
+        0.284,
+        0.315,
+        0.284,
+        0.132
+      ],
+      "units": "dimensionless",
+      "normalization": "bond",
+      "reason": null
+    },
+    "correlator_sigma_x": {
+      "status": "measured",
+      "value": [
+        1.0,
+        0.731,
+        0.548,
+        0.402
+      ],
+      "units": "dimensionless",
+      "normalization": "distance",
+      "reason": null
+    }
+  },
+  "convergence": [
+    {
+      "step": 1,
+      "metrics": {
+        "energy": -8.749171007567908
+      }
+    },
+    {
+      "step": 2,
+      "metrics": {
+        "energy": -8.749171017567908,
+        "canonical_residual": 1e-10,
+        "symmetry_residual": 1e-12
+      }
+    }
+  ],
+  "warnings": [],
+  "known_limitations": [
+    "Only the finite spin-1/2 TFIM open-chain route is promoted.",
+    "The fixture does not count as a generated challenge problem."
+  ]
+}

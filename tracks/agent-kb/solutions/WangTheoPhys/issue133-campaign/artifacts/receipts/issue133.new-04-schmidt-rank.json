@@ -1,0 +1,33 @@
+{
+  "certificate_digest": "sha256:5a27a20c5c5d98c4076edb361a7fa12032ac7fcc5022d6dab684d47603fdba1b",
+  "challenge_digest": "sha256:54b2d9624228c963dd2f358b2b0029a90d9a2e42b0a936d64d8286e9df476043",
+  "challenge_id": "issue133.new-04-schmidt-rank",
+  "created_at": "2026-07-30T12:25:00Z",
+  "digest": "sha256:8097b130ef5016bb44b2ffc15d898e177ca67d9fdab4c0cf10ae9498425a0dac",
+  "fresh_verifier_subprocess": true,
+  "gate_digest": "sha256:8cf0e74924f5085a4445deeb131a04c38b1ad4a19b028faa36fa391c62af7910",
+  "human_acceptance_digest": "sha256:4d68b2c91ddcb1aaefc930ebfe7cc3cfdec1b06c7a0b6f66007467a8e520a03d",
+  "negative_control": {
+    "certificate_digest": "sha256:810827aff38eb936b3025a6b880c774ec7224b5bfd962844094905e5632a2b6b",
+    "process_exit": 3,
+    "rejected": true,
+    "stderr": "exact rank gate failed"
+  },
+  "positive_process_exit": 0,
+  "receipt_id": "solved-receipt-4",
+  "schema_version": "wangtheophys.issue133.solved-receipt.v1",
+  "solver_source_digest": "sha256:26d20189405377d7e92b86d9f635c7b310d75ac35ea2bee304e8d8fff028a4d3",
+  "verification": {
+    "accepted": true,
+    "certificate_digest": "sha256:5a27a20c5c5d98c4076edb361a7fa12032ac7fcc5022d6dab684d47603fdba1b",
+    "challenge_digest": "sha256:54b2d9624228c963dd2f358b2b0029a90d9a2e42b0a936d64d8286e9df476043",
+    "gate_digest": "sha256:8cf0e74924f5085a4445deeb131a04c38b1ad4a19b028faa36fa391c62af7910",
+    "observables": {
+      "exact_rank": 2,
+      "factor_inner_dimension": 2,
+      "minor_determinant": 1
+    },
+    "schema_version": "wangtheophys.issue133.verification.v1"
+  },
+  "verifier_source_digest": "sha256:c853847ca37ccacb963b2d6ba3a87f34ca1101efa16106a11316887e03a255e8"
+}

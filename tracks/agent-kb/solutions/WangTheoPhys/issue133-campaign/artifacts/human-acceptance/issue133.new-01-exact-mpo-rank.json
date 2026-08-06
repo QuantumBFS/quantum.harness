@@ -1,0 +1,15 @@
+{
+  "actor": "human.junkaiwang",
+  "actor_role": "human expert supervision",
+  "authorization_basis": "explicit operator authorization in the active Codex task",
+  "challenge_digest": "sha256:a83ab05993dd92593b3e8253966ed81d3eaf56dac1635b644ade6a808127b93a",
+  "challenge_id": "issue133.new-01-exact-mpo-rank",
+  "created_at": "2026-07-30T12:25:00Z",
+  "decision": "accept",
+  "decision_id": "human-acceptance-1",
+  "digest": "sha256:cbd11366655b89f9347281dfd941a65cbba0cf252c725d2c5d37514c984a93fb",
+  "gate_digest": "sha256:de14385b8c8c58e1266765aeee7233b649cac0becbcd8e649b387dc442c898ea",
+  "schema_version": "wangtheophys.issue133.human-acceptance.v1",
+  "scope": "WangTheoPhys issue #133 submission campaign human acceptance",
+  "upstream_catalog_authority": "QuantumBFS maintainers"
+}

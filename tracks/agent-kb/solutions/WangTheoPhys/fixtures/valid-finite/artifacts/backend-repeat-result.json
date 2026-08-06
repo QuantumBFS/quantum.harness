@@ -1,0 +1,140 @@
+{
+  "schema_version": "tn-agent.backend-result.v1",
+  "request_digest": "sha256:247d02d04c82677698405851fe340c440a23b01620870591de0b785a60847a5d",
+  "binding": {
+    "schema_version": "tn-agent.backend-binding.v1",
+    "capability_id": "tenpy.finite_1d.dmrg",
+    "adapter_id": "tenpy.v1",
+    "backend_id": "tenpy",
+    "request_schema": "tn-agent.tenpy.finite-tfim-dmrg.v1",
+    "result_schema": "tn-agent.backend-result.v1"
+  },
+  "backend": {
+    "schema_version": "tn-agent.backend-identity.v1",
+    "backend_id": "tenpy",
+    "backend_version": "1.1.0",
+    "adapter_id": "tenpy.v1",
+    "adapter_version": "1.0.0"
+  },
+  "environment": {
+    "schema_version": "tn-agent.environment-identity.v1",
+    "environment_digest": "sha256:33f97f66d496d52d7a68f6a05160f07f90b1d928cea8481f892db7dac132a756",
+    "runtime_id": "python",
+    "runtime_version": "3.12.4",
+    "dependencies": {
+      "numpy": "2.0.1",
+      "tenpy": "1.1.0"
+    }
+  },
+  "execution": {
+    "schema_version": "tn-agent.execution-evidence.v1",
+    "status": "succeeded",
+    "return_code": 0,
+    "execution_handle": "fixture:finite:repeat",
+    "retryable": false,
+    "stdout_digest": "sha256:91cae5519e57dcb3300e0e8934d67448f2ffdc7f45e330bb0b270f4c60ebab8a",
+    "stderr_digest": "sha256:153ad8c471de56801462ca68e862cd9eb1e40a04cfbf7db67335f0c679c164ec",
+    "stdout_truncated": false,
+    "stderr_truncated": false
+  },
+  "observables": {
+    "correlator_sigma_x": {
+      "schema_version": "tn-agent.observable-evidence.v1",
+      "name": "correlator_sigma_x",
+      "status": "measured",
+      "value": [
+        1.0,
+        0.731,
+        0.548,
+        0.402
+      ],
+      "units": "dimensionless",
+      "normalization": "distance",
+      "reason": null
+    },
+    "energy": {
+      "schema_version": "tn-agent.observable-evidence.v1",
+      "name": "energy",
+      "status": "measured",
+      "value": -8.749170997567909,
+      "units": "J",
+      "normalization": "total",
+      "reason": null
+    },
+    "entanglement_entropy": {
+      "schema_version": "tn-agent.observable-evidence.v1",
+      "name": "entanglement_entropy",
+      "status": "measured",
+      "value": [
+        0.132,
+        0.284,
+        0.315,
+        0.284,
+        0.132
+      ],
+      "units": "dimensionless",
+      "normalization": "bond",
+      "reason": null
+    },
+    "magnetization_z": {
+      "schema_version": "tn-agent.observable-evidence.v1",
+      "name": "magnetization_z",
+      "status": "measured",
+      "value": 0.24931,
+      "units": "dimensionless",
+      "normalization": "per-site",
+      "reason": null
+    },
+    "variance": {
+      "schema_version": "tn-agent.observable-evidence.v1",
+      "name": "variance",
+      "status": "measured",
+      "value": 1e-10,
+      "units": "J^2",
+      "normalization": "total",
+      "reason": null
+    }
+  },
+  "convergence": [
+    {
+      "schema_version": "tn-agent.convergence-point.v1",
+      "step": 1,
+      "metrics": {
+        "energy": -8.749170987567908
+      }
+    },
+    {
+      "schema_version": "tn-agent.convergence-point.v1",
+      "step": 2,
+      "metrics": {
+        "energy": -8.749170997567909,
+        "canonical_residual": 1e-10,
+        "symmetry_residual": 1e-12
+      }
+    }
+  ],
+  "diagnostics": [],
+  "provenance": {
+    "schema_version": "tn-agent.provenance-evidence.v1",
+    "plan_id": "sha256:56217e253c4f5e13e66b9939c8ff5f56d26ee77023869288be54c2fe2c0ae307",
+    "capability_id": "tenpy.finite_1d.dmrg",
+    "adapter_id": "tenpy.v1",
+    "raw_result_relative": "backend-repeat-raw-result.json"
+  },
+  "artifacts": [
+    {
+      "schema_version": "tn-agent.result-artifact.v1",
+      "relative_path": "backend-repeat-raw-result.json",
+      "digest": "sha256:339d2baf5209c7ce0c50ddb84ee0efabaa000ddad1003725235025acdfb07778",
+      "media_type": "application/json",
+      "size_bytes": 2188
+    }
+  ],
+  "warnings": [],
+  "known_limitations": [
+    "Only the finite spin-1/2 TFIM open-chain route is promoted.",
+    "The fixture does not count as a generated challenge problem."
+  ],
+  "backend_limited_fields": [],
+  "result_digest": "sha256:4d17aa5b2ae63db1bf04ea42e28be46f0d5a9761d9a1e60f29f297c8ec13bbce"
+}
