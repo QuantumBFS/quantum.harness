@@ -1,0 +1,9 @@
+{
+  "complete": true,
+  "static": 54,
+  "amplitude": 72,
+  "realtime": 24,
+  "critical_gap": 105,
+  "refined_static": 28,
+  "fixed_adiabatic": 16
+}

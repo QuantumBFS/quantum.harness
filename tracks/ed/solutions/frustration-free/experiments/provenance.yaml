@@ -1,0 +1,12 @@
+source_repository: https://github.com/jiangweiqi001/quantum.harness.git
+source_commit: 9ebcab9
+source_path: quantum-2.harness-main/tracks/ed/hubbard-pump-2
+fetched_tracked_file_count: 120
+merged_on: 2026-07-30
+canonical_pipeline: ../src
+result_policy: >-
+  The imported tree contained no tracked results. Existing local results remain
+  authoritative and were not rerun or overwritten.
+path_policy: >-
+  Runnable entrypoints write under the repository-level results/<experiment>
+  namespace; source-specific Slurm templates may require local adaptation.

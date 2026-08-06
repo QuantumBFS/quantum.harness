@@ -1,0 +1,11 @@
+L: 10
+U: 12.0
+t: 1.0
+n_delta: 61
+n_Delta: 81
+delta_min: -1.0
+delta_max: 1.0
+Delta_min: -8.0
+Delta_max: 8.0
+method: "sparse"
+output_dir: "results/rmh_gap_landscape/L10"

@@ -1,0 +1,21 @@
+model:
+  L: 4
+  t: 1.0
+  delta0: 0.9
+  Delta0: 3.0
+  U: 0.0
+  N_up: 2
+  N_down: 2
+
+benchmark:
+  chern_grid: 5
+  gap_grids: [3, 6]
+  polarization_points: 40
+  period: 10.0
+  time_steps: 400
+
+scan:
+  grid_sizes: [5, 10]
+  U_values: [-8.0, 0.0, 8.0]
+
+output_dir: results
