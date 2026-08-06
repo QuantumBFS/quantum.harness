@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "operand_bits": 4,
+  "tasks": [
+    {"id":"xor","output_bits":4,"oracle":"(x XOR y)"},
+    {"id":"and","output_bits":4,"oracle":"(x AND y)"},
+    {"id":"or","output_bits":4,"oracle":"(x OR y)"},
+    {"id":"min","output_bits":4,"oracle":"min(x, y)"},
+    {"id":"max","output_bits":4,"oracle":"max(x, y)"},
+    {"id":"square-plus-y","output_bits":8,"oracle":"(square(x) + y)"},
+    {"id":"add-xor-x","output_bits":5,"oracle":"((x + y) XOR x)"},
+    {"id":"abs-plus-one","output_bits":5,"oracle":"(abs(x - y) + 1)"},
+    {"id":"add-one","output_bits":5,"oracle":"((x + y) + 1)"},
+    {"id":"multiply-plus-x","output_bits":8,"oracle":"((x * y) + x)"},
+    {"id":"shift-plus-y","output_bits":5,"oracle":"(shift_left(x, 1) + y)"},
+    {"id":"range","output_bits":4,"oracle":"(max(x, y) - min(x, y))"}
+  ]
+}

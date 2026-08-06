@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "tasks": [
+    {"id":"mystery-A","class":"official","operand_bits":8,"output_bits":9,"oracle":"(x + y)"},
+    {"id":"mystery-B","class":"official","operand_bits":7,"output_bits":7,"oracle":"abs(x - y)"},
+    {"id":"mystery-C","class":"official","operand_bits":6,"output_bits":12,"oracle":"(x * y)"},
+    {"id":"mystery-D","class":"official","operand_bits":5,"output_bits":11,"oracle":"(square(x) + square(y))"},
+    {"id":"xor","class":"synthetic","operand_bits":4,"output_bits":4,"oracle":"(x XOR y)"},
+    {"id":"and","class":"synthetic","operand_bits":4,"output_bits":4,"oracle":"(x AND y)"},
+    {"id":"or","class":"synthetic","operand_bits":4,"output_bits":4,"oracle":"(x OR y)"},
+    {"id":"min","class":"synthetic","operand_bits":4,"output_bits":4,"oracle":"min(x, y)"},
+    {"id":"max","class":"synthetic","operand_bits":4,"output_bits":4,"oracle":"max(x, y)"},
+    {"id":"square-plus-y","class":"synthetic","operand_bits":4,"output_bits":8,"oracle":"(square(x) + y)"},
+    {"id":"add-xor-x","class":"synthetic","operand_bits":4,"output_bits":5,"oracle":"((x + y) XOR x)"},
+    {"id":"abs-plus-one","class":"synthetic","operand_bits":4,"output_bits":5,"oracle":"(abs(x - y) + 1)"},
+    {"id":"add-one","class":"synthetic","operand_bits":4,"output_bits":5,"oracle":"((x + y) + 1)"},
+    {"id":"multiply-plus-x","class":"synthetic","operand_bits":4,"output_bits":8,"oracle":"((x * y) + x)"},
+    {"id":"shift-plus-y","class":"synthetic","operand_bits":4,"output_bits":5,"oracle":"(shift_left(x, 1) + y)"},
+    {"id":"range","class":"synthetic","operand_bits":4,"output_bits":4,"oracle":"(max(x, y) - min(x, y))"}
+  ]
+}

@@ -1,0 +1,307 @@
+#!/usr/bin/env python3
+import argparse
+import difflib
+import json
+import math
+import os
+import tempfile
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+RESULTS = ROOT / "benchmarks" / "results"
+CASE_ORDER = ("official-add-8", "add-8-100000", "add-16-100000", "mul-4-100000")
+CASE_LABELS = {
+    "official-add-8": "official add-8",
+    "add-8-100000": "generated add-8",
+    "add-16-100000": "generated add-16",
+    "mul-4-100000": "generated mul-4",
+}
+REPORTS = {
+    "apple-m4": RESULTS / "2026-07-28-apple-m4.md",
+}
+BEGIN = "<!-- BEGIN GENERATED BENCHMARK HEADLINE -->"
+END = "<!-- END GENERATED BENCHMARK HEADLINE -->"
+
+
+def load_json(path: Path) -> dict:
+    value = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(value, dict):
+        raise ValueError(f"{path} must contain a JSON object")
+    return value
+
+
+def validate_rust(case: str, backend: str, value: dict) -> None:
+    if value.get("schema_version") not in (2, 3) or value.get("backend") != backend:
+        raise ValueError(f"{case}/{backend}: wrong schema or backend")
+    if value["batch_count"] != 5 or len(value["batch_medians_ns"]) != 5:
+        raise ValueError(f"{case}/{backend}: expected five batches")
+    expected_raw = value["batch_count"] * value["measured_iterations"]
+    if len(value["raw_iterations_ns"]) != expected_raw:
+        raise ValueError(f"{case}/{backend}: raw iteration count mismatch")
+    if value["exact_matches"] != value["samples"]:
+        raise ValueError(f"{case}/{backend}: imperfect exact matches")
+    if value["correct_bits"] != value["total_bits"]:
+        raise ValueError(f"{case}/{backend}: imperfect bit matches")
+    if value["schema_version"] == 3:
+        for field in (
+            "scalar_dataset_parse_iterations_ns",
+            "legacy_pack_iterations_ns",
+            "direct_packed_parse_iterations_ns",
+            "compilation_iterations_ns",
+        ):
+            if len(value.get(field, ())) != 5:
+                raise ValueError(f"{case}/{backend}: incomplete {field}")
+    for field in ("median_ns", "standard_deviation_ns", "median_absolute_deviation_ns"):
+        number = value["evaluation"][field]
+        if not isinstance(number, (int, float)) or not math.isfinite(number) or number < 0:
+            raise ValueError(f"{case}/{backend}: invalid {field}")
+    for path_field in ("circuit_path", "dataset_path"):
+        if Path(value[path_field]).is_absolute():
+            raise ValueError(f"{case}/{backend}: absolute path in evidence")
+
+
+def milliseconds(nanoseconds: float) -> float:
+    return nanoseconds / 1_000_000.0
+
+
+def decimal_mb(byte_count: int) -> float:
+    return byte_count / 1_000_000.0
+
+
+def environment_value(snapshot: list[str], prefix: str) -> str:
+    for line in snapshot:
+        if line.startswith(prefix):
+            return line[len(prefix):].strip()
+    raise ValueError(f"missing environment field {prefix}")
+
+
+def render_report(profile: str) -> tuple[str, str]:
+    protocol = load_json(ROOT / "benchmarks" / "protocols" / f"{profile}.json")
+    process = load_json(RESULTS / f"{profile}-process.json")
+    if protocol.get("schema_version") != 1 or process.get("schema_version") != 1:
+        raise ValueError("unsupported protocol/process schema")
+    if protocol["profile"] != profile or process["profile"] != profile:
+        raise ValueError("profile mismatch")
+    if set(process["cases"]) != set(CASE_ORDER):
+        raise ValueError("process case set mismatch")
+
+    rust = {}
+    evaluator_speedups = []
+    one_shot_speedups = []
+    for case in CASE_ORDER:
+        rust[case] = {}
+        for backend in ("scalar", "packed"):
+            value = load_json(RESULTS / f"{case}-{backend}.json")
+            validate_rust(case, backend, value)
+            rust[case][backend] = value
+        scalar = rust[case]["scalar"]
+        packed = rust[case]["packed"]
+        if scalar["samples"] != packed["samples"] or scalar["gates"] != packed["gates"]:
+            raise ValueError(f"{case}: backend dimension mismatch")
+        scalar_time = scalar["evaluation"]["median_ns"]
+        packed_time = packed["evaluation"]["median_ns"]
+        packing = packed["packing_ns"]
+        evaluator_speedups.append(scalar_time / packed_time)
+        if scalar["schema_version"] == packed["schema_version"] == 3:
+            one_shot_speedups.append(scalar["one_shot_ns"] / packed["one_shot_ns"])
+        else:
+            one_shot_speedups.append(scalar_time / (packed_time + packing))
+
+    headline = (
+        f"The recorded Apple M4 results show a "
+        f"{min(evaluator_speedups):.0f}–{max(evaluator_speedups):.0f}× "
+        f"evaluator-only packed speedup and a "
+        f"{min(one_shot_speedups):.1f}–{max(one_shot_speedups):.1f}× "
+        f"production one-shot speedup after charging parsing and compilation."
+    )
+
+    snapshot = process["environment_snapshot"]
+    lines = [
+        "# Julia and Rust Verifier Benchmark — Apple M4",
+        "",
+        "> Generated by `scripts/render-benchmark-report`; do not edit numeric tables manually.",
+        "",
+        "## Environment",
+        "",
+        f"- Date: {protocol['date']}",
+        f"- Machine: {protocol['machine']}, {protocol['processor']}",
+        f"- CPU: {protocol['physical_cores']} physical/logical cores",
+        f"- Memory: {decimal_mb(protocol['memory_bytes']) / 1000:.1f} GB",
+        f"- Architecture: {protocol['architecture']}",
+        f"- Operating system: {protocol['operating_system']}",
+        f"- Rust: `{protocol['rust']}`",
+        f"- Julia: `{protocol['julia']}`",
+        f"- Power source: {environment_value(snapshot, 'power_source=')}",
+        f"- Battery state: {environment_value(snapshot, 'battery_state=')}",
+        f"- Low-power mode: {environment_value(snapshot, 'lowpowermode=')}",
+        f"- Load snapshot: `{environment_value(snapshot, 'system_load=')}`",
+        "",
+        "Serial numbers, hardware UUIDs, usernames, and absolute workspace paths are excluded.",
+        "",
+        "## Method",
+        "",
+        "Every case passed `Rust scalar == Rust packed == Julia` before timing.",
+        f"Rust uses {protocol['rust_batches']} independent batches; each batch has "
+        f"{protocol['rust_warmups_per_batch']} warm-ups followed by "
+        f"{protocol['rust_iterations_per_batch']} measured iterations. "
+        "Scalar/packed process order alternates by case. JSON stores every raw timing, "
+        "batch medians, standard deviation, and median absolute deviation (MAD).",
+        "",
+        f"Process measurements use {protocol['process_repetitions']} independent runs under "
+        f"{protocol['process_measurement']}. Julia time includes startup, JIT, parsing, "
+        "evaluation, and output.",
+        "",
+        "## Rust Evaluator Results",
+        "",
+        "| Case | Samples | Gates | Scalar parse ms | Scalar median ms | Packed preprocess ms | Packed median ms | Evaluator speedup | One-shot speedup |",
+        "|---|---:|---:|---:|---:|---:|---:|---:|---:|",
+    ]
+    for case in CASE_ORDER:
+        scalar = rust[case]["scalar"]
+        packed = rust[case]["packed"]
+        scalar_ns = scalar["evaluation"]["median_ns"]
+        packed_ns = packed["evaluation"]["median_ns"]
+        packing_ns = packed["packing_ns"]
+        one_shot_speedup = (
+            scalar["one_shot_ns"] / packed["one_shot_ns"]
+            if scalar["schema_version"] == packed["schema_version"] == 3
+            else scalar_ns / (packed_ns + packing_ns)
+        )
+        lines.append(
+            f"| {CASE_LABELS[case]} | {scalar['samples']:,} | {scalar['gates']} | "
+            f"{milliseconds(scalar['parse_ns']):.3f} | {milliseconds(scalar_ns):.6f} | "
+            f"{milliseconds(packing_ns):.6f} | {milliseconds(packed_ns):.6f} | "
+            f"{scalar_ns / packed_ns:.2f}× | {one_shot_speedup:.2f}× |"
+        )
+
+    lines += [
+        "",
+        "## Dispersion",
+        "",
+        "| Case | Scalar stddev ms | Scalar MAD ms | Packed stddev ms | Packed MAD ms |",
+        "|---|---:|---:|---:|---:|",
+    ]
+    for case in CASE_ORDER:
+        scalar = rust[case]["scalar"]["evaluation"]
+        packed = rust[case]["packed"]["evaluation"]
+        lines.append(
+            f"| {CASE_LABELS[case]} | "
+            f"{milliseconds(scalar['standard_deviation_ns']):.6f} | "
+            f"{milliseconds(scalar['median_absolute_deviation_ns']):.6f} | "
+            f"{milliseconds(packed['standard_deviation_ns']):.6f} | "
+            f"{milliseconds(packed['median_absolute_deviation_ns']):.6f} |"
+        )
+
+    lines += [
+        "",
+        "## Throughput",
+        "",
+        "| Case | Scalar samples/s | Packed samples/s |",
+        "|---|---:|---:|",
+    ]
+    for case in CASE_ORDER:
+        scalar = rust[case]["scalar"]
+        packed = rust[case]["packed"]
+        lines.append(
+            f"| {CASE_LABELS[case]} | "
+            f"{scalar['samples_per_second_at_median']:,.0f} | "
+            f"{packed['samples_per_second_at_median']:,.0f} |"
+        )
+
+    lines += [
+        "",
+        "## Startup-Inclusive Process Measurements",
+        "",
+        "| Case | Rust scalar wall s | Rust packed wall s | Julia wall s | Rust scalar peak RSS | Rust packed peak RSS | Julia peak RSS |",
+        "|---|---:|---:|---:|---:|---:|---:|",
+    ]
+    for case in CASE_ORDER:
+        case_process = process["cases"][case]
+        def wall(backend: str) -> str:
+            value = case_process[backend]["median_wall_seconds"]
+            return "<0.01" if value == 0 else f"{value:.2f}"
+        def rss(backend: str) -> str:
+            return f"{decimal_mb(case_process[backend]['median_rss_bytes']):.1f} MB"
+        lines.append(
+            f"| {CASE_LABELS[case]} | {wall('scalar')} | {wall('packed')} | "
+            f"{wall('julia')} | {rss('scalar')} | {rss('packed')} | {rss('julia')} |"
+        )
+
+    lines += [
+        "",
+        "## Interpretation",
+        "",
+        headline,
+        "",
+        "The production packed path includes direct CSV ingestion and one-time circuit "
+        "compilation. Parsing is larger than packed evaluation on the generated cases, so "
+        "text ingestion is now the dominant optimization target.",
+        "",
+        "Julia process results are end-to-end evidence for the unmodified official verifier, "
+        "not a language-only kernel comparison. The controlled performance conclusion is the "
+        "Rust scalar-versus-packed comparison under the same parser, circuit, metrics, compiler, "
+        "and hardware.",
+        "",
+        "## Reproduction",
+        "",
+        "```bash",
+        "./scripts/run-benchmarks.sh",
+        "./scripts/render-benchmark-report --check --profile apple-m4",
+        "```",
+        "",
+    ]
+    return "\n".join(lines), headline
+
+
+def replace_headline(readme: str, headline: str) -> str:
+    if readme.count(BEGIN) != 1 or readme.count(END) != 1:
+        raise ValueError("README benchmark markers are missing or duplicated")
+    start = readme.index(BEGIN) + len(BEGIN)
+    finish = readme.index(END)
+    return readme[:start] + "\n" + headline + "\n" + readme[finish:]
+
+
+def atomic_write(path: Path, content: str) -> None:
+    descriptor, temporary = tempfile.mkstemp(prefix=path.name, dir=path.parent)
+    try:
+        with os.fdopen(descriptor, "w", encoding="utf-8") as stream:
+            stream.write(content)
+        os.replace(temporary, path)
+    except BaseException:
+        os.unlink(temporary)
+        raise
+
+
+def check(path: Path, expected: str) -> bool:
+    actual = path.read_text(encoding="utf-8")
+    if actual == expected:
+        return True
+    print("".join(difflib.unified_diff(
+        actual.splitlines(keepends=True),
+        expected.splitlines(keepends=True),
+        fromfile=str(path),
+        tofile=f"{path} (generated)",
+    )))
+    return False
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--check", action="store_true")
+    parser.add_argument("--profile", choices=REPORTS, required=True)
+    arguments = parser.parse_args()
+    report, headline = render_report(arguments.profile)
+    report += "" if report.endswith("\n") else "\n"
+    report_path = REPORTS[arguments.profile]
+    readme_path = ROOT / "README.md"
+    readme = replace_headline(readme_path.read_text(encoding="utf-8"), headline)
+    if arguments.check:
+        if not check(report_path, report) or not check(readme_path, readme):
+            raise SystemExit(1)
+    else:
+        atomic_write(report_path, report)
+        atomic_write(readme_path, readme)
+
+
+if __name__ == "__main__":
+    main()

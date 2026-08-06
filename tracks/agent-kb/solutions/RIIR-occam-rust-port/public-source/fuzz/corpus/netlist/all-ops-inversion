@@ -1,0 +1,8 @@
+INPUTS 2
+w1 = AND ~x1 x2
+w2 = OR w1 x1
+w3 = XOR w2 ~x2
+w4 = NAND w3 x1
+w5 = NOR w4 x2
+w6 = XNOR ~w5 x1
+OUTPUTS ~w6 x2

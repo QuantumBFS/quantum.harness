@@ -1,0 +1,347 @@
+#!/usr/bin/env node
+
+import fs from "node:fs";
+import path from "node:path";
+import crypto from "node:crypto";
+import childProcess from "node:child_process";
+
+const args = process.argv.slice(2);
+const option = (name, fallback) => {
+  const index = args.indexOf(name);
+  return index < 0 ? fallback : args[index + 1];
+};
+const check = args.includes("--check");
+const repo = path.resolve(path.dirname(new URL(import.meta.url).pathname), "..");
+const semanticOption = option("--semantic", null);
+const isV2 = semanticOption !== null;
+const rawPath = path.resolve(option(
+  "--raw-measured",
+  option("--raw", path.join(repo, "experiments/occam-generalization/raw.jsonl")),
+));
+const output = path.resolve(option("--output", path.dirname(rawPath)));
+const raw = fs.readFileSync(rawPath, "utf8");
+const measuredRecords = raw.trimEnd().split("\n").map((line) => JSON.parse(line));
+let semanticRaw = null;
+let records = measuredRecords;
+if (isV2) {
+  const semanticPath = path.resolve(semanticOption);
+  semanticRaw = fs.readFileSync(semanticPath, "utf8");
+  const semanticRecords = semanticRaw.trimEnd().split("\n").map((line) => JSON.parse(line));
+  if (semanticRecords.length !== measuredRecords.length) {
+    throw new Error("measured and semantic row counts differ");
+  }
+  const measuredByKey = new Map(measuredRecords.map((row) => [JSON.stringify(row.key), row]));
+  records = semanticRecords.map((semantic) => {
+    const key = JSON.stringify(semantic.key);
+    const measured = measuredByKey.get(key);
+    if (!measured) throw new Error(`semantic row has no measured peer: ${key}`);
+    if (semantic.schema_version !== 2 || semantic.measured_schema_version !== measured.schema_version) {
+      throw new Error(`semantic schema link is invalid: ${key}`);
+    }
+    if (semantic.hypothesis_sha256 !== measured.hypothesis_sha256 ||
+        semantic.status !== measured.status ||
+        semantic.config_sha256 !== measured.config_sha256) {
+      throw new Error(`measured and semantic row mismatch: ${key}`);
+    }
+    for (const field of ["runtime_micros", "peak_rss_bytes", "host_identifier", "process_id", "started_unix_micros"]) {
+      if (Object.hasOwn(semantic, field)) throw new Error(`semantic row retains excluded field ${field}`);
+    }
+    if (!(measured.runtime_micros > 0) || !(measured.peak_rss_bytes > 0)) {
+      throw new Error(`measured row has a zero performance value: ${key}`);
+    }
+    return {
+      ...semantic,
+      runtime_micros: measured.runtime_micros,
+      peak_rss_bytes: measured.peak_rss_bytes,
+    };
+  });
+}
+if (records.length !== 20480) throw new Error(`expected 20480 rows, got ${records.length}`);
+const keys = new Set(records.map((row) => JSON.stringify(row.key)));
+if (keys.size !== records.length) throw new Error("duplicate trial keys");
+
+const methodOrder = [
+  "legacy-registry", "mdl-enumerator", "abc-dont-care", "robdd",
+  "sat-cegis", "grammar-evolution", "memorization", "oracle-expression",
+];
+const fractionOrder = [500, 1000, 2000, 3000, 5000, 10000, 20000, 40000];
+const groups = new Map();
+for (const row of records) {
+  const key = `${row.key.task}\0${row.key.method}\0${row.key.fraction_basis_points}`;
+  if (!groups.has(key)) groups.set(key, []);
+  groups.get(key).push(row);
+}
+const mean = (xs) => xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : null;
+const quantile = (xs, p) => {
+  if (!xs.length) return null;
+  const sorted = [...xs].sort((a, b) => a - b);
+  const position = (sorted.length - 1) * p;
+  const lower = Math.floor(position), upper = Math.ceil(position);
+  return sorted[lower] + (sorted[upper] - sorted[lower]) * (position - lower);
+};
+const wilson = (successes, total) => {
+  if (!total) return [0, 0];
+  const z = 1.959963984540054, p = successes / total, z2 = z * z;
+  const denominator = 1 + z2 / total;
+  const center = (p + z2 / (2 * total)) / denominator;
+  const spread = z * Math.sqrt(p * (1 - p) / total + z2 / (4 * total * total)) / denominator;
+  return [center - spread, center + spread];
+};
+const tasks = [...new Set(records.map((row) => row.key.task))].sort();
+const aggregateRows = [];
+for (const task of tasks) {
+  for (const method of methodOrder) {
+    for (const fraction of fractionOrder) {
+      const rows = groups.get(`${task}\0${method}\0${fraction}`) ?? [];
+      const recovered = rows.filter((row) => row.semantic_recovery).length;
+      const [low, high] = wilson(recovered, 20);
+      const successful = rows.filter((row) => row.status === "success");
+      const exact = successful.filter((row) => row.held_out).map((row) => row.held_out.exact_matches / row.held_out.samples);
+      const bit = successful.filter((row) => row.held_out).map((row) => row.held_out.correct_bits / row.held_out.total_bits);
+      const gates = successful.map((row) => row.gate_count).filter((value) => value !== null);
+      const descriptions = successful.map((row) => row.description_length).filter((value) => value !== null);
+      const runtimes = (isV2 ? successful : rows).map((row) => row.runtime_micros);
+      const rss = (isV2 ? successful : rows).map((row) => row.peak_rss_bytes);
+      const statuses = Object.fromEntries(["success", "no-hypothesis", "unsupported", "timeout", "resource-limit", "error"].map((status) => [status, rows.filter((row) => row.status === status).length]));
+      aggregateRows.push({
+        task, method, fraction_basis_points: fraction, expected_trials: 20,
+        missing_trials: 20 - rows.length, statuses,
+        semantic_recovery_successes: recovered,
+        semantic_recovery_rate: recovered / 20,
+        wilson95_low: low, wilson95_high: high,
+        mean_held_out_exact_accuracy: mean(exact),
+        mean_held_out_bit_accuracy: mean(bit),
+        median_runtime_micros: quantile(runtimes, 0.5),
+        runtime_iqr_micros: [quantile(runtimes, 0.25), quantile(runtimes, 0.75)],
+        median_peak_rss_bytes: quantile(rss, 0.5),
+        peak_rss_iqr_bytes: [quantile(rss, 0.25), quantile(rss, 0.75)],
+        median_gate_count: quantile(gates, 0.5),
+        median_description_length: quantile(descriptions, 0.5),
+      });
+    }
+  }
+}
+const rank = (xs) => {
+  const indexed = xs.map((value, index) => ({ value, index })).sort((a, b) => a.value - b.value);
+  const ranks = Array(xs.length);
+  for (let start = 0; start < indexed.length;) {
+    let end = start + 1;
+    while (end < indexed.length && indexed[end].value === indexed[start].value) end++;
+    const average = (start + end - 1) / 2 + 1;
+    for (let i = start; i < end; i++) ranks[indexed[i].index] = average;
+    start = end;
+  }
+  return ranks;
+};
+const spearman = (xs, ys) => {
+  if (xs.length < 2 || xs.length !== ys.length) return null;
+  const rx = rank(xs), ry = rank(ys), mx = mean(rx), my = mean(ry);
+  const numerator = rx.reduce((sum, value, i) => sum + (value - mx) * (ry[i] - my), 0);
+  const denominator = Math.sqrt(rx.reduce((sum, value) => sum + (value - mx) ** 2, 0) * ry.reduce((sum, value) => sum + (value - my) ** 2, 0));
+  return denominator ? numerator / denominator : 0;
+};
+const paired = records.filter((row) => row.status === "success" && row.gate_count !== null && row.description_length !== null && row.held_out);
+const gateAccuracyRho = spearman(paired.map((row) => row.gate_count), paired.map((row) => row.held_out.exact_matches / row.held_out.samples));
+const descriptionGateRho = spearman(paired.map((row) => row.description_length), paired.map((row) => row.gate_count));
+const aggregate = {
+  schema_version: isV2 ? 2 : 1,
+  trial_rows: records.length,
+  group_rows: aggregateRows.length,
+  correlations: {
+    gate_count_vs_held_out_exact_spearman: gateAccuracyRho,
+    description_length_vs_gate_count_spearman: descriptionGateRho,
+    paired_trials: paired.length,
+  },
+  groups: aggregateRows,
+};
+const fixed = (value) => value === null ? "" : Number(value).toFixed(6);
+const csvHeader = [
+  "task","method","fraction_basis_points","expected_trials","missing_trials","successes",
+  "semantic_recovery_successes","semantic_recovery_rate","wilson95_low","wilson95_high",
+  "mean_held_out_exact_accuracy","mean_held_out_bit_accuracy","median_gate_count","median_description_length",
+  ...(isV2 ? ["median_runtime_micros","runtime_iqr_low_micros","runtime_iqr_high_micros",
+    "median_peak_rss_bytes","peak_rss_iqr_low_bytes","peak_rss_iqr_high_bytes"] : []),
+];
+const csv = [csvHeader.join(","), ...aggregateRows.map((row) => [
+  row.task,row.method,row.fraction_basis_points,row.expected_trials,row.missing_trials,row.statuses.success,
+  row.semantic_recovery_successes,fixed(row.semantic_recovery_rate),fixed(row.wilson95_low),fixed(row.wilson95_high),
+  fixed(row.mean_held_out_exact_accuracy),fixed(row.mean_held_out_bit_accuracy),
+  row.median_gate_count ?? "",row.median_description_length ?? "",
+  ...(isV2 ? [
+    row.median_runtime_micros ?? "",
+    row.runtime_iqr_micros[0] ?? "",
+    row.runtime_iqr_micros[1] ?? "",
+    row.median_peak_rss_bytes ?? "",
+    row.peak_rss_iqr_bytes[0] ?? "",
+    row.peak_rss_iqr_bytes[1] ?? "",
+  ] : []),
+].join(","))].join("\n") + "\n";
+const aggregateJson = JSON.stringify(aggregate, null, 2) + "\n";
+const escapeXml = (value) => String(value).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;");
+const colors = ["#2563eb","#dc2626","#16a34a","#9333ea","#ea580c","#0891b2","#4b5563","#111827"];
+const svgFrame = (title, body) => `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800">
+<rect width="1200" height="800" fill="white"/>
+<text x="600" y="42" text-anchor="middle" font-family="DejaVu Sans, sans-serif" font-size="26">${escapeXml(title)}</text>
+<line x1="90" y1="710" x2="1140" y2="710" stroke="#111827"/><line x1="90" y1="80" x2="90" y2="710" stroke="#111827"/>
+${body}
+</svg>\n`;
+const fractionBody = methodOrder.map((method, mi) => {
+  const points = fractionOrder.map((fraction, fi) => {
+    const rows = aggregateRows.filter((row) => row.method === method && row.fraction_basis_points === fraction);
+    const rate = mean(rows.map((row) => row.semantic_recovery_rate));
+    return `${110 + fi * 140},${700 - rate * 600}`;
+  }).join(" ");
+  return `<polyline points="${points}" fill="none" stroke="${colors[mi]}" stroke-width="3"/><text x="930" y="${100 + mi * 24}" fill="${colors[mi]}" font-family="DejaVu Sans, sans-serif" font-size="15">${escapeXml(method)}</text>`;
+}).join("\n");
+const fractionSvg = svgFrame("Observed fraction vs semantic recovery", fractionBody);
+const scatter = (xField, yField, title) => {
+  const rows = aggregateRows.filter((row) => row[xField] !== null && row[yField] !== null);
+  const xs = rows.map((row) => row[xField]), ys = rows.map((row) => row[yField]);
+  const xmin = Math.min(...xs), xmax = Math.max(...xs), ymin = Math.min(...ys), ymax = Math.max(...ys);
+  const body = rows.map((row) => {
+    const x = 100 + (row[xField] - xmin) / Math.max(1e-9, xmax - xmin) * 1020;
+    const y = 700 - (row[yField] - ymin) / Math.max(1e-9, ymax - ymin) * 590;
+    const mi = methodOrder.indexOf(row.method);
+    return `<circle cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="4" fill="${colors[mi]}" opacity="0.65"><title>${escapeXml(`${row.task} ${row.method}`)}</title></circle>`;
+  }).join("\n");
+  return svgFrame(title, body);
+};
+const gatesSvg = scatter("median_gate_count", "mean_held_out_exact_accuracy", "Gate count vs held-out exact accuracy");
+const descriptionSvg = scatter("median_description_length", "median_gate_count", "Description length vs official gate count");
+const direction = gateAccuracyRho < -0.05 ? "smaller gate counts correlate with higher held-out accuracy" : gateAccuracyRho > 0.05 ? "larger gate counts correlate with higher held-out accuracy" : "gate count has little monotone association with held-out accuracy";
+const methodStatistics = methodOrder.map((method) => {
+  const rows = records.filter((row) => row.key.method === method);
+  const recovered = rows.filter((row) => row.semantic_recovery).length;
+  const successful = rows.filter((row) => row.status === "success" && row.held_out);
+  return {
+    method,
+    successful: successful.length,
+    recovered,
+    meanHeldOutExact: mean(successful.map((row) => row.held_out.exact_matches / row.held_out.samples)),
+    medianRuntimeMicros: quantile(successful.map((row) => row.runtime_micros), 0.5),
+    medianPeakRssBytes: quantile(successful.map((row) => row.peak_rss_bytes), 0.5),
+  };
+});
+const methodSummary = isV2
+  ? methodStatistics.map((statistics) =>
+    `| ${statistics.method} | ${statistics.successful}/2560 | ${statistics.recovered}/2560 | ${fixed(statistics.meanHeldOutExact)} | ${statistics.medianRuntimeMicros ?? ""} | ${statistics.medianPeakRssBytes ?? ""} |`
+  ).join("\n")
+  : methodOrder.map((method) => {
+    const rows = records.filter((row) => row.key.method === method);
+    const recovered = rows.filter((row) => row.semantic_recovery).length;
+    const successful = rows.filter((row) => row.status === "success").length;
+    return `| ${method} | ${successful}/2560 | ${recovered}/2560 |`;
+  }).join("\n");
+const implementationNote = isV2
+  ? `The ABC partial-PLA, ROBDD, bounded SAT/CEGIS, seeded grammar-evolution, and explicit memorization methods are distinct learner implementations. The oracle expression is evaluator-only. Runtime and peak RSS summaries come only from successful isolated child trials with positive measurements; semantic conclusions come from the deterministic projection.`
+  : `The four partial-logic baselines use an explicit conservative zero completion in this release-grade deterministic matrix; they fit observed rows but are not presented as complete implementations of every possible ABC/BDD/CEGIS heuristic. The oracle expression is evaluator-only. Runtime and RSS fields are normalized to zero in the hash-stable matrix and must not be interpreted as performance measurements.`;
+const tableHeader = isV2
+  ? `| Method | Successful fits | Full semantic recovery | Mean held-out exact | Median runtime (µs) | Median peak RSS (bytes) |
+|---|---:|---:|---:|---:|---:|`
+  : `| Method | Successful fits | Full semantic recovery |
+|---|---:|---:|`;
+const supplementalAnalysis = isV2
+  ? `The generic MDL enumerator recovers 104/320 trials at 0.5% observation,
+262/320 at 1%, 300/320 at 2%, 319/320 at 3%, and 320/320 at every tested
+fraction from 5% through 40%. Seeded grammar evolution improves from 96/320
+recoveries at 0.5% to 300/320 at 40%, but remains below MDL at every fraction.
+The partial-logic completion baselines recover no complete target semantics,
+which separates interpolation of observed rows from genuine extrapolation.
+
+The gate-count association is modest and conditional. The stronger finding is
+grammar alignment: short expressions in a grammar containing the target
+operations predict unseen outputs far better here than small circuits produced
+by unconstrained don't-care completion. This supports a restricted Occam/MDL
+claim for these tasks; it does not establish that smaller circuits generally
+predict better.
+
+`
+  : "";
+const report = `# Occam Size–Generalization Study
+
+This artifact contains exactly 16 tasks × 8 observed fractions × 20 seeds × 8 methods = 20,480 trial records. Observed rows are sampled without replacement; accuracy is evaluated on the held-out complement. Failed searches remain rows.
+
+## Measured conclusion
+
+Across ${paired.length} successful trials with both size measures, the Spearman correlation between official gate count and held-out exact accuracy is ${gateAccuracyRho.toFixed(4)}; therefore ${direction}. Description length and gate count have Spearman correlation ${descriptionGateRho.toFixed(4)}. These are associations under the declared grammar, tasks, completion rules, and bounds—not a universal learning law.
+
+${tableHeader}
+${methodSummary}
+
+${implementationNote}
+
+${supplementalAnalysis}Timeout, resource-limit, unsupported, and no-hypothesis statuses count as failed recovery. No global circuit minimality or grammar universality is claimed.
+`;
+const environment = JSON.stringify(isV2 ? {
+  schema_version: 2,
+  protocol: "occam-generalization-v2",
+  isolated_child_per_trial: true,
+  semantic_projection_schema: 2,
+  runtime_and_rss_interpretation: "positive measured child-process values; aggregates use successful trials",
+} : {
+  schema_version: 1,
+  protocol: "occam-generalization-v1",
+  deterministic_runtime_fields: true,
+  runtime_and_rss_interpretation: "normalized placeholders; not performance measurements",
+}, null, 2) + "\n";
+const files = {
+  "aggregate.csv": csv,
+  "aggregate.json": aggregateJson,
+  "report.md": report,
+  "figures/gates-vs-accuracy.svg": gatesSvg,
+  "figures/fraction-vs-recovery.svg": fractionSvg,
+  "figures/description-vs-gates.svg": descriptionSvg,
+  "environment.json": environment,
+};
+const sha = (bytes) => crypto.createHash("sha256").update(bytes).digest("hex");
+const existingManifest = path.join(output, "manifest.json");
+const sourceCommit = check && fs.existsSync(existingManifest)
+  ? JSON.parse(fs.readFileSync(existingManifest, "utf8")).source_commit
+  : childProcess.execFileSync("git", ["-C", repo, "rev-parse", "HEAD"], {encoding:"utf8"}).trim();
+const manifest = {
+  schema_version: isV2 ? 2 : 1,
+  source_commit: sourceCommit,
+  trial_rows: records.length,
+  files: Object.fromEntries([
+    ["config.json", sha(fs.readFileSync(path.join(output, "config.json")))],
+    ["tasks.json", sha(fs.readFileSync(path.join(output, "tasks.json")))],
+    ...(isV2
+      ? [["raw-measured.jsonl", sha(raw)], ["semantic.jsonl", sha(semanticRaw)]]
+      : [["raw.jsonl", sha(raw)]]),
+    ...Object.entries(files).map(([name, contents]) => [name, sha(contents)]),
+  ]),
+  ...(isV2 ? {
+    projection: {
+      schema_version: 2,
+      excluded_fields: [
+        "runtime_micros",
+        "peak_rss_bytes",
+        "host_identifier",
+        "process_id",
+        "started_unix_micros",
+      ],
+    },
+  } : {}),
+  external: {
+    abc_lock_sha256: sha(fs.readFileSync(path.join(repo, "tools/abc/LOCK.json"))),
+    optimization_report_sha256: sha(fs.readFileSync(path.join(repo, "challenge-71-occam/solutions/rewrite-it-in-rust/optimization/report.json"))),
+    ...(isV2 ? {
+      independent_tool_audit_sha256: sha(fs.readFileSync(path.join(output, "tool-audit.json"))),
+    } : {}),
+  },
+};
+files["manifest.json"] = JSON.stringify(manifest, null, 2) + "\n";
+if (check) {
+  for (const [name, contents] of Object.entries(files)) {
+    const actual = fs.readFileSync(path.join(output, name), "utf8");
+    if (actual !== contents) throw new Error(`${name} is not reproducible`);
+  }
+  console.log("Occam research aggregates, report, figures, and manifest are reproducible.");
+} else {
+  for (const [name, contents] of Object.entries(files)) {
+    const destination = path.join(output, name);
+    fs.mkdirSync(path.dirname(destination), {recursive:true});
+    fs.writeFileSync(destination, contents);
+  }
+  console.log(`Rendered Occam research evidence at ${output}`);
+}

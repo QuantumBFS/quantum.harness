@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "repository": "https://github.com/berkeley-abc/abc",
+  "commit": "e76768b9d34f9dc67cb6608efecd55db271ff849",
+  "archive_url": "https://github.com/berkeley-abc/abc/archive/e76768b9d34f9dc67cb6608efecd55db271ff849.tar.gz",
+  "archive_sha256": "158a4bf861be010cf899c5cb20c159d1b2e68ae1b461bce7d2c10be348a8e159",
+  "archive_bytes": 7709448,
+  "build": ["make", "-j2", "ABC_USE_NO_READLINE=1"]
+}

@@ -1,0 +1,1 @@
+# Persisted minimal failing seeds from tests/properties.rs are stored here.

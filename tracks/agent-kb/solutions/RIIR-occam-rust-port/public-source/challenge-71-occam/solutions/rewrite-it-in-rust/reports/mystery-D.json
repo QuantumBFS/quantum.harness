@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "instance": "mystery-D",
+  "selected_family": "sum-of-squares",
+  "operand_bits": 5,
+  "input_width": 10,
+  "output_width": 11,
+  "candidate_scores": [
+    {
+      "family": "sum-of-squares",
+      "evaluated_rows": 400,
+      "exact_matches": 400,
+      "mismatches": 0,
+      "first_mismatch_row": null
+    }
+  ],
+  "gate_count": 186,
+  "circuit_sha256": "1222f95531ffa51f713de9b4617b96063b59d9433a3cf4bb5f41106bd6ba1206",
+  "training_scalar": {
+    "samples": 400,
+    "gate_count": 186,
+    "exact_matches": 400,
+    "correct_bits": 4400,
+    "total_bits": 4400
+  },
+  "training_packed": {
+    "samples": 400,
+    "gate_count": 186,
+    "exact_matches": 400,
+    "correct_bits": 4400,
+    "total_bits": 4400
+  },
+  "exhaustive_cases": 1024,
+  "exhaustive_mismatches": 0,
+  "prediction_rows": 624,
+  "prediction_sha256": "b445a717483303fa3c5d8a1f7abe81888b267b7c472121c9c464fa9766808580",
+  "expected_commitment_sha256": "b445a717483303fa3c5d8a1f7abe81888b267b7c472121c9c464fa9766808580",
+  "commitment_matches": true
+}
