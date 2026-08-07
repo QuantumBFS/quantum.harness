@@ -1,0 +1,98 @@
+{
+  "schema_version": "2.0",
+  "challenge": {
+    "repository": "QuantumBFS/quantum.harness",
+    "issue": 122,
+    "title": "Criticality in open quantum matter"
+  },
+  "identity": {
+    "project": "Ranger Observer Ceff",
+    "team": "JunkaiWang-TheoPhy",
+    "positioning": "observer-dependent conformal data from Born trajectories"
+  },
+  "execution": {
+    "production_cells_verified": 105,
+    "production_cells_expected": 105,
+    "verification_fraction": 1.0,
+    "production_jobs": ["23020229", "23020507"],
+    "manifest_and_block_digest": "verified",
+    "circumferences": [6, 8, 10, 12, 14, 16],
+    "self_dual_extension_circumferences": [6, 8, 10, 12, 14, 16, 18, 20, 22, 24],
+    "focused_tests": 61
+  },
+  "headline_results": {
+    "clean_ising": {
+      "central_charge": 0.4999966194130345,
+      "target": 0.5,
+      "absolute_error": 0.0000033805869655,
+      "stage": "benchmark_locked"
+    },
+    "nishimori": {
+      "full_correction": {
+        "central_charge": 0.3700802276519329,
+        "standard_error": 0.05047267163857454,
+        "combined_distance_sigma": 1.855
+      },
+      "reduced_correction": {
+        "central_charge": 0.44737965355153064,
+        "standard_error": 0.016435383580663578,
+        "combined_distance_sigma": 0.982
+      },
+      "target": {"central_charge": 0.464, "standard_error": 0.004},
+      "stage": "reference_connected"
+    },
+    "weak_self_dual": {
+      "production_reduced_correction": {
+        "central_charge": 0.5532526284891004,
+        "standard_error": 0.09492854199374064,
+        "combined_distance_sigma": 1.119
+      },
+      "extension_reduced_correction": {
+        "central_charge": 0.4019242545249664,
+        "standard_error": 0.019194517279001403,
+        "combined_distance_sigma": 2.345
+      },
+      "target": {"central_charge": 0.447, "standard_error": 0.001},
+      "stage": "convergence_direction_measured"
+    },
+    "information_order": {
+      "confusion_bootstrap_p_value": 0.5314685314685315,
+      "erasure_bootstrap_p_value": 0.5234765234765235,
+      "stage": "global_covariance_order_analysis"
+    },
+    "measurement_rg": {
+      "range_1_tv_deficiency": 0.35355339059327373,
+      "range_2_tv_deficiency": 0.10355339059327376,
+      "stage": "exact_operational_witness"
+    }
+  },
+  "innovation_map": [
+    "quantum_hidden_history_likelihood",
+    "exact_to_particle_certification",
+    "spin_gaussian_representation_parity",
+    "matrix_free_nishimori_transfer",
+    "paired_width_covariance_reduction",
+    "global_information_order_bootstrap",
+    "exact_measurement_rg_deficiency"
+  ],
+  "capability_map": {
+    "born_sampling": "delivered",
+    "network_evolution": "delivered",
+    "multiple_circumferences": "delivered",
+    "covariance_error_bars": "delivered",
+    "clean_ising_benchmark": "delivered",
+    "nishimori_reference_connection": "delivered",
+    "self_dual_convergence_map": "delivered",
+    "observer_channel_inference": "delivered",
+    "global_information_order_test": "delivered",
+    "measurement_rg_witness": "delivered",
+    "full_lyapunov_spectrum": "next_stage_ready",
+    "learning_transition_network": "next_stage_ready"
+  },
+  "precision_acceleration": [
+    "self_dual_identity_rows_at_L18_to_L28",
+    "paired_particle_ladders_for_each_resolution",
+    "low_lying_lyapunov_spectrum"
+  ],
+  "overall_status": "audited observer-dependent conformal-data platform with a measured precision-acceleration path"
+}

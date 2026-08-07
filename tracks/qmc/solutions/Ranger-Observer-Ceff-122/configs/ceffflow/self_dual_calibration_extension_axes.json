@@ -1,0 +1,13 @@
+{
+  "lengths": [6, 8, 10, 12, 14, 16, 18, 20, 22, 24],
+  "seeds": [0, 1, 2, 3, 4, 5, 6, 7],
+  "self_dual": {
+    "channels": {
+      "identity": [0.0]
+    },
+    "steps": 50000,
+    "burn_in": 2000,
+    "block_size": 500,
+    "particles": 1
+  }
+}
