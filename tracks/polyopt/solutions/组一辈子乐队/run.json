@@ -1,0 +1,50 @@
+{
+  "schema": "quantum-harness-challenge-run-v1",
+  "generated": "2026-07-30",
+  "issue": 49,
+  "title": "Coarse-grained ground-state certification for spin chains",
+  "url": "https://github.com/QuantumBFS/quantum.harness/issues/49",
+  "status": "Partial: the infinite XXZ benchmark and scalable coarse-RDM implementation are complete; exact certification and the full challenge target grid remain open.",
+  "model": {
+    "name": "infinite spin-1/2 XXZ chain",
+    "hamiltonian": "H = sum_i (Sx_i Sx_{i+1} + Sy_i Sy_{i+1} + Delta Sz_i Sz_{i+1})",
+    "J": 1,
+    "Delta": 0.5,
+    "boundary": "thermodynamic limit",
+    "symmetry": "standalone U(1); standalone spin-flip Z2 implemented separately"
+  },
+  "method": {
+    "name": "MPS-guided coarse-grained reduced-density-matrix semidefinite relaxation",
+    "tool": "Julia, MPSKit, JuMP, and MOSEK",
+    "exact": "Floating-point lower estimates with reconstructed dual diagnostics; not yet exact certificates",
+    "settings": "two-site real U(1)-symmetric VUMPS; D=4,5,6; coarse depths 3-60; primary point D=6, depth=60",
+    "note": "The frozen MPS defines fixed coarse maps. It supplies a variational upper endpoint but is never imposed as lower-bound state data."
+  },
+  "estimate": [
+    {
+      "run_point": "D=6, depth=60",
+      "wall_time": "2 h 12 min Slurm elapsed; 5,621 s solve/post-processing",
+      "memory": "23.92 GiB peak RSS"
+    }
+  ],
+  "figures": [
+    {
+      "id": "depth-convergence",
+      "figure": "report-depth-convergence.svg",
+      "scope": "D=6 corrected numerical lower estimate versus coarse depth"
+    }
+  ],
+  "verification": {
+    "tests": "248/248 passed",
+    "primal_residual_depth60": 2.65e-8,
+    "dual_stationarity_depth60": 1.48e-11,
+    "depth_20_to_60_spread": 9e-7,
+    "git_diff_check": "passed"
+  },
+  "primary_result": {
+    "D": 6,
+    "depth": 60,
+    "corrected_numerical_lower_estimate_per_site": -0.3772436555,
+    "termination": "OPTIMAL"
+  }
+}

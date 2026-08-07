@@ -1,0 +1,167 @@
+{
+  "title": "Coarse-grained ground-state certification for spin chains",
+  "eyebrow": "Polyopt Track · Challenge #49 · 组一辈子乐队",
+  "url": "https://github.com/QuantumBFS/quantum.harness/issues/49",
+  "lede": "A scalable MPS-guided coarse-RDM relaxation reaches a stable D=6, depth-60 numerical lower estimate for the infinite XXZ chain while preserving a clear boundary between numerical evidence and exact certification.",
+  "sections": [
+    {
+      "title": "Challenge",
+      "note": "The problem and why it matters.",
+      "blocks": [
+        {
+          "kind": "text",
+          "text": "Ground-state lower bounds turn numerical evidence into certification, but ordinary NPA semidefinite relaxations grow exponentially with support size. Challenge #49 asks whether renormalization-group coarse graining and structure exploitation can extend that reach to large quantum spin systems."
+        },
+        {
+          "kind": "card",
+          "title": "Significance",
+          "blocks": [
+            {
+              "kind": "text",
+              "text": "The implementation demonstrates the core scalable mechanism on an infinite spin chain: frozen MPS contractions replace exponentially growing physical RDM blocks with fixed-size coarse blocks. A poor map can loosen the relaxation but does not exclude a physical state, preserving the lower-bound logic."
+            }
+          ]
+        },
+        {
+          "kind": "kv",
+          "pairs": [
+            ["Team", "组一辈子乐队 — 季恺昕、李文韬、夏轩哲"],
+            ["Catalog", "Issue #49, released by Jie Wang (AMSS-CAS)"],
+            ["Demonstrated model", "Infinite spin-1/2 XXZ chain, J=1, Δ=0.5"],
+            ["Target status", "Partial: scalable benchmark complete; exact certification and full 1D/2D target grid open"]
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Approach",
+      "note": "How the challenge was attacked.",
+      "blocks": [
+        {
+          "kind": "badge",
+          "style": "warn",
+          "text": "Numerically verified lower estimates — not yet exact certificates"
+        },
+        {
+          "kind": "equation",
+          "tex": "H = \\sum_i (S_i^x S_{i+1}^x + S_i^y S_{i+1}^y + \\Delta S_i^z S_{i+1}^z), \\quad \\Delta = 0.5"
+        },
+        {
+          "kind": "kv",
+          "pairs": [
+            ["Method", "MPS-guided coarse-grained RDM semidefinite relaxation"],
+            ["Software", "Julia, MPSKit, JuMP, MOSEK"],
+            ["MPS", "Two-site real U(1)-symmetric VUMPS"],
+            ["Sweep", "D=4,5,6; coarse depth 3–60"],
+            ["Primary point", "D=6, depth=60"]
+          ]
+        },
+        {
+          "kind": "text",
+          "text": "A frozen MPS tensor defines fixed linear coarse-graining maps. The MPS energy is only a variational upper endpoint; MPS moments are never imposed as lower-bound constraints. U(1) charge sectors split coarse RDMs into real symmetric PSD blocks. The branch also implements and tests standalone spin-flip Z2 parity blocks, but combined U(1)⋊Z2 reduction and Z2 dual reconstruction remain explicitly unsupported."
+        },
+        {
+          "kind": "table",
+          "columns": ["Run point", "Wall time", "Peak memory"],
+          "rows": [["D=6, depth=60", "2 h 12 min Slurm elapsed; 5,621 s solve/post-processing", "23.92 GiB RSS"]]
+        }
+      ]
+    },
+    {
+      "title": "Results",
+      "note": "What was achieved and how strongly it is supported.",
+      "blocks": [
+        {
+          "kind": "figures",
+          "items": [
+            {
+              "src": "report-depth-convergence.svg",
+              "caption": "For D=6, the corrected numerical lower estimate stabilizes by depth 20; depths 20–60 span about 9×10⁻⁷."
+            }
+          ]
+        },
+        {
+          "kind": "verdict",
+          "status": "good",
+          "label": "Numerically clean",
+          "why": "At D=6 and depth=60: corrected estimate −0.3772436555 per site, OPTIMAL termination, primal residual 2.65×10⁻⁸, and dual stationarity 1.48×10⁻¹¹."
+        },
+        {
+          "kind": "table",
+          "columns": ["D", "Depth", "Corrected lower estimate", "MOSEK", "Primal residual", "Dual stationarity"],
+          "rows": [
+            ["4", "3", "−0.3819032781", "OPTIMAL", "2.28×10⁻⁹", "2.75×10⁻¹²"],
+            ["4", "5", "−0.3784997730", "OPTIMAL", "2.65×10⁻⁸", "5.77×10⁻¹³"],
+            ["4", "7", "−0.3771269471", "OPTIMAL", "1.88×10⁻⁸", "2.47×10⁻¹²"],
+            ["6", "20", "−0.3772437176", "OPTIMAL", "2.90×10⁻⁸", "7.41×10⁻¹¹"],
+            ["6", "25", "−0.3772439823", "SLOW_PROGRESS", "3.16×10⁻⁸", "1.49×10⁻¹¹"],
+            ["6", "30", "−0.3772445424", "SLOW_PROGRESS", "4.45×10⁻⁸", "1.49×10⁻¹²"],
+            ["6", "60", "−0.3772436555", "OPTIMAL", "2.65×10⁻⁸", "1.48×10⁻¹¹"]
+          ],
+          "numeric": [true, true, true, false, true, true]
+        },
+        {
+          "kind": "card",
+          "title": "Verification",
+          "blocks": [
+            {
+              "kind": "list",
+              "items": [
+                "248/248 Julia regression tests pass, including standalone spin-flip symmetry validation and dense-equivalence checks.",
+                "Depth 20–60 results agree within about 9×10⁻⁷ at the present numerical precision.",
+                "The implementation retains original solver statuses; SLOW_PROGRESS is accepted only with feasible primal/dual status and residual/eigenvalue gates.",
+                "Whitespace validation passes."
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Highlight",
+      "note": "Innovation, significance, and the claim boundary.",
+      "blocks": [
+        {
+          "kind": "card",
+          "title": "What's innovative",
+          "blocks": [
+            {
+              "kind": "text",
+              "text": "Real U(1)-blocked coarse PSD matrices reduce the D=6 depth-60 problem to 1,301,413 real variables while using 23.92 GiB peak memory. An earlier complex Hermitian formulation used about 93.5 GiB already at depth 5, changing the feasible resource regime rather than merely tuning allocations."
+            }
+          ]
+        },
+        {
+          "kind": "card",
+          "title": "Significance of output",
+          "blocks": [
+            {
+              "kind": "text",
+              "text": "The result shows that deep coarse-RDM relaxations can be assembled and solved in the thermodynamic limit with stable numerical diagnostics. The implementation separates the variational MPS input from the lower-bound relaxation, which is essential for a defensible future certificate."
+            }
+          ]
+        },
+        {
+          "kind": "card",
+          "title": "Limitations and next step",
+          "blocks": [
+            {
+              "kind": "list",
+              "items": [
+                "The reported endpoints are floating-point numerical lower estimates, not independent exact certificates.",
+                "Publication-grade certification requires interval-enclosed or rational channel coefficients, PSD projection, full dual identity reconstruction, and rigorous residual correction.",
+                "The issue's requested 1D Heisenberg, J1–J2, and 2D system-size/accuracy targets have not yet been completed.",
+                "Standalone Z2 reduction is implemented and tested, but combined U(1)⋊Z2 symmetry and Z2 dual reconstruction are not claimed."
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "code",
+          "title": "Reproduce the regression suite",
+          "text": "julia --project=../../../../julia-env KullCGRDMTests.jl"
+        }
+      ]
+    }
+  ]
+}

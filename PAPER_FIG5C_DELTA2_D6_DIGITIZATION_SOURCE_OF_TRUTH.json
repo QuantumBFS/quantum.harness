@@ -1,0 +1,313 @@
+{
+  "schema_version": "1.0",
+  "record_type": "paper_figure_raster_digitization",
+  "record_status": "current_source_of_truth_for_local_comparisons",
+  "created_at": "2026-07-30T19:23:10+08:00",
+  "experiment_id": "EXP-20260730-003",
+  "source_commit": "55cd714be92fa6d83810d9f0934d55dcaecea42c",
+  "important_warning": "These are approximate values digitized from a raster rendering of the published figure. They are not an author-provided raw data table and should normally be quoted with only 2-3 significant digits.",
+  "source": {
+    "citation_short": "Kull et al., arXiv:2212.03014v3",
+    "arxiv_id": "2212.03014",
+    "figure": "Figure 5(c)",
+    "model_label_in_paper": "S=1/2 XXZ(Delta=2)",
+    "pdf_page_rendered_1_based": 23,
+    "local_pdf_relative_path": "../../../tmp/pdfs/kull-2212.03014.pdf",
+    "local_pdf_sha256": "b0e9596fa23cf2eb446167babb0dfa8606c870a056bcce0ae10b6eb45b3fcb18",
+    "rendered_page": {
+      "dpi": 720,
+      "pixel_size": [
+        6120,
+        7920
+      ],
+      "temporary_path_used_during_digitization": "C:/Windows/Temp/codex-fig5-hires/fig5-page23-720.png",
+      "sha256": "066dc4e63fa6702d414187975b82f49c683aeee1c54dd5bb7a23ac65a6ab9ec1"
+    },
+    "author_raw_point_table_found": false,
+    "author_repository_note": "No XXZ Figure 5 raw point table was found in the paper's public repository during this comparison work."
+  },
+  "paper_quantity": {
+    "name": "absolute per-site lower-bound error",
+    "paper_symbol": "Delta E_relax",
+    "definition": "E_TI - E_relax(n,D)",
+    "is_absolute_error": true,
+    "is_relative_error": false,
+    "energy_unit": "per physical spin site",
+    "exact_reference_energy_per_site_used_for_local_delta2_runs": -0.617222045975865,
+    "paper_text_locations": {
+      "hierarchy_definition": "Eq. (5): rho^(m) acts on m physical lattice sites and the hierarchy is kept through rho^(n).",
+      "figure_definition": "Figure 5 caption: the curves are shown for various sizes n and bond dimensions D.",
+      "error_definition": "Text immediately before Figure 5: Delta E_MPS/TTN^relax(n,D) := E_TI - E_MPS/TTN^relax(n,D)."
+    }
+  },
+  "paper_series": {
+    "method": "MPS-based relaxation",
+    "nominal_bond_dimension_D": 6,
+    "visual_style": "green star markers with a green dotted curve",
+    "reference_rgb_at_low_resolution": [
+      119,
+      172,
+      48
+    ],
+    "panel": "Figure 5(c), XXZ Delta=2"
+  },
+  "axis_semantics": {
+    "x_axis": {
+      "name": "n",
+      "definition": "number of physical spin sites in the largest uncompressed RDM rho^(n) before compression",
+      "scale": "logarithmic"
+    },
+    "y_axis": {
+      "name": "Delta E_relax",
+      "definition": "absolute per-site error E_TI - E_relax",
+      "scale": "logarithmic",
+      "visible_range": [
+        0.0001,
+        0.1
+      ]
+    }
+  },
+  "digitization_method": {
+    "summary": "The PDF page was rendered at 720 dpi. Axis tick centers were detected from the raster, the D=6 green pixels were selected by RGB distance, and marker centers or narrow curve slices were converted through the fitted log-axis calibration.",
+    "x_pixel_calibration": {
+      "formula": "x_pixel = 733.27674442 + 1010.33731799 * log10(n)",
+      "fit_ticks_n": [
+        2,
+        4,
+        6,
+        8,
+        10,
+        20,
+        30,
+        60
+      ],
+      "maximum_tick_fit_residual_pixels_approximately": 2.3,
+      "note": "This tick fit replaces the earlier incorrect assumption that the right plot edge represented n=70. That assumption shifted several requested x positions to the right."
+    },
+    "y_pixel_calibration": {
+      "top_axis_center_y_pixel": 2529,
+      "top_axis_value": 0.1,
+      "bottom_axis_center_y_pixel": 4055,
+      "bottom_axis_value": 0.0001,
+      "formula": "error = 10^(-1 - 3*(y_pixel-2529)/(4055-2529))"
+    },
+    "uncertainty_interpretation": "The low/high fields estimate raster-reading uncertainty from marker extent, line thickness, antialiasing, and local sampling. They are not statistical error bars reported by the authors.",
+    "central_value_policy": {
+      "marker_center": "Use the center of the visible D=6 star or of the coincident early-hierarchy marker.",
+      "curve_slice": "Use the center of a narrow vertical slice through the dotted D=6 curve when the requested n is not a marker location.",
+      "log_interpolation": "For n=30 and n=32, interpolate in log(n)-log(error) between the clearly identified n=28 and n=34 D=6 markers."
+    }
+  },
+  "digitized_d6_samples": [
+    {
+      "n_physical_sites": 5,
+      "error_per_site_central": 0.02531291,
+      "digitization_low": 0.0235,
+      "digitization_high": 0.027,
+      "sample_kind": "coincident_early_hierarchy_marker",
+      "note": "The green D=6 series is overplotted by the black LTI marker here; the common marker center was used."
+    },
+    {
+      "n_physical_sites": 8,
+      "error_per_site_central": 0.01274984,
+      "digitization_low": 0.01113,
+      "digitization_high": 0.01441,
+      "sample_kind": "marker_center"
+    },
+    {
+      "n_physical_sites": 10,
+      "error_per_site_central": 0.00721625,
+      "digitization_low": 0.00646,
+      "digitization_high": 0.00808,
+      "sample_kind": "marker_center",
+      "note": "The central value was selected from the marker geometry rather than the median of all colored pixels, because the star arms bias the raw pixel median."
+    },
+    {
+      "n_physical_sites": 12,
+      "error_per_site_central": 0.00446077,
+      "digitization_low": 0.00391,
+      "digitization_high": 0.00506,
+      "sample_kind": "marker_center"
+    },
+    {
+      "n_physical_sites": 14,
+      "error_per_site_central": 0.00290167,
+      "digitization_low": 0.00256,
+      "digitization_high": 0.00329,
+      "sample_kind": "marker_center"
+    },
+    {
+      "n_physical_sites": 16,
+      "error_per_site_central": 0.0019571,
+      "digitization_low": 0.00174,
+      "digitization_high": 0.00224,
+      "sample_kind": "marker_center"
+    },
+    {
+      "n_physical_sites": 20,
+      "error_per_site_central": 0.00104315,
+      "digitization_low": 0.00099,
+      "digitization_high": 0.0011,
+      "sample_kind": "curve_slice"
+    },
+    {
+      "n_physical_sites": 22,
+      "error_per_site_central": 0.00078078,
+      "digitization_low": 0.000688,
+      "digitization_high": 0.000886,
+      "sample_kind": "marker_center"
+    },
+    {
+      "n_physical_sites": 24,
+      "error_per_site_central": 0.0006283,
+      "digitization_low": 0.0006,
+      "digitization_high": 0.00066,
+      "sample_kind": "curve_slice"
+    },
+    {
+      "n_physical_sites": 28,
+      "error_per_site_central": 0.00043151,
+      "digitization_low": 0.00038,
+      "digitization_high": 0.00049,
+      "sample_kind": "marker_center"
+    },
+    {
+      "n_physical_sites": 30,
+      "error_per_site_central": 0.00039181,
+      "digitization_low": 0.00036,
+      "digitization_high": 0.00043,
+      "sample_kind": "log_interpolation_between_n28_and_n34"
+    },
+    {
+      "n_physical_sites": 32,
+      "error_per_site_central": 0.00035799,
+      "digitization_low": 0.00033,
+      "digitization_high": 0.00039,
+      "sample_kind": "log_interpolation_between_n28_and_n34"
+    },
+    {
+      "n_physical_sites": 34,
+      "error_per_site_central": 0.00032888,
+      "digitization_low": 0.00029,
+      "digitization_high": 0.000373,
+      "sample_kind": "marker_center"
+    },
+    {
+      "n_physical_sites": 40,
+      "error_per_site_central": 0.00029636,
+      "digitization_low": 0.000261,
+      "digitization_high": 0.000336,
+      "sample_kind": "marker_center"
+    },
+    {
+      "n_physical_sites": 44,
+      "error_per_site_central": 0.00030945,
+      "digitization_low": 0.00028,
+      "digitization_high": 0.00034,
+      "sample_kind": "log_interpolation_between_n40_and_n46",
+      "note": "Interpolation between the neighboring marker centers was used because a direct narrow slice is contaminated by the n=46 star arm."
+    },
+    {
+      "n_physical_sites": 46,
+      "error_per_site_central": 0.00031575,
+      "digitization_low": 0.000278,
+      "digitization_high": 0.000358,
+      "sample_kind": "marker_center",
+      "note": "The raster marker center is slightly non-monotone relative to neighboring points; do not over-interpret this within the digitization range."
+    },
+    {
+      "n_physical_sites": 52,
+      "error_per_site_central": 0.00028712,
+      "digitization_low": 0.000253,
+      "digitization_high": 0.000326,
+      "sample_kind": "marker_center"
+    },
+    {
+      "n_physical_sites": 60,
+      "error_per_site_central": 0.00028712,
+      "digitization_low": 0.00027,
+      "digitization_high": 0.00031,
+      "sample_kind": "plateau_curve_slice"
+    },
+    {
+      "n_physical_sites": 64,
+      "error_per_site_central": 0.00028712,
+      "digitization_low": 0.000266,
+      "digitization_high": 0.00031,
+      "sample_kind": "marker_center"
+    },
+    {
+      "n_physical_sites": 68,
+      "error_per_site_central": 0.00028973,
+      "digitization_low": 0.00027,
+      "digitization_high": 0.00031,
+      "sample_kind": "plateau_curve_slice"
+    },
+    {
+      "n_physical_sites": 70,
+      "error_per_site_central": 0.00029104,
+      "digitization_low": 0.000269,
+      "digitization_high": 0.000314,
+      "sample_kind": "marker_center"
+    }
+  ],
+  "comparison_mapping_guidance": {
+    "paper_n": "Always interpret the paper's n as a count of physical spin sites.",
+    "existing_local_real_u1_runner": {
+      "source_relative_path": "../src/run_u1_paper_grid.jl",
+      "physical_blocking": "two physical spins per SDP site",
+      "code_depth_name": "m_blocked_cells",
+      "mapping": "n_physical_spins = 2 * (m_blocked_cells + 2)",
+      "evidence": "The runner writes this formula directly into every result JSON."
+    },
+    "collaborator_table_alternative": {
+      "mapping_claim": "paper n = code m + 2",
+      "status": "inconsistent_with_the_existing_local_runner_unless_two_site_blocking_was_removed",
+      "required_confirmation": "Before using this alternative mapping, verify from the collaborator's exact code snapshot whether one SDP site is one physical spin or a two-spin blocked cell."
+    },
+    "indices_used_in_the_two_mapping_plot": {
+      "alternative_n_equals_m_plus_2": [
+        5,
+        8,
+        10,
+        12,
+        22,
+        34
+      ],
+      "existing_runner_n_equals_2_times_m_plus_2": [
+        10,
+        16,
+        20,
+        24,
+        44,
+        68
+      ]
+    }
+  },
+  "superseded_local_artifacts": [
+    {
+      "relative_path": "paper_fig5c_delta2_d6_overlay_values.csv",
+      "status": "superseded",
+      "reason": "It used an incorrect horizontal calibration and mixed star-marker arms into the n=10 interpolation."
+    },
+    {
+      "relative_path": "delta2_original_overlay_metadata.json",
+      "status": "superseded_for_paper_curve_values",
+      "reason": "Its paper n=20 value approximately equals the corrected n=22 value, revealing the horizontal-coordinate shift. Its n=30 value is likewise shifted toward later points."
+    },
+    {
+      "relative_path": "REVISED_D6_COMPARISON_SUMMARY.md",
+      "status": "partially_superseded",
+      "reason": "Its paper n=20 and n=30 comparison values predate the corrected x-axis tick calibration. Use this JSON for paper data."
+    }
+  ],
+  "agent_usage_rules": [
+    "Use digitized_d6_samples as the authoritative local paper D=6 data source.",
+    "Do not label these values as author raw data.",
+    "Use at most 2-3 significant digits in prose or figures.",
+    "Propagate digitization_low and digitization_high as a visual reading band when plotting.",
+    "Compare absolute error to absolute error; do not divide by the exact energy unless explicitly making a separate relative-error plot.",
+    "Resolve the factor-of-two blocking convention from the exact run code before placing collaborator points on the paper n axis.",
+    "Treat solver clean/status/certificate metadata separately from the paper digitization; a low plotted error is not by itself a rigorous certificate."
+  ]
+}

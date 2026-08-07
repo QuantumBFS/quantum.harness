@@ -1,0 +1,56 @@
+{
+  "exact_energy": -0.4431471805599453,
+  "runs": [
+    {
+      "D": 1,
+      "algorithm_error": 3.2957919968262575e-16,
+      "clean_convergence": true,
+      "energy_per_site": 0.25000000000000017,
+      "iteration_status": "converged",
+      "maxiter": 300,
+      "seed": 1001,
+      "tolerance": 1.0e-10,
+      "unit_cell_length": 1,
+      "verbosity": 0
+    },
+    {
+      "D": 2,
+      "algorithm_error": 8.958604850788391e-11,
+      "clean_convergence": true,
+      "energy_per_site": -0.42790801041973503,
+      "fallback_from_one_site": true,
+      "iteration_status": "converged",
+      "maxiter": 300,
+      "seed": 1002,
+      "tolerance": 1.0e-10,
+      "unit_cell_length": 2,
+      "verbosity": 0
+    },
+    {
+      "D": 3,
+      "algorithm_error": 5.725292427814536e-11,
+      "clean_convergence": true,
+      "energy_per_site": -0.4357838735937304,
+      "fallback_from_one_site": true,
+      "iteration_status": "converged",
+      "maxiter": 300,
+      "seed": 1003,
+      "tolerance": 1.0e-10,
+      "unit_cell_length": 2,
+      "verbosity": 0
+    },
+    {
+      "D": 4,
+      "algorithm_error": 8.58719588595453e-11,
+      "clean_convergence": true,
+      "energy_per_site": -0.44105819788743567,
+      "fallback_from_one_site": true,
+      "iteration_status": "converged",
+      "maxiter": 300,
+      "seed": 1004,
+      "tolerance": 1.0e-10,
+      "unit_cell_length": 2,
+      "verbosity": 0
+    }
+  ]
+}
