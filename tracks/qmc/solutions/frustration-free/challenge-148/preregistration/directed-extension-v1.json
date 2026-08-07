@@ -1,0 +1,77 @@
+{
+  "allocation": {
+    "adapter_timeout_seconds": 1800,
+    "cores_per_cell": 2,
+    "max_concurrency": 16,
+    "memory_mb_per_cell": 6000
+  },
+  "chain_count": 2,
+  "coordinates": [
+    {
+      "beta_ratio": 1,
+      "field_factors": [
+        0.97,
+        0.98
+      ],
+      "lattice": "triangular",
+      "lengths": [
+        4,
+        6
+      ]
+    },
+    {
+      "beta_ratio": 2,
+      "field_factors": [
+        1.02,
+        1.03
+      ],
+      "lattice": "triangular",
+      "lengths": [
+        6,
+        8
+      ]
+    },
+    {
+      "beta_ratio": 1,
+      "field_factors": [
+        0.97,
+        0.98
+      ],
+      "lattice": "honeycomb",
+      "lengths": [
+        6,
+        8
+      ]
+    }
+  ],
+  "lattices": [
+    {
+      "field_center": 4.76811,
+      "name": "triangular"
+    },
+    {
+      "field_center": 2.1325,
+      "name": "honeycomb"
+    }
+  ],
+  "model": {
+    "boundary": "periodic",
+    "coupling": 1.0,
+    "name": "transverse-field-ising",
+    "pauli_eigenvalues": [
+      -1,
+      1
+    ]
+  },
+  "sampling": {
+    "analysis_bin_length_samples": 100,
+    "checkpoint_analysis_bins": 8,
+    "retained_samples": 1600,
+    "serial_measurement_stride_samples": 1,
+    "thermalization_sweeps": 500,
+    "thinning": 2
+  },
+  "schema_version": "challenge148-directed-extension-preregistration-v1",
+  "seed_derivation": "sha256:challenge148-directed-extension-seed-v1||u64be",
+  "stage": "QMC_SSE coarse localization"
+}

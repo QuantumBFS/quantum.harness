@@ -1,0 +1,18 @@
+name = "Challenge148LTFIM"
+uuid = "f0df63df-d55a-4af1-9b3c-c1141487c148"
+authors = ["Quantum Harness contributors"]
+version = "0.1.0"
+
+[deps]
+JSON3 = "0f8b85d8-7281-11e9-16c2-39a750bddbf1"
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+OnlineStats = "a15396b6-48d5-5d58-9928-6d29437db91e"
+QMC = "2f4e9d4c-8fe0-4bb0-8a59-f49e9a5a66f1"
+Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
+SHA = "ea8e919c-243c-51af-8825-aaa63cd721ce"
+
+[compat]
+JSON3 = "1"
+OnlineStats = "1"
+QMC = "0.1.0"
+julia = "1.11.6"

@@ -1,0 +1,67 @@
+{
+  "base_plan_sha256": "9a4d1b3ac1df6bff5bc2ca275dcb0785772cbe7800429ec47b68df322833b2e7",
+  "extension_plan_sha256": "b823dd5e60dc62883348efafec9a6c7ce8c09dba1c9c9b39fd1b7ee3b2d4540b",
+  "notice": "Methodological pilot only: beta/L and sizes do not match the paper-aligned final design.",
+  "series": [
+    {
+      "beta_ratio": 1,
+      "binder_difference": [
+        -0.01651211179433265,
+        0.017022329796591462,
+        0.01918452229578904,
+        0.03252502926882028,
+        0.015253252321386968
+      ],
+      "fields": [
+        4.6250667,
+        4.6727478,
+        4.7204289,
+        4.76811,
+        4.8157911
+      ],
+      "large_length": 6,
+      "lattice": "triangular",
+      "small_length": 4
+    },
+    {
+      "beta_ratio": 2,
+      "binder_difference": [
+        0.0058127336387940876,
+        0.006824789689360289,
+        0.0017962776487903676,
+        0.017763002930946403,
+        0.015574874437568442
+      ],
+      "fields": [
+        4.7204289,
+        4.76811,
+        4.8157911,
+        4.8634722,
+        4.9111533
+      ],
+      "large_length": 8,
+      "lattice": "triangular",
+      "small_length": 6
+    },
+    {
+      "beta_ratio": 1,
+      "binder_difference": [
+        -0.047009297206572986,
+        -0.03888800227691436,
+        0.002788989180924517,
+        0.008948317664302485,
+        0.027846198776621867
+      ],
+      "fields": [
+        2.068525,
+        2.08985,
+        2.111175,
+        2.1325,
+        2.153825
+      ],
+      "large_length": 8,
+      "lattice": "honeycomb",
+      "small_length": 6
+    }
+  ]
+}

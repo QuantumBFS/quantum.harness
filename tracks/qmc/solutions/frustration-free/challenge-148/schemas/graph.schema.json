@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Challenge 148 periodic lattice graph",
+  "type": "object",
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "lattice": {
+            "const": "triangular"
+          }
+        },
+        "required": ["lattice"]
+      },
+      "then": {
+        "properties": {
+          "length": {
+            "minimum": 3
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lattice": {
+            "const": "honeycomb"
+          }
+        },
+        "required": ["lattice"]
+      },
+      "then": {
+        "properties": {
+          "length": {
+            "minimum": 2
+          }
+        }
+      }
+    }
+  ],
+  "required": ["bonds", "lattice", "length", "sha256", "site_count"],
+  "properties": {
+    "lattice": {
+      "type": "string",
+      "enum": ["honeycomb", "triangular"]
+    },
+    "length": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "site_count": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "bonds": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "array",
+        "minItems": 2,
+        "maxItems": 2,
+        "prefixItems": [
+          {
+            "type": "integer",
+            "minimum": 0
+          },
+          {
+            "type": "integer",
+            "minimum": 0
+          }
+        ],
+        "unevaluatedItems": false
+      }
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    }
+  }
+}

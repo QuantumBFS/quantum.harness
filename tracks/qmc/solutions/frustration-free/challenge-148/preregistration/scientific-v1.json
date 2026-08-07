@@ -1,0 +1,130 @@
+{
+  "schema_version": "challenge148-scientific-preregistration-v1",
+  "protocol": {
+    "analysis": {
+      "analysis_bin_length_samples": 100,
+      "autocorrelation_estimator": "geyer-ips-rho0-pairs-sokal-window-c5-unbiased-autocovariance-v2",
+      "binder_estimator": "delete-one-analysis-bin-jackknife-pseudovalue-v1",
+      "minimum_analysis_bin_tau_ratio": 10,
+      "serial_measurement_stride_samples": 1
+    },
+    "cells": [
+      {
+        "adapters": {
+          "qmc_ltfim": {
+            "chains": [
+              {"checkpoint_analysis_bins": 8, "retained_samples": 1600, "seed": 148003, "thermalization_sweeps": 500, "thinning": 2},
+              {"checkpoint_analysis_bins": 8, "retained_samples": 1600, "seed": 148004, "thermalization_sweeps": 500, "thinning": 2}
+            ],
+            "seed_derivation": "sha256:qmc-ltfim-seed-v1||u64be",
+            "seed_domain": "QMC_LTFIM:qmc-ltfim-seed-v1"
+          },
+          "qmc_sse": {
+            "chains": [
+              {"checkpoint_analysis_bins": 8, "retained_samples": 1600, "seed": 148001, "thermalization_sweeps": 500, "thinning": 2},
+              {"checkpoint_analysis_bins": 8, "retained_samples": 1600, "seed": 148002, "thermalization_sweeps": 500, "thinning": 2}
+            ],
+            "seed_derivation": "sha256:qmc-sse-seed-v1||u64be",
+            "seed_domain": "QMC_SSE:qmc-sse-seed-v1"
+          }
+        },
+        "beta": 0.55,
+        "cell_id": "honeycomb-l2-b055-h120",
+        "coupling": 1.0,
+        "field": 1.2,
+        "graph_sha256": "a0f23533e8e885a08921debd3c789c76b63d4a97ad4e96a9dcec9dcdb2ab2b64",
+        "lattice": "honeycomb",
+        "length": 2
+      },
+      {
+        "adapters": {
+          "qmc_ltfim": {
+            "chains": [
+              {"checkpoint_analysis_bins": 8, "retained_samples": 1600, "seed": 148007, "thermalization_sweeps": 500, "thinning": 2},
+              {"checkpoint_analysis_bins": 8, "retained_samples": 1600, "seed": 148008, "thermalization_sweeps": 500, "thinning": 2}
+            ],
+            "seed_derivation": "sha256:qmc-ltfim-seed-v1||u64be",
+            "seed_domain": "QMC_LTFIM:qmc-ltfim-seed-v1"
+          },
+          "qmc_sse": {
+            "chains": [
+              {"checkpoint_analysis_bins": 8, "retained_samples": 1600, "seed": 148005, "thermalization_sweeps": 500, "thinning": 2},
+              {"checkpoint_analysis_bins": 8, "retained_samples": 1600, "seed": 148006, "thermalization_sweeps": 500, "thinning": 2}
+            ],
+            "seed_derivation": "sha256:qmc-sse-seed-v1||u64be",
+            "seed_domain": "QMC_SSE:qmc-sse-seed-v1"
+          }
+        },
+        "beta": 0.8,
+        "cell_id": "honeycomb-l2-b080-h150",
+        "coupling": 1.0,
+        "field": 1.5,
+        "graph_sha256": "a0f23533e8e885a08921debd3c789c76b63d4a97ad4e96a9dcec9dcdb2ab2b64",
+        "lattice": "honeycomb",
+        "length": 2
+      },
+      {
+        "adapters": {
+          "qmc_ltfim": {
+            "chains": [
+              {"checkpoint_analysis_bins": 8, "retained_samples": 1600, "seed": 148011, "thermalization_sweeps": 500, "thinning": 2},
+              {"checkpoint_analysis_bins": 8, "retained_samples": 1600, "seed": 148012, "thermalization_sweeps": 500, "thinning": 2}
+            ],
+            "seed_derivation": "sha256:qmc-ltfim-seed-v1||u64be",
+            "seed_domain": "QMC_LTFIM:qmc-ltfim-seed-v1"
+          },
+          "qmc_sse": {
+            "chains": [
+              {"checkpoint_analysis_bins": 8, "retained_samples": 1600, "seed": 148009, "thermalization_sweeps": 500, "thinning": 2},
+              {"checkpoint_analysis_bins": 8, "retained_samples": 1600, "seed": 148010, "thermalization_sweeps": 500, "thinning": 2}
+            ],
+            "seed_derivation": "sha256:qmc-sse-seed-v1||u64be",
+            "seed_domain": "QMC_SSE:qmc-sse-seed-v1"
+          }
+        },
+        "beta": 0.55,
+        "cell_id": "triangular-l3-b055-h120",
+        "coupling": 1.0,
+        "field": 1.2,
+        "graph_sha256": "7535bec255f56427dba2e29cc35b70cfb9b33b5a055caa9853c1f97e822d61aa",
+        "lattice": "triangular",
+        "length": 3
+      },
+      {
+        "adapters": {
+          "qmc_ltfim": {
+            "chains": [
+              {"checkpoint_analysis_bins": 8, "retained_samples": 1600, "seed": 148015, "thermalization_sweeps": 500, "thinning": 2},
+              {"checkpoint_analysis_bins": 8, "retained_samples": 1600, "seed": 148016, "thermalization_sweeps": 500, "thinning": 2}
+            ],
+            "seed_derivation": "sha256:qmc-ltfim-seed-v1||u64be",
+            "seed_domain": "QMC_LTFIM:qmc-ltfim-seed-v1"
+          },
+          "qmc_sse": {
+            "chains": [
+              {"checkpoint_analysis_bins": 8, "retained_samples": 1600, "seed": 148013, "thermalization_sweeps": 500, "thinning": 2},
+              {"checkpoint_analysis_bins": 8, "retained_samples": 1600, "seed": 148014, "thermalization_sweeps": 500, "thinning": 2}
+            ],
+            "seed_derivation": "sha256:qmc-sse-seed-v1||u64be",
+            "seed_domain": "QMC_SSE:qmc-sse-seed-v1"
+          }
+        },
+        "beta": 0.8,
+        "cell_id": "triangular-l3-b080-h150",
+        "coupling": 1.0,
+        "field": 1.5,
+        "graph_sha256": "7535bec255f56427dba2e29cc35b70cfb9b33b5a055caa9853c1f97e822d61aa",
+        "lattice": "triangular",
+        "length": 3
+      }
+    ],
+    "ed_oracle": "full-thermal-dense-eigensystem-v1",
+    "launch_timeout_seconds": 600,
+    "observables": ["energy", "transverse_magnetization", "m2", "m4", "binder_ratio"],
+    "thresholds": {
+      "agreement_sigma": 3.0,
+      "max_normalized_residual": 4.0,
+      "median_normalized_residual": 1.5
+    }
+  }
+}

@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Challenge 148 ED observables",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "beta",
+    "binder_ratio",
+    "energy",
+    "energy_density",
+    "m2",
+    "m4",
+    "regime",
+    "transverse_magnetization"
+  ],
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "regime": {
+            "const": "finite_temperature"
+          }
+        },
+        "required": ["regime"]
+      },
+      "then": {
+        "properties": {
+          "beta": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "regime": {
+            "const": "ground_state"
+          }
+        },
+        "required": ["regime"]
+      },
+      "then": {
+        "properties": {
+          "beta": {
+            "type": "null"
+          }
+        }
+      }
+    }
+  ],
+  "properties": {
+    "regime": {
+      "type": "string",
+      "enum": ["finite_temperature", "ground_state"]
+    },
+    "beta": {},
+    "energy": {
+      "type": "number"
+    },
+    "energy_density": {
+      "type": "number"
+    },
+    "transverse_magnetization": {
+      "type": "number"
+    },
+    "m2": {
+      "type": "number",
+      "minimum": 0
+    },
+    "m4": {
+      "type": "number",
+      "minimum": 0
+    },
+    "binder_ratio": {
+      "type": "number"
+    }
+  }
+}

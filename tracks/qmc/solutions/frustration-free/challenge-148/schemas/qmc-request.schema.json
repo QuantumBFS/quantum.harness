@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "adapter": {"enum": ["QMC_SSE", "QMC_LTFIM"], "type": "string"},
+    "beta": {"exclusiveMinimum": 0, "type": "number"},
+    "bin_length": {"minimum": 1, "type": "integer"},
+    "checkpoint_bins": {"minimum": 1, "type": "integer"},
+    "coupling": {"minimum": 0, "type": "number"},
+    "expected_build_hash": {"pattern": "^[0-9a-f]{64}$", "type": "string"},
+    "expected_source_hash": {"pattern": "^[0-9a-f]{64}$", "type": "string"},
+    "field": {"exclusiveMinimum": 0, "type": "number"},
+    "graph_path": {"minLength": 1, "type": "string"},
+    "graph_sha256": {"pattern": "^[0-9a-f]{64}$", "type": "string"},
+    "retained_samples": {"minimum": 1, "type": "integer"},
+    "serial_measurement_stride_samples": {"const": 1},
+    "schema_version": {"const": "qmc-request-v1"},
+    "seed": {"minimum": 0, "type": "integer"},
+    "thermalization_sweeps": {"minimum": 0, "type": "integer"},
+    "thinning": {"minimum": 1, "type": "integer"}
+  },
+  "required": [
+    "schema_version",
+    "adapter",
+    "graph_path",
+    "graph_sha256",
+    "beta",
+    "coupling",
+    "field",
+    "seed",
+    "thermalization_sweeps",
+    "retained_samples",
+    "thinning",
+    "serial_measurement_stride_samples",
+    "bin_length",
+    "checkpoint_bins",
+    "expected_source_hash",
+    "expected_build_hash"
+  ],
+  "title": "Challenge 148 QMC request",
+  "type": "object"
+}
