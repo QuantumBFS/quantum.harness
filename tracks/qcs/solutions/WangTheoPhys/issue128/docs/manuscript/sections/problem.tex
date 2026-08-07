@@ -1,0 +1,94 @@
+\section{Problem Formulation and Fixed Benchmark}
+\label{sec:problem}
+
+\subsection{Hamiltonian and fragmentation}
+
+Let $\Lambda=(\mathbb{Z}/L\mathbb{Z})^2$ be a periodic square lattice with one
+qubit per site.  The target Hamiltonian is
+\begin{equation}
+ H=\sum_{\langle u,v\rangle}h_{uv},\qquad
+ h_{uv}=\frac{X_uX_v+Y_uY_v+Z_uZ_v}{4}.
+ \label{eq:hamiltonian}
+\end{equation}
+Horizontal and vertical bonds are split by parity into four perfect
+matchings $M_1,\ldots,M_4$.  Defining
+$H_a=\sum_{(u,v)\in M_a}h_{uv}$ gives
+$H=H_1+H_2+H_3+H_4$.  Terms within each matching have disjoint support and
+therefore commute exactly.  For real-time analysis we use anti-Hermitian
+generators $A_a=-iH_a$ and $A=\sum_a A_a$.
+
+The principal benchmark fixes
+\begin{equation}
+ L=12,qquad N=L^2=144,qquad T=1,qquad \eps=10^{-6}.
+ \label{eq:benchmark}
+\end{equation}
+The required guarantee is uniform over all input states:
+\begin{equation}
+ \opnorm{e^{-iTH}-\widetilde U_r(T)}\le \eps,
+ \label{eq:uniformerror}
+\end{equation}
+where $\opnorm{\cdot}$ is the spectral norm.  This is deliberately stronger
+than an observable-specific, state-dependent, or average-case condition.
+
+\subsection{Product formula}
+
+Let $S_2(t)$ denote the symmetric second-order formula for the four fragments.
+The standard five-copy Suzuki recursion \citep{suzuki1991general} forms
+\begin{equation}
+ S_4(t)=S_2(pt)^2S_2((1-4p)t)S_2(pt)^2,\qquad
+ p=(4-4^{1/3})^{-1}.
+ \label{eq:suzuki4}
+\end{equation}
+After merging adjacent equal fragments, one step contains 31 group
+exponentials.  The $r$-step approximation is
+\begin{equation}
+ \widetilde U_r(T)=S_4(T/r)^r.
+\end{equation}
+The baseline and candidate use precisely the same ordered stage sequence and
+the same outward interval for the algebraic coefficient $p$.  Consequently,
+any reduction in $r$ is a proof improvement rather than a change of
+simulation formula.
+
+\subsection{Cost model}
+
+Equal fragments at the boundary between adjacent symmetric steps merge.  The
+first step contributes 31 groups and each additional step contributes 30:
+\begin{equation}
+ G(r)=31+30(r-1)=30r+1.
+ \label{eq:groups}
+\end{equation}
+Each perfect matching contains $N/2=72$ disjoint bonds.  We therefore count
+\begin{equation}
+ B(r)=72G(r)
+ \label{eq:bonds}
+\end{equation}
+bond propagators.  Using the same conservative upper bound of three CNOTs per
+normalized Heisenberg bond propagator on both sides gives
+\begin{equation}
+ C(r)\le 3B(r)=216G(r).
+ \label{eq:cnots}
+\end{equation}
+The primary ratio is identical for groups, bond propagators, and this CNOT
+upper bound because the multiplicative factors cancel.
+
+\subsection{Compiler contract}
+
+The compiler receives a tuple
+\begin{equation}
+ \mathcal I=(H,\mathcal F,S,T,\eps,\mathcal C),
+\end{equation}
+where $\mathcal F$ is a fragmentation, $S$ a product formula, and
+$\mathcal C$ a cost model.  It must return a tuple
+\begin{equation}
+ \mathcal O=(r_\star,E_{r_\star},E_{r_\star-1},R_\star,\cert),
+\end{equation}
+such that an independent verifier establishes
+\begin{align}
+ E_{r_\star}&\le\eps,& E_{r_\star-1}&>\eps,\label{eq:adjacent}\
+ R_\star&=\mathcal C(S,r_\star),
+\end{align}
+using exact integers, rational numbers, or outward rational intervals.  The
+second inequality does not prove that the physical circuit with
+$r_\star-1$ fails; it proves that $r_\star$ is the smallest integer accepted
+by this particular certified upper-bound function.  This distinction is
+retained throughout.

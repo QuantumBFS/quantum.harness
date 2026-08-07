@@ -1,0 +1,120 @@
+\section{A Proof-Carrying Compiler for Error Bounds}
+\label{sec:compiler}
+
+\subsection{Intermediate representations}
+
+The compiler is organized around four intermediate representations (IRs).
+The \emph{word IR} stores sparse homogeneous polynomials in noncommuting
+letters $A_1,\ldots,A_4$.  The \emph{Lie IR} stores homogeneous logarithmic
+defects as rational linear combinations of right-nested commutators.  The
+\emph{Pauli IR} stores canonical finite-support symplectic Pauli strings with
+exact coefficients per translation cell.  The \emph{certificate IR} stores
+partitions, rational norm enclosures, finite-step contributions, tail data,
+hash bindings, and resource arithmetic.
+
+\begin{figure}[t]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[
+ node distance=5mm and 6mm,
+ box/.style={draw,rounded corners,align=center,minimum height=8mm,minimum width=25mm,fill=blue!4},
+ certbox/.style={box,fill=green!8},
+ arr/.style={-{Stealth[length=2mm]},thick}
+]
+\node[box] (input) {Hamiltonian, fragments,\\formula, $T,\eps$, cost};
+\node[box,right=of input] (word) {Free-word IR\\formal logarithm};
+\node[box,right=of word] (lie) {Free-Lie IR\\DSW projection};
+\node[box,right=of lie] (pauli) {Pauli IR\\translation quotient};
+\node[certbox,right=of pauli] (cert) {Certificate IR\\norm and tail};
+\node[certbox,below=of cert] (output) {$r_\star$, adjacent boundary,\\integer resources};
+\draw[arr] (input)--(word);
+\draw[arr] (word)--(lie);
+\draw[arr] (lie)--(pauli);
+\draw[arr] (pauli)--(cert);
+\draw[arr] (cert)--(output);
+\end{tikzpicture}
+}
+\caption{Compiler pipeline.  Algebraic structure is retained until the Pauli
+IR; irreversible norm inequalities enter only in the certificate IR.}
+\label{fig:pipeline}
+\end{figure}
+
+Each lowering pass preserves a semantic invariant.  Word multiplication
+preserves the truncated product series.  Formal logarithms preserve the
+truncated exponential identity.  DSW projection preserves the homogeneous
+Lie element.  Pauli evaluation is a representation homomorphism.  Translation
+canonicalization preserves the sum per cell.  Exact aggregation preserves the
+represented operator.  Finally, grouped norming replaces equality by a
+verified upper bound.
+
+\subsection{End-to-end algorithm}
+
+\begin{algorithm}[t]
+\caption{Compile a product formula into a resource certificate}
+\label{alg:compiler}
+\begin{algorithmic}[1]
+\Require $(H,\mathcal F,S,T,\eps,\mathcal C)$ and truncation policy
+\Ensure Certificate accepted by an independent verifier
+\State parse all stage coefficients into exact algebraic or outward intervals
+\State $P(t)\gets$ truncated free-word expansion of the complete stage product
+\State $L(t)\gets\log P(t)$ in the sparse free associative algebra
+\State verify order conditions and time-reversal parity through target degree
+\For{$d\in\{5,7\}$}
+  \State $E_d\gets$ DSW projection of the homogeneous component $L_d$
+  \State $Q_d\gets$ evaluate $E_d$ in the concrete local Pauli representation
+  \State quotient $Q_d$ by translation and combine identical Pauli strings
+\EndFor
+\State discover weighted pairwise-anticommuting groups for the leading ledger
+\State emit full group membership and outward rational square-root bounds
+\State convert $E_5,E_7$ to right-generator terms D4--D7
+\State close all remaining terms with a rational locality majorant and tail
+\State find the smallest integer $r_\star$ whose certified bound is at most $\eps$
+\State compile $r_\star$ to groups, bond propagators, and CNOT upper bound
+\State emit hashes, provenance, and adjacent-step evidence
+\end{algorithmic}
+\end{algorithm}
+
+The algorithm intentionally separates \emph{discovery} from \emph{trust}.
+The formal-series generator and grouping search can be large and optimized for
+throughput.  Their output is not accepted because the code ran successfully;
+it is accepted only after a second path rechecks the certificate.  In
+particular, no claim depends on the greedy grouping being optimal.  Any valid
+partition gives a sound bound, and a better heuristic can improve the bound
+without expanding the trusted computing base.
+
+\subsection{What is improved at each pass}
+
+\begin{table}[t]
+\centering
+\caption{Compiler passes and the information they preserve.}
+\label{tab:passes}
+\begin{tabularx}{\textwidth}{@{}p{0.19\textwidth}p{0.26\textwidth}Xp{0.18\textwidth}@{}}
+\toprule
+Pass & Conventional relaxation & Replacement & Verified invariant \\
+\midrule
+Complete formula log & Bound stages or partial sums separately & Multiply all
+stages and take the formal log before norming & Truncated series identity and
+order conditions \\
+Lie projection & Treat free words as unrelated monomials & Project homogeneous
+log defects into free-Lie elements & DSW identity at fixed degree \\
+Concrete evaluation & Count generic nonzero commutators & Evaluate exact local
+Pauli products and phases & Symplectic multiplication and support \\
+Translation quotient & Count translated clusters separately & Select a
+canonical orbit representative & Translation-equivalent configurations merge \\
+Coefficient aggregation & Take absolute values by derivation path & Sum exact
+coefficients of identical Paulis & Operator represented by sparse ledger \\
+Anticommuting grouping & Apply termwise Pauli-$\ell_1$ & Use exact group
+$\ell_2$ identities & Coverage and pairwise anticommutation \\
+Finite-step closure & Use only leading order & Retain D4--D7 and rational tail
+& Global error upper bound \\
+Adjacent integer search & Round a continuous estimate & Verify $r$ and $r-1$
+exactly & Smallest integer accepted by this bound \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+This organization also answers how the method should be extended.  A new
+Hamiltonian needs a representation backend and local-support rules; a new
+formula needs a stage generator and exact coefficient enclosure; a new norm
+strategy needs a certificate schema and verifier.  The higher layers need not
+be rewritten if their interfaces and invariants remain unchanged.

@@ -1,0 +1,195 @@
+\section{Right-Generator Expansion Details}
+\label{app:right-generator}
+
+This appendix records the finite-order identity used by the certificate.  Let
+\begin{equation}
+ Z(t)=\log S_4(t)=tA+t^5B+t^7C+O(t^9).
+\end{equation}
+Using
+\begin{equation}
+ \operatorname{dexp}_{Z}(Z')=
+ Z'+\frac12[Z,Z']+\frac16[Z,[Z,Z']]
+ +\frac1{24}[Z,[Z,[Z,Z']]]+\cdots,
+\end{equation}
+and collecting powers through $t^7$ gives
+\begin{align}
+ S_4'(t)S_4(t)^{-1}-A
+  ={}&5t^4B+2t^5[A,B]
+  +t^6\left(7C+\frac23[A,[A,B]]\right)\nonumber\\
+  &+t^7\left(3[A,C]+\frac16[A,[A,[A,B]]]\right)
+  +R_{\geq8}(t).
+ \label{eq:exact-right-expansion}
+\end{align}
+For example, the $t^5[A,B]$ coefficient comes from
+$\frac12[tA,5t^4B]+\frac12[t^5B,A]=2t^5[A,B]$.
+The later coefficients follow by the same homogeneous bookkeeping.  The
+implementation constructs the series in the word algebra and regression-tests
+\cref{eq:exact-right-expansion}; it does not substitute the printed identity
+as an unchecked constant table.
+
+The global contribution of a monomial $t^jD_j$ follows from
+\cref{eq:global-duhamel}:
+\begin{equation}
+ r\int_0^{T/r}s^j\opnorm{D_j}\,ds
+ =\frac{T^{j+1}\opnorm{D_j}}{(j+1)r^j}.
+ \label{eq:monomial-global}
+\end{equation}
+This explains the degree labels in the result ledger and provides a direct
+dimensional check on the inverse powers of $r$.
+
+\section{Local Heisenberg Pauli Audit}
+\label{app:local-pauli}
+
+The single-bond lemma can be checked without symbolic software.  Let
+$Q_1=XX$, $Q_2=YY$, and $Q_3=ZZ$.  For a phase-free two-qubit Pauli
+$P=P_1\otimes P_2$, the number of $Q_j$ that anticommute with $P$ is either
+zero or two.  One compact enumeration is shown in \cref{tab:local-audit}; rows
+and columns give the one-qubit factors.
+
+\begin{table}[ht]
+\centering
+\caption{Number of anticommuting terms among $XX,YY,ZZ$ for every local
+two-qubit Pauli.}
+\label{tab:local-audit}
+\begin{tabular}{@{}c|rrrr@{}}
+\toprule
+$P_1\backslash P_2$ & $I$ & $X$ & $Y$ & $Z$ \\
+\midrule
+$I$ & 0 & 2 & 2 & 2 \\
+$X$ & 2 & 0 & 2 & 2 \\
+$Y$ & 2 & 2 & 0 & 2 \\
+$Z$ & 2 & 2 & 2 & 0 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+If the count is zero, $[h,P]=0$.  If it is two, each contributing Hamiltonian
+coefficient has magnitude $1/4$ and the Pauli commutator supplies magnitude
+two, giving two output coefficients of magnitude $1/2$.  Their
+Pauli-$\ell_1$ sum is one.  Hence
+\begin{equation}
+  \paulinorm{[h,P]}\leq1=\paulinorm{P}
+\end{equation}
+for a unit Pauli input, and linearity extends the stated growth majorant.  The
+generic bound obtained by summing the three Hamiltonian Paulis independently
+would give $3/2$; the exact parity enumeration removes the impossible third
+contribution.
+
+\section{Verifier Pseudocode}
+\label{app:verifier}
+
+\begin{algorithm}[ht]
+\caption{Independent verification of the principal certificate}
+\label{alg:verifier}
+\begin{algorithmic}[1]
+\Require main certificate $C$ and sidecar directory
+\State validate schema version and required benchmark fields
+\State recompute SHA-256 for every referenced sidecar
+\State verify formula, normalization, $T$, $\eps$, and cost-model identities
+\State load the D4 coefficient ledger and declared group partition
+\State verify exact coverage: no missing, duplicate, or unknown Pauli key
+\For{every group $G$}
+  \For{every unordered pair $(P,Q)\subseteq G$}
+    \State require symplectic parity$(P,Q)=1$
+  \EndFor
+  \State recompute the rational squared-weight sum
+  \State require declared upper root squared $\geq$ recomputed sum
+\EndFor
+\State sum all group roots and compare to the D4 cell enclosure
+\State verify D5--D7 and tail preconditions and contributions
+\State sum the accepted-step global rational; require result $\leq\eps$
+\State sum the previous-step rational; require result $>\eps$
+\State recompute $G(r)$, bond propagators, CNOT totals, and exact ratio
+\State return a structured success record; fail closed on any mismatch
+\end{algorithmic}
+\end{algorithm}
+
+Deep mode inserts regeneration of the baseline center scan, complete formula
+logarithm, DSW defects, Pauli coefficient map, and higher-degree majorants
+before the certificate comparisons.  Importantly, both modes fail closed:
+unknown schema versions, absent files, extra group members, and invalid
+interval orientation are errors rather than warnings.
+
+\section{Certificate Schema Sketch}
+\label{app:schema}
+
+\begin{longtable}{@{}p{0.29\textwidth}p{0.19\textwidth}p{0.44\textwidth}@{}}
+\caption{Selected schema-v3 fields and verification obligations.}
+\label{tab:schema}\\
+\toprule
+Field & Type & Obligation \\
+\midrule
+\endfirsthead
+\toprule
+Field & Type & Obligation \\
+\midrule
+\endhead
+\path{benchmark} & object & Exact model, normalization, size, time,
+tolerance, and primary metric match the claim \\
+\path{published_baseline.site_density_upper} & integer pair & Denominator is
+positive and deep regeneration is enclosed \\
+\path{candidate.d4_certificate.path} & relative path & Resolves inside the
+bundle; no path traversal \\
+\path{candidate.d4_certificate.sha256} & 64-hex digest & Equals the bytes of
+the resolved sidecar \\
+\path{candidate.contributions} & rational pairs & Each pair has positive
+denominator and agrees with recomputed bounds \\
+\path{candidate.global_error_upper} & rational pair & Equals or dominates
+the contribution sum and is below tolerance \\
+\path{candidate.previous_step_error_upper} & rational pair & Correctly
+evaluated at $r-1$ and exceeds tolerance \\
+\path{cost_model} & integers/rule & Resource identities are evaluated without
+floating point \\
+\path{claimed_resources} & integer object & Every total is reconstructed from
+the step count and cost model \\
+\path{claims.exact_improvement_ratio} & integer pair & Equals the declared
+baseline and candidate group counts \\
+\bottomrule
+\end{longtable}
+
+\section{Additional Interpretation of the Improvement}
+\label{app:interpretation}
+
+Several ratios appear in the analysis and should not be conflated:
+\begin{align}
+\text{D4 norm tightening}
+  &=\frac{20.160968407335066}{6.472926505087888}
+    =3.114660484942633\ldots,\\
+\text{step ratio}
+  &=\frac{393}{97}=4.051546391752577\ldots,\\
+\text{compiled resource ratio}
+  &=\frac{30\cdot393+1}{30\cdot97+1}
+    =\frac{11791}{2911}
+    =4.050498110614909\ldots.
+\end{align}
+The step and resource ratios differ because the first and last fragment groups
+merge to give the additive one in \cref{eq:merged-groups}.  The norm ratio is
+not expected to equal either: a fourth-order global error scales roughly as
+$r^{-4}$ only in a leading asymptotic regime, while the actual accepted point
+contains D5--D7, a tail, and integer rounding.
+
+The improvement relative to the challenge's twofold target is
+\begin{equation}
+ \frac{(11791/2911)}{2}=2.025249055307454\ldots.
+\end{equation}
+This means the achieved multiplier is just over twice the requested
+multiplier; it does not mean an eightfold resource reduction.
+
+\section{Checklist for Independent Review}
+\label{app:checklist}
+
+A reviewer can audit the result in increasing order of cost:
+\begin{enumerate}
+\item Read the benchmark tuple and confirm that candidate and control use the
+same Hamiltonian, formula, tolerance, and cost model.
+\item Run the manuscript headline validator and the package checksum check.
+\item Run the fast verifier and inspect its structured output.
+\item Confirm the exact integer map from 393/97 steps to all three resources.
+\item Run the default unit suite, including mutation and local-Pauli tests.
+\item Run D5 \code{--verify-only} to confirm the follow-up is separate and
+marked noncertified at 78 steps.
+\item If computational resources permit, run the deep verifier to regenerate
+the formula-specific algebra and baseline center scan.
+\item Rebuild this PDF and visually inspect figures, tables, citations, and
+page boundaries; PDF appearance is a communication check, not a proof check.
+\end{enumerate}

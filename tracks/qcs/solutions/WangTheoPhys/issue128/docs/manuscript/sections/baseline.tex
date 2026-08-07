@@ -1,0 +1,81 @@
+\section{Reconstructing the Published-Theorem Baseline}
+\label{sec:baseline}
+
+The phrase ``published baseline'' can obscure two logically distinct objects.
+The first is the high-order commutator theorem published by Childs et al.
+\cite{childs2021trotter}; the second is our fixed, machine-evaluated
+instantiation of that theorem.  The number 393 is not a table entry quoted
+from the 2021 paper.  It is obtained by applying the published framework to
+\cref{eq:hamiltonian,eq:benchmark,eq:suzuki4} with a specified norming and
+interval procedure.  We call it the \emph{pinned control}.
+
+\subsection{Expansion-first local norming}
+
+The high-order theorem represents product-formula error by partial sums and
+nested commutators.  For the pinned control, every partial matching sum is
+expanded into local Heisenberg bonds, zero commutators are removed, and each
+surviving concrete Pauli expansion is bounded by its Pauli-$\ell_1$ norm.
+The resulting site-density upper bound is stored as an exact rational number
+whose outward decimal is
+\begin{equation}
+ \alpha_{\mathrm{base}}\le164.9759169527440.
+\end{equation}
+The calculation contains 8,316 theorem terms and 1,024 expanded commutator
+keys.  All algebraic product-formula coefficients are enclosed by rational
+intervals; no rounded decimal is used as the source of the result.
+
+The theorem admits a discrete family of center choices controlling how the
+high-order integral representation is partitioned.  We evaluate all 31
+admissible centers.  Center 20 gives the smallest certified control, and
+inverting its global bound at tolerance $10^{-6}$ yields
+\begin{equation}
+ r_{\mathrm{base}}=393,\qquad G(r_{\mathrm{base}})=11{,}791.
+\end{equation}
+The main certificate stores both the exact site-density rational and the
+chosen center.  A deep verification mode regenerates the center scan rather
+than trusting these stored labels.
+
+\subsection{Where the baseline loses information}
+
+The baseline is rigorous, general, and already exploits exact commutation.
+Its looseness in this instance arises from the order of operations.  Once an
+abstract contribution is replaced by an independent positive norm, later
+knowledge cannot recover cancellation between that contribution and another
+one.  Four losses are particularly important:
+
+\begin{enumerate}
+\item distinct free words can map to the same nested-commutator or Pauli
+  contribution with opposite signs;
+\item distinct translated local clusters can share a canonical translation
+  representative;
+\item different commutator paths can produce exactly the same Pauli string;
+\item different surviving Pauli strings can anticommute, causing cross terms
+  to vanish when the group norm is squared.
+\end{enumerate}
+
+The proposed compiler postpones the irreversible inequality until these
+relations have been exposed.  Importantly, it does not treat the baseline as
+incorrect.  It constructs a stronger proof for the same circuit and then
+verifies both sides under a common benchmark and cost model.
+
+\begin{table}[t]
+\centering
+\caption{Logical separation between the published theorem and the pinned
+finite-instance control.}
+\label{tab:baseline-separation}
+\begin{tabularx}{\textwidth}{@{}lXX@{}}
+\toprule
+ & Published theory & Pinned control used here \\
+\midrule
+Source & Childs et al. commutator-scaling framework & Exact interval
+instantiation for the fixed Heisenberg benchmark \\
+Scope & General Hamiltonian fragments and formula order & $L=12$, four
+matchings, five-copy $S_4$, $T=1$, $\eps=10^{-6}$ \\
+Norming & Theorem permits commutator-sensitive evaluation & Expanded local
+Pauli-$\ell_1$ procedure fixed by the certificate \\
+Finite number & No published 393-step table entry & 31 centers scanned;
+center 20 yields 393 steps \\
+Role & Mathematical foundation & Auditable comparison control \\
+\bottomrule
+\end{tabularx}
+\end{table}
