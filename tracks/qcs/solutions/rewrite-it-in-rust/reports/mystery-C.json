@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "instance": "mystery-C",
+  "selected_family": "multiply",
+  "operand_bits": 6,
+  "input_width": 12,
+  "output_width": 12,
+  "candidate_scores": [
+    {
+      "family": "multiply",
+      "evaluated_rows": 1200,
+      "exact_matches": 1200,
+      "mismatches": 0,
+      "first_mismatch_row": null
+    }
+  ],
+  "gate_count": 167,
+  "circuit_sha256": "f1d5838a3198b304f671c7479f619fba86ca63bc364b0ac2b0f7fd036fd3cf78",
+  "training_scalar": {
+    "samples": 1200,
+    "gate_count": 167,
+    "exact_matches": 1200,
+    "correct_bits": 14400,
+    "total_bits": 14400
+  },
+  "training_packed": {
+    "samples": 1200,
+    "gate_count": 167,
+    "exact_matches": 1200,
+    "correct_bits": 14400,
+    "total_bits": 14400
+  },
+  "exhaustive_cases": 4096,
+  "exhaustive_mismatches": 0,
+  "prediction_rows": 1500,
+  "prediction_sha256": "c7b37413844bf0b10ebad0010046469f500354a22cc2ba95cbe42709f8e8337d",
+  "expected_commitment_sha256": "c7b37413844bf0b10ebad0010046469f500354a22cc2ba95cbe42709f8e8337d",
+  "commitment_matches": true
+}

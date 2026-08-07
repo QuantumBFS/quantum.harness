@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "claim": "certified-minimum",
+  "family": "multiply",
+  "operand_bits": 2,
+  "gate_basis": ["AND", "OR", "XOR", "NAND", "NOR", "XNOR"],
+  "fanin": 2,
+  "free_input_inversion": true,
+  "minimum_gate_count": 8,
+  "upper_bound": {
+    "circuit": "circuit.txt",
+    "circuit_sha256": "70cf0d03dd2337c75e619706e8eab9b89f584786f1bc5292dc5786c5c3a20b24",
+    "rows": 16,
+    "valid_rows": 7,
+    "invalid_rows": 9,
+    "mismatches": 0
+  },
+  "lower_bound": {
+    "gate_bound": 7,
+    "cnf": "k-minus-1.cnf",
+    "cnf_sha256": "50d226cf21f0c96d5597b18f4e36b79e1afa090735281e6376d281e2e0729b17",
+    "drat": "k-minus-1.drat",
+    "drat_sha256": "2702e070ca5063b4ba36384cfea663d17ae1db51322672cdedef18c6ce1e14a6",
+    "checker": "drat-trim",
+    "checker_commit": "2e3b2dc0ecf938addbd779d42877b6ed69d9a985",
+    "checker_result": "VERIFIED"
+  }
+}

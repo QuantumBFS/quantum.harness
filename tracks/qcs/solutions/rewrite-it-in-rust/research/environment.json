@@ -1,0 +1,6 @@
+{
+  "schema_version": 1,
+  "protocol": "occam-generalization-v1",
+  "deterministic_runtime_fields": true,
+  "runtime_and_rss_interpretation": "normalized placeholders; not performance measurements"
+}

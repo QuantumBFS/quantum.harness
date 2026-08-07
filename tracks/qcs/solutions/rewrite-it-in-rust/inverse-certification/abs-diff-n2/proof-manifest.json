@@ -1,0 +1,8 @@
+{
+  "gate_bound": 0,
+  "variables": 40,
+  "clauses": 227,
+  "literals": 800,
+  "cnf_sha256": "31829fed621b102331bbab6cbb001cab464b08aec11b7e92234b0d2b6fdc589d",
+  "drat_sha256": "b16afb30fcc777293af8e6d7215c52066ed728beb162e387ffe09b4d16d9a94c"
+}
