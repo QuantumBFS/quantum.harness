@@ -1,0 +1,137 @@
+{
+  "schema_version": 1,
+  "created_at": "2026-07-30",
+  "status": "pass",
+  "hamiltonian_convention": "H_J2=-J2 sum_i S_i dot S_{i+2}",
+  "backend": {
+    "python": "3.11.14",
+    "tenpy": "1.0.6",
+    "layout": "two physical spins per GroupedSite",
+    "algorithm": "PurificationTEBD order=2, backwards disentangler, conserve=Sz"
+  },
+  "local_gates": {
+    "status": "pass",
+    "full_test_suite": {
+      "status": "pass",
+      "passed": 73
+    },
+    "exact_j2_up": {
+      "status": "pass",
+      "magnetization_max_abs": 2.0031640755868718e-10,
+      "current_max_abs": 8.274208813767447e-10,
+      "czz_max_abs": 2.4406865417603285e-12,
+      "fcs_logZ_max_abs": 1.348691971361313e-10,
+      "threshold": 2e-07
+    },
+    "exact_j2_down": {
+      "status": "pass",
+      "magnetization_max_abs": 2.0031646393720015e-10,
+      "current_max_abs": 8.274208898335217e-10,
+      "czz_max_abs": 2.4410473642433317e-12,
+      "fcs_logZ_max_abs": 1.3486768665734052e-10,
+      "threshold": 2e-07
+    },
+    "spin_flip_and_continuity": {
+      "status": "pass",
+      "magnetization_spin_flip_max_abs": 2.8206603719382883e-15,
+      "current_spin_flip_max_abs": 7.398595625041082e-16,
+      "czz_spin_flip_max_abs": 1.000393344552375e-15,
+      "continuity_relative_l2_max": 0.0003304906370844974
+    },
+    "transfer_fcs": {
+      "status": "pass",
+      "spin_flip_max_abs": 2.0679146294016065e-15,
+      "fcs_mean_vs_charge_relative": 0.006553003140757956,
+      "integrated_current_vs_charge_relative": 0.00011358158594008757
+    },
+    "j2zero_grouped_equivalence": {
+      "status": "pass",
+      "u_max_abs": 1.0017581153487498e-08,
+      "magnetization_max_abs": 5.008790569804855e-10,
+      "current_max_abs": 1.697599786979788e-09,
+      "czz_max_abs": 8.834400923210094e-12,
+      "fcs_logZ_max_abs": 5.262890056165581e-11,
+      "threshold": 2e-07
+    },
+    "interrupted_checkpoint_resume": {
+      "status": "pass",
+      "interruption_after_saved_time": 0.15,
+      "process_exit_code": 143,
+      "comparison_final_time": 0.5,
+      "all_observable_max_abs": 0.0,
+      "threshold": 1e-13
+    }
+  },
+  "source_sha256": {
+    "src/tenpy_research_backend.py": "de3fa5377cbfe415b4c0d5dc8368ff297f1ef47f61723ae4dae10a19a688ae94",
+    "scripts/run_tenpy_research_job.py": "8ddfa943bc6fe044b3537e9b69785c2b741b2d867fa1d83ed39159577f088c16",
+    "scripts/validate_tenpy_exact_diagonalization.py": "db0b4a1e17b90e41e90e141fcafca5d78c687399a913e3a92e66151f92cc9fba",
+    "scripts/validate_tenpy_grouped_equivalence.py": "94292c66c04b62c6a99571532585d1e4136e844a697a134676a61e5003a6d632",
+    "scripts/validate_tenpy_resume.py": "b37b1c9e19b1968decacdccd8fb4a9847ae9bfef47fa041b1e1c0ea902e3c296",
+    "hpc/scnet/j2_preflight.sbatch": "e59d2d4276561c0a30d5092405c5427f5893c150538ccffc0d08a8508926c70c"
+  },
+  "scnet_compute_gate": {
+    "status": "pass",
+    "verified_at": "2026-07-29T23:07:28.679411+00:00",
+    "slurm_job_id": 23015027,
+    "slurm_state": "COMPLETED",
+    "exit_code": "0:0",
+    "elapsed": "00:00:48",
+    "max_rss": "96296K",
+    "node": "a01r01n07",
+    "stdout": "/work/share/giggleliu/cfys01/kharkov_burgers_20260729/logs/j2-preflight-23015027.out",
+    "stderr": "/work/share/giggleliu/cfys01/kharkov_burgers_20260729/logs/j2-preflight-23015027.err",
+    "stderr_assessment": "expected TeNPy unused-option UserWarning only; no traceback, error, kill, or OOM marker",
+    "summary_status": {
+      "exact_j2_up": "pass",
+      "exact_j2_down": "pass",
+      "symmetry": "pass",
+      "fcs": "pass",
+      "grouped_equivalence": "pass",
+      "checkpoint_reload": "pass"
+    },
+    "summary_sha256": {
+      "exact_j2_up": "676c3d37dd8668c67a6cc6316f76b080201c9a5b30aa11cf4bc36e5ca6288b0e",
+      "exact_j2_down": "64d43a25b56dc0d1c6a96dfd0dee2244f3d9f7687c3d81ca46befbc3db7a6691",
+      "symmetry": "840f5b7a7172ccaaf741ffe9f2b032ffe87459947f902abdd7ee918f96cdc296",
+      "fcs": "bb2131698abc4009ed042fc71c72c8f49fa76e92c193d4c9dd79405c16333e68",
+      "grouped_equivalence": "febe04eb162fcbc81c953689fcf589554336fc112d40422ae8526059cef19a28",
+      "checkpoint_reload": "f696db3da7253d23800cb420bd5ba28c22c33c7033aabccca122569afe3e135f"
+    },
+    "source_sha256": {
+      "hpc/scnet/j2_preflight.sbatch": "e59d2d4276561c0a30d5092405c5427f5893c150538ccffc0d08a8508926c70c",
+      "src/tenpy_research_backend.py": "de3fa5377cbfe415b4c0d5dc8368ff297f1ef47f61723ae4dae10a19a688ae94",
+      "scripts/run_tenpy_research_job.py": "8ddfa943bc6fe044b3537e9b69785c2b741b2d867fa1d83ed39159577f088c16",
+      "scripts/validate_tenpy_exact_diagonalization.py": "db0b4a1e17b90e41e90e141fcafca5d78c687399a913e3a92e66151f92cc9fba",
+      "scripts/validate_tenpy_backend.py": "2b8da798244f50dc1e3b66c73980c6088cc5d554543b04021d9a6d263f9c2654",
+      "scripts/validate_tenpy_fcs.py": "c881a3ba8756c432e16b3a3d523cdc84355525530be1b0ef171bf4b2c37f71b7",
+      "scripts/validate_tenpy_grouped_equivalence.py": "94292c66c04b62c6a99571532585d1e4136e844a697a134676a61e5003a6d632",
+      "scripts/validate_tenpy_resume.py": "b37b1c9e19b1968decacdccd8fb4a9847ae9bfef47fa041b1e1c0ea902e3c296",
+      "results_research_program/manifest.json": "cfd39d2b8b67f8a812114c3d7a84daba2b12d2c6bf3bbe1433aa03eba837bd52"
+    },
+    "required_outputs": {
+      "j2_up.npz": 4790,
+      "j2_down.npz": 4801,
+      "j2zero_ungrouped.npz": 4596,
+      "j2zero_grouped.npz": 4772,
+      "j2_up.npz.checkpoint.h5": 717840,
+      "j2_down.npz.checkpoint.h5": 717840
+    }
+  },
+  "production_a_j2_gate": {
+    "status": "pass",
+    "verified_at": "2026-07-29T23:19:12.434927+00:00",
+    "reason": "SCNet J2 compute validation passed and the frozen base production-A bundle rebuilt with both J2 controls ready",
+    "ready_count": 31,
+    "blocked_count": 0,
+    "j2_blocker_rows": 0,
+    "jobs": [
+      "control_j2_up__production_a",
+      "control_j2_down__production_a"
+    ],
+    "execution_matrix": "/work/share/giggleliu/cfys01/kharkov_burgers_20260729/source/results_research_program/tenpy_jobs_production_a/execution_matrix.json",
+    "execution_matrix_sha256": "93376a7ce28360549a59142478e5caece1d9120334c9ee4144b1b4043e93fa02",
+    "submission_performed": false,
+    "convergence_gate_note": "Readiness does not authorize submission; frozen convergence audit must still be accepted."
+  }
+}

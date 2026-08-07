@@ -1,0 +1,117 @@
+{
+  "schema_version": 1,
+  "approved_at": "2026-07-30",
+  "base": {
+    "matrix_sha256": "9b6c60f982ac41da5b9ecd926ef30c3ab232ea9f82767e447bd52598037dffed",
+    "manifest_sha256": "cfd39d2b8b67f8a812114c3d7a84daba2b12d2c6bf3bbe1433aa03eba837bd52",
+    "runner_sha256": "8ddfa943bc6fe044b3537e9b69785c2b741b2d867fa1d83ed39159577f088c16",
+    "backend_sha256": "de3fa5377cbfe415b4c0d5dc8368ff297f1ef47f61723ae4dae10a19a688ae94"
+  },
+  "new_conditions": [
+    {
+      "condition_id": "response_local_pulse_pos",
+      "role": "two_mode_response",
+      "delta": 1.0,
+      "temperature": "infinite",
+      "mu": 0.02,
+      "orientation": 1,
+      "profile": "gaussian",
+      "width": 2.0,
+      "background_m": 0.0,
+      "j2": 0.0,
+      "center": 0.0
+    },
+    {
+      "condition_id": "response_local_pulse_neg",
+      "role": "two_mode_response",
+      "delta": 1.0,
+      "temperature": "infinite",
+      "mu": 0.02,
+      "orientation": -1,
+      "profile": "gaussian",
+      "width": 2.0,
+      "background_m": 0.0,
+      "j2": 0.0,
+      "center": 0.0
+    },
+    {
+      "condition_id": "equilibrium_m0",
+      "role": "two_mode_equilibrium",
+      "delta": 1.0,
+      "temperature": "infinite",
+      "mu": 0.02,
+      "orientation": 1,
+      "profile": "uniform_zero",
+      "width": 2.0,
+      "background_m": 0.0,
+      "j2": 0.0
+    }
+  ],
+  "fcs_gamma": [
+    -0.6,
+    -0.4,
+    -0.2,
+    0.0,
+    0.2,
+    0.4,
+    0.6
+  ],
+  "observable_policy": {
+    "current_condition_ids": [
+      "amp_mu002_up",
+      "amp_mu002_down",
+      "amp_mu005_up",
+      "amp_mu005_down",
+      "amp_mu010_up",
+      "amp_mu010_down",
+      "amp_mu020_up",
+      "amp_mu020_down",
+      "shape_double_wall",
+      "background_p005_up",
+      "response_local_pulse_pos",
+      "response_local_pulse_neg",
+      "equilibrium_m0"
+    ],
+    "czz_condition_ids": [
+      "amp_mu002_up",
+      "amp_mu002_down",
+      "amp_mu005_up",
+      "amp_mu005_down",
+      "amp_mu010_up",
+      "amp_mu010_down"
+    ]
+  },
+  "production_a": {
+    "fcs_condition_ids": [
+      "amp_mu002_up",
+      "amp_mu002_down",
+      "amp_mu005_up",
+      "amp_mu005_down",
+      "amp_mu010_up",
+      "amp_mu010_down",
+      "equilibrium_m0"
+    ],
+    "reuse": {
+      "amp_mu005_up": "amp_mu005_up__convergence__fine",
+      "amp_mu005_down": "amp_mu005_down__convergence__fine"
+    }
+  },
+  "production_b": {
+    "fcs_condition_ids": [
+      "amp_mu005_up",
+      "amp_mu005_down",
+      "equilibrium_m0"
+    ]
+  },
+  "frozen_counts": {
+    "condition_count": 34,
+    "logical_job_count": 68,
+    "production_a_logical": 34,
+    "production_a_execute": 32,
+    "production_a_reuse": 2,
+    "production_a_fcs_logical": 7,
+    "production_a_fcs_execute": 5,
+    "production_b_logical": 34,
+    "production_b_fcs": 3
+  }
+}

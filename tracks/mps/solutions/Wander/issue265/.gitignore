@@ -1,0 +1,12 @@
+__pycache__/
+*.py[cod]
+*.h5
+*.npz
+*.npy
+*.out
+*.err
+.pytest_cache/
+data/
+results/
+jobs/
+tracks/
