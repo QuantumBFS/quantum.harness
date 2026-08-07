@@ -1,0 +1,51 @@
+{
+  "note": "Deterministic construction; no random stream was required.",
+  "results": [
+    {
+      "circuit": "/home/user_milksang/private/homefile/quantum_harness/issue71_occam/results/occam71/warmups/circuits/practice-add-n4.txt",
+      "commitment_match": true,
+      "commitment_sha256": "a02fa3f4aa915b97534fd5c70ba89a08522991030423f1eeb92260bc8539671a",
+      "exhaustive": {
+        "checked": 256,
+        "failures": 0
+      },
+      "family": "add",
+      "gates": 17,
+      "instance": "practice-add-n4",
+      "prediction_sha256": "a02fa3f4aa915b97534fd5c70ba89a08522991030423f1eeb92260bc8539671a",
+      "predictions": "/home/user_milksang/private/homefile/quantum_harness/issue71_occam/results/occam71/warmups/predictions/practice-add-n4/test_outputs.csv",
+      "training": {
+        "bit_accuracy": 1.0,
+        "correct_bits": 600,
+        "exact": 120,
+        "exact_accuracy": 1.0,
+        "rows": 120,
+        "total_bits": 600
+      }
+    },
+    {
+      "circuit": "/home/user_milksang/private/homefile/quantum_harness/issue71_occam/results/occam71/warmups/circuits/practice-mul-n4.txt",
+      "commitment_match": true,
+      "commitment_sha256": "f9e600cdd707f60639138e4e14656ea0c420fbce9b9fdde52d630d83076e88fa",
+      "exhaustive": {
+        "checked": 256,
+        "failures": 0
+      },
+      "family": "mul",
+      "gates": 64,
+      "instance": "practice-mul-n4",
+      "prediction_sha256": "f9e600cdd707f60639138e4e14656ea0c420fbce9b9fdde52d630d83076e88fa",
+      "predictions": "/home/user_milksang/private/homefile/quantum_harness/issue71_occam/results/occam71/warmups/predictions/practice-mul-n4/test_outputs.csv",
+      "training": {
+        "bit_accuracy": 1.0,
+        "correct_bits": 960,
+        "exact": 120,
+        "exact_accuracy": 1.0,
+        "rows": 120,
+        "total_bits": 960
+      }
+    }
+  ],
+  "root_seed": 42,
+  "schema": "occam71-warmup-v1"
+}

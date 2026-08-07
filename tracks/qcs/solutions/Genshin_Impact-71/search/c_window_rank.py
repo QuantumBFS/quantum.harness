@@ -1,0 +1,168 @@
+#!/usr/bin/env python3
+"""Rank promising two-root exact-resynthesis windows in mystery C.
+
+This is a read-only structural/truth-table diagnostic.  It imports the
+independently tested generic window implementation and never executes content
+from a submitted netlist: the latter is parsed by the strict ASCII parser.
+"""
+
+from __future__ import annotations
+
+import argparse
+import importlib.util
+import itertools
+import json
+import sys
+from pathlib import Path
+
+
+DEFAULT_MODULE = Path(r"C:\tmp\occam71_d_window\window_search.py")
+DEFAULT_NETLIST = Path(r"C:\tmp\occam71_best_ref\mystery-C.txt")
+
+
+def load_window_module(path: Path):
+    spec = importlib.util.spec_from_file_location("c_window_generic", path)
+    if spec is None or spec.loader is None:
+        raise RuntimeError(f"cannot load audited module {path}")
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+def natural_name_key(name: str) -> tuple[int, int]:
+    if len(name) < 2 or name[0] not in {"x", "w"}:
+        raise ValueError(f"unexpected signal name {name!r}")
+    return (0 if name[0] == "x" else 1, int(name[1:]))
+
+
+def reachable_pattern_count(
+    names: tuple[str, ...],
+    values: dict[str, int],
+    rows: int,
+) -> int:
+    seen: set[int] = set()
+    for row in range(rows):
+        code = 0
+        for bit, name in enumerate(names):
+            code |= ((values[name] >> row) & 1) << bit
+        seen.add(code)
+    return len(seen)
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--module", type=Path, default=DEFAULT_MODULE)
+    parser.add_argument("--netlist", type=Path, default=DEFAULT_NETLIST)
+    parser.add_argument("--min-removed", type=int, default=6)
+    parser.add_argument("--max-removed", type=int, default=18)
+    parser.add_argument("--max-boundary", type=int, default=12)
+    parser.add_argument("--structural-limit", type=int, default=3000)
+    parser.add_argument("--output-limit", type=int, default=100)
+    parser.add_argument("--output", type=Path)
+    args = parser.parse_args()
+
+    if not (2 <= args.min_removed <= args.max_removed):
+        raise ValueError("invalid removed-gate bounds")
+    if not (1 <= args.max_boundary <= 16):
+        raise ValueError("invalid boundary bound")
+    if args.structural_limit <= 0 or args.output_limit <= 0:
+        raise ValueError("limits must be positive")
+
+    dws = load_window_module(args.module)
+    circuit = dws.parse_circuit(args.netlist)
+    _, values, _ = dws.evaluate(circuit)
+    gate_by_out, _ = dws.structural_maps(circuit)
+    gate_index = {gate.out: index for index, gate in enumerate(circuit.gates)}
+    rows = 1 << circuit.n_inputs
+
+    structural: list[dict[str, object]] = []
+    gate_names = tuple(gate.out for gate in circuit.gates)
+    for roots in itertools.combinations(gate_names, 2):
+        removed, _ = dws.removable_closure(circuit, roots)
+        removed_count = len(removed)
+        if not args.min_removed <= removed_count <= args.max_removed:
+            continue
+        boundary: set[str] = set()
+        for name in removed:
+            gate = gate_by_out[name]
+            for token in (gate.left, gate.right):
+                if token.name not in removed:
+                    boundary.add(token.name)
+        if len(boundary) > args.max_boundary:
+            continue
+        ordered_boundary = tuple(sorted(boundary, key=natural_name_key))
+        structural.append(
+            {
+                "roots": roots,
+                "removed_count": removed_count,
+                "boundary": ordered_boundary,
+                "boundary_count": len(ordered_boundary),
+                "removed": tuple(sorted(removed, key=gate_index.__getitem__)),
+            }
+        )
+
+    structural.sort(
+        key=lambda record: (
+            -int(record["removed_count"]),
+            int(record["boundary_count"]),
+            tuple(record["roots"]),
+        )
+    )
+    structural = structural[: args.structural_limit]
+
+    records: list[dict[str, object]] = []
+    for record in structural:
+        boundary = tuple(record["boundary"])
+        patterns = reachable_pattern_count(boundary, values, rows)
+        removed_count = int(record["removed_count"])
+        candidate_gates = removed_count - 1
+        boundary_count = int(record["boundary_count"])
+        # A deterministic proxy for SAT effort.  The exponent reflects the
+        # number of possible sources per synthesized gate; it is only used to
+        # rank pilots, never as a scientific result.
+        effort_proxy = patterns * candidate_gates * (
+            boundary_count + candidate_gates
+        ) ** 2
+        records.append(
+            {
+                **record,
+                "reachable_patterns": patterns,
+                "candidate_gates": candidate_gates,
+                "effort_proxy": effort_proxy,
+            }
+        )
+
+    records.sort(
+        key=lambda record: (
+            int(record["effort_proxy"]),
+            -int(record["removed_count"]),
+            int(record["boundary_count"]),
+            tuple(record["roots"]),
+        )
+    )
+    payload = {
+        "netlist": str(args.netlist),
+        "inputs": circuit.n_inputs,
+        "gates": len(circuit.gates),
+        "rows": rows,
+        "filters": {
+            "min_removed": args.min_removed,
+            "max_removed": args.max_removed,
+            "max_boundary": args.max_boundary,
+            "structural_limit": args.structural_limit,
+        },
+        "structural_candidates": len(structural),
+        "records": records[: args.output_limit],
+    }
+    rendered = json.dumps(payload, indent=2)
+    if args.output is None:
+        print(rendered)
+    else:
+        args.output.parent.mkdir(parents=True, exist_ok=True)
+        args.output.write_text(rendered + "\n", encoding="utf-8")
+        print(args.output)
+
+
+if __name__ == "__main__":
+    main()

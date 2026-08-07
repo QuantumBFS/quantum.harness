@@ -1,0 +1,19 @@
+{
+  "instance": "D",
+  "candidate": "results/occam71/frontier-347/netlists/mystery-D.txt",
+  "candidate_sha256": "cd3f317f4a0b88818e54869e40b4550fd67549f8eb4a5eb02c74db4ec6864dbd",
+  "inputs": 10,
+  "outputs": 11,
+  "gates": 109,
+  "assignments": 1024,
+  "output_bits_checked": 11264,
+  "formula": "x*x+y*y",
+  "equivalent": true,
+  "mismatches": [],
+  "structure": {
+    "dead_gates": [],
+    "constant_gates": [],
+    "duplicate_gate_functions": [],
+    "complement_gate_functions": []
+  }
+}
