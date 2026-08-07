@@ -1,0 +1,39 @@
+{
+  "method": "uniform_tempo_fig3_transversal_reproduction",
+  "complete": true,
+  "scope": "independent N=1 reproduction of the published Fig. 3 bottom-panel curve at drive frequency 2.0",
+  "reference": {
+    "record": "https://zenodo.org/records/19593671",
+    "archive_md5": "0f3f9d9d8538aa96aee089973df7d9c2",
+    "panel": "Fig. 3 bottom"
+  },
+  "controls": {
+    "steps_per_period": 60,
+    "delay_periods": 12,
+    "phase_samples": 4,
+    "tolerance": 1e-6
+  },
+  "diagnostics": {
+    "bond_dimension": 14,
+    "connected_tail_amplitude": 0.015605745626824328,
+    "fixed_point_residual": 0.0003084472032725321,
+    "hermiticity_error": 0.00320077988078783,
+    "trace_error": 0.00022911934882153764,
+    "minimum_density_eigenvalue": 0.05449589091447455,
+    "process_tensor_cache_hit": 1
+  },
+  "comparison": {
+    "continuous_relative_l1": 0.3455071050704775,
+    "normalized_shape_relative_l1": 0.37183146692817987,
+    "integrated_magnitude_ratio": 1.3118951143348248
+  },
+  "delta_peaks": [
+    {"frequency": 2.0, "harmonic": 1, "weight": 0.028133718980199732},
+    {"frequency": 4.0, "harmonic": 2, "weight": 3.5293284163875763e-10}
+  ],
+  "artifact_sha256": {
+    "results/validation/fig3_transversal_wd2.json": "a45949df0bde3cf7688cbd7863035950203f0aace7ea790975f40ebb5e0a4494",
+    "figures/validation/fig3_transversal_wd2.pdf": "3ba0bf730d41e3da1d37fde8e35f7ca7eb2c0cc0c2aa6fc2379e939be51e04d7",
+    "figures/validation/fig3_transversal_wd2.png": "a93859b38040c02a90a177af9ada81a06b905481302d4d385aa6d046482f381f"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "method": "n3_uniform_tempo_vs_floquet_markov_qr",
+  "complete": true,
+  "converged_points": 6,
+  "model_scope": "same N=3 reflection sector, Hamiltonian, drive and bath parameters",
+  "points": [
+    {"j": 0.25, "sector": "even", "trace_distance": 0.9996997375851921, "correlation_error": 1.1529657847337855, "heat_error": 9.016706811174881},
+    {"j": 0.50, "sector": "even", "trace_distance": 0.9999010667013211, "correlation_error": 1.0341250650150768, "heat_error": 11.715780183401042},
+    {"j": 1.00, "sector": "even", "trace_distance": 0.9920891824177340, "correlation_error": 1.0243258716943124, "heat_error": 9.077234824882260},
+    {"j": 0.25, "sector": "odd", "trace_distance": 0.4752509683642790, "correlation_error": 0.5666192029309954, "heat_error": 0.3920114223680808},
+    {"j": 0.50, "sector": "odd", "trace_distance": 0.4752509683642792, "correlation_error": 0.5666192029309957, "heat_error": 0.3920114223680807},
+    {"j": 1.00, "sector": "odd", "trace_distance": 0.4752509683642792, "correlation_error": 0.5666192029309958, "heat_error": 0.3920114223680807}
+  ],
+  "artifact_sha256": {
+    "results/paper/n3_error_map_manifest.json": "287f9cb189a57f0348791ce194adf75bccb5628dbe4975baf99b2f43597770ad",
+    "figures/paper/n3_error_maps.pdf": "958ecd31b08da93d168942ef7fc61e7d22ac21ecc7a8fed6aae9b045af622dd7",
+    "figures/paper/n3_error_maps.png": "07c5d5444285c07a0c2a47c4d988702189a18bd8cca603191cb0b4515c2c883c"
+  }
+}
