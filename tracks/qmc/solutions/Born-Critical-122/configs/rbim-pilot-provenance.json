@@ -1,0 +1,7 @@
+{
+  "model": "square-lattice Nishimori random-bond Ising cylinder",
+  "upstream_repository": "Zhouquan-Wan/fermionic-transfer-matrix-rbim",
+  "upstream_commit": "814c24775b6b46cab77f3b4829c9c3802cab2146",
+  "baseline_job": "17185",
+  "claim": "pilot-only performance, correlation, QR stability, and variance estimate"
+}

@@ -1,0 +1,9 @@
+{
+  "model": "square-lattice Nishimori random-bond Ising cylinder",
+  "upstream_commit": "814c24775b6b46cab77f3b4829c9c3802cab2146",
+  "baseline_job": "17185",
+  "pilot_run": "rbim-pilot-v2",
+  "pilot_aggregate_job": "17231",
+  "cpp_benchmark_job": "17233",
+  "claim": "production quenched free-energy finite-size series"
+}

@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "quantity": "phi",
+  "alpha": 1.0,
+  "bootstrap_samples": 10000,
+  "bootstrap_seed": 202607270303,
+  "main_model": "M1",
+  "main_candidates_lmin": [6, 8, 10, 12, 14, 16],
+  "stability_m1_lmin": [6, 8, 10, 12, 14, 16],
+  "stability_m0_lmin": [14, 16, 20],
+  "acceptance_m0_reference_lmin": 20,
+  "primary_selection_rule": {
+    "description": "Select the smallest declared M1 Lmin that passes all residual and conditioning checks; never use the target central charge in selection.",
+    "maximum_reduced_chi_squared": 2.0,
+    "maximum_absolute_standardized_residual": 3.0,
+    "maximum_same_sign_residual_run": 3,
+    "maximum_design_condition_number": 10000000000.0
+  },
+  "acceptance": {
+    "target_interval": [0.46, 0.468],
+    "maximum_stability_distance_combined_sigma": 1.5,
+    "minimum_largest_size_signal_to_noise": 5.0,
+    "maximum_bootstrap_failures": 0
+  },
+  "notes": [
+    "This declaration is frozen before production results are aggregated.",
+    "All declared windows are reported, including windows that fail fit-quality checks.",
+    "Bootstrap resamples complete independent replicas within each circumference."
+  ]
+}

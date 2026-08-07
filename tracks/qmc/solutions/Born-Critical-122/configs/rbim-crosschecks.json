@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "pc": 0.1092212,
+  "pc_half_width": 4e-7,
+  "base_seed": 202607270304,
+  "qr_interval": 5,
+  "output_block_size": 2600,
+  "pc_sensitivity": {
+    "sizes": [12, 16, 20, 24, 32],
+    "replicas": 8,
+    "burn_in_rows_per_size": 20,
+    "measurement_rows": 20020000,
+    "fit_model": "M1",
+    "fit_lmin": 12,
+    "bootstrap_samples": 10000
+  },
+  "clean_limit": {
+    "coupling": 0.44068679350977147,
+    "sizes": [8, 10, 12, 14, 16, 20, 24, 30, 32],
+    "burn_in_rows_per_size": 100,
+    "measurement_rows": 1040000,
+    "fit_model": "M1",
+    "fit_lmin": 10,
+    "central_charge_target": 0.5,
+    "absolute_tolerance": 0.0005
+  },
+  "upstream_distribution": {
+    "samples": 128,
+    "length": 12,
+    "size": 6,
+    "seed": 202607270305
+  },
+  "parity_defect": {
+    "samples_per_size": 128,
+    "sizes": [4, 6, 8],
+    "aspect_ratio": 4,
+    "seed": 202607270306
+  }
+}

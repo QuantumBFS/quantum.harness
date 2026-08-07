@@ -1,0 +1,8 @@
+{
+  "name": "fermionic-transfer-matrix-rbim",
+  "url": "https://github.com/Zhouquan-Wan/fermionic-transfer-matrix-rbim",
+  "commit": "814c24775b6b46cab77f3b4829c9c3802cab2146",
+  "verified_at": "2026-07-27",
+  "paper": "https://arxiv.org/abs/2511.02907",
+  "role": "Independent Nishimori-point transfer-matrix baseline; do not modify the pinned snapshot."
+}
