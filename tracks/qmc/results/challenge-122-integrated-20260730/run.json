@@ -1,0 +1,183 @@
+{
+  "schema_version": 1,
+  "status": "completed",
+  "track": "qmc",
+  "team": {
+    "name": "卧龙凤雏",
+    "members": [
+      "Xu Tian",
+      "Huidan Tan"
+    ]
+  },
+  "challenge": {
+    "issue": 122,
+    "title": "Criticality in open quantum matter",
+    "url": "https://github.com/QuantumBFS/quantum.harness/issues/122"
+  },
+  "paper": {
+    "title": "Effective Central Charges across Clean, Disordered, and Monitored Criticality: Benchmarks and an Exploratory Learning-Induced Metal–Insulator Transition",
+    "date": "2026-07-30",
+    "reference": "../../solutions/卧龙凤雏/prb-paper/paper.tex"
+  },
+  "scope": "Four-model validation ladder: clean Ising calibration, Nishimori random-bond Ising benchmark, weak self-dual monitored benchmark, and an exploratory learning-induced metal–insulator transition.",
+  "method": {
+    "name": "Finite-size free-energy and entanglement scaling",
+    "exact": false,
+    "tool": "Rust simulation with Xoshiro256++ random streams; Python-only frozen-data analysis, bootstrap fitting, and plotting",
+    "settings": "Predeclared fit windows, independent replicas or streams, finite-size corrections, bootstrap uncertainty, and explicit publication gates",
+    "narrative": "The workflow first calibrates the finite-size extraction of central charge on a clean model, then introduces quenched disorder and monitored Born-correlated trajectories. The final learning-induced transition is treated as exploratory and must pass phase-location, anisotropy-stability, and estimator-agreement gates before a universal effective central charge can be published."
+  },
+  "cost_estimates": [
+    {
+      "model": "Clean Ising",
+      "wall_time_seconds": 514.342374,
+      "system_sizes": "L=4–20",
+      "sampling": "4 replicas; 12,800 measurement sweeps per grid point"
+    },
+    {
+      "model": "Nishimori RBIM",
+      "wall_time_seconds": 466.618439,
+      "system_sizes": "L=4–14",
+      "sampling": "8 replicas"
+    },
+    {
+      "model": "Weak self-dual",
+      "wall_time_seconds": 330.297163,
+      "system_sizes": "L=6–32",
+      "sampling": "Born-correlated Gaussian Majorana trajectories"
+    },
+    {
+      "model": "Learning-induced MIT",
+      "wall_time_seconds": 4583.68863,
+      "system_sizes": "L=8–32",
+      "sampling": "XY validation, DIII locator, and DIII refinement stages"
+    }
+  ],
+  "figures": [
+    {
+      "id": "clean-ising",
+      "title": "Clean Ising calibration",
+      "paper_figure": null,
+      "reproduction": "figures/clean-ising.png",
+      "site_resolved": false,
+      "results": {
+        "status": "pass",
+        "why": "Independent transfer-matrix and Wolff Monte Carlo routes recover the Ising value c=0.5 within their declared accuracy gates.",
+        "numbers": [
+          {
+            "label": "Transfer-matrix c",
+            "value": 0.499424
+          },
+          {
+            "label": "Monte Carlo c",
+            "value": 0.4987390622675896
+          },
+          {
+            "label": "Target c",
+            "value": 0.5
+          }
+        ]
+      }
+    },
+    {
+      "id": "nishimori-rbim",
+      "title": "Nishimori random-bond Ising benchmark",
+      "paper_figure": null,
+      "reproduction": "figures/nishimori.png",
+      "site_resolved": false,
+      "results": {
+        "status": "pass",
+        "why": "The bootstrap interval contains the requested Nishimori effective central charge c_eff=0.464.",
+        "numbers": [
+          {
+            "label": "c_eff",
+            "value": 0.45646940076821396
+          },
+          {
+            "label": "Standard error",
+            "value": 0.008180521323622448
+          },
+          {
+            "label": "95% interval",
+            "value": "[0.440064, 0.472304]"
+          },
+          {
+            "label": "Target c_eff",
+            "value": 0.464
+          }
+        ]
+      }
+    },
+    {
+      "id": "weak-self-dual",
+      "title": "Weak self-dual monitored benchmark",
+      "paper_figure": null,
+      "reproduction": "figures/weak-self-dual.png",
+      "site_resolved": false,
+      "results": {
+        "status": "pass",
+        "why": "The finite-size estimate agrees with the benchmark target c_eff=0.447 within the bootstrap uncertainty.",
+        "numbers": [
+          {
+            "label": "c_eff",
+            "value": 0.44410663549565277
+          },
+          {
+            "label": "Standard error",
+            "value": 0.0042401492815340195
+          },
+          {
+            "label": "95% interval",
+            "value": "[0.435749, 0.452494]"
+          },
+          {
+            "label": "Target c_eff",
+            "value": 0.447
+          }
+        ]
+      }
+    },
+    {
+      "id": "learning-induced-mit",
+      "title": "Exploratory learning-induced metal–insulator transition",
+      "paper_figure": null,
+      "reproduction": "figures/learning-mit.png",
+      "site_resolved": false,
+      "results": {
+        "status": "inconclusive",
+        "why": "The known XY transition is reproduced, but the generic-DIII transition is not bracketed, anisotropy is unstable, and entanglement and Casimir estimators disagree. No standalone universal c_eff is published.",
+        "numbers": [
+          {
+            "label": "XY transition bracket φ/π",
+            "value": "[0.24, 0.25]"
+          },
+          {
+            "label": "Entanglement c_eff",
+            "value": "3.06074 ± 0.75975"
+          },
+          {
+            "label": "Casimir c_eff",
+            "value": "12.57993 ± 0.98981"
+          },
+          {
+            "label": "Publication gate",
+            "value": "withheld"
+          }
+        ],
+        "failed_gates": [
+          "diii_transition_not_bracketed",
+          "anisotropy_unstable",
+          "estimator_disagreement"
+        ]
+      }
+    }
+  ],
+  "sources": [
+    "../clean-ising-20260729-120302",
+    "../nishimori-ising-20260729-refinement1",
+    "../weak-self-dual-20260729-154737",
+    "../learning-mit-production-v2-20260730-132322",
+    "../../solutions/卧龙凤雏/README.md",
+    "../../solutions/卧龙凤雏/prb-paper/paper.tex"
+  ]
+}

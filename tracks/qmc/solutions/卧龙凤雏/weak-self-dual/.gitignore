@@ -1,0 +1,5 @@
+/.venv
+/target
+/.pytest_cache
+/analysis/__pycache__
+/analysis/tests/__pycache__

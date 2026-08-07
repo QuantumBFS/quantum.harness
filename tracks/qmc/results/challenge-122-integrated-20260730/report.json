@@ -1,0 +1,412 @@
+{
+  "title": "Effective Central Charges across Clean, Disordered, and Monitored Criticality",
+  "eyebrow": "Challenge #122 · Team 卧龙凤雏",
+  "url": "https://github.com/QuantumBFS/quantum.harness/issues/122",
+  "lede": "Three benchmark models reproduce their reference central charges under a common finite-size and uncertainty-validation framework. Applying the same standards to the proposed learning-induced metal–insulator transition yields an inconclusive result: the generic-DIII transition is not bracketed, anisotropy calibration is unstable, and independent effective-central-charge estimators disagree.",
+  "sections": [
+    {
+      "title": "Challenge",
+      "note": "A four-model validation ladder for criticality in open quantum matter.",
+      "blocks": [
+        {
+          "kind": "heading",
+          "level": 3,
+          "text": "Problem statement"
+        },
+        {
+          "kind": "text",
+          "text": "Reproduce reliable effective-central-charge estimates across clean, quenched-disordered, and monitored critical systems, then determine whether the same validated methodology supports a universal $c_{\\mathrm{eff}}$ at the proposed learning-induced metal–insulator transition. The central difficulty is that the universal finite-size contribution is subleading, while disorder correlations, finite-size corrections, trajectory dependence, and anisotropy can generate precise-looking but nonuniversal fits."
+        },
+        {
+          "kind": "card",
+          "title": "Significance",
+          "blocks": [
+            {
+              "kind": "text",
+              "text": "Effective central charge provides a common quantitative diagnostic across otherwise different critical models. Establishing a hierarchy of known benchmarks before addressing the open transition separates failures of numerical methodology from genuinely new physics. Explicit uncertainty propagation and publication gates also prevent an inconclusive exploratory result from being overstated."
+            }
+          ]
+        },
+        {
+          "kind": "kv",
+          "pairs": [
+            [
+              "Paper",
+              "Effective Central Charges across Clean, Disordered, and Monitored Criticality"
+            ],
+            [
+              "Track",
+              "QMC — Challenge #122, Criticality in open quantum matter"
+            ],
+            [
+              "Target figures",
+              "Four integrated model-result figures"
+            ],
+            [
+              "System sizes",
+              "Clean $L=4$–$20$; Nishimori $L=4$–$14$; weak self-dual $L=6$–$32$; learning-induced MIT $L=8$–$32$"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Approach",
+      "note": "Rust performs all stochastic simulation; Python analyzes only frozen outputs.",
+      "blocks": [
+        {
+          "kind": "badge",
+          "style": "warn",
+          "text": "APPROXIMATE / NUMERICAL"
+        },
+        {
+          "kind": "kv",
+          "pairs": [
+            [
+              "Method",
+              "Finite-size free-energy, Lyapunov, and entanglement scaling with bootstrap uncertainty"
+            ],
+            [
+              "Simulation",
+              "Rust implementations using Xoshiro256++ random streams"
+            ],
+            [
+              "Analysis",
+              "Python applied only to frozen data for fitting, resampling, diagnostics, and plotting"
+            ],
+            [
+              "Validation strategy",
+              "Predeclared fit windows, independent replicas or streams, correction terms, residual tests, and explicit claim gates"
+            ]
+          ]
+        },
+        {
+          "kind": "text",
+          "text": "The calculation follows a validation ladder. The clean Ising model first checks normalization, thermodynamic integration, finite-size fitting, and uncertainty propagation against $c=1/2$. Quenched disorder is then introduced through the Nishimori random-bond Ising model, where disorder realizations must be resampled at their true independence level. The weak self-dual monitored model tests state-conditioned Born sampling, Gaussian-state invariants, and self-duality. Only after these benchmarks does the workflow analyze the learning-induced transition using independent Casimir and entanglement estimators."
+        },
+        {
+          "kind": "text",
+          "text": "The universal coefficient is extracted from subleading finite-size terms rather than from the much larger bulk contribution. Correction terms and multiple size windows are therefore retained to expose finite-size drift. Bootstrap resampling propagates correlations through the complete nonlinear fit. A result is publishable only when phase location, numerical invariants, fit stability, anisotropy calibration, and independent-estimator agreement all pass."
+        },
+        {
+          "kind": "table",
+          "columns": [
+            "Model",
+            "Runtime",
+            "Sizes",
+            "Main sampling configuration"
+          ],
+          "rows": [
+            [
+              "Clean Ising",
+              "514.3 s",
+              "$L=4$–$20$",
+              "4 replicas; 12,800 measurement sweeps per coupling point"
+            ],
+            [
+              "Nishimori RBIM",
+              "466.6 s",
+              "$L=4$–$14$",
+              "8 disorder replicas"
+            ],
+            [
+              "Weak self-dual",
+              "330.3 s",
+              "$L=6$–$32$",
+              "Born-correlated Gaussian Majorana trajectories"
+            ],
+            [
+              "Learning-induced MIT",
+              "4583.7 s",
+              "$L=8$–$32$",
+              "XY validation, DIII locator, and DIII refinement stages"
+            ]
+          ],
+          "numeric": [
+            false,
+            true,
+            false,
+            false
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Results 1 — Clean Ising calibration",
+      "note": "The exact Ising value tests the full normalization and finite-size pipeline before disorder is introduced.",
+      "blocks": [
+        {
+          "kind": "figures",
+          "items": [
+            {
+              "src": "figures/clean-ising.png",
+              "caption": "Independent transfer-matrix and Wolff Monte Carlo estimates compared with the exact Ising value $c=0.5$."
+            }
+          ]
+        },
+        {
+          "kind": "verdict",
+          "status": "good",
+          "label": "PASS",
+          "why": "Both independent routes recover $c=1/2$ within the declared accuracy criteria. This validates free-energy normalization, thermodynamic integration, the $L^{-2}$ Casimir coefficient, finite-size fitting, and Monte Carlo uncertainty propagation."
+        },
+        {
+          "kind": "table",
+          "columns": [
+            "Quantity",
+            "Result"
+          ],
+          "rows": [
+            [
+              "Exact transfer-matrix $c$",
+              "0.499424"
+            ],
+            [
+              "Wolff Monte Carlo $c$",
+              "0.498739"
+            ],
+            [
+              "Monte Carlo 95% interval",
+              "[0.488719, 0.509064]"
+            ],
+            [
+              "Reference value",
+              "0.500000"
+            ],
+            [
+              "Width range",
+              "$L=4$–$20$"
+            ]
+          ],
+          "numeric": [
+            false,
+            true
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Results 2 — Nishimori random-bond Ising benchmark",
+      "note": "The ordinary quenched free energy is compared with the established Nishimori benchmark.",
+      "blocks": [
+        {
+          "kind": "figures",
+          "items": [
+            {
+              "src": "figures/nishimori.png",
+              "caption": "Bootstrap distribution of the ordinary quenched effective central charge, with reference $c_{\\mathrm{eff}}=0.464$."
+            }
+          ]
+        },
+        {
+          "kind": "verdict",
+          "status": "good",
+          "label": "PASS",
+          "why": "The estimate is about 0.92 standard errors below 0.464, and the reference lies inside the 95% bootstrap interval. Resampling independent disorder replicas preserves correlations among widths from the same realization."
+        },
+        {
+          "kind": "table",
+          "columns": [
+            "Quantity",
+            "Result"
+          ],
+          "rows": [
+            [
+              "$c_{\\mathrm{eff}}$",
+              "0.456469"
+            ],
+            [
+              "Standard error",
+              "0.008181"
+            ],
+            [
+              "95% interval",
+              "[0.440064, 0.472304]"
+            ],
+            [
+              "Reference value",
+              "0.464000"
+            ],
+            [
+              "Disorder replicas",
+              "8"
+            ],
+            [
+              "Width range",
+              "$L=4$–$14$"
+            ]
+          ],
+          "numeric": [
+            false,
+            true
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Results 3 — Weak self-dual monitored benchmark",
+      "note": "Born-correlated Gaussian trajectories test the monitored-state implementation and uncertainty model.",
+      "blocks": [
+        {
+          "kind": "figures",
+          "items": [
+            {
+              "src": "figures/weak-self-dual.png",
+              "caption": "Finite-size scaling of Born-correlated Gaussian Majorana trajectories compared with the weak self-dual benchmark $c_{\\mathrm{eff}}=0.447$."
+            }
+          ]
+        },
+        {
+          "kind": "verdict",
+          "status": "good",
+          "label": "PASS",
+          "why": "The estimate differs from the benchmark by about 0.68 standard errors, and the reference lies inside the 95% bootstrap interval. Gaussian covariance invariants, sampling diagnostics, fit-window stability, and self-duality provide independent audits."
+        },
+        {
+          "kind": "table",
+          "columns": [
+            "Quantity",
+            "Result"
+          ],
+          "rows": [
+            [
+              "$c_{\\mathrm{eff}}$",
+              "0.444107"
+            ],
+            [
+              "Standard error",
+              "0.004240"
+            ],
+            [
+              "95% interval",
+              "[0.435749, 0.452494]"
+            ],
+            [
+              "Reference value",
+              "0.447000"
+            ],
+            [
+              "Width range",
+              "$L=6$–$32$"
+            ]
+          ],
+          "numeric": [
+            false,
+            true
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Results 4 — Learning-induced metal–insulator transition",
+      "note": "Independent entanglement and Casimir routes are retained even though the universal claim gates fail.",
+      "blocks": [
+        {
+          "kind": "figures",
+          "items": [
+            {
+              "src": "figures/learning-mit.png",
+              "caption": "Comparison of entanglement and anisotropy-corrected Casimir effective-central-charge estimates."
+            }
+          ]
+        },
+        {
+          "kind": "verdict",
+          "status": "warn",
+          "label": "INCONCLUSIVE",
+          "why": "The known XY transition is reproduced, but the generic-DIII transition is not bracketed, spatial–temporal anisotropy is unstable across fitting windows, and the two effective-central-charge estimators disagree far beyond their bootstrap uncertainties. No standalone universal $c_{\\mathrm{eff}}$ is published."
+        },
+        {
+          "kind": "table",
+          "columns": [
+            "Quantity",
+            "Result"
+          ],
+          "rows": [
+            [
+              "XY transition bracket $\\phi/\\pi$",
+              "[0.24, 0.25]"
+            ],
+            [
+              "Exploratory DIII point $\\phi/\\pi$",
+              "0.30"
+            ],
+            [
+              "Entanglement $c_{\\mathrm{eff}}$",
+              "3.06074 ± 0.75975"
+            ],
+            [
+              "Entanglement 95% interval",
+              "[1.57163, 4.54985]"
+            ],
+            [
+              "Casimir $c_{\\mathrm{eff}}$",
+              "12.57993 ± 0.98981"
+            ],
+            [
+              "Casimir 95% interval",
+              "[10.72780, 14.61034]"
+            ],
+            [
+              "Anisotropy factor $\\alpha$",
+              "0.027675, unstable"
+            ],
+            [
+              "Publication status",
+              "Withheld"
+            ]
+          ],
+          "numeric": [
+            false,
+            true
+          ]
+        },
+        {
+          "kind": "list",
+          "title": "Failed claim gates",
+          "items": [
+            "diii_transition_not_bracketed",
+            "anisotropy_unstable",
+            "estimator_disagreement"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Highlight",
+      "note": "What the four-model comparison contributes.",
+      "blocks": [
+        {
+          "kind": "card",
+          "title": "Innovation",
+          "blocks": [
+            {
+              "kind": "text",
+              "text": "A single validation hierarchy connects exact transfer matrices, cluster Monte Carlo, quenched random-transfer products, and Born-correlated Gaussian trajectories. Every stochastic simulation uses reproducible Xoshiro256++ streams, while Python is restricted to frozen-data fitting, bootstrap analysis, and visualization."
+            }
+          ]
+        },
+        {
+          "kind": "card",
+          "title": "Significant output",
+          "blocks": [
+            {
+              "kind": "text",
+              "text": "Three progressively harder benchmarks reproduce their reference central charges: clean Ising $c=0.498739$, Nishimori RBIM $c_{\\mathrm{eff}}=0.456469$, and weak self-dual $c_{\\mathrm{eff}}=0.444107$. The learning-induced transition does not pass the same validation standard. Its failed phase-bracketing, anisotropy, and estimator-consistency gates identify what must improve before claiming a universal coefficient."
+            }
+          ]
+        },
+        {
+          "kind": "card",
+          "title": "Broader impact",
+          "blocks": [
+            {
+              "kind": "text",
+              "text": "The workflow provides a reusable template for numerical studies of disordered and monitored criticality: validate on known universality classes, resample at the true independence level, expose finite-size and fitting-window dependence, cross-check universal quantities with distinct observables, and define claim gates before interpreting results. This structure is applicable to localization transitions, monitored circuits, random tensor networks, and other finite-size scaling problems."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

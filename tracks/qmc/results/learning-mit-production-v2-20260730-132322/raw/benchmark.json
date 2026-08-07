@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "width": 16,
+  "streams": 2,
+  "elapsed_seconds": 0.104962458,
+  "benchmark_gate_updates": 3072,
+  "configured_gate_updates": 21304320,
+  "forecast_seconds": 727.91464623
+}

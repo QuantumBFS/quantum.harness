@@ -1,0 +1,14 @@
+widths = [4, 6, 8, 10, 12, 14]
+antiferromagnetic_probability = 0.1092212
+nishimori_k = 1.04936047630256835
+base_seed = 122464
+production_gates = false
+refinement_level = 0
+
+[disorder]
+replicas = 8
+burn_in_rows = 32
+measurement_rows = 64
+block_rows = 16
+identity_delta_k = 0.0001
+identity_rows = 128

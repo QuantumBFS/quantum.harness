@@ -1,0 +1,14 @@
+widths = [6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32]
+theta = 0.7853981633974483
+beta = 0.881373587019543
+base_seed = 122447
+production_gates = true
+refinement_level = 1
+
+[sampling]
+streams_per_width = 16
+burn_in_layers_per_width = 20
+measurement_layers_per_width = 200
+block_layers_per_width = 5
+stabilize_every_layers = 4
+invariant_tolerance = 1.0e-9

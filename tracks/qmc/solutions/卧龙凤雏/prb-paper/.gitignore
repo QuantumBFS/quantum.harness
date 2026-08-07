@@ -1,0 +1,16 @@
+.venv
+__pycache__/
+.pytest_cache/
+generated/*
+!generated/.gitkeep
+tmp/pdfs/*
+!tmp/pdfs/.gitkeep
+paper.aux
+paper.bbl
+paper.blg
+paper.fdb_latexmk
+paper.fls
+paper.log
+paper.out
+paper.pdf
+paperNotes.bib
