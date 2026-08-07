@@ -1,0 +1,33 @@
+{
+  "figures": [
+    {
+      "id": "Eq. (4) oracle",
+      "results": {}
+    },
+    {
+      "id": "Eq. (10) Hubbard realization",
+      "results": {}
+    }
+  ],
+  "method": {
+    "settings": {
+      "configuration_count": 256,
+      "fock_cross_checks": "configuration indices 0, 1, and 4",
+      "group_tolerance": 1e-10,
+      "lie_tolerance": 1e-12,
+      "random_seed": 121,
+      "trace_determinant_tolerance": 1e-10,
+      "weight_tolerance": 1e-10
+    }
+  },
+  "model": {
+    "couplings": {
+      "$U$": 4.0,
+      "$\\Gamma$": 2.0,
+      "$\\beta$": 2.0,
+      "$\\mu$": 0.0,
+      "$t_\\downarrow$": 0.5,
+      "$t_\\uparrow$": 1.0
+    }
+  }
+}

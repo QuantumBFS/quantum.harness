@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Issue #121: polyhedral sign-free generator supports</title><style>
+:root{
+  --bg:#fbfaf6; --panel:#fff; --ink:#1a1a1a; --muted:#5b5b5b; --line:#e6e3da;
+  --accent:#1f5cd6; --accent-soft:#e6efff; --warm:#b8651e; --warm-soft:#fcefdc;
+  --good:#1e7d3c; --good-soft:#e1f3e6; --bad:#b3261e; --bad-soft:#fbe4e2;
+  --olive:#7c6f1d; --olive-soft:#f5f1d8; --code-bg:#f2f1eb;
+  --serif:"Iowan Old Style","Source Serif 4","Charter",Cambria,Georgia,serif;
+  --sans:-apple-system,"Inter","Segoe UI",system-ui,sans-serif;
+  --mono:"JetBrains Mono","SF Mono",Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html,body{background:var(--bg);color:var(--ink);margin:0;font-family:var(--sans);-webkit-font-smoothing:antialiased}
+body{line-height:1.55}
+a{color:var(--accent);text-decoration:none;border-bottom:1px solid transparent}
+a:hover{border-bottom-color:var(--accent)}
+code{font-family:var(--mono);font-size:.9em;background:var(--code-bg);padding:1px 5px;border-radius:3px}
+mark{background:#fde68a;color:var(--ink);padding:1px 5px;border-radius:3px;font-weight:600;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+math{font-family:var(--serif);font-size:1.04em}
+math[display="block"]{font-size:1.2em;margin:2px 0}
+.wrap{max-width:880px;margin:0 auto;padding:46px 40px 100px}
+@media(max-width:720px){.wrap{padding:26px 18px 70px}}
+.eyebrow{font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);font-weight:600}
+h1{font-family:var(--serif);font-size:30px;line-height:1.15;margin:8px 0 12px;max-width:32ch}
+.sub{font-size:13px;color:var(--muted);margin:0}
+.lede{font-size:15px;color:#2a2a2a;margin:14px 0 0;max-width:72ch}
+.expected{margin:18px 0 0;padding:12px 15px;background:var(--accent-soft);border:1px solid #c4d9f7;border-radius:6px;font-size:14px}
+.expected b{color:#143b87}
+.hero{padding-bottom:24px;margin-bottom:8px;border-bottom:1px solid var(--line)}
+section{margin:38px 0 0}
+section>h2{font-family:var(--serif);font-size:22px;margin:0 0 4px}
+section>.note{color:var(--muted);font-size:13px;margin:0 0 16px;max-width:72ch}
+section h3{font-family:var(--serif);font-size:18px;margin:22px 0 6px;border-top:1px solid var(--line);padding-top:14px}
+.para{font-size:14px;margin:10px 0;max-width:72ch}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:13px 16px;margin:10px 0}
+.card .title{font-family:var(--serif);font-size:15px;font-weight:600;margin-bottom:2px}
+.eq{text-align:center;margin:6px 0 12px;padding:6px 0;overflow-x:auto}
+.kv{display:grid;grid-template-columns:150px minmax(0,1fr);gap:4px 14px;font-size:13.5px;margin-top:6px}
+.kv .k{color:var(--muted)} .kv .v{color:#1a1a1a}
+table{width:100%;border-collapse:collapse;font-size:13.5px;background:var(--panel);border:1px solid var(--line);border-radius:6px;overflow:hidden;margin:8px 0}
+thead th{background:#f7f5ed;text-align:left;padding:9px 11px;font-weight:600;border-bottom:1px solid var(--line)}
+tbody td{padding:9px 11px;border-top:1px solid var(--line);vertical-align:top}
+tbody tr:hover{background:#faf9f4}
+td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+td.muted{color:var(--muted);font-size:.92em}
+.pill{display:inline-block;font-size:11px;padding:2px 8px;border-radius:999px;border:1px solid var(--line);background:#fafafa;color:#444;white-space:nowrap}
+.pill.exact{background:var(--good-soft);border-color:#b4d9bd;color:var(--good)}
+.pill.approx{background:var(--warm-soft);border-color:#e7c79b;color:var(--warm)}
+ul.flat{padding-left:20px;margin:6px 0} ul.flat li{margin:3px 0;font-size:13.5px}
+.verdict{display:flex;gap:12px;align-items:baseline;padding:13px 16px;border-radius:6px;border:1px solid var(--line);margin:6px 0 14px}
+.verdict .label{font-family:var(--serif);font-size:17px;font-weight:600;white-space:nowrap}
+.verdict .why{font-size:13.5px;color:#222}
+.verdict.good{background:var(--good-soft);border-color:#b4d9bd} .verdict.good .label{color:var(--good)}
+.verdict.warn{background:var(--olive-soft);border-color:#d9d09b} .verdict.warn .label{color:var(--olive)}
+.verdict.bad{background:var(--bad-soft);border-color:#f1bdc1} .verdict.bad .label{color:var(--bad)}
+.figs{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;margin:14px 0;width:min(1180px,94vw);position:relative;left:50%;transform:translateX(-50%)}
+.figbox{border:1px solid var(--line);border-radius:6px;background:var(--panel);padding:10px;text-align:center}
+.figbox img{max-width:100%;height:auto;display:block;margin:0 auto;border-radius:3px}
+.figbox .cap{font-size:12px;color:var(--muted);margin-top:7px}
+.pending{padding:14px 16px;border:1px dashed var(--line);border-radius:6px;color:var(--muted);font-size:14px;background:#faf8f2}
+.toc{position:fixed;top:118px;left:calc(50% - 608px);width:152px;max-height:72vh;overflow:auto;font-size:12.5px;line-height:1.4}
+.toc .lbl{text-transform:uppercase;letter-spacing:.07em;font-size:10px;color:var(--muted);font-weight:700;margin-bottom:9px}
+.toc a{display:block;color:var(--muted);padding:4px 0 4px 12px;border-left:2px solid var(--line);border-bottom:none}
+.toc a:hover{color:var(--ink)}
+.toc a.on{color:var(--accent);border-left-color:var(--accent);font-weight:600}
+.toc-bar{display:none}
+@media(max-width:1299px){
+  .toc{display:none}
+  .toc-bar{display:flex;gap:7px;overflow-x:auto;margin:20px 0 0;padding-bottom:2px}
+  .toc-bar a{white-space:nowrap;font-size:12px;padding:5px 12px;border:1px solid var(--line);border-radius:999px;color:var(--muted);background:var(--panel)}
+  .toc-bar a:hover{color:var(--ink)}
+  .toc-bar a.on{color:var(--accent);border-color:#bcd2f5;background:var(--accent-soft);font-weight:600}
+}
+.footer{margin-top:56px;padding-top:18px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
+.print-btn{position:fixed;top:16px;right:18px;font-family:var(--sans);font-size:12.5px;padding:7px 12px;border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:5px;cursor:pointer}
+.print-btn:hover{border-color:var(--accent);color:var(--accent)}
+@media print{.print-btn,.toc,.toc-bar{display:none}.wrap{max-width:100%;padding:0}.figs{position:static;left:auto;transform:none;width:auto}.card,table,.verdict,.figbox{break-inside:avoid}}
+.lattix{position:relative;width:100%;margin:6px 0}
+.lattix-poster{display:block;width:100%}
+@media print{.lattix-poster{display:block}}
+</style></head><body><button class="print-btn" onclick="window.print()">Save as PDF</button><main class="wrap"><nav class="toc"><div class="lbl">Contents</div><a href="#1-mathematical-result">1. Mathematical result</a><a href="#2-preregistered-evidence">2. Preregistered evidence</a><a href="#3-interacting-physical-benchmark">3. Interacting physical benchmark</a><a href="#4-reproduction-and-claim-boundary">4. Reproduction and claim boundary</a></nav><header class="hero"><div class="eyebrow">Genshin_Impact formal verification</div><h1>Issue #121: polyhedral sign-free generator supports</h1><p class="sub"><a href="https://github.com/QuantumBFS/quantum.harness/pull/261">https://github.com/QuantumBFS/quantum.harness/pull/261</a></p><p class="lede">An open real generator family has an arbitrary-depth determinant-positivity proof, exact separation certificates, and a completed interacting four-site verification.</p></header><nav class="toc-bar"><a href="#1-mathematical-result">1. Mathematical result</a><a href="#2-preregistered-evidence">2. Preregistered evidence</a><a href="#3-interacting-physical-benchmark">3. Interacting physical benchmark</a><a href="#4-reproduction-and-claim-boundary">4. Reproduction and claim boundary</a></nav><section id="1-mathematical-result"><h2>1. Mathematical result</h2><p class="note">The theorem is analytic; sampling is an implementation audit.</p><div class="verdict good"><span class="label">Formal protocol passed</span><span class="why">224/224 cells and every exact, twirl, Fock, and physical stage passed.</span></div><p class="para">For epsilon&gt;0, kappa&gt;0, and 40 epsilon+59 kappa&lt;2, the two S3 orbits of A and B=SAS share a strict infinity-norm contraction rate -kappa. Therefore every finite positive-time word has det(I+T)&gt;=0, including locally embedded arbitrary-depth words.</p><div class="kv"><div class="k">Executable commit</div><div class="v">9fe85a6317132983b48c12cbe3628b2da2945a19</div><div class="k">Protocol</div><div class="v">ae54430bfb17790c197fabed523138ed6ba3a632881978b5665367e1517a2e20</div><div class="k">Structural certificates</div><div class="v">no common H&gt;0; span M_3(R); fixed same-dimensional CAR/Wei obstruction</div><div class="k">Design scope</div><div class="v">open two-orbit family and wider seven-parameter cone</div></div><div class="expected"><b>Proof boundary</b> The fixed-CAR result does not exclude ancillas, configuration-dependent bases, or a different many-body decomposition.</div></section><section id="2-preregistered-evidence"><h2>2. Preregistered evidence</h2><p class="note">Seed 1212026; Python 3.13.9, NumPy 2.5.1, SciPy 1.18.0, mpmath 1.4.1.</p><table><thead><tr><th>Stage</th><th>Cells</th><th>Words / checks</th><th>Outcome</th></tr></thead><tbody><tr><td>A/B candidates</td><td class="num">140</td><td class="num">35,840</td><td>all positive</td></tr><tr><td>Split O(n,n) controls</td><td class="num">28</td><td class="num">1,792</td><td>pass</td></tr><tr><td>Wei semigroup controls</td><td class="num">28</td><td class="num">1,792</td><td>pass</td></tr><tr><td>Four O(1,1) components</td><td class="num">28</td><td class="num">896</td><td>pass; 448 expected zeros</td></tr><tr><td>Direct Fock oracle</td><td class="num">-</td><td class="num">336</td><td>max abs error 5.400124791776761e-13</td></tr><tr><td>Physical Poisson strings</td><td class="num">-</td><td class="num">16,384</td><td>all nonnegative</td></tr></tbody></table><div class="kv"><div class="k">Core random words</div><div class="v">40,320</div><div class="k">Total including physical</div><div class="v">56,704</div><div class="k">High-precision rebuilds</div><div class="v">672</div><div class="k">Unexpected inconclusive cases</div><div class="v">0</div><div class="k">Regression tests</div><div class="v">39 pass</div></div><p class="para">The compact tracked record lists SHA256 values for the manifest, verifier, independent support oracle, exact/twirl/physical artifacts, reports, samples table, and COMPLETE sentinel. Row-level samples remain in this durable run directory.</p></section><section id="3-interacting-physical-benchmark"><h2>3. Interacting physical benchmark</h2><p class="note">Four open sites, overlapping triples (1,2,3) and (2,3,4), s=1/10, g_A=g_B=1/4, mu=0.</p><p class="para">The complete S3 twirl is Hermitian and non-Gaussian, while every resolved continuous-time configuration has a nonnegative determinant activity. Exact 16-dimensional diagonalization was compared with the normalized positive Poisson estimator.</p><table><thead><tr><th>beta</th><th>Exact ED Z_bar</th><th>Poisson abs error</th><th>Allowance</th></tr></thead><tbody><tr><td class="num">1/4</td><td class="num">15.316353408389649</td><td class="num">0.02808869231030009</td><td class="num">0.1727116598757571</td></tr><tr><td class="num">1/2</td><td class="num">14.669103080374773</td><td class="num">0.03512955219626335</td><td class="num">0.2233055507021328</td></tr><tr><td class="num">1</td><td class="num">13.475392271305402</td><td class="num">0.02453568366674652</td><td class="num">0.2857508015621753</td></tr><tr><td class="num">2</td><td class="num">11.439331388535233</td><td class="num">0.0461209100548885</td><td class="num">0.33059523654337436</td></tr></tbody></table><div class="kv"><div class="k">Minimum sampled determinant</div><div class="v">4.330910819303328</div><div class="k">Minimum H_bar eigenvalue</div><div class="v">4.440892098500626e-16</div><div class="k">Hermiticity residual</div><div class="v">1.7216638914240724e-17</div></div><div class="expected"><b>Physical boundary</b> This is an engineered local interacting CT Gaussian-vertex model, not a standard Hubbard AFQMC decomposition. Its mu=0 ground state is the vacuum; finite-density positivity remains open.</div></section><section id="4-reproduction-and-claim-boundary"><h2>4. Reproduction and claim boundary</h2><p class="note">Slurm jobs 42169, 42171, and 42173 completed the pilot, full run, and afterok audit.</p><div class="card"><div class="title">Reproduce from the repository root</div><pre style="margin:6px 0 0;font-size:12.5px;overflow-x:auto"><code>output=tracks/qmc/results/Genshin_Impact-121/REPRODUCE-$(date -u +%Y%m%d-%H%M%S)
+python tracks/qmc/solutions/Genshin_Impact-121/issue121_verification.py \
+  --manifest tracks/qmc/solutions/Genshin_Impact-121/issue121_full_run.json \
+  --output &quot;$output&quot;</code></pre></div><div class="card"><div class="title">What this result does not establish</div><ul class="flat"><li>It does not prove literature priority or maintainer acceptance.</li><li>It does not exclude every ancilla, Hubbard-Stratonovich, fermion-bag, Jordan-Wigner, or stoquastic reformulation.</li><li>It does not establish a finite-density sign-free phase or efficient autocorrelation time.</li><li>It is ready for independent expert review, but is not yet publication-ready.</li></ul></div><div class="verdict warn"><span class="label">Issue standard versus scientific acceptance</span><span class="why">The six explicit issue #121 submission gates are supplied; external proof review and priority assessment remain open.</span></div></section><div class="footer">Generated 2026-07-30. Single file, no external assets, opens offline.</div></main><script>(function(){var L=[].slice.call(document.querySelectorAll('.toc a,.toc-bar a'));if(!L.length)return;var m={};L.forEach(function(a){var i=a.getAttribute('href').slice(1);(m[i]=m[i]||[]).push(a)});var o=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){L.forEach(function(a){a.classList.remove('on')});(m[e.target.id]||[]).forEach(function(a){a.classList.add('on')})}})},{rootMargin:'-12% 0px -78% 0px'});document.querySelectorAll('section[id]').forEach(function(s){o.observe(s)});})();</script></body></html>

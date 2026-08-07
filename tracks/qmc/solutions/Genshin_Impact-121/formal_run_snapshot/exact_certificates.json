@@ -1,0 +1,55 @@
+{
+  "certificates": {
+    "mu_infinity": "-1/1000",
+    "no_common_H_lower_bound": "1541/42609",
+    "no_common_H_upper_bound": "-1541/24791",
+    "o11_component_det_I_plus": {
+      "++": "16/3",
+      "+-": "0",
+      "-+": "0",
+      "--": "-4/3"
+    },
+    "opposite_edge_product_A13_A31": "-1/50",
+    "seven_parameter_at_t_3_4": {
+      "G": "1679/16000",
+      "p": "10109/16000",
+      "q": "123/128"
+    },
+    "standard_polynomial": "2 epsilon^3 + epsilon^2 - 4 epsilon + 3",
+    "standard_polynomial_minimizer_nonnegative_axis": "2/3",
+    "standard_polynomial_minimum": "37/27",
+    "support_span_rank": 9,
+    "twirl_tau2": {
+      "A": {
+        "interaction": "5020671/1000000",
+        "non_gaussian": "363599/360000"
+      },
+      "B": {
+        "interaction": "3056033/3000000",
+        "non_gaussian": "797/120000"
+      }
+    }
+  },
+  "checks": {
+    "all_exact_row_rates_minus_kappa": true,
+    "component_weights": true,
+    "full_support_fraction_rank_9": true,
+    "no_common_quadratic_bounds_disjoint": true,
+    "open_region": true,
+    "opposite_edge_product": true,
+    "seven_parameter_t_3_4": true,
+    "split_boost_identity": true,
+    "standard_polynomial_minimum_positive": true,
+    "twirl_tau2_coefficients": true
+  },
+  "completed_at": "2026-07-29T18:20:29.546541+00:00",
+  "elapsed_seconds": 0.0044496890041045845,
+  "interpretation": "Exact Fraction arithmetic; these certify formulas, not literature priority.",
+  "parameters": {
+    "epsilon": "1/100",
+    "kappa": "1/1000"
+  },
+  "protocol_id": "ae54430bfb17790c197fabed523138ed6ba3a632881978b5665367e1517a2e20",
+  "schema_version": 1,
+  "status": "pass"
+}

@@ -1,0 +1,30 @@
+{
+  "base_seed": 1212026,
+  "completed_cells": 224,
+  "environment": {
+    "mpmath": "1.4.1",
+    "numpy": "2.5.1",
+    "python_full": "3.13.9 | packaged by Anaconda, Inc. | (main, Oct 21 2025, 19:16:10) [GCC 11.2.0]",
+    "python_major": 3,
+    "scipy": "1.18.0"
+  },
+  "environment_signature": {
+    "mpmath": "1.4.1",
+    "numpy": "2.5.1",
+    "python_full": "3.13.9 | packaged by Anaconda, Inc. | (main, Oct 21 2025, 19:16:10) [GCC 11.2.0]",
+    "python_major": 3,
+    "scipy": "1.18.0"
+  },
+  "git_revision": "9fe85a6317132983b48c12cbe3628b2da2945a19",
+  "manifest_sha256": "7a04a1e9a4293e85f47ddf4901ae8b20e7b034d7ee50b9d3e8317f805b2f4b12",
+  "protocol_id": "ae54430bfb17790c197fabed523138ed6ba3a632881978b5665367e1517a2e20",
+  "report_json_sha256": "52c8fb5419d2fdf463b4a56643f63de216aa45ac73b9fe46d149da9eb27390be",
+  "report_markdown_sha256": "727f5f0c54cc4b277a19503f5c2f865249c09f317c5251dc8c2b8f579c4fb8a9",
+  "schema_version": 1,
+  "sign_problem_hunter_sha256": "fea156818fafdfc9635fb9e7c797470aa34758d82a24e69b6dd3b62d2e04f780",
+  "started_at": "2026-07-29T18:20:29.516488+00:00",
+  "status": "pass",
+  "total_cells": 224,
+  "updated_at": "2026-07-29T18:25:23.972206+00:00",
+  "verifier_sha256": "e566f1a0f300d5201a354cfcd3c45b022631ac3175d98af3fa3b898c954993c4"
+}

@@ -1,0 +1,1080 @@
+{
+  "algorithm_id": "local-three-site-s3-twirl-physics-v1",
+  "basis_convention": {
+    "fermion_sign": "annihilation at site i contributes (-1)^(occupied sites below i)",
+    "ket_label": "|n1 n2 n3> written without spaces",
+    "matrix_indices": "row=destination Fock state, column=source Fock state",
+    "ordering": "integer masks 0,...,7",
+    "site_bit_order": "site 1 is the least-significant mask bit"
+  },
+  "canonical_basis_definition": {
+    "K": "sum_{i!=j} c_i^dagger c_j",
+    "N": "sum_i n_i",
+    "Ps_dagger": "(c1^dagger c2^dagger-c1^dagger c3^dagger+c2^dagger c3^dagger)/sqrt(3)",
+    "Q2": "sum_{i<j} n_i n_j",
+    "three_body": "n1 n2 n3"
+  },
+  "fock_basis": [
+    {
+      "ket": "|000>",
+      "mask": 0,
+      "particle_number": 0
+    },
+    {
+      "ket": "|100>",
+      "mask": 1,
+      "particle_number": 1
+    },
+    {
+      "ket": "|010>",
+      "mask": 2,
+      "particle_number": 1
+    },
+    {
+      "ket": "|110>",
+      "mask": 3,
+      "particle_number": 2
+    },
+    {
+      "ket": "|001>",
+      "mask": 4,
+      "particle_number": 1
+    },
+    {
+      "ket": "|101>",
+      "mask": 5,
+      "particle_number": 2
+    },
+    {
+      "ket": "|011>",
+      "mask": 6,
+      "particle_number": 2
+    },
+    {
+      "ket": "|111>",
+      "mask": 7,
+      "particle_number": 3
+    }
+  ],
+  "frozen_parameters": {
+    "epsilon": 0.01,
+    "g_A": 0.25,
+    "g_B": 0.25,
+    "kappa": 0.02,
+    "s": 0.25
+  },
+  "generator_matrices": {
+    "A": [
+      [
+        -1.03,
+        1.0,
+        -0.01
+      ],
+      [
+        0.0,
+        -1.02,
+        1.0
+      ],
+      [
+        2.0,
+        0.0,
+        -2.02
+      ]
+    ],
+    "B": [
+      [
+        -1.03,
+        1.0,
+        0.01
+      ],
+      [
+        0.0,
+        -1.02,
+        -1.0
+      ],
+      [
+        -2.0,
+        0.0,
+        -2.02
+      ]
+    ]
+  },
+  "operators": {
+    "A": {
+      "canonical_decomposition": {
+        "basis_order": [
+          "identity",
+          "N",
+          "K",
+          "Q2",
+          "Ps_dagger_Ps",
+          "n1_n2_n3"
+        ],
+        "best_quadratic_relative_residual_inf": 0.020223288352321588,
+        "coefficients": {
+          "K": -0.03407846250442239,
+          "N": 0.06985839779916983,
+          "Ps_dagger_Ps": -0.04809738250726868,
+          "Q2": -0.000730849230504857,
+          "identity": 3.4053470543074115e-16,
+          "n1_n2_n3": 0.0003403479706896714
+        },
+        "quartic_interpretation": {
+          "J_projector_matrix_in_pair_basis": [
+            [
+              -0.016032460835756226,
+              0.016032460835756226,
+              -0.016032460835756226
+            ],
+            [
+              0.016032460835756226,
+              -0.016032460835756226,
+              0.016032460835756226
+            ],
+            [
+              -0.016032460835756226,
+              0.016032460835756226,
+              -0.016032460835756226
+            ]
+          ],
+          "correlated_pair_transition_prefactor": -0.016032460835756226,
+          "genuine_three_density_coefficient": 0.0003403479706896714,
+          "pair_basis": [
+            "|12>",
+            "|13>",
+            "|23>"
+          ],
+          "pair_density_coefficient_after_expanding_projector": -0.016763310066261083
+        },
+        "rank": 6,
+        "relative_reconstruction_residual_inf": 3.4053470543074115e-16,
+        "singular_values": [
+          6.430298168345929,
+          3.5124540075599207,
+          2.0766852177567654,
+          0.7835280296784438,
+          0.5458288635255479,
+          0.2991078329707575
+        ]
+      },
+      "construction": {
+        "max_exponential_vs_exterior_residual_inf": 2.3592239273284576e-16,
+        "resolved_orientation_count": 6
+      },
+      "diagnostics": {
+        "hermiticity_relative_inf": 6.938893903907228e-18,
+        "maximum_eigenvalue": 0.1596256111694161,
+        "minimum_eigenvalue": 0.0,
+        "number_commutator_relative_inf": 0.0,
+        "permutation_invariance_relative_inf": 5.551115123125783e-17
+      },
+      "hamiltonian_matrix_fock_basis": [
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.06985839779917014,
+          -0.03407846250442242,
+          0.0,
+          -0.034078462504422424,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          -0.03407846250442242,
+          0.06985839779917016,
+          0.0,
+          -0.03407846250442242,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.122953485532079,
+          0.0,
+          -0.01804600166866616,
+          0.01804600166866616,
+          0.0
+        ],
+        [
+          0.0,
+          -0.034078462504422424,
+          -0.034078462504422424,
+          0.0,
+          0.06985839779917016,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          -0.01804600166866616,
+          0.0,
+          0.12295348553207905,
+          -0.01804600166866616,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.01804600166866616,
+          0.0,
+          -0.01804600166866616,
+          0.12295348553207905,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.1596256111694161
+        ]
+      ],
+      "irrep_energies": {
+        "fully_occupied": {
+          "energy": 0.1596256111694162,
+          "multiplicity": 1
+        },
+        "one_particle_standard": {
+          "energy": 0.10393686030359256,
+          "multiplicity": 2
+        },
+        "one_particle_symmetric": {
+          "energy": 0.0017014727903253979,
+          "multiplicity": 1
+        },
+        "two_particle_sign": {
+          "energy": 0.15904548886941122,
+          "multiplicity": 1
+        },
+        "two_particle_standard": {
+          "energy": 0.10490748386341274,
+          "multiplicity": 2
+        },
+        "vacuum": {
+          "energy": 3.4053470543074115e-16,
+          "multiplicity": 1
+        }
+      },
+      "name": "g(I-M_A)",
+      "particle_number_sectors": {
+        "0": {
+          "dimension": 1,
+          "hamiltonian_energies": [
+            {
+              "multiplicity": 1,
+              "value": 0.0
+            }
+          ],
+          "label": "vacuum",
+          "twirl_eigenvalues": [
+            {
+              "multiplicity": 1,
+              "value": 1.0
+            }
+          ]
+        },
+        "1": {
+          "dimension": 3,
+          "hamiltonian_energies": [
+            {
+              "multiplicity": 1,
+              "value": 0.0017014727903253077
+            },
+            {
+              "multiplicity": 2,
+              "value": 0.10393686030359257
+            }
+          ],
+          "label": "one_particle",
+          "twirl_eigenvalues": [
+            {
+              "multiplicity": 2,
+              "value": 0.5842525587856295
+            },
+            {
+              "multiplicity": 1,
+              "value": 0.9931941088386984
+            }
+          ]
+        },
+        "2": {
+          "dimension": 3,
+          "hamiltonian_energies": [
+            {
+              "multiplicity": 2,
+              "value": 0.10490748386341286
+            },
+            {
+              "multiplicity": 1,
+              "value": 0.15904548886941136
+            }
+          ],
+          "label": "two_particle",
+          "twirl_eigenvalues": [
+            {
+              "multiplicity": 1,
+              "value": 0.3638180445223546
+            },
+            {
+              "multiplicity": 2,
+              "value": 0.5803700645463485
+            }
+          ]
+        },
+        "3": {
+          "dimension": 1,
+          "hamiltonian_energies": [
+            {
+              "multiplicity": 1,
+              "value": 0.1596256111694161
+            }
+          ],
+          "label": "fully_occupied",
+          "twirl_eigenvalues": [
+            {
+              "multiplicity": 1,
+              "value": 0.3614975553223356
+            }
+          ]
+        }
+      },
+      "twirl_matrix_fock_basis": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.7205664088033195,
+          0.13631385001768967,
+          0.0,
+          0.1363138500176897,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.13631385001768967,
+          0.7205664088033193,
+          0.0,
+          0.13631385001768967,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.508186057871684,
+          0.0,
+          0.07218400667466464,
+          -0.07218400667466464,
+          0.0
+        ],
+        [
+          0.0,
+          0.1363138500176897,
+          0.1363138500176897,
+          0.0,
+          0.7205664088033193,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.07218400667466464,
+          0.0,
+          0.5081860578716838,
+          0.07218400667466464,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          -0.07218400667466464,
+          0.0,
+          0.07218400667466464,
+          0.5081860578716838,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.3614975553223356
+        ]
+      ]
+    },
+    "A_plus_B": {
+      "canonical_decomposition": {
+        "basis_order": [
+          "identity",
+          "N",
+          "K",
+          "Q2",
+          "Ps_dagger_Ps",
+          "n1_n2_n3"
+        ],
+        "best_quadratic_relative_residual_inf": 0.02497479111404717,
+        "coefficients": {
+          "K": -0.01985885766309159,
+          "N": 0.13971679559834005,
+          "Ps_dagger_Ps": -0.038368292854847184,
+          "Q2": -0.020737189180906668,
+          "identity": 2.655016347426117e-16,
+          "n1_n2_n3": 0.0006806959413790479
+        },
+        "quartic_interpretation": {
+          "J_projector_matrix_in_pair_basis": [
+            [
+              -0.012789430951615728,
+              0.012789430951615728,
+              -0.012789430951615728
+            ],
+            [
+              0.012789430951615728,
+              -0.012789430951615728,
+              0.012789430951615728
+            ],
+            [
+              -0.012789430951615728,
+              0.012789430951615728,
+              -0.012789430951615728
+            ]
+          ],
+          "correlated_pair_transition_prefactor": -0.012789430951615728,
+          "genuine_three_density_coefficient": 0.0006806959413790479,
+          "pair_basis": [
+            "|12>",
+            "|13>",
+            "|23>"
+          ],
+          "pair_density_coefficient_after_expanding_projector": -0.033526620132522396
+        },
+        "rank": 6,
+        "relative_reconstruction_residual_inf": 2.655016347426117e-16,
+        "singular_values": [
+          6.430298168345929,
+          3.5124540075599207,
+          2.0766852177567654,
+          0.7835280296784438,
+          0.5458288635255479,
+          0.2991078329707575
+        ]
+      },
+      "construction": {
+        "resolved_orientation_count": 12
+      },
+      "diagnostics": {
+        "hermiticity_relative_inf": 6.938893903907228e-18,
+        "maximum_eigenvalue": 0.3192512223388322,
+        "minimum_eigenvalue": 0.0,
+        "number_commutator_relative_inf": 0.0,
+        "permutation_invariance_relative_inf": 1.1796119636642288e-16
+      },
+      "hamiltonian_matrix_fock_basis": [
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.13971679559834027,
+          -0.019858857663091603,
+          0.0,
+          -0.01985885766309161,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          -0.019858857663091603,
+          0.13971679559834033,
+          0.0,
+          -0.019858857663091603,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.245906971064158,
+          0.0,
+          -0.007069426711475863,
+          0.007069426711475859,
+          0.0
+        ],
+        [
+          0.0,
+          -0.01985885766309161,
+          -0.019858857663091603,
+          0.0,
+          0.13971679559834033,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          -0.007069426711475858,
+          0.0,
+          0.2459069710641581,
+          -0.007069426711475858,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.007069426711475858,
+          0.0,
+          -0.007069426711475858,
+          0.2459069710641581,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.3192512223388322
+        ]
+      ],
+      "irrep_energies": {
+        "fully_occupied": {
+          "energy": 0.3192512223388323,
+          "multiplicity": 1
+        },
+        "one_particle_standard": {
+          "energy": 0.15957565326143192,
+          "multiplicity": 2
+        },
+        "one_particle_symmetric": {
+          "energy": 0.09999908027215715,
+          "multiplicity": 1
+        },
+        "two_particle_sign": {
+          "energy": 0.2600458244871097,
+          "multiplicity": 1
+        },
+        "two_particle_standard": {
+          "energy": 0.23883754435268212,
+          "multiplicity": 2
+        },
+        "vacuum": {
+          "energy": 2.655016347426117e-16,
+          "multiplicity": 1
+        }
+      },
+      "name": "g(I-M_A)+g(I-M_B)",
+      "particle_number_sectors": {
+        "0": {
+          "dimension": 1,
+          "hamiltonian_energies": [
+            {
+              "multiplicity": 1,
+              "value": 0.0
+            }
+          ],
+          "label": "vacuum"
+        },
+        "1": {
+          "dimension": 3,
+          "hamiltonian_energies": [
+            {
+              "multiplicity": 1,
+              "value": 0.09999908027215709
+            },
+            {
+              "multiplicity": 2,
+              "value": 0.15957565326143192
+            }
+          ],
+          "label": "one_particle"
+        },
+        "2": {
+          "dimension": 3,
+          "hamiltonian_energies": [
+            {
+              "multiplicity": 2,
+              "value": 0.2388375443526822
+            },
+            {
+              "multiplicity": 1,
+              "value": 0.26004582448710983
+            }
+          ],
+          "label": "two_particle"
+        },
+        "3": {
+          "dimension": 1,
+          "hamiltonian_energies": [
+            {
+              "multiplicity": 1,
+              "value": 0.3192512223388322
+            }
+          ],
+          "label": "fully_occupied"
+        }
+      },
+      "twirl_matrix_fock_basis": null
+    },
+    "B": {
+      "canonical_decomposition": {
+        "basis_order": [
+          "identity",
+          "N",
+          "K",
+          "Q2",
+          "Ps_dagger_Ps",
+          "n1_n2_n3"
+        ],
+        "best_quadratic_relative_residual_inf": 0.012487395557023585,
+        "coefficients": {
+          "K": 0.014219604841330828,
+          "N": 0.06985839779917022,
+          "Ps_dagger_Ps": 0.00972908965242149,
+          "Q2": -0.020006339950401825,
+          "identity": -5.483185934901764e-17,
+          "n1_n2_n3": 0.0003403479706893739
+        },
+        "quartic_interpretation": {
+          "J_projector_matrix_in_pair_basis": [
+            [
+              0.0032430298841404966,
+              -0.0032430298841404966,
+              0.0032430298841404966
+            ],
+            [
+              -0.0032430298841404966,
+              0.0032430298841404966,
+              -0.0032430298841404966
+            ],
+            [
+              0.0032430298841404966,
+              -0.0032430298841404966,
+              0.0032430298841404966
+            ]
+          ],
+          "correlated_pair_transition_prefactor": 0.0032430298841404966,
+          "genuine_three_density_coefficient": 0.0003403479706893739,
+          "pair_basis": [
+            "|12>",
+            "|13>",
+            "|23>"
+          ],
+          "pair_density_coefficient_after_expanding_projector": -0.016763310066261326
+        },
+        "rank": 6,
+        "relative_reconstruction_residual_inf": 1.1796119636642288e-16,
+        "singular_values": [
+          6.430298168345929,
+          3.5124540075599207,
+          2.0766852177567654,
+          0.7835280296784438,
+          0.5458288635255479,
+          0.2991078329707575
+        ]
+      },
+      "construction": {
+        "max_exponential_vs_exterior_residual_inf": 2.3592239273284576e-16,
+        "resolved_orientation_count": 6
+      },
+      "diagnostics": {
+        "hermiticity_relative_inf": 8.673617379884035e-18,
+        "maximum_eigenvalue": 0.1596256111694161,
+        "minimum_eigenvalue": 0.0,
+        "number_commutator_relative_inf": 0.0,
+        "permutation_invariance_relative_inf": 6.245004513516506e-17
+      },
+      "hamiltonian_matrix_fock_basis": [
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.06985839779917014,
+          0.014219604841330814,
+          0.0,
+          0.014219604841330814,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.014219604841330813,
+          0.06985839779917016,
+          0.0,
+          0.014219604841330813,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.122953485532079,
+          0.0,
+          0.010976574957190297,
+          -0.0109765749571903,
+          0.0
+        ],
+        [
+          0.0,
+          0.014219604841330814,
+          0.01421960484133082,
+          0.0,
+          0.06985839779917016,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.010976574957190302,
+          0.0,
+          0.12295348553207905,
+          0.010976574957190302,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          -0.010976574957190302,
+          0.0,
+          0.010976574957190302,
+          0.12295348553207905,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.1596256111694161
+        ]
+      ],
+      "irrep_energies": {
+        "fully_occupied": {
+          "energy": 0.159625611169416,
+          "multiplicity": 1
+        },
+        "one_particle_standard": {
+          "energy": 0.055638792957839335,
+          "multiplicity": 2
+        },
+        "one_particle_symmetric": {
+          "energy": 0.09829760748183182,
+          "multiplicity": 1
+        },
+        "two_particle_sign": {
+          "energy": 0.10100033561769839,
+          "multiplicity": 1
+        },
+        "two_particle_standard": {
+          "energy": 0.1339300604892694,
+          "multiplicity": 2
+        },
+        "vacuum": {
+          "energy": -5.483185934901764e-17,
+          "multiplicity": 1
+        }
+      },
+      "name": "g(I-M_B)",
+      "particle_number_sectors": {
+        "0": {
+          "dimension": 1,
+          "hamiltonian_energies": [
+            {
+              "multiplicity": 1,
+              "value": 0.0
+            }
+          ],
+          "label": "vacuum",
+          "twirl_eigenvalues": [
+            {
+              "multiplicity": 1,
+              "value": 1.0
+            }
+          ]
+        },
+        "1": {
+          "dimension": 3,
+          "hamiltonian_energies": [
+            {
+              "multiplicity": 2,
+              "value": 0.055638792957839356
+            },
+            {
+              "multiplicity": 1,
+              "value": 0.09829760748183178
+            }
+          ],
+          "label": "one_particle",
+          "twirl_eigenvalues": [
+            {
+              "multiplicity": 1,
+              "value": 0.6068095700726726
+            },
+            {
+              "multiplicity": 2,
+              "value": 0.7774448281686426
+            }
+          ]
+        },
+        "2": {
+          "dimension": 3,
+          "hamiltonian_energies": [
+            {
+              "multiplicity": 1,
+              "value": 0.10100033561769844
+            },
+            {
+              "multiplicity": 2,
+              "value": 0.1339300604892693
+            }
+          ],
+          "label": "two_particle",
+          "twirl_eigenvalues": [
+            {
+              "multiplicity": 2,
+              "value": 0.4642797580429227
+            },
+            {
+              "multiplicity": 1,
+              "value": 0.5959986575292062
+            }
+          ]
+        },
+        "3": {
+          "dimension": 1,
+          "hamiltonian_energies": [
+            {
+              "multiplicity": 1,
+              "value": 0.1596256111694161
+            }
+          ],
+          "label": "fully_occupied",
+          "twirl_eigenvalues": [
+            {
+              "multiplicity": 1,
+              "value": 0.3614975553223356
+            }
+          ]
+        }
+      },
+      "twirl_matrix_fock_basis": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.7205664088033195,
+          -0.05687841936532326,
+          0.0,
+          -0.05687841936532326,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          -0.05687841936532325,
+          0.7205664088033193,
+          0.0,
+          -0.05687841936532325,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.508186057871684,
+          0.0,
+          -0.04390629982876119,
+          0.0439062998287612,
+          0.0
+        ],
+        [
+          0.0,
+          -0.05687841936532326,
+          -0.05687841936532328,
+          0.0,
+          0.7205664088033193,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          -0.04390629982876121,
+          0.0,
+          0.5081860578716838,
+          -0.04390629982876121,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.04390629982876121,
+          0.0,
+          -0.04390629982876121,
+          0.5081860578716838,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.3614975553223356
+        ]
+      ]
+    }
+  },
+  "physical_conclusion": {
+    "has_correlated_pair_hopping": true,
+    "has_density_density_interaction": true,
+    "has_genuine_three_density_term": true,
+    "interpretation": "The complete A+B twirl is an S3-symmetric, number-conserving, positive-semidefinite interacting cluster term. Its nonzero Ps_dagger_Ps coefficient is a quartic correlated transition between two-particle configurations, and its residual n1 n2 n3 coefficient is a genuine three-density interaction after all constant, quadratic, and two-body canonical pieces are removed. The vacuum is the local zero-energy state; this local spectrum alone does not identify a macroscopic finite-density phase.",
+    "is_exactly_quadratic": false,
+    "largest_interaction_coefficient_abs": 0.038368292854847184,
+    "three_density_determinant_certificate": {
+      "absolute_residual": 1.7889335846010823e-17,
+      "decomposed": 0.0006806959413790479,
+      "identity": "W=(g_A+g_B) det[I-exp(sA)]",
+      "predicted": 0.0006806959413790658
+    }
+  },
+  "provenance": {
+    "source_commit": "886a082963429f3f62deb9e6090352a58a05b89a",
+    "source_commit_role": "repository base commit; analysis files are uncommitted working-tree additions",
+    "source_file": "tracks/qmc/solutions/Genshin_Impact-121/local_vertex_physics.py",
+    "source_file_sha256": "2ff89915d8da50a1840b6262cf1d49ccaa13ff754f8fe9b49bcd710ad5a196e3"
+  },
+  "schema_version": 1,
+  "scope": "one isolated three-site vertex; no lattice phase claim",
+  "self_checks": {
+    "checks": {
+      "A_S3_invariance": 5.551115123125783e-17,
+      "A_basis_reconstruction": 3.4053470543074115e-16,
+      "A_fock_lift": 2.3592239273284576e-16,
+      "A_hermiticity": 6.938893903907228e-18,
+      "A_negative_eigenvalue_violation": 0.0,
+      "A_number_commutator": 0.0,
+      "A_plus_B_S3_invariance": 1.1796119636642288e-16,
+      "A_plus_B_basis_reconstruction": 2.655016347426117e-16,
+      "A_plus_B_hermiticity": 6.938893903907228e-18,
+      "A_plus_B_negative_eigenvalue_violation": 0.0,
+      "A_plus_B_number_commutator": 0.0,
+      "A_plus_B_sector_0_irrep_match": 2.655016347426117e-16,
+      "A_plus_B_sector_1_irrep_match": 5.551115123125783e-17,
+      "A_plus_B_sector_2_irrep_match": 1.1102230246251565e-16,
+      "A_plus_B_sector_3_irrep_match": 1.1102230246251565e-16,
+      "A_sector_0_irrep_match": 3.4053470543074115e-16,
+      "A_sector_1_irrep_match": 9.020562075079397e-17,
+      "A_sector_2_irrep_match": 1.3877787807814457e-16,
+      "A_sector_3_irrep_match": 1.1102230246251565e-16,
+      "A_vacuum_energy": 0.0,
+      "B_S3_invariance": 6.245004513516506e-17,
+      "B_basis_reconstruction": 1.1796119636642288e-16,
+      "B_fock_lift": 2.3592239273284576e-16,
+      "B_hermiticity": 8.673617379884035e-18,
+      "B_negative_eigenvalue_violation": 0.0,
+      "B_number_commutator": 0.0,
+      "B_sector_0_irrep_match": 5.483185934901764e-17,
+      "B_sector_1_irrep_match": 4.163336342344337e-17,
+      "B_sector_2_irrep_match": 8.326672684688674e-17,
+      "B_sector_3_irrep_match": 8.326672684688674e-17,
+      "B_vacuum_energy": 0.0,
+      "car_absolute_inf": 0.0,
+      "three_density_determinant_identity": 1.7889335846010823e-17,
+      "total_additivity_relative_inf": 0.0
+    },
+    "maximum_residual_or_violation": 3.4053470543074115e-16,
+    "status": "pass",
+    "tolerance": 2e-11
+  },
+  "status": "analytic_numeric_local_result"
+}

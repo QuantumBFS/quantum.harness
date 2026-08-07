@@ -1,0 +1,240 @@
+{
+  "schema_version": 1,
+  "protocol_name": "Genshin_Impact issue 121 full preregistered audit",
+  "seed": 1212026,
+  "candidate": {
+    "description": "Locally embedded three-mode A/B orbit words",
+    "dimensions": [
+      3,
+      4,
+      6,
+      8,
+      12
+    ],
+    "depths": [
+      1,
+      2,
+      4,
+      8,
+      16,
+      32,
+      64
+    ],
+    "samples_per_cell": 256,
+    "regimes": [
+      {
+        "id": "center",
+        "kind": "fixed",
+        "epsilon": "1/100",
+        "kappa": "1/1000"
+      },
+      {
+        "id": "near_boundary",
+        "kind": "fixed",
+        "epsilon": "1/100",
+        "kappa": "1599/59000",
+        "note": "40 epsilon + 59 kappa = 1999/1000"
+      },
+      {
+        "id": "kappa_to_zero",
+        "kind": "fixed",
+        "epsilon": "1/100",
+        "kappa": "1/1000000"
+      },
+      {
+        "id": "dirichlet_open_triangle",
+        "kind": "dirichlet_open_triangle",
+        "alpha": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "map": "epsilon=x/20, kappa=2y/59"
+      }
+    ],
+    "time_distribution": {
+      "kind": "log_uniform",
+      "minimum": "1e-3",
+      "maximum": "5"
+    }
+  },
+  "positive_anchors": {
+    "split_orthogonal": {
+      "description": "Identity component of O(n,n)",
+      "n_values": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "depths": [
+        1,
+        2,
+        4,
+        8,
+        16,
+        32,
+        64
+      ],
+      "samples_per_cell": 64,
+      "generator_scale": 0.15,
+      "time_distribution": {
+        "kind": "log_uniform",
+        "minimum": "1e-3",
+        "maximum": "0.5"
+      }
+    },
+    "semigroup_cone": {
+      "description": "Wei semigroup A^T eta + eta A positive semidefinite",
+      "n_values": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "depths": [
+        1,
+        2,
+        4,
+        8,
+        16,
+        32,
+        64
+      ],
+      "samples_per_cell": 64,
+      "split_generator_scale": 0.1,
+      "dissipation_strength": {
+        "minimum": 0.01,
+        "maximum": 0.15
+      },
+      "rank_tolerance": "1e-10",
+      "time_distribution": {
+        "kind": "log_uniform",
+        "minimum": "1e-3",
+        "maximum": "0.5"
+      }
+    }
+  },
+  "component_controls": {
+    "description": "All four O(1,1) components",
+    "components": [
+      "++",
+      "--",
+      "-+",
+      "+-"
+    ],
+    "n_values": [
+      1
+    ],
+    "depths": [
+      1,
+      2,
+      4,
+      8,
+      16,
+      32,
+      64
+    ],
+    "samples_per_cell": 32,
+    "generator_scale": 0.15,
+    "time_distribution": {
+      "kind": "log_uniform",
+      "minimum": "1e-3",
+      "maximum": "0.5"
+    }
+  },
+  "fock_oracle": {
+    "maximum_dimension": 8,
+    "sample_indices": [
+      0,
+      127,
+      255
+    ],
+    "absolute_tolerance": "5e-8",
+    "relative_tolerance": "5e-9"
+  },
+  "thresholds": {
+    "contraction_abs": "5e-10",
+    "split_lie_abs": "5e-10",
+    "split_group_abs": "5e-8",
+    "semigroup_generator_eigenvalue_abs": "5e-10",
+    "semigroup_product_eigenvalue_abs": "5e-8",
+    "component_zero_sigma": "5e-9"
+  },
+  "determinant_precision": {
+    "sigma_min_escalation": "1e-9",
+    "mpmath_dps": 100,
+    "high_precision_zero_tolerance": "1e-60",
+    "high_precision_imag_tolerance": "1e-60"
+  },
+  "twirl_checks": {
+    "epsilon": "1/100",
+    "kappa": "1/1000",
+    "tau": "1/10",
+    "hermiticity_tolerance": "1e-11",
+    "nongaussian_gap_minimum_abs": "1e-8"
+  },
+  "physical_benchmark": {
+    "description": "Four-site OBC shifted-Hbar convention",
+    "sites": 4,
+    "boundary": "open",
+    "triangles": [
+      [
+        0,
+        1,
+        2
+      ],
+      [
+        1,
+        2,
+        3
+      ]
+    ],
+    "epsilon": "1/100",
+    "kappa": "1/1000",
+    "tau": "1/10",
+    "couplings": {
+      "A": "1/4",
+      "B": "1/4"
+    },
+    "chemical_potential": "0",
+    "betas": [
+      "1/4",
+      "1/2",
+      "1",
+      "2"
+    ],
+    "seed": 1212026,
+    "poisson_samples_per_beta": 4096,
+    "confidence_sigma": 8.0,
+    "relative_error_floor": 0.01,
+    "weight_tolerance": "1e-9",
+    "hermiticity_tolerance": "1e-11",
+    "partition_imag_tolerance": "1e-9",
+    "deterministic_truncation_order": 24,
+    "deterministic_roundoff_allowance": "1e-10"
+  },
+  "expected_workload": {
+    "candidate_cells": 140,
+    "candidate_words": 35840,
+    "split_cells": 28,
+    "split_words": 1792,
+    "semigroup_cells": 28,
+    "semigroup_words": 1792,
+    "component_cells": 28,
+    "component_words": 896,
+    "total_cells": 224,
+    "total_words": 40320,
+    "fock_oracle_checks": 336,
+    "physical_poisson_words": 16384,
+    "total_random_words_including_physical": 56704
+  },
+  "execution": {
+    "platform": "t02-server Slurm CPU job",
+    "cpus_per_task": 1,
+    "memory_mb": 2048,
+    "time_limit_minutes": 20,
+    "gpus": 0,
+    "durability": "atomic cells, protocol-bound resume, all-pass COMPLETE"
+  }
+}
