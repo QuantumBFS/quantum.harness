@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-07-29T15:40:45.540819+00:00",
+  "host": {
+    "python": "3.12.13",
+    "system": "Darwin",
+    "release": "24.6.0",
+    "machine": "arm64",
+    "processor": "arm"
+  },
+  "packages": {
+    "jax": "0.11.0",
+    "jaxlib": "0.11.0",
+    "numpy": "2.5.1",
+    "scipy": "1.18.0",
+    "opt_einsum": "3.4.0"
+  },
+  "jax": {
+    "default_backend": "cpu",
+    "x64_enabled": false,
+    "device_count": 1,
+    "devices": [
+      {
+        "id": 0,
+        "platform": "cpu",
+        "device_kind": "cpu",
+        "process_index": 0,
+        "memory_stats_available": false,
+        "memory_stats": null
+      }
+    ]
+  },
+  "memory_evidence": {
+    "process_peak_rss": {
+      "available": true,
+      "meaning": "host process resident-set peak; not GPU peak memory"
+    },
+    "compiler_memory_analysis": {
+      "available": true,
+      "fields": {
+        "argument_size_in_bytes": 32,
+        "output_size_in_bytes": 32,
+        "alias_size_in_bytes": 0,
+        "temp_size_in_bytes": 0,
+        "generated_code_size_in_bytes": 0
+      },
+      "meaning": "compiler estimate; not measured device peak"
+    },
+    "device_memory_profile_api": {
+      "available": true,
+      "meaning": "profiling API availability does not imply a GPU measurement was collected"
+    }
+  },
+  "gpu_benchmark": {
+    "status": "skipped",
+    "reason": "JAX reports no GPU device; CUDA/ROCm runtime and genuine GPU peak memory were not measured",
+    "device_count": 0,
+    "peak_memory_measured": false
+  }
+}

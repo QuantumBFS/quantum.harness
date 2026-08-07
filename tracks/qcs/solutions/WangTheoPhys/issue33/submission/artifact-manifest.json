@@ -1,0 +1,72 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-07-30T17:59:47+08:00",
+  "evidence_commit": "748c5e974573e11a22e639dfe76ff00be9819f78",
+  "challenge_issue": "https://github.com/QuantumBFS/quantum.harness/issues/33",
+  "pull_request": "https://github.com/QuantumBFS/quantum.harness/pull/263",
+  "public_showcase": "https://github.com/JunkaiWang-TheoPhy/issue-33-extreme-efficiency-vqe",
+  "artifacts": [
+    {
+      "path": "submission/vqetape-matched-benchmark.tsv",
+      "bytes": 1096,
+      "sha256": "5d80640912f9f5cfa2be365c1c0d1996b8baafabb4936e0c62520180b202e455"
+    },
+    {
+      "path": "submission/submission-status.txt",
+      "bytes": 1641,
+      "sha256": "a15f161fc2a3820e83c102dd70c0ab1f0f1562d0127e0e3672f9528c6b790f5b"
+    },
+    {
+      "path": "submission/vqetape-technical-report.md",
+      "bytes": 7676,
+      "sha256": "450716da50b128ffdcacec93299a0d13bd575f38b1aa11f1ff419efc58e9e9e5"
+    },
+    {
+      "path": "submission/report.json",
+      "bytes": 3373,
+      "sha256": "336f346ea154b843d76e22e9628152e3b4bf114bc577e890c712f988000a0fc8"
+    },
+    {
+      "path": "submission/report.html",
+      "bytes": 5497,
+      "sha256": "e27471d2ab5dfd6b2da25e12a6c8f3578e7a8ffe21a600ae31378f3942688e75"
+    },
+    {
+      "path": "submission/output/pdf/vqetape-technical-report.pdf",
+      "bytes": 79020,
+      "sha256": "0e902d921f233901abec51e0c1304bdfac16e00b99c6f94cbf99659570959b0e"
+    }
+  ],
+  "canonical_evidence": [
+    {
+      "path": "outputs/tensorcircuit-ng-fig2-rtx3080-smoke-n6-l3-run.json",
+      "bytes": 3756,
+      "sha256": "bf2eaecb2943e971ce8dd45968e362de6056ab3ad95234f74275dbfccc7911d5"
+    },
+    {
+      "path": "outputs/tensorcircuit-ng-rtx3090-matched-n10-d4.json",
+      "bytes": 6663,
+      "sha256": "25a0e6ae819582410ca87492eb03a73f1c1aff1a7df5125d5509acae62e0ac9b"
+    },
+    {
+      "path": "outputs/vqetape-ansatz-report.json",
+      "bytes": 105602,
+      "sha256": "a990d926e715003a1414596947aafa8b01ebfed0b3c06240be5e7674737acf66"
+    },
+    {
+      "path": "outputs/vqetape-gpu-rtx3090-direct-tn-n10-d4.json",
+      "bytes": 27409,
+      "sha256": "a7524d95258541ac8406f8a432801ffadb1f9a11b14b24f02aa603e7fa64d407"
+    },
+    {
+      "path": "outputs/vqetape-gpu-rtx3090-spatial-n10-d4.json",
+      "bytes": 23133,
+      "sha256": "d16cb5e47ff73cc4d17f5cb6560da02615233be0eb103a29c948e261007b169a"
+    },
+    {
+      "path": "outputs/vqetape-gpu-rtx3090-statevector-n10-d4.json",
+      "bytes": 9097,
+      "sha256": "07fc84c765d8f0d8d070c114e08cfe0886ae0a8ff2e8270905c915164a2ae93b"
+    }
+  ]
+}

@@ -1,0 +1,111 @@
+{
+  "title": "VQETape: a differentiated co-design compiler for exact VQE",
+  "eyebrow": "Quantum Circuit Simulation Track",
+  "url": "https://github.com/QuantumBFS/quantum.harness/pull/263",
+  "showcase_url": "https://github.com/JunkaiWang-TheoPhy/issue-33-extreme-efficiency-vqe",
+  "lede": "Compile the forward contraction, reverse program, and variational ansatz as one optimization problem. The matched result improves the 100-step objective by 8.2% and host RSS by 28.3%.",
+  "evidence_commit": "748c5e974573e11a22e639dfe76ff00be9819f78",
+  "sections": [
+    {
+      "title": "Challenge",
+      "blocks": [
+        {
+          "kind": "text",
+          "text": "Build an auto-evaluated VQE simulation harness that exceeds the TensorCircuit-NG baseline in time and space efficiency."
+        },
+        {
+          "kind": "kv",
+          "pairs": {
+            "Issue": "https://github.com/QuantumBFS/quantum.harness/issues/33",
+            "Track": "qcs",
+            "Matched system": "RTX 3090; TFIM n=10, L=4"
+          }
+        }
+      ]
+    },
+    {
+      "title": "Approach",
+      "blocks": [
+        {
+          "kind": "badge",
+          "text": "Exact simulation"
+        },
+        {
+          "kind": "text",
+          "text": "Joint compilation of representation, contraction path, reverse program, saved residuals, checkpoints, symmetry, optimizer, initialization, and ansatz growth."
+        }
+      ]
+    },
+    {
+      "title": "Results",
+      "blocks": [
+        {
+          "kind": "verdict",
+          "status": "demonstrated",
+          "text": "Demonstrated amortized objective (16.7781 s vs 18.2720 s) and host RSS (473.9 vs 661.3 MiB); measured warm frontier (3.3785 ms VQETape vs 2.6577 ms TensorCircuit-NG reference)."
+        },
+        {
+          "kind": "table",
+          "columns": [
+            "Implementation",
+            "Compile s",
+            "First s",
+            "Warm ms",
+            "Objective s",
+            "RSS MiB"
+          ],
+          "rows": [
+            [
+              "TensorCircuit-NG / OMECo",
+              17.7799,
+              0.2263,
+              2.6577,
+              18.272,
+              661.3
+            ],
+            [
+              "VQETape / statevector",
+              28.7213,
+              0.4025,
+              3.3785,
+              29.4617,
+              462.4
+            ],
+            [
+              "VQETape / direct TN",
+              45.6544,
+              0.1376,
+              5.0498,
+              46.297,
+              575.0
+            ],
+            [
+              "VQETape / spatial block-2",
+              15.5816,
+              0.3636,
+              8.3281,
+              16.7781,
+              473.9
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Highlight",
+      "blocks": [
+        {
+          "kind": "card",
+          "title": "What is innovative",
+          "text": "A differentiated contraction-program search plus exact spatial transfer, physics-aware reductions, and commutator-complete ansatz/optimizer co-design."
+        },
+        {
+          "kind": "card",
+          "title": "Research frontier",
+          "text": "Warm-kernel fusion and the N=32,L=16 Fig. 2 execution are the next measured optimization and scale-up targets."
+        }
+      ]
+    }
+  ],
+  "evidence_git_head": "748c5e974573e11a22e639dfe76ff00be9819f78"
+}

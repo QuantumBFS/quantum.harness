@@ -1,0 +1,36 @@
+VQETape Issue #33 delivery highlights
+Generated from committed evidence snapshot: 748c5e974573e11a22e639dfe76ff00be9819f78
+
+VALIDATED PROTOCOL
+Hardware: one NVIDIA RTX 3090, Slurm node c05r05
+Workload: open-boundary TFIM, n=10, L=4, plus state, RZZ then RX, seed=33, complex64
+Correctness: all four matched implementations satisfy energy and full-gradient tolerances
+
+DEMONSTRATED RESULT - AMORTIZED TIME OBJECTIVE
+TensorCircuit-NG compile + first + 100 warm: 18.2720 s
+VQETape spatial compile + first + 100 warm: 16.7781 s
+VQETape spatial improvement: 8.2%
+
+DEMONSTRATED RESULT - HOST PROCESS MEMORY
+TensorCircuit-NG peak RSS: 661.3 MiB
+VQETape spatial peak RSS: 473.9 MiB
+VQETape spatial reduction: 28.3%
+
+MEASURED TRADE-OFF - SUBSEQUENT WARM RUNTIME
+TensorCircuit-NG warm median: 2.6577 ms
+VQETape statevector warm median: 3.3785 ms
+VQETape spatial warm median: 8.3281 ms
+The current VQETape statevector warm frontier is 1.27x the TensorCircuit-NG reference.
+
+MEASURED TRADE-OFF - DEVICE MEMORY
+Sampled Slurm job NVML peaks span 272-274 MiB at this size.
+
+VALIDATED PROTOCOL - PAPER FIGURE 2
+The exact SU(4) find/execute protocol and safe JSON path artifact are implemented.
+An RTX 3080 N=6,L=3 execution satisfies direct energy and gradient comparison.
+
+SCALE-UP TARGET
+N=32,L=16 on paper-comparable hardware using the validated Fig. 2 protocol.
+
+RESEARCH THESIS
+VQETape compiles the forward contraction, reverse program, and variational ansatz as one optimization problem. The repository, same-machine baseline, complete data trail, and reviewer package establish a reproducible platform for the next warm-kernel and scale-up frontier.

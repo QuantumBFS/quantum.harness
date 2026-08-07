@@ -1,0 +1,3252 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-07-29T15:32:28.358980+00:00",
+  "environment": {
+    "python": "3.12.13",
+    "platform": "macOS-15.6-arm64-arm-64bit",
+    "jax": "0.11.0",
+    "parent_backend": "cpu",
+    "worker_x64_enabled": true,
+    "devices": [
+      {
+        "id": 0,
+        "platform": "cpu",
+        "device_kind": "cpu"
+      }
+    ]
+  },
+  "method": {
+    "fresh_process_per_policy": true,
+    "unique_jax_cache_per_policy": true,
+    "synchronization": "jax.block_until_ready",
+    "compile_and_screening_in_target_time": true,
+    "equal_maximum_parameter_budget": true,
+    "equal_adaptive_pool_budget": true
+  },
+  "results": [
+    {
+      "request": {
+        "spec": {
+          "nqubits": 4,
+          "depth": 1,
+          "coupling": 1.0,
+          "field": 1.0,
+          "initial_state": "plus",
+          "dtype": "complex128"
+        },
+        "policy": "fixed",
+        "target_energy_error": 1e-10,
+        "max_growth_rounds": 7,
+        "optimizer_steps_per_round": 100,
+        "seed": 3,
+        "initial_scale": 0.15,
+        "metric_epsilon": 1e-12,
+        "cost_weights": {
+          "boundary": 3.0,
+          "compile": 0.5,
+          "warm": 0.5,
+          "memory": 1.0
+        },
+        "seed_depth": 1,
+        "fixed_depth": 2
+      },
+      "converged": false,
+      "ground_energy": -4.758770483143631,
+      "target_energy": -4.758770483043631,
+      "final_energy": -4.75877031341861,
+      "final_parameters": [
+        0.33912478460966855,
+        -0.5249589981859161,
+        -1.0405524530798658,
+        0.9085122182895453,
+        -1.4114586478481381,
+        0.37090258822229805,
+        -0.8985834450900041,
+        -0.7562121664503986,
+        -0.13781188393909266,
+        0.790113016039145,
+        -1.5643485010213827,
+        -0.37948815016271836,
+        -0.34552659049992357,
+        -0.03799384494370163
+      ],
+      "final_structure": {
+        "nqubits": 4,
+        "operators": [
+          {
+            "kind": "rzz",
+            "wire": 0
+          },
+          {
+            "kind": "rzz",
+            "wire": 1
+          },
+          {
+            "kind": "rzz",
+            "wire": 2
+          },
+          {
+            "kind": "rx",
+            "wire": 0
+          },
+          {
+            "kind": "rx",
+            "wire": 1
+          },
+          {
+            "kind": "rx",
+            "wire": 2
+          },
+          {
+            "kind": "rx",
+            "wire": 3
+          },
+          {
+            "kind": "rzz",
+            "wire": 0
+          },
+          {
+            "kind": "rzz",
+            "wire": 1
+          },
+          {
+            "kind": "rzz",
+            "wire": 2
+          },
+          {
+            "kind": "rx",
+            "wire": 0
+          },
+          {
+            "kind": "rx",
+            "wire": 1
+          },
+          {
+            "kind": "rx",
+            "wire": 2
+          },
+          {
+            "kind": "rx",
+            "wire": 3
+          }
+        ]
+      },
+      "rounds": [
+        {
+          "round_index": 0,
+          "phase": "fixed",
+          "structure": {
+            "nqubits": 4,
+            "operators": [
+              {
+                "kind": "rzz",
+                "wire": 0
+              },
+              {
+                "kind": "rzz",
+                "wire": 1
+              },
+              {
+                "kind": "rzz",
+                "wire": 2
+              },
+              {
+                "kind": "rx",
+                "wire": 0
+              },
+              {
+                "kind": "rx",
+                "wire": 1
+              },
+              {
+                "kind": "rx",
+                "wire": 2
+              },
+              {
+                "kind": "rx",
+                "wire": 3
+              },
+              {
+                "kind": "rzz",
+                "wire": 0
+              },
+              {
+                "kind": "rzz",
+                "wire": 1
+              },
+              {
+                "kind": "rzz",
+                "wire": 2
+              },
+              {
+                "kind": "rx",
+                "wire": 0
+              },
+              {
+                "kind": "rx",
+                "wire": 1
+              },
+              {
+                "kind": "rx",
+                "wire": 2
+              },
+              {
+                "kind": "rx",
+                "wire": 3
+              }
+            ]
+          },
+          "selected_operator": null,
+          "candidates": [],
+          "cache_key": "d7040d90dcd0771e96cfb0912f688df66cea587efc19a521cde8519feeeb7164",
+          "compile_seconds": 1.074129874999926,
+          "screening_seconds": 0.0,
+          "optimization_seconds": 0.772486707995995,
+          "evaluations": 119,
+          "optimizer_steps": 100,
+          "optimizer_message": "STOP: TOTAL NO. OF ITERATIONS REACHED LIMIT",
+          "energy": -4.75877031341861,
+          "energy_error": 1.6972502070444762e-07,
+          "boundary_dimension": 48
+        }
+      ],
+      "evaluations": 119,
+      "compiled_structures": 1,
+      "compile_seconds": 1.074129874999926,
+      "screening_seconds": 0.0,
+      "optimization_seconds": 0.772486707995995,
+      "time_to_target_seconds": null,
+      "total_seconds": 1.877871791999496,
+      "peak_rss_bytes": 261292032,
+      "failure": "target not reached within ansatz budget",
+      "skipped": false
+    },
+    {
+      "request": {
+        "spec": {
+          "nqubits": 4,
+          "depth": 1,
+          "coupling": 1.0,
+          "field": 1.0,
+          "initial_state": "plus",
+          "dtype": "complex128"
+        },
+        "policy": "gradient-only",
+        "target_energy_error": 1e-10,
+        "max_growth_rounds": 7,
+        "optimizer_steps_per_round": 100,
+        "seed": 3,
+        "initial_scale": 0.15,
+        "metric_epsilon": 1e-12,
+        "cost_weights": {
+          "boundary": 3.0,
+          "compile": 0.5,
+          "warm": 0.5,
+          "memory": 1.0
+        },
+        "seed_depth": 1,
+        "fixed_depth": 2
+      },
+      "converged": true,
+      "ground_energy": -4.758770483143631,
+      "target_energy": -4.758770483043631,
+      "final_energy": -4.758770483093128,
+      "final_parameters": [
+        0.22382262328061822,
+        -0.5152614270045357,
+        -0.7875098054122487,
+        -3.330148514837988e-09,
+        -1.5707963249900354,
+        -1.3689177424037237e-09,
+        -1.570796325335325,
+        -0.7166155481682789,
+        0.31543620590999943,
+        -0.09212547977346816
+      ],
+      "final_structure": {
+        "nqubits": 4,
+        "operators": [
+          {
+            "kind": "rzz",
+            "wire": 0
+          },
+          {
+            "kind": "rzz",
+            "wire": 1
+          },
+          {
+            "kind": "rzz",
+            "wire": 2
+          },
+          {
+            "kind": "rx",
+            "wire": 0
+          },
+          {
+            "kind": "rx",
+            "wire": 1
+          },
+          {
+            "kind": "rx",
+            "wire": 2
+          },
+          {
+            "kind": "rx",
+            "wire": 3
+          },
+          {
+            "kind": "yz",
+            "wire": 0
+          },
+          {
+            "kind": "yz",
+            "wire": 2
+          },
+          {
+            "kind": "zy",
+            "wire": 1
+          }
+        ]
+      },
+      "rounds": [
+        {
+          "round_index": 0,
+          "phase": "seed",
+          "structure": {
+            "nqubits": 4,
+            "operators": [
+              {
+                "kind": "rzz",
+                "wire": 0
+              },
+              {
+                "kind": "rzz",
+                "wire": 1
+              },
+              {
+                "kind": "rzz",
+                "wire": 2
+              },
+              {
+                "kind": "rx",
+                "wire": 0
+              },
+              {
+                "kind": "rx",
+                "wire": 1
+              },
+              {
+                "kind": "rx",
+                "wire": 2
+              },
+              {
+                "kind": "rx",
+                "wire": 3
+              }
+            ]
+          },
+          "selected_operator": null,
+          "candidates": [],
+          "cache_key": "210f661a970111150cc34ad285301b22df94fe43121259d2ac2974862bba05df",
+          "compile_seconds": 0.5558170000003884,
+          "screening_seconds": 0.0,
+          "optimization_seconds": 0.5240562089966261,
+          "evaluations": 41,
+          "optimizer_steps": 34,
+          "optimizer_message": null,
+          "energy": -4.653055889417638,
+          "energy_error": 0.10571459372599268,
+          "boundary_dimension": 12
+        },
+        {
+          "round_index": 1,
+          "phase": "growth",
+          "structure": {
+            "nqubits": 4,
+            "operators": [
+              {
+                "kind": "rzz",
+                "wire": 0
+              },
+              {
+                "kind": "rzz",
+                "wire": 1
+              },
+              {
+                "kind": "rzz",
+                "wire": 2
+              },
+              {
+                "kind": "rx",
+                "wire": 0
+              },
+              {
+                "kind": "rx",
+                "wire": 1
+              },
+              {
+                "kind": "rx",
+                "wire": 2
+              },
+              {
+                "kind": "rx",
+                "wire": 3
+              },
+              {
+                "kind": "yz",
+                "wire": 0
+              }
+            ]
+          },
+          "selected_operator": {
+            "kind": "yz",
+            "wire": 0
+          },
+          "candidates": [
+            {
+              "operator": {
+                "kind": "yz",
+                "wire": 0
+              },
+              "signal": {
+                "operator": {
+                  "kind": "yz",
+                  "wire": 0
+                },
+                "gradient": 0.21871862059299474,
+                "metric": 0.25,
+                "normalized_signal": 0.19135133997564413
+              },
+              "cost": {
+                "boundary_before": 12,
+                "boundary_after": 48,
+                "delta_log_boundary": 1.3862943611198906,
+                "delta_compile_proxy": 0.2,
+                "delta_warm_proxy": 0.17647058823529413,
+                "delta_memory_relative": 3.0
+              },
+              "gradient_score": 0.19135133997564413,
+              "contraction_score": 0.02292423939882768,
+              "selection_score": 0.19135133997564413,
+              "eligible": true,
+              "exclusion_reason": null,
+              "rank": 1,
+              "selected": true
+            },
+            {
+              "operator": {
+                "kind": "zy",
+                "wire": 1
+              },
+              "signal": {
+                "operator": {
+                  "kind": "zy",
+                  "wire": 1
+                },
+                "gradient": 0.10592853191234286,
+                "metric": 0.25,
+                "normalized_signal": 0.04488341549223743
+              },
+              "cost": {
+                "boundary_before": 12,
+                "boundary_after": 48,
+                "delta_log_boundary": 1.3862943611198906,
+                "delta_compile_proxy": 0.2,
+                "delta_warm_proxy": 0.17647058823529413,
+                "delta_memory_relative": 3.0
+              },
+              "gradient_score": 0.04488341549223743,
+              "contraction_score": 0.0053771150069399365,
+              "selection_score": 0.04488341549223743,
+              "eligible": true,
+              "exclusion_reason": null,
+              "rank": 2,
+              "selected": false
+            },
+            {
+              "operator": {
+                "kind": "yz",
+                "wire": 2
+              },
+              "signal": {
+                "operator": {
+                  "kind": "yz",
+                  "wire": 2
+                },
+                "gradient": -0.07066881914201811,
+                "metric": 0.25,
+                "normalized_signal": 0.019976327995629158
+              },
+              "cost": {
+                "boundary_before": 12,
+                "boundary_after": 48,
+                "delta_log_boundary": 1.3862943611198906,
+                "delta_compile_proxy": 0.2,
+                "delta_warm_proxy": 0.17647058823529413,
+                "delta_memory_relative": 3.0
+              },
+              "gradient_score": 0.019976327995629158,
+              "contraction_score": 0.0023932005145069525,
+              "selection_score": 0.019976327995629158,
+              "eligible": true,
+              "exclusion_reason": null,
+              "rank": 3,
+              "selected": false
+            },
+            {
+              "operator": {
+                "kind": "zy",
+                "wire": 2
+              },
+              "signal": {
+                "operator": {
+                  "kind": "zy",
+                  "wire": 2
+                },
+                "gradient": 2.3822073202950378e-09,
+                "metric": 0.25,
+                "normalized_signal": 2.2699646867378263e-17
+              },
+              "cost": {
+                "boundary_before": 12,
+                "boundary_after": 48,
+                "delta_log_boundary": 1.3862943611198906,
+                "delta_compile_proxy": 0.2,
+                "delta_warm_proxy": 0.17647058823529413,
+                "delta_memory_relative": 3.0
+              },
+              "gradient_score": 2.2699646867378263e-17,
+              "contraction_score": 2.7194590804687485e-18,
+              "selection_score": 2.2699646867378263e-17,
+              "eligible": true,
+              "exclusion_reason": null,
+              "rank": 4,
+              "selected": false
+            },
+            {
+              "operator": {
+                "kind": "zy",
+                "wire": 0
+              },
+              "signal": {
+                "operator": {
+                  "kind": "zy",
+                  "wire": 0
+                },
+                "gradient": -1.5590382318464435e-09,
+                "metric": 0.25,
+                "normalized_signal": 9.722400833396652e-18
+              },
+              "cost": {
+                "boundary_before": 12,
+                "boundary_after": 48,
+                "delta_log_boundary": 1.3862943611198906,
+                "delta_compile_proxy": 0.2,
+                "delta_warm_proxy": 0.17647058823529413,
+                "delta_memory_relative": 3.0
+              },
+              "gradient_score": 9.722400833396652e-18,
+              "contraction_score": 1.1647613456196093e-18,
+              "selection_score": 9.722400833396652e-18,
+              "eligible": true,
+              "exclusion_reason": null,
+              "rank": 5,
+              "selected": false
+            },
+            {
+              "operator": {
+                "kind": "rzz",
+                "wire": 2
+              },
+              "signal": {
+                "operator": {
+                  "kind": "rzz",
+                  "wire": 2
+                },
+                "gradient": 9.781225924549106e-10,
+                "metric": 0.1966682828643296,
+                "normalized_signal": 4.8646573404306405e-18
+              },
+              "cost": {
+                "boundary_before": 12,
+                "boundary_after": 48,
+                "delta_log_boundary": 1.3862943611198906,
+                "delta_compile_proxy": 0.2,
+                "delta_warm_proxy": 0.17647058823529413,
+                "delta_memory_relative": 3.0
+              },
+              "gradient_score": 4.8646573404306405e-18,
+              "contraction_score": 5.827948185755628e-19,
+              "selection_score": 4.8646573404306405e-18,
+              "eligible": true,
+              "exclusion_reason": null,
+              "rank": 6,
+              "selected": false
+            },
+            {
+              "operator": {
+                "kind": "rzz",
+                "wire": 1
+              },
+              "signal": {
+                "operator": {
+                  "kind": "rzz",
+                  "wire": 1
+                },
+                "gradient": 3.098875674665014e-10,
+                "metric": 0.2169828671312801,
+                "normalized_signal": 4.425709077379004e-19
+              },
+              "cost": {
+                "boundary_before": 12,
+                "boundary_after": 48,
+                "delta_log_boundary": 1.3862943611198906,
+                "delta_compile_proxy": 0.2,
+                "delta_warm_proxy": 0.17647058823529413,
+                "delta_memory_relative": 3.0
+              },
+              "gradient_score": 4.425709077379004e-19,
+              "contraction_score": 5.3020801637613174e-20,
+              "selection_score": 4.425709077379004e-19,
+              "eligible": true,
+              "exclusion_reason": null,
+              "rank": 7,
+              "selected": false
+            },
+            {
+              "operator": {
+                "kind": "rzz",
+                "wire": 0
+              },
+              "signal": {
+                "operator": {
+                  "kind": "rzz",
+                  "wire": 0
+                },
+                "gradient": -2.9484454210222814e-10,
+                "metric": 0.22102554584869538,
+                "normalized_signal": 3.9331790211521554e-19
+              },
+              "cost": {
+                "boundary_before": 12,
+                "boundary_after": 48,
+                "delta_log_boundary": 1.3862943611198906,
+                "delta_compile_proxy": 0.2,
+                "delta_warm_proxy": 0.17647058823529413,
+                "delta_memory_relative": 3.0
+              },
+              "gradient_score": 3.9331790211521554e-19,
+              "contraction_score": 4.7120201766454976e-20,
+              "selection_score": 3.9331790211521554e-19,
+              "eligible": true,
+              "exclusion_reason": null,
+              "rank": 8,
+              "selected": false
+            },
+            {
+              "operator": {
+                "kind": "yz",
+                "wire": 1
+              },
+              "signal": {
+                "operator": {
+                  "kind": "yz",
+                  "wire": 1
+                },
+                "gradient": -2.896363149318404e-10,
+                "metric": 0.25,
+                "normalized_signal": 3.3555677970784273e-19
+              },
+              "cost": {
+                "boundary_before": 12,
+                "boundary_after": 48,
+                "delta_log_boundary": 1.3862943611198906,
+                "delta_compile_proxy": 0.2,
+                "delta_warm_proxy": 0.17647058823529413,
+                "delta_memory_relative": 3.0
+              },
+              "gradient_score": 3.3555677970784273e-19,
+              "contraction_score": 4.020031399258235e-20,
+              "selection_score": 3.3555677970784273e-19,
+              "eligible": true,
+              "exclusion_reason": null,
+              "rank": 9,
+              "selected": false
+            },
+            {
+              "operator": {
+                "kind": "rx",
+                "wire": 3
+              },
+              "signal": {
+                "operator": {
+                  "kind": "rx",
+                  "wire": 3
+                },
+                "gradient": -7.65779906287166e-10,
+                "metric": 0.053331717135670254,
+                "normalized_signal": 1.0995686926231863e-17
+              },
+              "cost": {
+                "boundary_before": 12,
+                "boundary_after": 12,
+                "delta_log_boundary": 0.0,
+                "delta_compile_proxy": 0.1,
+                "delta_warm_proxy": 0.11764705882352941,
+                "delta_memory_relative": 0.0
+              },
+              "gradient_score": 1.0995686926231863e-17,
+              "contraction_score": 9.916534628431918e-18,
+              "selection_score": 1.0995686926231863e-17,
+              "eligible": false,
+              "exclusion_reason": "fuses with a commuting prior gate",
+              "rank": 10,
+              "selected": false
+            },
+            {
+              "operator": {
+                "kind": "rx",
+                "wire": 2
+              },
+              "signal": {
+                "operator": {
+                  "kind": "rx",
+                  "wire": 2
+                },
+                "gradient": -2.488867844192041e-10,
+                "metric": 0.08342290933650495,
+                "normalized_signal": 7.42537415087279e-19
+              },
+              "cost": {
+                "boundary_before": 12,
+                "boundary_after": 12,
+                "delta_log_boundary": 0.0,
+                "delta_compile_proxy": 0.1,
+                "delta_warm_proxy": 0.11764705882352941,
+                "delta_memory_relative": 0.0
+              },
+              "gradient_score": 7.42537415087279e-19,
+              "contraction_score": 6.696623902643895e-19,
+              "selection_score": 7.42537415087279e-19,
+              "eligible": false,
+              "exclusion_reason": "fuses with a commuting prior gate",
+              "rank": 11,
+              "selected": false
+            },
+            {
+              "operator": {
+                "kind": "rx",
+                "wire": 0
+              },
+              "signal": {
+                "operator": {
+                  "kind": "rx",
+                  "wire": 0
+                },
+                "gradient": -7.692248246192046e-11,
+                "metric": 0.03420852244550038,
+                "normalized_signal": 1.7297058992706632e-19
+              },
+              "cost": {
+                "boundary_before": 12,
+                "boundary_after": 12,
+                "delta_log_boundary": 0.0,
+                "delta_compile_proxy": 0.1,
+                "delta_warm_proxy": 0.11764705882352941,
+                "delta_memory_relative": 0.0
+              },
+              "gradient_score": 1.7297058992706632e-19,
+              "contraction_score": 1.559946964859484e-19,
+              "selection_score": 1.7297058992706632e-19,
+              "eligible": false,
+              "exclusion_reason": "fuses with a commuting prior gate",
+              "rank": 12,
+              "selected": false
+            },
+            {
+              "operator": {
+                "kind": "rx",
+                "wire": 1
+              },
+              "signal": {
+                "operator": {
+                  "kind": "rx",
+                  "wire": 1
+                },
+                "gradient": 9.842355534910695e-11,
+                "metric": 0.06722565531422026,
+                "normalized_signal": 1.4409969232929863e-19
+              },
+              "cost": {
+                "boundary_before": 12,
+                "boundary_after": 12,
+                "delta_log_boundary": 0.0,
+                "delta_compile_proxy": 0.1,
+                "delta_warm_proxy": 0.11764705882352941,
+                "delta_memory_relative": 0.0
+              },
+              "gradient_score": 1.4409969232929863e-19,
+              "contraction_score": 1.2995728220679452e-19,
+              "selection_score": 1.4409969232929863e-19,
+              "eligible": false,
+              "exclusion_reason": "fuses with a commuting prior gate",
+              "rank": 13,
+              "selected": false
+            }
+          ],
+          "cache_key": "ce7f85b51749014ebce23969de8917d7329dde622665f085b80cde765fcd2449",
+          "compile_seconds": 0.9077652499981923,
+          "screening_seconds": 1.5531711670046207,
+          "optimization_seconds": 0.009117916997638531,
+          "evaluations": 16,
+          "optimizer_steps": 11,
+          "optimizer_message": null,
+          "energy": -4.7453415654512545,
+          "energy_error": 0.01342891769237653,
+          "boundary_dimension": 48
+        },
+        {
+          "round_index": 2,
+          "phase": "growth",
+          "structure": {
+            "nqubits": 4,
+            "operators": [
+              {
+                "kind": "rzz",
+                "wire": 0
+              },
+              {
+                "kind": "rzz",
+                "wire": 1
+              },
+              {
+                "kind": "rzz",
+                "wire": 2
+              },
+              {
+                "kind": "rx",
+                "wire": 0
+              },
+              {
+                "kind": "rx",
+                "wire": 1
+              },
+              {
+                "kind": "rx",
+                "wire": 2
+              },
+              {
+                "kind": "rx",
+                "wire": 3
+              },
+              {
+                "kind": "yz",
+                "wire": 0
+              },
+              {
+                "kind": "yz",
+                "wire": 2
+              }
+            ]
+          },
+          "selected_operator": {
+            "kind": "yz",
+            "wire": 2
+          },
+          "candidates": [
+            {
+              "operator": {
+                "kind": "yz",
+                "wire": 2
+              },
+              "signal": {
+                "operator": {
+                  "kind": "yz",
+                  "wire": 2
+                },
+                "gradient": -0.12764365638487957,
+                "metric": 0.25,
+                "normalized_signal": 0.06517161206094414
+              },
+              "cost": {
+                "boundary_before": 48,
+                "boundary_after": 48,
+                "delta_log_boundary": 0.0,
+                "delta_compile_proxy": 0.16666666666666666,
+                "delta_warm_proxy": 0.15,
+                "delta_memory_relative": 0.0
+              },
+              "gradient_score": 0.06517161206094414,
+              "contraction_score": 0.05626326221088704,
+              "selection_score": 0.06517161206094414,
+              "eligible": true,
+              "exclusion_reason": null,
+              "rank": 1,
+              "selected": true
+            },
+            {
+              "operator": {
+                "kind": "zy",
+                "wire": 1
+              },
+              "signal": {
+                "operator": {
+                  "kind": "zy",
+                  "wire": 1
+                },
+                "gradient": -0.11480524424361405,
+                "metric": 0.25,
+                "normalized_signal": 0.05272097642313262
+              },
+              "cost": {
+                "boundary_before": 48,
+                "boundary_after": 48,
+                "delta_log_boundary": 0.0,
+                "delta_compile_proxy": 0.16666666666666666,
+                "delta_warm_proxy": 0.15,
+                "delta_memory_relative": 0.0
+              },
+              "gradient_score": 0.05272097642313262,
+              "contraction_score": 0.045514512019970615,
+              "selection_score": 0.05272097642313262,
+              "eligible": true,
+              "exclusion_reason": null,
+              "rank": 2,
+              "selected": false
+            },
+            {
+              "operator": {
+                "kind": "rx",
+                "wire": 1
+              },
+              "signal": {
+                "operator": {
+                  "kind": "rx",
+                  "wire": 1
+                },
+                "gradient": -1.2886787472691025e-09,
+                "metric": 0.10089115272867119,
+                "normalized_signal": 1.6460243229777947e-17
+              },
+              "cost": {
+                "boundary_before": 48,
+                "boundary_after": 48,
+                "delta_log_boundary": 0.0,
+                "delta_compile_proxy": 0.08333333333333333,
+                "delta_warm_proxy": 0.1,
+                "delta_memory_relative": 0.0
+              },
+              "gradient_score": 1.6460243229777947e-17,
+              "contraction_score": 1.507808540132331e-17,
+              "selection_score": 1.6460243229777947e-17,
+              "eligible": true,
+              "exclusion_reason": null,
+              "rank": 3,
+              "selected": false
+            },
+            {
+              "operator": {
+                "kind": "rzz",
+                "wire": 0
+              },
+              "signal": {
+                "operator": {
+                  "kind": "rzz",
+                  "wire": 0
+                },
+                "gradient": 8.397164875007854e-10,
+                "metric": 0.1903584928576708,
+                "normalized_signal": 3.704188706222667e-18
+              },
+              "cost": {
+                "boundary_before": 48,
+                "boundary_after": 192,
+                "delta_log_boundary": 1.3862943611198906,
+                "delta_compile_proxy": 0.16666666666666666,
+                "delta_warm_proxy": 0.15,
+                "delta_memory_relative": 3.0
+              },
+              "gradient_score": 3.704188706222667e-18,
+              "contraction_score": 4.4536399206688955e-19,
+              "selection_score": 3.704188706222667e-18,
+              "eligible": true,
+              "exclusion_reason": null,
+              "rank": 4,
+              "selected": false
+            },
+            {
+              "operator": {
+                "kind": "rzz",
+                "wire": 1
+              },
+              "signal": {
+                "operator": {
+                  "kind": "rzz",
+                  "wire": 1
+                },
+                "gradient": 6.725857765325998e-10,
+                "metric": 0.18501355740291497,
+                "normalized_signal": 2.4450728538036735e-18
+              },
+              "cost": {
+                "boundary_before": 48,
+                "boundary_after": 48,
+                "delta_log_boundary": 0.0,
+                "delta_compile_proxy": 0.16666666666666666,
+                "delta_warm_proxy": 0.15,
+                "delta_memory_relative": 0.0
+              },
+              "gradient_score": 2.4450728538036735e-18,
+              "contraction_score": 2.1108542622765528e-18,
+              "selection_score": 2.4450728538036735e-18,
+              "eligible": true,
+              "exclusion_reason": null,
+              "rank": 5,
+              "selected": false
+            },
+            {
+              "operator": {
+                "kind": "rx",
+                "wire": 0
+              },
+              "signal": {
+                "operator": {
+                  "kind": "rx",
+                  "wire": 0
+                },
+                "gradient": -2.704503261127322e-10,
+                "metric": 0.06190301772107437,
+                "normalized_signal": 1.1815801811613548e-18
+              },
+              "cost": {
+                "boundary_before": 48,
+                "boundary_after": 48,
+                "delta_log_boundary": 0.0,
+                "delta_compile_proxy": 0.08333333333333333,
+                "delta_warm_proxy": 0.1,
+                "delta_memory_relative": 0.0
+              },
+              "gradient_score": 1.1815801811613548e-18,
+              "contraction_score": 1.0823635247279585e-18,
+              "selection_score": 1.1815801811613548e-18,
+              "eligible": true,
+              "exclusion_reason": null,
+              "rank": 6,
+              "selected": false
+            },
+            {
+              "operator": {
+                "kind": "rzz",
+                "wire": 2
+              },
+              "signal": {
+                "operator": {
+                  "kind": "rzz",
+                  "wire": 2
+                },
+                "gradient": 4.4462368823421016e-11,
+                "metric": 0.1937062269597217,
+                "normalized_signal": 1.02056721273642e-20
+              },
+              "cost": {
+                "boundary_before": 48,
+                "boundary_after": 48,
+                "delta_log_boundary": 0.0,
+                "delta_compile_proxy": 0.16666666666666666,
+                "delta_warm_proxy": 0.15,
+                "delta_memory_relative": 0.0
+              },
+              "gradient_score": 1.02056721273642e-20,
+              "contraction_score": 8.810652196285641e-21,
+              "selection_score": 1.02056721273642e-20,
+              "eligible": true,
+              "exclusion_reason": null,
+              "rank": 7,
+              "selected": false
+            },
+            {
+              "operator": {
+                "kind": "yz",
+                "wire": 1
+              },
+              "signal": {
+                "operator": {
+                  "kind": "yz",
+                  "wire": 1
+                },
+                "gradient": -2.219169292771994e-12,
+                "metric": 0.25,
+                "normalized_signal": 1.9698849399849817e-23
+              },
+              "cost": {
+                "boundary_before": 48,
+                "boundary_after": 48,
+                "delta_log_boundary": 0.0,
+                "delta_compile_proxy": 0.16666666666666666,
+                "delta_warm_proxy": 0.15,
+                "delta_memory_relative": 0.0
+              },
+              "gradient_score": 1.9698849399849817e-23,
+              "contraction_score": 1.7006200920733658e-23,
+              "selection_score": 1.9698849399849817e-23,
+              "eligible": true,
+              "exclusion_reason": null,
+              "rank": 8,
+              "selected": false
+            },
+            {
+              "operator": {
+                "kind": "zy",
+                "wire": 2
+              },
+              "signal": {
+                "operator": {
+                  "kind": "zy",
+                  "wire": 2
+                },
+                "gradient": 7.333023077649159e-13,
+                "metric": 0.25,
+                "normalized_signal": 2.1509290982848022e-24
+              },
+              "cost": {
+                "boundary_before": 48,
+                "boundary_after": 48,
+                "delta_log_boundary": 0.0,
+                "delta_compile_proxy": 0.16666666666666666,
+                "delta_warm_proxy": 0.15,
+                "delta_memory_relative": 0.0
+              },
+              "gradient_score": 2.1509290982848022e-24,
+              "contraction_score": 1.8569172071523474e-24,
+              "selection_score": 2.1509290982848022e-24,
+              "eligible": true,
+              "exclusion_reason": null,
+              "rank": 9,
+              "selected": false
+            },
+            {
+              "operator": {
+                "kind": "zy",
+                "wire": 0
+              },
+              "signal": {
+                "operator": {
+                  "kind": "zy",
+                  "wire": 0
+                },
+                "gradient": 3.6376457401843254e-13,
+                "metric": 0.25,
+                "normalized_signal": 5.292986612411296e-25
+              },
+              "cost": {
+                "boundary_before": 48,
+                "boundary_after": 192,
+                "delta_log_boundary": 1.3862943611198906,
+                "delta_compile_proxy": 0.16666666666666666,
+                "delta_warm_proxy": 0.15,
+                "delta_memory_relative": 3.0
+              },
+              "gradient_score": 5.292986612411296e-25,
+              "contraction_score": 6.363891892710701e-26,
+              "selection_score": 5.292986612411296e-25,
+              "eligible": true,
+              "exclusion_reason": null,
+              "rank": 10,
+              "selected": false
+            },
+            {
+              "operator": {
+                "kind": "rx",
+                "wire": 3
+              },
+              "signal": {
+                "operator": {
+                  "kind": "rx",
+                  "wire": 3
+                },
+                "gradient": -3.004223634828437e-10,
+                "metric": 0.05629377304027805,
+                "normalized_signal": 1.6032607445665153e-18
+              },
+              "cost": {
+                "boundary_before": 48,
+                "boundary_after": 48,
+                "delta_log_boundary": 0.0,
+                "delta_compile_proxy": 0.08333333333333333,
+                "delta_warm_proxy": 0.1,
+                "delta_memory_relative": 0.0
+              },
+              "gradient_score": 1.6032607445665153e-18,
+              "contraction_score": 1.4686357965494796e-18,
+              "selection_score": 1.6032607445665153e-18,
+              "eligible": false,
+              "exclusion_reason": "fuses with a commuting prior gate",
+              "rank": 11,
+              "selected": false
+            },
+            {
+              "operator": {
+                "kind": "rx",
+                "wire": 2
+              },
+              "signal": {
+                "operator": {
+                  "kind": "rx",
+                  "wire": 2
+                },
+                "gradient": 3.0278680400787076e-10,
+                "metric": 0.10839916216209466,
+                "normalized_signal": 8.457615986308227e-19
+              },
+              "cost": {
+                "boundary_before": 48,
+                "boundary_after": 48,
+                "delta_log_boundary": 0.0,
+                "delta_compile_proxy": 0.08333333333333333,
+                "delta_warm_proxy": 0.1,
+                "delta_memory_relative": 0.0
+              },
+              "gradient_score": 8.457615986308227e-19,
+              "contraction_score": 7.747434491274711e-19,
+              "selection_score": 8.457615986308227e-19,
+              "eligible": false,
+              "exclusion_reason": "fuses with a commuting prior gate",
+              "rank": 12,
+              "selected": false
+            },
+            {
+              "operator": {
+                "kind": "yz",
+                "wire": 0
+              },
+              "signal": {
+                "operator": {
+                  "kind": "yz",
+                  "wire": 0
+                },
+                "gradient": -1.545430450278218e-13,
+                "metric": 0.25,
+                "normalized_signal": 9.553421106550329e-26
+              },
+              "cost": {
+                "boundary_before": 48,
+                "boundary_after": 192,
+                "delta_log_boundary": 1.3862943611198906,
+                "delta_compile_proxy": 0.16666666666666666,
+                "delta_warm_proxy": 0.15,
+                "delta_memory_relative": 3.0
+              },
+              "gradient_score": 9.553421106550329e-26,
+              "contraction_score": 1.1486320215710883e-26,
+              "selection_score": 9.553421106550329e-26,
+              "eligible": false,
+              "exclusion_reason": "fuses with a commuting prior gate",
+              "rank": 13,
+              "selected": false
+            }
+          ],
+          "cache_key": "e0556d9e83e976e49fb2b9504ae5b37c1df3c0741f6440ed4db7d638b3021c44",
+          "compile_seconds": 0.733225541000138,
+          "screening_seconds": 0.27244270899973344,
+          "optimization_seconds": 0.01147800000035204,
+          "evaluations": 20,
+          "optimizer_steps": 13,
+          "optimizer_message": null,
+          "energy": -4.758525601066369,
+          "energy_error": 0.00024488207726225397,
+          "boundary_dimension": 48
+        },
+        {
+          "round_index": 3,
+          "phase": "growth",
+          "structure": {
+            "nqubits": 4,
+            "operators": [
+              {
+                "kind": "rzz",
+                "wire": 0
+              },
+              {
+                "kind": "rzz",
+                "wire": 1
+              },
+              {
+                "kind": "rzz",
+                "wire": 2
+              },
+              {
+                "kind": "rx",
+                "wire": 0
+              },
+              {
+                "kind": "rx",
+                "wire": 1
+              },
+              {
+                "kind": "rx",
+                "wire": 2
+              },
+              {
+                "kind": "rx",
+                "wire": 3
+              },
+              {
+                "kind": "yz",
+                "wire": 0
+              },
+              {
+                "kind": "yz",
+                "wire": 2
+              },
+              {
+                "kind": "zy",
+                "wire": 1
+              }
+            ]
+          },
+          "selected_operator": {
+            "kind": "zy",
+            "wire": 1
+          },
+          "candidates": [
+            {
+              "operator": {
+                "kind": "zy",
+                "wire": 1
+              },
+              "signal": {
+                "operator": {
+                  "kind": "zy",
+                  "wire": 1
+                },
+                "gradient": 0.004635874325836897,
+                "metric": 0.25,
+                "normalized_signal": 8.596532305947097e-05
+              },
+              "cost": {
+                "boundary_before": 48,
+                "boundary_after": 48,
+                "delta_log_boundary": 0.0,
+                "delta_compile_proxy": 0.14285714285714285,
+                "delta_warm_proxy": 0.13043478260869565,
+                "delta_memory_relative": 0.0
+              },
+              "gradient_score": 8.596532305947097e-05,
+              "contraction_score": 7.563069405778594e-05,
+              "selection_score": 8.596532305947097e-05,
+              "eligible": true,
+              "exclusion_reason": null,
+              "rank": 1,
+              "selected": true
+            },
+            {
+              "operator": {
+                "kind": "yz",
+                "wire": 1
+              },
+              "signal": {
+                "operator": {
+                  "kind": "yz",
+                  "wire": 1
+                },
+                "gradient": 0.004635872932907292,
+                "metric": 0.25,
+                "normalized_signal": 8.596527139990599e-05
+              },
+              "cost": {
+                "boundary_before": 48,
+                "boundary_after": 48,
+                "delta_log_boundary": 0.0,
+                "delta_compile_proxy": 0.14285714285714285,
+                "delta_warm_proxy": 0.13043478260869565,
+                "delta_memory_relative": 0.0
+              },
+              "gradient_score": 8.596527139990599e-05,
+              "contraction_score": 7.563064860866045e-05,
+              "selection_score": 8.596527139990599e-05,
+              "eligible": true,
+              "exclusion_reason": null,
+              "rank": 2,
+              "selected": false
+            },
+            {
+              "operator": {
+                "kind": "zy",
+                "wire": 2
+              },
+              "signal": {
+                "operator": {
+                  "kind": "zy",
+                  "wire": 2
+                },
+                "gradient": -6.063747060025548e-09,
+                "metric": 0.25,
+                "normalized_signal": 1.4707611363128563e-16
+              },
+              "cost": {
+                "boundary_before": 48,
+                "boundary_after": 192,
+                "delta_log_boundary": 1.3862943611198906,
+                "delta_compile_proxy": 0.14285714285714285,
+                "delta_warm_proxy": 0.13043478260869565,
+                "delta_memory_relative": 3.0
+              },
+              "gradient_score": 1.4707611363128563e-16,
+              "contraction_score": 1.7729564059637922e-17,
+              "selection_score": 1.4707611363128563e-16,
+              "eligible": true,
+              "exclusion_reason": null,
+              "rank": 3,
+              "selected": false
+            },
+            {
+              "operator": {
+                "kind": "zy",
+                "wire": 0
+              },
+              "signal": {
+                "operator": {
+                  "kind": "zy",
+                  "wire": 0
+                },
+                "gradient": 1.2258634662920542e-09,
+                "metric": 0.25,
+                "normalized_signal": 6.010964951934238e-18
+              },
+              "cost": {
+                "boundary_before": 48,
+                "boundary_after": 192,
+                "delta_log_boundary": 1.3862943611198906,
+                "delta_compile_proxy": 0.14285714285714285,
+                "delta_warm_proxy": 0.13043478260869565,
+                "delta_memory_relative": 3.0
+              },
+              "gradient_score": 6.010964951934238e-18,
+              "contraction_score": 7.246029660718938e-19,
+              "selection_score": 6.010964951934238e-18,
+              "eligible": true,
+              "exclusion_reason": null,
+              "rank": 4,
+              "selected": false
+            },
+            {
+              "operator": {
+                "kind": "rx",
+                "wire": 1
+              },
+              "signal": {
+                "operator": {
+                  "kind": "rx",
+                  "wire": 1
+                },
+                "gradient": -6.540159765948044e-10,
+                "metric": 0.10639069581671287,
+                "normalized_signal": 4.020435192698892e-18
+              },
+              "cost": {
+                "boundary_before": 48,
+                "boundary_after": 48,
+                "delta_log_boundary": 0.0,
+                "delta_compile_proxy": 0.07142857142857142,
+                "delta_warm_proxy": 0.08695652173913043,
+                "delta_memory_relative": 0.0
+              },
+              "gradient_score": 4.020435192698892e-18,
+              "contraction_score": 3.725410451939692e-18,
+              "selection_score": 4.020435192698892e-18,
+              "eligible": true,
+              "exclusion_reason": null,
+              "rank": 5,
+              "selected": false
+            },
+            {
+              "operator": {
+                "kind": "rzz",
+                "wire": 0
+              },
+              "signal": {
+                "operator": {
+                  "kind": "rzz",
+                  "wire": 0
+                },
+                "gradient": 5.305477452457441e-10,
+                "metric": 0.18884587273836909,
+                "normalized_signal": 1.4905324956390325e-18
+              },
+              "cost": {
+                "boundary_before": 48,
+                "boundary_after": 192,
+                "delta_log_boundary": 1.3862943611198906,
+                "delta_compile_proxy": 0.14285714285714285,
+                "delta_warm_proxy": 0.13043478260869565,
+                "delta_memory_relative": 3.0
+              },
+              "gradient_score": 1.4905324956390325e-18,
+              "contraction_score": 1.796790159322162e-19,
+              "selection_score": 1.4905324956390325e-18,
+              "eligible": true,
+              "exclusion_reason": null,
+              "rank": 6,
+              "selected": false
+            },
+            {
+              "operator": {
+                "kind": "rx",
+                "wire": 0
+              },
+              "signal": {
+                "operator": {
+                  "kind": "rx",
+                  "wire": 0
+                },
+                "gradient": -1.9825596577641908e-10,
+                "metric": 0.06399888994209699,
+                "normalized_signal": 6.1415796431607e-19
+              },
+              "cost": {
+                "boundary_before": 48,
+                "boundary_after": 48,
+                "delta_log_boundary": 0.0,
+                "delta_compile_proxy": 0.07142857142857142,
+                "delta_warm_proxy": 0.08695652173913043,
+                "delta_memory_relative": 0.0
+              },
+              "gradient_score": 6.1415796431607e-19,
+              "contraction_score": 5.690902575820849e-19,
+              "selection_score": 6.1415796431607e-19,
+              "eligible": true,
+              "exclusion_reason": null,
+              "rank": 7,
+              "selected": false
+            },
+            {
+              "operator": {
+                "kind": "rzz",
+                "wire": 1
+              },
+              "signal": {
+                "operator": {
+                  "kind": "rzz",
+                  "wire": 1
+                },
+                "gradient": 2.993987713024358e-10,
+                "metric": 0.18019714238876744,
+                "normalized_signal": 4.974530842643289e-19
+              },
+              "cost": {
+                "boundary_before": 48,
+                "boundary_after": 48,
+                "delta_log_boundary": 0.0,
+                "delta_compile_proxy": 0.14285714285714285,
+                "delta_warm_proxy": 0.13043478260869565,
+                "delta_memory_relative": 0.0
+              },
+              "gradient_score": 4.974530842643289e-19,
+              "contraction_score": 4.3764998123801615e-19,
+              "selection_score": 4.974530842643289e-19,
+              "eligible": true,
+              "exclusion_reason": null,
+              "rank": 8,
+              "selected": false
+            },
+            {
+              "operator": {
+                "kind": "rx",
+                "wire": 3
+              },
+              "signal": {
+                "operator": {
+                  "kind": "rx",
+                  "wire": 3
+                },
+                "gradient": -1.630796295291208e-10,
+                "metric": 0.06399889075476459,
+                "normalized_signal": 4.155535393394266e-19
+              },
+              "cost": {
+                "boundary_before": 48,
+                "boundary_after": 48,
+                "delta_log_boundary": 0.0,
+                "delta_compile_proxy": 0.07142857142857142,
+                "delta_warm_proxy": 0.08695652173913043,
+                "delta_memory_relative": 0.0
+              },
+              "gradient_score": 4.155535393394266e-19,
+              "contraction_score": 3.85059682495814e-19,
+              "selection_score": 4.155535393394266e-19,
+              "eligible": true,
+              "exclusion_reason": null,
+              "rank": 9,
+              "selected": false
+            },
+            {
+              "operator": {
+                "kind": "rx",
+                "wire": 2
+              },
+              "signal": {
+                "operator": {
+                  "kind": "rx",
+                  "wire": 2
+                },
+                "gradient": 9.81935286863538e-11,
+                "metric": 0.10639069604422494,
+                "normalized_signal": 9.062793490681877e-20
+              },
+              "cost": {
+                "boundary_before": 48,
+                "boundary_after": 48,
+                "delta_log_boundary": 0.0,
+                "delta_compile_proxy": 0.07142857142857142,
+                "delta_warm_proxy": 0.08695652173913043,
+                "delta_memory_relative": 0.0
+              },
+              "gradient_score": 9.062793490681877e-20,
+              "contraction_score": 8.397753968344069e-20,
+              "selection_score": 9.062793490681877e-20,
+              "eligible": true,
+              "exclusion_reason": null,
+              "rank": 10,
+              "selected": false
+            },
+            {
+              "operator": {
+                "kind": "rzz",
+                "wire": 2
+              },
+              "signal": {
+                "operator": {
+                  "kind": "rzz",
+                  "wire": 2
+                },
+                "gradient": 8.721152666581015e-11,
+                "metric": 0.1888458720299911,
+                "normalized_signal": 4.027543891525008e-20
+              },
+              "cost": {
+                "boundary_before": 48,
+                "boundary_after": 192,
+                "delta_log_boundary": 1.3862943611198906,
+                "delta_compile_proxy": 0.14285714285714285,
+                "delta_warm_proxy": 0.13043478260869565,
+                "delta_memory_relative": 3.0
+              },
+              "gradient_score": 4.027543891525008e-20,
+              "contraction_score": 4.85507780051965e-21,
+              "selection_score": 4.027543891525008e-20,
+              "eligible": true,
+              "exclusion_reason": null,
+              "rank": 11,
+              "selected": false
+            },
+            {
+              "operator": {
+                "kind": "yz",
+                "wire": 2
+              },
+              "signal": {
+                "operator": {
+                  "kind": "yz",
+                  "wire": 2
+                },
+                "gradient": -2.0491470742456386e-09,
+                "metric": 0.25,
+                "normalized_signal": 1.679601492749066e-17
+              },
+              "cost": {
+                "boundary_before": 48,
+                "boundary_after": 192,
+                "delta_log_boundary": 1.3862943611198906,
+                "delta_compile_proxy": 0.14285714285714285,
+                "delta_warm_proxy": 0.13043478260869565,
+                "delta_memory_relative": 3.0
+              },
+              "gradient_score": 1.679601492749066e-17,
+              "contraction_score": 2.024706903461693e-18,
+              "selection_score": 1.679601492749066e-17,
+              "eligible": false,
+              "exclusion_reason": "fuses with a commuting prior gate",
+              "rank": 12,
+              "selected": false
+            },
+            {
+              "operator": {
+                "kind": "yz",
+                "wire": 0
+              },
+              "signal": {
+                "operator": {
+                  "kind": "yz",
+                  "wire": 0
+                },
+                "gradient": 4.885152282696481e-10,
+                "metric": 0.25,
+                "normalized_signal": 9.545885130015672e-19
+              },
+              "cost": {
+                "boundary_before": 48,
+                "boundary_after": 192,
+                "delta_log_boundary": 1.3862943611198906,
+                "delta_compile_proxy": 0.14285714285714285,
+                "delta_warm_proxy": 0.13043478260869565,
+                "delta_memory_relative": 3.0
+              },
+              "gradient_score": 9.545885130015672e-19,
+              "contraction_score": 1.1507265030326225e-19,
+              "selection_score": 9.545885130015672e-19,
+              "eligible": false,
+              "exclusion_reason": "fuses with a commuting prior gate",
+              "rank": 13,
+              "selected": false
+            }
+          ],
+          "cache_key": "7d5c347975515b1d46087b7fbb3f45e941de4fde610bc4cd3c244b2586378b7d",
+          "compile_seconds": 0.942124708002666,
+          "screening_seconds": 0.2832720000005793,
+          "optimization_seconds": 0.011234334000619128,
+          "evaluations": 17,
+          "optimizer_steps": 13,
+          "optimizer_message": null,
+          "energy": -4.758770483093128,
+          "energy_error": 5.050271312256882e-11,
+          "boundary_dimension": 48
+        }
+      ],
+      "evaluations": 94,
+      "compiled_structures": 4,
+      "compile_seconds": 3.1389324990013847,
+      "screening_seconds": 2.1088858760049334,
+      "optimization_seconds": 0.5558864599952358,
+      "time_to_target_seconds": 5.860082209001121,
+      "total_seconds": 5.880126791998919,
+      "peak_rss_bytes": 308166656,
+      "failure": null,
+      "skipped": false
+    },
+    {
+      "request": {
+        "spec": {
+          "nqubits": 4,
+          "depth": 1,
+          "coupling": 1.0,
+          "field": 1.0,
+          "initial_state": "plus",
+          "dtype": "complex128"
+        },
+        "policy": "contraction-aware",
+        "target_energy_error": 1e-10,
+        "max_growth_rounds": 7,
+        "optimizer_steps_per_round": 100,
+        "seed": 3,
+        "initial_scale": 0.15,
+        "metric_epsilon": 1e-12,
+        "cost_weights": {
+          "boundary": 3.0,
+          "compile": 0.5,
+          "warm": 0.5,
+          "memory": 1.0
+        },
+        "seed_depth": 1,
+        "fixed_depth": 2
+      },
+      "converged": true,
+      "ground_energy": -4.758770483143631,
+      "target_energy": -4.758770483043631,
+      "final_energy": -4.758770483093128,
+      "final_parameters": [
+        0.22382262328061822,
+        -0.5152614270045357,
+        -0.7875098054122487,
+        -3.330148514837988e-09,
+        -1.5707963249900354,
+        -1.3689177424037237e-09,
+        -1.570796325335325,
+        -0.7166155481682789,
+        0.31543620590999943,
+        -0.09212547977346816
+      ],
+      "final_structure": {
+        "nqubits": 4,
+        "operators": [
+          {
+            "kind": "rzz",
+            "wire": 0
+          },
+          {
+            "kind": "rzz",
+            "wire": 1
+          },
+          {
+            "kind": "rzz",
+            "wire": 2
+          },
+          {
+            "kind": "rx",
+            "wire": 0
+          },
+          {
+            "kind": "rx",
+            "wire": 1
+          },
+          {
+            "kind": "rx",
+            "wire": 2
+          },
+          {
+            "kind": "rx",
+            "wire": 3
+          },
+          {
+            "kind": "yz",
+            "wire": 0
+          },
+          {
+            "kind": "yz",
+            "wire": 2
+          },
+          {
+            "kind": "zy",
+            "wire": 1
+          }
+        ]
+      },
+      "rounds": [
+        {
+          "round_index": 0,
+          "phase": "seed",
+          "structure": {
+            "nqubits": 4,
+            "operators": [
+              {
+                "kind": "rzz",
+                "wire": 0
+              },
+              {
+                "kind": "rzz",
+                "wire": 1
+              },
+              {
+                "kind": "rzz",
+                "wire": 2
+              },
+              {
+                "kind": "rx",
+                "wire": 0
+              },
+              {
+                "kind": "rx",
+                "wire": 1
+              },
+              {
+                "kind": "rx",
+                "wire": 2
+              },
+              {
+                "kind": "rx",
+                "wire": 3
+              }
+            ]
+          },
+          "selected_operator": null,
+          "candidates": [],
+          "cache_key": "210f661a970111150cc34ad285301b22df94fe43121259d2ac2974862bba05df",
+          "compile_seconds": 0.7371983749981155,
+          "screening_seconds": 0.0,
+          "optimization_seconds": 0.570086583000375,
+          "evaluations": 41,
+          "optimizer_steps": 34,
+          "optimizer_message": null,
+          "energy": -4.653055889417638,
+          "energy_error": 0.10571459372599268,
+          "boundary_dimension": 12
+        },
+        {
+          "round_index": 1,
+          "phase": "growth",
+          "structure": {
+            "nqubits": 4,
+            "operators": [
+              {
+                "kind": "rzz",
+                "wire": 0
+              },
+              {
+                "kind": "rzz",
+                "wire": 1
+              },
+              {
+                "kind": "rzz",
+                "wire": 2
+              },
+              {
+                "kind": "rx",
+                "wire": 0
+              },
+              {
+                "kind": "rx",
+                "wire": 1
+              },
+              {
+                "kind": "rx",
+                "wire": 2
+              },
+              {
+                "kind": "rx",
+                "wire": 3
+              },
+              {
+                "kind": "yz",
+                "wire": 0
+              }
+            ]
+          },
+          "selected_operator": {
+            "kind": "yz",
+            "wire": 0
+          },
+          "candidates": [
+            {
+              "operator": {
+                "kind": "yz",
+                "wire": 0
+              },
+              "signal": {
+                "operator": {
+                  "kind": "yz",
+                  "wire": 0
+                },
+                "gradient": 0.21871862059299474,
+                "metric": 0.25,
+                "normalized_signal": 0.19135133997564413
+              },
+              "cost": {
+                "boundary_before": 12,
+                "boundary_after": 48,
+                "delta_log_boundary": 1.3862943611198906,
+                "delta_compile_proxy": 0.2,
+                "delta_warm_proxy": 0.17647058823529413,
+                "delta_memory_relative": 3.0
+              },
+              "gradient_score": 0.19135133997564413,
+              "contraction_score": 0.02292423939882768,
+              "selection_score": 0.02292423939882768,
+              "eligible": true,
+              "exclusion_reason": null,
+              "rank": 1,
+              "selected": true
+            },
+            {
+              "operator": {
+                "kind": "zy",
+                "wire": 1
+              },
+              "signal": {
+                "operator": {
+                  "kind": "zy",
+                  "wire": 1
+                },
+                "gradient": 0.10592853191234286,
+                "metric": 0.25,
+                "normalized_signal": 0.04488341549223743
+              },
+              "cost": {
+                "boundary_before": 12,
+                "boundary_after": 48,
+                "delta_log_boundary": 1.3862943611198906,
+                "delta_compile_proxy": 0.2,
+                "delta_warm_proxy": 0.17647058823529413,
+                "delta_memory_relative": 3.0
+              },
+              "gradient_score": 0.04488341549223743,
+              "contraction_score": 0.0053771150069399365,
+              "selection_score": 0.0053771150069399365,
+              "eligible": true,
+              "exclusion_reason": null,
+              "rank": 2,
+              "selected": false
+            },
+            {
+              "operator": {
+                "kind": "yz",
+                "wire": 2
+              },
+              "signal": {
+                "operator": {
+                  "kind": "yz",
+                  "wire": 2
+                },
+                "gradient": -0.07066881914201811,
+                "metric": 0.25,
+                "normalized_signal": 0.019976327995629158
+              },
+              "cost": {
+                "boundary_before": 12,
+                "boundary_after": 48,
+                "delta_log_boundary": 1.3862943611198906,
+                "delta_compile_proxy": 0.2,
+                "delta_warm_proxy": 0.17647058823529413,
+                "delta_memory_relative": 3.0
+              },
+              "gradient_score": 0.019976327995629158,
+              "contraction_score": 0.0023932005145069525,
+              "selection_score": 0.0023932005145069525,
+              "eligible": true,
+              "exclusion_reason": null,
+              "rank": 3,
+              "selected": false
+            },
+            {
+              "operator": {
+                "kind": "zy",
+                "wire": 2
+              },
+              "signal": {
+                "operator": {
+                  "kind": "zy",
+                  "wire": 2
+                },
+                "gradient": 2.3822073202950378e-09,
+                "metric": 0.25,
+                "normalized_signal": 2.2699646867378263e-17
+              },
+              "cost": {
+                "boundary_before": 12,
+                "boundary_after": 48,
+                "delta_log_boundary": 1.3862943611198906,
+                "delta_compile_proxy": 0.2,
+                "delta_warm_proxy": 0.17647058823529413,
+                "delta_memory_relative": 3.0
+              },
+              "gradient_score": 2.2699646867378263e-17,
+              "contraction_score": 2.7194590804687485e-18,
+              "selection_score": 2.7194590804687485e-18,
+              "eligible": true,
+              "exclusion_reason": null,
+              "rank": 4,
+              "selected": false
+            },
+            {
+              "operator": {
+                "kind": "zy",
+                "wire": 0
+              },
+              "signal": {
+                "operator": {
+                  "kind": "zy",
+                  "wire": 0
+                },
+                "gradient": -1.5590382318464435e-09,
+                "metric": 0.25,
+                "normalized_signal": 9.722400833396652e-18
+              },
+              "cost": {
+                "boundary_before": 12,
+                "boundary_after": 48,
+                "delta_log_boundary": 1.3862943611198906,
+                "delta_compile_proxy": 0.2,
+                "delta_warm_proxy": 0.17647058823529413,
+                "delta_memory_relative": 3.0
+              },
+              "gradient_score": 9.722400833396652e-18,
+              "contraction_score": 1.1647613456196093e-18,
+              "selection_score": 1.1647613456196093e-18,
+              "eligible": true,
+              "exclusion_reason": null,
+              "rank": 5,
+              "selected": false
+            },
+            {
+              "operator": {
+                "kind": "rzz",
+                "wire": 2
+              },
+              "signal": {
+                "operator": {
+                  "kind": "rzz",
+                  "wire": 2
+                },
+                "gradient": 9.781225924549106e-10,
+                "metric": 0.1966682828643296,
+                "normalized_signal": 4.8646573404306405e-18
+              },
+              "cost": {
+                "boundary_before": 12,
+                "boundary_after": 48,
+                "delta_log_boundary": 1.3862943611198906,
+                "delta_compile_proxy": 0.2,
+                "delta_warm_proxy": 0.17647058823529413,
+                "delta_memory_relative": 3.0
+              },
+              "gradient_score": 4.8646573404306405e-18,
+              "contraction_score": 5.827948185755628e-19,
+              "selection_score": 5.827948185755628e-19,
+              "eligible": true,
+              "exclusion_reason": null,
+              "rank": 6,
+              "selected": false
+            },
+            {
+              "operator": {
+                "kind": "rzz",
+                "wire": 1
+              },
+              "signal": {
+                "operator": {
+                  "kind": "rzz",
+                  "wire": 1
+                },
+                "gradient": 3.098875674665014e-10,
+                "metric": 0.2169828671312801,
+                "normalized_signal": 4.425709077379004e-19
+              },
+              "cost": {
+                "boundary_before": 12,
+                "boundary_after": 48,
+                "delta_log_boundary": 1.3862943611198906,
+                "delta_compile_proxy": 0.2,
+                "delta_warm_proxy": 0.17647058823529413,
+                "delta_memory_relative": 3.0
+              },
+              "gradient_score": 4.425709077379004e-19,
+              "contraction_score": 5.3020801637613174e-20,
+              "selection_score": 5.3020801637613174e-20,
+              "eligible": true,
+              "exclusion_reason": null,
+              "rank": 7,
+              "selected": false
+            },
+            {
+              "operator": {
+                "kind": "rzz",
+                "wire": 0
+              },
+              "signal": {
+                "operator": {
+                  "kind": "rzz",
+                  "wire": 0
+                },
+                "gradient": -2.9484454210222814e-10,
+                "metric": 0.22102554584869538,
+                "normalized_signal": 3.9331790211521554e-19
+              },
+              "cost": {
+                "boundary_before": 12,
+                "boundary_after": 48,
+                "delta_log_boundary": 1.3862943611198906,
+                "delta_compile_proxy": 0.2,
+                "delta_warm_proxy": 0.17647058823529413,
+                "delta_memory_relative": 3.0
+              },
+              "gradient_score": 3.9331790211521554e-19,
+              "contraction_score": 4.7120201766454976e-20,
+              "selection_score": 4.7120201766454976e-20,
+              "eligible": true,
+              "exclusion_reason": null,
+              "rank": 8,
+              "selected": false
+            },
+            {
+              "operator": {
+                "kind": "yz",
+                "wire": 1
+              },
+              "signal": {
+                "operator": {
+                  "kind": "yz",
+                  "wire": 1
+                },
+                "gradient": -2.896363149318404e-10,
+                "metric": 0.25,
+                "normalized_signal": 3.3555677970784273e-19
+              },
+              "cost": {
+                "boundary_before": 12,
+                "boundary_after": 48,
+                "delta_log_boundary": 1.3862943611198906,
+                "delta_compile_proxy": 0.2,
+                "delta_warm_proxy": 0.17647058823529413,
+                "delta_memory_relative": 3.0
+              },
+              "gradient_score": 3.3555677970784273e-19,
+              "contraction_score": 4.020031399258235e-20,
+              "selection_score": 4.020031399258235e-20,
+              "eligible": true,
+              "exclusion_reason": null,
+              "rank": 9,
+              "selected": false
+            },
+            {
+              "operator": {
+                "kind": "rx",
+                "wire": 3
+              },
+              "signal": {
+                "operator": {
+                  "kind": "rx",
+                  "wire": 3
+                },
+                "gradient": -7.65779906287166e-10,
+                "metric": 0.053331717135670254,
+                "normalized_signal": 1.0995686926231863e-17
+              },
+              "cost": {
+                "boundary_before": 12,
+                "boundary_after": 12,
+                "delta_log_boundary": 0.0,
+                "delta_compile_proxy": 0.1,
+                "delta_warm_proxy": 0.11764705882352941,
+                "delta_memory_relative": 0.0
+              },
+              "gradient_score": 1.0995686926231863e-17,
+              "contraction_score": 9.916534628431918e-18,
+              "selection_score": 9.916534628431918e-18,
+              "eligible": false,
+              "exclusion_reason": "fuses with a commuting prior gate",
+              "rank": 10,
+              "selected": false
+            },
+            {
+              "operator": {
+                "kind": "rx",
+                "wire": 2
+              },
+              "signal": {
+                "operator": {
+                  "kind": "rx",
+                  "wire": 2
+                },
+                "gradient": -2.488867844192041e-10,
+                "metric": 0.08342290933650495,
+                "normalized_signal": 7.42537415087279e-19
+              },
+              "cost": {
+                "boundary_before": 12,
+                "boundary_after": 12,
+                "delta_log_boundary": 0.0,
+                "delta_compile_proxy": 0.1,
+                "delta_warm_proxy": 0.11764705882352941,
+                "delta_memory_relative": 0.0
+              },
+              "gradient_score": 7.42537415087279e-19,
+              "contraction_score": 6.696623902643895e-19,
+              "selection_score": 6.696623902643895e-19,
+              "eligible": false,
+              "exclusion_reason": "fuses with a commuting prior gate",
+              "rank": 11,
+              "selected": false
+            },
+            {
+              "operator": {
+                "kind": "rx",
+                "wire": 0
+              },
+              "signal": {
+                "operator": {
+                  "kind": "rx",
+                  "wire": 0
+                },
+                "gradient": -7.692248246192046e-11,
+                "metric": 0.03420852244550038,
+                "normalized_signal": 1.7297058992706632e-19
+              },
+              "cost": {
+                "boundary_before": 12,
+                "boundary_after": 12,
+                "delta_log_boundary": 0.0,
+                "delta_compile_proxy": 0.1,
+                "delta_warm_proxy": 0.11764705882352941,
+                "delta_memory_relative": 0.0
+              },
+              "gradient_score": 1.7297058992706632e-19,
+              "contraction_score": 1.559946964859484e-19,
+              "selection_score": 1.559946964859484e-19,
+              "eligible": false,
+              "exclusion_reason": "fuses with a commuting prior gate",
+              "rank": 12,
+              "selected": false
+            },
+            {
+              "operator": {
+                "kind": "rx",
+                "wire": 1
+              },
+              "signal": {
+                "operator": {
+                  "kind": "rx",
+                  "wire": 1
+                },
+                "gradient": 9.842355534910695e-11,
+                "metric": 0.06722565531422026,
+                "normalized_signal": 1.4409969232929863e-19
+              },
+              "cost": {
+                "boundary_before": 12,
+                "boundary_after": 12,
+                "delta_log_boundary": 0.0,
+                "delta_compile_proxy": 0.1,
+                "delta_warm_proxy": 0.11764705882352941,
+                "delta_memory_relative": 0.0
+              },
+              "gradient_score": 1.4409969232929863e-19,
+              "contraction_score": 1.2995728220679452e-19,
+              "selection_score": 1.2995728220679452e-19,
+              "eligible": false,
+              "exclusion_reason": "fuses with a commuting prior gate",
+              "rank": 13,
+              "selected": false
+            }
+          ],
+          "cache_key": "ce7f85b51749014ebce23969de8917d7329dde622665f085b80cde765fcd2449",
+          "compile_seconds": 0.6989134159957757,
+          "screening_seconds": 1.7654367499999353,
+          "optimization_seconds": 0.009596249998139683,
+          "evaluations": 16,
+          "optimizer_steps": 11,
+          "optimizer_message": null,
+          "energy": -4.7453415654512545,
+          "energy_error": 0.01342891769237653,
+          "boundary_dimension": 48
+        },
+        {
+          "round_index": 2,
+          "phase": "growth",
+          "structure": {
+            "nqubits": 4,
+            "operators": [
+              {
+                "kind": "rzz",
+                "wire": 0
+              },
+              {
+                "kind": "rzz",
+                "wire": 1
+              },
+              {
+                "kind": "rzz",
+                "wire": 2
+              },
+              {
+                "kind": "rx",
+                "wire": 0
+              },
+              {
+                "kind": "rx",
+                "wire": 1
+              },
+              {
+                "kind": "rx",
+                "wire": 2
+              },
+              {
+                "kind": "rx",
+                "wire": 3
+              },
+              {
+                "kind": "yz",
+                "wire": 0
+              },
+              {
+                "kind": "yz",
+                "wire": 2
+              }
+            ]
+          },
+          "selected_operator": {
+            "kind": "yz",
+            "wire": 2
+          },
+          "candidates": [
+            {
+              "operator": {
+                "kind": "yz",
+                "wire": 2
+              },
+              "signal": {
+                "operator": {
+                  "kind": "yz",
+                  "wire": 2
+                },
+                "gradient": -0.12764365638487957,
+                "metric": 0.25,
+                "normalized_signal": 0.06517161206094414
+              },
+              "cost": {
+                "boundary_before": 48,
+                "boundary_after": 48,
+                "delta_log_boundary": 0.0,
+                "delta_compile_proxy": 0.16666666666666666,
+                "delta_warm_proxy": 0.15,
+                "delta_memory_relative": 0.0
+              },
+              "gradient_score": 0.06517161206094414,
+              "contraction_score": 0.05626326221088704,
+              "selection_score": 0.05626326221088704,
+              "eligible": true,
+              "exclusion_reason": null,
+              "rank": 1,
+              "selected": true
+            },
+            {
+              "operator": {
+                "kind": "zy",
+                "wire": 1
+              },
+              "signal": {
+                "operator": {
+                  "kind": "zy",
+                  "wire": 1
+                },
+                "gradient": -0.11480524424361405,
+                "metric": 0.25,
+                "normalized_signal": 0.05272097642313262
+              },
+              "cost": {
+                "boundary_before": 48,
+                "boundary_after": 48,
+                "delta_log_boundary": 0.0,
+                "delta_compile_proxy": 0.16666666666666666,
+                "delta_warm_proxy": 0.15,
+                "delta_memory_relative": 0.0
+              },
+              "gradient_score": 0.05272097642313262,
+              "contraction_score": 0.045514512019970615,
+              "selection_score": 0.045514512019970615,
+              "eligible": true,
+              "exclusion_reason": null,
+              "rank": 2,
+              "selected": false
+            },
+            {
+              "operator": {
+                "kind": "rx",
+                "wire": 1
+              },
+              "signal": {
+                "operator": {
+                  "kind": "rx",
+                  "wire": 1
+                },
+                "gradient": -1.2886787472691025e-09,
+                "metric": 0.10089115272867119,
+                "normalized_signal": 1.6460243229777947e-17
+              },
+              "cost": {
+                "boundary_before": 48,
+                "boundary_after": 48,
+                "delta_log_boundary": 0.0,
+                "delta_compile_proxy": 0.08333333333333333,
+                "delta_warm_proxy": 0.1,
+                "delta_memory_relative": 0.0
+              },
+              "gradient_score": 1.6460243229777947e-17,
+              "contraction_score": 1.507808540132331e-17,
+              "selection_score": 1.507808540132331e-17,
+              "eligible": true,
+              "exclusion_reason": null,
+              "rank": 3,
+              "selected": false
+            },
+            {
+              "operator": {
+                "kind": "rzz",
+                "wire": 1
+              },
+              "signal": {
+                "operator": {
+                  "kind": "rzz",
+                  "wire": 1
+                },
+                "gradient": 6.725857765325998e-10,
+                "metric": 0.18501355740291497,
+                "normalized_signal": 2.4450728538036735e-18
+              },
+              "cost": {
+                "boundary_before": 48,
+                "boundary_after": 48,
+                "delta_log_boundary": 0.0,
+                "delta_compile_proxy": 0.16666666666666666,
+                "delta_warm_proxy": 0.15,
+                "delta_memory_relative": 0.0
+              },
+              "gradient_score": 2.4450728538036735e-18,
+              "contraction_score": 2.1108542622765528e-18,
+              "selection_score": 2.1108542622765528e-18,
+              "eligible": true,
+              "exclusion_reason": null,
+              "rank": 4,
+              "selected": false
+            },
+            {
+              "operator": {
+                "kind": "rx",
+                "wire": 0
+              },
+              "signal": {
+                "operator": {
+                  "kind": "rx",
+                  "wire": 0
+                },
+                "gradient": -2.704503261127322e-10,
+                "metric": 0.06190301772107437,
+                "normalized_signal": 1.1815801811613548e-18
+              },
+              "cost": {
+                "boundary_before": 48,
+                "boundary_after": 48,
+                "delta_log_boundary": 0.0,
+                "delta_compile_proxy": 0.08333333333333333,
+                "delta_warm_proxy": 0.1,
+                "delta_memory_relative": 0.0
+              },
+              "gradient_score": 1.1815801811613548e-18,
+              "contraction_score": 1.0823635247279585e-18,
+              "selection_score": 1.0823635247279585e-18,
+              "eligible": true,
+              "exclusion_reason": null,
+              "rank": 5,
+              "selected": false
+            },
+            {
+              "operator": {
+                "kind": "rzz",
+                "wire": 0
+              },
+              "signal": {
+                "operator": {
+                  "kind": "rzz",
+                  "wire": 0
+                },
+                "gradient": 8.397164875007854e-10,
+                "metric": 0.1903584928576708,
+                "normalized_signal": 3.704188706222667e-18
+              },
+              "cost": {
+                "boundary_before": 48,
+                "boundary_after": 192,
+                "delta_log_boundary": 1.3862943611198906,
+                "delta_compile_proxy": 0.16666666666666666,
+                "delta_warm_proxy": 0.15,
+                "delta_memory_relative": 3.0
+              },
+              "gradient_score": 3.704188706222667e-18,
+              "contraction_score": 4.4536399206688955e-19,
+              "selection_score": 4.4536399206688955e-19,
+              "eligible": true,
+              "exclusion_reason": null,
+              "rank": 6,
+              "selected": false
+            },
+            {
+              "operator": {
+                "kind": "rzz",
+                "wire": 2
+              },
+              "signal": {
+                "operator": {
+                  "kind": "rzz",
+                  "wire": 2
+                },
+                "gradient": 4.4462368823421016e-11,
+                "metric": 0.1937062269597217,
+                "normalized_signal": 1.02056721273642e-20
+              },
+              "cost": {
+                "boundary_before": 48,
+                "boundary_after": 48,
+                "delta_log_boundary": 0.0,
+                "delta_compile_proxy": 0.16666666666666666,
+                "delta_warm_proxy": 0.15,
+                "delta_memory_relative": 0.0
+              },
+              "gradient_score": 1.02056721273642e-20,
+              "contraction_score": 8.810652196285641e-21,
+              "selection_score": 8.810652196285641e-21,
+              "eligible": true,
+              "exclusion_reason": null,
+              "rank": 7,
+              "selected": false
+            },
+            {
+              "operator": {
+                "kind": "yz",
+                "wire": 1
+              },
+              "signal": {
+                "operator": {
+                  "kind": "yz",
+                  "wire": 1
+                },
+                "gradient": -2.219169292771994e-12,
+                "metric": 0.25,
+                "normalized_signal": 1.9698849399849817e-23
+              },
+              "cost": {
+                "boundary_before": 48,
+                "boundary_after": 48,
+                "delta_log_boundary": 0.0,
+                "delta_compile_proxy": 0.16666666666666666,
+                "delta_warm_proxy": 0.15,
+                "delta_memory_relative": 0.0
+              },
+              "gradient_score": 1.9698849399849817e-23,
+              "contraction_score": 1.7006200920733658e-23,
+              "selection_score": 1.7006200920733658e-23,
+              "eligible": true,
+              "exclusion_reason": null,
+              "rank": 8,
+              "selected": false
+            },
+            {
+              "operator": {
+                "kind": "zy",
+                "wire": 2
+              },
+              "signal": {
+                "operator": {
+                  "kind": "zy",
+                  "wire": 2
+                },
+                "gradient": 7.333023077649159e-13,
+                "metric": 0.25,
+                "normalized_signal": 2.1509290982848022e-24
+              },
+              "cost": {
+                "boundary_before": 48,
+                "boundary_after": 48,
+                "delta_log_boundary": 0.0,
+                "delta_compile_proxy": 0.16666666666666666,
+                "delta_warm_proxy": 0.15,
+                "delta_memory_relative": 0.0
+              },
+              "gradient_score": 2.1509290982848022e-24,
+              "contraction_score": 1.8569172071523474e-24,
+              "selection_score": 1.8569172071523474e-24,
+              "eligible": true,
+              "exclusion_reason": null,
+              "rank": 9,
+              "selected": false
+            },
+            {
+              "operator": {
+                "kind": "zy",
+                "wire": 0
+              },
+              "signal": {
+                "operator": {
+                  "kind": "zy",
+                  "wire": 0
+                },
+                "gradient": 3.6376457401843254e-13,
+                "metric": 0.25,
+                "normalized_signal": 5.292986612411296e-25
+              },
+              "cost": {
+                "boundary_before": 48,
+                "boundary_after": 192,
+                "delta_log_boundary": 1.3862943611198906,
+                "delta_compile_proxy": 0.16666666666666666,
+                "delta_warm_proxy": 0.15,
+                "delta_memory_relative": 3.0
+              },
+              "gradient_score": 5.292986612411296e-25,
+              "contraction_score": 6.363891892710701e-26,
+              "selection_score": 6.363891892710701e-26,
+              "eligible": true,
+              "exclusion_reason": null,
+              "rank": 10,
+              "selected": false
+            },
+            {
+              "operator": {
+                "kind": "rx",
+                "wire": 3
+              },
+              "signal": {
+                "operator": {
+                  "kind": "rx",
+                  "wire": 3
+                },
+                "gradient": -3.004223634828437e-10,
+                "metric": 0.05629377304027805,
+                "normalized_signal": 1.6032607445665153e-18
+              },
+              "cost": {
+                "boundary_before": 48,
+                "boundary_after": 48,
+                "delta_log_boundary": 0.0,
+                "delta_compile_proxy": 0.08333333333333333,
+                "delta_warm_proxy": 0.1,
+                "delta_memory_relative": 0.0
+              },
+              "gradient_score": 1.6032607445665153e-18,
+              "contraction_score": 1.4686357965494796e-18,
+              "selection_score": 1.4686357965494796e-18,
+              "eligible": false,
+              "exclusion_reason": "fuses with a commuting prior gate",
+              "rank": 11,
+              "selected": false
+            },
+            {
+              "operator": {
+                "kind": "rx",
+                "wire": 2
+              },
+              "signal": {
+                "operator": {
+                  "kind": "rx",
+                  "wire": 2
+                },
+                "gradient": 3.0278680400787076e-10,
+                "metric": 0.10839916216209466,
+                "normalized_signal": 8.457615986308227e-19
+              },
+              "cost": {
+                "boundary_before": 48,
+                "boundary_after": 48,
+                "delta_log_boundary": 0.0,
+                "delta_compile_proxy": 0.08333333333333333,
+                "delta_warm_proxy": 0.1,
+                "delta_memory_relative": 0.0
+              },
+              "gradient_score": 8.457615986308227e-19,
+              "contraction_score": 7.747434491274711e-19,
+              "selection_score": 7.747434491274711e-19,
+              "eligible": false,
+              "exclusion_reason": "fuses with a commuting prior gate",
+              "rank": 12,
+              "selected": false
+            },
+            {
+              "operator": {
+                "kind": "yz",
+                "wire": 0
+              },
+              "signal": {
+                "operator": {
+                  "kind": "yz",
+                  "wire": 0
+                },
+                "gradient": -1.545430450278218e-13,
+                "metric": 0.25,
+                "normalized_signal": 9.553421106550329e-26
+              },
+              "cost": {
+                "boundary_before": 48,
+                "boundary_after": 192,
+                "delta_log_boundary": 1.3862943611198906,
+                "delta_compile_proxy": 0.16666666666666666,
+                "delta_warm_proxy": 0.15,
+                "delta_memory_relative": 3.0
+              },
+              "gradient_score": 9.553421106550329e-26,
+              "contraction_score": 1.1486320215710883e-26,
+              "selection_score": 1.1486320215710883e-26,
+              "eligible": false,
+              "exclusion_reason": "fuses with a commuting prior gate",
+              "rank": 13,
+              "selected": false
+            }
+          ],
+          "cache_key": "e0556d9e83e976e49fb2b9504ae5b37c1df3c0741f6440ed4db7d638b3021c44",
+          "compile_seconds": 0.8361778750040685,
+          "screening_seconds": 0.29861395899933996,
+          "optimization_seconds": 0.008327791998453904,
+          "evaluations": 20,
+          "optimizer_steps": 13,
+          "optimizer_message": null,
+          "energy": -4.758525601066369,
+          "energy_error": 0.00024488207726225397,
+          "boundary_dimension": 48
+        },
+        {
+          "round_index": 3,
+          "phase": "growth",
+          "structure": {
+            "nqubits": 4,
+            "operators": [
+              {
+                "kind": "rzz",
+                "wire": 0
+              },
+              {
+                "kind": "rzz",
+                "wire": 1
+              },
+              {
+                "kind": "rzz",
+                "wire": 2
+              },
+              {
+                "kind": "rx",
+                "wire": 0
+              },
+              {
+                "kind": "rx",
+                "wire": 1
+              },
+              {
+                "kind": "rx",
+                "wire": 2
+              },
+              {
+                "kind": "rx",
+                "wire": 3
+              },
+              {
+                "kind": "yz",
+                "wire": 0
+              },
+              {
+                "kind": "yz",
+                "wire": 2
+              },
+              {
+                "kind": "zy",
+                "wire": 1
+              }
+            ]
+          },
+          "selected_operator": {
+            "kind": "zy",
+            "wire": 1
+          },
+          "candidates": [
+            {
+              "operator": {
+                "kind": "zy",
+                "wire": 1
+              },
+              "signal": {
+                "operator": {
+                  "kind": "zy",
+                  "wire": 1
+                },
+                "gradient": 0.004635874325836897,
+                "metric": 0.25,
+                "normalized_signal": 8.596532305947097e-05
+              },
+              "cost": {
+                "boundary_before": 48,
+                "boundary_after": 48,
+                "delta_log_boundary": 0.0,
+                "delta_compile_proxy": 0.14285714285714285,
+                "delta_warm_proxy": 0.13043478260869565,
+                "delta_memory_relative": 0.0
+              },
+              "gradient_score": 8.596532305947097e-05,
+              "contraction_score": 7.563069405778594e-05,
+              "selection_score": 7.563069405778594e-05,
+              "eligible": true,
+              "exclusion_reason": null,
+              "rank": 1,
+              "selected": true
+            },
+            {
+              "operator": {
+                "kind": "yz",
+                "wire": 1
+              },
+              "signal": {
+                "operator": {
+                  "kind": "yz",
+                  "wire": 1
+                },
+                "gradient": 0.004635872932907292,
+                "metric": 0.25,
+                "normalized_signal": 8.596527139990599e-05
+              },
+              "cost": {
+                "boundary_before": 48,
+                "boundary_after": 48,
+                "delta_log_boundary": 0.0,
+                "delta_compile_proxy": 0.14285714285714285,
+                "delta_warm_proxy": 0.13043478260869565,
+                "delta_memory_relative": 0.0
+              },
+              "gradient_score": 8.596527139990599e-05,
+              "contraction_score": 7.563064860866045e-05,
+              "selection_score": 7.563064860866045e-05,
+              "eligible": true,
+              "exclusion_reason": null,
+              "rank": 2,
+              "selected": false
+            },
+            {
+              "operator": {
+                "kind": "zy",
+                "wire": 2
+              },
+              "signal": {
+                "operator": {
+                  "kind": "zy",
+                  "wire": 2
+                },
+                "gradient": -6.063747060025548e-09,
+                "metric": 0.25,
+                "normalized_signal": 1.4707611363128563e-16
+              },
+              "cost": {
+                "boundary_before": 48,
+                "boundary_after": 192,
+                "delta_log_boundary": 1.3862943611198906,
+                "delta_compile_proxy": 0.14285714285714285,
+                "delta_warm_proxy": 0.13043478260869565,
+                "delta_memory_relative": 3.0
+              },
+              "gradient_score": 1.4707611363128563e-16,
+              "contraction_score": 1.7729564059637922e-17,
+              "selection_score": 1.7729564059637922e-17,
+              "eligible": true,
+              "exclusion_reason": null,
+              "rank": 3,
+              "selected": false
+            },
+            {
+              "operator": {
+                "kind": "rx",
+                "wire": 1
+              },
+              "signal": {
+                "operator": {
+                  "kind": "rx",
+                  "wire": 1
+                },
+                "gradient": -6.540159765948044e-10,
+                "metric": 0.10639069581671287,
+                "normalized_signal": 4.020435192698892e-18
+              },
+              "cost": {
+                "boundary_before": 48,
+                "boundary_after": 48,
+                "delta_log_boundary": 0.0,
+                "delta_compile_proxy": 0.07142857142857142,
+                "delta_warm_proxy": 0.08695652173913043,
+                "delta_memory_relative": 0.0
+              },
+              "gradient_score": 4.020435192698892e-18,
+              "contraction_score": 3.725410451939692e-18,
+              "selection_score": 3.725410451939692e-18,
+              "eligible": true,
+              "exclusion_reason": null,
+              "rank": 4,
+              "selected": false
+            },
+            {
+              "operator": {
+                "kind": "zy",
+                "wire": 0
+              },
+              "signal": {
+                "operator": {
+                  "kind": "zy",
+                  "wire": 0
+                },
+                "gradient": 1.2258634662920542e-09,
+                "metric": 0.25,
+                "normalized_signal": 6.010964951934238e-18
+              },
+              "cost": {
+                "boundary_before": 48,
+                "boundary_after": 192,
+                "delta_log_boundary": 1.3862943611198906,
+                "delta_compile_proxy": 0.14285714285714285,
+                "delta_warm_proxy": 0.13043478260869565,
+                "delta_memory_relative": 3.0
+              },
+              "gradient_score": 6.010964951934238e-18,
+              "contraction_score": 7.246029660718938e-19,
+              "selection_score": 7.246029660718938e-19,
+              "eligible": true,
+              "exclusion_reason": null,
+              "rank": 5,
+              "selected": false
+            },
+            {
+              "operator": {
+                "kind": "rx",
+                "wire": 0
+              },
+              "signal": {
+                "operator": {
+                  "kind": "rx",
+                  "wire": 0
+                },
+                "gradient": -1.9825596577641908e-10,
+                "metric": 0.06399888994209699,
+                "normalized_signal": 6.1415796431607e-19
+              },
+              "cost": {
+                "boundary_before": 48,
+                "boundary_after": 48,
+                "delta_log_boundary": 0.0,
+                "delta_compile_proxy": 0.07142857142857142,
+                "delta_warm_proxy": 0.08695652173913043,
+                "delta_memory_relative": 0.0
+              },
+              "gradient_score": 6.1415796431607e-19,
+              "contraction_score": 5.690902575820849e-19,
+              "selection_score": 5.690902575820849e-19,
+              "eligible": true,
+              "exclusion_reason": null,
+              "rank": 6,
+              "selected": false
+            },
+            {
+              "operator": {
+                "kind": "rzz",
+                "wire": 1
+              },
+              "signal": {
+                "operator": {
+                  "kind": "rzz",
+                  "wire": 1
+                },
+                "gradient": 2.993987713024358e-10,
+                "metric": 0.18019714238876744,
+                "normalized_signal": 4.974530842643289e-19
+              },
+              "cost": {
+                "boundary_before": 48,
+                "boundary_after": 48,
+                "delta_log_boundary": 0.0,
+                "delta_compile_proxy": 0.14285714285714285,
+                "delta_warm_proxy": 0.13043478260869565,
+                "delta_memory_relative": 0.0
+              },
+              "gradient_score": 4.974530842643289e-19,
+              "contraction_score": 4.3764998123801615e-19,
+              "selection_score": 4.3764998123801615e-19,
+              "eligible": true,
+              "exclusion_reason": null,
+              "rank": 7,
+              "selected": false
+            },
+            {
+              "operator": {
+                "kind": "rx",
+                "wire": 3
+              },
+              "signal": {
+                "operator": {
+                  "kind": "rx",
+                  "wire": 3
+                },
+                "gradient": -1.630796295291208e-10,
+                "metric": 0.06399889075476459,
+                "normalized_signal": 4.155535393394266e-19
+              },
+              "cost": {
+                "boundary_before": 48,
+                "boundary_after": 48,
+                "delta_log_boundary": 0.0,
+                "delta_compile_proxy": 0.07142857142857142,
+                "delta_warm_proxy": 0.08695652173913043,
+                "delta_memory_relative": 0.0
+              },
+              "gradient_score": 4.155535393394266e-19,
+              "contraction_score": 3.85059682495814e-19,
+              "selection_score": 3.85059682495814e-19,
+              "eligible": true,
+              "exclusion_reason": null,
+              "rank": 8,
+              "selected": false
+            },
+            {
+              "operator": {
+                "kind": "rzz",
+                "wire": 0
+              },
+              "signal": {
+                "operator": {
+                  "kind": "rzz",
+                  "wire": 0
+                },
+                "gradient": 5.305477452457441e-10,
+                "metric": 0.18884587273836909,
+                "normalized_signal": 1.4905324956390325e-18
+              },
+              "cost": {
+                "boundary_before": 48,
+                "boundary_after": 192,
+                "delta_log_boundary": 1.3862943611198906,
+                "delta_compile_proxy": 0.14285714285714285,
+                "delta_warm_proxy": 0.13043478260869565,
+                "delta_memory_relative": 3.0
+              },
+              "gradient_score": 1.4905324956390325e-18,
+              "contraction_score": 1.796790159322162e-19,
+              "selection_score": 1.796790159322162e-19,
+              "eligible": true,
+              "exclusion_reason": null,
+              "rank": 9,
+              "selected": false
+            },
+            {
+              "operator": {
+                "kind": "rx",
+                "wire": 2
+              },
+              "signal": {
+                "operator": {
+                  "kind": "rx",
+                  "wire": 2
+                },
+                "gradient": 9.81935286863538e-11,
+                "metric": 0.10639069604422494,
+                "normalized_signal": 9.062793490681877e-20
+              },
+              "cost": {
+                "boundary_before": 48,
+                "boundary_after": 48,
+                "delta_log_boundary": 0.0,
+                "delta_compile_proxy": 0.07142857142857142,
+                "delta_warm_proxy": 0.08695652173913043,
+                "delta_memory_relative": 0.0
+              },
+              "gradient_score": 9.062793490681877e-20,
+              "contraction_score": 8.397753968344069e-20,
+              "selection_score": 8.397753968344069e-20,
+              "eligible": true,
+              "exclusion_reason": null,
+              "rank": 10,
+              "selected": false
+            },
+            {
+              "operator": {
+                "kind": "rzz",
+                "wire": 2
+              },
+              "signal": {
+                "operator": {
+                  "kind": "rzz",
+                  "wire": 2
+                },
+                "gradient": 8.721152666581015e-11,
+                "metric": 0.1888458720299911,
+                "normalized_signal": 4.027543891525008e-20
+              },
+              "cost": {
+                "boundary_before": 48,
+                "boundary_after": 192,
+                "delta_log_boundary": 1.3862943611198906,
+                "delta_compile_proxy": 0.14285714285714285,
+                "delta_warm_proxy": 0.13043478260869565,
+                "delta_memory_relative": 3.0
+              },
+              "gradient_score": 4.027543891525008e-20,
+              "contraction_score": 4.85507780051965e-21,
+              "selection_score": 4.85507780051965e-21,
+              "eligible": true,
+              "exclusion_reason": null,
+              "rank": 11,
+              "selected": false
+            },
+            {
+              "operator": {
+                "kind": "yz",
+                "wire": 2
+              },
+              "signal": {
+                "operator": {
+                  "kind": "yz",
+                  "wire": 2
+                },
+                "gradient": -2.0491470742456386e-09,
+                "metric": 0.25,
+                "normalized_signal": 1.679601492749066e-17
+              },
+              "cost": {
+                "boundary_before": 48,
+                "boundary_after": 192,
+                "delta_log_boundary": 1.3862943611198906,
+                "delta_compile_proxy": 0.14285714285714285,
+                "delta_warm_proxy": 0.13043478260869565,
+                "delta_memory_relative": 3.0
+              },
+              "gradient_score": 1.679601492749066e-17,
+              "contraction_score": 2.024706903461693e-18,
+              "selection_score": 2.024706903461693e-18,
+              "eligible": false,
+              "exclusion_reason": "fuses with a commuting prior gate",
+              "rank": 12,
+              "selected": false
+            },
+            {
+              "operator": {
+                "kind": "yz",
+                "wire": 0
+              },
+              "signal": {
+                "operator": {
+                  "kind": "yz",
+                  "wire": 0
+                },
+                "gradient": 4.885152282696481e-10,
+                "metric": 0.25,
+                "normalized_signal": 9.545885130015672e-19
+              },
+              "cost": {
+                "boundary_before": 48,
+                "boundary_after": 192,
+                "delta_log_boundary": 1.3862943611198906,
+                "delta_compile_proxy": 0.14285714285714285,
+                "delta_warm_proxy": 0.13043478260869565,
+                "delta_memory_relative": 3.0
+              },
+              "gradient_score": 9.545885130015672e-19,
+              "contraction_score": 1.1507265030326225e-19,
+              "selection_score": 1.1507265030326225e-19,
+              "eligible": false,
+              "exclusion_reason": "fuses with a commuting prior gate",
+              "rank": 13,
+              "selected": false
+            }
+          ],
+          "cache_key": "7d5c347975515b1d46087b7fbb3f45e941de4fde610bc4cd3c244b2586378b7d",
+          "compile_seconds": 1.3491741250036284,
+          "screening_seconds": 0.5084232920053182,
+          "optimization_seconds": 0.007457749998138752,
+          "evaluations": 17,
+          "optimizer_steps": 13,
+          "optimizer_message": null,
+          "energy": -4.758770483093128,
+          "energy_error": 5.050271312256882e-11,
+          "boundary_dimension": 48
+        }
+      ],
+      "evaluations": 94,
+      "compiled_structures": 4,
+      "compile_seconds": 3.621463791001588,
+      "screening_seconds": 2.5724740010045934,
+      "optimization_seconds": 0.5954683749951073,
+      "time_to_target_seconds": 6.864571124999202,
+      "total_seconds": 6.8747040840025875,
+      "peak_rss_bytes": 337756160,
+      "failure": null,
+      "skipped": false
+    }
+  ],
+  "derived": {
+    "ranking_policy": "converged only; synchronized time to target including all recompilation and screening",
+    "best_policy": "gradient-only",
+    "gradient_sequence": [
+      "yz-0-1",
+      "yz-2-3",
+      "zy-1-2"
+    ],
+    "contraction_sequence": [
+      "yz-0-1",
+      "yz-2-3",
+      "zy-1-2"
+    ],
+    "adaptive_sequences_equal": true,
+    "fixed_final_parameter_count": 14,
+    "gradient_final_parameter_count": 10,
+    "contraction_final_parameter_count": 10,
+    "fixed_final_error": 1.6972502070444762e-07,
+    "gradient_final_error": 5.050271312256882e-11,
+    "contraction_final_error": 5.050271312256882e-11,
+    "gradient_max_boundary": 48,
+    "contraction_max_boundary": 48
+  }
+}

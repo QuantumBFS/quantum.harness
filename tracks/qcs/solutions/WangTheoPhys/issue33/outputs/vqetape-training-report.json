@@ -1,0 +1,4007 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-07-29T15:08:16.065146+00:00",
+  "environment": {
+    "python": "3.12.13",
+    "platform": "macOS-15.6-arm64-arm-64bit",
+    "jax": "0.11.0",
+    "backend": "cpu",
+    "devices": [
+      {
+        "id": 0,
+        "platform": "cpu",
+        "device_kind": "cpu"
+      }
+    ]
+  },
+  "method": {
+    "fresh_process_per_run": true,
+    "unique_jax_cache_per_run": true,
+    "synchronization": "jax.block_until_ready",
+    "target_includes_compile": true
+  },
+  "recycling_source": {
+    "request": {
+      "spec": {
+        "nqubits": 3,
+        "depth": 1,
+        "coupling": 1.0,
+        "field": 1.0,
+        "initial_state": "plus",
+        "dtype": "complex64"
+      },
+      "program": {
+        "path_strategy": "greedy",
+        "adjoint": "default",
+        "unroll": 1,
+        "block_width": 1,
+        "symmetry": "none",
+        "segment_length": null,
+        "column_paths": null,
+        "representation": "spatial_transfer"
+      },
+      "optimizer": "lbfgs",
+      "initialization": "random",
+      "target_energy_error": 0.1,
+      "max_steps": 80,
+      "seed": 3,
+      "learning_rate": 0.05,
+      "damping": 0.001,
+      "ground_energy": null,
+      "recycled_source_spec": null,
+      "recycled_parameters": null
+    },
+    "program_label": "spatial-transfer-greedy-b1-default-u1",
+    "converged": true,
+    "evaluations": 12,
+    "optimizer_steps": 5,
+    "compile_seconds": 1.2332716250020894,
+    "first_execute_seconds": 0.0038390420013456605,
+    "optimization_seconds": 0.4061272910039406,
+    "time_to_target_seconds": 1.6393379160072072,
+    "total_seconds": 1.63939891600603,
+    "peak_rss_bytes": 259817472,
+    "ground_energy": -3.4939592074349326,
+    "target_energy": -3.3939592074349325,
+    "final_energy": -3.4053304195404053,
+    "final_parameters": [
+      [
+        [
+          -0.42955118350723137,
+          -0.33286244786833113,
+          0.0
+        ],
+        [
+          -0.4363104199435354,
+          -1.0636866156792906,
+          -0.8032493030821216
+        ]
+      ]
+    ],
+    "trace": [
+      {
+        "evaluation": 1,
+        "optimizer_step": 0,
+        "energy": -2.8904993534088135,
+        "energy_error": 0.6034598540261191,
+        "gradient_norm": 0.7382573805008157,
+        "elapsed_seconds": 0.3974087500027963,
+        "metric_condition": null
+      },
+      {
+        "evaluation": 2,
+        "optimizer_step": 0,
+        "energy": -2.4820713996887207,
+        "energy_error": 1.011887807746212,
+        "gradient_norm": 1.5390893682319626,
+        "elapsed_seconds": 0.39844512499985285,
+        "metric_condition": null
+      },
+      {
+        "evaluation": 3,
+        "optimizer_step": 0,
+        "energy": -3.0090019702911377,
+        "energy_error": 0.4849572371437949,
+        "gradient_norm": 0.11880180494120911,
+        "elapsed_seconds": 0.3990318330033915,
+        "metric_condition": null
+      },
+      {
+        "evaluation": 4,
+        "optimizer_step": 1,
+        "energy": -3.0162391662597656,
+        "energy_error": 0.477720041175167,
+        "gradient_norm": 0.16391123372685057,
+        "elapsed_seconds": 0.40212804100156063,
+        "metric_condition": null
+      },
+      {
+        "evaluation": 5,
+        "optimizer_step": 1,
+        "energy": -3.064304828643799,
+        "energy_error": 0.4296543787911338,
+        "gradient_norm": 0.32968237631394676,
+        "elapsed_seconds": 0.4025853749990347,
+        "metric_condition": null
+      },
+      {
+        "evaluation": 6,
+        "optimizer_step": 1,
+        "energy": -3.322566509246826,
+        "energy_error": 0.17139269818810643,
+        "gradient_norm": 0.34134974460683826,
+        "elapsed_seconds": 0.40301295799872605,
+        "metric_condition": null
+      },
+      {
+        "evaluation": 7,
+        "optimizer_step": 2,
+        "energy": 0.09253328293561935,
+        "energy_error": 3.586492490370552,
+        "gradient_norm": 1.4685955910132198,
+        "elapsed_seconds": 0.40356662499834783,
+        "metric_condition": null
+      },
+      {
+        "evaluation": 8,
+        "optimizer_step": 2,
+        "energy": -3.2290611267089844,
+        "energy_error": 0.2648980807259482,
+        "gradient_norm": 0.7704798484997152,
+        "elapsed_seconds": 0.40477479100081837,
+        "metric_condition": null
+      },
+      {
+        "evaluation": 9,
+        "optimizer_step": 2,
+        "energy": -3.328026533126831,
+        "energy_error": 0.16593267430810155,
+        "gradient_norm": 0.33902078692362,
+        "elapsed_seconds": 0.4051387080035056,
+        "metric_condition": null
+      },
+      {
+        "evaluation": 10,
+        "optimizer_step": 3,
+        "energy": -3.3470993041992188,
+        "energy_error": 0.14685990323571385,
+        "gradient_norm": 0.25097133946361494,
+        "elapsed_seconds": 0.4054265000013402,
+        "metric_condition": null
+      },
+      {
+        "evaluation": 11,
+        "optimizer_step": 4,
+        "energy": -3.3805575370788574,
+        "energy_error": 0.11340167035607518,
+        "gradient_norm": 0.1867861613267879,
+        "elapsed_seconds": 0.40573179100465495,
+        "metric_condition": null
+      },
+      {
+        "evaluation": 12,
+        "optimizer_step": 5,
+        "energy": -3.4053304195404053,
+        "energy_error": 0.08862878789452733,
+        "gradient_norm": 0.1726374415956996,
+        "elapsed_seconds": 0.4060662910051178,
+        "metric_condition": null
+      }
+    ],
+    "initialization_provenance": {
+      "policy": "normal",
+      "mean": 0.0,
+      "scale": 0.1,
+      "seed": 3,
+      "padding_forced_zero": true
+    },
+    "failure": null,
+    "skipped": false
+  },
+  "runs": [
+    {
+      "id": "optimizer-adam-zeros",
+      "result": {
+        "request": {
+          "spec": {
+            "nqubits": 4,
+            "depth": 2,
+            "coupling": 1.0,
+            "field": 1.0,
+            "initial_state": "plus",
+            "dtype": "complex64"
+          },
+          "program": {
+            "path_strategy": "greedy",
+            "adjoint": "default",
+            "unroll": 1,
+            "block_width": 2,
+            "symmetry": "none",
+            "segment_length": null,
+            "column_paths": null,
+            "representation": "spatial_transfer"
+          },
+          "optimizer": "adam",
+          "initialization": "zeros",
+          "target_energy_error": 0.1,
+          "max_steps": 80,
+          "seed": 3,
+          "learning_rate": 0.08,
+          "damping": 0.01,
+          "ground_energy": null,
+          "recycled_source_spec": null,
+          "recycled_parameters": null
+        },
+        "program_label": "spatial-transfer-greedy-b2-default-u1",
+        "converged": false,
+        "evaluations": 81,
+        "optimizer_steps": 80,
+        "compile_seconds": 2.484464957997261,
+        "first_execute_seconds": 0.0031575419998262078,
+        "optimization_seconds": 0.11733466599980602,
+        "time_to_target_seconds": null,
+        "total_seconds": 2.601799623997067,
+        "peak_rss_bytes": 296091648,
+        "ground_energy": -4.758770483143631,
+        "target_energy": -4.658770483143631,
+        "final_energy": -3.9999992847442627,
+        "final_parameters": [
+          [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ]
+        ],
+        "trace": [
+          {
+            "evaluation": 1,
+            "optimizer_step": 0,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 0.0033645830044406466,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 2,
+            "optimizer_step": 1,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 0.004108458000700921,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 3,
+            "optimizer_step": 2,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 0.004669540998293087,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 4,
+            "optimizer_step": 3,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 0.005446415998449083,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 5,
+            "optimizer_step": 4,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 0.007288332999451086,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 6,
+            "optimizer_step": 5,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 0.007847166001738515,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 7,
+            "optimizer_step": 6,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 0.008412415998463985,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 8,
+            "optimizer_step": 7,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 0.008997333003208041,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 9,
+            "optimizer_step": 8,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 0.009515916004602332,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 10,
+            "optimizer_step": 9,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 0.010003374998632353,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 11,
+            "optimizer_step": 10,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 0.010481875004188623,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 12,
+            "optimizer_step": 11,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 0.010919665997789707,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 13,
+            "optimizer_step": 12,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 0.01134358299896121,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 14,
+            "optimizer_step": 13,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 0.011781125002016779,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 15,
+            "optimizer_step": 14,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 0.012207416002638638,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 16,
+            "optimizer_step": 15,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 0.012624499999219552,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 17,
+            "optimizer_step": 16,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 0.013118125003529713,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 18,
+            "optimizer_step": 17,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 0.013555000004998874,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 19,
+            "optimizer_step": 18,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 0.014020583003002685,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 20,
+            "optimizer_step": 19,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 0.014443915999436285,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 21,
+            "optimizer_step": 20,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 0.015234582999255508,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 22,
+            "optimizer_step": 21,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 0.015822332999960054,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 23,
+            "optimizer_step": 22,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 0.016332833001797553,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 24,
+            "optimizer_step": 23,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 0.01803308300441131,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 25,
+            "optimizer_step": 24,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 0.01962008300324669,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 26,
+            "optimizer_step": 25,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 0.020263791004254017,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 27,
+            "optimizer_step": 26,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 0.020939458001521416,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 28,
+            "optimizer_step": 27,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 0.021783791002235375,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 29,
+            "optimizer_step": 28,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 0.02274733300146181,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 30,
+            "optimizer_step": 29,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 0.023352125004748814,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 31,
+            "optimizer_step": 30,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 0.025192041000991594,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 32,
+            "optimizer_step": 31,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 0.03184424999926705,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 33,
+            "optimizer_step": 32,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 0.035882583004422486,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 34,
+            "optimizer_step": 33,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 0.03997579099814175,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 35,
+            "optimizer_step": 34,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 0.04301191600097809,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 36,
+            "optimizer_step": 35,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 0.04516295799840009,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 37,
+            "optimizer_step": 36,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 0.05365354099922115,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 38,
+            "optimizer_step": 37,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 0.05456541600142373,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 39,
+            "optimizer_step": 38,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 0.055414166003174614,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 40,
+            "optimizer_step": 39,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 0.05607645800046157,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 41,
+            "optimizer_step": 40,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 0.056567125000583474,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 42,
+            "optimizer_step": 41,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 0.05902029100252548,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 43,
+            "optimizer_step": 42,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 0.06101041600049939,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 44,
+            "optimizer_step": 43,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 0.06173404100263724,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 45,
+            "optimizer_step": 44,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 0.06212091600173153,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 46,
+            "optimizer_step": 45,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 0.0625807079995866,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 47,
+            "optimizer_step": 46,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 0.06295041600242257,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 48,
+            "optimizer_step": 47,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 0.06332908300100826,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 49,
+            "optimizer_step": 48,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 0.06387616600113688,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 50,
+            "optimizer_step": 49,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 0.0642885409979499,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 51,
+            "optimizer_step": 50,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 0.06485083299776306,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 52,
+            "optimizer_step": 51,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 0.06543475000216858,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 53,
+            "optimizer_step": 52,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 0.06586637500004144,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 54,
+            "optimizer_step": 53,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 0.06666170799871907,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 55,
+            "optimizer_step": 54,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 0.06727937499817926,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 56,
+            "optimizer_step": 55,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 0.06780895800329745,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 57,
+            "optimizer_step": 56,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 0.06835454099928029,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 58,
+            "optimizer_step": 57,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 0.06924825000169221,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 59,
+            "optimizer_step": 58,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 0.06986158300423995,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 60,
+            "optimizer_step": 59,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 0.07052400000247872,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 61,
+            "optimizer_step": 60,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 0.0711947500021779,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 62,
+            "optimizer_step": 61,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 0.07218354100041324,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 63,
+            "optimizer_step": 62,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 0.0728920410037972,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 64,
+            "optimizer_step": 63,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 0.07495724999898812,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 65,
+            "optimizer_step": 64,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 0.07713974999933271,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 66,
+            "optimizer_step": 65,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 0.08382741599780275,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 67,
+            "optimizer_step": 66,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 0.08796908300428186,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 68,
+            "optimizer_step": 67,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 0.09156383300432935,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 69,
+            "optimizer_step": 68,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 0.09357041600014782,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 70,
+            "optimizer_step": 69,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 0.0947957079988555,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 71,
+            "optimizer_step": 70,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 0.09630666600423865,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 72,
+            "optimizer_step": 71,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 0.09786591600277461,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 73,
+            "optimizer_step": 72,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 0.10009712500323076,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 74,
+            "optimizer_step": 73,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 0.10196325000288198,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 75,
+            "optimizer_step": 74,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 0.10366683299798751,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 76,
+            "optimizer_step": 75,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 0.10441625000385102,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 77,
+            "optimizer_step": 76,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 0.10509354100213386,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 78,
+            "optimizer_step": 77,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 0.1057767500024056,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 79,
+            "optimizer_step": 78,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 0.10826929099857807,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 80,
+            "optimizer_step": 79,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 0.11240545799955726,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 81,
+            "optimizer_step": 80,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 0.11728379099804442,
+            "metric_condition": null
+          }
+        ],
+        "initialization_provenance": {
+          "policy": "zeros",
+          "seed": null,
+          "padding_forced_zero": true
+        },
+        "failure": "target not reached within max_steps",
+        "skipped": false
+      }
+    },
+    {
+      "id": "optimizer-adam-random",
+      "result": {
+        "request": {
+          "spec": {
+            "nqubits": 4,
+            "depth": 2,
+            "coupling": 1.0,
+            "field": 1.0,
+            "initial_state": "plus",
+            "dtype": "complex64"
+          },
+          "program": {
+            "path_strategy": "greedy",
+            "adjoint": "default",
+            "unroll": 1,
+            "block_width": 2,
+            "symmetry": "none",
+            "segment_length": null,
+            "column_paths": null,
+            "representation": "spatial_transfer"
+          },
+          "optimizer": "adam",
+          "initialization": "random",
+          "target_energy_error": 0.1,
+          "max_steps": 80,
+          "seed": 3,
+          "learning_rate": 0.08,
+          "damping": 0.01,
+          "ground_energy": null,
+          "recycled_source_spec": null,
+          "recycled_parameters": null
+        },
+        "program_label": "spatial-transfer-greedy-b2-default-u1",
+        "converged": true,
+        "evaluations": 32,
+        "optimizer_steps": 31,
+        "compile_seconds": 3.2673016670014476,
+        "first_execute_seconds": 0.008816000001388602,
+        "optimization_seconds": 0.09512908299802803,
+        "time_to_target_seconds": 3.35611987500306,
+        "total_seconds": 3.3624307499994757,
+        "peak_rss_bytes": 260472832,
+        "ground_energy": -4.758770483143631,
+        "target_energy": -4.658770483143631,
+        "final_energy": -4.659789085388184,
+        "final_parameters": [
+          [
+            [
+              0.4665968183231339,
+              -0.5599222773788278,
+              -0.3213718263210608,
+              0.0
+            ],
+            [
+              1.1465741060149592,
+              -0.19549564026276733,
+              -0.7859771005282656,
+              -0.4803012842034722
+            ]
+          ],
+          [
+            [
+              -0.20244412674961756,
+              0.2988478294820957,
+              -0.2084652594349718,
+              0.0
+            ],
+            [
+              0.09564603642369175,
+              0.04427977152404623,
+              -0.22858955612234166,
+              -0.549726662507972
+            ]
+          ]
+        ],
+        "trace": [
+          {
+            "evaluation": 1,
+            "optimizer_step": 0,
+            "energy": -3.970587730407715,
+            "energy_error": 0.7881827527359162,
+            "gradient_norm": 1.0462381182414333,
+            "elapsed_seconds": 0.009994416002882645,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 2,
+            "optimizer_step": 1,
+            "energy": -4.066744804382324,
+            "energy_error": 0.6920256787613068,
+            "gradient_norm": 0.5843946381682775,
+            "elapsed_seconds": 0.012416083001880907,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 3,
+            "optimizer_step": 2,
+            "energy": -4.095556735992432,
+            "energy_error": 0.6632137471511994,
+            "gradient_norm": 0.8647065824846504,
+            "elapsed_seconds": 0.01631074999750126,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 4,
+            "optimizer_step": 3,
+            "energy": -4.199352264404297,
+            "energy_error": 0.5594182187393342,
+            "gradient_norm": 0.7074984993556571,
+            "elapsed_seconds": 0.016994124998745974,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 5,
+            "optimizer_step": 4,
+            "energy": -4.303623199462891,
+            "energy_error": 0.4551472836807404,
+            "gradient_norm": 0.5234350723757976,
+            "elapsed_seconds": 0.017559583000547718,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 6,
+            "optimizer_step": 5,
+            "energy": -4.3697123527526855,
+            "energy_error": 0.3890581303909455,
+            "gradient_norm": 0.5676793795657045,
+            "elapsed_seconds": 0.018324625001696404,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 7,
+            "optimizer_step": 6,
+            "energy": -4.408275127410889,
+            "energy_error": 0.3504953557327424,
+            "gradient_norm": 0.6595682737970174,
+            "elapsed_seconds": 0.01886062500125263,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 8,
+            "optimizer_step": 7,
+            "energy": -4.439888954162598,
+            "energy_error": 0.3188815289810334,
+            "gradient_norm": 0.6696737978491514,
+            "elapsed_seconds": 0.019552040997950826,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 9,
+            "optimizer_step": 8,
+            "energy": -4.466952800750732,
+            "energy_error": 0.2918176823928986,
+            "gradient_norm": 0.6715182927278277,
+            "elapsed_seconds": 0.022740125001291744,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 10,
+            "optimizer_step": 9,
+            "energy": -4.491602897644043,
+            "energy_error": 0.2671675854995881,
+            "gradient_norm": 0.7133964769287684,
+            "elapsed_seconds": 0.025948291004169732,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 11,
+            "optimizer_step": 10,
+            "energy": -4.519528388977051,
+            "energy_error": 0.23924209416658027,
+            "gradient_norm": 0.7566353293593001,
+            "elapsed_seconds": 0.02775820800161455,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 12,
+            "optimizer_step": 11,
+            "energy": -4.551315784454346,
+            "energy_error": 0.20745469868928534,
+            "gradient_norm": 0.7592448537636232,
+            "elapsed_seconds": 0.03227004100335762,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 13,
+            "optimizer_step": 12,
+            "energy": -4.581817150115967,
+            "energy_error": 0.17695333302766425,
+            "gradient_norm": 0.7091067741669738,
+            "elapsed_seconds": 0.03537262500321958,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 14,
+            "optimizer_step": 13,
+            "energy": -4.605975151062012,
+            "energy_error": 0.15279533208161933,
+            "gradient_norm": 0.6105821711042345,
+            "elapsed_seconds": 0.036380791003466584,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 15,
+            "optimizer_step": 14,
+            "energy": -4.620038032531738,
+            "energy_error": 0.13873245061189277,
+            "gradient_norm": 0.489653666143839,
+            "elapsed_seconds": 0.03755945800367044,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 16,
+            "optimizer_step": 15,
+            "energy": -4.620624542236328,
+            "energy_error": 0.13814594090730292,
+            "gradient_norm": 0.4207710885668521,
+            "elapsed_seconds": 0.04113800000050105,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 17,
+            "optimizer_step": 16,
+            "energy": -4.608773231506348,
+            "energy_error": 0.1499972516372834,
+            "gradient_norm": 0.4714996472827994,
+            "elapsed_seconds": 0.042054833000293,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 18,
+            "optimizer_step": 17,
+            "energy": -4.593076229095459,
+            "energy_error": 0.16569425404817206,
+            "gradient_norm": 0.5756219158901215,
+            "elapsed_seconds": 0.04530429100123001,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 19,
+            "optimizer_step": 18,
+            "energy": -4.584453105926514,
+            "energy_error": 0.17431737721711738,
+            "gradient_norm": 0.6433356258003933,
+            "elapsed_seconds": 0.04917250000289641,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 20,
+            "optimizer_step": 19,
+            "energy": -4.588886737823486,
+            "energy_error": 0.16988374532014472,
+            "gradient_norm": 0.6363352173068975,
+            "elapsed_seconds": 0.050625875002879184,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 21,
+            "optimizer_step": 20,
+            "energy": -4.604463577270508,
+            "energy_error": 0.15430690587312323,
+            "gradient_norm": 0.554892314840957,
+            "elapsed_seconds": 0.06030662500415929,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 22,
+            "optimizer_step": 21,
+            "energy": -4.623476505279541,
+            "energy_error": 0.13529397786409003,
+            "gradient_norm": 0.4312235099089606,
+            "elapsed_seconds": 0.06133333300385857,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 23,
+            "optimizer_step": 22,
+            "energy": -4.638264179229736,
+            "energy_error": 0.12050630391389472,
+            "gradient_norm": 0.3248471727951525,
+            "elapsed_seconds": 0.06254062500374857,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 24,
+            "optimizer_step": 23,
+            "energy": -4.646164417266846,
+            "energy_error": 0.11260606587678534,
+            "gradient_norm": 0.287562150297136,
+            "elapsed_seconds": 0.06525270800193539,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 25,
+            "optimizer_step": 24,
+            "energy": -4.649268627166748,
+            "energy_error": 0.109501855976883,
+            "gradient_norm": 0.2942068046759776,
+            "elapsed_seconds": 0.06897995799954515,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 26,
+            "optimizer_step": 25,
+            "energy": -4.650294303894043,
+            "energy_error": 0.10847617924958808,
+            "gradient_norm": 0.29578567398914246,
+            "elapsed_seconds": 0.07429666600364726,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 27,
+            "optimizer_step": 26,
+            "energy": -4.650002479553223,
+            "energy_error": 0.10876800359040839,
+            "gradient_norm": 0.29239372285606485,
+            "elapsed_seconds": 0.07822112499707146,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 28,
+            "optimizer_step": 27,
+            "energy": -4.6483354568481445,
+            "energy_error": 0.11043502629548652,
+            "gradient_norm": 0.3065469139269535,
+            "elapsed_seconds": 0.0829545410015271,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 29,
+            "optimizer_step": 28,
+            "energy": -4.646573543548584,
+            "energy_error": 0.11219693959504706,
+            "gradient_norm": 0.3347327398633654,
+            "elapsed_seconds": 0.08498154100379907,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 30,
+            "optimizer_step": 29,
+            "energy": -4.647273063659668,
+            "energy_error": 0.11149741948396308,
+            "gradient_norm": 0.34861238775557785,
+            "elapsed_seconds": 0.08578879100241465,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 31,
+            "optimizer_step": 30,
+            "energy": -4.652013778686523,
+            "energy_error": 0.10675670445710761,
+            "gradient_norm": 0.3276343762464627,
+            "elapsed_seconds": 0.0863607499995851,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 32,
+            "optimizer_step": 31,
+            "energy": -4.659789085388184,
+            "energy_error": 0.09898139775544745,
+            "gradient_norm": 0.27064678947492427,
+            "elapsed_seconds": 0.08881820800161222,
+            "metric_condition": null
+          }
+        ],
+        "initialization_provenance": {
+          "policy": "normal",
+          "mean": 0.0,
+          "scale": 0.1,
+          "seed": 3,
+          "padding_forced_zero": true
+        },
+        "failure": null,
+        "skipped": false
+      }
+    },
+    {
+      "id": "optimizer-adam-recycled",
+      "result": {
+        "request": {
+          "spec": {
+            "nqubits": 4,
+            "depth": 2,
+            "coupling": 1.0,
+            "field": 1.0,
+            "initial_state": "plus",
+            "dtype": "complex64"
+          },
+          "program": {
+            "path_strategy": "greedy",
+            "adjoint": "default",
+            "unroll": 1,
+            "block_width": 2,
+            "symmetry": "none",
+            "segment_length": null,
+            "column_paths": null,
+            "representation": "spatial_transfer"
+          },
+          "optimizer": "adam",
+          "initialization": "recycled",
+          "target_energy_error": 0.1,
+          "max_steps": 80,
+          "seed": 3,
+          "learning_rate": 0.08,
+          "damping": 0.01,
+          "ground_energy": null,
+          "recycled_source_spec": {
+            "nqubits": 3,
+            "depth": 1,
+            "coupling": 1.0,
+            "field": 1.0,
+            "initial_state": "plus",
+            "dtype": "complex64"
+          },
+          "recycled_parameters": [
+            [
+              [
+                -0.42955118350723137,
+                -0.33286244786833113,
+                0.0
+              ],
+              [
+                -0.4363104199435354,
+                -1.0636866156792906,
+                -0.8032493030821216
+              ]
+            ]
+          ]
+        },
+        "program_label": "spatial-transfer-greedy-b2-default-u1",
+        "converged": true,
+        "evaluations": 20,
+        "optimizer_steps": 19,
+        "compile_seconds": 2.292264499999874,
+        "first_execute_seconds": 0.006536166998557746,
+        "optimization_seconds": 0.023146416002418846,
+        "time_to_target_seconds": 2.3153870000023744,
+        "total_seconds": 2.3154109160022927,
+        "peak_rss_bytes": 279887872,
+        "ground_energy": -4.758770483143631,
+        "target_energy": -4.658770483143631,
+        "final_energy": -4.6712965965271,
+        "final_parameters": [
+          [
+            [
+              -0.30013986618668664,
+              -0.18861320952360955,
+              -0.25047530794098394,
+              0.0
+            ],
+            [
+              -0.7965529112493732,
+              -1.2996887341654682,
+              -1.0583583526854572,
+              -0.8001242519439223
+            ]
+          ],
+          [
+            [
+              -0.5376803043997213,
+              -0.5787428625713871,
+              -0.5045522376126403,
+              0.0
+            ],
+            [
+              -0.40118584344129526,
+              -0.7967698668830473,
+              -0.509432315234806,
+              -0.6332963180727814
+            ]
+          ]
+        ],
+        "trace": [
+          {
+            "evaluation": 1,
+            "optimizer_step": 0,
+            "energy": -4.1041154861450195,
+            "energy_error": 0.6546549969986115,
+            "gradient_norm": 1.8798115386493606,
+            "elapsed_seconds": 0.00664912500360515,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 2,
+            "optimizer_step": 1,
+            "energy": -4.436568260192871,
+            "energy_error": 0.32220222295075995,
+            "gradient_norm": 1.1934164848036346,
+            "elapsed_seconds": 0.013297083001816645,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 3,
+            "optimizer_step": 2,
+            "energy": -4.6105780601501465,
+            "energy_error": 0.14819242299348456,
+            "gradient_norm": 0.5272897331933936,
+            "elapsed_seconds": 0.013995625005918555,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 4,
+            "optimizer_step": 3,
+            "energy": -4.643260955810547,
+            "energy_error": 0.11550952733308417,
+            "gradient_norm": 0.3538573258081547,
+            "elapsed_seconds": 0.014706708003359381,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 5,
+            "optimizer_step": 4,
+            "energy": -4.596983909606934,
+            "energy_error": 0.16178657353669745,
+            "gradient_norm": 0.7192573049076041,
+            "elapsed_seconds": 0.01760520800598897,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 6,
+            "optimizer_step": 5,
+            "energy": -4.55056619644165,
+            "energy_error": 0.20820428670198066,
+            "gradient_norm": 0.8912553731850895,
+            "elapsed_seconds": 0.018123166002624203,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 7,
+            "optimizer_step": 6,
+            "energy": -4.535495758056641,
+            "energy_error": 0.22327472508699042,
+            "gradient_norm": 0.8658551487421864,
+            "elapsed_seconds": 0.01875350000045728,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 8,
+            "optimizer_step": 7,
+            "energy": -4.544924259185791,
+            "energy_error": 0.21384622395784003,
+            "gradient_norm": 0.7389550233777089,
+            "elapsed_seconds": 0.0191096250055125,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 9,
+            "optimizer_step": 8,
+            "energy": -4.5657124519348145,
+            "energy_error": 0.1930580312088166,
+            "gradient_norm": 0.602966943586134,
+            "elapsed_seconds": 0.019416250004724134,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 10,
+            "optimizer_step": 9,
+            "energy": -4.589842796325684,
+            "energy_error": 0.16892768681794745,
+            "gradient_norm": 0.5135208377348099,
+            "elapsed_seconds": 0.019718083000043407,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 11,
+            "optimizer_step": 10,
+            "energy": -4.613844394683838,
+            "energy_error": 0.14492608845979316,
+            "gradient_norm": 0.4647430906868481,
+            "elapsed_seconds": 0.020113958002184518,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 12,
+            "optimizer_step": 11,
+            "energy": -4.635232448577881,
+            "energy_error": 0.12353803456575019,
+            "gradient_norm": 0.4125952764978077,
+            "elapsed_seconds": 0.02046662499924423,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 13,
+            "optimizer_step": 12,
+            "energy": -4.649618625640869,
+            "energy_error": 0.1091518575027619,
+            "gradient_norm": 0.3451683267306642,
+            "elapsed_seconds": 0.02087983300589258,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 14,
+            "optimizer_step": 13,
+            "energy": -4.653185844421387,
+            "energy_error": 0.10558463872224433,
+            "gradient_norm": 0.3124365471038818,
+            "elapsed_seconds": 0.02123833299992839,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 15,
+            "optimizer_step": 14,
+            "energy": -4.64732551574707,
+            "energy_error": 0.11144496739656073,
+            "gradient_norm": 0.35706531717572726,
+            "elapsed_seconds": 0.021589208001387306,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 16,
+            "optimizer_step": 15,
+            "energy": -4.639580249786377,
+            "energy_error": 0.1191902333572541,
+            "gradient_norm": 0.42396325205114505,
+            "elapsed_seconds": 0.021894083001825493,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 17,
+            "optimizer_step": 16,
+            "energy": -4.637735366821289,
+            "energy_error": 0.12103511632234198,
+            "gradient_norm": 0.45529001740866976,
+            "elapsed_seconds": 0.022200916006113403,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 18,
+            "optimizer_step": 17,
+            "energy": -4.644450664520264,
+            "energy_error": 0.11431981862336738,
+            "gradient_norm": 0.4355289219043822,
+            "elapsed_seconds": 0.022486083005787805,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 19,
+            "optimizer_step": 18,
+            "energy": -4.657308578491211,
+            "energy_error": 0.10146190465242011,
+            "gradient_norm": 0.37512087611124556,
+            "elapsed_seconds": 0.022802791005233303,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 20,
+            "optimizer_step": 19,
+            "energy": -4.6712965965271,
+            "energy_error": 0.08747388661653144,
+            "gradient_norm": 0.3022439934543203,
+            "elapsed_seconds": 0.0231225000025006,
+            "metric_condition": null
+          }
+        ],
+        "initialization_provenance": {
+          "policy": "translation-mean-recycle",
+          "source_spec": {
+            "nqubits": 3,
+            "depth": 1,
+            "coupling": 1.0,
+            "field": 1.0,
+            "initial_state": "plus",
+            "dtype": "complex64"
+          },
+          "target_spec": {
+            "nqubits": 4,
+            "depth": 2,
+            "coupling": 1.0,
+            "field": 1.0,
+            "initial_state": "plus",
+            "dtype": "complex64"
+          },
+          "source_shape": [
+            1,
+            2,
+            3
+          ],
+          "target_shape": [
+            2,
+            2,
+            4
+          ],
+          "new_site_fill": "source-layer-active-mean",
+          "new_layer_fill": "last-source-layer",
+          "padding_forced_zero": true
+        },
+        "failure": null,
+        "skipped": false
+      }
+    },
+    {
+      "id": "optimizer-lbfgs-zeros",
+      "result": {
+        "request": {
+          "spec": {
+            "nqubits": 4,
+            "depth": 2,
+            "coupling": 1.0,
+            "field": 1.0,
+            "initial_state": "plus",
+            "dtype": "complex64"
+          },
+          "program": {
+            "path_strategy": "greedy",
+            "adjoint": "default",
+            "unroll": 1,
+            "block_width": 2,
+            "symmetry": "none",
+            "segment_length": null,
+            "column_paths": null,
+            "representation": "spatial_transfer"
+          },
+          "optimizer": "lbfgs",
+          "initialization": "zeros",
+          "target_energy_error": 0.1,
+          "max_steps": 80,
+          "seed": 3,
+          "learning_rate": 0.08,
+          "damping": 0.01,
+          "ground_energy": null,
+          "recycled_source_spec": null,
+          "recycled_parameters": null
+        },
+        "program_label": "spatial-transfer-greedy-b2-default-u1",
+        "converged": false,
+        "evaluations": 1,
+        "optimizer_steps": 0,
+        "compile_seconds": 3.1344515419987147,
+        "first_execute_seconds": 0.0027372499971534126,
+        "optimization_seconds": 0.44620025000040187,
+        "time_to_target_seconds": null,
+        "total_seconds": 3.5806517919991165,
+        "peak_rss_bytes": 246120448,
+        "ground_energy": -4.758770483143631,
+        "target_energy": -4.658770483143631,
+        "final_energy": -3.9999992847442627,
+        "final_parameters": [
+          [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ]
+        ],
+        "trace": [
+          {
+            "evaluation": 1,
+            "optimizer_step": 0,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 0.44526849999965634,
+            "metric_condition": null
+          }
+        ],
+        "initialization_provenance": {
+          "policy": "zeros",
+          "seed": null,
+          "padding_forced_zero": true
+        },
+        "failure": "target not reached within max_steps",
+        "skipped": false
+      }
+    },
+    {
+      "id": "optimizer-lbfgs-random",
+      "result": {
+        "request": {
+          "spec": {
+            "nqubits": 4,
+            "depth": 2,
+            "coupling": 1.0,
+            "field": 1.0,
+            "initial_state": "plus",
+            "dtype": "complex64"
+          },
+          "program": {
+            "path_strategy": "greedy",
+            "adjoint": "default",
+            "unroll": 1,
+            "block_width": 2,
+            "symmetry": "none",
+            "segment_length": null,
+            "column_paths": null,
+            "representation": "spatial_transfer"
+          },
+          "optimizer": "lbfgs",
+          "initialization": "random",
+          "target_energy_error": 0.1,
+          "max_steps": 80,
+          "seed": 3,
+          "learning_rate": 0.08,
+          "damping": 0.01,
+          "ground_energy": null,
+          "recycled_source_spec": null,
+          "recycled_parameters": null
+        },
+        "program_label": "spatial-transfer-greedy-b2-default-u1",
+        "converged": true,
+        "evaluations": 23,
+        "optimizer_steps": 15,
+        "compile_seconds": 2.440821333002532,
+        "first_execute_seconds": 0.0017732080013956875,
+        "optimization_seconds": 0.389920333000191,
+        "time_to_target_seconds": 2.8306556660027127,
+        "total_seconds": 2.830741666002723,
+        "peak_rss_bytes": 275611648,
+        "ground_energy": -4.758770483143631,
+        "target_energy": -4.658770483143631,
+        "final_energy": -4.6603193283081055,
+        "final_parameters": [
+          [
+            [
+              0.19565404847322077,
+              -0.21030577821357027,
+              -0.3027861238159288,
+              0.0
+            ],
+            [
+              0.8828184036979776,
+              -0.14385132457634467,
+              -0.5802378305007027,
+              -0.49442082750533817
+            ]
+          ],
+          [
+            [
+              -0.5609160267870251,
+              -0.21716663275796655,
+              -0.2193054929687623,
+              0.0
+            ],
+            [
+              -0.6357919778039754,
+              -0.6840001090061995,
+              -0.444783088510118,
+              -0.44119472717389785
+            ]
+          ]
+        ],
+        "trace": [
+          {
+            "evaluation": 1,
+            "optimizer_step": 0,
+            "energy": -3.970587730407715,
+            "energy_error": 0.7881827527359162,
+            "gradient_norm": 1.0462381182414333,
+            "elapsed_seconds": 0.3776806670066435,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 2,
+            "optimizer_step": 0,
+            "energy": -2.9472975730895996,
+            "energy_error": 1.8114729100540314,
+            "gradient_norm": 3.2600665657146277,
+            "elapsed_seconds": 0.3785889170030714,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 3,
+            "optimizer_step": 0,
+            "energy": -4.093392848968506,
+            "energy_error": 0.6653776341751252,
+            "gradient_norm": 0.508512245493954,
+            "elapsed_seconds": 0.37903400000504917,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 4,
+            "optimizer_step": 1,
+            "energy": -4.148207187652588,
+            "energy_error": 0.6105632954910432,
+            "gradient_norm": 0.5970070723552828,
+            "elapsed_seconds": 0.3802365420051501,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 5,
+            "optimizer_step": 1,
+            "energy": -4.325174808502197,
+            "energy_error": 0.4335956746414338,
+            "gradient_norm": 0.69749453082296,
+            "elapsed_seconds": 0.38073929200618295,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 6,
+            "optimizer_step": 2,
+            "energy": -4.061388969421387,
+            "energy_error": 0.6973815137222443,
+            "gradient_norm": 1.5567675630940168,
+            "elapsed_seconds": 0.38114375000441214,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 7,
+            "optimizer_step": 2,
+            "energy": -4.362720489501953,
+            "energy_error": 0.3960499936416779,
+            "gradient_norm": 0.5860640386235769,
+            "elapsed_seconds": 0.38164833300106693,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 8,
+            "optimizer_step": 3,
+            "energy": -4.421838760375977,
+            "energy_error": 0.3369317227676545,
+            "gradient_norm": 0.24087256368308252,
+            "elapsed_seconds": 0.3820422500066343,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 9,
+            "optimizer_step": 4,
+            "energy": -4.444638252258301,
+            "energy_error": 0.31413223088533027,
+            "gradient_norm": 0.27115129612717176,
+            "elapsed_seconds": 0.3824340420032968,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 10,
+            "optimizer_step": 5,
+            "energy": -4.477269172668457,
+            "energy_error": 0.281501310475174,
+            "gradient_norm": 0.4336546008786285,
+            "elapsed_seconds": 0.3828930000017863,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 11,
+            "optimizer_step": 6,
+            "energy": -1.198053002357483,
+            "energy_error": 3.560717480786148,
+            "gradient_norm": 3.7651999159870284,
+            "elapsed_seconds": 0.3835300830032793,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 12,
+            "optimizer_step": 6,
+            "energy": -4.499827861785889,
+            "energy_error": 0.2589426213577424,
+            "gradient_norm": 0.5194563036744081,
+            "elapsed_seconds": 0.38403562500025146,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 13,
+            "optimizer_step": 7,
+            "energy": -3.2647345066070557,
+            "energy_error": 1.4940359765365754,
+            "gradient_norm": 2.761480109317405,
+            "elapsed_seconds": 0.38461000000097556,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 14,
+            "optimizer_step": 7,
+            "energy": -4.535159587860107,
+            "energy_error": 0.22361089528352363,
+            "gradient_norm": 0.6014936436539243,
+            "elapsed_seconds": 0.3849589170058607,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 15,
+            "optimizer_step": 8,
+            "energy": -4.549318313598633,
+            "energy_error": 0.20945216954499823,
+            "gradient_norm": 0.5891567082900586,
+            "elapsed_seconds": 0.38535929200588726,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 16,
+            "optimizer_step": 8,
+            "energy": -4.561646461486816,
+            "energy_error": 0.19712402165681464,
+            "gradient_norm": 0.5674785188145134,
+            "elapsed_seconds": 0.38583616700634593,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 17,
+            "optimizer_step": 9,
+            "energy": -4.597549915313721,
+            "energy_error": 0.16122056782991034,
+            "gradient_norm": 0.36411353930294205,
+            "elapsed_seconds": 0.38629875000333413,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 18,
+            "optimizer_step": 10,
+            "energy": -4.625671863555908,
+            "energy_error": 0.13309861958772284,
+            "gradient_norm": 0.37452531404876316,
+            "elapsed_seconds": 0.3870653330013738,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 19,
+            "optimizer_step": 11,
+            "energy": -4.637852191925049,
+            "energy_error": 0.12091829121858222,
+            "gradient_norm": 0.19880449312309076,
+            "elapsed_seconds": 0.3874681670058635,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 20,
+            "optimizer_step": 12,
+            "energy": -4.646669387817383,
+            "energy_error": 0.11210109532624823,
+            "gradient_norm": 0.0998231170671519,
+            "elapsed_seconds": 0.38788729200314265,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 21,
+            "optimizer_step": 13,
+            "energy": -4.65224027633667,
+            "energy_error": 0.10653020680696113,
+            "gradient_norm": 0.05214644285742116,
+            "elapsed_seconds": 0.3884641670010751,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 22,
+            "optimizer_step": 14,
+            "energy": -4.6537957191467285,
+            "energy_error": 0.10497476399690253,
+            "gradient_norm": 0.049883323221182586,
+            "elapsed_seconds": 0.3891879170041648,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 23,
+            "optimizer_step": 15,
+            "energy": -4.6603193283081055,
+            "energy_error": 0.09845115483552558,
+            "gradient_norm": 0.09016435318566414,
+            "elapsed_seconds": 0.3898343330001808,
+            "metric_condition": null
+          }
+        ],
+        "initialization_provenance": {
+          "policy": "normal",
+          "mean": 0.0,
+          "scale": 0.1,
+          "seed": 3,
+          "padding_forced_zero": true
+        },
+        "failure": null,
+        "skipped": false
+      }
+    },
+    {
+      "id": "optimizer-lbfgs-recycled",
+      "result": {
+        "request": {
+          "spec": {
+            "nqubits": 4,
+            "depth": 2,
+            "coupling": 1.0,
+            "field": 1.0,
+            "initial_state": "plus",
+            "dtype": "complex64"
+          },
+          "program": {
+            "path_strategy": "greedy",
+            "adjoint": "default",
+            "unroll": 1,
+            "block_width": 2,
+            "symmetry": "none",
+            "segment_length": null,
+            "column_paths": null,
+            "representation": "spatial_transfer"
+          },
+          "optimizer": "lbfgs",
+          "initialization": "recycled",
+          "target_energy_error": 0.1,
+          "max_steps": 80,
+          "seed": 3,
+          "learning_rate": 0.08,
+          "damping": 0.01,
+          "ground_energy": null,
+          "recycled_source_spec": {
+            "nqubits": 3,
+            "depth": 1,
+            "coupling": 1.0,
+            "field": 1.0,
+            "initial_state": "plus",
+            "dtype": "complex64"
+          },
+          "recycled_parameters": [
+            [
+              [
+                -0.42955118350723137,
+                -0.33286244786833113,
+                0.0
+              ],
+              [
+                -0.4363104199435354,
+                -1.0636866156792906,
+                -0.8032493030821216
+              ]
+            ]
+          ]
+        },
+        "program_label": "spatial-transfer-greedy-b2-default-u1",
+        "converged": true,
+        "evaluations": 5,
+        "optimizer_steps": 3,
+        "compile_seconds": 2.3936526250035968,
+        "first_execute_seconds": 0.002241000001959037,
+        "optimization_seconds": 0.35655733400199097,
+        "time_to_target_seconds": 2.7501476670076954,
+        "total_seconds": 2.7502099590055877,
+        "peak_rss_bytes": 277741568,
+        "ground_energy": -4.758770483143631,
+        "target_energy": -4.658770483143631,
+        "final_energy": -4.6601104736328125,
+        "final_parameters": [
+          [
+            [
+              -0.16308722491637037,
+              -0.08639804268775089,
+              -0.14416490863611786,
+              0.0
+            ],
+            [
+              -0.4557708189059439,
+              -1.0696648978715715,
+              -0.801910406904183,
+              -0.7557201481903225
+            ]
+          ],
+          [
+            [
+              -0.3734625840491619,
+              -0.4169156490958254,
+              -0.41576181644457094,
+              0.0
+            ],
+            [
+              -0.36234629063012563,
+              -0.8114927509120109,
+              -0.5592188995102424,
+              -0.6726318113619107
+            ]
+          ]
+        ],
+        "trace": [
+          {
+            "evaluation": 1,
+            "optimizer_step": 0,
+            "energy": -4.1041154861450195,
+            "energy_error": 0.6546549969986115,
+            "gradient_norm": 1.8798115386493606,
+            "elapsed_seconds": 0.34582529200270073,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 2,
+            "optimizer_step": 0,
+            "energy": -4.2688093185424805,
+            "energy_error": 0.4899611646011506,
+            "gradient_norm": 1.6875056999120455,
+            "elapsed_seconds": 0.3497223340018536,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 3,
+            "optimizer_step": 1,
+            "energy": -4.654365539550781,
+            "energy_error": 0.1044049435928498,
+            "gradient_norm": 0.11124722470247853,
+            "elapsed_seconds": 0.35079133399995044,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 4,
+            "optimizer_step": 2,
+            "energy": -4.656859397888184,
+            "energy_error": 0.10191108525544745,
+            "gradient_norm": 0.07112454455278323,
+            "elapsed_seconds": 0.3559439590026159,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 5,
+            "optimizer_step": 3,
+            "energy": -4.6601104736328125,
+            "energy_error": 0.09866000951081855,
+            "gradient_norm": 0.07973783285936654,
+            "elapsed_seconds": 0.35649504200409865,
+            "metric_condition": null
+          }
+        ],
+        "initialization_provenance": {
+          "policy": "translation-mean-recycle",
+          "source_spec": {
+            "nqubits": 3,
+            "depth": 1,
+            "coupling": 1.0,
+            "field": 1.0,
+            "initial_state": "plus",
+            "dtype": "complex64"
+          },
+          "target_spec": {
+            "nqubits": 4,
+            "depth": 2,
+            "coupling": 1.0,
+            "field": 1.0,
+            "initial_state": "plus",
+            "dtype": "complex64"
+          },
+          "source_shape": [
+            1,
+            2,
+            3
+          ],
+          "target_shape": [
+            2,
+            2,
+            4
+          ],
+          "new_site_fill": "source-layer-active-mean",
+          "new_layer_fill": "last-source-layer",
+          "padding_forced_zero": true
+        },
+        "failure": null,
+        "skipped": false
+      }
+    },
+    {
+      "id": "optimizer-natural-gradient-zeros",
+      "result": {
+        "request": {
+          "spec": {
+            "nqubits": 4,
+            "depth": 2,
+            "coupling": 1.0,
+            "field": 1.0,
+            "initial_state": "plus",
+            "dtype": "complex64"
+          },
+          "program": {
+            "path_strategy": "greedy",
+            "adjoint": "default",
+            "unroll": 1,
+            "block_width": 2,
+            "symmetry": "none",
+            "segment_length": null,
+            "column_paths": null,
+            "representation": "spatial_transfer"
+          },
+          "optimizer": "natural-gradient",
+          "initialization": "zeros",
+          "target_energy_error": 0.1,
+          "max_steps": 80,
+          "seed": 3,
+          "learning_rate": 0.08,
+          "damping": 0.01,
+          "ground_energy": null,
+          "recycled_source_spec": null,
+          "recycled_parameters": null
+        },
+        "program_label": "spatial-transfer-greedy-b2-default-u1",
+        "converged": false,
+        "evaluations": 81,
+        "optimizer_steps": 80,
+        "compile_seconds": 2.5648843750022934,
+        "first_execute_seconds": 0.001698499996564351,
+        "optimization_seconds": 16.407765167001344,
+        "time_to_target_seconds": null,
+        "total_seconds": 18.972649542003637,
+        "peak_rss_bytes": 313999360,
+        "ground_energy": -4.758770483143631,
+        "target_energy": -4.658770483143631,
+        "final_energy": -3.9999992847442627,
+        "final_parameters": [
+          [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ]
+        ],
+        "trace": [
+          {
+            "evaluation": 1,
+            "optimizer_step": 0,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 0.001833125003031455,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 2,
+            "optimizer_step": 1,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 4.356884667002305,
+            "metric_condition": 51.00000000000005
+          },
+          {
+            "evaluation": 3,
+            "optimizer_step": 2,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 4.538902500004042,
+            "metric_condition": 51.00000000000005
+          },
+          {
+            "evaluation": 4,
+            "optimizer_step": 3,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 4.697084334002284,
+            "metric_condition": 51.00000000000005
+          },
+          {
+            "evaluation": 5,
+            "optimizer_step": 4,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 4.809623084001942,
+            "metric_condition": 51.00000000000005
+          },
+          {
+            "evaluation": 6,
+            "optimizer_step": 5,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 4.903907125000842,
+            "metric_condition": 51.00000000000005
+          },
+          {
+            "evaluation": 7,
+            "optimizer_step": 6,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 5.008726000000024,
+            "metric_condition": 51.00000000000005
+          },
+          {
+            "evaluation": 8,
+            "optimizer_step": 7,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 5.138096292001137,
+            "metric_condition": 51.00000000000005
+          },
+          {
+            "evaluation": 9,
+            "optimizer_step": 8,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 5.27029245900485,
+            "metric_condition": 51.00000000000005
+          },
+          {
+            "evaluation": 10,
+            "optimizer_step": 9,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 5.405926042003557,
+            "metric_condition": 51.00000000000005
+          },
+          {
+            "evaluation": 11,
+            "optimizer_step": 10,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 5.582791125001677,
+            "metric_condition": 51.00000000000005
+          },
+          {
+            "evaluation": 12,
+            "optimizer_step": 11,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 5.692315874999622,
+            "metric_condition": 51.00000000000005
+          },
+          {
+            "evaluation": 13,
+            "optimizer_step": 12,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 5.84603700000298,
+            "metric_condition": 51.00000000000005
+          },
+          {
+            "evaluation": 14,
+            "optimizer_step": 13,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 5.977870417002123,
+            "metric_condition": 51.00000000000005
+          },
+          {
+            "evaluation": 15,
+            "optimizer_step": 14,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 6.105341000002227,
+            "metric_condition": 51.00000000000005
+          },
+          {
+            "evaluation": 16,
+            "optimizer_step": 15,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 6.225844959000824,
+            "metric_condition": 51.00000000000005
+          },
+          {
+            "evaluation": 17,
+            "optimizer_step": 16,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 6.367283792002127,
+            "metric_condition": 51.00000000000005
+          },
+          {
+            "evaluation": 18,
+            "optimizer_step": 17,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 6.552609375001339,
+            "metric_condition": 51.00000000000005
+          },
+          {
+            "evaluation": 19,
+            "optimizer_step": 18,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 6.704045625003346,
+            "metric_condition": 51.00000000000005
+          },
+          {
+            "evaluation": 20,
+            "optimizer_step": 19,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 6.8414339590017335,
+            "metric_condition": 51.00000000000005
+          },
+          {
+            "evaluation": 21,
+            "optimizer_step": 20,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 7.0188475840041065,
+            "metric_condition": 51.00000000000005
+          },
+          {
+            "evaluation": 22,
+            "optimizer_step": 21,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 7.150018667001859,
+            "metric_condition": 51.00000000000005
+          },
+          {
+            "evaluation": 23,
+            "optimizer_step": 22,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 7.2652200420052395,
+            "metric_condition": 51.00000000000005
+          },
+          {
+            "evaluation": 24,
+            "optimizer_step": 23,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 7.362877292005578,
+            "metric_condition": 51.00000000000005
+          },
+          {
+            "evaluation": 25,
+            "optimizer_step": 24,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 7.469014042006165,
+            "metric_condition": 51.00000000000005
+          },
+          {
+            "evaluation": 26,
+            "optimizer_step": 25,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 7.570046459004516,
+            "metric_condition": 51.00000000000005
+          },
+          {
+            "evaluation": 27,
+            "optimizer_step": 26,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 7.678177375004452,
+            "metric_condition": 51.00000000000005
+          },
+          {
+            "evaluation": 28,
+            "optimizer_step": 27,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 7.895489334005106,
+            "metric_condition": 51.00000000000005
+          },
+          {
+            "evaluation": 29,
+            "optimizer_step": 28,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 8.105954750004457,
+            "metric_condition": 51.00000000000005
+          },
+          {
+            "evaluation": 30,
+            "optimizer_step": 29,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 8.331443875002151,
+            "metric_condition": 51.00000000000005
+          },
+          {
+            "evaluation": 31,
+            "optimizer_step": 30,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 8.615051459004462,
+            "metric_condition": 51.00000000000005
+          },
+          {
+            "evaluation": 32,
+            "optimizer_step": 31,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 8.893075625004712,
+            "metric_condition": 51.00000000000005
+          },
+          {
+            "evaluation": 33,
+            "optimizer_step": 32,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 8.997875834000297,
+            "metric_condition": 51.00000000000005
+          },
+          {
+            "evaluation": 34,
+            "optimizer_step": 33,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 9.162083667004481,
+            "metric_condition": 51.00000000000005
+          },
+          {
+            "evaluation": 35,
+            "optimizer_step": 34,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 9.298302334005712,
+            "metric_condition": 51.00000000000005
+          },
+          {
+            "evaluation": 36,
+            "optimizer_step": 35,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 9.417991792004614,
+            "metric_condition": 51.00000000000005
+          },
+          {
+            "evaluation": 37,
+            "optimizer_step": 36,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 9.585688541999843,
+            "metric_condition": 51.00000000000005
+          },
+          {
+            "evaluation": 38,
+            "optimizer_step": 37,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 9.729043667000951,
+            "metric_condition": 51.00000000000005
+          },
+          {
+            "evaluation": 39,
+            "optimizer_step": 38,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 9.84507300000405,
+            "metric_condition": 51.00000000000005
+          },
+          {
+            "evaluation": 40,
+            "optimizer_step": 39,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 10.022976000000199,
+            "metric_condition": 51.00000000000005
+          },
+          {
+            "evaluation": 41,
+            "optimizer_step": 40,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 10.201935000004596,
+            "metric_condition": 51.00000000000005
+          },
+          {
+            "evaluation": 42,
+            "optimizer_step": 41,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 10.363792667005328,
+            "metric_condition": 51.00000000000005
+          },
+          {
+            "evaluation": 43,
+            "optimizer_step": 42,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 10.490795167002943,
+            "metric_condition": 51.00000000000005
+          },
+          {
+            "evaluation": 44,
+            "optimizer_step": 43,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 10.572190250000858,
+            "metric_condition": 51.00000000000005
+          },
+          {
+            "evaluation": 45,
+            "optimizer_step": 44,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 10.652486292005051,
+            "metric_condition": 51.00000000000005
+          },
+          {
+            "evaluation": 46,
+            "optimizer_step": 45,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 10.737306542003353,
+            "metric_condition": 51.00000000000005
+          },
+          {
+            "evaluation": 47,
+            "optimizer_step": 46,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 10.871207084004709,
+            "metric_condition": 51.00000000000005
+          },
+          {
+            "evaluation": 48,
+            "optimizer_step": 47,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 11.130970666999929,
+            "metric_condition": 51.00000000000005
+          },
+          {
+            "evaluation": 49,
+            "optimizer_step": 48,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 11.273548249999294,
+            "metric_condition": 51.00000000000005
+          },
+          {
+            "evaluation": 50,
+            "optimizer_step": 49,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 11.493974167002307,
+            "metric_condition": 51.00000000000005
+          },
+          {
+            "evaluation": 51,
+            "optimizer_step": 50,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 11.661161209005513,
+            "metric_condition": 51.00000000000005
+          },
+          {
+            "evaluation": 52,
+            "optimizer_step": 51,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 11.802423375003855,
+            "metric_condition": 51.00000000000005
+          },
+          {
+            "evaluation": 53,
+            "optimizer_step": 52,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 11.94035895900015,
+            "metric_condition": 51.00000000000005
+          },
+          {
+            "evaluation": 54,
+            "optimizer_step": 53,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 12.040134084003512,
+            "metric_condition": 51.00000000000005
+          },
+          {
+            "evaluation": 55,
+            "optimizer_step": 54,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 12.139660125001683,
+            "metric_condition": 51.00000000000005
+          },
+          {
+            "evaluation": 56,
+            "optimizer_step": 55,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 12.24637208400236,
+            "metric_condition": 51.00000000000005
+          },
+          {
+            "evaluation": 57,
+            "optimizer_step": 56,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 12.366124709005817,
+            "metric_condition": 51.00000000000005
+          },
+          {
+            "evaluation": 58,
+            "optimizer_step": 57,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 12.591285667003831,
+            "metric_condition": 51.00000000000005
+          },
+          {
+            "evaluation": 59,
+            "optimizer_step": 58,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 12.711129625000467,
+            "metric_condition": 51.00000000000005
+          },
+          {
+            "evaluation": 60,
+            "optimizer_step": 59,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 12.810532709001563,
+            "metric_condition": 51.00000000000005
+          },
+          {
+            "evaluation": 61,
+            "optimizer_step": 60,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 12.939505959002418,
+            "metric_condition": 51.00000000000005
+          },
+          {
+            "evaluation": 62,
+            "optimizer_step": 61,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 13.096543209001538,
+            "metric_condition": 51.00000000000005
+          },
+          {
+            "evaluation": 63,
+            "optimizer_step": 62,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 13.209258375005447,
+            "metric_condition": 51.00000000000005
+          },
+          {
+            "evaluation": 64,
+            "optimizer_step": 63,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 13.35285187500267,
+            "metric_condition": 51.00000000000005
+          },
+          {
+            "evaluation": 65,
+            "optimizer_step": 64,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 13.481539792002877,
+            "metric_condition": 51.00000000000005
+          },
+          {
+            "evaluation": 66,
+            "optimizer_step": 65,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 13.58933091700601,
+            "metric_condition": 51.00000000000005
+          },
+          {
+            "evaluation": 67,
+            "optimizer_step": 66,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 13.85789033400215,
+            "metric_condition": 51.00000000000005
+          },
+          {
+            "evaluation": 68,
+            "optimizer_step": 67,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 14.110567042000184,
+            "metric_condition": 51.00000000000005
+          },
+          {
+            "evaluation": 69,
+            "optimizer_step": 68,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 14.291804334003245,
+            "metric_condition": 51.00000000000005
+          },
+          {
+            "evaluation": 70,
+            "optimizer_step": 69,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 14.433154541999102,
+            "metric_condition": 51.00000000000005
+          },
+          {
+            "evaluation": 71,
+            "optimizer_step": 70,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 14.644469584003673,
+            "metric_condition": 51.00000000000005
+          },
+          {
+            "evaluation": 72,
+            "optimizer_step": 71,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 14.801096375005727,
+            "metric_condition": 51.00000000000005
+          },
+          {
+            "evaluation": 73,
+            "optimizer_step": 72,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 14.984289292005997,
+            "metric_condition": 51.00000000000005
+          },
+          {
+            "evaluation": 74,
+            "optimizer_step": 73,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 15.168860249999852,
+            "metric_condition": 51.00000000000005
+          },
+          {
+            "evaluation": 75,
+            "optimizer_step": 74,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 15.409098750002158,
+            "metric_condition": 51.00000000000005
+          },
+          {
+            "evaluation": 76,
+            "optimizer_step": 75,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 15.619645584003592,
+            "metric_condition": 51.00000000000005
+          },
+          {
+            "evaluation": 77,
+            "optimizer_step": 76,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 15.757321500001126,
+            "metric_condition": 51.00000000000005
+          },
+          {
+            "evaluation": 78,
+            "optimizer_step": 77,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 15.924000625003828,
+            "metric_condition": 51.00000000000005
+          },
+          {
+            "evaluation": 79,
+            "optimizer_step": 78,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 16.12519854200218,
+            "metric_condition": 51.00000000000005
+          },
+          {
+            "evaluation": 80,
+            "optimizer_step": 79,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 16.270851667002717,
+            "metric_condition": 51.00000000000005
+          },
+          {
+            "evaluation": 81,
+            "optimizer_step": 80,
+            "energy": -3.9999992847442627,
+            "energy_error": 0.7587711983993684,
+            "gradient_norm": 0.0,
+            "elapsed_seconds": 16.407527542003663,
+            "metric_condition": 51.00000000000005
+          }
+        ],
+        "initialization_provenance": {
+          "policy": "zeros",
+          "seed": null,
+          "padding_forced_zero": true
+        },
+        "failure": "target not reached within max_steps",
+        "skipped": false
+      }
+    },
+    {
+      "id": "optimizer-natural-gradient-random",
+      "result": {
+        "request": {
+          "spec": {
+            "nqubits": 4,
+            "depth": 2,
+            "coupling": 1.0,
+            "field": 1.0,
+            "initial_state": "plus",
+            "dtype": "complex64"
+          },
+          "program": {
+            "path_strategy": "greedy",
+            "adjoint": "default",
+            "unroll": 1,
+            "block_width": 2,
+            "symmetry": "none",
+            "segment_length": null,
+            "column_paths": null,
+            "representation": "spatial_transfer"
+          },
+          "optimizer": "natural-gradient",
+          "initialization": "random",
+          "target_energy_error": 0.1,
+          "max_steps": 80,
+          "seed": 3,
+          "learning_rate": 0.08,
+          "damping": 0.01,
+          "ground_energy": null,
+          "recycled_source_spec": null,
+          "recycled_parameters": null
+        },
+        "program_label": "spatial-transfer-greedy-b2-default-u1",
+        "converged": true,
+        "evaluations": 4,
+        "optimizer_steps": 3,
+        "compile_seconds": 2.4398982920029084,
+        "first_execute_seconds": 0.0018973749974975362,
+        "optimization_seconds": 4.5181852919995436,
+        "time_to_target_seconds": 6.958006376000412,
+        "total_seconds": 6.958083584002452,
+        "peak_rss_bytes": 322732032,
+        "ground_energy": -4.758770483143631,
+        "target_energy": -4.658770483143631,
+        "final_energy": -4.669886112213135,
+        "final_parameters": [
+          [
+            [
+              0.559494287041268,
+              -0.32154137843187847,
+              -0.3113849592509148,
+              0.0
+            ],
+            [
+              0.6298725307886006,
+              -0.14342940557139283,
+              -0.7988520076332313,
+              -0.22988521895640493
+            ]
+          ],
+          [
+            [
+              -0.19638029747270005,
+              0.5284455203817908,
+              0.4710141180268827,
+              0.0
+            ],
+            [
+              0.3027995565907632,
+              0.5902391149118791,
+              0.2726572215905269,
+              0.5341079133392408
+            ]
+          ]
+        ],
+        "trace": [
+          {
+            "evaluation": 1,
+            "optimizer_step": 0,
+            "energy": -3.970587730407715,
+            "energy_error": 0.7881827527359162,
+            "gradient_norm": 1.0462381182414333,
+            "elapsed_seconds": 0.0021474169989232905,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 2,
+            "optimizer_step": 1,
+            "energy": -4.212218761444092,
+            "energy_error": 0.5465517216995393,
+            "gradient_norm": 1.710214904281269,
+            "elapsed_seconds": 4.292905084002996,
+            "metric_condition": 50.95048819148355
+          },
+          {
+            "evaluation": 3,
+            "optimizer_step": 2,
+            "energy": -4.602805137634277,
+            "energy_error": 0.1559653455093537,
+            "gradient_norm": 0.5055960154687927,
+            "elapsed_seconds": 4.39265579199855,
+            "metric_condition": 50.53706306613956
+          },
+          {
+            "evaluation": 4,
+            "optimizer_step": 3,
+            "energy": -4.669886112213135,
+            "energy_error": 0.08888437093049628,
+            "gradient_norm": 0.17914538990373804,
+            "elapsed_seconds": 4.518108083997504,
+            "metric_condition": 50.51682986901135
+          }
+        ],
+        "initialization_provenance": {
+          "policy": "normal",
+          "mean": 0.0,
+          "scale": 0.1,
+          "seed": 3,
+          "padding_forced_zero": true
+        },
+        "failure": null,
+        "skipped": false
+      }
+    },
+    {
+      "id": "optimizer-natural-gradient-recycled",
+      "result": {
+        "request": {
+          "spec": {
+            "nqubits": 4,
+            "depth": 2,
+            "coupling": 1.0,
+            "field": 1.0,
+            "initial_state": "plus",
+            "dtype": "complex64"
+          },
+          "program": {
+            "path_strategy": "greedy",
+            "adjoint": "default",
+            "unroll": 1,
+            "block_width": 2,
+            "symmetry": "none",
+            "segment_length": null,
+            "column_paths": null,
+            "representation": "spatial_transfer"
+          },
+          "optimizer": "natural-gradient",
+          "initialization": "recycled",
+          "target_energy_error": 0.1,
+          "max_steps": 80,
+          "seed": 3,
+          "learning_rate": 0.08,
+          "damping": 0.01,
+          "ground_energy": null,
+          "recycled_source_spec": {
+            "nqubits": 3,
+            "depth": 1,
+            "coupling": 1.0,
+            "field": 1.0,
+            "initial_state": "plus",
+            "dtype": "complex64"
+          },
+          "recycled_parameters": [
+            [
+              [
+                -0.42955118350723137,
+                -0.33286244786833113,
+                0.0
+              ],
+              [
+                -0.4363104199435354,
+                -1.0636866156792906,
+                -0.8032493030821216
+              ]
+            ]
+          ]
+        },
+        "program_label": "spatial-transfer-greedy-b2-default-u1",
+        "converged": true,
+        "evaluations": 3,
+        "optimizer_steps": 2,
+        "compile_seconds": 2.9815837909991387,
+        "first_execute_seconds": 0.02080766700237291,
+        "optimization_seconds": 4.893536417002906,
+        "time_to_target_seconds": 7.8750602080035605,
+        "total_seconds": 7.875120208002045,
+        "peak_rss_bytes": 271695872,
+        "ground_energy": -4.758770483143631,
+        "target_energy": -4.658770483143631,
+        "final_energy": -4.705329418182373,
+        "final_parameters": [
+          [
+            [
+              -0.18017980836953917,
+              -0.3639476193557529,
+              -0.22393307000361656,
+              0.0
+            ],
+            [
+              -0.6642726322235285,
+              -1.3384096312787013,
+              -1.1983322506688552,
+              -0.9609799325022277
+            ]
+          ],
+          [
+            [
+              -0.521000595573538,
+              -0.6230974168819637,
+              -0.5579210933729298,
+              0.0
+            ],
+            [
+              -0.717331814131961,
+              -0.5766142275975163,
+              -0.43841505921801205,
+              -0.8205390971846404
+            ]
+          ]
+        ],
+        "trace": [
+          {
+            "evaluation": 1,
+            "optimizer_step": 0,
+            "energy": -4.1041154861450195,
+            "energy_error": 0.6546549969986115,
+            "gradient_norm": 1.8798115386493606,
+            "elapsed_seconds": 0.02154812500521075,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 2,
+            "optimizer_step": 1,
+            "energy": -4.632693767547607,
+            "energy_error": 0.12607671559602363,
+            "gradient_norm": 0.43102784625168145,
+            "elapsed_seconds": 4.718468416998803,
+            "metric_condition": 45.04759222422079
+          },
+          {
+            "evaluation": 3,
+            "optimizer_step": 2,
+            "energy": -4.705329418182373,
+            "energy_error": 0.053441064961258,
+            "gradient_norm": 0.15711282727693562,
+            "elapsed_seconds": 4.893476417004422,
+            "metric_condition": 48.033219831048214
+          }
+        ],
+        "initialization_provenance": {
+          "policy": "translation-mean-recycle",
+          "source_spec": {
+            "nqubits": 3,
+            "depth": 1,
+            "coupling": 1.0,
+            "field": 1.0,
+            "initial_state": "plus",
+            "dtype": "complex64"
+          },
+          "target_spec": {
+            "nqubits": 4,
+            "depth": 2,
+            "coupling": 1.0,
+            "field": 1.0,
+            "initial_state": "plus",
+            "dtype": "complex64"
+          },
+          "source_shape": [
+            1,
+            2,
+            3
+          ],
+          "target_shape": [
+            2,
+            2,
+            4
+          ],
+          "new_site_fill": "source-layer-active-mean",
+          "new_layer_fill": "last-source-layer",
+          "padding_forced_zero": true
+        },
+        "failure": null,
+        "skipped": false
+      }
+    },
+    {
+      "id": "program-statevector",
+      "result": {
+        "request": {
+          "spec": {
+            "nqubits": 4,
+            "depth": 2,
+            "coupling": 1.0,
+            "field": 1.0,
+            "initial_state": "plus",
+            "dtype": "complex64"
+          },
+          "program": {
+            "control_flow": "scan",
+            "adjoint": "default",
+            "unroll": 1,
+            "segment_length": null,
+            "representation": "statevector"
+          },
+          "optimizer": "lbfgs",
+          "initialization": "random",
+          "target_energy_error": 0.1,
+          "max_steps": 80,
+          "seed": 3,
+          "learning_rate": 0.08,
+          "damping": 0.01,
+          "ground_energy": null,
+          "recycled_source_spec": null,
+          "recycled_parameters": null
+        },
+        "program_label": "scan-default-u1",
+        "converged": true,
+        "evaluations": 23,
+        "optimizer_steps": 15,
+        "compile_seconds": 1.2038961250000284,
+        "first_execute_seconds": 0.0013180000023567118,
+        "optimization_seconds": 0.5348042500045267,
+        "time_to_target_seconds": 1.7386206250012037,
+        "total_seconds": 1.738700375004555,
+        "peak_rss_bytes": 278822912,
+        "ground_energy": -4.758770483143631,
+        "target_energy": -4.658770483143631,
+        "final_energy": -4.660315990447998,
+        "final_parameters": [
+          [
+            [
+              0.1956490707631822,
+              -0.21033193378754994,
+              -0.3027884858310836,
+              0.0
+            ],
+            [
+              0.8828221879211614,
+              -0.14378688995628863,
+              -0.5802451539457344,
+              -0.4943990048042194
+            ]
+          ],
+          [
+            [
+              -0.5609140129584549,
+              -0.21714400134978096,
+              -0.21928447230755777,
+              0.0
+            ],
+            [
+              -0.6357669870736355,
+              -0.6839973124171032,
+              -0.4447819913250568,
+              -0.44115864671391636
+            ]
+          ]
+        ],
+        "trace": [
+          {
+            "evaluation": 1,
+            "optimizer_step": 0,
+            "energy": -3.970588207244873,
+            "energy_error": 0.788182275898758,
+            "gradient_norm": 1.0462380875880148,
+            "elapsed_seconds": 0.35799095800030045,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 2,
+            "optimizer_step": 0,
+            "energy": -2.9472970962524414,
+            "energy_error": 1.8114733868911896,
+            "gradient_norm": 3.2600673759922163,
+            "elapsed_seconds": 0.35881795800378313,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 3,
+            "optimizer_step": 0,
+            "energy": -4.093393325805664,
+            "energy_error": 0.665377157337967,
+            "gradient_norm": 0.5085119992856318,
+            "elapsed_seconds": 0.359333708001941,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 4,
+            "optimizer_step": 1,
+            "energy": -4.148209571838379,
+            "energy_error": 0.6105609113052521,
+            "gradient_norm": 0.5970068503045787,
+            "elapsed_seconds": 0.3598060830045142,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 5,
+            "optimizer_step": 1,
+            "energy": -4.32517671585083,
+            "energy_error": 0.43359376729280097,
+            "gradient_norm": 0.6974962215452724,
+            "elapsed_seconds": 0.3600673330001882,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 6,
+            "optimizer_step": 2,
+            "energy": -4.06139612197876,
+            "energy_error": 0.6973743611648713,
+            "gradient_norm": 1.556756500926748,
+            "elapsed_seconds": 0.3607512080052402,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 7,
+            "optimizer_step": 2,
+            "energy": -4.3627214431762695,
+            "energy_error": 0.3960490399673615,
+            "gradient_norm": 0.5860649482546183,
+            "elapsed_seconds": 0.3610855000006268,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 8,
+            "optimizer_step": 3,
+            "energy": -4.421840667724609,
+            "energy_error": 0.33692981541902167,
+            "gradient_norm": 0.2408717935525654,
+            "elapsed_seconds": 0.3669473330010078,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 9,
+            "optimizer_step": 4,
+            "energy": -4.444640636444092,
+            "energy_error": 0.31412984669953925,
+            "gradient_norm": 0.2711517244558274,
+            "elapsed_seconds": 0.3923876660046517,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 10,
+            "optimizer_step": 5,
+            "energy": -4.477268218994141,
+            "energy_error": 0.2815022641494904,
+            "gradient_norm": 0.43365619277790957,
+            "elapsed_seconds": 0.419187375002366,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 11,
+            "optimizer_step": 6,
+            "energy": -1.1983931064605713,
+            "energy_error": 3.5603773766830598,
+            "gradient_norm": 3.7651913253376175,
+            "elapsed_seconds": 0.4570393329995568,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 12,
+            "optimizer_step": 6,
+            "energy": -4.49983024597168,
+            "energy_error": 0.25894023717195136,
+            "gradient_norm": 0.5194698038510626,
+            "elapsed_seconds": 0.46466466600395506,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 13,
+            "optimizer_step": 7,
+            "energy": -3.2652158737182617,
+            "energy_error": 1.4935546094253693,
+            "gradient_norm": 2.761011682654513,
+            "elapsed_seconds": 0.48982283300574636,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 14,
+            "optimizer_step": 7,
+            "energy": -4.535165786743164,
+            "energy_error": 0.22360469640046698,
+            "gradient_norm": 0.6015072830065591,
+            "elapsed_seconds": 0.49106933300208766,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 15,
+            "optimizer_step": 8,
+            "energy": -4.549342155456543,
+            "energy_error": 0.20942832768708808,
+            "gradient_norm": 0.5890665410239416,
+            "elapsed_seconds": 0.4925285410063225,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 16,
+            "optimizer_step": 8,
+            "energy": -4.561652660369873,
+            "energy_error": 0.197117822773758,
+            "gradient_norm": 0.5674532861449093,
+            "elapsed_seconds": 0.4978269580024062,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 17,
+            "optimizer_step": 9,
+            "energy": -4.597558498382568,
+            "energy_error": 0.1612119847610627,
+            "gradient_norm": 0.3640569089990038,
+            "elapsed_seconds": 0.5296215410053264,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 18,
+            "optimizer_step": 10,
+            "energy": -4.625672340393066,
+            "energy_error": 0.13309814275056464,
+            "gradient_norm": 0.37461248084538407,
+            "elapsed_seconds": 0.5316066250015865,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 19,
+            "optimizer_step": 11,
+            "energy": -4.637856483459473,
+            "energy_error": 0.12091399968415839,
+            "gradient_norm": 0.19879618622803819,
+            "elapsed_seconds": 0.5330305410025176,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 20,
+            "optimizer_step": 12,
+            "energy": -4.646670341491699,
+            "energy_error": 0.11210014165193183,
+            "gradient_norm": 0.09983159999284111,
+            "elapsed_seconds": 0.5336957500039716,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 21,
+            "optimizer_step": 13,
+            "energy": -4.6522417068481445,
+            "energy_error": 0.10652877629548652,
+            "gradient_norm": 0.052155084184668576,
+            "elapsed_seconds": 0.5339996250040713,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 22,
+            "optimizer_step": 14,
+            "energy": -4.653794288635254,
+            "energy_error": 0.10497619450837714,
+            "gradient_norm": 0.04988092740094534,
+            "elapsed_seconds": 0.5343359160033287,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 23,
+            "optimizer_step": 15,
+            "energy": -4.660315990447998,
+            "energy_error": 0.098454492695633,
+            "gradient_norm": 0.09013266416191403,
+            "elapsed_seconds": 0.5347245000011753,
+            "metric_condition": null
+          }
+        ],
+        "initialization_provenance": {
+          "policy": "normal",
+          "mean": 0.0,
+          "scale": 0.1,
+          "seed": 3,
+          "padding_forced_zero": true
+        },
+        "failure": null,
+        "skipped": false
+      }
+    },
+    {
+      "id": "program-z2-native",
+      "result": {
+        "request": {
+          "spec": {
+            "nqubits": 4,
+            "depth": 2,
+            "coupling": 1.0,
+            "field": 1.0,
+            "initial_state": "plus",
+            "dtype": "complex64"
+          },
+          "program": {
+            "path_strategy": "greedy",
+            "adjoint": "default",
+            "unroll": 1,
+            "block_width": 1,
+            "symmetry": "z2-native",
+            "segment_length": null,
+            "column_paths": null,
+            "representation": "spatial_transfer"
+          },
+          "optimizer": "lbfgs",
+          "initialization": "random",
+          "target_energy_error": 0.1,
+          "max_steps": 80,
+          "seed": 3,
+          "learning_rate": 0.08,
+          "damping": 0.01,
+          "ground_energy": null,
+          "recycled_source_spec": null,
+          "recycled_parameters": null
+        },
+        "program_label": "spatial-transfer-greedy-b1-default-u1-z2-native",
+        "converged": true,
+        "evaluations": 23,
+        "optimizer_steps": 15,
+        "compile_seconds": 2.501413625002897,
+        "first_execute_seconds": 0.00567066600342514,
+        "optimization_seconds": 0.46104095799819333,
+        "time_to_target_seconds": 2.9623850000061793,
+        "total_seconds": 2.96245458300109,
+        "peak_rss_bytes": 298696704,
+        "ground_energy": -4.758770483143631,
+        "target_energy": -4.658770483143631,
+        "final_energy": -4.660317420959473,
+        "final_parameters": [
+          [
+            [
+              0.19564886194083791,
+              -0.21031959319292146,
+              -0.3027913139975643,
+              0.0
+            ],
+            [
+              0.8828145271338433,
+              -0.1437970417035222,
+              -0.5802405262539679,
+              -0.4944079904940536
+            ]
+          ],
+          [
+            [
+              -0.5609085026545104,
+              -0.21715189609599325,
+              -0.21928708230789937,
+              0.0
+            ],
+            [
+              -0.6357753571176938,
+              -0.683995743227185,
+              -0.44478145129676094,
+              -0.4411694730002602
+            ]
+          ]
+        ],
+        "trace": [
+          {
+            "evaluation": 1,
+            "optimizer_step": 0,
+            "energy": -3.970587730407715,
+            "energy_error": 0.7881827527359162,
+            "gradient_norm": 1.0462381801177534,
+            "elapsed_seconds": 0.44213783300074283,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 2,
+            "optimizer_step": 0,
+            "energy": -2.947296380996704,
+            "energy_error": 1.811474102146927,
+            "gradient_norm": 3.2600663130303067,
+            "elapsed_seconds": 0.44585250000091037,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 3,
+            "optimizer_step": 0,
+            "energy": -4.093392848968506,
+            "energy_error": 0.6653776341751252,
+            "gradient_norm": 0.5085115921925534,
+            "elapsed_seconds": 0.447573083001771,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 4,
+            "optimizer_step": 1,
+            "energy": -4.148208141326904,
+            "energy_error": 0.6105623418167268,
+            "gradient_norm": 0.597006725284157,
+            "elapsed_seconds": 0.4485923329993966,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 5,
+            "optimizer_step": 1,
+            "energy": -4.325174331665039,
+            "energy_error": 0.433596151478592,
+            "gradient_norm": 0.6974981119703373,
+            "elapsed_seconds": 0.4494364170022891,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 6,
+            "optimizer_step": 2,
+            "energy": -4.061396598815918,
+            "energy_error": 0.6973738843277131,
+            "gradient_norm": 1.5567497946537185,
+            "elapsed_seconds": 0.449992875001044,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 7,
+            "optimizer_step": 2,
+            "energy": -4.3627214431762695,
+            "energy_error": 0.3960490399673615,
+            "gradient_norm": 0.5860671597555764,
+            "elapsed_seconds": 0.45120241699623875,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 8,
+            "optimizer_step": 3,
+            "energy": -4.421838283538818,
+            "energy_error": 0.3369321996048127,
+            "gradient_norm": 0.2408720216822944,
+            "elapsed_seconds": 0.45194058299966855,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 9,
+            "optimizer_step": 4,
+            "energy": -4.444639205932617,
+            "energy_error": 0.31413127721101386,
+            "gradient_norm": 0.2711510757087276,
+            "elapsed_seconds": 0.4526419169997098,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 10,
+            "optimizer_step": 5,
+            "energy": -4.477268218994141,
+            "energy_error": 0.2815022641494904,
+            "gradient_norm": 0.43365376813553086,
+            "elapsed_seconds": 0.45337158299662406,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 11,
+            "optimizer_step": 6,
+            "energy": -1.1982049942016602,
+            "energy_error": 3.560565488941971,
+            "gradient_norm": 3.7651987675218717,
+            "elapsed_seconds": 0.4539258750010049,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 12,
+            "optimizer_step": 6,
+            "energy": -4.499825954437256,
+            "energy_error": 0.2589445287063752,
+            "gradient_norm": 0.5194610107278904,
+            "elapsed_seconds": 0.4543769579977379,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 13,
+            "optimizer_step": 7,
+            "energy": -3.264946937561035,
+            "energy_error": 1.493823545582596,
+            "gradient_norm": 2.761270909677714,
+            "elapsed_seconds": 0.4549152920008055,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 14,
+            "optimizer_step": 7,
+            "energy": -4.53516149520874,
+            "energy_error": 0.2236089879348908,
+            "gradient_norm": 0.6014991039614989,
+            "elapsed_seconds": 0.4553684170023189,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 15,
+            "optimizer_step": 8,
+            "energy": -4.549330234527588,
+            "energy_error": 0.20944024861604316,
+            "gradient_norm": 0.5891141747789909,
+            "elapsed_seconds": 0.45586275000096066,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 16,
+            "optimizer_step": 8,
+            "energy": -4.561651229858398,
+            "energy_error": 0.1971192532852326,
+            "gradient_norm": 0.5674670905825774,
+            "elapsed_seconds": 0.45628037500137,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 17,
+            "optimizer_step": 9,
+            "energy": -4.5975542068481445,
+            "energy_error": 0.16121627629548652,
+            "gradient_norm": 0.3640862684592331,
+            "elapsed_seconds": 0.4568647499982035,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 18,
+            "optimizer_step": 10,
+            "energy": -4.625669002532959,
+            "energy_error": 0.13310148061067206,
+            "gradient_norm": 0.37456817216273575,
+            "elapsed_seconds": 0.45739408300141804,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 19,
+            "optimizer_step": 11,
+            "energy": -4.637855529785156,
+            "energy_error": 0.1209149533584748,
+            "gradient_norm": 0.1988001998124144,
+            "elapsed_seconds": 0.45811787500133505,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 20,
+            "optimizer_step": 12,
+            "energy": -4.646670341491699,
+            "energy_error": 0.11210014165193183,
+            "gradient_norm": 0.09982908951217737,
+            "elapsed_seconds": 0.4590563329984434,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 21,
+            "optimizer_step": 13,
+            "energy": -4.652242183685303,
+            "energy_error": 0.10652829945832831,
+            "gradient_norm": 0.05215213349596941,
+            "elapsed_seconds": 0.45973987499746727,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 22,
+            "optimizer_step": 14,
+            "energy": -4.6537933349609375,
+            "energy_error": 0.10497714818269355,
+            "gradient_norm": 0.04988201352318374,
+            "elapsed_seconds": 0.4602759170011268,
+            "metric_condition": null
+          },
+          {
+            "evaluation": 23,
+            "optimizer_step": 15,
+            "energy": -4.660317420959473,
+            "energy_error": 0.09845306218415839,
+            "gradient_norm": 0.09014545836568953,
+            "elapsed_seconds": 0.46097137500328245,
+            "metric_condition": null
+          }
+        ],
+        "initialization_provenance": {
+          "policy": "normal",
+          "mean": 0.0,
+          "scale": 0.1,
+          "seed": 3,
+          "padding_forced_zero": true
+        },
+        "failure": null,
+        "skipped": false
+      }
+    }
+  ],
+  "derived": {
+    "ranking_policy": "converged runs only, ascending synchronized time_to_target_seconds including compilation",
+    "converged_run_ids": [
+      "program-statevector",
+      "optimizer-adam-recycled",
+      "optimizer-lbfgs-recycled",
+      "optimizer-lbfgs-random",
+      "program-z2-native",
+      "optimizer-adam-random",
+      "optimizer-natural-gradient-random",
+      "optimizer-natural-gradient-recycled"
+    ],
+    "best_run_id": "program-statevector",
+    "recycling": {
+      "adam": {
+        "random_evaluations": 32,
+        "recycled_evaluations": 20,
+        "target_only_seconds": 2.3153870000023744,
+        "two_stage_seconds": 3.9547249160095816
+      },
+      "lbfgs": {
+        "random_evaluations": 23,
+        "recycled_evaluations": 5,
+        "target_only_seconds": 2.7501476670076954,
+        "two_stage_seconds": 4.389485583014903
+      },
+      "natural-gradient": {
+        "random_evaluations": 4,
+        "recycled_evaluations": 3,
+        "target_only_seconds": 7.8750602080035605,
+        "two_stage_seconds": 9.514398124010768
+      }
+    },
+    "source_training_seconds": 1.6393379160072072
+  }
+}

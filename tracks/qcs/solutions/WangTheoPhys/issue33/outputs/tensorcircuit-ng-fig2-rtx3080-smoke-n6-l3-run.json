@@ -1,0 +1,115 @@
+{
+  "schema_version": 1,
+  "artifact_type": "tensorcircuit_ng_fig2_run",
+  "protocol": {
+    "paper": {
+      "title": "TensorCircuit-NG: A Universal, Composable, and Scalable Platform for Quantum Computing and Quantum Simulation",
+      "arxiv": "2602.14167",
+      "figure": 2,
+      "reported_hardware": "NVIDIA H200 141GB",
+      "reported_single_gpu_n32_l16_step_seconds": 17.86,
+      "reported_eight_gpu_n32_l16_step_seconds": 2.38
+    },
+    "hamiltonian": {
+      "paper_form": "-sum_i Z_i Z_{i+1} - sum_i X_i",
+      "implementation": "TensorNetwork FiniteTFI rotated-axis open-boundary MPO",
+      "coupling": 1.0,
+      "field": 1.0,
+      "boundary": "open"
+    },
+    "initial_state": "plus",
+    "ansatz": {
+      "gate": "TensorCircuit-NG su4",
+      "gate_parameterization": "exp(-i * sum_k theta_k P_k), 15 nonidentity two-qubit Pauli generators",
+      "layout": "ladder: adjacent pairs (0,1), (1,2), ..., (nqubits-2,nqubits-1) per layer",
+      "nqubits": 6,
+      "depth": 3,
+      "parameter_shape": [
+        3,
+        5,
+        15
+      ],
+      "parameter_count": 225,
+      "parameter_count_formula": "15 * depth * (nqubits - 1)"
+    },
+    "numerics": {
+      "dtype": "complex64",
+      "seed": 42,
+      "initialization": "jax.random.normal(PRNGKey(seed)) * scale",
+      "parameter_scale": 0.1,
+      "precision": "highest",
+      "seed_boundary": "the paper does not state a Fig. 2 seed; seed 42 follows the upstream DistributedContractor VQE example"
+    },
+    "contractor": {
+      "engine": "TensorCircuit-NG DistributedContractor",
+      "find_execute_workflow": true,
+      "max_repeats": 16,
+      "minimize": "combo-640",
+      "score": "FLOPS + 640 * WRITE",
+      "slicing_target_elements": 1048576,
+      "parallel_path_workers": 4,
+      "slicing_boundary": "the paper explicitly reports 2^29 elements for the 40-qubit case; this runner makes the value explicit for every run"
+    },
+    "scope": "paper_fig2_protocol_not_matched_rzz_rx_baseline"
+  },
+  "protocol_sha256": "e0ff2c9a0812093b9a925219cf970176902cfed21c2a5d66e383257cf5b48e2d",
+  "path_tree_stats": {
+    "slices": 1,
+    "flops": 9024,
+    "write": 1937,
+    "max_size_elements": 192,
+    "arithmetic_intensity": 4.658750645327826
+  },
+  "runtime": {
+    "jax_backend": "gpu",
+    "jax_devices": [
+      "cuda:0"
+    ],
+    "jax_default_matmul_precision": "highest",
+    "tensor_network_jax_precision": "HIGHEST",
+    "python": "3.12.11 | packaged by Anaconda, Inc. | (main, Jun  5 2025, 13:09:17) [GCC 11.2.0]",
+    "slurm_job_id": "23027373",
+    "slurm_node": "e04r04",
+    "cuda_visible_devices": "0",
+    "versions": {
+      "tensorcircuit-ng": "1.8.0",
+      "tensornetwork-ng": "0.5.1",
+      "jax": "0.4.38",
+      "jaxlib": "0.4.38",
+      "cotengra": "0.8.2",
+      "numpy": "2.2.6"
+    }
+  },
+  "timings": {
+    "first_value_and_grad_seconds": 22.750995699316263,
+    "first_call_includes_jit_compile": true,
+    "warm_value_and_grad_seconds": [
+      0.02017892338335514,
+      0.01942443661391735,
+      0.01930241659283638
+    ],
+    "warm_value_and_grad_seconds_median": 0.01942443661391735,
+    "warm_value_and_grad_seconds_mad": 0.00012202002108097076
+  },
+  "memory": {
+    "peak_rss_bytes": 911855616,
+    "nvml_job_peak_mib": 266
+  },
+  "result": {
+    "energy": 1.8954486846923828,
+    "gradient_shape": [
+      3,
+      5,
+      15
+    ],
+    "gradient_l2_norm": 18.2535343170166,
+    "gradient_sha256": "9f619aaa3d5bea9a57f516b1f79b309d76fbb897b55c149bd020d906999f0a1e"
+  },
+  "correctness": {
+    "reference": "direct unsliced contraction of identical nodes",
+    "energy_abs_error": 2.384185791015625e-07,
+    "gradient_relative_l2_error": 3.288356822395144e-07,
+    "tolerance": 1e-05,
+    "tolerance_passed": true
+  }
+}

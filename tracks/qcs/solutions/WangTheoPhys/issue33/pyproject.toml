@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=75"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "vqetape"
+version = "0.1.0"
+description = "Research compiler prototype for memory-aware VQE value-and-gradient programs"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+  "jax>=0.4.38,<1",
+  "numpy>=2.0,<3",
+  "opt_einsum>=3.4,<4",
+  "psutil>=6,<8",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=8,<10", "scipy>=1.14,<2"]
+training = ["scipy>=1.14,<2"]
+baseline = [
+  "tensorcircuit-ng==1.8.0",
+  "tensornetwork-ng==0.5.1",
+  "omeco==0.2.6",
+  "cotengra==0.8.2",
+]
+
+[project.scripts]
+vqetape = "vqetape.cli:main"
+vqetape-train = "vqetape.training_cli:main"
+vqetape-ansatz = "vqetape.ansatz_report:main"
+vqetape-tc-baseline = "vqetape.tensorcircuit_baseline_cli:main"
+vqetape-tc-fig2 = "vqetape.tensorcircuit_fig2_cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
