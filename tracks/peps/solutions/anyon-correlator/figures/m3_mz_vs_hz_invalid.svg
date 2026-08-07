@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="500" viewBox="0 0 800 500">
+<rect width="800" height="500" fill="white"/>
+<text x="400" y="30" text-anchor="middle" font-family="sans-serif" font-size="20">Invalid M3 first-pass polarization m_z(h_z)</text>
+<line x1="85.00" y1="430.00" x2="770.00" y2="430.00" stroke="#222"/>
+<line x1="85.00" y1="55.00" x2="85.00" y2="430.00" stroke="#222"/>
+<polyline points="85.00,383.89 222.00,174.38 359.00,105.85 468.60,101.90 496.00,101.83 523.40,101.83 537.10,101.83 550.80,101.83 578.20,101.11 633.00,101.11 770.00,101.11" fill="none" stroke="#8f2d2d" stroke-width="2.5"/>
+<circle cx="85.00" cy="383.89" r="4" fill="#8f2d2d"/>
+<circle cx="222.00" cy="174.38" r="4" fill="#8f2d2d"/>
+<circle cx="359.00" cy="105.85" r="4" fill="#8f2d2d"/>
+<circle cx="468.60" cy="101.90" r="4" fill="#8f2d2d"/>
+<circle cx="496.00" cy="101.83" r="4" fill="#8f2d2d"/>
+<circle cx="523.40" cy="101.83" r="4" fill="#8f2d2d"/>
+<circle cx="537.10" cy="101.83" r="4" fill="#8f2d2d"/>
+<circle cx="550.80" cy="101.83" r="4" fill="#8f2d2d"/>
+<circle cx="578.20" cy="101.11" r="4" fill="#8f2d2d"/>
+<circle cx="633.00" cy="101.11" r="4" fill="#8f2d2d"/>
+<circle cx="770.00" cy="101.11" r="4" fill="#8f2d2d"/>
+<text x="400" y="480" text-anchor="middle" font-family="sans-serif" font-size="15">h_z</text>
+<text x="20" y="250" text-anchor="middle" transform="rotate(-90 20 250)" font-family="sans-serif" font-size="15">m_z per edge spin</text>
+</svg>
