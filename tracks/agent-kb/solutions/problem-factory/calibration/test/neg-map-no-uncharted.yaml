@@ -1,0 +1,15 @@
+id: test-neg-map-no-uncharted
+source: synthetic adversarial - curves and anchors but the literature gap is never named
+title: Study magnetization plateaus of the sawtooth chain
+target:
+  system: sawtooth chain
+  pinned_number: "h_sat = 4J1; S/N = 0.2406 k_B"
+  reference: Schulenburg-Honecker-Schnack PRL 88, 167207 (2002)
+gate:
+  family: certificate
+  checker: exact_integer_degeneracy_counts
+merit:
+  curve: plateau width vs J2 detuning
+  analytic_check: degenerate perturbation theory slopes
+publishable_unit: plateau physics of frustrated chains is of broad interest
+uncharted: ""

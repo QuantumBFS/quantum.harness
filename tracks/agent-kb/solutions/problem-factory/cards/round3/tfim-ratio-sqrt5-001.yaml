@@ -1,0 +1,45 @@
+id: tfim-ratio-sqrt5-001
+model: tfim_2d                    # 2D transverse-field Ising, H = -J Σ σzσz - h Σ σx
+convention: pauli                 # J = 1; matches Blöte–Deng 2002 and KB model card
+setup:
+  boundary: pbc
+  lattices:                       # cluster shapes; honeycomb N = 2·L1·L2
+    triangular: [[3, 3], [3, 4], [3, 6]]   # N = 9, 12, 18
+    honeycomb: [[2, 2], [2, 3], [3, 3]]    # N = 8, 12, 18
+  params:
+    h_triangular: [3.8, 5.8]      # scan range around h_c ≈ 4.768 (step 0.1)
+    h_honeycomb: [1.4, 3.0]       # scan range around h_c ≈ 2.133 (step 0.1)
+observable:
+  name: binder_crossing_ratio
+  definition: R = h_c(triangular)/h_c(honeycomb); h_c per lattice = Binder-cumulant
+              U_L(h) crossings averaged over size pairs; sigma_R from pair scatter
+  sector: parity-even (P = prod sigma_x)
+gate:
+  type: ratio_vs_sqrt5
+  frozen: true
+  target: 2.23606797749979        # sqrt(5)
+  target_precision: 1.2e-5        # sigma_R needed for a decisive verdict (issue #148 item 3)
+  kill_if: {decisiveness_below: 2.0}   # decisiveness = |R - sqrt(5)| / sigma_R
+static_fire: [tfim_parity, tfim_classical_limit, tfim_strong_field, tfim_chain_jw]
+
+# --- generator declarations (priors, non-blocking) ---
+quality_rationale: >
+  adjudicate-class problem with a frozen numeric gate: Blöte & Deng (PRE 66, 066110
+  (2002), Table I) pin h_c(tri) = 4.76811(9) and h_c(honey) = 2.13250(4), giving
+  R = 2.23592(6) vs sqrt(5) = 2.236068 — 2.4 sigma tension, unresolved for 24 years.
+  The classical star-triangle analogue fails (T_c ratio 2.3975 != sqrt(5)), so a
+  conjectured exact ratio is specifically quantum. Falsifiable with sign-free methods.
+value_claim: >
+  Either branch publishes: refutation delivers modern reference critical points for
+  two canonical lattices; confirmation at 1e-5 would be a discovery about
+  non-universal quantities in (2+1)D. Reconnaissance question for THIS card: can
+  small-cluster ED say anything about R, and at what cost-to-decision?
+provenance:
+  papers_mined: ["Blöte & Deng, Phys. Rev. E 66, 066110 (2002)"]
+  citation_sweep: >
+    Semantic Scholar sweep of all 203 citing papers (2026-07-30): no post-2002
+    determination of h_c on triangular or honeycomb TFIM improving on the 2002
+    values; the SOTA pair is still Blöte–Deng. arXiv abstract searches
+    (triangular/honeycomb + transverse-field Ising + critical) concur.
+  challenge_issue: 148
+  run_id: gen-2026-07-30-sqrt5

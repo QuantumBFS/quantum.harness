@@ -1,0 +1,15 @@
+id: test-neg-map-no-analytic
+source: synthetic adversarial - charts a frontier but the curves have no analytic teeth (teacher's criticism in candidate form)
+title: Map the phase diagram of a decorated kagome lattice
+target:
+  system: decorated kagome lattice
+  pinned_number: "kagome hard-hexagon residual entropy 0.11108 k_B"
+  reference: Zhitomirsky-Honecker JSTAT P07012 (2004)
+gate:
+  family: certificate
+  checker: closed_form_anchor_battery
+uncharted: decorated variant not treated in cited works
+merit:
+  curve: full phase diagram vs decoration strength
+  analytic_check: ""
+publishable_unit: first phase diagram of this decoration

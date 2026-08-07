@@ -1,0 +1,8 @@
+problem_id: xxz-j2-boundary-101
+verdict: deferred
+root_cause:
+  category: null
+  evidence: signal visible (decisiveness 1.85) but below kill threshold 2.0 — worth
+    a larger launch (gradient -0.0037/site)
+lesson: signal visible (decisiveness 1.85) but below kill threshold 2.0 — worth a
+  larger launch (gradient -0.0037/site)

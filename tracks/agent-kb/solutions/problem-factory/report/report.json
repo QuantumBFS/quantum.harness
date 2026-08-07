@@ -1,0 +1,409 @@
+{
+  "title": "Localized-magnon erosion map of the sawtooth chain (detuning axis)",
+  "eyebrow": "issue #112",
+  "url": "https://github.com/QuantumBFS/quantum.harness/issues/112",
+  "lede": "Reproducing: magnetization-curves, erosion-metrics of the sawtooth-chain.",
+  "sections": [
+    {
+      "title": "Model",
+      "note": "The physical system — shared by every figure below.",
+      "blocks": [
+        {
+          "kind": "card",
+          "title": "Hamiltonian",
+          "blocks": [
+            {
+              "kind": "equation",
+              "tex": "H = J_1 \\sum_i \\mathbf{S}_{A_i}\\cdot\\mathbf{S}_{A_{i+1}} + J_2 \\sum_i \\left( \\mathbf{S}_{A_i}\\cdot\\mathbf{S}_{B_i} + \\mathbf{S}_{B_i}\\cdot\\mathbf{S}_{A_{i+1}} \\right) - h \\sum_i S^z_i"
+            },
+            {
+              "kind": "kv",
+              "pairs": [
+                [
+                  "Name",
+                  "sawtooth-chain"
+                ],
+                [
+                  "Couplings",
+                  "$J_1$ = 1.0 · $J_2/J_1$ = 2 + $\\delta$, $\\delta$ swept $-0.3 \\to 0.3$"
+                ],
+                [
+                  "Lattice",
+                  "sawtooth (delta) chain, N sites = N/2 unit cells"
+                ],
+                [
+                  "Boundary",
+                  "PBC"
+                ]
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Method",
+      "note": "One computation, shared by every figure — and what it should (then did) cost.",
+      "blocks": [
+        {
+          "kind": "card",
+          "title": "Approach",
+          "blocks": [
+            {
+              "kind": "badge",
+              "text": "exact",
+              "style": "good"
+            },
+            {
+              "kind": "kv",
+              "pairs": [
+                [
+                  "Method",
+                  "ED"
+                ],
+                [
+                  "Tool",
+                  "scipy sparse eigensolver (pf/ed.py), anchors cross-checked with XDiag (scripts/xdiag_crosscheck.jl)"
+                ],
+                [
+                  "Settings",
+                  "sector = every $S^z$ sector (magnetization curve from zero-field sector energies) · k_states = lowest per sector"
+                ]
+              ]
+            },
+            {
+              "kind": "text",
+              "text": "Exact diagonalization in each magnetization sector. Because $S^z$ is conserved, the field only contributes $-h S^z$, so the full magnetization staircase follows from zero-field sector energies without scanning $h$."
+            }
+          ]
+        },
+        {
+          "kind": "table",
+          "columns": [
+            "Parameter",
+            "Value",
+            "Source",
+            "Why this value",
+            "Risk & implication",
+            "Mitigation / fix"
+          ],
+          "widths": [
+            "13%",
+            "11%",
+            "13%",
+            "22%",
+            "25%",
+            "16%"
+          ],
+          "rows": [
+            [
+              "system size $N$",
+              "12, 16",
+              "we choose — issue asks for the detuning axis at reconnaissance scale",
+              "largest sizes a laptop finishes in seconds; N=12 anchors (Lucas(6)=18) are exact closed forms",
+              "too small → erosion widths Γ(δ) carry O(1/N) finite-size offsets",
+              "report both sizes; N=20–28 reserved for cluster (docs/sawtooth-ed-feasibility.md)"
+            ],
+            [
+              "detuning grid $\\delta$",
+              "-0.3 … 0.3, 9 points",
+              "we choose — issue fixes only the $\\delta=0$ exact point",
+              "spans the regime where localized-magnon features visibly erode",
+              "too coarse → miss asymmetric smearing across $\\delta=0$",
+              "finer grid near 0 (±0.05 points included)"
+            ]
+          ]
+        },
+        {
+          "kind": "table",
+          "columns": [
+            "Run point",
+            "Est. wall",
+            "Actual wall",
+            "Est. memory",
+            "Actual memory"
+          ],
+          "numeric": [
+            false,
+            true,
+            true,
+            true,
+            true
+          ],
+          "rows": [
+            [
+              "N=12",
+              "~2 s",
+              "—",
+              "~0.1 GB",
+              "—"
+            ],
+            [
+              "N=16",
+              "~15 s",
+              "—",
+              "~0.1 GB",
+              "—"
+            ]
+          ]
+        },
+        {
+          "kind": "text",
+          "text": "Scope: challenge · Runs: local"
+        },
+        {
+          "kind": "list",
+          "title": "Anticipated rough spots",
+          "items": [
+            "exact anchors hold only at $\\delta=0$; detuned points are numerical, not closed-form",
+            "candidate Γ(δ) asymmetry is unverified — needs N=20–28 + degenerate-PT cross-check before it is a claim"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Figures",
+      "note": "Each figure is one view of the computation above — its plan, then its result.",
+      "blocks": [
+        {
+          "kind": "heading",
+          "level": 3,
+          "text": "magnetization-curves — $M(h)$ staircases at $\\delta = -0.2, 0, +0.2$"
+        },
+        {
+          "kind": "kv",
+          "pairs": [
+            [
+              "x-axis",
+              "$h/J_1$"
+            ],
+            [
+              "Swept range",
+              "0 → saturation"
+            ],
+            [
+              "y-axis",
+              "$M/M_{sat}$"
+            ],
+            [
+              "Observable",
+              "ground-state magnetization curve"
+            ],
+            [
+              "Normalization",
+              "$M/M_{sat}$"
+            ],
+            [
+              "States used",
+              "ground state per $S^z$ sector"
+            ]
+          ]
+        },
+        {
+          "kind": "note",
+          "label": "What we expect:",
+          "text": "at $\\delta=0$: single jump $\\Delta M = M_{sat}/2$ at $h_{sat}=4J_1$ with Lucas-number degeneracy; at $\\delta\\neq0$: the jump smears into a staircase"
+        },
+        {
+          "kind": "figures",
+          "items": [
+            {
+              "src": "figs/magnetization_curves.png",
+              "caption": "Our reproduction"
+            }
+          ]
+        },
+        {
+          "kind": "verdict",
+          "status": "good",
+          "label": "Reproduced",
+          "why": "every closed-form anchor of the issue (flat band, jump, Lucas degeneracy, residual entropy, Monti–Sütő) reproduced to 1e-8–1e-10; smearing at δ≠0 as expected"
+        },
+        {
+          "kind": "table",
+          "columns": [
+            "Quantity",
+            "Value"
+          ],
+          "numeric": [
+            false,
+            true
+          ],
+          "rows": [
+            [
+              "flat band $\\varepsilon$",
+              "-4.000 (exact)"
+            ],
+            [
+              "GS degeneracy at $h_{sat}$, N=12",
+              "18 = Lucas(6)"
+            ],
+            [
+              "anchor residuals",
+              "1e-8 … 1e-10"
+            ]
+          ]
+        },
+        {
+          "kind": "card",
+          "title": "What actually ran",
+          "blocks": [
+            {
+              "kind": "kv",
+              "pairs": [
+                [
+                  "Wall time",
+                  "17.5 s"
+                ],
+                [
+                  "Changes from plan",
+                  "none"
+                ]
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "code",
+          "title": "Rerun",
+          "text": "python3 run_sawtooth.py"
+        },
+        {
+          "kind": "heading",
+          "level": 3,
+          "text": "erosion-metrics — erosion observables $W(\\delta)$, $\\Delta M(\\delta)$, $\\Gamma(\\delta)$ vs one-magnon bandwidth"
+        },
+        {
+          "kind": "kv",
+          "pairs": [
+            [
+              "x-axis",
+              "$\\delta = J_2/J_1 - 2$"
+            ],
+            [
+              "Swept range",
+              "-0.3 → 0.3"
+            ],
+            [
+              "y-axis",
+              "width / jump height / smearing scale"
+            ],
+            [
+              "Observable",
+              "plateau width W, jump size ΔM, smearing width Γ of the magnetization curve"
+            ],
+            [
+              "Normalization",
+              "Γ relative to one-magnon bandwidth"
+            ],
+            [
+              "States used",
+              "ground state per $S^z$ sector"
+            ]
+          ]
+        },
+        {
+          "kind": "note",
+          "label": "What we expect:",
+          "text": "W(δ) shrinks linearly; ΔM drops from M_sat/2 to a smooth rise; Γ(δ) ≈ one-magnon bandwidth if smearing is single-particle physics"
+        },
+        {
+          "kind": "figures",
+          "items": [
+            {
+              "src": "figs/erosion_metrics.png",
+              "caption": "Our reproduction"
+            }
+          ]
+        },
+        {
+          "kind": "verdict",
+          "status": "good",
+          "label": "Reproduced",
+          "why": "Γ(δ) tracks the one-magnon bandwidth → smearing is single-particle physics; candidate new observation: Γ exceeds bandwidth for δ<0 but not δ>0 (unverified, flagged in risks)"
+        },
+        {
+          "kind": "table",
+          "columns": [
+            "Quantity",
+            "Value"
+          ],
+          "numeric": [
+            false,
+            true
+          ],
+          "rows": [
+            [
+              "$\\Gamma(\\delta)$ vs bandwidth",
+              "tracks the one-magnon bandwidth"
+            ],
+            [
+              "$\\Delta M(0)$",
+              "$M_{sat}/2$ (measure-zero jump)"
+            ]
+          ]
+        },
+        {
+          "kind": "card",
+          "title": "What actually ran",
+          "blocks": [
+            {
+              "kind": "kv",
+              "pairs": [
+                [
+                  "Wall time",
+                  "17.5 s"
+                ],
+                [
+                  "Changes from plan",
+                  "none"
+                ]
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "code",
+          "title": "Rerun",
+          "text": "python3 run_sawtooth.py"
+        }
+      ]
+    },
+    {
+      "title": "Highlight",
+      "note": "Why this run matters beyond the two figures.",
+      "blocks": [
+        {
+          "kind": "card",
+          "title": "What's innovative",
+          "blocks": [
+            {
+              "kind": "text",
+              "text": "解题过程本身是一条可机读的工厂飞行记录：锚点、交叉验证、判决全部留档。解 #112 暴露了 harness 的知识发现缺口（sawtooth 模型对 agent 隐形），修复是机制级的——精确解 oracle 卡 + 模型卡 + dispatcher 白名单注册 + 根 AGENTS.md \"无卡先建卡\"规则。本次交付物不只是图，而是一个更有能力的 harness。"
+            }
+          ]
+        },
+        {
+          "kind": "card",
+          "title": "Significance of output",
+          "blocks": [
+            {
+              "kind": "text",
+              "text": "全部闭式锚点复现到 1e-8–1e-10，并被独立 ED 栈（XDiag）交叉确认；$\\Gamma(\\delta)$ 跟踪单磁振子带宽——磁化跳跃的抹平是单粒子物理。$\\delta$ 正负侧的不对称作为未证实候选如实标注：它现在是一张边界候选卡，即\"从结果中长出的新问题\"（待 N=20–28 + 简并微扰交叉验证）。"
+            }
+          ]
+        },
+        {
+          "kind": "card",
+          "title": "Broader impact",
+          "blocks": [
+            {
+              "kind": "text",
+              "text": "本次运行是序贯决策闭环 $K_t$ + 实验 $\\to K_{t+1}$ 的一次迭代：在 problem-factory 演示中，由 heuristics 库授权生成的 round-2 舰队把 hop 机时浪费从 29% 降到 0%（`run_learning_loop.py`）——判决改变下一舰队，全程无 agent 辩论当裁判。"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

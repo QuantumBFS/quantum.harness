@@ -59,6 +59,8 @@ Rendered: `./1012.0653_quantum-phase-transitions-in-transverse-field-spin-models
 
 - 1D chain QCP: `Γ_c/J = 1` exactly (self-dual / Jordan–Wigner); at criticality `c = 1/2`, `ν = 1`, `β = 1/8`. Ground-state energy density at `Γ = J = 1`: `E/N = −4/π ≈ −1.2732` (Pauli convention `H = −J Σ σ^z σ^z − Γ Σ σ^x`; from the free-fermion dispersion, consistent with this card's Verification note).
 - 2D square FM TFIM: critical field `(Γ/J)_c = 3.04438(2)`, 3D-Ising universality (Blöte & Deng, Phys. Rev. E 66, 066110 (2002)).
+- 2D triangular FM TFIM: `(Γ/J)_c = 4.76811(9)`; honeycomb: `2.13250(4)` (same reference, Table I). *Literal* — quoted verbatim in challenge issue #148, which reports their ratio 2.23592(6) at 2.4σ from √5; no post-2002 improvement found in a 203-citation sweep (2026-07-30). Still the SOTA pair.
+- Recon-scale ED crossings (Binder cumulant, PBC clusters N ≤ 18): triangular 4.342 ± 0.002, honeycomb 1.986 ± 0.062, square 2.870 — systematically ~5–7 % below the QMC values at these sizes, drifting upward with N. *Harness anchor* — `tracks/agent-kb/solutions/problem-factory/run_sqrt5.py` (2026-07-30), builder cross-checked against Jordan–Wigner chain + exact dimer/classical/strong-field limits (`tests/test_tfim2d.py`).
 
 ## Diagnose
 

@@ -1,0 +1,14 @@
+id: neg-xxz-signal-detection
+source: our own Day 1 card xxz-j2-gap-001, re-encoded as a candidate
+title: Detect gap shift in the XXZ+J2 chain
+target:
+  system: XXZ chain with next-nearest J2
+  pinned_number: ""
+  reference: ""
+gate:
+  family: signal_detection
+  checker: decisiveness_vs_finite_size_noise
+merit:
+  scalar: gap_shift
+  direction: up
+publishable_unit: ""

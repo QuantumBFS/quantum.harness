@@ -1,0 +1,6 @@
+problem_id: xxz-bad-setup-003
+verdict: dead
+root_cause:
+  category: setup_error
+  evidence: 'setup_error: bethe_delta1 failed: E/N=-1.806179 vs -0.443147'
+lesson: 'setup_error: bethe_delta1 failed: E/N=-1.806179 vs -0.443147'

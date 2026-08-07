@@ -1,0 +1,14 @@
+id: issue-126-aklt-gap-theorem
+source: QuantumBFS/quantum.harness#126
+title: A computer-assisted spectral gap theorem for an open AKLT-type lattice
+target:
+  system: AKLT model on the square lattice (and decorated/3D relatives)
+  pinned_number: honeycomb gap settled via Knabe/Lemm finite-size criterion with certified error bounds
+  reference: Lemm-Sandvik-Wang; Pomata-Wei decorated lattices
+gate:
+  family: interval_arithmetic
+  checker: knabe_threshold_inequality_in_interval_arithmetic
+merit:
+  scalar: finite_size_gap_threshold_margin
+  direction: up
+publishable_unit: one satisfied design (subgraph/weighting/boundary) proves a nonzero gap theorem

@@ -1,0 +1,14 @@
+id: neg-anchor-no-scalar
+source: synthetic adversarial case - has literature anchor but no single scalar or certificate
+title: Understand magnetization curves of the spin-1 Heisenberg chain better
+target:
+  system: spin-1 Heisenberg chain
+  pinned_number: Haldane gap ~ 0.4105
+  reference: White-Huse DMRG
+gate:
+  family: signal_detection
+  checker: ""
+merit:
+  scalar: ""
+  direction: ""
+publishable_unit: ""

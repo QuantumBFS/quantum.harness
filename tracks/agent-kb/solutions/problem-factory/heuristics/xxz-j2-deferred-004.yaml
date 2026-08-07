@@ -1,0 +1,8 @@
+problem_id: xxz-j2-deferred-004
+verdict: deferred
+root_cause:
+  category: null
+  evidence: signal visible (decisiveness 0.93) but below kill threshold 2.0 — worth
+    a larger launch (gradient -0.0017/site)
+lesson: signal visible (decisiveness 0.93) but below kill threshold 2.0 — worth a
+  larger launch (gradient -0.0017/site)

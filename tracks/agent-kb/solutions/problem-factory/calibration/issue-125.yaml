@@ -1,0 +1,14 @@
+id: issue-125-j1j2-leaderboard
+source: QuantumBFS/quantum.harness#125
+title: Beat the variational SOTA for the square-lattice J1-J2 model at maximal frustration
+target:
+  system: square-lattice J1-J2 Heisenberg model at J2/J1 = 0.5, 10x10
+  pinned_number: E/N ~ -0.4976 (SU(2)-symmetric / ViT NQS front-runners)
+  reference: NQS and PEPS leaderboard literature for 10x10 and thermodynamic extrapolations
+gate:
+  family: fresh_sample
+  checker: variational_energy_below_record_with_controlled_mc_error
+merit:
+  scalar: energy_per_site
+  direction: down
+publishable_unit: any state evaluating below the record with controlled error bars is a new record

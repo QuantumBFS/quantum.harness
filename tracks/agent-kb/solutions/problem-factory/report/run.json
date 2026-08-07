@@ -1,0 +1,125 @@
+{
+  "paper": {
+    "id": "issue #112",
+    "title": "Localized-magnon erosion map of the sawtooth chain (detuning axis)",
+    "url": "https://github.com/QuantumBFS/quantum.harness/issues/112"
+  },
+  "model": {
+    "name": "sawtooth-chain",
+    "H": "H = J_1 \\sum_i \\mathbf{S}_{A_i}\\cdot\\mathbf{S}_{A_{i+1}} + J_2 \\sum_i \\left( \\mathbf{S}_{A_i}\\cdot\\mathbf{S}_{B_i} + \\mathbf{S}_{B_i}\\cdot\\mathbf{S}_{A_{i+1}} \\right) - h \\sum_i S^z_i",
+    "couplings": {
+      "$J_1$": 1.0,
+      "$J_2/J_1$": "2 + $\\delta$, $\\delta$ swept $-0.3 \\to 0.3$"
+    },
+    "lattice": "sawtooth (delta) chain, N sites = N/2 unit cells",
+    "boundary": "PBC"
+  },
+  "method": {
+    "family": "ED",
+    "exact": true,
+    "tool": "scipy sparse eigensolver (pf/ed.py), anchors cross-checked with XDiag (scripts/xdiag_crosscheck.jl)",
+    "settings": {
+      "sector": "every $S^z$ sector (magnetization curve from zero-field sector energies)",
+      "k_states": "lowest per sector"
+    },
+    "note": "Exact diagonalization in each magnetization sector. Because $S^z$ is conserved, the field only contributes $-h S^z$, so the full magnetization staircase follows from zero-field sector energies without scanning $h$."
+  },
+  "params": [
+    {
+      "name": "system size $N$",
+      "value": "12, 16",
+      "source": "we choose — issue asks for the detuning axis at reconnaissance scale",
+      "why": "largest sizes a laptop finishes in seconds; N=12 anchors (Lucas(6)=18) are exact closed forms",
+      "risk": "too small → erosion widths Γ(δ) carry O(1/N) finite-size offsets",
+      "fix": "report both sizes; N=20–28 reserved for cluster (docs/sawtooth-ed-feasibility.md)"
+    },
+    {
+      "name": "detuning grid $\\delta$",
+      "value": "-0.3 … 0.3, 9 points",
+      "source": "we choose — issue fixes only the $\\delta=0$ exact point",
+      "why": "spans the regime where localized-magnon features visibly erode",
+      "risk": "too coarse → miss asymmetric smearing across $\\delta=0$",
+      "fix": "finer grid near 0 (±0.05 points included)"
+    }
+  ],
+  "scope": {
+    "label": "challenge"
+  },
+  "estimate": [
+    {
+      "point": "N=12",
+      "wall": "~2 s",
+      "memory": "~0.1 GB"
+    },
+    {
+      "point": "N=16",
+      "wall": "~15 s",
+      "memory": "~0.1 GB"
+    }
+  ],
+  "actual": [
+    {
+      "point": "N=12 + N=16",
+      "wall": "17.5 s",
+      "memory": "0.10 GB"
+    }
+  ],
+  "where": "local",
+  "risks": [
+    "exact anchors hold only at $\\delta=0$; detuned points are numerical, not closed-form",
+    "candidate Γ(δ) asymmetry is unverified — needs N=20–28 + degenerate-PT cross-check before it is a claim"
+  ],
+  "figures": [
+    {
+      "id": "magnetization-curves",
+      "plots": "$M(h)$ staircases at $\\delta = -0.2, 0, +0.2$",
+      "x": "$h/J_1$",
+      "x_range": "0 → saturation",
+      "y": "$M/M_{sat}$",
+      "observe": {
+        "quantity": "ground-state magnetization curve",
+        "normalization": "$M/M_{sat}$",
+        "states": "ground state per $S^z$ sector"
+      },
+      "expected": "at $\\delta=0$: single jump $\\Delta M = M_{sat}/2$ at $h_{sat}=4J_1$ with Lucas-number degeneracy; at $\\delta\\neq0$: the jump smears into a staircase",
+      "results": {
+        "figure": "figs/magnetization_curves.png",
+        "numbers": {
+          "flat band $\\varepsilon$": "-4.000 (exact)",
+          "GS degeneracy at $h_{sat}$, N=12": "18 = Lucas(6)",
+          "anchor residuals": "1e-8 … 1e-10"
+        },
+        "match": "yes",
+        "why": "every closed-form anchor of the issue (flat band, jump, Lucas degeneracy, residual entropy, Monti–Sütő) reproduced to 1e-8–1e-10; smearing at δ≠0 as expected",
+        "wall": "17.5 s",
+        "changes": [],
+        "rerun": "python3 run_sawtooth.py"
+      }
+    },
+    {
+      "id": "erosion-metrics",
+      "plots": "erosion observables $W(\\delta)$, $\\Delta M(\\delta)$, $\\Gamma(\\delta)$ vs one-magnon bandwidth",
+      "x": "$\\delta = J_2/J_1 - 2$",
+      "x_range": "-0.3 → 0.3",
+      "y": "width / jump height / smearing scale",
+      "observe": {
+        "quantity": "plateau width W, jump size ΔM, smearing width Γ of the magnetization curve",
+        "normalization": "Γ relative to one-magnon bandwidth",
+        "states": "ground state per $S^z$ sector"
+      },
+      "expected": "W(δ) shrinks linearly; ΔM drops from M_sat/2 to a smooth rise; Γ(δ) ≈ one-magnon bandwidth if smearing is single-particle physics",
+      "results": {
+        "figure": "figs/erosion_metrics.png",
+        "numbers": {
+          "$\\Gamma(\\delta)$ vs bandwidth": "tracks the one-magnon bandwidth",
+          "$\\Delta M(0)$": "$M_{sat}/2$ (measure-zero jump)"
+        },
+        "match": "yes",
+        "why": "Γ(δ) tracks the one-magnon bandwidth → smearing is single-particle physics; candidate new observation: Γ exceeds bandwidth for δ<0 but not δ>0 (unverified, flagged in risks)",
+        "wall": "17.5 s",
+        "changes": [],
+        "rerun": "python3 run_sawtooth.py"
+      }
+    }
+  ]
+}

@@ -9,6 +9,7 @@ description: |
   - xxz-chain: spin-1/2 XXZ, Bethe-ansatz integrable, Δ tunes FM / Luttinger / Néel
   - j1-j2: frustrated Heisenberg, J2/J1≈0.5 spin-liquid candidate
   - shastry-sutherland: orthogonal-dimer AFM, exact dimer phase, magnetization plateaus
+  - sawtooth-chain: delta chain, exact flat-band localized magnons at J2=2J1, magnetization jump ΔM=M_sat/2, m=1/2 plateau
   - spin-1-xxz: Haldane phase, single-ion anisotropy
   - aklt: spin-1 bilinear-biquadratic, exact VBS ground state
   - kitaev-honeycomb: bond-dependent exchange, exactly solvable Z2 spin liquid, anyons

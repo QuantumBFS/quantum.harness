@@ -1,0 +1,14 @@
+id: issue-128-trotter-bounds
+source: QuantumBFS/quantum.harness#128
+title: Tighter provable Trotter error bounds for a concrete 2D Hamiltonian
+target:
+  system: 2D Heisenberg on LxL lattice, fixed evolution time T and spectral-norm error epsilon
+  pinned_number: nested-commutator bounds of Childs-Su-Tran-Wiebe-Zhu, loose by orders of magnitude
+  reference: Childs-Su-Tran-Wiebe-Zhu product-formula theory
+gate:
+  family: certificate
+  checker: symbolic_commutator_norm_evaluation
+merit:
+  scalar: provable_gate_count
+  direction: down
+publishable_unit: a tighter machine-verifiable constant lowers rigorous resource estimates

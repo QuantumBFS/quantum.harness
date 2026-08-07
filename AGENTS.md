@@ -54,7 +54,7 @@ Current cards:
 - Per-method reference (notation, code shape, knobs, pitfalls) lives in the `## Details` section of each `skills/method-*/SKILL.md`, not in the knowledge base — see "Problem-Driven Skill Design".
 - `literature/<method>/` — rendered methodology references organized by method, each with its own `INDEX.md`. Raw PDFs, Semantic Scholar metadata, and extracted figures live in local-only `.raw/` / `.figures/` subfolders and must remain gitignored.
 
-Skills cite these cards; they never hardcode the data. New cards land when a real skill begins citing them.
+Skills cite these cards; they never hardcode the data. New cards land when a real skill begins citing them. When a computation targets a model with no card in `.knowledge/models/` or `.knowledge/solvable/`, flag the gap before running — the missing card is part of that session's deliverable, alongside the numbers; a result produced without a card leaves nothing for the next session to build on.
 
 **Provenance discipline.** Every numerical anchor on a KB card must carry one of three tags: *Literal* (a verbatim passage from a rendered literature file under `.knowledge/literature/<method>/`, with line number), *Analytic* (closed-form derivation from a stated definition or limit), or *Harness anchor* (verified empirical value from a tagged run in this repo, with a cross-check method named). Untagged numerical entries are not trustworthy.
 

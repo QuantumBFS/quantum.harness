@@ -1,0 +1,6 @@
+problem_id: xxz-j2-boundary-102
+verdict: survivor
+root_cause:
+  category: null
+  evidence: decisiveness 3.70 >= 2.0
+lesson: decisiveness 3.70 >= 2.0

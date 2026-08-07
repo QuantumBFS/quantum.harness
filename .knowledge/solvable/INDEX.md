@@ -113,6 +113,7 @@ built `ORACLE.md` where available.
 | `aklt-honeycomb` | C | P | ✓ wave 3 | [ORACLE](./aklt-honeycomb/ORACLE.md) |
 | `majumdar-ghosh` | C | S | ✓ wave 3 | [ORACLE](./majumdar-ghosh/ORACLE.md) |
 | `shastry-sutherland-dimer` | C | S | ✓ wave 3 | [ORACLE](./shastry-sutherland-dimer/ORACLE.md) |
+| `sawtooth-localized-magnon` | C | S | ✓ wave 4 | [ORACLE](./sawtooth-localized-magnon/ORACLE.md) |
 | `rk-quantum-dimer` | C | S | ✓ wave 3 | [ORACLE](./rk-quantum-dimer/ORACLE.md) |
 | `motzkin-fredkin` | C | S | ✓ wave 3 | [ORACLE](./motzkin-fredkin/ORACLE.md) |
 | `eta-pairing-hubbard` | C | S | ✓ wave 3 | [ORACLE](./eta-pairing-hubbard/ORACLE.md) |

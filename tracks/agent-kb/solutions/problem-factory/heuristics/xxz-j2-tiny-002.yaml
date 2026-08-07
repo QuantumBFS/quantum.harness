@@ -1,0 +1,6 @@
+problem_id: xxz-j2-tiny-002
+verdict: dead
+root_cause:
+  category: no_signal
+  evidence: 'no_signal: decisiveness 0.02 < 0.5'
+lesson: 'no_signal: decisiveness 0.02 < 0.5'

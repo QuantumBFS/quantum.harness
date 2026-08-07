@@ -1,0 +1,32 @@
+id: xxz-j2-boundary-102
+model: xxz_j2_chain
+convention: spin
+setup:
+  boundary: pbc
+  sizes:
+  - 6
+  - 8
+  - 10
+  delta:
+  - 0.5
+  - 1.0
+  - 1.5
+  j2:
+  - 0.0
+  - 0.2
+observable:
+  name: gap
+  definition: E1 - E0
+  sector: sz=0
+gate:
+  type: gap_trend
+  frozen: true
+  baseline: j2 = first entry of setup.j2 (must be 0.0)
+  kill_if:
+    decisiveness_below: 2.0
+static_fire:
+- bethe_delta1
+- sz_conservation
+licensed_by:
+- xxz-j2-tiny-002
+- xxz-j2-gap-001

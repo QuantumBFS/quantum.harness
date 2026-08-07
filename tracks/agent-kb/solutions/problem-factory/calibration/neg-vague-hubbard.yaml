@@ -1,0 +1,14 @@
+id: neg-vague-hubbard
+source: synthetic adversarial case
+title: Study the phase diagram of the Hubbard model
+target:
+  system: Hubbard model
+  pinned_number: ""
+  reference: ""
+gate:
+  family: ""
+  checker: ""
+merit:
+  scalar: ""
+  direction: ""
+publishable_unit: ""

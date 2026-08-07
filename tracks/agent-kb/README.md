@@ -22,25 +22,18 @@ advance how AI does science, rather than a single computational method.
 
 ## Reproduction target
 
-**Not yet fixed — to be decided at track start.** This track is scaffolded without a
-fixed onboarding target; pick the concrete target interactively when you begin.
-Candidate framings (choose and pin one with the track lead at the help desk):
+**Chosen (2026-07-28, team Fveritas):** the meta-challenge
+[#133 — the problem factory](https://github.com/QuantumBFS/quantum.harness/issues/133):
+a harness that generates, solves, and publishes its own autoresearch problems.
+Solution lives in [`solutions/problem-factory/`](solutions/problem-factory/)
+(one-command demo, calibration gate against #124–#128 + held-out #112,
+heuristics library).
 
-- **Reproduce an AI-for-science / research-agent result** — onboard by reproducing
-  a published autonomous-research-agent, tool-use, or retrieval-augmented-generation
-  benchmark, then go beyond it. Keeps the same reproduce → challenge shape as the
-  physics tracks; use `/download-ref` to bring the chosen paper into
-  `.knowledge/literature/`.
-- **Build a scientific knowledge base for AI** — onboard by turning a slice of the
-  scientific literature into structured, machine-consumable knowledge (cards +
-  retrieval) and measuring how well an agent is grounded by it.
-- **Stand up a research-agent evaluation** — onboard by building an eval that scores
-  how faithfully an agent answers scientific questions grounded in its knowledge base
-  (retrieval recall, citation faithfulness, task success), then improve the agent
-  against it.
-
-Once a target is chosen, record it here (and its tasks / success criteria) so the
-track has a fixed onboarding goal like the other tracks.
+Onboarding reproduction anchor: issue #112 (sawtooth-chain localized-magnon
+erosion, detuning axis) — solved at reconnaissance scale, all closed-form
+anchors reproduced to 1e-8–1e-10 and cross-checked with XDiag; see
+`solutions/problem-factory/README.md` § Reproduce for the 5-prompt mentor
+quickstart.
 
 ## References
 

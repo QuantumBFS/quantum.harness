@@ -1,0 +1,12 @@
+problem_id: tfim-ratio-sqrt5-001
+verdict: deferred
+root_cause:
+  category: null
+  evidence: signal visible (decisiveness 0.73) but below kill threshold 2.0 — worth
+    a larger launch (gradient -0.0010/site) — R = 2.18633 ± 0.06824 vs sqrt(5); h_c
+    tri 4.342±0.002, honey 1.986±0.062 (lit 4.76811(9), 2.13250(4)); need sigma_R
+    <= 1.2e-05 -> route to sign-free QMC
+lesson: signal visible (decisiveness 0.73) but below kill threshold 2.0 — worth a
+  larger launch (gradient -0.0010/site) — R = 2.18633 ± 0.06824 vs sqrt(5); h_c tri
+  4.342±0.002, honey 1.986±0.062 (lit 4.76811(9), 2.13250(4)); need sigma_R <= 1.2e-05
+  -> route to sign-free QMC

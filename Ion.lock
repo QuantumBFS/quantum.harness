@@ -154,7 +154,7 @@ checksum = "sha256:9e974150838d46556ef69ce30415fd040908bd6b0d7f9689b0b0f9c628f11
 name = "ion-cli"
 source = ""
 kind = "local"
-checksum = "sha256:bd5d3a00554413b17ddca6c53aa2f639a7a0c5bdfd8d300126ea6a471d5d669c"
+checksum = "sha256:33214573aea58b5b3925428050cc9ad13c37227a11bf6c19e4ad3535881ce16e"
 
 [[skill]]
 name = "method-dfpt"

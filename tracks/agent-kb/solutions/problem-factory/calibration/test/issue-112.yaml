@@ -1,0 +1,15 @@
+id: issue-112-magnon-erosion
+source: "QuantumBFS/quantum.harness#112 (public issue, contamination declared: physics known from classic literature, issue text first read 2026-07-28)"
+title: How do exact localized-magnon states die? Erosion maps for flat-band frustrated magnets
+target:
+  system: sawtooth chain at J2 = 2J1 (kagome/checkerboard relatives)
+  pinned_number: "h_sat = 4J1; jump DM = M_sat/2; S/N = 0.5*ln[(1+sqrt5)/2] = 0.2406 k_B; Fibonacci/Lucas degeneracies (exact integers); flat band e = -4J1"
+  reference: Schulenburg-Honecker-Schnack PRL 88, 167207 (2002); Heinze et al. PRL 134, 216701 (2025); Ohanyan et al. PRB 113, 214418 (2026)
+gate:
+  family: certificate
+  checker: exact_integer_degeneracy_counts_and_closed_form_anchors_plus_PT_slope_crosscheck
+uncharted: DM/XXZ off-manifold erosion and finite-T thermodynamics untreated by 2026 manifold papers (PRB 113, 214418 + companion)
+merit:
+  curve: erosion curves W(delta) plateau width and Gamma(delta) jump smearing; erosion phase diagram
+  analytic_check: small-delta slopes vs degenerate perturbation theory
+publishable_unit: erosion maps along DM/XXZ axes absent from literature incl. 2026 manifold papers; MCE erosion tied to 2025 PRL material proposal

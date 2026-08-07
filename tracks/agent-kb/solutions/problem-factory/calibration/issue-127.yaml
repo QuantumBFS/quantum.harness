@@ -1,0 +1,14 @@
+id: issue-127-contraction-cost
+source: QuantumBFS/quantum.harness#127
+title: Contract cheaper - beat published contraction costs on benchmark tensor networks
+target:
+  system: Sycamore-53 m=20 circuit, 3D lattice partition functions, hyper-optimizer benchmark graphs
+  pinned_number: best published FLOPs from cotengra / hyper-optimized and slicing literature
+  reference: Sycamore contraction papers; hyper-optimizer benchmark tables
+gate:
+  family: cost_arithmetic
+  checker: deterministic_flop_count_of_candidate_tree_under_memory_budget
+merit:
+  scalar: contraction_flops
+  direction: down
+publishable_unit: a cheaper verified tree on a canonical instance updates quantum-supremacy cost estimates

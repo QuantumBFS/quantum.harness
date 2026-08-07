@@ -1,0 +1,12 @@
+problem_id: tfim-ratio-sqrt5-001
+verdict: dead
+root_cause:
+  category: no_solver
+  evidence: model 'tfim_2d' not in registry ['xxz_j2_chain', 'sawtooth_chain'] (round-1 launch)
+lesson: >
+  A catalog challenge in a new model class dies at the registry gate before any
+  physics — budget one builder cycle (pf/tfim2d.py: ~60 lines, 6 first-principles
+  anchors including an independent Jordan-Wigner cross-check) before counting the
+  card as launched. no_solver is a capability signal, not a problem-quality signal:
+  the card survived relaunch unchanged and reached a physics verdict (deferred).
+physics_brief: briefs/tfim-ratio-sqrt5-001.md

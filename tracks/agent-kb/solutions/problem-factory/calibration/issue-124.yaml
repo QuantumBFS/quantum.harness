@@ -1,0 +1,14 @@
+id: issue-124-kagome-bracket
+source: QuantumBFS/quantum.harness#124
+title: Close the certified energy bracket for the kagome Heisenberg antiferromagnet
+target:
+  system: spin-1/2 kagome Heisenberg antiferromagnet
+  pinned_number: variational upper bound E0/N ~ -0.4386; certified lower bounds sit a few 1e-2/site below
+  reference: Yan-Huse-White DMRG; Kull-Schuch-Navascues RG-SDP; symmetry-adapted NPA hierarchies
+gate:
+  family: certificate
+  checker: sdp_dual_feasibility
+merit:
+  scalar: bracket_width
+  direction: down
+publishable_unit: shrink the certified bracket between best lower bound and best variational upper bound
