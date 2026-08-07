@@ -1,0 +1,127 @@
+\section{What standard DFPT actually assumes}
+\label{sec:dfpt}
+
+\subsection{The perturbation and the matrix element}
+
+Let $u_{\nu\vq}$ be the normal coordinate of phonon branch $\nu$ and wavevector
+$\vq$.  After including the conventional phonon normalization factor, define the
+self-consistent Kohn--Sham perturbation operator
+\begin{equation}
+  D^{\ks}_{\nu\vq}
+  \equiv \partial_{\nu\vq} V_{\ks}
+  = \partial_{\nu\vq} V_{\mathrm{ion}}
+  + \partial_{\nu\vq} V_{\mathrm{Hxc}} .
+  \label{eq:dks}
+\end{equation}
+The DFPT electron--phonon matrix element is
+\begin{equation}
+  g^{\dfpt}_{mn\nu}(\vk,\vq)
+  = \langle \psi_{m,\vk+\vq} |
+    D^{\ks}_{\nu\vq}
+    | \psi_{n,\vk} \rangle .
+  \label{eq:gdfpt}
+\end{equation}
+The perturbation is a matrix in band, orbital, spin, and reciprocal-lattice
+indices.  Therefore standard DFPT does not assume that every electron sees the
+same scalar shift.  For a general Fourier component the operator that transfers
+$\vk$ to $\vk+\vq$ is not Hermitian by itself; a real lattice displacement gives
+\begin{equation}
+  \left(D^{\ks}_{\nu\vq}\right)^\dagger
+  =D^{\ks}_{\nu,-\vq}.
+  \label{eq:qpairhermiticity}
+\end{equation}
+The executable Hermitian prototype below is therefore restricted to a real-space
+displacement derivative, a Gamma-point perturbation, or a real standing-wave
+combination of $\vq$ and $-\vq$.  It does not expose a general continuous
+fixed-$\vq$ matrix interface.
+
+The first-order orbital response is obtained from a Sternheimer equation of the
+schematic form
+\begin{equation}
+  \bigl(\hat H_{\ks}-\varepsilon_{n\vk}\bigr)
+  |\partial_{\nu\vq}\psi_{n\vk}\rangle
+  = -\hat Q_{\vk+\vq}
+  \bigl(\partial_{\nu\vq}V_{\ks}
+  -\partial_{\nu\vq}\varepsilon_{n\vk}\bigr)
+  |\psi_{n\vk}\rangle,
+  \label{eq:sternheimer}
+\end{equation}
+where $\hat Q$ projects outside the occupied state or selected variational
+subspace.  The induced density updates $V_{\mathrm{Hxc}}$ until self-consistency.
+
+\subsection{Static electronic equilibrium}
+
+In ordinary adiabatic DFPT, the electrons are assumed to remain in the
+instantaneous ground state associated with a slowly displaced lattice
+\citep{Gonze1995,Baroni2001}.  Equivalently, the electronic response entering
+\cref{eq:sternheimer} is evaluated at zero external frequency.  The electronic
+denominator contains Kohn--Sham energy differences, but not a phonon-frequency
+shift such as $\varepsilon_{m,\vk+\vq}-\varepsilon_{n\vk}\pm\omega_{\nu\vq}$.
+
+This assumption is usually sensible when electronic relaxation and interband
+energy scales are fast compared with the phonon period.  It can fail for low
+carrier densities, narrow bands, small Fermi energies, polar optical modes,
+collective modes, or any situation in which $\omega_{\nu\vq}$ is not negligible
+on the scale governing the electronic response.
+
+\subsection{The response equation behind DFPT screening}
+
+For a scalar density perturbation, suppressing matrix indices for clarity,
+\begin{align}
+  \delta V_{\ks}
+  &= \delta V_{\mathrm{ion}}+(v+f_{\mathrm{xc}})\delta n,
+  \label{eq:vksresponse}\\
+  \delta n &= \chi_s\,\delta V_{\ks},
+  \label{eq:chisresponse}
+\end{align}
+where $v$ is the Coulomb interaction, $f_{\mathrm{xc}}$ is the static
+exchange--correlation kernel, and $\chi_s$ is the independent Kohn--Sham density
+response.  Solving the two equations gives
+\begin{equation}
+  \delta V_{\ks}
+  = \bigl[1-(v+f_{\mathrm{xc}})\chi_s\bigr]^{-1}
+    \delta V_{\mathrm{ion}},
+  \qquad
+  g^{\dfpt}
+  = \frac{g^0}{1-(v+f_{\mathrm{xc}})\chi_s}
+  \label{eq:gdfptscalar}
+\end{equation}
+in a translationally invariant scalar problem.  In a crystal these quantities are
+matrices in reciprocal lattice vectors and may also carry spin or sublattice
+indices.
+
+\subsection{The precise missing term}
+
+Choose the convention
+\begin{equation}
+  G^{-1}(\omega)=
+  \omega+\mu-H_{\ks}-\Sigma^{\mathrm{corr}}(\omega),
+  \label{eq:gconvention}
+\end{equation}
+where $\Sigma^{\mathrm{corr}}$ is the self-energy correction beyond the chosen
+Kohn--Sham reference, with the corresponding double counting removed.  The
+fixed-basis one-body inverse-Green-function vertex is
+\begin{equation}
+  \Lambda^{(1)}_{\nu\vq}(\omega)
+  \equiv-\partial_{\nu\vq}G^{-1}(\omega)
+  = \partial_{\nu\vq}
+    \bigl[V_{\ks}+\Sigma^{\mathrm{corr}}(\omega)\bigr],
+  \label{eq:dmb}
+\end{equation}
+Thus the central vertex term absent from standard DFPT is
+$\partial_{\nu\vq}\Sigma^{\mathrm{corr}}$, together with its frequency
+dependence.  Quasiparticle external-leg factors and state rotations are separate
+from the fixed-basis vertex in \cref{eq:dmb} and must be applied consistently
+when constructing an observable.  A large equilibrium
+self-energy does not logically imply a large derivative with respect to a
+particular phonon.  This distinction is the first reason why the label ``strongly
+correlated'' alone cannot predict the DFPT error.  A consistent separation between
+the DFT starting point and many-body electron--phonon corrections is discussed in
+detail by \citet{Marini2015}.
+
+\begin{keypoint}[Operational limitation of DFPT]
+Standard DFPT is a static Kohn--Sham response.  Its reliability for a physical
+quasiparticle vertex depends on whether the phonon derivative of the beyond-DFT
+self-energy is small, already represented by the chosen static density
+functional, or cancelled by a constraint in the relevant operator channel.
+\end{keypoint}

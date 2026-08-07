@@ -1,0 +1,198 @@
+\section{A next-generation corrected-DFPT framework}
+\label{sec:nextdfpt}
+
+The proposed method is a correction layer, not a replacement for the mature
+machinery of DFPT.  It uses DFPT to obtain phonons, the fully self-consistent
+Kohn--Sham perturbation, and its Bloch-state geometry, then spends many-body effort
+only on a low-dimensional projected operator.
+
+\begin{figure}[t]
+  \centering
+  \resizebox{\linewidth}{!}{\input{figures/channel_framework}}
+  \caption{Proposed channel-resolved workflow.  DFPT supplies the baseline
+  perturbation.  Projection and operator decomposition expose which physical
+  one-body channels a phonon drives and records any separate two-body vertex.  A
+  risk gate returns one of four outputs: DFPT-safe calibration candidate, static
+  correction, dynamic correction, or abstention.  Validation is performed first
+  on a convention-fixed vertex and only then on observables.}
+  \label{fig:framework}
+\end{figure}
+
+\subsection{Corrected perturbation and matrix element}
+
+In a diagonal-channel approximation, define the fixed-basis one-body vertex
+\begin{equation}
+  \Lambda^{(1),\mathrm{next}}_{\nu\vq}(\omega)
+  =D^{\ks}_{\nu\vq}
+  +\sum_a\bigl[\mathcal K_a(\vq,\omega)-1\bigr]
+   D^{(a)}_{\nu\vq}.
+  \label{eq:dnext}
+\end{equation}
+Its matrix element in the declared reference basis is
+\begin{equation}
+  g^{\mathrm{vertex}}_{mn\nu}(\vk,\vq,\omega)
+  =\langle\psi_{m,\vk+\vq}|
+    \Lambda^{(1),\mathrm{next}}_{\nu\vq}(\omega)
+    |\psi_{n,\vk}\rangle.
+  \label{eq:gnext}
+\end{equation}
+When all $\mathcal K_a=1$, the method reduces exactly to its DFPT baseline.
+Because the correction acts on operators before Bloch-state matrix elements are
+taken, it preserves the band, momentum, and phase dependence already present in
+DFPT.
+
+For isolated quasiparticle poles with band-diagonal scalar residues, a physical
+quasiparticle matrix element also requires the external-leg residues and a
+rotation to quasiparticle states:
+\begin{equation}
+  g^{\mathrm{QP}}_{mn}
+  =\langle\phi^{\mathrm{QP}}_m|
+    Z_m^{1/2}\Lambda^{(1),\mathrm{next}}Z_n^{1/2}
+    |\phi^{\mathrm{QP}}_n\rangle .
+  \label{eq:externallegs}
+\end{equation}
+Those transformations are not part of the fitted $\mathcal K$ and must not be
+silently included in only some training anchors.  Degenerate or strongly mixed
+multiorbital poles generally require matrix residues and properly normalized left
+and right pole eigenvectors rather than the scalar form in
+\cref{eq:externallegs}.
+
+The executable quantitative prototype generalizes the diagonal rescaling in a
+fixed operator basis.  Let $O_a$ be localized, symmetry-adapted operators and
+write the short-range perturbation as
+
+\begin{equation}
+  D^{\mathrm{SR}}_{s}=\sum_a c^{\dfpt}_{s a} O_a,
+\end{equation}
+
+where $s$ labels a material--mode--momentum--frequency sample and
+$c^{\dfpt}_{s a}$ is its DFPT coefficient.  The four one-body channel names are
+\texttt{global\_charge}, \texttt{site\_charge}, \texttt{internal}, and
+\texttt{nonlocal}.  For convention-matched coefficients of the fixed-basis
+one-body inverse-Green-function vertex, the static sparse-anchor hypothesis is
+
+\begin{equation}
+  c^{\mathrm{ref}}_{s a}
+  =\sum_b K_{ab} c^{\dfpt}_{s b}+r_{s a}.
+  \label{eq:responsematrix}
+\end{equation}
+
+Here $K_{ab}$ is a small response matrix and $r_{s a}$ is the residual.  Diagonal
+elements rescale one channel; off-diagonal elements represent channel mixing.
+$K=I$ recovers the DFPT coefficient vector.  Equation~\eqref{eq:responsematrix}
+is a falsifiable low-dimensional hypothesis, not a statement that the complete
+band- and momentum-resolved electron--phonon matrix is low rank.
+
+The current standard-library implementation fits $K$ from supplied coefficient
+vectors, predicts held-out vectors, and reports their error.  It does not yet
+construct the $O_a$ from a production DFPT or Wannier output.  A real application
+must declare the basis and gauge, keep all phonon and matrix-element normalization
+conventions fixed, and separate analytic long-range polar fields from the
+localized short-range operator before fitting.
+The bundled synthetic response example excites only
+\texttt{global\_charge}, \texttt{internal}, and \texttt{nonlocal}; its omitted
+\texttt{site\_charge} coefficient is zero by construction, so it is not a
+four-channel physical validation.
+
+\subsection{How each channel is corrected}
+
+\paragraph{\texttt{global\_charge} and \texttt{site\_charge}.}
+The implementation enforces the exact common-potential constraint only for
+\texttt{global\_charge} with explicit evidence that the original unprojected
+perturbation is a full-space uniform shift at $\vq=0$.
+\texttt{site\_charge} contains relative block-identity shifts and
+is a correction-risk channel.  At finite $q$, the UEG comparison constrains the
+complete ratio $K_{\mathrm{total}}$ in \cref{eq:matchingcondition}, which is
+approximately one in the cited calibration domain.  It does not provide
+$P_{\mathrm{MB}}/\chi_s$ as an extra kernel for an already screened DFPT input.
+Crystal local-field matrices, dimensionality, polar long-range fields, and
+multi-band screening require their own convention-matched tests.
+
+\paragraph{Local internal channels.}
+For orbital splitting or mixing in a correlated subspace, obtain
+$\partial_u\Sigma_{ab}(\omega)$ from finite-displacement DFT+DMFT, a linearized
+impurity response, or a validated low-energy model.  If
+$\eta_a^{\mathrm{dyn}}\ll1$, retain only $\mathcal K_a(\vq,0)$.  Near orbital,
+spin-state, or Mott instabilities, the dynamic kernel and off-diagonal channel
+mixing must be kept.
+
+\paragraph{Nonlocal channels.}
+When a phonon mainly changes hopping, hybridization, or long-range exchange, a
+local impurity self-energy is insufficient.  Targeted GW perturbation theory,
+finite-difference quasiparticle calculations, or a nonlocal embedding method can
+provide selected matrix elements of $\mathcal K_{ab}$ \citep{Li2019}.  Symmetry
+and locality can then interpolate those corrections over equivalent bonds and
+wavevectors.
+
+\paragraph{Separate two-body interaction vertices.}
+If a displacement changes $U$, $J$, or another downfolded interaction, compute
+those derivatives with constrained response and include the resulting vertex in
+a separate two-body operator space.  Do not add it to the one-body
+Hilbert--Schmidt decomposition or fit it with the present $K_{ab}$.  Constrained DFPT provides a precedent for
+separating screening processes during downfolding \citep{Nomura2015}.
+
+\subsection{Four-output decision gate}
+
+The framework chooses the least expensive level justified by diagnostics.
+
+\begin{table}[htbp]
+\centering
+\caption{Decision levels for the proposed method.}
+\label{tab:decisiongate}
+\begin{tabularx}{\linewidth}{@{}p{2.6cm}XXp{3.2cm}@{}}
+\toprule
+Level & Physical diagnostic & Calculation & Required check \\
+\midrule
+DFPT-safe & \texttt{global\_charge} dominated; original operator explicitly
+verified as a strict uniform $\vq=0$ full-space common shift; adequate reference;
+weak estimated dynamics
+& Standard DFPT matrix elements & Gauge anchor and one representative high-level
+control \\
+Static correction & \texttt{site\_charge}, \texttt{internal}, or
+\texttt{nonlocal} weight is appreciable, but
+$\eta^{\mathrm{dyn}}$ is small & Channel-projected static
+$\mathcal K_a(\vq,0)$ & Held-out modes and momenta \\
+Dynamic correction & Rapid vertex variation, soft electronic mode, small
+coherence scale, or proximity to an instability & Frequency-dependent
+$\mathcal K_{ab}(\vq,\omega)$ & Values across the physical phonon-frequency
+window \\
+Abstain & Outside the validated channel/basis/material domain & No automatic
+prediction & Request a higher-level calculation \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Uncertainty and invariance requirements}
+
+Every reported $g^{\mathrm{next}}$ should include uncertainty from high-level
+training data, operator-basis choice, momentum interpolation, and neglected
+channel mixing.  The following tests are mandatory:
+
+\begin{itemize}
+  \item invariance to unitary rotations within a declared degenerate orbital
+  subspace;
+  \item the acoustic sum rule and appropriate translational constraints;
+  \item the uniform scalar-potential gauge test;
+  \item Hermiticity for the supported real-space/Gamma/standing-wave input and
+  $D(\vq)^\dagger=D(-\vq)$ for a future paired finite-$\vq$ interface; and
+  \item recovery of uncorrected DFPT with $\mathcal K=I$.
+\end{itemize}
+
+\subsection{Why this is a new prediction framework}
+
+Existing beyond-DFPT methods demonstrate how to compute particular corrections,
+but they remain expensive when applied to all modes and wavevectors.  The proposed
+novelty is the combination of (i) an operator-level physical diagnosis, (ii) a
+four-output choice of correction theory, (iii) a candidate low-dimensional
+kernel, and (iv) explicit uncertainty and abstention.  Its success criterion is
+not that it matches a full many-body calculation by construction, but that it
+predicts which parts of the DFPT matrix element need correction and reaches a
+defined accuracy with far fewer high-level calculations.
+
+This correction layer is not cheaper than performing the one DFPT calculation
+that supplies its input.  Its immediate cost advantage, if validated, is relative
+to evaluating a beyond-DFPT vertex for every mode and momentum.  Beating DFPT
+itself would require an additional surrogate that predicts the DFPT channel
+coefficients without evaluating DFPT at every requested point.  That surrogate
+is neither implied by the channel decomposition nor implemented in the present
+software.

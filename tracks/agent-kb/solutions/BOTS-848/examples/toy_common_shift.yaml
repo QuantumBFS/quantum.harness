@@ -1,0 +1,14 @@
+{
+  "name": "toy common local shift",
+  "operator": [[2.0, 0.0], [0.0, 2.0]],
+  "site_blocks": [[0, 1]],
+  "evidence": {
+    "source_traceable": true,
+    "reference_valid": true,
+    "adiabatic_ratio": 0.01,
+    "uniform_q_zero": true,
+    "full_space_common_shift": true
+  },
+  "expected_dominant_channel": "global_charge",
+  "expected_decision": "dfpt-safe"
+}

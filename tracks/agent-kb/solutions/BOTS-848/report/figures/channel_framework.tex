@@ -1,0 +1,45 @@
+\begin{tikzpicture}[
+  node distance=5.5mm and 4.5mm,
+  box/.style={draw,rounded corners=2pt,align=center,font=\small,
+              minimum height=8.5mm,text width=2.7cm,inner sep=3pt},
+  base/.style={box,fill=softblue,draw=deepblue},
+  channel/.style={box,fill=softorange,draw=deeporange,text width=2.45cm},
+  decision/.style={box,fill=softgreen,draw=deepgreen,text width=2.8cm},
+  arrow/.style={-{Latex[length=2.2mm]},thick,draw=black!70}
+]
+  \node[base] (dfpt) {DFPT baseline\\$D^{\ks}_{\nu\vq}$};
+  \node[base,right=of dfpt] (project) {Localized projection\\$P_cD^{\ks}P_c$};
+
+  \node[channel,right=of project,yshift=18mm] (global) {\texttt{global\_charge}\\global identity};
+  \node[channel,right=of project,yshift=6mm] (site) {\texttt{site\_charge}\\relative block shifts};
+  \node[channel,right=of project,yshift=-6mm] (internal) {\texttt{internal}\\block-traceless};
+  \node[channel,right=of project,yshift=-18mm] (nonlocal) {\texttt{nonlocal}\\inter-block};
+  \node[box,fill=black!5,draw=black!55,below=29mm of project]
+    (twobody) {Separate future space\\two-body $dU/du,dJ/du$};
+
+  \node[decision,right=12mm of internal,yshift=-6mm] (risk) {Channel weights +\\static/dynamic risk};
+
+  \node[base,right=of risk,yshift=27mm] (safe) {DFPT-safe\\calibration};
+  \node[decision,right=of risk,yshift=9mm] (static) {Static\\correction};
+  \node[box,fill=softorange,draw=deepred,right=of risk,yshift=-9mm] (dynamic) {Dynamic\\correction};
+  \node[box,fill=black!5,draw=black!55,right=of risk,yshift=-27mm] (abstain) {Abstain};
+
+  \node[base,below=43mm of risk] (validate) {Validate fixed-basis vertex,\\then observables};
+  \coordinate (merge) at ([xshift=6mm]static.east |- validate.east);
+
+  \draw[arrow] (dfpt) -- (project);
+  \foreach \x in {global,site,internal,nonlocal}
+    \draw[arrow] (project.east) -- (\x.west);
+  \foreach \x in {global,site,internal,nonlocal}
+    \draw[arrow] (\x.east) -- (risk.west);
+  \draw[arrow,dashed] (project.south) -- (twobody.north);
+  \draw[arrow] (risk) -- (safe);
+  \draw[arrow] (risk) -- (static);
+  \draw[arrow] (risk) -- (dynamic);
+  \draw[arrow] (risk) -- (abstain);
+  \draw[thick,draw=black!70] (safe.east) -| (merge);
+  \draw[thick,draw=black!70] (static.east) -| (merge);
+  \draw[thick,draw=black!70] (dynamic.east) -| (merge);
+  \draw[thick,draw=black!70] (abstain.east) -| (merge);
+  \draw[arrow] (merge) -- (validate.east);
+\end{tikzpicture}

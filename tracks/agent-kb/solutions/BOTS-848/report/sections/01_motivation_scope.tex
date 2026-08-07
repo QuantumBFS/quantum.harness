@@ -1,0 +1,92 @@
+\section{Problem statement and scope}
+\label{sec:motivation}
+
+In crystalline solids, the interaction between electrons and lattice vibrations
+controls electrical resistance, conventional superconductivity, thermoelectric
+transport, carrier relaxation, and device heating.  DFPT is the most widely used
+first-principles tool for calculating phonons and electron--phonon matrix elements
+because it avoids a separate large-supercell calculation for every displacement
+and treats the self-consistent electronic response directly
+\citep{Baroni2001,Gonze1995,Giustino2017}.
+
+The motivating observation of Quantum Harness Issue 35 is that DFPT is often
+quantitatively useful in a surprisingly broad range of materials
+\citep{Issue35}.  This statement needs careful wording.  It does \emph{not} mean
+that ordinary semilocal DFPT is uniformly accurate for every correlated material,
+every phonon, and every observable.  Standard DFPT can fail when the reference
+electronic structure is qualitatively wrong, when a phonon couples to an
+unprotected internal degree of freedom, or when the electronic response is
+strongly frequency dependent.  The real puzzle is narrower and more useful:
+
+\begin{keypoint}[Core scientific question]
+Why are corrections beyond static Kohn--Sham linear response small for some
+electron--phonon perturbations, including some perturbations in correlated
+materials, while they are large for other modes in the same material?
+\end{keypoint}
+
+This formulation rules out two incomplete answers.
+
+\begin{enumerate}
+  \item \textbf{``The quasiparticle residue cancels the vertex.''}  A numerical
+  product close to one is evidence, not a physical explanation.  The Ward identity
+  produces such a cancellation only in a specific conserved-charge limit, whose
+  order of limits is not the generic adiabatic phonon limit.
+  \item \textbf{``DFPT works because the phonon shifts every electronic state by
+  the same amount.''}  Real perturbations do not act equally on all Bloch states.
+  Even a local operator proportional to the identity inside a correlated orbital
+  subspace produces band- and momentum-dependent matrix elements because Bloch
+  states have different orbital weights and phases.
+\end{enumerate}
+
+The proposal instead treats the one-body derivative of the electronic Hamiltonian
+as an operator.  It separates the single global identity
+\texttt{global\_charge}, relative block-identity shifts
+\texttt{site\_charge}, block-internal traceless structure
+\texttt{internal}, and inter-block matrix elements \texttt{nonlocal}.
+Derivatives of interaction parameters are two-body vertices in a different
+operator space.  Conservation laws can constrain only the first one-body
+direction, and only when the original unprojected perturbation is independently
+verified as a strict uniform $\vq=0$ full-space common shift.
+
+\subsection{Target deliverable}
+
+The target is a computational framework that uses DFPT as a baseline and adds a
+small number of physically interpretable, channel-resolved many-body corrections.
+It should be:
+
+\begin{itemize}
+  \item \textbf{simpler} than a full many-body calculation of every
+  $g_{mn\nu}(\vk,\vq)$;
+  \item \textbf{potentially cheaper than a dense beyond-DFPT vertex grid} by
+  focusing expensive calculations on risky modes and low-dimensional operator
+  channels, without claiming a measured speedup over DFPT;
+  \item \textbf{transparent} because every correction is attached to a named
+  physical operator and a documented validity test;
+  \item \textbf{falsifiable} on materials for which DFPT succeeds for one mode
+  but fails for another; and
+  \item \textbf{uncertainty-aware}, including an abstention path when a mode lies
+  outside the validated regime.
+\end{itemize}
+
+The first validation object may be the uniform electron gas (UEG), but it is not
+the final theory.  The UEG contains only a scalar density channel and therefore
+provides a clean baseline for understanding what is special about that channel.
+The proposed method must then survive multi-orbital and correlated-material tests.
+
+\subsection{What is and is not being corrected}
+
+DFPT computes several related quantities: force constants, phonon eigenvectors,
+Born effective charges, dielectric response, and electron--phonon matrix elements.
+The main target here is the last quantity: the physical quasiparticle scattering
+vertex associated with a phonon.  Corrections to equilibrium structure,
+anharmonicity, or the phonon spectrum may also matter, but they are separate axes
+of error.  The proposed benchmark will keep the following gates distinct:
+
+\begin{enumerate}
+  \item the Kohn--Sham ground-state and phonon baseline;
+  \item the electron--phonon matrix element $g$;
+  \item the observable assembled from $g$, such as a linewidth, mobility, or
+  pairing kernel.
+\end{enumerate}
+
+Passing one gate does not establish the next.

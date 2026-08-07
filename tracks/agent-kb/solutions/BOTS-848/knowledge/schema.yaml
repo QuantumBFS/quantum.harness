@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "BOTS:848 DFPT research knowledge schema",
+  "description": "JSON-compatible YAML schema for source-traceable claims and material-mode cases.",
+  "definitions": {
+    "claim": {
+      "type": "object",
+      "required": [
+        "claim_id",
+        "statement",
+        "status",
+        "source_ids",
+        "source_traceable",
+        "scope",
+        "limitations"
+      ],
+      "properties": {
+        "claim_id": {"type": "string"},
+        "statement": {"type": "string"},
+        "status": {
+          "enum": [
+            "established-theory",
+            "exact-constraint",
+            "numerical-evidence",
+            "working-hypothesis",
+            "open-question"
+          ]
+        },
+        "source_ids": {"type": "array", "items": {"type": "string"}},
+        "source_traceable": {"type": "boolean"},
+        "scope": {"type": "string"},
+        "limitations": {"type": "string"}
+      }
+    },
+    "one_body_channel": {
+      "enum": ["global_charge", "site_charge", "internal", "nonlocal"]
+    },
+    "one_body_channel_weights": {
+      "type": "object",
+      "required": ["global_charge", "site_charge", "internal", "nonlocal"],
+      "properties": {
+        "global_charge": {"type": "number", "minimum": 0},
+        "site_charge": {"type": "number", "minimum": 0},
+        "internal": {"type": "number", "minimum": 0},
+        "nonlocal": {"type": "number", "minimum": 0}
+      },
+      "additionalProperties": false
+    },
+    "reported_value": {
+      "type": "object",
+      "required": ["method", "value", "unit", "source_id", "source_location"]
+    },
+    "material_case": {
+      "type": "object",
+      "required": [
+        "case_id",
+        "material",
+        "mode",
+        "q_point",
+        "frequency_or_limit",
+        "observable",
+        "status",
+        "source_ids",
+        "one_body_channels",
+        "normalization_note",
+        "limitations",
+        "verification_state"
+      ],
+      "properties": {
+        "one_body_channels": {
+          "type": "array",
+          "items": {"$ref": "#/definitions/one_body_channel"}
+        }
+      }
+    }
+  }
+}
