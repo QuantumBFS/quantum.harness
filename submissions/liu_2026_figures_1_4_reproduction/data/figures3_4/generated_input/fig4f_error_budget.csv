@@ -1,0 +1,6 @@
+noise_source,raw_contribution,postselected_contribution,uncertainty,parameter_source
+effective_lifetime,0.004410235156567799,0.00037471179922010656,2e-05,"simulator: 42 us lifetime, 90% erasure"
+effective_finite_blockade,0.00016,3e-05,2e-05,B0 calibrated to paper raw 1.6e-4 anchor
+Doppler,0.00037,0.00028,2e-05,paper-reported; no trap position samples
+laser_phase_noise,0.00014,0.0001,2e-05,paper-reported; PSD unavailable
+laser_amplitude_noise,1e-05,nan,2e-05,paper-reported; PSD unavailable

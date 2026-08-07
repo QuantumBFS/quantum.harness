@@ -1,0 +1,106 @@
+{
+  "attempt": 49,
+  "benchmark": {
+    "families": [
+      "control-map",
+      "drift",
+      "combined"
+    ],
+    "fixed_epsilon_by_family": {
+      "combined": 0.05,
+      "control-map": 0.05,
+      "drift": 0.1
+    },
+    "fresh_truth_seeds": [
+      260641,
+      260642,
+      260643,
+      260644,
+      260645,
+      260646,
+      260647,
+      260648
+    ],
+    "replicates_per_truth_cell": 4,
+    "retain_all_truth_cells": true
+  },
+  "bootstrap": {
+    "confidence": 0.95,
+    "draws": 20000,
+    "family_weighting": "equal-macro-average",
+    "independent_unit": "truth-cell",
+    "seed": 113049,
+    "stratify_by": "family"
+  },
+  "completion": {
+    "gram_schmidt_norm_min": 1e-10,
+    "raw_coordinate_order": "ascending-index",
+    "sign_rule": "largest-absolute-component-positive"
+  },
+  "firewall": {
+    "previous_truth_seed_max": 260628,
+    "preregistration_validation_must_not_import_simulator": true,
+    "truth_construction_allowed_mode": "--run"
+  },
+  "gates": {
+    "destructive_accepted_step_rate_ucb95_max": 0.05,
+    "full_cap_cost_ratio_max_exclusive": 0.6,
+    "pooled_k15_success_lcb95_min": 0.75,
+    "success_difference_k15_minus_k40_lcb95_min_exclusive": -0.1,
+    "success_difference_k15_minus_raw40_lcb95_min_exclusive": 0.0
+  },
+  "method": {
+    "central_difference_delta": 0.05,
+    "confidence": 0.995,
+    "cycles": 2,
+    "ridge_multiplier": 0.1,
+    "ridge_reference": "median(top-15 positive nominal curvatures)",
+    "sentinel_shots": 1024,
+    "shots_per_decision_query": 32768,
+    "target_infidelity": 0.001,
+    "trust_radius": 0.25
+  },
+  "methods": [
+    {
+      "full_query_cap": 66,
+      "full_shot_cap": 2099200,
+      "name": "model-informed-k15",
+      "search_dimension": 15
+    },
+    {
+      "full_query_cap": 166,
+      "full_shot_cap": 5376000,
+      "name": "model-informed-k40",
+      "search_dimension": 40
+    },
+    {
+      "full_query_cap": 166,
+      "full_shot_cap": 5376000,
+      "name": "raw-coordinate-global-40",
+      "search_dimension": 40
+    }
+  ],
+  "noise_seed_derivation": {
+    "algorithm": "numpy.random.SeedSequence",
+    "components": [
+      113,
+      49,
+      "family_index",
+      "truth_seed",
+      "replicate"
+    ],
+    "paired_across_methods": true
+  },
+  "provenance": {
+    "audited_checkpoint_commit": "375e1bf175bc9ba66f862b3b9fb20a1a84734433",
+    "development_result": "results_summary/QL1F-attempt44-dimension-cost.json",
+    "frozen_implementation": "code/attempt44_dimension_cost.py",
+    "protocol": "docs/ATTEMPT49_PROTOCOL.md"
+  },
+  "semantics": {
+    "cost_headline": "full-cap-online",
+    "destructive_safety_interval": "one-sided-95pct-exact-clopper-pearson-on-accepted-nonzero-steps",
+    "oracle_scored_first_hit": "supplementary-hidden-exact-only",
+    "success": "posthoc accepted-incumbent exact infidelity <= target"
+  }
+}

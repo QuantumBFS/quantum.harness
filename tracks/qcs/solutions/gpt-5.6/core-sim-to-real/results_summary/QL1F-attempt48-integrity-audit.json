@@ -1,0 +1,143 @@
+{
+  "adapter_terminology": {
+    "boundary": "audited API convention, not adversarial security isolation",
+    "objective": "stationary",
+    "rng_and_accounting": "stateful"
+  },
+  "attempt": 48,
+  "audit_decision": {
+    "attempt49_preparation_authorized": true,
+    "fresh_truth_opened": false,
+    "required_next_sequence": [
+      "commit-and-push-cycle5-audit-checkpoint",
+      "write-attempt49-protocol-code-config-seeds",
+      "commit-and-push-attempt49-preregistration",
+      "verify-preregistration-commit",
+      "run-attempt49-once-without-method-changes"
+    ]
+  },
+  "blockers": [],
+  "checks": {
+    "all_embedded_cycle5_source_seals_match_current_files": true,
+    "all_input_statuses_complete_or_pass": true,
+    "all_notebooks_absent_from_shared_core_package": true,
+    "attempt41_source_freeze_status_complete": true,
+    "attempt42_all_internal_checks_pass": true,
+    "attempt42_has_21_truth_cells": true,
+    "attempt42_has_84_runs": true,
+    "attempt42_identities_have_no_duplicates": true,
+    "attempt42_ledgers_independently_close": true,
+    "attempt43_exact_success_recomputed_from_runs": true,
+    "attempt43_full_queries_match_attempt42": true,
+    "attempt43_generated_no_new_queries": true,
+    "attempt43_identities_have_no_duplicates": true,
+    "attempt43_identity_multiset_matches_attempt42": true,
+    "attempt43_online_rule_rejected": true,
+    "attempt43_online_success_recomputed_from_runs": true,
+    "attempt43_pairwise_cost_and_success_close": true,
+    "attempt44_all_internal_checks_pass": true,
+    "attempt44_cartesian_grid_recomputed": true,
+    "attempt44_has_504_runs": true,
+    "attempt44_headline_is_full_cap_online": true,
+    "attempt44_k15_vs_k40_bootstrap_independently_recomputed": true,
+    "attempt44_ledgers_independently_close": true,
+    "attempt44_oracle_first_hit_is_supplementary": true,
+    "attempt44_paired_noise_seed_recomputed": true,
+    "attempt44_selected_k15": true,
+    "attempt44_success_bootstraps_independently_recomputed": true,
+    "attempt44_success_estimates_recomputed": true,
+    "attempt44_truth_rows_reconstructed_from_runs": true,
+    "attempt45_all_checks_pass": true,
+    "attempt45_generated_zero_new_simulator_queries": true,
+    "attempt45_opened_zero_confirmation_truths": true,
+    "attempt45_preserves_negative_scaling_result": true,
+    "attempt45_ranks_are_3_8_15_15": true,
+    "attempt46_claim_boundary_clean": true,
+    "attempt46_s1_s9_cartesian_and_numeric_details_close": true,
+    "attempt46_s1_s9_pass": true,
+    "attempt47_adaptive_label_gate_passed": true,
+    "attempt47_aggregate_ledger_recomputed": true,
+    "attempt47_labels_match_frozen_roles": true,
+    "attempt47_labels_recomputed_from_numeric_gates": true,
+    "attempt47b_cartesian_grid_recomputed": true,
+    "attempt47b_finite_shot_pilot_not_authorized": true,
+    "attempt47b_has_24_runs": true,
+    "attempt47b_ledgers_independently_close": true,
+    "attempt47b_negative_result_retained": true,
+    "no_personal_absolute_paths_in_cycle5_or_final_facing_artifacts": true
+  },
+  "claim_matrix": [
+    {
+      "claim": "Joint-15 v1 on original d=4 CNOT confirmation truths",
+      "evidence": "Attempt 22",
+      "role": "existing fresh confirmation"
+    },
+    {
+      "claim": "model-informed k=15 selected; full online cap versus k; not fresh confirmation",
+      "evidence": "Attempts 42-44",
+      "role": "development selection and mechanism"
+    },
+    {
+      "claim": "several mismatch gaps and rank invariant; no cross-dimension resource advantage",
+      "evidence": "Attempt 45",
+      "role": "historical development/mechanism inventory"
+    },
+    {
+      "claim": "two in-subspace controls and two out-of-subspace positives; not cesium or hardware",
+      "evidence": "Attempts 46-47",
+      "role": "synthetic-platform interface and labels"
+    },
+    {
+      "claim": "32-direction random residual sketch insufficient at frozen budget; no finite-shot adaptive claim",
+      "evidence": "Attempt 47b",
+      "role": "bounded negative geometry pilot"
+    }
+  ],
+  "personal_path_hits": [],
+  "schema": "QL1F-attempt48-integrity-audit-v1",
+  "scope": "cross-result integrity and claim audit; no performance compute",
+  "source_hashes": {
+    "41": {
+      "canonical_sha256": "bca9d5863d18c6098cd435c080fcf5040db4aaa17cfb3539a3dced6c5d26449d",
+      "path": "results_summary/QL1F-attempt41-charter-freeze.json"
+    },
+    "42": {
+      "canonical_sha256": "d0a4a35c76a0917b1456b7ca18fbfd4ab0b0875a328648f77ddacfa91d591c92",
+      "path": "results_summary/QL1F-attempt42-normalized-principal-global.json"
+    },
+    "43": {
+      "canonical_sha256": "20da1762725f2c4002ed85157f0186cee092f78453ad3bf9c58f54f5eefde668",
+      "path": "results_summary/QL1F-attempt43-online-certification.json"
+    },
+    "44": {
+      "canonical_sha256": "bcd09e297abffec5f3e1c027cef948f332ee781301ad7309a9b504a9bea1979a",
+      "path": "results_summary/QL1F-attempt44-dimension-cost.json"
+    },
+    "45": {
+      "canonical_sha256": "5b4df570cbca1a5fa8cb4e6917e42bbeb18ab834614f3b36c61e4a920162568d",
+      "path": "results_summary/QL1F-attempt45-existing-gap-size-evidence.json"
+    },
+    "46": {
+      "canonical_sha256": "496f56a2c0984bab9767ca2b03516d652e06afeb581f0509dcedc10706cb5eb3",
+      "path": "results_summary/QL1F-attempt46-platform-adapter-smoke.json"
+    },
+    "47": {
+      "canonical_sha256": "8b35c4eaedb30200d1a4851a7a8c24083fd054d68657b30a401b85f2dc6fe497",
+      "path": "results_summary/QL1F-attempt47-platform-label-gate.json"
+    },
+    "47b": {
+      "canonical_sha256": "6693d13b97541db163ea57df3de6fe42e8b11ce88bdabd1d2b5bce633e3a43c0",
+      "path": "results_summary/QL1F-attempt47b-residual-geometry-pilot.json"
+    },
+    "protocol": {
+      "canonical_sha256": "acdfbb514499c614d42934d2b7d6894363c44e927364f3467f42c7c2f9317cc6",
+      "path": "docs/ATTEMPT48_PROTOCOL.md"
+    },
+    "runner": {
+      "canonical_sha256": "c5fd5ab99d6ff18a9620678fde42af68d723535fe62b62ab04e383f5c60a795f",
+      "path": "code/attempt48_integrity_audit.py"
+    }
+  },
+  "source_seal_mismatches": [],
+  "status": "pass"
+}

@@ -1,0 +1,81 @@
+{
+  "run_id": "issue113-hour-scan",
+  "run_dir": "submissions/liu_2026_figures_1_4_reproduction/data/issue113_hour_scan",
+  "axes": {
+    "gap_strength": [
+      0.03,
+      0.11,
+      0.7
+    ],
+    "seed": [
+      260605060,
+      260605061,
+      260605062
+    ]
+  },
+  "cells": [
+    {
+      "cell_id": "cell-0001",
+      "params": {
+        "gap_strength": 0.03,
+        "seed": 260605060
+      }
+    },
+    {
+      "cell_id": "cell-0002",
+      "params": {
+        "gap_strength": 0.03,
+        "seed": 260605061
+      }
+    },
+    {
+      "cell_id": "cell-0003",
+      "params": {
+        "gap_strength": 0.03,
+        "seed": 260605062
+      }
+    },
+    {
+      "cell_id": "cell-0004",
+      "params": {
+        "gap_strength": 0.11,
+        "seed": 260605060
+      }
+    },
+    {
+      "cell_id": "cell-0005",
+      "params": {
+        "gap_strength": 0.11,
+        "seed": 260605061
+      }
+    },
+    {
+      "cell_id": "cell-0006",
+      "params": {
+        "gap_strength": 0.11,
+        "seed": 260605062
+      }
+    },
+    {
+      "cell_id": "cell-0007",
+      "params": {
+        "gap_strength": 0.7,
+        "seed": 260605060
+      }
+    },
+    {
+      "cell_id": "cell-0008",
+      "params": {
+        "gap_strength": 0.7,
+        "seed": 260605061
+      }
+    },
+    {
+      "cell_id": "cell-0009",
+      "params": {
+        "gap_strength": 0.7,
+        "seed": 260605062
+      }
+    }
+  ]
+}

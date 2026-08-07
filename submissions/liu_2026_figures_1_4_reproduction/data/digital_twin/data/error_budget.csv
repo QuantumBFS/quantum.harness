@@ -1,0 +1,7 @@
+source,raw_contribution,postselected_contribution,parameter_source
+Rydberg lifetime / erasure,0.0044012293614871245,0.00037076009862302417,"Liu: 42 us, 90% outside computational space"
+Finite blockade,0.00016,3e-05,paper-calibrated effective B0; not independent
+Doppler,0.0010635535926834666,0.0010635535926834666,Cold_Atom Gate Simu_Platform
+Thermal position / varying blockade,0.00020691735961679558,0.00020691735961679558,Cold_Atom Gate Simu_Platform
+Laser amplitude,6.294645014685157e-05,6.294645014685157e-05,Cold_Atom Gate Simu_Platform
+Laser phase + 1 kHz linewidth,0.0004805309534124738,0.0004805309534124738,Cold_Atom Gate Simu_Platform

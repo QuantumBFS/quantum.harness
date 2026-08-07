@@ -1,0 +1,192 @@
+{
+  "provenance": "unavailable without raw experimental data",
+  "raw_data_supplied": false,
+  "synthetic_points_generated_for_experimental_panels": false,
+  "contracts": {
+    "Fig2a_two_image_state_assignment": {
+      "status": "unavailable without raw experimental data",
+      "panel": "Figure 2(a)",
+      "pipeline_panel": "fig2a_imaging",
+      "required_columns": [
+        "shot_id",
+        "prepared_state",
+        "first_image_photon_count",
+        "second_image_photon_count",
+        "state_assignment",
+        "loss_assignment"
+      ]
+    },
+    "Fig2b_single_qubit_rb": {
+      "status": "unavailable without raw experimental data",
+      "panel": "Figure 2(b)",
+      "pipeline_panel": "fig2b_single_qubit_rb",
+      "required_columns": [
+        "rb_depth",
+        "sequence_id",
+        "shot_id",
+        "success",
+        "survival",
+        "postselection_flag"
+      ]
+    },
+    "Fig3d_mode_sensitivity": {
+      "status": "unavailable without raw experimental data",
+      "panel": "Figure 3(d)",
+      "pipeline_panel": "fig3d_mode_sensitivity",
+      "required_columns": [
+        "mode",
+        "coefficient",
+        "rb_fidelity_or_error",
+        "uncertainty",
+        "theory_sensitivity"
+      ]
+    },
+    "Fig3e_channel_decomposition": {
+      "status": "unavailable without raw experimental data",
+      "panel": "Figure 3(e)",
+      "pipeline_panel": "fig3e_channel_decomposition",
+      "required_columns": [
+        "mode",
+        "coefficient",
+        "initial_computational_state",
+        "leakage_channel",
+        "measured_leakage",
+        "leakage_uncertainty",
+        "ramsey_phase",
+        "ramsey_phase_uncertainty"
+      ]
+    },
+    "Fig4a_measured_waveforms": {
+      "status": "unavailable without raw experimental data",
+      "panel": "Figure 4(a)",
+      "pipeline_panel": "fig4a_waveforms",
+      "required_columns": [
+        "time_us",
+        "ideal_amplitude",
+        "before_amplitude",
+        "after_amplitude",
+        "ideal_intensity",
+        "before_intensity",
+        "after_intensity",
+        "wrapped_phase",
+        "unwrapped_phase",
+        "measurement_uncertainty"
+      ]
+    },
+    "Fig4b_closed_loop_scans": {
+      "status": "unavailable without raw experimental data",
+      "panel": "Figure 4(b)",
+      "pipeline_panel": "fig4b_closed_loop",
+      "required_columns": [
+        "cycle",
+        "mode",
+        "scan_coefficient",
+        "gate_error",
+        "uncertainty",
+        "selected_optimum"
+      ]
+    },
+    "Fig4c_echoed_rb": {
+      "status": "unavailable without raw experimental data",
+      "panel": "Figure 4(c)",
+      "pipeline_panel": "fig4c_echoed_rb",
+      "required_columns": [
+        "rb_circuit_depth",
+        "sequence_id",
+        "shot_id",
+        "success",
+        "loss",
+        "postselection_flag"
+      ]
+    },
+    "Fig4d_intensity": {
+      "status": "unavailable without raw experimental data",
+      "panel": "Figure 4(d)",
+      "pipeline_panel": "fig4d_intensity",
+      "required_columns": [
+        "gate_type",
+        "intensity_ratio",
+        "gate_error",
+        "uncertainty",
+        "fidelity_convention"
+      ]
+    },
+    "Fig4e_stability": {
+      "status": "unavailable without raw experimental data",
+      "panel": "Figure 4(e)",
+      "pipeline_panel": "fig4e_stability",
+      "required_columns": [
+        "elapsed_time",
+        "gate_error",
+        "uncertainty",
+        "calibration_or_reoptimization_event"
+      ]
+    },
+    "Fig4f_error_budget": {
+      "status": "unavailable without raw experimental data",
+      "panel": "Figure 4(f)",
+      "pipeline_panel": "fig4f_error_budget",
+      "required_columns": [
+        "noise_source",
+        "raw_contribution",
+        "postselected_contribution",
+        "uncertainty",
+        "parameter_source"
+      ]
+    }
+  },
+  "microscopic_input_contracts": {
+    "pulse_waveform": [
+      "time_us",
+      "amplitude_rad_per_us",
+      "phase_rad"
+    ],
+    "zeeman_calibration": [
+      "state_label",
+      "field_gauss",
+      "shift_mhz",
+      "uncertainty_mhz"
+    ],
+    "polarization_calibration": [
+      "beam_id",
+      "component",
+      "relative_amplitude",
+      "phase_rad",
+      "uncertainty"
+    ],
+    "mqdt_pair_states": [
+      "distance_um",
+      "pair_state_id",
+      "energy_mhz",
+      "product_state",
+      "overlap_real",
+      "overlap_imag"
+    ],
+    "distance_samples": [
+      "sample_id",
+      "distance_um",
+      "polar_angle_rad",
+      "azimuth_rad"
+    ],
+    "decay_branching": [
+      "initial_state",
+      "final_state",
+      "rate_per_us"
+    ],
+    "laser_phase_noise_psd": [
+      "frequency_mhz",
+      "psd_rad2_per_mhz"
+    ],
+    "laser_amplitude_noise_psd": [
+      "frequency_mhz",
+      "psd_fraction2_per_mhz"
+    ]
+  },
+  "microscopic_input_note": "schema-v2 input.in validates and audits these inputs; the current ten-state Hessian does not silently consume them",
+  "analysis_script": "/home/thy/thy/work/quantum_harnessing/quantum.harness/Sim-to-real-reproduction-run/reproduce/liu_2026_experimental_analysis.py",
+  "analysis_script_exists": true,
+  "input_manifest": "/home/thy/thy/work/quantum_harnessing/quantum.harness/Sim-to-real-reproduction-run/reproduce/input.in",
+  "input_manifest_exists": true,
+  "usage": "/home/thy/thy/work/quantum_harnessing/quantum.harness/Sim-to-real-reproduction-run/reproduce/liu_2026_experimental_analysis.py --panel <pipeline_panel> --input <csv> --output <json>",
+  "input_manifest_usage": "/home/thy/thy/work/quantum_harnessing/quantum.harness/Sim-to-real-reproduction-run/reproduce/liu_2026_experimental_analysis.py --input-in /home/thy/thy/work/quantum_harnessing/quantum.harness/Sim-to-real-reproduction-run/reproduce/input.in --output-dir <run_dir>/data/input_manifest_analysis"
+}

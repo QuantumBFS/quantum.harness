@@ -1,0 +1,631 @@
+{
+  "title": "低秩 Hessian 引导的中性原子量子门模拟到实验标定",
+  "eyebrow": "从 4×4 抽象门模型到 ¹⁷¹Yb 全参数数字孪生",
+  "url": "https://github.com/QuantumBFS/quantum.harness/pull/184",
+  "lede": "高维脉冲可以在理论模型中用梯度快速优化，但真实装置通常只能通过有限次重复测量返回一个带统计噪声的保真度。本项目复现并扩展 Liu 等人在 ¹⁷¹Yb 平台上提出的低秩 Hessian 标定思路：先在抽象两比特门上验证有限-shot 闭环的查询优势，再实现振幅鲁棒 CZ 脉冲及其敏感方向，最后把同一闭环原则放入包含多能级、泄露、器件响应和激光噪声的数字孪生实验平台。",
+  "sections": [
+    {
+      "title": "问题：高维脉冲与有限实验预算",
+      "note": "我们关心的不是在计算机里能否找到高保真脉冲，而是只依靠实验返回的有限-shot 保真度，能否用足够少的装置查询把门重新标定好。",
+      "blocks": [
+        {
+          "kind": "text",
+          "text": "量子最优控制通常把一个脉冲离散成几十到几百个参数。理论模型可通过自动微分同时得到损失函数、梯度和 Hessian；真实装置却不能直接提供这些量。实验端一次只能执行候选脉冲若干次，以成功/失败计数估计保真度。若直接在全部参数上做黑箱搜索，维数、shot 噪声和器件漂移会共同推高实验成本。"
+        },
+        {
+          "kind": "equation",
+          "tex": "\\widehat{F}(\\theta)=\\frac{k}{N_{\\mathrm{shot}}},\\qquad \\operatorname{Var}(\\widehat{F})\\simeq\\frac{F(1-F)}{N_{\\mathrm{shot}}}"
+        },
+        {
+          "kind": "text",
+          "text": "低秩方法利用一个局部事实：在模型最优脉冲附近，门误差对控制扰动的主要变化常集中在少数方向。Hessian 的大特征值方向表示保真度最敏感的脉冲组合，小特征值方向在局部近似中几乎不改变门。将实验查询集中到前者，可能同时减少搜索维数和无效测量。"
+        },
+        {
+          "kind": "equation",
+          "tex": "1-F(\\theta_\\star+\\delta\\theta)\\approx 1-F(\\theta_\\star)+\\frac{1}{2}\\delta\\theta^{\\mathsf T}H\\,\\delta\\theta"
+        },
+        {
+          "kind": "card",
+          "title": "项目要检验的命题",
+          "blocks": [
+            {
+              "kind": "text",
+              "text": "由可微模型得到的主 Hessian 子空间，能否在模型与装置不完全一致、且每次反馈只有有限-shot 标量保真度时，仍然构成一个低成本、可收敛的实验标定空间？"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "已有实验答案：Liu 等人的 ¹⁷¹Yb 门",
+      "note": "Liu 等人的工作已经在真实 ¹⁷¹Yb 阵列上展示了低秩 Hessian 校准；本项目的目标是重建其物理和算法链条，并把未公开的实验反馈替换为可审计的模拟实验反馈。",
+      "blocks": [
+        {
+          "kind": "text",
+          "text": "Liu、Bornet、Kurdak 等人在 2026 年报告了振幅鲁棒受控 Z 门。理论脉冲具有 400 个相位自由度，但局部保真度曲率集中在十个主方向。实验只沿这些方向修正激光波形，并通过重复门序列和原子读出估计保真度。论文报告的未后选择门保真度为 0.9959(4)，去除可识别原子损失后的保真度为 0.99902(20)。"
+        },
+        {
+          "kind": "table",
+          "columns": [
+            "对象",
+            "Liu 实验",
+            "本项目的处理"
+          ],
+          "rows": [
+            [
+              "物理平台",
+              "单光子 302 nm 激发的 ¹⁷¹Yb 原子对",
+              "从论文参数重建等效模型，并在数字孪生中加入器件和噪声"
+            ],
+            [
+              "控制脉冲",
+              "0.55 μs、400 个相位区间的振幅鲁棒 CZ",
+              "独立重新优化满足相同物理约束的等效脉冲"
+            ],
+            [
+              "低维坐标",
+              "十个 Hessian 主方向",
+              "独立求解 Hessian 并验证十维谱隙和有限差分曲率"
+            ],
+            [
+              "实验反馈",
+              "真实装置的有限次测量",
+              "抽象有限-shot oracle 与 Cold_Atom Gate Simu_Platform 两级替代"
+            ],
+            [
+              "不可获得信息",
+              "原始 shots、完整相位数组、实测复 AOM 传递函数和 MQDT pair table 未公开",
+              "不反演或补造；全部替代假设单独标注"
+            ]
+          ]
+        },
+        {
+          "kind": "verdict",
+          "status": "good",
+          "label": "项目定位：复现机制并建立可运行替代实验",
+          "why": "我们不把模拟数据称为实验测量；目标是验证低秩标定为何有效、何时失效，以及在更完整前向模型中还能保留多少收益。"
+        }
+      ]
+    },
+    {
+      "title": "工作一：4×4 门矩阵上的有限-shot 闭环",
+      "note": "第一层刻意移除原子物理细节，只保留一个两比特 4×4 目标门、40 个脉冲参数和一个只返回有限-shot 保真度的黑箱。",
+      "blocks": [
+        {
+          "kind": "text",
+          "text": "名义模型先优化一个 CNOT 门并计算 40×40 保真度 Hessian。模型在最优点附近有 15 个可辨识的正曲率方向。随后构造包含控制映射误差、漂移及两者组合的隐藏“装置”；在线算法只能调用 query(θ, shots) 并接收采样保真度，不能读取隐藏 Hamiltonian、精确保真度或梯度。"
+        },
+        {
+          "kind": "kv",
+          "pairs": [
+            [
+              "控制维数",
+              "40"
+            ],
+            [
+              "主 Hessian 维数",
+              "15"
+            ],
+            [
+              "独立隐藏装置条件",
+              "24 个 truth cells；每个包含 4 个嵌套 shot-noise 重复"
+            ],
+            [
+              "每个决策查询",
+              "32,768 shots，另有两个 1,024-shot sentinel"
+            ],
+            [
+              "验收目标",
+              "事后精确评分达到 1−F≤10⁻³；该精确量不反馈给在线算法"
+            ],
+            [
+              "比较原则",
+              "相同 warm start、相同更新规则、相同有限-shot 噪声和相同接受准则"
+            ]
+          ]
+        },
+        {
+          "kind": "figures",
+          "items": [
+            {
+              "src": "figures/project/abstract_finite_shot_calibration.png",
+              "caption": "抽象两比特门的有限-shot 校准结果。只搜索 15 个 Hessian 主方向时，目标成功率为 90.625%，固定查询上限为 66；加入 25 个名义平坦方向后，成功率降至 25%，查询上限增至 166；直接搜索 40 个原始坐标在本样本中未成功。误差条按 24 个独立隐藏条件分层 bootstrap。"
+            }
+          ]
+        },
+        {
+          "kind": "table",
+          "columns": [
+            "在线搜索空间",
+            "目标成功率",
+            "固定查询上限",
+            "固定 shot 上限",
+            "事后 queries-to-target"
+          ],
+          "rows": [
+            [
+              "Hessian 主空间，15 维",
+              "90.625%",
+              "66",
+              "2,099,200",
+              "48.76 [45.35, 52.47]"
+            ],
+            [
+              "主空间加平坦补空间，40 维",
+              "25.00%",
+              "166",
+              "5,376,000",
+              "160.63 [153.69, 165.84]"
+            ],
+            [
+              "原始坐标，40 维",
+              "0% observed",
+              "166",
+              "5,376,000",
+              "166"
+            ]
+          ],
+          "numeric": [
+            false,
+            true,
+            true,
+            true,
+            true
+          ]
+        },
+        {
+          "kind": "text",
+          "text": "结果说明优势不仅来自“维数更小”。40 维模型补全空间完整包含成功的 15 个主方向，但额外 25 个局部平坦方向会消耗查询，并把有限-shot 差分噪声注入更新，因此反而降低成功率。开发扫描同时表明维数过小也不够：5 维方法虽然查询少，却无法达到目标。可行域因此由“包含全部主要响应方向，但不纳入大量噪声主导的平坦方向”共同定义。"
+        },
+        {
+          "kind": "note",
+          "label": "无导数优化与贝叶斯优化的边界",
+          "style": "info",
+          "text": "query-only 接口可接入高斯过程贝叶斯优化、Nelder–Mead、CMA-ES 等无导数方法。为隔离 Hessian 几何本身的贡献，封存的定量比较采用相同的主方向有限差分扫描和信赖半径更新，而不是让不同搜索空间使用不同优化器。因此，本报告不把 90.625% 的优势归因于贝叶斯优化；贝叶斯方法是低维接口的可扩展优化器，而不是当前对照中的混杂变量。"
+        },
+        {
+          "kind": "verdict",
+          "status": "good",
+          "label": "有限-shot 低秩标定可行，但仅在可迁移响应子空间内",
+          "why": "在预注册的隐藏条件上，15 维主空间同时提高成功率并把查询和 shot 上限降到 40 维方法的约 40%；当模型失配显著旋转主空间或产生新通道时，这一固定子空间会失效。"
+        }
+      ]
+    },
+    {
+      "title": "工作二：振幅鲁棒 CZ 脉冲与敏感方向",
+      "note": "第二层把抽象门替换为中性原子动力学：先在可微模型中设计振幅鲁棒 CZ 脉冲，再比较不同实验搜索坐标在同一初始脉冲误差下的收敛。",
+      "blocks": [
+        {
+          "kind": "heading",
+          "level": 3,
+          "text": "振幅鲁棒脉冲设计"
+        },
+        {
+          "kind": "text",
+          "text": "我们实现了 ¹⁷¹Yb 十态完全阻塞模型中的脉冲优化。离线设计使用 JAX 自动微分、L-BFGS-B 名义优化、带 Jacobian 的信赖域最小二乘来压低振幅一阶响应，并在细时间网格上重新验证。得到的等效脉冲含 400 个相位系数；作者未公开的原始相位数组没有被假定或反演。"
+        },
+        {
+          "kind": "figures",
+          "items": [
+            {
+              "src": "figures/project/ar_cz_design.png",
+              "caption": "振幅鲁棒 CZ 的三项核心证据。左：0.55 μs 优化控制的幅度和相位；中：400 维控制在局部形成十个主 Hessian 方向，第 11 个特征值下降约 14 个数量级；右：振幅鲁棒门对相对强度误差呈约四阶响应，而同门时非鲁棒对照呈约二阶响应。"
+            }
+          ]
+        },
+        {
+          "kind": "table",
+          "columns": [
+            "脉冲指标",
+            "结果",
+            "意义"
+          ],
+          "rows": [
+            [
+              "自适应传播门误差",
+              "2.23×10⁻⁹",
+              "等效重优化脉冲达到高保真闭合"
+            ],
+            [
+              "最大泄露",
+              "3.64×10⁻⁹",
+              "计算态回到误差满足数值目标"
+            ],
+            [
+              "Hessian 主空间维数",
+              "10",
+              "与 Liu 实验采用的十个敏感方向一致"
+            ],
+            [
+              "λ₁₀/|λ₁₁|",
+              "7.35×10¹³",
+              "主空间和数值零空间清晰分离"
+            ],
+            [
+              "振幅响应",
+              "鲁棒门约四阶；非鲁棒门约二阶",
+              "验证振幅一阶误差通道被消除"
+            ]
+          ],
+          "numeric": [
+            false,
+            true,
+            false
+          ]
+        },
+        {
+          "kind": "heading",
+          "level": 3,
+          "text": "相同初始误差下的搜索坐标比较"
+        },
+        {
+          "kind": "text",
+          "text": "为了不把不同初始波形造成的难度差异误认为算法优势，我们从同一脉冲扰动和同一初始门误差 2.40×10⁻³ 出发，逐方向扫描 Hessian 特征向量、前六阶 Chebyshev 基、解析 ansatz，以及解析 ansatz 加正交方向。这里是确定性机制比较；有限-shot 统计优势由上一层独立验证。"
+        },
+        {
+          "kind": "figures",
+          "items": [
+            {
+              "src": "figures/project/hessian_search_comparison.png",
+              "caption": "相同初始脉冲误差下的收敛轨迹。Hessian 主方向在 5 次一维扫描后进入 1−F≤10⁻⁵，并在 10 次扫描后达到约 3.4×10⁻¹²；Chebyshev 基需要 25 次扫描才越过 10⁻⁵，另外两个低维参数化在给定预算内停留在约 4–5×10⁻⁵。"
+            }
+          ]
+        },
+        {
+          "kind": "table",
+          "columns": [
+            "搜索坐标",
+            "达到 1−F≤10⁻⁵ 的扫描数",
+            "最终扫描数",
+            "最终离散误差"
+          ],
+          "rows": [
+            [
+              "Hessian 特征向量",
+              "5",
+              "10",
+              "3.41×10⁻¹²"
+            ],
+            [
+              "前六阶 Chebyshev",
+              "25",
+              "60",
+              "2.04×10⁻⁹"
+            ],
+            [
+              "解析 ansatz",
+              "未达到",
+              "60",
+              "4.93×10⁻⁵"
+            ],
+            [
+              "ansatz 加正交方向",
+              "未达到",
+              "48",
+              "4.38×10⁻⁵"
+            ]
+          ],
+          "numeric": [
+            false,
+            true,
+            true,
+            true
+          ]
+        },
+        {
+          "kind": "verdict",
+          "status": "good",
+          "label": "敏感方向同时提供速度和精度",
+          "why": "在匹配的初始扰动下，Hessian 坐标最先进入目标区，并达到最低残余误差；其优势来自坐标与真实局部误差通道对齐，而不是更好的初始脉冲。"
+        }
+      ]
+    },
+    {
+      "title": "工作三：全参数数字孪生中的模拟实验",
+      "note": "第三层不再把保真度写成简单解析函数，而是让 Cold_Atom Gate Simu_Platform 传播多能级双原子模型，并将有限-shot 结果作为在线控制器唯一可见的实验反馈。",
+      "blocks": [
+        {
+          "kind": "text",
+          "text": "数字孪生表示五个彼此独立的 ¹⁷¹Yb 原子对；由于对间距为 25 μm，每次只需传播一个双原子模型。每个原子显式包含 |0⟩、|1⟩、|r⟩、|r′⟩ 和 erasure，双原子扇区包含 |rr⟩、|rr′⟩/|r′r⟩ 与 |r′r′⟩。同一 302 nm 复光场驱动目标跃迁和非目标泄露跃迁。"
+        },
+        {
+          "kind": "kv",
+          "pairs": [
+            [
+              "论文固定参数",
+              "Ω₀/(2π)=6.0 MHz，r′ 劈裂 16.1 MHz，门时间 0.55 μs，Rydberg 寿命 42 μs"
+            ],
+            [
+              "器件响应",
+              "AOM 增益与一阶低通传递图；参数由论文波形栅格曲线拟合"
+            ],
+            [
+              "运动与空间噪声",
+              "2.7 μK Doppler、0.02 μm 位置涨落、R⁻⁶ 相互作用变化和高斯光束不均匀"
+            ],
+            [
+              "激光噪声",
+              "1% pulse-energy RMS、Lorentzian 线宽、准静态频偏和 Ornstein–Uhlenbeck 频率噪声"
+            ],
+            [
+              "在线观测",
+              "每个候选脉冲 50,000 次等效 shots；控制器只读取失败数、保真度估计和统计误差"
+            ],
+            [
+              "离线验证",
+              "精确 coherent/open-system 通道仅在初始和最终点计算，不参与候选选择"
+            ]
+          ]
+        },
+        {
+          "kind": "figures",
+          "items": [
+            {
+              "src": "data/digital_twin/figs/digital_twin_summary.png",
+              "caption": "平台数字孪生闭环。左上为理想、校准前和校准后 AOM 波形；右上为十个 Hessian 方向上的有限-shot 反馈；左下分解寿命、有限阻塞、Doppler、位置和激光噪声；右下给出有效 302 nm 线宽从 0.1 kHz 到 300 kHz 时的总门误差。完整运行耗时 21.7 分钟。"
+            }
+          ]
+        },
+        {
+          "kind": "table",
+          "columns": [
+            "模拟实验指标",
+            "结果",
+            "解释"
+          ],
+          "rows": [
+            [
+              "有限-shot 初始门误差",
+              "0.01735±0.00058",
+              "器件响应和固定隐藏噪声条件下的在线观测"
+            ],
+            [
+              "最佳公开检查点",
+              "0.00807±0.00040",
+              "完成第 9 个主方向后"
+            ],
+            [
+              "十个方向后的公开观测",
+              "0.00851±0.00041",
+              "末步回升是 shot 波动；精确动力学未退化"
+            ],
+            [
+              "最终精确 coherent fidelity",
+              "0.997987",
+              "不含衰变和随机环境"
+            ],
+            [
+              "最终精确 raw fidelity",
+              "0.993586",
+              "含 42 μs 有效寿命"
+            ],
+            [
+              "最终精确 no-loss fidelity",
+              "0.997617",
+              "对 erasure sink 后选择"
+            ],
+            [
+              "1 kHz 组合噪声 raw fidelity",
+              "约 0.99153–0.99225",
+              "两个独立 16-context 样本给出的范围"
+            ]
+          ],
+          "numeric": [
+            false,
+            true,
+            false
+          ]
+        },
+        {
+          "kind": "table",
+          "columns": [
+            "误差源",
+            "raw error 增量",
+            "证据属性"
+          ],
+          "rows": [
+            [
+              "Rydberg 寿命与 erasure",
+              "4.40×10⁻³",
+              "精确 open-system 传播"
+            ],
+            [
+              "Doppler",
+              "1.06×10⁻³",
+              "平台噪声消融"
+            ],
+            [
+              "激光相位与 1 kHz 线宽",
+              "4.81×10⁻⁴",
+              "平台噪声消融"
+            ],
+            [
+              "热位置与变化的 blockade",
+              "2.07×10⁻⁴",
+              "平台噪声消融"
+            ],
+            [
+              "finite blockade",
+              "1.60×10⁻⁴",
+              "按论文单项误差标定，不是独立预测"
+            ],
+            [
+              "激光能量",
+              "6.29×10⁻⁵",
+              "平台噪声消融"
+            ]
+          ],
+          "numeric": [
+            false,
+            true,
+            false
+          ]
+        },
+        {
+          "kind": "verdict",
+          "status": "warn",
+          "label": "模拟实验闭环有效，但尚未达到论文装置的保真度",
+          "why": "十维反馈将有限-shot 误差降低约 51%，证明同一低秩原则可进入多能级实验模拟；最终 raw/no-loss fidelity 仍低于论文值，主要未约束量是实测复 AOM 传递函数、装置噪声谱和实验专用 MQDT pair table。"
+        },
+        {
+          "kind": "note",
+          "label": "AOM 证据边界",
+          "style": "info",
+          "text": "由论文波形曲线反推的一阶 AOM 模型达到 20 MHz 搜索上界，栅格拟合 MSE=0.0873，说明“增益+单极点低通”不足以描述真实振铃、chirp 和 I/Q 串扰。我们保留这一失配，不通过继续调参强制对齐论文保真度。"
+        }
+      ]
+    },
+    {
+      "title": "三层证据如何连成一个结论",
+      "blocks": [
+        {
+          "kind": "table",
+          "columns": [
+            "层次",
+            "回答的问题",
+            "主要证据",
+            "仍未包含"
+          ],
+          "rows": [
+            [
+              "抽象 4×4 门",
+              "有限-shot 下低秩搜索是否节省实验查询",
+              "15 维成功率 90.625%，66 次查询；40 维对照为 25%/0%，166 次查询",
+              "具体原子和光学误差"
+            ],
+            [
+              "中性原子 CZ 脉冲",
+              "能否得到振幅鲁棒控制及正确敏感方向",
+              "400 参数等效脉冲误差 2.23×10⁻⁹，十维 Hessian；同误差下 5 次扫描进入 10⁻⁵",
+              "真实器件传递函数和随机实验反馈"
+            ],
+            [
+              "全参数数字孪生",
+              "在多能级、泄露、衰变和激光噪声下是否仍可闭环",
+              "21.7 分钟模拟实验；有限-shot 误差下降约 51%",
+              "作者未公开的 AOM、MQDT 和真实 shots"
+            ]
+          ]
+        },
+        {
+          "kind": "card",
+          "title": "共同结论",
+          "blocks": [
+            {
+              "kind": "text",
+              "text": "Hessian 主方向不是一种只在理想模型中成立的降维技巧。只要模型与装置共享主要响应通道，它可以把高维脉冲校准压缩成少数高信息量实验方向，在有限-shot 条件下降低查询成本并提高收敛精度。其适用边界也很明确：强烈的子空间旋转或模型中不存在的新泄露通道，会使冻结的主空间失效。"
+            }
+          ]
+        },
+        {
+          "kind": "note",
+          "label": "不能合并成同一个统计量",
+          "style": "info",
+          "text": "4×4 CNOT、完全阻塞 CZ 机制比较和 ¹⁷¹Yb 数字孪生使用不同模型、目标阈值和噪声定义。它们构成逐层增加物理真实性的证据链，但成功率、误差和查询数不能跨层直接合并。"
+        }
+      ]
+    },
+    {
+      "title": "下一步：在全参数空间中联合设计与标定",
+      "note": "当前流程先在简化可微模型中求脉冲和 Hessian，再把主方向移植到数字孪生。下一步应让脉冲优化、Hessian 求解和实验标定共享同一个全参数前向模型。",
+      "blocks": [
+        {
+          "kind": "list",
+          "title": "建议的技术路线",
+          "items": [
+            "把实测复 AOM 传递函数、激光频率噪声功率谱、温度和实验专用 MQDT pair table 纳入可微或可求 Hessian-vector product 的前向模型。",
+            "在完整多能级模型中直接优化 400 个脉冲参数，使名义脉冲先适应器件带宽、泄露和寿命约束，而不是只在闭环阶段补偿。",
+            "在同一完整模型的最优点重新求主 Hessian 子空间，比较它与简化模型子空间的主角度；以该角度作为是否可安全迁移的判据。",
+            "在线阶段从冻结主空间开始，当残差停滞或新误差通道出现时，用 secant、低秩 Bayesian 更新或新增探测方向自适应扩展子空间。",
+            "接入真实装置后重新预注册噪声预算、查询上限、随机种子和验收标准，避免使用当前模拟结果反复调参后再称为独立验证。"
+          ]
+        },
+        {
+          "kind": "verdict",
+          "status": "good",
+          "label": "预期收益：更高初始保真度和更少闭环查询",
+          "why": "全参数模型先消除可预测的系统误差，重新求得的主方向再集中处理不可预测残差；这比用简化模型脉冲进入实验后完全依赖反馈修正更有机会接近或超过当前实验保真度。"
+        }
+      ]
+    },
+    {
+      "title": "复现入口与证据边界",
+      "blocks": [
+        {
+          "kind": "heading",
+          "level": 3,
+          "text": "抽象 4×4 有限-shot 基准"
+        },
+        {
+          "kind": "code",
+          "title": "从仓库根目录运行",
+          "text": "cd tracks/qcs/solutions/gpt-5.6\npython tools/validate_team_package.py --strict-closure\npython3 -m venv .venv\n.venv/bin/pip install -r core-sim-to-real/requirements.txt\n.venv/bin/python core-sim-to-real/code/attempt50_result_audit.py --verify-only\n.venv/bin/python core-sim-to-real/run_challenge.py --mwe"
+        },
+        {
+          "kind": "heading",
+          "level": 3,
+          "text": "¹⁷¹Yb 脉冲、Hessian 与数字孪生"
+        },
+        {
+          "kind": "code",
+          "title": "从本 submission 目录运行",
+          "text": "python -m venv .venv\n.venv/bin/pip install -r source/reproduce/requirements.txt\n.venv/bin/pip install -e 'source/simulator[test]'\nJAX_ENABLE_X64=true JAX_PLATFORM_NAME=cpu .venv/bin/python -m unittest discover -s source/reproduce/tests -p 'test_*.py'\n.venv/bin/python -m pytest -q source/simulator/tests/test_s3b_waveforms.py source/simulator/tests/test_s3c_stochastic.py source/simulator/tests/test_s4a_dynamic_noise.py source/simulator/tests/test_s4b_psd_stark.py source/simulator/tests/test_s8_yb171_profile.py\nMPLCONFIGDIR=/tmp/liu-project-report-mpl .venv/bin/python source/build_project_report_assets.py\npython3 ../../skills/report/render_report.py ."
+        },
+        {
+          "kind": "code",
+          "title": "重新运行完整数字孪生",
+          "text": "PYTHONPATH=source/simulator/src MPLCONFIGDIR=/tmp/liu-digital-twin-mpl .venv/bin/python -u source/liu_2026_complete_digital_twin.py --theory-dir data/figures3_4 --paper-figure4 figures/reference/Paper_Figure_4.png --output-dir data/digital_twin-rerun"
+        },
+        {
+          "kind": "table",
+          "columns": [
+            "验证",
+            "状态"
+          ],
+          "rows": [
+            [
+              "抽象基准团队包闭合",
+              "27/27 checks"
+            ],
+            [
+              "¹⁷¹Yb 复现回归测试",
+              "33/33 passed"
+            ],
+            [
+              "数字孪生平台聚焦测试",
+              "27/27 passed"
+            ],
+            [
+              "数字孪生文件 SHA-256",
+              "10/10 passed"
+            ],
+            [
+              "本报告图片、链接和关键数值",
+              "全部通过"
+            ]
+          ]
+        },
+        {
+          "kind": "list",
+          "title": "声明边界",
+          "items": [
+            "抽象 4×4 结果是软件黑箱基准，不是真实硬件统计。",
+            "振幅鲁棒脉冲是满足论文约束的等效重新优化，不是作者未公开的相位数组。",
+            "有限阻塞系数按论文一个误差项标定，不能用同一误差项作为独立验证。",
+            "平台数据是 Cold_Atom Gate Simu_Platform 生成的数字孪生数据，不是实验测量。",
+            "Evered 等人的 Rb 工作用于选择中性原子误差机制；其双光子中间态没有复制到单光子 Yb Hamiltonian。"
+          ]
+        },
+        {
+          "kind": "list",
+          "title": "主要参考",
+          "items": [
+            "Liu et al., High-fidelity neutral atom gates leveraging low-rank Hessian optimization, arXiv:2606.05060v1 (2026).",
+            "Evered et al., High-fidelity parallel entangling gates on a neutral-atom quantum computer, Nature 622, 268–272 (2023).",
+            "QuantumBFS/quantum.harness Issue #113, Sim-to-Real for Quantum Gates."
+          ]
+        }
+      ]
+    }
+  ]
+}

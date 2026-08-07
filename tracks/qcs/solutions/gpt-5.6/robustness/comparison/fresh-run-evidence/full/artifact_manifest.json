@@ -1,0 +1,101 @@
+{
+  "schema_version": 1,
+  "manifest_is_self_contained": false,
+  "excluded_paths": [
+    "artifact_manifest.json",
+    "progress.json",
+    "*.tmp"
+  ],
+  "artifacts": [
+    {
+      "path": "data/baseline.json",
+      "bytes": 743,
+      "sha256": "3e111b0a74bf0660d75c61b354060ebb00e5153218231854a0a0583fff1a97d2"
+    },
+    {
+      "path": "data/baseline.npz",
+      "bytes": 4210450,
+      "sha256": "f65292fb56c4e562b0f4c3cf682897896fd7cfa801b43760f218a511d60d06e6"
+    },
+    {
+      "path": "data/channel_decomposition.csv",
+      "bytes": 780,
+      "sha256": "8d594d7ce640ead304518c751b681c19df00b158c7428eb6bdd0fe241184c333"
+    },
+    {
+      "path": "data/core_scan.csv",
+      "bytes": 39473,
+      "sha256": "eec4b816640e48b70e2a4d5937307d60a81575a4a0048c7f439dec785c8df459"
+    },
+    {
+      "path": "data/hamiltonian_error_scan.csv",
+      "bytes": 790,
+      "sha256": "b809700a4a8fb7425cd7a1a819805913ad6ca0c9182225a9781fca09158bd817"
+    },
+    {
+      "path": "data/noise_scan.csv",
+      "bytes": 7018,
+      "sha256": "99adcf8a3f6abef69fcc2f57a0e259c5d9403be6175ed9055cac2f30a8fc0fe1"
+    },
+    {
+      "path": "data/pathology_scan.csv",
+      "bytes": 473,
+      "sha256": "68ee01ac057bacfbdcde6ca229bc0d35b4a6221e8f000210055e2a7f864aabf2"
+    },
+    {
+      "path": "data/subspace_rotation.csv",
+      "bytes": 1255,
+      "sha256": "a137e3d4335c33d604b1b8af520958d1753df3309f771d9c1ccdc5661a169e8d"
+    },
+    {
+      "path": "figs/fig01_baseline_hessian.png",
+      "bytes": 370675,
+      "sha256": "eafa364fd7e249d5d5fdf25f43f00b0b73ab8929874e9a7948fe7e81d89c4252"
+    },
+    {
+      "path": "figs/fig02_trajectories.png",
+      "bytes": 150999,
+      "sha256": "0de142077e55568a172bb9c5ba3510c15fe3687cb84ed1e0213fb173775b1751"
+    },
+    {
+      "path": "figs/fig03_failure_map.png",
+      "bytes": 158744,
+      "sha256": "e16d2df842bf513b4384cbc37d9ce4bf4e925c262ffcf2072c4d50c520da6968"
+    },
+    {
+      "path": "figs/fig04_quadratic_breakdown.png",
+      "bytes": 193375,
+      "sha256": "fff134dbbd46365a56cfe1eab425a853078fae4f2936672be35d4dc37a9fbf01"
+    },
+    {
+      "path": "figs/fig05_subspace_rotation.png",
+      "bytes": 162351,
+      "sha256": "e16646fd972d1e6e0980aec8ad4fbf2fb3543dcad942f4c6f72282e92df266d9"
+    },
+    {
+      "path": "figs/fig06_channel_decomposition.png",
+      "bytes": 57969,
+      "sha256": "f17fac6eb49f6063f22692b923076aa407c346f0d35a5c4e534fa37bc113389c"
+    },
+    {
+      "path": "figs/fig07_noise_conditioning.png",
+      "bytes": 90911,
+      "sha256": "a079f0509b66d74d507d9f891ce7a8abb4fe35b9a478d864c83e14209a207ad6"
+    },
+    {
+      "path": "figs/fig08_pathology_gallery.png",
+      "bytes": 251600,
+      "sha256": "959fb7b33efa528ddfedab3c4dd8f167ba3c3d2db8c0c9abfd9bd61a1257fc45"
+    },
+    {
+      "path": "figs/fig09_hamiltonian_channels.png",
+      "bytes": 156101,
+      "sha256": "34e41cbbc134e504b0626403c7da3c50c23a2b46fe98946e437282e7266ec623"
+    },
+    {
+      "path": "summary.json",
+      "bytes": 14676,
+      "sha256": "78ac106baff99450b02a3e0aaeb219b80b60084fb4d7c5c87a8d73d3ad3fff51"
+    }
+  ]
+}

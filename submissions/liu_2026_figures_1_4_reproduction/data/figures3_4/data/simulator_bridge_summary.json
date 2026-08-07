@@ -1,0 +1,115 @@
+{
+  "provenance": "simulator synthetic demonstration",
+  "shots": 50000,
+  "seed": 260605060,
+  "waveform_intervals_in_simulator": 400,
+  "effective_blockade_model": "B_eff(R)=B0*(2 um/R)^6",
+  "blockade_B0_over_2pi_mhz": 303.32537141073584,
+  "blockade_calibration_target_raw_infidelity": 0.00016,
+  "blockade_calibration_trace": [
+    {
+      "blockade_mhz": 91.16985515010268,
+      "coherent_infidelity": 0.002118654759105665,
+      "excess_over_reference": 0.0021185824769257566
+    },
+    {
+      "blockade_mhz": 548.4268886648955,
+      "coherent_infidelity": 4.426547312008644e-05,
+      "excess_over_reference": 4.419319094017826e-05
+    },
+    {
+      "blockade_mhz": 1662.3884976181419,
+      "coherent_infidelity": 4.055321718432481e-06,
+      "excess_over_reference": 3.983039538524302e-06
+    },
+    {
+      "blockade_mhz": 301.36976273922545,
+      "coherent_infidelity": 0.00017076455781717126,
+      "excess_over_reference": 0.00017069227563726308
+    },
+    {
+      "blockade_mhz": 302.13829425932204,
+      "coherent_infidelity": 0.0001624533716937382,
+      "excess_over_reference": 0.00016238108951383
+    },
+    {
+      "blockade_mhz": 336.0265227191051,
+      "coherent_infidelity": 0.0001414889718066581,
+      "excess_over_reference": 0.00014141668962674991
+    },
+    {
+      "blockade_mhz": 314.65910108001196,
+      "coherent_infidelity": 0.00014603962807924198,
+      "excess_over_reference": 0.0001459673458993338
+    },
+    {
+      "blockade_mhz": 307.57185133176915,
+      "coherent_infidelity": 0.00016601093510659748,
+      "excess_over_reference": 0.0001659386529266893
+    },
+    {
+      "blockade_mhz": 304.72360563667564,
+      "coherent_infidelity": 0.0001511242644598454,
+      "excess_over_reference": 0.00015105198227993721
+    },
+    {
+      "blockade_mhz": 303.12319619610304,
+      "coherent_infidelity": 0.00015988139113165545,
+      "excess_over_reference": 0.00015980910895174727
+    },
+    {
+      "blockade_mhz": 303.77188695008306,
+      "coherent_infidelity": 0.00015839085551105914,
+      "excess_over_reference": 0.00015831857333115096
+    },
+    {
+      "blockade_mhz": 302.9211557371526,
+      "coherent_infidelity": 0.00015965777553272886,
+      "excess_over_reference": 0.00015958549335282068
+    },
+    {
+      "blockade_mhz": 303.32537141073584,
+      "coherent_infidelity": 0.0001599332847691537,
+      "excess_over_reference": 0.00015986100258924552
+    },
+    {
+      "blockade_mhz": 303.5276814739312,
+      "coherent_infidelity": 0.00015956301323583055,
+      "excess_over_reference": 0.00015949073105592237
+    }
+  ],
+  "coherent_metrics": {
+    "average_fidelity": 0.9998400667152308,
+    "computational_return": 0.9999313608762544,
+    "local_z_phase_rad": [
+      null,
+      null
+    ]
+  },
+  "open_system_metrics": {
+    "raw_average_fidelity": 0.995429831558663,
+    "weighted_conditional_fidelity": 0.9994653549160107,
+    "computational_return": 0.9956833607578306,
+    "failure_sink": 0.004037682084224778,
+    "excited_residual": 0.00027895715794465793,
+    "not_failure_sink": 0.9959623179157753,
+    "bookkeeping_error": 0.0,
+    "trace_error": 2.220446049250313e-16
+  },
+  "paper_comparison_anchors": {
+    "figure2_single_qubit_rb_raw_fidelity": 0.99935,
+    "figure2_single_qubit_rb_postselected_fidelity": 0.999979,
+    "figure4_raw_cz_error": 0.004,
+    "figure4_postselected_cz_error": 0.001,
+    "figure4_erasure_fraction": 0.75,
+    "appendix_e_simulated_total_raw": 0.004,
+    "appendix_e_simulated_total_postselected": 0.00066
+  },
+  "claim_boundary": [
+    "The optimized pulse is an equivalent reoptimization, not the authors' waveform.",
+    "B0 is calibrated to one paper finite-blockade error and is not an independent MQDT prediction.",
+    "The imaging rows are simulator-generated public camera records using a published fluorescence calibration from a different neutral-atom experiment.",
+    "The Figure-2 RB decay is paper-anchored because the authors' single-qubit control/noise records are unavailable.",
+    "Reported Doppler and laser-noise budget entries remain literal anchors because the required microscopic samples/PSDs are absent."
+  ]
+}

@@ -1,0 +1,463 @@
+{
+  "status": "complete",
+  "baseline": {
+    "accepted": true,
+    "baseline_infidelity": 6.599615889280042e-06,
+    "leakage_01": 1.035936525237723e-06,
+    "leakage_11": 2.4304014767022437e-05,
+    "controlled_phase": 3.141399037835893,
+    "phase_error_to_pi": 0.00019361575390020036,
+    "active_rank": 5,
+    "largest_eigenvalue": 0.07165857574571571,
+    "sixth_to_first_eigenvalue": 2.5669566807740995e-16,
+    "propagation_compile_seconds": 0.13732965500000205,
+    "hessian_compile_seconds": 2.1074943160000004,
+    "environment": {
+      "python": "3.12.13",
+      "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.43",
+      "jax": "0.11.0",
+      "jaxlib": "0.11.0",
+      "numpy": "2.5.1",
+      "scipy": "1.18.0",
+      "jax_devices": [
+        "cpu:0"
+      ],
+      "jax_x64": true
+    }
+  },
+  "scope": {
+    "core_trials": 240,
+    "seeds_per_cell": 10,
+    "noise_trials": 100,
+    "pathology_trials": 6,
+    "hamiltonian_error_points": 10
+  },
+  "boundary": {
+    "p_parallel=0": [
+      {
+        "eta": 0.01,
+        "successes": 10,
+        "trials": 10,
+        "success_fraction": 1.0,
+        "success_wilson_95_low": 0.7224598312333834,
+        "success_wilson_95_high": 1.0,
+        "median_initial_infidelity": 6.680894510091573e-06,
+        "median_final_infidelity": 6.680894510091573e-06,
+        "median_quadratic_relative_residual": 0.9999999999989166
+      },
+      {
+        "eta": 0.03,
+        "successes": 10,
+        "trials": 10,
+        "success_fraction": 1.0,
+        "success_wilson_95_low": 0.7224598312333834,
+        "success_wilson_95_high": 1.0,
+        "median_initial_infidelity": 7.3631027374232445e-06,
+        "median_final_infidelity": 7.3631027374232445e-06,
+        "median_quadratic_relative_residual": 0.9999999999998899
+      },
+      {
+        "eta": 0.06,
+        "successes": 10,
+        "trials": 10,
+        "success_fraction": 1.0,
+        "success_wilson_95_low": 0.7224598312333834,
+        "success_wilson_95_high": 1.0,
+        "median_initial_infidelity": 1.0121326231293803e-05,
+        "median_final_infidelity": 8.18278291520036e-06,
+        "median_quadratic_relative_residual": 0.9999999999999722
+      },
+      {
+        "eta": 0.1,
+        "successes": 10,
+        "trials": 10,
+        "success_fraction": 1.0,
+        "success_wilson_95_low": 0.7224598312333834,
+        "success_wilson_95_high": 1.0,
+        "median_initial_infidelity": 1.9821164549982397e-05,
+        "median_final_infidelity": 7.880154416051166e-06,
+        "median_quadratic_relative_residual": 0.9999999999999969
+      },
+      {
+        "eta": 0.2,
+        "successes": 10,
+        "trials": 10,
+        "success_fraction": 1.0,
+        "success_wilson_95_low": 0.7224598312333834,
+        "success_wilson_95_high": 1.0,
+        "median_initial_infidelity": 0.00015866001995424873,
+        "median_final_infidelity": 7.885621895320495e-06,
+        "median_quadratic_relative_residual": 0.9999999999999992
+      },
+      {
+        "eta": 0.35,
+        "successes": 10,
+        "trials": 10,
+        "success_fraction": 1.0,
+        "success_wilson_95_low": 0.7224598312333834,
+        "success_wilson_95_high": 1.0,
+        "median_initial_infidelity": 0.0010992415178062822,
+        "median_final_infidelity": 8.637215417317545e-06,
+        "median_quadratic_relative_residual": 1.0
+      },
+      {
+        "eta": 0.6,
+        "successes": 10,
+        "trials": 10,
+        "success_fraction": 1.0,
+        "success_wilson_95_low": 0.7224598312333834,
+        "success_wilson_95_high": 1.0,
+        "median_initial_infidelity": 0.008800843089570288,
+        "median_final_infidelity": 6.2079405631521044e-06,
+        "median_quadratic_relative_residual": 0.9999999999999998
+      },
+      {
+        "eta": 1.0,
+        "successes": 8,
+        "trials": 10,
+        "success_fraction": 0.8,
+        "success_wilson_95_low": 0.49015684672072335,
+        "success_wilson_95_high": 0.9433190520193067,
+        "median_initial_infidelity": 0.05841344101724916,
+        "median_final_infidelity": 8.47869992121053e-06,
+        "median_quadratic_relative_residual": 1.0
+      }
+    ],
+    "p_parallel=0.5": [
+      {
+        "eta": 0.01,
+        "successes": 10,
+        "trials": 10,
+        "success_fraction": 1.0,
+        "success_wilson_95_low": 0.7224598312333834,
+        "success_wilson_95_high": 1.0,
+        "median_initial_infidelity": 0.0001931369115843018,
+        "median_final_infidelity": 8.419012478311228e-06,
+        "median_quadratic_relative_residual": 0.005464149107919435
+      },
+      {
+        "eta": 0.03,
+        "successes": 10,
+        "trials": 10,
+        "success_fraction": 1.0,
+        "success_wilson_95_low": 0.7224598312333834,
+        "success_wilson_95_high": 1.0,
+        "median_initial_infidelity": 0.001968705942110416,
+        "median_final_infidelity": 8.452665387304049e-06,
+        "median_quadratic_relative_residual": 0.016571339215855345
+      },
+      {
+        "eta": 0.06,
+        "successes": 10,
+        "trials": 10,
+        "success_fraction": 1.0,
+        "success_wilson_95_low": 0.7224598312333834,
+        "success_wilson_95_high": 1.0,
+        "median_initial_infidelity": 0.008021406959522127,
+        "median_final_infidelity": 8.469535593691457e-06,
+        "median_quadratic_relative_residual": 0.034245042716348505
+      },
+      {
+        "eta": 0.1,
+        "successes": 10,
+        "trials": 10,
+        "success_fraction": 1.0,
+        "success_wilson_95_low": 0.7224598312333834,
+        "success_wilson_95_high": 1.0,
+        "median_initial_infidelity": 0.02189888102505083,
+        "median_final_infidelity": 7.60441582657867e-06,
+        "median_quadratic_relative_residual": 0.054097967166784486
+      },
+      {
+        "eta": 0.2,
+        "successes": 10,
+        "trials": 10,
+        "success_fraction": 1.0,
+        "success_wilson_95_low": 0.7224598312333834,
+        "success_wilson_95_high": 1.0,
+        "median_initial_infidelity": 0.08262801858244252,
+        "median_final_infidelity": 7.416898162959651e-06,
+        "median_quadratic_relative_residual": 0.10141430122738651
+      },
+      {
+        "eta": 0.35,
+        "successes": 10,
+        "trials": 10,
+        "success_fraction": 1.0,
+        "success_wilson_95_low": 0.7224598312333834,
+        "success_wilson_95_high": 1.0,
+        "median_initial_infidelity": 0.2100309508858543,
+        "median_final_infidelity": 5.058409680136489e-06,
+        "median_quadratic_relative_residual": 0.17173326590892354
+      },
+      {
+        "eta": 0.6,
+        "successes": 6,
+        "trials": 10,
+        "success_fraction": 0.6,
+        "success_wilson_95_low": 0.3126695474501864,
+        "success_wilson_95_high": 0.8318224187964902,
+        "median_initial_infidelity": 0.463995379581696,
+        "median_final_infidelity": 9.480708928089054e-06,
+        "median_quadratic_relative_residual": 0.5340172423071826
+      },
+      {
+        "eta": 1.0,
+        "successes": 3,
+        "trials": 10,
+        "success_fraction": 0.3,
+        "success_wilson_95_low": 0.10778928748621183,
+        "success_wilson_95_high": 0.6032267800204347,
+        "median_initial_infidelity": 0.6492523823299379,
+        "median_final_infidelity": 0.027926778575892576,
+        "median_quadratic_relative_residual": 1.3549534837580495
+      }
+    ],
+    "p_parallel=1": [
+      {
+        "eta": 0.01,
+        "successes": 10,
+        "trials": 10,
+        "success_fraction": 1.0,
+        "success_wilson_95_low": 0.7224598312333834,
+        "success_wilson_95_high": 1.0,
+        "median_initial_infidelity": 0.00040998003690816413,
+        "median_final_infidelity": 8.371563574216535e-06,
+        "median_quadratic_relative_residual": 0.004951381991927066
+      },
+      {
+        "eta": 0.03,
+        "successes": 10,
+        "trials": 10,
+        "success_fraction": 1.0,
+        "success_wilson_95_low": 0.7224598312333834,
+        "success_wilson_95_high": 1.0,
+        "median_initial_infidelity": 0.003976513544476423,
+        "median_final_infidelity": 8.20592790130581e-06,
+        "median_quadratic_relative_residual": 0.01763078056735851
+      },
+      {
+        "eta": 0.06,
+        "successes": 10,
+        "trials": 10,
+        "success_fraction": 1.0,
+        "success_wilson_95_low": 0.7224598312333834,
+        "success_wilson_95_high": 1.0,
+        "median_initial_infidelity": 0.016040753203957914,
+        "median_final_infidelity": 7.671588837376843e-06,
+        "median_quadratic_relative_residual": 0.03869783529305314
+      },
+      {
+        "eta": 0.1,
+        "successes": 10,
+        "trials": 10,
+        "success_fraction": 1.0,
+        "success_wilson_95_low": 0.7224598312333834,
+        "success_wilson_95_high": 1.0,
+        "median_initial_infidelity": 0.04362644895180154,
+        "median_final_infidelity": 7.6013095799409855e-06,
+        "median_quadratic_relative_residual": 0.058772270409633474
+      },
+      {
+        "eta": 0.2,
+        "successes": 10,
+        "trials": 10,
+        "success_fraction": 1.0,
+        "success_wilson_95_low": 0.7224598312333834,
+        "success_wilson_95_high": 1.0,
+        "median_initial_infidelity": 0.15708743472121067,
+        "median_final_infidelity": 4.956228814856356e-06,
+        "median_quadratic_relative_residual": 0.09684527011645575
+      },
+      {
+        "eta": 0.35,
+        "successes": 10,
+        "trials": 10,
+        "success_fraction": 1.0,
+        "success_wilson_95_low": 0.7224598312333834,
+        "success_wilson_95_high": 1.0,
+        "median_initial_infidelity": 0.3847517048723834,
+        "median_final_infidelity": 4.2131927105670816e-06,
+        "median_quadratic_relative_residual": 0.2535740863277629
+      },
+      {
+        "eta": 0.6,
+        "successes": 2,
+        "trials": 10,
+        "success_fraction": 0.2,
+        "success_wilson_95_low": 0.056680947980693314,
+        "success_wilson_95_high": 0.5098431532792765,
+        "median_initial_infidelity": 0.7180889390932419,
+        "median_final_infidelity": 0.0641055417191048,
+        "median_quadratic_relative_residual": 0.5609971096222442
+      },
+      {
+        "eta": 1.0,
+        "successes": 0,
+        "trials": 10,
+        "success_fraction": 0.0,
+        "success_wilson_95_low": 0.0,
+        "success_wilson_95_high": 0.2775401687666166,
+        "median_initial_infidelity": 0.603175310973836,
+        "median_final_infidelity": 0.06381169127412786,
+        "median_quadratic_relative_residual": 2.871331543728804
+      }
+    ]
+  },
+  "pathologies": [
+    {
+      "pathology": "pure-null",
+      "initial_infidelity": 0.025568244865144987,
+      "final_infidelity": 4.036568960275045e-06,
+      "success": true,
+      "cycles": 3,
+      "steps": 13
+    },
+    {
+      "pathology": "zero-crossing",
+      "initial_infidelity": 0.1495177860540259,
+      "final_infidelity": 4.716726331588373e-06,
+      "success": true,
+      "cycles": 4,
+      "steps": 20
+    },
+    {
+      "pathology": "symmetry-breaking",
+      "initial_infidelity": 0.03002698102407434,
+      "final_infidelity": 0.029466661845265685,
+      "success": false,
+      "cycles": 8,
+      "steps": 40
+    },
+    {
+      "pathology": "new-leakage",
+      "initial_infidelity": 0.0019013155723743736,
+      "final_infidelity": 0.0018842983429755988,
+      "success": false,
+      "cycles": 8,
+      "steps": 40
+    },
+    {
+      "pathology": "slow-drift",
+      "initial_infidelity": 0.23863502452272933,
+      "final_infidelity": 7.3464110129761735e-06,
+      "success": true,
+      "cycles": 3,
+      "steps": 11
+    },
+    {
+      "pathology": "actuator-clipping",
+      "initial_infidelity": 0.22212581662003053,
+      "final_infidelity": 6.120293696676438e-06,
+      "success": true,
+      "cycles": 2,
+      "steps": 10
+    }
+  ],
+  "input_settings": {
+    "execution": {
+      "baseline_only": false,
+      "seeds_per_cell": 10,
+      "max_wall_seconds": 600.0
+    },
+    "model": {
+      "name": "perfect-blockade symmetric Rydberg-CZ",
+      "n_time": 256,
+      "real_control_coordinates": 512,
+      "omega_scale": 1.0,
+      "amplitude_phase": 0.7049733914655495,
+      "phase_frequency": 1.0431,
+      "phase_offset": -0.7318,
+      "detuning_offset": 0.0,
+      "duration": 7.634070148223198
+    },
+    "scan": {
+      "eta_values": [
+        0.01,
+        0.03,
+        0.06,
+        0.1,
+        0.2,
+        0.35,
+        0.6,
+        1.0
+      ],
+      "p_parallel_values": [
+        0.0,
+        0.5,
+        1.0
+      ],
+      "noise_values": [
+        0.0,
+        1e-06,
+        1e-05,
+        0.0001,
+        0.001
+      ],
+      "noise_eta_values": [
+        0.06,
+        0.35
+      ],
+      "success_target": 1e-05,
+      "maximum_cycles": 8,
+      "line_fit_samples": 7,
+      "line_fit_bracket_expansions": 4,
+      "distortion_sine_modes": 12,
+      "active_rank_relative_threshold": 1e-08,
+      "hamiltonian_strengths": [
+        0.0,
+        0.05,
+        0.1,
+        0.2,
+        0.4
+      ],
+      "named_pathologies": [
+        "pure-null",
+        "zero-crossing",
+        "symmetry-breaking",
+        "new-leakage",
+        "slow-drift",
+        "actuator-clipping"
+      ]
+    },
+    "randomness": {
+      "generator": "numpy.random.default_rng",
+      "seed_schedule": "deterministic integer formulas in source"
+    }
+  },
+  "provenance": {
+    "schema_version": 1,
+    "source": {
+      "script": {
+        "path": "code/hessian_loop_failure_map.py",
+        "bytes": 67381,
+        "sha256": "ac6ab231d106c53a623e52ec5f52af690b583890e753d531e8cf3a17f3344902"
+      },
+      "requirements": {
+        "path": "requirements.txt",
+        "bytes": 78,
+        "sha256": "b5d3bfac66dc3b4f09bc3095f09ca194d813b021cecf68a3077778d8145e80ca"
+      }
+    },
+    "artifact_manifest": "artifact_manifest.json"
+  },
+  "timing": {
+    "wall_seconds": 60.373062307000005,
+    "clock": "time.perf_counter",
+    "scope": "End-to-end process wall time from immediately before the first output write through summary construction.",
+    "jax_warm_cold_state": "uncontrolled",
+    "interpretation": "Host load, CPU model, JAX/XLA compilation caches, and cold-versus-warm process state can materially change this diagnostic timing. It is not a scientific acceptance criterion."
+  },
+  "elapsed_seconds": 60.373062307000005,
+  "figures": [
+    "figs/fig01_baseline_hessian.png",
+    "figs/fig02_trajectories.png",
+    "figs/fig03_failure_map.png",
+    "figs/fig04_quadratic_breakdown.png",
+    "figs/fig05_subspace_rotation.png",
+    "figs/fig06_channel_decomposition.png",
+    "figs/fig07_noise_conditioning.png",
+    "figs/fig08_pathology_gallery.png",
+    "figs/fig09_hamiltonian_channels.png"
+  ]
+}

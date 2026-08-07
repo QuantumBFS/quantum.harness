@@ -1,0 +1,47 @@
+{
+  "attempt": 44,
+  "benchmark": {
+    "input": "results_summary/QL1F-attempt35-normalized-difficulty.json",
+    "input_canonical_sha256": "dac4711cd9f30b4d3cadfbe314952a352236bda5bf2a400fcba1208fbfe132cd",
+    "replicates_per_truth_cell": 4,
+    "selected_truth_cells": 21
+  },
+  "bootstrap": {
+    "confidence": 0.95,
+    "draws": 20000,
+    "independent_unit": "truth-cell",
+    "seed": 113044,
+    "stratify_by": "family"
+  },
+  "completion": {
+    "gram_schmidt_norm_min": 1e-10,
+    "raw_coordinate_order": "ascending-index",
+    "sign_rule": "largest-absolute-component-positive"
+  },
+  "dimensions": [
+    5,
+    10,
+    15,
+    20,
+    40
+  ],
+  "method": {
+    "central_difference_delta": 0.05,
+    "cycles": 2,
+    "ridge_multiplier": 0.1,
+    "ridge_reference": "median(top-15 positive nominal curvatures)",
+    "sentinel_shots": 1024,
+    "shots_per_decision_query": 32768,
+    "target_infidelity": 0.001,
+    "trust_radius": 0.25
+  },
+  "raw_comparator": "raw-coordinate-global-40",
+  "selection_gate": {
+    "absolute_success_min": 0.75,
+    "cost_ratio_upper_95_max": 0.6,
+    "destructive_accepted_step_rate_max": 0.05,
+    "larger_k_success_improvement_min": 0.1,
+    "success_difference_lower_95_min_exclusive": -0.1
+  }
+}
+

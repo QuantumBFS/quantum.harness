@@ -1,0 +1,5243 @@
+{
+  "artifacts": {
+    "plot_png": "plots/attempt43-online-certification-development.png",
+    "plot_svg": "plots/attempt43-online-certification-development.svg"
+  },
+  "attempt": 43,
+  "checks": {
+    "at_most_two_certificate_events_per_run": true,
+    "cost_ledger_closes": true,
+    "cycle_one_cutoff_or_full_cap_only": true,
+    "exact_data_not_used_for_certificate_decision": true,
+    "frozen_32768_shot_threshold_is_18_failures": true,
+    "input_has_84_runs": true,
+    "no_new_oracle_queries": true,
+    "no_rejected_proposal_checked": true,
+    "online_success_count_closes": true,
+    "only_32768_shot_validation_proposals_checked": true,
+    "output_has_84_runs": true,
+    "run_identity_preserved": true,
+    "truth_cells_are_21x4": true
+  },
+  "claim_boundary": {
+    "hidden_exact_use": "post-hoc scoring of false stops, missed certificates, and exact accepted-incumbent success only",
+    "online_decision_uses_hidden_exact_fidelity": false,
+    "oracle_scored_first_hit_is_online": false
+  },
+  "frozen_rule": {
+    "cycle_one_certificate_cost_rule": "cut off at the cycle-1 validation-proposal query",
+    "eligible_event": "already-accepted non-zero proposal at its existing cycle validation-proposal count",
+    "maximum_events_per_run": 2,
+    "maximum_failures_certifying_at_32768_shots": 18,
+    "otherwise_cost_rule": "charge the complete method cap",
+    "per_event_confidence": 0.995,
+    "per_event_type_i_bound": 0.0050000000000000044,
+    "rejected_proposals_checked": false,
+    "run_false_stop_union_bound": 0.010000000000000009,
+    "same_state_sample_selection": false,
+    "target_infidelity": 0.001,
+    "validation_shots": 32768
+  },
+  "method_changed": false,
+  "new_oracle_queries_generated": 0,
+  "runs": [
+    {
+      "actual_online_cost": {
+        "queries": 66,
+        "query_ratio_to_full_cap": 1.0,
+        "reason": "full cap without certificate",
+        "shot_ratio_to_full_cap": 1.0,
+        "shots": 2099200
+      },
+      "certificate_event_count": 1,
+      "certificate_events_checked": [
+        {
+          "certified": false,
+          "cycle": 1,
+          "failures": 31,
+          "parameter_sha256": "61f77c90ecb33ba562b7193b4d0926719739d91970a5b74b1427bcfb1d875154",
+          "posthoc_only": {
+            "exact_infidelity": 0.0009869798043495859,
+            "exact_target_reached": true
+          },
+          "query_index": 33,
+          "sampled_infidelity": 0.000946044921875,
+          "shots": 32768,
+          "successes": 32737,
+          "upper_infidelity_99_5": 0.0014778493200544739
+        }
+      ],
+      "certified_cycle": null,
+      "epsilon": 0.1,
+      "exact_posthoc_success": true,
+      "false_early_stop": false,
+      "family": "control-map",
+      "full_cap_cost": {
+        "queries": 66,
+        "shots": 2099200
+      },
+      "missed_certificate": true,
+      "noise_seed": 18208686127199841809,
+      "online_certified_success": false,
+      "rejected_proposals_not_checked": 1,
+      "replicate": 0,
+      "selected_cell": "control-map:260605:0.1",
+      "selected_cell_index": 0,
+      "truth_seed": 260605,
+      "zero_steps_not_checked": 0
+    },
+    {
+      "actual_online_cost": {
+        "queries": 66,
+        "query_ratio_to_full_cap": 1.0,
+        "reason": "full cap without certificate",
+        "shot_ratio_to_full_cap": 1.0,
+        "shots": 2099200
+      },
+      "certificate_event_count": 2,
+      "certificate_events_checked": [
+        {
+          "certified": false,
+          "cycle": 1,
+          "failures": 63,
+          "parameter_sha256": "fd21c19b9d1f342e9f4175c0df5a1d18d77a48e57e7525a020d2903891fa53c7",
+          "posthoc_only": {
+            "exact_infidelity": 0.002072235542940004,
+            "exact_target_reached": false
+          },
+          "query_index": 33,
+          "sampled_infidelity": 0.001922607421875,
+          "shots": 32768,
+          "successes": 32705,
+          "upper_infidelity_99_5": 0.002638175833990104
+        },
+        {
+          "certified": false,
+          "cycle": 2,
+          "failures": 22,
+          "parameter_sha256": "57ec1595de84c2d8b61a117c238b9734ce4f27a78aec33314758fcfa170f3128",
+          "posthoc_only": {
+            "exact_infidelity": 0.0007307438222269313,
+            "exact_target_reached": true
+          },
+          "query_index": 65,
+          "sampled_infidelity": 0.00067138671875,
+          "shots": 32768,
+          "successes": 32746,
+          "upper_infidelity_99_5": 0.0011355476408633836
+        }
+      ],
+      "certified_cycle": null,
+      "epsilon": 0.1,
+      "exact_posthoc_success": true,
+      "false_early_stop": false,
+      "family": "control-map",
+      "full_cap_cost": {
+        "queries": 66,
+        "shots": 2099200
+      },
+      "missed_certificate": true,
+      "noise_seed": 13629200535204576169,
+      "online_certified_success": false,
+      "rejected_proposals_not_checked": 0,
+      "replicate": 1,
+      "selected_cell": "control-map:260605:0.1",
+      "selected_cell_index": 0,
+      "truth_seed": 260605,
+      "zero_steps_not_checked": 0
+    },
+    {
+      "actual_online_cost": {
+        "queries": 66,
+        "query_ratio_to_full_cap": 1.0,
+        "reason": "full cap without certificate",
+        "shot_ratio_to_full_cap": 1.0,
+        "shots": 2099200
+      },
+      "certificate_event_count": 1,
+      "certificate_events_checked": [
+        {
+          "certified": false,
+          "cycle": 1,
+          "failures": 30,
+          "parameter_sha256": "8711c2d1b43d7a01c05399ceb0660c1c0336d6cb157bdcd55b817671e458f557",
+          "posthoc_only": {
+            "exact_infidelity": 0.0009208320351947741,
+            "exact_target_reached": true
+          },
+          "query_index": 33,
+          "sampled_infidelity": 0.00091552734375,
+          "shots": 32768,
+          "successes": 32738,
+          "upper_infidelity_99_5": 0.0014403359696843635
+        }
+      ],
+      "certified_cycle": null,
+      "epsilon": 0.1,
+      "exact_posthoc_success": true,
+      "false_early_stop": false,
+      "family": "control-map",
+      "full_cap_cost": {
+        "queries": 66,
+        "shots": 2099200
+      },
+      "missed_certificate": true,
+      "noise_seed": 4943268120884161784,
+      "online_certified_success": false,
+      "rejected_proposals_not_checked": 1,
+      "replicate": 2,
+      "selected_cell": "control-map:260605:0.1",
+      "selected_cell_index": 0,
+      "truth_seed": 260605,
+      "zero_steps_not_checked": 0
+    },
+    {
+      "actual_online_cost": {
+        "queries": 66,
+        "query_ratio_to_full_cap": 1.0,
+        "reason": "full cap after cycle-2 certificate",
+        "shot_ratio_to_full_cap": 1.0,
+        "shots": 2099200
+      },
+      "certificate_event_count": 2,
+      "certificate_events_checked": [
+        {
+          "certified": false,
+          "cycle": 1,
+          "failures": 30,
+          "parameter_sha256": "3af2868542787a4bffbd2b4563340fb2c0323c8b831ec85b03e0931d00f8c707",
+          "posthoc_only": {
+            "exact_infidelity": 0.000864004374418581,
+            "exact_target_reached": true
+          },
+          "query_index": 33,
+          "sampled_infidelity": 0.00091552734375,
+          "shots": 32768,
+          "successes": 32738,
+          "upper_infidelity_99_5": 0.0014403359696843635
+        },
+        {
+          "certified": true,
+          "cycle": 2,
+          "failures": 8,
+          "parameter_sha256": "296dcbfabf70f99a051e04c80bac6d6e57242be4737a8ae8562031cac89b8b49",
+          "posthoc_only": {
+            "exact_infidelity": 0.00022170315172986843,
+            "exact_target_reached": true
+          },
+          "query_index": 65,
+          "sampled_infidelity": 0.000244140625,
+          "shots": 32768,
+          "successes": 32760,
+          "upper_infidelity_99_5": 0.0005668709457723925
+        }
+      ],
+      "certified_cycle": 2,
+      "epsilon": 0.1,
+      "exact_posthoc_success": true,
+      "false_early_stop": false,
+      "family": "control-map",
+      "full_cap_cost": {
+        "queries": 66,
+        "shots": 2099200
+      },
+      "missed_certificate": false,
+      "noise_seed": 15258301410876228014,
+      "online_certified_success": true,
+      "rejected_proposals_not_checked": 0,
+      "replicate": 3,
+      "selected_cell": "control-map:260605:0.1",
+      "selected_cell_index": 0,
+      "truth_seed": 260605,
+      "zero_steps_not_checked": 0
+    },
+    {
+      "actual_online_cost": {
+        "queries": 66,
+        "query_ratio_to_full_cap": 1.0,
+        "reason": "full cap after cycle-2 certificate",
+        "shot_ratio_to_full_cap": 1.0,
+        "shots": 2099200
+      },
+      "certificate_event_count": 2,
+      "certificate_events_checked": [
+        {
+          "certified": false,
+          "cycle": 1,
+          "failures": 30,
+          "parameter_sha256": "2892829ff74c20203236fd0f12d14a069a6da53b01ab48e00addc164de3e6983",
+          "posthoc_only": {
+            "exact_infidelity": 0.0008689215621717761,
+            "exact_target_reached": true
+          },
+          "query_index": 33,
+          "sampled_infidelity": 0.00091552734375,
+          "shots": 32768,
+          "successes": 32738,
+          "upper_infidelity_99_5": 0.0014403359696843635
+        },
+        {
+          "certified": true,
+          "cycle": 2,
+          "failures": 2,
+          "parameter_sha256": "f78bfc41522ef08549b50605fb42b7cc2b7a331dec0cb6fe7c82fe66711cde90",
+          "posthoc_only": {
+            "exact_infidelity": 0.0001573779389593133,
+            "exact_target_reached": true
+          },
+          "query_index": 65,
+          "sampled_infidelity": 6.103515625e-05,
+          "shots": 32768,
+          "successes": 32766,
+          "upper_infidelity_99_5": 0.0002829822650095611
+        }
+      ],
+      "certified_cycle": 2,
+      "epsilon": 0.05,
+      "exact_posthoc_success": true,
+      "false_early_stop": false,
+      "family": "control-map",
+      "full_cap_cost": {
+        "queries": 66,
+        "shots": 2099200
+      },
+      "missed_certificate": false,
+      "noise_seed": 12526477238169956336,
+      "online_certified_success": true,
+      "rejected_proposals_not_checked": 0,
+      "replicate": 0,
+      "selected_cell": "control-map:260607:0.05",
+      "selected_cell_index": 1,
+      "truth_seed": 260607,
+      "zero_steps_not_checked": 0
+    },
+    {
+      "actual_online_cost": {
+        "queries": 66,
+        "query_ratio_to_full_cap": 1.0,
+        "reason": "full cap without certificate",
+        "shot_ratio_to_full_cap": 1.0,
+        "shots": 2099200
+      },
+      "certificate_event_count": 1,
+      "certificate_events_checked": [
+        {
+          "certified": false,
+          "cycle": 1,
+          "failures": 22,
+          "parameter_sha256": "b6b68035f9994d38ce9cf6df2d08ed89c056ee7b97500a04bc668379aaed1329",
+          "posthoc_only": {
+            "exact_infidelity": 0.0006816831973370796,
+            "exact_target_reached": true
+          },
+          "query_index": 33,
+          "sampled_infidelity": 0.00067138671875,
+          "shots": 32768,
+          "successes": 32746,
+          "upper_infidelity_99_5": 0.0011355476408633836
+        }
+      ],
+      "certified_cycle": null,
+      "epsilon": 0.05,
+      "exact_posthoc_success": true,
+      "false_early_stop": false,
+      "family": "control-map",
+      "full_cap_cost": {
+        "queries": 66,
+        "shots": 2099200
+      },
+      "missed_certificate": true,
+      "noise_seed": 14747668808049211714,
+      "online_certified_success": false,
+      "rejected_proposals_not_checked": 1,
+      "replicate": 1,
+      "selected_cell": "control-map:260607:0.05",
+      "selected_cell_index": 1,
+      "truth_seed": 260607,
+      "zero_steps_not_checked": 0
+    },
+    {
+      "actual_online_cost": {
+        "queries": 66,
+        "query_ratio_to_full_cap": 1.0,
+        "reason": "full cap after cycle-2 certificate",
+        "shot_ratio_to_full_cap": 1.0,
+        "shots": 2099200
+      },
+      "certificate_event_count": 2,
+      "certificate_events_checked": [
+        {
+          "certified": false,
+          "cycle": 1,
+          "failures": 19,
+          "parameter_sha256": "8d1a88c91ac708ef01ebf54cbc3a03e1f6a10879c342ed7e8077742c08accccc",
+          "posthoc_only": {
+            "exact_infidelity": 0.0006428001501190828,
+            "exact_target_reached": true
+          },
+          "query_index": 33,
+          "sampled_infidelity": 0.000579833984375,
+          "shots": 32768,
+          "successes": 32749,
+          "upper_infidelity_99_5": 0.001018544144196247
+        },
+        {
+          "certified": true,
+          "cycle": 2,
+          "failures": 3,
+          "parameter_sha256": "4400dfb1f95e5c1dd5dc2245508891f50c6bdea914e5f6dde62fbaf073c870ca",
+          "posthoc_only": {
+            "exact_infidelity": 0.00019965454506731817,
+            "exact_target_reached": true
+          },
+          "query_index": 65,
+          "sampled_infidelity": 9.1552734375e-05,
+          "shots": 32768,
+          "successes": 32765,
+          "upper_infidelity_99_5": 0.000334965250372746
+        }
+      ],
+      "certified_cycle": 2,
+      "epsilon": 0.05,
+      "exact_posthoc_success": true,
+      "false_early_stop": false,
+      "family": "control-map",
+      "full_cap_cost": {
+        "queries": 66,
+        "shots": 2099200
+      },
+      "missed_certificate": false,
+      "noise_seed": 11122832577446482526,
+      "online_certified_success": true,
+      "rejected_proposals_not_checked": 0,
+      "replicate": 2,
+      "selected_cell": "control-map:260607:0.05",
+      "selected_cell_index": 1,
+      "truth_seed": 260607,
+      "zero_steps_not_checked": 0
+    },
+    {
+      "actual_online_cost": {
+        "queries": 66,
+        "query_ratio_to_full_cap": 1.0,
+        "reason": "full cap after cycle-2 certificate",
+        "shot_ratio_to_full_cap": 1.0,
+        "shots": 2099200
+      },
+      "certificate_event_count": 2,
+      "certificate_events_checked": [
+        {
+          "certified": false,
+          "cycle": 1,
+          "failures": 23,
+          "parameter_sha256": "ab985327bbd41618072dc764770a137657902e7135410920ed30c651fda5ca86",
+          "posthoc_only": {
+            "exact_infidelity": 0.0009129230173514635,
+            "exact_target_reached": true
+          },
+          "query_index": 33,
+          "sampled_infidelity": 0.000701904296875,
+          "shots": 32768,
+          "successes": 32745,
+          "upper_infidelity_99_5": 0.0011741726975211528
+        },
+        {
+          "certified": true,
+          "cycle": 2,
+          "failures": 11,
+          "parameter_sha256": "998fc454ff828e46df62301507a6f3677606d89a8968a1ac485d54ccdbc89e45",
+          "posthoc_only": {
+            "exact_infidelity": 0.0002822005351107437,
+            "exact_target_reached": true
+          },
+          "query_index": 65,
+          "sampled_infidelity": 0.000335693359375,
+          "shots": 32768,
+          "successes": 32757,
+          "upper_infidelity_99_5": 0.0006950427812317433
+        }
+      ],
+      "certified_cycle": 2,
+      "epsilon": 0.05,
+      "exact_posthoc_success": true,
+      "false_early_stop": false,
+      "family": "control-map",
+      "full_cap_cost": {
+        "queries": 66,
+        "shots": 2099200
+      },
+      "missed_certificate": false,
+      "noise_seed": 380880772470883382,
+      "online_certified_success": true,
+      "rejected_proposals_not_checked": 0,
+      "replicate": 3,
+      "selected_cell": "control-map:260607:0.05",
+      "selected_cell_index": 1,
+      "truth_seed": 260607,
+      "zero_steps_not_checked": 0
+    },
+    {
+      "actual_online_cost": {
+        "queries": 66,
+        "query_ratio_to_full_cap": 1.0,
+        "reason": "full cap after cycle-2 certificate",
+        "shot_ratio_to_full_cap": 1.0,
+        "shots": 2099200
+      },
+      "certificate_event_count": 2,
+      "certificate_events_checked": [
+        {
+          "certified": false,
+          "cycle": 1,
+          "failures": 44,
+          "parameter_sha256": "e7dbf4f0c2aa1ff54bb91eba23f7c77667be4f8e734a25f157505db2bda99f40",
+          "posthoc_only": {
+            "exact_infidelity": 0.0011413806769906554,
+            "exact_target_reached": false
+          },
+          "query_index": 33,
+          "sampled_infidelity": 0.0013427734375,
+          "shots": 32768,
+          "successes": 32724,
+          "upper_infidelity_99_5": 0.001957084541760076
+        },
+        {
+          "certified": true,
+          "cycle": 2,
+          "failures": 9,
+          "parameter_sha256": "cc430014baef9cb54f28697f5fb6ccf20016d75abb3841371ce78a1c36ff79ad",
+          "posthoc_only": {
+            "exact_infidelity": 0.0003290694774896741,
+            "exact_target_reached": true
+          },
+          "query_index": 65,
+          "sampled_infidelity": 0.000274658203125,
+          "shots": 32768,
+          "successes": 32759,
+          "upper_infidelity_99_5": 0.000610201023184829
+        }
+      ],
+      "certified_cycle": 2,
+      "epsilon": 0.05,
+      "exact_posthoc_success": true,
+      "false_early_stop": false,
+      "family": "control-map",
+      "full_cap_cost": {
+        "queries": 66,
+        "shots": 2099200
+      },
+      "missed_certificate": false,
+      "noise_seed": 6669086889650089793,
+      "online_certified_success": true,
+      "rejected_proposals_not_checked": 0,
+      "replicate": 0,
+      "selected_cell": "control-map:260608:0.05",
+      "selected_cell_index": 2,
+      "truth_seed": 260608,
+      "zero_steps_not_checked": 0
+    },
+    {
+      "actual_online_cost": {
+        "queries": 66,
+        "query_ratio_to_full_cap": 1.0,
+        "reason": "full cap after cycle-2 certificate",
+        "shot_ratio_to_full_cap": 1.0,
+        "shots": 2099200
+      },
+      "certificate_event_count": 2,
+      "certificate_events_checked": [
+        {
+          "certified": false,
+          "cycle": 1,
+          "failures": 20,
+          "parameter_sha256": "ec397f90b854b46538b3981499017a1ca77c6b7d67b27af225d90476f0b36aac",
+          "posthoc_only": {
+            "exact_infidelity": 0.00040784933608251084,
+            "exact_target_reached": true
+          },
+          "query_index": 33,
+          "sampled_infidelity": 0.0006103515625,
+          "shots": 32768,
+          "successes": 32748,
+          "upper_infidelity_99_5": 0.0010577465669746092
+        },
+        {
+          "certified": true,
+          "cycle": 2,
+          "failures": 3,
+          "parameter_sha256": "74186289dc179878a07c4edfb2fc1460eeec109c97e1cf1cb307580faed64343",
+          "posthoc_only": {
+            "exact_infidelity": 0.00011281645844163357,
+            "exact_target_reached": true
+          },
+          "query_index": 65,
+          "sampled_infidelity": 9.1552734375e-05,
+          "shots": 32768,
+          "successes": 32765,
+          "upper_infidelity_99_5": 0.000334965250372746
+        }
+      ],
+      "certified_cycle": 2,
+      "epsilon": 0.05,
+      "exact_posthoc_success": true,
+      "false_early_stop": false,
+      "family": "control-map",
+      "full_cap_cost": {
+        "queries": 66,
+        "shots": 2099200
+      },
+      "missed_certificate": false,
+      "noise_seed": 16466071637077445268,
+      "online_certified_success": true,
+      "rejected_proposals_not_checked": 0,
+      "replicate": 1,
+      "selected_cell": "control-map:260608:0.05",
+      "selected_cell_index": 2,
+      "truth_seed": 260608,
+      "zero_steps_not_checked": 0
+    },
+    {
+      "actual_online_cost": {
+        "queries": 33,
+        "query_ratio_to_full_cap": 0.5,
+        "reason": "cycle-1 certificate",
+        "shot_ratio_to_full_cap": 0.5,
+        "shots": 1049600
+      },
+      "certificate_event_count": 1,
+      "certificate_events_checked": [
+        {
+          "certified": true,
+          "cycle": 1,
+          "failures": 15,
+          "parameter_sha256": "162bbfe24aa012c5f14203e629d2e642d63b903590ed7bdd6f588f81ef6b496c",
+          "posthoc_only": {
+            "exact_infidelity": 0.0005248525533859683,
+            "exact_target_reached": true
+          },
+          "query_index": 33,
+          "sampled_infidelity": 0.000457763671875,
+          "shots": 32768,
+          "successes": 32753,
+          "upper_infidelity_99_5": 0.0008593261833731436
+        }
+      ],
+      "certified_cycle": 1,
+      "epsilon": 0.05,
+      "exact_posthoc_success": true,
+      "false_early_stop": false,
+      "family": "control-map",
+      "full_cap_cost": {
+        "queries": 66,
+        "shots": 2099200
+      },
+      "missed_certificate": false,
+      "noise_seed": 10924822024215993487,
+      "online_certified_success": true,
+      "rejected_proposals_not_checked": 0,
+      "replicate": 2,
+      "selected_cell": "control-map:260608:0.05",
+      "selected_cell_index": 2,
+      "truth_seed": 260608,
+      "zero_steps_not_checked": 0
+    },
+    {
+      "actual_online_cost": {
+        "queries": 66,
+        "query_ratio_to_full_cap": 1.0,
+        "reason": "full cap after cycle-2 certificate",
+        "shot_ratio_to_full_cap": 1.0,
+        "shots": 2099200
+      },
+      "certificate_event_count": 2,
+      "certificate_events_checked": [
+        {
+          "certified": false,
+          "cycle": 1,
+          "failures": 31,
+          "parameter_sha256": "c46f0acea8003037ad223c7a197fbb71b85e8e8ee3621ac8b4ec694ab58dc6b2",
+          "posthoc_only": {
+            "exact_infidelity": 0.0007010872486570285,
+            "exact_target_reached": true
+          },
+          "query_index": 33,
+          "sampled_infidelity": 0.000946044921875,
+          "shots": 32768,
+          "successes": 32737,
+          "upper_infidelity_99_5": 0.0014778493200544739
+        },
+        {
+          "certified": true,
+          "cycle": 2,
+          "failures": 3,
+          "parameter_sha256": "f3a9d9d40171ccea14076b7fc9efee4092100494bdc1ac488fa89bce20b7527e",
+          "posthoc_only": {
+            "exact_infidelity": 0.00010238156690145495,
+            "exact_target_reached": true
+          },
+          "query_index": 65,
+          "sampled_infidelity": 9.1552734375e-05,
+          "shots": 32768,
+          "successes": 32765,
+          "upper_infidelity_99_5": 0.000334965250372746
+        }
+      ],
+      "certified_cycle": 2,
+      "epsilon": 0.05,
+      "exact_posthoc_success": true,
+      "false_early_stop": false,
+      "family": "control-map",
+      "full_cap_cost": {
+        "queries": 66,
+        "shots": 2099200
+      },
+      "missed_certificate": false,
+      "noise_seed": 14307366738889821616,
+      "online_certified_success": true,
+      "rejected_proposals_not_checked": 0,
+      "replicate": 3,
+      "selected_cell": "control-map:260608:0.05",
+      "selected_cell_index": 2,
+      "truth_seed": 260608,
+      "zero_steps_not_checked": 0
+    },
+    {
+      "actual_online_cost": {
+        "queries": 66,
+        "query_ratio_to_full_cap": 1.0,
+        "reason": "full cap after cycle-2 certificate",
+        "shot_ratio_to_full_cap": 1.0,
+        "shots": 2099200
+      },
+      "certificate_event_count": 2,
+      "certificate_events_checked": [
+        {
+          "certified": false,
+          "cycle": 1,
+          "failures": 51,
+          "parameter_sha256": "571f1128ec820997f7d73bad1679200e98e327104c7c37e8316849bdc7950cf7",
+          "posthoc_only": {
+            "exact_infidelity": 0.0012309413283219106,
+            "exact_target_reached": false
+          },
+          "query_index": 33,
+          "sampled_infidelity": 0.001556396484375,
+          "shots": 32768,
+          "successes": 32717,
+          "upper_infidelity_99_5": 0.002210142508941486
+        },
+        {
+          "certified": true,
+          "cycle": 2,
+          "failures": 15,
+          "parameter_sha256": "2f8be8e3acd935ce5bfc51e4c2b6a95eeb7b08f5779194dc1a06698c37331c58",
+          "posthoc_only": {
+            "exact_infidelity": 0.0003952027918252554,
+            "exact_target_reached": true
+          },
+          "query_index": 65,
+          "sampled_infidelity": 0.000457763671875,
+          "shots": 32768,
+          "successes": 32753,
+          "upper_infidelity_99_5": 0.0008593261833731436
+        }
+      ],
+      "certified_cycle": 2,
+      "epsilon": 0.05,
+      "exact_posthoc_success": true,
+      "false_early_stop": false,
+      "family": "control-map",
+      "full_cap_cost": {
+        "queries": 66,
+        "shots": 2099200
+      },
+      "missed_certificate": false,
+      "noise_seed": 12636444890328392300,
+      "online_certified_success": true,
+      "rejected_proposals_not_checked": 0,
+      "replicate": 0,
+      "selected_cell": "control-map:260609:0.05",
+      "selected_cell_index": 3,
+      "truth_seed": 260609,
+      "zero_steps_not_checked": 0
+    },
+    {
+      "actual_online_cost": {
+        "queries": 66,
+        "query_ratio_to_full_cap": 1.0,
+        "reason": "full cap after cycle-2 certificate",
+        "shot_ratio_to_full_cap": 1.0,
+        "shots": 2099200
+      },
+      "certificate_event_count": 2,
+      "certificate_events_checked": [
+        {
+          "certified": false,
+          "cycle": 1,
+          "failures": 31,
+          "parameter_sha256": "de368ad039e74f3c34554748d582f6397cc92a72839fce3a06dbbb0545fc601f",
+          "posthoc_only": {
+            "exact_infidelity": 0.001010622622350743,
+            "exact_target_reached": false
+          },
+          "query_index": 33,
+          "sampled_infidelity": 0.000946044921875,
+          "shots": 32768,
+          "successes": 32737,
+          "upper_infidelity_99_5": 0.0014778493200544739
+        },
+        {
+          "certified": true,
+          "cycle": 2,
+          "failures": 9,
+          "parameter_sha256": "c0ea69f461b3074e8356b2a1555ba76abab9381d3a83f11daa749d675c0ad92a",
+          "posthoc_only": {
+            "exact_infidelity": 0.00022708022432060826,
+            "exact_target_reached": true
+          },
+          "query_index": 65,
+          "sampled_infidelity": 0.000274658203125,
+          "shots": 32768,
+          "successes": 32759,
+          "upper_infidelity_99_5": 0.000610201023184829
+        }
+      ],
+      "certified_cycle": 2,
+      "epsilon": 0.05,
+      "exact_posthoc_success": true,
+      "false_early_stop": false,
+      "family": "control-map",
+      "full_cap_cost": {
+        "queries": 66,
+        "shots": 2099200
+      },
+      "missed_certificate": false,
+      "noise_seed": 14635074811590653400,
+      "online_certified_success": true,
+      "rejected_proposals_not_checked": 0,
+      "replicate": 1,
+      "selected_cell": "control-map:260609:0.05",
+      "selected_cell_index": 3,
+      "truth_seed": 260609,
+      "zero_steps_not_checked": 0
+    },
+    {
+      "actual_online_cost": {
+        "queries": 66,
+        "query_ratio_to_full_cap": 1.0,
+        "reason": "full cap after cycle-2 certificate",
+        "shot_ratio_to_full_cap": 1.0,
+        "shots": 2099200
+      },
+      "certificate_event_count": 2,
+      "certificate_events_checked": [
+        {
+          "certified": false,
+          "cycle": 1,
+          "failures": 19,
+          "parameter_sha256": "5313e5bc1a4a5e95fb50cc9838472195740361a367c0ac494de6e07096498ad3",
+          "posthoc_only": {
+            "exact_infidelity": 0.000621400673526451,
+            "exact_target_reached": true
+          },
+          "query_index": 33,
+          "sampled_infidelity": 0.000579833984375,
+          "shots": 32768,
+          "successes": 32749,
+          "upper_infidelity_99_5": 0.001018544144196247
+        },
+        {
+          "certified": true,
+          "cycle": 2,
+          "failures": 3,
+          "parameter_sha256": "9e1db02c80efc991546b6bd0c3e2a8757e5d616c33a2e8714feb9a8fb05dcd2a",
+          "posthoc_only": {
+            "exact_infidelity": 0.00020037662232963438,
+            "exact_target_reached": true
+          },
+          "query_index": 65,
+          "sampled_infidelity": 9.1552734375e-05,
+          "shots": 32768,
+          "successes": 32765,
+          "upper_infidelity_99_5": 0.000334965250372746
+        }
+      ],
+      "certified_cycle": 2,
+      "epsilon": 0.05,
+      "exact_posthoc_success": true,
+      "false_early_stop": false,
+      "family": "control-map",
+      "full_cap_cost": {
+        "queries": 66,
+        "shots": 2099200
+      },
+      "missed_certificate": false,
+      "noise_seed": 3869996826379891594,
+      "online_certified_success": true,
+      "rejected_proposals_not_checked": 0,
+      "replicate": 2,
+      "selected_cell": "control-map:260609:0.05",
+      "selected_cell_index": 3,
+      "truth_seed": 260609,
+      "zero_steps_not_checked": 0
+    },
+    {
+      "actual_online_cost": {
+        "queries": 66,
+        "query_ratio_to_full_cap": 1.0,
+        "reason": "full cap without certificate",
+        "shot_ratio_to_full_cap": 1.0,
+        "shots": 2099200
+      },
+      "certificate_event_count": 1,
+      "certificate_events_checked": [
+        {
+          "certified": false,
+          "cycle": 1,
+          "failures": 25,
+          "parameter_sha256": "7526b9034078ee5fdc63904af50283eac26a50f5e4cd6c8c163ea922fbdd8e45",
+          "posthoc_only": {
+            "exact_infidelity": 0.0007465331034919309,
+            "exact_target_reached": true
+          },
+          "query_index": 33,
+          "sampled_infidelity": 0.000762939453125,
+          "shots": 32768,
+          "successes": 32743,
+          "upper_infidelity_99_5": 0.0012509278114604264
+        }
+      ],
+      "certified_cycle": null,
+      "epsilon": 0.05,
+      "exact_posthoc_success": true,
+      "false_early_stop": false,
+      "family": "control-map",
+      "full_cap_cost": {
+        "queries": 66,
+        "shots": 2099200
+      },
+      "missed_certificate": true,
+      "noise_seed": 17458042710604902338,
+      "online_certified_success": false,
+      "rejected_proposals_not_checked": 1,
+      "replicate": 3,
+      "selected_cell": "control-map:260609:0.05",
+      "selected_cell_index": 3,
+      "truth_seed": 260609,
+      "zero_steps_not_checked": 0
+    },
+    {
+      "actual_online_cost": {
+        "queries": 66,
+        "query_ratio_to_full_cap": 1.0,
+        "reason": "full cap after cycle-2 certificate",
+        "shot_ratio_to_full_cap": 1.0,
+        "shots": 2099200
+      },
+      "certificate_event_count": 2,
+      "certificate_events_checked": [
+        {
+          "certified": false,
+          "cycle": 1,
+          "failures": 40,
+          "parameter_sha256": "27aec956af23b211ee9a3a15589c58553131f585d7176267b522702c398205f7",
+          "posthoc_only": {
+            "exact_infidelity": 0.0010306631058871751,
+            "exact_target_reached": false
+          },
+          "query_index": 33,
+          "sampled_infidelity": 0.001220703125,
+          "shots": 32768,
+          "successes": 32728,
+          "upper_infidelity_99_5": 0.0018110817340195756
+        },
+        {
+          "certified": true,
+          "cycle": 2,
+          "failures": 5,
+          "parameter_sha256": "67fb9ba2f6050d46c2c62887e30177dc1956eb084ae0d785bd74a5c6b6ec357f",
+          "posthoc_only": {
+            "exact_infidelity": 0.00020049316386305804,
+            "exact_target_reached": true
+          },
+          "query_index": 65,
+          "sampled_infidelity": 0.000152587890625,
+          "shots": 32768,
+          "successes": 32763,
+          "upper_infidelity_99_5": 0.00043175610403415715
+        }
+      ],
+      "certified_cycle": 2,
+      "epsilon": 0.05,
+      "exact_posthoc_success": true,
+      "false_early_stop": false,
+      "family": "control-map",
+      "full_cap_cost": {
+        "queries": 66,
+        "shots": 2099200
+      },
+      "missed_certificate": false,
+      "noise_seed": 1214887166709983593,
+      "online_certified_success": true,
+      "rejected_proposals_not_checked": 0,
+      "replicate": 0,
+      "selected_cell": "control-map:260610:0.05",
+      "selected_cell_index": 4,
+      "truth_seed": 260610,
+      "zero_steps_not_checked": 0
+    },
+    {
+      "actual_online_cost": {
+        "queries": 33,
+        "query_ratio_to_full_cap": 0.5,
+        "reason": "cycle-1 certificate",
+        "shot_ratio_to_full_cap": 0.5,
+        "shots": 1049600
+      },
+      "certificate_event_count": 1,
+      "certificate_events_checked": [
+        {
+          "certified": true,
+          "cycle": 1,
+          "failures": 15,
+          "parameter_sha256": "5eda716a60727409d11088e294a724497e64fcea5c023a711ecf812e9dab1746",
+          "posthoc_only": {
+            "exact_infidelity": 0.00046593399488381593,
+            "exact_target_reached": true
+          },
+          "query_index": 33,
+          "sampled_infidelity": 0.000457763671875,
+          "shots": 32768,
+          "successes": 32753,
+          "upper_infidelity_99_5": 0.0008593261833731436
+        }
+      ],
+      "certified_cycle": 1,
+      "epsilon": 0.05,
+      "exact_posthoc_success": true,
+      "false_early_stop": false,
+      "family": "control-map",
+      "full_cap_cost": {
+        "queries": 66,
+        "shots": 2099200
+      },
+      "missed_certificate": false,
+      "noise_seed": 9911454016526310646,
+      "online_certified_success": true,
+      "rejected_proposals_not_checked": 0,
+      "replicate": 1,
+      "selected_cell": "control-map:260610:0.05",
+      "selected_cell_index": 4,
+      "truth_seed": 260610,
+      "zero_steps_not_checked": 0
+    },
+    {
+      "actual_online_cost": {
+        "queries": 66,
+        "query_ratio_to_full_cap": 1.0,
+        "reason": "full cap without certificate",
+        "shot_ratio_to_full_cap": 1.0,
+        "shots": 2099200
+      },
+      "certificate_event_count": 1,
+      "certificate_events_checked": [
+        {
+          "certified": false,
+          "cycle": 1,
+          "failures": 19,
+          "parameter_sha256": "bc20382d98a6e9e4c5ae0e13ca09936c28f42a20e7dee8caf2cd18a3f9a16085",
+          "posthoc_only": {
+            "exact_infidelity": 0.0005052759514206917,
+            "exact_target_reached": true
+          },
+          "query_index": 33,
+          "sampled_infidelity": 0.000579833984375,
+          "shots": 32768,
+          "successes": 32749,
+          "upper_infidelity_99_5": 0.001018544144196247
+        }
+      ],
+      "certified_cycle": null,
+      "epsilon": 0.05,
+      "exact_posthoc_success": true,
+      "false_early_stop": false,
+      "family": "control-map",
+      "full_cap_cost": {
+        "queries": 66,
+        "shots": 2099200
+      },
+      "missed_certificate": true,
+      "noise_seed": 1106469023395457267,
+      "online_certified_success": false,
+      "rejected_proposals_not_checked": 1,
+      "replicate": 2,
+      "selected_cell": "control-map:260610:0.05",
+      "selected_cell_index": 4,
+      "truth_seed": 260610,
+      "zero_steps_not_checked": 0
+    },
+    {
+      "actual_online_cost": {
+        "queries": 66,
+        "query_ratio_to_full_cap": 1.0,
+        "reason": "full cap after cycle-2 certificate",
+        "shot_ratio_to_full_cap": 1.0,
+        "shots": 2099200
+      },
+      "certificate_event_count": 2,
+      "certificate_events_checked": [
+        {
+          "certified": false,
+          "cycle": 1,
+          "failures": 64,
+          "parameter_sha256": "b8731b912455694f145cb85b5621ac79643220d630c30db0cfea039fb581b882",
+          "posthoc_only": {
+            "exact_infidelity": 0.0017777118978381523,
+            "exact_target_reached": false
+          },
+          "query_index": 33,
+          "sampled_infidelity": 0.001953125,
+          "shots": 32768,
+          "successes": 32704,
+          "upper_infidelity_99_5": 0.0026735702321341835
+        },
+        {
+          "certified": true,
+          "cycle": 2,
+          "failures": 15,
+          "parameter_sha256": "165701514ca21f54224506401da4aec1df59edcdc2d5d583669e8d8719af252e",
+          "posthoc_only": {
+            "exact_infidelity": 0.0004855736089511842,
+            "exact_target_reached": true
+          },
+          "query_index": 65,
+          "sampled_infidelity": 0.000457763671875,
+          "shots": 32768,
+          "successes": 32753,
+          "upper_infidelity_99_5": 0.0008593261833731436
+        }
+      ],
+      "certified_cycle": 2,
+      "epsilon": 0.05,
+      "exact_posthoc_success": true,
+      "false_early_stop": false,
+      "family": "control-map",
+      "full_cap_cost": {
+        "queries": 66,
+        "shots": 2099200
+      },
+      "missed_certificate": false,
+      "noise_seed": 5632732964677106889,
+      "online_certified_success": true,
+      "rejected_proposals_not_checked": 0,
+      "replicate": 3,
+      "selected_cell": "control-map:260610:0.05",
+      "selected_cell_index": 4,
+      "truth_seed": 260610,
+      "zero_steps_not_checked": 0
+    },
+    {
+      "actual_online_cost": {
+        "queries": 66,
+        "query_ratio_to_full_cap": 1.0,
+        "reason": "full cap after cycle-2 certificate",
+        "shot_ratio_to_full_cap": 1.0,
+        "shots": 2099200
+      },
+      "certificate_event_count": 2,
+      "certificate_events_checked": [
+        {
+          "certified": false,
+          "cycle": 1,
+          "failures": 19,
+          "parameter_sha256": "9ecbf9546de20be57cf35e36a9235a0dc20f381f7a6d18650dca632098f690e8",
+          "posthoc_only": {
+            "exact_infidelity": 0.0008092345335621864,
+            "exact_target_reached": true
+          },
+          "query_index": 33,
+          "sampled_infidelity": 0.000579833984375,
+          "shots": 32768,
+          "successes": 32749,
+          "upper_infidelity_99_5": 0.001018544144196247
+        },
+        {
+          "certified": true,
+          "cycle": 2,
+          "failures": 6,
+          "parameter_sha256": "aa72241122071d4c4dd705bde83901bc14e263c114727657f0525dd60175dab8",
+          "posthoc_only": {
+            "exact_infidelity": 0.00021088485418652159,
+            "exact_target_reached": true
+          },
+          "query_index": 65,
+          "sampled_infidelity": 0.00018310546875,
+          "shots": 32768,
+          "successes": 32762,
+          "upper_infidelity_99_5": 0.0004778249140287984
+        }
+      ],
+      "certified_cycle": 2,
+      "epsilon": 0.05,
+      "exact_posthoc_success": true,
+      "false_early_stop": false,
+      "family": "control-map",
+      "full_cap_cost": {
+        "queries": 66,
+        "shots": 2099200
+      },
+      "missed_certificate": false,
+      "noise_seed": 1728723874860896130,
+      "online_certified_success": true,
+      "rejected_proposals_not_checked": 0,
+      "replicate": 0,
+      "selected_cell": "control-map:260611:0.05",
+      "selected_cell_index": 5,
+      "truth_seed": 260611,
+      "zero_steps_not_checked": 0
+    },
+    {
+      "actual_online_cost": {
+        "queries": 66,
+        "query_ratio_to_full_cap": 1.0,
+        "reason": "full cap after cycle-2 certificate",
+        "shot_ratio_to_full_cap": 1.0,
+        "shots": 2099200
+      },
+      "certificate_event_count": 2,
+      "certificate_events_checked": [
+        {
+          "certified": false,
+          "cycle": 1,
+          "failures": 27,
+          "parameter_sha256": "960d8078bde20df84d25e2ca3abb5c8652ab61d6573c19117c738b987565865a",
+          "posthoc_only": {
+            "exact_infidelity": 0.0006867458139732108,
+            "exact_target_reached": true
+          },
+          "query_index": 33,
+          "sampled_infidelity": 0.000823974609375,
+          "shots": 32768,
+          "successes": 32741,
+          "upper_infidelity_99_5": 0.0013270852086123524
+        },
+        {
+          "certified": true,
+          "cycle": 2,
+          "failures": 5,
+          "parameter_sha256": "dfc3e2d0cd0d00b3b00198ad6badd627c05bcf4ef95ca22fa36fc3b0c21a1c4d",
+          "posthoc_only": {
+            "exact_infidelity": 0.00018254985161192394,
+            "exact_target_reached": true
+          },
+          "query_index": 65,
+          "sampled_infidelity": 0.000152587890625,
+          "shots": 32768,
+          "successes": 32763,
+          "upper_infidelity_99_5": 0.00043175610403415715
+        }
+      ],
+      "certified_cycle": 2,
+      "epsilon": 0.05,
+      "exact_posthoc_success": true,
+      "false_early_stop": false,
+      "family": "control-map",
+      "full_cap_cost": {
+        "queries": 66,
+        "shots": 2099200
+      },
+      "missed_certificate": false,
+      "noise_seed": 1491173355360328121,
+      "online_certified_success": true,
+      "rejected_proposals_not_checked": 0,
+      "replicate": 1,
+      "selected_cell": "control-map:260611:0.05",
+      "selected_cell_index": 5,
+      "truth_seed": 260611,
+      "zero_steps_not_checked": 0
+    },
+    {
+      "actual_online_cost": {
+        "queries": 66,
+        "query_ratio_to_full_cap": 1.0,
+        "reason": "full cap without certificate",
+        "shot_ratio_to_full_cap": 1.0,
+        "shots": 2099200
+      },
+      "certificate_event_count": 1,
+      "certificate_events_checked": [
+        {
+          "certified": false,
+          "cycle": 1,
+          "failures": 21,
+          "parameter_sha256": "d126bd7242dddb316c46400a3a16597b28dca10746c8d10db685459f9d0dc52b",
+          "posthoc_only": {
+            "exact_infidelity": 0.0006636367890864303,
+            "exact_target_reached": true
+          },
+          "query_index": 33,
+          "sampled_infidelity": 0.000640869140625,
+          "shots": 32768,
+          "successes": 32747,
+          "upper_infidelity_99_5": 0.0010967430798117588
+        }
+      ],
+      "certified_cycle": null,
+      "epsilon": 0.05,
+      "exact_posthoc_success": true,
+      "false_early_stop": false,
+      "family": "control-map",
+      "full_cap_cost": {
+        "queries": 66,
+        "shots": 2099200
+      },
+      "missed_certificate": true,
+      "noise_seed": 10999234781162480552,
+      "online_certified_success": false,
+      "rejected_proposals_not_checked": 1,
+      "replicate": 2,
+      "selected_cell": "control-map:260611:0.05",
+      "selected_cell_index": 5,
+      "truth_seed": 260611,
+      "zero_steps_not_checked": 0
+    },
+    {
+      "actual_online_cost": {
+        "queries": 66,
+        "query_ratio_to_full_cap": 1.0,
+        "reason": "full cap after cycle-2 certificate",
+        "shot_ratio_to_full_cap": 1.0,
+        "shots": 2099200
+      },
+      "certificate_event_count": 2,
+      "certificate_events_checked": [
+        {
+          "certified": false,
+          "cycle": 1,
+          "failures": 49,
+          "parameter_sha256": "0efb7736118c9649352556dd43a71d2f11f1d1f86a116ffdb164b9886fa87ede",
+          "posthoc_only": {
+            "exact_infidelity": 0.0016622832177674018,
+            "exact_target_reached": false
+          },
+          "query_index": 33,
+          "sampled_infidelity": 0.001495361328125,
+          "shots": 32768,
+          "successes": 32719,
+          "upper_infidelity_99_5": 0.0021381284542632177
+        },
+        {
+          "certified": true,
+          "cycle": 2,
+          "failures": 14,
+          "parameter_sha256": "3fd3190fdb72b0175d1e71642f61754e954fe683eb0d26271b92193562361197",
+          "posthoc_only": {
+            "exact_infidelity": 0.0003689573059442175,
+            "exact_target_reached": true
+          },
+          "query_index": 65,
+          "sampled_infidelity": 0.00042724609375,
+          "shots": 32768,
+          "successes": 32754,
+          "upper_infidelity_99_5": 0.0008188087458175965
+        }
+      ],
+      "certified_cycle": 2,
+      "epsilon": 0.05,
+      "exact_posthoc_success": true,
+      "false_early_stop": false,
+      "family": "control-map",
+      "full_cap_cost": {
+        "queries": 66,
+        "shots": 2099200
+      },
+      "missed_certificate": false,
+      "noise_seed": 8293781257236138957,
+      "online_certified_success": true,
+      "rejected_proposals_not_checked": 0,
+      "replicate": 3,
+      "selected_cell": "control-map:260611:0.05",
+      "selected_cell_index": 5,
+      "truth_seed": 260611,
+      "zero_steps_not_checked": 0
+    },
+    {
+      "actual_online_cost": {
+        "queries": 66,
+        "query_ratio_to_full_cap": 1.0,
+        "reason": "full cap after cycle-2 certificate",
+        "shot_ratio_to_full_cap": 1.0,
+        "shots": 2099200
+      },
+      "certificate_event_count": 2,
+      "certificate_events_checked": [
+        {
+          "certified": false,
+          "cycle": 1,
+          "failures": 23,
+          "parameter_sha256": "3aaff84795bafd923a7414ff3a47a9273e6c915315d3789eee745e694b6108f5",
+          "posthoc_only": {
+            "exact_infidelity": 0.000883599138440494,
+            "exact_target_reached": true
+          },
+          "query_index": 33,
+          "sampled_infidelity": 0.000701904296875,
+          "shots": 32768,
+          "successes": 32745,
+          "upper_infidelity_99_5": 0.0011741726975211528
+        },
+        {
+          "certified": true,
+          "cycle": 2,
+          "failures": 10,
+          "parameter_sha256": "f8e51357a2a70c7bd69e7d28151083621d85b19d6256842dd11cdbe9dd323b88",
+          "posthoc_only": {
+            "exact_infidelity": 0.00017096668407101667,
+            "exact_target_reached": true
+          },
+          "query_index": 65,
+          "sampled_infidelity": 0.00030517578125,
+          "shots": 32768,
+          "successes": 32758,
+          "upper_infidelity_99_5": 0.0006528963078875846
+        }
+      ],
+      "certified_cycle": 2,
+      "epsilon": 0.05,
+      "exact_posthoc_success": true,
+      "false_early_stop": false,
+      "family": "control-map",
+      "full_cap_cost": {
+        "queries": 66,
+        "shots": 2099200
+      },
+      "missed_certificate": false,
+      "noise_seed": 9818129317603671641,
+      "online_certified_success": true,
+      "rejected_proposals_not_checked": 0,
+      "replicate": 0,
+      "selected_cell": "control-map:260612:0.05",
+      "selected_cell_index": 6,
+      "truth_seed": 260612,
+      "zero_steps_not_checked": 0
+    },
+    {
+      "actual_online_cost": {
+        "queries": 66,
+        "query_ratio_to_full_cap": 1.0,
+        "reason": "full cap without certificate",
+        "shot_ratio_to_full_cap": 1.0,
+        "shots": 2099200
+      },
+      "certificate_event_count": 1,
+      "certificate_events_checked": [
+        {
+          "certified": false,
+          "cycle": 1,
+          "failures": 19,
+          "parameter_sha256": "e04c1a73d2c8a5cfa1ac72451020cbed33ba72f62fda2f93d616e84676aedf0f",
+          "posthoc_only": {
+            "exact_infidelity": 0.000651976975053592,
+            "exact_target_reached": true
+          },
+          "query_index": 33,
+          "sampled_infidelity": 0.000579833984375,
+          "shots": 32768,
+          "successes": 32749,
+          "upper_infidelity_99_5": 0.001018544144196247
+        }
+      ],
+      "certified_cycle": null,
+      "epsilon": 0.05,
+      "exact_posthoc_success": true,
+      "false_early_stop": false,
+      "family": "control-map",
+      "full_cap_cost": {
+        "queries": 66,
+        "shots": 2099200
+      },
+      "missed_certificate": true,
+      "noise_seed": 18352850569104016174,
+      "online_certified_success": false,
+      "rejected_proposals_not_checked": 1,
+      "replicate": 1,
+      "selected_cell": "control-map:260612:0.05",
+      "selected_cell_index": 6,
+      "truth_seed": 260612,
+      "zero_steps_not_checked": 0
+    },
+    {
+      "actual_online_cost": {
+        "queries": 66,
+        "query_ratio_to_full_cap": 1.0,
+        "reason": "full cap without certificate",
+        "shot_ratio_to_full_cap": 1.0,
+        "shots": 2099200
+      },
+      "certificate_event_count": 1,
+      "certificate_events_checked": [
+        {
+          "certified": false,
+          "cycle": 1,
+          "failures": 30,
+          "parameter_sha256": "b23baf720c93ad3f01c2b8f6eb7bde0483493aa4d29eb79315216b08f00fb069",
+          "posthoc_only": {
+            "exact_infidelity": 0.0008943877135970668,
+            "exact_target_reached": true
+          },
+          "query_index": 33,
+          "sampled_infidelity": 0.00091552734375,
+          "shots": 32768,
+          "successes": 32738,
+          "upper_infidelity_99_5": 0.0014403359696843635
+        }
+      ],
+      "certified_cycle": null,
+      "epsilon": 0.05,
+      "exact_posthoc_success": true,
+      "false_early_stop": false,
+      "family": "control-map",
+      "full_cap_cost": {
+        "queries": 66,
+        "shots": 2099200
+      },
+      "missed_certificate": true,
+      "noise_seed": 485697406381818061,
+      "online_certified_success": false,
+      "rejected_proposals_not_checked": 1,
+      "replicate": 2,
+      "selected_cell": "control-map:260612:0.05",
+      "selected_cell_index": 6,
+      "truth_seed": 260612,
+      "zero_steps_not_checked": 0
+    },
+    {
+      "actual_online_cost": {
+        "queries": 66,
+        "query_ratio_to_full_cap": 1.0,
+        "reason": "full cap after cycle-2 certificate",
+        "shot_ratio_to_full_cap": 1.0,
+        "shots": 2099200
+      },
+      "certificate_event_count": 2,
+      "certificate_events_checked": [
+        {
+          "certified": false,
+          "cycle": 1,
+          "failures": 31,
+          "parameter_sha256": "f46b703241ffc841dc29b0502debf0b3c3206cbf2e9f90be5c2d9613bd9642cd",
+          "posthoc_only": {
+            "exact_infidelity": 0.0009595174086521885,
+            "exact_target_reached": true
+          },
+          "query_index": 33,
+          "sampled_infidelity": 0.000946044921875,
+          "shots": 32768,
+          "successes": 32737,
+          "upper_infidelity_99_5": 0.0014778493200544739
+        },
+        {
+          "certified": true,
+          "cycle": 2,
+          "failures": 6,
+          "parameter_sha256": "e8e30ffbfc416958b5e8d97341b05ac312ab48042719249f3d044b80f6ee9404",
+          "posthoc_only": {
+            "exact_infidelity": 0.00014324308533908425,
+            "exact_target_reached": true
+          },
+          "query_index": 65,
+          "sampled_infidelity": 0.00018310546875,
+          "shots": 32768,
+          "successes": 32762,
+          "upper_infidelity_99_5": 0.0004778249140287984
+        }
+      ],
+      "certified_cycle": 2,
+      "epsilon": 0.05,
+      "exact_posthoc_success": true,
+      "false_early_stop": false,
+      "family": "control-map",
+      "full_cap_cost": {
+        "queries": 66,
+        "shots": 2099200
+      },
+      "missed_certificate": false,
+      "noise_seed": 6216874717751984607,
+      "online_certified_success": true,
+      "rejected_proposals_not_checked": 0,
+      "replicate": 3,
+      "selected_cell": "control-map:260612:0.05",
+      "selected_cell_index": 6,
+      "truth_seed": 260612,
+      "zero_steps_not_checked": 0
+    },
+    {
+      "actual_online_cost": {
+        "queries": 66,
+        "query_ratio_to_full_cap": 1.0,
+        "reason": "full cap after cycle-2 certificate",
+        "shot_ratio_to_full_cap": 1.0,
+        "shots": 2099200
+      },
+      "certificate_event_count": 2,
+      "certificate_events_checked": [
+        {
+          "certified": false,
+          "cycle": 1,
+          "failures": 48,
+          "parameter_sha256": "5c8e787747a1ffb50680c02b6a5523f0908bcc3b9593f0291d4b42b5dde827f2",
+          "posthoc_only": {
+            "exact_infidelity": 0.0014831856534852639,
+            "exact_target_reached": false
+          },
+          "query_index": 33,
+          "sampled_infidelity": 0.00146484375,
+          "shots": 32768,
+          "successes": 32720,
+          "upper_infidelity_99_5": 0.00210203849361288
+        },
+        {
+          "certified": true,
+          "cycle": 2,
+          "failures": 9,
+          "parameter_sha256": "f148ab11c7e63aae46863c749234d9dc5322998793b35fe1e49a95d605369d96",
+          "posthoc_only": {
+            "exact_infidelity": 0.00026020116441782815,
+            "exact_target_reached": true
+          },
+          "query_index": 65,
+          "sampled_infidelity": 0.000274658203125,
+          "shots": 32768,
+          "successes": 32759,
+          "upper_infidelity_99_5": 0.000610201023184829
+        }
+      ],
+      "certified_cycle": 2,
+      "epsilon": 0.1,
+      "exact_posthoc_success": true,
+      "false_early_stop": false,
+      "family": "drift",
+      "full_cap_cost": {
+        "queries": 66,
+        "shots": 2099200
+      },
+      "missed_certificate": false,
+      "noise_seed": 8290904388999299866,
+      "online_certified_success": true,
+      "rejected_proposals_not_checked": 0,
+      "replicate": 0,
+      "selected_cell": "drift:260605:0.1",
+      "selected_cell_index": 7,
+      "truth_seed": 260605,
+      "zero_steps_not_checked": 0
+    },
+    {
+      "actual_online_cost": {
+        "queries": 66,
+        "query_ratio_to_full_cap": 1.0,
+        "reason": "full cap without certificate",
+        "shot_ratio_to_full_cap": 1.0,
+        "shots": 2099200
+      },
+      "certificate_event_count": 2,
+      "certificate_events_checked": [
+        {
+          "certified": false,
+          "cycle": 1,
+          "failures": 67,
+          "parameter_sha256": "d656ecf4c47d58aeac7026f4d449363594b88d2568f6a6bad0fa413df6d41c37",
+          "posthoc_only": {
+            "exact_infidelity": 0.0022663478651181457,
+            "exact_target_reached": false
+          },
+          "query_index": 33,
+          "sampled_infidelity": 0.002044677734375,
+          "shots": 32768,
+          "successes": 32701,
+          "upper_infidelity_99_5": 0.0027795307877562154
+        },
+        {
+          "certified": false,
+          "cycle": 2,
+          "failures": 31,
+          "parameter_sha256": "5fb8912922aff599aa0e5d32dc0abe791d58524e153b75f61810fefdaa6bc62e",
+          "posthoc_only": {
+            "exact_infidelity": 0.0011892013766631182,
+            "exact_target_reached": false
+          },
+          "query_index": 65,
+          "sampled_infidelity": 0.000946044921875,
+          "shots": 32768,
+          "successes": 32737,
+          "upper_infidelity_99_5": 0.0014778493200544739
+        }
+      ],
+      "certified_cycle": null,
+      "epsilon": 0.1,
+      "exact_posthoc_success": false,
+      "false_early_stop": false,
+      "family": "drift",
+      "full_cap_cost": {
+        "queries": 66,
+        "shots": 2099200
+      },
+      "missed_certificate": false,
+      "noise_seed": 5404033623652392343,
+      "online_certified_success": false,
+      "rejected_proposals_not_checked": 0,
+      "replicate": 1,
+      "selected_cell": "drift:260605:0.1",
+      "selected_cell_index": 7,
+      "truth_seed": 260605,
+      "zero_steps_not_checked": 0
+    },
+    {
+      "actual_online_cost": {
+        "queries": 66,
+        "query_ratio_to_full_cap": 1.0,
+        "reason": "full cap after cycle-2 certificate",
+        "shot_ratio_to_full_cap": 1.0,
+        "shots": 2099200
+      },
+      "certificate_event_count": 2,
+      "certificate_events_checked": [
+        {
+          "certified": false,
+          "cycle": 1,
+          "failures": 34,
+          "parameter_sha256": "c3893c6f3a1e43c10e5e4f5b32986ae5afb833286a86b17604dd8e92b08a4a1f",
+          "posthoc_only": {
+            "exact_infidelity": 0.0013939887389097239,
+            "exact_target_reached": false
+          },
+          "query_index": 33,
+          "sampled_infidelity": 0.00103759765625,
+          "shots": 32768,
+          "successes": 32734,
+          "upper_infidelity_99_5": 0.0015897537619852379
+        },
+        {
+          "certified": true,
+          "cycle": 2,
+          "failures": 16,
+          "parameter_sha256": "499d7a44802e835b65d50ab7df4a111cd12def4a328740d7e72517e7e73d5ed5",
+          "posthoc_only": {
+            "exact_infidelity": 0.00041230271353676073,
+            "exact_target_reached": true
+          },
+          "query_index": 65,
+          "sampled_infidelity": 0.00048828125,
+          "shots": 32768,
+          "successes": 32752,
+          "upper_infidelity_99_5": 0.000899533022541561
+        }
+      ],
+      "certified_cycle": 2,
+      "epsilon": 0.1,
+      "exact_posthoc_success": true,
+      "false_early_stop": false,
+      "family": "drift",
+      "full_cap_cost": {
+        "queries": 66,
+        "shots": 2099200
+      },
+      "missed_certificate": false,
+      "noise_seed": 1766728268102204096,
+      "online_certified_success": true,
+      "rejected_proposals_not_checked": 0,
+      "replicate": 2,
+      "selected_cell": "drift:260605:0.1",
+      "selected_cell_index": 7,
+      "truth_seed": 260605,
+      "zero_steps_not_checked": 0
+    },
+    {
+      "actual_online_cost": {
+        "queries": 66,
+        "query_ratio_to_full_cap": 1.0,
+        "reason": "full cap after cycle-2 certificate",
+        "shot_ratio_to_full_cap": 1.0,
+        "shots": 2099200
+      },
+      "certificate_event_count": 2,
+      "certificate_events_checked": [
+        {
+          "certified": false,
+          "cycle": 1,
+          "failures": 51,
+          "parameter_sha256": "cc4b61a39b6e8905dac5da7463af5ec70c2a47be916783ce2d7518b4564780a6",
+          "posthoc_only": {
+            "exact_infidelity": 0.0011560492457403093,
+            "exact_target_reached": false
+          },
+          "query_index": 33,
+          "sampled_infidelity": 0.001556396484375,
+          "shots": 32768,
+          "successes": 32717,
+          "upper_infidelity_99_5": 0.002210142508941486
+        },
+        {
+          "certified": true,
+          "cycle": 2,
+          "failures": 4,
+          "parameter_sha256": "4ff1b536b8b99dec7a85a24580679a3e7e7fbba6ec551764a8d45288c4e0b5ba",
+          "posthoc_only": {
+            "exact_infidelity": 0.00028852414454560993,
+            "exact_target_reached": true
+          },
+          "query_index": 65,
+          "sampled_infidelity": 0.0001220703125,
+          "shots": 32768,
+          "successes": 32764,
+          "upper_infidelity_99_5": 0.0003842907212167433
+        }
+      ],
+      "certified_cycle": 2,
+      "epsilon": 0.1,
+      "exact_posthoc_success": true,
+      "false_early_stop": false,
+      "family": "drift",
+      "full_cap_cost": {
+        "queries": 66,
+        "shots": 2099200
+      },
+      "missed_certificate": false,
+      "noise_seed": 5520711870959302343,
+      "online_certified_success": true,
+      "rejected_proposals_not_checked": 0,
+      "replicate": 3,
+      "selected_cell": "drift:260605:0.1",
+      "selected_cell_index": 7,
+      "truth_seed": 260605,
+      "zero_steps_not_checked": 0
+    },
+    {
+      "actual_online_cost": {
+        "queries": 33,
+        "query_ratio_to_full_cap": 0.5,
+        "reason": "cycle-1 certificate",
+        "shot_ratio_to_full_cap": 0.5,
+        "shots": 1049600
+      },
+      "certificate_event_count": 1,
+      "certificate_events_checked": [
+        {
+          "certified": true,
+          "cycle": 1,
+          "failures": 14,
+          "parameter_sha256": "20aa5dd740b89e1e481a0109b99466bb87c79cbd4658c909959cd688a50a872f",
+          "posthoc_only": {
+            "exact_infidelity": 0.0003006066410360386,
+            "exact_target_reached": true
+          },
+          "query_index": 33,
+          "sampled_infidelity": 0.00042724609375,
+          "shots": 32768,
+          "successes": 32754,
+          "upper_infidelity_99_5": 0.0008188087458175965
+        }
+      ],
+      "certified_cycle": 1,
+      "epsilon": 0.1,
+      "exact_posthoc_success": true,
+      "false_early_stop": false,
+      "family": "drift",
+      "full_cap_cost": {
+        "queries": 66,
+        "shots": 2099200
+      },
+      "missed_certificate": false,
+      "noise_seed": 13966003391213958274,
+      "online_certified_success": true,
+      "rejected_proposals_not_checked": 0,
+      "replicate": 0,
+      "selected_cell": "drift:260606:0.1",
+      "selected_cell_index": 8,
+      "truth_seed": 260606,
+      "zero_steps_not_checked": 0
+    },
+    {
+      "actual_online_cost": {
+        "queries": 66,
+        "query_ratio_to_full_cap": 1.0,
+        "reason": "full cap after cycle-2 certificate",
+        "shot_ratio_to_full_cap": 1.0,
+        "shots": 2099200
+      },
+      "certificate_event_count": 2,
+      "certificate_events_checked": [
+        {
+          "certified": false,
+          "cycle": 1,
+          "failures": 56,
+          "parameter_sha256": "d0bd7aa69e661254f0adb74e130c256b1b7bbc85e4f3bdd384a6f1e049474c62",
+          "posthoc_only": {
+            "exact_infidelity": 0.001751357260318831,
+            "exact_target_reached": false
+          },
+          "query_index": 33,
+          "sampled_infidelity": 0.001708984375,
+          "shots": 32768,
+          "successes": 32712,
+          "upper_infidelity_99_5": 0.0023892811746501577
+        },
+        {
+          "certified": true,
+          "cycle": 2,
+          "failures": 7,
+          "parameter_sha256": "2ddb93c3a5cd298a748b1c50de600e8788175d05bebf97066f46e772431a55ab",
+          "posthoc_only": {
+            "exact_infidelity": 0.0002802777564718806,
+            "exact_target_reached": true
+          },
+          "query_index": 65,
+          "sampled_infidelity": 0.000213623046875,
+          "shots": 32768,
+          "successes": 32761,
+          "upper_infidelity_99_5": 0.0005227949250679456
+        }
+      ],
+      "certified_cycle": 2,
+      "epsilon": 0.1,
+      "exact_posthoc_success": true,
+      "false_early_stop": false,
+      "family": "drift",
+      "full_cap_cost": {
+        "queries": 66,
+        "shots": 2099200
+      },
+      "missed_certificate": false,
+      "noise_seed": 8031369344968133511,
+      "online_certified_success": true,
+      "rejected_proposals_not_checked": 0,
+      "replicate": 1,
+      "selected_cell": "drift:260606:0.1",
+      "selected_cell_index": 8,
+      "truth_seed": 260606,
+      "zero_steps_not_checked": 0
+    },
+    {
+      "actual_online_cost": {
+        "queries": 66,
+        "query_ratio_to_full_cap": 1.0,
+        "reason": "full cap after cycle-2 certificate",
+        "shot_ratio_to_full_cap": 1.0,
+        "shots": 2099200
+      },
+      "certificate_event_count": 2,
+      "certificate_events_checked": [
+        {
+          "certified": false,
+          "cycle": 1,
+          "failures": 32,
+          "parameter_sha256": "1ea4e5b1b84979224808a9daf990c55f003593f860a03daadfe58587653799bf",
+          "posthoc_only": {
+            "exact_infidelity": 0.001326453122871829,
+            "exact_target_reached": false
+          },
+          "query_index": 33,
+          "sampled_infidelity": 0.0009765625,
+          "shots": 32768,
+          "successes": 32736,
+          "upper_infidelity_99_5": 0.001515253504293236
+        },
+        {
+          "certified": true,
+          "cycle": 2,
+          "failures": 15,
+          "parameter_sha256": "fb2f9ee0fdf1e8d7ef3ffa49390e7d0318af4bccda4bfbaa7f412f2db2b7e592",
+          "posthoc_only": {
+            "exact_infidelity": 0.00043875088539857554,
+            "exact_target_reached": true
+          },
+          "query_index": 65,
+          "sampled_infidelity": 0.000457763671875,
+          "shots": 32768,
+          "successes": 32753,
+          "upper_infidelity_99_5": 0.0008593261833731436
+        }
+      ],
+      "certified_cycle": 2,
+      "epsilon": 0.1,
+      "exact_posthoc_success": true,
+      "false_early_stop": false,
+      "family": "drift",
+      "full_cap_cost": {
+        "queries": 66,
+        "shots": 2099200
+      },
+      "missed_certificate": false,
+      "noise_seed": 9233889234558498828,
+      "online_certified_success": true,
+      "rejected_proposals_not_checked": 0,
+      "replicate": 2,
+      "selected_cell": "drift:260606:0.1",
+      "selected_cell_index": 8,
+      "truth_seed": 260606,
+      "zero_steps_not_checked": 0
+    },
+    {
+      "actual_online_cost": {
+        "queries": 66,
+        "query_ratio_to_full_cap": 1.0,
+        "reason": "full cap after cycle-2 certificate",
+        "shot_ratio_to_full_cap": 1.0,
+        "shots": 2099200
+      },
+      "certificate_event_count": 2,
+      "certificate_events_checked": [
+        {
+          "certified": false,
+          "cycle": 1,
+          "failures": 30,
+          "parameter_sha256": "ded56b0ebb0bcc0e3f35e40a008059a6e2f3699b44b5c4da961ac50dd2f2cb63",
+          "posthoc_only": {
+            "exact_infidelity": 0.0010902551223441748,
+            "exact_target_reached": false
+          },
+          "query_index": 33,
+          "sampled_infidelity": 0.00091552734375,
+          "shots": 32768,
+          "successes": 32738,
+          "upper_infidelity_99_5": 0.0014403359696843635
+        },
+        {
+          "certified": true,
+          "cycle": 2,
+          "failures": 16,
+          "parameter_sha256": "36dba69b7c8072c4da6d41812755d1138154d80b512a6ac495e8470e9f713d4e",
+          "posthoc_only": {
+            "exact_infidelity": 0.0003369669635645556,
+            "exact_target_reached": true
+          },
+          "query_index": 65,
+          "sampled_infidelity": 0.00048828125,
+          "shots": 32768,
+          "successes": 32752,
+          "upper_infidelity_99_5": 0.000899533022541561
+        }
+      ],
+      "certified_cycle": 2,
+      "epsilon": 0.1,
+      "exact_posthoc_success": true,
+      "false_early_stop": false,
+      "family": "drift",
+      "full_cap_cost": {
+        "queries": 66,
+        "shots": 2099200
+      },
+      "missed_certificate": false,
+      "noise_seed": 1716703607028592942,
+      "online_certified_success": true,
+      "rejected_proposals_not_checked": 0,
+      "replicate": 3,
+      "selected_cell": "drift:260606:0.1",
+      "selected_cell_index": 8,
+      "truth_seed": 260606,
+      "zero_steps_not_checked": 0
+    },
+    {
+      "actual_online_cost": {
+        "queries": 33,
+        "query_ratio_to_full_cap": 0.5,
+        "reason": "cycle-1 certificate",
+        "shot_ratio_to_full_cap": 0.5,
+        "shots": 1049600
+      },
+      "certificate_event_count": 1,
+      "certificate_events_checked": [
+        {
+          "certified": true,
+          "cycle": 1,
+          "failures": 9,
+          "parameter_sha256": "888bd860192f8099f7d0903abbafce07167df63ae4c87de5b1c2755c91f29a16",
+          "posthoc_only": {
+            "exact_infidelity": 0.0004366066266404678,
+            "exact_target_reached": true
+          },
+          "query_index": 33,
+          "sampled_infidelity": 0.000274658203125,
+          "shots": 32768,
+          "successes": 32759,
+          "upper_infidelity_99_5": 0.000610201023184829
+        }
+      ],
+      "certified_cycle": 1,
+      "epsilon": 0.1,
+      "exact_posthoc_success": true,
+      "false_early_stop": false,
+      "family": "drift",
+      "full_cap_cost": {
+        "queries": 66,
+        "shots": 2099200
+      },
+      "missed_certificate": false,
+      "noise_seed": 15163725125819764804,
+      "online_certified_success": true,
+      "rejected_proposals_not_checked": 0,
+      "replicate": 0,
+      "selected_cell": "drift:260607:0.1",
+      "selected_cell_index": 9,
+      "truth_seed": 260607,
+      "zero_steps_not_checked": 0
+    },
+    {
+      "actual_online_cost": {
+        "queries": 66,
+        "query_ratio_to_full_cap": 1.0,
+        "reason": "full cap after cycle-2 certificate",
+        "shot_ratio_to_full_cap": 1.0,
+        "shots": 2099200
+      },
+      "certificate_event_count": 2,
+      "certificate_events_checked": [
+        {
+          "certified": false,
+          "cycle": 1,
+          "failures": 34,
+          "parameter_sha256": "012698cc24bae45dd3d093dc6746b60ef1657f53ad93e9abc43d511abe6424be",
+          "posthoc_only": {
+            "exact_infidelity": 0.0010422535571725788,
+            "exact_target_reached": false
+          },
+          "query_index": 33,
+          "sampled_infidelity": 0.00103759765625,
+          "shots": 32768,
+          "successes": 32734,
+          "upper_infidelity_99_5": 0.0015897537619852379
+        },
+        {
+          "certified": true,
+          "cycle": 2,
+          "failures": 6,
+          "parameter_sha256": "7273ea63ba5bb6dd00a8abac38eba9947db128c331c5abc5efdd8256ce1dee41",
+          "posthoc_only": {
+            "exact_infidelity": 0.00033117158299367233,
+            "exact_target_reached": true
+          },
+          "query_index": 65,
+          "sampled_infidelity": 0.00018310546875,
+          "shots": 32768,
+          "successes": 32762,
+          "upper_infidelity_99_5": 0.0004778249140287984
+        }
+      ],
+      "certified_cycle": 2,
+      "epsilon": 0.1,
+      "exact_posthoc_success": true,
+      "false_early_stop": false,
+      "family": "drift",
+      "full_cap_cost": {
+        "queries": 66,
+        "shots": 2099200
+      },
+      "missed_certificate": false,
+      "noise_seed": 10544026106302050653,
+      "online_certified_success": true,
+      "rejected_proposals_not_checked": 0,
+      "replicate": 1,
+      "selected_cell": "drift:260607:0.1",
+      "selected_cell_index": 9,
+      "truth_seed": 260607,
+      "zero_steps_not_checked": 0
+    },
+    {
+      "actual_online_cost": {
+        "queries": 33,
+        "query_ratio_to_full_cap": 0.5,
+        "reason": "cycle-1 certificate",
+        "shot_ratio_to_full_cap": 0.5,
+        "shots": 1049600
+      },
+      "certificate_event_count": 1,
+      "certificate_events_checked": [
+        {
+          "certified": true,
+          "cycle": 1,
+          "failures": 11,
+          "parameter_sha256": "1e7626cc554cbe644b8a5b240d8f4d0b5cbf5728eb8a48e47c750d752d4adefe",
+          "posthoc_only": {
+            "exact_infidelity": 0.0005185453213243374,
+            "exact_target_reached": true
+          },
+          "query_index": 33,
+          "sampled_infidelity": 0.000335693359375,
+          "shots": 32768,
+          "successes": 32757,
+          "upper_infidelity_99_5": 0.0006950427812317433
+        }
+      ],
+      "certified_cycle": 1,
+      "epsilon": 0.1,
+      "exact_posthoc_success": true,
+      "false_early_stop": false,
+      "family": "drift",
+      "full_cap_cost": {
+        "queries": 66,
+        "shots": 2099200
+      },
+      "missed_certificate": false,
+      "noise_seed": 6568118845285972009,
+      "online_certified_success": true,
+      "rejected_proposals_not_checked": 0,
+      "replicate": 2,
+      "selected_cell": "drift:260607:0.1",
+      "selected_cell_index": 9,
+      "truth_seed": 260607,
+      "zero_steps_not_checked": 0
+    },
+    {
+      "actual_online_cost": {
+        "queries": 66,
+        "query_ratio_to_full_cap": 1.0,
+        "reason": "full cap without certificate",
+        "shot_ratio_to_full_cap": 1.0,
+        "shots": 2099200
+      },
+      "certificate_event_count": 2,
+      "certificate_events_checked": [
+        {
+          "certified": false,
+          "cycle": 1,
+          "failures": 55,
+          "parameter_sha256": "657026dccbcead5f0d64a41dbd3320fd254c3a69e2279dc4a0ffe022882b933d",
+          "posthoc_only": {
+            "exact_infidelity": 0.0016551079952612513,
+            "exact_target_reached": false
+          },
+          "query_index": 33,
+          "sampled_infidelity": 0.001678466796875,
+          "shots": 32768,
+          "successes": 32713,
+          "upper_infidelity_99_5": 0.002353550289972944
+        },
+        {
+          "certified": false,
+          "cycle": 2,
+          "failures": 24,
+          "parameter_sha256": "79d4caf39395a80175d5b4aa163d4528e805b72cdc62c4e2c5301db24d3a481a",
+          "posthoc_only": {
+            "exact_infidelity": 0.0005353367890273963,
+            "exact_target_reached": true
+          },
+          "query_index": 65,
+          "sampled_infidelity": 0.000732421875,
+          "shots": 32768,
+          "successes": 32744,
+          "upper_infidelity_99_5": 0.0012126294059922698
+        }
+      ],
+      "certified_cycle": null,
+      "epsilon": 0.1,
+      "exact_posthoc_success": true,
+      "false_early_stop": false,
+      "family": "drift",
+      "full_cap_cost": {
+        "queries": 66,
+        "shots": 2099200
+      },
+      "missed_certificate": true,
+      "noise_seed": 10829162033802619891,
+      "online_certified_success": false,
+      "rejected_proposals_not_checked": 0,
+      "replicate": 3,
+      "selected_cell": "drift:260607:0.1",
+      "selected_cell_index": 9,
+      "truth_seed": 260607,
+      "zero_steps_not_checked": 0
+    },
+    {
+      "actual_online_cost": {
+        "queries": 66,
+        "query_ratio_to_full_cap": 1.0,
+        "reason": "full cap without certificate",
+        "shot_ratio_to_full_cap": 1.0,
+        "shots": 2099200
+      },
+      "certificate_event_count": 1,
+      "certificate_events_checked": [
+        {
+          "certified": false,
+          "cycle": 1,
+          "failures": 27,
+          "parameter_sha256": "cb1e096ef62aa68c8b90dafe74fe3acfef5635fef735f66b2ef4ae56cce45a4c",
+          "posthoc_only": {
+            "exact_infidelity": 0.000745045464160432,
+            "exact_target_reached": true
+          },
+          "query_index": 33,
+          "sampled_infidelity": 0.000823974609375,
+          "shots": 32768,
+          "successes": 32741,
+          "upper_infidelity_99_5": 0.0013270852086123524
+        }
+      ],
+      "certified_cycle": null,
+      "epsilon": 0.1,
+      "exact_posthoc_success": true,
+      "false_early_stop": false,
+      "family": "drift",
+      "full_cap_cost": {
+        "queries": 66,
+        "shots": 2099200
+      },
+      "missed_certificate": true,
+      "noise_seed": 14835674461781449881,
+      "online_certified_success": false,
+      "rejected_proposals_not_checked": 1,
+      "replicate": 0,
+      "selected_cell": "drift:260608:0.1",
+      "selected_cell_index": 10,
+      "truth_seed": 260608,
+      "zero_steps_not_checked": 0
+    },
+    {
+      "actual_online_cost": {
+        "queries": 66,
+        "query_ratio_to_full_cap": 1.0,
+        "reason": "full cap after cycle-2 certificate",
+        "shot_ratio_to_full_cap": 1.0,
+        "shots": 2099200
+      },
+      "certificate_event_count": 2,
+      "certificate_events_checked": [
+        {
+          "certified": false,
+          "cycle": 1,
+          "failures": 32,
+          "parameter_sha256": "d600f2a56790156965371f72a40bb7c12a9f2d9821a2b3979c3734168890cfe3",
+          "posthoc_only": {
+            "exact_infidelity": 0.0012796704198606568,
+            "exact_target_reached": false
+          },
+          "query_index": 33,
+          "sampled_infidelity": 0.0009765625,
+          "shots": 32768,
+          "successes": 32736,
+          "upper_infidelity_99_5": 0.001515253504293236
+        },
+        {
+          "certified": true,
+          "cycle": 2,
+          "failures": 12,
+          "parameter_sha256": "e9ba7d8a18465a74f6f1e38cdf486615d945fd04e56991aa7b12aff01c122e63",
+          "posthoc_only": {
+            "exact_infidelity": 0.0003341318446750119,
+            "exact_target_reached": true
+          },
+          "query_index": 65,
+          "sampled_infidelity": 0.0003662109375,
+          "shots": 32768,
+          "successes": 32756,
+          "upper_infidelity_99_5": 0.0007367085834187911
+        }
+      ],
+      "certified_cycle": 2,
+      "epsilon": 0.1,
+      "exact_posthoc_success": true,
+      "false_early_stop": false,
+      "family": "drift",
+      "full_cap_cost": {
+        "queries": 66,
+        "shots": 2099200
+      },
+      "missed_certificate": false,
+      "noise_seed": 13540727488425818811,
+      "online_certified_success": true,
+      "rejected_proposals_not_checked": 0,
+      "replicate": 1,
+      "selected_cell": "drift:260608:0.1",
+      "selected_cell_index": 10,
+      "truth_seed": 260608,
+      "zero_steps_not_checked": 0
+    },
+    {
+      "actual_online_cost": {
+        "queries": 66,
+        "query_ratio_to_full_cap": 1.0,
+        "reason": "full cap after cycle-2 certificate",
+        "shot_ratio_to_full_cap": 1.0,
+        "shots": 2099200
+      },
+      "certificate_event_count": 2,
+      "certificate_events_checked": [
+        {
+          "certified": false,
+          "cycle": 1,
+          "failures": 50,
+          "parameter_sha256": "a1a43f38464acdd960ec2c2c23111dff7576925b70f18ba724e28f0a131c01ee",
+          "posthoc_only": {
+            "exact_infidelity": 0.0015148061844703076,
+            "exact_target_reached": false
+          },
+          "query_index": 33,
+          "sampled_infidelity": 0.00152587890625,
+          "shots": 32768,
+          "successes": 32718,
+          "upper_infidelity_99_5": 0.0021741625810917592
+        },
+        {
+          "certified": true,
+          "cycle": 2,
+          "failures": 17,
+          "parameter_sha256": "0f00161b7f335f489e8a3b5db5eaf2f8c81dbd5c3feaadd552c6b8008869ebed",
+          "posthoc_only": {
+            "exact_infidelity": 0.0003049144733151543,
+            "exact_target_reached": true
+          },
+          "query_index": 65,
+          "sampled_infidelity": 0.000518798828125,
+          "shots": 32768,
+          "successes": 32751,
+          "upper_infidelity_99_5": 0.0009394564963882802
+        }
+      ],
+      "certified_cycle": 2,
+      "epsilon": 0.1,
+      "exact_posthoc_success": true,
+      "false_early_stop": false,
+      "family": "drift",
+      "full_cap_cost": {
+        "queries": 66,
+        "shots": 2099200
+      },
+      "missed_certificate": false,
+      "noise_seed": 17816668510935195051,
+      "online_certified_success": true,
+      "rejected_proposals_not_checked": 0,
+      "replicate": 2,
+      "selected_cell": "drift:260608:0.1",
+      "selected_cell_index": 10,
+      "truth_seed": 260608,
+      "zero_steps_not_checked": 0
+    },
+    {
+      "actual_online_cost": {
+        "queries": 66,
+        "query_ratio_to_full_cap": 1.0,
+        "reason": "full cap without certificate",
+        "shot_ratio_to_full_cap": 1.0,
+        "shots": 2099200
+      },
+      "certificate_event_count": 1,
+      "certificate_events_checked": [
+        {
+          "certified": false,
+          "cycle": 1,
+          "failures": 45,
+          "parameter_sha256": "8b59f4a5bb547e01ea17e0bccd22531e5549ad12c580e5bcbfbd2db17e159a4a",
+          "posthoc_only": {
+            "exact_infidelity": 0.0011511002644248869,
+            "exact_target_reached": false
+          },
+          "query_index": 33,
+          "sampled_infidelity": 0.001373291015625,
+          "shots": 32768,
+          "successes": 32723,
+          "upper_infidelity_99_5": 0.001993415962540439
+        }
+      ],
+      "certified_cycle": null,
+      "epsilon": 0.1,
+      "exact_posthoc_success": false,
+      "false_early_stop": false,
+      "family": "drift",
+      "full_cap_cost": {
+        "queries": 66,
+        "shots": 2099200
+      },
+      "missed_certificate": false,
+      "noise_seed": 10465574692355034710,
+      "online_certified_success": false,
+      "rejected_proposals_not_checked": 1,
+      "replicate": 3,
+      "selected_cell": "drift:260608:0.1",
+      "selected_cell_index": 10,
+      "truth_seed": 260608,
+      "zero_steps_not_checked": 0
+    },
+    {
+      "actual_online_cost": {
+        "queries": 66,
+        "query_ratio_to_full_cap": 1.0,
+        "reason": "full cap after cycle-2 certificate",
+        "shot_ratio_to_full_cap": 1.0,
+        "shots": 2099200
+      },
+      "certificate_event_count": 2,
+      "certificate_events_checked": [
+        {
+          "certified": false,
+          "cycle": 1,
+          "failures": 31,
+          "parameter_sha256": "ea121066c2a41439d2b63d26f62dc0d51bb525a89fc4cefded2bb259ac68f207",
+          "posthoc_only": {
+            "exact_infidelity": 0.0009027255001473611,
+            "exact_target_reached": true
+          },
+          "query_index": 33,
+          "sampled_infidelity": 0.000946044921875,
+          "shots": 32768,
+          "successes": 32737,
+          "upper_infidelity_99_5": 0.0014778493200544739
+        },
+        {
+          "certified": true,
+          "cycle": 2,
+          "failures": 8,
+          "parameter_sha256": "0d094193df9323bd011650d21c75154f625fd5a724c0fa7fe276cb98af3ca604",
+          "posthoc_only": {
+            "exact_infidelity": 0.0003026198172576544,
+            "exact_target_reached": true
+          },
+          "query_index": 65,
+          "sampled_infidelity": 0.000244140625,
+          "shots": 32768,
+          "successes": 32760,
+          "upper_infidelity_99_5": 0.0005668709457723925
+        }
+      ],
+      "certified_cycle": 2,
+      "epsilon": 0.1,
+      "exact_posthoc_success": true,
+      "false_early_stop": false,
+      "family": "drift",
+      "full_cap_cost": {
+        "queries": 66,
+        "shots": 2099200
+      },
+      "missed_certificate": false,
+      "noise_seed": 860736726459972314,
+      "online_certified_success": true,
+      "rejected_proposals_not_checked": 0,
+      "replicate": 0,
+      "selected_cell": "drift:260609:0.1",
+      "selected_cell_index": 11,
+      "truth_seed": 260609,
+      "zero_steps_not_checked": 0
+    },
+    {
+      "actual_online_cost": {
+        "queries": 66,
+        "query_ratio_to_full_cap": 1.0,
+        "reason": "full cap after cycle-2 certificate",
+        "shot_ratio_to_full_cap": 1.0,
+        "shots": 2099200
+      },
+      "certificate_event_count": 2,
+      "certificate_events_checked": [
+        {
+          "certified": false,
+          "cycle": 1,
+          "failures": 46,
+          "parameter_sha256": "fe57f7bc32c2586385da20b306c5f1cb95dc87769fe5d431cab9e1944f218110",
+          "posthoc_only": {
+            "exact_infidelity": 0.001496803289343429,
+            "exact_target_reached": false
+          },
+          "query_index": 33,
+          "sampled_infidelity": 0.00140380859375,
+          "shots": 32768,
+          "successes": 32722,
+          "upper_infidelity_99_5": 0.002029684105259787
+        },
+        {
+          "certified": true,
+          "cycle": 2,
+          "failures": 12,
+          "parameter_sha256": "22d08ef3ae5a26f278793309472ae2ff07d71534a0ac13696ca33df776cb251a",
+          "posthoc_only": {
+            "exact_infidelity": 0.00028272747926572084,
+            "exact_target_reached": true
+          },
+          "query_index": 65,
+          "sampled_infidelity": 0.0003662109375,
+          "shots": 32768,
+          "successes": 32756,
+          "upper_infidelity_99_5": 0.0007367085834187911
+        }
+      ],
+      "certified_cycle": 2,
+      "epsilon": 0.1,
+      "exact_posthoc_success": true,
+      "false_early_stop": false,
+      "family": "drift",
+      "full_cap_cost": {
+        "queries": 66,
+        "shots": 2099200
+      },
+      "missed_certificate": false,
+      "noise_seed": 543748428387099876,
+      "online_certified_success": true,
+      "rejected_proposals_not_checked": 0,
+      "replicate": 1,
+      "selected_cell": "drift:260609:0.1",
+      "selected_cell_index": 11,
+      "truth_seed": 260609,
+      "zero_steps_not_checked": 0
+    },
+    {
+      "actual_online_cost": {
+        "queries": 66,
+        "query_ratio_to_full_cap": 1.0,
+        "reason": "full cap after cycle-2 certificate",
+        "shot_ratio_to_full_cap": 1.0,
+        "shots": 2099200
+      },
+      "certificate_event_count": 2,
+      "certificate_events_checked": [
+        {
+          "certified": false,
+          "cycle": 1,
+          "failures": 36,
+          "parameter_sha256": "338c30bfcf0ad444041602699bb300d9aa4ce5df827c1394fc4c998cff1d1596",
+          "posthoc_only": {
+            "exact_infidelity": 0.0011108912852169084,
+            "exact_target_reached": false
+          },
+          "query_index": 33,
+          "sampled_infidelity": 0.0010986328125,
+          "shots": 32768,
+          "successes": 32732,
+          "upper_infidelity_99_5": 0.001663872112610844
+        },
+        {
+          "certified": true,
+          "cycle": 2,
+          "failures": 13,
+          "parameter_sha256": "38cb687a7f9563db8d3fc37f63f8613c0e447a4c72b6f420fa610e899d23b207",
+          "posthoc_only": {
+            "exact_infidelity": 0.00022891876510311437,
+            "exact_target_reached": true
+          },
+          "query_index": 65,
+          "sampled_infidelity": 0.000396728515625,
+          "shots": 32768,
+          "successes": 32755,
+          "upper_infidelity_99_5": 0.000777948806058755
+        }
+      ],
+      "certified_cycle": 2,
+      "epsilon": 0.1,
+      "exact_posthoc_success": true,
+      "false_early_stop": false,
+      "family": "drift",
+      "full_cap_cost": {
+        "queries": 66,
+        "shots": 2099200
+      },
+      "missed_certificate": false,
+      "noise_seed": 12885012354884886257,
+      "online_certified_success": true,
+      "rejected_proposals_not_checked": 0,
+      "replicate": 2,
+      "selected_cell": "drift:260609:0.1",
+      "selected_cell_index": 11,
+      "truth_seed": 260609,
+      "zero_steps_not_checked": 0
+    },
+    {
+      "actual_online_cost": {
+        "queries": 66,
+        "query_ratio_to_full_cap": 1.0,
+        "reason": "full cap after cycle-2 certificate",
+        "shot_ratio_to_full_cap": 1.0,
+        "shots": 2099200
+      },
+      "certificate_event_count": 2,
+      "certificate_events_checked": [
+        {
+          "certified": false,
+          "cycle": 1,
+          "failures": 58,
+          "parameter_sha256": "28f91603381afe648f24cb2878889db57e1f3206eaa0fe954e4e5305e66b44ea",
+          "posthoc_only": {
+            "exact_infidelity": 0.001904053894715485,
+            "exact_target_reached": false
+          },
+          "query_index": 33,
+          "sampled_infidelity": 0.00177001953125,
+          "shots": 32768,
+          "successes": 32710,
+          "upper_infidelity_99_5": 0.002460606517671272
+        },
+        {
+          "certified": true,
+          "cycle": 2,
+          "failures": 10,
+          "parameter_sha256": "d9782244e61f049e7a3a5b4d44cefd764368f97471837ccb19652f297871fbf0",
+          "posthoc_only": {
+            "exact_infidelity": 0.00041491201635657227,
+            "exact_target_reached": true
+          },
+          "query_index": 65,
+          "sampled_infidelity": 0.00030517578125,
+          "shots": 32768,
+          "successes": 32758,
+          "upper_infidelity_99_5": 0.0006528963078875846
+        }
+      ],
+      "certified_cycle": 2,
+      "epsilon": 0.1,
+      "exact_posthoc_success": true,
+      "false_early_stop": false,
+      "family": "drift",
+      "full_cap_cost": {
+        "queries": 66,
+        "shots": 2099200
+      },
+      "missed_certificate": false,
+      "noise_seed": 16571257436642391496,
+      "online_certified_success": true,
+      "rejected_proposals_not_checked": 0,
+      "replicate": 3,
+      "selected_cell": "drift:260609:0.1",
+      "selected_cell_index": 11,
+      "truth_seed": 260609,
+      "zero_steps_not_checked": 0
+    },
+    {
+      "actual_online_cost": {
+        "queries": 66,
+        "query_ratio_to_full_cap": 1.0,
+        "reason": "full cap after cycle-2 certificate",
+        "shot_ratio_to_full_cap": 1.0,
+        "shots": 2099200
+      },
+      "certificate_event_count": 2,
+      "certificate_events_checked": [
+        {
+          "certified": false,
+          "cycle": 1,
+          "failures": 38,
+          "parameter_sha256": "7c987e4955aa8b0c471fc6f68f2f09a2d82595363bd8bab240a7d23deff26488",
+          "posthoc_only": {
+            "exact_infidelity": 0.0009827976547013284,
+            "exact_target_reached": true
+          },
+          "query_index": 33,
+          "sampled_infidelity": 0.00115966796875,
+          "shots": 32768,
+          "successes": 32730,
+          "upper_infidelity_99_5": 0.001737639189746347
+        },
+        {
+          "certified": true,
+          "cycle": 2,
+          "failures": 2,
+          "parameter_sha256": "396f2f04f29bf8484139b46f7e735e1a63f6bdedfd3dea56cbda95fd427fb48d",
+          "posthoc_only": {
+            "exact_infidelity": 0.00013365560911426932,
+            "exact_target_reached": true
+          },
+          "query_index": 65,
+          "sampled_infidelity": 6.103515625e-05,
+          "shots": 32768,
+          "successes": 32766,
+          "upper_infidelity_99_5": 0.0002829822650095611
+        }
+      ],
+      "certified_cycle": 2,
+      "epsilon": 0.1,
+      "exact_posthoc_success": true,
+      "false_early_stop": false,
+      "family": "drift",
+      "full_cap_cost": {
+        "queries": 66,
+        "shots": 2099200
+      },
+      "missed_certificate": false,
+      "noise_seed": 11036976878259722125,
+      "online_certified_success": true,
+      "rejected_proposals_not_checked": 0,
+      "replicate": 0,
+      "selected_cell": "drift:260610:0.1",
+      "selected_cell_index": 12,
+      "truth_seed": 260610,
+      "zero_steps_not_checked": 0
+    },
+    {
+      "actual_online_cost": {
+        "queries": 33,
+        "query_ratio_to_full_cap": 0.5,
+        "reason": "cycle-1 certificate",
+        "shot_ratio_to_full_cap": 0.5,
+        "shots": 1049600
+      },
+      "certificate_event_count": 1,
+      "certificate_events_checked": [
+        {
+          "certified": true,
+          "cycle": 1,
+          "failures": 13,
+          "parameter_sha256": "4de37a811b83a49c00809b66161d1875e3035cab8860fa9477c35ee1bb0ace03",
+          "posthoc_only": {
+            "exact_infidelity": 0.0007526889129756409,
+            "exact_target_reached": true
+          },
+          "query_index": 33,
+          "sampled_infidelity": 0.000396728515625,
+          "shots": 32768,
+          "successes": 32755,
+          "upper_infidelity_99_5": 0.000777948806058755
+        }
+      ],
+      "certified_cycle": 1,
+      "epsilon": 0.1,
+      "exact_posthoc_success": true,
+      "false_early_stop": false,
+      "family": "drift",
+      "full_cap_cost": {
+        "queries": 66,
+        "shots": 2099200
+      },
+      "missed_certificate": false,
+      "noise_seed": 13120165581506551080,
+      "online_certified_success": true,
+      "rejected_proposals_not_checked": 0,
+      "replicate": 1,
+      "selected_cell": "drift:260610:0.1",
+      "selected_cell_index": 12,
+      "truth_seed": 260610,
+      "zero_steps_not_checked": 0
+    },
+    {
+      "actual_online_cost": {
+        "queries": 66,
+        "query_ratio_to_full_cap": 1.0,
+        "reason": "full cap without certificate",
+        "shot_ratio_to_full_cap": 1.0,
+        "shots": 2099200
+      },
+      "certificate_event_count": 1,
+      "certificate_events_checked": [
+        {
+          "certified": false,
+          "cycle": 1,
+          "failures": 26,
+          "parameter_sha256": "0d750bc28dbe4fabdc024873dfc8547c22f330b9c9068e4b5d05c824813f7684",
+          "posthoc_only": {
+            "exact_infidelity": 0.0008152836345599601,
+            "exact_target_reached": true
+          },
+          "query_index": 33,
+          "sampled_infidelity": 0.00079345703125,
+          "shots": 32768,
+          "successes": 32742,
+          "upper_infidelity_99_5": 0.0012890769971496095
+        }
+      ],
+      "certified_cycle": null,
+      "epsilon": 0.1,
+      "exact_posthoc_success": true,
+      "false_early_stop": false,
+      "family": "drift",
+      "full_cap_cost": {
+        "queries": 66,
+        "shots": 2099200
+      },
+      "missed_certificate": true,
+      "noise_seed": 17024511718276417289,
+      "online_certified_success": false,
+      "rejected_proposals_not_checked": 1,
+      "replicate": 2,
+      "selected_cell": "drift:260610:0.1",
+      "selected_cell_index": 12,
+      "truth_seed": 260610,
+      "zero_steps_not_checked": 0
+    },
+    {
+      "actual_online_cost": {
+        "queries": 66,
+        "query_ratio_to_full_cap": 1.0,
+        "reason": "full cap after cycle-2 certificate",
+        "shot_ratio_to_full_cap": 1.0,
+        "shots": 2099200
+      },
+      "certificate_event_count": 2,
+      "certificate_events_checked": [
+        {
+          "certified": false,
+          "cycle": 1,
+          "failures": 35,
+          "parameter_sha256": "77108d082960026f349a4b98900e7e7afb6ef296e8baf4c92e4bb7e62269708f",
+          "posthoc_only": {
+            "exact_infidelity": 0.0010268787018556935,
+            "exact_target_reached": false
+          },
+          "query_index": 33,
+          "sampled_infidelity": 0.001068115234375,
+          "shots": 32768,
+          "successes": 32733,
+          "upper_infidelity_99_5": 0.0016268586609937416
+        },
+        {
+          "certified": true,
+          "cycle": 2,
+          "failures": 12,
+          "parameter_sha256": "518ce5e0d5120ff36fbfd00ca9e638c411087890385bf5e2e9d2fac35964bd44",
+          "posthoc_only": {
+            "exact_infidelity": 0.00026918013173693467,
+            "exact_target_reached": true
+          },
+          "query_index": 65,
+          "sampled_infidelity": 0.0003662109375,
+          "shots": 32768,
+          "successes": 32756,
+          "upper_infidelity_99_5": 0.0007367085834187911
+        }
+      ],
+      "certified_cycle": 2,
+      "epsilon": 0.1,
+      "exact_posthoc_success": true,
+      "false_early_stop": false,
+      "family": "drift",
+      "full_cap_cost": {
+        "queries": 66,
+        "shots": 2099200
+      },
+      "missed_certificate": false,
+      "noise_seed": 13805537844799503602,
+      "online_certified_success": true,
+      "rejected_proposals_not_checked": 0,
+      "replicate": 3,
+      "selected_cell": "drift:260610:0.1",
+      "selected_cell_index": 12,
+      "truth_seed": 260610,
+      "zero_steps_not_checked": 0
+    },
+    {
+      "actual_online_cost": {
+        "queries": 66,
+        "query_ratio_to_full_cap": 1.0,
+        "reason": "full cap after cycle-2 certificate",
+        "shot_ratio_to_full_cap": 1.0,
+        "shots": 2099200
+      },
+      "certificate_event_count": 2,
+      "certificate_events_checked": [
+        {
+          "certified": false,
+          "cycle": 1,
+          "failures": 36,
+          "parameter_sha256": "41ca684c3e9a3a2626c1544b8ffe42ef429cbdbcc4eca3fc8386ffc2301fc38d",
+          "posthoc_only": {
+            "exact_infidelity": 0.00140507332071238,
+            "exact_target_reached": false
+          },
+          "query_index": 33,
+          "sampled_infidelity": 0.0010986328125,
+          "shots": 32768,
+          "successes": 32732,
+          "upper_infidelity_99_5": 0.001663872112610844
+        },
+        {
+          "certified": true,
+          "cycle": 2,
+          "failures": 1,
+          "parameter_sha256": "fd0d873a559edd06ff20b7f620ca8067783097026741a0c039e8d12b9e07bc8f",
+          "posthoc_only": {
+            "exact_infidelity": 0.00018137226786452132,
+            "exact_target_reached": true
+          },
+          "query_index": 65,
+          "sampled_infidelity": 3.0517578125e-05,
+          "shots": 32768,
+          "successes": 32767,
+          "upper_infidelity_99_5": 0.00022672731104946638
+        }
+      ],
+      "certified_cycle": 2,
+      "epsilon": 0.1,
+      "exact_posthoc_success": true,
+      "false_early_stop": false,
+      "family": "drift",
+      "full_cap_cost": {
+        "queries": 66,
+        "shots": 2099200
+      },
+      "missed_certificate": false,
+      "noise_seed": 16921420192874005269,
+      "online_certified_success": true,
+      "rejected_proposals_not_checked": 0,
+      "replicate": 0,
+      "selected_cell": "drift:260611:0.1",
+      "selected_cell_index": 13,
+      "truth_seed": 260611,
+      "zero_steps_not_checked": 0
+    },
+    {
+      "actual_online_cost": {
+        "queries": 33,
+        "query_ratio_to_full_cap": 0.5,
+        "reason": "cycle-1 certificate",
+        "shot_ratio_to_full_cap": 0.5,
+        "shots": 1049600
+      },
+      "certificate_event_count": 1,
+      "certificate_events_checked": [
+        {
+          "certified": true,
+          "cycle": 1,
+          "failures": 10,
+          "parameter_sha256": "65eeca2305b86ea9e741b1f6afa2ae8d7eaf7d633d2e8f5484d7b5911dd6ddbb",
+          "posthoc_only": {
+            "exact_infidelity": 0.0004723332308489425,
+            "exact_target_reached": true
+          },
+          "query_index": 33,
+          "sampled_infidelity": 0.00030517578125,
+          "shots": 32768,
+          "successes": 32758,
+          "upper_infidelity_99_5": 0.0006528963078875846
+        }
+      ],
+      "certified_cycle": 1,
+      "epsilon": 0.1,
+      "exact_posthoc_success": true,
+      "false_early_stop": false,
+      "family": "drift",
+      "full_cap_cost": {
+        "queries": 66,
+        "shots": 2099200
+      },
+      "missed_certificate": false,
+      "noise_seed": 9559965415118843329,
+      "online_certified_success": true,
+      "rejected_proposals_not_checked": 0,
+      "replicate": 1,
+      "selected_cell": "drift:260611:0.1",
+      "selected_cell_index": 13,
+      "truth_seed": 260611,
+      "zero_steps_not_checked": 0
+    },
+    {
+      "actual_online_cost": {
+        "queries": 66,
+        "query_ratio_to_full_cap": 1.0,
+        "reason": "full cap after cycle-2 certificate",
+        "shot_ratio_to_full_cap": 1.0,
+        "shots": 2099200
+      },
+      "certificate_event_count": 2,
+      "certificate_events_checked": [
+        {
+          "certified": false,
+          "cycle": 1,
+          "failures": 47,
+          "parameter_sha256": "7dc8492192e4ee8e286fe679350741ef593a1b33518f7df6f22fa9237a0425af",
+          "posthoc_only": {
+            "exact_infidelity": 0.0013910372708861862,
+            "exact_target_reached": false
+          },
+          "query_index": 33,
+          "sampled_infidelity": 0.001434326171875,
+          "shots": 32768,
+          "successes": 32721,
+          "upper_infidelity_99_5": 0.002065890980289384
+        },
+        {
+          "certified": true,
+          "cycle": 2,
+          "failures": 7,
+          "parameter_sha256": "65f1f75b6a9267a7ee81ac7b823fbf78125c44138907bbcbf50b17979644ef20",
+          "posthoc_only": {
+            "exact_infidelity": 0.0003703498071793154,
+            "exact_target_reached": true
+          },
+          "query_index": 65,
+          "sampled_infidelity": 0.000213623046875,
+          "shots": 32768,
+          "successes": 32761,
+          "upper_infidelity_99_5": 0.0005227949250679456
+        }
+      ],
+      "certified_cycle": 2,
+      "epsilon": 0.1,
+      "exact_posthoc_success": true,
+      "false_early_stop": false,
+      "family": "drift",
+      "full_cap_cost": {
+        "queries": 66,
+        "shots": 2099200
+      },
+      "missed_certificate": false,
+      "noise_seed": 6343443489588398380,
+      "online_certified_success": true,
+      "rejected_proposals_not_checked": 0,
+      "replicate": 2,
+      "selected_cell": "drift:260611:0.1",
+      "selected_cell_index": 13,
+      "truth_seed": 260611,
+      "zero_steps_not_checked": 0
+    },
+    {
+      "actual_online_cost": {
+        "queries": 66,
+        "query_ratio_to_full_cap": 1.0,
+        "reason": "full cap after cycle-2 certificate",
+        "shot_ratio_to_full_cap": 1.0,
+        "shots": 2099200
+      },
+      "certificate_event_count": 2,
+      "certificate_events_checked": [
+        {
+          "certified": false,
+          "cycle": 1,
+          "failures": 44,
+          "parameter_sha256": "c94ad8eec956fc2af47e32c099d7ad80e4e29d03434cdaf58fc692cf30183488",
+          "posthoc_only": {
+            "exact_infidelity": 0.0016053508774258596,
+            "exact_target_reached": false
+          },
+          "query_index": 33,
+          "sampled_infidelity": 0.0013427734375,
+          "shots": 32768,
+          "successes": 32724,
+          "upper_infidelity_99_5": 0.001957084541760076
+        },
+        {
+          "certified": true,
+          "cycle": 2,
+          "failures": 9,
+          "parameter_sha256": "c93ab6f71ff2afcea5eb1e9272e737440730252e968bf526d0804afd6a1ae958",
+          "posthoc_only": {
+            "exact_infidelity": 0.0004802879639684843,
+            "exact_target_reached": true
+          },
+          "query_index": 65,
+          "sampled_infidelity": 0.000274658203125,
+          "shots": 32768,
+          "successes": 32759,
+          "upper_infidelity_99_5": 0.000610201023184829
+        }
+      ],
+      "certified_cycle": 2,
+      "epsilon": 0.1,
+      "exact_posthoc_success": true,
+      "false_early_stop": false,
+      "family": "drift",
+      "full_cap_cost": {
+        "queries": 66,
+        "shots": 2099200
+      },
+      "missed_certificate": false,
+      "noise_seed": 8454025717076534663,
+      "online_certified_success": true,
+      "rejected_proposals_not_checked": 0,
+      "replicate": 3,
+      "selected_cell": "drift:260611:0.1",
+      "selected_cell_index": 13,
+      "truth_seed": 260611,
+      "zero_steps_not_checked": 0
+    },
+    {
+      "actual_online_cost": {
+        "queries": 66,
+        "query_ratio_to_full_cap": 1.0,
+        "reason": "full cap without certificate",
+        "shot_ratio_to_full_cap": 1.0,
+        "shots": 2099200
+      },
+      "certificate_event_count": 1,
+      "certificate_events_checked": [
+        {
+          "certified": false,
+          "cycle": 1,
+          "failures": 38,
+          "parameter_sha256": "ccdbed006bf485724b3f52db2c610f8ad6a524f1e550c30fc7c9c2e28cd40e76",
+          "posthoc_only": {
+            "exact_infidelity": 0.0011445402922674042,
+            "exact_target_reached": false
+          },
+          "query_index": 33,
+          "sampled_infidelity": 0.00115966796875,
+          "shots": 32768,
+          "successes": 32730,
+          "upper_infidelity_99_5": 0.001737639189746347
+        }
+      ],
+      "certified_cycle": null,
+      "epsilon": 0.1,
+      "exact_posthoc_success": false,
+      "false_early_stop": false,
+      "family": "drift",
+      "full_cap_cost": {
+        "queries": 66,
+        "shots": 2099200
+      },
+      "missed_certificate": false,
+      "noise_seed": 8347652216883664798,
+      "online_certified_success": false,
+      "rejected_proposals_not_checked": 1,
+      "replicate": 0,
+      "selected_cell": "drift:260612:0.1",
+      "selected_cell_index": 14,
+      "truth_seed": 260612,
+      "zero_steps_not_checked": 0
+    },
+    {
+      "actual_online_cost": {
+        "queries": 66,
+        "query_ratio_to_full_cap": 1.0,
+        "reason": "full cap without certificate",
+        "shot_ratio_to_full_cap": 1.0,
+        "shots": 2099200
+      },
+      "certificate_event_count": 1,
+      "certificate_events_checked": [
+        {
+          "certified": false,
+          "cycle": 1,
+          "failures": 39,
+          "parameter_sha256": "f3c2f0d21579879b3385bd49b0d0f6a2225543223d331c07259512a649ffb027",
+          "posthoc_only": {
+            "exact_infidelity": 0.0010971432777713286,
+            "exact_target_reached": false
+          },
+          "query_index": 33,
+          "sampled_infidelity": 0.001190185546875,
+          "shots": 32768,
+          "successes": 32729,
+          "upper_infidelity_99_5": 0.0017743994902061364
+        }
+      ],
+      "certified_cycle": null,
+      "epsilon": 0.1,
+      "exact_posthoc_success": false,
+      "false_early_stop": false,
+      "family": "drift",
+      "full_cap_cost": {
+        "queries": 66,
+        "shots": 2099200
+      },
+      "missed_certificate": false,
+      "noise_seed": 58985370435028388,
+      "online_certified_success": false,
+      "rejected_proposals_not_checked": 1,
+      "replicate": 1,
+      "selected_cell": "drift:260612:0.1",
+      "selected_cell_index": 14,
+      "truth_seed": 260612,
+      "zero_steps_not_checked": 0
+    },
+    {
+      "actual_online_cost": {
+        "queries": 66,
+        "query_ratio_to_full_cap": 1.0,
+        "reason": "full cap without certificate",
+        "shot_ratio_to_full_cap": 1.0,
+        "shots": 2099200
+      },
+      "certificate_event_count": 1,
+      "certificate_events_checked": [
+        {
+          "certified": false,
+          "cycle": 1,
+          "failures": 34,
+          "parameter_sha256": "2687eba9bbd77d63ecc74a85c2fc32b4a4a240e515c0053418157e35bfd00a49",
+          "posthoc_only": {
+            "exact_infidelity": 0.0010297249738406844,
+            "exact_target_reached": false
+          },
+          "query_index": 33,
+          "sampled_infidelity": 0.00103759765625,
+          "shots": 32768,
+          "successes": 32734,
+          "upper_infidelity_99_5": 0.0015897537619852379
+        }
+      ],
+      "certified_cycle": null,
+      "epsilon": 0.1,
+      "exact_posthoc_success": false,
+      "false_early_stop": false,
+      "family": "drift",
+      "full_cap_cost": {
+        "queries": 66,
+        "shots": 2099200
+      },
+      "missed_certificate": false,
+      "noise_seed": 5208642119497345913,
+      "online_certified_success": false,
+      "rejected_proposals_not_checked": 1,
+      "replicate": 2,
+      "selected_cell": "drift:260612:0.1",
+      "selected_cell_index": 14,
+      "truth_seed": 260612,
+      "zero_steps_not_checked": 0
+    },
+    {
+      "actual_online_cost": {
+        "queries": 66,
+        "query_ratio_to_full_cap": 1.0,
+        "reason": "full cap after cycle-2 certificate",
+        "shot_ratio_to_full_cap": 1.0,
+        "shots": 2099200
+      },
+      "certificate_event_count": 2,
+      "certificate_events_checked": [
+        {
+          "certified": false,
+          "cycle": 1,
+          "failures": 51,
+          "parameter_sha256": "075cce90873fe91fa18a2489d13aa5e7c243052b666bdc71feb12b53e974c55f",
+          "posthoc_only": {
+            "exact_infidelity": 0.0015194918231308252,
+            "exact_target_reached": false
+          },
+          "query_index": 33,
+          "sampled_infidelity": 0.001556396484375,
+          "shots": 32768,
+          "successes": 32717,
+          "upper_infidelity_99_5": 0.002210142508941486
+        },
+        {
+          "certified": true,
+          "cycle": 2,
+          "failures": 17,
+          "parameter_sha256": "5520801c5851a4a01127b9c6d8695b635e9b6c298b4ea7f37dc8803484584e20",
+          "posthoc_only": {
+            "exact_infidelity": 0.000652392354049125,
+            "exact_target_reached": true
+          },
+          "query_index": 65,
+          "sampled_infidelity": 0.000518798828125,
+          "shots": 32768,
+          "successes": 32751,
+          "upper_infidelity_99_5": 0.0009394564963882802
+        }
+      ],
+      "certified_cycle": 2,
+      "epsilon": 0.1,
+      "exact_posthoc_success": true,
+      "false_early_stop": false,
+      "family": "drift",
+      "full_cap_cost": {
+        "queries": 66,
+        "shots": 2099200
+      },
+      "missed_certificate": false,
+      "noise_seed": 10693959140516010368,
+      "online_certified_success": true,
+      "rejected_proposals_not_checked": 0,
+      "replicate": 3,
+      "selected_cell": "drift:260612:0.1",
+      "selected_cell_index": 14,
+      "truth_seed": 260612,
+      "zero_steps_not_checked": 0
+    },
+    {
+      "actual_online_cost": {
+        "queries": 66,
+        "query_ratio_to_full_cap": 1.0,
+        "reason": "full cap without certificate",
+        "shot_ratio_to_full_cap": 1.0,
+        "shots": 2099200
+      },
+      "certificate_event_count": 1,
+      "certificate_events_checked": [
+        {
+          "certified": false,
+          "cycle": 1,
+          "failures": 27,
+          "parameter_sha256": "5fa1be548e3f3bc3e2a9ac65a123d394799a9bbd6780bfb51e09fbffa190195b",
+          "posthoc_only": {
+            "exact_infidelity": 0.0008355972181579574,
+            "exact_target_reached": true
+          },
+          "query_index": 33,
+          "sampled_infidelity": 0.000823974609375,
+          "shots": 32768,
+          "successes": 32741,
+          "upper_infidelity_99_5": 0.0013270852086123524
+        }
+      ],
+      "certified_cycle": null,
+      "epsilon": 0.05,
+      "exact_posthoc_success": true,
+      "false_early_stop": false,
+      "family": "combined",
+      "full_cap_cost": {
+        "queries": 66,
+        "shots": 2099200
+      },
+      "missed_certificate": true,
+      "noise_seed": 14110497534715357795,
+      "online_certified_success": false,
+      "rejected_proposals_not_checked": 1,
+      "replicate": 0,
+      "selected_cell": "combined:260605:0.05",
+      "selected_cell_index": 15,
+      "truth_seed": 260605,
+      "zero_steps_not_checked": 0
+    },
+    {
+      "actual_online_cost": {
+        "queries": 66,
+        "query_ratio_to_full_cap": 1.0,
+        "reason": "full cap without certificate",
+        "shot_ratio_to_full_cap": 1.0,
+        "shots": 2099200
+      },
+      "certificate_event_count": 1,
+      "certificate_events_checked": [
+        {
+          "certified": false,
+          "cycle": 1,
+          "failures": 28,
+          "parameter_sha256": "3d12dde17091d556c708303ff083fd5af81bf5a7c102685b52ef3b53632c4efb",
+          "posthoc_only": {
+            "exact_infidelity": 0.0009974307171611851,
+            "exact_target_reached": true
+          },
+          "query_index": 33,
+          "sampled_infidelity": 0.0008544921875,
+          "shots": 32768,
+          "successes": 32740,
+          "upper_infidelity_99_5": 0.0013649599580953897
+        }
+      ],
+      "certified_cycle": null,
+      "epsilon": 0.05,
+      "exact_posthoc_success": true,
+      "false_early_stop": false,
+      "family": "combined",
+      "full_cap_cost": {
+        "queries": 66,
+        "shots": 2099200
+      },
+      "missed_certificate": true,
+      "noise_seed": 9629238408299219280,
+      "online_certified_success": false,
+      "rejected_proposals_not_checked": 1,
+      "replicate": 1,
+      "selected_cell": "combined:260605:0.05",
+      "selected_cell_index": 15,
+      "truth_seed": 260605,
+      "zero_steps_not_checked": 0
+    },
+    {
+      "actual_online_cost": {
+        "queries": 33,
+        "query_ratio_to_full_cap": 0.5,
+        "reason": "cycle-1 certificate",
+        "shot_ratio_to_full_cap": 0.5,
+        "shots": 1049600
+      },
+      "certificate_event_count": 1,
+      "certificate_events_checked": [
+        {
+          "certified": true,
+          "cycle": 1,
+          "failures": 4,
+          "parameter_sha256": "9b92eea52c17c286c66f36421482292ae712b39a940a5cd0a9fa402230204859",
+          "posthoc_only": {
+            "exact_infidelity": 0.00033019728823990846,
+            "exact_target_reached": true
+          },
+          "query_index": 33,
+          "sampled_infidelity": 0.0001220703125,
+          "shots": 32768,
+          "successes": 32764,
+          "upper_infidelity_99_5": 0.0003842907212167433
+        }
+      ],
+      "certified_cycle": 1,
+      "epsilon": 0.05,
+      "exact_posthoc_success": true,
+      "false_early_stop": false,
+      "family": "combined",
+      "full_cap_cost": {
+        "queries": 66,
+        "shots": 2099200
+      },
+      "missed_certificate": false,
+      "noise_seed": 2439590277662204939,
+      "online_certified_success": true,
+      "rejected_proposals_not_checked": 0,
+      "replicate": 2,
+      "selected_cell": "combined:260605:0.05",
+      "selected_cell_index": 15,
+      "truth_seed": 260605,
+      "zero_steps_not_checked": 0
+    },
+    {
+      "actual_online_cost": {
+        "queries": 66,
+        "query_ratio_to_full_cap": 1.0,
+        "reason": "full cap after cycle-2 certificate",
+        "shot_ratio_to_full_cap": 1.0,
+        "shots": 2099200
+      },
+      "certificate_event_count": 2,
+      "certificate_events_checked": [
+        {
+          "certified": false,
+          "cycle": 1,
+          "failures": 23,
+          "parameter_sha256": "4de172c6364420f53097c0c47f00b71de41edf1e8e4cd4a0a858dfc7403b3d20",
+          "posthoc_only": {
+            "exact_infidelity": 0.0007493505986001514,
+            "exact_target_reached": true
+          },
+          "query_index": 33,
+          "sampled_infidelity": 0.000701904296875,
+          "shots": 32768,
+          "successes": 32745,
+          "upper_infidelity_99_5": 0.0011741726975211528
+        },
+        {
+          "certified": true,
+          "cycle": 2,
+          "failures": 6,
+          "parameter_sha256": "8e694d845c4b9dba484a681894c85c6326e5eacfbf224f1f0abf7cc4a147b5e6",
+          "posthoc_only": {
+            "exact_infidelity": 0.0003573564794604467,
+            "exact_target_reached": true
+          },
+          "query_index": 65,
+          "sampled_infidelity": 0.00018310546875,
+          "shots": 32768,
+          "successes": 32762,
+          "upper_infidelity_99_5": 0.0004778249140287984
+        }
+      ],
+      "certified_cycle": 2,
+      "epsilon": 0.05,
+      "exact_posthoc_success": true,
+      "false_early_stop": false,
+      "family": "combined",
+      "full_cap_cost": {
+        "queries": 66,
+        "shots": 2099200
+      },
+      "missed_certificate": false,
+      "noise_seed": 18191192067761995156,
+      "online_certified_success": true,
+      "rejected_proposals_not_checked": 0,
+      "replicate": 3,
+      "selected_cell": "combined:260605:0.05",
+      "selected_cell_index": 15,
+      "truth_seed": 260605,
+      "zero_steps_not_checked": 0
+    },
+    {
+      "actual_online_cost": {
+        "queries": 66,
+        "query_ratio_to_full_cap": 1.0,
+        "reason": "full cap after cycle-2 certificate",
+        "shot_ratio_to_full_cap": 1.0,
+        "shots": 2099200
+      },
+      "certificate_event_count": 2,
+      "certificate_events_checked": [
+        {
+          "certified": false,
+          "cycle": 1,
+          "failures": 29,
+          "parameter_sha256": "3366f8cea4ba3a0a50b04a61bc08fc4b3e755041b63c71ee9ab8a3523919dc00",
+          "posthoc_only": {
+            "exact_infidelity": 0.0009959519221568458,
+            "exact_target_reached": true
+          },
+          "query_index": 33,
+          "sampled_infidelity": 0.000885009765625,
+          "shots": 32768,
+          "successes": 32739,
+          "upper_infidelity_99_5": 0.001402708112756739
+        },
+        {
+          "certified": true,
+          "cycle": 2,
+          "failures": 8,
+          "parameter_sha256": "da2cee477a7b09e28f90ef5ebcc47c29f01e4eb3ed8a19fd6ef30926cc083443",
+          "posthoc_only": {
+            "exact_infidelity": 0.0002797648227046423,
+            "exact_target_reached": true
+          },
+          "query_index": 65,
+          "sampled_infidelity": 0.000244140625,
+          "shots": 32768,
+          "successes": 32760,
+          "upper_infidelity_99_5": 0.0005668709457723925
+        }
+      ],
+      "certified_cycle": 2,
+      "epsilon": 0.05,
+      "exact_posthoc_success": true,
+      "false_early_stop": false,
+      "family": "combined",
+      "full_cap_cost": {
+        "queries": 66,
+        "shots": 2099200
+      },
+      "missed_certificate": false,
+      "noise_seed": 17270851984108110014,
+      "online_certified_success": true,
+      "rejected_proposals_not_checked": 0,
+      "replicate": 0,
+      "selected_cell": "combined:260608:0.05",
+      "selected_cell_index": 16,
+      "truth_seed": 260608,
+      "zero_steps_not_checked": 0
+    },
+    {
+      "actual_online_cost": {
+        "queries": 66,
+        "query_ratio_to_full_cap": 1.0,
+        "reason": "full cap without certificate",
+        "shot_ratio_to_full_cap": 1.0,
+        "shots": 2099200
+      },
+      "certificate_event_count": 1,
+      "certificate_events_checked": [
+        {
+          "certified": false,
+          "cycle": 1,
+          "failures": 26,
+          "parameter_sha256": "364cccb0a17a14d94715ca03663374712835ee05b25e93634906e21e380c71e1",
+          "posthoc_only": {
+            "exact_infidelity": 0.0008168234522789586,
+            "exact_target_reached": true
+          },
+          "query_index": 33,
+          "sampled_infidelity": 0.00079345703125,
+          "shots": 32768,
+          "successes": 32742,
+          "upper_infidelity_99_5": 0.0012890769971496095
+        }
+      ],
+      "certified_cycle": null,
+      "epsilon": 0.05,
+      "exact_posthoc_success": true,
+      "false_early_stop": false,
+      "family": "combined",
+      "full_cap_cost": {
+        "queries": 66,
+        "shots": 2099200
+      },
+      "missed_certificate": true,
+      "noise_seed": 13840170644872247284,
+      "online_certified_success": false,
+      "rejected_proposals_not_checked": 1,
+      "replicate": 1,
+      "selected_cell": "combined:260608:0.05",
+      "selected_cell_index": 16,
+      "truth_seed": 260608,
+      "zero_steps_not_checked": 0
+    },
+    {
+      "actual_online_cost": {
+        "queries": 33,
+        "query_ratio_to_full_cap": 0.5,
+        "reason": "cycle-1 certificate",
+        "shot_ratio_to_full_cap": 0.5,
+        "shots": 1049600
+      },
+      "certificate_event_count": 1,
+      "certificate_events_checked": [
+        {
+          "certified": true,
+          "cycle": 1,
+          "failures": 16,
+          "parameter_sha256": "4b7c71e04f2ee763eaf8222ba5a17e94398b8d3e03c5bca4201c6d0ca98efe70",
+          "posthoc_only": {
+            "exact_infidelity": 0.0006477185263951135,
+            "exact_target_reached": true
+          },
+          "query_index": 33,
+          "sampled_infidelity": 0.00048828125,
+          "shots": 32768,
+          "successes": 32752,
+          "upper_infidelity_99_5": 0.000899533022541561
+        }
+      ],
+      "certified_cycle": 1,
+      "epsilon": 0.05,
+      "exact_posthoc_success": true,
+      "false_early_stop": false,
+      "family": "combined",
+      "full_cap_cost": {
+        "queries": 66,
+        "shots": 2099200
+      },
+      "missed_certificate": false,
+      "noise_seed": 12213415517985321619,
+      "online_certified_success": true,
+      "rejected_proposals_not_checked": 0,
+      "replicate": 2,
+      "selected_cell": "combined:260608:0.05",
+      "selected_cell_index": 16,
+      "truth_seed": 260608,
+      "zero_steps_not_checked": 0
+    },
+    {
+      "actual_online_cost": {
+        "queries": 66,
+        "query_ratio_to_full_cap": 1.0,
+        "reason": "full cap after cycle-2 certificate",
+        "shot_ratio_to_full_cap": 1.0,
+        "shots": 2099200
+      },
+      "certificate_event_count": 2,
+      "certificate_events_checked": [
+        {
+          "certified": false,
+          "cycle": 1,
+          "failures": 32,
+          "parameter_sha256": "3357421158fdbbf5030305be3f8744c093f8e1d0d2c417b78769710ada6a258f",
+          "posthoc_only": {
+            "exact_infidelity": 0.0010145214458014973,
+            "exact_target_reached": false
+          },
+          "query_index": 33,
+          "sampled_infidelity": 0.0009765625,
+          "shots": 32768,
+          "successes": 32736,
+          "upper_infidelity_99_5": 0.001515253504293236
+        },
+        {
+          "certified": true,
+          "cycle": 2,
+          "failures": 6,
+          "parameter_sha256": "88b3d511d01272b43b59796c4f1fd0d0ed2fc817c6989308e85712dbc9fe0563",
+          "posthoc_only": {
+            "exact_infidelity": 0.0002721084977644894,
+            "exact_target_reached": true
+          },
+          "query_index": 65,
+          "sampled_infidelity": 0.00018310546875,
+          "shots": 32768,
+          "successes": 32762,
+          "upper_infidelity_99_5": 0.0004778249140287984
+        }
+      ],
+      "certified_cycle": 2,
+      "epsilon": 0.05,
+      "exact_posthoc_success": true,
+      "false_early_stop": false,
+      "family": "combined",
+      "full_cap_cost": {
+        "queries": 66,
+        "shots": 2099200
+      },
+      "missed_certificate": false,
+      "noise_seed": 2149297753852440635,
+      "online_certified_success": true,
+      "rejected_proposals_not_checked": 0,
+      "replicate": 3,
+      "selected_cell": "combined:260608:0.05",
+      "selected_cell_index": 16,
+      "truth_seed": 260608,
+      "zero_steps_not_checked": 0
+    },
+    {
+      "actual_online_cost": {
+        "queries": 66,
+        "query_ratio_to_full_cap": 1.0,
+        "reason": "full cap after cycle-2 certificate",
+        "shot_ratio_to_full_cap": 1.0,
+        "shots": 2099200
+      },
+      "certificate_event_count": 2,
+      "certificate_events_checked": [
+        {
+          "certified": false,
+          "cycle": 1,
+          "failures": 32,
+          "parameter_sha256": "1624f09aff106c05a16185f4d88465a028cd277764a839717ad4edff1f37c19f",
+          "posthoc_only": {
+            "exact_infidelity": 0.0009504668933256744,
+            "exact_target_reached": true
+          },
+          "query_index": 33,
+          "sampled_infidelity": 0.0009765625,
+          "shots": 32768,
+          "successes": 32736,
+          "upper_infidelity_99_5": 0.001515253504293236
+        },
+        {
+          "certified": true,
+          "cycle": 2,
+          "failures": 11,
+          "parameter_sha256": "197a9443bd4fafbedc346cd5ec731ef3d8c729fec991feae31b2cd25dc3259cd",
+          "posthoc_only": {
+            "exact_infidelity": 0.00018668757306161687,
+            "exact_target_reached": true
+          },
+          "query_index": 65,
+          "sampled_infidelity": 0.000335693359375,
+          "shots": 32768,
+          "successes": 32757,
+          "upper_infidelity_99_5": 0.0006950427812317433
+        }
+      ],
+      "certified_cycle": 2,
+      "epsilon": 0.05,
+      "exact_posthoc_success": true,
+      "false_early_stop": false,
+      "family": "combined",
+      "full_cap_cost": {
+        "queries": 66,
+        "shots": 2099200
+      },
+      "missed_certificate": false,
+      "noise_seed": 486632073719332991,
+      "online_certified_success": true,
+      "rejected_proposals_not_checked": 0,
+      "replicate": 0,
+      "selected_cell": "combined:260609:0.05",
+      "selected_cell_index": 17,
+      "truth_seed": 260609,
+      "zero_steps_not_checked": 0
+    },
+    {
+      "actual_online_cost": {
+        "queries": 66,
+        "query_ratio_to_full_cap": 1.0,
+        "reason": "full cap after cycle-2 certificate",
+        "shot_ratio_to_full_cap": 1.0,
+        "shots": 2099200
+      },
+      "certificate_event_count": 2,
+      "certificate_events_checked": [
+        {
+          "certified": false,
+          "cycle": 1,
+          "failures": 32,
+          "parameter_sha256": "4bc92ac86c44a1c3e4f6efd522a1cbab27c48289060205245886a46b85617d14",
+          "posthoc_only": {
+            "exact_infidelity": 0.001035991902026523,
+            "exact_target_reached": false
+          },
+          "query_index": 33,
+          "sampled_infidelity": 0.0009765625,
+          "shots": 32768,
+          "successes": 32736,
+          "upper_infidelity_99_5": 0.001515253504293236
+        },
+        {
+          "certified": true,
+          "cycle": 2,
+          "failures": 11,
+          "parameter_sha256": "30b168e6a26dafd3e5d4164744a8f7e20cfdf8f0930562f1df2eddb669396a53",
+          "posthoc_only": {
+            "exact_infidelity": 0.00028759598444894063,
+            "exact_target_reached": true
+          },
+          "query_index": 65,
+          "sampled_infidelity": 0.000335693359375,
+          "shots": 32768,
+          "successes": 32757,
+          "upper_infidelity_99_5": 0.0006950427812317433
+        }
+      ],
+      "certified_cycle": 2,
+      "epsilon": 0.05,
+      "exact_posthoc_success": true,
+      "false_early_stop": false,
+      "family": "combined",
+      "full_cap_cost": {
+        "queries": 66,
+        "shots": 2099200
+      },
+      "missed_certificate": false,
+      "noise_seed": 1016806983971120750,
+      "online_certified_success": true,
+      "rejected_proposals_not_checked": 0,
+      "replicate": 1,
+      "selected_cell": "combined:260609:0.05",
+      "selected_cell_index": 17,
+      "truth_seed": 260609,
+      "zero_steps_not_checked": 0
+    },
+    {
+      "actual_online_cost": {
+        "queries": 33,
+        "query_ratio_to_full_cap": 0.5,
+        "reason": "cycle-1 certificate",
+        "shot_ratio_to_full_cap": 0.5,
+        "shots": 1049600
+      },
+      "certificate_event_count": 1,
+      "certificate_events_checked": [
+        {
+          "certified": true,
+          "cycle": 1,
+          "failures": 15,
+          "parameter_sha256": "76261dbbac50b45f3b770746d8774e5db128dc4dbdbc8d58f804de4e0e71355c",
+          "posthoc_only": {
+            "exact_infidelity": 0.0005368123302526007,
+            "exact_target_reached": true
+          },
+          "query_index": 33,
+          "sampled_infidelity": 0.000457763671875,
+          "shots": 32768,
+          "successes": 32753,
+          "upper_infidelity_99_5": 0.0008593261833731436
+        }
+      ],
+      "certified_cycle": 1,
+      "epsilon": 0.05,
+      "exact_posthoc_success": true,
+      "false_early_stop": false,
+      "family": "combined",
+      "full_cap_cost": {
+        "queries": 66,
+        "shots": 2099200
+      },
+      "missed_certificate": false,
+      "noise_seed": 9754517735558407783,
+      "online_certified_success": true,
+      "rejected_proposals_not_checked": 0,
+      "replicate": 2,
+      "selected_cell": "combined:260609:0.05",
+      "selected_cell_index": 17,
+      "truth_seed": 260609,
+      "zero_steps_not_checked": 0
+    },
+    {
+      "actual_online_cost": {
+        "queries": 66,
+        "query_ratio_to_full_cap": 1.0,
+        "reason": "full cap after cycle-2 certificate",
+        "shot_ratio_to_full_cap": 1.0,
+        "shots": 2099200
+      },
+      "certificate_event_count": 2,
+      "certificate_events_checked": [
+        {
+          "certified": false,
+          "cycle": 1,
+          "failures": 33,
+          "parameter_sha256": "585cfd6d12d78722d3b894e651aac2b138ac72ee3075aa9fd37a685252f3e8d9",
+          "posthoc_only": {
+            "exact_infidelity": 0.0009977721513277915,
+            "exact_target_reached": true
+          },
+          "query_index": 33,
+          "sampled_infidelity": 0.001007080078125,
+          "shots": 32768,
+          "successes": 32735,
+          "upper_infidelity_99_5": 0.0015525534597340266
+        },
+        {
+          "certified": true,
+          "cycle": 2,
+          "failures": 9,
+          "parameter_sha256": "473803faf0e24d8ea7fd4f0181b1ac7efcab532218a10f75daac10ddcb713fb9",
+          "posthoc_only": {
+            "exact_infidelity": 0.000189031377478166,
+            "exact_target_reached": true
+          },
+          "query_index": 65,
+          "sampled_infidelity": 0.000274658203125,
+          "shots": 32768,
+          "successes": 32759,
+          "upper_infidelity_99_5": 0.000610201023184829
+        }
+      ],
+      "certified_cycle": 2,
+      "epsilon": 0.05,
+      "exact_posthoc_success": true,
+      "false_early_stop": false,
+      "family": "combined",
+      "full_cap_cost": {
+        "queries": 66,
+        "shots": 2099200
+      },
+      "missed_certificate": false,
+      "noise_seed": 16430316463218125550,
+      "online_certified_success": true,
+      "rejected_proposals_not_checked": 0,
+      "replicate": 3,
+      "selected_cell": "combined:260609:0.05",
+      "selected_cell_index": 17,
+      "truth_seed": 260609,
+      "zero_steps_not_checked": 0
+    },
+    {
+      "actual_online_cost": {
+        "queries": 66,
+        "query_ratio_to_full_cap": 1.0,
+        "reason": "full cap without certificate",
+        "shot_ratio_to_full_cap": 1.0,
+        "shots": 2099200
+      },
+      "certificate_event_count": 1,
+      "certificate_events_checked": [
+        {
+          "certified": false,
+          "cycle": 1,
+          "failures": 34,
+          "parameter_sha256": "ab59c29552c8e514256ba168df87f18e937d0871c92f0db8ca276adfe5628947",
+          "posthoc_only": {
+            "exact_infidelity": 0.0012568880407703986,
+            "exact_target_reached": false
+          },
+          "query_index": 33,
+          "sampled_infidelity": 0.00103759765625,
+          "shots": 32768,
+          "successes": 32734,
+          "upper_infidelity_99_5": 0.0015897537619852379
+        }
+      ],
+      "certified_cycle": null,
+      "epsilon": 0.05,
+      "exact_posthoc_success": false,
+      "false_early_stop": false,
+      "family": "combined",
+      "full_cap_cost": {
+        "queries": 66,
+        "shots": 2099200
+      },
+      "missed_certificate": false,
+      "noise_seed": 7815590449648321920,
+      "online_certified_success": false,
+      "rejected_proposals_not_checked": 1,
+      "replicate": 0,
+      "selected_cell": "combined:260610:0.05",
+      "selected_cell_index": 18,
+      "truth_seed": 260610,
+      "zero_steps_not_checked": 0
+    },
+    {
+      "actual_online_cost": {
+        "queries": 66,
+        "query_ratio_to_full_cap": 1.0,
+        "reason": "full cap after cycle-2 certificate",
+        "shot_ratio_to_full_cap": 1.0,
+        "shots": 2099200
+      },
+      "certificate_event_count": 2,
+      "certificate_events_checked": [
+        {
+          "certified": false,
+          "cycle": 1,
+          "failures": 26,
+          "parameter_sha256": "2619d4e79f2a2d92d542ec3f71bb436350ac1bf7734a1e6237b46336730a78ed",
+          "posthoc_only": {
+            "exact_infidelity": 0.000640122129342835,
+            "exact_target_reached": true
+          },
+          "query_index": 33,
+          "sampled_infidelity": 0.00079345703125,
+          "shots": 32768,
+          "successes": 32742,
+          "upper_infidelity_99_5": 0.0012890769971496095
+        },
+        {
+          "certified": true,
+          "cycle": 2,
+          "failures": 3,
+          "parameter_sha256": "fc213cd280e9ac46e1c6f0d8286d2300ca6492df0b23d36f2064359d9a858c9e",
+          "posthoc_only": {
+            "exact_infidelity": 9.965686039925536e-05,
+            "exact_target_reached": true
+          },
+          "query_index": 65,
+          "sampled_infidelity": 9.1552734375e-05,
+          "shots": 32768,
+          "successes": 32765,
+          "upper_infidelity_99_5": 0.000334965250372746
+        }
+      ],
+      "certified_cycle": 2,
+      "epsilon": 0.05,
+      "exact_posthoc_success": true,
+      "false_early_stop": false,
+      "family": "combined",
+      "full_cap_cost": {
+        "queries": 66,
+        "shots": 2099200
+      },
+      "missed_certificate": false,
+      "noise_seed": 9390853090951123059,
+      "online_certified_success": true,
+      "rejected_proposals_not_checked": 0,
+      "replicate": 1,
+      "selected_cell": "combined:260610:0.05",
+      "selected_cell_index": 18,
+      "truth_seed": 260610,
+      "zero_steps_not_checked": 0
+    },
+    {
+      "actual_online_cost": {
+        "queries": 66,
+        "query_ratio_to_full_cap": 1.0,
+        "reason": "full cap after cycle-2 certificate",
+        "shot_ratio_to_full_cap": 1.0,
+        "shots": 2099200
+      },
+      "certificate_event_count": 2,
+      "certificate_events_checked": [
+        {
+          "certified": false,
+          "cycle": 1,
+          "failures": 40,
+          "parameter_sha256": "a8252955e9bd9a41aa4d2e5be8ff47766290fe0bcd1b001e713564222edb0e1f",
+          "posthoc_only": {
+            "exact_infidelity": 0.0009184780759192712,
+            "exact_target_reached": true
+          },
+          "query_index": 33,
+          "sampled_infidelity": 0.001220703125,
+          "shots": 32768,
+          "successes": 32728,
+          "upper_infidelity_99_5": 0.0018110817340195756
+        },
+        {
+          "certified": true,
+          "cycle": 2,
+          "failures": 5,
+          "parameter_sha256": "5ebe41fb67e624793639e3281d3d23011a96162001f4f237acd93cc1e1b42dfe",
+          "posthoc_only": {
+            "exact_infidelity": 0.00021047157688613982,
+            "exact_target_reached": true
+          },
+          "query_index": 65,
+          "sampled_infidelity": 0.000152587890625,
+          "shots": 32768,
+          "successes": 32763,
+          "upper_infidelity_99_5": 0.00043175610403415715
+        }
+      ],
+      "certified_cycle": 2,
+      "epsilon": 0.05,
+      "exact_posthoc_success": true,
+      "false_early_stop": false,
+      "family": "combined",
+      "full_cap_cost": {
+        "queries": 66,
+        "shots": 2099200
+      },
+      "missed_certificate": false,
+      "noise_seed": 11363219260073997577,
+      "online_certified_success": true,
+      "rejected_proposals_not_checked": 0,
+      "replicate": 2,
+      "selected_cell": "combined:260610:0.05",
+      "selected_cell_index": 18,
+      "truth_seed": 260610,
+      "zero_steps_not_checked": 0
+    },
+    {
+      "actual_online_cost": {
+        "queries": 33,
+        "query_ratio_to_full_cap": 0.5,
+        "reason": "cycle-1 certificate",
+        "shot_ratio_to_full_cap": 0.5,
+        "shots": 1049600
+      },
+      "certificate_event_count": 1,
+      "certificate_events_checked": [
+        {
+          "certified": true,
+          "cycle": 1,
+          "failures": 17,
+          "parameter_sha256": "e281f64a7116410024e7ac49e97876a06288eae1a8edbe76b4a60163a133d52e",
+          "posthoc_only": {
+            "exact_infidelity": 0.0007444393298867702,
+            "exact_target_reached": true
+          },
+          "query_index": 33,
+          "sampled_infidelity": 0.000518798828125,
+          "shots": 32768,
+          "successes": 32751,
+          "upper_infidelity_99_5": 0.0009394564963882802
+        }
+      ],
+      "certified_cycle": 1,
+      "epsilon": 0.05,
+      "exact_posthoc_success": true,
+      "false_early_stop": false,
+      "family": "combined",
+      "full_cap_cost": {
+        "queries": 66,
+        "shots": 2099200
+      },
+      "missed_certificate": false,
+      "noise_seed": 861004656958598573,
+      "online_certified_success": true,
+      "rejected_proposals_not_checked": 0,
+      "replicate": 3,
+      "selected_cell": "combined:260610:0.05",
+      "selected_cell_index": 18,
+      "truth_seed": 260610,
+      "zero_steps_not_checked": 0
+    },
+    {
+      "actual_online_cost": {
+        "queries": 33,
+        "query_ratio_to_full_cap": 0.5,
+        "reason": "cycle-1 certificate",
+        "shot_ratio_to_full_cap": 0.5,
+        "shots": 1049600
+      },
+      "certificate_event_count": 1,
+      "certificate_events_checked": [
+        {
+          "certified": true,
+          "cycle": 1,
+          "failures": 18,
+          "parameter_sha256": "9a049baecfab1944505f351901bf82ba080b34c59f2a687cb24d263187476f64",
+          "posthoc_only": {
+            "exact_infidelity": 0.0005215954188529937,
+            "exact_target_reached": true
+          },
+          "query_index": 33,
+          "sampled_infidelity": 0.00054931640625,
+          "shots": 32768,
+          "successes": 32750,
+          "upper_infidelity_99_5": 0.0009791200724728268
+        }
+      ],
+      "certified_cycle": 1,
+      "epsilon": 0.05,
+      "exact_posthoc_success": true,
+      "false_early_stop": false,
+      "family": "combined",
+      "full_cap_cost": {
+        "queries": 66,
+        "shots": 2099200
+      },
+      "missed_certificate": false,
+      "noise_seed": 12734637299724397834,
+      "online_certified_success": true,
+      "rejected_proposals_not_checked": 0,
+      "replicate": 0,
+      "selected_cell": "combined:260611:0.05",
+      "selected_cell_index": 19,
+      "truth_seed": 260611,
+      "zero_steps_not_checked": 0
+    },
+    {
+      "actual_online_cost": {
+        "queries": 66,
+        "query_ratio_to_full_cap": 1.0,
+        "reason": "full cap after cycle-2 certificate",
+        "shot_ratio_to_full_cap": 1.0,
+        "shots": 2099200
+      },
+      "certificate_event_count": 2,
+      "certificate_events_checked": [
+        {
+          "certified": false,
+          "cycle": 1,
+          "failures": 41,
+          "parameter_sha256": "4eab1a2a0a8fd965a5e9e07a26ebb4b474497b639f9edf7aa2b83fa0fea028e1",
+          "posthoc_only": {
+            "exact_infidelity": 0.0011548367504742307,
+            "exact_target_reached": false
+          },
+          "query_index": 33,
+          "sampled_infidelity": 0.001251220703125,
+          "shots": 32768,
+          "successes": 32727,
+          "upper_infidelity_99_5": 0.0018476887635757765
+        },
+        {
+          "certified": true,
+          "cycle": 2,
+          "failures": 9,
+          "parameter_sha256": "9785bb8840cd4dbb0f7e03872cd0545463c9eab0be29f144bfe5ae66f2a78b45",
+          "posthoc_only": {
+            "exact_infidelity": 0.0004095328531542597,
+            "exact_target_reached": true
+          },
+          "query_index": 65,
+          "sampled_infidelity": 0.000274658203125,
+          "shots": 32768,
+          "successes": 32759,
+          "upper_infidelity_99_5": 0.000610201023184829
+        }
+      ],
+      "certified_cycle": 2,
+      "epsilon": 0.05,
+      "exact_posthoc_success": true,
+      "false_early_stop": false,
+      "family": "combined",
+      "full_cap_cost": {
+        "queries": 66,
+        "shots": 2099200
+      },
+      "missed_certificate": false,
+      "noise_seed": 17592961231435272817,
+      "online_certified_success": true,
+      "rejected_proposals_not_checked": 0,
+      "replicate": 1,
+      "selected_cell": "combined:260611:0.05",
+      "selected_cell_index": 19,
+      "truth_seed": 260611,
+      "zero_steps_not_checked": 0
+    },
+    {
+      "actual_online_cost": {
+        "queries": 66,
+        "query_ratio_to_full_cap": 1.0,
+        "reason": "full cap after cycle-2 certificate",
+        "shot_ratio_to_full_cap": 1.0,
+        "shots": 2099200
+      },
+      "certificate_event_count": 2,
+      "certificate_events_checked": [
+        {
+          "certified": false,
+          "cycle": 1,
+          "failures": 33,
+          "parameter_sha256": "ccc8fc5f179b9e6c4e2f5623c171eedf91d0ea1a239c49f97fea2ab7c7c7d6f3",
+          "posthoc_only": {
+            "exact_infidelity": 0.0010942380999896528,
+            "exact_target_reached": false
+          },
+          "query_index": 33,
+          "sampled_infidelity": 0.001007080078125,
+          "shots": 32768,
+          "successes": 32735,
+          "upper_infidelity_99_5": 0.0015525534597340266
+        },
+        {
+          "certified": true,
+          "cycle": 2,
+          "failures": 6,
+          "parameter_sha256": "86471da4641169188cc04408ef13ba6a14d9a0e85b4c5d9a4d4830b99bde7815",
+          "posthoc_only": {
+            "exact_infidelity": 0.00023078136288934292,
+            "exact_target_reached": true
+          },
+          "query_index": 65,
+          "sampled_infidelity": 0.00018310546875,
+          "shots": 32768,
+          "successes": 32762,
+          "upper_infidelity_99_5": 0.0004778249140287984
+        }
+      ],
+      "certified_cycle": 2,
+      "epsilon": 0.05,
+      "exact_posthoc_success": true,
+      "false_early_stop": false,
+      "family": "combined",
+      "full_cap_cost": {
+        "queries": 66,
+        "shots": 2099200
+      },
+      "missed_certificate": false,
+      "noise_seed": 1386119649926497157,
+      "online_certified_success": true,
+      "rejected_proposals_not_checked": 0,
+      "replicate": 2,
+      "selected_cell": "combined:260611:0.05",
+      "selected_cell_index": 19,
+      "truth_seed": 260611,
+      "zero_steps_not_checked": 0
+    },
+    {
+      "actual_online_cost": {
+        "queries": 66,
+        "query_ratio_to_full_cap": 1.0,
+        "reason": "full cap without certificate",
+        "shot_ratio_to_full_cap": 1.0,
+        "shots": 2099200
+      },
+      "certificate_event_count": 1,
+      "certificate_events_checked": [
+        {
+          "certified": false,
+          "cycle": 1,
+          "failures": 22,
+          "parameter_sha256": "9f42a42dd959938ef65ed019734d4076471d28337d2349c4c47efb6b12209d56",
+          "posthoc_only": {
+            "exact_infidelity": 0.0007363197747056738,
+            "exact_target_reached": true
+          },
+          "query_index": 33,
+          "sampled_infidelity": 0.00067138671875,
+          "shots": 32768,
+          "successes": 32746,
+          "upper_infidelity_99_5": 0.0011355476408633836
+        }
+      ],
+      "certified_cycle": null,
+      "epsilon": 0.05,
+      "exact_posthoc_success": true,
+      "false_early_stop": false,
+      "family": "combined",
+      "full_cap_cost": {
+        "queries": 66,
+        "shots": 2099200
+      },
+      "missed_certificate": true,
+      "noise_seed": 16990095421234368998,
+      "online_certified_success": false,
+      "rejected_proposals_not_checked": 1,
+      "replicate": 3,
+      "selected_cell": "combined:260611:0.05",
+      "selected_cell_index": 19,
+      "truth_seed": 260611,
+      "zero_steps_not_checked": 0
+    },
+    {
+      "actual_online_cost": {
+        "queries": 66,
+        "query_ratio_to_full_cap": 1.0,
+        "reason": "full cap after cycle-2 certificate",
+        "shot_ratio_to_full_cap": 1.0,
+        "shots": 2099200
+      },
+      "certificate_event_count": 2,
+      "certificate_events_checked": [
+        {
+          "certified": false,
+          "cycle": 1,
+          "failures": 42,
+          "parameter_sha256": "d28ea7dd924ce9937664776e3c1ebb3db5087da94b2747a8c2a3529b41002ff0",
+          "posthoc_only": {
+            "exact_infidelity": 0.0015935836180289709,
+            "exact_target_reached": false
+          },
+          "query_index": 33,
+          "sampled_infidelity": 0.00128173828125,
+          "shots": 32768,
+          "successes": 32726,
+          "upper_infidelity_99_5": 0.0018842232526261582
+        },
+        {
+          "certified": true,
+          "cycle": 2,
+          "failures": 16,
+          "parameter_sha256": "aa67f0765a3ceee110ff31f0b07a56ebbf44177d769457301ce0d36a0389873e",
+          "posthoc_only": {
+            "exact_infidelity": 0.0008889317877084357,
+            "exact_target_reached": true
+          },
+          "query_index": 65,
+          "sampled_infidelity": 0.00048828125,
+          "shots": 32768,
+          "successes": 32752,
+          "upper_infidelity_99_5": 0.000899533022541561
+        }
+      ],
+      "certified_cycle": 2,
+      "epsilon": 0.05,
+      "exact_posthoc_success": true,
+      "false_early_stop": false,
+      "family": "combined",
+      "full_cap_cost": {
+        "queries": 66,
+        "shots": 2099200
+      },
+      "missed_certificate": false,
+      "noise_seed": 14170956788586915824,
+      "online_certified_success": true,
+      "rejected_proposals_not_checked": 0,
+      "replicate": 0,
+      "selected_cell": "combined:260612:0.05",
+      "selected_cell_index": 20,
+      "truth_seed": 260612,
+      "zero_steps_not_checked": 0
+    },
+    {
+      "actual_online_cost": {
+        "queries": 33,
+        "query_ratio_to_full_cap": 0.5,
+        "reason": "cycle-1 certificate",
+        "shot_ratio_to_full_cap": 0.5,
+        "shots": 1049600
+      },
+      "certificate_event_count": 1,
+      "certificate_events_checked": [
+        {
+          "certified": true,
+          "cycle": 1,
+          "failures": 15,
+          "parameter_sha256": "7cce3b2994e60e771a885d4669468c546bd8a6140a6d6b6e41a949e1e233a7eb",
+          "posthoc_only": {
+            "exact_infidelity": 0.00042887861545493067,
+            "exact_target_reached": true
+          },
+          "query_index": 33,
+          "sampled_infidelity": 0.000457763671875,
+          "shots": 32768,
+          "successes": 32753,
+          "upper_infidelity_99_5": 0.0008593261833731436
+        }
+      ],
+      "certified_cycle": 1,
+      "epsilon": 0.05,
+      "exact_posthoc_success": true,
+      "false_early_stop": false,
+      "family": "combined",
+      "full_cap_cost": {
+        "queries": 66,
+        "shots": 2099200
+      },
+      "missed_certificate": false,
+      "noise_seed": 16941200809964469436,
+      "online_certified_success": true,
+      "rejected_proposals_not_checked": 0,
+      "replicate": 1,
+      "selected_cell": "combined:260612:0.05",
+      "selected_cell_index": 20,
+      "truth_seed": 260612,
+      "zero_steps_not_checked": 0
+    },
+    {
+      "actual_online_cost": {
+        "queries": 66,
+        "query_ratio_to_full_cap": 1.0,
+        "reason": "full cap after cycle-2 certificate",
+        "shot_ratio_to_full_cap": 1.0,
+        "shots": 2099200
+      },
+      "certificate_event_count": 2,
+      "certificate_events_checked": [
+        {
+          "certified": false,
+          "cycle": 1,
+          "failures": 37,
+          "parameter_sha256": "9ff0a02d0db9010ecfa8d316956c6e79c0cb55d01eda1c5f16d29a15c802b904",
+          "posthoc_only": {
+            "exact_infidelity": 0.001494796985333835,
+            "exact_target_reached": false
+          },
+          "query_index": 33,
+          "sampled_infidelity": 0.001129150390625,
+          "shots": 32768,
+          "successes": 32731,
+          "upper_infidelity_99_5": 0.0017007978063295654
+        },
+        {
+          "certified": true,
+          "cycle": 2,
+          "failures": 14,
+          "parameter_sha256": "1b5f5599574c6a8fbf63c3bd21676c01b1cfeba7bc1d45f8e1cad3176d570843",
+          "posthoc_only": {
+            "exact_infidelity": 0.0005926613967029981,
+            "exact_target_reached": true
+          },
+          "query_index": 65,
+          "sampled_infidelity": 0.00042724609375,
+          "shots": 32768,
+          "successes": 32754,
+          "upper_infidelity_99_5": 0.0008188087458175965
+        }
+      ],
+      "certified_cycle": 2,
+      "epsilon": 0.05,
+      "exact_posthoc_success": true,
+      "false_early_stop": false,
+      "family": "combined",
+      "full_cap_cost": {
+        "queries": 66,
+        "shots": 2099200
+      },
+      "missed_certificate": false,
+      "noise_seed": 5509239966060686590,
+      "online_certified_success": true,
+      "rejected_proposals_not_checked": 0,
+      "replicate": 2,
+      "selected_cell": "combined:260612:0.05",
+      "selected_cell_index": 20,
+      "truth_seed": 260612,
+      "zero_steps_not_checked": 0
+    },
+    {
+      "actual_online_cost": {
+        "queries": 66,
+        "query_ratio_to_full_cap": 1.0,
+        "reason": "full cap after cycle-2 certificate",
+        "shot_ratio_to_full_cap": 1.0,
+        "shots": 2099200
+      },
+      "certificate_event_count": 2,
+      "certificate_events_checked": [
+        {
+          "certified": false,
+          "cycle": 1,
+          "failures": 45,
+          "parameter_sha256": "0951700152a30d80ec30e33a3d7d7d0aea4e06405171c6f15291619c0355928e",
+          "posthoc_only": {
+            "exact_infidelity": 0.0014483250164690764,
+            "exact_target_reached": false
+          },
+          "query_index": 33,
+          "sampled_infidelity": 0.001373291015625,
+          "shots": 32768,
+          "successes": 32723,
+          "upper_infidelity_99_5": 0.001993415962540439
+        },
+        {
+          "certified": true,
+          "cycle": 2,
+          "failures": 6,
+          "parameter_sha256": "85c64952539f140c6db77a446601188a5abba409c8473083442c7e1259a1f7b6",
+          "posthoc_only": {
+            "exact_infidelity": 0.00030676363812531804,
+            "exact_target_reached": true
+          },
+          "query_index": 65,
+          "sampled_infidelity": 0.00018310546875,
+          "shots": 32768,
+          "successes": 32762,
+          "upper_infidelity_99_5": 0.0004778249140287984
+        }
+      ],
+      "certified_cycle": 2,
+      "epsilon": 0.05,
+      "exact_posthoc_success": true,
+      "false_early_stop": false,
+      "family": "combined",
+      "full_cap_cost": {
+        "queries": 66,
+        "shots": 2099200
+      },
+      "missed_certificate": false,
+      "noise_seed": 16660069337224136616,
+      "online_certified_success": true,
+      "rejected_proposals_not_checked": 0,
+      "replicate": 3,
+      "selected_cell": "combined:260612:0.05",
+      "selected_cell_index": 20,
+      "truth_seed": 260612,
+      "zero_steps_not_checked": 0
+    }
+  ],
+  "schema": "QL1F-attempt43-online-certification-v1",
+  "scope": "development evidence only",
+  "source_seal": {
+    "files": {
+      "code/cycle5_statistics.py": "16fbef6cb34dee4c2d9bbbe744f2831b97ac47cf4cddb0f55971dce2722deccb",
+      "docs/ATTEMPT42_PROTOCOL.md": "7f2c12738ee0d8274e711fe6fdcd0778601bfe60312dfe02d2786c5e6c1d2905",
+      "docs/ATTEMPT43_PROTOCOL.md": "6c9e82595ebb412c7249b95ef11dd0a5c311d7da9e4d454a0295b376c2b9d379",
+      "results_summary/QL1F-attempt42-normalized-principal-global.json": "d0a4a35c76a0917b1456b7ca18fbfd4ab0b0875a328648f77ddacfa91d591c92"
+    },
+    "runner": {
+      "path": "code/attempt43_online_certification.py",
+      "sha256": "16c6611dd6604747867e5803b80a5961e4dd796e92dff07aa06ae818a051ebe8"
+    },
+    "text_hash_strategy": "sha256-utf8-lf-v1"
+  },
+  "status": "complete",
+  "summary": {
+    "actual_online_cost": {
+      "mean_queries_per_run": 60.892857142857146,
+      "mean_shots_per_run": 1936761.9047619049,
+      "query_ratio_to_full_cap": 0.9226190476190477,
+      "query_ratio_truth_cell_bootstrap": {
+        "bootstrap_draws": 20000,
+        "estimate": 0.9226190476190477,
+        "independent_truth_cells": 21,
+        "lower_95": 0.8928571428571429,
+        "seed": 11304305,
+        "strata": 3,
+        "upper_95": 0.9464285714285714
+      },
+      "shot_ratio_to_full_cap": 0.9226190476190477,
+      "shot_ratio_truth_cell_bootstrap": {
+        "bootstrap_draws": 20000,
+        "estimate": 0.9226190476190477,
+        "independent_truth_cells": 21,
+        "lower_95": 0.8928571428571429,
+        "seed": 11304306,
+        "strata": 3,
+        "upper_95": 0.9464285714285714
+      },
+      "total_queries": 5115,
+      "total_shots": 162688000
+    },
+    "by_family": {
+      "combined": {
+        "exact_posthoc_success_rate": 0.9583333333333334,
+        "exact_posthoc_successes": 23,
+        "false_early_stop_rate": 0.0,
+        "false_early_stops": 0,
+        "mean_actual_online_queries": 57.75,
+        "mean_actual_online_shots": 1836800.0,
+        "mean_query_ratio_to_full_cap": 0.875,
+        "mean_shot_ratio_to_full_cap": 0.875,
+        "missed_certificate_rate_among_exact_successes": 0.17391304347826086,
+        "missed_certificates": 4,
+        "nested_runs": 24,
+        "online_certified_success_rate": 0.7916666666666666,
+        "online_certified_successes": 19,
+        "success_difference": -0.16666666666666666,
+        "truth_cells": 6
+      },
+      "control-map": {
+        "exact_posthoc_success_rate": 1.0,
+        "exact_posthoc_successes": 28,
+        "false_early_stop_rate": 0.0,
+        "false_early_stops": 0,
+        "mean_actual_online_queries": 63.642857142857146,
+        "mean_actual_online_shots": 2024228.5714285714,
+        "mean_query_ratio_to_full_cap": 0.9642857142857143,
+        "mean_shot_ratio_to_full_cap": 0.9642857142857143,
+        "missed_certificate_rate_among_exact_successes": 0.32142857142857145,
+        "missed_certificates": 9,
+        "nested_runs": 28,
+        "online_certified_success_rate": 0.6785714285714286,
+        "online_certified_successes": 19,
+        "success_difference": -0.32142857142857145,
+        "truth_cells": 7
+      },
+      "drift": {
+        "exact_posthoc_success_rate": 0.84375,
+        "exact_posthoc_successes": 27,
+        "false_early_stop_rate": 0.0,
+        "false_early_stops": 0,
+        "mean_actual_online_queries": 60.84375,
+        "mean_actual_online_shots": 1935200.0,
+        "mean_query_ratio_to_full_cap": 0.921875,
+        "mean_shot_ratio_to_full_cap": 0.921875,
+        "missed_certificate_rate_among_exact_successes": 0.1111111111111111,
+        "missed_certificates": 3,
+        "nested_runs": 32,
+        "online_certified_success_rate": 0.75,
+        "online_certified_successes": 24,
+        "success_difference": -0.09375,
+        "truth_cells": 8
+      }
+    },
+    "exact_posthoc_success": {
+      "rate": 0.9285714285714286,
+      "successes": 78,
+      "truth_cell_bootstrap": {
+        "bootstrap_draws": 20000,
+        "estimate": 0.9285714285714286,
+        "independent_truth_cells": 21,
+        "lower_95": 0.8571428571428571,
+        "seed": 11304301,
+        "strata": 3,
+        "upper_95": 0.9880952380952381
+      }
+    },
+    "false_early_stop": {
+      "count": 0,
+      "rate": 0.0,
+      "theoretical_run_level_union_bound": 0.010000000000000009,
+      "truth_cell_bootstrap": {
+        "bootstrap_draws": 20000,
+        "estimate": 0.0,
+        "independent_truth_cells": 21,
+        "lower_95": 0.0,
+        "seed": 11304304,
+        "strata": 3,
+        "upper_95": 0.0
+      }
+    },
+    "full_cap_cost": {
+      "queries_per_run": 66,
+      "shots_per_run": 2099200,
+      "total_queries": 5544,
+      "total_shots": 176332800
+    },
+    "gate_decision": {
+      "cost_reporting": "full method-cap cost",
+      "online_rule_accepted": false,
+      "oracle_scored_first_hit_label": "post-hoc diagnostic only; not an online stopping rule"
+    },
+    "gates": {
+      "absolute_online_success_at_least_75_percent": {
+        "passed": false,
+        "threshold": 0.75,
+        "value": 0.7380952380952381
+      },
+      "false_early_stop_at_most_1_percent": {
+        "passed": true,
+        "threshold": 0.01,
+        "value": 0.0
+      },
+      "query_ratio_ucb_below_0_90": {
+        "passed": false,
+        "threshold": 0.9,
+        "value": 0.9464285714285714
+      },
+      "shot_ratio_ucb_below_0_90": {
+        "passed": false,
+        "threshold": 0.9,
+        "value": 0.9464285714285714
+      },
+      "success_difference_lcb_above_minus_5pp": {
+        "passed": false,
+        "threshold": -0.05,
+        "value": -0.27380952380952384
+      }
+    },
+    "independent_truth_cells": 21,
+    "missed_certificate": {
+      "count": 16,
+      "exact_success_denominator": 78,
+      "rate_among_exact_successes": 0.20512820512820512
+    },
+    "nested_runs": 84,
+    "online_certified_success": {
+      "certified_by_cycle": {
+        "1": 13,
+        "2": 49
+      },
+      "rate": 0.7380952380952381,
+      "successes": 62,
+      "truth_cell_bootstrap": {
+        "bootstrap_draws": 20000,
+        "estimate": 0.7380952380952381,
+        "independent_truth_cells": 21,
+        "lower_95": 0.6428571428571429,
+        "seed": 11304302,
+        "strata": 3,
+        "upper_95": 0.8333333333333334
+      }
+    },
+    "paired_online_minus_exact_success": {
+      "bootstrap_draws": 20000,
+      "estimate": -0.19047619047619047,
+      "independent_truth_cells": 21,
+      "lower_95": -0.27380952380952384,
+      "seed": 11304303,
+      "strata": 3,
+      "upper_95": -0.11904761904761904
+    }
+  },
+  "truth_level_rows": [
+    {
+      "epsilon": 0.1,
+      "exact_posthoc_success_fraction": 1.0,
+      "exact_success_count": 4,
+      "false_early_stop_count": 0,
+      "false_early_stop_fraction": 0.0,
+      "family": "control-map",
+      "mean_actual_online_queries": 66.0,
+      "mean_actual_online_shots": 2099200.0,
+      "mean_query_ratio_to_full_cap": 1.0,
+      "mean_shot_ratio_to_full_cap": 1.0,
+      "missed_certificate_count": 3,
+      "missed_certificate_given_exact": 0.75,
+      "nested_replicates": 4,
+      "online_certificate_count": 1,
+      "online_certified_success_fraction": 0.25,
+      "selected_cell": "control-map:260605:0.1",
+      "selected_cell_index": 0,
+      "success_difference": -0.75,
+      "truth_seed": 260605
+    },
+    {
+      "epsilon": 0.05,
+      "exact_posthoc_success_fraction": 1.0,
+      "exact_success_count": 4,
+      "false_early_stop_count": 0,
+      "false_early_stop_fraction": 0.0,
+      "family": "control-map",
+      "mean_actual_online_queries": 66.0,
+      "mean_actual_online_shots": 2099200.0,
+      "mean_query_ratio_to_full_cap": 1.0,
+      "mean_shot_ratio_to_full_cap": 1.0,
+      "missed_certificate_count": 1,
+      "missed_certificate_given_exact": 0.25,
+      "nested_replicates": 4,
+      "online_certificate_count": 3,
+      "online_certified_success_fraction": 0.75,
+      "selected_cell": "control-map:260607:0.05",
+      "selected_cell_index": 1,
+      "success_difference": -0.25,
+      "truth_seed": 260607
+    },
+    {
+      "epsilon": 0.05,
+      "exact_posthoc_success_fraction": 1.0,
+      "exact_success_count": 4,
+      "false_early_stop_count": 0,
+      "false_early_stop_fraction": 0.0,
+      "family": "control-map",
+      "mean_actual_online_queries": 57.75,
+      "mean_actual_online_shots": 1836800.0,
+      "mean_query_ratio_to_full_cap": 0.875,
+      "mean_shot_ratio_to_full_cap": 0.875,
+      "missed_certificate_count": 0,
+      "missed_certificate_given_exact": 0.0,
+      "nested_replicates": 4,
+      "online_certificate_count": 4,
+      "online_certified_success_fraction": 1.0,
+      "selected_cell": "control-map:260608:0.05",
+      "selected_cell_index": 2,
+      "success_difference": 0.0,
+      "truth_seed": 260608
+    },
+    {
+      "epsilon": 0.05,
+      "exact_posthoc_success_fraction": 1.0,
+      "exact_success_count": 4,
+      "false_early_stop_count": 0,
+      "false_early_stop_fraction": 0.0,
+      "family": "control-map",
+      "mean_actual_online_queries": 66.0,
+      "mean_actual_online_shots": 2099200.0,
+      "mean_query_ratio_to_full_cap": 1.0,
+      "mean_shot_ratio_to_full_cap": 1.0,
+      "missed_certificate_count": 1,
+      "missed_certificate_given_exact": 0.25,
+      "nested_replicates": 4,
+      "online_certificate_count": 3,
+      "online_certified_success_fraction": 0.75,
+      "selected_cell": "control-map:260609:0.05",
+      "selected_cell_index": 3,
+      "success_difference": -0.25,
+      "truth_seed": 260609
+    },
+    {
+      "epsilon": 0.05,
+      "exact_posthoc_success_fraction": 1.0,
+      "exact_success_count": 4,
+      "false_early_stop_count": 0,
+      "false_early_stop_fraction": 0.0,
+      "family": "control-map",
+      "mean_actual_online_queries": 57.75,
+      "mean_actual_online_shots": 1836800.0,
+      "mean_query_ratio_to_full_cap": 0.875,
+      "mean_shot_ratio_to_full_cap": 0.875,
+      "missed_certificate_count": 1,
+      "missed_certificate_given_exact": 0.25,
+      "nested_replicates": 4,
+      "online_certificate_count": 3,
+      "online_certified_success_fraction": 0.75,
+      "selected_cell": "control-map:260610:0.05",
+      "selected_cell_index": 4,
+      "success_difference": -0.25,
+      "truth_seed": 260610
+    },
+    {
+      "epsilon": 0.05,
+      "exact_posthoc_success_fraction": 1.0,
+      "exact_success_count": 4,
+      "false_early_stop_count": 0,
+      "false_early_stop_fraction": 0.0,
+      "family": "control-map",
+      "mean_actual_online_queries": 66.0,
+      "mean_actual_online_shots": 2099200.0,
+      "mean_query_ratio_to_full_cap": 1.0,
+      "mean_shot_ratio_to_full_cap": 1.0,
+      "missed_certificate_count": 1,
+      "missed_certificate_given_exact": 0.25,
+      "nested_replicates": 4,
+      "online_certificate_count": 3,
+      "online_certified_success_fraction": 0.75,
+      "selected_cell": "control-map:260611:0.05",
+      "selected_cell_index": 5,
+      "success_difference": -0.25,
+      "truth_seed": 260611
+    },
+    {
+      "epsilon": 0.05,
+      "exact_posthoc_success_fraction": 1.0,
+      "exact_success_count": 4,
+      "false_early_stop_count": 0,
+      "false_early_stop_fraction": 0.0,
+      "family": "control-map",
+      "mean_actual_online_queries": 66.0,
+      "mean_actual_online_shots": 2099200.0,
+      "mean_query_ratio_to_full_cap": 1.0,
+      "mean_shot_ratio_to_full_cap": 1.0,
+      "missed_certificate_count": 2,
+      "missed_certificate_given_exact": 0.5,
+      "nested_replicates": 4,
+      "online_certificate_count": 2,
+      "online_certified_success_fraction": 0.5,
+      "selected_cell": "control-map:260612:0.05",
+      "selected_cell_index": 6,
+      "success_difference": -0.5,
+      "truth_seed": 260612
+    },
+    {
+      "epsilon": 0.1,
+      "exact_posthoc_success_fraction": 0.75,
+      "exact_success_count": 3,
+      "false_early_stop_count": 0,
+      "false_early_stop_fraction": 0.0,
+      "family": "drift",
+      "mean_actual_online_queries": 66.0,
+      "mean_actual_online_shots": 2099200.0,
+      "mean_query_ratio_to_full_cap": 1.0,
+      "mean_shot_ratio_to_full_cap": 1.0,
+      "missed_certificate_count": 0,
+      "missed_certificate_given_exact": 0.0,
+      "nested_replicates": 4,
+      "online_certificate_count": 3,
+      "online_certified_success_fraction": 0.75,
+      "selected_cell": "drift:260605:0.1",
+      "selected_cell_index": 7,
+      "success_difference": 0.0,
+      "truth_seed": 260605
+    },
+    {
+      "epsilon": 0.1,
+      "exact_posthoc_success_fraction": 1.0,
+      "exact_success_count": 4,
+      "false_early_stop_count": 0,
+      "false_early_stop_fraction": 0.0,
+      "family": "drift",
+      "mean_actual_online_queries": 57.75,
+      "mean_actual_online_shots": 1836800.0,
+      "mean_query_ratio_to_full_cap": 0.875,
+      "mean_shot_ratio_to_full_cap": 0.875,
+      "missed_certificate_count": 0,
+      "missed_certificate_given_exact": 0.0,
+      "nested_replicates": 4,
+      "online_certificate_count": 4,
+      "online_certified_success_fraction": 1.0,
+      "selected_cell": "drift:260606:0.1",
+      "selected_cell_index": 8,
+      "success_difference": 0.0,
+      "truth_seed": 260606
+    },
+    {
+      "epsilon": 0.1,
+      "exact_posthoc_success_fraction": 1.0,
+      "exact_success_count": 4,
+      "false_early_stop_count": 0,
+      "false_early_stop_fraction": 0.0,
+      "family": "drift",
+      "mean_actual_online_queries": 49.5,
+      "mean_actual_online_shots": 1574400.0,
+      "mean_query_ratio_to_full_cap": 0.75,
+      "mean_shot_ratio_to_full_cap": 0.75,
+      "missed_certificate_count": 1,
+      "missed_certificate_given_exact": 0.25,
+      "nested_replicates": 4,
+      "online_certificate_count": 3,
+      "online_certified_success_fraction": 0.75,
+      "selected_cell": "drift:260607:0.1",
+      "selected_cell_index": 9,
+      "success_difference": -0.25,
+      "truth_seed": 260607
+    },
+    {
+      "epsilon": 0.1,
+      "exact_posthoc_success_fraction": 0.75,
+      "exact_success_count": 3,
+      "false_early_stop_count": 0,
+      "false_early_stop_fraction": 0.0,
+      "family": "drift",
+      "mean_actual_online_queries": 66.0,
+      "mean_actual_online_shots": 2099200.0,
+      "mean_query_ratio_to_full_cap": 1.0,
+      "mean_shot_ratio_to_full_cap": 1.0,
+      "missed_certificate_count": 1,
+      "missed_certificate_given_exact": 0.3333333333333333,
+      "nested_replicates": 4,
+      "online_certificate_count": 2,
+      "online_certified_success_fraction": 0.5,
+      "selected_cell": "drift:260608:0.1",
+      "selected_cell_index": 10,
+      "success_difference": -0.25,
+      "truth_seed": 260608
+    },
+    {
+      "epsilon": 0.1,
+      "exact_posthoc_success_fraction": 1.0,
+      "exact_success_count": 4,
+      "false_early_stop_count": 0,
+      "false_early_stop_fraction": 0.0,
+      "family": "drift",
+      "mean_actual_online_queries": 66.0,
+      "mean_actual_online_shots": 2099200.0,
+      "mean_query_ratio_to_full_cap": 1.0,
+      "mean_shot_ratio_to_full_cap": 1.0,
+      "missed_certificate_count": 0,
+      "missed_certificate_given_exact": 0.0,
+      "nested_replicates": 4,
+      "online_certificate_count": 4,
+      "online_certified_success_fraction": 1.0,
+      "selected_cell": "drift:260609:0.1",
+      "selected_cell_index": 11,
+      "success_difference": 0.0,
+      "truth_seed": 260609
+    },
+    {
+      "epsilon": 0.1,
+      "exact_posthoc_success_fraction": 1.0,
+      "exact_success_count": 4,
+      "false_early_stop_count": 0,
+      "false_early_stop_fraction": 0.0,
+      "family": "drift",
+      "mean_actual_online_queries": 57.75,
+      "mean_actual_online_shots": 1836800.0,
+      "mean_query_ratio_to_full_cap": 0.875,
+      "mean_shot_ratio_to_full_cap": 0.875,
+      "missed_certificate_count": 1,
+      "missed_certificate_given_exact": 0.25,
+      "nested_replicates": 4,
+      "online_certificate_count": 3,
+      "online_certified_success_fraction": 0.75,
+      "selected_cell": "drift:260610:0.1",
+      "selected_cell_index": 12,
+      "success_difference": -0.25,
+      "truth_seed": 260610
+    },
+    {
+      "epsilon": 0.1,
+      "exact_posthoc_success_fraction": 1.0,
+      "exact_success_count": 4,
+      "false_early_stop_count": 0,
+      "false_early_stop_fraction": 0.0,
+      "family": "drift",
+      "mean_actual_online_queries": 57.75,
+      "mean_actual_online_shots": 1836800.0,
+      "mean_query_ratio_to_full_cap": 0.875,
+      "mean_shot_ratio_to_full_cap": 0.875,
+      "missed_certificate_count": 0,
+      "missed_certificate_given_exact": 0.0,
+      "nested_replicates": 4,
+      "online_certificate_count": 4,
+      "online_certified_success_fraction": 1.0,
+      "selected_cell": "drift:260611:0.1",
+      "selected_cell_index": 13,
+      "success_difference": 0.0,
+      "truth_seed": 260611
+    },
+    {
+      "epsilon": 0.1,
+      "exact_posthoc_success_fraction": 0.25,
+      "exact_success_count": 1,
+      "false_early_stop_count": 0,
+      "false_early_stop_fraction": 0.0,
+      "family": "drift",
+      "mean_actual_online_queries": 66.0,
+      "mean_actual_online_shots": 2099200.0,
+      "mean_query_ratio_to_full_cap": 1.0,
+      "mean_shot_ratio_to_full_cap": 1.0,
+      "missed_certificate_count": 0,
+      "missed_certificate_given_exact": 0.0,
+      "nested_replicates": 4,
+      "online_certificate_count": 1,
+      "online_certified_success_fraction": 0.25,
+      "selected_cell": "drift:260612:0.1",
+      "selected_cell_index": 14,
+      "success_difference": 0.0,
+      "truth_seed": 260612
+    },
+    {
+      "epsilon": 0.05,
+      "exact_posthoc_success_fraction": 1.0,
+      "exact_success_count": 4,
+      "false_early_stop_count": 0,
+      "false_early_stop_fraction": 0.0,
+      "family": "combined",
+      "mean_actual_online_queries": 57.75,
+      "mean_actual_online_shots": 1836800.0,
+      "mean_query_ratio_to_full_cap": 0.875,
+      "mean_shot_ratio_to_full_cap": 0.875,
+      "missed_certificate_count": 2,
+      "missed_certificate_given_exact": 0.5,
+      "nested_replicates": 4,
+      "online_certificate_count": 2,
+      "online_certified_success_fraction": 0.5,
+      "selected_cell": "combined:260605:0.05",
+      "selected_cell_index": 15,
+      "success_difference": -0.5,
+      "truth_seed": 260605
+    },
+    {
+      "epsilon": 0.05,
+      "exact_posthoc_success_fraction": 1.0,
+      "exact_success_count": 4,
+      "false_early_stop_count": 0,
+      "false_early_stop_fraction": 0.0,
+      "family": "combined",
+      "mean_actual_online_queries": 57.75,
+      "mean_actual_online_shots": 1836800.0,
+      "mean_query_ratio_to_full_cap": 0.875,
+      "mean_shot_ratio_to_full_cap": 0.875,
+      "missed_certificate_count": 1,
+      "missed_certificate_given_exact": 0.25,
+      "nested_replicates": 4,
+      "online_certificate_count": 3,
+      "online_certified_success_fraction": 0.75,
+      "selected_cell": "combined:260608:0.05",
+      "selected_cell_index": 16,
+      "success_difference": -0.25,
+      "truth_seed": 260608
+    },
+    {
+      "epsilon": 0.05,
+      "exact_posthoc_success_fraction": 1.0,
+      "exact_success_count": 4,
+      "false_early_stop_count": 0,
+      "false_early_stop_fraction": 0.0,
+      "family": "combined",
+      "mean_actual_online_queries": 57.75,
+      "mean_actual_online_shots": 1836800.0,
+      "mean_query_ratio_to_full_cap": 0.875,
+      "mean_shot_ratio_to_full_cap": 0.875,
+      "missed_certificate_count": 0,
+      "missed_certificate_given_exact": 0.0,
+      "nested_replicates": 4,
+      "online_certificate_count": 4,
+      "online_certified_success_fraction": 1.0,
+      "selected_cell": "combined:260609:0.05",
+      "selected_cell_index": 17,
+      "success_difference": 0.0,
+      "truth_seed": 260609
+    },
+    {
+      "epsilon": 0.05,
+      "exact_posthoc_success_fraction": 0.75,
+      "exact_success_count": 3,
+      "false_early_stop_count": 0,
+      "false_early_stop_fraction": 0.0,
+      "family": "combined",
+      "mean_actual_online_queries": 57.75,
+      "mean_actual_online_shots": 1836800.0,
+      "mean_query_ratio_to_full_cap": 0.875,
+      "mean_shot_ratio_to_full_cap": 0.875,
+      "missed_certificate_count": 0,
+      "missed_certificate_given_exact": 0.0,
+      "nested_replicates": 4,
+      "online_certificate_count": 3,
+      "online_certified_success_fraction": 0.75,
+      "selected_cell": "combined:260610:0.05",
+      "selected_cell_index": 18,
+      "success_difference": 0.0,
+      "truth_seed": 260610
+    },
+    {
+      "epsilon": 0.05,
+      "exact_posthoc_success_fraction": 1.0,
+      "exact_success_count": 4,
+      "false_early_stop_count": 0,
+      "false_early_stop_fraction": 0.0,
+      "family": "combined",
+      "mean_actual_online_queries": 57.75,
+      "mean_actual_online_shots": 1836800.0,
+      "mean_query_ratio_to_full_cap": 0.875,
+      "mean_shot_ratio_to_full_cap": 0.875,
+      "missed_certificate_count": 1,
+      "missed_certificate_given_exact": 0.25,
+      "nested_replicates": 4,
+      "online_certificate_count": 3,
+      "online_certified_success_fraction": 0.75,
+      "selected_cell": "combined:260611:0.05",
+      "selected_cell_index": 19,
+      "success_difference": -0.25,
+      "truth_seed": 260611
+    },
+    {
+      "epsilon": 0.05,
+      "exact_posthoc_success_fraction": 1.0,
+      "exact_success_count": 4,
+      "false_early_stop_count": 0,
+      "false_early_stop_fraction": 0.0,
+      "family": "combined",
+      "mean_actual_online_queries": 57.75,
+      "mean_actual_online_shots": 1836800.0,
+      "mean_query_ratio_to_full_cap": 0.875,
+      "mean_shot_ratio_to_full_cap": 0.875,
+      "missed_certificate_count": 0,
+      "missed_certificate_given_exact": 0.0,
+      "nested_replicates": 4,
+      "online_certificate_count": 4,
+      "online_certified_success_fraction": 1.0,
+      "selected_cell": "combined:260612:0.05",
+      "selected_cell_index": 20,
+      "success_difference": 0.0,
+      "truth_seed": 260612
+    }
+  ]
+}

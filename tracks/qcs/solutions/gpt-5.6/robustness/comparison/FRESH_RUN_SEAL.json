@@ -1,0 +1,69 @@
+{
+  "status": "pass",
+  "seal_version": 1,
+  "sealed_at": "2026-07-29",
+  "evidence_root": "fresh-run-evidence",
+  "source_commit": "7bc049f8302e9b42c8f64590732291de92bef3a7",
+  "source": {
+    "simulation_script": {
+      "path": "code/hessian_loop_failure_map.py",
+      "sha256": "ac6ab231d106c53a623e52ec5f52af690b583890e753d531e8cf3a17f3344902",
+      "canonical_sha256": "d7982488e575be8bb1bdcd422ae43ced56b615adc4ea7002e8a724fd2407c878"
+    },
+    "requirements": {
+      "path": "requirements.txt",
+      "sha256": "b5d3bfac66dc3b4f09bc3095f09ca194d813b021cecf68a3077778d8145e80ca",
+      "canonical_sha256": "82c79de183a6349ae913664f7fc571a2097baa19a3d8c094dd644651f305c545"
+    },
+    "comparison_script": {
+      "path": "code/compare_robustness_runs.py",
+      "sha256": "7e4e8c5d85eb00747b0ba31b9f22d97acd3db01b8ea22a3a4285fa69d914e7c8",
+      "canonical_sha256": "7e4e8c5d85eb00747b0ba31b9f22d97acd3db01b8ea22a3a4285fa69d914e7c8"
+    }
+  },
+  "environment": {
+    "python": "3.12.13",
+    "jax": "0.11.0",
+    "jaxlib": "0.11.0",
+    "numpy": "2.5.1",
+    "scipy": "1.18.0",
+    "matplotlib": "3.11.1",
+    "backend": "WSL2 CPU",
+    "jax_x64": true
+  },
+  "baseline_run": {
+    "artifact_id": "robustness-seal-baseline-working",
+    "summary_sha256": "55b772e2f64c4c2c09730e5d97362e586fe1eae3b27d0aa651c3f27694f185de",
+    "artifact_manifest_sha256": "eeb33bf0cffb82560da1d9234a05a1bd4c88d4b327afa9fd5c2c6d4f7c2d65f8",
+    "validator_checks_passed": 32,
+    "validator_checks_total": 32,
+    "baseline_infidelity": 6.599615889280042e-06,
+    "active_rank": 5
+  },
+  "full_run": {
+    "artifact_id": "robustness-seal-full-7bc049f",
+    "summary_sha256": "78ac106baff99450b02a3e0aaeb219b80b60084fb4d7c5c87a8d73d3ad3fff51",
+    "artifact_manifest_sha256": "648f9b6535caacb1c8aa7f19b650c9c5583d249dd06247f35fdf017007f4957a",
+    "validator_checks_passed": 33,
+    "validator_checks_total": 33,
+    "stable_artifact_count": 18,
+    "process_wall_seconds": 60.373062307000005,
+    "core_trials": 240,
+    "noise_trials": 100,
+    "pathology_trials": 6,
+    "hamiltonian_error_points": 10
+  },
+  "scientific_comparison": {
+    "reference": "checked-in historical evidence",
+    "candidate": "fresh full run from source_commit",
+    "status": "pass",
+    "relative_tolerance": 1e-08,
+    "absolute_tolerance": 1e-10,
+    "numeric_comparisons": 3951,
+    "categorical_comparisons": 402,
+    "maximum_tolerance_ratio": 0.2064761612288416,
+    "mismatch_count": 0,
+    "comparison_json_sha256": "74960178fde5652238c4dc5b66cd4a033920d55d1d95f9b4b3441ba2af2bad7f"
+  },
+  "claim_boundary": "The fresh run reproduces the archived scientific tables within the declared mixed tolerance. Runtime and rendered image bytes are host-dependent and are not scientific acceptance gates."
+}

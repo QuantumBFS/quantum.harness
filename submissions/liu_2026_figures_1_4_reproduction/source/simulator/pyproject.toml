@@ -1,0 +1,57 @@
+[build-system]
+requires = ["setuptools>=75", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cs-tweezer-sim"
+version = "0.1.0"
+description = "Experiment-facing digital twin and closed-loop benchmark platform for neutral-atom optical-tweezer gates."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "Cold-Atom Gate Simulation Platform contributors" }]
+keywords = [
+    "neutral atoms",
+    "optical tweezers",
+    "Rydberg gates",
+    "quantum control",
+    "sim-to-real",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Physics",
+]
+dependencies = [
+    "numpy>=1.26,<3",
+    "qutip==5.3.0",
+    "scipy>=1.15,<2",
+]
+
+[project.urls]
+Homepage = "https://github.com/thy10817/Sim-to-real-simulation"
+Repository = "https://github.com/thy10817/Sim-to-real-simulation"
+Issues = "https://github.com/thy10817/Sim-to-real-simulation/issues"
+Documentation = "https://github.com/thy10817/Sim-to-real-simulation/tree/main/docs"
+
+[project.optional-dependencies]
+test = [
+    "pytest>=8.0,<10",
+]
+atomic = [
+    "ARC-Alkali-Rydberg-Calculator==3.10.2",
+]
+pair = [
+    "pairinteraction==2.5.1",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"

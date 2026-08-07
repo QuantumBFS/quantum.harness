@@ -1,0 +1,16 @@
+{
+  "status": "analysis of supplied manifest data",
+  "provenance": "simulator/theory synthetic data; not experimental",
+  "panel": "fig3e_channel_decomposition",
+  "input_manifest": "/home/thy/thy/work/quantum_harnessing/quantum.harness/tracks/qcs/results/20260730-143545-liu-2026-fig34-effective-digital-twin/input.in",
+  "input_source": "/home/thy/thy/work/quantum_harnessing/quantum.harness/tracks/qcs/results/20260730-143545-liu-2026-fig34-effective-digital-twin/generated_input/fig3e_channel_decomposition.csv",
+  "fit": {
+    "rows": 10,
+    "weighted_mean_leakage": 0.0025181834698039525,
+    "weighted_mean_ramsey_phase": 0.049172298633508665
+  },
+  "rows": 10,
+  "synthetic_points_generated": false,
+  "figure": "/home/thy/thy/work/quantum_harnessing/quantum.harness/tracks/qcs/results/20260730-143545-liu-2026-fig34-effective-digital-twin/figs/input_manifest_analysis/diagnostics/fig3e_channel_decomposition.png",
+  "figure_provenance": "simulator/theory synthetic data; not experimental"
+}

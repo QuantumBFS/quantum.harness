@@ -1,0 +1,35 @@
+{
+  "fit": {
+    "bright_location_photoelectrons": 16.897,
+    "bright_scale_photoelectrons": 8.894,
+    "bright_shape_a": 1.802,
+    "dark_fraction": 0.508,
+    "dark_location_photoelectrons": -0.007,
+    "dark_scale_photoelectrons": 0.6,
+    "dark_shape_k": 2.363,
+    "threshold_photoelectrons": 8.29
+  },
+  "provenance": {
+    "data_kind": "published_fit_summary_not_raw_camera_frames",
+    "raw_data_available": false,
+    "source_id": "Radnaev et al. PRX Quantum 6, 030334 (2025), Methods 6.8.2",
+    "source_url": "https://arxiv.org/html/2408.08288",
+    "source_version": "arXiv:2408.08288v3"
+  },
+  "reported": {
+    "bright_readout_loss_probability": 0.01,
+    "dark_readout_loss_probability": 0.008,
+    "discrimination_fidelity": 0.996,
+    "discrimination_fidelity_uncertainty": 0.002,
+    "two_atom_cycle_polarization_per_gate": 0.9967,
+    "two_atom_cycle_polarization_uncertainty": 0.0004,
+    "two_atom_survival_per_gate": 0.9962,
+    "two_atom_survival_uncertainty": 0.0003
+  },
+  "schema": "cs_tweezer_sim.fluorescence_fit.v1",
+  "units": {
+    "camera_signal": "photoelectrons",
+    "probabilities": "dimensionless"
+  },
+  "warning": "The article states that raw camera data are available from the corresponding author on reasonable request. This file contains only numeric fit and summary values printed in the article."
+}

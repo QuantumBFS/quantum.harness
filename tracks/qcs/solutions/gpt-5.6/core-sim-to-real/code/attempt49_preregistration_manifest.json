@@ -1,0 +1,33 @@
+{
+  "attempt": 49,
+  "audited_checkpoint_commit": "375e1bf175bc9ba66f862b3b9fb20a1a84734433",
+  "evidence_status": "preregistration-only-no-fresh-truth-opened",
+  "sealed_files": {
+    "code/attempt44_dimension_cost.py": "a91138ccae0641882e7a82f8f49f603f110a4d31ffc880242580a6e68b385e72",
+    "code/attempt44_dimension_cost_config.json": "9804eebf7c5a637105c8a6ab5976a5e0e801222c1bfe5369595e24ed6dc6b9f2",
+    "code/attempt49_fresh_confirmation.py": "367291d3d75c6b789df6099879421c0b78efd40e751f39cb3ff60880a752fcee",
+    "code/attempt49_fresh_confirmation_config.json": "963d468ad67116c4c5a1e140ec5d089935f6434ef41459c86981dba7b1a20e10",
+    "code/cycle5_statistics.py": "16fbef6cb34dee4c2d9bbbe744f2831b97ac47cf4cddb0f55971dce2722deccb",
+    "code/phase3_common.py": "3e7a0c09ecf97fc5df09e67563ce0688dd11276e20de06f853c8cd7fee102a91",
+    "docs/ATTEMPT44_PROTOCOL.md": "f86f868be199b8b646d629bff9e188cbe644e934e41b1d32b55c61bea9df8501",
+    "docs/ATTEMPT48_PROTOCOL.md": "acdfbb514499c614d42934d2b7d6894363c44e927364f3467f42c7c2f9317cc6",
+    "docs/ATTEMPT49_PROTOCOL.md": "1c101967f585842198623373c340c3ee258e493c0a981c3f8822ea46d2949571",
+    "results_summary/QL1F-attempt44-dimension-cost.json": "bcd09e297abffec5f3e1c027cef948f332ee781301ad7309a9b504a9bea1979a",
+    "results_summary/QL1F-attempt48-integrity-audit.json": "033ba3ff9d19dad443f6340930cfde52310bd8c553792051729def20e6f45d18"
+  },
+  "text_hash_strategy": "sha256-utf8-lf-v1",
+  "truth_firewall": {
+    "fresh_truth_opened_during_manifest_creation": false,
+    "fresh_truth_seeds": [
+      260641,
+      260642,
+      260643,
+      260644,
+      260645,
+      260646,
+      260647,
+      260648
+    ],
+    "previous_truth_seed_max": 260628
+  }
+}

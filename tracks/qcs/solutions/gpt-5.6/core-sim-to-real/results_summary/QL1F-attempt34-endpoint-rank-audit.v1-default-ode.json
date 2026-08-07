@@ -1,0 +1,708 @@
+{
+  "attempt": 34,
+  "checks": {
+    "all_endpoint_ranks_physical": true,
+    "all_finite_difference_checks_below_5e-3": false,
+    "all_lie_algebras_full_su": true,
+    "all_unitarity_residuals_below_1e-6": true,
+    "converged_hessian_endpoint_ranks_match": false,
+    "dimension_general_d4_discrepancy_is_numerical_artifact": false
+  },
+  "decision": {
+    "attempt27_d4_rank_discrepancy_classification": "unresolved",
+    "rejected_claim": "Unconditional rank(H)=d^2-1.",
+    "supported_claim": "Near a sufficiently converged optimum, Hessian rank equals the rank of accessible weighted phase-blind endpoint-error channels for the audited controllable systems."
+  },
+  "environment": {
+    "backend": "cpu",
+    "jax": "0.4.38",
+    "jaxlib": "0.4.38",
+    "numpy": "2.2.6",
+    "python": "3.13.14",
+    "scipy": "1.15.3",
+    "x64": true
+  },
+  "protocol": "tracks/other/solutions/QL1F/ATTEMPT34_PROTOCOL.md",
+  "rank_rule": {
+    "absolute": 1e-09,
+    "relative": 1.4901161193847656e-08
+  },
+  "status": "diagnostic-failed",
+  "systems": [
+    {
+      "dimension": 2,
+      "label": "general-d2",
+      "lie_algebra": {
+        "dimension": 3,
+        "full_su_controllable": true,
+        "maximum_su_dimension": 3,
+        "minimum_added_residual": 0.8329879930787196,
+        "orthogonalization_tolerance": 1e-10
+      },
+      "points": [
+        {
+          "dimension": 2,
+          "endpoint_rank": {
+            "absolute_rule": 1e-09,
+            "maximum": 0.7543935334763697,
+            "rank": 3,
+            "relative_rule": 1.4901161193847656e-08,
+            "threshold": 1.1241339645927693e-08
+          },
+          "endpoint_singular_values_descending": [
+            0.7543935334763697,
+            0.615939631409106,
+            0.11116124038506138
+          ],
+          "finite_difference_endpoint_checks": [
+            {
+              "parameter_index": 0,
+              "relative_error": 8.448639765495031e-08
+            },
+            {
+              "parameter_index": 10,
+              "relative_error": 1.0800877429222078e-07
+            },
+            {
+              "parameter_index": 19,
+              "relative_error": 0.0006653163490969157
+            }
+          ],
+          "finite_difference_max_relative_error": 0.0006653163490969157,
+          "gradient_norm": 1.8212199865231803e-07,
+          "hessian_eigenvalues_ascending": [
+            -1.5033823040394265e-07,
+            -1.1881556879241917e-07,
+            -1.377942125804841e-08,
+            -1.1219884481530715e-08,
+            -7.387433250462888e-09,
+            -5.896773012714202e-09,
+            -3.9821016195762225e-09,
+            -1.8109305481699961e-09,
+            -1.2115412496853084e-09,
+            7.723794908671168e-10,
+            2.447134869732241e-09,
+            5.249164982330864e-09,
+            6.165559402521322e-09,
+            1.1467235995148594e-08,
+            1.5426355634532987e-08,
+            4.1453695641792716e-08,
+            1.2966156686017305e-07,
+            0.008237865671554438,
+            0.25292105996903963,
+            0.3794064262746595
+          ],
+          "hessian_gap_rank_diagnostic": {
+            "gap_ratio": 63533.59650850237,
+            "rank": 3,
+            "threshold": 0.008237865671554438
+          },
+          "hessian_rank": {
+            "absolute_rule": 1e-09,
+            "maximum": 0.3794064262746595,
+            "rank": 8,
+            "relative_rule": 1.4901161193847656e-08,
+            "threshold": 5.653596315900378e-09
+          },
+          "infidelity": 4.91817140716814e-09,
+          "label": "bfgs-output",
+          "negative_hessian_eigenvalues_below_threshold": 6,
+          "parameter_count": 20,
+          "unitarity_residual_frobenius": 1.5190640298515885e-08,
+          "weighted_endpoint_hessian_relative_error": 6.386946097741685e-07
+        },
+        {
+          "dimension": 2,
+          "endpoint_rank": {
+            "absolute_rule": 1e-09,
+            "maximum": 0.7531274186488903,
+            "rank": 3,
+            "relative_rule": 1.4901161193847656e-08,
+            "threshold": 1.1222473064793502e-08
+          },
+          "endpoint_singular_values_descending": [
+            0.7531274186488903,
+            0.6143503546726222,
+            0.12730578750227084
+          ],
+          "finite_difference_endpoint_checks": [
+            {
+              "parameter_index": 0,
+              "relative_error": 2.8641540606387428e-08
+            },
+            {
+              "parameter_index": 10,
+              "relative_error": 4.889721716115072e-08
+            },
+            {
+              "parameter_index": 19,
+              "relative_error": 4.387326791878394e-05
+            }
+          ],
+          "finite_difference_max_relative_error": 4.387326791878394e-05,
+          "gradient_norm": 3.669430094320071e-17,
+          "hessian_eigenvalues_ascending": [
+            -5.232540118528725e-08,
+            -3.646077805609419e-08,
+            -7.860890646240892e-09,
+            -2.9660002903213085e-09,
+            -1.9210120958522856e-09,
+            -1.7895343646752673e-09,
+            -1.2596159448841344e-09,
+            -4.359536116438399e-10,
+            -5.851467095528302e-11,
+            7.404434340383821e-11,
+            1.332704418830208e-09,
+            1.4691218846878057e-09,
+            2.533266279153435e-09,
+            5.017595547224066e-09,
+            7.644841664783623e-09,
+            1.3909242016293878e-08,
+            6.799358057969744e-08,
+            0.01080451566958996,
+            0.2516175834520345,
+            0.37813396671800353
+          ],
+          "hessian_gap_rank_diagnostic": {
+            "gap_ratio": 158904.93745840673,
+            "rank": 3,
+            "threshold": 0.01080451566958996
+          },
+          "hessian_rank": {
+            "absolute_rule": 1e-09,
+            "maximum": 0.37813396671800353,
+            "rank": 6,
+            "relative_rule": 1.4901161193847656e-08,
+            "threshold": 5.6346351909339954e-09
+          },
+          "infidelity": -4.485627813632931e-09,
+          "label": "exact-construction",
+          "negative_hessian_eigenvalues_below_threshold": 3,
+          "parameter_count": 20,
+          "unitarity_residual_frobenius": 4.757726826226905e-09,
+          "weighted_endpoint_hessian_relative_error": 3.117306163772428e-07
+        }
+      ]
+    },
+    {
+      "dimension": 3,
+      "label": "general-d3",
+      "lie_algebra": {
+        "dimension": 8,
+        "full_su_controllable": true,
+        "maximum_su_dimension": 8,
+        "minimum_added_residual": 0.17475354325695314,
+        "orthogonalization_tolerance": 1e-10
+      },
+      "points": [
+        {
+          "dimension": 3,
+          "endpoint_rank": {
+            "absolute_rule": 1e-09,
+            "maximum": 0.808345123414664,
+            "rank": 8,
+            "relative_rule": 1.4901161193847656e-08,
+            "threshold": 1.2045280984262586e-08
+          },
+          "endpoint_singular_values_descending": [
+            0.808345123414664,
+            0.7594772119523832,
+            0.3729941771787491,
+            0.23975133299325255,
+            0.09154683154042474,
+            0.0674071676275799,
+            0.0219470865713135,
+            0.007441112927128823
+          ],
+          "finite_difference_endpoint_checks": [
+            {
+              "parameter_index": 0,
+              "relative_error": 1.1871762204070129e-07
+            },
+            {
+              "parameter_index": 15,
+              "relative_error": 6.72151874701153e-06
+            },
+            {
+              "parameter_index": 29,
+              "relative_error": 0.0004480353044276719
+            }
+          ],
+          "finite_difference_max_relative_error": 0.0004480353044276719,
+          "gradient_norm": 1.290820216004983e-05,
+          "hessian_eigenvalues_ascending": [
+            -6.006194489479989e-07,
+            -4.721421737225533e-07,
+            -3.2885143106670447e-07,
+            -2.744702081895727e-07,
+            -2.2356801161403194e-07,
+            -1.5828482663832834e-07,
+            -1.086490919696798e-07,
+            -6.101855358541919e-08,
+            -5.994230395694681e-09,
+            6.333622255725112e-09,
+            1.214604613871453e-08,
+            2.3463662291781356e-08,
+            3.8640301873823257e-08,
+            8.569461113589523e-08,
+            1.1697923703365084e-07,
+            1.6833709555794408e-07,
+            1.7151915435033626e-07,
+            2.1105168248258314e-07,
+            2.939147979709001e-07,
+            3.474370073277561e-07,
+            5.251453602167048e-07,
+            6.38447281908868e-07,
+            2.7912007622280014e-05,
+            0.00024139028273660297,
+            0.002272047320783024,
+            0.004190116067007851,
+            0.02874178608416271,
+            0.06956215178947216,
+            0.28840323975388177,
+            0.32670783901451184
+          ],
+          "hessian_gap_rank_diagnostic": {
+            "gap_ratio": 43.71857851571866,
+            "rank": 8,
+            "threshold": 2.7912007622280014e-05
+          },
+          "hessian_rank": {
+            "absolute_rule": 1e-09,
+            "maximum": 0.32670783901451184,
+            "rank": 21,
+            "relative_rule": 1.4901161193847656e-08,
+            "threshold": 4.868326172448871e-09
+          },
+          "infidelity": -1.7354211641803136e-08,
+          "label": "bfgs-output",
+          "negative_hessian_eigenvalues_below_threshold": 9,
+          "parameter_count": 30,
+          "unitarity_residual_frobenius": 3.7088330538798723e-08,
+          "weighted_endpoint_hessian_relative_error": 1.2114477387912922e-05
+        },
+        {
+          "dimension": 3,
+          "endpoint_rank": {
+            "absolute_rule": 1e-09,
+            "maximum": 0.8067525923768177,
+            "rank": 8,
+            "relative_rule": 1.4901161193847656e-08,
+            "threshold": 1.2021550422561433e-08
+          },
+          "endpoint_singular_values_descending": [
+            0.8067525923768177,
+            0.7594371706115419,
+            0.37313327511192385,
+            0.24253169676932687,
+            0.09764875674689052,
+            0.06651728476717168,
+            0.023564472214797808,
+            0.009937683499235501
+          ],
+          "finite_difference_endpoint_checks": [
+            {
+              "parameter_index": 0,
+              "relative_error": 3.207575548054587e-07
+            },
+            {
+              "parameter_index": 15,
+              "relative_error": 4.037235407577508e-07
+            },
+            {
+              "parameter_index": 29,
+              "relative_error": 1.8978473728038084e-05
+            }
+          ],
+          "finite_difference_max_relative_error": 1.8978473728038084e-05,
+          "gradient_norm": 3.664435739909937e-17,
+          "hessian_eigenvalues_ascending": [
+            -6.166987208429833e-08,
+            -1.7119881943296504e-08,
+            -9.007858250601629e-09,
+            -7.0822274286575944e-09,
+            -3.9451470903738085e-09,
+            -2.265576413512464e-09,
+            -1.6635418629467667e-09,
+            -8.267405460960006e-10,
+            -4.786367281387917e-10,
+            -3.664213515180379e-10,
+            -9.220411678346903e-11,
+            6.194190916321833e-11,
+            2.711422897656705e-10,
+            3.528982488299093e-10,
+            9.61983023101956e-10,
+            1.4756814091214257e-09,
+            2.503697642818043e-09,
+            2.907536448970445e-09,
+            3.1222813729281914e-09,
+            6.673332237600428e-09,
+            1.057129290991285e-08,
+            4.364599439446469e-08,
+            4.9377830255504414e-05,
+            0.00027763598410806244,
+            0.0022122726258546606,
+            0.004767635388381598,
+            0.02941079560800951,
+            0.06961421699563601,
+            0.28837239905791584,
+            0.3254248614438693
+          ],
+          "hessian_gap_rank_diagnostic": {
+            "gap_ratio": 1131.325587618337,
+            "rank": 8,
+            "threshold": 4.9377830255504414e-05
+          },
+          "hessian_rank": {
+            "absolute_rule": 1e-09,
+            "maximum": 0.3254248614438693,
+            "rank": 11,
+            "relative_rule": 1.4901161193847656e-08,
+            "threshold": 4.849208316860635e-09
+          },
+          "infidelity": -1.6995800119120236e-08,
+          "label": "exact-construction",
+          "negative_hessian_eigenvalues_below_threshold": 4,
+          "parameter_count": 30,
+          "unitarity_residual_frobenius": 2.3180830593657725e-08,
+          "weighted_endpoint_hessian_relative_error": 4.4029982610659946e-07
+        }
+      ]
+    },
+    {
+      "dimension": 4,
+      "label": "general-d4",
+      "lie_algebra": {
+        "dimension": 15,
+        "full_su_controllable": true,
+        "maximum_su_dimension": 15,
+        "minimum_added_residual": 0.0628099398914943,
+        "orthogonalization_tolerance": 1e-10
+      },
+      "points": [
+        {
+          "dimension": 4,
+          "endpoint_rank": {
+            "absolute_rule": 1e-09,
+            "maximum": 0.8898647368215861,
+            "rank": 15,
+            "relative_rule": 1.4901161193847656e-08,
+            "threshold": 1.3260017884099276e-08
+          },
+          "endpoint_singular_values_descending": [
+            0.8898647368215861,
+            0.757059330128053,
+            0.5457728748430533,
+            0.4513417177178475,
+            0.16084947747225284,
+            0.1239110018288218,
+            0.0865679279884097,
+            0.06655095898474696,
+            0.015825357435839706,
+            0.009837204915127207,
+            0.006854284719027346,
+            0.0033595437093837297,
+            0.0009572655102891718,
+            0.0008901777127801831,
+            0.00022564451937544117
+          ],
+          "finite_difference_endpoint_checks": [
+            {
+              "parameter_index": 0,
+              "relative_error": 3.2595766333737617e-07
+            },
+            {
+              "parameter_index": 20,
+              "relative_error": 9.661404347010465e-08
+            },
+            {
+              "parameter_index": 39,
+              "relative_error": 0.00890080697544117
+            }
+          ],
+          "finite_difference_max_relative_error": 0.00890080697544117,
+          "gradient_norm": 1.2075212332566001e-05,
+          "hessian_eigenvalues_ascending": [
+            -3.090900560489145e-05,
+            -2.829249292486995e-05,
+            -1.8745868449089573e-05,
+            -1.761602685724601e-05,
+            -1.3312738871968131e-05,
+            -1.2694675725921738e-05,
+            -8.95433544924034e-06,
+            -6.4363128335661915e-06,
+            -1.8396098486171822e-06,
+            -1.680955846374338e-06,
+            -1.4388030221520511e-06,
+            -1.3783606191412347e-06,
+            -5.835265440941214e-07,
+            -4.265409958756892e-07,
+            -2.008585114858303e-07,
+            -3.2304508205698516e-08,
+            5.20483475200913e-07,
+            6.693587045053937e-07,
+            1.0958206776261008e-06,
+            1.3779652098976958e-06,
+            1.7960781842410625e-06,
+            2.068068855801204e-06,
+            5.801066754845259e-06,
+            1.0593629434246793e-05,
+            1.2035393799587716e-05,
+            1.4584521130212444e-05,
+            1.618360180950727e-05,
+            2.1207708843624357e-05,
+            2.442910322970479e-05,
+            3.833089930350709e-05,
+            4.417397686670254e-05,
+            0.0001038388565098378,
+            0.001773564373324483,
+            0.002997039098646774,
+            0.006144292004437694,
+            0.010344867564635854,
+            0.08147881148925813,
+            0.11916106819738896,
+            0.2292486468778908,
+            0.3167460192181934
+          ],
+          "hessian_gap_rank_diagnostic": {
+            "gap_ratio": 17.079968259824334,
+            "rank": 8,
+            "threshold": 0.001773564373324483
+          },
+          "hessian_rank": {
+            "absolute_rule": 1e-09,
+            "maximum": 0.3167460192181934,
+            "rank": 24,
+            "relative_rule": 1.4901161193847656e-08,
+            "threshold": 4.719883489879867e-09
+          },
+          "infidelity": 1.7409771774778982e-06,
+          "label": "bfgs-output",
+          "negative_hessian_eigenvalues_below_threshold": 16,
+          "parameter_count": 40,
+          "unitarity_residual_frobenius": 4.169994245161955e-08,
+          "weighted_endpoint_hessian_relative_error": 0.0005225991715237132
+        },
+        {
+          "dimension": 4,
+          "endpoint_rank": {
+            "absolute_rule": 1e-09,
+            "maximum": 0.8899440746277766,
+            "rank": 15,
+            "relative_rule": 1.4901161193847656e-08,
+            "threshold": 1.3261200109538087e-08
+          },
+          "endpoint_singular_values_descending": [
+            0.8899440746277766,
+            0.7569832567424486,
+            0.5453142921133258,
+            0.45109416111617456,
+            0.16072267135061927,
+            0.12669479120429514,
+            0.08414861542939005,
+            0.06672188052171173,
+            0.01850383860489444,
+            0.014159840623646737,
+            0.012644199915013116,
+            0.007446567432262151,
+            0.006072342552520399,
+            0.003633592932915562,
+            0.0017891813748407946
+          ],
+          "finite_difference_endpoint_checks": [
+            {
+              "parameter_index": 0,
+              "relative_error": 3.4121397402086536e-08
+            },
+            {
+              "parameter_index": 20,
+              "relative_error": 1.7107166449829033e-07
+            },
+            {
+              "parameter_index": 39,
+              "relative_error": 1.4587395106783028e-05
+            }
+          ],
+          "finite_difference_max_relative_error": 1.4587395106783028e-05,
+          "gradient_norm": 9.876045971217738e-18,
+          "hessian_eigenvalues_ascending": [
+            -4.6428051612687065e-08,
+            -3.3343958505792215e-08,
+            -1.9440534250142113e-08,
+            -4.930732327696901e-09,
+            -3.4971807301716928e-09,
+            -2.264262998131821e-09,
+            -1.4967888901542377e-09,
+            -1.252083617476693e-09,
+            -7.555867005745228e-10,
+            -6.06432060025206e-10,
+            -4.1902632699543e-10,
+            -1.9098152972252207e-10,
+            -7.536032600949985e-11,
+            1.7465230395371162e-10,
+            3.452894917184825e-10,
+            5.05504516873625e-10,
+            5.967997407558899e-10,
+            9.486722405380455e-10,
+            1.4424331789984502e-09,
+            2.1446457704276685e-09,
+            2.5315287393015754e-09,
+            8.632342241421543e-09,
+            1.3980667936385809e-08,
+            3.117210187335175e-08,
+            3.9938201799872996e-08,
+            1.2809673488696286e-06,
+            5.2775313356874305e-06,
+            1.4750679188146792e-05,
+            2.2182448021090162e-05,
+            6.394672030786654e-05,
+            8.02038289343127e-05,
+            0.00013694798243696135,
+            0.0017807233618489183,
+            0.0028323977892214416,
+            0.006420629697641737,
+            0.010332711686030028,
+            0.08139437638629485,
+            0.11894707890390428,
+            0.2292094600607609,
+            0.3168001850811443
+          ],
+          "hessian_gap_rank_diagnostic": {
+            "gap_ratio": 32.0737362009549,
+            "rank": 15,
+            "threshold": 1.2809673488696286e-06
+          },
+          "hessian_rank": {
+            "absolute_rule": 1e-09,
+            "maximum": 0.3168001850811443,
+            "rank": 19,
+            "relative_rule": 1.4901161193847656e-08,
+            "threshold": 4.720690624134903e-09
+          },
+          "infidelity": -3.406297613972598e-08,
+          "label": "exact-construction",
+          "negative_hessian_eigenvalues_below_threshold": 4,
+          "parameter_count": 40,
+          "unitarity_residual_frobenius": 8.012997169481434e-08,
+          "weighted_endpoint_hessian_relative_error": 6.34701064494839e-07
+        }
+      ]
+    },
+    {
+      "dimension": 4,
+      "label": "original-d4-cnot",
+      "lie_algebra": {
+        "dimension": 15,
+        "full_su_controllable": true,
+        "maximum_su_dimension": 15,
+        "minimum_added_residual": 0.11602202247990602,
+        "orthogonalization_tolerance": 1e-10
+      },
+      "points": [
+        {
+          "dimension": 4,
+          "endpoint_rank": {
+            "absolute_rule": 1e-09,
+            "maximum": 2.720428932456009,
+            "rank": 15,
+            "relative_rule": 1.4901161193847656e-08,
+            "threshold": 4.053755003893389e-08
+          },
+          "endpoint_singular_values_descending": [
+            2.720428932456009,
+            2.316124195003914,
+            1.967895175021018,
+            1.9001333394115985,
+            1.5721796390390248,
+            1.3912970911869735,
+            1.2203503694072195,
+            0.9469957167733225,
+            0.8312956456180461,
+            0.7646000670408869,
+            0.6876658661587245,
+            0.5683846344538224,
+            0.43518113357085286,
+            0.38389571604563166,
+            0.20598514721871453
+          ],
+          "finite_difference_endpoint_checks": [
+            {
+              "parameter_index": 0,
+              "relative_error": 2.3082277313180335e-07
+            },
+            {
+              "parameter_index": 20,
+              "relative_error": 1.4734854011793134e-07
+            },
+            {
+              "parameter_index": 39,
+              "relative_error": 2.5874579288549265e-06
+            }
+          ],
+          "finite_difference_max_relative_error": 2.5874579288549265e-06,
+          "gradient_norm": 2.66220334942815e-05,
+          "hessian_eigenvalues_ascending": [
+            -1.2707837486946612e-05,
+            -1.0634467497824956e-05,
+            -6.302609935150021e-06,
+            -5.432401648810028e-06,
+            -4.9808781860096124e-06,
+            -2.5800219789756716e-06,
+            -2.4963945834822682e-06,
+            -1.9382191372733585e-06,
+            -1.7487078258669153e-06,
+            -9.745249112951103e-07,
+            -7.135949125440792e-07,
+            -1.7635127029922714e-07,
+            3.0548049680082544e-09,
+            3.425665427218558e-07,
+            4.2612991441090963e-07,
+            6.124532776079335e-07,
+            1.5574069030041382e-06,
+            1.92554302787885e-06,
+            2.111675420506244e-06,
+            3.0964001865534926e-06,
+            4.241799560931018e-06,
+            4.827482166001863e-06,
+            5.515633984350842e-06,
+            6.735209467813875e-06,
+            7.5491638449394445e-06,
+            0.01697262878293017,
+            0.05894845610483247,
+            0.07575426121503764,
+            0.1292204099962425,
+            0.18915654897991624,
+            0.2338420793613416,
+            0.27641955408917507,
+            0.3587156662606298,
+            0.5956985891943772,
+            0.7742551825778518,
+            0.9886995727527654,
+            1.4442040835132162,
+            1.5490437829143995,
+            2.1457842771075732,
+            2.9603428585525893
+          ],
+          "hessian_gap_rank_diagnostic": {
+            "gap_ratio": 2248.279297091652,
+            "rank": 15,
+            "threshold": 0.01697262878293017
+          },
+          "hessian_rank": {
+            "absolute_rule": 1e-09,
+            "maximum": 2.9603428585525893,
+            "rank": 27,
+            "relative_rule": 1.4901161193847656e-08,
+            "threshold": 4.4112546124347885e-08
+          },
+          "infidelity": 5.844917309039133e-08,
+          "label": "frozen-optimized",
+          "negative_hessian_eigenvalues_below_threshold": 12,
+          "parameter_count": 40,
+          "unitarity_residual_frobenius": 1.945252821025189e-07,
+          "weighted_endpoint_hessian_relative_error": 2.8645183289972603e-05
+        }
+      ]
+    }
+  ]
+}

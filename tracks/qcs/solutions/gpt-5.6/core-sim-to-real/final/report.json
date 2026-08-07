@@ -1,0 +1,358 @@
+{
+  "eyebrow": "QCS Track \u00b7 preregistered synthetic confirmation",
+  "lede": "A frozen 15-dimensional model-Hessian subspace calibrated a 40-parameter synthetic CNOT black box with 90.6% fresh-truth success at a deterministic 66-query online cap, versus 25% and 0% success at 166 queries for the k=40 comparators. The post-hoc oracle-scored first-hit indices are 48.76, 160.63, and 166.",
+  "sections": [
+    {
+      "blocks": [
+        {
+          "kind": "text",
+          "text": "A differentiable simulator can optimize a quantum gate cheaply, but a mismatched device must be calibrated through noisy, derivative-free physical queries. Challenge 113 asks whether the nominal control landscape identifies a small subspace in which that expensive closed loop remains effective."
+        },
+        {
+          "blocks": [
+            {
+              "kind": "text",
+              "text": "For a two-qubit gate the local phase-blind landscape suggests 15 curved directions, even though the pulse has 40 parameters. If those directions transfer across model mismatch, finite-shot calibration can spend substantially fewer device queries."
+            }
+          ],
+          "kind": "card",
+          "title": "Significance"
+        },
+        {
+          "kind": "kv",
+          "pairs": [
+            [
+              "Challenge",
+              "#113 Sim-to-Real for Quantum Gates"
+            ],
+            [
+              "System",
+              "Synthetic d=4 CNOT, 40 pulse parameters"
+            ],
+            [
+              "Independent units",
+              "24 fresh truth cells"
+            ],
+            [
+              "Nested noise",
+              "4 finite-shot replicates per cell"
+            ]
+          ]
+        }
+      ],
+      "note": "Why the expensive device loop needs fewer directions",
+      "title": "Challenge"
+    },
+    {
+      "blocks": [
+        {
+          "kind": "badge",
+          "style": "neutral",
+          "text": "Approximate finite-shot black-box calibration"
+        },
+        {
+          "kind": "kv",
+          "pairs": [
+            [
+              "Method",
+              "principal-global model-informed k=15"
+            ],
+            [
+              "Tool",
+              "JAX autodiff + SciPy statistics"
+            ],
+            [
+              "Cycles",
+              "2 global updates"
+            ],
+            [
+              "Shots/query",
+              "32,768 (+ two 1,024 sentinels)"
+            ],
+            [
+              "Target",
+              "exact post-hoc infidelity <= 1e-3"
+            ]
+          ]
+        },
+        {
+          "kind": "text",
+          "text": "The nominal simulator supplies a warm-start pulse and Hessian principal directions. The true device is represented by a separately constructed mismatched model behind `query(parameters, shots) -> sampled scalar fidelity`. Calibration cannot differentiate through or inspect the true device. Exact fidelity is attached only after the client closes and cannot change an accepted step."
+        },
+        {
+          "columns": [
+            "Method",
+            "Dimension",
+            "Full queries/run",
+            "Full shots/run"
+          ],
+          "kind": "table",
+          "numeric": [
+            false,
+            true,
+            true,
+            true
+          ],
+          "rows": [
+            [
+              "model-informed k=15",
+              "15",
+              "66",
+              "2,099,200"
+            ],
+            [
+              "completed model k=40",
+              "40",
+              "166",
+              "5,376,000"
+            ],
+            [
+              "raw-coordinate k=40",
+              "40",
+              "166",
+              "5,376,000"
+            ]
+          ]
+        },
+        {
+          "kind": "note",
+          "label": "Cost semantics",
+          "style": "info",
+          "text": "Frozen full-cap cost remains the primary online resource quantity. The queries-to-target figure uses post-hoc exact scoring and charges failures their full method cap. It answers the benchmark question but is not a deployable stopping rule; the attempted online certificate failed."
+        }
+      ],
+      "note": "Differentiable model outside, scalar oracle inside",
+      "title": "Approach"
+    },
+    {
+      "blocks": [
+        {
+          "kind": "heading",
+          "level": 2,
+          "text": "Queries to target versus dimension"
+        },
+        {
+          "items": [
+            {
+              "caption": "Left: the development dimension sweep over k=5,10,15,20,40. Right: the preregistered fresh comparison. Values are restricted-mean post-hoc queries to exact infidelity <= 1e-3; failures are charged their complete method cap. Success percentages must be read jointly with query cost.",
+              "src": "queries-to-target.png"
+            }
+          ],
+          "kind": "figures"
+        },
+        {
+          "columns": [
+            "Fresh method",
+            "Search dimension",
+            "Queries to target",
+            "95% interval"
+          ],
+          "kind": "table",
+          "numeric": [
+            false,
+            true,
+            true,
+            true
+          ],
+          "rows": [
+            [
+              "model-informed k=15",
+              "15",
+              "48.76",
+              "[45.35, 52.47]"
+            ],
+            [
+              "completed model k=40",
+              "40",
+              "160.62",
+              "[153.69, 165.84]"
+            ],
+            [
+              "raw-coordinate k=40",
+              "40",
+              "166.00",
+              "[166.00, 166.00]"
+            ]
+          ]
+        },
+        {
+          "kind": "note",
+          "label": "Interpret together with success",
+          "style": "info",
+          "text": "A small method cap is not evidence of reaching the target: development k=5 used only 26 queries but succeeded in 0% of truth cells. The selected k=15 is the smallest tested geometry that combines high success with a low query horizon."
+        },
+        {
+          "kind": "heading",
+          "level": 2,
+          "text": "Fresh confirmation"
+        },
+        {
+          "items": [
+            {
+              "caption": "PASS on the fixed 24-cell synthetic CNOT benchmark. Bars show truth-cell success with empirical stratified-bootstrap intervals and deterministic full-cap resource ratios. This is not hardware evidence.",
+              "src": "headline.png"
+            }
+          ],
+          "kind": "figures"
+        },
+        {
+          "kind": "verdict",
+          "label": "PASS \u00b7 6/6 frozen gates",
+          "status": "good",
+          "why": "The k=15 success lower bound exceeds 75%, both paired-difference gates pass, both cost ratios are below 0.60, and the destructive-step upper bound is below 5%."
+        },
+        {
+          "columns": [
+            "Quantity",
+            "Estimate",
+            "Empirical bootstrap interval"
+          ],
+          "kind": "table",
+          "numeric": [
+            false,
+            true,
+            true
+          ],
+          "rows": [
+            [
+              "k=15 success",
+              "90.62%",
+              "[81.25, 97.92]%"
+            ],
+            [
+              "completed k=40 success",
+              "25.00%",
+              "[12.50, 37.50]%"
+            ],
+            [
+              "raw k=40 success",
+              "0.00%",
+              "[0.00, 0.00]%"
+            ],
+            [
+              "k15 - completed k40",
+              "65.62 pp",
+              "[51.04, 80.21] pp"
+            ],
+            [
+              "k15 - raw k40",
+              "90.62 pp",
+              "[81.25, 97.92] pp"
+            ]
+          ]
+        },
+        {
+          "kind": "note",
+          "label": "Bootstrap boundary",
+          "style": "info",
+          "text": "These are empirical family-stratified truth-cell bootstrap summaries. The raw-k=40 [0,0] interval is degenerate because every observed truth cell and every resample has zero success; it is not a strict confidence interval asserting zero population success probability."
+        },
+        {
+          "kind": "kv",
+          "pairs": [
+            [
+              "Query-cap ratio",
+              "0.3976"
+            ],
+            [
+              "Shot-cap ratio",
+              "0.3905"
+            ],
+            [
+              "Destructive accepted steps",
+              "0/165"
+            ],
+            [
+              "Safety one-sided UCB95",
+              "1.80%"
+            ],
+            [
+              "Independent final audit",
+              "18/18 checks"
+            ]
+          ]
+        },
+        {
+          "kind": "heading",
+          "level": 2,
+          "text": "Failure boundary and cross-size invariant"
+        },
+        {
+          "items": [
+            {
+              "caption": "Development/mechanism evidence only. The three upper/left panels show oracle-scored target success degrading with model-truth gap for historical Joint-15 v1, principal-line-15, and raw-40 methods. The lower-right panel shows equality of converged endpoint and Hessian ranks across d=2,3,4 systems.",
+              "src": "gap-and-invariant.png"
+            }
+          ],
+          "kind": "figures"
+        },
+        {
+          "kind": "note",
+          "label": "Conditional invariant, not a universal law",
+          "style": "info",
+          "text": "Near the audited converged optima, Hessian rank matches the accessible weighted phase-blind endpoint-error rank: 3, 8, and 15 for d=2,3,4. The unconditional rank(H)=d^2-1 claim is rejected; an earlier d=4 discrepancy was traced to optimizer residual and spectral-gap numerics."
+        },
+        {
+          "blocks": [
+            {
+              "items": [
+                "The online early-stop rule missed successes and failed its cost gate.",
+                "The attempted cross-dimension resource-scaling comparison was not identifiable because the frozen epsilon left zero-cost raw warm-start successes in d=2,3,4.",
+                "A frozen residual platform sketch reached the target in 0/4 positive stress seeds and was not escalated."
+              ],
+              "kind": "list"
+            }
+          ],
+          "kind": "card",
+          "title": "Honest negative results"
+        }
+      ],
+      "note": "One-shot public result plus independent reconstruction",
+      "title": "Results"
+    },
+    {
+      "blocks": [
+        {
+          "blocks": [
+            {
+              "kind": "text",
+              "text": "The comparison isolates geometry from optimizer class: the k=15 and completed k=40 methods share the same principal prefix, update rule, confidence thresholds, and paired finite-shot noise. Adding 25 nominally flat complement directions makes the calibration worse while spending over 2.5 times the fixed query cap. On the fresh benchmark, k=15 also reduces the restricted-mean post-hoc query-to-target score from 160.63 to 48.76."
+            }
+          ],
+          "kind": "card",
+          "title": "What's innovative"
+        },
+        {
+          "blocks": [
+            {
+              "kind": "text",
+              "text": "A separately preregistered holdout confirms that the development-selected k=15 geometry transfers across three mismatch families. The result supports a practical local sim-to-real rule: concentrate finite-shot feedback in simulator-informed curved directions and treat complement widening as a risky, testable intervention."
+            }
+          ],
+          "kind": "card",
+          "title": "Significance of output"
+        },
+        {
+          "blocks": [
+            {
+              "kind": "text",
+              "text": "The software cleanly separates a free differentiable model from a costly scalar device oracle and can be adapted to another simulator or hardware client. The present evidence is nevertheless synthetic CNOT evidence only: it is not cesium-specific, not hardware calibration, and not a universal cross-dimension law."
+            }
+          ],
+          "kind": "card",
+          "title": "Broader impact and boundary"
+        },
+        {
+          "kind": "note",
+          "label": "Audit boundary",
+          "style": "info",
+          "text": "The immutable formal result retains aggregate ledger closure and a canonical row hash, not every query row. The fast MWE closes this presentation gap by retaining all 66/166/166 query rows. A drift-only metadata field is also documented as a sampled-but-unapplied control map; it does not enter the simulator or any gate."
+        }
+      ],
+      "note": "What is new, and where the claim stops",
+      "title": "Highlight"
+    }
+  ],
+  "title": "Challenge 113: Sim-to-Real for Quantum Gates",
+  "url": "https://github.com/QuantumBFS/quantum.harness/issues/113"
+}

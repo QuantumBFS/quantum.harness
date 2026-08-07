@@ -1,0 +1,118 @@
+{
+  "run_id": "20260730-143543-liu-2026-fig1-perfect-blockade",
+  "status": "complete",
+  "paper": {
+    "id": "arXiv:2606.05060v1",
+    "title": "High-fidelity neutral atom gates leveraging low-rank Hessian optimization — Figure 1",
+    "url": "https://arxiv.org/abs/2606.05060"
+  },
+  "model": {
+    "name": "two-atom three-level perfect-blockade CZ model",
+    "H": "H(t)=\\frac{1}{2}\\sum_{j=1}^{2}\\left[\\widetilde\\Omega(t)|r\\rangle_j\\langle1|+\\widetilde\\Omega^*(t)|1\\rangle_j\\langle r|\\right],\\quad |rr\\rangle\\ \\mathrm{excluded}",
+    "couplings": {
+      "analytic pulse A": "2π×0.1122",
+      "ω": "1.0431",
+      "φ₀": "−0.7318",
+      "T": "2π×1.215"
+    },
+    "lattice": "two identical atoms; seven-state symmetry reduction",
+    "boundary": "perfect-blockade projection; closed system"
+  },
+  "method": {
+    "family": "exact Schrödinger propagation plus analytic fidelity Hessian",
+    "exact": true,
+    "tool": "NumPy/SciPy reproduction code",
+    "settings": {
+      "time_nodes": 201,
+      "hessian_dimension": "402×402",
+      "distortion_seed": 260605060
+    },
+    "note": "The seven-state and symmetry-reduced propagations use identical inputs. The Hessian is checked by independent finite differences. Panel g is a mechanistic reconstruction from the computed two-cycle trajectory; panels h–i test qualitative optimizer ordering."
+  },
+  "params": [
+    {
+      "name": "time grid",
+      "value": "201 nodes",
+      "source": "checked-in full-run configuration",
+      "why": "This is the repository's declared full Figure 1 grid.",
+      "risk": "The winning optimizer endpoint is sensitive below the continuous-propagation resolution.",
+      "fix": "Report the continuous DOP853 result and qualitative ordering; do not claim an exact sub-resolution floor."
+    },
+    {
+      "name": "distortion seed",
+      "value": "260605060",
+      "source": "checked-in full-run configuration",
+      "why": "It makes the reconstructed optimization trajectories deterministic.",
+      "risk": "One seed does not establish a population success probability.",
+      "fix": "Label panels h–i as deterministic mechanistic reconstructions."
+    },
+    {
+      "name": "generated panels",
+      "value": "a–i",
+      "source": "reproduction package plus computed panel-g trajectory",
+      "why": "The full composite now contains all nine paper panel positions.",
+      "risk": "Panel g is a mechanism-level reconstruction, not digitized source data.",
+      "fix": "Label panel g explicitly as a mechanistic reconstruction."
+    }
+  ],
+  "scope": {
+    "label": "full checked-in Figure 1 reconstruction"
+  },
+  "estimate": [
+    {
+      "point": "Figure 1 full run",
+      "wall": "5–30 min",
+      "memory": "<1 GB"
+    }
+  ],
+  "actual": [
+    {
+      "point": "Figure 1 full run",
+      "wall": "72.5 s",
+      "memory": "371 MiB peak resident"
+    }
+  ],
+  "where": "local CPU; no usable Slurm profile is configured",
+  "risks": [
+    "Panel g is a computed mechanistic reconstruction rather than digitized paper data.",
+    "The published rounded pulse is not an exact CZ in the numerical convention.",
+    "Panels h–i are mechanism reconstructions, not digitized experimental curves."
+  ],
+  "figures": [
+    {
+      "id": "Figure 1",
+      "paper_image": "paper_figure1.png",
+      "plots": "low-rank Hessian geometry and optimization trajectories",
+      "x": "time, distortion mode, or optimization step",
+      "x_range": "paper panel ranges",
+      "y": "control waveform, Hessian sensitivity, or simulated gate error",
+      "observe": {
+        "quantity": "Hessian eigenspectrum, principal/null modes, and optimizer trajectories",
+        "normalization": "trapezoid-normalized waveform modes; computational-subspace average CZ fidelity",
+        "states": "|00⟩, |01⟩, |10⟩, |11⟩ plus three leakage partners"
+      },
+      "expected": "The analytic Hessian has rank 5; principal finite-difference curvatures agree with theory, null curvatures are negligible, and the Hessian-coordinate search has the fastest stable qualitative convergence.",
+      "results": {
+        "figure": "figs/figure1_reproduction.png",
+        "match": "partly",
+        "why": "The rank, principal/null modes, and optimizer ordering reproduce the paper's mechanism, but panel g is reconstructed from this run and the rounded analytic pulse is not the authors' exact numerical control.",
+        "numbers": {
+          "active Hessian rank": "5",
+          "λ₆/λ₁": "1.22×10⁻¹⁶",
+          "maximum principal curvature error": "4.47×10⁻⁶",
+          "maximum null curvature / λ₁": "8.00×10⁻⁷"
+        },
+        "wall": "72.5 s",
+        "changes": [
+          "added panel g from the computed two-cycle Hessian trajectory"
+        ],
+        "rerun": "MPLCONFIGDIR=/tmp/liu-figures-mpl .venv/bin/python reproduce/liu_2026_fig1_reproduction.py --run-dir /home/thy/thy/work/quantum_harnessing/quantum.harness/tracks/qcs/results/20260730-143543-liu-2026-fig1-perfect-blockade",
+        "active_hessian_rank": 5,
+        "lambda6_over_lambda1": 1.2223791873387053e-16,
+        "max_principal_relative_error": 4.468553145770559e-6,
+        "max_null_curvature_ratio": 7.998850389012809e-7,
+        "acceptance": "all declared numerical checks passed"
+      }
+    }
+  ]
+}

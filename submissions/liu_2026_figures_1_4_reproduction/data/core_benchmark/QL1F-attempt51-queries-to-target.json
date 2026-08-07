@@ -1,0 +1,958 @@
+{
+  "artifacts": {
+    "plot_png": {
+      "binary_sha256": "383a5ee65b079f7d8efa2eea5a0677dc4c400b7924f3d32cc9ba34ad549c8a2f",
+      "path": "plots/attempt51-queries-to-target.png"
+    },
+    "plot_svg": {
+      "canonical_sha256": "c62686eba4f7a2a518a7a4e125d6f996056b520352da7a133da02930d17010d5",
+      "path": "plots/attempt51-queries-to-target.svg"
+    },
+    "report": {
+      "canonical_sha256": "8f5aac35053ab28c5f42053f36034b05f9972b7f8e6b6d3285639537bdf1057a",
+      "path": "docs/ATTEMPT51_DELIVERABLE_REPORT.md"
+    }
+  },
+  "checks": {
+    "all_statistics_finite": true,
+    "confirmation_four_nested_replicates": true,
+    "confirmation_grid_288_without_exception": true,
+    "confirmation_has_24_truth_cells_each": true,
+    "confirmation_status_complete": true,
+    "development_dimensions_exact": true,
+    "development_has_21_truth_cells_each": true,
+    "development_status_complete": true,
+    "first_hit_present_if_and_only_if_success": true,
+    "online_certificate_not_relabelled": true,
+    "recomputed_success_intervals_match_formal_summary": true
+  },
+  "claim_boundary": [
+    "The development dimension sweep is not confirmation evidence.",
+    "The confirmation truths are now public.",
+    "Exact scores are post-hoc and never enter calibration.",
+    "This metric is not a deployable online stopping rule.",
+    "Attempt 43's failed online certificate remains negative."
+  ],
+  "confirmation": [
+    {
+      "independent_truth_cells": 24,
+      "method": "model-informed-k15",
+      "nested_replicates_per_cell": 4,
+      "oracle_scored_success": {
+        "estimate": 0.90625,
+        "lower_95": 0.8125,
+        "upper_95": 0.9791666666666666
+      },
+      "queries_to_target": {
+        "estimate": 48.760416666666664,
+        "lower_95": 45.354166666666664,
+        "upper_95": 52.46875
+      },
+      "search_dimension": 15,
+      "semantics": "fresh confirmation; post-hoc oracle first accepted hit; failures charged full cap",
+      "shots_to_target": {
+        "estimate": 1563061.3333333333,
+        "lower_95": 1453760.0,
+        "upper_95": 1683253.3333333333
+      },
+      "truth_level_rows": [
+        {
+          "family": "control-map",
+          "nested_replicates": 4,
+          "oracle_scored_success": 1.0,
+          "restricted_mean_queries_to_target": 33.0,
+          "restricted_mean_shots_to_target": 1049600.0,
+          "selected_cell": "control-map:260641:0.05",
+          "truth_seed": 260641
+        },
+        {
+          "family": "control-map",
+          "nested_replicates": 4,
+          "oracle_scored_success": 1.0,
+          "restricted_mean_queries_to_target": 33.0,
+          "restricted_mean_shots_to_target": 1049600.0,
+          "selected_cell": "control-map:260642:0.05",
+          "truth_seed": 260642
+        },
+        {
+          "family": "control-map",
+          "nested_replicates": 4,
+          "oracle_scored_success": 1.0,
+          "restricted_mean_queries_to_target": 33.0,
+          "restricted_mean_shots_to_target": 1049600.0,
+          "selected_cell": "control-map:260643:0.05",
+          "truth_seed": 260643
+        },
+        {
+          "family": "control-map",
+          "nested_replicates": 4,
+          "oracle_scored_success": 1.0,
+          "restricted_mean_queries_to_target": 33.0,
+          "restricted_mean_shots_to_target": 1049600.0,
+          "selected_cell": "control-map:260644:0.05",
+          "truth_seed": 260644
+        },
+        {
+          "family": "control-map",
+          "nested_replicates": 4,
+          "oracle_scored_success": 1.0,
+          "restricted_mean_queries_to_target": 41.0,
+          "restricted_mean_shots_to_target": 1311744.0,
+          "selected_cell": "control-map:260645:0.05",
+          "truth_seed": 260645
+        },
+        {
+          "family": "control-map",
+          "nested_replicates": 4,
+          "oracle_scored_success": 1.0,
+          "restricted_mean_queries_to_target": 33.0,
+          "restricted_mean_shots_to_target": 1049600.0,
+          "selected_cell": "control-map:260646:0.05",
+          "truth_seed": 260646
+        },
+        {
+          "family": "control-map",
+          "nested_replicates": 4,
+          "oracle_scored_success": 1.0,
+          "restricted_mean_queries_to_target": 33.0,
+          "restricted_mean_shots_to_target": 1049600.0,
+          "selected_cell": "control-map:260647:0.05",
+          "truth_seed": 260647
+        },
+        {
+          "family": "control-map",
+          "nested_replicates": 4,
+          "oracle_scored_success": 1.0,
+          "restricted_mean_queries_to_target": 57.0,
+          "restricted_mean_shots_to_target": 1836032.0,
+          "selected_cell": "control-map:260648:0.05",
+          "truth_seed": 260648
+        },
+        {
+          "family": "drift",
+          "nested_replicates": 4,
+          "oracle_scored_success": 1.0,
+          "restricted_mean_queries_to_target": 57.0,
+          "restricted_mean_shots_to_target": 1836032.0,
+          "selected_cell": "drift:260641:0.1",
+          "truth_seed": 260641
+        },
+        {
+          "family": "drift",
+          "nested_replicates": 4,
+          "oracle_scored_success": 1.0,
+          "restricted_mean_queries_to_target": 57.0,
+          "restricted_mean_shots_to_target": 1836032.0,
+          "selected_cell": "drift:260642:0.1",
+          "truth_seed": 260642
+        },
+        {
+          "family": "drift",
+          "nested_replicates": 4,
+          "oracle_scored_success": 0.5,
+          "restricted_mean_queries_to_target": 57.5,
+          "restricted_mean_shots_to_target": 1836544.0,
+          "selected_cell": "drift:260643:0.1",
+          "truth_seed": 260643
+        },
+        {
+          "family": "drift",
+          "nested_replicates": 4,
+          "oracle_scored_success": 1.0,
+          "restricted_mean_queries_to_target": 57.0,
+          "restricted_mean_shots_to_target": 1836032.0,
+          "selected_cell": "drift:260644:0.1",
+          "truth_seed": 260644
+        },
+        {
+          "family": "drift",
+          "nested_replicates": 4,
+          "oracle_scored_success": 1.0,
+          "restricted_mean_queries_to_target": 65.0,
+          "restricted_mean_shots_to_target": 2098176.0,
+          "selected_cell": "drift:260645:0.1",
+          "truth_seed": 260645
+        },
+        {
+          "family": "drift",
+          "nested_replicates": 4,
+          "oracle_scored_success": 0.75,
+          "restricted_mean_queries_to_target": 65.25,
+          "restricted_mean_shots_to_target": 2098432.0,
+          "selected_cell": "drift:260646:0.1",
+          "truth_seed": 260646
+        },
+        {
+          "family": "drift",
+          "nested_replicates": 4,
+          "oracle_scored_success": 0.0,
+          "restricted_mean_queries_to_target": 66.0,
+          "restricted_mean_shots_to_target": 2099200.0,
+          "selected_cell": "drift:260647:0.1",
+          "truth_seed": 260647
+        },
+        {
+          "family": "drift",
+          "nested_replicates": 4,
+          "oracle_scored_success": 1.0,
+          "restricted_mean_queries_to_target": 65.0,
+          "restricted_mean_shots_to_target": 2098176.0,
+          "selected_cell": "drift:260648:0.1",
+          "truth_seed": 260648
+        },
+        {
+          "family": "combined",
+          "nested_replicates": 4,
+          "oracle_scored_success": 1.0,
+          "restricted_mean_queries_to_target": 57.0,
+          "restricted_mean_shots_to_target": 1836032.0,
+          "selected_cell": "combined:260641:0.05",
+          "truth_seed": 260641
+        },
+        {
+          "family": "combined",
+          "nested_replicates": 4,
+          "oracle_scored_success": 1.0,
+          "restricted_mean_queries_to_target": 33.0,
+          "restricted_mean_shots_to_target": 1049600.0,
+          "selected_cell": "combined:260642:0.05",
+          "truth_seed": 260642
+        },
+        {
+          "family": "combined",
+          "nested_replicates": 4,
+          "oracle_scored_success": 0.75,
+          "restricted_mean_queries_to_target": 49.25,
+          "restricted_mean_shots_to_target": 1574144.0,
+          "selected_cell": "combined:260643:0.05",
+          "truth_seed": 260643
+        },
+        {
+          "family": "combined",
+          "nested_replicates": 4,
+          "oracle_scored_success": 1.0,
+          "restricted_mean_queries_to_target": 33.0,
+          "restricted_mean_shots_to_target": 1049600.0,
+          "selected_cell": "combined:260644:0.05",
+          "truth_seed": 260644
+        },
+        {
+          "family": "combined",
+          "nested_replicates": 4,
+          "oracle_scored_success": 0.75,
+          "restricted_mean_queries_to_target": 65.25,
+          "restricted_mean_shots_to_target": 2098432.0,
+          "selected_cell": "combined:260645:0.05",
+          "truth_seed": 260645
+        },
+        {
+          "family": "combined",
+          "nested_replicates": 4,
+          "oracle_scored_success": 1.0,
+          "restricted_mean_queries_to_target": 33.0,
+          "restricted_mean_shots_to_target": 1049600.0,
+          "selected_cell": "combined:260646:0.05",
+          "truth_seed": 260646
+        },
+        {
+          "family": "combined",
+          "nested_replicates": 4,
+          "oracle_scored_success": 1.0,
+          "restricted_mean_queries_to_target": 49.0,
+          "restricted_mean_shots_to_target": 1573888.0,
+          "selected_cell": "combined:260647:0.05",
+          "truth_seed": 260647
+        },
+        {
+          "family": "combined",
+          "nested_replicates": 4,
+          "oracle_scored_success": 1.0,
+          "restricted_mean_queries_to_target": 65.0,
+          "restricted_mean_shots_to_target": 2098176.0,
+          "selected_cell": "combined:260648:0.05",
+          "truth_seed": 260648
+        }
+      ]
+    },
+    {
+      "independent_truth_cells": 24,
+      "method": "model-informed-k40",
+      "nested_replicates_per_cell": 4,
+      "oracle_scored_success": {
+        "estimate": 0.25,
+        "lower_95": 0.125,
+        "upper_95": 0.375
+      },
+      "queries_to_target": {
+        "estimate": 160.625,
+        "lower_95": 153.6875,
+        "upper_95": 165.84375
+      },
+      "search_dimension": 40,
+      "semantics": "fresh confirmation; post-hoc oracle first accepted hit; failures charged full cap",
+      "shots_to_target": {
+        "estimate": 5207808.0,
+        "lower_95": 4983786.666666667,
+        "upper_95": 5375840.0
+      },
+      "truth_level_rows": [
+        {
+          "family": "control-map",
+          "nested_replicates": 4,
+          "oracle_scored_success": 0.75,
+          "restricted_mean_queries_to_target": 165.25,
+          "restricted_mean_shots_to_target": 5375232.0,
+          "selected_cell": "control-map:260641:0.05",
+          "truth_seed": 260641
+        },
+        {
+          "family": "control-map",
+          "nested_replicates": 4,
+          "oracle_scored_success": 0.0,
+          "restricted_mean_queries_to_target": 166.0,
+          "restricted_mean_shots_to_target": 5376000.0,
+          "selected_cell": "control-map:260642:0.05",
+          "truth_seed": 260642
+        },
+        {
+          "family": "control-map",
+          "nested_replicates": 4,
+          "oracle_scored_success": 1.0,
+          "restricted_mean_queries_to_target": 165.0,
+          "restricted_mean_shots_to_target": 5374976.0,
+          "selected_cell": "control-map:260643:0.05",
+          "truth_seed": 260643
+        },
+        {
+          "family": "control-map",
+          "nested_replicates": 4,
+          "oracle_scored_success": 1.0,
+          "restricted_mean_queries_to_target": 124.0,
+          "restricted_mean_shots_to_target": 4031488.0,
+          "selected_cell": "control-map:260644:0.05",
+          "truth_seed": 260644
+        },
+        {
+          "family": "control-map",
+          "nested_replicates": 4,
+          "oracle_scored_success": 0.0,
+          "restricted_mean_queries_to_target": 166.0,
+          "restricted_mean_shots_to_target": 5376000.0,
+          "selected_cell": "control-map:260645:0.05",
+          "truth_seed": 260645
+        },
+        {
+          "family": "control-map",
+          "nested_replicates": 4,
+          "oracle_scored_success": 1.0,
+          "restricted_mean_queries_to_target": 83.0,
+          "restricted_mean_shots_to_target": 2688000.0,
+          "selected_cell": "control-map:260646:0.05",
+          "truth_seed": 260646
+        },
+        {
+          "family": "control-map",
+          "nested_replicates": 4,
+          "oracle_scored_success": 0.75,
+          "restricted_mean_queries_to_target": 165.25,
+          "restricted_mean_shots_to_target": 5375232.0,
+          "selected_cell": "control-map:260647:0.05",
+          "truth_seed": 260647
+        },
+        {
+          "family": "control-map",
+          "nested_replicates": 4,
+          "oracle_scored_success": 0.0,
+          "restricted_mean_queries_to_target": 166.0,
+          "restricted_mean_shots_to_target": 5376000.0,
+          "selected_cell": "control-map:260648:0.05",
+          "truth_seed": 260648
+        },
+        {
+          "family": "drift",
+          "nested_replicates": 4,
+          "oracle_scored_success": 0.0,
+          "restricted_mean_queries_to_target": 166.0,
+          "restricted_mean_shots_to_target": 5376000.0,
+          "selected_cell": "drift:260641:0.1",
+          "truth_seed": 260641
+        },
+        {
+          "family": "drift",
+          "nested_replicates": 4,
+          "oracle_scored_success": 0.0,
+          "restricted_mean_queries_to_target": 166.0,
+          "restricted_mean_shots_to_target": 5376000.0,
+          "selected_cell": "drift:260642:0.1",
+          "truth_seed": 260642
+        },
+        {
+          "family": "drift",
+          "nested_replicates": 4,
+          "oracle_scored_success": 0.0,
+          "restricted_mean_queries_to_target": 166.0,
+          "restricted_mean_shots_to_target": 5376000.0,
+          "selected_cell": "drift:260643:0.1",
+          "truth_seed": 260643
+        },
+        {
+          "family": "drift",
+          "nested_replicates": 4,
+          "oracle_scored_success": 0.0,
+          "restricted_mean_queries_to_target": 166.0,
+          "restricted_mean_shots_to_target": 5376000.0,
+          "selected_cell": "drift:260644:0.1",
+          "truth_seed": 260644
+        },
+        {
+          "family": "drift",
+          "nested_replicates": 4,
+          "oracle_scored_success": 0.0,
+          "restricted_mean_queries_to_target": 166.0,
+          "restricted_mean_shots_to_target": 5376000.0,
+          "selected_cell": "drift:260645:0.1",
+          "truth_seed": 260645
+        },
+        {
+          "family": "drift",
+          "nested_replicates": 4,
+          "oracle_scored_success": 0.0,
+          "restricted_mean_queries_to_target": 166.0,
+          "restricted_mean_shots_to_target": 5376000.0,
+          "selected_cell": "drift:260646:0.1",
+          "truth_seed": 260646
+        },
+        {
+          "family": "drift",
+          "nested_replicates": 4,
+          "oracle_scored_success": 0.0,
+          "restricted_mean_queries_to_target": 166.0,
+          "restricted_mean_shots_to_target": 5376000.0,
+          "selected_cell": "drift:260647:0.1",
+          "truth_seed": 260647
+        },
+        {
+          "family": "drift",
+          "nested_replicates": 4,
+          "oracle_scored_success": 0.0,
+          "restricted_mean_queries_to_target": 166.0,
+          "restricted_mean_shots_to_target": 5376000.0,
+          "selected_cell": "drift:260648:0.1",
+          "truth_seed": 260648
+        },
+        {
+          "family": "combined",
+          "nested_replicates": 4,
+          "oracle_scored_success": 0.0,
+          "restricted_mean_queries_to_target": 166.0,
+          "restricted_mean_shots_to_target": 5376000.0,
+          "selected_cell": "combined:260641:0.05",
+          "truth_seed": 260641
+        },
+        {
+          "family": "combined",
+          "nested_replicates": 4,
+          "oracle_scored_success": 0.0,
+          "restricted_mean_queries_to_target": 166.0,
+          "restricted_mean_shots_to_target": 5376000.0,
+          "selected_cell": "combined:260642:0.05",
+          "truth_seed": 260642
+        },
+        {
+          "family": "combined",
+          "nested_replicates": 4,
+          "oracle_scored_success": 0.0,
+          "restricted_mean_queries_to_target": 166.0,
+          "restricted_mean_shots_to_target": 5376000.0,
+          "selected_cell": "combined:260643:0.05",
+          "truth_seed": 260643
+        },
+        {
+          "family": "combined",
+          "nested_replicates": 4,
+          "oracle_scored_success": 0.75,
+          "restricted_mean_queries_to_target": 165.25,
+          "restricted_mean_shots_to_target": 5375232.0,
+          "selected_cell": "combined:260644:0.05",
+          "truth_seed": 260644
+        },
+        {
+          "family": "combined",
+          "nested_replicates": 4,
+          "oracle_scored_success": 0.0,
+          "restricted_mean_queries_to_target": 166.0,
+          "restricted_mean_shots_to_target": 5376000.0,
+          "selected_cell": "combined:260645:0.05",
+          "truth_seed": 260645
+        },
+        {
+          "family": "combined",
+          "nested_replicates": 4,
+          "oracle_scored_success": 0.75,
+          "restricted_mean_queries_to_target": 165.25,
+          "restricted_mean_shots_to_target": 5375232.0,
+          "selected_cell": "combined:260646:0.05",
+          "truth_seed": 260646
+        },
+        {
+          "family": "combined",
+          "nested_replicates": 4,
+          "oracle_scored_success": 0.0,
+          "restricted_mean_queries_to_target": 166.0,
+          "restricted_mean_shots_to_target": 5376000.0,
+          "selected_cell": "combined:260647:0.05",
+          "truth_seed": 260647
+        },
+        {
+          "family": "combined",
+          "nested_replicates": 4,
+          "oracle_scored_success": 0.0,
+          "restricted_mean_queries_to_target": 166.0,
+          "restricted_mean_shots_to_target": 5376000.0,
+          "selected_cell": "combined:260648:0.05",
+          "truth_seed": 260648
+        }
+      ]
+    },
+    {
+      "independent_truth_cells": 24,
+      "method": "raw-coordinate-global-40",
+      "nested_replicates_per_cell": 4,
+      "oracle_scored_success": {
+        "estimate": 0.0,
+        "lower_95": 0.0,
+        "upper_95": 0.0
+      },
+      "queries_to_target": {
+        "estimate": 166.0,
+        "lower_95": 166.0,
+        "upper_95": 166.0
+      },
+      "search_dimension": 40,
+      "semantics": "fresh confirmation; post-hoc oracle first accepted hit; failures charged full cap",
+      "shots_to_target": {
+        "estimate": 5376000.0,
+        "lower_95": 5376000.0,
+        "upper_95": 5376000.0
+      },
+      "truth_level_rows": [
+        {
+          "family": "control-map",
+          "nested_replicates": 4,
+          "oracle_scored_success": 0.0,
+          "restricted_mean_queries_to_target": 166.0,
+          "restricted_mean_shots_to_target": 5376000.0,
+          "selected_cell": "control-map:260641:0.05",
+          "truth_seed": 260641
+        },
+        {
+          "family": "control-map",
+          "nested_replicates": 4,
+          "oracle_scored_success": 0.0,
+          "restricted_mean_queries_to_target": 166.0,
+          "restricted_mean_shots_to_target": 5376000.0,
+          "selected_cell": "control-map:260642:0.05",
+          "truth_seed": 260642
+        },
+        {
+          "family": "control-map",
+          "nested_replicates": 4,
+          "oracle_scored_success": 0.0,
+          "restricted_mean_queries_to_target": 166.0,
+          "restricted_mean_shots_to_target": 5376000.0,
+          "selected_cell": "control-map:260643:0.05",
+          "truth_seed": 260643
+        },
+        {
+          "family": "control-map",
+          "nested_replicates": 4,
+          "oracle_scored_success": 0.0,
+          "restricted_mean_queries_to_target": 166.0,
+          "restricted_mean_shots_to_target": 5376000.0,
+          "selected_cell": "control-map:260644:0.05",
+          "truth_seed": 260644
+        },
+        {
+          "family": "control-map",
+          "nested_replicates": 4,
+          "oracle_scored_success": 0.0,
+          "restricted_mean_queries_to_target": 166.0,
+          "restricted_mean_shots_to_target": 5376000.0,
+          "selected_cell": "control-map:260645:0.05",
+          "truth_seed": 260645
+        },
+        {
+          "family": "control-map",
+          "nested_replicates": 4,
+          "oracle_scored_success": 0.0,
+          "restricted_mean_queries_to_target": 166.0,
+          "restricted_mean_shots_to_target": 5376000.0,
+          "selected_cell": "control-map:260646:0.05",
+          "truth_seed": 260646
+        },
+        {
+          "family": "control-map",
+          "nested_replicates": 4,
+          "oracle_scored_success": 0.0,
+          "restricted_mean_queries_to_target": 166.0,
+          "restricted_mean_shots_to_target": 5376000.0,
+          "selected_cell": "control-map:260647:0.05",
+          "truth_seed": 260647
+        },
+        {
+          "family": "control-map",
+          "nested_replicates": 4,
+          "oracle_scored_success": 0.0,
+          "restricted_mean_queries_to_target": 166.0,
+          "restricted_mean_shots_to_target": 5376000.0,
+          "selected_cell": "control-map:260648:0.05",
+          "truth_seed": 260648
+        },
+        {
+          "family": "drift",
+          "nested_replicates": 4,
+          "oracle_scored_success": 0.0,
+          "restricted_mean_queries_to_target": 166.0,
+          "restricted_mean_shots_to_target": 5376000.0,
+          "selected_cell": "drift:260641:0.1",
+          "truth_seed": 260641
+        },
+        {
+          "family": "drift",
+          "nested_replicates": 4,
+          "oracle_scored_success": 0.0,
+          "restricted_mean_queries_to_target": 166.0,
+          "restricted_mean_shots_to_target": 5376000.0,
+          "selected_cell": "drift:260642:0.1",
+          "truth_seed": 260642
+        },
+        {
+          "family": "drift",
+          "nested_replicates": 4,
+          "oracle_scored_success": 0.0,
+          "restricted_mean_queries_to_target": 166.0,
+          "restricted_mean_shots_to_target": 5376000.0,
+          "selected_cell": "drift:260643:0.1",
+          "truth_seed": 260643
+        },
+        {
+          "family": "drift",
+          "nested_replicates": 4,
+          "oracle_scored_success": 0.0,
+          "restricted_mean_queries_to_target": 166.0,
+          "restricted_mean_shots_to_target": 5376000.0,
+          "selected_cell": "drift:260644:0.1",
+          "truth_seed": 260644
+        },
+        {
+          "family": "drift",
+          "nested_replicates": 4,
+          "oracle_scored_success": 0.0,
+          "restricted_mean_queries_to_target": 166.0,
+          "restricted_mean_shots_to_target": 5376000.0,
+          "selected_cell": "drift:260645:0.1",
+          "truth_seed": 260645
+        },
+        {
+          "family": "drift",
+          "nested_replicates": 4,
+          "oracle_scored_success": 0.0,
+          "restricted_mean_queries_to_target": 166.0,
+          "restricted_mean_shots_to_target": 5376000.0,
+          "selected_cell": "drift:260646:0.1",
+          "truth_seed": 260646
+        },
+        {
+          "family": "drift",
+          "nested_replicates": 4,
+          "oracle_scored_success": 0.0,
+          "restricted_mean_queries_to_target": 166.0,
+          "restricted_mean_shots_to_target": 5376000.0,
+          "selected_cell": "drift:260647:0.1",
+          "truth_seed": 260647
+        },
+        {
+          "family": "drift",
+          "nested_replicates": 4,
+          "oracle_scored_success": 0.0,
+          "restricted_mean_queries_to_target": 166.0,
+          "restricted_mean_shots_to_target": 5376000.0,
+          "selected_cell": "drift:260648:0.1",
+          "truth_seed": 260648
+        },
+        {
+          "family": "combined",
+          "nested_replicates": 4,
+          "oracle_scored_success": 0.0,
+          "restricted_mean_queries_to_target": 166.0,
+          "restricted_mean_shots_to_target": 5376000.0,
+          "selected_cell": "combined:260641:0.05",
+          "truth_seed": 260641
+        },
+        {
+          "family": "combined",
+          "nested_replicates": 4,
+          "oracle_scored_success": 0.0,
+          "restricted_mean_queries_to_target": 166.0,
+          "restricted_mean_shots_to_target": 5376000.0,
+          "selected_cell": "combined:260642:0.05",
+          "truth_seed": 260642
+        },
+        {
+          "family": "combined",
+          "nested_replicates": 4,
+          "oracle_scored_success": 0.0,
+          "restricted_mean_queries_to_target": 166.0,
+          "restricted_mean_shots_to_target": 5376000.0,
+          "selected_cell": "combined:260643:0.05",
+          "truth_seed": 260643
+        },
+        {
+          "family": "combined",
+          "nested_replicates": 4,
+          "oracle_scored_success": 0.0,
+          "restricted_mean_queries_to_target": 166.0,
+          "restricted_mean_shots_to_target": 5376000.0,
+          "selected_cell": "combined:260644:0.05",
+          "truth_seed": 260644
+        },
+        {
+          "family": "combined",
+          "nested_replicates": 4,
+          "oracle_scored_success": 0.0,
+          "restricted_mean_queries_to_target": 166.0,
+          "restricted_mean_shots_to_target": 5376000.0,
+          "selected_cell": "combined:260645:0.05",
+          "truth_seed": 260645
+        },
+        {
+          "family": "combined",
+          "nested_replicates": 4,
+          "oracle_scored_success": 0.0,
+          "restricted_mean_queries_to_target": 166.0,
+          "restricted_mean_shots_to_target": 5376000.0,
+          "selected_cell": "combined:260646:0.05",
+          "truth_seed": 260646
+        },
+        {
+          "family": "combined",
+          "nested_replicates": 4,
+          "oracle_scored_success": 0.0,
+          "restricted_mean_queries_to_target": 166.0,
+          "restricted_mean_shots_to_target": 5376000.0,
+          "selected_cell": "combined:260647:0.05",
+          "truth_seed": 260647
+        },
+        {
+          "family": "combined",
+          "nested_replicates": 4,
+          "oracle_scored_success": 0.0,
+          "restricted_mean_queries_to_target": 166.0,
+          "restricted_mean_shots_to_target": 5376000.0,
+          "selected_cell": "combined:260648:0.05",
+          "truth_seed": 260648
+        }
+      ]
+    }
+  ],
+  "development": [
+    {
+      "independent_truth_cells": 21,
+      "method": "model-informed-k5",
+      "oracle_scored_success": {
+        "bootstrap_draws": 20000,
+        "bootstrap_seed": 113044,
+        "estimate": 0.0,
+        "independent_truth_cells": 21,
+        "lower_95": 0.0,
+        "stratified_by": "family",
+        "upper_95": 0.0
+      },
+      "queries_to_target": {
+        "bootstrap_draws": 20000,
+        "bootstrap_seed": 113044,
+        "estimate": 26.0,
+        "independent_truth_cells": 21,
+        "lower_95": 26.0,
+        "stratified_by": "family",
+        "upper_95": 26.0
+      },
+      "search_dimension": 5,
+      "semantics": "development; post-hoc oracle first accepted hit; failures charged full cap",
+      "shots_to_target": {
+        "bootstrap_draws": 20000,
+        "bootstrap_seed": 113044,
+        "estimate": 788480.0,
+        "independent_truth_cells": 21,
+        "lower_95": 788480.0,
+        "stratified_by": "family",
+        "upper_95": 788480.0
+      }
+    },
+    {
+      "independent_truth_cells": 21,
+      "method": "model-informed-k10",
+      "oracle_scored_success": {
+        "bootstrap_draws": 20000,
+        "bootstrap_seed": 113044,
+        "estimate": 0.38095238095238093,
+        "independent_truth_cells": 21,
+        "lower_95": 0.25,
+        "stratified_by": "family",
+        "upper_95": 0.5119047619047619
+      },
+      "queries_to_target": {
+        "bootstrap_draws": 20000,
+        "bootstrap_seed": 113044,
+        "estimate": 37.76190476190476,
+        "independent_truth_cells": 21,
+        "lower_95": 34.48809523809524,
+        "stratified_by": "family",
+        "upper_95": 41.035714285714285
+      },
+      "search_dimension": 10,
+      "semantics": "development; post-hoc oracle first accepted hit; failures charged full cap",
+      "shots_to_target": {
+        "bootstrap_draws": 20000,
+        "bootstrap_seed": 113044,
+        "estimate": 1185987.0476190476,
+        "independent_truth_cells": 21,
+        "lower_95": 1082867.8095238095,
+        "stratified_by": "family",
+        "upper_95": 1289106.2857142857
+      }
+    },
+    {
+      "independent_truth_cells": 21,
+      "method": "model-informed-k15",
+      "oracle_scored_success": {
+        "bootstrap_draws": 20000,
+        "bootstrap_seed": 113044,
+        "estimate": 0.9404761904761905,
+        "independent_truth_cells": 21,
+        "lower_95": 0.9047619047619048,
+        "stratified_by": "family",
+        "upper_95": 0.9761904761904762
+      },
+      "queries_to_target": {
+        "bootstrap_draws": 20000,
+        "bootstrap_seed": 113044,
+        "estimate": 47.154761904761905,
+        "independent_truth_cells": 21,
+        "lower_95": 43.333333333333336,
+        "stratified_by": "family",
+        "upper_95": 51.0
+      },
+      "search_dimension": 15,
+      "semantics": "development; post-hoc oracle first accepted hit; failures charged full cap",
+      "shots_to_target": {
+        "bootstrap_draws": 20000,
+        "bootstrap_seed": 113044,
+        "estimate": 1511533.7142857143,
+        "independent_truth_cells": 21,
+        "lower_95": 1386691.0476190476,
+        "stratified_by": "family",
+        "upper_95": 1636400.761904762
+      }
+    },
+    {
+      "independent_truth_cells": 21,
+      "method": "model-informed-k20",
+      "oracle_scored_success": {
+        "bootstrap_draws": 20000,
+        "bootstrap_seed": 113044,
+        "estimate": 0.8571428571428571,
+        "independent_truth_cells": 21,
+        "lower_95": 0.7738095238095238,
+        "stratified_by": "family",
+        "upper_95": 0.9404761904761905
+      },
+      "queries_to_target": {
+        "bootstrap_draws": 20000,
+        "bootstrap_seed": 113044,
+        "estimate": 75.64285714285714,
+        "independent_truth_cells": 21,
+        "lower_95": 71.0952380952381,
+        "stratified_by": "family",
+        "upper_95": 80.13095238095238
+      },
+      "search_dimension": 20,
+      "semantics": "development; post-hoc oracle first accepted hit; failures charged full cap",
+      "shots_to_target": {
+        "bootstrap_draws": 20000,
+        "bootstrap_seed": 113044,
+        "estimate": 2442386.285714286,
+        "independent_truth_cells": 21,
+        "lower_95": 2294881.523809524,
+        "stratified_by": "family",
+        "upper_95": 2589830.095238095
+      }
+    },
+    {
+      "independent_truth_cells": 21,
+      "method": "model-informed-k40",
+      "oracle_scored_success": {
+        "bootstrap_draws": 20000,
+        "bootstrap_seed": 113044,
+        "estimate": 0.25,
+        "independent_truth_cells": 21,
+        "lower_95": 0.13095238095238096,
+        "stratified_by": "family",
+        "upper_95": 0.38095238095238093
+      },
+      "queries_to_target": {
+        "bootstrap_draws": 20000,
+        "bootstrap_seed": 113044,
+        "estimate": 165.75,
+        "independent_truth_cells": 21,
+        "lower_95": 165.61904761904762,
+        "stratified_by": "family",
+        "upper_95": 165.86904761904762
+      },
+      "search_dimension": 40,
+      "semantics": "development; post-hoc oracle first accepted hit; failures charged full cap",
+      "shots_to_target": {
+        "bootstrap_draws": 20000,
+        "bootstrap_seed": 113044,
+        "estimate": 5375744.0,
+        "independent_truth_cells": 21,
+        "lower_95": 5375609.904761905,
+        "stratified_by": "family",
+        "upper_95": 5375865.904761905
+      }
+    }
+  ],
+  "inputs": {
+    "confirmation_config": {
+      "canonical_sha256": "963d468ad67116c4c5a1e140ec5d089935f6434ef41459c86981dba7b1a20e10",
+      "path": "code/attempt49_fresh_confirmation_config.json"
+    },
+    "confirmation_result": {
+      "binary_sha256": "70378d5cf5f2f72a7aadad773effa05d7405ccd8391f2285a9cbc2b1fa7ed612",
+      "path": "results_summary/QL1F-attempt49-fresh-confirmation.json"
+    },
+    "development_result": {
+      "canonical_sha256": "bcd09e297abffec5f3e1c027cef948f332ee781301ad7309a9b504a9bea1979a",
+      "path": "results_summary/QL1F-attempt44-dimension-cost.json"
+    }
+  },
+  "metric": {
+    "bootstrap": {
+      "confidence": 0.95,
+      "draws": 20000,
+      "family_weighting": "equal-macro-average",
+      "independent_unit": "truth-cell",
+      "seed": 113049,
+      "stratify_by": "family"
+    },
+    "failure_charge": "complete frozen query and shot cap",
+    "independent_unit": "truth cell",
+    "name": "restricted-mean post-hoc oracle-scored first accepted hit",
+    "nested_replicates": 4,
+    "online_stopping_rule": false
+  },
+  "schema": "challenge113-queries-to-target-v1",
+  "status": "pass",
+  "target_infidelity": 0.001,
+  "title": "Queries to target versus search dimension"
+}

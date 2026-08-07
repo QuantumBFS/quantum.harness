@@ -1,0 +1,1261 @@
+{
+  "actual": [
+    {
+      "memory": "CPU-only; not profiled",
+      "point": "formal Attempt 49",
+      "wall": "86.55 seconds"
+    }
+  ],
+  "challenge": {
+    "number": 113,
+    "status": "complete",
+    "track": "other"
+  },
+  "claim_boundary": [
+    "Synthetic two-qubit CNOT benchmark only.",
+    "No real-hardware or cesium-specific evidence.",
+    "Success is post-hoc oracle-scored, not an online certificate.",
+    "Full-cap cost is a deterministic frozen protocol cap.",
+    "Queries-to-target is a post-hoc restricted-mean benchmark; failures are charged their complete method cap.",
+    "Four shot-noise replicates are nested within 24 truth cells.",
+    "Gap and cross-size evidence is development/mechanism evidence, not fresh principal-global confirmation."
+  ],
+  "estimate": [
+    {
+      "memory": "CPU-only; not profiled",
+      "point": "mwe",
+      "wall": "about 15 seconds on audited WSL2 CPU"
+    },
+    {
+      "memory": "CPU-only; compact ledgers",
+      "point": "full public replay",
+      "wall": "about 90 seconds on audited WSL2 CPU"
+    }
+  ],
+  "figures": [
+    {
+      "expected": "selected k=15 reaches the target with materially fewer queries than either k=40 comparator",
+      "id": "queries-to-target",
+      "plots": "Restricted-mean post-hoc queries to target versus search dimension",
+      "results": {
+        "changes": [],
+        "figure": "queries-to-target.png",
+        "match": "pass",
+        "numbers": {
+          "model-informed-k15": {
+            "oracle_scored_success": {
+              "estimate": 0.90625,
+              "lower_95": 0.8125,
+              "upper_95": 0.9791666666666666
+            },
+            "queries_to_target": {
+              "estimate": 48.760416666666664,
+              "lower_95": 45.354166666666664,
+              "upper_95": 52.46875
+            }
+          },
+          "model-informed-k40": {
+            "oracle_scored_success": {
+              "estimate": 0.25,
+              "lower_95": 0.125,
+              "upper_95": 0.375
+            },
+            "queries_to_target": {
+              "estimate": 160.625,
+              "lower_95": 153.6875,
+              "upper_95": 165.84375
+            }
+          },
+          "raw-coordinate-global-40": {
+            "oracle_scored_success": {
+              "estimate": 0.0,
+              "lower_95": 0.0,
+              "upper_95": 0.0
+            },
+            "queries_to_target": {
+              "estimate": 166.0,
+              "lower_95": 166.0,
+              "upper_95": 166.0
+            }
+          }
+        },
+        "rerun": "python core-sim-to-real/code/attempt51_queries_to_target.py",
+        "wall": "derived from sealed Attempt-44/49 artifacts",
+        "why": "The development panel spans k=5,10,15,20,40 and the preregistered confirmation panel gives 48.76 queries for k=15 versus 160.63 and 166 for the frozen k=40 comparators. Failures are retained at their full method cap."
+      },
+      "x": "model-informed search dimension / frozen comparator",
+      "y": "black-box queries to post-hoc exact target"
+    },
+    {
+      "expected": "k=15 passes all preregistered confirmation gates",
+      "id": "headline",
+      "plots": "Fresh truth-cell success and deterministic full-cap resources",
+      "results": {
+        "changes": [],
+        "figure": "headline.png",
+        "match": "pass",
+        "numbers": {
+          "k15_minus_k40": {
+            "bootstrap_draws": 20000,
+            "bootstrap_seed": 113049,
+            "estimate": 0.65625,
+            "family_weighting": "equal-macro-average",
+            "independent_truth_cells": 24,
+            "lower_95": 0.5104166666666666,
+            "upper_95": 0.8020833333333334
+          },
+          "k15_minus_raw40": {
+            "bootstrap_draws": 20000,
+            "bootstrap_seed": 113049,
+            "estimate": 0.90625,
+            "family_weighting": "equal-macro-average",
+            "independent_truth_cells": 24,
+            "lower_95": 0.8125,
+            "upper_95": 0.9791666666666666
+          },
+          "k15_success": {
+            "bootstrap_draws": 20000,
+            "bootstrap_seed": 113049,
+            "estimate": 0.90625,
+            "family_weighting": "equal-macro-average",
+            "independent_truth_cells": 24,
+            "lower_95": 0.8125,
+            "upper_95": 0.9791666666666666
+          },
+          "query_cap_ratio": 0.39759036144578314,
+          "shot_cap_ratio": 0.3904761904761905
+        },
+        "rerun": "python core-sim-to-real/run_challenge.py --full",
+        "wall": "86.55 seconds",
+        "why": "All six frozen statistical/resource/safety gates and 18 independent final-audit checks pass."
+      },
+      "x": "frozen search geometry",
+      "y": "oracle-scored success / full query and shot cap"
+    },
+    {
+      "expected": "success degrades at large mismatch while converged endpoint and Hessian ranks agree across d=2,3,4",
+      "id": "gap-and-invariant",
+      "plots": "Development failure boundary versus model-truth gap and cross-size endpoint/Hessian-rank invariant",
+      "results": {
+        "changes": [],
+        "figure": "gap-and-invariant.png",
+        "match": "pass",
+        "numbers": {
+          "combined_success_epsilon_0_05": 0.875,
+          "combined_success_epsilon_0_10": 0.15625,
+          "rank_pairs": [
+            [
+              3,
+              3
+            ],
+            [
+              8,
+              8
+            ],
+            [
+              15,
+              15
+            ],
+            [
+              15,
+              15
+            ]
+          ]
+        },
+        "rerun": "python core-sim-to-real/code/attempt52_gap_invariant_audit.py --verify-only",
+        "wall": "derived from sealed Attempts 25\u201328, 34, and 45",
+        "why": "Attempt 52 closes all 22 simulator-free checks, including source hashes, the large-gap failure boundary, conditional endpoint/Hessian-rank equality, the old d=4 numerical-artifact correction, and the retained unidentifiable resource-scaling result."
+      },
+      "x": "model-truth gap epsilon / audited system",
+      "y": "oracle-scored success / converged numerical rank"
+    }
+  ],
+  "method": {
+    "exact": false,
+    "family": "differentiable quantum control",
+    "name": "model-informed principal-global k=15",
+    "note": "A differentiable nominal simulator supplies a warm pulse and the top 15 Hessian directions. The mismatched device exposes only sampled scalar fidelities; exact truth values are attached after calibration for scoring.",
+    "settings": {
+      "cycles": 2,
+      "search_dimension": 15,
+      "shots_per_decision_query": 32768,
+      "target_infidelity": 0.001,
+      "trust_radius": 0.25
+    },
+    "tool": "JAX + SciPy + finite-shot scalar oracle"
+  },
+  "model": {
+    "boundary": "query-only finite-shot synthetic device",
+    "hilbert_dimension": 4,
+    "name": "Synthetic d=4 CNOT control benchmark",
+    "nominal_hessian_rank": 15,
+    "pulse_parameters": 40
+  },
+  "paper": {
+    "id": "QuantumBFS/quantum.harness#113",
+    "title": "Sim-to-Real for Quantum Gates",
+    "url": "https://github.com/QuantumBFS/quantum.harness/issues/113"
+  },
+  "params": [
+    {
+      "name": "fresh benchmark",
+      "value": "24 truth cells x 4 nested replicates x 3 methods"
+    }
+  ],
+  "provenance": {
+    "final_audit": "../results_summary/QL1F-attempt50-final-audit.json",
+    "final_audit_canonical_sha256": "4eed9f39c734f7e4d5df05a07f6815e46b1842c2cc5af2b83a903bf25c7b8419",
+    "formal_result": "../results_summary/QL1F-attempt49-fresh-confirmation.json",
+    "formal_result_canonical_sha256": "70378d5cf5f2f72a7aadad773effa05d7405ccd8391f2285a9cbc2b1fa7ed612",
+    "gap_invariant_figure_binary_sha256": "2c9f0b876dfcf5d57857c930ddfca7f550bd01748419e7b47933c51bdd2f34d7",
+    "gap_invariant_result": "../results_summary/QL1F-attempt52-gap-invariant-audit.json",
+    "gap_invariant_result_canonical_sha256": "792140f9c6209a34d875678d96d77651b7dc17e9290fd40f1fe6580af60137d5",
+    "headline_figure_binary_sha256": "05ccd38abc4c9ed33f6251fa6dbf54c45f5a567d988f0f8790acc8a964f001e7",
+    "preregistration_commit": "5ffe482e4c275b96cf317f25652b7e24ec6bcfca",
+    "queries_to_target_figure_binary_sha256": "383a5ee65b079f7d8efa2eea5a0677dc4c400b7924f3d32cc9ba34ad549c8a2f",
+    "queries_to_target_result": "../results_summary/QL1F-attempt51-queries-to-target.json",
+    "queries_to_target_result_canonical_sha256": "49b86bdef6c2de7ec7a2a2c989d4b20d27c365f767eebb48b53d2cc6e67d3bc2",
+    "source_commit": "6db303f959331536d5ded591b2eb7160ad417b54"
+  },
+  "results": {
+    "confirmation_decision": "pass",
+    "confirmation_gates": {
+      "destructive_rate_ucb95_at_most_0_05": true,
+      "full_cap_query_ratios_below_0_60": true,
+      "full_cap_shot_ratios_below_0_60": true,
+      "k15_minus_k40_lcb95_above_minus_0_10": true,
+      "k15_minus_raw40_lcb95_above_zero": true,
+      "k15_success_lcb95_at_least_0_75": true
+    },
+    "final_audit": {
+      "checks_passed": 18,
+      "checks_total": 18,
+      "status": "pass"
+    },
+    "gap_invariant_delivery": {
+      "checks_passed": 22,
+      "checks_total": 22,
+      "cross_size_invariant": {
+        "distinct_hilbert_dimensions": [
+          2,
+          3,
+          4
+        ],
+        "interpretation": "near a converged optimum, Hessian rank matches accessible weighted phase-blind endpoint-error channels",
+        "numerical_artifact_correction": "optimizer-residual/spectral-gap artifact",
+        "observed_rank_pairs": [
+          [
+            3,
+            3
+          ],
+          [
+            8,
+            8
+          ],
+          [
+            15,
+            15
+          ],
+          [
+            15,
+            15
+          ]
+        ],
+        "old_attempt27_gap_ranks": [
+          3,
+          8,
+          8
+        ],
+        "rejected_claim": "Unconditional rank(H)=d^2-1.",
+        "rows": [
+          {
+            "dimension": 2,
+            "endpoint_rank": 3,
+            "hessian_rank": 3,
+            "infidelity": 8.622195550126813e-12,
+            "parameter_count": 20,
+            "point": "exact-construction",
+            "ranks_match": true,
+            "system": "general-d2",
+            "unitarity_residual_frobenius": 9.145082032246559e-12
+          },
+          {
+            "dimension": 3,
+            "endpoint_rank": 8,
+            "hessian_rank": 8,
+            "infidelity": -5.821806000246473e-12,
+            "parameter_count": 30,
+            "point": "exact-construction",
+            "ranks_match": true,
+            "system": "general-d3",
+            "unitarity_residual_frobenius": 1.1227591434277806e-11
+          },
+          {
+            "dimension": 4,
+            "endpoint_rank": 15,
+            "hessian_rank": 15,
+            "infidelity": -1.8092960463178545e-11,
+            "parameter_count": 40,
+            "point": "exact-construction",
+            "ranks_match": true,
+            "system": "general-d4",
+            "unitarity_residual_frobenius": 9.78963394959448e-11
+          },
+          {
+            "dimension": 4,
+            "endpoint_rank": 15,
+            "hessian_rank": 15,
+            "infidelity": 6.38907038386094e-11,
+            "parameter_count": 40,
+            "point": "refined-optimized",
+            "ranks_match": true,
+            "system": "original-d4-cnot",
+            "unitarity_residual_frobenius": 2.0504735628398595e-10
+          }
+        ],
+        "source_attempts": [
+          34,
+          45
+        ],
+        "spectral_gap_is_rank_definition": false,
+        "supported_claim": "Near a sufficiently converged optimum, Hessian rank equals the rank of accessible weighted phase-blind endpoint-error channels for the audited controllable systems."
+      },
+      "failure_mode_evidence": {
+        "claim_boundary": "This is historical development evidence, not a fresh principal-global confirmation sweep.",
+        "families": [
+          "combined",
+          "control-map",
+          "drift"
+        ],
+        "gap_levels": [
+          0.02,
+          0.05,
+          0.1
+        ],
+        "interpretation": "Development success degrades as the model-truth gap grows; the combined family falls from 0.875 at epsilon=0.05 to 0.15625 at epsilon=0.10.",
+        "method": "historical joint-15-v1 coordinate-scan package",
+        "rows": [
+          {
+            "epsilon": 0.02,
+            "family": "combined",
+            "lower_95": 1.0,
+            "method": "joint-15-v1",
+            "nested_replicates_per_truth": 4,
+            "success": 1.0,
+            "truth_cells": 8,
+            "upper_95": 1.0
+          },
+          {
+            "epsilon": 0.05,
+            "family": "combined",
+            "lower_95": 0.78125,
+            "method": "joint-15-v1",
+            "nested_replicates_per_truth": 4,
+            "success": 0.875,
+            "truth_cells": 8,
+            "upper_95": 0.96875
+          },
+          {
+            "epsilon": 0.1,
+            "family": "combined",
+            "lower_95": 0.03125,
+            "method": "joint-15-v1",
+            "nested_replicates_per_truth": 4,
+            "success": 0.15625,
+            "truth_cells": 8,
+            "upper_95": 0.34375
+          },
+          {
+            "epsilon": 0.02,
+            "family": "control-map",
+            "lower_95": 1.0,
+            "method": "joint-15-v1",
+            "nested_replicates_per_truth": 4,
+            "success": 1.0,
+            "truth_cells": 8,
+            "upper_95": 1.0
+          },
+          {
+            "epsilon": 0.05,
+            "family": "control-map",
+            "lower_95": 0.8125,
+            "method": "joint-15-v1",
+            "nested_replicates_per_truth": 4,
+            "success": 0.90625,
+            "truth_cells": 8,
+            "upper_95": 0.96875
+          },
+          {
+            "epsilon": 0.1,
+            "family": "control-map",
+            "lower_95": 0.40625,
+            "method": "joint-15-v1",
+            "nested_replicates_per_truth": 4,
+            "success": 0.59375,
+            "truth_cells": 8,
+            "upper_95": 0.78125
+          },
+          {
+            "epsilon": 0.02,
+            "family": "drift",
+            "lower_95": 1.0,
+            "method": "joint-15-v1",
+            "nested_replicates_per_truth": 4,
+            "success": 1.0,
+            "truth_cells": 8,
+            "upper_95": 1.0
+          },
+          {
+            "epsilon": 0.05,
+            "family": "drift",
+            "lower_95": 1.0,
+            "method": "joint-15-v1",
+            "nested_replicates_per_truth": 4,
+            "success": 1.0,
+            "truth_cells": 8,
+            "upper_95": 1.0
+          },
+          {
+            "epsilon": 0.1,
+            "family": "drift",
+            "lower_95": 0.53125,
+            "method": "joint-15-v1",
+            "nested_replicates_per_truth": 4,
+            "success": 0.71875,
+            "truth_cells": 8,
+            "upper_95": 0.875
+          }
+        ],
+        "source_attempt": 45
+      },
+      "honest_negative_result": {
+        "claim": "no cross-dimension resource-scaling advantage",
+        "cross_dimension_resource_advantage_established": false,
+        "reason": "The frozen epsilon leaves zero-cost raw baselines, so the resource-scaling hypothesis is not identifiable.",
+        "source_attempt": 28,
+        "status": "unidentifiable-zero-cost-raw-baseline",
+        "zero_cost_raw_by_dimension": {
+          "2": true,
+          "3": true,
+          "4": true
+        }
+      },
+      "status": "pass"
+    },
+    "numbers": {
+      "completed_model_informed_k40": {
+        "bootstrap_draws": 20000,
+        "bootstrap_seed": 113049,
+        "estimate": 0.25,
+        "family_weighting": "equal-macro-average",
+        "independent_truth_cells": 24,
+        "lower_95": 0.125,
+        "upper_95": 0.375
+      },
+      "destructive_step_safety": {
+        "accepted_nonzero_steps": 165,
+        "confidence": 0.95,
+        "destructive_accepted_steps": 0,
+        "estimate": 0.0,
+        "event_unit": "accepted nonzero step",
+        "interval": "one-sided exact Clopper-Pearson upper bound",
+        "lower_95": 0.0,
+        "ratio_definition": "destructive accepted nonzero steps / accepted nonzero steps",
+        "upper_95": 0.01799212682800506,
+        "warning": "step events are a safety diagnostic and do not increase the 24-truth-cell sample size used for performance inference"
+      },
+      "model_informed_k15": {
+        "bootstrap_draws": 20000,
+        "bootstrap_seed": 113049,
+        "estimate": 0.90625,
+        "family_weighting": "equal-macro-average",
+        "independent_truth_cells": 24,
+        "lower_95": 0.8125,
+        "upper_95": 0.9791666666666666
+      },
+      "paired_k15_minus_k40": {
+        "bootstrap_draws": 20000,
+        "bootstrap_seed": 113049,
+        "estimate": 0.65625,
+        "family_weighting": "equal-macro-average",
+        "independent_truth_cells": 24,
+        "lower_95": 0.5104166666666666,
+        "upper_95": 0.8020833333333334
+      },
+      "paired_k15_minus_raw40": {
+        "bootstrap_draws": 20000,
+        "bootstrap_seed": 113049,
+        "estimate": 0.90625,
+        "family_weighting": "equal-macro-average",
+        "independent_truth_cells": 24,
+        "lower_95": 0.8125,
+        "upper_95": 0.9791666666666666
+      },
+      "query_cap_ratio": 0.39759036144578314,
+      "raw_coordinate_k40": {
+        "bootstrap_draws": 20000,
+        "bootstrap_seed": 113049,
+        "estimate": 0.0,
+        "family_weighting": "equal-macro-average",
+        "independent_truth_cells": 24,
+        "lower_95": 0.0,
+        "upper_95": 0.0
+      },
+      "shot_cap_ratio": 0.3904761904761905
+    },
+    "queries_to_target_delivery": {
+      "checks_passed": 11,
+      "checks_total": 11,
+      "confirmation": [
+        {
+          "independent_truth_cells": 24,
+          "method": "model-informed-k15",
+          "nested_replicates_per_cell": 4,
+          "oracle_scored_success": {
+            "estimate": 0.90625,
+            "lower_95": 0.8125,
+            "upper_95": 0.9791666666666666
+          },
+          "queries_to_target": {
+            "estimate": 48.760416666666664,
+            "lower_95": 45.354166666666664,
+            "upper_95": 52.46875
+          },
+          "search_dimension": 15,
+          "semantics": "fresh confirmation; post-hoc oracle first accepted hit; failures charged full cap",
+          "shots_to_target": {
+            "estimate": 1563061.3333333333,
+            "lower_95": 1453760.0,
+            "upper_95": 1683253.3333333333
+          },
+          "truth_level_rows": [
+            {
+              "family": "control-map",
+              "nested_replicates": 4,
+              "oracle_scored_success": 1.0,
+              "restricted_mean_queries_to_target": 33.0,
+              "restricted_mean_shots_to_target": 1049600.0,
+              "selected_cell": "control-map:260641:0.05",
+              "truth_seed": 260641
+            },
+            {
+              "family": "control-map",
+              "nested_replicates": 4,
+              "oracle_scored_success": 1.0,
+              "restricted_mean_queries_to_target": 33.0,
+              "restricted_mean_shots_to_target": 1049600.0,
+              "selected_cell": "control-map:260642:0.05",
+              "truth_seed": 260642
+            },
+            {
+              "family": "control-map",
+              "nested_replicates": 4,
+              "oracle_scored_success": 1.0,
+              "restricted_mean_queries_to_target": 33.0,
+              "restricted_mean_shots_to_target": 1049600.0,
+              "selected_cell": "control-map:260643:0.05",
+              "truth_seed": 260643
+            },
+            {
+              "family": "control-map",
+              "nested_replicates": 4,
+              "oracle_scored_success": 1.0,
+              "restricted_mean_queries_to_target": 33.0,
+              "restricted_mean_shots_to_target": 1049600.0,
+              "selected_cell": "control-map:260644:0.05",
+              "truth_seed": 260644
+            },
+            {
+              "family": "control-map",
+              "nested_replicates": 4,
+              "oracle_scored_success": 1.0,
+              "restricted_mean_queries_to_target": 41.0,
+              "restricted_mean_shots_to_target": 1311744.0,
+              "selected_cell": "control-map:260645:0.05",
+              "truth_seed": 260645
+            },
+            {
+              "family": "control-map",
+              "nested_replicates": 4,
+              "oracle_scored_success": 1.0,
+              "restricted_mean_queries_to_target": 33.0,
+              "restricted_mean_shots_to_target": 1049600.0,
+              "selected_cell": "control-map:260646:0.05",
+              "truth_seed": 260646
+            },
+            {
+              "family": "control-map",
+              "nested_replicates": 4,
+              "oracle_scored_success": 1.0,
+              "restricted_mean_queries_to_target": 33.0,
+              "restricted_mean_shots_to_target": 1049600.0,
+              "selected_cell": "control-map:260647:0.05",
+              "truth_seed": 260647
+            },
+            {
+              "family": "control-map",
+              "nested_replicates": 4,
+              "oracle_scored_success": 1.0,
+              "restricted_mean_queries_to_target": 57.0,
+              "restricted_mean_shots_to_target": 1836032.0,
+              "selected_cell": "control-map:260648:0.05",
+              "truth_seed": 260648
+            },
+            {
+              "family": "drift",
+              "nested_replicates": 4,
+              "oracle_scored_success": 1.0,
+              "restricted_mean_queries_to_target": 57.0,
+              "restricted_mean_shots_to_target": 1836032.0,
+              "selected_cell": "drift:260641:0.1",
+              "truth_seed": 260641
+            },
+            {
+              "family": "drift",
+              "nested_replicates": 4,
+              "oracle_scored_success": 1.0,
+              "restricted_mean_queries_to_target": 57.0,
+              "restricted_mean_shots_to_target": 1836032.0,
+              "selected_cell": "drift:260642:0.1",
+              "truth_seed": 260642
+            },
+            {
+              "family": "drift",
+              "nested_replicates": 4,
+              "oracle_scored_success": 0.5,
+              "restricted_mean_queries_to_target": 57.5,
+              "restricted_mean_shots_to_target": 1836544.0,
+              "selected_cell": "drift:260643:0.1",
+              "truth_seed": 260643
+            },
+            {
+              "family": "drift",
+              "nested_replicates": 4,
+              "oracle_scored_success": 1.0,
+              "restricted_mean_queries_to_target": 57.0,
+              "restricted_mean_shots_to_target": 1836032.0,
+              "selected_cell": "drift:260644:0.1",
+              "truth_seed": 260644
+            },
+            {
+              "family": "drift",
+              "nested_replicates": 4,
+              "oracle_scored_success": 1.0,
+              "restricted_mean_queries_to_target": 65.0,
+              "restricted_mean_shots_to_target": 2098176.0,
+              "selected_cell": "drift:260645:0.1",
+              "truth_seed": 260645
+            },
+            {
+              "family": "drift",
+              "nested_replicates": 4,
+              "oracle_scored_success": 0.75,
+              "restricted_mean_queries_to_target": 65.25,
+              "restricted_mean_shots_to_target": 2098432.0,
+              "selected_cell": "drift:260646:0.1",
+              "truth_seed": 260646
+            },
+            {
+              "family": "drift",
+              "nested_replicates": 4,
+              "oracle_scored_success": 0.0,
+              "restricted_mean_queries_to_target": 66.0,
+              "restricted_mean_shots_to_target": 2099200.0,
+              "selected_cell": "drift:260647:0.1",
+              "truth_seed": 260647
+            },
+            {
+              "family": "drift",
+              "nested_replicates": 4,
+              "oracle_scored_success": 1.0,
+              "restricted_mean_queries_to_target": 65.0,
+              "restricted_mean_shots_to_target": 2098176.0,
+              "selected_cell": "drift:260648:0.1",
+              "truth_seed": 260648
+            },
+            {
+              "family": "combined",
+              "nested_replicates": 4,
+              "oracle_scored_success": 1.0,
+              "restricted_mean_queries_to_target": 57.0,
+              "restricted_mean_shots_to_target": 1836032.0,
+              "selected_cell": "combined:260641:0.05",
+              "truth_seed": 260641
+            },
+            {
+              "family": "combined",
+              "nested_replicates": 4,
+              "oracle_scored_success": 1.0,
+              "restricted_mean_queries_to_target": 33.0,
+              "restricted_mean_shots_to_target": 1049600.0,
+              "selected_cell": "combined:260642:0.05",
+              "truth_seed": 260642
+            },
+            {
+              "family": "combined",
+              "nested_replicates": 4,
+              "oracle_scored_success": 0.75,
+              "restricted_mean_queries_to_target": 49.25,
+              "restricted_mean_shots_to_target": 1574144.0,
+              "selected_cell": "combined:260643:0.05",
+              "truth_seed": 260643
+            },
+            {
+              "family": "combined",
+              "nested_replicates": 4,
+              "oracle_scored_success": 1.0,
+              "restricted_mean_queries_to_target": 33.0,
+              "restricted_mean_shots_to_target": 1049600.0,
+              "selected_cell": "combined:260644:0.05",
+              "truth_seed": 260644
+            },
+            {
+              "family": "combined",
+              "nested_replicates": 4,
+              "oracle_scored_success": 0.75,
+              "restricted_mean_queries_to_target": 65.25,
+              "restricted_mean_shots_to_target": 2098432.0,
+              "selected_cell": "combined:260645:0.05",
+              "truth_seed": 260645
+            },
+            {
+              "family": "combined",
+              "nested_replicates": 4,
+              "oracle_scored_success": 1.0,
+              "restricted_mean_queries_to_target": 33.0,
+              "restricted_mean_shots_to_target": 1049600.0,
+              "selected_cell": "combined:260646:0.05",
+              "truth_seed": 260646
+            },
+            {
+              "family": "combined",
+              "nested_replicates": 4,
+              "oracle_scored_success": 1.0,
+              "restricted_mean_queries_to_target": 49.0,
+              "restricted_mean_shots_to_target": 1573888.0,
+              "selected_cell": "combined:260647:0.05",
+              "truth_seed": 260647
+            },
+            {
+              "family": "combined",
+              "nested_replicates": 4,
+              "oracle_scored_success": 1.0,
+              "restricted_mean_queries_to_target": 65.0,
+              "restricted_mean_shots_to_target": 2098176.0,
+              "selected_cell": "combined:260648:0.05",
+              "truth_seed": 260648
+            }
+          ]
+        },
+        {
+          "independent_truth_cells": 24,
+          "method": "model-informed-k40",
+          "nested_replicates_per_cell": 4,
+          "oracle_scored_success": {
+            "estimate": 0.25,
+            "lower_95": 0.125,
+            "upper_95": 0.375
+          },
+          "queries_to_target": {
+            "estimate": 160.625,
+            "lower_95": 153.6875,
+            "upper_95": 165.84375
+          },
+          "search_dimension": 40,
+          "semantics": "fresh confirmation; post-hoc oracle first accepted hit; failures charged full cap",
+          "shots_to_target": {
+            "estimate": 5207808.0,
+            "lower_95": 4983786.666666667,
+            "upper_95": 5375840.0
+          },
+          "truth_level_rows": [
+            {
+              "family": "control-map",
+              "nested_replicates": 4,
+              "oracle_scored_success": 0.75,
+              "restricted_mean_queries_to_target": 165.25,
+              "restricted_mean_shots_to_target": 5375232.0,
+              "selected_cell": "control-map:260641:0.05",
+              "truth_seed": 260641
+            },
+            {
+              "family": "control-map",
+              "nested_replicates": 4,
+              "oracle_scored_success": 0.0,
+              "restricted_mean_queries_to_target": 166.0,
+              "restricted_mean_shots_to_target": 5376000.0,
+              "selected_cell": "control-map:260642:0.05",
+              "truth_seed": 260642
+            },
+            {
+              "family": "control-map",
+              "nested_replicates": 4,
+              "oracle_scored_success": 1.0,
+              "restricted_mean_queries_to_target": 165.0,
+              "restricted_mean_shots_to_target": 5374976.0,
+              "selected_cell": "control-map:260643:0.05",
+              "truth_seed": 260643
+            },
+            {
+              "family": "control-map",
+              "nested_replicates": 4,
+              "oracle_scored_success": 1.0,
+              "restricted_mean_queries_to_target": 124.0,
+              "restricted_mean_shots_to_target": 4031488.0,
+              "selected_cell": "control-map:260644:0.05",
+              "truth_seed": 260644
+            },
+            {
+              "family": "control-map",
+              "nested_replicates": 4,
+              "oracle_scored_success": 0.0,
+              "restricted_mean_queries_to_target": 166.0,
+              "restricted_mean_shots_to_target": 5376000.0,
+              "selected_cell": "control-map:260645:0.05",
+              "truth_seed": 260645
+            },
+            {
+              "family": "control-map",
+              "nested_replicates": 4,
+              "oracle_scored_success": 1.0,
+              "restricted_mean_queries_to_target": 83.0,
+              "restricted_mean_shots_to_target": 2688000.0,
+              "selected_cell": "control-map:260646:0.05",
+              "truth_seed": 260646
+            },
+            {
+              "family": "control-map",
+              "nested_replicates": 4,
+              "oracle_scored_success": 0.75,
+              "restricted_mean_queries_to_target": 165.25,
+              "restricted_mean_shots_to_target": 5375232.0,
+              "selected_cell": "control-map:260647:0.05",
+              "truth_seed": 260647
+            },
+            {
+              "family": "control-map",
+              "nested_replicates": 4,
+              "oracle_scored_success": 0.0,
+              "restricted_mean_queries_to_target": 166.0,
+              "restricted_mean_shots_to_target": 5376000.0,
+              "selected_cell": "control-map:260648:0.05",
+              "truth_seed": 260648
+            },
+            {
+              "family": "drift",
+              "nested_replicates": 4,
+              "oracle_scored_success": 0.0,
+              "restricted_mean_queries_to_target": 166.0,
+              "restricted_mean_shots_to_target": 5376000.0,
+              "selected_cell": "drift:260641:0.1",
+              "truth_seed": 260641
+            },
+            {
+              "family": "drift",
+              "nested_replicates": 4,
+              "oracle_scored_success": 0.0,
+              "restricted_mean_queries_to_target": 166.0,
+              "restricted_mean_shots_to_target": 5376000.0,
+              "selected_cell": "drift:260642:0.1",
+              "truth_seed": 260642
+            },
+            {
+              "family": "drift",
+              "nested_replicates": 4,
+              "oracle_scored_success": 0.0,
+              "restricted_mean_queries_to_target": 166.0,
+              "restricted_mean_shots_to_target": 5376000.0,
+              "selected_cell": "drift:260643:0.1",
+              "truth_seed": 260643
+            },
+            {
+              "family": "drift",
+              "nested_replicates": 4,
+              "oracle_scored_success": 0.0,
+              "restricted_mean_queries_to_target": 166.0,
+              "restricted_mean_shots_to_target": 5376000.0,
+              "selected_cell": "drift:260644:0.1",
+              "truth_seed": 260644
+            },
+            {
+              "family": "drift",
+              "nested_replicates": 4,
+              "oracle_scored_success": 0.0,
+              "restricted_mean_queries_to_target": 166.0,
+              "restricted_mean_shots_to_target": 5376000.0,
+              "selected_cell": "drift:260645:0.1",
+              "truth_seed": 260645
+            },
+            {
+              "family": "drift",
+              "nested_replicates": 4,
+              "oracle_scored_success": 0.0,
+              "restricted_mean_queries_to_target": 166.0,
+              "restricted_mean_shots_to_target": 5376000.0,
+              "selected_cell": "drift:260646:0.1",
+              "truth_seed": 260646
+            },
+            {
+              "family": "drift",
+              "nested_replicates": 4,
+              "oracle_scored_success": 0.0,
+              "restricted_mean_queries_to_target": 166.0,
+              "restricted_mean_shots_to_target": 5376000.0,
+              "selected_cell": "drift:260647:0.1",
+              "truth_seed": 260647
+            },
+            {
+              "family": "drift",
+              "nested_replicates": 4,
+              "oracle_scored_success": 0.0,
+              "restricted_mean_queries_to_target": 166.0,
+              "restricted_mean_shots_to_target": 5376000.0,
+              "selected_cell": "drift:260648:0.1",
+              "truth_seed": 260648
+            },
+            {
+              "family": "combined",
+              "nested_replicates": 4,
+              "oracle_scored_success": 0.0,
+              "restricted_mean_queries_to_target": 166.0,
+              "restricted_mean_shots_to_target": 5376000.0,
+              "selected_cell": "combined:260641:0.05",
+              "truth_seed": 260641
+            },
+            {
+              "family": "combined",
+              "nested_replicates": 4,
+              "oracle_scored_success": 0.0,
+              "restricted_mean_queries_to_target": 166.0,
+              "restricted_mean_shots_to_target": 5376000.0,
+              "selected_cell": "combined:260642:0.05",
+              "truth_seed": 260642
+            },
+            {
+              "family": "combined",
+              "nested_replicates": 4,
+              "oracle_scored_success": 0.0,
+              "restricted_mean_queries_to_target": 166.0,
+              "restricted_mean_shots_to_target": 5376000.0,
+              "selected_cell": "combined:260643:0.05",
+              "truth_seed": 260643
+            },
+            {
+              "family": "combined",
+              "nested_replicates": 4,
+              "oracle_scored_success": 0.75,
+              "restricted_mean_queries_to_target": 165.25,
+              "restricted_mean_shots_to_target": 5375232.0,
+              "selected_cell": "combined:260644:0.05",
+              "truth_seed": 260644
+            },
+            {
+              "family": "combined",
+              "nested_replicates": 4,
+              "oracle_scored_success": 0.0,
+              "restricted_mean_queries_to_target": 166.0,
+              "restricted_mean_shots_to_target": 5376000.0,
+              "selected_cell": "combined:260645:0.05",
+              "truth_seed": 260645
+            },
+            {
+              "family": "combined",
+              "nested_replicates": 4,
+              "oracle_scored_success": 0.75,
+              "restricted_mean_queries_to_target": 165.25,
+              "restricted_mean_shots_to_target": 5375232.0,
+              "selected_cell": "combined:260646:0.05",
+              "truth_seed": 260646
+            },
+            {
+              "family": "combined",
+              "nested_replicates": 4,
+              "oracle_scored_success": 0.0,
+              "restricted_mean_queries_to_target": 166.0,
+              "restricted_mean_shots_to_target": 5376000.0,
+              "selected_cell": "combined:260647:0.05",
+              "truth_seed": 260647
+            },
+            {
+              "family": "combined",
+              "nested_replicates": 4,
+              "oracle_scored_success": 0.0,
+              "restricted_mean_queries_to_target": 166.0,
+              "restricted_mean_shots_to_target": 5376000.0,
+              "selected_cell": "combined:260648:0.05",
+              "truth_seed": 260648
+            }
+          ]
+        },
+        {
+          "independent_truth_cells": 24,
+          "method": "raw-coordinate-global-40",
+          "nested_replicates_per_cell": 4,
+          "oracle_scored_success": {
+            "estimate": 0.0,
+            "lower_95": 0.0,
+            "upper_95": 0.0
+          },
+          "queries_to_target": {
+            "estimate": 166.0,
+            "lower_95": 166.0,
+            "upper_95": 166.0
+          },
+          "search_dimension": 40,
+          "semantics": "fresh confirmation; post-hoc oracle first accepted hit; failures charged full cap",
+          "shots_to_target": {
+            "estimate": 5376000.0,
+            "lower_95": 5376000.0,
+            "upper_95": 5376000.0
+          },
+          "truth_level_rows": [
+            {
+              "family": "control-map",
+              "nested_replicates": 4,
+              "oracle_scored_success": 0.0,
+              "restricted_mean_queries_to_target": 166.0,
+              "restricted_mean_shots_to_target": 5376000.0,
+              "selected_cell": "control-map:260641:0.05",
+              "truth_seed": 260641
+            },
+            {
+              "family": "control-map",
+              "nested_replicates": 4,
+              "oracle_scored_success": 0.0,
+              "restricted_mean_queries_to_target": 166.0,
+              "restricted_mean_shots_to_target": 5376000.0,
+              "selected_cell": "control-map:260642:0.05",
+              "truth_seed": 260642
+            },
+            {
+              "family": "control-map",
+              "nested_replicates": 4,
+              "oracle_scored_success": 0.0,
+              "restricted_mean_queries_to_target": 166.0,
+              "restricted_mean_shots_to_target": 5376000.0,
+              "selected_cell": "control-map:260643:0.05",
+              "truth_seed": 260643
+            },
+            {
+              "family": "control-map",
+              "nested_replicates": 4,
+              "oracle_scored_success": 0.0,
+              "restricted_mean_queries_to_target": 166.0,
+              "restricted_mean_shots_to_target": 5376000.0,
+              "selected_cell": "control-map:260644:0.05",
+              "truth_seed": 260644
+            },
+            {
+              "family": "control-map",
+              "nested_replicates": 4,
+              "oracle_scored_success": 0.0,
+              "restricted_mean_queries_to_target": 166.0,
+              "restricted_mean_shots_to_target": 5376000.0,
+              "selected_cell": "control-map:260645:0.05",
+              "truth_seed": 260645
+            },
+            {
+              "family": "control-map",
+              "nested_replicates": 4,
+              "oracle_scored_success": 0.0,
+              "restricted_mean_queries_to_target": 166.0,
+              "restricted_mean_shots_to_target": 5376000.0,
+              "selected_cell": "control-map:260646:0.05",
+              "truth_seed": 260646
+            },
+            {
+              "family": "control-map",
+              "nested_replicates": 4,
+              "oracle_scored_success": 0.0,
+              "restricted_mean_queries_to_target": 166.0,
+              "restricted_mean_shots_to_target": 5376000.0,
+              "selected_cell": "control-map:260647:0.05",
+              "truth_seed": 260647
+            },
+            {
+              "family": "control-map",
+              "nested_replicates": 4,
+              "oracle_scored_success": 0.0,
+              "restricted_mean_queries_to_target": 166.0,
+              "restricted_mean_shots_to_target": 5376000.0,
+              "selected_cell": "control-map:260648:0.05",
+              "truth_seed": 260648
+            },
+            {
+              "family": "drift",
+              "nested_replicates": 4,
+              "oracle_scored_success": 0.0,
+              "restricted_mean_queries_to_target": 166.0,
+              "restricted_mean_shots_to_target": 5376000.0,
+              "selected_cell": "drift:260641:0.1",
+              "truth_seed": 260641
+            },
+            {
+              "family": "drift",
+              "nested_replicates": 4,
+              "oracle_scored_success": 0.0,
+              "restricted_mean_queries_to_target": 166.0,
+              "restricted_mean_shots_to_target": 5376000.0,
+              "selected_cell": "drift:260642:0.1",
+              "truth_seed": 260642
+            },
+            {
+              "family": "drift",
+              "nested_replicates": 4,
+              "oracle_scored_success": 0.0,
+              "restricted_mean_queries_to_target": 166.0,
+              "restricted_mean_shots_to_target": 5376000.0,
+              "selected_cell": "drift:260643:0.1",
+              "truth_seed": 260643
+            },
+            {
+              "family": "drift",
+              "nested_replicates": 4,
+              "oracle_scored_success": 0.0,
+              "restricted_mean_queries_to_target": 166.0,
+              "restricted_mean_shots_to_target": 5376000.0,
+              "selected_cell": "drift:260644:0.1",
+              "truth_seed": 260644
+            },
+            {
+              "family": "drift",
+              "nested_replicates": 4,
+              "oracle_scored_success": 0.0,
+              "restricted_mean_queries_to_target": 166.0,
+              "restricted_mean_shots_to_target": 5376000.0,
+              "selected_cell": "drift:260645:0.1",
+              "truth_seed": 260645
+            },
+            {
+              "family": "drift",
+              "nested_replicates": 4,
+              "oracle_scored_success": 0.0,
+              "restricted_mean_queries_to_target": 166.0,
+              "restricted_mean_shots_to_target": 5376000.0,
+              "selected_cell": "drift:260646:0.1",
+              "truth_seed": 260646
+            },
+            {
+              "family": "drift",
+              "nested_replicates": 4,
+              "oracle_scored_success": 0.0,
+              "restricted_mean_queries_to_target": 166.0,
+              "restricted_mean_shots_to_target": 5376000.0,
+              "selected_cell": "drift:260647:0.1",
+              "truth_seed": 260647
+            },
+            {
+              "family": "drift",
+              "nested_replicates": 4,
+              "oracle_scored_success": 0.0,
+              "restricted_mean_queries_to_target": 166.0,
+              "restricted_mean_shots_to_target": 5376000.0,
+              "selected_cell": "drift:260648:0.1",
+              "truth_seed": 260648
+            },
+            {
+              "family": "combined",
+              "nested_replicates": 4,
+              "oracle_scored_success": 0.0,
+              "restricted_mean_queries_to_target": 166.0,
+              "restricted_mean_shots_to_target": 5376000.0,
+              "selected_cell": "combined:260641:0.05",
+              "truth_seed": 260641
+            },
+            {
+              "family": "combined",
+              "nested_replicates": 4,
+              "oracle_scored_success": 0.0,
+              "restricted_mean_queries_to_target": 166.0,
+              "restricted_mean_shots_to_target": 5376000.0,
+              "selected_cell": "combined:260642:0.05",
+              "truth_seed": 260642
+            },
+            {
+              "family": "combined",
+              "nested_replicates": 4,
+              "oracle_scored_success": 0.0,
+              "restricted_mean_queries_to_target": 166.0,
+              "restricted_mean_shots_to_target": 5376000.0,
+              "selected_cell": "combined:260643:0.05",
+              "truth_seed": 260643
+            },
+            {
+              "family": "combined",
+              "nested_replicates": 4,
+              "oracle_scored_success": 0.0,
+              "restricted_mean_queries_to_target": 166.0,
+              "restricted_mean_shots_to_target": 5376000.0,
+              "selected_cell": "combined:260644:0.05",
+              "truth_seed": 260644
+            },
+            {
+              "family": "combined",
+              "nested_replicates": 4,
+              "oracle_scored_success": 0.0,
+              "restricted_mean_queries_to_target": 166.0,
+              "restricted_mean_shots_to_target": 5376000.0,
+              "selected_cell": "combined:260645:0.05",
+              "truth_seed": 260645
+            },
+            {
+              "family": "combined",
+              "nested_replicates": 4,
+              "oracle_scored_success": 0.0,
+              "restricted_mean_queries_to_target": 166.0,
+              "restricted_mean_shots_to_target": 5376000.0,
+              "selected_cell": "combined:260646:0.05",
+              "truth_seed": 260646
+            },
+            {
+              "family": "combined",
+              "nested_replicates": 4,
+              "oracle_scored_success": 0.0,
+              "restricted_mean_queries_to_target": 166.0,
+              "restricted_mean_shots_to_target": 5376000.0,
+              "selected_cell": "combined:260647:0.05",
+              "truth_seed": 260647
+            },
+            {
+              "family": "combined",
+              "nested_replicates": 4,
+              "oracle_scored_success": 0.0,
+              "restricted_mean_queries_to_target": 166.0,
+              "restricted_mean_shots_to_target": 5376000.0,
+              "selected_cell": "combined:260648:0.05",
+              "truth_seed": 260648
+            }
+          ]
+        }
+      ],
+      "metric": {
+        "bootstrap": {
+          "confidence": 0.95,
+          "draws": 20000,
+          "family_weighting": "equal-macro-average",
+          "independent_unit": "truth-cell",
+          "seed": 113049,
+          "stratify_by": "family"
+        },
+        "failure_charge": "complete frozen query and shot cap",
+        "independent_unit": "truth cell",
+        "name": "restricted-mean post-hoc oracle-scored first accepted hit",
+        "nested_replicates": 4,
+        "online_stopping_rule": false
+      },
+      "status": "pass"
+    }
+  },
+  "risks": [
+    "The formal result stores aggregate query-ledger closure and a canonical row hash, not every query row.",
+    "The online early-stop rule failed its development cost gate; the headline resource quantity is a deterministic full cap.",
+    "The unconditional rank(H)=d^2-1 statement was rejected; only a conditional local endpoint/Hessian-rank invariant is supported."
+  ],
+  "schema": "quantum-harness-challenge-run-v1",
+  "scope": {
+    "independent_truth_cells": 24,
+    "label": "one-shot preregistered synthetic confirmation"
+  },
+  "title": "Low-dimensional model-informed calibration of a synthetic CNOT",
+  "where": "Ubuntu 26.04 WSL2, CPU/x64"
+}

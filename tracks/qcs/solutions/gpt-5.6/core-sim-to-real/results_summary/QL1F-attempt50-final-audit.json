@@ -1,0 +1,120 @@
+{
+  "artifact_matches": {
+    "plot_png": true,
+    "plot_svg": true,
+    "report": true
+  },
+  "attempt": 50,
+  "audited_result": "results_summary/QL1F-attempt49-fresh-confirmation.json",
+  "audited_result_binary_sha256": "70378d5cf5f2f72a7aadad773effa05d7405ccd8391f2285a9cbc2b1fa7ed612",
+  "checks": {
+    "aggregate_ledgers_and_frozen_cost_formula_close": true,
+    "all_runs_exception_free_and_finite": true,
+    "all_six_gates_reproduced_and_pass": true,
+    "claim_boundary_is_synthetic_not_hardware": true,
+    "cost_ratios_reproduced": true,
+    "exact_24_truth_cells_and_four_nested_replicates": true,
+    "exact_unique_288_run_grid": true,
+    "generated_artifact_hashes_match": true,
+    "method_bootstrap_intervals_reproduced": true,
+    "method_dimensions_exact": true,
+    "paired_bootstrap_intervals_reproduced": true,
+    "paired_noise_seed_formula_exact": true,
+    "paired_noise_seed_shared_across_methods": true,
+    "posthoc_boundary_closed": true,
+    "preregistration_commit_and_revalidation_recorded": true,
+    "result_schema_and_status_exact": true,
+    "safety_interval_reproduced": true,
+    "source_manifest_seals_match": true
+  },
+  "decision": "Attempt-49 PASS independently reproduced",
+  "known_evidence_boundaries": {
+    "aggregate_ledger_only": {
+      "description": "The immutable formal result stores aggregate ledger closure, purpose totals, and a canonical ledger hash, but not every query row. Aggregate costs are independently reproducible; the stored row hash cannot be reconstructed from the compact result alone.",
+      "mitigation": "Attempt-50 MWE retains complete query-ledger rows.",
+      "severity": "P1-auditability-not-performance"
+    },
+    "drift_control_map_metadata": {
+      "affected_run_count": 96,
+      "description": "For drift-only truths, the metadata field named control_map_minus_identity_spectral_norm describes a sampled candidate map that was not applied. The actual applied control-map perturbation is zero. This field does not enter simulation, success, bootstrap, or any gate.",
+      "severity": "P2-label-semantics"
+    },
+    "statistical_unit": "Twenty-four truth cells; four finite-shot replicates are nested within each cell and are never treated as 96 independent samples."
+  },
+  "recomputed": {
+    "cost_ratios": {
+      "query": 0.39759036144578314,
+      "shots": 0.3904761904761905
+    },
+    "gates": {
+      "destructive_rate_ucb95_at_most_0_05": true,
+      "full_cap_query_ratios_below_0_60": true,
+      "full_cap_shot_ratios_below_0_60": true,
+      "k15_minus_k40_lcb95_above_minus_0_10": true,
+      "k15_minus_raw40_lcb95_above_zero": true,
+      "k15_success_lcb95_at_least_0_75": true
+    },
+    "method_success": {
+      "model-informed-k15": {
+        "estimate": 0.90625,
+        "lower_95": 0.8125,
+        "upper_95": 0.9791666666666666
+      },
+      "model-informed-k40": {
+        "estimate": 0.25,
+        "lower_95": 0.125,
+        "upper_95": 0.375
+      },
+      "raw-coordinate-global-40": {
+        "estimate": 0.0,
+        "lower_95": 0.0,
+        "upper_95": 0.0
+      }
+    },
+    "paired_success_differences": {
+      "model-informed-k40": {
+        "estimate": 0.65625,
+        "lower_95": 0.5104166666666666,
+        "upper_95": 0.8020833333333334
+      },
+      "raw-coordinate-global-40": {
+        "estimate": 0.90625,
+        "lower_95": 0.8125,
+        "upper_95": 0.9791666666666666
+      }
+    },
+    "safety": {
+      "accepted_nonzero_steps": 165,
+      "destructive_accepted_steps": 0,
+      "one_sided_95pct_clopper_pearson_upper": 0.01799212682800506
+    }
+  },
+  "result_source_matches": {
+    "code/attempt44_dimension_cost.py": true,
+    "code/attempt44_dimension_cost_config.json": true,
+    "code/attempt49_fresh_confirmation.py": true,
+    "code/attempt49_fresh_confirmation_config.json": true,
+    "code/cycle5_statistics.py": true,
+    "code/phase3_common.py": true,
+    "docs/ATTEMPT44_PROTOCOL.md": true,
+    "docs/ATTEMPT48_PROTOCOL.md": true,
+    "docs/ATTEMPT49_PROTOCOL.md": true,
+    "results_summary/QL1F-attempt44-dimension-cost.json": true,
+    "results_summary/QL1F-attempt48-integrity-audit.json": true
+  },
+  "schema": "QL1F-attempt50-final-audit-v1",
+  "source_seal_matches": {
+    "code/attempt44_dimension_cost.py": true,
+    "code/attempt44_dimension_cost_config.json": true,
+    "code/attempt49_fresh_confirmation.py": true,
+    "code/attempt49_fresh_confirmation_config.json": true,
+    "code/cycle5_statistics.py": true,
+    "code/phase3_common.py": true,
+    "docs/ATTEMPT44_PROTOCOL.md": true,
+    "docs/ATTEMPT48_PROTOCOL.md": true,
+    "docs/ATTEMPT49_PROTOCOL.md": true,
+    "results_summary/QL1F-attempt44-dimension-cost.json": true,
+    "results_summary/QL1F-attempt48-integrity-audit.json": true
+  },
+  "status": "pass"
+}

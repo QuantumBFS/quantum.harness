@@ -1,0 +1,33 @@
+{
+  "data_class": "simulator timing and physics MWE",
+  "waveform_intervals": 64,
+  "effective_blockade_mhz": 303.325,
+  "points": [
+    {
+      "amplitude_scale": 0.98,
+      "coherent_seconds": 0.6401815620010893,
+      "open_system_seconds": 26.18124784899919,
+      "coherent_infidelity": 0.002401449346524309,
+      "open_raw_infidelity": 0.006754920541848675,
+      "open_postselected_infidelity": 0.0027590990843869845
+    },
+    {
+      "amplitude_scale": 1.0,
+      "coherent_seconds": 0.7240811779993237,
+      "open_system_seconds": 24.323042202002398,
+      "coherent_infidelity": 0.0024946485454501177,
+      "open_raw_infidelity": 0.006837272274268558,
+      "open_postselected_infidelity": 0.0028513815695992983
+    },
+    {
+      "amplitude_scale": 1.02,
+      "coherent_seconds": 0.5759256669989554,
+      "open_system_seconds": 25.05702838900106,
+      "coherent_infidelity": 0.002548739691310531,
+      "open_raw_infidelity": 0.006887531357900101,
+      "open_postselected_infidelity": 0.0029053189253565037
+    }
+  ],
+  "total_seconds": 77.50150684700202,
+  "budget_decision": "Use a fixed hidden-context coherent ensemble for online queries and reserve exact open-system propagation for initial/final anchors."
+}

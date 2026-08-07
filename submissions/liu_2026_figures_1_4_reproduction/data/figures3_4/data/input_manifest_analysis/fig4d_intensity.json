@@ -1,0 +1,43 @@
+{
+  "status": "analysis of supplied manifest data",
+  "provenance": "simulator/theory synthetic data; not experimental",
+  "panel": "fig4d_intensity",
+  "input_manifest": "/home/thy/thy/work/quantum_harnessing/quantum.harness/tracks/qcs/results/20260730-143545-liu-2026-fig34-effective-digital-twin/input.in",
+  "input_source": "/home/thy/thy/work/quantum_harnessing/quantum.harness/tracks/qcs/results/20260730-143545-liu-2026-fig34-effective-digital-twin/generated_input/fig4d_intensity.csv",
+  "fit": {
+    "AR::pointwise_cz_equivalent": {
+      "baseline": 1e-05,
+      "directions": {
+        "negative": {
+          "power": 4.7001258036827975,
+          "prefactor": 3.2249510605069864,
+          "model": "excess error=A*|delta_I|^p"
+        },
+        "positive": {
+          "power": 4.674640149516239,
+          "prefactor": 2.830325829750749,
+          "model": "excess error=A*|delta_I|^p"
+        }
+      }
+    },
+    "same_duration_nonrobust_surrogate::pointwise_cz_equivalent": {
+      "baseline": 1e-05,
+      "directions": {
+        "negative": {
+          "power": 2.002829872637962,
+          "prefactor": 13.081095786264612,
+          "model": "excess error=A*|delta_I|^p"
+        },
+        "positive": {
+          "power": 1.9946881256055535,
+          "prefactor": 12.467732066242514,
+          "model": "excess error=A*|delta_I|^p"
+        }
+      }
+    }
+  },
+  "rows": 90,
+  "synthetic_points_generated": false,
+  "figure": "/home/thy/thy/work/quantum_harnessing/quantum.harness/tracks/qcs/results/20260730-143545-liu-2026-fig34-effective-digital-twin/figs/input_manifest_analysis/diagnostics/fig4d_intensity.png",
+  "figure_provenance": "simulator/theory synthetic data; not experimental"
+}
