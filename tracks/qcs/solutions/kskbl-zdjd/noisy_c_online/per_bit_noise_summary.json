@@ -1,0 +1,165 @@
+{
+  "kind": "heterogeneous-per-bit-noise-dual-track-discovery",
+  "protocol": {
+    "oracle_per_bit_noise_rates": [
+      0.05,
+      0.1,
+      0.15,
+      0.2,
+      0.25,
+      0.3,
+      0.35,
+      0.4,
+      0.45,
+      0.12,
+      0.28,
+      0.38
+    ],
+    "seeds": [
+      207100,
+      217100
+    ],
+    "batch_size": 100,
+    "d_optimal_design_points": 79,
+    "initial_noise_rate_for_every_bit": 0.1,
+    "fresh_noise_each_sample": true,
+    "clean_labels_used_for_updates": false,
+    "oracle_noise_profile_given_to_learner": false,
+    "blind_stop": {
+      "sum_of_per_bit_posterior_entropies_below_bits": 0.001,
+      "maximum_coefficient_rounding_residual_below": 0.05,
+      "clean_accuracy_not_used_by_stop": true
+    }
+  },
+  "claims": {
+    "all_four_runs_final_exact": true,
+    "all_four_runs_recover_same_integer_rule": true,
+    "all_four_blind_stops_clean_exact_report_only": true,
+    "dual_track_mean_first_exact_step": 455.0,
+    "per_bit_fit_mean_first_exact_step": 805.0,
+    "dual_track_mean_blind_stop_step": 855.0,
+    "per_bit_fit_mean_blind_stop_step": 895.0,
+    "mean_per_bit_noise_mae_at_blind_stop": 0.0011938537560061413,
+    "maximum_per_bit_noise_error_at_blind_stop": 0.004104627530094995
+  },
+  "dual_track": [
+    {
+      "path": "tracks/qcs/results/20260730-211000-noisy-c-per-bit-noise/global-seed207100",
+      "run_sha256": "e9d0b5500564c28ec06261134f39f1382c7691c51ca34405020a88689698d40b",
+      "metrics_sha256": "11227e7b11676e6dad85cc737369a715a74d5b84fe3f487c1ea96c3a5f5403f1",
+      "base_seed": 207100,
+      "learner_noise_mode": "pairwise-estimated",
+      "first_full_recovery_step": 290,
+      "blind_stop_step": 900,
+      "blind_stop_examples": 90000,
+      "blind_stop_clean_word_accuracy_report_only": 1.0,
+      "blind_stop_word_entropy_bits": 0.0007068314104165904,
+      "blind_stop_maximum_rounding_residual": 0.000686665964076921,
+      "estimated_noise_rates_at_blind_stop": [
+        0.048679575168416256,
+        0.09966441477372967,
+        0.15040292504727737,
+        0.197926144599891,
+        0.24956039344239433,
+        0.3034176585922388,
+        0.3460147012292388,
+        0.398207203172173,
+        0.4488005632004688,
+        0.12104213588242502,
+        0.28189073700808187,
+        0.37949653914991605
+      ],
+      "per_bit_noise_mae_at_blind_stop": 0.0015336601494829333,
+      "per_bit_noise_max_error_at_blind_stop": 0.003985298770761203
+    },
+    {
+      "path": "tracks/qcs/results/20260730-211000-noisy-c-per-bit-noise/global-seed217100",
+      "run_sha256": "549dcdfbeb154b5e506da82b1ade3b884f5b892ef0449f870db3a902c86cb482",
+      "metrics_sha256": "66e0ebf33a77ef58dbc84b7dd6a43c1a6fdd1133f0d4c3ccc7a6fbee4e0cf7bc",
+      "base_seed": 217100,
+      "learner_noise_mode": "pairwise-estimated",
+      "first_full_recovery_step": 620,
+      "blind_stop_step": 810,
+      "blind_stop_examples": 81000,
+      "blind_stop_clean_word_accuracy_report_only": 1.0,
+      "blind_stop_word_entropy_bits": 0.0007797900870134878,
+      "blind_stop_maximum_rounding_residual": 0.0007639904944166,
+      "estimated_noise_rates_at_blind_stop": [
+        0.05031594335397077,
+        0.09920283353346382,
+        0.15194902734049665,
+        0.20110457875735305,
+        0.24881108563871002,
+        0.2984334743447669,
+        0.3525262093732432,
+        0.4004239951822324,
+        0.4497206395551885,
+        0.12133400692364371,
+        0.28044318688823044,
+        0.3799425272600627
+      ],
+      "per_bit_noise_mae_at_blind_stop": 0.0009988656239148508,
+      "per_bit_noise_max_error_at_blind_stop": 0.0025262093732432156
+    }
+  ],
+  "per_bit_fit": [
+    {
+      "path": "tracks/qcs/results/20260730-211000-noisy-c-per-bit-noise/seed207100",
+      "run_sha256": "fb04611240db3b04377ce26418bcc4c96087d699188460b809db5c1831f56836",
+      "metrics_sha256": "45c6b0fe638e836fcaf5aeb67c032bea7962bd0c5e38181db50e3446164ee7e0",
+      "base_seed": 207100,
+      "learner_noise_mode": "per-bit-pairwise-estimated",
+      "first_full_recovery_step": 840,
+      "blind_stop_step": 940,
+      "blind_stop_examples": 94000,
+      "blind_stop_clean_word_accuracy_report_only": 1.0,
+      "blind_stop_word_entropy_bits": 0.0001750329710750131,
+      "blind_stop_maximum_rounding_residual": 0.03869842138399869,
+      "estimated_noise_rates_at_blind_stop": [
+        0.04871530981874955,
+        0.09966397495737112,
+        0.1498815474550606,
+        0.19811738096598086,
+        0.24979766565254308,
+        0.3028394176946115,
+        0.345895372469905,
+        0.3985892502287877,
+        0.44940410051579815,
+        0.12088724406723944,
+        0.281847010548116,
+        0.37940777586108565
+      ],
+      "per_bit_noise_mae_at_blind_stop": 0.0013417745320571026,
+      "per_bit_noise_max_error_at_blind_stop": 0.004104627530094995
+    },
+    {
+      "path": "tracks/qcs/results/20260730-211000-noisy-c-per-bit-noise/seed217100",
+      "run_sha256": "6ddc1f9b92611cfbc1fefa87e9196962cc83c8b0c2cac4635ea98806cd7137e8",
+      "metrics_sha256": "6408f4ad54e5a44cca1738453c9b9d7c84ace3bfc02dc6a41cffc1f698eed128",
+      "base_seed": 217100,
+      "learner_noise_mode": "per-bit-pairwise-estimated",
+      "first_full_recovery_step": 770,
+      "blind_stop_step": 850,
+      "blind_stop_examples": 85000,
+      "blind_stop_clean_word_accuracy_report_only": 1.0,
+      "blind_stop_word_entropy_bits": 0.00016088769748443286,
+      "blind_stop_maximum_rounding_residual": 0.03902316965018659,
+      "estimated_noise_rates_at_blind_stop": [
+        0.050183604928484615,
+        0.09932142032605656,
+        0.1515620749889478,
+        0.20092917776257946,
+        0.2490008169500762,
+        0.2985420759309269,
+        0.3520034615392268,
+        0.4003874635202217,
+        0.44964891185905675,
+        0.12123021551763513,
+        0.28100789756585554,
+        0.38002270586600156
+      ],
+      "per_bit_noise_mae_at_blind_stop": 0.0009011147185696786,
+      "per_bit_noise_max_error_at_blind_stop": 0.002003461539226814
+    }
+  ]
+}

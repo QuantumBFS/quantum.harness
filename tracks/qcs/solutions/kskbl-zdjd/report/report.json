@@ -1,0 +1,1708 @@
+{
+  "title": "⟦zh⟧精确电路与随机噪声学习⟦en⟧Exact Circuits and Learning under Random Noise",
+  "eyebrow": "⟦zh⟧QuantumBFS 问题 71 · 两页研究报告⟦en⟧QuantumBFS Challenge 71 · Two-page Research Report",
+  "subtitle": "⟦zh⟧第 1 页：精确电路优化 · 第 2 页：25% 新鲜随机噪声实验⟦en⟧Page 1: exact-circuit optimization · Page 2: fresh 25% random-noise experiment",
+  "lede": "⟦zh⟧第一页汇总四个经过完整定义域验证的精确电路；第二页研究一个随机初始化的学习器，能否只从每次重新生成噪声的样本中恢复隐藏的六位函数。⟦en⟧Page one summarizes four exact circuits verified over their complete domains. Page two asks whether randomly initialized learners can recover a hidden six-bit function using only samples whose noise is regenerated every time.",
+  "sections": [
+    {
+      "title": "⟦zh⟧第 1 页 · 精确电路⟦en⟧Page 1 · Exact Circuits",
+      "note": "⟦zh⟧计分基元为二输入 AND、OR、XOR、NAND、NOR、XNOR；输入与输出反相免费。下表中的四个当前电路均为完全精确结果。⟦en⟧The score counts two-input AND, OR, XOR, NAND, NOR and XNOR gates; input and output complementation is free. All four current circuits below are exact.",
+      "blocks": [
+        {
+          "kind": "verdict",
+          "status": "good",
+          "label": "⟦zh⟧385 → 355 门⟦en⟧385 → 355 gates",
+          "why": "⟦zh⟧总计减少 30 门，降幅 7.79%；每个保留电路均通过完整输入域验证。⟦en⟧Thirty gates are removed in total, a 7.79% reduction; every retained circuit passes complete-domain verification."
+        },
+        {
+          "kind": "table",
+          "columns": [
+            "⟦zh⟧任务⟦en⟧Task",
+            "⟦zh⟧精确目标⟦en⟧Exact target",
+            "⟦zh⟧原始门数⟦en⟧Start",
+            "⟦zh⟧当前门数⟦en⟧Current",
+            "⟦zh⟧减少⟦en⟧Saved",
+            "⟦zh⟧完整验证⟦en⟧Full verification"
+          ],
+          "rows": [
+            ["A", "x + y", "37", "37", "0", "65,536 / 65,536"],
+            ["B", "abs(x − y)", "53", "49", "4", "16,384 / 16,384"],
+            ["C", "x × y", "168", "156", "12", "4,096 / 4,096"],
+            ["D", "x² + y²", "127", "113", "14", "1,024 / 1,024"]
+          ],
+          "numeric": [false, false, true, true, true, true]
+        },
+        {
+          "kind": "figures",
+          "items": [
+            {
+              "src": "gate-score-overview.svg",
+              "caption": "⟦zh⟧四个精确任务的原始与当前门数。A 保持 37 门；B、C、D 分别减少 4、12、14 门。图中所有“当前”值都对应完整定义域上零错误的电路。⟦en⟧Original and current gate counts for the four exact tasks. A remains at 37 gates; B, C and D save 4, 12 and 14 gates. Every current value corresponds to a circuit with zero errors over its complete domain."
+            }
+          ]
+        },
+        {
+          "kind": "heading",
+          "level": 2,
+          "text": "⟦zh⟧任务 A：八位加法⟦en⟧Task A: Eight-bit Addition"
+        },
+        {
+          "kind": "note",
+          "label": "⟦zh⟧搜索结论⟦en⟧Search result",
+          "text": "⟦zh⟧在测试的脉动进位结构和优化流程中，没有发现低于原始 37 门的候选。该结果不构成全局最优性证明。⟦en⟧No candidate below the original 37 gates was found within the tested ripple-carry structures and optimization flows. This result does not establish global optimality."
+        },
+        {
+          "kind": "verdict",
+          "status": "good",
+          "label": "37 → 37",
+          "why": "⟦zh⟧一个半加器加七个五门全加器，完整验证 65,536 组输入。⟦en⟧One half adder followed by seven five-gate full adders, verified on all 65,536 inputs."
+        },
+        {
+          "kind": "text",
+          "text": "⟦zh⟧原始设计已经正好对应 2 + 7 × 5 的标准脉动进位成本。我们利用全加器三输入对称性生成了 50 个不同的 37 门拓扑，再分别经过 SAT 窗口、重写与重映射；所有候选最终仍停在 37。⟦en⟧The baseline exactly matches the standard ripple cost of 2 + 7 × 5. We used full-adder input symmetry to generate 50 distinct 37-gate topologies and ran SAT windows, rewriting and remapping on each; every candidate remained at 37."
+        },
+        {
+          "kind": "card",
+          "title": "⟦zh⟧实验观察⟦en⟧Experimental observations",
+          "blocks": [
+            {
+              "kind": "list",
+              "items": [
+                "⟦zh⟧标准五门全加器与本题的免费反相和 XOR/XNOR 等价计价规则兼容；测试中未发现更小的独立全加器实现。⟦en⟧The standard five-gate full adder is compatible with free complementation and equal XOR/XNOR cost; the tests did not find a smaller independent full-adder implementation.",
+                "⟦zh⟧保留同门数但结构不同的候选，可以检验后续优化结果是否依赖初始拓扑。⟦en⟧Retaining structurally distinct candidates with the same gate count tests whether subsequent optimization depends on the initial topology.",
+                "⟦zh⟧50 个测试拓扑均未低于 37 门；这一观察仅适用于已测试的拓扑和流程。⟦en⟧None of the 50 tested topologies fell below 37 gates; this observation applies only to the tested topologies and flows."
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "heading",
+          "level": 2,
+          "text": "⟦zh⟧任务 B：绝对差⟦en⟧Task B: Absolute Difference"
+        },
+        {
+          "kind": "note",
+          "label": "⟦zh⟧优化思路⟦en⟧Optimization idea",
+          "text": "⟦zh⟧B 的收益来自先做代数消除，再利用减法器与全加器之间的结构同构。⟦en⟧B improved first through algebraic cancellation, then through the structural equivalence between subtractors and full adders."
+        },
+        {
+          "kind": "verdict",
+          "status": "good",
+          "label": "53 → 51 → 49",
+          "why": "⟦zh⟧总计减少 4 门，完整验证 16,384 组输入和 1,500 条训练数据。⟦en⟧Four gates saved, verified on all 16,384 inputs and 1,500 training rows."
+        },
+        {
+          "kind": "heading",
+          "level": 3,
+          "text": "⟦zh⟧第一步：消掉两次异或⟦en⟧Step one: cancel two XORs"
+        },
+        {
+          "kind": "text",
+          "text": "⟦zh⟧在原始的条件二补码阶段，最低输出位连续执行的两个 XOR 在代数上抵消。精确库映射识别出这一点，53 门直接降到 51 门。⟦en⟧In the original conditional two’s-complement stage, two consecutive XOR operations on the least-significant output cancel algebraically. Exact-library mapping exposed this and reduced 53 gates to 51."
+        },
+        {
+          "kind": "heading",
+          "level": 3,
+          "text": "⟦zh⟧第二步：把全减器看成全加器⟦en⟧Step two: reinterpret the full subtractor"
+        },
+        {
+          "kind": "text",
+          "text": "⟦zh⟧全减器可写成输入为非 x、y 和借位的全加器；其进位就是下一位借位，而和位的补正好免费得到差位。基于全加器三输入对称性生成的 50 个种子，经八层 SAT 窗口后全部收敛到 49 门。⟦en⟧A full subtractor can be written as a full adder fed by complemented x, y and the borrow. Its carry is the next borrow, while the complemented sum yields the difference bit for free. Fifty symmetry-derived seeds all converged to 49 gates after eight-level SAT-window optimization."
+        },
+        {
+          "kind": "note",
+          "label": "⟦zh⟧结果解释⟦en⟧Interpretation",
+          "text": "⟦zh⟧在本任务的计分模型下，把全减器改写为带输入和输出极性的全加器形式，使优化结果由 51 门降到 49 门。该结果说明算术单元的表示方式会影响映射结果，但不说明该改写对其他门库或位宽同样有效。⟦en⟧Under this task’s cost model, rewriting the full subtractor as a full adder with input and output polarity reduced the mapped result from 51 to 49 gates. This shows that arithmetic-cell representation affects mapping in this instance; it does not establish the same benefit for other libraries or bit widths."
+        },
+        {
+          "kind": "heading",
+          "level": 2,
+          "text": "⟦zh⟧任务 C：六位乘法⟦en⟧Task C: Six-bit Multiplication"
+        },
+        {
+          "kind": "note",
+          "label": "⟦zh⟧搜索范围⟦en⟧Search scope",
+          "text": "⟦zh⟧C 的原始门数最高，所用搜索流程也最多。常规部分积压缩树在已测试流程中的最低结果为 166 门；更低结果分别来自大型多输出区域综合、公开构造复现和全局可达状态约束。⟦en⟧C has the largest initial gate count and received the broadest set of search procedures. The lowest result obtained from the tested conventional partial-product trees was 166 gates. Lower counts came from large multi-output region synthesis, reproduction of a published construction, and globally reachable-state constraints."
+        },
+        {
+          "kind": "verdict",
+          "status": "good",
+          "label": "168 → 156",
+          "why": "⟦zh⟧减少 12 门；当前候选通过全部 4,096 组输入和 1,200 条训练数据。⟦en⟧Twelve gates saved; the current candidate passes all 4,096 inputs and all 1,200 training rows."
+        },
+        {
+          "kind": "heading",
+          "level": 3,
+          "text": "⟦zh⟧阶段一：SAT 局部无关项优化，168 到 166⟦en⟧Phase I: SAT-derived local don’t-care optimization, 168 to 166"
+        },
+        {
+          "kind": "text",
+          "text": "⟦zh⟧基线由 36 个部分积门、24 个五门全加器和 6 个两门半加器组成，恰好是 168 门。高强度 mfs2 使用 SAT 推导局部无关项，先得到 167，再用更大的六层窗口得到 166。之后生成 100 个随机压缩顺序种子，17 个也到达 166，但没有一个继续下降。⟦en⟧The baseline contains 36 partial-product gates, 24 five-gate full adders and 6 two-gate half adders, exactly 168 gates. High-effort mfs2 with SAT-derived local don’t-cares first reached 167, then 166 with a larger six-level window. One hundred randomized compressor-order seeds were generated; 17 also reached 166, but none went lower."
+        },
+        {
+          "kind": "card",
+          "title": "⟦zh⟧166 门阶段的结构性观察⟦en⟧Structural observations at 166 gates",
+          "blocks": [
+            {
+              "kind": "list",
+              "items": [
+                "⟦zh⟧基线中的全加器和半加器分别使用五门和两门；已完成的小型精确综合没有找到更低的独立实现。⟦en⟧Full and half adders use five and two gates, respectively; completed small exact-synthesis tests did not find cheaper independent implementations.",
+                "⟦zh⟧独立替换某个输出锥会复制原本与高位共享的中间进位。⟦en⟧Replacing a single output cone duplicates intermediate carries shared with higher bits.",
+                "⟦zh⟧局部切口把边界信号视为任意组合，会丢掉乘法器内部的可达性约束。⟦en⟧Local cuts treat boundary signals as arbitrary combinations and lose multiplier reachability constraints."
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "heading",
+          "level": 3,
+          "text": "⟦zh⟧阶段二：166 到 165，大型联合张量区域⟦en⟧Phase II: 166 to 165 through a large joint tensor region"
+        },
+        {
+          "kind": "text",
+          "text": "⟦zh⟧小型扇出自由锥均未发现改进，于是我们转而把跨越多条乘法对角线的区域收缩成多输入、多输出布尔张量。一个 22 门、7 输入、5 输出的低位区域经过关系综合得到 21 门实现；128 个边界状态全部一致，嵌回全局后 4,096 组输入仍完全正确，于是 C 到达 165。⟦en⟧Small fanout-free cones yielded no improvement, so the search contracted regions spanning several multiplication diagonals into multi-input, multi-output Boolean tensors. Relation synthesis reduced one 22-gate, seven-input, five-output low-product region to 21 gates. All 128 boundary states matched, and the embedded circuit remained exact on all 4,096 inputs, producing the 165-gate result."
+        },
+        {
+          "kind": "heading",
+          "level": 3,
+          "text": "⟦zh⟧阶段三：采用不同乘法器构造，165 到 158⟦en⟧Phase III: replacing the multiplier construction, 165 to 158"
+        },
+        {
+          "kind": "text",
+          "text": "⟦zh⟧对 165 门网络进行的后续局部和联合区域搜索没有产生更小结果。随后直接重建 Sergeev 给出的 158 门乘法器，其中包含 36 个部分积、6 个半加器、3 个普通全加器、1 个编码输入全加器、10 个改进双全加器，以及 11 个用于构造编码对的 XOR。165 到 158 对应整体构造替换，不能解释为在 165 门网络中删除了七个局部门。⟦en⟧Subsequent local and joint-region searches on the 165-gate network did not produce a smaller result. We then directly reconstructed Sergeev’s 158-gate multiplier, containing 36 partial products, 6 half adders, 3 ordinary full adders, 1 encoded-input full adder, 10 modified double full adders, and 11 XOR gates used to form encoded pairs. The change from 165 to 158 is a replacement of the complete construction, not the deletion of seven local gates from the 165-gate network."
+        },
+        {
+          "kind": "heading",
+          "level": 3,
+          "text": "⟦zh⟧阶段四：158 到 156，只在可达状态上成立⟦en⟧Phase IV: 158 to 156 using reachable states"
+        },
+        {
+          "kind": "text",
+          "text": "⟦zh⟧全域语义重代入为每条内部线计算了覆盖全部 12 位输入的真值向量。它发现最高乘积位的四门扇出自由锥可以由两门替换。若把三个边界信号当作独立变量，该替换并不成立；但在真实乘法器的 4,096 个可达输入上，它完全等价。⟦en⟧Full-domain semantic resubstitution computed a truth vector over all twelve primary inputs for every internal wire. It discovered that the four-gate fanout-free cone driving the most significant product bit could be replaced by two gates. The identity is false if the three boundary signals are independent, yet it is exact on all 4,096 states reachable in the real multiplier."
+        },
+        {
+          "kind": "code",
+          "title": "⟦zh⟧两门替换⟦en⟧The two-gate replacement",
+          "text": "g159 = NAND ~g29 ~g154\ng160 = AND g159 g36\n\noutput = g36 AND (g29 OR g154)"
+        },
+        {
+          "kind": "note",
+          "label": "⟦zh⟧结论范围⟦en⟧Scope of the conclusion",
+          "text": "⟦zh⟧158 是构造性上界，不是六位乘法的最优性证明。158 到 156 的结果表明，在本电路中，全局可达状态约束能够产生普通局部真值表未表示的简化机会。是否还存在其他此类区域尚未确定。⟦en⟧The 158 figure is a constructive upper bound, not an optimality proof for six-bit multiplication. The reduction from 158 to 156 shows that, in this circuit, globally reachable-state constraints can expose a simplification not represented by an ordinary local truth table. It remains unknown whether additional regions of this kind exist."
+        },
+        {
+          "kind": "heading",
+          "level": 3,
+          "text": "⟦zh⟧未产生更小结果的已测试路线⟦en⟧Tested routes that did not produce a smaller result"
+        },
+        {
+          "kind": "table",
+          "columns": [
+            "⟦zh⟧路线⟦en⟧Route",
+            "⟦zh⟧结果⟦en⟧Result",
+            "⟦zh⟧结果解释⟦en⟧Interpretation"
+          ],
+          "rows": [
+            [
+              "⟦zh⟧完整真值表 PLA⟦en⟧Flat truth-table PLA",
+              "6,176",
+              "⟦zh⟧先破坏算术结构，再要求综合器重新发现它。⟦en⟧It destroys arithmetic structure before asking synthesis to rediscover it."
+            ],
+            [
+              "⟦zh⟧通用 RTL 综合⟦en⟧Generic RTL synthesis",
+              "178",
+              "⟦zh⟧该流程的结果比手工压缩树多 10 门；推测通用位级映射没有保留全部共享结构。⟦en⟧This flow used ten more gates than the hand-structured compressor tree; the likely explanation is that generic bit-level mapping did not preserve all shared structure."
+            ],
+            [
+              "Radix-4 Booth",
+              "222",
+              "⟦zh⟧六位规模太小，重编码开销无法摊薄。⟦en⟧At six bits, recoding overhead cannot be amortized."
+            ],
+            [
+              "3 × 3 Karatsuba",
+              "239",
+              "⟦zh⟧加减与重组成本超过少掉的部分积。⟦en⟧Addition, subtraction and recombination cost more than the saved partial products."
+            ],
+            [
+              "⟦zh⟧完整张量列车⟦en⟧Whole tensor train",
+              "3,093",
+              "⟦zh⟧整数乘法在单变量切分下键维过大。⟦en⟧Integer multiplication has excessive bond dimension under one-variable cuts."
+            ],
+            [
+              "⟦zh⟧小型精确锥替换⟦en⟧Small exact cone replacement",
+              "tie",
+              "⟦zh⟧已测试的独立锥没有更小实现；该结果不排除跨切口共享逻辑的改进。⟦en⟧The tested independent cones had no smaller implementation; this does not exclude improvements that share logic across a cut."
+            ]
+          ],
+          "numeric": [false, true, false]
+        },
+        {
+          "kind": "heading",
+          "level": 2,
+          "text": "⟦zh⟧任务 D：平方和⟦en⟧Task D: Sum of Squares"
+        },
+        {
+          "kind": "note",
+          "label": "⟦zh⟧优化思路⟦en⟧Optimization idea",
+          "text": "⟦zh⟧D 的改进来自多轮拓扑重写、随机种子筛选和四次联合区域替换。没有任何一次操作单独产生大于两门的减少。⟦en⟧D improved through repeated topology rewriting, randomized seed selection, and four joint-region replacements. No single operation reduced the count by more than two gates."
+        },
+        {
+          "kind": "verdict",
+          "status": "good",
+          "label": "127 → 113",
+          "why": "⟦zh⟧减少 14 门，降幅 11.02%；完整验证 1,024 组输入和 400 条训练数据。⟦en⟧Fourteen gates saved, an 11.02% reduction; verified on all 1,024 inputs and 400 training rows."
+        },
+        {
+          "kind": "heading",
+          "level": 3,
+          "text": "⟦zh⟧阶段一：确定性重写序列⟦en⟧Phase I: deterministic rewrite sequence"
+        },
+        {
+          "kind": "text",
+          "text": "⟦zh⟧从平方专用的对角项与非对角项表示出发，resyn3、drwsat2 和高强度 mfs2 交替改变拓扑，形成 127、126、125、124、123、122 的连续轨迹。重复相同脚本很快稳定，因此后续搜索转向随机化结构。⟦en⟧Starting from a square-specific diagonal and off-diagonal representation, alternating resyn3, drwsat2 and high-effort mfs2 changed the topology along the sequence 127, 126, 125, 124, 123 and 122. Repeating the same scripts soon stabilized, motivating a move to randomized structures."
+        },
+        {
+          "kind": "heading",
+          "level": 3,
+          "text": "⟦zh⟧阶段二：拓扑岛避免早熟收敛⟦en⟧Phase II: topology islands avoid premature convergence"
+        },
+        {
+          "kind": "text",
+          "text": "⟦zh⟧实验生成了 200 个精确平方和种子，并随机改变加权项和压缩器顺序。种子 003 经后续优化由 120 降到 119；另一个 120 门种子 012 则依次得到 118 和 117 门。在该样本中，初始门数相同的母体产生了不同的后续结果，因此搜索档案保留了同门数和少量增门但结构不同的候选。⟦en⟧The experiment generated 200 exact square-sum seeds with randomized weighted-term and compressor order. Subsequent optimization reduced seed 003 from 120 to 119 gates, while another 120-gate seed, 012, produced 118 and then 117 gates. Within this sample, equal-count parents produced different subsequent results, so the search archive retained structurally distinct candidates with equal or slightly larger counts."
+        },
+        {
+          "kind": "heading",
+          "level": 3,
+          "text": "⟦zh⟧阶段三：非连续张量窗口得到 115⟦en⟧Phase III: non-contiguous tensor windows reach 115"
+        },
+        {
+          "kind": "text",
+          "text": "⟦zh⟧图张量搜索不要求区域在网表文本中连续，而是在超图中选取不会离开后重新进入的连通区域。综合器先为一个四输入、三输出的 10 门区域找到并验证了 9 门实现；重建图后，又为一个 8 门区域找到并验证了 7 门实现。两次替换均通过边界穷举和完整定义域验证，使门数由 117 降到 115。⟦en⟧Graph-tensor search does not require a region to be contiguous in the netlist text; it selects connected hypergraph regions that do not leave and later re-enter. The synthesizer first found and verified a nine-gate implementation of a four-input, three-output ten-gate region. After rebuilding the graph, it found and verified a seven-gate implementation of an eight-gate region. Both replacements passed boundary enumeration and full-domain verification, reducing the count from 117 to 115."
+        },
+        {
+          "kind": "heading",
+          "level": 3,
+          "text": "⟦zh⟧阶段四：26 门联合区域压到 25 门⟦en⟧Phase IV: a 26-gate joint region becomes 25"
+        },
+        {
+          "kind": "text",
+          "text": "⟦zh⟧在 115 门网络中，一个 7 输入、5 输出、26 门的联合区域由 eSLIM 关系综合得到 25 门实现。全部 128 个边界赋值一致，嵌回后完整定义域仍精确，得到 114 门电路。⟦en⟧Inside the 115-gate network, eSLIM relation synthesis found a 25-gate realization for a seven-input, five-output, 26-gate joint region. All 128 boundary assignments matched and the embedded full circuit remained exact, producing a 114-gate circuit."
+        },
+        {
+          "kind": "heading",
+          "level": 3,
+          "text": "⟦zh⟧阶段五：27 门联合区域压到 26 门⟦en⟧Phase V: a 27-gate joint region becomes 26"
+        },
+        {
+          "kind": "text",
+          "text": "⟦zh⟧在 114 门网络中，一个 8 输入、6 输出、27 门的凸联合区域由 eSLIM 得到 26 门实现。替换在全部 256 个边界赋值上等价；嵌回后，完整电路通过 1,024 组输入与 400 条训练数据验证，得到当前 113 门结果。对 113 门网络继续进行语义重代入、三个大型联合区域搜索和多种全局 ABC 重写，均未得到 112 门电路。该负结果仅适用于本轮测试范围，不构成最优性证明。⟦en⟧In the 114-gate network, eSLIM produced a 26-gate realization of an eight-input, six-output, 27-gate convex joint region. The replacement was equivalent on all 256 boundary assignments. After embedding, the complete circuit passed all 1,024 inputs and 400 training rows, producing the current 113-gate result. Follow-up semantic resubstitution, three large joint-region searches, and several whole-network ABC rewrites did not produce a 112-gate circuit. This negative result applies only to the tested search scope and is not an optimality proof."
+        },
+        {
+          "kind": "card",
+          "title": "⟦zh⟧当前 113 门电路的结构数据⟦en⟧Structural data for the current 113-gate circuit",
+          "blocks": [
+            {
+              "kind": "kv",
+              "pairs": [
+                ["⟦zh⟧逻辑深度⟦en⟧Logic depth", "27"],
+                ["⟦zh⟧门型组成⟦en⟧Gate composition", "42 AND · 29 NOR · 29 XNOR · 10 XOR · 2 NAND · 1 OR"],
+                ["⟦zh⟧完整定义域⟦en⟧Full domain", "1,024 / 1,024"],
+                ["⟦zh⟧训练数据⟦en⟧Training data", "400 / 400"],
+                ["⟦zh⟧结构审计⟦en⟧Structural audit", "⟦zh⟧0 个死门，0 个常量线，0 组重复或互补内部线⟦en⟧0 dead gates, 0 constant wires, 0 duplicate or complement-equivalent internal-wire groups"]
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "card",
+          "title": "⟦zh⟧工具正确性问题及处理方式⟦en⟧Tool-correctness issue and mitigation",
+          "blocks": [
+            {
+              "kind": "text",
+              "text": "⟦zh⟧当前 ABC 版本导出非对称二输入门时会交换局部真值表的两个轴。第一次嵌入立刻被全局验证拒绝。修正扇入顺序后，先验证全部边界状态，再验证完整输入域。另一些 ABC 内部崩溃还会留下旧输出，因此每次运行必须使用唯一文件名，并同时检查退出码与文件时间。⟦en⟧The current ABC build swaps the two local truth-table axes when exporting asymmetric two-input gates. The first embedding was immediately rejected by global verification. After correcting fanin order, every replacement was checked on all boundary states and then on the full domain. Other ABC crashes can leave stale outputs, so every run must use a unique filename and check both exit status and file freshness."
+            }
+          ]
+        },
+        {
+          "kind": "figures",
+          "items": [
+            {
+              "src": "c-d-journeys.svg",
+              "caption": "⟦zh⟧C 与 D 的全部已接受门数轨迹。曲线只记录通过边界检查和完整定义域验证后正式保留的结果；搜索过程中产生但未通过验证的候选不在图中。⟦en⟧All accepted gate-count milestones for C and D. The curves include only results retained after boundary checks and complete-domain verification; candidates that failed validation are excluded."
+            }
+          ]
+        },
+        {
+          "kind": "heading",
+          "level": 2,
+          "text": "⟦zh⟧方法比较与适用范围⟦en⟧Method Comparison and Scope"
+        },
+        {
+          "kind": "note",
+          "label": "⟦zh⟧适用边界⟦en⟧Scope",
+          "text": "⟦zh⟧以下结论来自本问题、当前计分模型和已运行参数，不能直接外推到其他位宽、门库或优化目标。⟦en⟧The following conclusions are specific to this problem, cost model, and tested parameter settings; they should not be extrapolated directly to other bit widths, gate libraries, or objectives."
+        },
+        {
+          "kind": "table",
+          "columns": [
+            "⟦zh⟧方法⟦en⟧Method",
+            "⟦zh⟧作用层次⟦en⟧Applied scale",
+            "⟦zh⟧本项目结论⟦en⟧Finding"
+          ],
+          "rows": [
+            ["⟦zh⟧算术结构设计⟦en⟧Arithmetic architecture", "global", "⟦zh⟧初始结构会影响后续门数；对 C，采用 Sergeev 构造得到 158 门，低于原 165 门结构。⟦en⟧The initial structure affects the resulting count; for C, Sergeev’s construction produced 158 gates, below the previous 165-gate structure."],
+            ["SAT don’t-care", "local", "⟦zh⟧在测试参数下，C 由 168 降到 166，D 由 123 降到 122。⟦en⟧Under the tested settings, C decreased from 168 to 166 and D from 123 to 122."],
+            ["⟦zh⟧多岛拓扑搜索⟦en⟧Multi-island topology search", "mesoscopic", "⟦zh⟧在 D 中产生了 117 门结果；相同门数的不同母体在后续流程中得到不同结果。⟦en⟧Produced the 117-gate D result; equal-count parents gave different outcomes under subsequent optimization."],
+            ["⟦zh⟧张量边界综合⟦en⟧Tensor-boundary synthesis", "joint region", "⟦zh⟧在已接受的联合区域替换中，C 减少 1 门，D 累计减少 4 门。⟦en⟧Across the accepted joint-region replacements, C saved one gate and D saved four gates in total."],
+            ["⟦zh⟧全域语义重代入⟦en⟧Full-domain semantic resubstitution", "global constraint", "⟦zh⟧发现普通局部真值表看不到的 158 到 156。⟦en⟧Found the 158-to-156 reduction invisible to ordinary local truth tables."],
+            ["⟦zh⟧完整穷举验证⟦en⟧Exhaustive verification", "acceptance", "⟦zh⟧作为每次替换、嵌入和正式更新的必要验收条件。⟦en⟧Used as a required acceptance condition for every replacement, embedding, and update of the retained circuit."]
+          ]
+        },
+        {
+          "kind": "list",
+          "title": "⟦zh⟧本研究采用的工作准则⟦en⟧Practices used in this study",
+          "items": [
+            "⟦zh⟧实验优先保留算术结构；完整真值表 PLA 在 C 上产生 6,176 门，因此未用于后续候选生成。⟦en⟧The experiments retained arithmetic structure where possible. A complete truth-table PLA produced 6,176 gates for C and was therefore not used for subsequent candidate generation.",
+            "⟦zh⟧小型切口的精确综合结果仅用于判断该切口内是否找到更小实现，不用于推断整个电路最优。⟦en⟧Exact-synthesis results for small cuts were used only to determine whether a smaller implementation was found within that cut, not to infer whole-circuit optimality.",
+            "⟦zh⟧搜索档案保留同门数和少量增门但结构不同的拓扑，以支持非单调搜索。⟦en⟧The search archive retained structurally distinct topologies with equal or slightly larger counts to support non-monotone search.",
+            "⟦zh⟧只有按比赛门库重新映射后的门数用于比较；AIG 节点数等内部目标不直接作为最终得分。⟦en⟧Only the count after remapping to the challenge gate library was used for comparison; internal objectives such as AIG node count were not treated as the final score.",
+            "⟦zh⟧所有外部工具输出均经过独立解析和完整定义域验证，以检测崩溃残留、导出错误和功能不等价。⟦en⟧All external-tool outputs were independently parsed and verified over the complete domain to detect stale crash outputs, export errors, and functional inequivalence."
+          ]
+        },
+        {
+          "kind": "heading",
+          "level": 2,
+          "text": "⟦zh⟧正确性与可复现性⟦en⟧Correctness and Reproducibility"
+        },
+        {
+          "kind": "note",
+          "label": "⟦zh⟧验收标准⟦en⟧Acceptance standard",
+          "text": "⟦zh⟧这里的“正确”不是训练集准确率，而是完整有限定义域上的零错误。⟦en⟧Here, “correct” means zero errors over the complete finite domain, not merely training accuracy."
+        },
+        {
+          "kind": "table",
+          "columns": [
+            "⟦zh⟧任务⟦en⟧Task",
+            "⟦zh⟧完整定义域⟦en⟧Full domain",
+            "⟦zh⟧训练集⟦en⟧Training set",
+            "⟦zh⟧结构审计⟦en⟧Structural audit"
+          ],
+          "rows": [
+            ["A", "65,536 / 65,536", "2,000 / 2,000", "⟦zh⟧无死门、常量或重复补关系⟦en⟧No dead gates, constants or duplicate-complement groups"],
+            ["B", "16,384 / 16,384", "1,500 / 1,500", "⟦zh⟧无死门、常量或重复补关系⟦en⟧No dead gates, constants or duplicate-complement groups"],
+            ["C", "4,096 / 4,096", "1,200 / 1,200", "⟦zh⟧无死门、常量或重复补关系⟦en⟧No dead gates, constants or duplicate-complement groups"],
+            ["D", "1,024 / 1,024", "400 / 400", "⟦zh⟧无死门、常量或重复补关系⟦en⟧No dead gates, constants or duplicate-complement groups"]
+          ]
+        },
+        {
+          "kind": "card",
+          "title": "⟦zh⟧可重复入口⟦en⟧Reproduction entry points",
+          "blocks": [
+            {
+              "kind": "kv",
+              "pairs": [
+                ["⟦zh⟧正式电路⟦en⟧Retained circuits", "mystery-A.txt · mystery-B.txt · mystery-C.txt · mystery-D.txt"],
+                ["⟦zh⟧公式验证⟦en⟧Formula verification", "validate_formulas.py"],
+                ["⟦zh⟧门数与结构审计⟦en⟧Scoring and structural audit", "score_circuits.py · analyze_netlists.py"],
+                ["⟦zh⟧158 门构造⟦en⟧158-gate construction", "build_sergeev_multiplier.py"],
+                ["⟦zh⟧158 到 156 重写⟦en⟧158-to-156 rewrite", "optimize_sergeev_multiplier.py"],
+                ["⟦zh⟧D 的联合区域提取与嵌入⟦en⟧D joint-region extraction and embedding", "extract_tensor_region.py · embed_tensor_region.py"],
+                ["⟦zh⟧D 的 114 门前序版本⟦en⟧D 114-gate predecessor", "abc-work/parallel/bd_tensor/mystery-D-114-candidate.txt"],
+                ["⟦zh⟧完整实验日志⟦en⟧Full experiment log", "OPTIMIZATION_LOG.md"]
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "heading",
+          "level": 2,
+          "text": "⟦zh⟧上界状态与后续工作⟦en⟧Upper-bound Status and Follow-up Work"
+        },
+        {
+          "kind": "note",
+          "label": "⟦zh⟧结果边界⟦en⟧Scope of the result",
+          "text": "⟦zh⟧当前保留的 C 和 D 电路分别为 156 门和 113 门，均经过完整定义域验证。这些结果给出了当前搜索得到的构造性上界；现有实验没有建立全局最优性。⟦en⟧The retained C and D circuits contain 156 and 113 gates, respectively, and both pass full-domain verification. They are constructive upper bounds obtained by the current search; the experiments do not establish global optimality."
+        },
+        {
+          "kind": "verdict",
+          "status": "warn",
+          "label": "⟦zh⟧C 的候选上界 156⟦en⟧Candidate upper bound for C: 156",
+          "why": "⟦zh⟧公开文献核查中未发现低于 Sergeev 158 的同模型六位乘法结果；公开挑战电路中检查到 168 和 167。未发表、未索引或私人结果仍可能更低。⟦en⟧The literature audit found no same-model six-bit multiplier below Sergeev’s 158; inspected public challenge circuits scored 168 and 167. Unpublished, unindexed or private results may still be lower."
+        },
+        {
+          "kind": "verdict",
+          "status": "warn",
+          "label": "⟦zh⟧D 的候选上界 113⟦en⟧Candidate upper bound for D: 113",
+          "why": "⟦zh⟧该电路通过全部 1,024 个输入。后续有限搜索没有得到 112 门，但尚未进行能够证明 113 门最优的完整下界分析。⟦en⟧The circuit passes all 1,024 inputs. Bounded follow-up searches did not produce 112 gates, but no complete lower-bound analysis has proved 113 optimal."
+        },
+        {
+          "kind": "list",
+          "title": "⟦zh⟧建议的后续分析⟦en⟧Proposed follow-up analyses",
+          "items": [
+            "⟦zh⟧对跨越部分积和相邻 MDFA 列的大型多输出区域显式编码可达状态约束。⟦en⟧Explicitly encode reachable-state constraints for large multi-output regions spanning partial products and adjacent MDFA columns.",
+            "⟦zh⟧从 158、156、165 及 29 个不同的 166 门语义指纹同时出发，继续非单调母体搜索。⟦en⟧Continue non-monotone parent search from the 158, 156 and 165 networks plus 29 distinct 166-gate semantic fingerprints.",
+            "⟦zh⟧把 C 的精确综合预算集中到八门以上、边界受约束的窗口；已完成的六门和七门普通窗口均只得到平局。⟦en⟧Concentrate C exact-synthesis budget on constrained windows of eight gates or more; completed ordinary six- and seven-gate windows only tied.",
+            "⟦zh⟧对 D 的 113、114、115 和 117 门保留母体分别重新采样大型凸区域，并显式利用实际可达的边界状态。⟦en⟧Resample large convex regions independently from the retained 113-, 114-, 115-, and 117-gate D parents, with explicit use of their reachable boundary states."
+          ]
+        },
+        {
+          "kind": "code",
+          "title": "⟦zh⟧公开来源⟦en⟧Public sources",
+          "text": "Sergeev, On the circuit complexity of multiplying integers\nhttps://arxiv.org/abs/1602.02362\n\nSmaller Circuits for Bit Addition, STACS 2026\nhttps://doi.org/10.4230/LIPIcs.STACS.2026.46\n\nQuantumBFS Challenge 71\nhttps://github.com/QuantumBFS/quantum.harness/issues/71\n\nSPbSAT Simplifier\nhttps://github.com/SPbSAT/simplifier"
+        }
+      ]
+    },
+    {
+      "title": "⟦zh⟧第 2 页 · 随机噪声学习⟦en⟧Page 2 · Learning under Random Noise",
+      "note": "⟦zh⟧学习器不知道隐藏函数是乘法，也不能读取第一页的 156 门电路。训练只使用在线生成的带噪样本；完整无噪定义域仅用于定期画曲线，不反馈训练。⟦en⟧The learner does not know that the hidden function is multiplication and cannot read the 156-gate circuit from page one. Training uses only online noisy samples; the complete clean domain is used solely for periodic plotting and never feeds back into training.",
+      "blocks": [
+        {
+          "kind": "verdict",
+          "status": "good",
+          "label": "⟦zh⟧突破：从随机噪声训练独立得到 156 门精确网络，与第一页参考同门数⟦en⟧Breakthrough: noisy training independently yields an exact 156-gate network, matching the page-one reference count",
+          "why": "⟦zh⟧两个随机初始化、两条独立噪声流分别在第 2,800 和 2,400 步学出同一个 36 项整数规则；通用压缩器先自动得到 158 门，再由只看学出网络全域语义指纹的盲搜索把最高输出的 4 门锥替换为 2 门。整个搜索未读取乘法公式、第一页电路、线号或重写模板；最终 156 门网络重新加载后在 4,096 / 4,096 个输入上逐门验证正确。⟦en⟧Two random initializations and independent noise streams learn the same 36-term integer rule at steps 2,800 and 2,400. A generic compressor first produces 158 gates, then a blind search using only full-domain fingerprints of the learned network replaces a four-gate cone at the highest output with two gates. The search reads neither the multiplication formula, page-one circuit, wire identities nor rewrite template; the final 156-gate network was reloaded and verified gate by gate on 4,096 / 4,096 inputs."
+        },
+        {
+          "kind": "card",
+          "title": "⟦zh⟧当前最重要结果：从统计学习到离散门图⟦en⟧Most important result: from statistical learning to a discrete gate graph",
+          "blocks": [
+            {
+              "kind": "kv",
+              "pairs": [
+                ["⟦zh⟧随机初始化空间⟦en⟧Randomly initialized search space", "⟦zh⟧79 个通用候选：1 个常数、12 个一次位特征、全部 66 个两两 AND；随机高斯系数先验，不预设哪一对输入相关⟦en⟧79 generic candidates: one constant, 12 linear bit features and all 66 pairwise ANDs, with a random Gaussian coefficient prior and no predefined relevant input pairs"],
+                ["⟦zh⟧噪声学习⟦en⟧Noisy learning", "⟦zh⟧每步重新生成 100 个样本，每个输出位独立以 25% 概率翻转；贝叶斯后验只由这些新鲜观察更新⟦en⟧Regenerate 100 examples per step, flip every output bit independently with 25% probability and update the Bayesian posterior only from these fresh observations"],
+                ["⟦zh⟧整数结构投影⟦en⟧Integer structure projection", "⟦zh⟧把后验期望值加权投影到 79 维二次基并取整；两个实验都自动把 79 项收缩为相同的 36 个非零二次项⟦en⟧Weighted-project posterior expectations onto the 79-dimensional quadratic basis and round to integers; both runs automatically shrink 79 candidates to the same 36 nonzero pairwise terms"],
+                ["⟦zh⟧通用门编译⟦en⟧Generic gate compilation", "⟦zh⟧36 个特征门，加上动态规划找到的 122 门 MDFA 压缩器，先得到 158 门中间网络⟦en⟧36 feature gates plus a 122-gate MDFA compressor found by dynamic programming first produce a 158-gate intermediate network"],
+                ["⟦zh⟧盲语义重代入⟦en⟧Blind semantic resubstitution", "⟦zh⟧自动定位最高输出的 4 门无外部扇出锥，枚举锥外信号的一门、二门表达式并找到 2 门等价替代；最终 156 门为 53 AND、14 OR、89 XOR⟦en⟧Automatically identify the four-gate maximum fanout-free cone at the highest output, enumerate one- and two-gate expressions from signals outside the cone and find a two-gate equivalent; the final 156 gates are 53 AND, 14 OR and 89 XOR"],
+                ["⟦zh⟧主实验⟦en⟧Primary run", "⟦zh⟧第 2,800 步首次全对；之后 7 / 7 个检查点全对；最终最大系数取整残差 0.000226⟦en⟧First exact at step 2,800; all 7 / 7 checkpoints from that point are exact; final maximum coefficient-rounding residual 0.000226"],
+                ["⟦zh⟧独立复跑⟦en⟧Independent replication", "⟦zh⟧第 2,400 步首次全对；之后 9 / 9 个检查点全对；最终最大系数取整残差 0.000041⟦en⟧First exact at step 2,400; all 9 / 9 checkpoints from that point are exact; final maximum coefficient-rounding residual 0.000041"],
+                ["⟦zh⟧可审计产物⟦en⟧Auditable artifacts", "symbolic_discovery_p25_summary.json · learned_mdfa_p25_network.json · learned_mdfa_p25_optimized_network.json · SHA-256 recorded"]
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "table",
+          "columns": [
+            "⟦zh⟧从同一带噪后验得到的表示⟦en⟧Representation from the noisy posterior",
+            "⟦zh⟧最终准确率⟦en⟧Final accuracy",
+            "⟦zh⟧离散门数⟦en⟧Discrete gates",
+            "⟦zh⟧说明⟦en⟧Interpretation"
+          ],
+          "rows": [
+            ["⟦zh⟧二次整数发现 + 通用 MDFA + 盲语义重代入⟦en⟧Quadratic discovery + generic MDFA + blind semantic resubstitution", "100%", "156", "⟦zh⟧两个独立种子得到同一拓扑；盲搜索不读取第一页解，当前最佳学习结果⟦en⟧Both independent seeds yield the same topology; blind search does not read the page-one solution; current best learned result"],
+            ["⟦zh⟧二次整数发现 + 通用 MDFA，中间结果⟦en⟧Quadratic discovery + generic MDFA, intermediate", "100%", "158", "⟦zh⟧只根据学到的列项数自动找到 122 门压缩计划⟦en⟧A 122-gate compression schedule is found automatically from learned column counts alone"],
+            ["⟦zh⟧二次整数发现 + 普通 Wallace 压缩⟦en⟧Quadratic integer discovery + ordinary Wallace compression", "100%", "168", "⟦zh⟧同一 36 项规则，普通全加器编译多 10 门⟦en⟧The same 36-term rule; ordinary full-adder compilation costs ten extra gates"],
+            ["⟦zh⟧共享有序 BDD⟦en⟧Shared ordered BDD", "100%", "3,343", "⟦zh⟧跨十二个输出共享子图后仍远大于算术结构投影⟦en⟧Still much larger than arithmetic structure projection despite sharing subgraphs across all twelve outputs"],
+            ["⟦zh⟧直接 ANF + 前缀和异或公共子式⟦en⟧Direct ANF + prefix/XOR common subexpressions", "100%", "5,046", "⟦zh⟧精确但展开严重；最后几个标签错误还会额外产生约两千个伪项⟦en⟧Exact but heavily expanded; the last few label errors additionally create roughly two thousand spurious terms"],
+            ["⟦zh⟧第一页精确电路，仅作参考⟦en⟧Page-one exact circuit, reference only", "100%", "156", "⟦zh⟧未提供给学习器；与盲学习管线最终门数相同⟦en⟧Not supplied to the learner; its count matches the final blind-learned network"]
+          ],
+          "numeric": [false, true, true, false]
+        },
+        {
+          "kind": "figures",
+          "items": [
+            {
+              "src": "noisy-c-symbolic-discovery-p25.png",
+              "caption": "⟦zh⟧左上：两个独立噪声流分别在第 2,800 与 2,400 步进入全域精确并保持。右上：整数投影把 79 个随机先验候选收缩到稳定的 36 项。左下：直接 ANF 和共享 BDD 虽然精确，但门数分别为 5,046 和 3,343；同一二次规则用普通 Wallace 编译为 168 门，用只看列项数的通用 MDFA 动态规划降到 158 门，再用盲全域语义重代入降到 156 门，与未提供给学习器的第一页参考相同。右下：非零系数只出现在自动学出的两组输入位之间，颜色表示整数权重的二进制指数；这张结构图来自训练结果，不是预置公式。⟦en⟧Upper left: two independent noise streams become exact at steps 2,800 and 2,400 and remain exact. Upper right: integer projection shrinks 79 random-prior candidates to a stable 36 terms. Lower left: direct ANF and shared BDD are exact but require 5,046 and 3,343 gates. The same quadratic rule compiles to 168 gates with ordinary Wallace compression, 158 with generic MDFA dynamic programming that sees only column counts, and 156 after blind full-domain semantic resubstitution, matching the withheld page-one reference. Lower right: nonzero coefficients appear only between two automatically discovered input-bit groups; color encodes the binary exponent of each integer weight. This structure comes from training and is not a seeded formula."
+            }
+          ]
+        },
+        {
+          "kind": "note",
+          "label": "⟦zh⟧这里如何衡量结构不确定性⟦en⟧How structural uncertainty is measured here",
+          "text": "⟦zh⟧浮点集成使用逐位分歧；离散规则改用“距离最近整数系数还有多远”。若最大取整残差接近 0.5，任一候选项都可能因少量新数据而改变整数值；若接近 0，规则具有大取整裕量。主实验和复跑最终残差分别为 0.000226 与 0.000041，同时非零项集合、整数系数和 158 门拓扑完全一致。这比只看 100% 准确率更严格地说明结构已经稳定。⟦en⟧The floating ensemble uses bitwise disagreement; the discrete rule instead measures distance to the nearest integer coefficient. A maximum rounding residual near 0.5 means that a small amount of new data can change at least one integer term, whereas a value near zero provides a large rounding margin. Final residuals are 0.000226 and 0.000041, while the nonzero set, integer coefficients and 158-gate topology agree exactly. This is stronger structural evidence than 100% accuracy alone."
+        },
+        {
+          "kind": "heading",
+          "level": 3,
+          "text": "⟦zh⟧最新主结果：不知道噪声率，也能在 5%–35% 间自动分配训练证据⟦en⟧Newest main result: allocate training evidence automatically from 5% to 35% noise without knowing the rate"
+        },
+        {
+          "kind": "verdict",
+          "status": "good",
+          "label": "⟦zh⟧48 / 48 次恢复同一条 156 门精确网络；35% 噪声平均成本从 48,087 降到 20,383 词⟦en⟧All 48 runs recover the same exact 156-gate network; at 35% noise, mean cost falls from 48,087 to 20,383 words",
+          "why": "⟦zh⟧真实翻转率只由数据生成器持有，学习器用互不重叠的重复噪声标签对估计 p，并以 p 的置信上界决定何时开始检查模型。正式实验在 5%、15%、25%、35% 四档各使用六个配对种子；固定每个设计点 50 次和新方法共 48 次，最终全部先扩展到二次空间、在事后 4,096 输入干净审计上零错误，并编译为同一个 156 门网络。最困难的 35% 档，旧观测误差阈值六次都无法置信拒绝一次模型，只能在 300 批耗尽后扩阶；新方法六次均在第 35–55 批置信拒绝，平均总成本减少 2.36 倍。⟦en⟧The true flip probability is held only by the data generator. The learner estimates p from disjoint pairs of repeated noisy labels and uses an upper confidence bound on p to decide when model checks may begin. The main experiment uses six paired seeds at each of 5%, 15%, 25% and 35% noise. Across the fixed-50 and new methods, all 48 runs expand to the quadratic space, have zero error in the post-selection 4,096-input clean audit and compile to the same 156-gate network. In the hardest 35% condition, the old observed-error threshold never confidence-rejects the linear model and expands only after exhausting 300 batches; the new method confidence-rejects it at batches 35–55 in all six runs and reduces mean total cost by 2.36x."
+        },
+        {
+          "kind": "card",
+          "title": "⟦zh⟧创新算法：把未知噪声换算成可比较的“有效证据”⟦en⟧New algorithm: convert unknown noise into comparable effective evidence",
+          "blocks": [
+            {
+              "kind": "kv",
+              "pairs": [
+                [
+                  "⟦zh⟧噪声率估计⟦en⟧Noise-rate estimation",
+                  "⟦zh⟧同一输入的两次独立噪声标签发生分歧的概率为 2p(1−p)；训练器只用互不重叠的标签对反解 p，并为它建立区间，不需要干净标签。⟦en⟧Two independently corrupted labels of the same input disagree with probability 2p(1−p). The trainer inverts this relation using only disjoint label pairs and builds an interval for p without clean labels."
+                ],
+                [
+                  "⟦zh⟧噪声自适应预热⟦en⟧Noise-adaptive warmup",
+                  "⟦zh⟧若每个设计点平均观察 n 次，保守有效证据定义为 n 乘以 (1−2p上界) 的平方；有效证据达到 10 才允许模型检查。低噪声自动提前，高噪声自动等待。⟦en⟧With a mean of n observations per design point, conservative effective evidence is n times the square of (1−2 times the upper bound on p). Model checks begin only after this value reaches ten, automatically starting earlier under low noise and waiting longer under high noise."
+                ],
+                [
+                  "⟦zh⟧去衰减的扩阶判据⟦en⟧Deattenuated expansion test",
+                  "⟦zh⟧候选模型的观测超额分歧满足“超额分歧 = 干净模型错误率 × (1−2p)”。因此一次模型的拒绝区间先换算回干净错误率；其下界超过 20% 才扩阶。这样同一个含义可跨噪声率使用。⟦en⟧A candidate model obeys “excess observed disagreement = clean model error times (1−2p).” The linear-model rejection interval is therefore deattenuated to clean-error units, and expansion occurs only when its lower bound exceeds 20%, giving the threshold the same meaning across noise rates."
+                ],
+                [
+                  "⟦zh⟧验证节流⟦en⟧Validation throttling",
+                  "⟦zh⟧整数系数签名尚未连续稳定三次时，每次最多增加 128 个留出词；只有候选稳定后才允许几何扩展到 256、512、1,024 等。它避免把大量验证预算花在马上会变化的候选上。⟦en⟧Before an integer-coefficient signature is stable for three checks, each check may add at most 128 holdout words. Geometric growth to 256, 512, 1,024 and beyond is allowed only after stabilization, avoiding large validation spends on candidates that are about to change."
+                ],
+                [
+                  "⟦zh⟧信息隔离⟦en⟧Information isolation",
+                  "⟦zh⟧真实 p、目标公式、正确阶数和第一页电路均不提供给训练器；干净全域准确率与 156 门编译结果只在停止和阶数选择全部锁定后附加。⟦en⟧The true p, target formula, correct degree and page-one circuit are withheld from the trainer. Clean-domain accuracy and the 156-gate compilation result are attached only after stopping and degree selection are locked."
+                ]
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "table",
+          "columns": [
+            "⟦zh⟧真实翻转率（隐藏）⟦en⟧True flip rate (hidden)",
+            "⟦zh⟧固定 50 次平均总词⟦en⟧Fixed-50 mean total words",
+            "⟦zh⟧自适应平均总词⟦en⟧Adaptive mean total words",
+            "⟦zh⟧成本改进⟦en⟧Cost improvement",
+            "⟦zh⟧固定法置信拒绝一次⟦en⟧Fixed confidence rejection of linear",
+            "⟦zh⟧新方法置信拒绝一次⟦en⟧New confidence rejection of linear",
+            "⟦zh⟧最终精确⟦en⟧Final exact"
+          ],
+          "rows": [
+            ["5%", "7,277", "4,277", "1.70×", "6 / 6", "6 / 6", "12 / 12"],
+            ["15%", "7,896", "5,501", "1.44×", "6 / 6", "6 / 6", "12 / 12"],
+            ["25%", "8,863", "8,778", "1.01×", "6 / 6", "6 / 6", "12 / 12"],
+            ["35%", "48,087", "20,383", "2.36×", "0 / 6（300 批超时）", "6 / 6（35–55 批）", "12 / 12"]
+          ],
+          "numeric": [true, true, true, true, true, true, true]
+        },
+        {
+          "kind": "figures",
+          "items": [
+            {
+              "src": "noisy-c-noise-adaptive-warmup.png",
+              "caption": "⟦zh⟧A：六个种子均值及最小—最大范围；新方法在低噪声减少过度训练，在 35% 时避免一次模型的 300 批超时。B：一次模型扩阶批次；旧规则在 35% 到达预算上限，新规则平均第 44.2 批获得置信拒绝。C：新方法成本随噪声自然增加，说明它没有假装所有噪声率同样容易。D：25% 先导扫描比较每设计点有效证据阈值 8、10、12.5；阈值 8 偶尔过早触发昂贵留出，四种子均值最低的 10 用于正式实验。⟦en⟧A: six-seed means with minimum-to-maximum ranges; the new method removes overtraining at low noise and avoids the 300-batch linear-model timeout at 35%. B: linear-model expansion batches; the old rule reaches the budget at 35%, whereas the new method obtains confidence rejection at a mean batch 44.2. C: new-method cost rises naturally with noise, so it does not pretend every noise rate is equally easy. D: a 25% pilot compares effective-evidence thresholds 8, 10 and 12.5 per design point. Threshold 8 occasionally triggers expensive holdout too early; threshold 10 has the lowest four-seed mean and is used in the main experiment."
+            }
+          ]
+        },
+        {
+          "kind": "note",
+          "label": "⟦zh⟧不确定性与边界：这是跨四档噪声的压力测试，不是所有噪声模型的证明⟦en⟧Uncertainty and boundary: this is a four-rate stress test, not a proof for every noise model",
+          "text": "⟦zh⟧每档只有六个配对种子；48 / 48 精确说明当前实现稳定，但不能给出跨随机种子的零失败保证。聚类正态区间的覆盖由前面的 50,000 次蒙特卡洛审计支持，不是有限样本分布无关界；若要求更保守结论，应切回经验 Bernstein。20% 的干净错误拒绝边界适合当前“一次对二次”的模型阶梯，相邻模型差异更小时需要重新设置。上述平均值、每次原始日志哈希及先导扫描都保存在 noise_adaptive_warmup_summary.json。⟦en⟧Each rate has only six paired seeds. The 48/48 exact result demonstrates stability here but cannot guarantee zero failures over future seeds. Coverage of the cluster-normal interval is supported by the earlier 50,000-trial Monte Carlo audit rather than a finite-sample distribution-free bound; empirical Bernstein remains the conservative option. The 20% clean-error rejection boundary fits the present linear-versus-quadratic ladder and must be revised for closer adjacent model classes. Means, raw-run hashes and the pilot scan are stored in noise_adaptive_warmup_summary.json."
+        },
+        {
+          "kind": "heading",
+          "level": 3,
+          "text": "⟦zh⟧最新加速：标签盲 D-optimal 实验设计⟦en⟧Newest acceleration: label-blind D-optimal experimental design"
+        },
+        {
+          "kind": "verdict",
+          "status": "good",
+          "label": "⟦zh⟧25% 噪声下平均只需 4,125 个样本，比均匀采样少 59.1 倍⟦en⟧At 25% noise, only 4,125 examples are needed on average—59.1x fewer than uniform sampling",
+          "why": "⟦zh⟧四个完全匹配的随机种子中，D-optimal 方法分别在第 35、40、40、50 批首次恢复全域 4,096 / 4,096；均匀采样分别需要第 2,355、2,355、2,370、2,675 批。每批仍为 100 个输入，每次观察仍重新生成独立 25% 位翻转。四次 D-optimal 训练都得到相同的 36 项整数规则，随后仍编译并验证为同一个 156 门网络。⟦en⟧Across four exactly matched seeds, D-optimal sampling first recovers all 4,096 inputs at batches 35, 40, 40 and 50; uniform sampling needs batches 2,355, 2,355, 2,370 and 2,675. Every batch still contains 100 inputs and every observation receives a new independent 25% bit-flip mask. All four D-optimal runs recover the same 36-term integer rule, which still compiles and verifies as the same 156-gate network."
+        },
+        {
+          "kind": "card",
+          "title": "⟦zh⟧算法思想：用最少输入把通用假设空间“照亮”⟦en⟧Algorithm: illuminate the generic hypothesis space with the fewest inputs",
+          "blocks": [
+            {
+              "kind": "kv",
+              "pairs": [
+                [
+                  "⟦zh⟧学习器预先知道什么⟦en⟧What the learner knows",
+                  "⟦zh⟧只有 12 个输入位以及常数、一次项、两两 AND 构成的 79 维通用二次候选空间；不知道目标公式、正确系数、已有电路或任何干净标签。⟦en⟧Only the 12 input bits and a generic 79-dimensional quadratic candidate space consisting of a constant, linear terms and pairwise ANDs; no target formula, correct coefficients, existing circuit or clean labels."
+                ],
+                [
+                  "⟦zh⟧输入如何选择⟦en⟧How inputs are selected",
+                  "⟦zh⟧先把 0/1 特征改写成正负一效应编码，再对完整输入矩阵做带列主元 QR，选出 79 个满秩、高体积、条件数 8.776 的输入点；选择过程完全不读取输出。⟦en⟧Convert the binary features to effect coding, then apply column-pivoted QR to the full input matrix and select 79 full-rank, high-volume points with condition number 8.776; output values are never consulted."
+                ],
+                [
+                  "⟦zh⟧训练如何进行⟦en⟧How training proceeds",
+                  "⟦zh⟧随机打乱这 79 个点并循环，每次访问都向隐藏 oracle 请求一份新噪声标签；贝叶斯后验与整数投影保持不变。79 也是在该候选空间中唯一确定 79 个系数所需的理论最少独立方程数。⟦en⟧Shuffle and cycle through the 79 points, requesting a newly corrupted label from the hidden oracle on every visit; the Bayesian posterior and integer projection are unchanged. Seventy-nine is also the theoretical minimum number of independent equations for uniquely identifying 79 coefficients in this candidate space."
+                ]
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "table",
+          "columns": [
+            "⟦zh⟧采样方法⟦en⟧Sampling method",
+            "⟦zh⟧四个种子的首次全对批次⟦en⟧First-exact batches, four seeds",
+            "⟦zh⟧平均样本数⟦en⟧Mean examples",
+            "⟦zh⟧成功数⟦en⟧Recovered runs",
+            "⟦zh⟧解释⟦en⟧Interpretation"
+          ],
+          "rows": [
+            [
+              "⟦zh⟧D-optimal 79 点循环⟦en⟧D-optimal 79-point cycle",
+              "35, 40, 40, 50",
+              "4,125",
+              "4 / 4",
+              "⟦zh⟧满秩且条件良好；四次都得到同一条精确规则⟦en⟧Full rank and well conditioned; all four recover the same exact rule"
+            ],
+            [
+              "⟦zh⟧完整域均匀有放回⟦en⟧Uniform with replacement over the full domain",
+              "2,355, 2,355, 2,370, 2,675",
+              "243,875",
+              "4 / 4",
+              "⟦zh⟧必须把证据分散到 4,096 个输入，样本效率低 59.1 倍⟦en⟧Evidence is spread over all 4,096 inputs, requiring 59.1x more examples"
+            ],
+            [
+              "⟦zh⟧随机固定 79 点循环⟦en⟧Random fixed 79-point cycle",
+              "50, 340, 未恢复, 未恢复",
+              "⟦zh⟧不适用⟦en⟧N/A",
+              "2 / 4",
+              "⟦zh⟧两个失败实验各训练到 100,000 个样本；说明“79 点”本身不够，矩阵条件性才是关键⟦en⟧Two failures each trained for 100,000 examples; merely using 79 points is insufficient—the conditioning is essential"
+            ]
+          ]
+        },
+        {
+          "kind": "figures",
+          "items": [
+            {
+              "src": "noisy-c-doptimal-sampling-p25.png",
+              "caption": "⟦zh⟧左：相同四个种子的全域整词准确率轨迹，D-optimal 曲线在约四千个样本处跃迁到 100%，均匀采样在约二十四万个样本处才跃迁。中：每个种子的配对首次全对样本数，纵轴为对数尺度。右：D-optimal 设计的效应基条件数固定为 8.776；随机 79 点设计条件数高得多，且两个实验在 100,000 样本后整词准确率仍只有 25.46% 和 29.69%。⟦en⟧Left: clean-domain word-accuracy traces for the same four seeds; D-optimal runs jump to 100% near four thousand examples, whereas uniform sampling jumps near 240 thousand. Middle: paired first-exact example counts on a logarithmic axis. Right: the effect-basis condition number is 8.776 for the D-optimal design; random 79-point designs are much worse conditioned, and two runs remain at only 25.46% and 29.69% word accuracy after 100,000 examples."
+            }
+          ]
+        },
+        {
+          "kind": "note",
+          "label": "⟦zh⟧原有限制：D-optimal 加速仍预先指定了“二次”候选空间⟦en⟧Previous limitation: D-optimal acceleration still preselected a quadratic candidate space",
+          "text": "⟦zh⟧这个限制现在由下一项实验直接处理：学习器从 13 维一次模型开始，只根据独立的新鲜噪声留出集决定拒绝、扩展或接受，不再把正确阶数写进初始化。最终干净全域仍只在所有阶数决策锁定后用于报告。⟦en⟧The next experiment addresses this limitation directly. The learner begins with a 13-dimensional linear model and uses only an independent fresh-noise holdout to reject, expand or accept; the correct degree is no longer encoded at initialization. The clean full domain is evaluated for reporting only after every degree decision is locked."
+        },
+        {
+          "kind": "heading",
+          "level": 3,
+          "text": "⟦zh⟧自适应模型族：连“二次”假设也由噪声数据发现⟦en⟧Adaptive model family: even the quadratic assumption is discovered from noisy data"
+        },
+        {
+          "kind": "verdict",
+          "status": "good",
+          "label": "⟦zh⟧四次随机复跑都先拒绝一次模型，再接受二次模型，并恢复同一个 156 门精确网络⟦en⟧All four random replications reject the linear model, accept the quadratic model and recover the same exact 156-gate network",
+          "why": "⟦zh⟧学习器从随机高斯系数的一次模型出发，真实翻转率 25% 不提供给训练器；它只从重复噪声标签估计噪声底，并用另一条从不参与更新的新鲜噪声流判断模型失配。四次均在第 40 批拒绝一次空间，在第 55、60、60、60 批接受二次空间。所有选择完成后才运行 4,096 输入干净检查，四次均为 100%，非零的 36 个整数系数也都与已逐门验证的 156 门网络一致。⟦en⟧The learner starts from a linear model with random Gaussian coefficients and is not given the true 25% flip rate. It estimates the noise floor from repeated corrupted labels and uses a separate fresh-noise stream that never updates the model to diagnose misspecification. Every run rejects the linear space at batch 40 and accepts the quadratic space at batches 55, 60, 60 and 60. The clean 4,096-input audit runs only after all choices are locked: every model is exact, and all 36 nonzero integer coefficients match the previously gate-by-gate verified 156-gate network."
+        },
+        {
+          "kind": "card",
+          "title": "⟦zh⟧序贯阶数发现怎样避免偷看标准答案⟦en⟧How sequential degree discovery avoids peeking at the clean answer",
+          "blocks": [
+            {
+              "kind": "kv",
+              "pairs": [
+                [
+                  "⟦zh⟧候选空间阶梯⟦en⟧Candidate ladder",
+                  "⟦zh⟧从常数加 12 个一次位的 13 维空间开始；若拒绝，再扩展到常数、一次项及全部两两 AND 的 79 维空间；三次项的 299 维空间只有二次模型也失败时才会建立。⟦en⟧Start with the 13-dimensional space containing a constant and 12 linear bits. On rejection, expand to the 79-dimensional space containing the constant, linear terms and every pairwise AND. The 299-dimensional cubic space is created only if the quadratic model also fails."
+                ],
+                [
+                  "⟦zh⟧模型失配信号⟦en⟧Misspecification signal",
+                  "⟦zh⟧冻结当前整数模型，在 4,096 个独立新鲜噪声词上测预测与观测的分歧率，再减去由训练重复标签估计的翻转率。模型正确时差值应接近 0；一次模型的差值稳定在约 23.5 个百分点。⟦en⟧Freeze the current integer model, measure prediction-versus-observation disagreement on 4,096 independent freshly corrupted words, then subtract the flip rate estimated from repeated training labels. A correct model should give a value near zero; the linear model remains near 23.5 percentage points."
+                ],
+                [
+                  "⟦zh⟧拒绝与接受⟦en⟧Reject and accept",
+                  "⟦zh⟧连续三次高出噪声底 15 个百分点才早停拒绝；连续三次与噪声底相差不到 1 个百分点、且最大系数取整残差小于 0.10 才接受。取整稳定性只约束接受，不会掩盖明显失配。⟦en⟧Reject early only after three consecutive checks more than 15 percentage points above the noise floor. Accept only after three checks within one percentage point of the floor and with maximum coefficient-rounding residual below 0.10. Rounding stability safeguards acceptance without hiding clear misspecification."
+                ],
+                [
+                  "⟦zh⟧信息隔离⟦en⟧Information isolation",
+                  "⟦zh⟧训练流只更新后验；带噪留出流只做阶数选择；干净全域在选择锁定后才附加到日志。目标公式、现有电路、真实噪声率和正确阶数均未提供。⟦en⟧The training stream only updates the posterior; the noisy holdout only selects model degree; the clean domain is attached to the log after selection is locked. The target formula, existing circuit, true noise rate and correct degree are all withheld."
+                ]
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "table",
+          "columns": [
+            "⟦zh⟧随机种子⟦en⟧Seed",
+            "⟦zh⟧一次模型拒绝⟦en⟧Linear rejection",
+            "⟦zh⟧二次模型接受⟦en⟧Quadratic acceptance",
+            "⟦zh⟧接受时留出差值⟦en⟧Holdout excess at acceptance",
+            "⟦zh⟧训练样本⟦en⟧Training examples",
+            "⟦zh⟧最终全域⟦en⟧Final full domain"
+          ],
+          "rows": [
+            ["277100", "⟦zh⟧第 40 批 · +23.78 pp⟦en⟧Batch 40 · +23.78 pp", "⟦zh⟧第 55 批⟦en⟧Batch 55", "−0.37 pp", "9,500", "4,096 / 4,096"],
+            ["287100", "⟦zh⟧第 40 批 · +23.24 pp⟦en⟧Batch 40 · +23.24 pp", "⟦zh⟧第 60 批⟦en⟧Batch 60", "+0.23 pp", "10,000", "4,096 / 4,096"],
+            ["297100", "⟦zh⟧第 40 批 · +23.54 pp⟦en⟧Batch 40 · +23.54 pp", "⟦zh⟧第 60 批⟦en⟧Batch 60", "−0.17 pp", "10,000", "4,096 / 4,096"],
+            ["307100", "⟦zh⟧第 40 批 · +23.38 pp⟦en⟧Batch 40 · +23.38 pp", "⟦zh⟧第 60 批⟦en⟧Batch 60", "−0.21 pp", "10,000", "4,096 / 4,096"]
+          ],
+          "numeric": [true, false, false, true, true, true]
+        },
+        {
+          "kind": "figures",
+          "items": [
+            {
+              "src": "noisy-c-adaptive-degree.png",
+              "caption": "⟦zh⟧左：一次模型的独立留出分歧始终比自估噪声底高约 23.5 个百分点，二次模型则随训练降到零附近。中：一次模型在留出差值上明确越过拒绝线；二次模型同时进入“留出差值不超过 1 个百分点、取整残差小于 0.10”的接受区域。右：透明计入样本代价——自适应训练平均用 9,875 个训练词，但反复阶数检验另用 80,896 个独立带噪留出词，合计 90,771；仍少于已知阶数时均匀采样的 243,875，但高于直接指定二次空间的 D-optimal 4,125。⟦en⟧Left: independent holdout disagreement for the linear model stays roughly 23.5 percentage points above the self-estimated noise floor, while the quadratic model falls toward zero. Middle: the linear model clearly crosses the rejection line; the quadratic model simultaneously enters the acceptance region with holdout excess within one percentage point and rounding residual below 0.10. Right: the sample cost is counted transparently—the adaptive learner averages 9,875 training words plus 80,896 independent noisy holdout words for repeated degree tests, totaling 90,771. This remains below 243,875 for uniform sampling with known degree, but exceeds the 4,125 needed by D-optimal sampling when the quadratic space is specified directly."
+            }
+          ]
+        },
+        {
+          "kind": "note",
+          "label": "⟦zh⟧上一版的主要成本：固定大小留出反复消耗 80,896 个噪声词⟦en⟧Main cost in the previous version: fixed-size checks repeatedly consume 80,896 noisy words",
+          "text": "⟦zh⟧这个成本问题由下面的置信序贯版本直接解决。上一版仍作为对照保留，因为它清楚展示了阶数发现本身；新版则把“每次都读满 4,096 个词”替换为按证据强弱动态分配 128 到 8,192 个词。上一版可复核记录为 adaptive_degree_summary.json。⟦en⟧The confidence-sequential version below directly addresses this cost. The previous version remains as a clear demonstration of degree discovery; the new version replaces always reading 4,096 words with evidence-dependent allocation from 128 to 8,192 words. The previous auditable record is adaptive_degree_summary.json."
+        },
+        {
+          "kind": "heading",
+          "level": 3,
+          "text": "⟦zh⟧继续加速：置信序贯留出把选模审计成本再降 10.71 倍⟦en⟧Further acceleration: confidence-sequential holdout cuts model-selection audit cost another 10.71x"
+        },
+        {
+          "kind": "verdict",
+          "status": "good",
+          "label": "⟦zh⟧匹配四种子的总噪声 oracle 调用从 90,771 降到 17,177；扩展到八种子仍全部精确⟦en⟧Total noisy-oracle use falls from 90,771 to 17,177 on four matched seeds; all eight extended replications remain exact",
+          "why": "⟦zh⟧把固定 4,096 词留出改成 128、256、512、1,024、2,048、4,096、8,192 的几何序贯检查，并预先把 5% 全局区间失败预算分配给所有可能查询。四个匹配种子的留出词均值从 80,896 降到 7,552，即少 10.71 倍；训练加留出的总词数少 5.28 倍。再加入四个新种子后，八次都在第 40 批拒绝一次模型，在第 50 至 65 批接受二次模型，最后都恢复同一条 36 项规则和 156 门网络。⟦en⟧Fixed 4,096-word holdouts are replaced by geometric sequential looks of 128, 256, 512, 1,024, 2,048, 4,096 and 8,192 words, with a precommitted 5% global interval-failure budget split over every possible query. Mean holdout use on four matched seeds falls from 80,896 to 7,552 words, a 10.71x reduction; training plus holdout falls 5.28x. With four additional seeds, all eight reject the linear model at batch 40, accept the quadratic model between batches 50 and 65, and finally recover the same 36-term rule and 156-gate network."
+        },
+        {
+          "kind": "card",
+          "title": "⟦zh⟧方法创新：把每个噪声标签花在“仍然不确定”的地方⟦en⟧Method innovation: spend each noisy label only where uncertainty remains",
+          "blocks": [
+            {
+              "kind": "kv",
+              "pairs": [
+                [
+                  "⟦zh⟧自适应留出分配⟦en⟧Adaptive holdout allocation",
+                  "⟦zh⟧每个新整数系数签名先只取 128 个独立带噪词；若点估计已远离拒绝区且签名尚未稳定，立即延后而不继续花样本。只有接近决策边界时才按二倍序列扩大留出。⟦en⟧Each new integer-coefficient signature first receives only 128 independent noisy words. If its point estimate is already away from the rejection region and the signature is not yet stable, testing is deferred without spending more samples. The holdout doubles only near a decision boundary."
+                ],
+                [
+                  "⟦zh⟧两个置信区间⟦en⟧Two confidence intervals",
+                  "⟦zh⟧预测与噪声标签的分歧按“每个输入词的十二位平均”形成有界样本；噪声率则由训练流中互不重叠的重复标签对估计。两者都使用经验 Bernstein 区间，再相减得到“超出噪声底多少”的区间。⟦en⟧Prediction-versus-label disagreement is represented by a bounded twelve-bit average for each input word. The noise rate is estimated from non-overlapping repeated-label pairs in the training stream. Empirical-Bernstein intervals are built for both and subtracted to bound excess over the noise floor."
+                ],
+                [
+                  "⟦zh⟧防止把欠训练误当成欠表达⟦en⟧Avoid confusing undertraining with undercapacity",
+                  "⟦zh⟧一次统计检查只能拒绝当前候选，不能拒绝整个模型族；因此阶数拒绝还必须跨三个训练检查点持续成立。实验中种子 327100 的二次候选在第 30 批明显失配，但随后完成结构跃迁并在第 65 批被正确接受。⟦en⟧One statistical check can reject only the current candidate, not an entire model family, so degree rejection must persist across three training checkpoints. For seed 327100 the quadratic candidate is clearly poor at batch 30, then undergoes a structural transition and is correctly accepted at batch 65."
+                ],
+                [
+                  "⟦zh⟧接受条件⟦en⟧Acceptance condition",
+                  "⟦zh⟧同一个整数系数签名连续出现三次、最大取整残差小于 0.10，并且留出差值的整个置信区间落在正负 3.5 个百分点内。八次接受中六次只需 4,096 个最终签名留出词，另两次扩大到 8,192。⟦en⟧The same integer-coefficient signature must appear at three consecutive checks, maximum rounding residual must be below 0.10, and the entire excess-disagreement interval must lie within plus or minus 3.5 percentage points. Six of eight acceptances use only 4,096 final-signature holdout words; two expand to 8,192."
+                ]
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "table",
+          "columns": [
+            "⟦zh⟧方法⟦en⟧Method",
+            "⟦zh⟧运行数⟦en⟧Runs",
+            "⟦zh⟧平均训练词⟦en⟧Mean training words",
+            "⟦zh⟧平均留出词⟦en⟧Mean holdout words",
+            "⟦zh⟧平均总噪声词⟦en⟧Mean total noisy words",
+            "⟦zh⟧最终精确⟦en⟧Final exact"
+          ],
+          "rows": [
+            ["⟦zh⟧固定 4,096 词阶数检查⟦en⟧Fixed 4,096-word degree checks", "4", "9,875", "80,896", "90,771", "4 / 4"],
+            ["⟦zh⟧置信序贯，匹配四种子⟦en⟧Confidence-sequential, four matched seeds", "4", "9,625", "7,552", "17,177", "4 / 4"],
+            ["⟦zh⟧置信序贯，全部八种子⟦en⟧Confidence-sequential, all eight seeds", "8", "9,500", "6,912", "16,412", "8 / 8"],
+            ["⟦zh⟧直接指定二次空间的 D-optimal⟦en⟧D-optimal with quadratic space specified", "4", "4,125", "0", "4,125", "4 / 4"]
+          ],
+          "numeric": [false, true, true, true, true, true]
+        },
+        {
+          "kind": "figures",
+          "items": [
+            {
+              "src": "noisy-c-sequential-degree.png",
+              "caption": "⟦zh⟧左：四个完全匹配种子的总带噪 oracle 词，置信序贯版本均显著低于固定留出。中：八次实验逐一列出训练与自适应留出成本；虚线是旧版固定检查的 90,771 词均值。右：每次一次模型拒绝的超额分歧区间都完整位于 15 个百分点拒绝线右侧，每次二次模型接受区间都完整落入正负 3.5 个百分点区域；图中区间在预先分配的全局 5% 预算下计算。⟦en⟧Left: total noisy-oracle words on four exactly matched seeds; the confidence-sequential version is substantially lower in every case. Middle: training and adaptive-holdout costs for all eight runs; the dashed line is the previous fixed-check mean of 90,771 words. Right: every linear rejection interval lies wholly to the right of the 15-percentage-point rejection line, while every quadratic acceptance interval lies wholly inside the plus-or-minus 3.5-point region; intervals use the preallocated global 5% budget."
+            }
+          ]
+        },
+        {
+          "kind": "note",
+          "label": "⟦zh⟧统计边界：这是置信控制的模型族选择，不是无需验证的精确性证明⟦en⟧Statistical boundary: this is confidence-controlled family selection, not an exactness proof without verification",
+          "text": "⟦zh⟧5% 预算控制的是已查询经验 Bernstein 区间同时覆盖失败的上界；接受带宽仍允许非常稀疏、很小的未建模项，因此不能仅凭该停止条件声称全域零错误。这里八次 100% 结果来自所有选择锁定后的独立干净全域审计，不参与训练或选模。下一项先在相同独立噪声种子上用自归一化区间继续加速，再转向强词内相关噪声。Bernstein 版本记录为 sequential_degree_summary.json。⟦en⟧The 5% budget bounds simultaneous coverage failure across the queried empirical-Bernstein intervals. The acceptance band can still admit a very sparse, small unmodeled term, so the stopping rule alone cannot claim zero error over the domain. The eight 100% results come from an independent clean-domain audit after every choice is locked and do not participate in training or model selection. The next experiment first accelerates the same independent-noise seeds with self-normalized intervals, then turns to strong within-word correlation. The Bernstein version is recorded in sequential_degree_summary.json."
+        },
+        {
+          "kind": "heading",
+          "level": 3,
+          "text": "⟦zh⟧区间层面加速：自归一化方法把总成本降到 11,276 词⟦en⟧Interval-level acceleration: self-normalization reduces total cost to 11,276 words"
+        },
+        {
+          "kind": "verdict",
+          "status": "good",
+          "label": "⟦zh⟧八个匹配种子全部精确，总噪声词比 Bernstein 再少 1.46 倍⟦en⟧All eight matched seeds remain exact with 1.46x fewer total noisy words than Bernstein",
+          "why": "⟦zh⟧在真实独立逐位噪声下，重复标签对中的位分歧确实是独立样本，因此用样本方差和预分配正态分位数形成自归一化区间。与前一节完全相同的八个种子逐一配对：两种方法都 8 / 8 拒绝一次、接受二次、恢复同一 36 项和 156 门网络，接受时 8 / 8 噪声率区间包含真实 25%。平均训练词都为 9,500；自归一化版本把留出词从 6,912 降到 1,776，总词从 16,412 降到 11,276，每一个配对种子都更省。⟦en⟧Under genuinely independent per-bit noise, bit disagreements from repeated-label pairs are independent samples, so a self-normalized interval uses the sample variance with a preallocated normal quantile. On the exact same eight seeds, both methods reject linear, accept quadratic and recover the same 36-term, 156-gate network in 8 / 8 runs; all eight acceptance-time noise intervals contain the true 25%. Mean training stays at 9,500 words, while self-normalization cuts holdout from 6,912 to 1,776 and total words from 16,412 to 11,276. Every paired seed is cheaper."
+        },
+        {
+          "kind": "table",
+          "columns": [
+            "⟦zh⟧独立噪声区间方法⟦en⟧Independent-noise interval method",
+            "⟦zh⟧平均训练词⟦en⟧Mean training words",
+            "⟦zh⟧平均留出词⟦en⟧Mean holdout words",
+            "⟦zh⟧平均总噪声词⟦en⟧Mean total noisy words",
+            "⟦zh⟧真实 p 被覆盖⟦en⟧True p covered",
+            "⟦zh⟧最终精确⟦en⟧Final exact"
+          ],
+          "rows": [
+            ["⟦zh⟧经验 Bernstein 安全护栏⟦en⟧Empirical-Bernstein guardrail", "9,500", "6,912", "16,412", "8 / 8", "8 / 8"],
+            ["⟦zh⟧自归一化正态实用版⟦en⟧Self-normalized normal practical version", "9,500", "1,776", "11,276", "8 / 8", "8 / 8"],
+            ["⟦zh⟧已知二次空间的 D-optimal⟦en⟧D-optimal with quadratic space known", "4,125", "0", "4,125", "⟦zh⟧不适用⟦en⟧N/A", "4 / 4"]
+          ],
+          "numeric": [false, true, true, true, true, true]
+        },
+        {
+          "kind": "figures",
+          "items": [
+            {
+              "src": "noisy-c-independent-normal.png",
+              "caption": "⟦zh⟧左：八个配对点全部在对角线下方。中：训练成本不变，验证开销大幅收缩。右：每档 50,000 次、99% 层级的独立位对模拟中，自归一化覆盖率为 98.964%–99.034%，接近名义 99%；Bernstein 为 99.96%–100%，但区间更宽。⟦en⟧Left: all eight paired points lie below the diagonal. Middle: training cost is unchanged while validation overhead contracts sharply. Right: across 50,000 independent-bit-pair trials per setting at the 99% level, self-normalized coverage is 98.964%–99.034%, close to nominal 99%, while Bernstein gives 99.96%–100% with wider intervals."
+            }
+          ]
+        },
+        {
+          "kind": "note",
+          "label": "⟦zh⟧方法定位：独立噪声的快速区间版；相关性出现时必须退回整词单位⟦en⟧Method position: fast interval variant for independent noise; correlation requires falling back to word clusters",
+          "text": "⟦zh⟧部署时使用的单区间失败概率比 99% 模拟层级更小，50,000 次模拟仍无法直接验证极端尾部；因此它不替代 Bernstein 的有限样本护栏。更重要的是，若同一输出词的位相关，逐位自归一化也会过度自信；后续相关噪声实验始终改用整词方差。当前独立噪声下追求速度选择本方法，风险敏感选择 Bernstein。可复核记录为 independent_normal_summary.json。⟦en⟧The deployed per-interval failure probability is smaller than the 99% simulation level, and 50,000 trials still cannot verify its extreme tail directly, so this does not replace the finite-sample Bernstein guardrail. More importantly, bitwise self-normalization is also overconfident when bits within an output word are correlated; subsequent correlated-noise experiments always use variance across whole words. Choose this method for speed under independent noise and Bernstein for risk-sensitive use. The auditable record is independent_normal_summary.json."
+        },
+        {
+          "kind": "heading",
+          "level": 3,
+          "text": "⟦zh⟧25% 基线加速：按候选维度分配热身，总成本降到 8,860 词⟦en⟧A 25%-noise baseline acceleration: dimension-normalized warmup reduces total cost to 8,860 words"
+        },
+        {
+          "kind": "verdict",
+          "status": "good",
+          "label": "⟦zh⟧一次模型提前 20 批被淘汰，八个配对种子全部精确且再少 1.27 倍成本⟦en⟧The linear model is eliminated twenty batches earlier; all eight paired seeds remain exact at another 1.27x lower cost",
+          "why": "⟦zh⟧固定 30 批热身忽略了候选空间大小：一次模型只有 13 个 D-optimal 点，二次模型有 79 个。新规则只要求每个设计点平均获得 50 次噪声观察，因此一次空间从第 7 批起可判定，二次空间从第 40 批起可判定；规则不读取输出或正确阶数。八次一次模型都在第 20 批被置信拒绝，二次模型仍在第 50–65 批接受；平均训练词由 9,500 降到 7,500，留出词由 1,776 降到 1,360，总词由 11,276 降到 8,860。⟦en⟧A fixed 30-batch warmup ignores candidate-space size: the linear model has only 13 D-optimal points while the quadratic model has 79. The new rule asks for a mean of 50 noisy observations per design point, making linear eligible at batch 7 and quadratic at batch 40 without reading outputs or the correct degree. All eight linear models are confidence-rejected at batch 20, while quadratic models are still accepted between batches 50 and 65. Mean training words fall from 9,500 to 7,500, holdout words from 1,776 to 1,360, and total words from 11,276 to 8,860."
+        },
+        {
+          "kind": "table",
+          "columns": [
+            "⟦zh⟧热身规则⟦en⟧Warmup rule",
+            "⟦zh⟧一次最早判定批次⟦en⟧Linear earliest eligible batch",
+            "⟦zh⟧二次最早判定批次⟦en⟧Quadratic earliest eligible batch",
+            "⟦zh⟧一次实际拒绝⟦en⟧Actual linear rejection",
+            "⟦zh⟧平均训练词⟦en⟧Mean training words",
+            "⟦zh⟧平均总噪声词⟦en⟧Mean total noisy words",
+            "⟦zh⟧最终精确⟦en⟧Final exact"
+          ],
+          "rows": [
+            ["⟦zh⟧所有阶数固定 30 批⟦en⟧Fixed 30 batches for every degree", "30", "30", "40", "9,500", "11,276", "8 / 8"],
+            ["⟦zh⟧每个设计点平均 50 次⟦en⟧Mean 50 observations per design point", "7", "40", "20", "7,500", "8,860", "8 / 8"],
+            ["⟦zh⟧已知二次空间的 D-optimal⟦en⟧D-optimal with quadratic space known", "⟦zh⟧不适用⟦en⟧N/A", "⟦zh⟧不适用⟦en⟧N/A", "⟦zh⟧不适用⟦en⟧N/A", "4,125", "4,125", "4 / 4"]
+          ],
+          "numeric": [false, true, true, true, true, true, true]
+        },
+        {
+          "kind": "figures",
+          "items": [
+            {
+              "src": "noisy-c-normalized-warmup.png",
+              "caption": "⟦zh⟧左：固定热身对大小模型一视同仁；信息归一化让 13 点一次空间更早可判，同时给 79 点二次空间更多学习时间。中：八个配对种子全部进一步下降。右：主要收益是提前拒绝一次空间，平均直接省去 2,000 个训练词；验证也略有减少。⟦en⟧Left: fixed warmup treats small and large models alike; information normalization makes the 13-point linear space eligible earlier while giving the 79-point quadratic space more learning time. Middle: all eight paired seeds improve further. Right: most of the gain comes from rejecting the linear space earlier, directly saving 2,000 training words on average; validation also decreases slightly."
+            }
+          ]
+        },
+        {
+          "kind": "note",
+          "label": "⟦zh⟧边界：50 次是当前 25% 噪声的经验预算，不是跨噪声率常数⟦en⟧Boundary: fifty observations is an empirical budget for current 25% noise, not a universal constant",
+          "text": "⟦zh⟧热身公式本身按候选维度归一化，但每点 50 次仍由当前噪声强度和整数投影收敛速度决定。这个局限已经由本页前部的噪声自适应有效证据方法处理：低噪声减少预算，高噪声按净标签信号强度平方的倒数增加预算，并把扩阶阈值换算为干净错误单位。本节保留为 25% 条件下的直接消融对照。可复核记录为 normalized_warmup_summary.json。⟦en⟧The warmup formula is normalized by candidate dimension, but fifty observations per point still depends on the current noise level and integer-projection convergence. The noise-adaptive effective-evidence method near the front of this page now addresses that limitation: it reduces the budget at low noise, increases it with inverse squared clean-label signal at high noise, and expresses the expansion threshold in clean-error units. This section is retained as a direct 25%-noise ablation. The auditable record is normalized_warmup_summary.json."
+        },
+        {
+          "kind": "heading",
+          "level": 3,
+          "text": "⟦zh⟧相关噪声：函数仍能学对，但逐位不确定性会过度自信⟦en⟧Correlated noise: the function is still learned, but bitwise uncertainty becomes overconfident"
+        },
+        {
+          "kind": "verdict",
+          "status": "good",
+          "label": "⟦zh⟧强词内相关下 24 次训练仍全部得到 156 门精确规则；整词聚类区间修复置信失校准⟦en⟧Under strong within-word correlation, all 24 runs still recover the exact 156-gate rule; word-cluster intervals repair confidence miscalibration",
+          "why": "⟦zh⟧每一位的边际翻转率仍为 25%，但每个输出词先以 22.222% 概率进入共同翻转状态，再叠加 5% 独立残差翻转，使同词任意两位的翻转指示相关系数达到 0.7467。逐位区间与整词聚类区间各做十二个匹配种子，二十四次都拒绝一次、接受二次，并在事后干净全域上恢复同一条 36 项、156 门规则。区别出现在不确定性：逐位区间已有 1 / 12 次漏掉真实 25%，整词区间为 12 / 12 覆盖。⟦en⟧Each bit still has a 25% marginal flip rate, but every output word first enters a shared-flip state with probability 22.222% and then receives 5% independent residual flips, producing flip-indicator correlation 0.7467 between any two bits in the same word. Twelve matched seeds are run with bitwise intervals and twelve with word-cluster intervals. All 24 reject linear, accept quadratic and recover the same 36-term, 156-gate rule on the post-selection clean audit. The difference is uncertainty: bitwise intervals miss the true 25% rate once in twelve runs, whereas word-cluster intervals cover it in all twelve."
+        },
+        {
+          "kind": "card",
+          "title": "⟦zh⟧为什么训练仍成功，而原来的置信区间却失效⟦en⟧Why learning still succeeds while the original confidence interval fails",
+          "blocks": [
+            {
+              "kind": "kv",
+              "pairs": [
+                [
+                  "⟦zh⟧相关噪声生成式⟦en⟧Correlated-noise construction",
+                  "⟦zh⟧对同一个输出词令第 j 位翻转 F_j 等于共同状态 C 与独立残差 E_j 的异或；C 的概率为 2 / 9，E_j 的概率为 1 / 20。由此每位边际仍为 1 / 4，但十二位不再是十二个独立统计样本。⟦en⟧For one output word, let bit-j flip F_j be the XOR of a shared state C and an independent residual E_j. C has probability 2 / 9 and E_j has probability 1 / 20. Every marginal remains 1 / 4, but the twelve bits are no longer twelve independent statistical samples."
+                ],
+                [
+                  "⟦zh⟧函数学习为什么不坏⟦en⟧Why function learning survives",
+                  "⟦zh⟧固定某一输出位、跨不同新鲜输出词观察时，该位仍是时间上独立的 25% 翻转；贝叶斯位后验因此仍无偏，并最终得到相同整数规则。相关性主要改变同一个词能够提供多少独立证据。⟦en⟧For any fixed output bit observed across different fresh words, flips remain temporally independent with rate 25%. The Bayesian bit posterior is therefore still unbiased and reaches the same integer rule. Correlation mainly changes how much independent evidence one word provides."
+                ],
+                [
+                  "⟦zh⟧逐位区间为什么过窄⟦en⟧Why the bitwise interval is too narrow",
+                  "⟦zh⟧重复标签对中，不同位的“是否分歧”相关系数为 0.633，十二位的设计效应为 7.96；把它们当十二次独立 Bernoulli 观察会把有效样本量夸大近八倍。⟦en⟧Within a repeated-label pair, disagreement indicators across bits have correlation 0.633, giving a twelve-bit design effect of 7.96. Treating them as twelve independent Bernoulli observations inflates effective sample size by almost eightfold."
+                ],
+                [
+                  "⟦zh⟧整词聚类修正⟦en⟧Word-cluster correction",
+                  "⟦zh⟧每个互不重叠的重复标签对只贡献一个介于 0 与 1 的量：十二位分歧比例。经验 Bernstein 方差在整词之间计算，允许同词十二位任意相关；噪声校准证据跨模型阶数复用。⟦en⟧Each non-overlapping repeated-label pair contributes one bounded value between zero and one: its fraction of disagreeing bits. Empirical-Bernstein variance is computed across words, allowing arbitrary correlation among the twelve bits within a word; noise-calibration evidence is reused across model degrees."
+                ]
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "table",
+          "columns": [
+            "⟦zh⟧噪声与区间单位⟦en⟧Noise and interval unit",
+            "⟦zh⟧运行数⟦en⟧Runs",
+            "⟦zh⟧真实噪声率被区间覆盖⟦en⟧True rate covered",
+            "⟦zh⟧平均训练词⟦en⟧Mean training words",
+            "⟦zh⟧平均留出与校准词⟦en⟧Mean holdout and calibration words",
+            "⟦zh⟧平均总噪声词⟦en⟧Mean total noisy words",
+            "⟦zh⟧最终精确⟦en⟧Final exact"
+          ],
+          "rows": [
+            ["⟦zh⟧独立翻转 · 标准序贯区间⟦en⟧Independent flips · standard sequential interval", "8", "⟦zh⟧未单独统计⟦en⟧Not separately audited", "9,500", "6,912", "16,412", "8 / 8"],
+            ["⟦zh⟧相关翻转 · 天真逐位区间⟦en⟧Correlated flips · naive bit interval", "12", "11 / 12", "9,333", "18,293", "27,627", "12 / 12"],
+            ["⟦zh⟧相关翻转 · 整词聚类区间⟦en⟧Correlated flips · word-cluster interval", "12", "12 / 12", "21,667", "71,136", "92,803", "12 / 12"]
+          ],
+          "numeric": [false, true, true, true, true, true, true]
+        },
+        {
+          "kind": "table",
+          "columns": [
+            "⟦zh⟧每次独立整词对数⟦en⟧Independent word pairs per trial",
+            "⟦zh⟧逐位区间经验覆盖率⟦en⟧Naive bit-interval coverage",
+            "⟦zh⟧整词聚类经验覆盖率⟦en⟧Word-cluster empirical coverage",
+            "⟦zh⟧名义单区间覆盖率⟦en⟧Nominal single-interval coverage",
+            "⟦zh⟧逐位与整词区间宽度⟦en⟧Naive and cluster interval widths"
+          ],
+          "rows": [
+            ["250", "97.52%", "100.00% · 5,000 / 5,000", "99.99896%", "11.70 pp · 44.79 pp"],
+            ["1,000", "95.54%", "100.00% · 5,000 / 5,000", "99.99896%", "5.09 pp · 22.46 pp"],
+            ["5,000", "93.98%", "100.00% · 5,000 / 5,000", "99.99896%", "2.11 pp · 7.18 pp"]
+          ],
+          "numeric": [true, true, true, true, true]
+        },
+        {
+          "kind": "figures",
+          "items": [
+            {
+              "src": "noisy-c-correlated-noise.png",
+              "caption": "⟦zh⟧左：每档 5,000 次蒙特卡洛中，把相关的十二位当独立样本会得到只有 93.98% 至 97.52% 的覆盖率，远低于预分配概率对应的 99.99896%；整词聚类区间在这些有限模拟中没有漏覆盖。中：诚实区间明显更宽，直接展示了相关性导致的有效样本量损失。右：这份可信度有实际成本；相关噪声下整词稳健方法平均用 92,803 个噪声词，是独立噪声序贯实验的 5.65 倍、天真相关版本的 3.36 倍。⟦en⟧Left: across 5,000 Monte Carlo trials per setting, treating twelve correlated bits as independent yields only 93.98% to 97.52% coverage, far below the 99.99896% implied by the allocated probability; the word-cluster interval has no misses in these finite simulations. Middle: the honest interval is visibly wider, directly exposing correlation-induced effective-sample loss. Right: that reliability has a real cost. Under correlated noise, the word-robust method averages 92,803 noisy words, 5.65x the independent-noise sequential experiment and 3.36x the naive correlated version."
+            }
+          ]
+        },
+        {
+          "kind": "note",
+          "label": "⟦zh⟧边界：整词内部相关已处理，跨时间与输入的相关仍未处理⟦en⟧Boundary: within-word correlation is handled; temporal and input-dependent correlation are not",
+          "text": "⟦zh⟧整词聚类区间要求不同新鲜输出词以及互不重叠的重复标签对彼此独立；它允许一个词内十二位任意相关，但不覆盖持续多个批次的噪声状态、特定输入更容易出错、或对手式标签污染。蒙特卡洛的 100% 是各档 5,000 次中零次漏覆盖，不是数学上宣称覆盖概率等于 1。完整可复核记录为 correlated_noise_summary.json。⟦en⟧The word-cluster interval assumes independence across fresh output words and across non-overlapping repeated-label pairs. It allows arbitrary correlation among the twelve bits within a word, but does not cover noise states persisting across batches, input-dependent error rates or adversarial label contamination. Monte Carlo 100% means zero misses among 5,000 trials at each setting, not a mathematical claim that coverage probability equals one. The complete auditable record is correlated_noise_summary.json."
+        },
+        {
+          "kind": "heading",
+          "level": 3,
+          "text": "⟦zh⟧相关噪声加速：聚类正态区间把诚实 oracle 成本近乎减半⟦en⟧Correlated-noise acceleration: cluster-normal intervals nearly halve the honest oracle cost"
+        },
+        {
+          "kind": "verdict",
+          "status": "good",
+          "label": "⟦zh⟧十二个配对种子全部精确，平均总噪声词从 92,803 降到 47,290，少 1.96 倍⟦en⟧All twelve paired seeds remain exact while mean total noisy words fall 1.96x, from 92,803 to 47,290",
+          "why": "⟦zh⟧仍以独立整词对为统计单位、仍用整词间经验方差，但把分布无关经验 Bernstein 半径替换为自归一化聚类正态半径。与前一节完全相同的十二个相关噪声种子逐一配对：两种方法都 12 / 12 选择二次、恢复同一 36 项和 156 门网络，且接受时 12 / 12 噪声率区间包含真实 25%；聚类正态版在每个种子上都更省，平均训练词由 21,667 降到 13,125，留出与校准词由 71,136 降到 34,165。⟦en⟧The statistical unit remains an independent word pair and variance is still estimated across words, but the distribution-free empirical-Bernstein radius is replaced by a self-normalized cluster-normal radius. On the exact same twelve correlated-noise seeds, both methods select quadratic in 12 / 12 runs, recover the same 36-term and 156-gate network, and contain the true 25% noise rate at acceptance in 12 / 12 runs. Cluster-normal is cheaper on every seed: mean training words fall from 21,667 to 13,125 and holdout-plus-calibration words from 71,136 to 34,165."
+        },
+        {
+          "kind": "table",
+          "columns": [
+            "⟦zh⟧整词区间方法⟦en⟧Word-cluster interval method",
+            "⟦zh⟧平均接受批次⟦en⟧Mean acceptance batch",
+            "⟦zh⟧平均训练词⟦en⟧Mean training words",
+            "⟦zh⟧平均留出与校准词⟦en⟧Mean holdout and calibration words",
+            "⟦zh⟧平均总噪声词⟦en⟧Mean total noisy words",
+            "⟦zh⟧真实 p 被覆盖⟦en⟧True p covered",
+            "⟦zh⟧最终精确⟦en⟧Final exact"
+          ],
+          "rows": [
+            ["⟦zh⟧经验 Bernstein，分布无关护栏⟦en⟧Empirical Bernstein, distribution-free guardrail", "156.2", "21,667", "71,136", "92,803", "12 / 12", "12 / 12"],
+            ["⟦zh⟧聚类正态，自归一化实用版⟦en⟧Cluster-normal, self-normalized practical version", "90.4", "13,125", "34,165", "47,290", "12 / 12", "12 / 12"]
+          ],
+          "numeric": [false, true, true, true, true, true, true]
+        },
+        {
+          "kind": "figures",
+          "items": [
+            {
+              "src": "noisy-c-cluster-normal.png",
+              "caption": "⟦zh⟧左：十二个配对点全部位于对角线下方，说明每个种子都减少总 oracle 词。中：另做每档 20,000 次的 99% 层级模拟审计；聚类正态覆盖率为 98.83%–99.06%，接近名义 99%，Bernstein 为 99.985%–100%。右：聚类正态区间显著更窄，正是速度来源。⟦en⟧Left: all twelve paired points lie below the diagonal, so every seed reduces total oracle words. Middle: a separate 20,000-trial audit at the 99% level gives 98.83%–99.06% coverage for cluster-normal, close to nominal 99%, versus 99.985%–100% for Bernstein. Right: cluster-normal intervals are substantially narrower, which is exactly where the speedup comes from."
+            }
+          ]
+        },
+        {
+          "kind": "note",
+          "label": "⟦zh⟧方法定位：更快的实用相关性版本，不替代 Bernstein 安全护栏⟦en⟧Method position: a faster practical correlated-noise variant, not a replacement for the Bernstein guardrail",
+          "text": "⟦zh⟧部署训练使用的单区间失败概率约为 2.31×10⁻⁵，比 99% 模拟审计更严格；20,000 次模拟无法直接分辨如此稀有的尾部事件。因此聚类正态版拥有配对训练证据和常规 99% 校准证据，但没有经验 Bernstein 的有限样本分布无关保证。风险敏感任务继续选 Bernstein；当前共同翻转模型下追求速度则选聚类正态。可复核记录为 cluster_normal_summary.json。⟦en⟧The deployed per-interval failure probability is about 2.31×10⁻⁵, more stringent than the 99% simulation audit, and 20,000 trials cannot resolve such rare tails directly. Cluster-normal therefore has paired training evidence and conventional 99% calibration evidence, but not the finite-sample distribution-free guarantee of empirical Bernstein. Risk-sensitive use should retain Bernstein; speed under the current common-flip model favors cluster-normal. The auditable record is cluster_normal_summary.json."
+        },
+        {
+          "kind": "heading",
+          "level": 3,
+          "text": "⟦zh⟧自动相关性诊断：训练器自行决定能否逐位相加不确定性⟦en⟧Automatic correlation diagnosis: the learner decides whether bitwise uncertainty may be added"
+        },
+        {
+          "kind": "verdict",
+          "status": "good",
+          "label": "⟦zh⟧无需提供噪声家族，16 次训练从第一次阶数检查起全部选择正确区间单位并最终精确⟦en⟧Without being told the noise family, all 16 runs choose the correct interval unit from the first degree check and finish exact",
+          "why": "⟦zh⟧自动模式先把每个重复输出词对视为一个聚类；达到 250 个独立词对后，估计十二位分歧的设计效应。低于 2 才允许切换到逐位区间，否则保留整词区间。八个独立噪声种子的最终设计效应为 0.966–1.027，全部选择逐位；八个相关噪声种子为 7.937–8.032，全部选择整词。所有检查点的选择都一致，十六次最终仍恢复同一 36 项、156 门精确规则。⟦en⟧Automatic mode initially treats each repeated output-word pair as one cluster. After 250 independent pairs, it estimates the design effect of twelve-bit disagreement and switches to bitwise intervals only below 2; otherwise it retains word-cluster intervals. Final design effects are 0.966–1.027 for eight independent-noise seeds, all choosing bitwise, and 7.937–8.032 for eight correlated-noise seeds, all choosing word-cluster. Every recorded check makes the same choice, and all sixteen runs recover the same exact 36-term, 156-gate rule."
+        },
+        {
+          "kind": "card",
+          "title": "⟦zh⟧一个不读取干净标签的过度离散检验⟦en⟧An overdispersion test that reads no clean labels",
+          "blocks": [
+            {
+              "kind": "kv",
+              "pairs": [
+                [
+                  "⟦zh⟧观测量⟦en⟧Observable",
+                  "⟦zh⟧对同一输入的两份独立噪声标签，记录十二位中有多少位不同；隐藏干净输出仍在两份标签的比较中消掉。⟦en⟧For two independently corrupted labels of the same input, count how many of the twelve bits differ; the hidden clean output still cancels when the two labels are compared."
+                ],
+                [
+                  "⟦zh⟧设计效应⟦en⟧Design effect",
+                  "⟦zh⟧用整词分歧比例的经验方差除以相同边际分歧率下独立位模型的方差，再乘十二。独立位应接近 1；大于 1 表示同词位相关导致有效样本量下降。⟦en⟧Divide the empirical variance of word-level disagreement fractions by the variance under independent bits with the same marginal disagreement rate, then multiply by twelve. Independent bits should give roughly 1; values above 1 signal reduced effective sample size from within-word correlation."
+                ],
+                [
+                  "⟦zh⟧保守启动⟦en⟧Conservative start",
+                  "⟦zh⟧不足 250 个词对时始终用整词区间；只有设计效应降到预设阈值 2 以下才采用更窄的逐位区间。噪声类型、真实翻转率、正确模型阶数和干净标签均未输入诊断器。⟦en⟧Before 250 word pairs, always use the word-cluster interval. Adopt the narrower bitwise interval only when the design effect falls below the precommitted threshold of 2. Noise family, true flip rate, correct model degree and clean labels are never supplied to the diagnostic."
+                ]
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "table",
+          "columns": [
+            "⟦zh⟧真实噪声家族⟦en⟧True noise family",
+            "⟦zh⟧自动选择⟦en⟧Automatic choice",
+            "⟦zh⟧最终设计效应范围⟦en⟧Final design-effect range",
+            "⟦zh⟧平均总噪声词⟦en⟧Mean total noisy words",
+            "⟦zh⟧正确选择与精确恢复⟦en⟧Correct choice and exact recovery"
+          ],
+          "rows": [
+            ["⟦zh⟧25% 独立逐位翻转⟦en⟧25% independent bit flips", "⟦zh⟧逐位区间⟦en⟧Bitwise interval", "0.966–1.027", "17,909", "8 / 8"],
+            ["⟦zh⟧25% 边际、强词内相关⟦en⟧25% marginal, strong within-word correlation", "⟦zh⟧整词聚类区间⟦en⟧Word-cluster interval", "7.937–8.032", "92,991", "8 / 8"]
+          ],
+          "numeric": [false, false, true, true, true]
+        },
+        {
+          "kind": "figures",
+          "items": [
+            {
+              "src": "noisy-c-auto-correlation.png",
+              "caption": "⟦zh⟧左：第一次记录的阶数检查已经把独立噪声聚在设计效应 1 附近、相关噪声聚在 8 附近；直到接受时两簇仍稳定，阈值 2 留有很大间隔。中：十六根柱逐一显示 8 / 8 独立实验选择逐位、8 / 8 相关实验选择整词。右：自动模式不会为了速度在相关噪声下偷偷采用过窄区间，因此保留了约 93,000 词的诚实相关性成本。⟦en⟧Left: the first recorded degree check already clusters independent noise near design effect 1 and correlated noise near 8; both clusters remain stable through acceptance with a wide margin around threshold 2. Middle: all sixteen bars show 8 / 8 independent runs choosing bitwise and 8 / 8 correlated runs choosing word-cluster. Right: automatic mode does not secretly use narrow intervals for speed under correlation, so it preserves the honest cost of roughly 93,000 words."
+            }
+          ]
+        },
+        {
+          "kind": "note",
+          "label": "⟦zh⟧自动诊断的边界：当前两类噪声分离很强，阈值附近还需置信化⟦en⟧Boundary of automatic diagnosis: the tested families are well separated; the threshold region still needs confidence control",
+          "text": "⟦zh⟧这十六次实验中的设计效应簇相距很远，因此固定阈值 2 没有出现含糊选择；它尚不是一个对阈值附近弱相关噪声具有形式错误率保证的检验。下一项实验真的为设计效应建立上界，并展示这种形式安全目前带来的保守性。点阈值版本记录为 auto_correlation_summary.json。⟦en⟧The design-effect clusters are widely separated in these sixteen runs, so fixed threshold 2 creates no ambiguous choices. This is not yet a formal error-controlled test for weak correlation near the threshold. The next experiment actually constructs an upper bound for the design effect and exposes the conservatism currently imposed by that formal safety. The point-threshold version is recorded in auto_correlation_summary.json."
+        },
+        {
+          "kind": "heading",
+          "level": 3,
+          "text": "⟦zh⟧置信上界尝试：安全规则正确，但暂时过于保守⟦en⟧Confidence-upper-bound attempt: the safe rule is correct but currently too conservative"
+        },
+        {
+          "kind": "verdict",
+          "status": "warn",
+          "label": "⟦zh⟧十二次都精确且没有错误切换，但独立噪声 6 / 6 也无法获准使用逐位区间⟦en⟧All twelve runs are exact with no unsafe switch, but even independent noise is denied bitwise intervals in 6 / 6 runs",
+          "why": "⟦zh⟧对整词分歧比例及其平方分别建立预分配经验 Bernstein 区间，从而得到设计效应上界；只有上界低于 2 才切换。六个独立噪声种子的点估计均约为 1，但接受时上界仍为 2.566–2.775，因此全部保留整词区间；六个相关噪声种子的上界为 10.015–10.719，也全部保留整词。十二次都选择二次并最终精确，但独立噪声平均总成本由点阈值版 17,909 增到 24,129，即增加 34.7%。⟦en⟧Preallocated empirical-Bernstein intervals are built for both the word-disagreement fraction and its square, yielding an upper bound on the design effect; switching is allowed only below 2. Point estimates for six independent-noise seeds are all near 1, but their acceptance-time upper bounds remain 2.566–2.775, so all retain word-cluster intervals. Upper bounds for six correlated seeds are 10.015–10.719 and likewise remain word-cluster. All twelve select quadratic and finish exact, but mean independent-noise cost rises 34.7%, from 17,909 words with the point rule to 24,129."
+        },
+        {
+          "kind": "table",
+          "columns": [
+            "⟦zh⟧方法与噪声⟦en⟧Method and noise",
+            "⟦zh⟧设计效应点估计⟦en⟧Design-effect point estimate",
+            "⟦zh⟧置信上界范围⟦en⟧Confidence-upper-bound range",
+            "⟦zh⟧选择逐位⟦en⟧Choose bitwise",
+            "⟦zh⟧平均总噪声词⟦en⟧Mean total noisy words",
+            "⟦zh⟧最终精确⟦en⟧Final exact"
+          ],
+          "rows": [
+            ["⟦zh⟧点阈值 · 独立⟦en⟧Point threshold · independent", "1.006", "⟦zh⟧未使用⟦en⟧Not used", "8 / 8", "17,909", "8 / 8"],
+            ["⟦zh⟧置信上界 · 独立⟦en⟧Confidence upper bound · independent", "0.994", "2.566–2.775", "0 / 6", "24,129", "6 / 6"],
+            ["⟦zh⟧点阈值 · 相关⟦en⟧Point threshold · correlated", "7.976", "⟦zh⟧未使用⟦en⟧Not used", "0 / 8", "92,991", "8 / 8"],
+            ["⟦zh⟧置信上界 · 相关⟦en⟧Confidence upper bound · correlated", "7.979", "10.015–10.719", "0 / 6", "91,535", "6 / 6"]
+          ],
+          "numeric": [false, true, true, true, true, true]
+        },
+        {
+          "kind": "figures",
+          "items": [
+            {
+              "src": "noisy-c-safe-auto-correlation.png",
+              "caption": "⟦zh⟧左：独立噪声点估计约为 1，但有效上界仍高于阈值 2；相关噪声的点估计和上界都远高于阈值。中：点阈值能在独立噪声下切换，置信上界规则则对两类噪声都保留整词区间。右：该保守性主要增加独立噪声成本；相关噪声本来就应该使用整词区间，两批不同种子的成本差异不应解释为上界方法带来加速。⟦en⟧Left: independent-noise point estimates are near 1, but valid upper bounds remain above threshold 2; both point estimates and upper bounds are far above threshold under correlation. Middle: the point rule switches under independent noise, whereas the confidence-upper-bound rule retains word-cluster intervals for both families. Right: this conservatism mainly raises independent-noise cost. Correlated noise should use word-cluster intervals anyway, and the cost difference between the two seed groups must not be interpreted as an acceleration from the upper-bound method."
+            }
+          ]
+        },
+        {
+          "kind": "note",
+          "label": "⟦zh⟧方法选择：保留为安全护栏，不提升为当前最佳训练器⟦en⟧Method choice: retain as a safety guardrail, not the current best trainer",
+          "text": "⟦zh⟧这个负结果说明“形式安全”和“快速切换”目前还没有同时实现。报告的主方法仍是经过模拟校准、在两类强分离噪声上 16 / 16 选择正确的点阈值自动版本；置信上界版用于风险敏感场景或作为后续开发基线。改进方向是为聚类方差构造更紧的经验界，而不是放松覆盖预算。可复核记录为 safe_auto_correlation_summary.json。⟦en⟧This negative result shows that formal safety and rapid switching are not yet achieved simultaneously. The report's primary method remains the simulation-calibrated point-threshold automatic version, which selects correctly in 16 / 16 strongly separated runs. The upper-bound version is retained for risk-sensitive settings and as a development baseline. The next improvement should tighten empirical cluster-variance bounds rather than relax the coverage budget. The auditable record is safe_auto_correlation_summary.json."
+        },
+        {
+          "kind": "heading",
+          "level": 3,
+          "text": "⟦zh⟧高噪声复核：59 倍加速不是低噪声特例⟦en⟧High-noise confirmation: the 59x acceleration is not a low-noise exception"
+        },
+        {
+          "kind": "verdict",
+          "status": "good",
+          "label": "⟦zh⟧从 5% 到 45%，每一档都减少 55–72 倍样本；24 次训练全部精确⟦en⟧From 5% to 45%, every level uses 55–72x fewer examples; all 24 runs are exact",
+          "why": "⟦zh⟧把原来的十二次均匀采样实验与十二次 D-optimal 实验按噪声率和随机种子逐一配对。两组都只用新鲜带噪标签更新，最终全部恢复同一条 36 项整数规则。六档噪声的平均样本减少倍数为 55.0、60.0、55.6、57.1、72.4、61.4，说明实验设计提供的是跨噪声区间的稳定约六十倍增益，而不是 25% 单点调参。⟦en⟧The original twelve uniform runs and twelve D-optimal runs are paired one-for-one by noise rate and seed. Both groups update only from freshly corrupted labels, and every run ultimately recovers the same 36-term integer rule. Mean example reductions across the six noise levels are 55.0x, 60.0x, 55.6x, 57.1x, 72.4x and 61.4x, showing a stable roughly sixty-fold gain across the noise range rather than tuning to the 25% point."
+        },
+        {
+          "kind": "table",
+          "columns": [
+            "⟦zh⟧逐位翻转率⟦en⟧Per-bit flip rate",
+            "⟦zh⟧均匀采样平均样本⟦en⟧Uniform mean examples",
+            "⟦zh⟧D-optimal 平均样本⟦en⟧D-optimal mean examples",
+            "⟦zh⟧样本减少倍数⟦en⟧Example reduction"
+          ],
+          "rows": [
+            [
+              "5%",
+              "55,000",
+              "1,000",
+              "55.0x"
+            ],
+            [
+              "15%",
+              "135,000",
+              "2,250",
+              "60.0x"
+            ],
+            [
+              "25%",
+              "250,000",
+              "4,500",
+              "55.6x"
+            ],
+            [
+              "35%",
+              "700,000",
+              "12,250",
+              "57.1x"
+            ],
+            [
+              "40%",
+              "1,900,000",
+              "26,250",
+              "72.4x"
+            ],
+            [
+              "45%",
+              "6,750,000",
+              "110,000",
+              "61.4x"
+            ]
+          ]
+        },
+        {
+          "kind": "figures",
+          "items": [
+            {
+              "src": "noisy-c-doptimal-noise-scaling.png",
+              "caption": "⟦zh⟧左：六档噪声的平均首次全对样本数，纵轴为对数尺度；两条曲线在整个区间内近似保持平行。中：每档的样本减少倍数均在 55 到 72 之间，六档平均为 60.24 倍。右：D-optimal 的平均首次全对批次与净标签信号强度平方的倒数近似线性，拟合 R² 为 0.99985；45% 噪声只剩 10% 净偏置，但两个种子仍分别在第 990 和 1,210 批恢复全域精确。⟦en⟧Left: mean examples to first exact recovery at six noise levels on a logarithmic axis; the two curves remain nearly parallel across the range. Middle: example reduction stays between 55x and 72x at every level, averaging 60.24x. Right: D-optimal mean recovery batches are nearly linear in inverse squared clean-label signal, with R² 0.99985; at 45% noise only a 10% net bias remains, yet the two seeds still recover the complete domain at batches 990 and 1,210."
+            }
+          ]
+        },
+        {
+          "kind": "heading",
+          "level": 3,
+          "text": "⟦zh⟧进一步去先验：训练器不再知道噪声率⟦en⟧Removing another prior: the learner is no longer told the noise rate"
+        },
+        {
+          "kind": "verdict",
+          "status": "good",
+          "label": "⟦zh⟧同一个 10% 初值自动追踪 5%–45% 真实噪声；12 次训练全部精确⟦en⟧One 10% initial guess automatically tracks true noise from 5% to 45%; all 12 runs are exact",
+          "why": "⟦zh⟧学习器只看到重复输入的带噪输出，不读取 oracle 的噪声设置。与已知真实噪声率的十二次实验逐一配对后，11 对在完全相同的批次首次全对，剩下一对的未知噪声训练反而早 5 批。首次全对时，估计噪声率与真实值的平均绝对误差为 0.001239，即 0.124 个百分点；最大误差为 0.003765，即 0.376 个百分点。⟦en⟧The learner sees only corrupted outputs for repeated inputs and never reads the oracle's noise setting. Paired one-for-one against twelve runs supplied with the true rate, 11 pairs first become exact at the identical batch, while the remaining unknown-noise run is five batches earlier. At first exact recovery, mean absolute noise-rate error is 0.001239, or 0.124 percentage points; the maximum is 0.003765, or 0.376 percentage points."
+        },
+        {
+          "kind": "card",
+          "title": "⟦zh⟧为什么不用干净标签也能估计噪声⟦en⟧Why noise can be estimated without clean labels",
+          "blocks": [
+            {
+              "kind": "kv",
+              "pairs": [
+                [
+                  "⟦zh⟧可观测量⟦en⟧Observable",
+                  "⟦zh⟧对同一个输入、同一个输出位取两次独立带噪标签，只统计两次是否不同；隐藏的干净位无论是 0 还是 1 都会在这个比较中消掉。⟦en⟧Take two independently corrupted labels for the same input and output bit and record only whether they differ; the hidden clean bit cancels from this comparison whether it is zero or one."
+                ],
+                [
+                  "⟦zh⟧估计式⟦en⟧Estimator",
+                  "⟦zh⟧若单次翻转概率为 p，两次标签不同的概率 d 等于 2p(1−p)。累计 79 个设计点、12 个输出位上的所有异值对，先估计 d，再取小于 0.5 的解 p。⟦en⟧If the single-observation flip rate is p, the probability d that two labels disagree is 2p(1−p). Aggregate all disagreeing pairs over 79 design points and 12 output bits, estimate d, then choose the solution for p below 0.5."
+                ],
+                [
+                  "⟦zh⟧后验更新⟦en⟧Posterior update",
+                  "⟦zh⟧每批重新计算 p，并用新的对数似然比重建所有已观察输入的干净位后验；整数投影、D-optimal 设计和最终全域验证均不改变。⟦en⟧After every batch, recompute p and rebuild clean-bit posteriors for all observed inputs using the new log-likelihood ratio; integer projection, D-optimal design and final full-domain verification remain unchanged."
+                ]
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "table",
+          "columns": [
+            "⟦zh⟧真实逐位翻转率⟦en⟧True per-bit flip rate",
+            "⟦zh⟧未知噪声首次全对批次⟦en⟧Unknown-noise first-exact batches",
+            "⟦zh⟧首次全对时的两个估计⟦en⟧Two estimates at first exact",
+            "⟦zh⟧已知噪声基线批次⟦en⟧Known-noise baseline batches"
+          ],
+          "rows": [
+            [
+              "5%",
+              "10, 10",
+              "5.244%, 5.033%",
+              "10, 10"
+            ],
+            [
+              "15%",
+              "25, 20",
+              "15.011%, 15.015%",
+              "25, 20"
+            ],
+            [
+              "25%",
+              "40, 45",
+              "24.624%, 25.225%",
+              "45, 45"
+            ],
+            [
+              "35%",
+              "100, 145",
+              "34.803%, 35.184%",
+              "100, 145"
+            ],
+            [
+              "40%",
+              "230, 295",
+              "39.910%, 40.058%",
+              "230, 295"
+            ],
+            [
+              "45%",
+              "990, 1,210",
+              "44.949%, 44.997%",
+              "990, 1,210"
+            ]
+          ]
+        },
+        {
+          "kind": "figures",
+          "items": [
+            {
+              "src": "noisy-c-unknown-noise.png",
+              "caption": "⟦zh⟧左：所有训练器都从同一个 10% 初值出发，随重复标签累积分别稳定到六个真实噪声率。中：未知噪声与已知噪声的首次全对样本数几乎落在对角线上，没有可见样本效率惩罚。右：在模型首次达到 4,096 / 4,096 时，噪声估计已经紧贴真实值。额外压力测试让真实噪声固定为 25%，初值分别设为错误的 5% 和 45%，两次仍在第 60 和 35 批全对，最终估计分别为 25.000% 和 25.077%。⟦en⟧Left: every learner starts from the same 10% guess and stabilizes near one of six true rates as repeated labels accumulate. Middle: first-exact sample counts for unknown and known noise lie almost exactly on the diagonal, with no visible sample-efficiency penalty. Right: when the model first reaches 4,096 / 4,096, its noise estimate is already close to the truth. In an extra stress test with true noise fixed at 25% but initial guesses set to the incorrect extremes 5% and 45%, both runs still become exact at batches 60 and 35, ending with estimates 25.000% and 25.077%."
+            }
+          ]
+        },
+        {
+          "kind": "note",
+          "label": "⟦zh⟧单一噪声率假设已在下一组实验中放宽⟦en⟧The single-noise-rate assumption is relaxed in the next experiment",
+          "text": "⟦zh⟧下面让 12 个输出位拥有从 5% 到 45% 不等的翻转率，并把快速函数拟合与逐位不确定性校准拆成两个后验轨道。仍保留的边界是：同一位在不同输入上的噪声率不变，且同一输出字内各位翻转相互独立；相关噪声留给后续检验。⟦en⟧The next experiment gives the 12 output bits different flip rates ranging from 5% to 45%, and separates fast function fitting from per-bit uncertainty calibration into two posterior tracks. The remaining boundary is that each bit's rate stays constant across inputs and flips within a word remain independent; correlated noise is left for a later test."
+        },
+        {
+          "kind": "heading",
+          "level": 3,
+          "text": "⟦zh⟧异方差噪声：快速拟合与逐位校准双轨并行⟦en⟧Heterogeneous noise: fast fitting and per-bit calibration in parallel"
+        },
+        {
+          "kind": "verdict",
+          "status": "good",
+          "label": "⟦zh⟧12 位噪声率从 5% 到 45% 混合，四次训练与四次盲停止全部精确⟦en⟧With 12 bit rates mixed from 5% to 45%, all four runs and all four blind stops are exact",
+          "why": "⟦zh⟧两个种子分别运行双轨模型和完全逐位模型。四次最终都恢复同一条 36 项规则。双轨模型用全局有效噪声率快速拟合函数，平均第 455 批首次全对；同时用十二个逐位后验计算校准不确定性。只看“12 位熵和小于 0.001 bit 且最大系数取整残差小于 0.05”的盲停止平均第 855 批触发，四个触发点事后干净全域验证均为 4,096 / 4,096。停止点逐位噪声率估计的平均绝对误差为 0.001194，即 0.119 个百分点，最大为 0.410 个百分点。⟦en⟧Two seeds each run the dual-track and fully per-bit models. All four ultimately recover the same 36-term rule. The dual-track model uses one effective global rate for fast function fitting and first becomes exact at batch 455 on average, while twelve per-bit posteriors provide calibrated uncertainty. A blind stop using only “sum of 12 entropies below 0.001 bit and maximum coefficient rounding residual below 0.05” triggers at batch 855 on average; report-only clean evaluation is 4,096 / 4,096 at all four trigger points. Mean absolute per-bit noise-rate error at the stop is 0.001194, or 0.119 percentage points, with a maximum of 0.410 percentage points."
+        },
+        {
+          "kind": "card",
+          "title": "⟦zh⟧双轨方法如何兼顾速度与可信度⟦en⟧How the dual-track method combines speed and calibration",
+          "blocks": [
+            {
+              "kind": "kv",
+              "pairs": [
+                [
+                  "⟦zh⟧函数拟合轨道⟦en⟧Function-fitting track",
+                  "⟦zh⟧把所有位的重复标签异值对合并成一个有效噪声率，用它形成更激进的干净位后验并投影整数系数；这条轨道负责尽快找到候选规则。⟦en⟧Pool repeated-label disagreements across all bits into one effective noise rate, use it to form a more aggressive clean-bit posterior and project integer coefficients; this track finds a candidate rule quickly."
+                ],
+                [
+                  "⟦zh⟧校准轨道⟦en⟧Calibration track",
+                  "⟦zh⟧对每个输出位分别估计 pⱼ，并用各自的似然比形成十二个后验；这条轨道不改变候选规则，只输出逐位熵以及十二位熵和。⟦en⟧Estimate pⱼ separately for every output bit and form twelve posteriors with their own likelihood ratios; this track does not change the candidate rule and reports per-bit entropy plus their sum."
+                ],
+                [
+                  "⟦zh⟧结构轨道⟦en⟧Structural track",
+                  "⟦zh⟧连续系数距离最近整数的最大残差防止“输出暂时全对但规则仍在整数边界附近”时过早停止。熵衡量标签不确定性，取整残差衡量规则不确定性，两者必须同时低。⟦en⟧The maximum distance from continuous coefficients to their nearest integers prevents stopping when outputs are temporarily exact but the rule remains near an integer boundary. Entropy measures label uncertainty and rounding residual measures rule uncertainty; both must be low."
+                ]
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "table",
+          "columns": [
+            "⟦zh⟧策略与种子⟦en⟧Strategy and seed",
+            "⟦zh⟧首次全对批次⟦en⟧First exact batch",
+            "⟦zh⟧盲停止批次⟦en⟧Blind stop batch",
+            "⟦zh⟧停止点全域准确率，仅报告⟦en⟧Clean accuracy at stop, report only",
+            "⟦zh⟧停止点逐位噪声平均误差⟦en⟧Per-bit noise MAE at stop"
+          ],
+          "rows": [
+            [
+              "⟦zh⟧双轨，种子 207100⟦en⟧Dual-track, seed 207100",
+              "290",
+              "900",
+              "4,096 / 4,096",
+              "0.153 个百分点 / percentage points"
+            ],
+            [
+              "⟦zh⟧双轨，种子 217100⟦en⟧Dual-track, seed 217100",
+              "620",
+              "810",
+              "4,096 / 4,096",
+              "0.100 个百分点 / percentage points"
+            ],
+            [
+              "⟦zh⟧逐位拟合，种子 207100⟦en⟧Per-bit fit, seed 207100",
+              "840",
+              "940",
+              "4,096 / 4,096",
+              "0.134 个百分点 / percentage points"
+            ],
+            [
+              "⟦zh⟧逐位拟合，种子 217100⟦en⟧Per-bit fit, seed 217100",
+              "770",
+              "850",
+              "4,096 / 4,096",
+              "0.090 个百分点 / percentage points"
+            ]
+          ]
+        },
+        {
+          "kind": "figures",
+          "items": [
+            {
+              "src": "noisy-c-per-bit-noise.png",
+              "caption": "⟦zh⟧左：真实的十二位噪声率依次为 5%、10%、15%、20%、25%、30%、35%、40%、45%、12%、28%、38%；两个双轨校准后验在盲停止点几乎覆盖真实折线。中：全局有效噪声率的函数拟合轨道更早出现精确候选，完全逐位拟合更谨慎；四条曲线最终均稳定为 100%。右：横轴是十二位校准后验熵之和，纵轴是最大系数取整残差；虚线围出的左下区域是不读取干净标签的停止区，四个方形或圆形停止点事后都验证精确。⟦en⟧Left: the true twelve-bit noise profile is 5%, 10%, 15%, 20%, 25%, 30%, 35%, 40%, 45%, 12%, 28% and 38%; both dual-track calibration posteriors nearly cover the true curve at the blind stop. Middle: the global effective-rate fitting track produces exact candidates earlier, while fully per-bit fitting is more cautious; all four curves ultimately stabilize at 100%. Right: the horizontal axis is the sum of twelve calibrated posterior entropies and the vertical axis is maximum coefficient rounding residual; the lower-left region bounded by dashed lines is the clean-label-free stop region, and all four square or circular stop points verify exact afterward."
+            }
+          ]
+        },
+        {
+          "kind": "note",
+          "label": "⟦zh⟧不确定性定义现在是可操作的停止规则⟦en⟧Uncertainty is now an operational stopping rule",
+          "text": "⟦zh⟧“不同位数的不确定性相加”具体化为十二个二元后验熵之和，单位为 bit；它能区分某一高噪声位尚未稳定与所有位都已确定。单独用熵仍不够，因为整数系数可能靠近 0.5 取整边界；加入最大取整残差后，四次无需干净标签的停止都没有误判。当前证据是两种子、一个异方差配置，仍需更多噪声剖面才能把阈值 0.001 与 0.05 视为通用。⟦en⟧“Adding uncertainty across different bits” is made concrete as the sum of twelve binary posterior entropies, measured in bits; it distinguishes one unresolved high-noise bit from a word whose bits are all determined. Entropy alone is insufficient because integer coefficients may remain near a 0.5 rounding boundary. Adding maximum rounding residual yields no false stop in these four runs without clean labels. The evidence currently covers two seeds and one heterogeneous profile, so thresholds 0.001 and 0.05 should not yet be treated as universal."
+        },
+        {
+          "kind": "heading",
+          "level": 3,
+          "text": "⟦zh⟧输入采样消融：速度与结构置信度并不相同⟦en⟧Input-sampling ablation: speed and structural confidence differ"
+        },
+        {
+          "kind": "table",
+          "columns": [
+            "⟦zh⟧输入采样⟦en⟧Input sampling",
+            "⟦zh⟧种子数⟦en⟧Seeds",
+            "⟦zh⟧平均首次全对步数⟦en⟧Mean first exact step",
+            "⟦zh⟧首次全对范围⟦en⟧First-exact range",
+            "⟦zh⟧第 3,200 步取整残差中位数⟦en⟧Median rounding residual at step 3,200",
+            "⟦zh⟧每个输入的最少观察数⟦en⟧Minimum observations per input"
+          ],
+          "rows": [
+            ["⟦zh⟧均匀有放回⟦en⟧Uniform with replacement", "4", "2,600", "2,400–2,800", "0.008191", "43–51"],
+            ["⟦zh⟧随机打乱周期内无重复⟦en⟧Random shuffled cycle without replacement", "4", "2,750", "2,600–2,800", "0.002305", "78"]
+          ],
+          "numeric": [false, true, true, false, true, false]
+        },
+        {
+          "kind": "note",
+          "label": "⟦zh⟧覆盖均衡更稳，但没有更快⟦en⟧Balanced coverage is more stable, not faster",
+          "text": "⟦zh⟧两种模式都在每次出现样本时重新生成独立 25% 位噪声，没有固定噪声数据集。四种子配对实验显示：随机周期把每个输入的最少观察数固定到 78，并把最终取整残差中位数降低 3.55 倍，但平均首次全对反而晚 150 步。可能原因是有放回采样偶尔会给关键输入更多重复证据，从而更早越过整数边界；均衡覆盖则减少了最差输入和系数尾部风险。因此当前默认仍选更快的均匀采样，但在强调规则置信度时保留随机周期。完整哈希证据见 sampling_ablation_p25_summary.json。⟦en⟧Both modes regenerate independent 25% bit noise whenever an example appears; neither uses a fixed noisy dataset. Across four paired seeds, shuffled cycles fix the minimum observations per input at 78 and reduce the median final rounding residual by 3.55 times, yet delay mean first recovery by 150 steps. With-replacement sampling may occasionally give critical inputs extra repeated evidence and cross integer boundaries earlier, while balanced coverage reduces worst-input and coefficient-tail risk. Uniform sampling remains the speed default, with shuffled cycles retained when rule confidence matters. Complete hashed evidence is in sampling_ablation_p25_summary.json."
+        },
+        {
+          "kind": "heading",
+          "level": 3,
+          "text": "⟦zh⟧噪声强度扫描：从 5% 到 45%⟦en⟧Noise-rate scan: from 5% to 45%"
+        },
+        {
+          "kind": "verdict",
+          "status": "good",
+          "label": "⟦zh⟧十二次实验全部恢复同一个 36 项规则；45% 噪声仍可学习⟦en⟧All twelve runs recover the same 36-term rule; learning still succeeds at 45% noise",
+          "why": "⟦zh⟧在 5%、15%、25%、35%、40%、45% 六个独立位翻转率上各运行两个随机种子，最终整词准确率全部为 100%，非零整数项完全相同。45% 时每个观察位只有 10% 的净偏置信号，两个种子仍分别在第 77,500 和 57,500 步首次全对。⟦en⟧Two random seeds are run at each independent bit-flip probability of 5%, 15%, 25%, 35%, 40% and 45%. Every final exact-word accuracy is 100% and every nonzero integer rule is identical. At 45%, each observed bit retains only a 10% net bias, yet the two runs first become exact at steps 77,500 and 57,500."
+        },
+        {
+          "kind": "table",
+          "columns": [
+            "⟦zh⟧单个位翻转率⟦en⟧Per-bit flip rate",
+            "⟦zh⟧两个种子的首次全对步数⟦en⟧First exact steps, two seeds",
+            "⟦zh⟧平均首次全对⟦en⟧Mean first exact",
+            "⟦zh⟧平均本机训练时间⟦en⟧Mean local training time",
+            "⟦zh⟧最终规则⟦en⟧Final rule"
+          ],
+          "rows": [
+            ["5%", "550 / 550", "550", "0.28 s", "⟦zh⟧36 项，全域精确⟦en⟧36 terms, full-domain exact"],
+            ["15%", "1,500 / 1,200", "1,350", "0.40 s", "⟦zh⟧36 项，全域精确⟦en⟧36 terms, full-domain exact"],
+            ["25%", "2,400 / 2,600", "2,500", "0.76 s", "⟦zh⟧36 项，全域精确⟦en⟧36 terms, full-domain exact"],
+            ["35%", "7,000 / 7,000", "7,000", "1.72 s", "⟦zh⟧36 项，全域精确⟦en⟧36 terms, full-domain exact"],
+            ["40%", "17,000 / 21,000", "19,000", "4.70 s", "⟦zh⟧36 项，全域精确⟦en⟧36 terms, full-domain exact"],
+            ["45%", "77,500 / 57,500", "67,500", "18.22 s", "⟦zh⟧36 项，全域精确⟦en⟧36 terms, full-domain exact"]
+          ],
+          "numeric": [true, false, true, true, false]
+        },
+        {
+          "kind": "figures",
+          "items": [
+            {
+              "src": "noisy-c-noise-rate-scan.png",
+              "caption": "⟦zh⟧左：两个随机种子的首次全对步数随噪声率快速增长，但 45% 仍全部成功。中：以贝叶斯去噪的净信号强度衡量，首次全对步数与 1 除以“1−2p 的平方”近似线性，十二点线性拟合的 R² 为 0.9688；这是经验标度，不是样本复杂度定理。右：即使 45% 噪声的十百万个新鲜样本实验，本机训练部分平均约 18.22 秒。完整配置、曲线哈希和拟合值见 noise_rate_scan_summary.json。⟦en⟧Left: first exact recovery rises rapidly with noise, but both seeds still succeed at 45%. Center: measured against Bayesian denoising signal strength, first exact steps are approximately linear in one divided by the square of 1−2p; the twelve-point linear fit has R²=0.9688. This is empirical scaling, not a sample-complexity theorem. Right: even the ten-million-fresh-example experiment at 45% noise averages about 18.22 seconds for the local training portion. Full configurations, curve hashes and fit values are in noise_rate_scan_summary.json."
+            }
+          ]
+        },
+        {
+          "kind": "note",
+          "label": "⟦zh⟧这 2 门如何在盲搜索中消失⟦en⟧How blind search removes the final two gates",
+          "text": "⟦zh⟧搜索器先从图结构计算十二个输出的最大无外部扇出锥；只有最高输出出现 4 门候选锥。它删除该锥后，把所有锥外输入线和内部线转换成 4,096 位语义指纹，枚举零门、一门和二门 AND、OR、XOR 表达式，自动找到“先 OR、后 AND”的二门替代。替换前后十二个输出的全域指纹完全相同，随后独立逐门模拟再次得到 4,096 / 4,096。156 仍是构造性上界，不是最优性证明。⟦en⟧The search first computes the maximum fanout-free cone of each output from graph structure; only the highest output has a four-gate candidate cone. After removing it, all external input and internal wires are converted into 4,096-bit semantic fingerprints. Zero-, one- and two-gate AND, OR and XOR expressions are enumerated, automatically finding an OR-then-AND replacement. All twelve full-domain output fingerprints remain identical, and independent gate simulation again gives 4,096 / 4,096. The 156 figure remains a constructive upper bound, not an optimality proof."
+        },
+        {
+          "kind": "heading",
+          "level": 3,
+          "text": "⟦zh⟧156 门全局重综合审计：独立方法追平，但尚未突破⟦en⟧Global resynthesis audit of 156 gates: independent methods match but do not beat it"
+        },
+        {
+          "kind": "verdict",
+          "status": "neutral",
+          "label": "⟦zh⟧当前最优已验证值仍为 156；这是更强的经验上界证据，不是下界证明⟦en⟧The best verified value remains 156; this strengthens the empirical upper bound but is not a lower-bound proof",
+          "why": "⟦zh⟧将学到的 156 门网表导出为 Verilog 后，使用 Yosys 0.67 与 ABC 做全局重综合。允许 NAND、NOR、ANDNOT、ORNOT、XNOR 等“一个基础门加免费反相”的等价形式时，ABC 独立返回恰好 156 个计数门；五个不同延迟约束也全部返回 156。Python 再对 ABC JSON 网表逐门模拟，十二个输出在全部 4,096 个输入上同时匹配源网络与标准答案。没有任何测试方法低于 156。⟦en⟧The learned 156-gate graph is exported to Verilog and globally resynthesized with Yosys 0.67 and ABC. When NAND, NOR, ANDNOT, ORNOT and XNOR are admitted as one base gate plus free inversion, ABC independently returns exactly 156 counted gates; five delay constraints also all return 156. A Python simulator then evaluates the ABC JSON netlist gate by gate and all twelve outputs match both the source graph and clean answers on all 4,096 inputs. No tested method goes below 156."
+        },
+        {
+          "kind": "table",
+          "columns": [
+            "⟦zh⟧重综合或搜索方法⟦en⟧Resynthesis or search method",
+            "⟦zh⟧计数门数或最好误差⟦en⟧Counted gates or best error",
+            "⟦zh⟧全域验证⟦en⟧Full-domain verification",
+            "⟦zh⟧结论⟦en⟧Conclusion"
+          ],
+          "rows": [
+            [
+              "⟦zh⟧学到的 MDFA + 盲语义重代入⟦en⟧Learned MDFA plus blind semantic resubstitution",
+              "156 gates",
+              "4,096 / 4,096",
+              "⟦zh⟧当前基准⟦en⟧Current reference"
+            ],
+            [
+              "⟦zh⟧ABC 快速全局映射，免费反相等价门族⟦en⟧ABC fast global map, free-inversion-equivalent gate family",
+              "156 gates",
+              "4,096 / 4,096",
+              "⟦zh⟧不同门型组合独立追平；另有五个延迟目标仍全为 156⟦en⟧Independent tie with a different cell mix; five delay targets also remain 156"
+            ],
+            [
+              "⟦zh⟧ABC 快速映射，只允许 AND/OR/XOR⟦en⟧ABC fast map, AND/OR/XOR only",
+              "160 gates",
+              "⟦zh⟧综合保持等价⟦en⟧Equivalence preserved by synthesis",
+              "⟦zh⟧比当前基准多 4 门⟦en⟧Four gates worse"
+            ],
+            [
+              "⟦zh⟧ABC 默认面积流程，只允许 AND/OR/XOR⟦en⟧ABC default area flow, AND/OR/XOR only",
+              "243 gates",
+              "⟦zh⟧综合保持等价⟦en⟧Equivalence preserved by synthesis",
+              "⟦zh⟧AIG 展开破坏了紧凑 XOR 结构⟦en⟧AIG expansion destroys compact XOR structure"
+            ],
+            [
+              "⟦zh⟧从学到的 36 项多项式重新综合，不写入乘法公式⟦en⟧Recompile the learned 36-term polynomial without inserting the multiplication formula",
+              "252 gates",
+              "4,096 / 4,096",
+              "⟦zh⟧通用加法器综合明显更差⟦en⟧Generic adder synthesis is substantially worse"
+            ],
+            [
+              "⟦zh⟧把重复 10 次的 8 门 MDFA 进化为 7 门，三个种子⟦en⟧Evolve the ten-times-repeated 8-gate MDFA into seven gates, three seeds",
+              "171,018,000 candidates; best mismatch 4",
+              "⟦zh⟧未找到 32 / 32 精确宏⟦en⟧No exact 32 / 32 macro found",
+              "⟦zh⟧否定结果仅是启发式搜索证据，不是 8 门下界⟦en⟧Negative heuristic evidence only, not an eight-gate lower bound"
+            ]
+          ]
+        },
+        {
+          "kind": "note",
+          "label": "⟦zh⟧为什么仍不能声称 156 最优⟦en⟧Why 156 still cannot be claimed optimal",
+          "text": "⟦zh⟧ABC 的 156 说明另一个成熟全局综合器在同一门模型下也停在相同大小，三个 MDFA 搜索则说明最直接的“每个宏少一门”路线很难；但两者都没有穷尽所有 12 输入、12 输出、155 门电路。要得到真正下界，需要 SAT/SMT 精确综合证书、形式化不可满足证明，或更强的电路复杂度论证。下一步若继续压门数，应优先联合综合相邻压缩器，而不是继续重复同一个 7 门宏随机搜索。⟦en⟧ABC reaching 156 shows that another mature global synthesizer stops at the same size in the same gate model, while the three MDFA searches show that the most direct “save one gate per macro” route is difficult. Neither enumerates all 12-input, 12-output, 155-gate circuits. A genuine lower bound would require a SAT/SMT exact-synthesis certificate, a formal unsatisfiability proof or a stronger circuit-complexity argument. Further gate reduction should prioritize joint synthesis of adjacent compressors rather than repeating the same random seven-gate macro search."
+        },
+        {
+          "kind": "heading",
+          "level": 3,
+          "text": "⟦zh⟧此前的浮点学生容量压缩结果⟦en⟧Previous floating-student capacity result"
+        },
+        {
+          "kind": "verdict",
+          "status": "good",
+          "label": "⟦zh⟧新压缩结果：13,872 参数单模型，两次恢复 4,096 / 4,096⟦en⟧New compression result: a 13,872-parameter single model recovers 4,096 / 4,096 twice",
+          "why": "⟦zh⟧宽度 36 的随机初始化学生在两条独立噪声流上分别于第 10,000 和 9,500 步首次全对，之后所有检查点持续精确；两个最终检查点均已独立重新加载并验证。与此前 128 宽单成员相比，连续参数减少 80.96%。⟦en⟧The randomly initialized width-36 student first becomes exact at steps 10,000 and 9,500 on two independent noise streams, then remains exact at every subsequent checkpoint; both final checkpoints were independently reloaded and verified. Continuous parameters fall by 80.96% relative to one previous width-128 member."
+        },
+        {
+          "kind": "card",
+          "title": "⟦zh⟧当前最紧凑、已复现的训练方法⟦en⟧Most compact replicated training method",
+          "blocks": [
+            {
+              "kind": "kv",
+              "pairs": [
+                ["⟦zh⟧学生网络⟦en⟧Student", "⟦zh⟧单模型、随机初始化；298 个通用一至三阶奇偶特征，三层 36 宽 MLP，13,872 个连续参数⟦en⟧One randomly initialized model; 298 generic degree-one to degree-three parity features, three 36-wide hidden layers and 13,872 continuous parameters"],
+                ["⟦zh⟧数据流⟦en⟧Data stream", "⟦zh⟧每步 100 个新输入，每个输出位独立以 25% 概率翻转；无固定噪声数据集⟦en⟧100 fresh inputs per step; every output bit flips independently with 25% probability and no noisy dataset is reused"],
+                ["⟦zh⟧主动后验回放⟦en⟧Active posterior replay", "⟦zh⟧贝叶斯教师只积累新鲜带噪观察；每步从 800 个候选中选择 100 个高置信、高分歧样本，并保留 20% 随机探索⟦en⟧A Bayesian teacher accumulates only fresh noisy observations; 100 high-confidence, high-disagreement examples are selected from 800 candidates while 20% remain random exploration"],
+                ["⟦zh⟧损失触发退火⟦en⟧Loss-triggered annealing", "⟦zh⟧学习率保持 0.001，直到带噪蒸馏损失的指数均值降至 0.05；随后用 1,500 步余弦冷却到 0.00005。触发器不读取干净评测结果⟦en⟧The learning rate stays at 0.001 until the noisy distillation-loss EMA reaches 0.05, then cools to 0.00005 over 1,500 cosine steps. The trigger never reads clean evaluation results"],
+                ["⟦zh⟧主实验⟦en⟧Primary run", "⟦zh⟧第 9,575 步触发退火，第 10,000 步首次全对；之后 5 / 5 个检查点全对⟦en⟧Annealing triggers at step 9,575 and first exact recovery occurs at step 10,000; all 5 / 5 checkpoints from that point are exact"],
+                ["⟦zh⟧独立复跑⟦en⟧Independent replication", "⟦zh⟧第 8,584 步触发退火，第 9,500 步首次全对；之后 6 / 6 个检查点全对⟦en⟧Annealing triggers at step 8,584 and first exact recovery occurs at step 9,500; all 6 / 6 checkpoints from that point are exact"],
+                ["⟦zh⟧完整证据⟦en⟧Evidence", "capacity_schedule_p25_summary.json · SHA-256 recorded inside"]
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "table",
+          "columns": [
+            "⟦zh⟧单模型配置⟦en⟧Single-model configuration",
+            "⟦zh⟧参数数⟦en⟧Parameters",
+            "⟦zh⟧首次全对⟦en⟧First exact",
+            "⟦zh⟧最终整词准确率⟦en⟧Final exact-word accuracy",
+            "⟦zh⟧稳定性⟦en⟧Stability"
+          ],
+          "rows": [
+            ["⟦zh⟧宽 36，损失触发，主实验⟦en⟧h36, loss-triggered, primary", "13,872", "10,000", "100%", "⟦zh⟧首次全对后 5 / 5 检查点全对⟦en⟧5 / 5 checkpoints exact after first recovery"],
+            ["⟦zh⟧宽 36，损失触发，独立复跑⟦en⟧h36, loss-triggered, replication", "13,872", "9,500", "100%", "⟦zh⟧首次全对后 6 / 6 检查点全对⟦en⟧6 / 6 checkpoints exact after first recovery"],
+            ["⟦zh⟧宽 40，损失触发⟦en⟧h40, loss-triggered", "15,732", "6,500", "100%", "⟦zh⟧首次全对后 15 / 15 检查点全对⟦en⟧15 / 15 checkpoints exact after first recovery"],
+            ["⟦zh⟧宽 48，损失触发⟦en⟧h48, loss-triggered", "19,644", "4,900", "100%", "⟦zh⟧首次全对后 22 / 22 检查点全对⟦en⟧22 / 22 checkpoints exact after first recovery"],
+            ["⟦zh⟧宽 48，恒定学习率⟦en⟧h48, constant learning rate", "19,644", "5,000", "100%", "⟦zh⟧达到全对后又出现错误，最终重新全对⟦en⟧Errors reappear after exact recovery before the final return to 100%"],
+            ["⟦zh⟧宽 32，损失触发⟦en⟧h32, loss-triggered", "12,076", "⟦zh⟧12,000 步内未达到⟦en⟧Not reached by 12,000", "74.4385%", "⟦zh⟧这是当前预算下的结果，不宣称为容量硬下界⟦en⟧Current-budget result, not a claimed hard capacity lower bound"]
+          ],
+          "numeric": [false, true, false, true, false]
+        },
+        {
+          "kind": "figures",
+          "items": [
+            {
+              "src": "noisy-c-capacity-schedule-p25.png",
+              "caption": "⟦zh⟧容量与学习率机制的统一比较。左上显示模型越小通常需要越多训练步；右上给出参数数与首次全对时间的前沿。左下固定宽度 48：按总步数预先设定的余弦退火在 6,000 步仅到 80.08%，恒定学习率虽达到 100% 却会再次出错；只用带噪训练损失触发冷却后，从第 4,900 步起 22 个检查点持续全对。右下显示已复现的最小精确学生为宽 36、13,872 参数；宽 32 在 12,000 步的 74.44% 只是一项负结果，不是理论下界。⟦en⟧Unified comparison of capacity and learning-rate mechanisms. The upper left shows that smaller students generally require more optimization; the upper right gives the parameter-versus-first-recovery frontier. At fixed width 48, the lower-left panel shows that fixed-horizon cosine annealing reaches only 80.08% by step 6,000, while a constant rate reaches 100% but later makes errors. Cooling triggered solely by noisy training loss stays exact for 22 checkpoints from step 4,900. The lower right identifies the smallest replicated exact student as width 36 with 13,872 parameters; width 32 at 74.44% after 12,000 steps is a negative result, not a theoretical lower bound."
+            }
+          ]
+        },
+        {
+          "kind": "note",
+          "label": "⟦zh⟧创新点：把“何时降学习率”交给带噪训练状态⟦en⟧Innovation: let noisy training state decide when to lower the learning rate",
+          "text": "⟦zh⟧固定总步数的余弦计划会让小模型在尚未学会结构时过早冻结；恒定学习率又会在已经全对后把模型推离精确解。新的触发式计划只观察蒸馏损失的指数均值：先让小模型长期保持探索能力，达到预设置信区间后再冷却。这不是利用干净验证集调度，因此保留了训练与标准数据评测的隔离。⟦en⟧A fixed-horizon cosine schedule freezes small models before they learn the structure, whereas a constant learning rate can push an already exact model away from the solution. The triggered schedule watches only the distillation-loss EMA: it preserves exploration for as long as needed and cools only after reaching a preset confidence regime. It does not schedule from the clean validation domain, preserving the separation between training and standard-data evaluation."
+        },
+        {
+          "kind": "note",
+          "label": "⟦zh⟧压缩仍不等于少门⟦en⟧Compression is still not a low-gate circuit",
+          "text": "⟦zh⟧13,872 是浮点参数数，不是布尔门数；在线教师还保存 4,096 × 12 个后验状态，主动选择每步仍需评估 800 个候选。当前结果把可复现的精确学生缩小了，但尚未得到可与第一页 156 门电路直接比较的离散门图。下一循环将把稀疏化、离散化和门级验证直接放进目标函数。⟦en⟧The number 13,872 counts floating-point parameters, not Boolean gates. The online teacher still stores 4,096 × 12 posterior states and active selection evaluates 800 candidates per step. This round makes the replicated exact student much smaller, but does not yet produce a discrete gate graph comparable with the 156-gate circuit on page one. The next cycle puts sparsity, discretization and gate-level verification directly into the objective."
+        },
+        {
+          "kind": "heading",
+          "level": 3,
+          "text": "⟦zh⟧此前的最快全精确结果⟦en⟧Previous fastest exact-recovery result"
+        },
+        {
+          "kind": "verdict",
+          "status": "good",
+          "label": "⟦zh⟧速度结果：四成员随机神经集成完整恢复 4,096 / 4,096⟦en⟧Speed result: a four-member random neural ensemble recovers 4,096 / 4,096",
+          "why": "⟦zh⟧“三阶奇偶特征 + 主动后验回放”在主实验第 1,400 步首次达到 100%，不同随机种子的独立复跑在第 1,600 步达到 100%；两次实验的最终整词准确率均为 100%。⟦en⟧Third-order parity features with active posterior replay first reach 100% at step 1,400 in the main run and at step 1,600 in an independent seed replication; both runs finish at 100% exact-word accuracy."
+        },
+        {
+          "kind": "card",
+          "title": "⟦zh⟧此前最快的训练方法⟦en⟧Previous fastest training method",
+          "blocks": [
+            {
+              "kind": "kv",
+              "pairs": [
+                ["⟦zh⟧学生网络⟦en⟧Student", "⟦zh⟧随机初始化；298 个通用一至三阶奇偶特征，三层 128 宽 MLP，72,844 个参数⟦en⟧Random initialization; 298 generic degree-one to degree-three parity features, three 128-wide hidden layers, 72,844 parameters"],
+                ["⟦zh⟧在线教师⟦en⟧Online teacher", "⟦zh⟧只累积新鲜带噪观察的贝叶斯对数似然，不读取公式或 156 门电路⟦en⟧Bayesian log-likelihood accumulated only from fresh noisy observations; it cannot read the formula or 156-gate circuit"],
+                ["⟦zh⟧主动回放⟦en⟧Active replay", "⟦zh⟧每步从 800 个随机候选中选 100 个；80% 按“教师置信度 × 学生分歧”排序，20% 保持随机探索⟦en⟧Select 100 of 800 random candidates per step; 80% rank by teacher confidence times student disagreement and 20% preserve random exploration"],
+                ["⟦zh⟧主实验首次全对⟦en⟧Main first full recovery", "1,400 steps · 140,000 fresh examples/member · 20.14 s"],
+                ["⟦zh⟧独立复跑首次全对⟦en⟧Replication first full recovery", "1,600 steps · 160,000 fresh examples/member · 24.10 s"],
+                ["⟦zh⟧完整证据⟦en⟧Evidence", "posterior_replay_p25_summary.json · SHA-256 recorded inside"]
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "table",
+          "columns": [
+            "⟦zh⟧方法⟦en⟧Method",
+            "⟦zh⟧最终整词准确率⟦en⟧Final exact-word accuracy",
+            "⟦zh⟧首次完整恢复⟦en⟧First full recovery",
+            "⟦zh⟧最终位分歧⟦en⟧Final bit disagreement",
+            "⟦zh⟧说明⟦en⟧Scope"
+          ],
+          "rows": [
+            ["⟦zh⟧主动后验回放，主实验⟦en⟧Active posterior replay, main", "100%", "1,400", "0.000183", "⟦zh⟧第 1,400 至 3,000 步的 17 个检查点全部保持全对⟦en⟧All 17 checkpoints from step 1,400 through 3,000 remain exact"],
+            ["⟦zh⟧主动后验回放，独立复跑⟦en⟧Active posterior replay, replication", "100%", "1,600", "0.006226", "⟦zh⟧第 1,700 步曾短暂出现一个整词错误，1,800 至 2,000 步再次全对⟦en⟧One transient word error reappears at step 1,700; steps 1,800 through 2,000 are exact again"],
+            ["⟦zh⟧贝叶斯证据表⟦en⟧Bayesian evidence table", "100%", "1,200", "0", "⟦zh⟧最快，但推理仍需逐输入后验表⟦en⟧Fastest, but inference retains a per-input posterior table"],
+            ["⟦zh⟧直接共享 MLP⟦en⟧Direct shared MLP", "98.2178%", "⟦zh⟧未达到⟦en⟧Not reached", "0.1552", "30,000 steps"],
+            ["⟦zh⟧十二位独立 MLP⟦en⟧Twelve independent MLPs", "90.1855%", "⟦zh⟧未达到⟦en⟧Not reached", "0.4360", "30,000 steps"]
+          ],
+          "numeric": [false, true, false, true, false]
+        },
+        {
+          "kind": "figures",
+          "items": [
+            {
+              "src": "noisy-c-posterior-replay-p25.png",
+              "caption": "⟦zh⟧新方法的主实验、独立复跑、直接共享 MLP 与贝叶斯表的统一比较。左上显示整词准确率：两条后验回放曲线都在 2,000 步内到达 100%，而直接 MLP 在 30,000 步仍为 98.22%。右下是单模型消融：主动采样会伤害普通共享表示，却把三阶奇偶表示从 98.51% 提高到 99.76%，说明主动回放与表示能力存在强耦合。每个集成成员每步接收 100 个新鲜样本；完整干净定义域只评测，不产生梯度。⟦en⟧Unified comparison of the new method, its independent replication, the direct shared MLP and the Bayesian table. Exact-word accuracy shows that both posterior-replay runs reach 100% within 2,000 steps, while the direct MLP remains at 98.22% after 30,000. The single-model ablation shows a strong interaction: active selection harms the ordinary shared representation but raises the degree-three parity representation from 98.51% to 99.76%. Every ensemble member receives 100 fresh examples per step; the complete clean domain is evaluated only and supplies no gradients."
+            }
+          ]
+        },
+        {
+          "kind": "note",
+          "label": "⟦zh⟧这还不是少门电路⟦en⟧This is not yet a low-gate circuit",
+          "text": "⟦zh⟧学生在推理时不查真值表，但在线教师仍保存 4,096 × 12 个后验状态；学生本身有 72,844 个连续参数，主动选择还需每步评分 800 个候选。因此该结果证明“能够快速、稳定地学到标准映射”，不证明已经得到紧凑门图。下一阶段必须做教师移除、参数剪枝、离散化和门级验证。⟦en⟧The student performs inference without a truth-table lookup, but the online teacher still stores 4,096 × 12 posterior states; the student has 72,844 continuous parameters and active selection scores 800 candidates per step. The result demonstrates rapid and repeatable recovery of the clean mapping, not a compact gate graph. The next stage must remove the teacher, prune parameters, discretize the model and verify the resulting gates."
+        },
+        {
+          "kind": "heading",
+          "level": 3,
+          "text": "⟦zh⟧统一噪声协议⟦en⟧Common noise protocol"
+        },
+        {
+          "kind": "card",
+          "title": "⟦zh⟧25% 噪声的准确含义⟦en⟧Exact meaning of 25% noise",
+          "blocks": [
+            {
+              "kind": "kv",
+              "pairs": [
+                ["⟦zh⟧每个训练步⟦en⟧Every training step", "⟦zh⟧每个集成成员重新随机抽取 100 个十二位输入；四成员方法合计接收 400 个独立观察⟦en⟧Each ensemble member resamples 100 twelve-bit inputs; a four-member method receives 400 independent observations in total"],
+                ["⟦zh⟧单个位翻转概率⟦en⟧Flip probability per output bit", "25%"],
+                ["⟦zh⟧同一输入再次出现⟦en⟧When an input reappears", "⟦zh⟧重新独立生成噪声，不复用旧错误⟦en⟧Regenerate noise independently; never reuse old errors"],
+                ["⟦zh⟧十二位标签完全不变⟦en⟧Twelve-bit label untouched", "3.17%"],
+                ["⟦zh⟧十二位标签至少一位错误⟦en⟧At least one wrong output bit", "96.83%"],
+                ["⟦zh⟧每个样本平均错误位数⟦en⟧Expected wrong bits per example", "3 / 12"],
+                ["⟦zh⟧模型初始化⟦en⟧Model initialization", "⟦zh⟧随机；不提供公式或已有电路⟦en⟧Random; no formula or existing circuit is supplied"]
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "heading",
+          "level": 3,
+          "text": "⟦zh⟧2,000 步单模型消融⟦en⟧Single-model ablation at 2,000 steps"
+        },
+        {
+          "kind": "table",
+          "columns": [
+            "⟦zh⟧表示形式⟦en⟧Representation",
+            "⟦zh⟧回放选择⟦en⟧Replay selection",
+            "⟦zh⟧逐位准确率⟦en⟧Bit accuracy",
+            "⟦zh⟧整词准确率⟦en⟧Exact-word accuracy",
+            "⟦zh⟧干净 BCE⟦en⟧Clean BCE"
+          ],
+          "rows": [
+            ["⟦zh⟧普通共享 MLP⟦en⟧Ordinary shared MLP", "⟦zh⟧均匀⟦en⟧Uniform", "85.1522%", "18.5547%", "0.27200"],
+            ["⟦zh⟧普通共享 MLP⟦en⟧Ordinary shared MLP", "⟦zh⟧主动⟦en⟧Active", "81.6243%", "7.4219%", "0.33505"],
+            ["⟦zh⟧三阶奇偶特征⟦en⟧Degree-three parity features", "⟦zh⟧均匀⟦en⟧Uniform", "99.8698%", "98.5107%", "0.01421"],
+            ["⟦zh⟧三阶奇偶特征⟦en⟧Degree-three parity features", "⟦zh⟧主动⟦en⟧Active", "99.9797%", "99.7559%", "0.01905"]
+          ],
+          "numeric": [false, false, true, true, true]
+        },
+        {
+          "kind": "figures",
+          "items": [
+            {
+              "src": "noisy-c-method-comparison-p25.png",
+              "caption": "⟦zh⟧早期基线在 25% 新鲜位翻转下的收敛曲线。四个面板依次显示整词准确率、完整干净定义域 loss、四个随机成员的位分歧，以及按二进制位权重计算的数值误差。横轴为训练步数，每个成员每步接收 100 个新鲜带噪样本；干净指标只记录、不训练。该图保留在后部作为新方法出现前的历史对照。⟦en⟧Convergence of the earlier baselines under fresh 25% bit flips. The panels show exact-word accuracy, complete clean-domain loss, disagreement among four random members and bit-significance-weighted numerical error. The horizontal axis is training steps, with 100 fresh noisy examples per member per step; clean metrics are recorded but never trained on. This figure is retained as the historical comparison preceding the new method."
+            }
+          ]
+        },
+        {
+          "kind": "note",
+          "label": "⟦zh⟧不确定性⟦en⟧Uncertainty",
+          "text": "⟦zh⟧位不确定性衡量四个随机成员在十二个输出位上的总硬预测分歧，0 表示完全一致，最大值为 12；数值不确定性让高位分歧权重更大。主实验在首次全对时位分歧仍为 0.04395，说明集成投票已经正确但单成员尚不稳定；到第 3,000 步降为 0.000183。独立复跑最终为 0.006226。这里不把“集成输出全对”等同于“所有成员都全对”。⟦en⟧Bit uncertainty measures total hard-prediction disagreement across twelve output bits among four random members: zero means complete agreement and the maximum is twelve. At the main run's first exact checkpoint it is still 0.04395, showing that the vote is exact while individual members remain imperfect; it falls to 0.000183 by step 3,000. The independent replication ends at 0.006226. Exact ensemble output is not conflated with every member being exact."
+        },
+        {
+          "kind": "note",
+          "label": "⟦zh⟧当前结论⟦en⟧Current conclusion",
+          "text": "⟦zh⟧当前最强结论已经从“神经网络能否逼近”推进到“能否从随机噪声中学出与精确参考同门数的离散门图”：可以。79 项通用二次空间在两个独立随机种子上都收缩为相同的 36 项整数规则；不读取现有电路的通用压缩搜索先得到 158 门，再由盲全域语义重代入独立降到 156 门。浮点路线仍提供更快的首次全对和表示容量消融，但门级路线第一次把随机噪声训练、结构不确定性、稀疏规则、通用编译和实际门数闭合在同一条可复核证据链中。下一循环将从 156 门学习网络继续做更大切割的多门重综合，探索是否能低于当前构造性上界。⟦en⟧The strongest conclusion has advanced from whether a neural model can approximate the map to whether noisy data can yield a discrete gate graph matching the exact reference count: yes. In two independent random seeds, the generic 79-term quadratic space contracts to the same 36-term integer rule. A generic compressor search that does not read the existing circuit first produces 158 gates, and blind full-domain semantic resubstitution independently reduces it to 156. The floating route still provides faster first recovery and capacity ablations, but the gate route now closes a reproducible evidence chain from random-noise training and structural uncertainty through a sparse rule and generic compilation to an actual gate count. The next cycle applies larger-cut multi-gate resynthesis to the learned 156-gate network, exploring whether it can beat the current constructive upper bound."
+        }
+      ]
+    }
+  ]
+}

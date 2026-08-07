@@ -1,0 +1,221 @@
+# Benchmark "abc-work/sergeev-156/mystery-C" written by ABC on Tue Jul 28 12:22:36 2026
+.model abc-work/sergeev-156/mystery-C
+.inputs x1 x2 x3 x4 x5 x6 x7 x8 x9 x10 x11 x12
+.outputs out0 out1 out2 out3 out4 out5 out6 out7 out8 out9 out10 out11
+.gate and2  A=x7 B=x1 Y=out0
+.gate and2  A=x8 B=x1 Y=new_n26
+.gate and2  A=x7 B=x2 Y=new_n27
+.gate nor2  A=new_n27 B=new_n26 Y=new_n28
+.gate and2  A=x8 B=x2 Y=new_n29
+.gate and2  A=new_n29 B=out0 Y=new_n30
+.gate nor2  A=new_n30 B=new_n28 Y=out1
+.gate and2  A=x9 B=x1 Y=new_n32
+.gate xnor2 A=new_n32 B=new_n29 Y=new_n33
+.gate and2  A=x7 B=x3 Y=new_n34
+.gate xor2  A=new_n34 B=new_n33 Y=new_n35
+.gate xnor2 A=new_n35 B=new_n30 Y=out2
+.gate inv   A=new_n30 Y=new_n37
+.gate nor2  A=new_n35 B=new_n37 Y=new_n38
+.gate inv   A=new_n38 Y=new_n39
+.gate and2  A=x10 B=x1 Y=new_n40
+.gate and2  A=x9 B=x2 Y=new_n41
+.gate xnor2 A=new_n41 B=new_n40 Y=new_n42
+.gate nor2  A=new_n34 B=new_n33 Y=new_n43
+.gate nor2  A=new_n32 B=new_n29 Y=new_n44
+.gate nor2  A=new_n44 B=new_n43 Y=new_n45
+.gate xor2  A=new_n45 B=new_n42 Y=new_n46
+.gate and2  A=x8 B=x3 Y=new_n47
+.gate and2  A=x7 B=x4 Y=new_n48
+.gate xnor2 A=new_n48 B=new_n47 Y=new_n49
+.gate inv   A=new_n49 Y=new_n50
+.gate xnor2 A=new_n50 B=new_n46 Y=new_n51
+.gate xnor2 A=new_n51 B=new_n39 Y=out3
+.gate and2  A=new_n51 B=new_n38 Y=new_n53
+.gate and2  A=x8 B=x4 Y=new_n54
+.gate and2  A=x7 B=x5 Y=new_n55
+.gate xnor2 A=new_n55 B=new_n54 Y=new_n56
+.gate xor2  A=new_n56 B=new_n53 Y=new_n57
+.gate and2  A=x9 B=x3 Y=new_n58
+.gate xnor2 A=new_n45 B=new_n40 Y=new_n59
+.gate and2  A=new_n59 B=new_n42 Y=new_n60
+.gate inv   A=new_n47 Y=new_n61
+.gate xnor2 A=new_n61 B=new_n46 Y=new_n62
+.gate nor2  A=new_n62 B=new_n50 Y=new_n63
+.gate xnor2 A=new_n63 B=new_n60 Y=new_n64
+.gate xnor2 A=new_n64 B=new_n58 Y=new_n65
+.gate and2  A=x11 B=x1 Y=new_n66
+.gate and2  A=x10 B=x2 Y=new_n67
+.gate xnor2 A=new_n67 B=new_n66 Y=new_n68
+.gate inv   A=new_n68 Y=new_n69
+.gate xnor2 A=new_n69 B=new_n65 Y=new_n70
+.gate xnor2 A=new_n70 B=new_n57 Y=out4
+.gate nor2  A=new_n45 B=new_n42 Y=new_n72
+.gate nor2  A=new_n41 B=new_n40 Y=new_n73
+.gate nor2  A=new_n73 B=new_n72 Y=new_n74
+.gate xnor2 A=new_n74 B=new_n58 Y=new_n75
+.gate inv   A=new_n75 Y=new_n76
+.gate nor2  A=new_n76 B=new_n64 Y=new_n77
+.gate inv   A=new_n77 Y=new_n78
+.gate inv   A=new_n66 Y=new_n79
+.gate xnor2 A=new_n79 B=new_n65 Y=new_n80
+.gate nor2  A=new_n80 B=new_n69 Y=new_n81
+.gate xnor2 A=new_n81 B=new_n78 Y=new_n82
+.gate and2  A=x10 B=x3 Y=new_n83
+.gate inv   A=new_n83 Y=new_n84
+.gate xnor2 A=new_n84 B=new_n82 Y=new_n85
+.gate and2  A=x12 B=x1 Y=new_n86
+.gate and2  A=x11 B=x2 Y=new_n87
+.gate xnor2 A=new_n87 B=new_n86 Y=new_n88
+.gate inv   A=new_n88 Y=new_n89
+.gate xnor2 A=new_n89 B=new_n85 Y=new_n90
+.gate inv   A=new_n57 Y=new_n91
+.gate and2  A=new_n70 B=new_n91 Y=new_n92
+.gate and2  A=x9 B=x4 Y=new_n93
+.gate and2  A=x8 B=x5 Y=new_n94
+.gate xnor2 A=new_n94 B=new_n93 Y=new_n95
+.gate inv   A=new_n95 Y=new_n96
+.gate xnor2 A=new_n96 B=new_n92 Y=new_n97
+.gate and2  A=x7 B=x6 Y=new_n98
+.gate nor2  A=new_n56 B=new_n53 Y=new_n99
+.gate nor2  A=new_n55 B=new_n54 Y=new_n100
+.gate nor2  A=new_n100 B=new_n99 Y=new_n101
+.gate xnor2 A=new_n101 B=new_n98 Y=new_n102
+.gate inv   A=new_n102 Y=new_n103
+.gate xnor2 A=new_n103 B=new_n97 Y=new_n104
+.gate inv   A=new_n104 Y=new_n105
+.gate xnor2 A=new_n105 B=new_n90 Y=out5
+.gate and2  A=x12 B=x2 Y=new_n107
+.gate inv   A=new_n58 Y=new_n108
+.gate and2  A=new_n64 B=new_n108 Y=new_n109
+.gate nor2  A=new_n74 B=new_n64 Y=new_n110
+.gate nor2  A=new_n110 B=new_n109 Y=new_n111
+.gate xnor2 A=new_n111 B=new_n84 Y=new_n112
+.gate inv   A=new_n112 Y=new_n113
+.gate and2  A=new_n113 B=new_n82 Y=new_n114
+.gate inv   A=new_n86 Y=new_n115
+.gate xnor2 A=new_n115 B=new_n85 Y=new_n116
+.gate nor2  A=new_n116 B=new_n89 Y=new_n117
+.gate xnor2 A=new_n117 B=new_n114 Y=new_n118
+.gate xnor2 A=new_n118 B=new_n107 Y=new_n119
+.gate inv   A=new_n93 Y=new_n120
+.gate xnor2 A=new_n120 B=new_n92 Y=new_n121
+.gate nor2  A=new_n121 B=new_n96 Y=new_n122
+.gate inv   A=new_n98 Y=new_n123
+.gate xnor2 A=new_n123 B=new_n97 Y=new_n124
+.gate nor2  A=new_n124 B=new_n103 Y=new_n125
+.gate xnor2 A=new_n125 B=new_n122 Y=new_n126
+.gate xnor2 A=new_n126 B=new_n119 Y=new_n127
+.gate and2  A=new_n104 B=new_n90 Y=new_n128
+.gate and2  A=x11 B=x3 Y=new_n129
+.gate and2  A=x10 B=x4 Y=new_n130
+.gate xnor2 A=new_n130 B=new_n129 Y=new_n131
+.gate inv   A=new_n131 Y=new_n132
+.gate xnor2 A=new_n132 B=new_n128 Y=new_n133
+.gate and2  A=x9 B=x5 Y=new_n134
+.gate and2  A=x8 B=x6 Y=new_n135
+.gate xnor2 A=new_n135 B=new_n134 Y=new_n136
+.gate inv   A=new_n136 Y=new_n137
+.gate xnor2 A=new_n137 B=new_n133 Y=new_n138
+.gate inv   A=new_n138 Y=new_n139
+.gate xnor2 A=new_n139 B=new_n127 Y=out6
+.gate and2  A=x11 B=x4 Y=new_n141
+.gate and2  A=x10 B=x5 Y=new_n142
+.gate xor2  A=new_n142 B=new_n141 Y=new_n143
+.gate nor2  A=new_n83 B=new_n82 Y=new_n144
+.gate inv   A=new_n82 Y=new_n145
+.gate nor2  A=new_n111 B=new_n145 Y=new_n146
+.gate nor2  A=new_n146 B=new_n144 Y=new_n147
+.gate xnor2 A=new_n147 B=new_n107 Y=new_n148
+.gate inv   A=new_n148 Y=new_n149
+.gate nor2  A=new_n149 B=new_n118 Y=new_n150
+.gate inv   A=new_n150 Y=new_n151
+.gate nor2  A=new_n93 B=new_n92 Y=new_n152
+.gate and2  A=new_n93 B=new_n92 Y=new_n153
+.gate nor2  A=new_n153 B=new_n94 Y=new_n154
+.gate or2   A=new_n154 B=new_n152 Y=new_n155
+.gate xnor2 A=new_n155 B=new_n119 Y=new_n156
+.gate nor2  A=new_n156 B=new_n126 Y=new_n157
+.gate xnor2 A=new_n157 B=new_n151 Y=new_n158
+.gate and2  A=x12 B=x3 Y=new_n159
+.gate inv   A=new_n159 Y=new_n160
+.gate xnor2 A=new_n160 B=new_n158 Y=new_n161
+.gate inv   A=new_n129 Y=new_n162
+.gate xnor2 A=new_n162 B=new_n128 Y=new_n163
+.gate nor2  A=new_n163 B=new_n132 Y=new_n164
+.gate inv   A=new_n134 Y=new_n165
+.gate xnor2 A=new_n165 B=new_n133 Y=new_n166
+.gate nor2  A=new_n166 B=new_n137 Y=new_n167
+.gate xnor2 A=new_n167 B=new_n164 Y=new_n168
+.gate xor2  A=new_n168 B=new_n161 Y=new_n169
+.gate xnor2 A=new_n169 B=new_n143 Y=new_n170
+.gate and2  A=new_n138 B=new_n127 Y=new_n171
+.gate and2  A=x9 B=x6 Y=new_n172
+.gate xnor2 A=new_n172 B=new_n171 Y=new_n173
+.gate xnor2 A=new_n173 B=new_n170 Y=out7
+.gate and2  A=x11 B=x5 Y=new_n175
+.gate and2  A=x10 B=x6 Y=new_n176
+.gate xnor2 A=new_n176 B=new_n175 Y=new_n177
+.gate and2  A=x12 B=x4 Y=new_n178
+.gate inv   A=new_n107 Y=new_n179
+.gate and2  A=new_n118 B=new_n179 Y=new_n180
+.gate nor2  A=new_n147 B=new_n118 Y=new_n181
+.gate nor2  A=new_n181 B=new_n180 Y=new_n182
+.gate xnor2 A=new_n182 B=new_n160 Y=new_n183
+.gate inv   A=new_n183 Y=new_n184
+.gate and2  A=new_n184 B=new_n158 Y=new_n185
+.gate nor2  A=new_n129 B=new_n128 Y=new_n186
+.gate and2  A=new_n129 B=new_n128 Y=new_n187
+.gate nor2  A=new_n187 B=new_n130 Y=new_n188
+.gate or2   A=new_n188 B=new_n186 Y=new_n189
+.gate xnor2 A=new_n189 B=new_n161 Y=new_n190
+.gate nor2  A=new_n190 B=new_n168 Y=new_n191
+.gate xnor2 A=new_n191 B=new_n185 Y=new_n192
+.gate xnor2 A=new_n192 B=new_n178 Y=new_n193
+.gate xnor2 A=new_n169 B=new_n141 Y=new_n194
+.gate nor2  A=new_n194 B=new_n143 Y=new_n195
+.gate inv   A=new_n173 Y=new_n196
+.gate xnor2 A=new_n172 B=new_n170 Y=new_n197
+.gate nor2  A=new_n197 B=new_n196 Y=new_n198
+.gate xnor2 A=new_n198 B=new_n195 Y=new_n199
+.gate xnor2 A=new_n199 B=new_n193 Y=new_n200
+.gate xnor2 A=new_n200 B=new_n177 Y=out8
+.gate nor2  A=new_n159 B=new_n158 Y=new_n202
+.gate inv   A=new_n158 Y=new_n203
+.gate nor2  A=new_n182 B=new_n203 Y=new_n204
+.gate nor2  A=new_n204 B=new_n202 Y=new_n205
+.gate xnor2 A=new_n205 B=new_n178 Y=new_n206
+.gate inv   A=new_n206 Y=new_n207
+.gate nor2  A=new_n207 B=new_n192 Y=new_n208
+.gate inv   A=new_n208 Y=new_n209
+.gate inv   A=new_n141 Y=new_n210
+.gate and2  A=new_n169 B=new_n210 Y=new_n211
+.gate nor2  A=new_n169 B=new_n210 Y=new_n212
+.gate nor2  A=new_n212 B=new_n142 Y=new_n213
+.gate or2   A=new_n213 B=new_n211 Y=new_n214
+.gate xnor2 A=new_n214 B=new_n193 Y=new_n215
+.gate nor2  A=new_n215 B=new_n199 Y=new_n216
+.gate xnor2 A=new_n216 B=new_n209 Y=new_n217
+.gate nor2  A=new_n200 B=new_n177 Y=new_n218
+.gate nor2  A=new_n176 B=new_n175 Y=new_n219
+.gate nor2  A=new_n219 B=new_n218 Y=new_n220
+.gate xnor2 A=new_n220 B=new_n217 Y=new_n221
+.gate and2  A=x12 B=x5 Y=new_n222
+.gate and2  A=x11 B=x6 Y=new_n223
+.gate xnor2 A=new_n223 B=new_n222 Y=new_n224
+.gate xnor2 A=new_n224 B=new_n221 Y=out9
+.gate nand2 A=x12 B=x6 Y=new_n226
+.gate inv   A=new_n217 Y=new_n227
+.gate inv   A=new_n178 Y=new_n228
+.gate and2  A=new_n192 B=new_n228 Y=new_n229
+.gate nor2  A=new_n205 B=new_n192 Y=new_n230
+.gate or2   A=new_n230 B=new_n229 Y=new_n231
+.gate xnor2 A=new_n231 B=new_n220 Y=new_n232
+.gate nor2  A=new_n232 B=new_n227 Y=new_n233
+.gate inv   A=new_n224 Y=new_n234
+.gate xnor2 A=new_n222 B=new_n221 Y=new_n235
+.gate nor2  A=new_n235 B=new_n234 Y=new_n236
+.gate xnor2 A=new_n236 B=new_n233 Y=new_n237
+.gate xnor2 A=new_n237 B=new_n226 Y=out10
+.gate nor2  A=new_n237 B=new_n175 Y=new_n239
+.gate nor2  A=new_n239 B=new_n226 Y=out11
+.end

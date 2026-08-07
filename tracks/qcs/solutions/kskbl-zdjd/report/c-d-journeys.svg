@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="650" viewBox="0 0 1120 650" role="img" aria-labelledby="title desc">
+  <title id="title">Optimization journeys for the multiplier and square-sum circuits</title>
+  <desc id="desc">Two descending paths show the accepted exact gate counts for task C and task D.</desc>
+  <defs>
+    <linearGradient id="cLine" x1="0" x2="1">
+      <stop offset="0" stop-color="#087f8c"/><stop offset="1" stop-color="#5746b8"/>
+    </linearGradient>
+    <linearGradient id="dLine" x1="0" x2="1">
+      <stop offset="0" stop-color="#c56a19"/><stop offset="1" stop-color="#b83280"/>
+    </linearGradient>
+    <filter id="dotGlow" x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <rect width="1120" height="650" rx="28" fill="#ffffff"/>
+  <g stroke="#dbe4ec" stroke-width="1">
+    <path d="M95 110H1060M95 160H1060M95 210H1060M95 260H1060"/>
+    <path d="M95 390H1060M95 440H1060M95 490H1060M95 540H1060"/>
+  </g>
+  <g font-family="Inter,Segoe UI,sans-serif">
+    <text x="56" y="72" fill="#087f8c" font-size="22" font-weight="800">C</text>
+    <text x="94" y="72" fill="#17212b" font-size="17">6 × 6 multiplier</text>
+    <text x="56" y="352" fill="#b85022" font-size="22" font-weight="800">D</text>
+    <text x="94" y="352" fill="#17212b" font-size="17">x² + y²</text>
+  </g>
+  <path d="M120 116 L280 133 L440 150 L600 167 L800 232 L980 252"
+        fill="none" stroke="url(#cLine)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M120 394 L220 405 L320 416 L420 427 L520 438 L620 449 L700 471 L760 482 L850 504 L920 526 L990 537 L1040 548"
+        fill="none" stroke="url(#dLine)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <g fill="#ffffff" stroke="#087f8c" stroke-width="4">
+    <circle cx="120" cy="116" r="8"/><circle cx="280" cy="133" r="8"/><circle cx="440" cy="150" r="8"/>
+    <circle cx="600" cy="167" r="8"/><circle cx="800" cy="232" r="8"/><circle cx="980" cy="252" r="8"/>
+  </g>
+  <g fill="#ffffff" stroke="#b85022" stroke-width="4">
+    <circle cx="120" cy="394" r="7"/><circle cx="220" cy="405" r="7"/><circle cx="320" cy="416" r="7"/>
+    <circle cx="420" cy="427" r="7"/><circle cx="520" cy="438" r="7"/><circle cx="620" cy="449" r="7"/>
+    <circle cx="700" cy="471" r="7"/><circle cx="760" cy="482" r="7"/><circle cx="850" cy="504" r="7"/>
+    <circle cx="920" cy="526" r="7"/><circle cx="990" cy="537" r="7"/><circle cx="1040" cy="548" r="7"/>
+  </g>
+  <g font-family="JetBrains Mono,Consolas,monospace" font-size="15" font-weight="800" fill="#17212b">
+    <text x="120" y="102" text-anchor="middle">168</text><text x="280" y="119" text-anchor="middle">167</text>
+    <text x="440" y="136" text-anchor="middle">166</text><text x="600" y="153" text-anchor="middle">165</text>
+    <text x="800" y="218" text-anchor="middle">158</text><text x="980" y="238" text-anchor="middle">156</text>
+  </g>
+  <g font-family="Inter,Segoe UI,sans-serif" font-size="12" fill="#526170">
+    <text x="120" y="286" text-anchor="middle">baseline</text><text x="280" y="286" text-anchor="middle">mfs2</text>
+    <text x="440" y="286" text-anchor="middle">SAT window</text><text x="600" y="286" text-anchor="middle">joint tensor</text>
+    <text x="800" y="286" text-anchor="middle">Sergeev</text><text x="980" y="286" text-anchor="middle">reachable states</text>
+  </g>
+  <g font-family="JetBrains Mono,Consolas,monospace" font-size="13" font-weight="800" fill="#17212b">
+    <text x="120" y="381" text-anchor="middle">127</text><text x="220" y="392" text-anchor="middle">126</text>
+    <text x="320" y="403" text-anchor="middle">125</text><text x="420" y="414" text-anchor="middle">124</text>
+    <text x="520" y="425" text-anchor="middle">123</text><text x="620" y="436" text-anchor="middle">122</text>
+    <text x="700" y="458" text-anchor="middle">120</text><text x="760" y="469" text-anchor="middle">119</text>
+    <text x="850" y="491" text-anchor="middle">117</text><text x="920" y="513" text-anchor="middle">115</text>
+    <text x="990" y="524" text-anchor="middle">114</text><text x="1040" y="535" text-anchor="middle">113</text>
+  </g>
+  <g font-family="Inter,Segoe UI,sans-serif" font-size="12" fill="#526170">
+    <text x="120" y="586" text-anchor="middle">baseline</text><text x="420" y="586" text-anchor="middle">topology evolution</text>
+    <text x="700" y="586" text-anchor="middle">islands</text><text x="850" y="586" text-anchor="middle">alt. island</text>
+    <text x="920" y="586" text-anchor="middle">tensor windows</text><text x="1015" y="586" text-anchor="middle">joint regions</text>
+  </g>
+</svg>

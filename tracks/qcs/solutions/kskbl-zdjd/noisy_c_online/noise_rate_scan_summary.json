@@ -1,0 +1,4980 @@
+{
+  "kind": "quadratic-discovery-noise-rate-scan",
+  "protocol": {
+    "noise_rates": [
+      0.05,
+      0.15,
+      0.25,
+      0.35,
+      0.4,
+      0.45
+    ],
+    "seeds": [
+      127100,
+      137100
+    ],
+    "batch_size": 100,
+    "input_sampling": "uniform",
+    "fresh_noise_each_sample": true,
+    "clean_domain_used_for_updates": false,
+    "formula_or_existing_circuit_seeded": false
+  },
+  "claims": {
+    "all_runs_final_exact": true,
+    "all_runs_recover_same_36_term_rule": true,
+    "maximum_verified_noise_rate": 0.45,
+    "maximum_noise_mean_first_recovery_step": 67500.0
+  },
+  "scaling_fit": {
+    "model": "first_exact_step = intercept + slope / (1 - 2p)^2",
+    "intercept": 121.4515410237094,
+    "slope": 677.6878849309019,
+    "r_squared": 0.9687873467424499
+  },
+  "noise_rates": [
+    0.05,
+    0.15,
+    0.25,
+    0.35,
+    0.4,
+    0.45
+  ],
+  "by_noise_rate": {
+    "0.05": {
+      "run_count": 2,
+      "first_full_recovery_steps": [
+        550,
+        550
+      ],
+      "mean_first_full_recovery_step": 550.0,
+      "mean_final_elapsed_seconds": 0.28412890000254265
+    },
+    "0.15": {
+      "run_count": 2,
+      "first_full_recovery_steps": [
+        1500,
+        1200
+      ],
+      "mean_first_full_recovery_step": 1350.0,
+      "mean_final_elapsed_seconds": 0.39842474999750266
+    },
+    "0.25": {
+      "run_count": 2,
+      "first_full_recovery_steps": [
+        2400,
+        2600
+      ],
+      "mean_first_full_recovery_step": 2500.0,
+      "mean_final_elapsed_seconds": 0.7563266000033764
+    },
+    "0.35": {
+      "run_count": 2,
+      "first_full_recovery_steps": [
+        7000,
+        7000
+      ],
+      "mean_first_full_recovery_step": 7000.0,
+      "mean_final_elapsed_seconds": 1.7221199999985402
+    },
+    "0.40": {
+      "run_count": 2,
+      "first_full_recovery_steps": [
+        17000,
+        21000
+      ],
+      "mean_first_full_recovery_step": 19000.0,
+      "mean_final_elapsed_seconds": 4.699069650003366
+    },
+    "0.45": {
+      "run_count": 2,
+      "first_full_recovery_steps": [
+        77500,
+        57500
+      ],
+      "mean_first_full_recovery_step": 67500.0,
+      "mean_final_elapsed_seconds": 18.217620949995762
+    }
+  },
+  "by_seed": {
+    "127100": [
+      {
+        "path": "tracks/qcs/results/20260730-185000-noisy-c-noise-rate-scan/p05-seed127100",
+        "run_sha256": "1d1713b65b7ab9d674104a43e5d0c494f2675210ff05ce1ebc43bf1eed753410",
+        "metrics_sha256": "641dd949b63b648f4134b7b04790a62665cb41072bdc4bc1574446c8d26846e0",
+        "config": {
+          "steps": 1200,
+          "batch_size": 100,
+          "noise_rate": 0.05,
+          "eval_every": 50,
+          "base_seed": 127100,
+          "prior_jitter": 1e-06,
+          "coefficient_prior_std": 1.0,
+          "projection_ridge": 0.001,
+          "weight_mode": "observation",
+          "input_sampling": "uniform",
+          "device": "cpu"
+        },
+        "first_full_recovery_step": 550,
+        "final": {
+          "step": 1200,
+          "examples_seen": 120000,
+          "elapsed_seconds": 0.28140430000348715,
+          "train_loss_ema": 0.19920875230262444,
+          "teacher_mean_observations": 29.296875,
+          "teacher_min_observations": 13,
+          "effective_projection_inputs": 4096,
+          "active_integer_coefficients": 36,
+          "maximum_rounding_residual": 0.000126896281358313,
+          "bit_accuracy": 1.0,
+          "word_accuracy": 1.0,
+          "normalized_mae": 0.0,
+          "per_bit_accuracy": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        "active_integer_coefficients": [
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              0,
+              6
+            ],
+            "mask": 65,
+            "coefficient": 1
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              0,
+              7
+            ],
+            "mask": 129,
+            "coefficient": 2
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              0,
+              8
+            ],
+            "mask": 257,
+            "coefficient": 4
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              0,
+              9
+            ],
+            "mask": 513,
+            "coefficient": 8
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              0,
+              10
+            ],
+            "mask": 1025,
+            "coefficient": 16
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              0,
+              11
+            ],
+            "mask": 2049,
+            "coefficient": 32
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              1,
+              6
+            ],
+            "mask": 66,
+            "coefficient": 2
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              1,
+              7
+            ],
+            "mask": 130,
+            "coefficient": 4
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              1,
+              8
+            ],
+            "mask": 258,
+            "coefficient": 8
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              1,
+              9
+            ],
+            "mask": 514,
+            "coefficient": 16
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              1,
+              10
+            ],
+            "mask": 1026,
+            "coefficient": 32
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              1,
+              11
+            ],
+            "mask": 2050,
+            "coefficient": 64
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              2,
+              6
+            ],
+            "mask": 68,
+            "coefficient": 4
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              2,
+              7
+            ],
+            "mask": 132,
+            "coefficient": 8
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              2,
+              8
+            ],
+            "mask": 260,
+            "coefficient": 16
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              2,
+              9
+            ],
+            "mask": 516,
+            "coefficient": 32
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              2,
+              10
+            ],
+            "mask": 1028,
+            "coefficient": 64
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              2,
+              11
+            ],
+            "mask": 2052,
+            "coefficient": 128
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              3,
+              6
+            ],
+            "mask": 72,
+            "coefficient": 8
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              3,
+              7
+            ],
+            "mask": 136,
+            "coefficient": 16
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              3,
+              8
+            ],
+            "mask": 264,
+            "coefficient": 32
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              3,
+              9
+            ],
+            "mask": 520,
+            "coefficient": 64
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              3,
+              10
+            ],
+            "mask": 1032,
+            "coefficient": 128
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              3,
+              11
+            ],
+            "mask": 2056,
+            "coefficient": 256
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              4,
+              6
+            ],
+            "mask": 80,
+            "coefficient": 16
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              4,
+              7
+            ],
+            "mask": 144,
+            "coefficient": 32
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              4,
+              8
+            ],
+            "mask": 272,
+            "coefficient": 64
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              4,
+              9
+            ],
+            "mask": 528,
+            "coefficient": 128
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              4,
+              10
+            ],
+            "mask": 1040,
+            "coefficient": 256
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              4,
+              11
+            ],
+            "mask": 2064,
+            "coefficient": 512
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              5,
+              6
+            ],
+            "mask": 96,
+            "coefficient": 32
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              5,
+              7
+            ],
+            "mask": 160,
+            "coefficient": 64
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              5,
+              8
+            ],
+            "mask": 288,
+            "coefficient": 128
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              5,
+              9
+            ],
+            "mask": 544,
+            "coefficient": 256
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              5,
+              10
+            ],
+            "mask": 1056,
+            "coefficient": 512
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              5,
+              11
+            ],
+            "mask": 2080,
+            "coefficient": 1024
+          }
+        ]
+      },
+      {
+        "path": "tracks/qcs/results/20260730-185000-noisy-c-noise-rate-scan/p15-seed127100",
+        "run_sha256": "f4113a7a7b024c1e866b022274b8e91a0720b251868d2c21ee5d7a9a341e6ace",
+        "metrics_sha256": "688202d62d9eeb5cd5c2132e30481920304642f9bde47cddaa6ab8c023d0b37b",
+        "config": {
+          "steps": 2000,
+          "batch_size": 100,
+          "noise_rate": 0.15,
+          "eval_every": 100,
+          "base_seed": 127100,
+          "prior_jitter": 1e-06,
+          "coefficient_prior_std": 1.0,
+          "projection_ridge": 0.001,
+          "weight_mode": "observation",
+          "input_sampling": "uniform",
+          "device": "cpu"
+        },
+        "first_full_recovery_step": 1500,
+        "final": {
+          "step": 2000,
+          "examples_seen": 200000,
+          "elapsed_seconds": 0.40483649999805493,
+          "train_loss_ema": 0.42767757470349804,
+          "teacher_mean_observations": 48.828125,
+          "teacher_min_observations": 27,
+          "effective_projection_inputs": 4096,
+          "active_integer_coefficients": 36,
+          "maximum_rounding_residual": 0.000252647596427005,
+          "bit_accuracy": 1.0,
+          "word_accuracy": 1.0,
+          "normalized_mae": 0.0,
+          "per_bit_accuracy": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        "active_integer_coefficients": [
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              0,
+              6
+            ],
+            "mask": 65,
+            "coefficient": 1
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              0,
+              7
+            ],
+            "mask": 129,
+            "coefficient": 2
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              0,
+              8
+            ],
+            "mask": 257,
+            "coefficient": 4
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              0,
+              9
+            ],
+            "mask": 513,
+            "coefficient": 8
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              0,
+              10
+            ],
+            "mask": 1025,
+            "coefficient": 16
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              0,
+              11
+            ],
+            "mask": 2049,
+            "coefficient": 32
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              1,
+              6
+            ],
+            "mask": 66,
+            "coefficient": 2
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              1,
+              7
+            ],
+            "mask": 130,
+            "coefficient": 4
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              1,
+              8
+            ],
+            "mask": 258,
+            "coefficient": 8
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              1,
+              9
+            ],
+            "mask": 514,
+            "coefficient": 16
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              1,
+              10
+            ],
+            "mask": 1026,
+            "coefficient": 32
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              1,
+              11
+            ],
+            "mask": 2050,
+            "coefficient": 64
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              2,
+              6
+            ],
+            "mask": 68,
+            "coefficient": 4
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              2,
+              7
+            ],
+            "mask": 132,
+            "coefficient": 8
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              2,
+              8
+            ],
+            "mask": 260,
+            "coefficient": 16
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              2,
+              9
+            ],
+            "mask": 516,
+            "coefficient": 32
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              2,
+              10
+            ],
+            "mask": 1028,
+            "coefficient": 64
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              2,
+              11
+            ],
+            "mask": 2052,
+            "coefficient": 128
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              3,
+              6
+            ],
+            "mask": 72,
+            "coefficient": 8
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              3,
+              7
+            ],
+            "mask": 136,
+            "coefficient": 16
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              3,
+              8
+            ],
+            "mask": 264,
+            "coefficient": 32
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              3,
+              9
+            ],
+            "mask": 520,
+            "coefficient": 64
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              3,
+              10
+            ],
+            "mask": 1032,
+            "coefficient": 128
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              3,
+              11
+            ],
+            "mask": 2056,
+            "coefficient": 256
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              4,
+              6
+            ],
+            "mask": 80,
+            "coefficient": 16
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              4,
+              7
+            ],
+            "mask": 144,
+            "coefficient": 32
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              4,
+              8
+            ],
+            "mask": 272,
+            "coefficient": 64
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              4,
+              9
+            ],
+            "mask": 528,
+            "coefficient": 128
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              4,
+              10
+            ],
+            "mask": 1040,
+            "coefficient": 256
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              4,
+              11
+            ],
+            "mask": 2064,
+            "coefficient": 512
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              5,
+              6
+            ],
+            "mask": 96,
+            "coefficient": 32
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              5,
+              7
+            ],
+            "mask": 160,
+            "coefficient": 64
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              5,
+              8
+            ],
+            "mask": 288,
+            "coefficient": 128
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              5,
+              9
+            ],
+            "mask": 544,
+            "coefficient": 256
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              5,
+              10
+            ],
+            "mask": 1056,
+            "coefficient": 512
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              5,
+              11
+            ],
+            "mask": 2080,
+            "coefficient": 1024
+          }
+        ]
+      },
+      {
+        "path": "tracks/qcs/results/20260730-185000-noisy-c-noise-rate-scan/p25-seed127100",
+        "run_sha256": "5238587f14db616aa5e16e01c0cda193223a2d083e08139bfdfc909fb87ac80b",
+        "metrics_sha256": "bc203a2f896e86c60b3f85f2df2299f2f213c4ac59a69fdb51123560f03fc210",
+        "config": {
+          "steps": 4000,
+          "batch_size": 100,
+          "noise_rate": 0.25,
+          "eval_every": 200,
+          "base_seed": 127100,
+          "prior_jitter": 1e-06,
+          "coefficient_prior_std": 1.0,
+          "projection_ridge": 0.001,
+          "weight_mode": "observation",
+          "input_sampling": "uniform",
+          "device": "cpu"
+        },
+        "first_full_recovery_step": 2400,
+        "final": {
+          "step": 4000,
+          "examples_seen": 400000,
+          "elapsed_seconds": 0.7682980000026873,
+          "train_loss_ema": 0.56240135022015,
+          "teacher_mean_observations": 97.65625,
+          "teacher_min_observations": 67,
+          "effective_projection_inputs": 4096,
+          "active_integer_coefficients": 36,
+          "maximum_rounding_residual": 5.913811291815474e-05,
+          "bit_accuracy": 1.0,
+          "word_accuracy": 1.0,
+          "normalized_mae": 0.0,
+          "per_bit_accuracy": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        "active_integer_coefficients": [
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              0,
+              6
+            ],
+            "mask": 65,
+            "coefficient": 1
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              0,
+              7
+            ],
+            "mask": 129,
+            "coefficient": 2
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              0,
+              8
+            ],
+            "mask": 257,
+            "coefficient": 4
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              0,
+              9
+            ],
+            "mask": 513,
+            "coefficient": 8
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              0,
+              10
+            ],
+            "mask": 1025,
+            "coefficient": 16
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              0,
+              11
+            ],
+            "mask": 2049,
+            "coefficient": 32
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              1,
+              6
+            ],
+            "mask": 66,
+            "coefficient": 2
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              1,
+              7
+            ],
+            "mask": 130,
+            "coefficient": 4
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              1,
+              8
+            ],
+            "mask": 258,
+            "coefficient": 8
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              1,
+              9
+            ],
+            "mask": 514,
+            "coefficient": 16
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              1,
+              10
+            ],
+            "mask": 1026,
+            "coefficient": 32
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              1,
+              11
+            ],
+            "mask": 2050,
+            "coefficient": 64
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              2,
+              6
+            ],
+            "mask": 68,
+            "coefficient": 4
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              2,
+              7
+            ],
+            "mask": 132,
+            "coefficient": 8
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              2,
+              8
+            ],
+            "mask": 260,
+            "coefficient": 16
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              2,
+              9
+            ],
+            "mask": 516,
+            "coefficient": 32
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              2,
+              10
+            ],
+            "mask": 1028,
+            "coefficient": 64
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              2,
+              11
+            ],
+            "mask": 2052,
+            "coefficient": 128
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              3,
+              6
+            ],
+            "mask": 72,
+            "coefficient": 8
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              3,
+              7
+            ],
+            "mask": 136,
+            "coefficient": 16
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              3,
+              8
+            ],
+            "mask": 264,
+            "coefficient": 32
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              3,
+              9
+            ],
+            "mask": 520,
+            "coefficient": 64
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              3,
+              10
+            ],
+            "mask": 1032,
+            "coefficient": 128
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              3,
+              11
+            ],
+            "mask": 2056,
+            "coefficient": 256
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              4,
+              6
+            ],
+            "mask": 80,
+            "coefficient": 16
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              4,
+              7
+            ],
+            "mask": 144,
+            "coefficient": 32
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              4,
+              8
+            ],
+            "mask": 272,
+            "coefficient": 64
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              4,
+              9
+            ],
+            "mask": 528,
+            "coefficient": 128
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              4,
+              10
+            ],
+            "mask": 1040,
+            "coefficient": 256
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              4,
+              11
+            ],
+            "mask": 2064,
+            "coefficient": 512
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              5,
+              6
+            ],
+            "mask": 96,
+            "coefficient": 32
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              5,
+              7
+            ],
+            "mask": 160,
+            "coefficient": 64
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              5,
+              8
+            ],
+            "mask": 288,
+            "coefficient": 128
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              5,
+              9
+            ],
+            "mask": 544,
+            "coefficient": 256
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              5,
+              10
+            ],
+            "mask": 1056,
+            "coefficient": 512
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              5,
+              11
+            ],
+            "mask": 2080,
+            "coefficient": 1024
+          }
+        ]
+      },
+      {
+        "path": "tracks/qcs/results/20260730-185000-noisy-c-noise-rate-scan/p35-seed127100",
+        "run_sha256": "917a0555148e62a549b68fc12966a579a8f798688674e6d35368a042dc6db490",
+        "metrics_sha256": "8c41dbe9c8d69d3138edb08795d778bfcf7f89803a71551e807954cf28880309",
+        "config": {
+          "steps": 10000,
+          "batch_size": 100,
+          "noise_rate": 0.35,
+          "eval_every": 500,
+          "base_seed": 127100,
+          "prior_jitter": 1e-06,
+          "coefficient_prior_std": 1.0,
+          "projection_ridge": 0.001,
+          "weight_mode": "observation",
+          "input_sampling": "uniform",
+          "device": "cpu"
+        },
+        "first_full_recovery_step": 7000,
+        "final": {
+          "step": 10000,
+          "examples_seen": 1000000,
+          "elapsed_seconds": 1.7153352000023006,
+          "train_loss_ema": 0.6462045225293125,
+          "teacher_mean_observations": 244.140625,
+          "teacher_min_observations": 193,
+          "effective_projection_inputs": 4096,
+          "active_integer_coefficients": 36,
+          "maximum_rounding_residual": 0.001477502004475294,
+          "bit_accuracy": 1.0,
+          "word_accuracy": 1.0,
+          "normalized_mae": 0.0,
+          "per_bit_accuracy": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        "active_integer_coefficients": [
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              0,
+              6
+            ],
+            "mask": 65,
+            "coefficient": 1
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              0,
+              7
+            ],
+            "mask": 129,
+            "coefficient": 2
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              0,
+              8
+            ],
+            "mask": 257,
+            "coefficient": 4
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              0,
+              9
+            ],
+            "mask": 513,
+            "coefficient": 8
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              0,
+              10
+            ],
+            "mask": 1025,
+            "coefficient": 16
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              0,
+              11
+            ],
+            "mask": 2049,
+            "coefficient": 32
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              1,
+              6
+            ],
+            "mask": 66,
+            "coefficient": 2
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              1,
+              7
+            ],
+            "mask": 130,
+            "coefficient": 4
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              1,
+              8
+            ],
+            "mask": 258,
+            "coefficient": 8
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              1,
+              9
+            ],
+            "mask": 514,
+            "coefficient": 16
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              1,
+              10
+            ],
+            "mask": 1026,
+            "coefficient": 32
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              1,
+              11
+            ],
+            "mask": 2050,
+            "coefficient": 64
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              2,
+              6
+            ],
+            "mask": 68,
+            "coefficient": 4
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              2,
+              7
+            ],
+            "mask": 132,
+            "coefficient": 8
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              2,
+              8
+            ],
+            "mask": 260,
+            "coefficient": 16
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              2,
+              9
+            ],
+            "mask": 516,
+            "coefficient": 32
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              2,
+              10
+            ],
+            "mask": 1028,
+            "coefficient": 64
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              2,
+              11
+            ],
+            "mask": 2052,
+            "coefficient": 128
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              3,
+              6
+            ],
+            "mask": 72,
+            "coefficient": 8
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              3,
+              7
+            ],
+            "mask": 136,
+            "coefficient": 16
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              3,
+              8
+            ],
+            "mask": 264,
+            "coefficient": 32
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              3,
+              9
+            ],
+            "mask": 520,
+            "coefficient": 64
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              3,
+              10
+            ],
+            "mask": 1032,
+            "coefficient": 128
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              3,
+              11
+            ],
+            "mask": 2056,
+            "coefficient": 256
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              4,
+              6
+            ],
+            "mask": 80,
+            "coefficient": 16
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              4,
+              7
+            ],
+            "mask": 144,
+            "coefficient": 32
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              4,
+              8
+            ],
+            "mask": 272,
+            "coefficient": 64
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              4,
+              9
+            ],
+            "mask": 528,
+            "coefficient": 128
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              4,
+              10
+            ],
+            "mask": 1040,
+            "coefficient": 256
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              4,
+              11
+            ],
+            "mask": 2064,
+            "coefficient": 512
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              5,
+              6
+            ],
+            "mask": 96,
+            "coefficient": 32
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              5,
+              7
+            ],
+            "mask": 160,
+            "coefficient": 64
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              5,
+              8
+            ],
+            "mask": 288,
+            "coefficient": 128
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              5,
+              9
+            ],
+            "mask": 544,
+            "coefficient": 256
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              5,
+              10
+            ],
+            "mask": 1056,
+            "coefficient": 512
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              5,
+              11
+            ],
+            "mask": 2080,
+            "coefficient": 1024
+          }
+        ]
+      },
+      {
+        "path": "tracks/qcs/results/20260730-185000-noisy-c-noise-rate-scan/p40-seed127100",
+        "run_sha256": "d4389a40dc1db547ef097fa3d2520025be0ff82583988b0839277149a2fbe80d",
+        "metrics_sha256": "4ecf1d5b9d72f5ae17422c712cd3f1da00f4737482df3d5b04fe7734d1e87b0e",
+        "config": {
+          "steps": 25000,
+          "batch_size": 100,
+          "noise_rate": 0.4,
+          "eval_every": 1000,
+          "base_seed": 127100,
+          "prior_jitter": 1e-06,
+          "coefficient_prior_std": 1.0,
+          "projection_ridge": 0.001,
+          "weight_mode": "observation",
+          "input_sampling": "uniform",
+          "device": "cpu"
+        },
+        "first_full_recovery_step": 17000,
+        "final": {
+          "step": 25000,
+          "examples_seen": 2500000,
+          "elapsed_seconds": 4.748587900001439,
+          "train_loss_ema": 0.6729973342661997,
+          "teacher_mean_observations": 610.3515625,
+          "teacher_min_observations": 519,
+          "effective_projection_inputs": 4096,
+          "active_integer_coefficients": 36,
+          "maximum_rounding_residual": 0.0003468567079404376,
+          "bit_accuracy": 1.0,
+          "word_accuracy": 1.0,
+          "normalized_mae": 0.0,
+          "per_bit_accuracy": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        "active_integer_coefficients": [
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              0,
+              6
+            ],
+            "mask": 65,
+            "coefficient": 1
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              0,
+              7
+            ],
+            "mask": 129,
+            "coefficient": 2
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              0,
+              8
+            ],
+            "mask": 257,
+            "coefficient": 4
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              0,
+              9
+            ],
+            "mask": 513,
+            "coefficient": 8
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              0,
+              10
+            ],
+            "mask": 1025,
+            "coefficient": 16
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              0,
+              11
+            ],
+            "mask": 2049,
+            "coefficient": 32
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              1,
+              6
+            ],
+            "mask": 66,
+            "coefficient": 2
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              1,
+              7
+            ],
+            "mask": 130,
+            "coefficient": 4
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              1,
+              8
+            ],
+            "mask": 258,
+            "coefficient": 8
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              1,
+              9
+            ],
+            "mask": 514,
+            "coefficient": 16
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              1,
+              10
+            ],
+            "mask": 1026,
+            "coefficient": 32
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              1,
+              11
+            ],
+            "mask": 2050,
+            "coefficient": 64
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              2,
+              6
+            ],
+            "mask": 68,
+            "coefficient": 4
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              2,
+              7
+            ],
+            "mask": 132,
+            "coefficient": 8
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              2,
+              8
+            ],
+            "mask": 260,
+            "coefficient": 16
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              2,
+              9
+            ],
+            "mask": 516,
+            "coefficient": 32
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              2,
+              10
+            ],
+            "mask": 1028,
+            "coefficient": 64
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              2,
+              11
+            ],
+            "mask": 2052,
+            "coefficient": 128
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              3,
+              6
+            ],
+            "mask": 72,
+            "coefficient": 8
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              3,
+              7
+            ],
+            "mask": 136,
+            "coefficient": 16
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              3,
+              8
+            ],
+            "mask": 264,
+            "coefficient": 32
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              3,
+              9
+            ],
+            "mask": 520,
+            "coefficient": 64
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              3,
+              10
+            ],
+            "mask": 1032,
+            "coefficient": 128
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              3,
+              11
+            ],
+            "mask": 2056,
+            "coefficient": 256
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              4,
+              6
+            ],
+            "mask": 80,
+            "coefficient": 16
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              4,
+              7
+            ],
+            "mask": 144,
+            "coefficient": 32
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              4,
+              8
+            ],
+            "mask": 272,
+            "coefficient": 64
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              4,
+              9
+            ],
+            "mask": 528,
+            "coefficient": 128
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              4,
+              10
+            ],
+            "mask": 1040,
+            "coefficient": 256
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              4,
+              11
+            ],
+            "mask": 2064,
+            "coefficient": 512
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              5,
+              6
+            ],
+            "mask": 96,
+            "coefficient": 32
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              5,
+              7
+            ],
+            "mask": 160,
+            "coefficient": 64
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              5,
+              8
+            ],
+            "mask": 288,
+            "coefficient": 128
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              5,
+              9
+            ],
+            "mask": 544,
+            "coefficient": 256
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              5,
+              10
+            ],
+            "mask": 1056,
+            "coefficient": 512
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              5,
+              11
+            ],
+            "mask": 2080,
+            "coefficient": 1024
+          }
+        ]
+      },
+      {
+        "path": "tracks/qcs/results/20260730-185000-noisy-c-noise-rate-scan/p45-seed127100",
+        "run_sha256": "3bde54cbdfa0a0f834b7b8fe63132ea01ede44732c3df2cf954b4be1e98c59c8",
+        "metrics_sha256": "a9cd327e967dea147f4811f8602c3fd394050a249f823c9b17a1857978a6eb6a",
+        "config": {
+          "steps": 100000,
+          "batch_size": 100,
+          "noise_rate": 0.45,
+          "eval_every": 2500,
+          "base_seed": 127100,
+          "prior_jitter": 1e-06,
+          "coefficient_prior_std": 1.0,
+          "projection_ridge": 0.001,
+          "weight_mode": "observation",
+          "input_sampling": "uniform",
+          "device": "cpu"
+        },
+        "first_full_recovery_step": 77500,
+        "final": {
+          "step": 100000,
+          "examples_seen": 10000000,
+          "elapsed_seconds": 18.294947999995202,
+          "train_loss_ema": 0.6886456955237755,
+          "teacher_mean_observations": 2441.40625,
+          "teacher_min_observations": 2266,
+          "effective_projection_inputs": 4096,
+          "active_integer_coefficients": 36,
+          "maximum_rounding_residual": 0.00010431708692818994,
+          "bit_accuracy": 1.0,
+          "word_accuracy": 1.0,
+          "normalized_mae": 0.0,
+          "per_bit_accuracy": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        "active_integer_coefficients": [
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              0,
+              6
+            ],
+            "mask": 65,
+            "coefficient": 1
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              0,
+              7
+            ],
+            "mask": 129,
+            "coefficient": 2
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              0,
+              8
+            ],
+            "mask": 257,
+            "coefficient": 4
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              0,
+              9
+            ],
+            "mask": 513,
+            "coefficient": 8
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              0,
+              10
+            ],
+            "mask": 1025,
+            "coefficient": 16
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              0,
+              11
+            ],
+            "mask": 2049,
+            "coefficient": 32
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              1,
+              6
+            ],
+            "mask": 66,
+            "coefficient": 2
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              1,
+              7
+            ],
+            "mask": 130,
+            "coefficient": 4
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              1,
+              8
+            ],
+            "mask": 258,
+            "coefficient": 8
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              1,
+              9
+            ],
+            "mask": 514,
+            "coefficient": 16
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              1,
+              10
+            ],
+            "mask": 1026,
+            "coefficient": 32
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              1,
+              11
+            ],
+            "mask": 2050,
+            "coefficient": 64
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              2,
+              6
+            ],
+            "mask": 68,
+            "coefficient": 4
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              2,
+              7
+            ],
+            "mask": 132,
+            "coefficient": 8
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              2,
+              8
+            ],
+            "mask": 260,
+            "coefficient": 16
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              2,
+              9
+            ],
+            "mask": 516,
+            "coefficient": 32
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              2,
+              10
+            ],
+            "mask": 1028,
+            "coefficient": 64
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              2,
+              11
+            ],
+            "mask": 2052,
+            "coefficient": 128
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              3,
+              6
+            ],
+            "mask": 72,
+            "coefficient": 8
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              3,
+              7
+            ],
+            "mask": 136,
+            "coefficient": 16
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              3,
+              8
+            ],
+            "mask": 264,
+            "coefficient": 32
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              3,
+              9
+            ],
+            "mask": 520,
+            "coefficient": 64
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              3,
+              10
+            ],
+            "mask": 1032,
+            "coefficient": 128
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              3,
+              11
+            ],
+            "mask": 2056,
+            "coefficient": 256
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              4,
+              6
+            ],
+            "mask": 80,
+            "coefficient": 16
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              4,
+              7
+            ],
+            "mask": 144,
+            "coefficient": 32
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              4,
+              8
+            ],
+            "mask": 272,
+            "coefficient": 64
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              4,
+              9
+            ],
+            "mask": 528,
+            "coefficient": 128
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              4,
+              10
+            ],
+            "mask": 1040,
+            "coefficient": 256
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              4,
+              11
+            ],
+            "mask": 2064,
+            "coefficient": 512
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              5,
+              6
+            ],
+            "mask": 96,
+            "coefficient": 32
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              5,
+              7
+            ],
+            "mask": 160,
+            "coefficient": 64
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              5,
+              8
+            ],
+            "mask": 288,
+            "coefficient": 128
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              5,
+              9
+            ],
+            "mask": 544,
+            "coefficient": 256
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              5,
+              10
+            ],
+            "mask": 1056,
+            "coefficient": 512
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              5,
+              11
+            ],
+            "mask": 2080,
+            "coefficient": 1024
+          }
+        ]
+      }
+    ],
+    "137100": [
+      {
+        "path": "tracks/qcs/results/20260730-185000-noisy-c-noise-rate-scan/p05-seed137100",
+        "run_sha256": "aa0bf4386a1919199b68171797aa592248ef03b5efed6963b4378b41e4a02291",
+        "metrics_sha256": "80b3b1b3cac5ddeb2ff2e4c4fbfabc7df5dd205614af30f19cf7362ff39309f6",
+        "config": {
+          "steps": 1200,
+          "batch_size": 100,
+          "noise_rate": 0.05,
+          "eval_every": 50,
+          "base_seed": 137100,
+          "prior_jitter": 1e-06,
+          "coefficient_prior_std": 1.0,
+          "projection_ridge": 0.001,
+          "weight_mode": "observation",
+          "input_sampling": "uniform",
+          "device": "cpu"
+        },
+        "first_full_recovery_step": 550,
+        "final": {
+          "step": 1200,
+          "examples_seen": 120000,
+          "elapsed_seconds": 0.28685350000159815,
+          "train_loss_ema": 0.19762380062430634,
+          "teacher_mean_observations": 29.296875,
+          "teacher_min_observations": 12,
+          "effective_projection_inputs": 4096,
+          "active_integer_coefficients": 36,
+          "maximum_rounding_residual": 0.00013665037192822638,
+          "bit_accuracy": 1.0,
+          "word_accuracy": 1.0,
+          "normalized_mae": 0.0,
+          "per_bit_accuracy": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        "active_integer_coefficients": [
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              0,
+              6
+            ],
+            "mask": 65,
+            "coefficient": 1
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              0,
+              7
+            ],
+            "mask": 129,
+            "coefficient": 2
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              0,
+              8
+            ],
+            "mask": 257,
+            "coefficient": 4
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              0,
+              9
+            ],
+            "mask": 513,
+            "coefficient": 8
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              0,
+              10
+            ],
+            "mask": 1025,
+            "coefficient": 16
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              0,
+              11
+            ],
+            "mask": 2049,
+            "coefficient": 32
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              1,
+              6
+            ],
+            "mask": 66,
+            "coefficient": 2
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              1,
+              7
+            ],
+            "mask": 130,
+            "coefficient": 4
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              1,
+              8
+            ],
+            "mask": 258,
+            "coefficient": 8
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              1,
+              9
+            ],
+            "mask": 514,
+            "coefficient": 16
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              1,
+              10
+            ],
+            "mask": 1026,
+            "coefficient": 32
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              1,
+              11
+            ],
+            "mask": 2050,
+            "coefficient": 64
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              2,
+              6
+            ],
+            "mask": 68,
+            "coefficient": 4
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              2,
+              7
+            ],
+            "mask": 132,
+            "coefficient": 8
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              2,
+              8
+            ],
+            "mask": 260,
+            "coefficient": 16
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              2,
+              9
+            ],
+            "mask": 516,
+            "coefficient": 32
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              2,
+              10
+            ],
+            "mask": 1028,
+            "coefficient": 64
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              2,
+              11
+            ],
+            "mask": 2052,
+            "coefficient": 128
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              3,
+              6
+            ],
+            "mask": 72,
+            "coefficient": 8
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              3,
+              7
+            ],
+            "mask": 136,
+            "coefficient": 16
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              3,
+              8
+            ],
+            "mask": 264,
+            "coefficient": 32
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              3,
+              9
+            ],
+            "mask": 520,
+            "coefficient": 64
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              3,
+              10
+            ],
+            "mask": 1032,
+            "coefficient": 128
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              3,
+              11
+            ],
+            "mask": 2056,
+            "coefficient": 256
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              4,
+              6
+            ],
+            "mask": 80,
+            "coefficient": 16
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              4,
+              7
+            ],
+            "mask": 144,
+            "coefficient": 32
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              4,
+              8
+            ],
+            "mask": 272,
+            "coefficient": 64
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              4,
+              9
+            ],
+            "mask": 528,
+            "coefficient": 128
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              4,
+              10
+            ],
+            "mask": 1040,
+            "coefficient": 256
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              4,
+              11
+            ],
+            "mask": 2064,
+            "coefficient": 512
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              5,
+              6
+            ],
+            "mask": 96,
+            "coefficient": 32
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              5,
+              7
+            ],
+            "mask": 160,
+            "coefficient": 64
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              5,
+              8
+            ],
+            "mask": 288,
+            "coefficient": 128
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              5,
+              9
+            ],
+            "mask": 544,
+            "coefficient": 256
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              5,
+              10
+            ],
+            "mask": 1056,
+            "coefficient": 512
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              5,
+              11
+            ],
+            "mask": 2080,
+            "coefficient": 1024
+          }
+        ]
+      },
+      {
+        "path": "tracks/qcs/results/20260730-185000-noisy-c-noise-rate-scan/p15-seed137100",
+        "run_sha256": "0fef037ddc65980c97716a7a6d2d9dac523764fe993c07cf3878b605e3b02a75",
+        "metrics_sha256": "cf97f2ff5af266f78634af1555a673359c06015b202fc982991b832affca75d6",
+        "config": {
+          "steps": 2000,
+          "batch_size": 100,
+          "noise_rate": 0.15,
+          "eval_every": 100,
+          "base_seed": 137100,
+          "prior_jitter": 1e-06,
+          "coefficient_prior_std": 1.0,
+          "projection_ridge": 0.001,
+          "weight_mode": "observation",
+          "input_sampling": "uniform",
+          "device": "cpu"
+        },
+        "first_full_recovery_step": 1200,
+        "final": {
+          "step": 2000,
+          "examples_seen": 200000,
+          "elapsed_seconds": 0.3920129999969504,
+          "train_loss_ema": 0.4221522620644495,
+          "teacher_mean_observations": 48.828125,
+          "teacher_min_observations": 25,
+          "effective_projection_inputs": 4096,
+          "active_integer_coefficients": 36,
+          "maximum_rounding_residual": 0.0001749527362922799,
+          "bit_accuracy": 1.0,
+          "word_accuracy": 1.0,
+          "normalized_mae": 0.0,
+          "per_bit_accuracy": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        "active_integer_coefficients": [
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              0,
+              6
+            ],
+            "mask": 65,
+            "coefficient": 1
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              0,
+              7
+            ],
+            "mask": 129,
+            "coefficient": 2
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              0,
+              8
+            ],
+            "mask": 257,
+            "coefficient": 4
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              0,
+              9
+            ],
+            "mask": 513,
+            "coefficient": 8
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              0,
+              10
+            ],
+            "mask": 1025,
+            "coefficient": 16
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              0,
+              11
+            ],
+            "mask": 2049,
+            "coefficient": 32
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              1,
+              6
+            ],
+            "mask": 66,
+            "coefficient": 2
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              1,
+              7
+            ],
+            "mask": 130,
+            "coefficient": 4
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              1,
+              8
+            ],
+            "mask": 258,
+            "coefficient": 8
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              1,
+              9
+            ],
+            "mask": 514,
+            "coefficient": 16
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              1,
+              10
+            ],
+            "mask": 1026,
+            "coefficient": 32
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              1,
+              11
+            ],
+            "mask": 2050,
+            "coefficient": 64
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              2,
+              6
+            ],
+            "mask": 68,
+            "coefficient": 4
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              2,
+              7
+            ],
+            "mask": 132,
+            "coefficient": 8
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              2,
+              8
+            ],
+            "mask": 260,
+            "coefficient": 16
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              2,
+              9
+            ],
+            "mask": 516,
+            "coefficient": 32
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              2,
+              10
+            ],
+            "mask": 1028,
+            "coefficient": 64
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              2,
+              11
+            ],
+            "mask": 2052,
+            "coefficient": 128
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              3,
+              6
+            ],
+            "mask": 72,
+            "coefficient": 8
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              3,
+              7
+            ],
+            "mask": 136,
+            "coefficient": 16
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              3,
+              8
+            ],
+            "mask": 264,
+            "coefficient": 32
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              3,
+              9
+            ],
+            "mask": 520,
+            "coefficient": 64
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              3,
+              10
+            ],
+            "mask": 1032,
+            "coefficient": 128
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              3,
+              11
+            ],
+            "mask": 2056,
+            "coefficient": 256
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              4,
+              6
+            ],
+            "mask": 80,
+            "coefficient": 16
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              4,
+              7
+            ],
+            "mask": 144,
+            "coefficient": 32
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              4,
+              8
+            ],
+            "mask": 272,
+            "coefficient": 64
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              4,
+              9
+            ],
+            "mask": 528,
+            "coefficient": 128
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              4,
+              10
+            ],
+            "mask": 1040,
+            "coefficient": 256
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              4,
+              11
+            ],
+            "mask": 2064,
+            "coefficient": 512
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              5,
+              6
+            ],
+            "mask": 96,
+            "coefficient": 32
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              5,
+              7
+            ],
+            "mask": 160,
+            "coefficient": 64
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              5,
+              8
+            ],
+            "mask": 288,
+            "coefficient": 128
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              5,
+              9
+            ],
+            "mask": 544,
+            "coefficient": 256
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              5,
+              10
+            ],
+            "mask": 1056,
+            "coefficient": 512
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              5,
+              11
+            ],
+            "mask": 2080,
+            "coefficient": 1024
+          }
+        ]
+      },
+      {
+        "path": "tracks/qcs/results/20260730-185000-noisy-c-noise-rate-scan/p25-seed137100",
+        "run_sha256": "7e45b436e4baea87787204defe15e0991bbc7e31db8d0fb891577b3e42cd7eb4",
+        "metrics_sha256": "3623f3c3d9e4269dc6c2ec42d23e55496dc1307196f829a4a54fcd99a1af6768",
+        "config": {
+          "steps": 4000,
+          "batch_size": 100,
+          "noise_rate": 0.25,
+          "eval_every": 200,
+          "base_seed": 137100,
+          "prior_jitter": 1e-06,
+          "coefficient_prior_std": 1.0,
+          "projection_ridge": 0.001,
+          "weight_mode": "observation",
+          "input_sampling": "uniform",
+          "device": "cpu"
+        },
+        "first_full_recovery_step": 2600,
+        "final": {
+          "step": 4000,
+          "examples_seen": 400000,
+          "elapsed_seconds": 0.7443552000040654,
+          "train_loss_ema": 0.5595601455599483,
+          "teacher_mean_observations": 97.65625,
+          "teacher_min_observations": 66,
+          "effective_projection_inputs": 4096,
+          "active_integer_coefficients": 36,
+          "maximum_rounding_residual": 0.008012897772202677,
+          "bit_accuracy": 1.0,
+          "word_accuracy": 1.0,
+          "normalized_mae": 0.0,
+          "per_bit_accuracy": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        "active_integer_coefficients": [
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              0,
+              6
+            ],
+            "mask": 65,
+            "coefficient": 1
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              0,
+              7
+            ],
+            "mask": 129,
+            "coefficient": 2
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              0,
+              8
+            ],
+            "mask": 257,
+            "coefficient": 4
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              0,
+              9
+            ],
+            "mask": 513,
+            "coefficient": 8
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              0,
+              10
+            ],
+            "mask": 1025,
+            "coefficient": 16
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              0,
+              11
+            ],
+            "mask": 2049,
+            "coefficient": 32
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              1,
+              6
+            ],
+            "mask": 66,
+            "coefficient": 2
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              1,
+              7
+            ],
+            "mask": 130,
+            "coefficient": 4
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              1,
+              8
+            ],
+            "mask": 258,
+            "coefficient": 8
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              1,
+              9
+            ],
+            "mask": 514,
+            "coefficient": 16
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              1,
+              10
+            ],
+            "mask": 1026,
+            "coefficient": 32
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              1,
+              11
+            ],
+            "mask": 2050,
+            "coefficient": 64
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              2,
+              6
+            ],
+            "mask": 68,
+            "coefficient": 4
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              2,
+              7
+            ],
+            "mask": 132,
+            "coefficient": 8
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              2,
+              8
+            ],
+            "mask": 260,
+            "coefficient": 16
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              2,
+              9
+            ],
+            "mask": 516,
+            "coefficient": 32
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              2,
+              10
+            ],
+            "mask": 1028,
+            "coefficient": 64
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              2,
+              11
+            ],
+            "mask": 2052,
+            "coefficient": 128
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              3,
+              6
+            ],
+            "mask": 72,
+            "coefficient": 8
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              3,
+              7
+            ],
+            "mask": 136,
+            "coefficient": 16
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              3,
+              8
+            ],
+            "mask": 264,
+            "coefficient": 32
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              3,
+              9
+            ],
+            "mask": 520,
+            "coefficient": 64
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              3,
+              10
+            ],
+            "mask": 1032,
+            "coefficient": 128
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              3,
+              11
+            ],
+            "mask": 2056,
+            "coefficient": 256
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              4,
+              6
+            ],
+            "mask": 80,
+            "coefficient": 16
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              4,
+              7
+            ],
+            "mask": 144,
+            "coefficient": 32
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              4,
+              8
+            ],
+            "mask": 272,
+            "coefficient": 64
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              4,
+              9
+            ],
+            "mask": 528,
+            "coefficient": 128
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              4,
+              10
+            ],
+            "mask": 1040,
+            "coefficient": 256
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              4,
+              11
+            ],
+            "mask": 2064,
+            "coefficient": 512
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              5,
+              6
+            ],
+            "mask": 96,
+            "coefficient": 32
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              5,
+              7
+            ],
+            "mask": 160,
+            "coefficient": 64
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              5,
+              8
+            ],
+            "mask": 288,
+            "coefficient": 128
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              5,
+              9
+            ],
+            "mask": 544,
+            "coefficient": 256
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              5,
+              10
+            ],
+            "mask": 1056,
+            "coefficient": 512
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              5,
+              11
+            ],
+            "mask": 2080,
+            "coefficient": 1024
+          }
+        ]
+      },
+      {
+        "path": "tracks/qcs/results/20260730-185000-noisy-c-noise-rate-scan/p35-seed137100",
+        "run_sha256": "c8ea8d80eb6d6076ce27fe46c372df461aa018599fb977da2390b5084f7d87cd",
+        "metrics_sha256": "5edfad6142ca312a36a75b91dbba6a13d5c712a8baaabc43a24c510350192449",
+        "config": {
+          "steps": 10000,
+          "batch_size": 100,
+          "noise_rate": 0.35,
+          "eval_every": 500,
+          "base_seed": 137100,
+          "prior_jitter": 1e-06,
+          "coefficient_prior_std": 1.0,
+          "projection_ridge": 0.001,
+          "weight_mode": "observation",
+          "input_sampling": "uniform",
+          "device": "cpu"
+        },
+        "first_full_recovery_step": 7000,
+        "final": {
+          "step": 10000,
+          "examples_seen": 1000000,
+          "elapsed_seconds": 1.7289047999947798,
+          "train_loss_ema": 0.6481974462610833,
+          "teacher_mean_observations": 244.140625,
+          "teacher_min_observations": 188,
+          "effective_projection_inputs": 4096,
+          "active_integer_coefficients": 36,
+          "maximum_rounding_residual": 0.002226448059397639,
+          "bit_accuracy": 1.0,
+          "word_accuracy": 1.0,
+          "normalized_mae": 0.0,
+          "per_bit_accuracy": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        "active_integer_coefficients": [
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              0,
+              6
+            ],
+            "mask": 65,
+            "coefficient": 1
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              0,
+              7
+            ],
+            "mask": 129,
+            "coefficient": 2
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              0,
+              8
+            ],
+            "mask": 257,
+            "coefficient": 4
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              0,
+              9
+            ],
+            "mask": 513,
+            "coefficient": 8
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              0,
+              10
+            ],
+            "mask": 1025,
+            "coefficient": 16
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              0,
+              11
+            ],
+            "mask": 2049,
+            "coefficient": 32
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              1,
+              6
+            ],
+            "mask": 66,
+            "coefficient": 2
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              1,
+              7
+            ],
+            "mask": 130,
+            "coefficient": 4
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              1,
+              8
+            ],
+            "mask": 258,
+            "coefficient": 8
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              1,
+              9
+            ],
+            "mask": 514,
+            "coefficient": 16
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              1,
+              10
+            ],
+            "mask": 1026,
+            "coefficient": 32
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              1,
+              11
+            ],
+            "mask": 2050,
+            "coefficient": 64
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              2,
+              6
+            ],
+            "mask": 68,
+            "coefficient": 4
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              2,
+              7
+            ],
+            "mask": 132,
+            "coefficient": 8
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              2,
+              8
+            ],
+            "mask": 260,
+            "coefficient": 16
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              2,
+              9
+            ],
+            "mask": 516,
+            "coefficient": 32
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              2,
+              10
+            ],
+            "mask": 1028,
+            "coefficient": 64
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              2,
+              11
+            ],
+            "mask": 2052,
+            "coefficient": 128
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              3,
+              6
+            ],
+            "mask": 72,
+            "coefficient": 8
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              3,
+              7
+            ],
+            "mask": 136,
+            "coefficient": 16
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              3,
+              8
+            ],
+            "mask": 264,
+            "coefficient": 32
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              3,
+              9
+            ],
+            "mask": 520,
+            "coefficient": 64
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              3,
+              10
+            ],
+            "mask": 1032,
+            "coefficient": 128
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              3,
+              11
+            ],
+            "mask": 2056,
+            "coefficient": 256
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              4,
+              6
+            ],
+            "mask": 80,
+            "coefficient": 16
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              4,
+              7
+            ],
+            "mask": 144,
+            "coefficient": 32
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              4,
+              8
+            ],
+            "mask": 272,
+            "coefficient": 64
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              4,
+              9
+            ],
+            "mask": 528,
+            "coefficient": 128
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              4,
+              10
+            ],
+            "mask": 1040,
+            "coefficient": 256
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              4,
+              11
+            ],
+            "mask": 2064,
+            "coefficient": 512
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              5,
+              6
+            ],
+            "mask": 96,
+            "coefficient": 32
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              5,
+              7
+            ],
+            "mask": 160,
+            "coefficient": 64
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              5,
+              8
+            ],
+            "mask": 288,
+            "coefficient": 128
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              5,
+              9
+            ],
+            "mask": 544,
+            "coefficient": 256
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              5,
+              10
+            ],
+            "mask": 1056,
+            "coefficient": 512
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              5,
+              11
+            ],
+            "mask": 2080,
+            "coefficient": 1024
+          }
+        ]
+      },
+      {
+        "path": "tracks/qcs/results/20260730-185000-noisy-c-noise-rate-scan/p40-seed137100",
+        "run_sha256": "6737586fcaba84e672fc956e251d2e3f5086c84e2ec36f4c04b6d390b5019122",
+        "metrics_sha256": "2d7653ba6c018a7daa748a63f592b852f34503af29c720515ec6cec5e13278c6",
+        "config": {
+          "steps": 25000,
+          "batch_size": 100,
+          "noise_rate": 0.4,
+          "eval_every": 1000,
+          "base_seed": 137100,
+          "prior_jitter": 1e-06,
+          "coefficient_prior_std": 1.0,
+          "projection_ridge": 0.001,
+          "weight_mode": "observation",
+          "input_sampling": "uniform",
+          "device": "cpu"
+        },
+        "first_full_recovery_step": 21000,
+        "final": {
+          "step": 25000,
+          "examples_seen": 2500000,
+          "elapsed_seconds": 4.6495514000052935,
+          "train_loss_ema": 0.6728262398031346,
+          "teacher_mean_observations": 610.3515625,
+          "teacher_min_observations": 512,
+          "effective_projection_inputs": 4096,
+          "active_integer_coefficients": 36,
+          "maximum_rounding_residual": 0.00026416437160037276,
+          "bit_accuracy": 1.0,
+          "word_accuracy": 1.0,
+          "normalized_mae": 0.0,
+          "per_bit_accuracy": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        "active_integer_coefficients": [
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              0,
+              6
+            ],
+            "mask": 65,
+            "coefficient": 1
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              0,
+              7
+            ],
+            "mask": 129,
+            "coefficient": 2
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              0,
+              8
+            ],
+            "mask": 257,
+            "coefficient": 4
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              0,
+              9
+            ],
+            "mask": 513,
+            "coefficient": 8
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              0,
+              10
+            ],
+            "mask": 1025,
+            "coefficient": 16
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              0,
+              11
+            ],
+            "mask": 2049,
+            "coefficient": 32
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              1,
+              6
+            ],
+            "mask": 66,
+            "coefficient": 2
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              1,
+              7
+            ],
+            "mask": 130,
+            "coefficient": 4
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              1,
+              8
+            ],
+            "mask": 258,
+            "coefficient": 8
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              1,
+              9
+            ],
+            "mask": 514,
+            "coefficient": 16
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              1,
+              10
+            ],
+            "mask": 1026,
+            "coefficient": 32
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              1,
+              11
+            ],
+            "mask": 2050,
+            "coefficient": 64
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              2,
+              6
+            ],
+            "mask": 68,
+            "coefficient": 4
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              2,
+              7
+            ],
+            "mask": 132,
+            "coefficient": 8
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              2,
+              8
+            ],
+            "mask": 260,
+            "coefficient": 16
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              2,
+              9
+            ],
+            "mask": 516,
+            "coefficient": 32
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              2,
+              10
+            ],
+            "mask": 1028,
+            "coefficient": 64
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              2,
+              11
+            ],
+            "mask": 2052,
+            "coefficient": 128
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              3,
+              6
+            ],
+            "mask": 72,
+            "coefficient": 8
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              3,
+              7
+            ],
+            "mask": 136,
+            "coefficient": 16
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              3,
+              8
+            ],
+            "mask": 264,
+            "coefficient": 32
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              3,
+              9
+            ],
+            "mask": 520,
+            "coefficient": 64
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              3,
+              10
+            ],
+            "mask": 1032,
+            "coefficient": 128
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              3,
+              11
+            ],
+            "mask": 2056,
+            "coefficient": 256
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              4,
+              6
+            ],
+            "mask": 80,
+            "coefficient": 16
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              4,
+              7
+            ],
+            "mask": 144,
+            "coefficient": 32
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              4,
+              8
+            ],
+            "mask": 272,
+            "coefficient": 64
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              4,
+              9
+            ],
+            "mask": 528,
+            "coefficient": 128
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              4,
+              10
+            ],
+            "mask": 1040,
+            "coefficient": 256
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              4,
+              11
+            ],
+            "mask": 2064,
+            "coefficient": 512
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              5,
+              6
+            ],
+            "mask": 96,
+            "coefficient": 32
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              5,
+              7
+            ],
+            "mask": 160,
+            "coefficient": 64
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              5,
+              8
+            ],
+            "mask": 288,
+            "coefficient": 128
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              5,
+              9
+            ],
+            "mask": 544,
+            "coefficient": 256
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              5,
+              10
+            ],
+            "mask": 1056,
+            "coefficient": 512
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              5,
+              11
+            ],
+            "mask": 2080,
+            "coefficient": 1024
+          }
+        ]
+      },
+      {
+        "path": "tracks/qcs/results/20260730-185000-noisy-c-noise-rate-scan/p45-seed137100",
+        "run_sha256": "29c7d60f9558d0added1c5f329d489020cf7b6f5f4e5ba7513d35c9c1caa0651",
+        "metrics_sha256": "f0296c3402f393285ce7953efdbbfe76000d512f53c5695be0bf0d667330a288",
+        "config": {
+          "steps": 100000,
+          "batch_size": 100,
+          "noise_rate": 0.45,
+          "eval_every": 2500,
+          "base_seed": 137100,
+          "prior_jitter": 1e-06,
+          "coefficient_prior_std": 1.0,
+          "projection_ridge": 0.001,
+          "weight_mode": "observation",
+          "input_sampling": "uniform",
+          "device": "cpu"
+        },
+        "first_full_recovery_step": 57500,
+        "final": {
+          "step": 100000,
+          "examples_seen": 10000000,
+          "elapsed_seconds": 18.140293899996323,
+          "train_loss_ema": 0.688493124917477,
+          "teacher_mean_observations": 2441.40625,
+          "teacher_min_observations": 2251,
+          "effective_projection_inputs": 4096,
+          "active_integer_coefficients": 36,
+          "maximum_rounding_residual": 1.5504413106775763e-05,
+          "bit_accuracy": 1.0,
+          "word_accuracy": 1.0,
+          "normalized_mae": 0.0,
+          "per_bit_accuracy": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        "active_integer_coefficients": [
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              0,
+              6
+            ],
+            "mask": 65,
+            "coefficient": 1
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              0,
+              7
+            ],
+            "mask": 129,
+            "coefficient": 2
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              0,
+              8
+            ],
+            "mask": 257,
+            "coefficient": 4
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              0,
+              9
+            ],
+            "mask": 513,
+            "coefficient": 8
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              0,
+              10
+            ],
+            "mask": 1025,
+            "coefficient": 16
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              0,
+              11
+            ],
+            "mask": 2049,
+            "coefficient": 32
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              1,
+              6
+            ],
+            "mask": 66,
+            "coefficient": 2
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              1,
+              7
+            ],
+            "mask": 130,
+            "coefficient": 4
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              1,
+              8
+            ],
+            "mask": 258,
+            "coefficient": 8
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              1,
+              9
+            ],
+            "mask": 514,
+            "coefficient": 16
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              1,
+              10
+            ],
+            "mask": 1026,
+            "coefficient": 32
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              1,
+              11
+            ],
+            "mask": 2050,
+            "coefficient": 64
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              2,
+              6
+            ],
+            "mask": 68,
+            "coefficient": 4
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              2,
+              7
+            ],
+            "mask": 132,
+            "coefficient": 8
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              2,
+              8
+            ],
+            "mask": 260,
+            "coefficient": 16
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              2,
+              9
+            ],
+            "mask": 516,
+            "coefficient": 32
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              2,
+              10
+            ],
+            "mask": 1028,
+            "coefficient": 64
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              2,
+              11
+            ],
+            "mask": 2052,
+            "coefficient": 128
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              3,
+              6
+            ],
+            "mask": 72,
+            "coefficient": 8
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              3,
+              7
+            ],
+            "mask": 136,
+            "coefficient": 16
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              3,
+              8
+            ],
+            "mask": 264,
+            "coefficient": 32
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              3,
+              9
+            ],
+            "mask": 520,
+            "coefficient": 64
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              3,
+              10
+            ],
+            "mask": 1032,
+            "coefficient": 128
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              3,
+              11
+            ],
+            "mask": 2056,
+            "coefficient": 256
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              4,
+              6
+            ],
+            "mask": 80,
+            "coefficient": 16
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              4,
+              7
+            ],
+            "mask": 144,
+            "coefficient": 32
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              4,
+              8
+            ],
+            "mask": 272,
+            "coefficient": 64
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              4,
+              9
+            ],
+            "mask": 528,
+            "coefficient": 128
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              4,
+              10
+            ],
+            "mask": 1040,
+            "coefficient": 256
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              4,
+              11
+            ],
+            "mask": 2064,
+            "coefficient": 512
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              5,
+              6
+            ],
+            "mask": 96,
+            "coefficient": 32
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              5,
+              7
+            ],
+            "mask": 160,
+            "coefficient": 64
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              5,
+              8
+            ],
+            "mask": 288,
+            "coefficient": 128
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              5,
+              9
+            ],
+            "mask": 544,
+            "coefficient": 256
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              5,
+              10
+            ],
+            "mask": 1056,
+            "coefficient": 512
+          },
+          {
+            "kind": "quadratic",
+            "input_bits": [
+              5,
+              11
+            ],
+            "mask": 2080,
+            "coefficient": 1024
+          }
+        ]
+      }
+    ]
+  },
+  "points": [
+    {
+      "noise_rate": 0.05,
+      "base_seed": 127100,
+      "inverse_signal_squared": 1.2345679012345678,
+      "first_full_recovery_step": 550
+    },
+    {
+      "noise_rate": 0.05,
+      "base_seed": 137100,
+      "inverse_signal_squared": 1.2345679012345678,
+      "first_full_recovery_step": 550
+    },
+    {
+      "noise_rate": 0.15,
+      "base_seed": 127100,
+      "inverse_signal_squared": 2.0408163265306127,
+      "first_full_recovery_step": 1500
+    },
+    {
+      "noise_rate": 0.15,
+      "base_seed": 137100,
+      "inverse_signal_squared": 2.0408163265306127,
+      "first_full_recovery_step": 1200
+    },
+    {
+      "noise_rate": 0.25,
+      "base_seed": 127100,
+      "inverse_signal_squared": 4.0,
+      "first_full_recovery_step": 2400
+    },
+    {
+      "noise_rate": 0.25,
+      "base_seed": 137100,
+      "inverse_signal_squared": 4.0,
+      "first_full_recovery_step": 2600
+    },
+    {
+      "noise_rate": 0.35,
+      "base_seed": 127100,
+      "inverse_signal_squared": 11.111111111111109,
+      "first_full_recovery_step": 7000
+    },
+    {
+      "noise_rate": 0.35,
+      "base_seed": 137100,
+      "inverse_signal_squared": 11.111111111111109,
+      "first_full_recovery_step": 7000
+    },
+    {
+      "noise_rate": 0.4,
+      "base_seed": 127100,
+      "inverse_signal_squared": 25.000000000000014,
+      "first_full_recovery_step": 17000
+    },
+    {
+      "noise_rate": 0.4,
+      "base_seed": 137100,
+      "inverse_signal_squared": 25.000000000000014,
+      "first_full_recovery_step": 21000
+    },
+    {
+      "noise_rate": 0.45,
+      "base_seed": 127100,
+      "inverse_signal_squared": 100.00000000000006,
+      "first_full_recovery_step": 77500
+    },
+    {
+      "noise_rate": 0.45,
+      "base_seed": 137100,
+      "inverse_signal_squared": 100.00000000000006,
+      "first_full_recovery_step": 57500
+    }
+  ],
+  "active_integer_coefficients": [
+    {
+      "kind": "quadratic",
+      "input_bits": [
+        0,
+        6
+      ],
+      "mask": 65,
+      "coefficient": 1
+    },
+    {
+      "kind": "quadratic",
+      "input_bits": [
+        0,
+        7
+      ],
+      "mask": 129,
+      "coefficient": 2
+    },
+    {
+      "kind": "quadratic",
+      "input_bits": [
+        0,
+        8
+      ],
+      "mask": 257,
+      "coefficient": 4
+    },
+    {
+      "kind": "quadratic",
+      "input_bits": [
+        0,
+        9
+      ],
+      "mask": 513,
+      "coefficient": 8
+    },
+    {
+      "kind": "quadratic",
+      "input_bits": [
+        0,
+        10
+      ],
+      "mask": 1025,
+      "coefficient": 16
+    },
+    {
+      "kind": "quadratic",
+      "input_bits": [
+        0,
+        11
+      ],
+      "mask": 2049,
+      "coefficient": 32
+    },
+    {
+      "kind": "quadratic",
+      "input_bits": [
+        1,
+        6
+      ],
+      "mask": 66,
+      "coefficient": 2
+    },
+    {
+      "kind": "quadratic",
+      "input_bits": [
+        1,
+        7
+      ],
+      "mask": 130,
+      "coefficient": 4
+    },
+    {
+      "kind": "quadratic",
+      "input_bits": [
+        1,
+        8
+      ],
+      "mask": 258,
+      "coefficient": 8
+    },
+    {
+      "kind": "quadratic",
+      "input_bits": [
+        1,
+        9
+      ],
+      "mask": 514,
+      "coefficient": 16
+    },
+    {
+      "kind": "quadratic",
+      "input_bits": [
+        1,
+        10
+      ],
+      "mask": 1026,
+      "coefficient": 32
+    },
+    {
+      "kind": "quadratic",
+      "input_bits": [
+        1,
+        11
+      ],
+      "mask": 2050,
+      "coefficient": 64
+    },
+    {
+      "kind": "quadratic",
+      "input_bits": [
+        2,
+        6
+      ],
+      "mask": 68,
+      "coefficient": 4
+    },
+    {
+      "kind": "quadratic",
+      "input_bits": [
+        2,
+        7
+      ],
+      "mask": 132,
+      "coefficient": 8
+    },
+    {
+      "kind": "quadratic",
+      "input_bits": [
+        2,
+        8
+      ],
+      "mask": 260,
+      "coefficient": 16
+    },
+    {
+      "kind": "quadratic",
+      "input_bits": [
+        2,
+        9
+      ],
+      "mask": 516,
+      "coefficient": 32
+    },
+    {
+      "kind": "quadratic",
+      "input_bits": [
+        2,
+        10
+      ],
+      "mask": 1028,
+      "coefficient": 64
+    },
+    {
+      "kind": "quadratic",
+      "input_bits": [
+        2,
+        11
+      ],
+      "mask": 2052,
+      "coefficient": 128
+    },
+    {
+      "kind": "quadratic",
+      "input_bits": [
+        3,
+        6
+      ],
+      "mask": 72,
+      "coefficient": 8
+    },
+    {
+      "kind": "quadratic",
+      "input_bits": [
+        3,
+        7
+      ],
+      "mask": 136,
+      "coefficient": 16
+    },
+    {
+      "kind": "quadratic",
+      "input_bits": [
+        3,
+        8
+      ],
+      "mask": 264,
+      "coefficient": 32
+    },
+    {
+      "kind": "quadratic",
+      "input_bits": [
+        3,
+        9
+      ],
+      "mask": 520,
+      "coefficient": 64
+    },
+    {
+      "kind": "quadratic",
+      "input_bits": [
+        3,
+        10
+      ],
+      "mask": 1032,
+      "coefficient": 128
+    },
+    {
+      "kind": "quadratic",
+      "input_bits": [
+        3,
+        11
+      ],
+      "mask": 2056,
+      "coefficient": 256
+    },
+    {
+      "kind": "quadratic",
+      "input_bits": [
+        4,
+        6
+      ],
+      "mask": 80,
+      "coefficient": 16
+    },
+    {
+      "kind": "quadratic",
+      "input_bits": [
+        4,
+        7
+      ],
+      "mask": 144,
+      "coefficient": 32
+    },
+    {
+      "kind": "quadratic",
+      "input_bits": [
+        4,
+        8
+      ],
+      "mask": 272,
+      "coefficient": 64
+    },
+    {
+      "kind": "quadratic",
+      "input_bits": [
+        4,
+        9
+      ],
+      "mask": 528,
+      "coefficient": 128
+    },
+    {
+      "kind": "quadratic",
+      "input_bits": [
+        4,
+        10
+      ],
+      "mask": 1040,
+      "coefficient": 256
+    },
+    {
+      "kind": "quadratic",
+      "input_bits": [
+        4,
+        11
+      ],
+      "mask": 2064,
+      "coefficient": 512
+    },
+    {
+      "kind": "quadratic",
+      "input_bits": [
+        5,
+        6
+      ],
+      "mask": 96,
+      "coefficient": 32
+    },
+    {
+      "kind": "quadratic",
+      "input_bits": [
+        5,
+        7
+      ],
+      "mask": 160,
+      "coefficient": 64
+    },
+    {
+      "kind": "quadratic",
+      "input_bits": [
+        5,
+        8
+      ],
+      "mask": 288,
+      "coefficient": 128
+    },
+    {
+      "kind": "quadratic",
+      "input_bits": [
+        5,
+        9
+      ],
+      "mask": 544,
+      "coefficient": 256
+    },
+    {
+      "kind": "quadratic",
+      "input_bits": [
+        5,
+        10
+      ],
+      "mask": 1056,
+      "coefficient": 512
+    },
+    {
+      "kind": "quadratic",
+      "input_bits": [
+        5,
+        11
+      ],
+      "mask": 2080,
+      "coefficient": 1024
+    }
+  ]
+}

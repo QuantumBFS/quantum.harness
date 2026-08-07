@@ -1,0 +1,253 @@
+{
+  "kind": "design-size-normalized-degree-warmup",
+  "protocol": {
+    "minimum_mean_observations_per_design_point": 50,
+    "linear_design_points": 13,
+    "quadratic_design_points": 79,
+    "linear_minimum_eligible_step": 7,
+    "quadratic_minimum_eligible_step": 40,
+    "rule_uses_output_labels": false,
+    "target_degree_seeded": false,
+    "clean_labels_used_for_updates_or_selection": false
+  },
+  "claims": {
+    "all_eight_reject_linear_at_step_20": true,
+    "all_eight_accept_quadratic": true,
+    "all_eight_final_models_exact": true,
+    "all_eight_recover_verified_36_term_156_gate_rule": true,
+    "mean_training_examples": 7500.0,
+    "mean_holdout_words": 1360.0,
+    "mean_total_noisy_words": 8860.0,
+    "fixed_warmup_mean_total_noisy_words": 11276.0,
+    "mean_cost_reduction_factor": 1.272686230248307,
+    "all_eight_dimension_normalized_runs_cheaper": true
+  },
+  "runs": [
+    {
+      "path": "tracks/qcs/results/20260731-061500-noisy-c-normalized-warmup/seed277100/run.json",
+      "run_sha256": "3a0b5c0e2c0b3118478275d3b8afa3855c8e402c62e34f75d7135959509ca428",
+      "base_seed": 277100,
+      "linear_warmup_steps": 7,
+      "linear_reject_step": 20,
+      "quadratic_warmup_steps": 40,
+      "quadratic_accept_step": 55,
+      "training_examples": 7500,
+      "holdout_words": 1280,
+      "total_noisy_oracle_words": 8780,
+      "final_clean_word_accuracy": 1.0
+    },
+    {
+      "path": "tracks/qcs/results/20260731-061500-noisy-c-normalized-warmup/seed287100/run.json",
+      "run_sha256": "9070723891ff76e087b06abb62d933f0ca6b9e10b02d568bcd8e3185e9257c45",
+      "base_seed": 287100,
+      "linear_warmup_steps": 7,
+      "linear_reject_step": 20,
+      "quadratic_warmup_steps": 40,
+      "quadratic_accept_step": 50,
+      "training_examples": 7000,
+      "holdout_words": 1152,
+      "total_noisy_oracle_words": 8152,
+      "final_clean_word_accuracy": 1.0
+    },
+    {
+      "path": "tracks/qcs/results/20260731-061500-noisy-c-normalized-warmup/seed297100/run.json",
+      "run_sha256": "1aa81c77f782daf46f949597fbc0d2cf5a551ac9451882c9dd2bb5b48928a685",
+      "base_seed": 297100,
+      "linear_warmup_steps": 7,
+      "linear_reject_step": 20,
+      "quadratic_warmup_steps": 40,
+      "quadratic_accept_step": 60,
+      "training_examples": 8000,
+      "holdout_words": 2560,
+      "total_noisy_oracle_words": 10560,
+      "final_clean_word_accuracy": 1.0
+    },
+    {
+      "path": "tracks/qcs/results/20260731-061500-noisy-c-normalized-warmup/seed307100/run.json",
+      "run_sha256": "aa48b36f1ad7b0a7d4e6a22f3f7984935a37037f880f692e41620e3c64b90637",
+      "base_seed": 307100,
+      "linear_warmup_steps": 7,
+      "linear_reject_step": 20,
+      "quadratic_warmup_steps": 40,
+      "quadratic_accept_step": 60,
+      "training_examples": 8000,
+      "holdout_words": 1408,
+      "total_noisy_oracle_words": 9408,
+      "final_clean_word_accuracy": 1.0
+    },
+    {
+      "path": "tracks/qcs/results/20260731-061500-noisy-c-normalized-warmup/seed317100/run.json",
+      "run_sha256": "9dee54ba7b9290e7176514ecf9a0c1e72e72e1a4e21a40b5a63b6ce2e4e23510",
+      "base_seed": 317100,
+      "linear_warmup_steps": 7,
+      "linear_reject_step": 20,
+      "quadratic_warmup_steps": 40,
+      "quadratic_accept_step": 50,
+      "training_examples": 7000,
+      "holdout_words": 1152,
+      "total_noisy_oracle_words": 8152,
+      "final_clean_word_accuracy": 1.0
+    },
+    {
+      "path": "tracks/qcs/results/20260731-061500-noisy-c-normalized-warmup/seed327100/run.json",
+      "run_sha256": "89fe8e518282856657ee2df586f031193ee4020514fc85e11ae25d4f777d0e03",
+      "base_seed": 327100,
+      "linear_warmup_steps": 7,
+      "linear_reject_step": 20,
+      "quadratic_warmup_steps": 40,
+      "quadratic_accept_step": 65,
+      "training_examples": 8500,
+      "holdout_words": 896,
+      "total_noisy_oracle_words": 9396,
+      "final_clean_word_accuracy": 1.0
+    },
+    {
+      "path": "tracks/qcs/results/20260731-061500-noisy-c-normalized-warmup/seed337100/run.json",
+      "run_sha256": "c1f8dc9847e10f4649a429a266cc6558e7b76f62fdbc336f9c880f5665d0bdc6",
+      "base_seed": 337100,
+      "linear_warmup_steps": 7,
+      "linear_reject_step": 20,
+      "quadratic_warmup_steps": 40,
+      "quadratic_accept_step": 50,
+      "training_examples": 7000,
+      "holdout_words": 1280,
+      "total_noisy_oracle_words": 8280,
+      "final_clean_word_accuracy": 1.0
+    },
+    {
+      "path": "tracks/qcs/results/20260731-061500-noisy-c-normalized-warmup/seed347100/run.json",
+      "run_sha256": "94958b4e573f2b8bb0d28ea882019bce923f865f7be9095d5b92788eba8e8501",
+      "base_seed": 347100,
+      "linear_warmup_steps": 7,
+      "linear_reject_step": 20,
+      "quadratic_warmup_steps": 40,
+      "quadratic_accept_step": 50,
+      "training_examples": 7000,
+      "holdout_words": 1152,
+      "total_noisy_oracle_words": 8152,
+      "final_clean_word_accuracy": 1.0
+    }
+  ],
+  "fixed_warmup_runs": [
+    {
+      "path": "tracks/qcs/results/20260731-053000-noisy-c-independent-normal/seed277100/run.json",
+      "run_sha256": "7764e80007b3ac6bef0433aa033730487c0af43b99fb9257c1719e495157fbec",
+      "base_seed": 277100,
+      "accept_step": 55,
+      "noise_interval_at_acceptance": [
+        0.24259668257800227,
+        0.26493659197186714
+      ],
+      "noise_interval_contains_true_rate": true,
+      "training_examples": 9500,
+      "holdout_words": 1536,
+      "total_noisy_oracle_words": 11036,
+      "final_clean_word_accuracy": 1.0
+    },
+    {
+      "path": "tracks/qcs/results/20260731-053000-noisy-c-independent-normal/seed287100/run.json",
+      "run_sha256": "b1825bc3a94d0c092614673e6af6796f3e330463bab373467ec1e6b6bbb03f19",
+      "base_seed": 287100,
+      "accept_step": 50,
+      "noise_interval_at_acceptance": [
+        0.23548678640198584,
+        0.25826138028119966
+      ],
+      "noise_interval_contains_true_rate": true,
+      "training_examples": 9000,
+      "holdout_words": 1408,
+      "total_noisy_oracle_words": 10408,
+      "final_clean_word_accuracy": 1.0
+    },
+    {
+      "path": "tracks/qcs/results/20260731-053000-noisy-c-independent-normal/seed297100/run.json",
+      "run_sha256": "02f8abe4699d91190752ccb5e8bd181a6ac6c3c478b355076afd1b9277aa09ad",
+      "base_seed": 297100,
+      "accept_step": 60,
+      "noise_interval_at_acceptance": [
+        0.24150747703766534,
+        0.2626832014100081
+      ],
+      "noise_interval_contains_true_rate": true,
+      "training_examples": 10000,
+      "holdout_words": 2688,
+      "total_noisy_oracle_words": 12688,
+      "final_clean_word_accuracy": 1.0
+    },
+    {
+      "path": "tracks/qcs/results/20260731-053000-noisy-c-independent-normal/seed307100/run.json",
+      "run_sha256": "e8ef9fc3b87298ca76549583f50d3d2e52416b9b3c67e5bc3b0d3829e5cfdab3",
+      "base_seed": 307100,
+      "accept_step": 60,
+      "noise_interval_at_acceptance": [
+        0.23913904545537673,
+        0.26007692652774594
+      ],
+      "noise_interval_contains_true_rate": true,
+      "training_examples": 10000,
+      "holdout_words": 1536,
+      "total_noisy_oracle_words": 11536,
+      "final_clean_word_accuracy": 1.0
+    },
+    {
+      "path": "tracks/qcs/results/20260731-053000-noisy-c-independent-normal/seed317100/run.json",
+      "run_sha256": "fbb966e170fd64c2a69f52036128fbe38a1a62c5f5e9b395f0005ec3e74d0fea",
+      "base_seed": 317100,
+      "accept_step": 50,
+      "noise_interval_at_acceptance": [
+        0.23678806450277579,
+        0.25970407674392826
+      ],
+      "noise_interval_contains_true_rate": true,
+      "training_examples": 9000,
+      "holdout_words": 2432,
+      "total_noisy_oracle_words": 11432,
+      "final_clean_word_accuracy": 1.0
+    },
+    {
+      "path": "tracks/qcs/results/20260731-053000-noisy-c-independent-normal/seed327100/run.json",
+      "run_sha256": "dc53345cf4811e9e2898d31a0527e9744e8cd48af28e489f26e45a05441f34d2",
+      "base_seed": 327100,
+      "accept_step": 65,
+      "noise_interval_at_acceptance": [
+        0.23876675985062845,
+        0.2588374490423582
+      ],
+      "noise_interval_contains_true_rate": true,
+      "training_examples": 10500,
+      "holdout_words": 1792,
+      "total_noisy_oracle_words": 12292,
+      "final_clean_word_accuracy": 1.0
+    },
+    {
+      "path": "tracks/qcs/results/20260731-053000-noisy-c-independent-normal/seed337100/run.json",
+      "run_sha256": "951fce41b2ea155bbe3a59f44611ece4c0e44fc99a5e36f528ec950053798cae",
+      "base_seed": 337100,
+      "accept_step": 50,
+      "noise_interval_at_acceptance": [
+        0.2377443707370725,
+        0.2607651534981842
+      ],
+      "noise_interval_contains_true_rate": true,
+      "training_examples": 9000,
+      "holdout_words": 1408,
+      "total_noisy_oracle_words": 10408,
+      "final_clean_word_accuracy": 1.0
+    },
+    {
+      "path": "tracks/qcs/results/20260731-053000-noisy-c-independent-normal/seed347100/run.json",
+      "run_sha256": "347fea438bcb21f9a860c9979b89f06356e8d8f1dcef8e3fc8a1b5c90460a4df",
+      "base_seed": 347100,
+      "accept_step": 50,
+      "noise_interval_at_acceptance": [
+        0.24027973596343954,
+        0.2635818311210586
+      ],
+      "noise_interval_contains_true_rate": true,
+      "training_examples": 9000,
+      "holdout_words": 1408,
+      "total_noisy_oracle_words": 10408,
+      "final_clean_word_accuracy": 1.0
+    }
+  ]
+}
