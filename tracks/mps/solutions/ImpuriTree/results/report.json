@@ -1,0 +1,192 @@
+{
+  "title": "Challenge: Purified Anderson Impurity Solver at β = 16",
+  "eyebrow": "MPS Track · ImpuriTree",
+  "url": "https://github.com/QuantumBFS/quantum.harness/issues/81",
+  "lede": "ImpuriTree benchmarks deterministic purification against continuous-bath CT-QMC and develops residual-controlled implicit evolution toward colder impurity calculations.",
+  "sections": [
+    {
+      "title": "Challenge",
+      "note": "The problem and why it matters.",
+      "blocks": [
+        {
+          "kind": "text",
+          "text": "Finite-temperature quantum impurity solvers must represent an interacting impurity coupled to a continuous fermionic bath while controlling errors from bath discretization, tensor-network truncation, and imaginary-time propagation. ImpuriTree tests whether deterministic purification, implicit evolution on a logarithmic time grid, and residual-driven bond expansion can form a trustworthy solver at $\\beta = 16$ and ultimately approach $\\beta = 100$."
+        },
+        {
+          "kind": "card",
+          "title": "Significance",
+          "blocks": [
+            {
+              "kind": "text",
+              "text": "Reliable low-temperature impurity solvers are central to studying strongly correlated quantum materials. A solver that exposes its residuals and separates bath, bond, and time-stepping errors would make tensor-network results easier to trust, compare with CT-QMC, and extend toward demanding multiorbital or electron–phonon problems."
+            }
+          ]
+        },
+        {
+          "kind": "kv",
+          "pairs": [
+            ["Challenge", "QuantumBFS/quantum.harness #81"],
+            ["Track", "MPS"],
+            ["Target result", "$\\beta = 16$ MPS–CT-QMC Green-function comparison"],
+            ["Model points", "Semicircular bath, $D = 2$; $U = 2$ and $8$ at particle-hole symmetry"],
+            ["Tensor-network size", "9 bath poles per spin; maximum bond dimension $\\chi = 96$"]
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Approach",
+      "note": "How the challenge was solved.",
+      "blocks": [
+        {
+          "kind": "badge",
+          "text": "Controlled approximation",
+          "style": "warn"
+        },
+        {
+          "kind": "text",
+          "text": "The interacting thermal state is represented by a purified tensor network. The calculation approximates the continuous bath with nine poles per spin and controls tensor-network and propagation errors through bond truncation, time-step settings, and residual checks; CT-QMC supplies an independent stochastic reference."
+        },
+        {
+          "kind": "kv",
+          "pairs": [
+            ["Method", "Deterministic purification with two-site TDVP; implicit logarithmic evolution investigated separately"],
+            ["Software", "Graft.jl, GraftImpurity.jl, GreenFunc.jl; TRIQS/CTSEG 4.0.0 reference"],
+            ["Bath", "Nine-pole ESPRIT fit per spin"],
+            ["Settings", "$\\beta = 16$, $\\chi = 96$, TDVP $\\Delta\\tau = 0.5$, 65 measurement points at 0.25 spacing"],
+            ["Reference statistics", "Eight CT-QMC replicas, 200,000 production cycles each"]
+          ]
+        },
+        {
+          "kind": "text",
+          "text": "ImpuriTree first compresses the semicircular hybridization into a finite pole bath using ESPRIT in imaginary time. It prepares the complete interacting Gibbs state through deterministic purification, evolves that state to $\\beta/2$, and measures $G(\\tau)$ through operator insertions on the purification branches. Uniform-step two-site TDVP provides the production baseline, while global-Krylov bootstrapping, implicit logarithmic stepping, certified right-hand-side truncation, and residual-driven bond expansion form the low-temperature research path."
+        },
+        {
+          "kind": "table",
+          "columns": ["Run point", "Wall time", "Memory / compute"],
+          "rows": [
+            ["$\\beta = 16$ TDVP2, $U = 2$", "82 min", "7.3 GiB peak RSS; 16 threads"],
+            ["$\\beta = 16$ TDVP2, $U = 8$", "82 min", "7.3 GiB peak RSS; 16 threads"],
+            ["$\\beta = 4$ implicit control", "90 min", "32 cores; bond capped at 128"],
+            ["$\\beta = 16$ implicit baseline", "≈30 min per step at $\\chi = 128$", "Shared cluster node; production trajectory still in progress"]
+          ],
+          "numeric": [false, true, false]
+        },
+        {
+          "kind": "note",
+          "label": "Reference cost",
+          "text": "CT-QMC wall time and peak memory were not recorded in the supplied artifacts.",
+          "style": "info"
+        }
+      ]
+    },
+    {
+      "title": "Results",
+      "note": "What was achieved.",
+      "blocks": [
+        {
+          "kind": "heading",
+          "text": "$\\beta = 16$ Green function: purified MPS versus continuous-bath CT-QMC",
+          "level": 3
+        },
+        {
+          "kind": "text",
+          "text": "The figure compares $G(\\tau)$ and pointwise residuals for $U = 2$ and $U = 8$ at particle-hole symmetry."
+        },
+        {
+          "kind": "figures",
+          "items": [
+            {
+              "src": "comparison_overview.png",
+              "caption": "Nine-pole ESPRIT bath with purified TDVP2 compared against continuous-bath TRIQS/CTSEG at $\\beta = 16$. Left panels overlay $-G(\\tau)$; right panels show the MPS–CT-QMC residual and the particle-hole-symmetrized CT-QMC statistical band."
+            }
+          ]
+        },
+        {
+          "kind": "table",
+          "columns": ["Quantity", "$U = 2$", "$U = 8$"],
+          "rows": [
+            ["$-G(0^+)$", "0.5003", "0.4978"],
+            ["RMS $\\Delta G$", "4.27×10⁻³", "2.34×10⁻³"],
+            ["Relative $L_2$ error", "2.82%", "2.95%"],
+            ["Maximum absolute deviation", "5.8×10⁻³", "4.8×10⁻³"],
+            ["Median CT-QMC standard error", "6.8×10⁻⁴", "7.9×10⁻⁴"]
+          ],
+          "numeric": [false, true, true]
+        },
+        {
+          "kind": "heading",
+          "text": "$\\beta = 4$ implicit log-step working demonstration",
+          "level": 3
+        },
+        {
+          "kind": "figures",
+          "items": [
+            {
+              "src": "beta4_partial/beta4_u2_gtau_partial_vs_ctseg.png",
+              "caption": "Working demonstration, not a completed error estimate. Seven-pole ESPRIT bath with implicit logarithmic-grid MPS evolution compared against continuous-bath CT-QMC at $\\beta = 4$ and $U = 2$. Five of 17 planned $G(\\tau)$ points were available in this snapshot."
+            }
+          ]
+        },
+        {
+          "kind": "note",
+          "label": "Partial data",
+          "text": "The $\\beta = 4$ preparation completed all 21 implicit steps below the $10^{-6}$ physical-residual tolerance, while the measurement snapshot contains 5 of 17 planned $G(\\tau)$ points. The CT-QMC comparison demonstrates the pipeline but is not used as a final error quantification.",
+          "style": "pending"
+        },
+        {
+          "kind": "heading",
+          "text": "Implicit logarithmic-grid campaign status",
+          "level": 3
+        },
+        {
+          "kind": "table",
+          "columns": ["Milestone", "Status", "Evidence"],
+          "rows": [
+            ["$\\beta = 16$ paired first-step gate", "Passed", "RDE residual $8.1\\times10^{-7}$ in three expansion rounds; two-site reference $6.6\\times10^{-7}$ at matched cap 24"],
+            ["$\\beta = 4$ preparation", "Complete", "21/21 implicit steps converged below $10^{-6}$; bond capped at 128"],
+            ["$\\beta = 4$ measurement", "Partial", "5/17 $G(\\tau)$ points in the supplied snapshot"],
+            ["$\\beta = 16$ full implicit trajectory", "In progress", "Exact-RHS preparation passed $\\tau = 1.0$; no complete data set supplied"]
+          ],
+          "muted": [false, false, true]
+        }
+      ]
+    },
+    {
+      "title": "Highlight",
+      "note": "Innovation, significance, and broader impact.",
+      "blocks": [
+        {
+          "kind": "card",
+          "title": "What's innovative",
+          "blocks": [
+            {
+              "kind": "text",
+              "text": "ImpuriTree combines a symmetry-aware tree tensor-network implementation with deterministic purification and a fail-closed ESPRIT bath fit. Its low-temperature path adds global-Krylov bond bootstrapping, implicit A-stable evolution on logarithmic grids, certified right-hand-side truncation, and residual-driven bond expansion that targets only bonds implicated by the unconverged physical residual."
+            }
+          ]
+        },
+        {
+          "kind": "card",
+          "title": "Significance of output",
+          "blocks": [
+            {
+              "kind": "text",
+              "text": "At $\\beta = 16$, the purified MPS calculation tracks continuous-bath CT-QMC with RMS Green-function differences of 2.34×10⁻³–4.27×10⁻³ across weak- and strong-interaction benchmarks. The comparison isolates bath discretization as the leading visible systematic and provides a reproducible baseline for evaluating colder implicit-evolution runs."
+            }
+          ]
+        },
+        {
+          "kind": "card",
+          "title": "Broader impact",
+          "blocks": [
+            {
+              "kind": "text",
+              "text": "A tensor-network impurity solver with explicit residual accounting can complement Monte Carlo methods where stochastic noise, low temperatures, complex orbital structure, or coupled bosonic degrees of freedom become limiting. Separating the general Graft.jl tensor-network core from GraftImpurity.jl also makes new geometries, bath representations, and evolution algorithms independently testable and reusable."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
