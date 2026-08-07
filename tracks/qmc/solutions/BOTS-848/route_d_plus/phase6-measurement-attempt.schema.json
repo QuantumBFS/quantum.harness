@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "challenge-15-route-d-plus-phase6-measurement-attempt-v1",
+  "title": "Route D+ Phase 6 measurement extension attempt envelope",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "created_at_utc",
+    "producer_source_revision",
+    "measurement_source_revision",
+    "measurement_source_tree",
+    "measurement_source_clean",
+    "input_attempt",
+    "architecture",
+    "checkpoints",
+    "protocol",
+    "tasks",
+    "seed_results",
+    "gates",
+    "slurm_job_id",
+    "ed_accessed",
+    "passed"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "challenge-15-route-d-plus-phase6-measurement-attempt-v1"
+    },
+    "created_at_utc": {"type": "string", "format": "date-time"},
+    "producer_source_revision": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "measurement_source_revision": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "measurement_source_tree": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "measurement_source_clean": {"const": true},
+    "input_attempt": {"type": "object"},
+    "architecture": {"type": "object"},
+    "checkpoints": {"type": "array", "minItems": 3, "maxItems": 3},
+    "protocol": {"type": "object"},
+    "tasks": {"type": "array", "minItems": 24, "maxItems": 24},
+    "seed_results": {"type": "array", "minItems": 3, "maxItems": 3},
+    "gates": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {"type": "boolean"}
+    },
+    "slurm_job_id": {"type": "string", "minLength": 1},
+    "ed_accessed": {"const": false},
+    "passed": {"type": "boolean"}
+  },
+  "additionalProperties": true
+}

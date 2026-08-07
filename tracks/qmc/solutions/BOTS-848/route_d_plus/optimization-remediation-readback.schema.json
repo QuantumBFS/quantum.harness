@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "challenge-15-route-d-plus-optimization-remediation-readback-v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "created_at_utc",
+    "source_revision",
+    "verifier_revision",
+    "remediation_certificate",
+    "seed_results",
+    "slurm",
+    "gates",
+    "passed"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "challenge-15-route-d-plus-optimization-remediation-readback-v1"
+    },
+    "created_at_utc": {"type": "string", "format": "date-time"},
+    "source_revision": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "verifier_revision": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "remediation_certificate": {"$ref": "#/$defs/artifact"},
+    "seed_results": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["seed", "result", "checkpoint"],
+        "properties": {
+          "seed": {"enum": [848, 1848, 2848]},
+          "result": {"$ref": "#/$defs/artifact"},
+          "checkpoint": {"$ref": "#/$defs/artifact"}
+        }
+      }
+    },
+    "slurm": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "job_id",
+        "cluster_name",
+        "node_list",
+        "partition",
+        "gpu_devices"
+      ],
+      "properties": {
+        "job_id": {"type": "string", "minLength": 1},
+        "cluster_name": {"type": "string", "minLength": 1},
+        "node_list": {"type": "string", "minLength": 1},
+        "partition": {"type": "string", "minLength": 1},
+        "gpu_devices": {"type": "array", "minItems": 1, "items": {"type": "string"}}
+      }
+    },
+    "gates": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "aggregate_schema_valid",
+        "aggregate_hash_valid",
+        "phase7_trigger_hash_valid",
+        "protocol_hash_and_schema_valid",
+        "architecture_hash_and_schema_valid",
+        "exact_three_seed_set",
+        "all_seed_hashes_and_schemas_valid",
+        "all_checkpoint_hashes_and_schemas_valid",
+        "all_base_checkpoint_hashes_valid",
+        "clean_traceable_source_revisions",
+        "gpu_slurm_evidence"
+      ],
+      "properties": {
+        "aggregate_schema_valid": {"const": true},
+        "aggregate_hash_valid": {"const": true},
+        "phase7_trigger_hash_valid": {"const": true},
+        "protocol_hash_and_schema_valid": {"const": true},
+        "architecture_hash_and_schema_valid": {"const": true},
+        "exact_three_seed_set": {"const": true},
+        "all_seed_hashes_and_schemas_valid": {"const": true},
+        "all_checkpoint_hashes_and_schemas_valid": {"const": true},
+        "all_base_checkpoint_hashes_valid": {"const": true},
+        "clean_traceable_source_revisions": {"const": true},
+        "gpu_slurm_evidence": {"const": true}
+      }
+    },
+    "passed": {"const": true}
+  },
+  "$defs": {
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256"],
+      "properties": {
+        "path": {"type": "string", "minLength": 2},
+        "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+      }
+    }
+  }
+}

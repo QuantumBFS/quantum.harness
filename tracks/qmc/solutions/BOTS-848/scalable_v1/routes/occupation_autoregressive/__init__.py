@@ -1,0 +1,1 @@
+"""Fixed-occupation autoregressive route."""

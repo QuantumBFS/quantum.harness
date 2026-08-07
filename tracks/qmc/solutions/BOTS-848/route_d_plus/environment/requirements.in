@@ -1,0 +1,22 @@
+# JAX is installed separately by bootstrap.sh so that exactly one of the
+# cpu/cuda12/cuda13 profiles is selected.
+numpy==2.0.2
+ml_dtypes==0.5.1
+scipy==1.16.3
+sympy
+pycparser
+cffi==2.0.0
+optax==0.2.4
+h5py
+pyyaml
+pydantic
+psutil
+rich
+tqdm
+matplotlib
+pandas
+pytest
+pytest-xdist
+hypothesis
+jsonschema
+ruff

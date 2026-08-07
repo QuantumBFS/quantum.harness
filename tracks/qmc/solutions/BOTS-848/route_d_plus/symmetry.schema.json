@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "challenge-15-route-d-plus-symmetry-v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "seed",
+    "n_electrons",
+    "two_q",
+    "architecture_sha256",
+    "rotation_convention",
+    "errors",
+    "tolerances",
+    "gates",
+    "passed"
+  ],
+  "properties": {
+    "schema_version": {"const": "challenge-15-route-d-plus-symmetry-v1"},
+    "seed": {"enum": [848, 1848, 2848]},
+    "n_electrons": {"const": 6},
+    "two_q": {"const": 15},
+    "architecture_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "rotation_convention": {
+      "const": "Phi_2(RX)=D2(R)@Phi_2(X)"
+    },
+    "errors": {"$ref": "#/$defs/error_map"},
+    "tolerances": {"$ref": "#/$defs/tolerance_map"},
+    "gates": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "lll_homogeneity",
+        "exchange",
+        "scalarity",
+        "ladder",
+        "finite_rotation"
+      ],
+      "properties": {
+        "lll_homogeneity": {"const": true},
+        "exchange": {"const": true},
+        "scalarity": {"const": true},
+        "ladder": {"const": true},
+        "finite_rotation": {"const": true}
+      }
+    },
+    "passed": {"const": true}
+  },
+  "$defs": {
+    "error_map": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "lll_homogeneity",
+        "exchange",
+        "scalarity",
+        "ladder",
+        "finite_rotation"
+      ],
+      "properties": {
+        "lll_homogeneity": {"type": "number", "minimum": 0, "exclusiveMaximum": 1e-9},
+        "exchange": {"type": "number", "minimum": 0, "exclusiveMaximum": 1e-9},
+        "scalarity": {"type": "number", "minimum": 0, "exclusiveMaximum": 1e-9},
+        "ladder": {"type": "number", "minimum": 0, "exclusiveMaximum": 1e-8},
+        "finite_rotation": {"type": "number", "minimum": 0, "exclusiveMaximum": 1e-9}
+      }
+    },
+    "tolerance_map": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "lll_homogeneity",
+        "exchange",
+        "scalarity",
+        "ladder",
+        "finite_rotation"
+      ],
+      "properties": {
+        "lll_homogeneity": {"const": 1e-9},
+        "exchange": {"const": 1e-9},
+        "scalarity": {"const": 1e-9},
+        "ladder": {"const": 1e-8},
+        "finite_rotation": {"const": 1e-9}
+      }
+    }
+  }
+}

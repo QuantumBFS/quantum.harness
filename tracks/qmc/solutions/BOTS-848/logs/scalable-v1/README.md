@@ -1,0 +1,86 @@
+# Scalable v1 research-step index
+
+| Step | Purpose | Current attempt | Status |
+|---:|---|---:|---|
+| 1 | common protocol and evaluator | a03 | step-pass |
+| 2A | occupation autoregressive NQS | a05 | implementation-reviewed; training-not-run; route open |
+| 2B | continuous holomorphic NQS | not started | pending |
+| 2C | strict-LLL CF operator NQS | a03 | attempt-incomplete; route open |
+| 2D | analytic L=2 seed times neural correlator | not started | pending |
+| 3 | synchronized audit, ED reveal, and route selection | not started | pending |
+| 4 | winner N=8 | not started | pending |
+| 5 | winner SCNet N=10/12 | not started | pending |
+
+## Step 1 attempt accounting
+
+Step 1 used three implementation attempts within one research step:
+
+- [Attempt a01](s01-a01.md) completed Tasks 1-4, then stopped at its
+  90-minute active-development limit. It did not claim `step-pass`.
+- [Attempt a02](s01-a02.md) completed Tasks 5-6, then stopped at its
+  90-minute active-development limit with Task 7 closure still pending.
+- [Attempt a03](s01-a03.md) performed Task 7 closure and classified Step 1 as
+  `step-pass` after fresh verification.
+
+Attempts a04 and a05 were unused. The additive Route D admission consumes no
+Step 2 attempt. After admission, Steps 2A-2D start in separate worktrees and
+each has its own `a01` through `a05` implementation-attempt counter.
+
+## Step 2A attempt accounting
+
+- [Attempt a01](s02a-a01.md) established the constrained occupation-space
+  support and sampling boundary.
+- [Attempt a02](s02a-a02-logpsi-correctness-accepted.md) closed the accepted
+  log-domain sparse-estimator correctness gate after bounded rescue attempts.
+- [Attempt a03](s02a-a03.md) implemented and reviewed the shared
+  autoregressive model and reduced trainer.
+- [Attempt a04](s02a-a04.md) implemented and reviewed the shared `L=2` tower
+  and its symmetry diagnostics.
+- [Attempt a05](s02a-a05.md) completed the adapter, N=8 smoke path, and
+  training-ready integration. The formal 2048-update three-seed training was
+  not run; a separate exploratory seed was cut off without a checkpoint,
+  optimizer state, or receipt. Route A remains open and is not a scientific
+  result.
+
+## Step 2C attempt accounting
+
+- [Attempt a01](s02c-a01.md) completed the common Route C amendment, exact
+  projected-density/scalar primitives, and the JK-projected `L=0/2` seed
+  family. It failed at the frozen two-layer exact coordinate-action boundary;
+  no trainer, checkpoint, freeze receipt, or ED reveal was produced.
+- [Attempt a02](s02c-a02.md) froze one exact operator layer and implemented
+  pair-Casimir/PairJet coordinate action. Small analytic and independent
+  symbolic checks passed, but the N=6 batch-8 `L=2` correctness branch still
+  exceeded the `600 s` local wall ceiling after vectorization. No full frozen
+  action microbenchmark, trainer, checkpoint, freeze receipt, or ED reveal was
+  produced.
+- [Attempt a03](s02c-a03.md) used the a02 fast exact JAX family action and
+  added the shared one-layer Operator-NQS model, eight-chain SU(2) Metropolis
+  sampler, and frozen 2048-update trainer. Canonical tests and production
+  startup passed,
+  but the user-directed cutoff stopped seeds `848/1848/2848` at updates
+  `46/25/19`, before checkpoint update `128`.  The partial JSONL traces are
+  diagnostics only and are not a Challenge result.
+
+Attempts a04 and a05 remain available. Route C is not `route-stopped` or
+`route-frozen`; resumption must preserve the frozen contract and complete a
+final-update checkpoint before any result claim.
+
+## Trusted-pipeline boundary
+
+`human_blind=false`. The static AST/text audit and hashed manifest checks are
+evidence for a cooperative trusted pipeline; they are not a sandbox against
+malicious dynamic Python or arbitrary file access. A concrete route may claim
+`oracle_isolated` only after a route-specific factory test proves that the
+evaluator loads the same checkpoint produced by that route's trainer and bound
+to that run by its manifest.
+
+## Resource lifecycle boundary
+
+Step 1 `resource_budget_valid` enforces only the placement-selected wall-time,
+peak-RSS, and checkpoint-size ceilings. The frozen `remote_max_cpus=32` becomes
+enforceable in Step 5, where tests must inspect the actual `using-slurm` job
+request. Peak VRAM remains observed-only until a hardware-specific ceiling is
+approved and frozen; no VRAM ceiling is implied by Step 1. Independently, the
+Step 2 route-factory test that binds the trainer-produced checkpoint to the same
+run manifest remains a hard requirement for `oracle_isolated`.

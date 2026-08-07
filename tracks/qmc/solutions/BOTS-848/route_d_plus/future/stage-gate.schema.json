@@ -1,0 +1,156 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "challenge-15-route-d-plus-future-stage-gate-v1",
+  "title": "Route D+ future-stage single decision gate",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "stage",
+    "source_revision",
+    "task_ids",
+    "created_at_utc",
+    "decision",
+    "passed"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "challenge-15-route-d-plus-future-stage-gate-v1"
+    },
+    "stage": {
+      "enum": ["phase7", "phase8", "phase9", "phase10", "phase11"]
+    },
+    "source_revision": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "task_ids": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9][a-z0-9._-]{1,63}$"
+      }
+    },
+    "created_at_utc": {"type": "string", "format": "date-time"},
+    "decision": {
+      "oneOf": [
+        {"$ref": "#/$defs/phase7"},
+        {"$ref": "#/$defs/phase8"},
+        {"$ref": "#/$defs/phase9"},
+        {"$ref": "#/$defs/phase10"},
+        {"$ref": "#/$defs/phase11"}
+      ]
+    },
+    "passed": {"const": true}
+  },
+  "$defs": {
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256"],
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      }
+    },
+    "phase7": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "benchmark_classification",
+        "capacity_action",
+        "capacity_protocol_modified",
+        "checkpoint_modified"
+      ],
+      "properties": {
+        "kind": {"const": "phase7-capacity-decision"},
+        "benchmark_classification": {
+          "enum": [
+            "dplus0-sufficient",
+            "optimization-failure",
+            "expression-limited"
+          ]
+        },
+        "capacity_action": {
+          "enum": ["keep-D+0", "trigger-preregistered-D+1-D+2"]
+        },
+        "capacity_protocol_modified": {"const": false},
+        "checkpoint_modified": {"const": false}
+      }
+    },
+    "phase8": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "selected_capacity",
+        "selection_rule_preregistered",
+        "heldout_accessed",
+        "beyond_ed_accessed",
+        "architecture_freeze"
+      ],
+      "properties": {
+        "kind": {"const": "phase8-architecture-selection"},
+        "selected_capacity": {"enum": ["D+0", "D+1", "D+2"]},
+        "selection_rule_preregistered": {"const": true},
+        "heldout_accessed": {"const": false},
+        "beyond_ed_accessed": {"const": false},
+        "architecture_freeze": {"$ref": "#/$defs/artifact"}
+      }
+    },
+    "phase9": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "read_only_evaluation",
+        "architecture_modified"
+      ],
+      "properties": {
+        "kind": {"const": "phase9-heldout-summary"},
+        "read_only_evaluation": {"const": true},
+        "architecture_modified": {"const": false}
+      }
+    },
+    "phase10": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "phase_convention_gate",
+        "second_mother_action",
+        "architecture_modified"
+      ],
+      "properties": {
+        "kind": {"const": "phase10-chirality-summary"},
+        "phase_convention_gate": {"const": true},
+        "second_mother_action": {
+          "enum": ["not-needed", "triggered-by-unified-gate"]
+        },
+        "architecture_modified": {"const": false}
+      }
+    },
+    "phase11": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "preregistered_sizes_complete",
+        "read_only_synthesis",
+        "architecture_modified"
+      ],
+      "properties": {
+        "kind": {"const": "phase11-beyond-ed-summary"},
+        "preregistered_sizes_complete": {"const": true},
+        "read_only_synthesis": {"const": true},
+        "architecture_modified": {"const": false}
+      }
+    }
+  }
+}

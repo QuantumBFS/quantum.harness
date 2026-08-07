@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "challenge-15-route-d-plus-checkpoint-v1",
+  "title": "Route D+ D+0 seed checkpoint",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "seed",
+    "n_electrons",
+    "two_q",
+    "raw_generator_ranks",
+    "architecture_sha256",
+    "source_revision",
+    "proposal_adaptation",
+    "ground_delta_maxima",
+    "tower_delta_maxima",
+    "ground_coefficients",
+    "tower_coefficients",
+    "initialization_norm",
+    "updates",
+    "chains",
+    "samples_per_update",
+    "proposal_sweeps",
+    "final_samples_per_chain",
+    "checkpoint_selection"
+  ],
+  "properties": {
+    "seed": {"enum": [848, 1848, 2848]},
+    "n_electrons": {"const": 6},
+    "two_q": {"const": 15},
+    "raw_generator_ranks": {
+      "type": "array",
+      "prefixItems": [{"const": 2}, {"const": 3}, {"const": 4}],
+      "items": false
+    },
+    "architecture_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "source_revision": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "proposal_adaptation": {
+      "const": "burn-in-only-target-0.35-0.60-frozen-before-training"
+    },
+    "ground_delta_maxima": {"$ref": "#/$defs/delta_maxima"},
+    "tower_delta_maxima": {"$ref": "#/$defs/delta_maxima"},
+    "ground_coefficients": {"$ref": "#/$defs/complex_vector"},
+    "tower_coefficients": {"$ref": "#/$defs/complex_vector"},
+    "initialization_norm": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "exclusiveMaximum": 0.02
+    },
+    "updates": {"const": 24},
+    "chains": {"const": 4},
+    "samples_per_update": {"const": 8},
+    "proposal_sweeps": {"const": 2},
+    "final_samples_per_chain": {"const": 128},
+    "checkpoint_selection": {"const": "final_update"}
+  },
+  "$defs": {
+    "delta_maxima": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "items": {
+        "type": "number",
+        "minimum": 0.02,
+        "maximum": 3.141592653589793
+      }
+    },
+    "complex_vector": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["real", "imag"],
+      "properties": {
+        "real": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 3,
+          "items": {"type": "number"}
+        },
+        "imag": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 3,
+          "items": {"type": "number"}
+        }
+      }
+    }
+  }
+}

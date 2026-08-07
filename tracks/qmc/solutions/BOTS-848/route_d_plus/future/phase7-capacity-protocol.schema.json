@@ -1,0 +1,112 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "challenge-15-route-d-plus-phase7-capacity-protocol-v1",
+  "title": "Route D+ Phase 7 capacity decision protocol",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "protocol_id",
+    "frozen_before_phase7",
+    "seeds",
+    "mandatory_benchmark",
+    "classification_rule",
+    "capacity_action_rule",
+    "phase8_candidates",
+    "phase8_selection_rule",
+    "dplus3_rule",
+    "heldout_used_for_structure_selection",
+    "beyond_ed_used_for_structure_selection"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "challenge-15-route-d-plus-phase7-capacity-protocol-v1"
+    },
+    "protocol_id": {"const": "route-d-plus-capacity-20260730-v1"},
+    "frozen_before_phase7": {"const": true},
+    "seeds": {
+      "type": "array",
+      "prefixItems": [{"const": 848}, {"const": 1848}, {"const": 2848}],
+      "items": false
+    },
+    "mandatory_benchmark": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["gap_absolute_error_max", "fidelity0_min", "fidelity2_min"],
+      "properties": {
+        "gap_absolute_error_max": {"const": 0.005},
+        "fidelity0_min": {"const": 0.95},
+        "fidelity2_min": {"const": 0.9}
+      }
+    },
+    "classification_rule": {
+      "type": "array",
+      "prefixItems": [
+        {
+          "const": "dplus0-sufficient iff every mandatory benchmark gate passes"
+        },
+        {
+          "const": "expression-limited iff fidelity0-span<0.95 or fidelity2-span<0.90"
+        },
+        {
+          "const": "optimization-failure otherwise"
+        }
+      ],
+      "items": false
+    },
+    "capacity_action_rule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "dplus0-sufficient",
+        "optimization-failure",
+        "expression-limited"
+      ],
+      "properties": {
+        "dplus0-sufficient": {"const": "keep-D+0"},
+        "optimization-failure": {"const": "keep-D+0"},
+        "expression-limited": {
+          "const": "trigger-preregistered-D+1-D+2"
+        }
+      }
+    },
+    "phase8_candidates": {
+      "type": "array",
+      "prefixItems": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["capacity", "K", "H", "rank", "run_concurrently"],
+          "properties": {
+            "capacity": {"const": "D+1"},
+            "K": {"const": 2},
+            "H": {"const": 8},
+            "rank": {"const": 2},
+            "run_concurrently": {"const": true}
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["capacity", "K", "H", "rank", "run_concurrently"],
+          "properties": {
+            "capacity": {"const": "D+2"},
+            "K": {"const": 2},
+            "H": {"const": 16},
+            "rank": {"const": 4},
+            "run_concurrently": {"const": true}
+          }
+        }
+      ],
+      "items": false
+    },
+    "phase8_selection_rule": {
+      "const": "freeze-smallest-capacity-passing-all-mandatory-and-internal-gates"
+    },
+    "dplus3_rule": {
+      "const": "excluded-before-architecture-freeze"
+    },
+    "heldout_used_for_structure_selection": {"const": false},
+    "beyond_ed_used_for_structure_selection": {"const": false}
+  }
+}

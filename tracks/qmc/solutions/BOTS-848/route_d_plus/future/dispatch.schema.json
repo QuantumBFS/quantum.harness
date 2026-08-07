@@ -1,0 +1,189 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "challenge-15-route-d-plus-future-dispatch-v1",
+  "title": "Route D+ Phase 7-11 pre-registered dispatch",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "stage",
+    "run_id",
+    "run_root",
+    "source_revision",
+    "created_at_utc",
+    "prerequisites",
+    "tasks"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "challenge-15-route-d-plus-future-dispatch-v1"
+    },
+    "stage": {
+      "enum": ["phase7", "phase8", "phase9", "phase10", "phase11"]
+    },
+    "run_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]{2,95}$"
+    },
+    "run_root": {"type": "string", "minLength": 2},
+    "source_revision": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "created_at_utc": {"type": "string", "format": "date-time"},
+    "prerequisites": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/artifact"}
+    },
+    "tasks": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/task"}
+    }
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"stage": {"const": "phase7"}}},
+      "then": {
+        "properties": {
+          "prerequisites": {
+            "contains": {
+              "properties": {
+                "kind": {
+                  "enum": [
+                    "phase6-frozen-checkpoint-gate",
+                    "user-authorized-phase7-reveal",
+                    "dplus0-remediation-gate"
+                  ]
+                }
+              },
+              "required": ["kind"]
+            }
+          },
+          "tasks": {
+            "contains": {
+              "properties": {"kind": {"const": "ed-sector"}},
+              "required": ["kind"]
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {"properties": {"stage": {"const": "phase8"}}},
+      "then": {
+        "properties": {
+          "prerequisites": {
+            "contains": {
+              "properties": {
+                "kind": {"const": "phase7-capacity-gate"}
+              },
+              "required": ["kind"]
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "stage": {"enum": ["phase9", "phase10", "phase11"]}
+        }
+      },
+      "then": {
+        "properties": {
+          "prerequisites": {
+            "contains": {
+              "properties": {
+                "kind": {"const": "architecture-freeze"}
+              },
+              "required": ["kind"]
+            }
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "path", "sha256"],
+      "properties": {
+        "kind": {
+          "enum": [
+            "phase6-frozen-checkpoint-gate",
+            "user-authorized-phase7-reveal",
+            "dplus0-remediation-gate",
+            "phase7-capacity-gate",
+            "architecture-freeze",
+            "protocol-registration"
+          ]
+        },
+        "path": {"type": "string", "minLength": 1},
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      }
+    },
+    "task": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "task_id",
+        "kind",
+        "run_dir",
+        "required_gates",
+        "n_electrons"
+      ],
+      "properties": {
+        "task_id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9._-]{1,63}$"
+        },
+        "kind": {
+          "enum": [
+            "ed-sector",
+            "overlap",
+            "span-ceiling",
+            "dplus1-seed",
+            "dplus2-seed",
+            "heldout-ed",
+            "chirality",
+            "beyond-ed"
+          ]
+        },
+        "run_dir": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9._/-]{1,127}$"
+        },
+        "required_gates": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_-]{2,63}$"
+          }
+        },
+        "n_electrons": {"type": "integer", "minimum": 2},
+        "m_sector": {
+          "type": ["integer", "null"],
+          "minimum": -2,
+          "maximum": 2
+        },
+        "seed": {"type": ["integer", "null"], "minimum": 0},
+        "capacity": {
+          "type": ["string", "null"],
+          "enum": ["D+0", "D+1", "D+2", null]
+        },
+        "helicity": {
+          "type": ["string", "null"],
+          "enum": ["plus", "minus", "both", null]
+        }
+      }
+    }
+  }
+}

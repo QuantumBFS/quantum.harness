@@ -1,0 +1,193 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "challenge-15-route-d-plus-phase5-v1",
+  "title": "Route D+ Phase 5 scalar-generator certificate",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "created_at_utc",
+    "target_n_electrons",
+    "target_two_q",
+    "certification_n_electrons",
+    "certification_two_q",
+    "generator_ranks",
+    "fock_dimension",
+    "casimir_coefficients",
+    "coupled_pair_eigenvalues",
+    "covariance",
+    "tolerances",
+    "max_errors",
+    "passed",
+    "git_commit",
+    "git_dirty",
+    "hostname",
+    "slurm_job_id",
+    "slurm_cluster_name",
+    "phase4_certificate_path",
+    "phase4_certificate_sha256",
+    "phase4_git_commit"
+  ],
+  "properties": {
+    "schema_version": {"const": "challenge-15-route-d-plus-phase5-v1"},
+    "created_at_utc": {"type": "string", "format": "date-time"},
+    "target_n_electrons": {"const": 6},
+    "target_two_q": {"const": 15},
+    "certification_n_electrons": {"const": 4},
+    "certification_two_q": {"const": 9},
+    "generator_ranks": {
+      "type": "array",
+      "prefixItems": [{"const": 2}, {"const": 3}, {"const": 4}],
+      "items": false
+    },
+    "fock_dimension": {"const": 210},
+    "casimir_coefficients": {
+      "type": "object",
+      "required": ["2", "3", "4"],
+      "additionalProperties": {"type": "number"}
+    },
+    "coupled_pair_eigenvalues": {
+      "type": "object",
+      "required": ["2", "3", "4"],
+      "additionalProperties": {
+        "type": "object",
+        "required": ["0", "2", "4", "6", "8"],
+        "additionalProperties": {"type": "number"}
+      }
+    },
+    "covariance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sample_count",
+        "mixture_weights",
+        "mean",
+        "covariance",
+        "covariance_eigenvalues",
+        "covariance_scale",
+        "retained_directions",
+        "relative_cutoff",
+        "mother_reconstruction_error",
+        "whitening_error"
+      ],
+      "properties": {
+        "sample_count": {"const": 4096},
+        "mixture_weights": {
+          "type": "array",
+          "prefixItems": [{"const": 0.5}, {"const": 0.5}],
+          "items": false
+        },
+        "mean": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": {"type": "number"}
+        },
+        "covariance": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": {
+            "type": "array",
+            "minItems": 3,
+            "maxItems": 3,
+            "items": {"type": "number"}
+          }
+        },
+        "covariance_eigenvalues": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": {"type": "number"}
+        },
+        "covariance_scale": {
+          "type": "number",
+          "exclusiveMinimum": 1e-8
+        },
+        "retained_directions": {"const": 2},
+        "relative_cutoff": {"const": 1e-12},
+        "mother_reconstruction_error": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMaximum": 1e-10
+        },
+        "whitening_error": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMaximum": 1e-8
+        }
+      }
+    },
+    "tolerances": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "casimir_residual",
+        "hermiticity",
+        "scalarity",
+        "proof_production",
+        "coupled_channel_spread",
+        "mother_reconstruction",
+        "whitening"
+      ],
+      "properties": {
+        "casimir_residual": {"const": 1e-13},
+        "hermiticity": {"const": 1e-12},
+        "scalarity": {"const": 1e-11},
+        "proof_production": {"const": 1e-10},
+        "coupled_channel_spread": {"const": 1e-11},
+        "mother_reconstruction": {"const": 1e-10},
+        "whitening": {"const": 1e-8}
+      }
+    },
+    "max_errors": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "casimir_residual",
+        "hermiticity",
+        "scalarity",
+        "proof_production",
+        "coupled_channel_spread",
+        "mother_reconstruction",
+        "whitening"
+      ],
+      "properties": {
+        "casimir_residual": {
+          "type": "number", "minimum": 0, "exclusiveMaximum": 1e-13
+        },
+        "hermiticity": {
+          "type": "number", "minimum": 0, "exclusiveMaximum": 1e-12
+        },
+        "scalarity": {
+          "type": "number", "minimum": 0, "exclusiveMaximum": 1e-11
+        },
+        "proof_production": {
+          "type": "number", "minimum": 0, "exclusiveMaximum": 1e-10
+        },
+        "coupled_channel_spread": {
+          "type": "number", "minimum": 0, "exclusiveMaximum": 1e-11
+        },
+        "mother_reconstruction": {
+          "type": "number", "minimum": 0, "exclusiveMaximum": 1e-10
+        },
+        "whitening": {
+          "type": "number", "minimum": 0, "exclusiveMaximum": 1e-8
+        }
+      }
+    },
+    "passed": {"const": true},
+    "git_commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "git_dirty": {"const": false},
+    "hostname": {"type": "string"},
+    "slurm_job_id": {"type": ["string", "null"]},
+    "slurm_cluster_name": {"type": ["string", "null"]},
+    "phase4_certificate_path": {"type": "string"},
+    "phase4_certificate_sha256": {
+      "type": "string", "pattern": "^[0-9a-f]{64}$"
+    },
+    "phase4_git_commit": {
+      "type": "string", "pattern": "^[0-9a-f]{40}$"
+    }
+  }
+}

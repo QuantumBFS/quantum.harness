@@ -1,0 +1,250 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "challenge-15-route-d-plus-phase6-final-v2",
+  "title": "Route D+ Phase 6 immutable-checkpoint aggregate gate v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "created_at_utc",
+    "source_revisions",
+    "phase6a_certificate",
+    "input_attempt",
+    "measurement_certificate",
+    "architecture_protocol",
+    "capacity_protocol",
+    "architecture",
+    "seed_artifacts",
+    "training_blind_access_audit",
+    "measurement_tasks",
+    "jobs",
+    "finalizer_job",
+    "gates",
+    "architecture_frozen",
+    "checkpoints_frozen",
+    "checkpoint_selection_used_ed",
+    "ed_accessed",
+    "passed"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "challenge-15-route-d-plus-phase6-final-v2"
+    },
+    "created_at_utc": {"type": "string", "format": "date-time"},
+    "source_revisions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "checkpoint_producer",
+        "measurement",
+        "finalizer",
+        "finalizer_tree",
+        "finalizer_clean"
+      ],
+      "properties": {
+        "checkpoint_producer": {"$ref": "#/$defs/revision"},
+        "measurement": {"$ref": "#/$defs/revision"},
+        "finalizer": {"$ref": "#/$defs/revision"},
+        "finalizer_tree": {"$ref": "#/$defs/revision"},
+        "finalizer_clean": {"const": true}
+      }
+    },
+    "phase6a_certificate": {"$ref": "#/$defs/artifact"},
+    "input_attempt": {"$ref": "#/$defs/artifact"},
+    "measurement_certificate": {"$ref": "#/$defs/artifact"},
+    "architecture_protocol": {"$ref": "#/$defs/schema_artifact"},
+    "capacity_protocol": {"$ref": "#/$defs/schema_artifact"},
+    "architecture": {"$ref": "#/$defs/schema_artifact"},
+    "seed_artifacts": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["seed", "checkpoint", "symmetry"],
+        "properties": {
+          "seed": {"enum": [848, 1848, 2848]},
+          "checkpoint": {"$ref": "#/$defs/schema_artifact"},
+          "symmetry": {"$ref": "#/$defs/schema_artifact"}
+        }
+      }
+    },
+    "training_blind_access_audit": {"$ref": "#/$defs/artifact"},
+    "measurement_tasks": {
+      "type": "array",
+      "minItems": 24,
+      "maxItems": 24,
+      "items": {"$ref": "#/$defs/task_reference"}
+    },
+    "jobs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "training_attempt",
+        "attempt_readback",
+        "measurement"
+      ],
+      "properties": {
+        "training_attempt": {
+          "allOf": [
+            {"$ref": "#/$defs/job"},
+            {
+              "properties": {
+                "state": {"const": "FAILED"},
+                "exit_code": {"const": "1:0"}
+              }
+            }
+          ]
+        },
+        "attempt_readback": {
+          "allOf": [
+            {"$ref": "#/$defs/job"},
+            {
+              "properties": {
+                "state": {"const": "COMPLETED"},
+                "exit_code": {"const": "0:0"}
+              }
+            }
+          ]
+        },
+        "measurement": {
+          "allOf": [
+            {"$ref": "#/$defs/job"},
+            {
+              "properties": {
+                "state": {"const": "COMPLETED"},
+                "exit_code": {"const": "0:0"}
+              }
+            }
+          ]
+        }
+      }
+    },
+    "finalizer_job": {"$ref": "#/$defs/finalizer_job"},
+    "gates": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "phase6a_valid",
+        "input_attempt_schema_valid",
+        "sole_input_failure_gap_precision",
+        "measurement_schema_valid",
+        "measurement_all_gates_passed",
+        "future_protocols_valid",
+        "architecture_schema_hash_valid",
+        "three_checkpoint_schema_hashes_valid",
+        "three_symmetry_schema_hashes_valid",
+        "training_blind_audit_valid",
+        "exact_measurement_task_set_valid",
+        "measurement_task_logs_hash_valid",
+        "slurm_evidence_valid",
+        "clean_traceable_source_revisions",
+        "gpu_finalizer_allocation"
+      ],
+      "properties": {
+        "phase6a_valid": {"const": true},
+        "input_attempt_schema_valid": {"const": true},
+        "sole_input_failure_gap_precision": {"const": true},
+        "measurement_schema_valid": {"const": true},
+        "measurement_all_gates_passed": {"const": true},
+        "future_protocols_valid": {"const": true},
+        "architecture_schema_hash_valid": {"const": true},
+        "three_checkpoint_schema_hashes_valid": {"const": true},
+        "three_symmetry_schema_hashes_valid": {"const": true},
+        "training_blind_audit_valid": {"const": true},
+        "exact_measurement_task_set_valid": {"const": true},
+        "measurement_task_logs_hash_valid": {"const": true},
+        "slurm_evidence_valid": {"const": true},
+        "clean_traceable_source_revisions": {"const": true},
+        "gpu_finalizer_allocation": {"const": true}
+      }
+    },
+    "architecture_frozen": {"const": true},
+    "checkpoints_frozen": {"const": true},
+    "checkpoint_selection_used_ed": {"const": false},
+    "ed_accessed": {"const": false},
+    "passed": {"const": true}
+  },
+  "$defs": {
+    "revision": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256"],
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "schema_artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256", "schema_path", "schema_sha256"],
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "sha256": {"$ref": "#/$defs/sha256"},
+        "schema_path": {"type": "string", "minLength": 1},
+        "schema_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "task_reference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "seed",
+        "sector",
+        "chain",
+        "certificate",
+        "stdout",
+        "stderr"
+      ],
+      "properties": {
+        "seed": {"enum": [848, 1848, 2848]},
+        "sector": {"enum": ["ground", "tower"]},
+        "chain": {"type": "integer", "minimum": 0, "maximum": 3},
+        "certificate": {"$ref": "#/$defs/artifact"},
+        "stdout": {"$ref": "#/$defs/artifact"},
+        "stderr": {"$ref": "#/$defs/artifact"}
+      }
+    },
+    "job": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "job_id",
+        "state",
+        "exit_code",
+        "stdout",
+        "stderr",
+        "sacct"
+      ],
+      "properties": {
+        "job_id": {"type": "string", "minLength": 1},
+        "state": {"enum": ["FAILED", "COMPLETED"]},
+        "exit_code": {"enum": ["1:0", "0:0"]},
+        "stdout": {"$ref": "#/$defs/artifact"},
+        "stderr": {"$ref": "#/$defs/artifact"},
+        "sacct": {"$ref": "#/$defs/artifact"}
+      }
+    },
+    "finalizer_job": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["job_id", "cluster_name", "hostname", "gpu_visible"],
+      "properties": {
+        "job_id": {"type": "string", "minLength": 1},
+        "cluster_name": {"type": "string", "minLength": 1},
+        "hostname": {"type": "string", "minLength": 1},
+        "gpu_visible": {"type": "string", "minLength": 1}
+      }
+    }
+  }
+}

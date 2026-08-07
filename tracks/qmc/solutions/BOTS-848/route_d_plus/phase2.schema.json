@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "challenge-15-route-d-plus-phase2-v1",
+  "title": "Route D+ Phase 2 one-particle LLL certificate",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "created_at_utc",
+    "two_q",
+    "orbital_count",
+    "quadrature",
+    "tolerance",
+    "max_errors",
+    "passed",
+    "python_version",
+    "numpy_version",
+    "scipy_version",
+    "git_commit",
+    "git_dirty",
+    "hostname",
+    "phase1_manifest_path",
+    "phase1_manifest_sha256",
+    "phase1_git_commit"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "challenge-15-route-d-plus-phase2-v1"
+    },
+    "created_at_utc": {"type": "string", "format": "date-time"},
+    "two_q": {"const": 15},
+    "orbital_count": {"const": 16},
+    "quadrature": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "n_theta", "n_phi", "point_count"],
+      "properties": {
+        "kind": {"const": "gauss-legendre-x-uniform-fourier"},
+        "n_theta": {"type": "integer", "minimum": 34},
+        "n_phi": {"type": "integer", "minimum": 64},
+        "point_count": {"type": "integer", "minimum": 2176}
+      }
+    },
+    "tolerance": {"const": 1e-12},
+    "max_errors": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "spinor_norm",
+        "orbital_overlap",
+        "kernel_orbital_sum",
+        "orbital_reconstruction"
+      ],
+      "properties": {
+        "spinor_norm": {"type": "number", "minimum": 0, "exclusiveMaximum": 1e-12},
+        "orbital_overlap": {"type": "number", "minimum": 0, "exclusiveMaximum": 1e-12},
+        "kernel_orbital_sum": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMaximum": 1e-12
+        },
+        "orbital_reconstruction": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMaximum": 1e-12
+        }
+      }
+    },
+    "passed": {"const": true},
+    "python_version": {"type": "string", "pattern": "^3\\.11\\."},
+    "numpy_version": {"type": "string"},
+    "scipy_version": {"type": "string"},
+    "git_commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "git_dirty": {"const": false},
+    "hostname": {"type": "string"},
+    "slurm_job_id": {"type": ["string", "null"]},
+    "slurm_cluster_name": {"type": ["string", "null"]},
+    "phase1_manifest_path": {"type": "string"},
+    "phase1_manifest_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "phase1_git_commit": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    }
+  }
+}

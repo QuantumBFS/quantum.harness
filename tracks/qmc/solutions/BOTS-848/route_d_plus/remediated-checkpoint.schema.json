@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "challenge-15-route-d-plus-remediated-checkpoint-v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "seed",
+    "n_electrons",
+    "two_q",
+    "capacity",
+    "architecture_sha256",
+    "source_revision",
+    "base_checkpoint",
+    "ground_coefficients",
+    "tower_coefficients",
+    "additional_updates",
+    "total_updates",
+    "chains",
+    "samples_per_update_per_chain",
+    "proposal_sweeps",
+    "learning_rate",
+    "diagonal_shift",
+    "trust_radius",
+    "final_samples_per_chain",
+    "checkpoint_selection",
+    "ed_used_for_gradient",
+    "ed_used_for_checkpoint_selection"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "challenge-15-route-d-plus-remediated-checkpoint-v1"
+    },
+    "seed": {"enum": [848, 1848, 2848]},
+    "n_electrons": {"const": 6},
+    "two_q": {"const": 15},
+    "capacity": {"const": "D+0"},
+    "architecture_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "source_revision": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "base_checkpoint": {"$ref": "#/$defs/artifact"},
+    "ground_coefficients": {"$ref": "#/$defs/complex_vector"},
+    "tower_coefficients": {"$ref": "#/$defs/complex_vector"},
+    "additional_updates": {"const": 48},
+    "total_updates": {"const": 72},
+    "chains": {"const": 4},
+    "samples_per_update_per_chain": {"const": 16},
+    "proposal_sweeps": {"const": 2},
+    "learning_rate": {"const": 0.03},
+    "diagonal_shift": {"const": 0.03},
+    "trust_radius": {"const": 0.02},
+    "final_samples_per_chain": {"const": 512},
+    "checkpoint_selection": {
+      "const": "final-additional-update-fixed-before-remediation"
+    },
+    "ed_used_for_gradient": {"const": false},
+    "ed_used_for_checkpoint_selection": {"const": false}
+  },
+  "$defs": {
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256"],
+      "properties": {
+        "path": {"type": "string", "minLength": 2},
+        "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+      }
+    },
+    "complex_vector": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["real", "imag"],
+      "properties": {
+        "real": {"type": "array", "minItems": 1, "maxItems": 3, "items": {"type": "number"}},
+        "imag": {"type": "array", "minItems": 1, "maxItems": 3, "items": {"type": "number"}}
+      }
+    }
+  }
+}
