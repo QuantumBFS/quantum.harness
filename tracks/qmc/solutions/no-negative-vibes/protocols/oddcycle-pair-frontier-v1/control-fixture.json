@@ -1,0 +1,9 @@
+{
+  "cell_id": "control-p_low-0.001-p_high-0.8-q-1-r-1",
+  "params": {
+    "p_low": 0.001,
+    "p_high": 0.8,
+    "q": 1.0,
+    "r": 1.0
+  }
+}

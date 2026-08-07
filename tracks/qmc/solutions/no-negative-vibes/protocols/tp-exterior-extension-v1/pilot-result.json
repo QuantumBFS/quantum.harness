@@ -1,0 +1,32 @@
+{
+  "schema": "tp-exterior-extension-pilot-result-v1",
+  "source_commit": "8969305f04e0",
+  "tests": {
+    "file": "tests/test_tp_exterior_extension.py",
+    "passed": 35,
+    "wall_seconds": 1.59
+  },
+  "control": {
+    "selected": 1,
+    "completed": 1,
+    "compute_errors": 0,
+    "classification": "known-tn-control",
+    "wall_seconds": 0.168
+  },
+  "pilot": {
+    "planned_cells": 256,
+    "unique_manifests": 256,
+    "compute_errors": 0,
+    "classification": {
+      "structural-compound-failed": 228,
+      "known-tn-or-minor-failed": 28
+    },
+    "elapsed_seconds_per_cell": {
+      "mean": 0.23675,
+      "median": 0.23139,
+      "maximum": 0.36455
+    },
+    "cells_per_second": 4.22
+  },
+  "decision": "do not launch the coarse full grid; switch to an adaptive boundary search with smaller Jacobi strengths and shear values chosen around minor sign crossings"
+}

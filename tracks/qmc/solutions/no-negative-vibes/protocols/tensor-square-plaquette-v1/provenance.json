@@ -1,0 +1,8 @@
+{
+  "known_class_audit": "split O(2,2) via eta=epsilon tensor epsilon",
+  "precision": "exact SymPy certificates plus numpy-scipy float64 regressions",
+  "protocol": "tensor-square-plaquette-v1",
+  "purpose": "close the matrix-to-local-HS loop for the tensor-square candidate",
+  "source_commit": "37f69a3992925b598b8c2a75428185012678af7c",
+  "weight": "det(I + product_l (X_l tensor X_l))"
+}

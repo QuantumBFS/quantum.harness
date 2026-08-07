@@ -1,0 +1,482 @@
+{
+  "schema": "oddcycle-local-hs-first-batch-v1",
+  "status": "complete",
+  "source": {
+    "commit": "bebab46956baf3c672f68349a76e49879f6be483",
+    "branch": "work/zibo/representation-cones",
+    "clean_worktree": true,
+    "detached_worktree": true,
+    "wsl_worktree": "/home/zibojin/code/nnv-local-h-dev",
+    "cpu_source": "/home/jzb/code/nnv-local-h-bebab46956baf3c672f68349a76e49879f6be483",
+    "source_archive": "/home/jzb/nnv-local-h-bebab46956baf3c672f68349a76e49879f6be483-source.tar",
+    "source_archive_sha256_file": "/home/jzb/nnv-local-h-bebab46956baf3c672f68349a76e49879f6be483-source.tar.sha256",
+    "source_sha_file": "/home/jzb/nnv-local-h-bebab46956baf3c672f68349a76e49879f6be483.source-sha",
+    "source_archive_sha256": "be546b877bcd86fac98705b1417183dd204647095746692a7c92ec7af59c1f25"
+  },
+  "settings": {
+    "path": "protocols/oddcycle-local-hs-v1/settings.json",
+    "schema": "oddcycle-local-hs-settings-v1",
+    "sha256": "c2ba0297dc3c59e74db52cfbebc3858c8a04d57b0867e3bb088d5f2776dc30ae",
+    "seed": 20260730,
+    "dictionary_lengths": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "free_localities": [
+      "path-edge",
+      "ring-edge",
+      "path-arc3",
+      "ring-arc3",
+      "cluster-two-body"
+    ],
+    "target_library": "first",
+    "target_families": [
+      "path-correlated-hop",
+      "path-pair-hop",
+      "path-t-v",
+      "ring-frustrated-t-v"
+    ],
+    "portfolio_sample_count": 256,
+    "promotion_active_ray_limit": 32,
+    "numerical_active_tolerance": 1e-10,
+    "numerical_residual_tolerance": 1e-09,
+    "python_hash_seed": 0,
+    "expected_cells": 40
+  },
+  "verification": {
+    "precompute": {
+      "host_role": "WSL exact worker",
+      "passed": 41,
+      "wall_seconds": 31.88,
+      "source_commit": "bebab46956baf3c672f68349a76e49879f6be483",
+      "working_directory": "/home/zibojin/code/nnv-task1-oddcycle-word/tracks/qmc/solutions/no-negative-vibes",
+      "command": "env OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 PYTHONHASHSEED=0 /home/zibojin/miniforge3/envs/quantum_harness/bin/python -m pytest -q tests/test_oddcycle_local_hs_runner.py tests/test_oddcycle_word_operator.py tests/test_oddcycle_local_hs_scan.py tests/test_oddcycle_local_hs_exact.py tests/test_oddcycle_local_targets.py tests/test_oddcycle_transfer_portfolio.py tests/test_oddcycle_path_metric.py tests/test_oddcycle_pair_physical.py tests/test_oddcycle_final_certificate.py tests/test_oddcycle_robust_certificate.py",
+      "rerun_for_execution": false
+    },
+    "final": {
+      "host_role": "WSL exact worker",
+      "passed": 42,
+      "wall_seconds": 32.14,
+      "source_commit": "bebab46956baf3c672f68349a76e49879f6be483",
+      "command": "env OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 PYTHONHASHSEED=0 /home/zibojin/miniforge3/envs/quantum_harness/bin/python -m pytest -q tests/test_oddcycle_word_operator.py tests/test_oddcycle_local_hs_scan.py tests/test_oddcycle_local_hs_exact.py tests/test_oddcycle_local_targets.py tests/test_oddcycle_transfer_portfolio.py tests/test_oddcycle_local_hs_runner.py tests/test_oddcycle_path_metric.py tests/test_oddcycle_pair_physical.py tests/test_oddcycle_final_certificate.py tests/test_oddcycle_robust_certificate.py tests/test_oddcycle_majorana_wei_audit.py",
+      "environment": {
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "PYTHONHASHSEED": "0"
+      },
+      "test_files": [
+        "tests/test_oddcycle_word_operator.py",
+        "tests/test_oddcycle_local_hs_scan.py",
+        "tests/test_oddcycle_local_hs_exact.py",
+        "tests/test_oddcycle_local_targets.py",
+        "tests/test_oddcycle_transfer_portfolio.py",
+        "tests/test_oddcycle_local_hs_runner.py",
+        "tests/test_oddcycle_path_metric.py",
+        "tests/test_oddcycle_pair_physical.py",
+        "tests/test_oddcycle_final_certificate.py",
+        "tests/test_oddcycle_robust_certificate.py",
+        "tests/test_oddcycle_majorana_wei_audit.py"
+      ],
+      "scope_note": "exact-SHA code regression; the newly tracked result JSON was parsed separately on local Windows"
+    },
+    "local_result_json_parse": true
+  },
+  "execution": {
+    "cpu": {
+      "host": "frankzhangyi-dell",
+      "logical_cores": 64,
+      "workers": 62,
+      "pid": 2350951,
+      "elapsed_seconds": 923.805,
+      "started_at": "2026-07-30T15:07:20+08:00",
+      "ended_at": null,
+      "end_timestamp_note": "the wrapper did not persist an end timestamp; it stopped normally and the final log reports 923.805 seconds",
+      "stopped_normally": true,
+      "working_directory": "/home/jzb/code/nnv-local-h-bebab46956baf3c672f68349a76e49879f6be483/tracks/qmc/solutions/no-negative-vibes",
+      "output": "/home/jzb/runs/nnv-local-h-bebab46956baf3c672f68349a76e49879f6be483/length4",
+      "manifest": "/home/jzb/runs/nnv-local-h-bebab46956baf3c672f68349a76e49879f6be483/length4/manifest.jsonl",
+      "log": "/home/jzb/runs/nnv-local-h-bebab46956baf3c672f68349a76e49879f6be483/length4.log",
+      "launch_json": "/home/jzb/runs/nnv-local-h-bebab46956baf3c672f68349a76e49879f6be483/length4-launch.json",
+      "command_file": "/home/jzb/runs/nnv-local-h-bebab46956baf3c672f68349a76e49879f6be483/length4-command.txt",
+      "runner": "/home/jzb/runs/nnv-local-h-bebab46956baf3c672f68349a76e49879f6be483/length4-runner.sh",
+      "pid_file": "/home/jzb/runs/nnv-local-h-bebab46956baf3c672f68349a76e49879f6be483/length4.pid",
+      "command": "env OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 PYTHONHASHSEED=0 /home/jzb/miniforge3/envs/quantum-harness/bin/python -u -m oracle.oddcycle_local_hs_runner --settings /home/jzb/code/nnv-local-h-bebab46956baf3c672f68349a76e49879f6be483/tracks/qmc/solutions/no-negative-vibes/protocols/oddcycle-local-hs-v1/settings.json --output /home/jzb/runs/nnv-local-h-bebab46956baf3c672f68349a76e49879f6be483/length4 --workers 62 --resume"
+    },
+    "wsl": {
+      "logical_cores": 16,
+      "workers": 14,
+      "incoming_free": "/home/zibojin/code/nnv-local-h-runs/bebab46956baf3c672f68349a76e49879f6be483/incoming-free",
+      "legacy_misrouted_incoming": "/home/zibojin/code/nnv-local-h-runs/bebab46956baf3c672f68349a76e49879f6be483/incoming",
+      "legacy_misrouted_incoming_note": "preserves the initial rejected portfolio-l1 copy and was never the corrected free-promotion input",
+      "incoming_other": "/home/zibojin/code/nnv-local-h-runs/bebab46956baf3c672f68349a76e49879f6be483/incoming-other",
+      "exact_promotion_output": "/home/zibojin/code/nnv-local-h-runs/bebab46956baf3c672f68349a76e49879f6be483/exact-promotions",
+      "exact_promotion_candidates": 0,
+      "promotion_invoked": false
+    },
+    "environment": {
+      "OMP_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1",
+      "MKL_NUM_THREADS": "1",
+      "NUMEXPR_NUM_THREADS": "1",
+      "PYTHONHASHSEED": "0",
+      "resume": true
+    }
+  },
+  "length_four": {
+    "planned_cells": 40,
+    "terminal_cells": 40,
+    "status_counts": {
+      "survivor": 4,
+      "infeasible": 36,
+      "inconclusive": 0
+    },
+    "mode_status_counts": {
+      "free": {
+        "survivor": 0,
+        "infeasible": 20,
+        "inconclusive": 0
+      },
+      "target": {
+        "survivor": 0,
+        "infeasible": 16,
+        "inconclusive": 0
+      },
+      "portfolio": {
+        "survivor": 4,
+        "infeasible": 0,
+        "inconclusive": 0
+      }
+    },
+    "survivor_cell_ids": [
+      "portfolio-l1",
+      "portfolio-l2",
+      "portfolio-l3",
+      "portfolio-l4"
+    ],
+    "infeasible_cell_ids": [
+      "free-l1-path-edge",
+      "free-l1-ring-edge",
+      "free-l1-path-arc3",
+      "free-l1-ring-arc3",
+      "free-l1-cluster-two-body",
+      "free-l2-path-edge",
+      "free-l2-ring-edge",
+      "free-l2-path-arc3",
+      "free-l2-ring-arc3",
+      "free-l2-cluster-two-body",
+      "free-l3-path-edge",
+      "free-l3-ring-edge",
+      "free-l3-path-arc3",
+      "free-l3-ring-arc3",
+      "free-l3-cluster-two-body",
+      "free-l4-path-edge",
+      "free-l4-ring-edge",
+      "free-l4-path-arc3",
+      "free-l4-ring-arc3",
+      "free-l4-cluster-two-body",
+      "target-l1-path-correlated-hop",
+      "target-l1-path-pair-hop",
+      "target-l1-path-t-v",
+      "target-l1-ring-frustrated-t-v",
+      "target-l2-path-correlated-hop",
+      "target-l2-path-pair-hop",
+      "target-l2-path-t-v",
+      "target-l2-ring-frustrated-t-v",
+      "target-l3-path-correlated-hop",
+      "target-l3-path-pair-hop",
+      "target-l3-path-t-v",
+      "target-l3-ring-frustrated-t-v",
+      "target-l4-path-correlated-hop",
+      "target-l4-path-pair-hop",
+      "target-l4-path-t-v",
+      "target-l4-ring-frustrated-t-v"
+    ],
+    "inconclusive_cell_ids": [],
+    "unique_cell_ids": 40,
+    "duplicate_cell_ids": 0,
+    "missing_cells": 0,
+    "payload_hash_conflicts": 0
+  },
+  "routes": {
+    "route_a_free_local": {
+      "selected_cells": 20,
+      "terminal_cells": 20,
+      "status_counts": {
+        "survivor": 0,
+        "infeasible": 20,
+        "inconclusive": 0
+      },
+      "cell_ids": [
+        "free-l1-path-edge",
+        "free-l1-ring-edge",
+        "free-l1-path-arc3",
+        "free-l1-ring-arc3",
+        "free-l1-cluster-two-body",
+        "free-l2-path-edge",
+        "free-l2-ring-edge",
+        "free-l2-path-arc3",
+        "free-l2-ring-arc3",
+        "free-l2-cluster-two-body",
+        "free-l3-path-edge",
+        "free-l3-ring-edge",
+        "free-l3-path-arc3",
+        "free-l3-ring-arc3",
+        "free-l3-cluster-two-body",
+        "free-l4-path-edge",
+        "free-l4-ring-edge",
+        "free-l4-path-arc3",
+        "free-l4-ring-arc3",
+        "free-l4-cluster-two-body"
+      ],
+      "numerical_survivor_ids": [],
+      "exact_promotion_candidates": 0,
+      "exact_local_survivors": [],
+      "exact_survivor_certificates": [],
+      "conclusion": "dictionary-scoped numerical infeasibility through maximum word length four; not an exact no-go theorem"
+    },
+    "route_b_targets": {
+      "selected_cells": 16,
+      "terminal_cells": 16,
+      "status_counts": {
+        "survivor": 0,
+        "infeasible": 16,
+        "inconclusive": 0
+      },
+      "target_families": [
+        "path-correlated-hop",
+        "path-pair-hop",
+        "path-t-v",
+        "ring-frustrated-t-v"
+      ],
+      "cell_ids": [
+        "target-l1-path-correlated-hop",
+        "target-l1-path-pair-hop",
+        "target-l1-path-t-v",
+        "target-l1-ring-frustrated-t-v",
+        "target-l2-path-correlated-hop",
+        "target-l2-path-pair-hop",
+        "target-l2-path-t-v",
+        "target-l2-ring-frustrated-t-v",
+        "target-l3-path-correlated-hop",
+        "target-l3-path-pair-hop",
+        "target-l3-path-t-v",
+        "target-l3-ring-frustrated-t-v",
+        "target-l4-path-correlated-hop",
+        "target-l4-path-pair-hop",
+        "target-l4-path-t-v",
+        "target-l4-ring-frustrated-t-v"
+      ],
+      "numerical_survivor_ids": [],
+      "exact_separating_functionals": [],
+      "conclusion": "target-scoped numerical infeasibility through maximum word length four; the frozen runner did not retain exact dual vectors"
+    },
+    "route_d_portfolio": {
+      "selected_cells": 4,
+      "terminal_cells": 4,
+      "status_counts": {
+        "survivor": 4,
+        "infeasible": 0,
+        "inconclusive": 0
+      },
+      "survivor_cell_ids": [
+        "portfolio-l1",
+        "portfolio-l2",
+        "portfolio-l3",
+        "portfolio-l4"
+      ],
+      "claim": "exact strictly positive discrete transfers with positive history weights and numerical interacting/non-Gaussian Hamiltonian profiles",
+      "exact_local_hamiltonian_certified": false,
+      "cell_summaries": [
+        {
+          "cell_id": "portfolio-l1",
+          "sample_count": 256,
+          "conclusive": 256,
+          "inconclusive": 0,
+          "payload_sha256": "c52374feaf2e81a7c6e7aff69d4165594d4595cecc3b884ce4b5aa1f5fb270e8",
+          "raw_file_sha256": "3abcff81413d479801aa54e4d55e33464613813d5ee23d21249b3626f442b36f",
+          "best_sample_index": 142
+        },
+        {
+          "cell_id": "portfolio-l2",
+          "sample_count": 256,
+          "conclusive": 256,
+          "inconclusive": 0,
+          "payload_sha256": "b93465d16f4c9d796bac26104b035ae74f85c1e1e297cc94ff2cb8e4373e2c42",
+          "raw_file_sha256": "c16d32355448d9bd89e282323fbaa64852a408edc8439404feb82ff5bc21cae7",
+          "best_sample_index": 122
+        },
+        {
+          "cell_id": "portfolio-l3",
+          "sample_count": 256,
+          "conclusive": 256,
+          "inconclusive": 0,
+          "payload_sha256": "ce065bb507cc0c073f62b8f45a132b9aa0b5d420480368c4fecc184eb0359a81",
+          "raw_file_sha256": "f116c5e4bede6fb7f334d0ae193f3d7bc16de283934fd4a167a3ef04a7d9d4f0",
+          "best_sample_index": 89
+        },
+        {
+          "cell_id": "portfolio-l4",
+          "sample_count": 256,
+          "conclusive": 256,
+          "inconclusive": 0,
+          "payload_sha256": "d99c8c45bea6c90e75c1c00a9a591106d06c0844125b71a18e910c5e37ccac3c",
+          "raw_file_sha256": "4a48d182f44139ace3946a66bc1bc7b11828b540a938a1bf18779ce73aa2850b",
+          "best_sample_index": 206
+        }
+      ],
+      "accepted_reverse_construction_seeds": [
+        {
+          "label": "A",
+          "selection": "minimum cluster-two-body forbidden-support norm across the completed portfolio",
+          "selection_rank": 1,
+          "selection_population": 1024,
+          "source_cell_id": "portfolio-l2",
+          "max_word_length": 2,
+          "sample_index": 122,
+          "source_cell_payload_sha256": "b93465d16f4c9d796bac26104b035ae74f85c1e1e297cc94ff2cb8e4373e2c42",
+          "source_raw_file_sha256": "c16d32355448d9bd89e282323fbaa64852a408edc8439404feb82ff5bc21cae7",
+          "status": "numerical-log-conclusive",
+          "seed": 20260730,
+          "source_words": [
+            [0],
+            [2],
+            [0, 0],
+            [0, 1],
+            [0, 2],
+            [0, 3],
+            [1, 0],
+            [1, 2],
+            [1, 3],
+            [2, 2],
+            [2, 3],
+            [3, 2]
+          ],
+          "source_transpose_words": [
+            [1],
+            [3],
+            [1, 1],
+            [0, 1],
+            [3, 1],
+            [2, 1],
+            [1, 0],
+            [3, 0],
+            [2, 0],
+            [3, 3],
+            [2, 3],
+            [3, 2]
+          ],
+          "exact_weights": [
+            {"numerator": 11, "denominator": 72},
+            {"numerator": 1, "denominator": 36},
+            {"numerator": 1, "denominator": 72},
+            {"numerator": 11, "denominator": 72},
+            {"numerator": 1, "denominator": 72},
+            {"numerator": 1, "denominator": 24},
+            {"numerator": 1, "denominator": 12},
+            {"numerator": 1, "denominator": 24},
+            {"numerator": 1, "denominator": 72},
+            {"numerator": 1, "denominator": 72},
+            {"numerator": 2, "denominator": 9},
+            {"numerator": 2, "denominator": 9}
+          ],
+          "exact_shift": 42,
+          "exact_vacuum_value": {
+            "numerator": 44,
+            "denominator": 1
+          },
+          "exact_minimum_row_margin": {
+            "numerator": 12213,
+            "denominator": 15625
+          },
+          "minimum_eigenvalue": 43.08101089589473,
+          "log_reconstruction_residual": 2.5863801869872575e-14,
+          "coordinate_reconstruction_residual": 2.9716871307260523e-15,
+          "body_order_norms": {
+            "0": 0.0,
+            "1": 0.19310387271049814,
+            "2": 0.5508039417815956,
+            "3": 0.4566425597169218,
+            "4": 0.22510540122185593,
+            "5": 0.18329334415921095
+          },
+          "forbidden_support_norms": {
+            "cluster-two-body": 0.5411019488203146,
+            "path-arc3": 0.5977828806814701,
+            "path-edge": 0.6860196263057259,
+            "ring-arc3": 0.5691435089461904,
+            "ring-edge": 0.6842674402775771
+          },
+          "gaussian_grade_distance": 7.973697906947008,
+          "interaction_norm": 0.7721245374285716,
+          "exact_transfer_positive": true,
+          "positive_discrete_histories": true,
+          "hamiltonian_profile_numerical": true,
+          "exact_hamiltonian_locality_certified": false,
+          "scalable_lattice": false
+        }
+      ],
+      "length_four_leader": {
+        "source_cell_id": "portfolio-l4",
+        "max_word_length": 4,
+        "source_cell_payload_sha256": "d99c8c45bea6c90e75c1c00a9a591106d06c0844125b71a18e910c5e37ccac3c",
+        "dictionary_columns": 180,
+        "conclusive_samples": 256,
+        "sample_count": 256,
+        "best_sample_index": 206,
+        "exact_shift": 14219,
+        "exact_minimum_row_margin": {
+          "numerator": 6660970905617,
+          "denominator": 12179687500000
+        },
+        "minimum_eigenvalue": 14219.459608288844,
+        "log_reconstruction_residual": 9.79082851200976e-15,
+        "coordinate_reconstruction_residual": 2.483727966208917e-15,
+        "interaction_norm": 1.0788673738422012,
+        "forbidden_support_norms": {
+          "cluster-two-body": 1.0782559100784923,
+          "path-arc3": 1.078337976935679,
+          "path-edge": 1.0786828432541062,
+          "ring-arc3": 1.0783073707232071,
+          "ring-edge": 1.0786813956534906
+        },
+        "gaussian_grade_distance": 3.2399488165601835
+      }
+    }
+  },
+  "artifacts": {
+    "cpu_archive": "/home/zibojin/code/nnv-local-h-runs/bebab46956baf3c672f68349a76e49879f6be483/archive/cpu-final-20260730T072536Z",
+    "manifest_sha256": "c5d8a3632d4a53d79148250fcd03fb422192de91c36bf75820df005d0e5f0b16",
+    "log_sha256": "0d6e0533bbb7625b4615d96bcd6a59d103aab3994a02c723ae6600971029917f",
+    "files_list_sha256": "ea6a9a589f22afd31a3f6be2312ddde5ca9078e8988dae65b7f5b822a8266f98",
+    "archive_list_sha256": "eb3c94112a6816b0baddbc2bad611af2af9ac5a175359501f3aba00fff1f508c",
+    "run_root_list_sha256": "6542e7505e37322127356b6fbf48abf6acf998833de59bfe6e2247aea26d97fa",
+    "incoming_other_list_sha256": "7bbe92d5925a2b6f228760a6cee7e540dd7f47e737bd6b7385da57eacc3edf22",
+    "portfolio_summary": {
+      "path": "/home/zibojin/code/nnv-local-h-runs/bebab46956baf3c672f68349a76e49879f6be483/portfolio-partial-summary.json",
+      "historical_filename_note": "the file retained its partial-stage name but contains portfolio-l1 through portfolio-l4",
+      "sha256": "5279b37038d75a81a001f1583041612c9e272cd19007b5a9a048ee04e6b940ee"
+    }
+  },
+  "success_hierarchy": {
+    "level_reached": "L1",
+    "L0": true,
+    "L1": true,
+    "L2": false,
+    "L3": false,
+    "L4": false,
+    "interpretation": "the same certified alphabet yields a ranked batch of exact positive discrete transfers; no geometrically local continuous-time Hamiltonian was certified exactly through maximum word length four"
+  },
+  "continuation": {
+    "closure_state": "complete_with_documented_plan_deviation",
+    "decision": "defer the residual-prioritized length-six amendment and design/freeze the Survivor-A reverse-construction protocol first",
+    "recovery_command": "cd /home/jzb/code/nnv-local-h-bebab46956baf3c672f68349a76e49879f6be483/tracks/qmc/solutions/no-negative-vibes && env OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 PYTHONHASHSEED=0 /home/jzb/miniforge3/envs/quantum-harness/bin/python -u -m oracle.oddcycle_local_hs_runner --settings /home/jzb/code/nnv-local-h-bebab46956baf3c672f68349a76e49879f6be483/tracks/qmc/solutions/no-negative-vibes/protocols/oddcycle-local-hs-v1/settings.json --output /home/jzb/runs/nnv-local-h-bebab46956baf3c672f68349a76e49879f6be483/length4 --workers 62 --resume",
+    "next_scientific_command": null,
+    "next_scientific_command_reason": "the length-six and Survivor-A reverse-construction protocols must be frozen and committed before either scientific launch",
+    "plan_deviation": "the frozen runner retained no exact dual or residual vectors required by the planned residual-prioritized length-six amendment, so freezing a command now would fabricate its prioritization; under user-delegated success-first autonomy, the controller defers that amendment and prioritizes a separately designed Survivor-A reverse-construction protocol; neither launches until frozen and committed",
+    "interface_status": "Task 8 execution and results are closed; the exact next-scientific-command interface is intentionally unsatisfied and carried to the next protocol task"
+  }
+}

@@ -1,0 +1,6 @@
+[
+  {"family": "number-conserving", "mask": "rings-bridges"},
+  {"family": "number-conserving", "mask": "rings-diagonals-bridges"},
+  {"family": "bdg", "mask": "rings-bridges"},
+  {"family": "bdg", "mask": "rings-diagonals-bridges"}
+]

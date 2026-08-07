@@ -1,0 +1,41 @@
+{
+  "schema": "oddcycle-survivor-a-partial-checkpoint-v1",
+  "protocol_id": "oddcycle-survivor-a-v1",
+  "captured_at": "2026-07-30T19:06:55.5403826+08:00",
+  "snapshot_is_nonterminal": true,
+  "background_compute_continues": true,
+  "scientific_status": "running-no-completed-cells",
+  "claim_boundary": "This checkpoint contains launch identities and frozen settings only. It is not a Hamiltonian survivor, exact-locality certificate, or completed scan result.",
+  "wsl": {
+    "tmux_session": "nnv-survivor-hportfolio-wsl-20260730",
+    "observed_process_count": 16,
+    "worker_count": 14,
+    "completed_cell_files": 0,
+    "seed_first": 20271000,
+    "seed_last": 20271013,
+    "samples_per_cell": 2048,
+    "sample_count_total": 28672,
+    "settings_sha256": "d2d82d4db8790b72472141a999607240a0f4ce05121472bb0e9d5b0fdab6f0ae",
+    "settings_path": "/home/zibojin/runs/nnv-survivor-hportfolio-20260730/wsl/settings.json",
+    "output_path": "/home/zibojin/runs/nnv-survivor-hportfolio-20260730/wsl/output"
+  },
+  "cpu": {
+    "tmux_session": "nnv-survivor-hportfolio-20260730",
+    "observed_process_count": 64,
+    "worker_count": 62,
+    "completed_cell_files": 0,
+    "seed_first": 20270000,
+    "seed_last": 20270061,
+    "samples_per_cell": 2048,
+    "sample_count_total": 126976,
+    "settings_sha256": "193e9878fa82d6c55757acd402f11aa96ca07e89ae8dcd0be804c03ba0fe1d02",
+    "settings_path": "/home/jzb/runs/nnv-survivor-hportfolio-20260730/cpu/cpu-settings.json",
+    "output_path": "/home/jzb/runs/nnv-survivor-hportfolio-20260730/cpu/output"
+  },
+  "tracked_artifacts": {
+    "wsl_settings": "protocols/oddcycle-survivor-a-v1/portfolio-wsl-settings-20260730.json",
+    "cpu_settings": "protocols/oddcycle-survivor-a-v1/portfolio-cpu-settings-20260730.json",
+    "recovery_log": "docs/EXPERIMENT_LOG.md"
+  },
+  "next_action": "On explicit continuation, inspect the same output directories and sessions first. Do not recreate settings or repeat completed cells."
+}

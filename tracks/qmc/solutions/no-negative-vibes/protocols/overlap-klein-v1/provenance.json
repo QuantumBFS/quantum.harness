@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "protocol": "overlap-klein-v1",
+  "design_commit": "b0d40ff",
+  "common_baseline": "04e72bd",
+  "design_path": "tracks/qmc/solutions/no-negative-vibes/docs/superpowers/plans/2026-07-28-r01-overlapping-klein-cone.md",
+  "candidate_card_path": "tracks/qmc/solutions/no-negative-vibes/docs/candidates/R01_OVERLAPPING_KLEIN_FOCK.md"
+}

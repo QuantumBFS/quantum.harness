@@ -1,0 +1,17 @@
+{
+  "protocol": "az-survivor-cones-v1",
+  "precision": "numpy-scipy-float64",
+  "weight": "det(I + product_l exp(A_l))",
+  "purpose": "rapid falsification of natural number-conserving semigroup-cone extensions of BDI, AII, DIII, and CII",
+  "candidate_principles": [
+    "fixed and two-sided BDI split-contraction cones",
+    "non-Hermitian AII Kramers algebra",
+    "DIII chiral-metric cones with particle-hole-preserving or generic positive directions",
+    "CII chiral-metric cones with Kramers-preserving or generic positive directions"
+  ],
+  "sources": [
+    "https://github.com/QuantumBFS/quantum.harness/issues/121",
+    "https://arxiv.org/abs/1712.09412",
+    "https://arxiv.org/abs/1601.01994"
+  ]
+}
