@@ -1,0 +1,138 @@
+{
+  "exact_closing_edge_counterexample": {
+    "I_plus_product": [
+      [
+        2,
+        3,
+        9
+      ],
+      [
+        0,
+        2,
+        3
+      ],
+      [
+        1,
+        0,
+        2
+      ]
+    ],
+    "each_factor_is": "exp(Eij) = I + Eij because Eij^2 = 0",
+    "exact_integer_determinant": -1,
+    "product": [
+      [
+        1,
+        3,
+        9
+      ],
+      [
+        0,
+        1,
+        3
+      ],
+      [
+        1,
+        0,
+        1
+      ]
+    ],
+    "word": [
+      "E12",
+      "E12",
+      "E12",
+      "E31",
+      "E23",
+      "E23",
+      "E23"
+    ]
+  },
+  "fock_trace_check": {
+    "absolute_difference": 7.105427357601002e-15,
+    "determinant": 35.852592547734055,
+    "fock_dimension": 32,
+    "fock_trace_imag": 0.0,
+    "fock_trace_real": 35.85259254773405,
+    "one_particle_dimension": 5
+  },
+  "known_anchors": {
+    "component_controls": {
+      "O_minus_minus_determinant": -0.5,
+      "mixed_component_determinant": 0.0
+    },
+    "split_cone": {
+      "maximum_cone_violation": 0.0,
+      "minimum_determinant": 3.6150254149035583,
+      "negative_count": 0,
+      "samples": 600
+    },
+    "split_lie": {
+      "maximum_metric_residual": 8.87334158954865e-15,
+      "minimum_determinant": 4.000008416107035,
+      "negative_count": 0,
+      "samples": 600
+    },
+    "trials_per_dimension_depth_cell": 50
+  },
+  "novelty_obstruction_checks": {
+    "dimensions": [
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "dirac_commutant_dimensions": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+    ],
+    "expected_for_no_2024_contraction_J2": "all nullities equal 0",
+    "expected_for_no_kramers": "all commutant dimensions equal 1",
+    "majorana_skew_J2_nullities": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  "seed": 121,
+  "tn_semigroup": {
+    "depths": [
+      1,
+      2,
+      4,
+      8
+    ],
+    "determinant_below_one_count": 0,
+    "dimensions": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "exhaustive_all_minor_checks": 64,
+    "maximum_determinant": 156608.52410555657,
+    "maximum_generator_structure_violation": 0.0,
+    "maximum_principal_identity_error": 1.0186340659856796e-10,
+    "minimum_checked_minor": 5.881419941595498e-29,
+    "minimum_determinant": 1.0895854257783073,
+    "minor_violation_count": 0,
+    "negative_determinant_count": 0,
+    "principal_identity_checks": 96,
+    "samples": 8000,
+    "trials_per_dimension_depth_cell": 250
+  }
+}
