@@ -1,0 +1,147 @@
+{
+  "schema_version": 2,
+  "article": "Spectral Silence and Geometric Chaos in an Exactly Degenerate Topological Manifold",
+  "checks": {
+    "source_artifact_passes": true,
+    "statistical_artifact_passes": true,
+    "figure_manifest_passes": true,
+    "exact_energy_silence": true,
+    "same_rank_structured_control": true,
+    "registered_geometry_axis": true,
+    "registered_spectral_axis": true,
+    "spectral_endpoint_confidence_separated": true,
+    "finite_jacobi_numerics_pass": true,
+    "atom_plateau_data_exact": true,
+    "registered_hierarchy_resolved": true,
+    "statistical_arrays_complete": true,
+    "bootstrap_replicates_exact": true,
+    "v1_large_scale_evidence_retained": true,
+    "figure_inputs_hashed": true,
+    "figure_outputs_hashed": true,
+    "figures_synchronized": true,
+    "generated_inputs_synchronized": true,
+    "all_citation_keys_resolve": true,
+    "new_reference_metadata_registered": true,
+    "chen_program_positioned": true,
+    "no_cross_task_v2_runtime_dependency": true,
+    "article_pdf_archived": true,
+    "pdf_page_count_in_contract": true,
+    "pdf_title_metadata": true,
+    "pdf_author_metadata": true,
+    "pdf_affiliations_visible": true,
+    "headline_claim_visible": true,
+    "time_caveat_visible": true,
+    "non_susy_scope_visible": true,
+    "all_pdf_pages_rendered": true,
+    "no_undefined_control_sequence": true,
+    "no_undefined_references": true,
+    "no_undefined_citations": true,
+    "no_overfull_boxes": true,
+    "no_stuck_floats": true,
+    "pytest_complete_if_recorded": true
+  },
+  "all_checks_pass": true,
+  "pdf": {
+    "path": "overleaf_sync/geometric_eth_large_scale/main.pdf",
+    "archived_path": "01_task_folder/task_05/script/output/spectral_silence_and_geometric_chaos_v2.pdf",
+    "sha256": "5d51ad4997a8cc95fa60fdafa02ef5aa13ad86cd31f10764b61a8f8903c2895c",
+    "pages": 12,
+    "title": "Spectral Silence and Geometric Chaos in an Exactly Degenerate Topological Manifold",
+    "author": "Thomas J. Wang; OKongOYangO"
+  },
+  "rendered_pages": [
+    {
+      "page": 1,
+      "width": 1275,
+      "height": 1650,
+      "sha256": "9dae24ba1ba37821574e5868df7cf5a3fcb93c2904d362494fbbc9a4606d3fbc"
+    },
+    {
+      "page": 2,
+      "width": 1275,
+      "height": 1650,
+      "sha256": "ddb783aa2f35cfa313837f6db8b662b6e5cec9197ec979bb1f678405acd6c189"
+    },
+    {
+      "page": 3,
+      "width": 1275,
+      "height": 1650,
+      "sha256": "46636d057b18843669b4fd2c0366f2b0f03e364dfedbe488b812089b18ce41b7"
+    },
+    {
+      "page": 4,
+      "width": 1275,
+      "height": 1650,
+      "sha256": "f1746ee40c4ad19fa0b4b80cab084d37404da2fa24631a5212e2c2a428043deb"
+    },
+    {
+      "page": 5,
+      "width": 1275,
+      "height": 1650,
+      "sha256": "6e18d587ae4a3dfbc7316d14d556876fe28a9afa01226e3bec21a581f330ccc7"
+    },
+    {
+      "page": 6,
+      "width": 1275,
+      "height": 1650,
+      "sha256": "ae560c77c41e59532930fd4caa9ee7d4e52cec6486010a21a6fa1655258ee3e0"
+    },
+    {
+      "page": 7,
+      "width": 1275,
+      "height": 1650,
+      "sha256": "f398d005d850aeebc597be9f3f2860c67e2377bca8e86b72e8a90071152df117"
+    },
+    {
+      "page": 8,
+      "width": 1275,
+      "height": 1650,
+      "sha256": "5558b1accf8d922a1ee9c8d11965683e300a3dd425b3be6d45badac386271d63"
+    },
+    {
+      "page": 9,
+      "width": 1275,
+      "height": 1650,
+      "sha256": "79b69fe3c56c1c711dbb3457653022a11acb746e4c2702ebdad4335dbc03b266"
+    },
+    {
+      "page": 10,
+      "width": 1275,
+      "height": 1650,
+      "sha256": "44e22dd987bd2669d7f2f583de2d258493f1f14ab1e149d34e7ae7c764a186dc"
+    },
+    {
+      "page": 11,
+      "width": 1275,
+      "height": 1650,
+      "sha256": "f0e86de09dbe57320a6ad97debbf66a077e5e1c26c81e425a2fd9f0a718d32be"
+    },
+    {
+      "page": 12,
+      "width": 1275,
+      "height": 1650,
+      "sha256": "655079db805d87572ca145d6753b4e08f5810fa01a623032178759c9f82c918e"
+    }
+  ],
+  "pytest_passed": 34,
+  "registered_scale": {
+    "physical_matrices": 20000,
+    "physical_test_matrices": 4000,
+    "structured_momenta": 24,
+    "structured_orbits": 12,
+    "geometric_interpolation_matrices": 28000,
+    "spectral_interpolation_matrices": 32000,
+    "haar_matrices": 10000,
+    "root_matrices": 8750,
+    "maximum_rank": 800,
+    "bootstrap_replicates": 10000
+  },
+  "supported_conclusion": {
+    "energy_connected_sff": 0.0,
+    "physical_jacobi_tau_onset": 0.25,
+    "geometric_local_onset": 0.20000000298023224,
+    "geometric_ramp_onset": 0.4000000059604645,
+    "number_variance_compatibility_extent": 1.0,
+    "D800_connected_plateau": 0.7
+  }
+}

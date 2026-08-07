@@ -1,0 +1,53 @@
+\documentclass[aps,prl,reprint,superscriptaddress,longbibliography,floatfix]{revtex4-2}
+
+\usepackage{amsmath,amssymb,bm}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{microtype}
+\usepackage{xcolor}
+\usepackage[colorlinks=true,citecolor=blue!55!black,linkcolor=blue!55!black,urlcolor=blue!55!black]{hyperref}
+\hypersetup{pdftitle={Response-Complex Memory in Exactly Degenerate Quantum Matter},pdfauthor={Thomas J. Wang; OKongOYangO},pdfsubject={Hodge-resolved quantum geometry and chaos under exact degeneracy}}
+
+\graphicspath{{figures/}}
+\input{generated/results_v7.tex}
+\newcommand{\Tr}{\operatorname{Tr}}
+\newcommand{\dd}{\mathrm d}
+\newcommand{\cH}{\mathcal H}
+\newcommand{\cM}{\mathcal M}
+
+\begin{document}
+
+\title{Response-Complex Memory in Exactly Degenerate Quantum Matter}
+
+\author{Thomas J. Wang}
+\email{WangTheoPhys@outlook.com}
+\affiliation{Tsinghua University, Beijing 100084, China}
+
+\author{OKongOYangO}
+\affiliation{The Pennsylvania State University, University Park, Pennsylvania 16802, USA}
+
+\date{\today}
+
+\begin{abstract}
+\ifheldoutcomplete
+\HeldoutAbstract
+\else
+This source tree freezes the response-complex formalism and the prediction protocol before the held-out calculation is opened. The result-bearing abstract is generated only after a valid prediction seal, explicit unseal, and fail-closed inference audit exist. No held-out scientific branch is claimed in this draft state.
+\fi
+\end{abstract}
+
+\maketitle
+
+\input{sections/01-introduction.tex}
+\input{sections/02-response-complex.tex}
+\input{sections/03-sealed-protocol.tex}
+\input{sections/04-results.tex}
+\input{sections/05-discussion.tex}
+
+\begin{acknowledgments}
+The numerical artifacts, complete-realization resampling records, source hashes, and prediction seals are retained with the reproducibility package. We thank the Quantum Harness community for discussions motivating fail-closed computational tests.
+\end{acknowledgments}
+
+\bibliography{references}
+
+\end{document}

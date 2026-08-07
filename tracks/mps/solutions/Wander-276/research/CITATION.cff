@@ -1,0 +1,29 @@
+cff-version: 1.2.0
+message: "If you use this code or dataset, please cite the article and this software release."
+title: "Spectral Silence and Geometric Chaos in an Exactly Degenerate Topological Manifold"
+type: software
+authors:
+  - family-names: Wang
+    given-names: Thomas J.
+  - family-names: OKongOYangO
+repository-code: "https://github.com/JunkaiWang-TheoPhy/Chaos-of-Quantum-Geometry"
+url: "https://github.com/JunkaiWang-TheoPhy/Chaos-of-Quantum-Geometry"
+version: 1.0.0
+date-released: 2026-07-30
+license: GPL-3.0-only
+abstract: "A reproducible analytic and numerical baseline for non-Abelian geometric chaos under exact spectral degeneracy, including finite-Jacobi curvature correlations, gauge-invariant four-channel response tests, and fixed-Chern Wilson holonomy."
+keywords:
+  - quantum chaos
+  - non-Abelian Berry curvature
+  - geometric ETH
+  - fractional quantum Hall effect
+  - Chern number
+  - Wilson holonomy
+preferred-citation:
+  type: article
+  authors:
+    - family-names: Wang
+      given-names: Thomas J.
+    - family-names: OKongOYangO
+  title: "Spectral Silence and Geometric Chaos in an Exactly Degenerate Topological Manifold"
+  year: 2026
