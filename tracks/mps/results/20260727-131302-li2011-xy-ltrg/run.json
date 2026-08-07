@@ -1,0 +1,239 @@
+{
+  "paper": {
+    "id": "arXiv:1011.0155",
+    "title": "Linearized Tensor Renormalization Group Algorithm for Thermodynamics of Quantum Lattice Models",
+    "url": "https://arxiv.org/abs/1011.0155",
+    "doi": "10.1103/PhysRevLett.106.127202"
+  },
+  "model": {
+    "name": "one-dimensional spin-1/2 XY chain",
+    "H": "H = -J \\sum_i \\left(S_i^x S_{i+1}^x + S_i^y S_{i+1}^y\\right)",
+    "couplings": {
+      "$J$": 1,
+      "$h$": 0
+    },
+    "lattice": "infinite one-dimensional chain with a two-site unit cell (paper uses N = 2^100)",
+    "boundary": "periodic / thermodynamic limit",
+    "scene": "figs/scene_model.json",
+    "scene_poster": "figs/scene_model.png"
+  },
+  "method": {
+    "family": "Linearized Tensor Renormalization Group (LTRG)",
+    "exact": false,
+    "tool": "ITensors.jl 0.9.30",
+    "settings": {
+      "Trotter product": "alternating even/odd",
+      "local dimension q": 2,
+      "retained dimension Dc": "50, 100, 150",
+      "Trotter step tau": "0.1, 0.05, 0.02, 0.01",
+      "SVD cutoff": 0
+    },
+    "note": "The thermal density operator is vectorized into a two-site Gamma-lambda boundary state. Each imaginary-time layer is absorbed and compressed with an ITensors singular-value decomposition; every removed scale factor is accumulated exactly once to recover the free energy. The Jordan-Wigner solution is evaluated independently and used only as the benchmark."
+  },
+  "params": [
+    {
+      "name": "spin convention",
+      "value": "S = sigma/2",
+      "source": "paper Hamiltonian and XY oracle",
+      "why": "fixes the energy scale of every plotted quantity",
+      "risk": "using Pauli matrices makes each bilinear four times too large and shifts all temperature features",
+      "fix": "unit-test the two-site matrix element and run the deliberate Pauli mismatch control"
+    },
+    {
+      "name": "exchange J",
+      "value": "1",
+      "source": "paper text below Eq. (7)",
+      "why": "sets the paper's temperature and energy units",
+      "risk": "a different J rescales both axes and prevents a numerical comparison",
+      "fix": "echo J in every cell manifest and compare e0 with -1/pi"
+    },
+    {
+      "name": "chain and boundary",
+      "value": "infinite two-site unit cell, periodic",
+      "source": "paper N = 2^100 with periodic spatial boundary",
+      "why": "removes finite-size effects while matching the paper's thermodynamic limit",
+      "risk": "an open finite chain adds edge and finite-size corrections",
+      "fix": "use the dominant trace-transfer eigenvalue per two-site cell"
+    },
+    {
+      "name": "inverse-temperature range",
+      "value": "beta <= 5 (Fig. 4), beta <= 120 (Figs. 5-6a)",
+      "source": "paper axes and text",
+      "why": "covers both the high-temperature Trotter regime and low-temperature truncation regime",
+      "risk": "stopping early misses the beta=120 accuracy claims and low-temperature heat capacity",
+      "fix": "cell success requires the declared beta_max sample"
+    },
+    {
+      "name": "Trotter step tau",
+      "value": "0.1, 0.05, 0.02, 0.01",
+      "source": "Fig. 4 legend; tau=0.05 in Figs. 5-6a",
+      "why": "the paper identifies tau as the dominant high-temperature error control",
+      "risk": "one tau cannot reveal the paper's ordered error curves",
+      "fix": "plan separate resumable cells for every plotted tau"
+    },
+    {
+      "name": "retained SVD dimension Dc",
+      "value": "50, 100, 150",
+      "source": "Figs. 4-6a legends",
+      "why": "shows low-temperature truncation error and high-temperature saturation",
+      "risk": "small Dc distorts beta=120 while a single large Dc hides the convergence signature",
+      "fix": "plot all three paper dimensions from independent cells"
+    },
+    {
+      "name": "SVD cutoff",
+      "value": "0 (Dc alone controls truncation)",
+      "source": "paper retains a fixed number Dc",
+      "why": "keeps the reproduction's truncation rule aligned with the plotted Dc labels",
+      "risk": "an additional cutoff may silently retain fewer states than the legend claims",
+      "fix": "record the actual retained dimension and ITensors discarded weight"
+    },
+    {
+      "name": "energy and heat-capacity estimator",
+      "value": "five-point derivatives of beta*f",
+      "source": "paper permits numerical differentiation of free energy",
+      "why": "one LTRG free-energy run supplies all three requested observables",
+      "risk": "differentiation amplifies low-temperature numerical noise",
+      "fix": "use a uniform beta grid and show the exact analytic curve beside the result"
+    },
+    {
+      "name": "CPU parallelism",
+      "value": "1 Julia thread, 1 OpenBLAS thread",
+      "source": "local reproducibility choice",
+      "why": "makes resource use and timings predictable on the available laptop",
+      "risk": "uncontrolled BLAS threading makes timings noisy and competes with normal use",
+      "fix": "set JULIA_NUM_THREADS=1 and OPENBLAS_NUM_THREADS=1 in the rerun command"
+    },
+    {
+      "name": "Fig. 6a Dc label",
+      "value": "150",
+      "source": "plotted panel legend; caption says 200",
+      "why": "the actual curve label is the closest evidence for the data shown",
+      "risk": "following the inconsistent caption would create a curve not named in the panel",
+      "fix": "record the source discrepancy in the report and retain the panel image"
+    }
+  ],
+  "scope": {
+    "label": "beginner Track 2, all LTRG targets in Figs. 4-6a"
+  },
+  "estimate": [
+    {"point": "tau=0.1, Dc=100, beta<=5", "wall": "~10 s", "memory": "<0.2 GB"},
+    {"point": "tau=0.05, Dc=50, beta<=120", "wall": "~1 min", "memory": "<0.2 GB"},
+    {"point": "tau=0.05, Dc=100, beta<=120", "wall": "~3 min", "memory": "<0.5 GB"},
+    {"point": "tau=0.05, Dc=150, beta<=120", "wall": "~8 min", "memory": "<1.0 GB"},
+    {"point": "tau=0.02, Dc=100, beta<=5", "wall": "~20 s", "memory": "<0.5 GB"},
+    {"point": "tau=0.02, Dc=150, beta<=5", "wall": "~45 s", "memory": "<1.0 GB"},
+    {"point": "tau=0.01, Dc=150, beta<=5", "wall": "~90 s", "memory": "<1.0 GB"}
+  ],
+  "actual": [
+    {"point": "tau=0.1, Dc=100, beta<=5", "wall": "6.2 s", "memory": "0.88 GiB process peak"},
+    {"point": "tau=0.05, Dc=50, beta<=120", "wall": "26.8 s", "memory": "0.88 GiB process peak"},
+    {"point": "tau=0.05, Dc=100, beta<=120", "wall": "2 min 1 s", "memory": "0.91 GiB process peak"},
+    {"point": "tau=0.05, Dc=150, beta<=120", "wall": "5 min 48 s", "memory": "0.93 GiB process peak"},
+    {"point": "tau=0.02, Dc=100, beta<=5", "wall": "13.4 s", "memory": "<=0.93 GiB shared-process peak"},
+    {"point": "tau=0.02, Dc=150, beta<=5", "wall": "32.4 s", "memory": "<=0.93 GiB shared-process peak"},
+    {"point": "tau=0.01, Dc=150, beta<=5", "wall": "1 min 4 s", "memory": "<=0.93 GiB shared-process peak"}
+  ],
+  "where": "local CPU (i9-13980HX, 31 GiB RAM)",
+  "risks": [
+    "No official LTRG implementation accompanies the paper; the layer update is reimplemented from Eqs. 2-7 and Figs. 1-3.",
+    "The paper's free-energy normalization equation is image-extracted, so beta=0 entropy and the exact XY curve are mandatory bookkeeping anchors.",
+    "Numerical second derivatives can be noisy near the lowest temperatures; the report will not smooth away a disagreement.",
+    "TMRG comparison curves are not regenerated; exact XY thermodynamics is the declared primary benchmark."
+  ],
+  "figures": [
+    {
+      "id": "Fig. 4",
+      "paper_image": "figs/paper_fig4.png",
+      "plots": "high-temperature free-energy relative error",
+      "x": "inverse temperature $\\beta$",
+      "x_range": "0 to 5",
+      "y": "$\\delta f = |(f-f_{exact})/f_{exact}|$ on a logarithmic scale",
+      "observe": {
+        "quantity": "relative error of free energy per site",
+        "normalization": "relative to the thermodynamic-limit Jordan-Wigner free energy",
+        "states": "thermal trace over the full spin Hilbert space"
+      },
+      "expected": "Smaller Trotter step lowers the error; at fixed tau=0.05 or 0.02 the Dc=100 and Dc=150 curves nearly coincide, showing that high-temperature error is set by Trotter discretization.",
+      "results": {
+        "figure": "figs/fig4.png",
+        "numbers": {
+          "$\\delta f$ at $\\beta=5$, $\\tau=0.1$, $D_c=100$": "1.084e-4",
+          "$\\delta f$ at $\\beta=5$, $\\tau=0.05$, $D_c=100/150$": "2.704e-5 / 2.711e-5",
+          "$\\delta f$ at $\\beta=5$, $\\tau=0.02$, $D_c=100/150$": "4.257e-6 / 4.329e-6",
+          "$\\delta f$ at $\\beta=5$, $\\tau=0.01$, $D_c=150$": "1.074e-6",
+          "Pauli-bilinear negative control at $\\beta=2$": "1.853 relative error; caught (>5%)"
+        },
+        "match": "yes",
+        "why": "The error decreases in the paper's Trotter-step order, while the Dc=100 and 150 curves coincide at fixed tau=0.05 and 0.02.",
+        "wall": "10 min 13 s for the shared seven-cell run",
+        "changes": [
+          "The uv launcher was unavailable; the unchanged XY catalog oracle ran with .venv/bin/python."
+        ],
+        "rerun": "JULIA_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 julia --project=julia-env tracks/mps/solutions/xy_ltrg_reproduction.jl --run-dir tracks/mps/results/20260727-131302-li2011-xy-ltrg"
+      }
+    },
+    {
+      "id": "Fig. 5a-b",
+      "paper_image": "figs/paper_fig5.png",
+      "plots": "low-temperature free-energy error and internal energy",
+      "x": "inverse temperature $\\beta$",
+      "x_range": "20 to 120",
+      "y": "free-energy relative error and energy per site",
+      "observe": {
+        "quantity": "free energy from log normalization; energy from $\\partial(\\beta f)/\\partial\\beta$",
+        "normalization": "per lattice site; energy error also compared with $e_0=-1/\\pi$",
+        "states": "thermal trace, approaching the ground state as beta grows"
+      },
+      "expected": "Increasing Dc improves the beta=120 result; the paper reports delta f about 7e-6 and relative ground-state-energy error about 1e-4 at Dc=150.",
+      "results": {
+        "figure": "figs/fig5.png",
+        "numbers": {
+          "$\\delta f$ at $\\beta=120$, $D_c=50/100/150$": "2.923e-4 / 3.086e-5 / 4.436e-6",
+          "$e(\\beta=120)$ at $D_c=150$": "-0.3182704340",
+          "relative $e_0$ error at $\\beta=120$, $D_c=150$": "1.239e-4",
+          "finite-$L$ XY oracle ($L=400$)": "-0.3183131587",
+          "thermodynamic exact $e_0=-1/\\pi$": "-0.3183098862"
+        },
+        "match": "yes",
+        "why": "At Dc=150 the beta=120 free-energy error is below the paper's approximately 7e-6 value, and the ground-energy error reproduces the reported 1e-4 scale.",
+        "wall": "10 min 13 s for the shared seven-cell run",
+        "changes": [],
+        "rerun": "JULIA_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 julia --project=julia-env tracks/mps/solutions/xy_ltrg_reproduction.jl --run-dir tracks/mps/results/20260727-131302-li2011-xy-ltrg"
+      }
+    },
+    {
+      "id": "Fig. 6a",
+      "paper_image": "figs/paper_fig6a.png",
+      "plots": "specific heat versus temperature",
+      "x": "temperature $T=1/\\beta$",
+      "x_range": "approximately 0.0083 to 2",
+      "y": "specific heat per site $C$",
+      "observe": {
+        "quantity": "specific heat from $-\\beta^2 \\partial^2(\\beta f)/\\partial\\beta^2$",
+        "normalization": "per lattice site",
+        "states": "thermal trace over the full spin Hilbert space"
+      },
+      "expected": "The LTRG curves follow the exact broad peak and low-temperature linear decay; Dc=150 remains closest to exact at the lowest temperatures.",
+      "results": {
+        "figure": "figs/fig6a.png",
+        "numbers": {
+          "LTRG peak $(T/J, C)$ at $D_c=150$": "(0.31746, 0.326009)",
+          "exact $C$ at the same temperature": "0.326001",
+          "$C$ at $T/J=1/120$, $D_c=150$ / exact": "0.008375 / 0.008731",
+          "lowest-temperature relative difference": "4.08%",
+          "full-window absolute RMS difference ($D_c=150$)": "2.88e-4",
+          "Fig. 6a source conflict": "panel legend Dc=150; caption Dc=200; legend followed"
+        },
+        "match": "yes",
+        "why": "The broad peak is reproduced at the exact position and height, the low-temperature decay remains linear, and Dc=150 is visibly closer to exact than Dc=100 down to T/J=1/120.",
+        "wall": "10 min 13 s for the shared seven-cell run",
+        "changes": [],
+        "rerun": "JULIA_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 julia --project=julia-env tracks/mps/solutions/xy_ltrg_reproduction.jl --run-dir tracks/mps/results/20260727-131302-li2011-xy-ltrg"
+      }
+    }
+  ],
+  "approval": {
+    "status": "auto-approved",
+    "source": "user requested uninterrupted autonomous reproduction"
+  }
+}

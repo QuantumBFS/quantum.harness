@@ -1,0 +1,49 @@
+schema_version = 1
+stage = "stage6"
+scope = "physical_conditioned_vmcrg_representation_comparison"
+
+[sources]
+stage6_pilot = "config/hard_goal/stage6_pilot_v1.toml"
+
+[physical]
+length = 12
+target_temperature = 1.10
+rg_level = 1
+
+[split]
+train_j = 32
+validation_j = 16
+test_j = 16
+
+[models]
+templates = ["cube", "cross"]
+cube_routes = ["C", "B"]
+cross_routes = ["B"]
+chis = [2, 4, 8]
+initializations = 2
+
+[training]
+c1_steps = 24
+c2_steps = 48
+c3_steps = 0
+draw_count = 16
+sweeps_per_batch = 4
+linear_learning_rate = 0.01
+tt_learning_rate = 0.002
+gradient_clip = 0.1
+canonicalize_every = 8
+momentum = 0.9
+checkpoint_every = 4
+
+[evaluation]
+equilibration_sweeps = 512
+proposal_measurement_sweeps = 1024
+wall_budget_seconds = 600.0
+measurement_cadence = 4
+bootstrap_replicates = 2000
+material_regression = 0.0
+
+[seeds]
+initialization = 2026073601
+evaluation = 2026073602
+bootstrap = 2026073101

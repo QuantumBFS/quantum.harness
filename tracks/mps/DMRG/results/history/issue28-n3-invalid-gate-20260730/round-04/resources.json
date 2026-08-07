@@ -1,0 +1,1 @@
+{"backend":"slurm","checkpoint_bytes":30736,"compact_output_bytes":245558,"elapsed_seconds":60797.05445901677,"execution_policy":"SLURM","log_bytes":0,"peak_rss_kib":169388,"proposals_per_second":4452.0332873675,"sweeps_per_second":2.198534956724691,"threads":8,"workers_per_bundle":8}

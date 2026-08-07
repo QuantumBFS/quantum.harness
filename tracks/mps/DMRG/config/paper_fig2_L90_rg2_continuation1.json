@@ -1,0 +1,41 @@
+{
+  "protocol_version": "paper_fig2_L90_rg2_bias_continuation_v1",
+  "scope": "continue_bias_optimization_for_the_same_RG2_input_Hamiltonian",
+  "source_rg2": "output/reproduction/paper_fig2_L90_map_v1/rg2",
+  "candidate_couplings": [
+    0.3792825693499585,
+    0.06775508062668299,
+    -0.025865343298895883,
+    -0.010808902389558008,
+    -0.0021182616181217454,
+    0.0024017702528964374,
+    0.0012588104023456463,
+    -0.012946563540778276,
+    -0.0017996563612826012,
+    0.009019063804118864,
+    0.001676637579645805,
+    0.0032739891644462745,
+    0.002124566070654786
+  ],
+  "optimization": {
+    "length": 90,
+    "steps": 3000,
+    "sweeps_per_step": 20,
+    "walkers": 16,
+    "learning_rate": 0.00005,
+    "seed": 20269400,
+    "initial_bias_from": "output/reproduction/paper_fig2_L90_map_v1/rg2"
+  },
+  "frozen_validation": {
+    "thermalization_sweeps": 500,
+    "measurement_sweeps_per_run": 1000,
+    "independent_runs": 64,
+    "seed": 20269500,
+    "family_alpha": 0.05,
+    "multiple_testing_method": "two_sided_bonferroni"
+  },
+  "hard_gate": {
+    "maximum_absolute_component_drift_90_to_100_percent": 0.001,
+    "expected_operator_count": 13
+  }
+}

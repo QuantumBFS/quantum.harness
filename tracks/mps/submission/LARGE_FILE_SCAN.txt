@@ -1,0 +1,6 @@
+LARGE FILE SCAN: PASS
+
+No file in the submission worktree under tracks/mps exceeds 10 MiB.
+Total migrated track size before Git staging: approximately 24 MiB.
+Raw chains, archives, virtual environments, caches, GPU artifacts and large
+checkpoint bodies are not part of the intended commit.

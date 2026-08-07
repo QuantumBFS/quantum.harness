@@ -1,0 +1,13 @@
+PATH BOUNDARY CHECK: PASS
+
+PR worktree branch: pr154-nnrh-vmcrg-final
+Task-generated persistent modifications outside tracks/mps/: none.
+Task-generated persistent modifications inside tracks/mps/: project source,
+tests, configs, compact evidence, audits, Skill, final result and submission.
+
+PRE_EXISTING_EXTERNAL_CHANGE in original worktree (not copied or staged):
+root .gitignore, knowledge/literature files, Ion.lock, Makefile, root tests,
+and local credential/download metadata. These remain untouched.
+
+Ion temporarily registered the track-local Skill in root Ion.toml; that exact
+tool-generated line was removed before staging. Root Ion.toml matches HEAD.

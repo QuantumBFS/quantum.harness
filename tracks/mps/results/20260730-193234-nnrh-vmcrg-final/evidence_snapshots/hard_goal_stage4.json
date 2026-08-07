@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "artifact_type": "sanitized_evidence_snapshot",
+  "source_path": "DMRG/results/hard_goal/stage4-b2-r1/manifest.json",
+  "source_sha256": "1241e62660f35221b9a675909f239a75130f9b0a4649be0be59b0d0bcceb96a7",
+  "stage": "stage4",
+  "classification": "PASS",
+  "regression_only": true,
+  "three_dimensional_hard_goal_evidence": false,
+  "cell_parameters": {
+    "dimensions": 2,
+    "length": 45,
+    "block_size": 3,
+    "chi": 2,
+    "seed": 2026280402
+  },
+  "artifact_integrity_passed": true,
+  "source_integrity_passed": true,
+  "fresh_mps_tests_passed": true,
+  "sanitization": "Local interpreter paths removed; gate outcomes and original SHA-256 retained."
+}

@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "run_id": "issue28-n4-20260729-01",
+  "code_sha256": "e8f5e3c9163eab8db9f0df3cccdc4f853844d049a8cf58df7db5e991c2a0ad31",
+  "umbrella_sha256": "a08eef49f356f40b40eed878b62993e671d383fb98d8b201e09bc51ff88464e6",
+  "predecessor_run_id": "issue28-n3-hpc-replica-20260729-01",
+  "formal_seed": true,
+  "resume_only": true,
+  "cells": [
+    {
+      "cell_id": "formal-1",
+      "params": {
+        "stage": "N4",
+        "bundle_id": "formal-1",
+        "protocol": "tracks/mps/DMRG/config/issue28_formal_v1.json",
+        "backend": "slurm",
+        "resume": true,
+        "output": "results/issue28-n4-20260729-01/cells/formal-1"
+      }
+    },
+    {
+      "cell_id": "formal-2",
+      "params": {
+        "stage": "N4",
+        "bundle_id": "formal-2",
+        "protocol": "tracks/mps/DMRG/config/issue28_formal_v1.json",
+        "backend": "slurm",
+        "resume": true,
+        "output": "results/issue28-n4-20260729-01/cells/formal-2"
+      }
+    },
+    {
+      "cell_id": "formal-3",
+      "params": {
+        "stage": "N4",
+        "bundle_id": "formal-3",
+        "protocol": "tracks/mps/DMRG/config/issue28_formal_v1.json",
+        "backend": "slurm",
+        "resume": true,
+        "output": "results/issue28-n4-20260729-01/cells/formal-3"
+      }
+    },
+    {
+      "cell_id": "formal-4",
+      "params": {
+        "stage": "N4",
+        "bundle_id": "formal-4",
+        "protocol": "tracks/mps/DMRG/config/issue28_formal_v1.json",
+        "backend": "slurm",
+        "resume": true,
+        "output": "results/issue28-n4-20260729-01/cells/formal-4"
+      }
+    },
+    {
+      "cell_id": "formal-5",
+      "params": {
+        "stage": "N4",
+        "bundle_id": "formal-5",
+        "protocol": "tracks/mps/DMRG/config/issue28_formal_v1.json",
+        "backend": "slurm",
+        "resume": true,
+        "output": "results/issue28-n4-20260729-01/cells/formal-5"
+      }
+    }
+  ]
+}

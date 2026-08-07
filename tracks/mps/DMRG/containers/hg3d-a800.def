@@ -1,0 +1,18 @@
+Bootstrap: docker
+From: docker.m.daocloud.io/library/python:3.12.11-slim-bookworm
+
+%files
+    hg3d-a800-requirements.txt /opt/hg3d/requirements.txt
+
+%post
+    set -eux
+    export PIP_INDEX_URL=https://mirrors.aliyun.com/pypi/simple/
+    python -m pip install --no-cache-dir -r /opt/hg3d/requirements.txt
+    python -c 'import jax, numpy, scipy; print(jax.__version__, numpy.__version__, scipy.__version__)'
+
+%environment
+    export PYTHONNOUSERSITE=1
+    export JAX_ENABLE_X64=true
+
+%runscript
+    exec python "$@"

@@ -1,0 +1,47 @@
+schema_version = 1
+stage = "stage4"
+classification_scope = "two_dimensional_mps_regression"
+regression_only = true
+three_dimensional_hard_goal_evidence = false
+statement = "This two-dimensional MPS/VMCRG regression is not 3D Hard Goal evidence."
+
+[sources]
+hard_goal_design = "config/hard_goal/design_v1.toml"
+exact_checks = "results/mps_challenge/exact_checks.json"
+exact_checks_sha256 = "6324ee957319d1682bc24ca957d38f979026183e8559fcb75200f21a852ca9b7"
+tests_glob = "tests/*mps*.py"
+
+[tolerances]
+gradient_error = 2e-6
+canonical_error = 1e-12
+local_delta_error = 1e-10
+
+[probes]
+gradient_epsilon = 1e-6
+local_delta_trials = 100
+
+[cell]
+dimensions = 2
+length = 45
+block_size = 3
+rg_levels = 1
+coupling = 0.436
+operator_count = 13
+chi = 2
+symmetrize = true
+walkers = 4
+optimizer_steps = 8
+sweeps_per_step = 2
+thermalization_sweeps = 8
+frozen_measurement_sweeps = 16
+measurement_thinning = 1
+initial_alpha = 0.1
+alpha_learning_rate = 0.005
+core_learning_rate = 0.0005
+linear_learning_rate = 0.0
+gradient_clip = 5.0
+canonicalize_every = 4
+cache_check_every = 4
+compiled = true
+parallel_walkers = false
+seed = 2026280402

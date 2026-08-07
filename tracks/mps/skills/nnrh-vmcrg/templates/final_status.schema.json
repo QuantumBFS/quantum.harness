@@ -1,0 +1,1 @@
+{"$schema":"https://json-schema.org/draft/2020-12/schema","title":"NNRH-VMCRG final status","type":"object","required":["project_name","acronym","slug","challenge_issue","pull_request","track","team","reproduction_status","easy_goal_status","mps_tt_support_status","hard_goal_status","scientific_claims_allowed","scientific_claims_forbidden","submission_status"]}

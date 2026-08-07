@@ -1,0 +1,43 @@
+{
+  "title": "Neural-Network Renormalized Hamiltonians for VMCRG",
+  "eyebrow": "NNRH-VMCRG | Team LULU | Issue #28",
+  "url": "https://github.com/QuantumBFS/quantum.harness/pull/154",
+  "lede": "Paper baselines are reproduced; the 2D Easy Goal is protocol-incomplete, MPS/TT is supporting evidence, and the 3D Hard Goal remains Stage 6 no-go.",
+  "sections": [
+    {"title":"Project overview","blocks":[
+      {"kind":"figures","items":[{"src":"figures/final_gate_overview.png","caption":"Final classification from immutable evidence. Bar length is only a visual grouping aid, not a scientific completion percentage."}]},
+      {"kind":"kv","pairs":[["Project","Neural-Network Renormalized Hamiltonians for VMCRG (NNRH-VMCRG)"],["Team","LULU"],["Challenge","QuantumBFS quantum.harness Issue #28"],["Easy Goal","Periodic 45 x 45 2D Ising model"],["Hard Goal","Periodic 45 x 45 x 45 iid +/-J spin glass and transition point"],["New scientific compute","None during finalization"]]},
+      {"kind":"text","text":"The method combines VMCRG, symmetry-preserving neural local energies, MPS/TT bias representations, immutable checkpoints, independent frozen validation, and staged parallel tempering. Paper reproduction is a method baseline and is not Issue #28 completion."}
+    ]},
+    {"title":"Paper reproduction","blocks":[
+      {"kind":"verdict","status":"good","label":"REPRODUCTION_COMPLETE","why":"XY-chain LTRG Figs. 4-6a match the declared targets, and 2D VMCRG eigenvalues are statistically compatible with the paper."},
+      {"kind":"figures","items":[{"src":"figures/ltrg_fig4.png","caption":"PASS. LTRG free-energy Trotter convergence for the XY chain."},{"src":"figures/ltrg_fig5.png","caption":"PASS. Low-temperature free and internal energies versus the exact solution."},{"src":"figures/ltrg_fig6a.png","caption":"PASS. Specific heat follows the exact curve; source run records the full settings."}]},
+      {"kind":"figures","items":[{"src":"figures/vmcrg_reproduction.png","caption":"PASS. Left: hierarchical 95% confidence intervals cover both published L=45 eigenvalues. Right: the frozen bias reduces L=90 integrated autocorrelation time from 475.55 to 4.98 across eight paired chains."}]},
+      {"kind":"note","label":"Boundary","style":"info","text":"The separate locked 1% LTRG endpoint extension failed and remains a scientific negative. It does not overturn the declared Figs. 4-6a reproduction."}
+    ]},
+    {"title":"Easy Goal","blocks":[
+      {"kind":"verdict","status":"bad","label":"PROTOCOL_INCOMPLETE","why":"The legacy N3 gate statistic and classifier were invalid. The corrected chain has one complete negative round and an interrupted unpublished second round, not five valid rounds."},
+      {"kind":"figures","items":[{"src":"figures/easy_goal_n3_gates.png","caption":"Historical diagnostic only. Operator bounds improved through the archived old-code Round 4, but all exceed 0.02 and the plotted legacy patch-TV statistic was invalid for the frozen excess-TV gate. No formal success claim follows."}]},
+      {"kind":"table","columns":["Requirement","Evidence","Status"],"rows":[["Five corrected hash-linked N3 rounds","One corrected published round","INCOMPLETE"],["Training convergence","Corrected Round 1 and staged Round 2: NOT_CONVERGED","FAIL"],["Frozen operator and excess-TV <= 0.02","Staged Round 2: 0.212841 and 0.238629","FAIL"],["N4 five bundles / N5 paired analysis","No result trees","NOT_EXECUTED"]]}
+    ]},
+    {"title":"MPS/TT supporting route","blocks":[
+      {"kind":"badge","text":"SUPPORTING_EVIDENCE","style":"neutral"},
+      {"kind":"figures","items":[{"src":"figures/mps_error_vs_bond_dimension.png","caption":"SUPPORTING ONLY. Existing L=27 smoke results compare representation error across available chi values; chi=8 formal cells are absent."},{"src":"figures/mps_autocorrelation_comparison.png","caption":"SUPPORTING ONLY. Smoke-level autocorrelation comparisons show feasibility but lack the formal seed/error-bar contract required for superiority."}]},
+      {"kind":"text","text":"Exact Z2, D4, centering, lookup and local-update checks pass for chi=2,4,8. Only six L=27 chi=2/4 smoke cells exist; missing chi=8 cells are NOT_EXECUTED. The route is not part of the frozen Easy Goal success gate."}
+    ]},
+    {"title":"Hard Goal","blocks":[
+      {"kind":"verdict","status":"bad","label":"STAGE_6_NO_GO","why":"Stages 4-5 pass engineering validation, but Stage 6 has zero minimum complete temperature round trips and terminal resource classification RESOURCE_NO_GO."},
+      {"kind":"figures","items":[{"src":"figures/hard_goal_stage6_8192.png","caption":"NO-GO. L=24/27 candidates at 8,192 sweeps keep all swap acceptances inside 0.20-0.50, but every candidate has minimum full round trips equal to zero. Calibration is not Tc evidence."}]},
+      {"kind":"table","columns":["Stage","Status","Claim boundary"],"rows":[["Stage 4","PASS","2D regression only"],["Stage 5","PASS","Exact and small-3D mechanics; no equilibration"],["Stage 6","NO_GO","Round-trip, multi-J, ESS, representation and power gates incomplete"],["Stages 7-8","NOT_EXECUTED","No L=45, second RG, FSS, Binder/xi crossing or Tc"]]}
+    ]},
+    {"title":"Engineering validation and cleanup","blocks":[
+      {"kind":"text","text":"The submission preserves source, tests, configs, compact primary evidence, negative results and checkpoint metadata. Caches, temporary directories, raw chains, archives and process markers are excluded from the PR; no unique original data was deleted."},
+      {"kind":"kv","pairs":[["Original inventory","approximately 472 MB, 4,191 files"],["Submission boundary","tracks/mps only"],["Track-local Skill","tracks/mps/skills/nnrh-vmcrg/SKILL.md"],["Final checks","See tracks/mps/submission/FINAL_TEST_RESULTS.txt"]]}
+    ]},
+    {"title":"Final classification and reproduction","blocks":[
+      {"kind":"table","columns":["Allowed claims","Forbidden claims"],"rows":[["Paper reproduction complete","Easy Goal or full NNRH-VMCRG success"],["Corrected Easy Goal attempt incomplete/negative at observed gates","Formal MPS/TT superiority"],["MPS/TT supporting only","Hard Goal success or L=45 result"],["Hard Goal Stage 6 no-go","Transition-temperature estimate"]]},
+      {"kind":"code","title":"Validate","text":"python tracks/mps/skills/nnrh-vmcrg/scripts/validate_final_status.py tracks/mps/results/20260730-193234-nnrh-vmcrg-final/final_status.json\n.venv/bin/python -m pytest tracks/mps/DMRG/tests tracks/mps/tests -q"},
+      {"kind":"note","label":"Remaining research","style":"pending","text":"A fresh five-round corrected N3 chain, N4/N5, formal chi=8 TT cells, multi-J Stage 6 evidence, L=45 production and finite-size Tc analysis remain unexecuted."}
+    ]}
+  ]
+}

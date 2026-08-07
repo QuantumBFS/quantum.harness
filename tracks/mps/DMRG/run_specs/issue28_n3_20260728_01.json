@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "run_id": "issue28-n3-20260728-01",
+  "code_sha256": "9953f5b709f6c038b957c2140c0c06c00d7659efd0bb20180e3cd9906b69b39c",
+  "protocol_sha256": "a08eef49f356f40b40eed878b62993e671d383fb98d8b201e09bc51ff88464e6",
+  "pilot_config_sha256": "b46913d790001e0165fbb5ea6f21e27079006b9dacee12cd6eb7bd592630b816",
+  "formal_seed": false,
+  "cells": [
+    {
+      "cell_id": "pilot",
+      "params": {
+        "stage": "N3",
+        "protocol": "tracks/mps/DMRG/config/issue28_easy_v1.json",
+        "preset": "pilot",
+        "rounds": 5,
+        "backend": "slurm",
+        "resume": false,
+        "output": "results/issue28-n3-20260728-01/cells/pilot"
+      }
+    }
+  ]
+}

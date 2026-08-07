@@ -1,0 +1,128 @@
+{
+  "acceptance_rates": [
+    0.2993827160493827,
+    0.4074074074074074
+  ],
+  "coarse_length": 3,
+  "coupling": 0.436,
+  "elapsed_seconds": 0.2012231039998369,
+  "learning_rate": 5e-05,
+  "length": 9,
+  "linear_bias": [
+    -0.0016095577784895048
+  ],
+  "operator_names": [
+    "even_01_nn"
+  ],
+  "seed": 20260801,
+  "stage": "A_traditional",
+  "steps": 8,
+  "sweeps_per_step": 1,
+  "trajectory": [
+    {
+      "gradient_norm": 4.0,
+      "instantaneous_bias": [
+        -0.0002
+      ],
+      "mean_operators": [
+        -4.0
+      ],
+      "running_bias": [
+        -0.0002
+      ],
+      "step": 0
+    },
+    {
+      "gradient_norm": 4.0,
+      "instantaneous_bias": [
+        -0.0004
+      ],
+      "mean_operators": [
+        -4.0
+      ],
+      "running_bias": [
+        -0.0004
+      ],
+      "step": 1
+    },
+    {
+      "gradient_norm": 8.0,
+      "instantaneous_bias": [
+        -0.0008
+      ],
+      "mean_operators": [
+        -8.0
+      ],
+      "running_bias": [
+        -0.0006000000000000001
+      ],
+      "step": 2
+    },
+    {
+      "gradient_norm": 8.0,
+      "instantaneous_bias": [
+        -0.001199
+      ],
+      "mean_operators": [
+        -8.0
+      ],
+      "running_bias": [
+        -0.0007996666666666667
+      ],
+      "step": 3
+    },
+    {
+      "gradient_norm": 8.0,
+      "instantaneous_bias": [
+        -0.0015970033333333334
+      ],
+      "mean_operators": [
+        -8.0
+      ],
+      "running_bias": [
+        -0.0009990008333333334
+      ],
+      "step": 4
+    },
+    {
+      "gradient_norm": 8.0,
+      "instantaneous_bias": [
+        -0.001994013320833333
+      ],
+      "mean_operators": [
+        -8.0
+      ],
+      "running_bias": [
+        -0.0011980033308333334
+      ],
+      "step": 5
+    },
+    {
+      "gradient_norm": 8.0,
+      "instantaneous_bias": [
+        -0.0023900332708833333
+      ],
+      "mean_operators": [
+        -8.0
+      ],
+      "running_bias": [
+        -0.0013966749875083334
+      ],
+      "step": 6
+    },
+    {
+      "gradient_norm": 10.0,
+      "instantaneous_bias": [
+        -0.0028868545243765334
+      ],
+      "mean_operators": [
+        -10.0
+      ],
+      "running_bias": [
+        -0.0016095577784895048
+      ],
+      "step": 7
+    }
+  ],
+  "walkers": 2
+}

@@ -1,0 +1,25 @@
+NNRH-VMCRG FINAL TEST RECORD
+Generated: 2026-07-30 CST
+
+PASS  PR-source baseline repository suite: 197 passed in 5.54 s
+PASS  JSON parsing for migrated/final JSON files
+PASS  Python compilation (one pre-existing invalid-escape SyntaxWarning)
+PASS  final_status validator
+PASS  track-local Skill validator
+PASS  project reference validator (14 paths)
+PASS  report renderer and offline external-src check
+PASS  git diff --check
+PASS  secret scan and large-file scan
+
+PARTIAL Issue 28 shard: 95 passed, 8 failed in 119.71 s.
+The eight failures call the shared root cluster_guardrail.py `directive`
+subcommand, which is absent at PR #154 base HEAD. This task forbids modifying
+root public scripts.
+
+SKIPPED_BY_PROJECT_ADMINISTRATOR:
+- HG3D shard cancelled before completion.
+- Remaining DMRG/NNRH shard cancelled before completion.
+- Sequential full suite cancelled and replaced by shards before the explicit
+  instruction to submit without testing.
+
+No passing claim is made for the complete migrated track suite.

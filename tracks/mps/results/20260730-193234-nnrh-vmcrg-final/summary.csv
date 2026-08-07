@@ -1,0 +1,5 @@
+route,status,key_evidence
+paper_reproduction,REPRODUCTION_COMPLETE,"LTRG Figs. 4-6a; VMCRG Table I and L=90 autocorrelation"
+easy_goal,PROTOCOL_INCOMPLETE,"one corrected published negative round; round 2 interrupted/unpublished"
+mps_tt,SUPPORTING_EVIDENCE,"exact checks and six chi=2/4 L=27 smoke cells; chi=8 not executed"
+hard_goal,STAGE_6_NO_GO,"acceptance passed but minimum temperature round trips remained zero"

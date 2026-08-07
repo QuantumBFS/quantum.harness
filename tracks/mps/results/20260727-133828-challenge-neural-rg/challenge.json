@@ -1,0 +1,12 @@
+{
+  "track": "mps",
+  "step": "ideate",
+  "team": "LULU",
+  "members": ["汪薇薇 (Weiwei Wang)", "郑圆 (Yuan Zheng)", "张大中 (Dazhong Zhang)"],
+  "contact": "wwwang@ahnu.edu.cn",
+  "challenge_issue": 28,
+  "challenge_title": "Use neural network to represent renormalized Hamiltonians for classical spin systems",
+  "reproduction_run": null,
+  "days_left": 4.0,
+  "created": "2026-07-27"
+}

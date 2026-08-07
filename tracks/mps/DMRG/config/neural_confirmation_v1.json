@@ -1,0 +1,85 @@
+{
+  "protocol": "neural_l45_hybrid_confirmation_v1",
+  "locked": true,
+  "scope": "2D_L45_hybrid_neural_VMCRG_easy_challenge",
+  "representation": "13_operator_skip_plus_d4_z2_patch_residual",
+  "formal_requirements": {
+    "repeats": 5,
+    "length": 45,
+    "training_steps": 3000,
+    "walkers": 16,
+    "sweeps_per_step": 20,
+    "target_samples_per_step": 32,
+    "hidden_units": 32,
+    "learning_rate": 0.0005,
+    "averaging_start": 1500,
+    "validation_chains_per_repeat": 16,
+    "validation_thermal_sweeps": 1000,
+    "validation_measurements": 1000,
+    "validation_spacing_sweeps": 5,
+    "projection_samples": 20000,
+    "ablation_chains_per_repeat": 32,
+    "ablation_thermal_sweeps": 1000,
+    "ablation_measurements": 1000,
+    "ablation_spacing_sweeps": 5,
+    "autocorrelation_chains_per_repeat": 8,
+    "autocorrelation_thermal_sweeps": 1000,
+    "autocorrelation_measurements": 5000,
+    "autocorrelation_max_lag": 1000,
+    "minimum_negative_repeat_means": 4,
+    "bootstrap_samples": 10000,
+    "confidence_multiplier": 2.0,
+    "autocorrelation_ratio_threshold": 0.5
+  },
+  "repeat_seeds": [
+    {
+      "repeat": 1,
+      "model": 202611101,
+      "optimizer": 202611102,
+      "validation": 202611103,
+      "projection": 202611104,
+      "ablation": 202611105,
+      "autocorrelation": 202611106
+    },
+    {
+      "repeat": 2,
+      "model": 202611201,
+      "optimizer": 202611202,
+      "validation": 202611203,
+      "projection": 202611204,
+      "ablation": 202611205,
+      "autocorrelation": 202611206
+    },
+    {
+      "repeat": 3,
+      "model": 202611301,
+      "optimizer": 202611302,
+      "validation": 202611303,
+      "projection": 202611304,
+      "ablation": 202611305,
+      "autocorrelation": 202611306
+    },
+    {
+      "repeat": 4,
+      "model": 202611401,
+      "optimizer": 202611402,
+      "validation": 202611403,
+      "projection": 202611404,
+      "ablation": 202611405,
+      "autocorrelation": 202611406
+    },
+    {
+      "repeat": 5,
+      "model": 202611501,
+      "optimizer": 202611502,
+      "validation": 202611503,
+      "projection": 202611504,
+      "ablation": 202611505,
+      "autocorrelation": 202611506
+    }
+  ],
+  "bootstrap_seeds": {
+    "ablation": 202611901,
+    "autocorrelation": 202611902
+  }
+}

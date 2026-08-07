@@ -1,0 +1,113 @@
+{
+  "run_id": "20260727-131302-li2011-xy-ltrg",
+  "run_dir": "tracks/mps/results/20260727-131302-li2011-xy-ltrg",
+  "settings": {
+    "model": "spin-1/2 XY chain",
+    "spin_convention": "S=sigma/2",
+    "J": 1.0,
+    "field": 0.0,
+    "boundary": "periodic thermodynamic limit",
+    "method": "single-layer two-site LTRG",
+    "trotter_product": "alternating even/odd first order",
+    "svd_cutoff": 0.0,
+    "julia_threads": 1,
+    "blas_threads": 1
+  },
+  "provenance": {
+    "paper": "arXiv:1011.0155",
+    "doi": "10.1103/PhysRevLett.106.127202",
+    "paper_markdown_sha256": "f56b9c25dcff102e4734cf02e6ad21ea7f8eb89e55068998798595c4066ba78c",
+    "method_skill_sha256": "2d57801a0c812692c319266910fa22cb2b1ba94b75900e76114b7e7146d02fe1",
+    "method_reference_sha256": "692c3b890915a754d870f70f03ae905499b46836ce570268ea97f345dae99a34",
+    "sources": [
+      ".knowledge/literature/ltrg/1011.0155_linearized-tensor-renormalization-group-algorithm-for-the-ca.md",
+      "tracks/mps/README.md",
+      "skills/method-ltrg/references/ltrg-methodology.md",
+      ".knowledge/solvable/xy-chain/ORACLE.md"
+    ],
+    "claims": [
+      "Fig. 4 high-temperature free-energy error",
+      "Fig. 5 low-temperature free energy and energy",
+      "Fig. 6a specific heat"
+    ]
+  },
+  "cells": [
+    {
+      "cell_id": "cell-0001",
+      "params": {
+        "curve": {
+          "id": "tau0.1_dc100_b5",
+          "tau": 0.1,
+          "Dc": 100,
+          "beta_max": 5.0
+        }
+      }
+    },
+    {
+      "cell_id": "cell-0002",
+      "params": {
+        "curve": {
+          "id": "tau0.05_dc50_b120",
+          "tau": 0.05,
+          "Dc": 50,
+          "beta_max": 120.0
+        }
+      }
+    },
+    {
+      "cell_id": "cell-0003",
+      "params": {
+        "curve": {
+          "id": "tau0.05_dc100_b120",
+          "tau": 0.05,
+          "Dc": 100,
+          "beta_max": 120.0
+        }
+      }
+    },
+    {
+      "cell_id": "cell-0004",
+      "params": {
+        "curve": {
+          "id": "tau0.05_dc150_b120",
+          "tau": 0.05,
+          "Dc": 150,
+          "beta_max": 120.0
+        }
+      }
+    },
+    {
+      "cell_id": "cell-0005",
+      "params": {
+        "curve": {
+          "id": "tau0.02_dc100_b5",
+          "tau": 0.02,
+          "Dc": 100,
+          "beta_max": 5.0
+        }
+      }
+    },
+    {
+      "cell_id": "cell-0006",
+      "params": {
+        "curve": {
+          "id": "tau0.02_dc150_b5",
+          "tau": 0.02,
+          "Dc": 150,
+          "beta_max": 5.0
+        }
+      }
+    },
+    {
+      "cell_id": "cell-0007",
+      "params": {
+        "curve": {
+          "id": "tau0.01_dc150_b5",
+          "tau": 0.01,
+          "Dc": 150,
+          "beta_max": 5.0
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,70 @@
+{
+  "protocol": "issue28_b0_traditional_certification_v1",
+  "umbrella": "config/issue28_easy_v1.json",
+  "presets": {
+    "formal": {
+      "length": 45,
+      "coupling": 0.436,
+      "block_size": 3,
+      "operators": 13,
+      "steps": 3000,
+      "sweeps_per_step": 20,
+      "walkers": 16,
+      "learning_rate": 5e-5,
+      "optimizer_seed": 2026282001,
+      "validation_thermalization": 500,
+      "validation_measurements": 1000,
+      "validation_runs": 16,
+      "validation_seed": 2026282002,
+      "autocorrelation_thermalization": 5000,
+      "autocorrelation_measurements": 100000,
+      "autocorrelation_spacing": 1,
+      "autocorrelation_max_lag": 2000,
+      "autocorrelation_chains": 8,
+      "autocorrelation_seed": 2026282003,
+      "local_delta_trials": 256,
+      "local_delta_seed": 2026282004,
+      "gauge_configurations": 256
+    },
+    "smoke": {
+      "length": 45,
+      "coupling": 0.436,
+      "block_size": 3,
+      "operators": 13,
+      "steps": 2,
+      "sweeps_per_step": 1,
+      "walkers": 2,
+      "learning_rate": 5e-5,
+      "optimizer_seed": 2026282101,
+      "validation_thermalization": 1,
+      "validation_measurements": 4,
+      "validation_runs": 2,
+      "validation_seed": 2026282102,
+      "autocorrelation_thermalization": 1,
+      "autocorrelation_measurements": 12,
+      "autocorrelation_spacing": 1,
+      "autocorrelation_max_lag": 4,
+      "autocorrelation_chains": 2,
+      "autocorrelation_seed": 2026282103,
+      "local_delta_trials": 4,
+      "local_delta_seed": 2026282104,
+      "gauge_configurations": 4
+    }
+  },
+  "gates": {
+    "maximum_late_abs_z": 3.5,
+    "maximum_bias_drift": 0.005,
+    "maximum_covariance_condition": 1000000.0,
+    "validation_family_alpha": 0.05,
+    "autocorrelation_ratio_upper": 1.0
+  },
+  "principal_coupling_anchor": {
+    "indices": [0, 1, 2],
+    "values": [0.3791150680466233, 0.06793014194605712, -0.02624332078597479],
+    "absolute_tolerances": [0.02, 0.02, 0.02],
+    "source": "verified_harness_anchor",
+    "evidence_path": "output/L45_K0436_rg1/summary.json",
+    "evidence_sha256": "200bf0c05d383a5ba90f2a45eccdf065007a2d1fb89bc23a703808c5611c24f0",
+    "anchor_record_sha256": "c1d0861d0c6f94369b3f8eda9c50ca985397ccdda2d9a6140d41777040b3c84e"
+  }
+}

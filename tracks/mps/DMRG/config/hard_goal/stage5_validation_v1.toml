@@ -1,0 +1,54 @@
+schema_version = 1
+stage = "stage5"
+classification_scope = "exact_and_small_3d_validation"
+second_rg = false
+
+[sources]
+hard_goal_design = "config/hard_goal/design_v1.toml"
+
+[exact]
+l2_betas = [0.4, 0.8, 0.9, 1.2]
+l2_seeds = [2026073001, 2026073002, 2026073003, 2026073004]
+l2_samples = 131072
+l3_betas = [0.55, 1.05]
+l3_seeds = [2026073011, 2026073012]
+finite_difference_epsilon = 1e-5
+
+[parallel_tempering]
+lengths = [6, 9]
+betas = [0.30, 0.45, 0.60, 0.78, 0.98, 1.20]
+chain_pairs = 4
+sweeps = 12
+biased_smoke_length = 3
+biased_smoke_sweeps = 1
+seed = 2026073020
+
+[vmcrg]
+templates = ["cube", "cross"]
+routes = ["C", "B"]
+chis = [2, 4, 8]
+disorder_samples = 3
+pool_size = 24
+training_steps = 1
+learning_rate = 0.02
+gradient_clip = 1.0
+finite_difference_epsilon = 1e-6
+seed = 2026073030
+
+[backends]
+names = ["reference", "available_accelerator"]
+benchmark_length = 3
+benchmark_temperatures = 3
+benchmark_samples = 2
+benchmark_walkers = 1
+benchmark_sweeps = 1
+seed = 2026073040
+
+[tolerances]
+l2_absolute = 2e-3
+l2_standard_errors = 5.0
+l3_energy_per_site = 5e-4
+detailed_balance = 2e-13
+rg_cache = 0.0
+symmetry = 5e-13
+gradient = 2e-6

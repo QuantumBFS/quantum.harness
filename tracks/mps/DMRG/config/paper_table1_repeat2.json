@@ -1,0 +1,51 @@
+{
+  "protocol_version": "paper_table1_map_repeats_v1",
+  "repeat": 2,
+  "rg": {
+    "length": 45,
+    "coupling": 0.436,
+    "rounds": 2,
+    "steps": 3000,
+    "sweeps_per_step": 20,
+    "walkers": 16,
+    "learning_rate": 0.00005,
+    "seeds": [202618101, 202618102]
+  },
+  "frozen_validation": {
+    "round": 2,
+    "thermalization_sweeps": 500,
+    "measurement_sweeps_per_run": 1000,
+    "independent_runs": 16,
+    "family_alpha": 0.05,
+    "seed": 202618201
+  },
+  "gate": {
+    "maximum_absolute_component_drift_90_to_100_percent": 0.001
+  },
+  "jacobian": {
+    "thermalization_sweeps": 5000,
+    "measurements_per_run": 1000000,
+    "spacing_sweeps": 1,
+    "independent_runs": 16,
+    "bootstrap_replicates": 2000
+  },
+  "bootstrap_seed": 202618301,
+  "run_seed_sequences": [
+    {"entropy": 202618311, "spawn_key": [0]},
+    {"entropy": 202618311, "spawn_key": [1]},
+    {"entropy": 202618311, "spawn_key": [2]},
+    {"entropy": 202618311, "spawn_key": [3]},
+    {"entropy": 202618321, "spawn_key": [0]},
+    {"entropy": 202618321, "spawn_key": [1]},
+    {"entropy": 202618321, "spawn_key": [2]},
+    {"entropy": 202618321, "spawn_key": [3]},
+    {"entropy": 202618331, "spawn_key": [0]},
+    {"entropy": 202618331, "spawn_key": [1]},
+    {"entropy": 202618331, "spawn_key": [2]},
+    {"entropy": 202618331, "spawn_key": [3]},
+    {"entropy": 202618341, "spawn_key": [0]},
+    {"entropy": 202618341, "spawn_key": [1]},
+    {"entropy": 202618341, "spawn_key": [2]},
+    {"entropy": 202618341, "spawn_key": [3]}
+  ]
+}
