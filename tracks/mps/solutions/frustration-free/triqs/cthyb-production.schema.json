@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$comment": "Deprecated non-production schema 1 scaffold. It permanently requires production_ready=false and scientific_comparison=false; production uses cthyb-production-input.schema.json schema 2.",
+  "title": "Challenge 81 CT-HYB production configuration scaffold",
+  "description": "Non-production schema 1 scaffold retained for compatibility; it cannot authorize a scientific comparison.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_type",
+    "production_ready",
+    "scientific_comparison",
+    "hybridization",
+    "random",
+    "monte_carlo",
+    "autocorrelation",
+    "tau_grid",
+    "runtime"
+  ],
+  "properties": {
+    "schema_version": {"const": 1},
+    "artifact_type": {"const": "cthyb_production_configuration"},
+    "production_ready": {"const": false},
+    "scientific_comparison": {"const": false},
+    "hybridization": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["representation", "file_sha256", "convention"],
+      "properties": {
+        "representation": {"enum": ["delta_iw_hdf5", "delta_tau_hdf5"]},
+        "file_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "convention": {"type": "string", "minLength": 1}
+      }
+    },
+    "random": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["master_seed", "chain_seeds"],
+      "properties": {
+        "master_seed": {"type": "integer", "minimum": 0},
+        "chain_seeds": {
+          "type": "array",
+          "minItems": 2,
+          "uniqueItems": true,
+          "items": {"type": "integer", "minimum": 0}
+        }
+      }
+    },
+    "monte_carlo": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "warmup_cycles",
+        "measurement_cycles",
+        "cycle_length",
+        "max_time_seconds"
+      ],
+      "properties": {
+        "warmup_cycles": {"type": "integer", "minimum": 1},
+        "measurement_cycles": {"type": "integer", "minimum": 1},
+        "cycle_length": {"type": "integer", "minimum": 1},
+        "max_time_seconds": {"type": "integer", "minimum": 1}
+      }
+    },
+    "autocorrelation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "method",
+        "minimum_effective_samples",
+        "maximum_integrated_time"
+      ],
+      "properties": {
+        "method": {"enum": ["batch_means", "integrated_autocorrelation"]},
+        "minimum_effective_samples": {"type": "integer", "minimum": 100},
+        "maximum_integrated_time": {"type": "number", "exclusiveMinimum": 0}
+      }
+    },
+    "tau_grid": {
+      "type": "array",
+      "minItems": 3,
+      "uniqueItems": true,
+      "items": {"type": "number", "minimum": 0}
+    },
+    "runtime": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mpi_ranks", "threads_per_rank"],
+      "properties": {
+        "mpi_ranks": {"type": "integer", "minimum": 1},
+        "threads_per_rank": {"type": "integer", "minimum": 1}
+      }
+    }
+  }
+}

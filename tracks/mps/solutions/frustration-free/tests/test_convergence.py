@@ -1,0 +1,3271 @@
+from __future__ import annotations
+
+import copy
+from contextlib import contextmanager
+import importlib.util
+import json
+import math
+import os
+from pathlib import Path
+import platform
+import shutil
+import signal
+import subprocess
+import sys
+import threading
+import time
+
+import pytest
+from jsonschema import Draft202012Validator
+
+
+SOLUTION_DIR = Path(__file__).parents[1]
+MODULE_PATH = SOLUTION_DIR / "convergence.py"
+SPEC = importlib.util.spec_from_file_location("challenge_81_convergence", MODULE_PATH)
+assert SPEC is not None and SPEC.loader is not None
+convergence = importlib.util.module_from_spec(SPEC)
+SPEC.loader.exec_module(convergence)
+
+
+def test_machine_readable_schema_covers_plan_cell_and_analysis():
+    schema = json.loads(
+        (SOLUTION_DIR / "convergence.schema.json").read_text(encoding="utf-8")
+    )
+    assert schema["$schema"] == "https://json-schema.org/draft/2020-12/schema"
+    assert set(schema["$defs"]) >= {
+        "convergencePlan",
+        "completedCell",
+        "convergenceAnalysis",
+        "resourceEstimate",
+        "calibrationTelemetry",
+        "slurmAccountingExport",
+        "runtimeCalibration",
+        "calibratedResources",
+    }
+    assert schema["oneOf"] == [
+        {"$ref": "#/$defs/convergencePlan"},
+        {"$ref": "#/$defs/completedCell"},
+        {"$ref": "#/$defs/convergenceAnalysis"},
+        {"$ref": "#/$defs/resourceEstimate"},
+        {"$ref": "#/$defs/calibrationTelemetry"},
+        {"$ref": "#/$defs/slurmAccountingExport"},
+        {"$ref": "#/$defs/runtimeCalibration"},
+        {"$ref": "#/$defs/calibratedResources"},
+    ]
+
+
+def test_slurm_array_wrapper_is_profile_driven_and_one_cell_restartable():
+    script = (SOLUTION_DIR / "convergence_slurm_array.sh").read_text(
+        encoding="utf-8"
+    )
+    assert "HARNESS_RUN_SPEC" in script
+    assert "HARNESS_RUN_DIR" in script
+    assert "HARNESS_RESOURCES" in script
+    assert "HARNESS_RESOURCE_ACK" in script
+    assert "HARNESS_SOLUTION_DIR" in script
+    assert "SLURM_ARRAY_TASK_ID" in script
+    assert '${JULIA_PROJECT:?set JULIA_PROJECT' in script
+    assert "JULIA_PROJECT:-" not in script
+    assert 'run-cell' in script
+    assert "--cell-index" in script
+    assert "--execution-target cluster" in script
+    assert "#SBATCH --partition" not in script
+    assert "ssh " not in script
+
+
+def test_slurm_array_wrapper_uses_explicit_solution_directory_when_spooled(tmp_path):
+    solution_dir = tmp_path / "solution"
+    solution_dir.mkdir()
+    output_path = tmp_path / "arguments.json"
+    (solution_dir / "convergence.py").write_text(
+        "import json, os, sys\n"
+        "with open(os.environ['WRAPPER_ARGUMENTS'], 'w', encoding='utf-8') as stream:\n"
+        "    json.dump(sys.argv, stream)\n",
+        encoding="utf-8",
+    )
+    spool_dir = tmp_path / "slurm-spool"
+    spool_dir.mkdir()
+    wrapper = spool_dir / "job.sh"
+    shutil.copy2(SOLUTION_DIR / "convergence_slurm_array.sh", wrapper)
+    environment = {
+        **os.environ,
+        "HARNESS_SOLUTION_DIR": str(solution_dir),
+        "HARNESS_RUN_SPEC": "/run/plan.json",
+        "HARNESS_RUN_DIR": "/run",
+        "HARNESS_RESOURCES": "/run/resources.json",
+        "HARNESS_RESOURCE_ACK": "resource-sha256",
+        "SLURM_ARRAY_TASK_ID": "7",
+        "JULIA_PROJECT": "/runtime/julia",
+        "PYTHON": sys.executable,
+        "WRAPPER_ARGUMENTS": str(output_path),
+    }
+
+    subprocess.run(["bash", str(wrapper)], env=environment, check=True)
+
+    arguments = json.loads(output_path.read_text(encoding="utf-8"))
+    assert arguments[0] == str(solution_dir / "convergence.py")
+    assert arguments[1:] == [
+        "run-cell",
+        "--plan",
+        "/run/plan.json",
+        "--run-directory",
+        "/run",
+        "--resources",
+        "/run/resources.json",
+        "--acknowledge-resources",
+        "resource-sha256",
+        "--cell-index",
+        "7",
+        "--execution-target",
+        "cluster",
+        "--julia-project",
+        "/runtime/julia",
+    ]
+
+
+def _plan(**overrides):
+    settings = {
+        "betas": [16.0, 32.0],
+        "cutoffs": [1.0e-12],
+        "tau_fractions": [0.0, 0.25, 0.5, 0.75, 1.0],
+        "stage": "production",
+    }
+    settings.update(overrides)
+    return convergence.make_plan(**settings)
+
+
+def _solver_result(cell, shift=0.0):
+    beta = cell["parameters"]["beta"]
+    tau = [beta * fraction for fraction in cell["tau_fractions"]]
+    n_d = 1.0 + shift
+    green = [
+        (
+            -(1.0 - n_d / 2.0)
+            if point == 0.0
+            else -n_d / 2.0
+            if point == beta
+            else -0.5 + shift
+        )
+        for point in tau
+    ]
+    bath_file_sha256 = convergence._sha256(
+        convergence._canonical_json(cell["bath_artifact"]) + b"\n"
+    )
+    branch = [
+        {
+            "tau": point,
+            "spin": spin,
+            "insertion": (
+                "annihilation" if point == beta else "creation"
+            ),
+            "branch_status": (
+                "endpoint_identity" if point in (0.0, beta) else "finite"
+            ),
+            "max_link_dimension": 16,
+            "maximum_link_dimensions_by_bond": [4, 16, 8],
+            "truncation_max_error": 1.0e-13,
+            "krylov_all_converged": True,
+            "krylov_max_error_estimate": 1.0e-13,
+            "krylov_num_operations": 0 if point in (0.0, beta) else 20,
+            "krylov_num_iterations": 0 if point in (0.0, beta) else 4,
+            "krylov_local_updates": 0 if point in (0.0, beta) else 8,
+        }
+        for spin in ("up", "dn")
+        for point in tau
+    ]
+    return {
+        "schema_version": 3,
+        "input_sha256": "a" * 64,
+        "input_payload_sha256": "b" * 64,
+        "solver": {
+            "name": "finite_bath_mps",
+            "settings": copy.deepcopy(cell["solver_settings"]),
+        },
+        "tau": tau,
+        "observables": {
+            "n_d": n_d,
+            "double_occupancy": 0.2 + shift,
+            "G_up": green,
+            "G_down": green.copy(),
+        },
+        "diagnostics": {
+            "finite": True,
+            "profiling": {
+                "phase_timings_seconds": {
+                    "request_validation": 0.01,
+                    "context_and_evolution": 0.9,
+                    "result_serialization": 0.02,
+                },
+                "julia_threads": 2,
+                "blas_threads": 1,
+                "blas_vendor": "test",
+                "julia_version": "test",
+                "peak_rss_bytes": 123456,
+                "actual_mpo_link_dimensions": [4, 7, 4],
+            },
+            "krylov_expansion_dim": 0,
+            "expansion_policy": "tdvp_only",
+            "bath_representation": cell["solver_settings"][
+                "bath_representation"
+            ],
+            "chain_mapping_sha256": cell["chain_mapping_sha256"],
+            "thermal_max_link_dimension": 16,
+            "maximum_link_dimensions_by_bond": [4, 16, 8],
+            "thermal": {
+                "steps": 2,
+                "max_link_dimension": 16,
+                "maximum_link_dimensions_by_bond": [4, 16, 8],
+                "truncation_max_error": 1.0e-13,
+                "krylov_all_converged": True,
+                "krylov_max_error_estimate": 1.0e-13,
+                "krylov_num_operations": 20,
+                "krylov_num_iterations": 4,
+                "krylov_local_updates": 8,
+            },
+            "green_up": [entry for entry in branch if entry["spin"] == "up"],
+            "green_down": [entry for entry in branch if entry["spin"] == "dn"],
+        },
+        "provenance": {
+            "runner": "finite_bath_mps_runner",
+            "runner_version": "test",
+            "julia_version": "test",
+            "itensors_version": "test",
+            "itensormps_version": "test",
+            "active_project_path": str(
+                (SOLUTION_DIR / "julia" / "Project.toml").resolve()
+            ),
+            "manifest_path": str(
+                (SOLUTION_DIR / "julia" / "Manifest.toml").resolve()
+            ),
+            "project_toml_sha256": cell["provenance"][
+                "julia_environment_sha256"
+            ]["Project.toml"],
+            "manifest_toml_sha256": cell["provenance"][
+                "julia_environment_sha256"
+            ]["Manifest.toml"],
+            "runner_source_sha256": cell["provenance"]["source_sha256"][
+                "finite_bath_mps_runner.jl"
+            ],
+            "checkpoint_source_sha256": cell["provenance"]["source_sha256"][
+                "finite_bath_checkpoint.jl"
+            ],
+            "purification_source_sha256": cell["provenance"]["source_sha256"][
+                "finite_bath_purification.jl"
+            ],
+            "observables_source_sha256": cell["provenance"]["source_sha256"][
+                "finite_bath_observables.jl"
+            ],
+            "model_definition_sha256": cell["provenance"]["source_sha256"][
+                "model.json"
+            ],
+            "chain_mapping_source_sha256": cell["provenance"]["source_sha256"][
+                "chain_mapping.py"
+            ],
+            "bath_artifact_file_sha256": bath_file_sha256,
+            "bath_representation": cell["solver_settings"][
+                "bath_representation"
+            ],
+            "chain_mapping_sha256": cell["chain_mapping_sha256"],
+            "krylov_expansion_dim": 0,
+            "expansion_policy": "tdvp_only",
+        },
+    }
+
+
+def _complete(cell, shift=0.0):
+    return convergence.make_cell_artifact(
+        cell=cell,
+        solver_output=_solver_result(cell, shift),
+        wall_time_seconds=1.25,
+        peak_rss_bytes=123456,
+        peak_rss_method="test",
+    )
+
+
+def test_initial_plan_is_deterministic_hash_bound_and_tdvp_only():
+    first = _plan()
+    second = _plan()
+
+    assert first == second
+    assert first["plan_sha256"] == convergence.plan_sha256(first)
+    assert len(first["cells"]) == 14
+    assert {cell["parameters"]["beta"] for cell in first["cells"]} == {16.0, 32.0}
+    assert {cell["parameters"]["n_bath"] for cell in first["cells"]} == {
+        12,
+        24,
+        48,
+    }
+    assert {cell["solver_settings"]["time_step"] for cell in first["cells"]} == {
+        0.2,
+        0.1,
+        0.05,
+    }
+    assert {cell["solver_settings"]["maxdim"] for cell in first["cells"]} == {
+        128,
+        256,
+        512,
+    }
+    assert all(
+        cell["solver_settings"]["krylov_expansion_dim"] == 0
+        for cell in first["cells"]
+    )
+    assert len({cell["cell_id"] for cell in first["cells"]}) == len(first["cells"])
+    assert len({cell["input_sha256"] for cell in first["cells"]}) == len(
+        first["cells"]
+    )
+    assert all(cell["bath_artifact_sha256"] for cell in first["cells"])
+    for beta in (16.0, 32.0):
+        beta_cells = [
+            cell for cell in first["cells"] if cell["parameters"]["beta"] == beta
+        ]
+        anchor = [
+            cell
+            for cell in beta_cells
+            if cell["parameters"]["n_bath"] == 12
+            and cell["solver_settings"]["time_step"] == 0.05
+            and cell["solver_settings"]["maxdim"] == 512
+        ]
+        assert len(anchor) == 1
+        assert len(beta_cells) == 7
+    assert first["bath_resolution_policy"]["bath_sizes"] == [12, 24, 48]
+    assert first["bath_resolution_policy"]["finest_ratio_limit"] == 1.1
+    assert first["solver_feasibility"]["n_bath_48"]["chain_mapping_required"] is True
+    assert first["artifact_type"] == "convergence_plan"
+    assert first["generator"] == {
+        "name": "convergence.py",
+        "version": convergence.MODULE_VERSION,
+    }
+    assert first["software_version"] == convergence.SOFTWARE_VERSION
+    assert first["run_id"] == f"run-{first['plan_sha256'][:16]}"
+
+
+def test_pilot_plan_is_staged_and_not_a_production_claim():
+    plan = _plan(
+        betas=[0.2],
+        bath_sizes=[1],
+        time_steps=[0.1],
+        maxdims=[32],
+        stage="pilot",
+    )
+
+    assert len(plan["cells"]) == 1
+    assert plan["claim_policy"]["production_eligible"] is False
+    assert plan["cells"][0]["solver_settings"]["krylov_expansion_dim"] == 0
+
+
+def test_plan_defaults_to_direct_star_and_chain_is_explicit():
+    direct = _plan(betas=[0.2], bath_sizes=[2], stage="pilot")
+    chain_plan = _plan(
+        betas=[0.2],
+        bath_sizes=[2],
+        stage="pilot",
+        bath_representation="chain",
+    )
+
+    assert direct["solver_capability"] == {
+        "bath_representations": ["direct_star", "finite_chain"],
+        "default_bath_representation": "direct_star",
+        "finite_chain_mapping_validated": True,
+        "finite_chain_max_validated_n_bath": 6,
+        "qn_purification_validated": False,
+        "n_bath_48_execution_validated": False,
+        "capability_evidence_sha256": None,
+    }
+    assert direct["cells"][0]["solver_settings"]["bath_representation"] == (
+        "direct_star"
+    )
+    assert direct["cells"][0]["chain_mapping_artifact"] is None
+    assert direct["cells"][0]["chain_mapping_sha256"] is None
+    chain_cell = chain_plan["cells"][0]
+    assert chain_cell["solver_settings"]["bath_representation"] == "chain"
+    assert chain_cell["chain_mapping_artifact"]["payload"][
+        "source_bath_sha256"
+    ] == chain_cell["bath_artifact_sha256"]
+    assert (
+        chain_cell["chain_mapping_sha256"]
+        == chain_cell["chain_mapping_artifact"]["sha256"]
+    )
+    assert direct["cells"][0]["input_sha256"] != chain_cell["input_sha256"]
+    direct_request = json.loads(
+        convergence._runner_request_for_cell(direct["cells"][0])["payload_json"]
+    )
+    chain_request = json.loads(
+        convergence._runner_request_for_cell(chain_cell)["payload_json"]
+    )
+    assert direct_request["schema_version"] == 3
+    assert direct_request["bath_geometry"] == {
+        "representation": "direct_star",
+        "chain_mapping_artifact_json": None,
+        "chain_mapping_artifact_file_sha256": None,
+    }
+    mapping_bytes = (
+        convergence._canonical_json(chain_cell["chain_mapping_artifact"]) + b"\n"
+    )
+    assert chain_request["bath_geometry"] == {
+        "representation": "chain",
+        "chain_mapping_artifact_json": mapping_bytes.decode("utf-8"),
+        "chain_mapping_artifact_file_sha256": convergence._sha256(mapping_bytes),
+    }
+
+
+def test_documentation_states_finite_chain_execution_contract():
+    readme = (SOLUTION_DIR / "README.md").read_text(encoding="utf-8")
+    chain_pilot_command = """uv run --project tracks/mps/solutions/frustration-free --frozen python \\
+  tracks/mps/solutions/frustration-free/convergence.py plan \\
+  --stage pilot --betas 0.2 --bath-sizes 2 --time-steps 0.1 \\
+  --maxdims 32 --bath-representation chain \\
+  --output-root /tmp/challenge81-chain-pilot"""
+
+    assert "`direct_star` is the default" in readme
+    assert "bath_representation chain" in readme
+    assert "--bath-representation chain" in readme
+    assert chain_pilot_command in readme
+    assert "QN purification is not implemented" in readme
+    assert "does not unlock N_b=48" in readme
+
+
+def test_chain_mapping_and_capability_schemas_are_recursively_closed():
+    plan = _plan(
+        betas=[0.2],
+        bath_sizes=[2],
+        stage="pilot",
+        bath_representation="chain",
+    )
+    malformed_capability = copy.deepcopy(plan)
+    malformed_capability["solver_capability"]["unknown"] = True
+    with pytest.raises(ValueError, match="schema"):
+        convergence.validate_artifact_schema(
+            malformed_capability, "convergencePlan"
+        )
+
+    malformed_mapping = copy.deepcopy(plan)
+    malformed_mapping["cells"][0]["chain_mapping_artifact"]["unknown"] = True
+    with pytest.raises(ValueError, match="schema"):
+        convergence.validate_artifact_schema(malformed_mapping, "convergencePlan")
+
+
+def _rebind_mutated_plan(plan):
+    cell = plan["cells"][0]
+    settings = cell["solver_settings"]
+    input_payload = convergence._cell_input_payload(
+        beta=cell["parameters"]["beta"],
+        n_bath=cell["parameters"]["n_bath"],
+        time_step=settings["time_step"],
+        cutoff=settings["cutoff"],
+        maxdim=settings["maxdim"],
+        tau_fractions=cell["tau_fractions"],
+        bath_artifact=cell["bath_artifact"],
+        source_hashes=cell["provenance"]["source_sha256"],
+        project_hashes=cell["provenance"]["julia_environment_sha256"],
+        julia_project=cell["provenance"]["julia_project"],
+        diagnostic_limits=cell["diagnostic_limits"],
+        solver_capability=cell["solver_capability"],
+        bath_representation=settings["bath_representation"],
+        chain_mapping_artifact=cell["chain_mapping_artifact"],
+        chain_mapping_sha256=cell["chain_mapping_sha256"],
+    )
+    cell["input_sha256"] = convergence._sha256(
+        convergence._canonical_json(input_payload)
+    )
+    cell["cell_id"] = f"c0000-{cell['input_sha256'][:12]}"
+    plan["plan_sha256"] = convergence.plan_sha256(plan)
+    plan["run_id"] = f"run-{plan['plan_sha256'][:16]}"
+    return plan
+
+
+@pytest.mark.parametrize(
+    ("corruption", "expected_error"),
+    [
+        ("mapping_payload_sha256", "mapping payload SHA256 mismatch"),
+        ("cell_mapping_sha256", "chain mapping SHA256 linkage mismatch"),
+        (
+            "representation",
+            r"convergencePlan schema validation failed at "
+            r"cells\.0\.chain_mapping_artifact: .* is not of type 'null'",
+        ),
+        (
+            "capability",
+            "convergencePlan schema validation failed at "
+            r"cells\.0\.solver_capability\.finite_chain_mapping_validated: "
+            "True was expected",
+        ),
+        (
+            "source_hash",
+            "cell source provenance does not match the current checkout",
+        ),
+        (
+            "scientific_source_hash",
+            "mapping source bath SHA256 mismatch",
+        ),
+    ],
+)
+def test_chain_plan_corruption_is_rejected_before_executor(
+    tmp_path, monkeypatch, corruption, expected_error
+):
+    plan = _plan(
+        betas=[0.2],
+        bath_sizes=[2],
+        time_steps=[0.1],
+        maxdims=[32],
+        stage="pilot",
+        bath_representation="chain",
+    )
+    cell = plan["cells"][0]
+    if corruption == "mapping_payload_sha256":
+        cell["chain_mapping_artifact"]["sha256"] = "0" * 64
+    elif corruption == "cell_mapping_sha256":
+        cell["chain_mapping_sha256"] = "b" * 64
+        cell["solver_settings"]["chain_mapping_sha256"] = "b" * 64
+    elif corruption == "representation":
+        cell["solver_settings"]["bath_representation"] = "direct_star"
+    elif corruption == "capability":
+        plan["solver_capability"]["finite_chain_mapping_validated"] = False
+        cell["solver_capability"]["finite_chain_mapping_validated"] = False
+    elif corruption == "source_hash":
+        cell["provenance"]["source_sha256"]["chain_mapping.py"] = "f" * 64
+    elif corruption == "scientific_source_hash":
+        mapping = cell["chain_mapping_artifact"]
+        mapping["payload"]["source_bath_sha256"] = "0" * 64
+        mapping["sha256"] = convergence._sha256(
+            convergence._canonical_json(mapping["payload"])
+        )
+        cell["chain_mapping_sha256"] = mapping["sha256"]
+        cell["solver_settings"]["chain_mapping_sha256"] = mapping["sha256"]
+    else:
+        raise AssertionError(f"unknown corruption: {corruption}")
+    _rebind_mutated_plan(plan)
+    calls = []
+    verifier_calls = []
+    real_verifier = convergence.chain_mapping.verify_chain_mapping_artifact
+
+    def recording_verifier(mapping, bath_artifact):
+        verifier_calls.append(mapping)
+        return real_verifier(mapping, bath_artifact)
+
+    monkeypatch.setattr(
+        convergence.chain_mapping,
+        "verify_chain_mapping_artifact",
+        recording_verifier,
+    )
+
+    with pytest.raises(ValueError, match=f"^{expected_error}$"):
+        convergence.run_cell(
+            plan,
+            0,
+            tmp_path,
+            executor=lambda item, _stage: calls.append(item["cell_id"])
+            or _solver_result(item),
+            julia_project=SOLUTION_DIR / "julia",
+        )
+
+    assert calls == []
+    if corruption == "scientific_source_hash":
+        assert verifier_calls
+
+
+def test_chain_pilot_publishes_mapping_and_exact_expected_files(tmp_path):
+    plan = _plan(
+        betas=[0.2],
+        bath_sizes=[2],
+        time_steps=[0.1],
+        maxdims=[32],
+        stage="pilot",
+        bath_representation="chain",
+    )
+    result = convergence.run_cell(
+        plan,
+        0,
+        tmp_path,
+        executor=lambda cell, _stage: _solver_result(cell),
+        julia_project=SOLUTION_DIR / "julia",
+    )
+
+    assert {path.name for path in result["path"].iterdir()} == {
+        "bath.json",
+        "chain-mapping.json",
+        "mps-input.json",
+        "mps-result.json",
+        "cell.json",
+    }
+    mapping_bytes = (result["path"] / "chain-mapping.json").read_bytes()
+    assert mapping_bytes == convergence._canonical_json(
+        plan["cells"][0]["chain_mapping_artifact"]
+    ) + b"\n"
+    convergence.validate_cell_artifact(
+        result["cell"],
+        expected_cell=plan["cells"][0],
+        artifact_directory=result["path"],
+    )
+
+
+def test_chain_cell_restart_is_geometry_bound_and_mapping_is_immutable(tmp_path):
+    plan = _plan(
+        betas=[0.2],
+        bath_sizes=[2],
+        time_steps=[0.1],
+        maxdims=[32],
+        stage="pilot",
+        bath_representation="chain",
+    )
+    cell = plan["cells"][0]
+    checkpoint_root = tmp_path / "checkpoints" / cell["cell_id"]
+    _write_python_validated_checkpoint(checkpoint_root, cell)
+    calls = []
+
+    first = convergence.run_cell(
+        plan,
+        0,
+        tmp_path,
+        executor=lambda item, _stage: calls.append(item["cell_id"])
+        or _solver_result(item),
+        julia_project=SOLUTION_DIR / "julia",
+    )
+    second = convergence.run_cell(
+        plan,
+        0,
+        tmp_path,
+        executor=lambda item, _stage: calls.append(item["cell_id"])
+        or _solver_result(item),
+        julia_project=SOLUTION_DIR / "julia",
+    )
+
+    assert first["action"] == "completed"
+    assert second["action"] == "skipped"
+    assert calls == [cell["cell_id"]]
+    _assert_retired_checkpoint(checkpoint_root, first["cell"])
+
+    (first["path"] / "chain-mapping.json").write_bytes(b"tampered\n")
+    with pytest.raises(ValueError, match="stale|invalid|immutable"):
+        convergence.run_cell(
+            plan,
+            0,
+            tmp_path,
+            executor=lambda item, _stage: calls.append(item["cell_id"])
+            or _solver_result(item),
+            julia_project=SOLUTION_DIR / "julia",
+        )
+    assert calls == [cell["cell_id"]]
+
+
+def test_chain_execution_above_validated_size_is_refused_before_executor(tmp_path):
+    plan = _plan(
+        betas=[0.2],
+        bath_sizes=[7],
+        time_steps=[0.1],
+        maxdims=[32],
+        stage="pilot",
+        bath_representation="chain",
+    )
+    calls = []
+
+    with pytest.raises(ValueError, match="solver capability"):
+        convergence.run_cell(
+            plan,
+            0,
+            tmp_path,
+            executor=lambda item, _stage: calls.append(item["cell_id"])
+            or _solver_result(item),
+            julia_project=SOLUTION_DIR / "julia",
+        )
+    assert calls == []
+
+
+def test_chain_executor_cannot_publish_mapping_other_than_planned(tmp_path):
+    plan = _plan(
+        betas=[0.2],
+        bath_sizes=[2],
+        time_steps=[0.1],
+        maxdims=[32],
+        stage="pilot",
+        bath_representation="chain",
+    )
+
+    def executor(cell, staging):
+        (staging / "chain-mapping.json").write_bytes(b"{}\n")
+        return _solver_result(cell)
+
+    with pytest.raises(ValueError, match="mapping"):
+        convergence.run_cell(
+            plan,
+            0,
+            tmp_path,
+            executor=executor,
+            julia_project=SOLUTION_DIR / "julia",
+        )
+    assert not (tmp_path / "cells" / plan["cells"][0]["cell_id"]).exists()
+
+
+def test_rehashed_published_mapping_still_cannot_replace_planned_mapping(tmp_path):
+    plan = _plan(
+        betas=[0.2],
+        bath_sizes=[2],
+        time_steps=[0.1],
+        maxdims=[32],
+        stage="pilot",
+        bath_representation="chain",
+    )
+    calls = []
+    result = convergence.run_cell(
+        plan,
+        0,
+        tmp_path,
+        executor=lambda item, _stage: calls.append(item["cell_id"])
+        or _solver_result(item),
+        julia_project=SOLUTION_DIR / "julia",
+    )
+    cell_path = result["path"] / "cell.json"
+    mapping_path = result["path"] / "chain-mapping.json"
+    mapping_path.write_bytes(b"{}\n")
+    completed = json.loads(cell_path.read_text(encoding="utf-8"))
+    completed["artifact_file_sha256"]["chain-mapping.json"] = (
+        convergence._sha256_file(mapping_path)
+    )
+    completed["artifact_sha256"] = convergence._sha256(
+        convergence._canonical_json(
+            {
+                key: value
+                for key, value in completed.items()
+                if key != "artifact_sha256"
+            }
+        )
+    )
+    cell_path.write_bytes(convergence._canonical_json(completed) + b"\n")
+
+    with pytest.raises(ValueError, match="stale|invalid|immutable"):
+        convergence.run_cell(
+            plan,
+            0,
+            tmp_path,
+            executor=lambda item, _stage: calls.append(item["cell_id"])
+            or _solver_result(item),
+            julia_project=SOLUTION_DIR / "julia",
+        )
+    assert calls == [plan["cells"][0]["cell_id"]]
+
+
+@pytest.mark.parametrize(
+    "kwargs,match",
+    [
+        ({"betas": [0.0]}, "beta"),
+        ({"bath_sizes": [0]}, "bath"),
+        ({"time_steps": [float("nan")]}, "time_step"),
+        ({"cutoffs": [-1.0]}, "cutoff"),
+        ({"maxdims": [True]}, "maxdim"),
+        ({"tau_fractions": [0.0, 1.1]}, "tau"),
+    ],
+)
+def test_plan_validation_fails_closed(kwargs, match):
+    with pytest.raises((TypeError, ValueError), match=match):
+        _plan(**kwargs)
+
+
+def test_plan_validation_rejects_production_krylov_expansion():
+    plan = _plan()
+    plan["cells"][0]["solver_settings"]["krylov_expansion_dim"] = 32
+    with pytest.raises(ValueError, match="krylov_expansion_dim|0 was expected"):
+        convergence.validate_plan(plan)
+
+
+def test_execution_rejects_plan_bound_to_stale_sources():
+    cell = _plan()["cells"][0]
+    cell["provenance"]["source_sha256"]["convergence.py"] = "f" * 64
+
+    with pytest.raises(ValueError, match="source provenance"):
+        convergence.validate_execution_environment(
+            cell, julia_project=SOLUTION_DIR / "julia"
+        )
+
+
+def test_plan_binds_selected_julia_project_and_all_sources(tmp_path):
+    project = tmp_path / "julia"
+    project.mkdir()
+    shutil.copy(SOLUTION_DIR / "julia" / "Project.toml", project / "Project.toml")
+    shutil.copy(SOLUTION_DIR / "julia" / "Manifest.toml", project / "Manifest.toml")
+    for name in (
+        "finite_bath_mps_runner.jl",
+        "finite_bath_checkpoint.jl",
+        "finite_bath_observables.jl",
+        "finite_bath_purification.jl",
+    ):
+        (project / name).write_text("# decoy project-local source\n", encoding="utf-8")
+
+    plan = convergence.make_plan(
+        betas=[0.2],
+        bath_sizes=[1],
+        time_steps=[0.1],
+        maxdims=[32],
+        stage="pilot",
+        julia_project=project,
+    )
+
+    assert "runtime_absolute_paths" not in plan["execution_environment"]
+    assert plan["execution_environment"]["repository_relative_paths"] == {
+        "solution": "tracks/mps/solutions/frustration-free",
+        "julia_project": "tracks/mps/solutions/frustration-free/julia",
+    }
+    assert set(plan["execution_environment"]["source_sha256"]) >= {
+        "acceptance.py",
+        "bath.py",
+        "chain_mapping.py",
+        "convergence.py",
+        "convergence.schema.json",
+        "model.json",
+        "pyproject.toml",
+        "uv.lock",
+        "finite_bath_mps_runner.jl",
+        "finite_bath_checkpoint.jl",
+        "finite_bath_observables.jl",
+        "finite_bath_purification.jl",
+    }
+    assert plan["execution_environment"]["source_sha256"][
+        "finite_bath_mps_runner.jl"
+    ] == convergence._sha256_file(SOLUTION_DIR / "julia" / "finite_bath_mps_runner.jl")
+    portable = tmp_path / "portable-checkout"
+    portable.mkdir()
+    shutil.copy(project / "Project.toml", portable / "Project.toml")
+    shutil.copy(project / "Manifest.toml", portable / "Manifest.toml")
+    convergence.validate_execution_environment(
+        plan["cells"][0], julia_project=portable
+    )
+    second = convergence.make_plan(
+        betas=[0.2],
+        bath_sizes=[1],
+        time_steps=[0.1],
+        maxdims=[32],
+        stage="pilot",
+        julia_project=portable,
+    )
+    assert second == plan
+    with pytest.raises(TypeError, match="julia_project"):
+        convergence.validate_execution_environment(plan["cells"][0])
+
+
+def test_completed_cell_is_skipped_but_stale_cell_fails_closed(tmp_path):
+    plan = _plan(
+        betas=[0.2],
+        bath_sizes=[1],
+        time_steps=[0.1],
+        maxdims=[32],
+        stage="pilot",
+    )
+    calls = []
+
+    def executor(cell, staging):
+        calls.append(cell["cell_id"])
+        return _solver_result(cell)
+
+    first = convergence.run_cell(
+        plan, 0, tmp_path, executor=executor, julia_project=SOLUTION_DIR / "julia"
+    )
+    checkpoint_root = (
+        tmp_path / "checkpoints" / plan["cells"][0]["cell_id"]
+    )
+    _write_python_validated_checkpoint(checkpoint_root, plan["cells"][0])
+    generations = {
+        path.name for path in (checkpoint_root / "generations").iterdir()
+    }
+    second = convergence.run_cell(
+        plan, 0, tmp_path, executor=executor, julia_project=SOLUTION_DIR / "julia"
+    )
+
+    assert first["action"] == "completed"
+    assert second["action"] == "skipped"
+    _assert_retired_checkpoint(checkpoint_root, first["cell"])
+    assert {
+        path.name for path in (checkpoint_root / "generations").iterdir()
+    } == generations
+    assert calls == [plan["cells"][0]["cell_id"]]
+
+    cell_path = tmp_path / "cells" / plan["cells"][0]["cell_id"] / "cell.json"
+    stale = json.loads(cell_path.read_text(encoding="utf-8"))
+    stale["input_sha256"] = "f" * 64
+    cell_path.write_text(json.dumps(stale), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="stale|invalid|immutable"):
+        convergence.run_cell(
+            plan,
+            0,
+            tmp_path,
+            executor=executor,
+            julia_project=SOLUTION_DIR / "julia",
+        )
+    assert calls == [plan["cells"][0]["cell_id"]]
+    assert set(first["cell"]["artifact_file_sha256"]) == {
+        "bath.json",
+        "mps-input.json",
+        "mps-result.json",
+    }
+    assert any(
+        path.name.startswith(f".{plan['cells'][0]['cell_id']}.superseded-")
+        for path in cell_path.parent.parent.iterdir()
+    )
+
+
+def test_execution_rejects_solver_runtime_project_path_mismatch(tmp_path):
+    plan = _plan(
+        betas=[0.2],
+        bath_sizes=[1],
+        time_steps=[0.1],
+        maxdims=[32],
+        stage="pilot",
+    )
+
+    def executor(cell, _staging):
+        result = _solver_result(cell)
+        result["provenance"]["active_project_path"] = "/stale/julia"
+        return result
+
+    with pytest.raises(ValueError, match="runtime Julia project"):
+        convergence.run_cell(
+            plan,
+            0,
+            tmp_path,
+            executor=executor,
+            julia_project=SOLUTION_DIR / "julia",
+        )
+
+
+def test_tampered_published_file_fails_closed_and_is_archived(tmp_path):
+    plan = _plan(
+        betas=[0.2],
+        bath_sizes=[1],
+        time_steps=[0.1],
+        maxdims=[32],
+        stage="pilot",
+    )
+    calls = []
+
+    def executor(cell, _staging):
+        calls.append(cell["cell_id"])
+        return _solver_result(cell)
+
+    first = convergence.run_cell(
+        plan, 0, tmp_path, executor=executor, julia_project=SOLUTION_DIR / "julia"
+    )
+    cell_root = first["path"]
+    (cell_root / "mps-result.json").write_bytes(b"tampered\n")
+
+    with pytest.raises(ValueError, match="stale|invalid|immutable"):
+        convergence.run_cell(
+            plan,
+            0,
+            tmp_path,
+            executor=executor,
+            julia_project=SOLUTION_DIR / "julia",
+        )
+    assert len(calls) == 1
+    assert not cell_root.exists()
+    assert any(
+        path.name.startswith(f".{plan['cells'][0]['cell_id']}.superseded-")
+        for path in cell_root.parent.iterdir()
+    )
+
+
+def test_validate_existing_rejects_superseded_plan_and_resource_versions(tmp_path):
+    plan = _plan(
+        betas=[0.2],
+        bath_sizes=[1],
+        time_steps=[0.1],
+        maxdims=[32],
+        stage="pilot",
+    )
+    resources = convergence.estimate_plan_resources(plan)
+    plan_path = tmp_path / "plan.json"
+    resource_path = tmp_path / "resources.json"
+    plan_path.write_text(json.dumps(plan), encoding="utf-8")
+    resource_path.write_text(json.dumps(resources), encoding="utf-8")
+
+    assert convergence.validate_existing(
+        plan_path=plan_path, resources_path=resource_path
+    )["valid"] is True
+
+    stale = copy.deepcopy(plan)
+    stale["generator"]["version"] = "0.0.0"
+    stale["plan_sha256"] = convergence.plan_sha256(stale)
+    plan_path.write_text(json.dumps(stale), encoding="utf-8")
+    with pytest.raises(ValueError, match="generator|version"):
+        convergence.validate_existing(
+            plan_path=plan_path, resources_path=resource_path
+        )
+
+
+def test_create_plan_run_uses_new_content_addressed_directory(tmp_path):
+    plan = _plan(
+        betas=[0.2],
+        bath_sizes=[1],
+        time_steps=[0.1],
+        maxdims=[32],
+        stage="pilot",
+    )
+
+    plan_path = convergence.create_plan_run(tmp_path, plan)
+
+    assert plan_path == tmp_path / plan["run_id"] / "plan.json"
+    assert convergence._load_json(plan_path, "plan") == plan
+    resources = convergence._load_json(
+        plan_path.parent / "resources.json", "resources"
+    )
+    convergence.validate_resources(resources, plan)
+    completion = convergence._load_json(
+        plan_path.parent / "completion.json", "completion"
+    )
+    assert completion["plan_sha256"] == plan["plan_sha256"]
+    assert completion["resource_sha256"] == resources["resource_sha256"]
+    assert convergence._load_json(tmp_path / "current.json", "pointer") == {
+        "schema_version": 1,
+        "run_id": plan["run_id"],
+        "plan_sha256": plan["plan_sha256"],
+        "resource_sha256": resources["resource_sha256"],
+        "completion_sha256": completion["completion_sha256"],
+        "relative_path": plan["run_id"],
+    }
+    (tmp_path / "current.json").unlink()
+    assert convergence.create_plan_run(tmp_path, plan) == plan_path
+    assert (tmp_path / "current.json").is_file()
+
+
+def test_plan_run_publication_failure_never_exposes_final_directory(
+    tmp_path, monkeypatch
+):
+    plan = _plan(
+        betas=[0.2],
+        bath_sizes=[1],
+        time_steps=[0.1],
+        maxdims=[32],
+        stage="pilot",
+    )
+    real_replace = convergence.os.replace
+
+    def fail_publish(source, target):
+        if Path(target) == tmp_path / plan["run_id"]:
+            raise OSError("injected plan publication failure")
+        return real_replace(source, target)
+
+    monkeypatch.setattr(convergence.os, "replace", fail_publish)
+
+    with pytest.raises(OSError, match="publication"):
+        convergence.create_plan_run(tmp_path, plan)
+
+    assert not (tmp_path / plan["run_id"]).exists()
+    assert not (tmp_path / "current.json").exists()
+    assert list(tmp_path.glob(".run.stage-*"))
+
+
+def test_plan_startup_recovery_archives_abandoned_staging(tmp_path):
+    stage = tmp_path / ".run.stage-dead"
+    stage.mkdir()
+    (stage / "partial").write_text("preserve", encoding="utf-8")
+
+    archived = convergence.recover_plan_publication_state(tmp_path)
+
+    assert len(archived) == 1
+    assert archived[0].name.startswith(".run.abandoned-stage-")
+    assert (archived[0] / "partial").read_text(encoding="utf-8") == "preserve"
+
+
+def test_validate_existing_rejects_unexpected_cells_but_reports_archives(tmp_path):
+    plan = _plan(
+        betas=[0.2],
+        bath_sizes=[1],
+        time_steps=[0.1],
+        maxdims=[32],
+        stage="pilot",
+    )
+    plan_path = convergence.create_plan_run(tmp_path, plan)
+    run = plan_path.parent
+    cells = run / "cells"
+    cells.mkdir()
+    archived = cells / f".{plan['cells'][0]['cell_id']}.superseded-old"
+    archived.mkdir()
+
+    result = convergence.validate_existing(
+        plan_path=plan_path,
+        resources_path=run / "resources.json",
+        run_directory=run,
+    )
+    assert result["archived_cells"] == 1
+
+    forged_archive = cells / f".{plan['cells'][0]['cell_id']}.superseded-forged"
+    forged_archive.write_text("not an archive directory", encoding="utf-8")
+    with pytest.raises(ValueError, match="archive.*directory"):
+        convergence.validate_existing(
+            plan_path=plan_path,
+            resources_path=run / "resources.json",
+            run_directory=run,
+        )
+    forged_archive.unlink()
+
+    (cells / "stale-cell").mkdir()
+    with pytest.raises(ValueError, match="unexpected.*cell|stale-cell"):
+        convergence.validate_existing(
+            plan_path=plan_path,
+            resources_path=run / "resources.json",
+            run_directory=run,
+        )
+
+
+def _write_completed_cell_tree(run, artifact):
+    cell_root = run / "cells" / artifact["cell_id"]
+    cell_root.mkdir(parents=True, exist_ok=True)
+    for filename in ("bath.json", "mps-input.json", "mps-result.json"):
+        payload = f"{artifact['cell_id']}:{filename}\n".encode()
+        (cell_root / filename).write_bytes(payload)
+        artifact["artifact_file_sha256"][filename] = convergence._sha256(
+            payload
+        )
+    artifact["artifact_sha256"] = convergence._sha256(
+        convergence._canonical_json(
+            {
+                key: value
+                for key, value in artifact.items()
+                if key != "artifact_sha256"
+            }
+        )
+    )
+    (cell_root / "cell.json").write_text(
+        json.dumps(artifact), encoding="utf-8"
+    )
+
+
+def _analysis_digest(analysis):
+    return convergence._sha256(
+        convergence._canonical_json(
+            {
+                key: value
+                for key, value in analysis.items()
+                if key != "analysis_sha256"
+            }
+        )
+    )
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    [
+        "malformed",
+        "symlink",
+        "wrong_plan",
+        "wrong_digest",
+        "semantic_forgery",
+        "stale_current",
+        "malformed_current",
+    ],
+)
+def test_validate_existing_rejects_invalid_analysis_artifacts(tmp_path, mutation):
+    plan = _plan(
+        betas=[0.2],
+        bath_sizes=[1],
+        time_steps=[0.1],
+        maxdims=[32],
+        stage="pilot",
+    )
+    plan_path = convergence.create_plan_run(tmp_path, plan)
+    run = plan_path.parent
+    artifact = _complete(plan["cells"][0])
+    _write_completed_cell_tree(run, artifact)
+    analysis = convergence.analyze_available_cells(plan, [artifact])
+    analysis_path = run / "analysis.json"
+    analysis_path.write_text(json.dumps(analysis), encoding="utf-8")
+
+    if mutation == "malformed":
+        analysis_path.write_text("{", encoding="utf-8")
+    elif mutation == "symlink":
+        analysis_path.unlink()
+        target = tmp_path / "forged-analysis.json"
+        target.write_text(json.dumps(analysis), encoding="utf-8")
+        analysis_path.symlink_to(target)
+    elif mutation == "wrong_plan":
+        analysis["plan_sha256"] = "f" * 64
+        analysis["analysis_sha256"] = _analysis_digest(analysis)
+        analysis_path.write_text(json.dumps(analysis), encoding="utf-8")
+    elif mutation == "wrong_digest":
+        analysis["analysis_sha256"] = "f" * 64
+        analysis_path.write_text(json.dumps(analysis), encoding="utf-8")
+    elif mutation == "semantic_forgery":
+        analysis["available_cell_count"] += 1
+        analysis["analysis_sha256"] = _analysis_digest(analysis)
+        analysis_path.write_text(json.dumps(analysis), encoding="utf-8")
+    elif mutation == "stale_current":
+        pointer_path = tmp_path / "current.json"
+        pointer = json.loads(pointer_path.read_text(encoding="utf-8"))
+        pointer["completion_sha256"] = "f" * 64
+        pointer_path.write_text(json.dumps(pointer), encoding="utf-8")
+    else:
+        (tmp_path / "current.json").write_text("{}", encoding="utf-8")
+
+    with pytest.raises((OSError, TypeError, ValueError)):
+        convergence.validate_existing(
+            plan_path=plan_path,
+            resources_path=run / "resources.json",
+            run_directory=run,
+        )
+
+
+def test_validate_existing_accepts_semantically_recomputed_analysis(tmp_path):
+    plan = _plan(
+        betas=[0.2],
+        bath_sizes=[1],
+        time_steps=[0.1],
+        maxdims=[32],
+        stage="pilot",
+    )
+    plan_path = convergence.create_plan_run(tmp_path, plan)
+    run = plan_path.parent
+    artifact = _complete(plan["cells"][0])
+    _write_completed_cell_tree(run, artifact)
+    analysis = convergence.analyze_available_cells(plan, [artifact])
+    (run / "analysis.json").write_text(json.dumps(analysis), encoding="utf-8")
+
+    checked = convergence.validate_existing(
+        plan_path=plan_path,
+        resources_path=run / "resources.json",
+        run_directory=run,
+    )
+
+    assert checked["analysis"] is True
+
+
+def test_production_cli_rejects_standalone_plan_export(tmp_path):
+    plan = _plan()
+    plan_path = tmp_path / "standalone-plan.json"
+    plan_path.write_text(json.dumps(plan), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="published|bundled|completion"):
+        convergence.main(
+            [
+                "run-cell",
+                "--plan",
+                str(plan_path),
+                "--run-directory",
+                str(tmp_path / "run"),
+                "--cell-index",
+                "0",
+                "--julia-project",
+                str(SOLUTION_DIR / "julia"),
+            ]
+        )
+
+
+def test_atomic_publication_rolls_back_old_cell(tmp_path, monkeypatch):
+    destination = tmp_path / "cell"
+    destination.mkdir()
+    (destination / "cell.json").write_bytes(b"old")
+    staging = tmp_path / ".stage"
+    staging.mkdir()
+    (staging / "cell.json").write_bytes(b"new")
+    real_replace = convergence.os.replace
+    calls = 0
+
+    def fail_second(source, target):
+        nonlocal calls
+        calls += 1
+        if calls == 2:
+            raise OSError("injected publication failure")
+        return real_replace(source, target)
+
+    monkeypatch.setattr(convergence.os, "replace", fail_second)
+    with pytest.raises(OSError, match="publication"):
+        convergence.atomic_publish_directory(staging, destination)
+    assert (destination / "cell.json").read_bytes() == b"old"
+
+
+def test_concurrent_run_cell_executes_and_publishes_once(tmp_path):
+    plan = _plan(
+        betas=[0.2],
+        bath_sizes=[1],
+        time_steps=[0.1],
+        maxdims=[32],
+        stage="pilot",
+    )
+    calls = []
+    barrier = threading.Barrier(2)
+    results = []
+
+    def executor(cell, _staging):
+        calls.append(cell["cell_id"])
+        time.sleep(0.1)
+        return _solver_result(cell)
+
+    def worker():
+        barrier.wait()
+        results.append(
+            convergence.run_cell(
+                plan,
+                0,
+                tmp_path,
+                executor=executor,
+                julia_project=SOLUTION_DIR / "julia",
+            )
+        )
+
+    threads = [threading.Thread(target=worker) for _ in range(2)]
+    for thread in threads:
+        thread.start()
+    for thread in threads:
+        thread.join(timeout=5)
+
+    assert all(not thread.is_alive() for thread in threads)
+    assert len(calls) == 1
+    assert sorted(result["action"] for result in results) == [
+        "completed",
+        "skipped",
+    ]
+
+
+def test_run_cell_recovers_sigkill_equivalent_abandoned_stage(tmp_path):
+    plan = _plan(
+        betas=[0.2],
+        bath_sizes=[1],
+        time_steps=[0.1],
+        maxdims=[32],
+        stage="pilot",
+    )
+    cell = plan["cells"][0]
+    cells = tmp_path / "cells"
+    abandoned = cells / f".{cell['cell_id']}.stage-dead"
+    abandoned.mkdir(parents=True)
+    (abandoned / "partial.log").write_text("keep for audit", encoding="utf-8")
+
+    convergence.run_cell(
+        plan,
+        0,
+        tmp_path,
+        executor=lambda item, _stage: _solver_result(item),
+        julia_project=SOLUTION_DIR / "julia",
+    )
+
+    recovered = list(cells.glob(f".{cell['cell_id']}.abandoned-*"))
+    assert len(recovered) == 1
+    assert (recovered[0] / "partial.log").read_text(encoding="utf-8") == (
+        "keep for audit"
+    )
+
+
+def test_cell_artifact_records_required_diagnostics_and_rejects_mismatch():
+    cell = _plan()["cells"][0]
+    artifact = _complete(cell)
+
+    convergence.validate_cell_artifact(artifact, expected_cell=cell)
+    assert artifact["resources"]["wall_time_seconds"] == 1.25
+    assert artifact["resources"]["peak_rss_bytes"] == 123456
+    assert artifact["resources"]["phase_timings_seconds"][
+        "context_and_evolution"
+    ] == 0.9
+    assert artifact["resources"]["thread_settings"] == {
+        "julia_threads": 2,
+        "blas_threads": 1,
+        "blas_vendor": "test",
+    }
+    assert artifact["resources"]["actual_mpo_link_dimensions"] == [4, 7, 4]
+    assert artifact["diagnostics"]["maximum_link_dimensions_by_bond"] == [4, 16, 8]
+    assert artifact["solver_settings"]["krylov_expansion_dim"] == 0
+    assert artifact["observables"]["n_d"] == 1.0
+    assert artifact["tau_fractions"] == [0.0, 0.25, 0.5, 0.75, 1.0]
+    assert set(artifact["provenance"]["source_sha256"]) == {
+        "acceptance.py",
+        "bath.py",
+        "chain_mapping.py",
+        "convergence.py",
+        "convergence.schema.json",
+        "model.json",
+        "pyproject.toml",
+        "uv.lock",
+        "finite_bath_mps_runner.jl",
+        "finite_bath_checkpoint.jl",
+        "finite_bath_observables.jl",
+        "finite_bath_purification.jl",
+    }
+
+    bad = copy.deepcopy(artifact)
+    bad["solver_settings"]["krylov_expansion_dim"] = 32
+    with pytest.raises(ValueError, match="krylov_expansion_dim|0 was expected"):
+        convergence.validate_cell_artifact(bad, expected_cell=cell)
+
+
+@pytest.mark.parametrize(
+    "mutation,match",
+    [
+        (lambda output: output.__setitem__("tau", []), "tau"),
+        (lambda output: output["tau"].__setitem__(1, 0.123), "tau"),
+        (lambda output: output["observables"].__setitem__("G_up", []), "G_up"),
+        (
+            lambda output: output["observables"]["G_down"].__setitem__(1, math.nan),
+            "finite",
+        ),
+        (lambda output: output["observables"].__setitem__("n_d", 2.1), "n_d"),
+        (
+            lambda output: output["observables"].__setitem__(
+                "double_occupancy", 0.6
+            ),
+            "double occupancy",
+        ),
+        (lambda output: output["observables"]["G_up"].__setitem__(1, 0.1), "G_up"),
+        (
+            lambda output: output["observables"]["G_down"].__setitem__(0, -0.25),
+            "endpoint",
+        ),
+        (
+            lambda output: output["observables"]["G_up"].__setitem__(-1, -0.25),
+            "endpoint",
+        ),
+    ],
+)
+def test_completed_cell_rejects_invalid_observable_semantics(mutation, match):
+    cell = _plan()["cells"][0]
+    output = _solver_result(cell)
+    mutation(output)
+
+    with pytest.raises((TypeError, ValueError), match=match):
+        convergence.make_cell_artifact(
+            cell=cell,
+            solver_output=output,
+            wall_time_seconds=1.0,
+            peak_rss_bytes=100,
+            peak_rss_method="test",
+        )
+
+
+def test_pair_comparison_rejects_unequal_observable_vectors():
+    cell = _plan()["cells"][0]
+    left = _complete(cell)
+    right = copy.deepcopy(left)
+    right["observables"]["G_up"].pop()
+
+    with pytest.raises(ValueError, match="length"):
+        convergence._pair_delta(left, right)
+
+
+@pytest.mark.parametrize(
+    "field",
+    ["runner_source_sha256", "project_toml_sha256", "bath_artifact_file_sha256"],
+)
+def test_completed_cell_rejects_solver_provenance_mismatch(field):
+    cell = _plan()["cells"][0]
+    output = _solver_result(cell)
+    output["provenance"][field] = "f" * 64
+
+    with pytest.raises(ValueError, match="provenance"):
+        convergence.make_cell_artifact(
+            cell=cell,
+            solver_output=output,
+            wall_time_seconds=1.0,
+            peak_rss_bytes=100,
+            peak_rss_method="test",
+        )
+
+
+@pytest.mark.parametrize(
+    "mutation,match",
+    [
+        (
+            lambda output: output["diagnostics"].__setitem__("thermal", {}),
+            "thermal diagnostics",
+        ),
+        (
+            lambda output: output["diagnostics"].__setitem__("green_up", []),
+            "Green-branch diagnostics",
+        ),
+        (
+            lambda output: output["diagnostics"]["thermal"].__setitem__(
+                "krylov_all_converged", False
+            ),
+            "Krylov",
+        ),
+        (
+            lambda output: output["diagnostics"]["thermal"].__setitem__(
+                "krylov_max_error_estimate", 1.0
+            ),
+            "Krylov error",
+        ),
+        (
+            lambda output: output["diagnostics"]["green_up"][1].__setitem__(
+                "truncation_max_error", 1.0
+            ),
+            "truncation",
+        ),
+        (
+            lambda output: output["diagnostics"].__setitem__(
+                "maximum_link_dimensions_by_bond",
+                [4, output["solver"]["settings"]["maxdim"], 8],
+            ),
+            "maxdim saturation",
+        ),
+        (
+            lambda output: output["diagnostics"]["green_up"][1].__setitem__(
+                "spin", "dn"
+            ),
+            "Green-branch identity",
+        ),
+        (
+            lambda output: output["diagnostics"]["green_down"][1].__setitem__(
+                "tau", -1.0
+            ),
+            "Green-branch identity",
+        ),
+    ],
+)
+def test_diagnostics_gate_fails_closed(mutation, match):
+    cell = _plan()["cells"][0]
+    output = _solver_result(cell)
+    mutation(output)
+    with pytest.raises(ValueError, match=match):
+        convergence.make_cell_artifact(
+            cell=cell,
+            solver_output=output,
+            wall_time_seconds=1.0,
+            peak_rss_bytes=100,
+            peak_rss_method="test",
+        )
+
+
+@pytest.mark.skipif(platform.system() != "Linux", reason="Linux /proc assertion")
+def test_linux_proc_peak_rss_parser_and_unsupported_fallback(tmp_path):
+    process = tmp_path / "42"
+    process.mkdir()
+    (process / "status").write_text(
+        "Name:\tjulia\nVmRSS:\t120 kB\nVmHWM:\t456 kB\n",
+        encoding="utf-8",
+    )
+    assert convergence.read_linux_process_peak_rss(
+        42, proc_root=tmp_path
+    ) == 456 * 1024
+    assert convergence.read_linux_process_peak_rss(
+        99, proc_root=tmp_path
+    ) is None
+    assert convergence.process_rss_monitoring_method() == "linux_proc_status_vmhwm"
+
+
+def test_process_rss_monitoring_is_null_on_unsupported_platform(monkeypatch):
+    monkeypatch.setattr(convergence.platform, "system", lambda: "Darwin")
+    assert convergence.process_rss_monitoring_method() is None
+
+
+def test_local_subprocess_timeout_is_enforced(tmp_path):
+    output = tmp_path / "result.json"
+    with pytest.raises(subprocess.TimeoutExpired):
+        convergence.invoke_julia_runner_monitored(
+            [
+                shutil.which("python3"),
+                "-c",
+                "import time; time.sleep(2)",
+            ],
+            output_path=output,
+            timeout_seconds=0.05,
+            max_rss_bytes=convergence.LOCAL_RSS_LIMIT_BYTES,
+        )
+    assert not output.exists()
+
+
+def test_monitored_runner_starts_new_process_group(tmp_path):
+    output = tmp_path / "result.json"
+    convergence.invoke_julia_runner_monitored(
+        [
+            sys.executable,
+            "-c",
+            (
+                "import json, os, sys; "
+                "json.dump({'pid': os.getpid(), 'pgid': os.getpgrp()}, "
+                "open(sys.argv[1], 'w'))"
+            ),
+            str(output),
+        ],
+        output_path=output,
+    )
+
+    result = json.loads(output.read_text(encoding="utf-8"))
+    assert result["pid"] == result["pgid"]
+    assert result["pgid"] != os.getpgrp()
+
+
+def test_parent_sigusr1_is_forwarded_to_runner_process_group(tmp_path):
+    output = tmp_path / "result.json"
+
+    def signal_parent():
+        time.sleep(0.2)
+        os.kill(os.getpid(), signal.SIGUSR1)
+
+    sender = threading.Thread(target=signal_parent)
+    sender.start()
+    convergence.invoke_julia_runner_monitored(
+        [
+            sys.executable,
+            "-c",
+            (
+                "import json, signal, sys, time; "
+                "signal.signal(signal.SIGUSR1, "
+                "lambda *_: (json.dump({'signal': 'SIGUSR1'}, "
+                "open(sys.argv[1], 'w')), sys.exit(0))); "
+                "time.sleep(5)"
+            ),
+            str(output),
+        ],
+        output_path=output,
+        timeout_seconds=2,
+    )
+    sender.join(timeout=2)
+
+    assert json.loads(output.read_text(encoding="utf-8")) == {
+        "signal": "SIGUSR1"
+    }
+
+
+def test_parent_sigterm_is_forwarded_to_runner_process_group(tmp_path):
+    output = tmp_path / "result.json"
+
+    def signal_parent():
+        time.sleep(0.2)
+        os.kill(os.getpid(), signal.SIGTERM)
+
+    sender = threading.Thread(target=signal_parent)
+    sender.start()
+    convergence.invoke_julia_runner_monitored(
+        [
+            sys.executable,
+            "-c",
+            (
+                "import json, signal, sys, time; "
+                "signal.signal(signal.SIGTERM, "
+                "lambda *_: (json.dump({'signal': 'SIGTERM'}, "
+                "open(sys.argv[1], 'w')), sys.exit(0))); "
+                "time.sleep(5)"
+            ),
+            str(output),
+        ],
+        output_path=output,
+        timeout_seconds=2,
+    )
+    sender.join(timeout=2)
+
+    assert json.loads(output.read_text(encoding="utf-8")) == {
+        "signal": "SIGTERM"
+    }
+
+
+def test_timeout_requests_checkpoint_and_accepts_only_new_valid_exit_75(tmp_path):
+    output = tmp_path / "result.json"
+    checkpoint = tmp_path / "checkpoint"
+    grace_calls = []
+
+    def validate_checkpoint():
+        if not checkpoint.exists():
+            return None
+        value = checkpoint.read_text(encoding="utf-8")
+        if value != "valid\n":
+            raise ValueError("invalid checkpoint")
+        return convergence._sha256(checkpoint.read_bytes())
+
+    with pytest.raises(convergence.ContinuationAvailable):
+        convergence.invoke_julia_runner_monitored(
+            [
+                sys.executable,
+                "-c",
+                (
+                    "import pathlib, signal, sys, time; "
+                    "signal.signal(signal.SIGTERM, "
+                    "lambda *_: (pathlib.Path(sys.argv[1]).write_text('valid\\n'), "
+                    "sys.exit(75))); "
+                    "time.sleep(5)"
+                ),
+                str(checkpoint),
+            ],
+            output_path=output,
+            timeout_seconds=0.2,
+            checkpoint_validator=validate_checkpoint,
+            checkpoint_grace_period=lambda: grace_calls.append(True) or 1.0,
+        )
+
+    assert grace_calls == [True]
+    assert validate_checkpoint() is not None
+
+
+def test_timeout_kills_process_group_after_bounded_checkpoint_grace(tmp_path):
+    output = tmp_path / "result.json"
+    started = time.monotonic()
+
+    with pytest.raises(subprocess.TimeoutExpired):
+        convergence.invoke_julia_runner_monitored(
+            [
+                sys.executable,
+                "-c",
+                (
+                    "import signal, time; "
+                    "signal.signal(signal.SIGTERM, lambda *_: None); "
+                    "time.sleep(5)"
+                ),
+            ],
+            output_path=output,
+            timeout_seconds=0.1,
+            checkpoint_grace_period=lambda: 0.1,
+        )
+
+    assert time.monotonic() - started < 2
+
+
+def test_exit_75_without_new_valid_checkpoint_is_hard_failure(tmp_path):
+    output = tmp_path / "result.json"
+    checkpoint = tmp_path / "checkpoint"
+    checkpoint.write_text("valid\n", encoding="utf-8")
+
+    with pytest.raises(subprocess.CalledProcessError) as caught:
+        convergence.invoke_julia_runner_monitored(
+            [sys.executable, "-c", "raise SystemExit(75)"],
+            output_path=output,
+            checkpoint_validator=lambda: convergence._sha256(
+                checkpoint.read_bytes()
+            ),
+        )
+
+    assert caught.value.returncode == 75
+
+
+def test_rss_breach_remains_nonretryable(tmp_path, monkeypatch):
+    output = tmp_path / "result.json"
+    monkeypatch.setattr(
+        convergence, "read_linux_process_peak_rss", lambda _pid: 1024
+    )
+
+    with pytest.raises(MemoryError):
+        convergence.invoke_julia_runner_monitored(
+            [sys.executable, "-c", "import time; time.sleep(5)"],
+            output_path=output,
+            max_rss_bytes=1,
+            checkpoint_validator=lambda: "f" * 64,
+        )
+
+
+def test_run_cell_retires_pointer_and_retains_generations_after_publish(
+    tmp_path,
+):
+    plan = _plan(
+        betas=[0.2],
+        bath_sizes=[1],
+        time_steps=[0.1],
+        maxdims=[32],
+        stage="pilot",
+    )
+    cell = plan["cells"][0]
+    observed = []
+
+    def executor(item, _staging, checkpoint_root):
+        observed.append(checkpoint_root)
+        _write_python_validated_checkpoint(checkpoint_root, item)
+        return _solver_result(item)
+
+    result = convergence.run_cell(
+        plan,
+        0,
+        tmp_path,
+        executor=executor,
+        julia_project=SOLUTION_DIR / "julia",
+    )
+
+    assert observed == [tmp_path / "checkpoints" / cell["cell_id"]]
+    assert result["action"] == "completed"
+    _assert_retired_checkpoint(observed[0], result["cell"])
+    assert list((observed[0] / "generations").iterdir())
+    assert set(path.name for path in result["path"].iterdir()) == {
+        "bath.json",
+        "mps-input.json",
+        "mps-result.json",
+        "cell.json",
+    }
+
+
+def test_run_cell_preserves_checkpoint_on_continuation_and_cli_maps_75(
+    tmp_path, monkeypatch, capsys
+):
+    plan = _plan(
+        betas=[0.2],
+        bath_sizes=[1],
+        time_steps=[0.1],
+        maxdims=[32],
+        stage="pilot",
+    )
+    plan_path = tmp_path / "plan.json"
+    plan_path.write_text(json.dumps(plan), encoding="utf-8")
+    checkpoint_root = (
+        tmp_path / "run" / "checkpoints" / plan["cells"][0]["cell_id"]
+    )
+
+    def continued(*_args, **_kwargs):
+        checkpoint_root.mkdir(parents=True, exist_ok=True)
+        raise convergence.ContinuationAvailable(checkpoint_root)
+
+    monkeypatch.setattr(convergence, "_default_executor", continued)
+    status = convergence.main(
+        [
+            "run-cell",
+            "--plan",
+            str(plan_path),
+            "--run-directory",
+            str(tmp_path / "run"),
+            "--cell-index",
+            "0",
+            "--julia-project",
+            str(SOLUTION_DIR / "julia"),
+        ]
+    )
+
+    assert status == 75
+    assert checkpoint_root.is_dir()
+    output = capsys.readouterr().out
+    assert "action=continuation" in output
+    assert "action=failed" not in output
+
+
+def test_validate_existing_rejects_unplanned_or_invalid_checkpoint_roots(
+    tmp_path,
+):
+    plan = _plan(
+        betas=[0.2],
+        bath_sizes=[1],
+        time_steps=[0.1],
+        maxdims=[32],
+        stage="pilot",
+    )
+    plan_path = convergence.create_plan_run(tmp_path, plan)
+    run = plan_path.parent
+    checkpoints = run / "checkpoints"
+    checkpoints.mkdir()
+    (checkpoints / "unplanned-cell").mkdir()
+
+    with pytest.raises(ValueError, match="checkpoint"):
+        convergence.validate_existing(
+            plan_path=plan_path,
+            resources_path=run / "resources.json",
+            run_directory=run,
+        )
+
+
+def test_checkpoint_validator_accepts_julia_float_canonicalization(tmp_path):
+    metadata = tmp_path / "metadata.json"
+    metadata.write_bytes(
+        '{"beta":4.0,"cutoff":1.0e-12,"label":"β"}\n'.encode("utf-8")
+    )
+
+    assert convergence._strict_checkpoint_canonical_json_file(
+        metadata, "checkpoint metadata"
+    ) == {
+        "beta": 4.0,
+        "cutoff": 1.0e-12,
+        "label": "β",
+    }
+
+
+def _write_python_validated_checkpoint(root, cell):
+    request = convergence._runner_request_for_cell(cell)
+    payload = json.loads(request["payload_json"])
+    identity = {
+        "request_sha256": convergence._sha256(
+            convergence._canonical_json(request) + b"\n"
+        ),
+        "input_payload_sha256": request["sha256"],
+        "bath_sha256": cell["bath_artifact"]["sha256"],
+        "bath_representation": cell["solver_settings"]["bath_representation"],
+        "chain_mapping_sha256": cell["chain_mapping_sha256"],
+        "solver_settings": {
+            "beta": cell["parameters"]["beta"],
+            "tau": [
+                cell["parameters"]["beta"] * fraction
+                for fraction in cell["tau_fractions"]
+            ],
+            **{
+                key: cell["solver_settings"][key]
+                for key in (
+                    "time_step",
+                    "cutoff",
+                    "maxdim",
+                    "krylov_expansion_dim",
+                )
+            },
+        },
+        "source_hashes": payload["checkpoint"]["source_hashes"],
+        "project_toml_sha256": payload["checkpoint"]["project_toml_sha256"],
+        "manifest_toml_sha256": payload["checkpoint"]["manifest_toml_sha256"],
+        "julia_version": "test",
+        "itensors_version": "test",
+        "itensormps_version": "test",
+        "hdf5_version": "test",
+        "checkpoint_schema": 1,
+        "writer_version": "1.0.0",
+    }
+    metadata = {
+        "checkpoint_schema": 1,
+        "writer_version": "1.0.0",
+        "identity": identity,
+        "completed_steps": 1,
+        "resume_state": {"kind": "test"},
+    }
+    metadata_bytes = convergence._checkpoint_canonical_json(metadata) + b"\n"
+    metadata_sha = convergence._sha256(metadata_bytes)
+    generation_name = f"checkpoint-{metadata_sha}"
+    generation = root / "generations" / generation_name
+    generation.mkdir(parents=True)
+    (generation / "metadata.json").write_bytes(metadata_bytes)
+    state = b"test-hdf5-state"
+    (generation / "state.h5").write_bytes(state)
+    completion = {
+        "checkpoint_schema": 1,
+        "writer_version": "1.0.0",
+        "generation": generation_name,
+        "metadata_sha256": metadata_sha,
+        "state_sha256": convergence._sha256(state),
+    }
+    completion_bytes = convergence._canonical_json(completion) + b"\n"
+    (generation / "completion.json").write_bytes(completion_bytes)
+    current = {
+        **completion,
+        "completed_steps": 1,
+        "completion_sha256": convergence._sha256(completion_bytes),
+    }
+    (root / "current.json").write_bytes(
+        convergence._canonical_json(current) + b"\n"
+    )
+
+
+def _assert_retired_checkpoint(root, completed_cell):
+    assert root.is_dir()
+    assert not (root / "current.json").exists()
+    assert (root / "generations").is_dir()
+    assert (root / "retired").is_dir()
+    retired_pointers = list((root / "retired").glob("current-*.json"))
+    assert retired_pointers
+    retirement = json.loads(
+        (root / "retirement.json").read_text(encoding="utf-8")
+    )
+    assert retirement["cell_id"] == completed_cell["cell_id"]
+    assert retirement["input_sha256"] == completed_cell["input_sha256"]
+    assert (
+        retirement["completed_cell_artifact_sha256"]
+        == completed_cell["artifact_sha256"]
+    )
+    assert retirement["retired_pointer_file"] == retired_pointers[-1].name
+    assert retirement["retired_pointer_sha256"] == convergence._sha256(
+        retired_pointers[-1].read_bytes()
+    )
+
+
+def test_validate_existing_accepts_only_hash_valid_planned_checkpoint(tmp_path):
+    plan = _plan(
+        betas=[0.2],
+        bath_sizes=[1],
+        time_steps=[0.1],
+        maxdims=[32],
+        stage="pilot",
+    )
+    plan_path = convergence.create_plan_run(tmp_path, plan)
+    run = plan_path.parent
+    checkpoint = run / "checkpoints" / plan["cells"][0]["cell_id"]
+    _write_python_validated_checkpoint(checkpoint, plan["cells"][0])
+
+    checked = convergence.validate_existing(
+        plan_path=plan_path,
+        resources_path=run / "resources.json",
+        run_directory=run,
+    )
+
+    assert checked["checkpoints"] == 1
+    (checkpoint / "current.json").write_text("{}\n", encoding="utf-8")
+    with pytest.raises(ValueError, match="checkpoint"):
+        convergence.validate_existing(
+            plan_path=plan_path,
+            resources_path=run / "resources.json",
+            run_directory=run,
+        )
+    assert not checkpoint.exists()
+    assert any(
+        entry.name.startswith(f".{plan['cells'][0]['cell_id']}.superseded-")
+        for entry in checkpoint.parent.iterdir()
+    )
+
+
+def test_validate_existing_repairs_completed_cell_with_active_checkpoint(tmp_path):
+    plan = _plan(
+        betas=[0.2],
+        bath_sizes=[1],
+        time_steps=[0.1],
+        maxdims=[32],
+        stage="pilot",
+    )
+    plan_path = convergence.create_plan_run(tmp_path, plan)
+    run = plan_path.parent
+    completed = convergence.run_cell(
+        plan,
+        0,
+        run,
+        executor=lambda item, _stage: _solver_result(item),
+        julia_project=SOLUTION_DIR / "julia",
+    )["cell"]
+    checkpoint = run / "checkpoints" / plan["cells"][0]["cell_id"]
+    _write_python_validated_checkpoint(checkpoint, plan["cells"][0])
+    generations = {
+        path.name for path in (checkpoint / "generations").iterdir()
+    }
+
+    checked = convergence.validate_existing(
+        plan_path=plan_path,
+        resources_path=run / "resources.json",
+        run_directory=run,
+    )
+
+    assert checked["cells"] == 1
+    assert checked["retired_checkpoints"] == 1
+    _assert_retired_checkpoint(checkpoint, completed)
+    assert {
+        path.name for path in (checkpoint / "generations").iterdir()
+    } == generations
+
+
+def test_validate_existing_waits_for_concurrent_cell_publication(tmp_path):
+    plan = _plan(
+        betas=[0.2],
+        bath_sizes=[1],
+        time_steps=[0.1],
+        maxdims=[32],
+        stage="pilot",
+    )
+    plan_path = convergence.create_plan_run(tmp_path, plan)
+    run = plan_path.parent
+    entered = threading.Event()
+    release = threading.Event()
+    run_errors = []
+    validation_errors = []
+    validation_results = []
+
+    def executor(item, _stage, checkpoint_root):
+        _write_python_validated_checkpoint(checkpoint_root, item)
+        entered.set()
+        assert release.wait(timeout=5)
+        return _solver_result(item)
+
+    def execute():
+        try:
+            convergence.run_cell(
+                plan,
+                0,
+                run,
+                executor=executor,
+                julia_project=SOLUTION_DIR / "julia",
+            )
+        except BaseException as error:
+            run_errors.append(error)
+
+    def validate():
+        try:
+            validation_results.append(
+                convergence.validate_existing(
+                    plan_path=plan_path,
+                    resources_path=run / "resources.json",
+                    run_directory=run,
+                )
+            )
+        except BaseException as error:
+            validation_errors.append(error)
+
+    runner = threading.Thread(target=execute)
+    runner.start()
+    assert entered.wait(timeout=5)
+    validator = threading.Thread(target=validate)
+    validator.start()
+    time.sleep(0.1)
+    assert validator.is_alive()
+    release.set()
+    runner.join(timeout=5)
+    validator.join(timeout=5)
+
+    assert not runner.is_alive()
+    assert not validator.is_alive()
+    assert run_errors == []
+    assert validation_errors == []
+    assert validation_results[0]["cells"] == 1
+    assert validation_results[0]["retired_checkpoints"] == 1
+    completed = json.loads(
+        (
+            run
+            / "cells"
+            / plan["cells"][0]["cell_id"]
+            / "cell.json"
+        ).read_text(encoding="utf-8")
+    )
+    _assert_retired_checkpoint(
+        run / "checkpoints" / plan["cells"][0]["cell_id"],
+        completed,
+    )
+
+
+def test_validate_existing_does_not_reject_stage_created_after_cell_check(
+    tmp_path, monkeypatch
+):
+    plan = _plan(
+        betas=[0.2],
+        bath_sizes=[1, 2],
+        time_steps=[0.1],
+        maxdims=[32],
+        stage="pilot",
+    )
+    plan_path = convergence.create_plan_run(tmp_path, plan)
+    run = plan_path.parent
+    first_cell_id = plan["cells"][0]["cell_id"]
+    first_validation_released = threading.Event()
+    stage_created = threading.Event()
+    release_runner = threading.Event()
+    real_lock = convergence.cell_advisory_lock
+    runner_errors = []
+    validation_errors = []
+    validation_results = []
+
+    @contextmanager
+    def observed_lock(cells_root, cell_id):
+        with real_lock(cells_root, cell_id):
+            yield
+        if (
+            threading.current_thread().name == "inverse-order-validator"
+            and cell_id == first_cell_id
+            and not first_validation_released.is_set()
+        ):
+            first_validation_released.set()
+            assert stage_created.wait(timeout=5)
+
+    monkeypatch.setattr(convergence, "cell_advisory_lock", observed_lock)
+
+    def executor(item, _stage, _checkpoint_root):
+        stage_created.set()
+        assert release_runner.wait(timeout=5)
+        return _solver_result(item)
+
+    def execute():
+        try:
+            convergence.run_cell(
+                plan,
+                0,
+                run,
+                executor=executor,
+                julia_project=SOLUTION_DIR / "julia",
+            )
+        except BaseException as error:
+            runner_errors.append(error)
+
+    def validate():
+        try:
+            validation_results.append(
+                convergence.validate_existing(
+                    plan_path=plan_path,
+                    resources_path=run / "resources.json",
+                    run_directory=run,
+                )
+            )
+        except BaseException as error:
+            validation_errors.append(error)
+
+    validator = threading.Thread(
+        target=validate, name="inverse-order-validator"
+    )
+    validator.start()
+    assert first_validation_released.wait(timeout=5)
+    runner = threading.Thread(target=execute, name="inverse-order-runner")
+    runner.start()
+    assert stage_created.wait(timeout=5)
+
+    validator.join(timeout=0.2)
+    release_runner.set()
+    runner.join(timeout=5)
+    validator.join(timeout=5)
+
+    assert not runner.is_alive()
+    assert not validator.is_alive()
+    assert runner_errors == []
+    assert validation_errors == []
+    assert len(validation_results) == 1
+    assert validation_results[0]["cells"] in {0, 1}
+    assert not any(
+        entry.name.startswith(f".{first_cell_id}.abandoned-")
+        for entry in (run / "cells").iterdir()
+    )
+
+
+@pytest.mark.parametrize(
+    "interruption_point",
+    ["pointer_moved_before_marker", "marker_written_before_pointer_removed"],
+)
+def test_retire_checkpoint_root_is_idempotent_across_interruption_points(
+    tmp_path, interruption_point
+):
+    plan = _plan(
+        betas=[0.2],
+        bath_sizes=[1],
+        time_steps=[0.1],
+        maxdims=[32],
+        stage="pilot",
+    )
+    cell = plan["cells"][0]
+    checkpoint = tmp_path / cell["cell_id"]
+    _write_python_validated_checkpoint(checkpoint, cell)
+    completed = _complete(cell)
+    generations = {
+        path.name for path in (checkpoint / "generations").iterdir()
+    }
+    fingerprint = convergence.validate_checkpoint_root(checkpoint, cell=cell)
+    retired = checkpoint / "retired"
+    retired.mkdir()
+    retired_pointer = retired / f"current-{fingerprint}.json"
+
+    if interruption_point == "pointer_moved_before_marker":
+        os.replace(checkpoint / "current.json", retired_pointer)
+    else:
+        shutil.copy2(checkpoint / "current.json", retired_pointer)
+        convergence._write_checkpoint_retirement(
+            checkpoint,
+            cell=cell,
+            completed_cell=completed,
+            retired_pointer=retired_pointer,
+        )
+
+    convergence.retire_checkpoint_root(
+        checkpoint,
+        cell=cell,
+        completed_cell=completed,
+    )
+    convergence.retire_checkpoint_root(
+        checkpoint,
+        cell=cell,
+        completed_cell=completed,
+    )
+
+    _assert_retired_checkpoint(checkpoint, completed)
+    assert {
+        path.name for path in (checkpoint / "generations").iterdir()
+    } == generations
+
+
+def test_schema_defines_strict_checkpoint_pointer():
+    schema = json.loads(
+        (SOLUTION_DIR / "convergence.schema.json").read_text(encoding="utf-8")
+    )
+    pointer = schema["$defs"]["checkpointPointer"]
+    assert pointer["additionalProperties"] is False
+    assert set(pointer["required"]) == {
+        "checkpoint_schema",
+        "writer_version",
+        "generation",
+        "completed_steps",
+        "metadata_sha256",
+        "state_sha256",
+        "completion_sha256",
+    }
+
+
+def test_slurm_wrapper_forwards_signals_and_preserves_python_status():
+    script = (SOLUTION_DIR / "convergence_slurm_array.sh").read_text(
+        encoding="utf-8"
+    )
+    assert "trap" in script
+    assert "SIGUSR1" in script or "USR1" in script
+    assert "SIGTERM" in script or "TERM" in script
+    assert "wait" in script
+    assert "exit \"${status}\"" in script
+    assert "#SBATCH --signal" not in script
+
+
+def test_slurm_wrapper_waits_after_forwarded_signal_and_preserves_exit_75(
+    tmp_path,
+):
+    solution_dir = tmp_path / "solution"
+    solution_dir.mkdir()
+    marker = tmp_path / "forwarded"
+    (solution_dir / "convergence.py").write_text(
+        "import os, pathlib, signal, time\n"
+        "def stop(*_):\n"
+        "    pathlib.Path(os.environ['SIGNAL_MARKER']).write_text('USR1\\n')\n"
+        "    raise SystemExit(75)\n"
+        "signal.signal(signal.SIGUSR1, stop)\n"
+        "time.sleep(10)\n",
+        encoding="utf-8",
+    )
+    environment = {
+        **os.environ,
+        "HARNESS_SOLUTION_DIR": str(solution_dir),
+        "HARNESS_RUN_SPEC": "/run/plan.json",
+        "HARNESS_RUN_DIR": "/run",
+        "HARNESS_RESOURCES": "/run/resources.json",
+        "HARNESS_RESOURCE_ACK": "resource-sha256",
+        "SLURM_ARRAY_TASK_ID": "0",
+        "JULIA_PROJECT": "/runtime/julia",
+        "PYTHON": sys.executable,
+        "SIGNAL_MARKER": str(marker),
+    }
+    wrapper = subprocess.Popen(
+        ["bash", str(SOLUTION_DIR / "convergence_slurm_array.sh")],
+        env=environment,
+    )
+    time.sleep(0.2)
+    wrapper.send_signal(signal.SIGUSR1)
+
+    assert wrapper.wait(timeout=5) == 75
+    assert marker.read_text(encoding="utf-8") == "USR1\n"
+
+
+def test_resources_are_hashed_bound_and_required_for_production(tmp_path):
+    plan = _plan()
+    resources = convergence.estimate_plan_resources(plan)
+    convergence.validate_resources(resources, plan)
+    assert resources["resource_sha256"] == convergence.resource_sha256(resources)
+    assert resources["safety_factors"]["memory"] > 1
+    assert resources["safety_factors"]["wall"] > 1
+
+    with pytest.raises(ValueError, match="resources"):
+        convergence.run_cell(
+            plan,
+            0,
+            tmp_path,
+            executor=lambda cell, _stage: _solver_result(cell),
+            julia_project=SOLUTION_DIR / "julia",
+        )
+    with pytest.raises(ValueError, match="acknowledgment"):
+        convergence.run_cell(
+            plan,
+            0,
+            tmp_path,
+            executor=lambda cell, _stage: _solver_result(cell),
+            julia_project=SOLUTION_DIR / "julia",
+            resources=resources,
+        )
+
+
+@pytest.mark.parametrize("execution_target", ["local", "cluster"])
+def test_n48_cell_is_refused_without_validated_solver_capability(
+    tmp_path, execution_target
+):
+    plan = _plan(bath_representation="chain")
+    assert plan["solver_capability"]["finite_chain_mapping_validated"] is True
+    assert plan["solver_capability"]["qn_purification_validated"] is False
+    assert plan["solver_capability"]["n_bath_48_execution_validated"] is False
+    resources = convergence.estimate_plan_resources(plan)
+    index = next(
+        index
+        for index, cell in enumerate(plan["cells"])
+        if cell["parameters"]["n_bath"] == 48
+    )
+    calls = []
+    with pytest.raises(ValueError, match="solver capability"):
+        convergence.run_cell(
+            plan,
+            index,
+            tmp_path,
+            executor=lambda cell, _stage: (
+                calls.append(cell["cell_id"]),
+                _solver_result(cell),
+            )[1],
+            julia_project=SOLUTION_DIR / "julia",
+            resources=resources,
+            resource_acknowledgment=resources["resource_sha256"],
+            execution_target=execution_target,
+        )
+    assert calls == []
+
+
+def test_accidental_full_cluster_array_never_launches_n48(tmp_path):
+    plan = _plan()
+    resources = convergence.estimate_plan_resources(plan)
+    launched = []
+    for index, cell in enumerate(plan["cells"]):
+        run_root = tmp_path / str(index)
+        if cell["parameters"]["n_bath"] == 48:
+            with pytest.raises(ValueError, match="solver capability"):
+                convergence.run_cell(
+                    plan,
+                    index,
+                    run_root,
+                    executor=lambda item, _stage: launched.append(
+                        item["parameters"]["n_bath"]
+                    )
+                    or _solver_result(item),
+                    julia_project=SOLUTION_DIR / "julia",
+                    resources=resources,
+                    resource_acknowledgment=resources["resource_sha256"],
+                    execution_target="cluster",
+                )
+    assert 48 not in launched
+
+
+def test_validate_plan_schema_first_and_binds_schema_digest(monkeypatch):
+    plan = _plan()
+    assert plan["execution_environment"]["source_sha256"][
+        "convergence.schema.json"
+    ] == convergence._sha256_file(SOLUTION_DIR / "convergence.schema.json")
+    assert all(
+        cell["provenance"]["source_sha256"]["convergence.schema.json"]
+        == plan["execution_environment"]["source_sha256"][
+            "convergence.schema.json"
+        ]
+        for cell in plan["cells"]
+    )
+    malformed = copy.deepcopy(plan)
+    malformed["cells"][0]["solver_settings"]["unknown"] = True
+    malformed["plan_sha256"] = convergence.plan_sha256(malformed)
+    calls = []
+    real_validate = convergence.validate_artifact_schema
+
+    def tracked(value, definition):
+        calls.append(definition)
+        return real_validate(value, definition)
+
+    monkeypatch.setattr(convergence, "validate_artifact_schema", tracked)
+    with pytest.raises(ValueError, match="schema"):
+        convergence.validate_plan(malformed)
+    assert calls == ["convergencePlan"]
+
+
+def test_schema_is_recursive_and_runtime_validation_rejects_nested_unknown():
+    schema = json.loads(
+        (SOLUTION_DIR / "convergence.schema.json").read_text(encoding="utf-8")
+    )
+    Draft202012Validator.check_schema(schema)
+    plan = _plan()
+    convergence.validate_artifact_schema(plan, "convergencePlan")
+    malformed = copy.deepcopy(plan)
+    malformed["cells"][0]["solver_settings"]["unknown"] = True
+    with pytest.raises(ValueError, match="schema"):
+        convergence.validate_artifact_schema(malformed, "convergencePlan")
+
+
+def test_out_of_range_cli_index_reports_once_without_secondary_index_error(
+    tmp_path, capsys
+):
+    plan = _plan(
+        betas=[0.2],
+        bath_sizes=[1],
+        time_steps=[0.1],
+        maxdims=[32],
+        stage="pilot",
+    )
+    plan_path = tmp_path / "plan.json"
+    plan_path.write_text(json.dumps(plan), encoding="utf-8")
+    exit_code = convergence.main(
+        [
+            "run-cell",
+            "--plan",
+            str(plan_path),
+            "--run-directory",
+            str(tmp_path / "run"),
+            "--cell-index",
+            "-1",
+            "--julia-project",
+            str(SOLUTION_DIR / "julia"),
+        ]
+    )
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert output.count("action=failed") == 1
+    assert "out of range" in output
+
+
+def _analysis_cells(nonmonotonic=False):
+    plan = _plan(
+        betas=[16.0],
+        bath_sizes=[4, 6],
+        time_steps=[0.2, 0.1, 0.05],
+        maxdims=[128, 256, 512],
+    )
+    artifacts = []
+    for cell in plan["cells"]:
+        parameters = cell["parameters"]
+        settings = cell["solver_settings"]
+        bath_error = 2.0e-5 if parameters["n_bath"] == 4 else 0.0
+        maxdim_error = {128: 2.0e-5, 256: 5.0e-6, 512: 0.0}[
+            settings["maxdim"]
+        ]
+        if nonmonotonic:
+            dt_error = {0.2: 1.0e-5, 0.1: 2.0e-6, 0.05: 8.0e-6}[
+                settings["time_step"]
+            ]
+        else:
+            dt_error = {0.2: 1.0e-5, 0.1: 2.0e-6, 0.05: 0.0}[
+                settings["time_step"]
+            ]
+        artifacts.append(_complete(cell, bath_error + maxdim_error + dt_error))
+    return plan, artifacts
+
+
+def test_pairwise_analysis_controls_other_axes_and_passes_named_tolerances():
+    plan, artifacts = _analysis_cells()
+    report = convergence.analyze_cells(plan, artifacts)
+
+    assert report["pair_counts"] == {"bath_size": 9, "time_step": 12, "maxdim": 12}
+    assert all(pair["controlled"] for pairs in report["pairs"].values() for pair in pairs)
+    assert set(report["axis_status"]) == {"bath_size", "time_step", "maxdim"}
+    assert report["axis_status"]["time_step"]["nonmonotonic"] is False
+    assert report["convergence_claim"] is False
+    assert "three-level bath resolution policy not established" in report[
+        "claim_blockers"
+    ]
+
+
+def test_analysis_rejects_plan_from_a_different_current_checkout(monkeypatch):
+    plan, artifacts = _analysis_cells()
+    monkeypatch.setattr(
+        convergence,
+        "_source_hashes",
+        lambda _project: {"changed": "0" * 64},
+    )
+
+    with pytest.raises(ValueError, match="current checkout"):
+        convergence.analyze_cells(plan, artifacts)
+
+
+def test_nonmonotonic_timestep_blocks_convergence_claim():
+    plan, artifacts = _analysis_cells(nonmonotonic=True)
+    report = convergence.analyze_cells(plan, artifacts)
+
+    assert report["axis_status"]["time_step"]["nonmonotonic"] is True
+    assert report["axis_status"]["time_step"]["passed"] is False
+    assert report["convergence_claim"] is False
+    assert "non-monotonic" in report["claim_blockers"][0]
+
+
+def _staged_analysis_cells(nonmonotonic_bath=False):
+    plan = _plan()
+    artifacts = []
+    bath_error = (
+        {12: 1.0e-5, 24: 0.0, 48: 8.0e-6}
+        if nonmonotonic_bath
+        else {12: 2.0e-5, 24: 5.0e-6, 48: 0.0}
+    )
+    for cell in plan["cells"]:
+        settings = cell["solver_settings"]
+        shift = bath_error[cell["parameters"]["n_bath"]]
+        shift += {0.2: 2.0e-5, 0.1: 5.0e-6, 0.05: 0.0}[
+            settings["time_step"]
+        ]
+        shift += {128: 2.0e-5, 256: 5.0e-6, 512: 0.0}[
+            settings["maxdim"]
+        ]
+        artifacts.append(_complete(cell, shift))
+    return plan, artifacts
+
+
+def test_complete_synthetic_grid_cannot_claim_without_n48_solver_capability():
+    plan, artifacts = _staged_analysis_cells()
+    report = convergence.analyze_cells(plan, artifacts)
+
+    assert report["pair_counts"] == {
+        "bath_size": 4,
+        "time_step": 4,
+        "maxdim": 4,
+    }
+    for beta, status in report["bath_resolution"].items():
+        assert status["bath_sizes"] == [12, 24, 48]
+        assert status["nearest_energy_strictly_decreasing"] is True
+        assert status["finest_nearest_energy_over_temperature"] <= 1.1
+        assert status["passed"] is True
+    assert report["convergence_claim"] is False
+    assert any(
+        "N_b=48 solver capability" in blocker
+        for blocker in report["claim_blockers"]
+    )
+    assert "validated N_b=48 solver capability" in report["policy"]
+
+
+def test_nonmonotonic_bath_trend_blocks_convergence_claim():
+    plan, artifacts = _staged_analysis_cells(nonmonotonic_bath=True)
+    report = convergence.analyze_cells(plan, artifacts)
+
+    assert report["axis_status"]["bath_size"]["nonmonotonic"] is True
+    assert report["convergence_claim"] is False
+    assert any("non-monotonic bath" in item for item in report["claim_blockers"])
+
+
+def test_incomplete_analysis_reports_available_calibration_without_claim():
+    plan, artifacts = _staged_analysis_cells()
+    available = [
+        artifact
+        for artifact in artifacts
+        if artifact["parameters"]["n_bath"] in (12, 24)
+    ]
+
+    report = convergence.analyze_available_cells(plan, available)
+
+    assert report["analysis_mode"] == "incomplete_calibration"
+    assert report["convergence_claim"] is False
+    assert report["available_cell_count"] == 12
+    assert len(report["missing_cell_ids"]) == 2
+    assert report["pair_counts"] == {
+        "bath_size": 2,
+        "time_step": 4,
+        "maxdim": 4,
+    }
+    assert report["calibration_telemetry"] == {
+        "observed_cell_count": 12,
+        "total_wall_time_seconds": 15.0,
+        "max_peak_rss_bytes": 123456,
+        "peak_rss_unavailable_count": 0,
+        "peak_rss_methods": ["test"],
+    }
+    assert any("N_b=48" in blocker for blocker in report["claim_blockers"])
+    assert any("three-level bath" in blocker for blocker in report["claim_blockers"])
+    assert any(
+        "incomplete calibration" in blocker
+        for blocker in report["claim_blockers"]
+    )
+
+
+def test_missing_cell_blocker_describes_actual_non_n48_cell():
+    plan, artifacts = _staged_analysis_cells()
+    missing_artifact = next(
+        artifact
+        for artifact in artifacts
+        if artifact["parameters"]["n_bath"] == 12
+    )
+    available = [
+        artifact
+        for artifact in artifacts
+        if artifact["cell_id"] != missing_artifact["cell_id"]
+    ]
+
+    report = convergence.analyze_available_cells(plan, available)
+
+    matching = [
+        blocker
+        for blocker in report["claim_blockers"]
+        if missing_artifact["cell_id"] in blocker
+    ]
+    assert len(matching) == 1
+    assert "N_b=12" in matching[0]
+    assert "missing N_b=48 cells" not in matching[0]
+
+
+def test_cli_allow_incomplete_publishes_calibration_report(tmp_path):
+    plan, artifacts = _staged_analysis_cells()
+    plan_path = convergence.create_plan_run(tmp_path / "runs", plan)
+    run_root = plan_path.parent
+    for artifact in artifacts:
+        if artifact["parameters"]["n_bath"] == 48:
+            continue
+        cell_root = run_root / "cells" / artifact["cell_id"]
+        cell_root.mkdir(parents=True)
+        for filename in ("bath.json", "mps-input.json", "mps-result.json"):
+            payload = f"{artifact['cell_id']}:{filename}\n".encode()
+            (cell_root / filename).write_bytes(payload)
+            artifact["artifact_file_sha256"][filename] = convergence._sha256(
+                payload
+            )
+        artifact["artifact_sha256"] = convergence._sha256(
+            convergence._canonical_json(
+                {
+                    key: value
+                    for key, value in artifact.items()
+                    if key != "artifact_sha256"
+                }
+            )
+        )
+        (cell_root / "cell.json").write_text(
+            json.dumps(artifact), encoding="utf-8"
+        )
+    output = tmp_path / "incomplete.json"
+
+    status = convergence.main(
+        [
+            "analyze",
+            "--plan",
+            str(plan_path),
+            "--run-directory",
+            str(run_root),
+            "--output",
+            str(output),
+            "--allow-incomplete",
+        ]
+    )
+
+    report = json.loads(output.read_text(encoding="utf-8"))
+    assert status == 2
+    assert report["analysis_mode"] == "incomplete_calibration"
+    assert report["convergence_claim"] is False
+
+
+def test_analysis_requires_complete_valid_cells():
+    plan, artifacts = _analysis_cells()
+    artifacts.pop()
+    with pytest.raises(ValueError, match="missing"):
+        convergence.analyze_cells(plan, artifacts)
+
+
+def test_resource_estimates_are_bounded_explicit_and_cluster_directed():
+    plan = _plan()
+    estimate = convergence.estimate_plan_resources(plan)
+
+    assert estimate["cell_count"] == 14
+    assert estimate["model"]["memory_scaling"] == "O(L * W * maxdim^2)"
+    assert estimate["model"]["work_scaling"] == "O(steps * L * W * maxdim^3)"
+    assert estimate["recommendation"] == "cluster_array"
+    assert estimate["max_estimated_peak_rss_bytes"] > 0
+    assert estimate["max_estimated_wall_seconds"] > 600
+    assert min(cell["estimated_wall_seconds"] for cell in estimate["cells"]) >= 30
+    assert min(
+        cell["estimated_peak_rss_bytes"] for cell in estimate["cells"]
+    ) >= 512 * 1024**2
+    assert estimate["local_limits"] == {
+        "wall_seconds": 600,
+        "peak_rss_bytes": 16 * 1024**3,
+    }
+    n48 = [
+        cell
+        for cell in estimate["cells"]
+        if cell["n_bath"] == 48
+    ]
+    assert len(n48) == 2
+    assert all(cell["requires_chain_mapping_optimization"] for cell in n48)
+    assert all(cell["execution_permitted"] is False for cell in n48)
+    assert estimate["direct_star_mpo_assessment"]["n_bath_48_feasible"] is False
+
+
+def _julia_available():
+    configured = os.environ.get("JULIA")
+    return bool(
+        (configured and Path(configured).is_file())
+        or shutil.which("julia")
+    )
+
+
+@pytest.mark.skipif(
+    os.environ.get("SKIP_CHALLENGE81_CONVERGENCE_PILOT") == "1"
+    or not _julia_available(),
+    reason="Julia unavailable or tiny pilot explicitly opted out",
+)
+def test_tiny_real_julia_tdvp_only_pilot(tmp_path):
+    plan = _plan(
+        betas=[0.2],
+        bath_sizes=[1],
+        time_steps=[0.1],
+        maxdims=[32],
+        tau_fractions=[0.0, 0.5, 1.0],
+        stage="pilot",
+    )
+
+    result = convergence.run_cell(
+        plan, 0, tmp_path, julia_project=SOLUTION_DIR / "julia"
+    )
+    cell = result["cell"]
+
+    assert result["action"] == "completed"
+    assert cell["solver_settings"]["krylov_expansion_dim"] == 0
+    assert cell["diagnostics"]["expansion_policy"] == "tdvp_only"
+    assert cell["diagnostics"]["maximum_link_dimensions_by_bond"]
+    assert cell["resources"]["wall_time_seconds"] < 600
+    if platform.system() == "Linux":
+        assert cell["resources"]["peak_rss_bytes"] < 16 * 1024**3
+        assert cell["resources"]["peak_rss_method"] == "linux_proc_status_vmhwm"
+    else:
+        assert cell["resources"]["peak_rss_bytes"] is None
+        assert cell["resources"]["peak_rss_method"] is None
+
+
+def _calibration_checkpoint_identity(cell):
+    request_sha256 = convergence._sha256(
+        convergence._canonical_json(convergence._runner_request_for_cell(cell))
+        + b"\n"
+    )
+    request = convergence._runner_request_for_cell(cell)
+    payload = json.loads(request["payload_json"])
+    return {
+        "request_sha256": request_sha256,
+        "input_payload_sha256": request["sha256"],
+        "bath_sha256": cell["bath_artifact"]["sha256"],
+        "bath_representation": cell["solver_settings"]["bath_representation"],
+        "chain_mapping_sha256": cell["chain_mapping_sha256"],
+        "solver_settings": {
+            "beta": cell["parameters"]["beta"],
+            "tau": [
+                cell["parameters"]["beta"] * fraction
+                for fraction in cell["tau_fractions"]
+            ],
+            **{
+                key: cell["solver_settings"][key]
+                for key in (
+                    "time_step",
+                    "cutoff",
+                    "maxdim",
+                    "krylov_expansion_dim",
+                )
+            },
+        },
+        "source_hashes": payload["checkpoint"]["source_hashes"],
+        "project_toml_sha256": payload["checkpoint"]["project_toml_sha256"],
+        "manifest_toml_sha256": payload["checkpoint"]["manifest_toml_sha256"],
+        "julia_version": "1.11.7",
+        "itensors_version": "0.9.10",
+        "itensormps_version": "0.3.8",
+        "hdf5_version": "0.17.2",
+        "checkpoint_schema": 1,
+        "writer_version": "1.0.0",
+    }
+
+
+def _write_calibration_generation(
+    root,
+    cell,
+    *,
+    completed_steps,
+    beta_endpoint,
+    max_link_dimension,
+    history=None,
+):
+    identity = _calibration_checkpoint_identity(cell)
+    if history is None:
+        history = [
+            {
+                "keys": ["beta_endpoint", "max_link_dimension"],
+                "values": [
+                    beta_endpoint * (step + 1) / completed_steps,
+                    max_link_dimension,
+                ],
+            }
+            for step in range(completed_steps)
+        ]
+    metadata = {
+        "checkpoint_schema": 1,
+        "writer_version": "1.0.0",
+        "identity": identity,
+        "completed_steps": completed_steps,
+        "resume_state": {
+            "completed_steps": completed_steps,
+            "beta_endpoint": beta_endpoint,
+            "log_unnormalized_norm": 0.0,
+            "maximum_link_dimensions_by_bond": [4, max_link_dimension, 8],
+            "step_history": history,
+            "expansion_applied": False,
+        },
+    }
+    metadata_bytes = convergence._checkpoint_canonical_json(metadata) + b"\n"
+    metadata_sha256 = convergence._sha256(metadata_bytes)
+    generation_name = f"checkpoint-{metadata_sha256}"
+    generation = root / "generations" / generation_name
+    generation.mkdir(parents=True)
+    (generation / "metadata.json").write_bytes(metadata_bytes)
+    state = f"state:{completed_steps}:{beta_endpoint}\n".encode()
+    (generation / "state.h5").write_bytes(state)
+    completion = {
+        "checkpoint_schema": 1,
+        "writer_version": "1.0.0",
+        "generation": generation_name,
+        "metadata_sha256": metadata_sha256,
+        "state_sha256": convergence._sha256(state),
+    }
+    completion_bytes = convergence._canonical_json(completion) + b"\n"
+    (generation / "completion.json").write_bytes(completion_bytes)
+    pointer = {
+        **completion,
+        "completed_steps": completed_steps,
+        "completion_sha256": convergence._sha256(completion_bytes),
+    }
+    (root / "current.json").write_bytes(
+        convergence._canonical_json(pointer) + b"\n"
+    )
+    return {
+        "generation": generation_name,
+        "metadata_sha256": metadata_sha256,
+        "state_sha256": completion["state_sha256"],
+        "completion_sha256": pointer["completion_sha256"],
+    }
+
+
+def _calibration_fixture(tmp_path, plan, *, mixed_cells=False):
+    samples = []
+    specs = [
+        (4, 10.0, 64, 2_000_000_000),
+        (8, 9.2, 128, 2_500_000_000),
+        (16, 9.0, 256, 3_000_000_000),
+    ]
+    benchmark_cell = plan["cells"][-1]
+    cells = plan["cells"] if mixed_cells else [benchmark_cell] * 3
+    for index, ((cpus, elapsed, link, rss), cell) in enumerate(
+        zip(specs, cells, strict=True)
+    ):
+        root = tmp_path / f"checkpoint-{cpus}"
+        (root / "generations").mkdir(parents=True)
+        start_history = [
+            {
+                "keys": ["beta_endpoint", "max_link_dimension"],
+                "values": [0.01 * (step + 1), 16],
+            }
+            for step in range(10)
+        ]
+        start = _write_calibration_generation(
+            root,
+            cell,
+            completed_steps=10,
+            beta_endpoint=0.1,
+            max_link_dimension=16,
+            history=start_history,
+        )
+        end_history = [
+            *start_history,
+            {
+                "keys": ["beta_endpoint", "max_link_dimension"],
+                "values": [0.2, link],
+            },
+            {
+                "keys": ["beta_endpoint", "max_link_dimension"],
+                "values": [0.3, link],
+            },
+        ]
+        end = _write_calibration_generation(
+            root,
+            cell,
+            completed_steps=12,
+            beta_endpoint=0.3,
+            max_link_dimension=link,
+            history=end_history,
+        )
+        identity = _calibration_checkpoint_identity(cell)
+        accounting = {
+            "schema_version": 1,
+            "artifact_type": "slurm_accounting_export",
+            "job_id": str(1000 + index),
+            "plan_sha256": plan["plan_sha256"],
+            "cell_id": cell["cell_id"],
+            "input_sha256": cell["input_sha256"],
+            "start_generation": start["generation"],
+            "end_generation": end["generation"],
+            "elapsed_seconds": elapsed,
+            "allocated_cpus": cpus,
+            "allocated_memory_bytes": 8 * 1024**3,
+            "max_rss_bytes": rss,
+            "checkpoint_write_seconds": 2.0 + index,
+            "checkpoint_read_seconds": 1.0 + index / 2,
+            "runtime": {
+                key: copy.deepcopy(identity[key])
+                for key in (
+                    "source_hashes",
+                    "project_toml_sha256",
+                    "manifest_toml_sha256",
+                    "julia_version",
+                    "itensors_version",
+                    "itensormps_version",
+                    "hdf5_version",
+                )
+            },
+            "julia_threads": cpus,
+            "blas_threads": 1,
+        }
+        accounting_path = tmp_path / f"sacct-{cpus}.json"
+        accounting_path.write_bytes(
+            convergence._canonical_json(accounting) + b"\n"
+        )
+        samples.append(
+            {
+                "cell_id": cell["cell_id"],
+                "input_sha256": cell["input_sha256"],
+                "checkpoint_root": str(root.resolve()),
+                "start_generation": start,
+                "end_generation": end,
+                "slurm_accounting_export": {
+                    "path": str(accounting_path.resolve()),
+                    "sha256": convergence._sha256_file(accounting_path),
+                },
+            }
+        )
+    return {
+        "schema_version": 1,
+        "artifact_type": "calibration_telemetry",
+        "plan_sha256": plan["plan_sha256"],
+        "samples": samples,
+    }
+
+
+def _calibration_plan():
+    return _plan(
+        betas=[0.2],
+        bath_sizes=[1],
+        time_steps=[0.1],
+        maxdims=[64, 128, 256],
+        stage="production",
+    )
+
+
+def test_calibration_derives_segment_deltas_and_sparse_conservative_resources(
+    tmp_path,
+):
+    plan = _calibration_plan()
+    resources = convergence.estimate_plan_resources(plan)
+    telemetry = _calibration_fixture(tmp_path, plan)
+
+    calibration, calibrated = convergence.calibrate_plan_resources(
+        plan, resources, telemetry
+    )
+
+    assert calibration["artifact_type"] == "runtime_calibration"
+    assert calibration["calibration_sha256"] == convergence.calibration_sha256(
+        calibration
+    )
+    assert [sample["allocation"]["cpus"] for sample in calibration["samples"]] == [
+        4, 8, 16
+    ]
+    assert calibration["samples"][0]["segment_counters"] == {
+        "start_completed_beta": 0.1,
+        "end_completed_beta": 0.3,
+        "completed_beta_delta": pytest.approx(0.2),
+        "start_completed_steps": 10,
+        "end_completed_steps": 12,
+        "completed_steps_delta": 2,
+    }
+    assert calibration["samples"][0]["rates"] == {
+        "completed_beta_per_second": pytest.approx(0.2 / 10.0),
+        "steps_per_second": pytest.approx(2.0 / 10.0),
+        "seconds_per_step": pytest.approx(10.0 / 2.0),
+    }
+    assert set(calibration["link_dimension_groups"]) == {"64", "128", "256"}
+    assert calibration["checkpoint_overhead"]["max_size_bytes"] > 0
+    assert calibration["checkpoint_overhead"]["max_write_seconds"] == 4.0
+    assert calibration["checkpoint_overhead"]["max_read_seconds"] == 2.0
+    assert calibration["observed_resources"]["max_peak_rss_bytes"] == 3_000_000_000
+    assert calibration["observed_resources"]["actual_julia_threads"] == [4, 8, 16]
+    assert calibration["observed_resources"]["actual_blas_threads"] == [1]
+    assert calibration["selected_allocation"]["cpus"] == 4
+    assert calibration["selection_policy"]["throughput_fraction_of_best"] == 0.9
+    assert calibration["uncertainty"]["basis"] == "three_class_observed_envelope"
+    assert calibration["uncertainty"]["upper_normalized_seconds_per_work_unit"] >= (
+        calibration["uncertainty"]["central_normalized_seconds_per_work_unit"]
+    )
+
+    assert calibrated["artifact_type"] == "calibrated_resources"
+    assert calibrated["plan_sha256"] == plan["plan_sha256"]
+    assert calibrated["base_resource_sha256"] == resources["resource_sha256"]
+    assert calibrated["calibration_sha256"] == calibration["calibration_sha256"]
+    assert calibrated["resource_sha256"] == convergence.resource_sha256(calibrated)
+    assert calibrated["allocation"]["cpus"] == 4
+    assert calibrated["cells"][0]["recommended_wall_seconds"] >= (
+        calibrated["cells"][0]["predicted_wall_seconds"]
+    )
+    assert calibrated["cells"][2]["target_link_dimension"] == 256
+    assert calibrated["cells"][2]["work_units"] >= calibrated["cells"][0]["work_units"]
+    assert calibrated["cells"][2]["recommended_wall_seconds"] > (
+        calibrated["cells"][0]["recommended_wall_seconds"]
+    )
+    assert calibrated["uncertainty"]["basis"] == "three_class_observed_envelope"
+
+
+def test_calibration_rejects_missing_classes_duplicate_jobs_and_mixed_runtime(tmp_path):
+    plan = _calibration_plan()
+    resources = convergence.estimate_plan_resources(plan)
+    telemetry = _calibration_fixture(tmp_path, plan)
+    missing = copy.deepcopy(telemetry)
+    missing["samples"].pop()
+    with pytest.raises(ValueError, match="schema"):
+        convergence.calibrate_plan_resources(plan, resources, missing)
+
+    wrong_classes = _calibration_fixture(tmp_path / "classes", plan)
+    class_export = Path(
+        wrong_classes["samples"][2]["slurm_accounting_export"]["path"]
+    )
+    class_accounting = json.loads(class_export.read_text(encoding="utf-8"))
+    class_accounting["allocated_cpus"] = 8
+    class_accounting["julia_threads"] = 8
+    class_export.write_bytes(
+        convergence._canonical_json(class_accounting) + b"\n"
+    )
+    wrong_classes["samples"][2]["slurm_accounting_export"]["sha256"] = (
+        convergence._sha256_file(class_export)
+    )
+    with pytest.raises(ValueError, match="4.*8.*16|class"):
+        convergence.calibrate_plan_resources(plan, resources, wrong_classes)
+
+    duplicate = copy.deepcopy(telemetry)
+    second_export = Path(
+        duplicate["samples"][1]["slurm_accounting_export"]["path"]
+    )
+    second = json.loads(second_export.read_text(encoding="utf-8"))
+    second["job_id"] = "1000"
+    second_export.write_bytes(convergence._canonical_json(second) + b"\n")
+    duplicate["samples"][1]["slurm_accounting_export"]["sha256"] = (
+        convergence._sha256_file(second_export)
+    )
+    with pytest.raises(ValueError, match="duplicate.*job"):
+        convergence.calibrate_plan_resources(plan, resources, duplicate)
+
+    telemetry = _calibration_fixture(tmp_path / "mixed", plan)
+    export_path = Path(telemetry["samples"][2]["slurm_accounting_export"]["path"])
+    export = json.loads(export_path.read_text(encoding="utf-8"))
+    export["runtime"]["manifest_toml_sha256"] = "f" * 64
+    export_path.write_bytes(convergence._canonical_json(export) + b"\n")
+    telemetry["samples"][2]["slurm_accounting_export"]["sha256"] = (
+        convergence._sha256_file(export_path)
+    )
+    with pytest.raises(ValueError, match="runtime|Manifest|identity"):
+        convergence.calibrate_plan_resources(plan, resources, telemetry)
+
+    mixed_cells = _calibration_fixture(
+        tmp_path / "mixed-cells", plan, mixed_cells=True
+    )
+    with pytest.raises(ValueError, match="mixed.*cell|benchmark identity"):
+        convergence.calibrate_plan_resources(plan, resources, mixed_cells)
+
+
+def test_calibration_rejects_tampered_or_nonregular_raw_artifacts(tmp_path):
+    plan = _calibration_plan()
+    resources = convergence.estimate_plan_resources(plan)
+    telemetry = _calibration_fixture(tmp_path, plan)
+    state = (
+        Path(telemetry["samples"][0]["checkpoint_root"])
+        / "generations"
+        / telemetry["samples"][0]["end_generation"]["generation"]
+        / "state.h5"
+    )
+    state.write_bytes(b"tampered")
+    with pytest.raises(ValueError, match="checkpoint|hash"):
+        convergence.calibrate_plan_resources(plan, resources, telemetry)
+
+    telemetry = _calibration_fixture(tmp_path / "symlink", plan)
+    export_reference = telemetry["samples"][0]["slurm_accounting_export"]
+    export_path = Path(export_reference["path"])
+    target = export_path.with_suffix(".target")
+    export_path.rename(target)
+    export_path.symlink_to(target)
+    with pytest.raises(ValueError, match="regular|symlink"):
+        convergence.calibrate_plan_resources(plan, resources, telemetry)
+
+
+def test_calibration_telemetry_and_accounting_schemas_are_recursively_closed(
+    tmp_path,
+):
+    plan = _calibration_plan()
+    telemetry = _calibration_fixture(tmp_path, plan)
+    malformed_telemetry = copy.deepcopy(telemetry)
+    malformed_telemetry["samples"][0]["start_generation"]["unknown"] = True
+    with pytest.raises(ValueError, match="schema"):
+        convergence.validate_artifact_schema(
+            malformed_telemetry, "calibrationTelemetry"
+        )
+
+    export_path = Path(
+        telemetry["samples"][0]["slurm_accounting_export"]["path"]
+    )
+    accounting = json.loads(export_path.read_text(encoding="utf-8"))
+    accounting["runtime"]["unknown"] = True
+    with pytest.raises(ValueError, match="schema"):
+        convergence.validate_artifact_schema(
+            accounting, "slurmAccountingExport"
+        )
+
+
+def test_calibration_validators_replay_all_derivations(tmp_path):
+    plan = _calibration_plan()
+    resources = convergence.estimate_plan_resources(plan)
+    telemetry = _calibration_fixture(tmp_path, plan)
+    calibration, calibrated = convergence.calibrate_plan_resources(
+        plan, resources, telemetry
+    )
+
+    forged_calibration = copy.deepcopy(calibration)
+    forged_calibration["samples"][0]["rates"]["steps_per_second"] += 1
+    forged_calibration["calibration_sha256"] = convergence.calibration_sha256(
+        forged_calibration
+    )
+    with pytest.raises(ValueError, match="derived|replay|semantics"):
+        convergence.validate_calibration(forged_calibration, plan)
+
+    forged_resources = copy.deepcopy(calibrated)
+    forged_resources["cells"][0]["recommended_wall_seconds"] += 1
+    forged_resources["resource_sha256"] = convergence.resource_sha256(
+        forged_resources
+    )
+    with pytest.raises(ValueError, match="derived|replay|semantics"):
+        convergence.validate_resources(forged_resources, plan)
+
+
+def test_calibration_publication_is_immutable_and_preserves_original_bundle(tmp_path):
+    plan = _calibration_plan()
+    plan_path = convergence.create_plan_run(tmp_path, plan)
+    run = plan_path.parent
+    telemetry = _calibration_fixture(tmp_path / "raw", plan)
+    resources_before = (run / "resources.json").read_bytes()
+    completion_before = (run / "completion.json").read_bytes()
+    pointer_before = (tmp_path / "current.json").read_bytes()
+
+    result = convergence.publish_calibrated_resources(
+        run, telemetry=telemetry
+    )
+
+    assert result == {
+        "calibration": run / "calibration.json",
+        "resources": run / "resources-calibrated.json",
+    }
+    calibration = json.loads(result["calibration"].read_text(encoding="utf-8"))
+    calibrated = json.loads(result["resources"].read_text(encoding="utf-8"))
+    convergence.validate_calibration(calibration, plan)
+    convergence.validate_resources(calibrated, plan)
+    assert (run / "resources.json").read_bytes() == resources_before
+    assert (run / "completion.json").read_bytes() == completion_before
+    assert (tmp_path / "current.json").read_bytes() == pointer_before
+    assert (
+        convergence.publish_calibrated_resources(
+            run, telemetry=telemetry
+        )
+        == result
+    )
+    changed = copy.deepcopy(telemetry)
+    changed["samples"].reverse()
+    with pytest.raises(ValueError, match="immutable|different"):
+        convergence.publish_calibrated_resources(run, telemetry=changed)
+
+
+def test_production_accepts_only_explicit_calibrated_resource_acknowledgment(tmp_path):
+    plan = _calibration_plan()
+    base = convergence.estimate_plan_resources(plan)
+    telemetry = _calibration_fixture(tmp_path / "raw", plan)
+    _calibration, calibrated = convergence.calibrate_plan_resources(
+        plan, base, telemetry
+    )
+
+    with pytest.raises(ValueError, match="acknowledgment"):
+        convergence.run_cell(
+            plan,
+            0,
+            tmp_path,
+            executor=lambda cell, _stage: _solver_result(cell),
+            julia_project=SOLUTION_DIR / "julia",
+            resources=calibrated,
+            resource_acknowledgment=base["resource_sha256"],
+        )
+    result = convergence.run_cell(
+        plan,
+        0,
+        tmp_path,
+        executor=lambda cell, _stage: _solver_result(cell),
+        julia_project=SOLUTION_DIR / "julia",
+        resources=calibrated,
+        resource_acknowledgment=calibrated["resource_sha256"],
+    )
+    assert result["action"] == "completed"
+
+
+def test_calibrate_cli_publishes_fixed_artifacts_without_advancing_pointer(
+    tmp_path, capsys
+):
+    plan = _calibration_plan()
+    plan_path = convergence.create_plan_run(tmp_path, plan)
+    run = plan_path.parent
+    telemetry = _calibration_fixture(tmp_path / "raw", plan)
+    telemetry_path = tmp_path / "telemetry.json"
+    telemetry_path.write_bytes(
+        convergence._canonical_json(telemetry) + b"\n"
+    )
+    pointer_before = (tmp_path / "current.json").read_bytes()
+
+    status = convergence.main(
+        [
+            "calibrate",
+            "--plan",
+            str(plan_path),
+            "--run-directory",
+            str(run),
+            "--telemetry",
+            str(telemetry_path),
+        ]
+    )
+
+    assert status == 0
+    assert (run / "calibration.json").is_file()
+    assert (run / "resources-calibrated.json").is_file()
+    assert (tmp_path / "current.json").read_bytes() == pointer_before
+    output = capsys.readouterr().out
+    assert "calibration_sha256=" in output
+    assert "resource_sha256=" in output

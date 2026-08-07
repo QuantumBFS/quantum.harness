@@ -1,0 +1,269 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://quantum-harness.invalid/challenge-81/cthyb-production-input.schema.json",
+  "title": "Challenge 81 canonical CT-HYB production input",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["payload", "sha256"],
+  "properties": {
+    "sha256": {"$ref": "#/$defs/sha256"},
+    "payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "artifact_type",
+        "schema_version",
+        "model",
+        "conventions",
+        "hybridization",
+        "meshes",
+        "chains",
+        "monte_carlo",
+        "gates",
+        "runtime",
+        "calibration",
+        "provenance_inputs"
+      ],
+      "properties": {
+        "artifact_type": {"const": "cthyb_production_input"},
+        "schema_version": {"const": 2},
+        "model": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["model_id", "D", "U", "Gamma", "epsilon_d", "mu", "beta"],
+          "properties": {
+            "model_id": {"const": "challenge-81-spinful-anderson-semicircular"},
+            "D": {"const": 1.0},
+            "U": {"const": 0.8},
+            "Gamma": {"const": 0.1},
+            "epsilon_d": {"const": -0.4},
+            "mu": {"const": 0.0},
+            "beta": {"const": 16.0}
+          }
+        },
+        "conventions": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "green_function",
+            "hybridization_spectrum",
+            "matsubara_transform",
+            "noninteracting_inverse"
+          ],
+          "properties": {
+            "green_function": {
+              "const": "G_sigma(tau) = -Tr[exp(-(beta-tau)K) d_sigma exp(-tau K) d_sigma^dag] / Z"
+            },
+            "hybridization_spectrum": {"const": "Gamma(omega) = -Im Delta^R(omega)"},
+            "matsubara_transform": {
+              "const": "Delta(z) = integral_-D^D d epsilon Gamma(epsilon) / (pi * (z-epsilon))"
+            },
+            "noninteracting_inverse": {
+              "const": "G0_sigma^-1(z) = z + mu - epsilon_d - Delta(z)"
+            }
+          }
+        },
+        "hybridization": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "formula",
+            "dtype",
+            "n_iw",
+            "matsubara_omega",
+            "delta_iw",
+            "common_real_frequency"
+          ],
+          "properties": {
+            "kind": {"const": "analytic_semicircle"},
+            "formula": {
+              "const": "Delta(iw) = i*(Gamma/D)*(w-sign(w)*sqrt(w*w+D*D))"
+            },
+            "dtype": {"const": "complex128"},
+            "n_iw": {"const": 2049},
+            "matsubara_omega": {
+              "type": "array",
+              "minItems": 4098,
+              "maxItems": 4098,
+              "items": {"type": "number"}
+            },
+            "delta_iw": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["real", "imag", "sha256"],
+              "properties": {
+                "real": {
+                  "type": "array",
+                  "minItems": 4098,
+                  "maxItems": 4098,
+                  "items": {"type": "number"}
+                },
+                "imag": {
+                  "type": "array",
+                  "minItems": 4098,
+                  "maxItems": 4098,
+                  "items": {"type": "number"}
+                },
+                "sha256": {"$ref": "#/$defs/sha256"}
+              }
+            },
+            "common_real_frequency": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["omega", "Gamma", "sha256"],
+              "properties": {
+                "omega": {
+                  "type": "array",
+                  "prefixItems": [{"const": -1.0}, {"const": 0.0}, {"const": 1.0}],
+                  "items": false
+                },
+                "Gamma": {
+                  "type": "array",
+                  "prefixItems": [{"const": 0.0}, {"const": 0.1}, {"const": 0.0}],
+                  "items": false
+                },
+                "sha256": {
+                  "const": "d424a7438f1b7da8938256f2cae9812a2b52c737d34f6026453ca4aa15f55b0f"
+                }
+              }
+            }
+          }
+        },
+        "meshes": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["n_tau", "reported_tau"],
+          "properties": {
+            "n_tau": {"const": 12297},
+            "reported_tau": {
+              "type": "array",
+              "prefixItems": [
+                {"const": 0.0},
+                {"const": 4.0},
+                {"const": 8.0},
+                {"const": 12.0},
+                {"const": 16.0}
+              ],
+              "items": false
+            }
+          }
+        },
+        "chains": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["count", "random_generator", "master_seed", "seeds"],
+          "properties": {
+            "count": {"const": 4},
+            "random_generator": {"const": "mt19937"},
+            "master_seed": {"const": 810000},
+            "seeds": {
+              "type": "array",
+              "uniqueItems": true,
+              "prefixItems": [
+                {"const": 810001},
+                {"const": 810002},
+                {"const": 810003},
+                {"const": 810004}
+              ],
+              "items": false
+            }
+          }
+        },
+        "monte_carlo": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "warmup_cycles",
+            "measurement_cycles",
+            "cycle_length",
+            "measure_G_tau",
+            "measure_density_matrix",
+            "use_norm_as_weight",
+            "measure_pert_order"
+          ],
+          "properties": {
+            "warmup_cycles": {"const": 50000},
+            "measurement_cycles": {"const": 1000000},
+            "cycle_length": {"const": 50},
+            "measure_G_tau": {"const": true},
+            "measure_density_matrix": {"const": true},
+            "use_norm_as_weight": {"const": true},
+            "measure_pert_order": {"const": true}
+          }
+        },
+        "gates": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "minimum_average_sign",
+            "require_autocorrelation_converged",
+            "maximum_integrated_autocorrelation_cycles",
+            "minimum_effective_samples_per_chain",
+            "minimum_effective_samples_total",
+            "maximum_spin_asymmetry",
+            "maximum_half_filling_error",
+            "minimum_completed_chains"
+          ],
+          "properties": {
+            "minimum_average_sign": {"const": 0.99},
+            "require_autocorrelation_converged": {"const": true},
+            "maximum_integrated_autocorrelation_cycles": {"const": 5.0},
+            "minimum_effective_samples_per_chain": {"const": 100000},
+            "minimum_effective_samples_total": {"const": 400000},
+            "maximum_spin_asymmetry": {"const": 0.005},
+            "maximum_half_filling_error": {"const": 0.005},
+            "minimum_completed_chains": {"const": 4}
+          }
+        },
+        "runtime": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["mpi_ranks_per_chain", "threads_per_rank"],
+          "properties": {
+            "mpi_ranks_per_chain": {"const": 1},
+            "threads_per_rank": {"const": 1}
+          }
+        },
+        "calibration": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["artifact_sha256"],
+          "properties": {"artifact_sha256": {"$ref": "#/$defs/sha256"}}
+        },
+        "provenance_inputs": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "source_manifest",
+            "source_manifest_sha256",
+            "conda_lock_sha256",
+            "environment_yml_sha256",
+            "model_json_sha256"
+          ],
+          "properties": {
+            "source_manifest": {
+              "type": "object",
+              "minProperties": 33,
+              "maxProperties": 33,
+              "patternProperties": {
+                "^[A-Za-z0-9_./-]+$": {"$ref": "#/$defs/sha256"}
+              },
+              "additionalProperties": false
+            },
+            "source_manifest_sha256": {"$ref": "#/$defs/sha256"},
+            "conda_lock_sha256": {"$ref": "#/$defs/sha256"},
+            "environment_yml_sha256": {"$ref": "#/$defs/sha256"},
+            "model_json_sha256": {"$ref": "#/$defs/sha256"}
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^(?!0000000000000000000000000000000000000000000000000000000000000000$)[0-9a-f]{64}$"
+    }
+  }
+}

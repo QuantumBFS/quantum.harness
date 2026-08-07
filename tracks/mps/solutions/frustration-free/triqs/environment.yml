@@ -1,0 +1,10 @@
+name: challenge81-triqs
+channels:
+  - conda-forge
+dependencies:
+  - python=3.12
+  - triqs=4.0.0
+  - triqs_cthyb=4.0.0
+  - pytest
+  - jsonschema
+  - mpmath

@@ -1,0 +1,1075 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://quantum-harness.invalid/challenge-81/convergence.schema.json",
+  "title": "Challenge 81 convergence artifacts",
+  "oneOf": [
+    {"$ref": "#/$defs/convergencePlan"},
+    {"$ref": "#/$defs/completedCell"},
+    {"$ref": "#/$defs/convergenceAnalysis"},
+    {"$ref": "#/$defs/resourceEstimate"},
+    {"$ref": "#/$defs/calibrationTelemetry"},
+    {"$ref": "#/$defs/slurmAccountingExport"},
+    {"$ref": "#/$defs/runtimeCalibration"},
+    {"$ref": "#/$defs/calibratedResources"}
+  ],
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "generator": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "version"],
+      "properties": {
+        "name": {"const": "convergence.py"},
+        "version": {"type": "string", "minLength": 1}
+      }
+    },
+    "numberArray": {"type": "array", "items": {"type": "number"}},
+    "dimensionArray": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "integer", "minimum": 1}
+    },
+    "hashMap": {
+      "type": "object",
+      "patternProperties": {".+": {"$ref": "#/$defs/sha256"}},
+      "additionalProperties": false
+    },
+    "environmentHashes": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["Project.toml", "Manifest.toml"],
+      "properties": {
+        "Project.toml": {"$ref": "#/$defs/sha256"},
+        "Manifest.toml": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "artifactFileHashes": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["bath.json", "mps-input.json", "mps-result.json"],
+          "properties": {
+            "bath.json": {"$ref": "#/$defs/sha256"},
+            "mps-input.json": {"$ref": "#/$defs/sha256"},
+            "mps-result.json": {"$ref": "#/$defs/sha256"}
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["bath.json", "chain-mapping.json", "mps-input.json", "mps-result.json"],
+          "properties": {
+            "bath.json": {"$ref": "#/$defs/sha256"},
+            "chain-mapping.json": {"$ref": "#/$defs/sha256"},
+            "mps-input.json": {"$ref": "#/$defs/sha256"},
+            "mps-result.json": {"$ref": "#/$defs/sha256"}
+          }
+        }
+      ]
+    },
+    "checkpointPointer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "checkpoint_schema", "writer_version", "generation", "completed_steps",
+        "metadata_sha256", "state_sha256", "completion_sha256"
+      ],
+      "properties": {
+        "checkpoint_schema": {"const": 1},
+        "writer_version": {"const": "1.0.0"},
+        "generation": {"type": "string", "pattern": "^checkpoint-[0-9a-f]{64}$"},
+        "completed_steps": {"type": "integer", "minimum": 0},
+        "metadata_sha256": {"$ref": "#/$defs/sha256"},
+        "state_sha256": {"$ref": "#/$defs/sha256"},
+        "completion_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "checkpointCompletion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "checkpoint_schema", "writer_version", "generation",
+        "metadata_sha256", "state_sha256"
+      ],
+      "properties": {
+        "checkpoint_schema": {"const": 1},
+        "writer_version": {"const": "1.0.0"},
+        "generation": {"type": "string", "pattern": "^checkpoint-[0-9a-f]{64}$"},
+        "metadata_sha256": {"$ref": "#/$defs/sha256"},
+        "state_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "checkpointMetadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "checkpoint_schema", "writer_version", "identity",
+        "completed_steps", "resume_state"
+      ],
+      "properties": {
+        "checkpoint_schema": {"const": 1},
+        "writer_version": {"const": "1.0.0"},
+        "identity": {"type": "object"},
+        "completed_steps": {"type": "integer", "minimum": 0},
+        "resume_state": {"type": "object"}
+      }
+    },
+    "checkpointRetirement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version", "status", "cell_id", "input_sha256",
+        "completed_cell_artifact_sha256", "retired_pointer_file",
+        "retired_pointer_sha256", "retirement_sha256"
+      ],
+      "properties": {
+        "schema_version": {"const": 1},
+        "status": {"const": "retired"},
+        "cell_id": {"type": "string", "pattern": "^c[0-9]{4}-[0-9a-f]{12}$"},
+        "input_sha256": {"$ref": "#/$defs/sha256"},
+        "completed_cell_artifact_sha256": {"$ref": "#/$defs/sha256"},
+        "retired_pointer_file": {
+          "type": "string",
+          "pattern": "^current-[0-9a-f]{64}\\.json$"
+        },
+        "retired_pointer_sha256": {"$ref": "#/$defs/sha256"},
+        "retirement_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "namedLimit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "absolute"],
+      "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "absolute": {"type": "number", "minimum": 0}
+      }
+    },
+    "solverSettings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["time_step", "cutoff", "maxdim", "krylov_expansion_dim", "bath_representation", "chain_mapping_sha256"],
+      "properties": {
+        "time_step": {"type": "number", "exclusiveMinimum": 0},
+        "cutoff": {"type": "number", "minimum": 0},
+        "maxdim": {"type": "integer", "minimum": 1},
+        "krylov_expansion_dim": {"const": 0},
+        "bath_representation": {"enum": ["direct_star", "chain"]},
+        "chain_mapping_sha256": {"oneOf": [{"$ref": "#/$defs/sha256"}, {"type": "null"}]}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"bath_representation": {"const": "direct_star"}}},
+          "then": {"properties": {"chain_mapping_sha256": {"type": "null"}}},
+          "else": {"properties": {"chain_mapping_sha256": {"$ref": "#/$defs/sha256"}}}
+        }
+      ]
+    },
+    "diagnosticLimits": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["krylov_error", "truncation"],
+      "properties": {
+        "krylov_error": {"$ref": "#/$defs/namedLimit"},
+        "truncation": {"$ref": "#/$defs/namedLimit"}
+      }
+    },
+    "solverCapability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["bath_representations", "default_bath_representation", "finite_chain_mapping_validated", "finite_chain_max_validated_n_bath", "qn_purification_validated", "n_bath_48_execution_validated", "capability_evidence_sha256"],
+      "properties": {
+        "bath_representations": {
+          "type": "array",
+          "prefixItems": [{"const": "direct_star"}, {"const": "finite_chain"}],
+          "items": false
+        },
+        "default_bath_representation": {"const": "direct_star"},
+        "finite_chain_mapping_validated": {"const": true},
+        "finite_chain_max_validated_n_bath": {"const": 6},
+        "qn_purification_validated": {"const": false},
+        "n_bath_48_execution_validated": {"const": false},
+        "capability_evidence_sha256": {"type": "null"}
+      }
+    },
+    "bathArtifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["payload", "sha256"],
+      "properties": {
+        "sha256": {"$ref": "#/$defs/sha256"},
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "schema_version", "parameters", "conventions", "provenance",
+            "epsilon", "V", "frequency_grid", "target_continuum_hybridization",
+            "broadening", "broadened_finite_bath_hybridization"
+          ],
+          "properties": {
+            "schema_version": {"const": 2},
+            "parameters": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["gamma", "bandwidth", "n_bath"],
+              "properties": {
+                "gamma": {"type": "number", "minimum": 0},
+                "bandwidth": {"type": "number", "exclusiveMinimum": 0},
+                "n_bath": {"type": "integer", "minimum": 1}
+              }
+            },
+            "conventions": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["hybridization", "quadrature", "target_continuum", "ordering", "epsilon", "V_squared"],
+              "properties": {
+                "hybridization": {"type": "string"},
+                "quadrature": {"type": "string"},
+                "target_continuum": {"type": "string"},
+                "ordering": {"type": "string"},
+                "epsilon": {"type": "string"},
+                "V_squared": {"type": "string"}
+              }
+            },
+            "provenance": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["module", "module_version", "python_version", "numpy_version", "schema_version"],
+              "properties": {
+                "module": {"const": "bath"},
+                "module_version": {"type": "string"},
+                "python_version": {"type": "string"},
+                "numpy_version": {"type": "string"},
+                "schema_version": {"const": 2}
+              }
+            },
+            "epsilon": {"$ref": "#/$defs/numberArray"},
+            "V": {"$ref": "#/$defs/numberArray"},
+            "frequency_grid": {"$ref": "#/$defs/numberArray"},
+            "target_continuum_hybridization": {"$ref": "#/$defs/numberArray"},
+            "broadened_finite_bath_hybridization": {"$ref": "#/$defs/numberArray"},
+            "broadening": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["kernel", "width", "width_rule", "interpretation"],
+              "properties": {
+                "kernel": {"type": "string"},
+                "width": {"type": "number", "exclusiveMinimum": 0},
+                "width_rule": {"type": "string"},
+                "interpretation": {"type": "string"}
+              }
+            }
+          }
+        }
+      }
+    },
+    "chainMappingArtifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["payload", "sha256"],
+      "properties": {
+        "sha256": {"$ref": "#/$defs/sha256"},
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "schema_version", "source_bath_sha256", "source_bath_schema_version",
+            "n_bath", "representation", "lambda", "Q", "chain_onsite",
+            "chain_hopping", "deflation_boundaries", "conventions", "numerics",
+            "provenance"
+          ],
+          "properties": {
+            "schema_version": {"const": 1},
+            "source_bath_sha256": {"$ref": "#/$defs/sha256"},
+            "source_bath_schema_version": {"const": 2},
+            "n_bath": {"type": "integer", "minimum": 1},
+            "representation": {"const": "finite_chain"},
+            "lambda": {"type": "number", "minimum": 0},
+            "Q": {
+              "type": "array",
+              "minItems": 1,
+              "items": {"$ref": "#/$defs/numberArray"}
+            },
+            "chain_onsite": {"$ref": "#/$defs/numberArray"},
+            "chain_hopping": {
+              "type": "array",
+              "items": {"type": "number", "minimum": 0}
+            },
+            "deflation_boundaries": {
+              "type": "array",
+              "items": {"type": "integer", "minimum": 0},
+              "uniqueItems": true
+            },
+            "conventions": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "star_matrix", "coupling_gauge", "initial_vector",
+                "spin_transform", "chemical_potential", "hopping_gauge",
+                "breakdown", "decoupled"
+              ],
+              "properties": {
+                "star_matrix": {"type": "string"},
+                "coupling_gauge": {"type": "string"},
+                "initial_vector": {"type": "string"},
+                "spin_transform": {"type": "string"},
+                "chemical_potential": {"type": "string"},
+                "hopping_gauge": {"type": "string"},
+                "breakdown": {"type": "string"},
+                "decoupled": {"type": "string"}
+              }
+            },
+            "numerics": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "algorithm", "breakdown_tolerance", "breakdown_tolerance_rule",
+                "orthogonality_max_error", "off_tridiagonal_max_abs",
+                "coupling_max_error"
+              ],
+              "properties": {
+                "algorithm": {"type": "string"},
+                "breakdown_tolerance": {"type": "number", "minimum": 0},
+                "breakdown_tolerance_rule": {"type": "string"},
+                "orthogonality_max_error": {"type": "number", "minimum": 0},
+                "off_tridiagonal_max_abs": {"type": "number", "minimum": 0},
+                "coupling_max_error": {"type": "number", "minimum": 0}
+              }
+            },
+            "provenance": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "module", "module_version", "python_version", "numpy_version",
+                "schema_version"
+              ],
+              "properties": {
+                "module": {"const": "chain_mapping"},
+                "module_version": {"type": "string", "minLength": 1},
+                "python_version": {"type": "string", "minLength": 1},
+                "numpy_version": {"type": "string", "minLength": 1},
+                "schema_version": {"const": 1}
+              }
+            }
+          }
+        }
+      }
+    },
+    "cellProvenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_sha256", "julia_environment_sha256", "julia_project"],
+      "properties": {
+        "source_sha256": {"$ref": "#/$defs/hashMap"},
+        "julia_environment_sha256": {"$ref": "#/$defs/environmentHashes"},
+        "julia_project": {"type": "string", "minLength": 1}
+      }
+    },
+    "bathResolution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["nearest_absolute_energy", "temperature", "nearest_energy_over_temperature"],
+      "properties": {
+        "nearest_absolute_energy": {"type": "number", "minimum": 0},
+        "temperature": {"type": "number", "exclusiveMinimum": 0},
+        "nearest_energy_over_temperature": {"type": "number", "minimum": 0}
+      }
+    },
+    "cellSpec": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "cell_id", "input_sha256", "parameters", "tau_fractions",
+        "solver_settings", "diagnostic_limits", "solver_capability", "bath_artifact",
+        "bath_artifact_sha256", "chain_mapping_artifact", "chain_mapping_sha256",
+        "bath_resolution", "execution_class", "provenance"
+      ],
+      "properties": {
+        "cell_id": {"type": "string", "pattern": "^c[0-9]{4}-[0-9a-f]{12}$"},
+        "input_sha256": {"$ref": "#/$defs/sha256"},
+        "parameters": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["beta", "n_bath"],
+          "properties": {
+            "beta": {"type": "number", "exclusiveMinimum": 0},
+            "n_bath": {"type": "integer", "minimum": 1}
+          }
+        },
+        "tau_fractions": {
+          "type": "array", "minItems": 1, "uniqueItems": true,
+          "items": {"type": "number", "minimum": 0, "maximum": 1}
+        },
+        "solver_settings": {"$ref": "#/$defs/solverSettings"},
+        "diagnostic_limits": {"$ref": "#/$defs/diagnosticLimits"},
+        "solver_capability": {"$ref": "#/$defs/solverCapability"},
+        "bath_artifact": {"$ref": "#/$defs/bathArtifact"},
+        "bath_artifact_sha256": {"$ref": "#/$defs/sha256"},
+        "chain_mapping_artifact": {
+          "oneOf": [
+            {"$ref": "#/$defs/chainMappingArtifact"},
+            {"type": "null"}
+          ]
+        },
+        "chain_mapping_sha256": {
+          "oneOf": [{"$ref": "#/$defs/sha256"}, {"type": "null"}]
+        },
+        "bath_resolution": {"$ref": "#/$defs/bathResolution"},
+        "execution_class": {"enum": ["direct_star_calibration", "requires_chain_mapping_optimization"]},
+        "provenance": {"$ref": "#/$defs/cellProvenance"}
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "solver_settings": {
+                "properties": {"bath_representation": {"const": "direct_star"}}
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "chain_mapping_artifact": {"type": "null"},
+              "chain_mapping_sha256": {"type": "null"}
+            }
+          },
+          "else": {
+            "properties": {
+              "chain_mapping_artifact": {"$ref": "#/$defs/chainMappingArtifact"},
+              "chain_mapping_sha256": {"$ref": "#/$defs/sha256"}
+            }
+          }
+        }
+      ]
+    },
+    "model": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["D", "U", "Gamma", "epsilon_d", "mu"],
+      "properties": {
+        "D": {"const": 1.0}, "U": {"const": 0.8}, "Gamma": {"const": 0.1},
+        "epsilon_d": {"const": -0.4}, "mu": {"const": 0.0}
+      }
+    },
+    "convergencePlan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "artifact_type", "generator", "software_version", "run_id",
+        "schema_version", "stage", "model", "grid", "tolerances",
+        "execution_environment", "bath_resolution_policy", "solver_feasibility", "solver_capability",
+        "claim_policy", "cells", "plan_sha256"
+      ],
+      "properties": {
+        "artifact_type": {"const": "convergence_plan"},
+        "generator": {"$ref": "#/$defs/generator"},
+        "software_version": {"type": "string", "minLength": 1},
+        "run_id": {"type": "string", "pattern": "^run-[0-9a-f]{16}$"},
+        "schema_version": {"const": 1},
+        "stage": {"enum": ["pilot", "production"]},
+        "model": {"$ref": "#/$defs/model"},
+        "grid": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["betas", "bath_sizes", "time_steps", "cutoffs", "maxdims", "tau_fractions", "kind"],
+          "properties": {
+            "betas": {"$ref": "#/$defs/numberArray"},
+            "bath_sizes": {"type": "array", "items": {"type": "integer", "minimum": 1}},
+            "time_steps": {"$ref": "#/$defs/numberArray"},
+            "cutoffs": {"$ref": "#/$defs/numberArray"},
+            "maxdims": {"type": "array", "items": {"type": "integer", "minimum": 1}},
+            "tau_fractions": {"$ref": "#/$defs/numberArray"},
+            "kind": {"enum": ["controlled_staged", "explicit_cartesian"]}
+          }
+        },
+        "tolerances": {
+          "type": "object", "additionalProperties": false,
+          "required": ["bath_size", "time_step", "maxdim", "krylov_error", "truncation"],
+          "properties": {
+            "bath_size": {"$ref": "#/$defs/namedLimit"},
+            "time_step": {"$ref": "#/$defs/namedLimit"},
+            "maxdim": {"$ref": "#/$defs/namedLimit"},
+            "krylov_error": {"$ref": "#/$defs/namedLimit"},
+            "truncation": {"$ref": "#/$defs/namedLimit"}
+          }
+        },
+        "execution_environment": {
+          "type": "object", "additionalProperties": false,
+          "required": ["repository_relative_paths", "julia_environment_sha256", "source_sha256"],
+          "properties": {
+            "repository_relative_paths": {
+              "type": "object", "additionalProperties": false,
+              "required": ["solution", "julia_project"],
+              "properties": {
+                "solution": {"type": "string", "minLength": 1},
+                "julia_project": {"type": "string", "minLength": 1}
+              }
+            },
+            "julia_environment_sha256": {"$ref": "#/$defs/environmentHashes"},
+            "source_sha256": {"$ref": "#/$defs/hashMap"}
+          }
+        },
+        "bath_resolution_policy": {
+          "type": "object", "additionalProperties": false,
+          "required": ["name", "bath_sizes", "finest_ratio_limit", "requires_strictly_decreasing_nearest_energy", "requires_three_level_controlled_trend"],
+          "properties": {
+            "name": {"type": "string"},
+            "bath_sizes": {"type": "array", "prefixItems": [{"const": 12}, {"const": 24}, {"const": 48}], "items": false},
+            "finest_ratio_limit": {"type": "number", "exclusiveMinimum": 0},
+            "requires_strictly_decreasing_nearest_energy": {"const": true},
+            "requires_three_level_controlled_trend": {"const": true}
+          }
+        },
+        "solver_feasibility": {
+          "type": "object", "additionalProperties": false,
+          "required": ["direct_star_mpo", "n_bath_48"],
+          "properties": {
+            "direct_star_mpo": {"type": "string"},
+            "n_bath_48": {
+              "type": "object", "additionalProperties": false,
+              "required": ["local_execution_allowed", "cluster_calibration_required", "chain_mapping_required", "status"],
+              "properties": {
+                "local_execution_allowed": {"const": false},
+                "cluster_calibration_required": {"const": true},
+                "chain_mapping_required": {"const": true},
+                "status": {"type": "string"}
+              }
+            }
+          }
+        },
+        "solver_capability": {"$ref": "#/$defs/solverCapability"},
+        "claim_policy": {
+          "type": "object", "additionalProperties": false,
+          "required": ["production_eligible", "requires_all_axes", "nonmonotonic_timestep_blocks_claim", "nonmonotonic_controlled_trend_blocks_claim", "diagnostics_must_pass", "single_setting_never_sufficient"],
+          "properties": {
+            "production_eligible": {"type": "boolean"},
+            "requires_all_axes": {"type": "array", "items": {"type": "string"}},
+            "nonmonotonic_timestep_blocks_claim": {"const": true},
+            "nonmonotonic_controlled_trend_blocks_claim": {"const": true},
+            "diagnostics_must_pass": {"const": true},
+            "single_setting_never_sufficient": {"const": true}
+          }
+        },
+        "cells": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/cellSpec"}},
+        "plan_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "diagnosticBase": {
+      "type": "object",
+      "required": ["max_link_dimension", "maximum_link_dimensions_by_bond", "truncation_max_error", "krylov_all_converged", "krylov_max_error_estimate", "krylov_num_operations", "krylov_num_iterations", "krylov_local_updates"],
+      "properties": {
+        "max_link_dimension": {"type": "integer", "minimum": 1},
+        "maximum_link_dimensions_by_bond": {"$ref": "#/$defs/dimensionArray"},
+        "truncation_max_error": {"type": "number", "minimum": 0},
+        "krylov_all_converged": {"type": "boolean"},
+        "krylov_max_error_estimate": {"type": "number", "minimum": 0},
+        "krylov_num_operations": {"type": "integer", "minimum": 0},
+        "krylov_num_iterations": {"type": "integer", "minimum": 0},
+        "krylov_local_updates": {"type": "integer", "minimum": 0}
+      }
+    },
+    "thermalDiagnostics": {
+      "allOf": [
+        {"$ref": "#/$defs/diagnosticBase"},
+        {
+          "type": "object", "additionalProperties": false,
+          "required": ["steps", "max_link_dimension", "maximum_link_dimensions_by_bond", "truncation_max_error", "krylov_all_converged", "krylov_max_error_estimate", "krylov_num_operations", "krylov_num_iterations", "krylov_local_updates"],
+          "properties": {
+            "steps": {"type": "integer", "minimum": 1},
+            "max_link_dimension": true, "maximum_link_dimensions_by_bond": true,
+            "truncation_max_error": true, "krylov_all_converged": true,
+            "krylov_max_error_estimate": true, "krylov_num_operations": true,
+            "krylov_num_iterations": true, "krylov_local_updates": true
+          }
+        }
+      ]
+    },
+    "branchDiagnostics": {
+      "allOf": [
+        {"$ref": "#/$defs/diagnosticBase"},
+        {
+          "type": "object", "additionalProperties": false,
+          "required": ["tau", "spin", "insertion", "branch_status", "max_link_dimension", "maximum_link_dimensions_by_bond", "truncation_max_error", "krylov_all_converged", "krylov_max_error_estimate", "krylov_num_operations", "krylov_num_iterations", "krylov_local_updates"],
+          "properties": {
+            "tau": {"type": "number"}, "spin": {"type": "string"},
+            "insertion": {"type": "string"}, "branch_status": {"type": "string"},
+            "max_link_dimension": true, "maximum_link_dimensions_by_bond": true,
+            "truncation_max_error": true, "krylov_all_converged": true,
+            "krylov_max_error_estimate": true, "krylov_num_operations": true,
+            "krylov_num_iterations": true, "krylov_local_updates": true
+          }
+        }
+      ]
+    },
+    "diagnosticGate": {
+      "type": "object", "additionalProperties": false,
+      "required": ["passed", "krylov_error_limit", "truncation_limit", "maxdim_saturation_forbidden", "required_green_branches"],
+      "properties": {
+        "passed": {"const": true},
+        "krylov_error_limit": {"$ref": "#/$defs/namedLimit"},
+        "truncation_limit": {"$ref": "#/$defs/namedLimit"},
+        "maxdim_saturation_forbidden": {"const": true},
+        "required_green_branches": {"type": "integer", "minimum": 2}
+      }
+    },
+    "solverProvenance": {
+      "type": "object", "additionalProperties": false,
+      "required": ["runner", "runner_version", "julia_version", "itensors_version", "itensormps_version", "active_project_path", "manifest_path", "project_toml_sha256", "manifest_toml_sha256", "runner_source_sha256", "checkpoint_source_sha256", "purification_source_sha256", "observables_source_sha256", "model_definition_sha256", "chain_mapping_source_sha256", "bath_artifact_file_sha256", "bath_representation", "chain_mapping_sha256", "krylov_expansion_dim", "expansion_policy"],
+      "properties": {
+        "runner": {"type": "string"}, "runner_version": {"type": "string"},
+        "julia_version": {"type": "string"}, "itensors_version": {"type": "string"},
+        "itensormps_version": {"type": "string"}, "active_project_path": {"type": "string"},
+        "manifest_path": {"type": "string"}, "project_toml_sha256": {"$ref": "#/$defs/sha256"},
+        "manifest_toml_sha256": {"$ref": "#/$defs/sha256"}, "runner_source_sha256": {"$ref": "#/$defs/sha256"},
+        "checkpoint_source_sha256": {"$ref": "#/$defs/sha256"},
+        "purification_source_sha256": {"$ref": "#/$defs/sha256"}, "observables_source_sha256": {"$ref": "#/$defs/sha256"},
+        "model_definition_sha256": {"$ref": "#/$defs/sha256"},
+        "chain_mapping_source_sha256": {"$ref": "#/$defs/sha256"},
+        "bath_artifact_file_sha256": {"$ref": "#/$defs/sha256"}, "krylov_expansion_dim": {"const": 0},
+        "bath_representation": {"enum": ["direct_star", "chain"]},
+        "chain_mapping_sha256": {"oneOf": [{"$ref": "#/$defs/sha256"}, {"type": "null"}]},
+        "expansion_policy": {"const": "tdvp_only"}
+      }
+    },
+    "completedCell": {
+      "type": "object", "additionalProperties": false,
+      "required": ["artifact_type", "generator", "software_version", "schema_version", "status", "cell_id", "input_sha256", "parameters", "tau_fractions", "tau", "solver_settings", "diagnostic_limits", "observables", "diagnostics", "resources", "bath_artifact_sha256", "chain_mapping_sha256", "artifact_file_sha256", "provenance", "artifact_sha256"],
+      "properties": {
+        "artifact_type": {"const": "completed_cell"},
+        "generator": {"$ref": "#/$defs/generator"},
+        "software_version": {"type": "string", "minLength": 1},
+        "schema_version": {"const": 1}, "status": {"const": "completed"},
+        "cell_id": {"type": "string"}, "input_sha256": {"$ref": "#/$defs/sha256"},
+        "parameters": {"type": "object", "additionalProperties": false, "required": ["beta", "n_bath"], "properties": {"beta": {"type": "number"}, "n_bath": {"type": "integer"}}},
+        "tau_fractions": {"type": "array", "minItems": 1, "items": {"type": "number", "minimum": 0, "maximum": 1}},
+        "tau": {"type": "array", "minItems": 1, "items": {"type": "number", "minimum": 0}},
+        "solver_settings": {"$ref": "#/$defs/solverSettings"}, "diagnostic_limits": {"$ref": "#/$defs/diagnosticLimits"},
+        "observables": {
+          "type": "object", "additionalProperties": false,
+          "required": ["n_d", "double_occupancy", "G_up", "G_down"],
+          "properties": {
+            "n_d": {"type": "number", "minimum": 0, "maximum": 2},
+            "double_occupancy": {"type": "number", "minimum": 0, "maximum": 1},
+            "G_up": {"type": "array", "minItems": 1, "items": {"type": "number", "minimum": -1, "maximum": 0}},
+            "G_down": {"type": "array", "minItems": 1, "items": {"type": "number", "minimum": -1, "maximum": 0}}
+          }
+        },
+        "diagnostics": {
+          "type": "object", "additionalProperties": false,
+          "required": ["maximum_link_dimensions_by_bond", "thermal_max_link_dimension", "thermal", "green_up", "green_down", "krylov_expansion_dim", "expansion_policy", "gate"],
+          "properties": {
+            "maximum_link_dimensions_by_bond": {"$ref": "#/$defs/dimensionArray"},
+            "thermal_max_link_dimension": {"type": "integer", "minimum": 1},
+            "thermal": {"$ref": "#/$defs/thermalDiagnostics"},
+            "green_up": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/branchDiagnostics"}},
+            "green_down": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/branchDiagnostics"}},
+            "krylov_expansion_dim": {"const": 0}, "expansion_policy": {"const": "tdvp_only"},
+            "gate": {"$ref": "#/$defs/diagnosticGate"}
+          }
+        },
+        "resources": {
+          "type": "object", "additionalProperties": false,
+          "required": ["wall_time_seconds", "peak_rss_bytes", "peak_rss_method", "solver_peak_rss_bytes", "phase_timings_seconds", "thread_settings", "julia_version", "actual_mpo_link_dimensions"],
+          "properties": {
+            "wall_time_seconds": {"type": "number", "exclusiveMinimum": 0},
+            "peak_rss_bytes": {"type": ["integer", "null"], "minimum": 0},
+            "peak_rss_method": {"type": ["string", "null"]},
+            "solver_peak_rss_bytes": {"type": ["integer", "null"], "minimum": 1},
+            "phase_timings_seconds": {
+              "type": "object", "additionalProperties": false,
+              "required": ["request_validation", "context_and_evolution", "result_serialization"],
+              "properties": {
+                "request_validation": {"type": "number", "minimum": 0},
+                "context_and_evolution": {"type": "number", "minimum": 0},
+                "result_serialization": {"type": "number", "minimum": 0}
+              }
+            },
+            "thread_settings": {
+              "type": "object", "additionalProperties": false,
+              "required": ["julia_threads", "blas_threads", "blas_vendor"],
+              "properties": {
+                "julia_threads": {"type": "integer", "minimum": 1},
+                "blas_threads": {"type": "integer", "minimum": 1},
+                "blas_vendor": {"type": "string", "minLength": 1}
+              }
+            },
+            "julia_version": {"type": "string", "minLength": 1},
+            "actual_mpo_link_dimensions": {"$ref": "#/$defs/dimensionArray"}
+          }
+        },
+        "bath_artifact_sha256": {"$ref": "#/$defs/sha256"},
+        "chain_mapping_sha256": {"oneOf": [{"$ref": "#/$defs/sha256"}, {"type": "null"}]},
+        "artifact_file_sha256": {"$ref": "#/$defs/artifactFileHashes"},
+        "provenance": {
+          "type": "object", "additionalProperties": false,
+          "required": ["source_sha256", "julia_environment_sha256", "julia_project", "solver", "orchestrator", "orchestrator_version", "python_version"],
+          "properties": {
+            "source_sha256": {"$ref": "#/$defs/hashMap"}, "julia_environment_sha256": {"$ref": "#/$defs/environmentHashes"},
+            "julia_project": {"type": "string"}, "solver": {"$ref": "#/$defs/solverProvenance"},
+            "orchestrator": {"const": "convergence.py"}, "orchestrator_version": {"type": "string"}, "python_version": {"type": "string"}
+          }
+        },
+        "artifact_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "pair": {
+      "type": "object", "additionalProperties": false,
+      "required": ["left_cell_id", "right_cell_id", "left_value", "right_value", "fixed", "controlled", "max_observable_delta", "observable_differences"],
+      "properties": {
+        "left_cell_id": {"type": "string"}, "right_cell_id": {"type": "string"},
+        "left_value": {"type": "number"}, "right_value": {"type": "number"},
+        "fixed": {"type": "object", "patternProperties": {".+": {"type": "number"}}, "additionalProperties": false},
+        "controlled": {"const": true}, "max_observable_delta": {"type": "number", "minimum": 0},
+        "observable_differences": {"$ref": "#/$defs/numberArray"}
+      }
+    },
+    "axisStatus": {
+      "type": "object", "additionalProperties": false,
+      "required": ["tolerance_name", "tolerance_absolute", "max_observable_delta", "pair_count", "nonmonotonic", "passed"],
+      "properties": {
+        "tolerance_name": {"type": "string"}, "tolerance_absolute": {"type": "number"},
+        "max_observable_delta": {"type": ["number", "null"]}, "pair_count": {"type": "integer"},
+        "nonmonotonic": {"type": "boolean"}, "passed": {"type": "boolean"}
+      }
+    },
+    "bathResolutionStatus": {
+      "type": "object", "additionalProperties": false,
+      "required": ["bath_sizes", "nearest_absolute_energy", "temperature", "nearest_energy_over_temperature", "nearest_energy_strictly_decreasing", "finest_nearest_energy_over_temperature", "finest_ratio_limit", "passed"],
+      "properties": {
+        "bath_sizes": {"type": "array", "items": {"type": "integer"}}, "nearest_absolute_energy": {"$ref": "#/$defs/numberArray"},
+        "temperature": {"type": "number"}, "nearest_energy_over_temperature": {"$ref": "#/$defs/numberArray"},
+        "nearest_energy_strictly_decreasing": {"type": "boolean"}, "finest_nearest_energy_over_temperature": {"type": ["number", "null"]},
+        "finest_ratio_limit": {"type": "number"}, "passed": {"type": "boolean"}
+      }
+    },
+    "convergenceAnalysis": {
+      "type": "object", "additionalProperties": false,
+      "required": ["schema_version", "analysis_mode", "plan_sha256", "cell_count", "available_cell_count", "missing_cell_ids", "pair_counts", "pairs", "axis_status", "bath_resolution", "convergence_claim", "claim_blockers", "calibration_telemetry", "policy", "analysis_sha256"],
+      "properties": {
+        "schema_version": {"const": 1}, "analysis_mode": {"enum": ["complete", "incomplete_calibration"]}, "plan_sha256": {"$ref": "#/$defs/sha256"}, "cell_count": {"type": "integer"}, "available_cell_count": {"type": "integer"}, "missing_cell_ids": {"type": "array", "items": {"type": "string"}},
+        "pair_counts": {"type": "object", "additionalProperties": false, "required": ["bath_size", "time_step", "maxdim"], "properties": {"bath_size": {"type": "integer"}, "time_step": {"type": "integer"}, "maxdim": {"type": "integer"}}},
+        "pairs": {"type": "object", "additionalProperties": false, "required": ["bath_size", "time_step", "maxdim"], "properties": {"bath_size": {"type": "array", "items": {"$ref": "#/$defs/pair"}}, "time_step": {"type": "array", "items": {"$ref": "#/$defs/pair"}}, "maxdim": {"type": "array", "items": {"$ref": "#/$defs/pair"}}}},
+        "axis_status": {"type": "object", "additionalProperties": false, "required": ["bath_size", "time_step", "maxdim"], "properties": {"bath_size": {"$ref": "#/$defs/axisStatus"}, "time_step": {"$ref": "#/$defs/axisStatus"}, "maxdim": {"$ref": "#/$defs/axisStatus"}}},
+        "bath_resolution": {"type": "object", "patternProperties": {"^[0-9]+(\\.[0-9]+)?$": {"$ref": "#/$defs/bathResolutionStatus"}}, "additionalProperties": false},
+        "convergence_claim": {"type": "boolean"}, "claim_blockers": {"type": "array", "items": {"type": "string"}},
+        "calibration_telemetry": {
+          "type": "object", "additionalProperties": false,
+          "required": ["observed_cell_count", "total_wall_time_seconds", "max_peak_rss_bytes", "peak_rss_unavailable_count", "peak_rss_methods"],
+          "properties": {
+            "observed_cell_count": {"type": "integer", "minimum": 1},
+            "total_wall_time_seconds": {"type": "number", "minimum": 0},
+            "max_peak_rss_bytes": {"type": ["integer", "null"], "minimum": 0},
+            "peak_rss_unavailable_count": {"type": "integer", "minimum": 0},
+            "peak_rss_methods": {"type": "array", "items": {"type": "string"}, "uniqueItems": true}
+          }
+        },
+        "policy": {"type": "string"}, "analysis_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "checkpointGenerationReference": {
+      "type": "object", "additionalProperties": false,
+      "required": ["generation", "metadata_sha256", "state_sha256", "completion_sha256"],
+      "properties": {
+        "generation": {"type": "string", "pattern": "^checkpoint-[0-9a-f]{64}$"},
+        "metadata_sha256": {"$ref": "#/$defs/sha256"},
+        "state_sha256": {"$ref": "#/$defs/sha256"},
+        "completion_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "fileReference": {
+      "type": "object", "additionalProperties": false,
+      "required": ["path", "sha256"],
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "calibrationTelemetrySample": {
+      "type": "object", "additionalProperties": false,
+      "required": ["cell_id", "input_sha256", "checkpoint_root", "start_generation", "end_generation", "slurm_accounting_export"],
+      "properties": {
+        "cell_id": {"type": "string", "minLength": 1},
+        "input_sha256": {"$ref": "#/$defs/sha256"},
+        "checkpoint_root": {"type": "string", "minLength": 1},
+        "start_generation": {"$ref": "#/$defs/checkpointGenerationReference"},
+        "end_generation": {"$ref": "#/$defs/checkpointGenerationReference"},
+        "slurm_accounting_export": {"$ref": "#/$defs/fileReference"}
+      }
+    },
+    "calibrationTelemetry": {
+      "type": "object", "additionalProperties": false,
+      "required": ["schema_version", "artifact_type", "plan_sha256", "samples"],
+      "properties": {
+        "schema_version": {"const": 1},
+        "artifact_type": {"const": "calibration_telemetry"},
+        "plan_sha256": {"$ref": "#/$defs/sha256"},
+        "samples": {
+          "type": "array", "minItems": 3, "maxItems": 3,
+          "items": {"$ref": "#/$defs/calibrationTelemetrySample"}
+        }
+      }
+    },
+    "slurmRuntimeIdentity": {
+      "type": "object", "additionalProperties": false,
+      "required": ["source_hashes", "project_toml_sha256", "manifest_toml_sha256", "julia_version", "itensors_version", "itensormps_version", "hdf5_version"],
+      "properties": {
+        "source_hashes": {"$ref": "#/$defs/hashMap"},
+        "project_toml_sha256": {"$ref": "#/$defs/sha256"},
+        "manifest_toml_sha256": {"$ref": "#/$defs/sha256"},
+        "julia_version": {"type": "string", "minLength": 1},
+        "itensors_version": {"type": "string", "minLength": 1},
+        "itensormps_version": {"type": "string", "minLength": 1},
+        "hdf5_version": {"type": "string", "minLength": 1}
+      }
+    },
+    "slurmAccountingExport": {
+      "type": "object", "additionalProperties": false,
+      "required": ["schema_version", "artifact_type", "job_id", "plan_sha256", "cell_id", "input_sha256", "start_generation", "end_generation", "elapsed_seconds", "allocated_cpus", "allocated_memory_bytes", "max_rss_bytes", "checkpoint_write_seconds", "checkpoint_read_seconds", "runtime", "julia_threads", "blas_threads"],
+      "properties": {
+        "schema_version": {"const": 1},
+        "artifact_type": {"const": "slurm_accounting_export"},
+        "job_id": {"type": "string", "minLength": 1},
+        "plan_sha256": {"$ref": "#/$defs/sha256"},
+        "cell_id": {"type": "string", "minLength": 1},
+        "input_sha256": {"$ref": "#/$defs/sha256"},
+        "start_generation": {"type": "string", "pattern": "^checkpoint-[0-9a-f]{64}$"},
+        "end_generation": {"type": "string", "pattern": "^checkpoint-[0-9a-f]{64}$"},
+        "elapsed_seconds": {"type": "number", "exclusiveMinimum": 0},
+        "allocated_cpus": {"enum": [4, 8, 16]},
+        "allocated_memory_bytes": {"type": "integer", "minimum": 1},
+        "max_rss_bytes": {"type": "integer", "minimum": 1},
+        "checkpoint_write_seconds": {"type": "number", "minimum": 0},
+        "checkpoint_read_seconds": {"type": "number", "minimum": 0},
+        "runtime": {"$ref": "#/$defs/slurmRuntimeIdentity"},
+        "julia_threads": {"enum": [4, 8, 16]},
+        "blas_threads": {"type": "integer", "minimum": 1}
+      }
+    },
+    "calibrationRates": {
+      "type": "object", "additionalProperties": false,
+      "required": ["completed_beta_per_second", "steps_per_second", "seconds_per_step"],
+      "properties": {
+        "completed_beta_per_second": {"type": "number", "exclusiveMinimum": 0},
+        "steps_per_second": {"type": "number", "exclusiveMinimum": 0},
+        "seconds_per_step": {"type": "number", "exclusiveMinimum": 0}
+      }
+    },
+    "calibrationSample": {
+      "type": "object", "additionalProperties": false,
+      "required": ["job_id", "cell_id", "input_sha256", "start_generation", "end_generation", "segment_counters", "max_link_dimension", "allocation", "rates", "normalized_seconds_per_work_unit", "checkpoint_overhead", "actual_runtime"],
+      "properties": {
+        "job_id": {"type": "string", "minLength": 1},
+        "cell_id": {"type": "string", "minLength": 1},
+        "input_sha256": {"$ref": "#/$defs/sha256"},
+        "start_generation": {"$ref": "#/$defs/checkpointGenerationReference"},
+        "end_generation": {"$ref": "#/$defs/checkpointGenerationReference"},
+        "segment_counters": {
+          "type": "object", "additionalProperties": false,
+          "required": ["start_completed_beta", "end_completed_beta", "completed_beta_delta", "start_completed_steps", "end_completed_steps", "completed_steps_delta"],
+          "properties": {
+            "start_completed_beta": {"type": "number", "minimum": 0},
+            "end_completed_beta": {"type": "number", "exclusiveMinimum": 0},
+            "completed_beta_delta": {"type": "number", "exclusiveMinimum": 0},
+            "start_completed_steps": {"type": "integer", "minimum": 0},
+            "end_completed_steps": {"type": "integer", "minimum": 1},
+            "completed_steps_delta": {"type": "integer", "minimum": 1}
+          }
+        },
+        "max_link_dimension": {"type": "integer", "minimum": 1},
+        "allocation": {
+          "type": "object", "additionalProperties": false,
+          "required": ["cpus", "memory_bytes"],
+          "properties": {
+            "cpus": {"enum": [4, 8, 16]},
+            "memory_bytes": {"type": "integer", "minimum": 1}
+          }
+        },
+        "rates": {"$ref": "#/$defs/calibrationRates"},
+        "normalized_seconds_per_work_unit": {"type": "number", "exclusiveMinimum": 0},
+        "checkpoint_overhead": {
+          "type": "object", "additionalProperties": false,
+          "required": ["write_seconds", "read_seconds", "size_bytes"],
+          "properties": {
+            "write_seconds": {"type": "number", "minimum": 0},
+            "read_seconds": {"type": "number", "minimum": 0},
+            "size_bytes": {"type": "integer", "minimum": 1}
+          }
+        },
+        "actual_runtime": {
+          "type": "object", "additionalProperties": false,
+          "required": ["julia_threads", "blas_threads", "peak_rss_bytes"],
+          "properties": {
+            "julia_threads": {"enum": [4, 8, 16]},
+            "blas_threads": {"type": "integer", "minimum": 1},
+            "peak_rss_bytes": {"type": "integer", "minimum": 1}
+          }
+        }
+      }
+    },
+    "calibrationUncertainty": {
+      "type": "object", "additionalProperties": false,
+      "required": ["basis", "sample_count", "lower_normalized_seconds_per_work_unit", "central_normalized_seconds_per_work_unit", "upper_normalized_seconds_per_work_unit", "relative_envelope_width", "sparse_sample_safety_factor", "formula"],
+      "properties": {
+        "basis": {"const": "three_class_observed_envelope"},
+        "sample_count": {"const": 3},
+        "lower_normalized_seconds_per_work_unit": {"type": "number", "exclusiveMinimum": 0},
+        "central_normalized_seconds_per_work_unit": {"type": "number", "exclusiveMinimum": 0},
+        "upper_normalized_seconds_per_work_unit": {"type": "number", "exclusiveMinimum": 0},
+        "relative_envelope_width": {"type": "number", "minimum": 0},
+        "sparse_sample_safety_factor": {"const": 1.25},
+        "formula": {"type": "string", "minLength": 1}
+      }
+    },
+    "observedCalibrationResources": {
+      "type": "object", "additionalProperties": false,
+      "required": ["max_peak_rss_bytes", "actual_julia_threads", "actual_blas_threads"],
+      "properties": {
+        "max_peak_rss_bytes": {"type": "integer", "minimum": 1},
+        "actual_julia_threads": {"type": "array", "minItems": 3, "maxItems": 3, "uniqueItems": true, "items": {"enum": [4, 8, 16]}},
+        "actual_blas_threads": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "integer", "minimum": 1}}
+      }
+    },
+    "runtimeCalibration": {
+      "type": "object", "additionalProperties": false,
+      "required": ["schema_version", "artifact_type", "generator", "software_version", "plan_sha256", "base_resource_sha256", "telemetry", "identity", "samples", "link_dimension_groups", "checkpoint_overhead", "observed_resources", "selected_allocation", "selection_policy", "uncertainty", "calibration_sha256"],
+      "properties": {
+        "schema_version": {"const": 2},
+        "artifact_type": {"const": "runtime_calibration"},
+        "generator": {"$ref": "#/$defs/generator"},
+        "software_version": {"type": "string", "minLength": 1},
+        "plan_sha256": {"$ref": "#/$defs/sha256"},
+        "base_resource_sha256": {"$ref": "#/$defs/sha256"},
+        "telemetry": {"$ref": "#/$defs/calibrationTelemetry"},
+        "identity": {
+          "type": "object", "additionalProperties": false,
+          "required": ["runtime_identity_sha256", "telemetry_sha256"],
+          "properties": {
+            "runtime_identity_sha256": {"$ref": "#/$defs/sha256"},
+            "telemetry_sha256": {"$ref": "#/$defs/sha256"}
+          }
+        },
+        "samples": {"type": "array", "minItems": 3, "maxItems": 3, "items": {"$ref": "#/$defs/calibrationSample"}},
+        "link_dimension_groups": {
+          "type": "object", "additionalProperties": false,
+          "patternProperties": {
+            "^[1-9][0-9]*$": {
+              "type": "object", "additionalProperties": false,
+              "required": ["sample_count", "mean_seconds_per_step", "min_seconds_per_step", "max_seconds_per_step", "max_normalized_seconds_per_work_unit"],
+              "properties": {
+                "sample_count": {"type": "integer", "minimum": 1},
+                "mean_seconds_per_step": {"type": "number", "exclusiveMinimum": 0},
+                "min_seconds_per_step": {"type": "number", "exclusiveMinimum": 0},
+                "max_seconds_per_step": {"type": "number", "exclusiveMinimum": 0},
+                "max_normalized_seconds_per_work_unit": {"type": "number", "exclusiveMinimum": 0}
+              }
+            }
+          }
+        },
+        "checkpoint_overhead": {
+          "type": "object", "additionalProperties": false,
+          "required": ["mean_write_seconds", "max_write_seconds", "mean_read_seconds", "max_read_seconds", "max_size_bytes"],
+          "properties": {
+            "mean_write_seconds": {"type": "number", "minimum": 0},
+            "max_write_seconds": {"type": "number", "minimum": 0},
+            "mean_read_seconds": {"type": "number", "minimum": 0},
+            "max_read_seconds": {"type": "number", "minimum": 0},
+            "max_size_bytes": {"type": "integer", "minimum": 1}
+          }
+        },
+        "observed_resources": {"$ref": "#/$defs/observedCalibrationResources"},
+        "selected_allocation": {
+          "type": "object", "additionalProperties": false,
+          "required": ["cpus", "memory_bytes", "sample_count", "mean_steps_per_second"],
+          "properties": {
+            "cpus": {"enum": [4, 8, 16]},
+            "memory_bytes": {"type": "integer", "minimum": 1},
+            "sample_count": {"const": 1},
+            "mean_steps_per_second": {"type": "number", "exclusiveMinimum": 0}
+          }
+        },
+        "selection_policy": {
+          "type": "object", "additionalProperties": false,
+          "required": ["rule", "throughput_fraction_of_best", "best_mean_steps_per_second"],
+          "properties": {
+            "rule": {"const": "smallest_cpu_then_memory_allocation_within_fraction_of_best"},
+            "throughput_fraction_of_best": {"const": 0.9},
+            "best_mean_steps_per_second": {"type": "number", "exclusiveMinimum": 0}
+          }
+        },
+        "uncertainty": {"$ref": "#/$defs/calibrationUncertainty"},
+        "calibration_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "calibratedResourceCell": {
+      "type": "object", "additionalProperties": false,
+      "required": ["cell_id", "work_units", "target_link_dimension", "predicted_wall_seconds", "wall_uncertainty_seconds", "recommended_wall_seconds", "recommended_memory_bytes"],
+      "properties": {
+        "cell_id": {"type": "string"},
+        "work_units": {"type": "integer", "minimum": 1},
+        "target_link_dimension": {"type": "integer", "minimum": 1},
+        "predicted_wall_seconds": {"type": "number", "exclusiveMinimum": 0},
+        "wall_uncertainty_seconds": {"type": "number", "minimum": 0},
+        "recommended_wall_seconds": {"type": "integer", "minimum": 1},
+        "recommended_memory_bytes": {"type": "integer", "minimum": 1}
+      }
+    },
+    "calibratedResources": {
+      "type": "object", "additionalProperties": false,
+      "required": ["schema_version", "artifact_type", "generator", "software_version", "plan_sha256", "base_resource_sha256", "calibration_sha256", "telemetry", "allocation", "observed_resources", "uncertainty", "cells", "resource_sha256"],
+      "properties": {
+        "schema_version": {"const": 2},
+        "artifact_type": {"const": "calibrated_resources"},
+        "generator": {"$ref": "#/$defs/generator"},
+        "software_version": {"type": "string", "minLength": 1},
+        "plan_sha256": {"$ref": "#/$defs/sha256"},
+        "base_resource_sha256": {"$ref": "#/$defs/sha256"},
+        "calibration_sha256": {"$ref": "#/$defs/sha256"},
+        "telemetry": {"$ref": "#/$defs/calibrationTelemetry"},
+        "allocation": {
+          "type": "object", "additionalProperties": false,
+          "required": ["cpus", "memory_bytes", "actual_julia_threads", "actual_blas_threads"],
+          "properties": {
+            "cpus": {"enum": [4, 8, 16]},
+            "memory_bytes": {"type": "integer", "minimum": 1},
+            "actual_julia_threads": {"type": "array", "minItems": 1, "maxItems": 1, "items": {"enum": [4, 8, 16]}},
+            "actual_blas_threads": {"type": "array", "minItems": 1, "maxItems": 1, "items": {"type": "integer", "minimum": 1}}
+          }
+        },
+        "observed_resources": {"$ref": "#/$defs/observedCalibrationResources"},
+        "uncertainty": {"$ref": "#/$defs/calibrationUncertainty"},
+        "cells": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/calibratedResourceCell"}},
+        "resource_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "resourceCell": {
+      "type": "object", "additionalProperties": false,
+      "required": ["cell_id", "n_bath", "estimated_peak_rss_bytes", "estimated_wall_seconds", "raw_peak_rss_bytes", "raw_wall_seconds", "steps", "branch_equivalents", "direct_star_mpo_width_estimate", "requires_chain_mapping_optimization", "execution_permitted"],
+      "properties": {
+        "cell_id": {"type": "string"}, "n_bath": {"type": "integer"},
+        "estimated_peak_rss_bytes": {"type": "integer"}, "estimated_wall_seconds": {"type": "number"},
+        "raw_peak_rss_bytes": {"type": "integer"}, "raw_wall_seconds": {"type": "number"},
+        "steps": {"type": "integer"}, "branch_equivalents": {"type": "integer"},
+        "direct_star_mpo_width_estimate": {"type": "integer"}, "requires_chain_mapping_optimization": {"type": "boolean"}, "execution_permitted": {"type": "boolean"}
+      }
+    },
+    "resourceEstimate": {
+      "type": "object", "additionalProperties": false,
+      "required": ["schema_version", "artifact_type", "generator", "software_version", "plan_sha256", "cell_count", "model", "safety_factors", "local_limits", "max_estimated_peak_rss_bytes", "max_estimated_wall_seconds", "recommendation", "calibrated_recommendation", "direct_star_mpo_assessment", "cells", "resource_sha256"],
+      "properties": {
+        "schema_version": {"const": 1}, "artifact_type": {"const": "resource_estimate"},
+        "generator": {"$ref": "#/$defs/generator"},
+        "software_version": {"type": "string", "minLength": 1},
+        "plan_sha256": {"$ref": "#/$defs/sha256"}, "cell_count": {"type": "integer"},
+        "model": {"type": "object", "additionalProperties": false, "required": ["memory_scaling", "work_scaling", "startup_seconds_per_cell", "baseline_rss_bytes_per_cell", "status"], "properties": {"memory_scaling": {"type": "string"}, "work_scaling": {"type": "string"}, "startup_seconds_per_cell": {"type": "number"}, "baseline_rss_bytes_per_cell": {"type": "integer"}, "status": {"type": "string"}}},
+        "safety_factors": {"type": "object", "additionalProperties": false, "required": ["memory", "wall"], "properties": {"memory": {"type": "number"}, "wall": {"type": "number"}}},
+        "local_limits": {"type": "object", "additionalProperties": false, "required": ["wall_seconds", "peak_rss_bytes"], "properties": {"wall_seconds": {"type": "integer"}, "peak_rss_bytes": {"type": "integer"}}},
+        "max_estimated_peak_rss_bytes": {"type": "integer"}, "max_estimated_wall_seconds": {"type": "number"}, "recommendation": {"type": "string"},
+        "calibrated_recommendation": {"type": "object", "additionalProperties": false, "required": ["execution", "start_with", "n_bath_48"], "properties": {"execution": {"type": "string"}, "start_with": {"type": "string"}, "n_bath_48": {"type": "string"}}},
+        "direct_star_mpo_assessment": {"type": "object", "additionalProperties": false, "required": ["n_bath_48_feasible", "reason", "required_optimization"], "properties": {"n_bath_48_feasible": {"const": false}, "reason": {"type": "string"}, "required_optimization": {"type": "string"}}},
+        "cells": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/resourceCell"}},
+        "resource_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    }
+  }
+}

@@ -1,0 +1,11 @@
+[project]
+name = "frustration-free"
+version = "0.1.0"
+requires-python = "==3.12.13"
+dependencies = [
+    "h5py>=3.16.0",
+    "jsonschema>=4.26.0",
+    "numpy>=2.5.1",
+    "pytest>=9.1.1",
+    "scipy>=1.18.0",
+]
