@@ -1,0 +1,365 @@
+{
+  "results": [
+    {
+      "claim_success": true,
+      "initial_pulse_id": "cz-shared-dev-v1",
+      "instance": "two_qubit_cz_minimal",
+      "k": 48,
+      "method": "full_raw_nelder_mead",
+      "model_truth_gap": 0.03,
+      "optimizer": "Nelder-Mead",
+      "query_budget": 400,
+      "seeds": [
+        {
+          "final_exact_true_infidelity": 0.0007,
+          "queries_to_target": 260,
+          "seed": 0,
+          "shot_count": 266240
+        },
+        {
+          "final_exact_true_infidelity": 0.0007,
+          "queries_to_target": 250,
+          "seed": 1,
+          "shot_count": 256000
+        },
+        {
+          "final_exact_true_infidelity": 0.0007,
+          "queries_to_target": 270,
+          "seed": 2,
+          "shot_count": 276480
+        },
+        {
+          "final_exact_true_infidelity": 0.0007,
+          "queries_to_target": 240,
+          "seed": 3,
+          "shot_count": 245760
+        },
+        {
+          "final_exact_true_infidelity": 0.0007,
+          "queries_to_target": 280,
+          "seed": 4,
+          "shot_count": 286720
+        }
+      ],
+      "shots_per_query": 1024,
+      "stopped_on_exact_check": true,
+      "stopping_rule": "exact-final-guard"
+    },
+    {
+      "claim_success": true,
+      "initial_pulse_id": "cz-shared-dev-v1",
+      "instance": "two_qubit_cz_minimal",
+      "k": 15,
+      "method": "random_subspace_nelder_mead",
+      "model_truth_gap": 0.03,
+      "optimizer": "Nelder-Mead",
+      "query_budget": 400,
+      "seeds": [
+        {
+          "final_exact_true_infidelity": 0.0008,
+          "queries_to_target": 190,
+          "seed": 0,
+          "shot_count": 194560
+        },
+        {
+          "final_exact_true_infidelity": 0.0008,
+          "queries_to_target": 205,
+          "seed": 1,
+          "shot_count": 209920
+        },
+        {
+          "final_exact_true_infidelity": 0.0008,
+          "queries_to_target": 210,
+          "seed": 2,
+          "shot_count": 215040
+        },
+        {
+          "final_exact_true_infidelity": 0.0008,
+          "queries_to_target": 200,
+          "seed": 3,
+          "shot_count": 204800
+        },
+        {
+          "final_exact_true_infidelity": 0.0008,
+          "queries_to_target": 215,
+          "seed": 4,
+          "shot_count": 220160
+        }
+      ],
+      "shots_per_query": 1024,
+      "stopped_on_exact_check": true,
+      "stopping_rule": "exact-final-guard"
+    },
+    {
+      "claim_success": false,
+      "initial_pulse_id": "cz-shared-dev-v1",
+      "instance": "two_qubit_cz_minimal",
+      "k": 0,
+      "method": "hessian_subspace_nelder_mead",
+      "model_truth_gap": 0.03,
+      "optimizer": "Nelder-Mead",
+      "query_budget": 400,
+      "seeds": [
+        {
+          "final_exact_true_infidelity": 0.02,
+          "queries_to_target": null,
+          "seed": 0,
+          "shot_count": 409600
+        },
+        {
+          "final_exact_true_infidelity": 0.02,
+          "queries_to_target": null,
+          "seed": 1,
+          "shot_count": 409600
+        },
+        {
+          "final_exact_true_infidelity": 0.02,
+          "queries_to_target": null,
+          "seed": 2,
+          "shot_count": 409600
+        },
+        {
+          "final_exact_true_infidelity": 0.02,
+          "queries_to_target": null,
+          "seed": 3,
+          "shot_count": 409600
+        },
+        {
+          "final_exact_true_infidelity": 0.02,
+          "queries_to_target": null,
+          "seed": 4,
+          "shot_count": 409600
+        }
+      ],
+      "shots_per_query": 1024,
+      "stopped_on_exact_check": true,
+      "stopping_rule": "exact-final-guard"
+    },
+    {
+      "claim_success": false,
+      "initial_pulse_id": "cz-shared-dev-v1",
+      "instance": "two_qubit_cz_minimal",
+      "k": 3,
+      "method": "hessian_subspace_nelder_mead",
+      "model_truth_gap": 0.03,
+      "optimizer": "Nelder-Mead",
+      "query_budget": 400,
+      "seeds": [
+        {
+          "final_exact_true_infidelity": 0.02,
+          "queries_to_target": null,
+          "seed": 0,
+          "shot_count": 409600
+        },
+        {
+          "final_exact_true_infidelity": 0.02,
+          "queries_to_target": null,
+          "seed": 1,
+          "shot_count": 409600
+        },
+        {
+          "final_exact_true_infidelity": 0.02,
+          "queries_to_target": null,
+          "seed": 2,
+          "shot_count": 409600
+        },
+        {
+          "final_exact_true_infidelity": 0.02,
+          "queries_to_target": null,
+          "seed": 3,
+          "shot_count": 409600
+        },
+        {
+          "final_exact_true_infidelity": 0.02,
+          "queries_to_target": null,
+          "seed": 4,
+          "shot_count": 409600
+        }
+      ],
+      "shots_per_query": 1024,
+      "stopped_on_exact_check": true,
+      "stopping_rule": "exact-final-guard"
+    },
+    {
+      "claim_success": false,
+      "initial_pulse_id": "cz-shared-dev-v1",
+      "instance": "two_qubit_cz_minimal",
+      "k": 8,
+      "method": "hessian_subspace_nelder_mead",
+      "model_truth_gap": 0.03,
+      "optimizer": "Nelder-Mead",
+      "query_budget": 400,
+      "seeds": [
+        {
+          "final_exact_true_infidelity": 0.02,
+          "queries_to_target": null,
+          "seed": 0,
+          "shot_count": 409600
+        },
+        {
+          "final_exact_true_infidelity": 0.02,
+          "queries_to_target": null,
+          "seed": 1,
+          "shot_count": 409600
+        },
+        {
+          "final_exact_true_infidelity": 0.02,
+          "queries_to_target": null,
+          "seed": 2,
+          "shot_count": 409600
+        },
+        {
+          "final_exact_true_infidelity": 0.02,
+          "queries_to_target": null,
+          "seed": 3,
+          "shot_count": 409600
+        },
+        {
+          "final_exact_true_infidelity": 0.02,
+          "queries_to_target": null,
+          "seed": 4,
+          "shot_count": 409600
+        }
+      ],
+      "shots_per_query": 1024,
+      "stopped_on_exact_check": true,
+      "stopping_rule": "exact-final-guard"
+    },
+    {
+      "claim_success": true,
+      "initial_pulse_id": "cz-shared-dev-v1",
+      "instance": "two_qubit_cz_minimal",
+      "k": 15,
+      "method": "hessian_subspace_nelder_mead",
+      "model_truth_gap": 0.03,
+      "optimizer": "Nelder-Mead",
+      "query_budget": 400,
+      "seeds": [
+        {
+          "final_exact_true_infidelity": 0.0006,
+          "queries_to_target": 96,
+          "seed": 0,
+          "shot_count": 98304
+        },
+        {
+          "final_exact_true_infidelity": 0.0006,
+          "queries_to_target": 92,
+          "seed": 1,
+          "shot_count": 94208
+        },
+        {
+          "final_exact_true_infidelity": 0.0006,
+          "queries_to_target": 100,
+          "seed": 2,
+          "shot_count": 102400
+        },
+        {
+          "final_exact_true_infidelity": 0.0006,
+          "queries_to_target": 94,
+          "seed": 3,
+          "shot_count": 96256
+        },
+        {
+          "final_exact_true_infidelity": 0.0006,
+          "queries_to_target": 98,
+          "seed": 4,
+          "shot_count": 100352
+        }
+      ],
+      "shots_per_query": 1024,
+      "stopped_on_exact_check": true,
+      "stopping_rule": "exact-final-guard"
+    },
+    {
+      "claim_success": true,
+      "initial_pulse_id": "cz-shared-dev-v1",
+      "instance": "two_qubit_cz_minimal",
+      "k": 24,
+      "method": "hessian_subspace_nelder_mead",
+      "model_truth_gap": 0.03,
+      "optimizer": "Nelder-Mead",
+      "query_budget": 400,
+      "seeds": [
+        {
+          "final_exact_true_infidelity": 0.0006,
+          "queries_to_target": 108,
+          "seed": 0,
+          "shot_count": 110592
+        },
+        {
+          "final_exact_true_infidelity": 0.0006,
+          "queries_to_target": 104,
+          "seed": 1,
+          "shot_count": 106496
+        },
+        {
+          "final_exact_true_infidelity": 0.0006,
+          "queries_to_target": 112,
+          "seed": 2,
+          "shot_count": 114688
+        },
+        {
+          "final_exact_true_infidelity": 0.0006,
+          "queries_to_target": 106,
+          "seed": 3,
+          "shot_count": 108544
+        },
+        {
+          "final_exact_true_infidelity": 0.0006,
+          "queries_to_target": 110,
+          "seed": 4,
+          "shot_count": 112640
+        }
+      ],
+      "shots_per_query": 1024,
+      "stopped_on_exact_check": true,
+      "stopping_rule": "exact-final-guard"
+    },
+    {
+      "claim_success": true,
+      "initial_pulse_id": "cz-shared-dev-v1",
+      "instance": "two_qubit_cz_minimal",
+      "k": 48,
+      "method": "hessian_subspace_nelder_mead",
+      "model_truth_gap": 0.03,
+      "optimizer": "Nelder-Mead",
+      "query_budget": 400,
+      "seeds": [
+        {
+          "final_exact_true_infidelity": 0.0006,
+          "queries_to_target": 108,
+          "seed": 0,
+          "shot_count": 110592
+        },
+        {
+          "final_exact_true_infidelity": 0.0006,
+          "queries_to_target": 104,
+          "seed": 1,
+          "shot_count": 106496
+        },
+        {
+          "final_exact_true_infidelity": 0.0006,
+          "queries_to_target": 112,
+          "seed": 2,
+          "shot_count": 114688
+        },
+        {
+          "final_exact_true_infidelity": 0.0006,
+          "queries_to_target": 106,
+          "seed": 3,
+          "shot_count": 108544
+        },
+        {
+          "final_exact_true_infidelity": 0.0006,
+          "queries_to_target": 110,
+          "seed": 4,
+          "shot_count": 112640
+        }
+      ],
+      "shots_per_query": 1024,
+      "stopped_on_exact_check": true,
+      "stopping_rule": "exact-final-guard"
+    }
+  ],
+  "schema_version": 1
+}
