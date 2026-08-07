@@ -1,0 +1,37 @@
+{
+  "baseline_commit": "9c73ca0acb1a48fd1dc797f5f6deabbb5f5d3feb",
+  "claim_policy": {
+    "challenge_gate": "not_fully_validated",
+    "monte_carlo_advantage": "not_demonstrated",
+    "phase0_speedup": "verified_current_scope"
+  },
+  "official_baseline_binary_sha256": "f49df68983ee7b5da9d2f093ba42e49052455798140f6d7f60a7079685a4b18a",
+  "phase0_binary_sha256": "c093b31c4a2a701247ebe8ce7b6c79c2750ec3d474e996c8f66626309bbaea14",
+  "schema_version": 1,
+  "sources": [
+    {
+      "path": "tesseract_ler_results/slurm-410856/figure2_small_summary.json",
+      "sha256": "3c9eb1b3dc9fd0f76ea7376341e4ba4d7b4859ad19ab416b46fcec90b58cdfd7"
+    },
+    {
+      "path": "tesseract_ler_results/research-p0-p4/p2_certified_summary.json",
+      "sha256": "48eb6bb0199fd0043bb26b4a6fd19da13218345d0e2d1db7129977f6a9dc678d"
+    },
+    {
+      "path": "tesseract_ler_results/research-p0-p4/baseline_audit_final_v6_summary.json",
+      "sha256": "0737a3d7cb17ecb3f5b0f2f3c6762e2c14cecef5f1c849089c3bf4e328779c6f"
+    },
+    {
+      "path": "tesseract_ler_results/research-p0-p4/validation_final_summary.json",
+      "sha256": "7862d897a99c78d98c86efb8ad0307efd12ebf8d02bdfa5eef2dfb052e40904a"
+    },
+    {
+      "path": "tesseract_ler_results/research-tempered-domain-wall-phase0/aggregate.json",
+      "sha256": "50e4affdda751df780b755042a491eedc6dcb225a5a9c0adef5acf3e6b3fcd5e"
+    },
+    {
+      "path": "tesseract_ler_results/research-tempered-domain-wall-phase0/independent_baseline_audit.json",
+      "sha256": "2ebe5d1ffe327ce660e50c248779f4b8798f7cd6af38c716a1280ab542e3fc62"
+    }
+  ]
+}

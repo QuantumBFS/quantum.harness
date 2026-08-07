@@ -1,0 +1,48 @@
+{
+  "challenge": {
+    "gate_status": "not_fully_validated",
+    "issue": 162,
+    "member": "@Fermichen99",
+    "team": "bosonchen",
+    "title": "Decode 20\u00d7 faster than Tesseract at matched accuracy"
+  },
+  "method": {
+    "exact": false,
+    "family": "bounded A* search and logical-sector free-energy sampling",
+    "note": "The final study compares a correctness-preserving search branch, an aggressive speed ablation, and a logical-sector sampler with strict syndrome and sampling-reliability gates.",
+    "tool": "quantumlib/tesseract-decoder + C++ GF(2)/BAR prototype"
+  },
+  "paper": {
+    "id": "arXiv:2503.10988",
+    "title": "Tesseract: A Search-Based Decoder for Quantum Error Correction",
+    "url": "https://arxiv.org/abs/2503.10988"
+  },
+  "results": {
+    "aggressive_search": {
+      "configurations_at_least_20x": 7,
+      "median_decode_speedup": 32.63434812936259,
+      "prediction_mismatches": 11,
+      "shots": 200
+    },
+    "certified_search": {
+      "configurations_at_least_20x": 0,
+      "median_decode_speedup": 0.8666233151752647,
+      "prediction_mismatches": 0,
+      "shots": 200
+    },
+    "held_out_policy": {
+      "median_decode_speedup": 1.1600085491471965,
+      "optimized_only_errors": 3,
+      "shots": 600
+    },
+    "logical_sector_phase0": {
+      "cases": 3,
+      "claim_status": "verified_current_scope",
+      "prediction_mismatches": 0,
+      "reliable_bar_comparisons": 0,
+      "shots": 30
+    }
+  },
+  "schema_version": 1,
+  "status": "completed_substantial_prototype_result"
+}
