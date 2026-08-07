@@ -27,7 +27,6 @@ tracks/**/results/
 
 # Managed by Ion
 .claude/skills/
-CLAUDE.md
 
 # Remote skills managed by Ion. Ion recreates these symlinks from Ion.toml/Ion.lock.
 skills/arxiv-search
