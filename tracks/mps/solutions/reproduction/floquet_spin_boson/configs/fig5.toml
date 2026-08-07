@@ -1,0 +1,30 @@
+# Development validation settings on the exact 191-point author grid.
+# Production tolerances remain gated on the Task 10 convergence study.
+mode = "validation"
+dt_target = 0.05235987755982989 # π / 60
+frequencies = { start = 0.5, step = 0.05, stop = 10.0 }
+correlation_lag_steps = 1024
+tail_count = 128
+tail_norm_tolerance = 1.0e-4
+tail_mean_tolerance = 1.0e-5
+tail_slope_tolerance = 1.0e-5
+c0_tolerance = 1.0e-8
+omega_max = 20.0
+nmax = 20
+weight_tolerance = 1.0e-12
+eigensolver_tolerance = 1.0e-10
+eigensolver_max_iterations = 1000
+energy_balance_tolerance = 1.0e-3
+energy_balance_floor = 1.0e-12
+
+compression_tolerance = 1.0e-7
+cache_dir = "output/cache"
+rebuild_cache = false
+temperature = 0.0
+auto_nc = true
+n_c = 100000
+truncation = "rel"
+cap_rank = 100000
+max_rank = 100000
+low_rank_svd = false
+svd_filtering_tolerance = 0.0

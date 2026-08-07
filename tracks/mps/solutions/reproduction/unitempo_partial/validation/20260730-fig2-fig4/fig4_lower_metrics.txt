@@ -1,0 +1,9 @@
+matched_points=600
+rmse=0.0017487031
+mae=0.0014429749
+bias=-0.0014429159
+pearson_correlation=0.9999536826
+author_range=0.0044637876,0.4958471724
+generated_range=0.0044339026,0.4939467087
+author_peak=omega 2.175000, amplitude 1.150000, value 0.4958471724
+generated_peak=omega 2.175000, amplitude 1.150000, value 0.4939467087
