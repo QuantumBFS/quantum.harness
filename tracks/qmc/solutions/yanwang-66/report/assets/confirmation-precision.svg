@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="680" viewBox="0 0 1200 680" role="img" aria-labelledby="title desc">
+  <title id="title">Independent confirmation precision gate</title>
+  <desc id="desc">All 32 independent-seed policy comparisons meet the precision target; four of forty cells meet the separate logical-failure count target.</desc>
+  <rect width="1200" height="680" fill="#ffffff"/>
+  <style>
+    text { font-family: Inter, ui-sans-serif, system-ui, sans-serif; fill: #17202a; }
+    .muted { fill: #667085; }
+    .small { font-size: 22px; }
+  </style>
+  <text x="70" y="82" font-size="38" font-weight="760">Independent confirmation reaches its precision target</text>
+  <text x="70" y="126" class="muted small">Phase 5 · separate random seed · 12.8 million cumulative cell-shots</text>
+
+  <g transform="translate(300 350)">
+    <circle r="154" fill="none" stroke="#e6e9ed" stroke-width="34"/>
+    <circle r="154" fill="none" stroke="#2563eb" stroke-width="34" stroke-linecap="round" stroke-dasharray="968 968" transform="rotate(-90)"/>
+    <text x="0" y="-4" text-anchor="middle" font-size="74" font-weight="780">32/32</text>
+    <text x="0" y="42" text-anchor="middle" class="muted small">precision met</text>
+  </g>
+
+  <g transform="translate(580 190)">
+    <text x="0" y="0" font-size="26" font-weight="700">Registered precision fraction</text>
+    <rect x="0" y="36" width="500" height="56" rx="8" fill="#e6e9ed"/>
+    <rect x="0" y="36" width="500" height="56" rx="8" fill="#2563eb"/>
+    <line x1="400" x2="400" y1="24" y2="106" stroke="#101828" stroke-width="3" stroke-dasharray="7 7"/>
+    <text x="500" y="132" text-anchor="end" class="small" fill="#175cd3">observed 100%</text>
+    <text x="400" y="168" text-anchor="middle" class="small">required 80%</text>
+
+    <text x="0" y="244" font-size="26" font-weight="700">Separate cell-level stopping gate</text>
+    <rect x="0" y="280" width="500" height="56" rx="8" fill="#f2f4f7"/>
+    <rect x="0" y="280" width="50" height="56" rx="8" fill="#f79009"/>
+    <text x="0" y="376" class="small" fill="#b54708">4/40 cells reached 1,000 logical failures</text>
+    <text x="0" y="390" class="muted small">Precision passed; event-count stopping remains open.</text>
+  </g>
+
+  <rect x="70" y="620" width="1060" height="1" fill="#e4e7ec"/>
+  <text x="70" y="658" class="muted small">Precision establishes stable paired estimates; it does not by itself authorize a winner.</text>
+</svg>

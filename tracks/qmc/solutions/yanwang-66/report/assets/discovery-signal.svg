@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="680" viewBox="0 0 1200 680" role="img" aria-labelledby="title desc">
+  <title id="title">Discovery Phase 3 provisional classification</title>
+  <desc id="desc">Of 1960 paired policy comparisons, 502 are provisionally helpful, 1458 show no significant difference, and zero are harmful.</desc>
+  <rect width="1200" height="680" fill="#ffffff"/>
+  <style>
+    text { font-family: Inter, ui-sans-serif, system-ui, sans-serif; fill: #17202a; }
+    .muted { fill: #667085; }
+    .small { font-size: 22px; }
+    .label { font-size: 24px; font-weight: 650; }
+    .value { font-size: 58px; font-weight: 760; }
+  </style>
+  <text x="70" y="82" font-size="38" font-weight="760">A broad positive signal, still under a conservative stop rule</text>
+  <text x="70" y="126" class="muted small">Discovery Phase 3 · 1,960 paired policy-versus-none comparisons</text>
+
+  <rect x="70" y="188" width="1060" height="98" rx="10" fill="#eef1f4"/>
+  <rect x="70" y="188" width="271" height="98" rx="10" fill="#159a78"/>
+  <path d="M331 188h10v98h-10z" fill="#159a78"/>
+  <text x="205" y="250" text-anchor="middle" font-size="28" font-weight="740" fill="#ffffff">25.6% helpful</text>
+  <text x="735" y="250" text-anchor="middle" font-size="28" font-weight="680" fill="#475467">74.4% no significant difference</text>
+
+  <g transform="translate(70 350)">
+    <rect width="320" height="190" rx="8" fill="#f0faf7" stroke="#a8dfd0"/>
+    <circle cx="42" cy="43" r="11" fill="#159a78"/>
+    <text x="68" y="51" class="label">Helpful</text>
+    <text x="28" y="130" class="value" fill="#0d765c">502</text>
+    <text x="28" y="166" class="muted small">provisional comparisons</text>
+  </g>
+  <g transform="translate(440 350)">
+    <rect width="320" height="190" rx="8" fill="#f6f7f8" stroke="#d5dae0"/>
+    <circle cx="42" cy="43" r="11" fill="#98a2b3"/>
+    <text x="68" y="51" class="label">No significant difference</text>
+    <text x="28" y="130" class="value">1,458</text>
+    <text x="28" y="166" class="muted small">provisional comparisons</text>
+  </g>
+  <g transform="translate(810 350)">
+    <rect width="320" height="190" rx="8" fill="#fff6f5" stroke="#ffd1cc"/>
+    <circle cx="42" cy="43" r="11" fill="#d92d20"/>
+    <text x="68" y="51" class="label">Harmful</text>
+    <text x="28" y="130" class="value" fill="#b42318">0</text>
+    <text x="28" y="166" class="muted small">provisional comparisons</text>
+  </g>
+
+  <rect x="70" y="588" width="1060" height="1" fill="#e4e7ec"/>
+  <text x="70" y="630" class="muted small">Paired 95% intervals · 20,000 bootstrap resamples · Benjamini-Hochberg FDR q = 0.05</text>
+</svg>

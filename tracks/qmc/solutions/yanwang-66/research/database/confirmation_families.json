@@ -1,0 +1,44 @@
+{
+  "schema_version": "q66-confirmation-family-v1",
+  "selection": {
+    "distance": 5,
+    "rounds": 10,
+    "basis": ["X", "Z"],
+    "p": 0.001,
+    "p_m": 0.001,
+    "p_loss": [0.001, 0.003, 0.01, 0.03]
+  },
+  "policies": [
+    {"name": "none"},
+    {"name": "immediate"},
+    {"name": "periodic", "interval": 5},
+    {"name": "periodic", "interval": 10},
+    {"name": "threshold", "fraction": 0.05}
+  ],
+  "reload": {
+    "delay_rounds": 0,
+    "reset_error_probability": 0.0,
+    "failure_probability": 0.0
+  },
+  "sampling": {
+    "initial_shots_per_cell": 20000,
+    "minimum_logical_failures_per_cell": 1000,
+    "maximum_shots_per_cell": 20000000,
+    "growth": "double cumulative shots while all 5 policies remain paired",
+    "paired_precision": {
+      "confidence": 0.95,
+      "required_comparison_fraction": 0.8,
+      "half_width_rule": "max(0.2 * p_L(none), 0.0001)"
+    }
+  },
+  "seed": {
+    "derivation": "sha256-domain-separated-little-endian-u64",
+    "domain": "q66-confirmation-seed-v1",
+    "independent_of": "q66-discovery-seed-v1"
+  },
+  "provenance": {
+    "contract": "WORKFLOW.md version 1.0 sections 5.3, 9F, and 10",
+    "headline_slice": "topics.md acceptance gate items 2 and 3",
+    "selection_rule": "fixed before any discovery analysis"
+  }
+}

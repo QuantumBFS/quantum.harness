@@ -1,0 +1,76 @@
+{
+  "artifacts": [
+    "discovery-cells.parquet",
+    "discovery-comparisons.parquet",
+    "logical-failures.packbits.npy",
+    "logical-failure-shots.npy",
+    "continuation-plan.json",
+    "analysis-summary.json",
+    "analysis-checksums.sha256"
+  ],
+  "bootstrap_resamples_per_comparison": 20000,
+  "cell_sampling_status": {
+    "continue": 2159,
+    "target_met": 81
+  },
+  "cells": 2240,
+  "comparisons": 1960,
+  "evidence_classification": {
+    "provisional": 1960
+  },
+  "fdr": {
+    "method": "Benjamini-Hochberg",
+    "q": 0.05,
+    "scope": "all 1960 policy-vs-none discovery comparisons"
+  },
+  "group_sampling_status": {
+    "continue": 276,
+    "target_met": 4
+  },
+  "headline_claims_authorized": false,
+  "initial_matrix": "/work/home/hesicheng5/quantum-harness-ch66/research/requests/discovery/discovery-matrix-v1.json",
+  "initial_matrix_sha256": "75490cff0949dc128221bf9168138d4d813c07014f26c1c9cacac9b2ec6b9b18",
+  "logical_failure_state": {
+    "encoding": "numpy-packbits-little",
+    "max_shots": 80000,
+    "row_order": "discovery-cells.parquet",
+    "rows": 2240
+  },
+  "next_phase_cells": 2208,
+  "next_phase_groups": 276,
+  "note": "Discovery classifications remain provisional until all stopping rules finish; headline claims additionally require confirmation and holdout.",
+  "phases": [
+    {
+      "group_count": 280,
+      "kind": "initial",
+      "phase_index": 1,
+      "results_root": "/work/home/hesicheng5/quantum-harness-ch66/results/discovery/phase-1/6766558",
+      "spec": "/work/home/hesicheng5/quantum-harness-ch66/research/requests/discovery/discovery-matrix-v1.json",
+      "spec_sha256": "75490cff0949dc128221bf9168138d4d813c07014f26c1c9cacac9b2ec6b9b18"
+    },
+    {
+      "group_count": 280,
+      "kind": "continuation",
+      "phase_index": 2,
+      "results_root": "/work/home/hesicheng5/quantum-harness-ch66/results/discovery/phase-2/6770290",
+      "spec": "/work/home/hesicheng5/quantum-harness-ch66/results/discovery/analysis/phase-1/6769992/continuation-plan.json",
+      "spec_sha256": "ded977b2646a3f7704a2408ab856df4af611641c1f88133035ad061afe2cd215"
+    },
+    {
+      "group_count": 280,
+      "kind": "continuation",
+      "phase_index": 3,
+      "results_root": "/work/home/hesicheng5/quantum-harness-ch66/results/discovery/phase-3/23019121",
+      "spec": "/work/home/hesicheng5/quantum-harness-ch66/results/discovery/analysis/phase-2/6771281/continuation-plan.json",
+      "spec_sha256": "c2183dcaa8aad272d7eb77050aedefb38ad24f85e78687ba965e943ebe753519"
+    }
+  ],
+  "schema_version": "q66-discovery-analysis-v1",
+  "slurm_job_id": "23023314",
+  "statistical_classification": {
+    "helpful": 502,
+    "no_significant_difference": 1458
+  },
+  "status": "provisional",
+  "total_cell_shots": 179200000
+}
