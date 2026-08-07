@@ -1,0 +1,20 @@
+{
+  "energy_every": 5,
+  "fixed_horizon_nwalkers": [
+    100,
+    500,
+    1000
+  ],
+  "fixed_horizon_pc_every_at_1000": [
+    5,
+    20,
+    40
+  ],
+  "fixed_systems_per_wave": 20,
+  "primary_pc_every": 5,
+  "production_initial_blocks": 50,
+  "production_nwalkers": 1000,
+  "production_steps_per_block": 20,
+  "schema_version": 1,
+  "stabilize_every": 5
+}

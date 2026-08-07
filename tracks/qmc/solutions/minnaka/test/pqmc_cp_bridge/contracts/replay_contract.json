@@ -1,0 +1,10 @@
+{
+  "central_estimator": "two_sided_checkpoint_at_center_slice",
+  "center_slice_formula": "theta/dt + beta/(2*dt)",
+  "endpoint_estimator": "two_sided_after_all_ltrot_slices",
+  "left_projector_slices_formula": "theta/dt",
+  "measurement_window_slices_formula": "beta/dt",
+  "right_projector_slices_formula": "theta/dt",
+  "schema_version": 1,
+  "selected_projection_required": true
+}

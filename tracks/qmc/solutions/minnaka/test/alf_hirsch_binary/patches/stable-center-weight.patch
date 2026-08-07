@@ -1,0 +1,59 @@
+diff --git a/Prog/main.F90 b/Prog/main.F90
+index d99b719c..f084d745 100644
+--- a/Prog/main.F90
++++ b/Prog/main.F90
+@@ -949,7 +949,7 @@ Program Main
+           real(Kind=Kind(0.d0)) :: central(4), endpoint(3)
+           real(Kind=Kind(0.d0)) :: endpoint_logabs
+           real(Kind=Kind(0.d0)) :: endpoint_npart
+-          real(Kind=Kind(0.d0)) :: right_logabs
++          real(Kind=Kind(0.d0)) :: left_logabs, right_logabs
+           integer :: center, current, next_slice, flavor, flavor_eff
+           integer :: nvar_local, endpoint_sign, frozen_sign
+ 
+@@ -964,6 +964,7 @@ Program Main
+           enddo
+ 
+           center = Ltrot / 2
++          left_logabs = 0.d0
+           right_logabs = 0.d0
+           current = 0
+           do while (current < center)
+@@ -976,6 +977,7 @@ Program Main
+           do while (current > center)
+              next_slice = max(current - Nwrap, center)
+              call WRAPUL(current, next_slice, frozen_left)
++             left_logabs = left_logabs + path_udv_logabs(frozen_left)
+              current = next_slice
+           enddo
+ 
+@@ -1006,6 +1008,15 @@ Program Main
+                                      central(3), central(4))
+           endif
+ 
++          call path_endpoint_signed_log(frozen_left, frozen_right, N_SUN, &
++                                        endpoint_sign, endpoint_logabs)
++          endpoint_logabs = endpoint_logabs &
++               + (left_logabs + right_logabs) * real(N_SUN,kind(0.d0)) &
++               - real(size(OP_V,1) * Ltrot, kind(0.d0)) * log(2.d0) &
++               - 0.5d0 * Archive_dt * Archive_interaction &
++                 * real(size(WF_R(1)%P,2) + size(WF_R(2)%P,2),kind(0.d0)) &
++                 * real(Ltrot,kind(0.d0))
++
+           current = center
+           do while (current < Ltrot)
+              next_slice = min(current + Nwrap, Ltrot)
+@@ -1037,13 +1049,6 @@ Program Main
+              call ham%Frozen_scalars(frozen_gr, endpoint(1), endpoint(2), &
+                                      endpoint(3), endpoint_npart)
+           endif
+-          call path_endpoint_signed_log(frozen_left, frozen_right, N_SUN, &
+-                                        endpoint_sign, endpoint_logabs)
+-          endpoint_logabs = endpoint_logabs + right_logabs * real(N_SUN,kind(0.d0)) &
+-               - real(size(OP_V,1) * Ltrot, kind(0.d0)) * log(2.d0) &
+-               - 0.5d0 * Archive_dt * Archive_interaction &
+-                 * real(size(WF_R(1)%P,2) + size(WF_R(2)%P,2),kind(0.d0)) &
+-                 * real(Ltrot,kind(0.d0))
+           call path_archive_write(bin_id, sweep_id, frozen_sign, central, &
+                endpoint_sign, endpoint_logabs, endpoint, nsigma%f)
+ 

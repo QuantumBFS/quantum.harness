@@ -1,0 +1,17 @@
+{
+  "bit_order": "least_significant_bit_first",
+  "crc32": {
+    "coverage": "sample_id_through_fields_payload",
+    "polynomial": "0xEDB88320"
+  },
+  "endian": "little",
+  "endian_marker": "0x01020304",
+  "header_bytes": 256,
+  "header_magic": "QHPATH01",
+  "payload_bytes_formula": "ceil(nfield/8)",
+  "record_bytes_formula": "align64(112+payload_bytes)",
+  "record_prefix_bytes": 108,
+  "sample_id_layout": "bits63..60=ensemble, bits59..52=chain, bits51..0=local_sequence",
+  "schema_version": 1,
+  "version": 1
+}

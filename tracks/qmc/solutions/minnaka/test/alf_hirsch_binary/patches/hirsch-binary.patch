@@ -1,0 +1,103 @@
+diff --git a/Prog/Hamiltonians/Hamiltonian_Hubbard_Plain_Vanilla_smod.F90 b/Prog/Hamiltonians/Hamiltonian_Hubbard_Plain_Vanilla_smod.F90
+index 4cae8543..f6176600 100644
+--- a/Prog/Hamiltonians/Hamiltonian_Hubbard_Plain_Vanilla_smod.F90
++++ b/Prog/Hamiltonians/Hamiltonian_Hubbard_Plain_Vanilla_smod.F90
+@@ -142,6 +142,7 @@
+         procedure, nopass :: weight_reconstruction
+         procedure, nopass :: GR_reconstruction
+         procedure, nopass :: GRT_reconstruction
++        procedure, nopass :: S0
+ #ifdef HDF5
+         procedure, nopass :: write_parameters_hdf5
+ #endif
+@@ -164,11 +165,13 @@
+       real(Kind=Kind(0.d0)) :: Theta    = 10.d0     ! Projection parameter
+       !logical              :: Symm     = .true.    ! Whether symmetrization takes place
+       Integer               :: N_part   = -1        ! Number of particles in trial wave function. If N_part < 0 -> N_part = L1*L2/2
++      Logical               :: Hirsch_binary = .false. ! Use the exact two-valued Hirsch spin transformation
+       !#PARAMETERS END#
+ 
+       Type (Lattice),       target :: Latt
+       Type (Unit_cell),     target :: Latt_unit
+       INTEGER :: nf_calc, nf_reconst
++      real(Kind=Kind(0.d0)) :: Hirsch_lambda = 0.d0
+ 
+     contains
+       
+@@ -211,7 +214,11 @@
+ 
+           ! From dynamically generated file "Hamiltonian_Hubbard_Plain_Vanilla_read_write_parameters.F90"
+           call read_parameters()
+-          
++
++          If (Hirsch_binary .and. Ham_U <= 0.d0) then
++             Write(error_unit,*) 'Hirsch_binary requires repulsive Ham_U > 0'
++             error stop 1
++          endif
+ 
+           If (L1 == 1) then
+              Write(6,*) 'For  one-dimensional lattices set L2=1'
+@@ -267,6 +274,12 @@
+              Write(unit_info,*) 't             : ', Ham_T
+              Write(unit_info,*) 'Ham_U         : ', Ham_U
+              Write(unit_info,*) 'Ham_chem      : ', Ham_chem
++             If (Hirsch_binary) then
++                Write(unit_info,*) 'HS transformation: binary Hirsch spin'
++                Write(unit_info,*) 'Hirsch lambda: ', Hirsch_lambda
++             Else
++                Write(unit_info,*) 'HS transformation: four-valued discrete spin'
++             Endif
+              If  (  Ham_U >=0.d0  .and.   Ham_chem   == 0.d0 )    then
+                 Write(unit_info,*) 'Assuming particle hole symmetry' 
+              endif
+@@ -442,15 +455,25 @@
+              enddo
+           enddo
+ 
++          Hirsch_lambda = 0.d0
++          If (Hirsch_binary) then
++             Hirsch_lambda = acosh(exp(Dtau*Ham_U/2.d0))
++          Endif
++
+           Do nf = 1,N_FL
+              X = 1.d0
+              if (nf == 2)  X = -1.d0
+              Do i = 1,Ndim
+                 Op_V(i,nf)%P(1)   = I
+                 Op_V(i,nf)%O(1,1) = cmplx(1.d0, 0.d0, kind(0.D0))
+-                Op_V(i,nf)%g      = X*SQRT(CMPLX(DTAU*ham_U/2.d0, 0.D0, kind(0.D0)))
++                If (Hirsch_binary) then
++                   Op_V(i,nf)%g    = cmplx(X*Hirsch_lambda, 0.d0, kind(0.D0))
++                   Op_V(i,nf)%type = 1
++                Else
++                   Op_V(i,nf)%g    = X*SQRT(CMPLX(DTAU*ham_U/2.d0, 0.D0, kind(0.D0)))
++                   Op_V(i,nf)%type = 2
++                Endif
+                 Op_V(i,nf)%alpha  = cmplx(-0.5d0, 0.d0, kind(0.D0))
+-                Op_V(i,nf)%type   = 2
+                 Call Op_set( Op_V(i,nf) )
+              Enddo
+           Enddo
+@@ -846,4 +869,22 @@
+          endif
+       end Subroutine GRT_reconstruction
+ 
++!--------------------------------------------------------------------
++!> @author
++!> Mingzhong Lu
++!>
++!> @brief
++!> Returns the auxiliary-field action ratio for a local field flip.
++!--------------------------------------------------------------------
++      Real (Kind=Kind(0.d0)) function S0(n,nt,Hs_new)
++        Implicit none
++        Integer, Intent(IN) :: n
++        Integer, Intent(IN) :: nt
++        Real (Kind=Kind(0.d0)), Intent(In) :: Hs_new
++
++        ! Both supported discrete spin transformations have a field-independent
++        ! bare measure; their local weight change is entirely fermionic.
++        S0 = 1.d0
++      end function S0
++
+     end submodule ham_Hubbard_Plain_Vanilla_smod

@@ -1,0 +1,39 @@
+{
+  "alf_executable_sha256": "7d9cd7e1be8f8736ea58054c026cadf05a402e8a8d558abfdf06c8aa0d9f73e1",
+  "cpmc_audit_sha256": "5650cb2fbeb467413617c8941be86274d57cf98994729c0c6ff68d695dcb19e0",
+  "format_version": 1,
+  "mixed_smoke_min_sign": 1.0,
+  "mixing": 0.2,
+  "orthonormality_residuals": {
+    "I_down": 1.5543122344752192e-15,
+    "I_up": 1.5543122344752192e-15,
+    "T_down": 5.551115123125783e-16,
+    "T_up": 1.7763568394002505e-15
+  },
+  "particle_hole_residuals": {
+    "I": 1.504352198367087e-14,
+    "T": 6.661338147750939e-16
+  },
+  "scf_converged": true,
+  "scf_energy": -12.566554520604551,
+  "scf_iterations": 174,
+  "scf_residual": 9.690026558928366e-13,
+  "sha256": {
+    "site_map.dat": "cc508275283d2710d62816b8f1c4865e2f4e80d3a64fc23267ed1d1e889aedb9",
+    "trial_I_down.dat": "852e805a7f6193c67de196694d9037cfea2efd89dc49cef323f6afce7a488884",
+    "trial_I_up.dat": "852e805a7f6193c67de196694d9037cfea2efd89dc49cef323f6afce7a488884",
+    "trial_T_down.dat": "7eec2f83964a5d9ea542b3200f621d96de86bf5efbf77f4630ef240de3fc74e4",
+    "trial_T_up.dat": "4a97f0b4dc35e7d78504b92f55dc49c24b94b0938d35ce0e92d3dad900710d2b",
+    "uhf_metadata.json": "702ca38d8de07a4b0cbe2c49c4d59fad01f254471a284afe45663de3235ce4d1"
+  },
+  "site_order": "ALF exported; explicit site_map.dat",
+  "spin_overlap_determinants": {
+    "down": 0.2877919810169136,
+    "up": 0.28779198101690284
+  },
+  "staggered_magnetization": 0.7044916870944546,
+  "tolerance": 1e-12,
+  "trial_left": "collinear Neel UHF",
+  "trial_right": "ALF stock free, Delta=0.01",
+  "uhf_u": 4
+}

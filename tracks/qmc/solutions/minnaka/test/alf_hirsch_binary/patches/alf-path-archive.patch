@@ -1,0 +1,706 @@
+--- a/Prog/Hamiltonian_main_mod.F90
++++ b/Prog/Hamiltonian_main_mod.F90
+@@ -142,6 +142,8 @@
+         procedure, nopass :: ham_set => ham_set_base
+         procedure, nopass :: Alloc_obs => Alloc_obs_base
+         procedure, nopass :: Obser => Obser_base
++        procedure, nopass :: Frozen_scalars => Frozen_scalars_base
++        procedure, nopass :: Archive_metadata => Archive_metadata_base
+         procedure, nopass :: ObserT => ObserT_base
+         procedure, nopass :: Pr_obs => Pr_obs_base
+         procedure, nopass :: Init_obs => Init_obs_base
+@@ -393,6 +395,23 @@
+ 
+           end Subroutine Obser_base
+ 
++          subroutine Frozen_scalars_base(GR, Ekin, Epot, Etot, Npart)
++             Implicit none
++             Complex (Kind=Kind(0.d0)), INTENT(IN) :: GR(Ndim,Ndim,N_FL)
++             Real (Kind=Kind(0.d0)), INTENT(OUT) :: Ekin, Epot, Etot, Npart
++             write(error_unit, *) "Frozen_scalars not implemented."
++             error stop 1
++          end Subroutine Frozen_scalars_base
++
++          subroutine Archive_metadata_base(lx_out, ly_out, hopping, interaction, dt, beta_out, theta_out, binary)
++             Implicit none
++             Integer, INTENT(OUT) :: lx_out, ly_out
++             Real (Kind=Kind(0.d0)), INTENT(OUT) :: hopping, interaction, dt, beta_out, theta_out
++             Logical, INTENT(OUT) :: binary
++             write(error_unit, *) "Archive_metadata not implemented."
++             error stop 1
++          end Subroutine Archive_metadata_base
++
+ 
+     !--------------------------------------------------------------------
+     !> @author
+--- a/Prog/Hamiltonians/Hamiltonian_Hubbard_Plain_Vanilla_smod.F90
++++ b/Prog/Hamiltonians/Hamiltonian_Hubbard_Plain_Vanilla_smod.F90
+@@ -138,6 +138,8 @@
+         procedure, nopass :: Ham_Set
+         procedure, nopass :: Alloc_obs
+         procedure, nopass :: Obser
++        procedure, nopass :: Frozen_scalars
++        procedure, nopass :: Archive_metadata
+         procedure, nopass :: ObserT
+         procedure, nopass :: weight_reconstruction
+         procedure, nopass :: GR_reconstruction
+@@ -858,6 +860,71 @@
+ 
+ 
+         end Subroutine Obser
++
++        subroutine Frozen_scalars(GR, Ekin, Epot, Etot, Npart)
++          Implicit none
++          Complex (Kind=Kind(0.d0)), INTENT(IN) :: GR(Ndim,Ndim,N_FL)
++          Real (Kind=Kind(0.d0)), INTENT(OUT) :: Ekin, Epot, Etot, Npart
++          Complex (Kind=Kind(0.d0)) :: GRC(Ndim,Ndim,N_FL)
++          Complex (Kind=Kind(0.d0)) :: Zkin, Zpot, Zrho
++          Integer :: I, J, Ix, Iy, nf
++
++          Do nf = 1,N_FL
++             Do I = 1,Ndim
++                Do J = 1,Ndim
++                   GRC(I, J, nf) = -GR(J, I, nf)
++                Enddo
++                GRC(I, I, nf) = 1.D0 + GRC(I, I, nf)
++             Enddo
++          Enddo
++
++          Zkin = cmplx(0.d0, 0.d0, kind(0.D0))
++          Do I = 1,Latt%N
++             Ix = Latt%nnlist(I,1,0)
++             Zkin = Zkin + GRC(I,Ix,1) + GRC(Ix,I,1) &
++                         + GRC(I,Ix,2) + GRC(Ix,I,2)
++          Enddo
++          If (L2 > 1) then
++             Do I = 1,Latt%N
++                Iy = Latt%nnlist(I,0,1)
++                Zkin = Zkin + GRC(I,Iy,2) + GRC(Iy,I,2) &
++                            + GRC(I,Iy,1) + GRC(Iy,I,1)
++             Enddo
++          Endif
++          Zkin = Zkin * cmplx(-Ham_T,0.d0,Kind(0.d0))
++
++          Zpot = cmplx(0.d0, 0.d0, kind(0.D0))
++          Do I = 1,Ndim
++             Zpot = Zpot + GRC(I,I,1) * GRC(I,I,2)
++          Enddo
++          Zpot = Zpot * Ham_U
++
++          Zrho = cmplx(0.d0, 0.d0, kind(0.D0))
++          Do I = 1,Ndim
++             Zrho = Zrho + GRC(I,I,1) + GRC(I,I,2)
++          Enddo
++          if (max(abs(aimag(Zkin)), abs(aimag(Zpot)), abs(aimag(Zrho))) > 1.d-8) &
++            error stop 'complex frozen scalar in real Hubbard archive'
++          Ekin = real(Zkin, kind(0.d0))
++          Epot = real(Zpot, kind(0.d0))
++          Etot = Ekin + Epot
++          Npart = real(Zrho, kind(0.d0))
++        end subroutine Frozen_scalars
++
++        subroutine Archive_metadata(lx_out, ly_out, hopping, interaction, dt, beta_out, theta_out, binary)
++          Implicit none
++          Integer, INTENT(OUT) :: lx_out, ly_out
++          Real (Kind=Kind(0.d0)), INTENT(OUT) :: hopping, interaction, dt, beta_out, theta_out
++          Logical, INTENT(OUT) :: binary
++          lx_out = L1
++          ly_out = L2
++          hopping = Ham_T
++          interaction = Ham_U
++          dt = Dtau
++          beta_out = Beta
++          theta_out = Theta
++          binary = Hirsch_binary
++        end subroutine Archive_metadata
+ !--------------------------------------------------------------------
+ !> @author
+ !> ALF Collaboration
+--- a/Prog/Makefile
++++ b/Prog/Makefile
+@@ -10,14 +10,15 @@
+ 	Hamiltonian_main_mod.o QDRP_decompose_mod.o udv_state_mod.o Hop_mod.o UDV_WRAP_mod.o \
+ 	wrapul_mod.o   cgr1_mod.o   wrapur_mod.o   cgr2_2_mod.o   upgrade_mod.o   Set_random_mod.o \
+ 	Global_mod.o Langevin_HMC_mod.o Wrapgr_mod.o tau_m_mod.o tau_p_mod.o \
+-	main.o
++	Path_archive_mod.o main.o
+ 
+ MODS = control.mod fields_mod.mod global_mod.mod hop_mod.mod lrc_mod.mod observables.mod \
+ 	operator_mod.mod predefined_int.mod predefined_lattices.mod predefined_obs.mod \
+ 	predefined_hoppings.mod  predefined_trial.mod qdrp_mod.mod tau_m_mod.mod tau_p_mod.mod \
+ 	udv_state_mod.mod udv_wrap_mod.mod wavefunction_mod.mod wrapgr_mod.mod hamiltonian.mod \
+ 	containerelementbase_mod.mod opttypes_mod.mod dynamicmatrixarray_mod.mod langevin_hmc_mod.mod \
+-	wrapul_mod.mod cgr1_mod.mod wrapur_mod.mod cgr2_2_mod.mod upgrade_mod.mod set_random.mod
++	wrapul_mod.mod cgr1_mod.mod wrapur_mod.mod cgr2_2_mod.mod upgrade_mod.mod set_random.mod \
++	path_archive_mod.mod
+ 
+ program: git.h parse_parameters Hamiltonians_interface.h Hamiltonians_case.h echo_compile_mods $(OBJS)
+ 	make $(OHAM)
+--- /dev/null
++++ b/Prog/Path_archive_mod.F90
+@@ -0,0 +1,315 @@
++module Path_archive_mod
++  use iso_fortran_env, only: int8, int32, int64, real64, error_unit
++  use ieee_arithmetic, only: ieee_value, ieee_quiet_nan
++  use UDV_State_mod, only: UDV_State
++  implicit none
++  private
++
++  integer, parameter :: header_bytes = 256
++  integer, parameter :: record_prefix_bytes = 108
++  integer :: archive_unit = -1
++  integer(int32) :: archive_ltrot = 0
++  integer(int32) :: archive_nsites = 0
++  integer(int32) :: archive_nfield = 0
++  integer(int32) :: archive_payload_bytes = 0
++  integer(int32) :: archive_record_bytes = 0
++  integer(int32) :: archive_chain = 0
++  integer(int8) :: archive_ensemble = 0
++  integer(int64) :: local_sequence = 0_int64
++  logical :: archive_is_open = .false.
++
++  public :: path_archive_open, path_archive_close
++  public :: path_archive_write, path_endpoint_signed_log
++  public :: path_udv_logabs
++
++contains
++
++  pure integer(int8) function byte_value(value)
++    integer(int32), intent(in) :: value
++    integer(int32) :: normalized
++    normalized = iand(value, int(z'000000ff', int32))
++    if (normalized <= 127_int32) then
++      byte_value = int(normalized, int8)
++    else
++      byte_value = int(normalized - 256_int32, int8)
++    endif
++  end function byte_value
++
++  pure subroutine put_u16(buffer, offset, value)
++    integer(int8), intent(inout) :: buffer(:)
++    integer, intent(in) :: offset
++    integer(int32), intent(in) :: value
++    integer :: index
++    do index = 0, 1
++      buffer(offset + index) = byte_value(shiftr(value, 8 * index))
++    enddo
++  end subroutine put_u16
++
++  pure subroutine put_u32(buffer, offset, value)
++    integer(int8), intent(inout) :: buffer(:)
++    integer, intent(in) :: offset
++    integer(int32), intent(in) :: value
++    integer :: index
++    do index = 0, 3
++      buffer(offset + index) = byte_value(shiftr(value, 8 * index))
++    enddo
++  end subroutine put_u32
++
++  pure subroutine put_u64(buffer, offset, value)
++    integer(int8), intent(inout) :: buffer(:)
++    integer, intent(in) :: offset
++    integer(int64), intent(in) :: value
++    integer :: index
++    do index = 0, 7
++      buffer(offset + index) = byte_value( &
++        int(iand(shiftr(value, 8 * index), int(z'ff', int64)), int32))
++    enddo
++  end subroutine put_u64
++
++  pure subroutine put_real64(buffer, offset, value)
++    integer(int8), intent(inout) :: buffer(:)
++    integer, intent(in) :: offset
++    real(real64), intent(in) :: value
++    call put_u64(buffer, offset, transfer(value, 0_int64))
++  end subroutine put_real64
++
++  pure subroutine put_ascii(buffer, offset, value)
++    integer(int8), intent(inout) :: buffer(:)
++    integer, intent(in) :: offset
++    character(len=*), intent(in) :: value
++    integer :: index
++    do index = 1, len(value)
++      buffer(offset + index - 1) = byte_value(int(iachar(value(index:index)), int32))
++    enddo
++  end subroutine put_ascii
++
++  pure integer(int32) function crc32_bytes(buffer)
++    integer(int8), intent(in) :: buffer(:)
++    integer(int32) :: crc
++    integer :: index, bit
++    crc = not(0_int32)
++    do index = 1, size(buffer)
++      crc = ieor(crc, iand(int(buffer(index), int32), int(z'ff', int32)))
++      do bit = 1, 8
++        if (btest(crc, 0)) then
++          crc = ieor(shiftr(crc, 1), int(z'edb88320', int32))
++        else
++          crc = shiftr(crc, 1)
++        endif
++      enddo
++    enddo
++    crc32_bytes = not(crc)
++  end function crc32_bytes
++
++  subroutine path_archive_open(filename, lx, ly, n_up, n_down, ltrot, &
++       hopping, interaction, dt, beta, theta, ensemble, chain_id, &
++       selected_hash, trial_hash)
++    character(len=*), intent(in) :: filename
++    integer, intent(in) :: lx, ly, n_up, n_down, ltrot, ensemble, chain_id
++    real(real64), intent(in) :: hopping, interaction, dt, beta, theta
++    character(len=*), intent(in) :: selected_hash, trial_hash
++    integer(int8) :: header(header_bytes), existing(header_bytes)
++    integer(int64) :: file_size, payload_size
++    integer :: index, io_status, read_unit
++    logical :: exists
++
++    if (archive_is_open) error stop 'path archive already open'
++    if (len_trim(selected_hash) /= 64 .or. len_trim(trial_hash) /= 64) &
++      error stop 'path archive hashes must contain 64 characters'
++    if (ensemble < 1 .or. ensemble > 2) &
++      error stop 'Archive_ensemble must be 1 or 2'
++    if (chain_id < 0 .or. chain_id >= 2048) &
++      error stop 'Archive_chain_id must be in [0,2048)'
++    if (ltrot <= 0 .or. lx <= 0 .or. ly <= 0) &
++      error stop 'invalid path archive dimensions'
++
++    archive_ltrot = int(ltrot, int32)
++    archive_nsites = int(lx * ly, int32)
++    archive_nfield = archive_ltrot * archive_nsites
++    archive_payload_bytes = (archive_nfield + 7_int32) / 8_int32
++    archive_record_bytes = ((record_prefix_bytes + archive_payload_bytes + 4 + 63) / 64) * 64
++    archive_chain = int(chain_id, int32)
++    archive_ensemble = int(ensemble, int8)
++
++    header = 0_int8
++    call put_ascii(header, 1, 'QHPATH01')
++    call put_u32(header, 9, 1_int32)
++    call put_u32(header, 13, int(z'01020304', int32))
++    call put_u32(header, 17, int(header_bytes, int32))
++    call put_u32(header, 21, archive_record_bytes)
++    call put_u32(header, 25, int(lx, int32))
++    call put_u32(header, 29, int(ly, int32))
++    call put_u32(header, 33, int(n_up, int32))
++    call put_u32(header, 37, int(n_down, int32))
++    call put_u32(header, 41, archive_ltrot)
++    call put_u32(header, 45, archive_nsites)
++    call put_u32(header, 49, archive_nfield)
++    call put_u32(header, 53, archive_payload_bytes)
++    call put_real64(header, 57, hopping)
++    call put_real64(header, 65, interaction)
++    call put_real64(header, 73, dt)
++    call put_real64(header, 81, beta)
++    call put_real64(header, 89, theta)
++    header(97) = archive_ensemble
++    header(98) = 1_int8
++    header(99) = 1_int8
++    call put_ascii(header, 101, selected_hash(1:64))
++    call put_ascii(header, 165, trial_hash(1:64))
++
++    inquire(file=trim(filename), exist=exists, size=file_size)
++    if (exists) then
++      if (file_size < header_bytes) error stop 'truncated path archive header'
++      open(newunit=read_unit, file=trim(filename), access='stream', &
++           form='unformatted', status='old', action='read', iostat=io_status)
++      if (io_status /= 0) error stop 'cannot read existing path archive'
++      read(read_unit, iostat=io_status) existing
++      close(read_unit)
++      if (io_status /= 0 .or. any(existing /= header)) &
++        error stop 'existing path archive header mismatch'
++      payload_size = file_size - int(header_bytes, int64)
++      if (mod(payload_size, int(archive_record_bytes, int64)) /= 0_int64) &
++        error stop 'path archive has a truncated record'
++      local_sequence = payload_size / int(archive_record_bytes, int64)
++      open(newunit=archive_unit, file=trim(filename), access='stream', &
++           form='unformatted', status='old', position='append', &
++           action='write', iostat=io_status)
++    else
++      local_sequence = 0_int64
++      open(newunit=archive_unit, file=trim(filename), access='stream', &
++           form='unformatted', status='new', action='write', iostat=io_status)
++      if (io_status == 0) write(archive_unit) header
++    endif
++    if (io_status /= 0) error stop 'cannot open path archive for writing'
++    archive_is_open = .true.
++  end subroutine path_archive_open
++
++  subroutine path_archive_close()
++    if (archive_is_open) close(archive_unit)
++    archive_unit = -1
++    archive_is_open = .false.
++  end subroutine path_archive_close
++
++  subroutine path_archive_write(bin_id, sweep_id, frozen_sign, central, &
++       endpoint_sign, endpoint_logabs, endpoint, field_values)
++    integer, intent(in) :: bin_id, frozen_sign, endpoint_sign
++    integer(int64), intent(in) :: sweep_id
++    real(real64), intent(in) :: central(4), endpoint_logabs, endpoint(3)
++    real(real64), intent(in) :: field_values(:,:)
++    integer(int8), allocatable :: record(:)
++    integer(int32) :: crc
++    integer(int64) :: sample_id
++    integer :: site, slice, field_index, payload_index, bit_index
++
++    if (.not. archive_is_open) error stop 'path archive is not open'
++    if (size(field_values, 1) /= archive_nsites .or. &
++        size(field_values, 2) /= archive_ltrot) &
++      error stop 'path archive field dimensions do not match header'
++    local_sequence = local_sequence + 1_int64
++    if (local_sequence >= shiftl(1_int64, 49)) &
++      error stop 'path archive local sequence overflow'
++    sample_id = ior(shiftl(int(archive_ensemble, int64), 60), &
++                    ior(shiftl(int(archive_chain, int64), 49), local_sequence))
++    allocate(record(archive_record_bytes))
++    record = 0_int8
++    call put_u64(record, 1, sample_id)
++    call put_u32(record, 9, archive_chain)
++    call put_u32(record, 13, int(bin_id, int32))
++    call put_u64(record, 17, sweep_id)
++    call put_u32(record, 25, archive_ltrot)
++    call put_u32(record, 29, archive_nfield)
++    record(33) = int(frozen_sign, int8)
++    record(34) = 1_int8
++    call put_u16(record, 35, 0_int32)
++    call put_real64(record, 37, central(1))
++    call put_real64(record, 45, central(2))
++    call put_real64(record, 53, central(3))
++    call put_real64(record, 61, central(4))
++    record(69) = int(endpoint_sign, int8)
++    call put_real64(record, 77, endpoint_logabs)
++    call put_real64(record, 85, endpoint(1))
++    call put_real64(record, 93, endpoint(2))
++    call put_real64(record, 101, endpoint(3))
++
++    field_index = 0
++    do slice = 1, archive_ltrot
++      do site = 1, archive_nsites
++        if (nint(field_values(site, slice)) /= -1 .and. &
++            nint(field_values(site, slice)) /= 1) &
++          error stop 'path archive requires binary fields'
++        if (nint(field_values(site, slice)) == 1) then
++          payload_index = record_prefix_bytes + 1 + field_index / 8
++          bit_index = mod(field_index, 8)
++          record(payload_index) = byte_value(ior( &
++            iand(int(record(payload_index), int32), int(z'ff', int32)), &
++            shiftl(1_int32, bit_index)))
++        endif
++        field_index = field_index + 1
++      enddo
++    enddo
++    crc = crc32_bytes(record(1:record_prefix_bytes + archive_payload_bytes))
++    call put_u32(record, record_prefix_bytes + archive_payload_bytes + 1, crc)
++    write(archive_unit) record
++    flush(archive_unit)
++    deallocate(record)
++  end subroutine path_archive_write
++
++  subroutine path_endpoint_signed_log(udvl, udvr, n_sun, sign_value, logabs_value)
++    class(UDV_State), intent(in) :: udvl(:), udvr(:)
++    integer, intent(in) :: n_sun
++    integer, intent(out) :: sign_value
++    real(real64), intent(out) :: logabs_value
++    complex(real64), allocatable :: overlap(:,:)
++    complex(real64) :: phase
++    integer, allocatable :: pivots(:)
++    integer :: flavor, index, info, part
++
++    if (size(udvl) /= size(udvr)) error stop 'endpoint flavor mismatch'
++    phase = cmplx(1.0_real64, 0.0_real64, real64)
++    logabs_value = 0.0_real64
++    do flavor = 1, size(udvr)
++      part = udvr(flavor)%n_part
++      if (udvl(flavor)%n_part /= part) error stop 'endpoint particle mismatch'
++      allocate(overlap(part, part), pivots(part))
++      overlap = matmul(conjg(transpose(udvl(flavor)%U)), udvr(flavor)%U)
++      call zgetrf(part, part, overlap, part, pivots, info)
++      if (info /= 0) then
++        sign_value = 0
++        logabs_value = -huge(1.0_real64)
++        deallocate(overlap, pivots)
++        return
++      endif
++      do index = 1, part
++        if (pivots(index) /= index) phase = -phase
++        phase = phase * overlap(index,index) / abs(overlap(index,index))
++        logabs_value = logabs_value + log(abs(overlap(index,index)))
++      enddo
++      deallocate(overlap, pivots)
++    enddo
++    phase = phase ** n_sun
++    logabs_value = logabs_value * real(n_sun, real64)
++    if (abs(aimag(phase)) > 1.0e-8_real64) &
++      error stop 'complex endpoint phase in real path archive'
++    if (real(phase, real64) > 0.0_real64) then
++      sign_value = 1
++    else if (real(phase, real64) < 0.0_real64) then
++      sign_value = -1
++    else
++      sign_value = 0
++      logabs_value = ieee_value(logabs_value, ieee_quiet_nan)
++    endif
++  end subroutine path_endpoint_signed_log
++
++  real(real64) function path_udv_logabs(states)
++    class(UDV_State), intent(in) :: states(:)
++    complex(real64) :: scale
++    integer :: flavor, index
++    path_udv_logabs = 0.0_real64
++    do flavor = 1, size(states)
++      do index = 1, states(flavor)%n_part
++        call states(flavor)%getscale(scale, index)
++        path_udv_logabs = path_udv_logabs + log(abs(scale))
++      enddo
++    enddo
++  end function path_udv_logabs
++
++end module Path_archive_mod
+--- a/Prog/main.F90
++++ b/Prog/main.F90
+@@ -132,6 +132,8 @@
+         use wrapul_mod
+         use cgr1_mod
+         use set_random
++        use Path_archive_mod
++        use iso_fortran_env, only: int64
+ 
+ #ifdef MPI
+         Use mpi
+@@ -163,6 +165,15 @@
+         Integer :: Nt_sequential_start, Nt_sequential_end, mpi_per_parameter_set
+         Integer :: N_Global_tau
+         Logical :: Sequential
++        Logical :: Archive_paths, Archive_binary
++        Integer :: Archive_stride, Archive_after_sweep
++        Integer :: Archive_ensemble, Archive_chain_id
++        Character(len=256) :: Archive_file
++        Character(len=64) :: Archive_selected_hash, Archive_trial_hash
++        Integer :: Archive_lx, Archive_ly
++        Real(Kind=Kind(0.d0)) :: Archive_hopping, Archive_interaction
++        Real(Kind=Kind(0.d0)) :: Archive_dt, Archive_beta, Archive_theta
++        Integer(int64) :: Archive_sweep_id
+ 
+ #ifdef HDF5
+         INTEGER(HID_T) :: file_id
+@@ -181,7 +192,10 @@
+         NAMELIST /VAR_QMC/   Nwrap, NSweep, NBin, Ltau, LOBS_EN, LOBS_ST, CPU_MAX, &
+              &               Propose_S0,Global_moves,  N_Global, Global_tau_moves, &
+              &               Nt_sequential_start, Nt_sequential_end, N_Global_tau, &
+-             &               Langevin, HMC, Delta_t_Langevin_HMC, Max_Force, Leapfrog_steps
++             &               Langevin, HMC, Delta_t_Langevin_HMC, Max_Force, Leapfrog_steps, &
++             &               Archive_paths, Archive_stride, Archive_after_sweep, &
++             &               Archive_ensemble, Archive_chain_id, Archive_file, &
++             &               Archive_selected_hash, Archive_trial_hash
+ 
+ 
+         !  General
+@@ -285,6 +299,10 @@
+            Global_tau_moves = .false.; Langevin = .false. ; HMC =.false.
+            Delta_t_Langevin_HMC = 0.d0;  Max_Force = 0.d0 ; Leapfrog_steps = 0
+            Nt_sequential_start = 1 ;  Nt_sequential_end  = 0;  N_Global_tau  = 0
++           Archive_paths = .false.; Archive_stride = 0
++           Archive_after_sweep = 0; Archive_ensemble = 0
++           Archive_chain_id = 0; Archive_file = 'paths.qhpath'
++           Archive_selected_hash = ''; Archive_trial_hash = ''
+            OPEN(UNIT=5,FILE='parameters',STATUS='old',ACTION='read',IOSTAT=ierr)
+            IF (ierr /= 0) THEN
+               WRITE(error_unit,*) 'main: unable to open <parameters>',ierr
+@@ -314,6 +332,14 @@
+         CALL MPI_BCAST(Leapfrog_steps       ,1 ,MPI_Integer  ,0,MPI_COMM_WORLD,ierr)
+         CALL MPI_BCAST(Max_Force            ,1 ,MPI_REAL8    ,0,MPI_COMM_WORLD,ierr)
+         CALL MPI_BCAST(Delta_t_Langevin_HMC ,1 ,MPI_REAL8    ,0,MPI_COMM_WORLD,ierr)
++        CALL MPI_BCAST(Archive_paths        ,1 ,MPI_LOGICAL  ,0,MPI_COMM_WORLD,ierr)
++        CALL MPI_BCAST(Archive_stride       ,1 ,MPI_INTEGER  ,0,MPI_COMM_WORLD,ierr)
++        CALL MPI_BCAST(Archive_after_sweep  ,1 ,MPI_INTEGER  ,0,MPI_COMM_WORLD,ierr)
++        CALL MPI_BCAST(Archive_ensemble     ,1 ,MPI_INTEGER  ,0,MPI_COMM_WORLD,ierr)
++        CALL MPI_BCAST(Archive_chain_id     ,1 ,MPI_INTEGER  ,0,MPI_COMM_WORLD,ierr)
++        CALL MPI_BCAST(Archive_file         ,256,MPI_CHARACTER,0,MPI_COMM_WORLD,ierr)
++        CALL MPI_BCAST(Archive_selected_hash,64,MPI_CHARACTER,0,MPI_COMM_WORLD,ierr)
++        CALL MPI_BCAST(Archive_trial_hash   ,64,MPI_CHARACTER,0,MPI_COMM_WORLD,ierr)
+ #endif
+         Call Fields_init()
+         Call Alloc_Ham()
+@@ -324,6 +350,9 @@
+           allocate(Calc_Fl(N_FL))
+           Calc_Fl=.True.
+         endif
++        ! Frozen path records need both explicit spin blocks even when the
++        ! stock free/free calculation would reconstruct one by symmetry.
++        if (Archive_paths) Calc_Fl = .True.
+         ! Count number of flavors to be calculated
+         N_FL_eff=0
+         Do I=1,N_Fl
+@@ -453,6 +482,26 @@
+ 
+         Stab_nt(Nstm) = Ltrot
+ 
++        if (Archive_paths) then
++           if (.not. Projector) error stop 'Archive_paths requires Projector=.T.'
++           if (Archive_stride <= 0) error stop 'Archive_stride must be positive'
++           if (Archive_after_sweep < 0) error stop 'Archive_after_sweep must be nonnegative'
++#ifdef MPI
++           if (Isize_g /= 1) error stop 'Archive_paths requires one MPI rank per chain'
++#endif
++           call ham%Archive_metadata(Archive_lx, Archive_ly, Archive_hopping, &
++                Archive_interaction, Archive_dt, Archive_beta, Archive_theta, &
++                Archive_binary)
++           if (.not. Archive_binary) error stop 'Archive_paths requires binary Hirsch fields'
++           if (N_FL /= 2 .or. N_FL_eff /= 2) &
++                error stop 'Archive_paths requires two explicit spin flavors'
++           call path_archive_open(trim(Archive_file), Archive_lx, Archive_ly, &
++                size(WF_R(1)%P,2), size(WF_R(2)%P,2), Ltrot, &
++                Archive_hopping, Archive_interaction, Archive_dt, Archive_beta, &
++                Archive_theta, Archive_ensemble, Archive_chain_id, &
++                Archive_selected_hash, Archive_trial_hash)
++        endif
++
+ #if defined(TEMPERING)
+         write(File1,'(A,I0,A)') "Temp_",igroup,"/info"
+ #else
+@@ -795,6 +844,14 @@
+                  endif
+               endif
+ 
++              Archive_sweep_id = int((NBC - 1) * NSWEEP + NSW, int64)
++              if (Archive_paths .and. &
++                  Archive_sweep_id > int(Archive_after_sweep, int64) .and. &
++                  mod(Archive_sweep_id - int(Archive_after_sweep, int64), &
++                      int(Archive_stride, int64)) == 0_int64) then
++                 call Write_frozen_archive(NBC - 1, Archive_sweep_id)
++              endif
++
+            ENDDO
+            Call ham%Pr_obs(Ltau)
+ #if defined(TEMPERING)
+@@ -814,6 +871,8 @@
+            Endif
+         Enddo
+ 
++        if (Archive_paths) call path_archive_close()
++
+         ! Deallocate things
+         DO nf_eff = 1, N_FL_eff
+            CALL udvl(nf_eff)%dealloc
+@@ -874,4 +933,123 @@
+         CALL MPI_FINALIZE(ierr)
+ #endif
+ 
++      contains
++
++        subroutine Write_frozen_archive(bin_id, sweep_id)
++          integer, intent(in) :: bin_id
++          integer(int64), intent(in) :: sweep_id
++          class(UDV_State), allocatable :: frozen_left(:), frozen_right(:)
++          complex(Kind=Kind(0.d0)), allocatable :: frozen_gr(:,:,:)
++          complex(Kind=Kind(0.d0)), allocatable :: frozen_tilde(:,:,:)
++          complex(Kind=Kind(0.d0)), allocatable :: frozen_phases(:)
++          complex(Kind=Kind(0.d0)) :: phase_one, phase_total
++          real(Kind=Kind(0.d0)) :: central(4), endpoint(3)
++          real(Kind=Kind(0.d0)) :: endpoint_logabs
++          real(Kind=Kind(0.d0)) :: endpoint_npart
++          real(Kind=Kind(0.d0)) :: right_logabs
++          integer :: center, current, next_slice, flavor, flavor_eff
++          integer :: nvar_local, endpoint_sign, frozen_sign
++
++          allocate(frozen_left(N_FL_eff), frozen_right(N_FL_eff))
++          allocate(frozen_gr(Ndim,Ndim,N_FL), frozen_tilde(Ndim,Ndim,N_FL))
++          allocate(frozen_phases(N_FL))
++          frozen_gr = cmplx(0.d0, 0.d0, kind(0.d0))
++          do flavor_eff = 1, N_FL_eff
++             flavor = Calc_Fl_map(flavor_eff)
++             call frozen_right(flavor_eff)%init(Ndim, 'r', WF_R(flavor)%P)
++             call frozen_left(flavor_eff)%init(Ndim, 'l', WF_L(flavor)%P)
++          enddo
++
++          center = Ltrot / 2
++          right_logabs = 0.d0
++          current = 0
++          do while (current < center)
++             next_slice = min(current + Nwrap, center)
++             call WRAPUR(current, next_slice, frozen_right)
++             right_logabs = right_logabs + path_udv_logabs(frozen_right)
++             current = next_slice
++          enddo
++          current = Ltrot
++          do while (current > center)
++             next_slice = max(current - Nwrap, center)
++             call WRAPUL(current, next_slice, frozen_left)
++             current = next_slice
++          enddo
++
++          frozen_phases = cmplx(1.d0, 0.d0, kind(0.d0))
++          nvar_local = 1
++          if (center > Ltrot/2) nvar_local = 2
++          do flavor_eff = 1, N_FL_eff
++             flavor = Calc_Fl_map(flavor_eff)
++             call CGR(phase_one, nvar_local, frozen_gr(:,:,flavor), &
++                      frozen_right(flavor_eff), frozen_left(flavor_eff))
++             call Op_phase(phase_one, OP_V, nsigma, flavor)
++             frozen_phases(flavor) = phase_one
++          enddo
++          if (reconstruction_needed) call ham%weight_reconstruction(frozen_phases)
++          phase_total = product(frozen_phases)
++          phase_total = phase_total ** N_SUN
++          if (abs(aimag(phase_total)) > 1.d-8) &
++               error stop 'complex frozen phase in real archive'
++          frozen_sign = merge(1, -1, real(phase_total,kind(0.d0)) >= 0.d0)
++          if (Symm) then
++             call Hop_mod_Symm(frozen_tilde, frozen_gr)
++             if (reconstruction_needed) call ham%GR_reconstruction(frozen_tilde)
++             call ham%Frozen_scalars(frozen_tilde, central(1), central(2), &
++                                     central(3), central(4))
++          else
++             if (reconstruction_needed) call ham%GR_reconstruction(frozen_gr)
++             call ham%Frozen_scalars(frozen_gr, central(1), central(2), &
++                                     central(3), central(4))
++          endif
++
++          current = center
++          do while (current < Ltrot)
++             next_slice = min(current + Nwrap, Ltrot)
++             call WRAPUR(current, next_slice, frozen_right)
++             right_logabs = right_logabs + path_udv_logabs(frozen_right)
++             current = next_slice
++          enddo
++          do flavor_eff = 1, N_FL_eff
++             flavor = Calc_Fl_map(flavor_eff)
++             call frozen_left(flavor_eff)%reset('l', WF_L(flavor)%P)
++          enddo
++          frozen_gr = cmplx(0.d0, 0.d0, kind(0.d0))
++          frozen_phases = cmplx(1.d0, 0.d0, kind(0.d0))
++          do flavor_eff = 1, N_FL_eff
++             flavor = Calc_Fl_map(flavor_eff)
++             call CGR(phase_one, 2, frozen_gr(:,:,flavor), &
++                      frozen_right(flavor_eff), frozen_left(flavor_eff))
++             call Op_phase(phase_one, OP_V, nsigma, flavor)
++             frozen_phases(flavor) = phase_one
++          enddo
++          if (reconstruction_needed) call ham%weight_reconstruction(frozen_phases)
++          if (Symm) then
++             call Hop_mod_Symm(frozen_tilde, frozen_gr)
++             if (reconstruction_needed) call ham%GR_reconstruction(frozen_tilde)
++             call ham%Frozen_scalars(frozen_tilde, endpoint(1), endpoint(2), &
++                                     endpoint(3), endpoint_npart)
++          else
++             if (reconstruction_needed) call ham%GR_reconstruction(frozen_gr)
++             call ham%Frozen_scalars(frozen_gr, endpoint(1), endpoint(2), &
++                                     endpoint(3), endpoint_npart)
++          endif
++          call path_endpoint_signed_log(frozen_left, frozen_right, N_SUN, &
++                                        endpoint_sign, endpoint_logabs)
++          endpoint_logabs = endpoint_logabs + right_logabs * real(N_SUN,kind(0.d0)) &
++               - real(size(OP_V,1) * Ltrot, kind(0.d0)) * log(2.d0) &
++               - 0.5d0 * Archive_dt * Archive_interaction &
++                 * real(size(WF_R(1)%P,2) + size(WF_R(2)%P,2),kind(0.d0)) &
++                 * real(Ltrot,kind(0.d0))
++          call path_archive_write(bin_id, sweep_id, frozen_sign, central, &
++               endpoint_sign, endpoint_logabs, endpoint, nsigma%f)
++
++          do flavor_eff = 1, N_FL_eff
++             call frozen_left(flavor_eff)%dealloc
++             call frozen_right(flavor_eff)%dealloc
++          enddo
++          deallocate(frozen_left, frozen_right, frozen_gr, frozen_tilde)
++          deallocate(frozen_phases)
++        end subroutine Write_frozen_archive
++
+       end Program Main

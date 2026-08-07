@@ -1,0 +1,456 @@
+diff --git a/CPMC_BRIDGE_PATCH.txt b/CPMC_BRIDGE_PATCH.txt
+new file mode 100644
+index 0000000..f5252bb
+--- /dev/null
++++ b/CPMC_BRIDGE_PATCH.txt
+@@ -0,0 +1,4 @@
++PQMC/CP bridge patch series
++Base: official CPMC-Lab 2.0, CPMC_Lab_20160129
++Mixed initial/guide determinants, fixed-horizon paths, and genealogy
++diagnostics are implemented in CPMC_Bridge.m without changing stock calls.
+diff --git a/CPMC_Bridge.m b/CPMC_Bridge.m
+new file mode 100644
+index 0000000..94a23bf
+--- /dev/null
++++ b/CPMC_Bridge.m
+@@ -0,0 +1,440 @@
++function [E_ave,E_err,savedFileName,diag] = CPMC_Bridge(params,opts)
++%CPMC_BRIDGE Audited mixed-boundary driver using CPMC-Lab propagation.
++
++required_params = {'Lx','Ly','Lz','N_up','N_dn','kx','ky','kz', ...
++    'U','tx','ty','tz','deltau','N_wlk','N_blksteps','N_eqblk', ...
++    'N_blk','itv_modsvd','itv_pc','itv_Em'};
++for index = 1:numel(required_params)
++    assert(isfield(params,required_params{index}), ...
++        'bridge:params:missing','Missing parameter %s',required_params{index});
++end
++N_sites=params.Lx*params.Ly*params.Lz;
++N_up=params.N_up;
++N_par=params.N_up+params.N_dn;
++opts=validate_bridge_opts(opts,N_sites,params.N_up,params.N_dn);
++rng(opts.rng_seed,'twister');
++
++H_k=H_K(params.Lx,params.Ly,params.Lz,params.kx,params.ky,params.kz, ...
++    params.tx,params.ty,params.tz);
++Proj_k_half=expm(-0.5*params.deltau*H_k);
++gamma=acosh(exp(0.5*params.deltau*params.U));
++aux_fld=[exp(gamma),exp(-gamma);exp(-gamma),exp(gamma)];
++Phi_T=opts.Phi_trial;
++Phi=repmat(opts.Phi_init,1,1,params.N_wlk);
++[O0,inv_up0,inv_dn0]=bridge_overlap(opts.Phi_init,Phi_T,N_up,N_par);
++assert(real(O0)>1e-10 && abs(imag(O0))<1e-12, ...
++    'bridge:init:overlap','Initial mixed overlap must be positive real');
++O=repmat(O0,params.N_wlk,1);
++w=ones(params.N_wlk,1);
++E_ref=real(measure(H_k,opts.Phi_init,Phi_T,inv_up0,inv_dn0, ...
++    N_up,N_par,params.U));
++fac_norm=(E_ref-0.5*params.U*N_par)*params.deltau;
++
++if strcmp(opts.mode,'production')
++    total_steps=params.N_eqblk*params.N_blksteps+ ...
++        params.N_blk*params.N_blksteps;
++    history_origin='rolling_population';
++else
++    total_steps=opts.total_steps;
++    history_origin='I';
++end
++state=bridge_state(params.N_wlk,total_steps,N_sites,history_origin);
++if isfield(opts,'prefix_logq_floor')
++    assert(numel(opts.prefix_logq_floor)>=total_steps, ...
++        'bridge:tag:floor','prefix_logq_floor is shorter than run');
++    state.prefix_logq_floor=opts.prefix_logq_floor(:);
++end
++state.initial_overlap=O0;
++state.initial_energy=E_ref;
++state.reference_energy=zeros(total_steps,1);
++terminal_weights_pre_pc=[];
++terminal_energies=[];
++block_energies=[];
++global_step=0;
++tic;
++
++if strcmp(opts.mode,'production')
++    for block=1:params.N_eqblk
++        for step=1:params.N_blksteps
++            global_step=global_step+1;
++            state.reference_energy(global_step)=E_ref;
++            [Phi,w,O,state,~]=bridge_step(Phi,w,O,state,global_step, ...
++                H_k,Proj_k_half,Phi_T,N_up,N_par,params.U, ...
++                params.deltau,fac_norm,E_ref,aux_fld,false);
++            if mod(global_step,params.itv_modsvd)==0
++                [Phi,O,state]=bridge_stabilize(Phi,O,state,N_up,N_par);
++            end
++            if mod(global_step,params.itv_pc)==0
++                [Phi,w,O,state]=bridge_population(Phi,w,O,state,global_step);
++            end
++        end
++    end
++    block_energies=zeros(params.N_blk,1);
++    for block=1:params.N_blk
++        energy_sum=0;
++        weight_sum=0;
++        for step=1:params.N_blksteps
++            global_step=global_step+1;
++            measure_now=mod(step,params.itv_Em)==0;
++            state.reference_energy(global_step)=E_ref;
++            [Phi,w,O,state,local_energy]=bridge_step( ...
++                Phi,w,O,state,global_step,H_k,Proj_k_half,Phi_T, ...
++                N_up,N_par,params.U,params.deltau,fac_norm,E_ref, ...
++                aux_fld,measure_now);
++            if measure_now
++                alive=w>0;
++                energy_sum=energy_sum+sum(w(alive).*local_energy(alive));
++                weight_sum=weight_sum+sum(w(alive));
++            end
++            if mod(global_step,params.itv_modsvd)==0
++                [Phi,O,state]=bridge_stabilize(Phi,O,state,N_up,N_par);
++            end
++            if mod(global_step,params.itv_pc)==0
++                [Phi,w,O,state]=bridge_population(Phi,w,O,state,global_step);
++            end
++            if measure_now
++                assert(weight_sum>0,'bridge:weight:zero', ...
++                    'Measured population has zero weight');
++                E_ref=real(energy_sum/weight_sum);
++                fac_norm=(E_ref-0.5*params.U*N_par)*params.deltau;
++            end
++        end
++        block_energies(block)=real(energy_sum/weight_sum);
++        fprintf('bridge production block %d/%d E=%.12f\n', ...
++            block,params.N_blk,block_energies(block));
++    end
++    E_ave=mean(block_energies);
++    E_err=std(block_energies)/sqrt(params.N_blk);
++    [terminal_energies,terminal_weights_pre_pc]=bridge_terminal( ...
++        Phi,w,Phi_T,H_k,N_up,N_par,params.U);
++else
++    for step=1:opts.total_steps
++        global_step=step;
++        measure_now=step==opts.total_steps;
++        state.reference_energy(step)=E_ref;
++        [Phi,w,O,state,local_energy]=bridge_step( ...
++            Phi,w,O,state,step,H_k,Proj_k_half,Phi_T,N_up,N_par, ...
++            params.U,params.deltau,fac_norm,E_ref,aux_fld,measure_now);
++        if mod(step,params.itv_modsvd)==0
++            [Phi,O,state]=bridge_stabilize(Phi,O,state,N_up,N_par);
++        end
++        if measure_now
++            terminal_weights_pre_pc=w;
++            terminal_energies=local_energy;
++        elseif strcmp(opts.mode,'fixed_horizon') && ...
++                mod(step,params.itv_pc)==0
++            [Phi,w,O,state]=bridge_population(Phi,w,O,state,step);
++        end
++        if mod(step,max(1,ceil(opts.total_steps/20)))==0 || ...
++                step==opts.total_steps
++            fprintf('bridge %s step %d/%d alive=%d\n',opts.mode, ...
++                step,opts.total_steps,sum(w>0));
++        end
++    end
++    total_weight=sum(terminal_weights_pre_pc);
++    assert(total_weight>0,'bridge:terminal:zero', ...
++        'Terminal population has zero weight');
++    E_ave=real(sum(terminal_weights_pre_pc.*terminal_energies)/total_weight);
++    E_err=NaN;
++end
++
++state.final_Phi=Phi;
++state.final_w=w;
++state.final_O=O;
++state.terminal_ancestor_id=state.ancestor_id;
++state.terminal_descendant_count=bridge_descendants( ...
++    state.ancestor_id,params.N_wlk);
++state.terminal_tagged_count=sum(state.prefix_tag);
++state.wall_seconds=toc;
++diag=state;
++diag.mode=opts.mode;
++diag.rng_seed=opts.rng_seed;
++diag.total_steps=global_step;
++diag.terminal_weights_pre_pc=terminal_weights_pre_pc;
++diag.terminal_energies=terminal_energies;
++diag.block_energies=block_energies;
++
++if ~exist(opts.output_dir,'dir')
++    mkdir(opts.output_dir);
++end
++savedFileName=fullfile(opts.output_dir,[opts.run_id,'.mat']);
++schema_version=1;
++mode=opts.mode;
++run_id=opts.run_id;
++seed=opts.rng_seed;
++ltrot=opts.ltrot;
++contract_selected_projection_sha256= ...
++    opts.contract_hashes.selected_projection;
++strata_names={};
++strata_mass=[];
++save(savedFileName,'schema_version','mode','run_id','seed','ltrot', ...
++    'contract_selected_projection_sha256','terminal_weights_pre_pc', ...
++    'terminal_energies','block_energies','strata_names','strata_mass', ...
++    'E_ave','E_err','params','opts','diag','-v7');
++end
++
++function state=bridge_state(N_wlk,total_steps,N_sites,origin)
++words=ceil(total_steps*N_sites/64);
++state.logQ_prop=zeros(N_wlk,1);
++state.logW_path=zeros(N_wlk,1);
++state.logW_ratio=zeros(N_wlk,1);
++state.eref_sum=zeros(N_wlk,1);
++state.log_orbital_scale=zeros(N_wlk,1);
++state.orbital_scale_sign=ones(N_wlk,1);
++state.alive=true(N_wlk,1);
++state.first_rejection_kind=zeros(N_wlk,1,'uint8');
++state.first_rejection_step=-ones(N_wlk,1,'int32');
++state.first_rejection_site=-ones(N_wlk,1,'int32');
++state.min_q=ones(N_wlk,1);
++state.min_halfk_ratio=ones(N_wlk,1);
++state.path_bits_uint64=zeros(words,N_wlk,'uint64');
++state.prefix_logQ=NaN(total_steps,N_wlk);
++state.prefix_logW_phys=NaN(total_steps,N_wlk);
++state.prefix_alive=false(total_steps,N_wlk);
++state.prefix_logq_floor=-Inf(total_steps,1);
++state.prefix_tag=false(N_wlk,1);
++state.prefix_tag_first_step=-ones(N_wlk,1,'int32');
++state.ancestor_id=uint64((1:N_wlk)');
++state.history_origin=origin;
++state.pc_step=[];
++state.pc_parent_index={};
++state.pc_offspring_count={};
++state.pc_log_mean_weight=[];
++state.pc_weight_ess=[];
++state.pc_genealogical_ess=[];
++state.pc_unique_ancestors_before=[];
++state.pc_unique_ancestors_after=[];
++state.pc_logW_phys_before={};
++state.pc_ancestor_before={};
++state.pc_tagged_before=[];
++state.pc_tagged_after=[];
++end
++
++function [Phi,w,O,state,local_energy]=bridge_step( ...
++    Phi,w,O,state,step,H_k,Khalf,Phi_T,N_up,N_par,U,dt, ...
++    fac_norm,E_ref,aux_fld,measure_now)
++N_wlk=size(Phi,3);
++N_sites=size(Phi,1);
++local_energy=zeros(N_wlk,1);
++for walker=1:N_wlk
++    phi=Phi(:,:,walker);
++    if w(walker)>0
++        w(walker)=w(walker)*exp(fac_norm);
++        state.logW_path(walker)=state.logW_path(walker)+fac_norm;
++        state.eref_sum(walker)=state.eref_sum(walker)+E_ref*dt;
++        [phi,w(walker),O(walker),inv_up,inv_dn,state]= ...
++            bridge_halfK(phi,w(walker),O(walker),Khalf,Phi_T, ...
++            N_up,N_par,state,walker,step,uint8(1));
++        for site=1:N_sites
++            if w(walker)<=0
++                break
++            end
++            u_random=rand;
++            [phi(site,:),O(walker),w(walker),inv_up,inv_dn, ...
++                state]=bridge_site(phi(site,:),Phi_T(site,:),N_up, ...
++                N_par,O(walker),w(walker),inv_up,inv_dn,aux_fld, ...
++                u_random,state,walker,step,site,N_sites);
++        end
++        if w(walker)>0
++            [phi,w(walker),O(walker),inv_up,inv_dn,state]= ...
++                bridge_halfK(phi,w(walker),O(walker),Khalf,Phi_T, ...
++                N_up,N_par,state,walker,step,uint8(3));
++            if w(walker)>0 && measure_now
++                local_energy(walker)=real(measure( ...
++                    H_k,phi,Phi_T,inv_up,inv_dn,N_up,N_par,U));
++            end
++        end
++    end
++    Phi(:,:,walker)=phi;
++end
++state.prefix_logQ(step,:)=state.logQ_prop;
++state.prefix_logW_phys(step,:)=state.logW_path-state.eref_sum;
++state.prefix_alive(step,:)=state.alive;
++new_tag=state.alive & ...
++    state.logQ_prop<=state.prefix_logq_floor(step);
++state.prefix_tag_first_step(new_tag & ~state.prefix_tag)=int32(step);
++state.prefix_tag=state.prefix_tag | new_tag;
++end
++
++function [phi,w,O,inv_up,inv_dn,state]=bridge_halfK( ...
++    phi,w,O,Khalf,Phi_T,N_up,N_par,state,walker,step,kind)
++phi=Khalf*phi;
++[O_new,inv_up,inv_dn]=bridge_overlap(phi,Phi_T,N_up,N_par);
++ratio=real(O_new/O);
++if ratio>0 && isfinite(ratio)
++    O=O_new;
++    w=w*ratio;
++    state.logW_path(walker)=state.logW_path(walker)+log(ratio);
++    state.logW_ratio(walker)=state.logW_ratio(walker)+log(ratio);
++    state.min_halfk_ratio(walker)=min( ...
++        state.min_halfk_ratio(walker),ratio);
++else
++    w=0;
++    state=bridge_kill(state,walker,kind,step,0);
++end
++end
++
++function [row,O,w,inv_up,inv_dn,state]=bridge_site( ...
++    row,trial_row,N_up,N_par,O,w,inv_up,inv_dn,aux_fld,u_random, ...
++    state,walker,step,site,N_sites)
++temp1_up=row(1:N_up)*inv_up;
++temp1_dn=row(N_up+1:N_par)*inv_dn;
++temp2_up=inv_up*trial_row(1:N_up)';
++temp2_dn=inv_dn*trial_row(N_up+1:N_par)';
++G_up=temp1_up*trial_row(1:N_up)';
++G_dn=temp1_dn*trial_row(N_up+1:N_par)';
++RR=(aux_fld-ones(2,2)).*[G_up,G_up;G_dn,G_dn]+ones(2,2);
++ratios=RR(1,:).*RR(2,:);
++positive=max(real(ratios),zeros(1,2));
++normalization=sum(positive);
++if normalization<=0 || ~isfinite(normalization)
++    w=0;
++    state=bridge_kill(state,walker,uint8(2),step,site);
++    return
++end
++q_plus=positive(1)/normalization;
++chosen=1+(u_random>q_plus);
++q_selected=positive(chosen)/normalization;
++if q_selected<=0
++    w=0;
++    state=bridge_kill(state,walker,uint8(2),step,site);
++    return
++end
++factor=0.5*normalization;
++w=w*factor;
++state.logQ_prop(walker)=state.logQ_prop(walker)+log(q_selected);
++state.logW_path(walker)=state.logW_path(walker)+log(factor);
++state.logW_ratio(walker)=state.logW_ratio(walker)+log(factor);
++state.min_q(walker)=min(state.min_q(walker),q_selected);
++event=(step-1)*N_sites+(site-1);
++if chosen==1
++    word=floor(event/64)+1;
++    bit=mod(event,64)+1;
++    state.path_bits_uint64(word,walker)=bitset( ...
++        state.path_bits_uint64(word,walker),bit,1);
++end
++row(1:N_up)=row(1:N_up)*aux_fld(1,chosen);
++row(N_up+1:N_par)=row(N_up+1:N_par)*aux_fld(2,chosen);
++O=O*ratios(chosen);
++inv_up=inv_up+(1-aux_fld(1,chosen))/RR(1,chosen)* ...
++    temp2_up*temp1_up;
++inv_dn=inv_dn+(1-aux_fld(2,chosen))/RR(2,chosen)* ...
++    temp2_dn*temp1_dn;
++end
++
++function state=bridge_kill(state,walker,kind,step,site)
++if state.alive(walker)
++    state.first_rejection_kind(walker)=kind;
++    state.first_rejection_step(walker)=int32(step);
++    state.first_rejection_site(walker)=int32(site);
++end
++state.alive(walker)=false;
++state.logQ_prop(walker)=-Inf;
++state.logW_path(walker)=-Inf;
++state.logW_ratio(walker)=-Inf;
++end
++
++function [O,inv_up,inv_dn]=bridge_overlap(phi,Phi_T,N_up,N_par)
++overlap_up=Phi_T(:,1:N_up)'*phi(:,1:N_up);
++overlap_dn=Phi_T(:,N_up+1:N_par)'*phi(:,N_up+1:N_par);
++inv_up=overlap_up\eye(N_up);
++N_dn=N_par-N_up;
++inv_dn=overlap_dn\eye(N_dn);
++O=det(overlap_up)*det(overlap_dn);
++end
++
++function [Phi,O,state]=bridge_stabilize(Phi,O,state,N_up,N_par)
++for walker=1:size(Phi,3)
++    [Phi(:,1:N_up,walker),R_up]=qr(Phi(:,1:N_up,walker),0);
++    [Phi(:,N_up+1:N_par,walker),R_dn]=qr( ...
++        Phi(:,N_up+1:N_par,walker),0);
++    determinant=det(R_up)*det(R_dn);
++    O(walker)=O(walker)/determinant;
++    if determinant==0
++        state.orbital_scale_sign(walker)=0;
++        state.log_orbital_scale(walker)=-Inf;
++    else
++        state.orbital_scale_sign(walker)= ...
++            state.orbital_scale_sign(walker)*sign(real(determinant));
++        state.log_orbital_scale(walker)= ...
++            state.log_orbital_scale(walker)+log(abs(determinant));
++    end
++end
++end
++
++function [Phi,w,O,state]=bridge_population(Phi,w,O,state,step)
++N_wlk=numel(w);
++total=sum(w);
++assert(total>0,'bridge:population:zero','Population weight vanished');
++scale=N_wlk/total;
++u0=rand;
++parent=zeros(N_wlk,1);
++offspring=zeros(N_wlk,1);
++running=-u0;
++children=0;
++for walker=1:N_wlk
++    running=running+w(walker)*scale;
++    target=ceil(running);
++    for child=children+1:target
++        parent(child)=walker;
++        offspring(walker)=offspring(walker)+1;
++    end
++    children=target;
++end
++assert(children==N_wlk,'bridge:population:count', ...
++    'Combing did not preserve walker count');
++ancestor_before=state.ancestor_id;
++state.pc_step(end+1,1)=step;
++state.pc_parent_index{end+1,1}=parent;
++state.pc_offspring_count{end+1,1}=offspring;
++state.pc_log_mean_weight(end+1,1)=log(total/N_wlk);
++state.pc_weight_ess(end+1,1)=total^2/sum(w.^2);
++state.pc_genealogical_ess(end+1,1)=N_wlk^2/sum(offspring.^2);
++state.pc_unique_ancestors_before(end+1,1)=numel(unique(ancestor_before));
++state.pc_unique_ancestors_after(end+1,1)= ...
++    numel(unique(ancestor_before(parent)));
++state.pc_logW_phys_before{end+1,1}= ...
++    state.logW_path-state.eref_sum;
++state.pc_ancestor_before{end+1,1}=ancestor_before;
++state.pc_tagged_before(end+1,1)=sum(state.prefix_tag);
++Phi=Phi(:,:,parent);
++O=O(parent);
++walker_fields={'logQ_prop','logW_path','logW_ratio','eref_sum', ...
++    'log_orbital_scale','orbital_scale_sign','alive', ...
++    'first_rejection_kind','first_rejection_step', ...
++    'first_rejection_site','min_q','min_halfk_ratio','ancestor_id'};
++walker_fields=[walker_fields,{'prefix_tag','prefix_tag_first_step'}];
++for index=1:numel(walker_fields)
++    name=walker_fields{index};
++    state.(name)=state.(name)(parent,:);
++end
++state.path_bits_uint64=state.path_bits_uint64(:,parent);
++state.prefix_logQ(1:step,:)=state.prefix_logQ(1:step,parent);
++state.prefix_logW_phys(1:step,:)=state.prefix_logW_phys(1:step,parent);
++state.prefix_alive(1:step,:)=state.prefix_alive(1:step,parent);
++state.ancestor_id=ancestor_before(parent);
++state.pc_tagged_after(end+1,1)=sum(state.prefix_tag);
++w=ones(N_wlk,1);
++end
++
++function [energies,weights]=bridge_terminal( ...
++    Phi,w,Phi_T,H_k,N_up,N_par,U)
++weights=w;
++energies=zeros(numel(w),1);
++for walker=1:numel(w)
++    if w(walker)>0
++        [~,inv_up,inv_dn]=bridge_overlap( ...
++            Phi(:,:,walker),Phi_T,N_up,N_par);
++        energies(walker)=real(measure(H_k,Phi(:,:,walker),Phi_T, ...
++            inv_up,inv_dn,N_up,N_par,U));
++    end
++end
++end
++
++function counts=bridge_descendants(ancestor,N_wlk)
++counts=zeros(N_wlk,1);
++for walker=1:numel(ancestor)
++    index=double(ancestor(walker));
++    counts(index)=counts(index)+1;
++end
++end

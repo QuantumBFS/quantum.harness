@@ -1,0 +1,156 @@
+!=======================================================================================
+!  Input variables for a general ALF run
+!---------------------------------------------------------------------------------------
+&VAR_ham_name
+ham_name = "Hubbard"
+/
+
+&VAR_lattice               !! Parameters defining the specific lattice and base model
+L1           = 6            ! Length in direction a_1
+L2           = 6            ! Length in direction a_2
+Lattice_type = "Square"     ! Sets a_1 = (1,0), a_2=(0,1), Norb=1, N_coord=2
+Model        = "Hubbard"    ! Sets the Hubbard model, to be specified in &VAR_Hubbard
+/
+
+&VAR_Model_Generic         !! Common model parameters
+Checkerboard = .T.          ! Whether checkerboard decomposition is used
+Symm         = .T.          ! Whether symmetrization takes place
+N_SUN        = 2            ! Number of colors
+N_FL         = 1            ! Number of flavors
+Phi_X        = 0.d0         ! Twist along the L_1 direction, in units of the flux quanta
+Phi_Y        = 0.d0         ! Twist along the L_2 direction, in units of the flux quanta
+Bulk         = .T.          ! Twist as a vector potential (.T.), or at the boundary (.F.)
+N_Phi        = 0            ! Total number of flux quanta traversing the lattice
+Dtau         = 0.1d0        ! Thereby Ltrot=Beta/dtau
+Beta         = 5.d0         ! Inverse temperature
+Projector    = .F.          ! Whether the projective algorithm is used
+Theta        = 10.d0        ! Projection parameter
+/
+
+&VAR_QMC                   !! Variables for the QMC run
+Nwrap                = 10   ! Stabilization. Green functions will be computed from 
+                            ! scratch after each time interval Nwrap*Dtau
+NSweep               = 20   ! Number of sweeps
+NBin                 = 5    ! Number of bins
+Ltau                 = 1    ! 1 to calculate time-displaced Green functions; 0 otherwise
+LOBS_ST              = 0    ! Start measurements at time slice LOBS_ST
+LOBS_EN              = 0    ! End measurements at time slice LOBS_EN
+CPU_MAX              = 0.0  ! Code stops after CPU_MAX hours, if 0 or not
+                            ! specified, the code stops after Nbin bins
+Propose_S0           = .F.  ! Proposes single spin flip moves with probability exp(-S0) 
+Global_moves         = .F.  ! Allows for global moves in space and time 
+N_Global             = 1    ! Number of global moves per sweep 
+Global_tau_moves     = .F.  ! Allows for global moves on a single time slice.  
+N_Global_tau         = 1    ! Number of global moves that will be carried out on a 
+                            ! single time slice
+Nt_sequential_start  = 0    ! One can combine sequential and global moves on a time slice
+Nt_sequential_end    = -1   ! The program then carries out sequential local moves in the
+                            ! range [Nt_sequential_start, Nt_sequential_end] followed by
+                            ! N_Global_tau global moves
+Langevin            = .F.   ! Langevin update
+Delta_t_Langevin_HMC=0.1    ! Default time step for Langevin and HMC updates
+Max_Force           = 5.0   ! Max Force for  Langevin
+HMC                 = .F.   ! HMC update
+Leapfrog_steps      = 0     ! Number of leapfrog interations
+/
+
+&VAR_errors                !! Variables for analysis programs
+n_skip  = 1                 ! Number of bins that to be skipped.
+N_rebin = 1                 ! Rebinning  
+N_Cov   = 0                 ! If set to 1 covariance computed for non-equal-time
+                            ! correlation functions
+/  
+
+&VAR_TEMP                  !! Variables for parallel tempering
+N_exchange_steps      = 6   ! Number of exchange moves #[see Eq.~\eqref{eq:exchangestep}]#
+N_Tempering_frequency = 10  ! The frequency in units of sweeps at which the
+                            ! exchange moves are carried out
+mpi_per_parameter_set = 2   ! Number of mpi-processes per parameter set
+Tempering_calc_det    = .T. ! Specifies whether the fermion weight has to be taken
+                            ! into account while tempering. The default is .true.,
+                            ! and it can be set to .F. if the parameters that
+                            ! get varied only enter the Ising action S_0
+/
+
+&VAR_Max_Stoch             !! Variables for Stochastic Maximum entropy
+Ngamma     = 400            ! Number of Dirac delta-functions for parametrization
+Om_st      = -10.d0         ! Frequency range lower bound
+Om_en      = 10.d0          ! Frequency range upper bound
+NDis       = 2000           ! Number of boxes for histogram
+Nbins      = 250            ! Number of bins for Monte Carlo
+Nsweeps    = 70             ! Number of sweeps per bin
+NWarm      = 20             ! The Nwarm first bins will be ommitted
+N_alpha    = 14             ! Number of temperatures
+alpha_st   = 1.d0           ! Smallest inverse temperature increment for inverse
+R          = 1.2d0          ! temperature (see above) 
+Checkpoint = .F.            ! Whether to produce dump files, allowing the simulation
+                            ! to be resumed later on
+Tolerance  = 0.1d0          ! Data points for which the relative error exceeds the
+                            ! tolerance threshold will be omitted.
+/
+
+&VAR_Hubbard               !! Variables for the specific model
+Mz         = .T.            ! When true, sets the M_z-Hubbard model: Nf=2, demands that
+                            ! N_sun is even, HS field couples to the z-component of
+                            ! magnetization; otherwise, HS field couples to the density
+Continuous = .F.            ! Uses (T: continuous; F: discrete) HS transformation
+ham_T      = 1.d0           ! Hopping parameter
+ham_chem   = 0.d0           ! Chemical potential
+ham_U      = 4.d0           ! Hubbard interaction
+ham_T2     = 1.d0           ! For bilayer systems
+ham_U2     = 4.d0           ! For bilayer systems
+ham_Tperp  = 1.d0           ! For bilayer systems
+/
+
+&VAR_Hubbard_Plain_Vanilla !! Variables for the specific model
+ham_T     = 1.d0            ! Hopping parameter
+ham_chem  = 0.d0            ! Chemical potential
+ham_U     = 4.d0            ! Hubbard interaction
+Dtau      = 0.1d0           ! Thereby Ltrot=Beta/dtau
+Beta      = 5.d0            ! Inverse temperature
+Projector = .F.             ! Whether the projective algorithm is used
+Theta     = 10.d0           ! Projection parameter
+Symm      = .T.             ! Whether symmetrization takes place
+/
+
+&VAR_tV                    !! Variables for the t-V class
+ham_T     = 1.d0            ! Hopping parameter
+ham_chem  = 0.d0            ! Chemical potential
+ham_V     = 4.d0            ! Hubbard interaction
+ham_T2    = 1.d0            ! For bilayer systems
+ham_V2    = 4.d0            ! For bilayer systems
+ham_Tperp = 1.d0            ! For bilayer systems
+ham_Vperp = 1.d0            ! For bilayer systems
+/
+
+&VAR_Kondo                 !! Variables for the Kondo class
+ham_T     = 1.d0            ! Hopping parameter
+ham_chem  = 0.d0            ! Chemical potential
+ham_Uc    = 0.d0            ! Hubbard interaction  on  c-orbitals Uc
+ham_Uf    = 2.d0            ! Hubbard interaction  on  f-orbials  Uf
+ham_JK    = 2.d0            ! Kondo Coupling  J
+/
+
+&VAR_LRC                   !! Variables for the  Long Range Coulomb class
+ham_T          = 1.0        ! Specifies the hopping and chemical potential
+ham_T2         = 1.0        ! For bilayer systems
+ham_Tperp      = 1.0        ! For bilayer systems
+ham_chem       = 1.0        ! Chemical potential
+ham_U          = 4.0        ! On-site interaction
+ham_alpha      = 0.1        ! Coulomb tail magnitude
+Percent_change = 0.1        ! Parameter P
+/
+
+&VAR_Z2_Matter             !! Variables for the Z_2 class
+ham_T          = 1.0        ! Hopping for fermions
+ham_TZ2        = 1.0        ! Hopping for orthogonal fermions
+ham_chem       = 0.0        ! Chemical potential for fermions
+ham_U          = 0.0        ! Hubbard for fermions
+Ham_J          = 1.0        ! Hopping Z2 matter fields
+Ham_K          = 1.0        ! Plaquette term for gauge fields
+Ham_h          = 1.0        ! sigma^x-term for matter
+Ham_g          = 1.0        ! tau^x-term for gauge
+Dtau           = 0.1d0      ! Thereby Ltrot=Beta/dtau
+Beta           = 10.d0      ! Inverse temperature
+/
+! slash terminates namelist statement - DO NOT REMOVE

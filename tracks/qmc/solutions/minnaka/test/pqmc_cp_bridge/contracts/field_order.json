@@ -1,0 +1,20 @@
+{
+  "alf_slice_to_cp_step": "cp_step = alf_slice - 1",
+  "bit_order_within_byte": "least_significant_bit_first",
+  "byte_order": "little_endian",
+  "down_exponent": "-gamma*x",
+  "hs_constant_per_slice": "exp(-dt*U*(N_up+N_down)/2)",
+  "hs_measure_per_site": 0.5,
+  "minus_one_bit": 0,
+  "physical_time_direction": "right_boundary_to_left_boundary",
+  "plus_one_bit": 1,
+  "schema_version": 1,
+  "slice_split": "K/2-V-K/2",
+  "storage_order": "time_slice_major_then_alf_site",
+  "up_exponent": "+gamma*x",
+  "validated": true,
+  "validation_candidate": "time_forward_site_forward",
+  "validation_max_residual": 0.0009285159935075171,
+  "validation_result": "test/pqmc_cp_bridge/results/field_order_validation.json",
+  "validation_tolerance": 0.002
+}
