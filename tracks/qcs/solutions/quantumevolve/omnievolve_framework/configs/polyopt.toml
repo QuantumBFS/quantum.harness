@@ -1,0 +1,110 @@
+# Fast local pilot for QuantumBFS/quantum.harness issue #232.
+# Run from challenges/omnievolve:
+#   omnievolve run ../../tracks/polyopt/solutions/quantumevolve/initial_code.py \
+#     -e tracks.polyopt.solutions.quantumevolve.evaluator:BellCertificateEvaluator \
+#     -c ../../tracks/polyopt/solutions/quantumevolve/config.toml --trusted
+
+[evolution]
+max_generations = 20
+population_size = 1
+island_count = 1
+novelty_threshold = 0.92
+novelty_retry_limit = 2
+mutation_rate = 0.3
+crossover_rate = 0.0
+max_stagnation_gens = 20
+token_budget = 500_000
+compute_budget_sec = 0
+sandbox_timeout = 10
+sandbox_mem_limit_mb = 256
+health_window_gens = 5
+self_evolve_enabled = false
+
+[selection]
+parent_selector = "progressive_mcgs"
+tournament_size = 2
+pareto_enabled = true
+island_migration_interval = 20
+
+[models]
+heavy = ["openai/qwen3.8-max-preview"]
+light = ["openai/qwen3.8-max-preview"]
+max_tokens = 4096
+request_timeout = 300
+reasoning_effort = "low"
+
+[models.routing]
+algorithm = "sliding_window_ucb"
+window_size = 20
+ucb_c = 1.414
+cost_weight = 0.2
+latency_weight = 0.1
+role_conditioned = true
+
+[embedding.code]
+provider = "local"
+model = "Qwen/Qwen3-Embedding-0.6B"
+revision = "default"
+dimension = 1024
+normalization = "provider_default"
+input_type = "document"
+
+[embedding.thought]
+provider = "local"
+model = "Qwen/Qwen3-Embedding-0.6B"
+revision = "default"
+dimension = 1024
+normalization = "l2"
+input_type = "document"
+
+[novelty]
+embedding_gate = false
+ast_gate = true
+behavior_gate = false
+llm_judge_on_borderline = true
+borderline_low = 0.88
+borderline_high = 0.96
+
+[sandbox]
+backend = "trusted_subprocess"
+timeout_sec = 10
+mem_limit_mb = 256
+cpu_limit = 1.0
+pids_limit = 32
+network_mode = "none"
+read_only_root = false
+run_as_non_root = true
+drop_capabilities = true
+no_new_privileges = true
+language = "python"
+
+[storage]
+code_backend = "cas"
+db_path = ".omnievolve/bell_certificate_fast_qwen38_v2.db"
+vector_dir = ".omnievolve/vectors"
+artifact_dir = ".omnievolve/artifacts"
+export_dir = ".omnievolve/exports"
+
+[storage.jobs]
+lease_sec = 30
+heartbeat_sec = 5
+max_attempts = 2
+
+[memory]
+default_top_k = 8
+scope_weights = { L0 = 1.0, L1 = 0.9, L2 = 0.6, L3 = 0.4, L4 = 0.2 }
+ablation_interval_gens = 10
+
+[meta_evolution]
+enabled = false
+auto_apply_l0 = true
+allow_l2_actions = false
+
+[evaluation_governance]
+immutable_task_semantics = true
+immutable_correctness_tests = true
+immutable_hidden_data = true
+immutable_score_formula = true
+allow_environment_adaptation = true
+require_baseline_recheck = true
+require_elite_rank_stability = true

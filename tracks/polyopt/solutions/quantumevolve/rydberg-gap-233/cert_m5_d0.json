@@ -1,0 +1,103 @@
+{
+  "method": "martingale",
+  "m": 5,
+  "delta": 0.0,
+  "gamma_m": 1.2555834174595213,
+  "epsilon": 1.625442792842127,
+  "threshold": 0.5,
+  "certified_gap": 0.0,
+  "all_contained": true,
+  "results": [
+    {
+      "N": 6,
+      "ed_gap": 1.1661532576285394,
+      "certified_gap": 0.0,
+      "contains": true
+    },
+    {
+      "N": 7,
+      "ed_gap": 1.1485282761394946,
+      "certified_gap": 0.0,
+      "contains": true
+    },
+    {
+      "N": 8,
+      "ed_gap": 1.1065151028379674,
+      "certified_gap": 0.0,
+      "contains": true
+    },
+    {
+      "N": 9,
+      "ed_gap": 1.0906515092380609,
+      "certified_gap": 0.0,
+      "contains": true
+    },
+    {
+      "N": 10,
+      "ed_gap": 1.0685361730815277,
+      "certified_gap": 0.0,
+      "contains": true
+    },
+    {
+      "N": 11,
+      "ed_gap": 1.0565081659975455,
+      "certified_gap": 0.0,
+      "contains": true
+    },
+    {
+      "N": 12,
+      "ed_gap": 1.0435445481365857,
+      "certified_gap": 0.0,
+      "contains": true
+    },
+    {
+      "N": 13,
+      "ed_gap": 1.0348224206150238,
+      "certified_gap": 0.0,
+      "contains": true
+    },
+    {
+      "N": 14,
+      "ed_gap": 1.026520647174463,
+      "certified_gap": 0.0,
+      "contains": true
+    },
+    {
+      "N": 15,
+      "ed_gap": 1.020213782198601,
+      "certified_gap": 0.0,
+      "contains": true
+    },
+    {
+      "N": 16,
+      "ed_gap": 1.014531441860898,
+      "certified_gap": 0.0,
+      "contains": true
+    },
+    {
+      "N": 17,
+      "ed_gap": 1.0099089375358528,
+      "certified_gap": 0.0,
+      "contains": true
+    },
+    {
+      "N": 18,
+      "ed_gap": 1.005825735249017,
+      "certified_gap": 0.0,
+      "contains": true
+    },
+    {
+      "N": 19,
+      "ed_gap": 1.0023712362710064,
+      "certified_gap": 0.0,
+      "contains": true
+    },
+    {
+      "N": 20,
+      "ed_gap": 0.9993294768033252,
+      "certified_gap": 0.0,
+      "contains": true
+    }
+  ],
+  "wall_sec": 4.454776300000958
+}
