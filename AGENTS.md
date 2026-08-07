@@ -129,8 +129,8 @@ dangling links. A session started in a `git worktree` has no remote skills
 (gitignored) — tell the user to run `make skills` first.
 
 **Conventions:**
-- `AGENTS.md` is canonical; `CLAUDE.md` is a one-liner (`treat @AGENTS.md the
-  same as this file`) that Ion treats as a managed (gitignored) artifact.
+- `AGENTS.md` is canonical; `CLAUDE.md` is a tracked symlink to it, so
+  Claude Code loads the same instructions.
 - Local skills use `{ type = "local" }`; remote skills use registry shorthand
   like `anthropics/skills/skill-creator` (discover with `ion search`).
 
