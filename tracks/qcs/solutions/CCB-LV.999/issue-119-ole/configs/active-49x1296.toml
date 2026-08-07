@@ -1,0 +1,50 @@
+[problem]
+name = "operator_loschmidt_echo_49x1296"
+run_directory = "active-49x1296"
+tracker_issue = "https://github.com/quantum-advantage-tracker/quantum-advantage-tracker.github.io/issues/11"
+qasm_path = "inputs/49Q_OLE_circuit_L_6_b_0.25_delta0.15.qasm"
+qasm_url = "https://raw.githubusercontent.com/quantum-advantage-tracker/quantum-advantage-tracker.github.io/main/data/observable-estimations/circuit-models/operator_loschmidt_echo/49Q_OLE_circuit_L_6_b_0.25_delta0.15.qasm"
+qasm_sha256 = "3748e2c026c118f9d6c7499093ea43e41a45251b6bf8d3adb6fb056f718f6cc0"
+qasm_bytes = 321769
+qasm_git_blob = "829be362d1526ea9afe8e13fe1594e2e00eaa2e2"
+qasm_register_size = 156
+active_qubits = [7, 8, 9, 10, 11, 12, 13, 14, 15, 17, 18, 19, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 37, 38, 39, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 57, 58, 59, 67, 68, 69, 70, 71, 72, 73, 74, 75]
+observable_qubits = [52, 59, 72]
+layers = 145
+barriers = 145
+cz_gates = 1296
+L = 6
+b = 0.25
+delta = 0.15
+
+[problem.perturbation]
+qasm_gate = "rz"
+qasm_angle = 0.3
+gate_count = 24
+
+[problem.issue_attachment_qasm]
+url = "https://github.com/user-attachments/files/23483343/49Q_OLE_circuit_L_6_b_0.25_delta0.15.txt"
+format = "OpenQASM 2.0"
+sha256 = "d237a273c7cc233e9d64039ad06613af17eb472b19bda12f4ce458b9c4541645"
+bytes = 297926
+canonical_tnqs_equal = true
+
+[software]
+julia = ">=1.10"
+tnqs_version = "0.4.4"
+tnqs_commit = "b5d4089849de1cc23806aa8325e8db56a55f2e0b"
+gate_convention = "OpenQASM/Qiskit Rx(theta)=exp(-i*theta*X/2), Rz(theta)=exp(-i*theta*Z/2); S/SX translated to equivalent rotations up to global phase"
+
+[simulation]
+seed_namespace = "issue119-ole-v1"
+seed_ids = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+bond_dimensions = [64, 128, 192, 256, 384, 512]
+cutoff = 1.0e-12
+normalize_tensors = true
+dtype = "ComplexF64"
+bp_maxiter = 25
+bp_tolerance = 1.0e-8
+
+[reference]
+chi512_raw = 0.88157984
+chi512_rescaled = 0.94257142

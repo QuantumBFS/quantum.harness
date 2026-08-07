@@ -1,0 +1,37 @@
+[instance]
+name = "anderson"
+filename = "anderson_impurity_model_4i_28b_32e.fcidump"
+sha256 = "9c8ceb3faa39ccb9cf2c15632cdc748e449cf26197ee1e8251092a6bb49ce4b6"
+norb = 32
+nelec = 32
+ms2 = 0
+
+[dmrg]
+symmetry = "SU2"
+spin = 0
+seed = 1234
+threads = 8
+stack_mem_gb = 10.0
+bond_dimensions = [100, 200, 400, 600, 800, 1000]
+n_sweeps_per_m = 8
+tolerance = 1e-9
+iprint = 1
+stage_noise = 1e-4
+final_stage_noise = 1e-4
+stage_threshold = 1e-6
+final_stage_threshold = 1e-6
+tighten_each_stage = true
+
+[ordering]
+method = "ga"
+ga_tasks = 64
+ga_generations = 10000
+ga_configs = 64
+ga_elite = 8
+ga_clone_rate = 0.1
+ga_mutate_rate = 0.1
+
+[references]
+rhf = -57.52492815
+cas4 = -61.63174447
+skqd = -62.25668182839704

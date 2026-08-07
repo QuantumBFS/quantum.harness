@@ -1,0 +1,9 @@
+{
+  "qasm2_sha256": "d237a273c7cc233e9d64039ad06613af17eb472b19bda12f4ce458b9c4541645",
+  "qasm2_bytes": 297926,
+  "source_qasm3_sha256": "3748e2c026c118f9d6c7499093ea43e41a45251b6bf8d3adb6fb056f718f6cc0",
+  "canonical_gate_lists_equal": true,
+  "quimb_commit": "3c89529fe0a3487133a3928201691161e110abdf",
+  "design_commit": "8ab4973",
+  "classification": "feasibility_probe"
+}

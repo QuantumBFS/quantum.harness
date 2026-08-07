@@ -1,0 +1,44 @@
+[problem]
+name = "operator_loschmidt_echo_49x648"
+run_directory = "baseline-49x648"
+tracker_issue = "https://github.com/quantum-advantage-tracker/quantum-advantage-tracker.github.io/issues/10"
+qasm_path = "inputs/49Q_OLE_circuit_L_3_b_0.25_delta0.15.qasm"
+qasm_url = "https://github.com/user-attachments/files/23483330/49Q_OLE_circuit_L_3_b_0.25_delta0.15.txt"
+qasm_sha256 = "1705197e7b1ebb02266600b3ddaba0d2c47a96de84c5895e2bb530728b815455"
+qasm_bytes = 150686
+qasm_register_size = 156
+active_qubits = [7, 8, 9, 10, 11, 12, 13, 14, 15, 17, 18, 19, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 37, 38, 39, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 57, 58, 59, 67, 68, 69, 70, 71, 72, 73, 74, 75]
+observable_qubits = [52, 59, 72]
+layers = 73
+barriers = 73
+cz_gates = 648
+L = 3
+b = 0.25
+delta = 0.15
+
+[problem.perturbation]
+qasm_gate = "rz"
+qasm_angle = 0.3
+gate_count = 24
+
+[software]
+julia = ">=1.10"
+tnqs_version = "0.4.4"
+tnqs_commit = "b5d4089849de1cc23806aa8325e8db56a55f2e0b"
+gate_convention = "OpenQASM/Qiskit Rx(theta)=exp(-i*theta*X/2), Rz(theta)=exp(-i*theta*Z/2); S/SX translated to equivalent rotations up to global phase"
+
+[simulation]
+seed_namespace = "issue119-ole-v1"
+seed_ids = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+bond_dimensions = [64, 128, 192, 256, 384, 512]
+cutoff = 1.0e-12
+normalize_tensors = true
+dtype = "ComplexF64"
+bp_maxiter = 25
+bp_tolerance = 1.0e-8
+
+[reference]
+chi192_raw = 0.8202512915
+chi512_raw = 0.821658489
+g2_absolute_floor = 0.002
+g2_standard_errors = 3

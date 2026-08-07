@@ -1,0 +1,74 @@
+[identity]
+name = "zyli"
+purpose = "Internal Slurm cluster for issue 119 OLE CPU tensor-network runs"
+maintainer = "zyli"
+
+[connection]
+repo_path_remote = "/home/zyli/quantum.harness"
+
+[connection.ssh]
+alias = "zyli@172.16.42.215"
+host = "172.16.42.215"
+user = "zyli"
+port = 22
+
+[scheduler]
+type = "slurm"
+default_partition = "batch"
+
+[[partitions]]
+name = "batch"
+class = "default-cpu"
+cores = 192
+memory = "1500000M"
+max_wall = "infinite"
+gpu = ""
+
+[[partitions]]
+name = "bigmem"
+class = "high-mem"
+cores = 128
+memory = "4100000M"
+max_wall = "infinite"
+gpu = ""
+
+[[partitions]]
+name = "gpu"
+class = "gpu"
+cores = 96
+memory = "2000000M"
+max_wall = "infinite"
+gpu = "gpu:8"
+
+[filesystem]
+home = "/home/zyli"
+scratch = ""
+project = "/home/zyli/quantum.harness"
+quota = "home filesystem: 1.0P total, 752T available at setup"
+
+[network]
+internet_from_login = true
+internet_from_compute = false
+
+[region]
+region = "mainland_china"
+
+[limits.hard]
+max_walltime = "24:00:00"
+max_nodes = 1
+max_cpus = 192
+max_array_size = 200
+
+[limits.soft]
+warn_walltime = "08:00:00"
+warn_cpus = 64
+unusual_partitions = ["bigmem", "gpu"]
+
+[limits.paths]
+allowed_roots = ["/home/zyli/quantum.harness/results"]
+
+[commands]
+quota_command = ""
+
+[notes]
+text = "Use WSL native ssh. Issue 119 pilot is restricted to batch; do not use SCNet, bigmem, or gpu."

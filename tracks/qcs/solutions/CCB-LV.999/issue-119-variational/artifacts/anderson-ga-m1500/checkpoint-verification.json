@@ -1,0 +1,17 @@
+{
+  "checkpoint": "/home/fs/QuantumHarness/quantum.harness/tracks/qcs/results/issue-119-20260728/anderson-ga-m1500/checkpoints/block2/KET-mps_info.bin",
+  "difference_before_update_hartree": -7.105427357601002e-15,
+  "difference_hartree": -7.105427357601002e-15,
+  "headline_energy_hartree": -62.26005366939074,
+  "headline_updated": false,
+  "input_sha256": "9c8ceb3faa39ccb9cf2c15632cdc748e449cf26197ee1e8251092a6bb49ce4b6",
+  "norm": 0.9999999999999981,
+  "normalized_energy_hartree": -62.26005366939075,
+  "ordering": "ga",
+  "raw_energy_hartree": -62.26005366939063,
+  "recorded_headline_before_update_hartree": -62.26005366939074,
+  "schema_version": 1,
+  "tolerance_hartree": 1e-09,
+  "verified": true,
+  "verified_at_utc": "2026-07-28T06:37:48.821391+00:00"
+}

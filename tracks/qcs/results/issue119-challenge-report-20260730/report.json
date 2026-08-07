@@ -1,0 +1,518 @@
+{
+  "title": "Issue #119 量子优越性验证：Observable Estimations 与 Variational Problems",
+  "eyebrow": "Quantum Many-Body Physics Harness · CCB-LV.999",
+  "url": "https://github.com/QuantumBFS/quantum.harness/issues/119",
+  "lede": "BP-TN 成功复现 49×648 OLE 基线，PEPO-Heisenberg 给出接近收敛的独立交叉检查；49×1296 active OLE 尚未收敛，而 Anderson DMRG 获得了低于 SKQD 的显式变分能量，但尚不能声明基态严格收敛。",
+  "sections": [
+    {
+      "title": "1. Observable estimations：Operator Loschmidt Echo",
+      "note": "从已验证的 49×648 baseline 出发，比较 BP-TN 与 PEPO-Heisenberg，并评估 49×1296 active 电路的经典可计算性。",
+      "blocks": [
+        {
+          "kind": "verdict",
+          "status": "warn",
+          "label": "Baseline 已复现；active 仍为 diagnostic",
+          "why": "49×648 BP-TN 通过预注册复现标准；PEPO 的 D_op 方向已达到经验精度目标，但 χ_env 趋势尚未稳定；49×1296 BP-TN 在 χ≤192 明显未收敛。"
+        },
+        {
+          "kind": "heading",
+          "text": "问题背景",
+          "level": 2
+        },
+        {
+          "kind": "text",
+          "text": "Operator Loschmidt echo（OLE）衡量一个局域算符经过扰动 Floquet 电路传播后，与原始算符仍保留多少重叠。它既是算符扩散和信息 scrambling 的诊断，也是 Quantum Advantage Tracker 中用于比较量子硬件与经典模拟能力的 observable-estimation 候选。49 qubits 的完整状态向量需要约 8 PiB，因此完整实例必须依赖张量网络或其他结构化近似。"
+        },
+        {
+          "kind": "equation",
+          "tex": "F=2^{-N}\\operatorname{Tr}\\!\\left[O C^{\\dagger} O C\\right],\\qquad O=Z_{52}Z_{59}Z_{72},\\quad N=49"
+        },
+        {
+          "kind": "text",
+          "text": "精确值接近 1 表示演化后的算符仍与原始局域结构高度相似；接近 0 则表示其分量已显著扩散。本工作统一使用经过 SHA-256 审计的 QASM：baseline 为 L=3、73 层、648 个 CZ，active 为 L=6、145 层、1,296 个 CZ；二者使用相同的 49-site open heavy-hex 图、b=0.25、δ=0.15 和观测量。"
+        },
+        {
+          "kind": "figures",
+          "items": [
+            {
+              "src": "algorithmiq-ole-protocol.webp",
+              "caption": "原始 OLE 实验协议图。随机 bitstring 先经过正向演化 U₁，再经过含局域扰动 Vδ 的反向回声支路 U₂†；末端测量选定区域内的 Z 奇偶性，并与输入 bitstring 的对应奇偶性相乘后取样本平均。图中 U₁/U₂ 允许表示扰动两侧的两段 Floquet 演化；本报告的 QASM 已把完整门序列固定为 C。来源：Algorithmiq, “Quantum Processors Model the Flow of Information in Complex Materials”, Fig. 4 / 2025 technical report。"
+            }
+          ]
+        },
+        {
+          "kind": "heading",
+          "text": "已有 benchmark 与方法定位",
+          "level": 2
+        },
+        {
+          "kind": "table",
+          "columns": ["方法", "49×648 公开结果", "公开用时", "主要限制"],
+          "rows": [
+            ["BP-TN, χ=192, raw", "0.8202512915", "118 s, CPU", "无公开误差条"],
+            ["BP-TN, χ=512, raw", "0.8216584890", "149 s, CPU", "无公开误差条"],
+            ["Single-path Pauli MC", "0.808", "640 s, Apple M1 Max", "忽略 Pauli path 相位干涉，不作精度基准"],
+            ["IBM Heron R3", "0.824", "4,260 s, QPU", "global-rescaled；无公开误差条"],
+            ["本工作 PEPO-Heisenberg", "0.8225508376", "1,756 s, 128 CPU", "D_op 已稳定；χ_env 趋势仍非单调"]
+          ],
+          "numeric": [false, true, true, false],
+          "widths": ["24%", "18%", "20%", "38%"]
+        },
+        {
+          "kind": "figures",
+          "items": [
+            {
+              "src": "ole-method-comparison.png",
+              "caption": "优化后的 baseline benchmark 图。左图只比较同一 raw 口径：本工作 BP-TN、Tracker BP-TN 与本工作 PEPO；BP-TN 横线为 sampling SE，PEPO 横线为 ΔD_op+Δχ_env，Tracker 未公开误差条。右图把经过 δ=0 global rescaling 的 IBM Heron R3 单独放置，避免把不同归一化的量误读成同口径精度比较。"
+            },
+            {
+              "src": "tn-method-positioning.png",
+              "caption": "方法定位与张量表示。BP-TN 位于“演化状态 + 随机 trace estimator”路线，PEPO-Heisenberg 位于“演化算符 + 确定性收缩”路线。两者都沿 heavy-hex 图连接虚拟键；区别是 BP-TN 每个站点只有一个物理腿，PEPO 每个站点有输入、输出两个物理腿。下方概括了两种两站点更新所使用的环境信息。"
+            }
+          ]
+        },
+        {
+          "kind": "heading",
+          "text": "BP-TN 与 PEPO-Heisenberg",
+          "level": 2
+        },
+        {
+          "kind": "card",
+          "title": "BP-TN：它不是 MPS，而是 heavy-hex 图上的张量网络态",
+          "blocks": [
+            {
+              "kind": "text",
+              "text": "先区分几种常见表示：MPS 把张量排成一条链；标准 PEPS 把张量排在规则二维方格上。本工作调用 TensorNetworkQuantumSimulator.jl，从 QASM 的两比特门连接关系直接建立 49-site heavy-hex 图，并在每个站点放一个态张量。因此它最准确的名称是 arbitrary-geometry graph tensor-network state（任意图张量网络态），也可以说是 PEPS-like TNS；它不是 MPS，也不是把整条量子电路一次性收缩掉的 circuit tensor network。"
+            },
+            {
+              "kind": "equation",
+              "tex": "\\psi(s_1,\\ldots,s_N)\\approx\\operatorname{Contract}\\!\\left[\\prod_i A_i^{s_i}\\right],\\qquad A_i:\\;2\\times\\prod_{j\\in\\mathrm{nbr}(i)}\\chi_{ij}"
+            },
+            {
+              "kind": "text",
+              "text": "局域张量 A_i 有一个维数为 2 的物理指标 s_i，用来记录第 i 个 qubit 的 0/1 状态；它还对每个 heavy-hex 邻居带一个虚拟指标 α_ij。虚拟键维 χ_ij 表示跨过该边能够保留多少相关信息，程序限制 χ_ij≤χ。随机计算基初态是乘积态，所以初始 bond dimension 为 1；纠缠随双比特门增长后，虚拟键才需要扩张和截断。"
+            },
+            {
+              "kind": "heading",
+              "text": "两比特门：BP-assisted reduced simple update",
+              "level": 4
+            },
+            {
+              "kind": "list",
+              "items": [
+                "① 读取两个目标站点周围的 BP messages。每条 message 近似“沿这条边看出去，其余网络对局部张量产生的环境”；在树上该环境是精确的，在有回路的 heavy-hex 图上是近似的。",
+                "② 对环境矩阵取伪平方根和伪逆平方根，把 √M 临时吸收到局域张量。这一步相当于先把两个张量放到更适合截断的局域规范中。",
+                "③ 对两个穿衣后的张量分别做 QR 分解，只留下与本次物理腿和共享虚拟键有关的小型 R 张量；这就是 reduced 版本能降低计算量的原因。",
+                "④ 在两个 R 张量组成的有效两站点对象上作用量子门 U，并沿 i|j 切分做 SVD。最多保留 χ 个奇异值，同时丢弃低于 cutoff=10⁻¹² 的分量。",
+                "⑤ 用环境的伪逆平方根撤销临时规范，重建更新后的 A_i、A_j；保留的奇异值同时写回该键的两个方向 BP messages。",
+                "⑥ 每层门之后继续迭代 BP，当前设置为最多 25 次、残差容差 10⁻⁸。单比特门只改变一个物理腿，不增加虚拟键维，因此可局域精确施加。"
+              ]
+            },
+            {
+              "kind": "note",
+              "style": "info",
+              "label": "为什么叫 BP-TN",
+              "text": "BP 不是一种新的张量网络形状，而是环境近似和 message-passing 算法；TN 才是保存量子态的 graph TNS。完整方法应理解为“heavy-hex graph TNS + BP 近似环境 + reduced simple-update SVD 截断”。它不是 full update，也没有用 boundary-MPS 精确收缩整个二维环境。"
+            },
+            {
+              "kind": "heading",
+              "text": "随机 trace estimator",
+              "level": 4
+            },
+            {
+              "kind": "text",
+              "text": "OLE 中的归一化 trace 等于对全部 2^49 个计算基态求平均。程序不可能枚举全部基态，而是固定抽取 N_init 个随机 bitstring |z_i⟩；每个样本向前演化 graph TNS，再将末端测量值乘以输入态上 O 的本征值 σ_i。"
+            },
+            {
+              "kind": "equation",
+              "tex": "x_i=\\sigma_i\\operatorname{Re}\\langle z_i|C^{\\dagger}OC|z_i\\rangle,\\qquad \\widehat F=\\frac{1}{N_{\\mathrm{init}}}\\sum_{i=1}^{N_{\\mathrm{init}}}x_i"
+            },
+            {
+              "kind": "text",
+              "text": "因此 χ 和 N_init 解决的是两类不同问题：增大 χ 主要减少状态表示和门更新的截断偏差；增大 N_init 只压低随机 trace 的 sampling SE，不能修复有限 χ 或 BP 环境造成的系统误差。"
+            }
+          ]
+        },
+        {
+          "kind": "card",
+          "title": "PEPO-Heisenberg：heavy-hex 图上的算符张量网络",
+          "blocks": [
+            {
+              "kind": "text",
+              "text": "PEPO（projected entangled-pair operator）保存的是算符而不是波函数。每个站点的局域张量 W_i 有两个维数为 2 的物理指标：s_i 是矩阵输入，s_i′ 是矩阵输出；其余虚拟指标仍沿同一 heavy-hex 图连接。初始 O=Z_52 Z_59 Z_72 是严格的 bond-1 PEPO：三个站点放 Z，其余站点放 I，此时所有虚拟边维数都是 1。"
+            },
+            {
+              "kind": "equation",
+              "tex": "O^{s'_1\\ldots s'_N}_{s_1\\ldots s_N}\\approx\\operatorname{Contract}\\!\\left[\\prod_i W_i^{s'_i,s_i}\\right],\\qquad W_i:\\;2\\times2\\times\\prod_{j\\in\\mathrm{nbr}(i)}D_{ij}"
+            },
+            {
+              "kind": "text",
+              "text": "程序从电路末端向前遍历因果光锥。若前向电路的一道门是 G，则算符更新为 O←G†OG；跳过与当前算符支撑不相交的门是精确的光锥化简。单比特门只做局域共轭，不增加 D_ij。两比特门可能增加跨边的 operator entanglement，因此需要压缩。"
+            },
+            {
+              "kind": "heading",
+              "text": "两比特门：Vidal-style simple update + reduce-split",
+              "level": 4
+            },
+            {
+              "kind": "list",
+              "items": [
+                "① 每条虚拟边保存一个 λ gauge vector，可把它理解为 simple update 对该边 Schmidt 谱的局域近似。更新站点 i、j 时，先把周围 λ 临时吸收到两个 PEPO 张量。",
+                "② quimb 的 reduce-split 先对两个大张量做局域 QR 型降维，把与本次共享边无关的空间隔离出来；随后只在较小的有效两站点对象上完成门作用和 SVD，因此比直接分解完整张量便宜。",
+                "③ 在两个物理输出腿施加 G†、输入腿施加 G，形成 Heisenberg sandwich G†OG。程序实际把 gate_dagger 交给 quimb 的 sandwich 接口，得到的矩阵方向已经由七 qubit dense oracle 验证。",
+                "④ 沿 i|j 切分做 SVD，最多保留 D_op 个奇异值，并使用相对 cutoff=10⁻¹²；也就是相对最大奇异值过小的分量会被丢弃。",
+                "⑤ 将左右因子恢复为新的 W_i、W_j，并把保留的奇异值存成该边的新 λ。当前明确设置 renorm=false，不在每道门后重新归一化奇异值，因为 PEPO 的整体尺度本身会进入最终 OLE。",
+                "⑥ 这仍是 simple update：环境只由局域 λ gauges 表示，没有使用 full update、CTMRG 或 cluster environment。因此不能只凭一个较大的 D_op 就宣称收敛，必须观察 D_op 扫描。"
+              ]
+            },
+            {
+              "kind": "heading",
+              "text": "最终 trace：χ_env 与 D_op 不是同一个参数",
+              "level": 4
+            },
+            {
+              "kind": "equation",
+              "tex": "F(D_{\\mathrm{op}},\\chi_{\\mathrm{env}})=2^{-N}\\operatorname{Contract}\\!\\left[\\operatorname{PEPO}_{D_{\\mathrm{op}}}(C^{\\dagger}OC)\\,O\\right]"
+            },
+            {
+              "kind": "text",
+              "text": "反向演化结束后，程序把原始 O 插入 PEPO 的输入/输出物理腿并逐站点取迹，物理指标在这一阶段被精确消去；留下的纯虚拟 heavy-hex 网络再由 compressed contraction 收缩，最大中间键维由 χ_env 控制。因此 D_op 控制“算符演化保留多少信息”，χ_env 控制“最后把二维网络压成一个标量时保留多少环境信息”。PEPO 没有随机初态和 sampling SE，但同时存在 D_op 截断误差与 χ_env 收缩误差。"
+            }
+          ]
+        },
+        {
+          "kind": "table",
+          "columns": ["比较项", "BP-TN", "PEPO-Heisenberg"],
+          "rows": [
+            ["演化对象", "随机计算基态", "观测算符 O"],
+            ["张量表示", "heavy-hex graph TNS；每站点一个物理腿", "heavy-hex PEPO；每站点两个物理腿"],
+            ["picture", "Schrödinger", "Heisenberg"],
+            ["两站点更新", "BP-assisted reduced simple update", "Vidal simple update；reduce-split"],
+            ["环境近似", "BP messages；回路图上为近似", "局域 λ gauges；不是 full environment"],
+            ["trace", "N_init 个随机样本平均", "确定性直接收缩"],
+            ["精度旋钮", "χ 与 N_init", "D_op 与 χ_env"],
+            ["主要优势", "与公开 benchmark 同路线；单样本较便宜", "无采样误差；独立近似结构"],
+            ["主要瓶颈", "深电路下 χ 与逐 seed 用时快速增长", "高 D_op 的 SVD、内存和二维收缩成本"]
+          ],
+          "widths": ["18%", "41%", "41%"]
+        },
+        {
+          "kind": "heading",
+          "text": "利用当前 package 复现",
+          "level": 3
+        },
+        {
+          "kind": "text",
+          "text": "BP-TN 使用 solution-local Julia 环境锁定 TensorNetworkQuantumSimulator.jl 0.4.4（commit b5d4089）。先抓取并审计输入、运行小系统验证和 dry-run；只有核对打印出的配置摘要后，才将 confirmation token 交给执行命令。"
+        },
+        {
+          "kind": "code",
+          "title": "BP-TN baseline 最短路线",
+          "text": "cd tracks/qcs/solutions/CCB-LV.999/issue-119-ole\njulia --project=. -e 'using Pkg; Pkg.instantiate()'\njulia --project=. scripts/fetch_inputs.jl\njulia --project=. scripts/validate_small.jl\njulia --project=. scripts/run_bp.jl --seed 1 --chi 512 --delta 0.15\njulia --project=. scripts/run_bp.jl --seed 1 --chi 512 --delta 0.15 --execute --confirm TOKEN"
+        },
+        {
+          "kind": "text",
+          "text": "迁移到 active 时使用同一 runner，仅加入 --config configs/active-49x1296.toml。完整 20-seed、多 χ 网格由 scripts/parameter_scan.py 生成，并由当前 Slurm 工作流提交、监控、拉取和汇总。"
+        },
+        {
+          "kind": "text",
+          "text": "PEPO 使用独立且锁定的 uv/quimb 环境。七量子比特 dense oracle 必须先通过；完整 49Q runner 会拒绝 QASM hash、quimb revision 或数值核心 digest 已过期的证书。D_op=512 应走参数扫描和 Slurm，不建议在普通本地环境执行。"
+        },
+        {
+          "kind": "code",
+          "title": "PEPO-Heisenberg 最短路线",
+          "text": "make skills\nOLE_ROOT=tracks/qcs/solutions/CCB-LV.999/issue-119-ole\nuv sync --project \"$OLE_ROOT/pepo\" --frozen\nuv run --project \"$OLE_ROOT/pepo\" pytest \"$OLE_ROOT/pepo/tests\" -q\nuv run --project \"$OLE_ROOT/pepo\" python \"$OLE_ROOT/scripts/validate_pepo_small.py\"\nuv run --project \"$OLE_ROOT/pepo\" python \"$OLE_ROOT/scripts/run_pepo.py\" --dop 512 --chi-env 64 --delta 0.15 --output results/issue119-pepo-example/pepo-result.json\n# 核对 dry-run 后，为 oracle/49Q 命令追加：--execute --confirm TOKEN"
+        },
+        {
+          "kind": "heading",
+          "text": "49×648 baseline：BP-TN 复现",
+          "level": 2
+        },
+        {
+          "kind": "table",
+          "columns": ["χ", "N", "本工作 mean", "SE", "95% CI", "公开值", "|差值|", "结论"],
+          "rows": [
+            ["192", "20", "0.8185618335", "0.0019847196", "[0.8144078, 0.8227159]", "0.8202512915", "0.0016894580", "通过"],
+            ["512", "20", "0.8183229132", "0.0019858354", "[0.8141665, 0.8224793]", "0.8216584890", "0.0033355758", "通过"]
+          ],
+          "numeric": [true, true, true, true, false, true, true, false]
+        },
+        {
+          "kind": "verdict",
+          "status": "good",
+          "label": "G2 baseline reproduction 通过",
+          "why": "两组结果均满足预注册条件 |mean−reference|≤max(0.002,3SE)；χ=192→512 的 paired drift 仅 −2.389×10⁻⁴，远小于当前约 1.99×10⁻³ 的 sampling SE。"
+        },
+        {
+          "kind": "figures",
+          "items": [
+            {
+              "src": "baseline-bptn-comparison.png",
+              "caption": "已复现。左图显示同一 20-seed bank 在 χ=192/512 的逐 seed 结果；右图比较本工作均值、Tracker raw BP-TN 与 IBM global-rescaled 背景值。本工作两个 95% Student-t 区间均覆盖相应 Tracker 中心值。"
+            }
+          ]
+        },
+        {
+          "kind": "table",
+          "columns": ["BP-TN 设置", "χ=192", "χ=512"],
+          "rows": [
+            ["平均 wall / 最大 wall", "120.2 / 129.3 s", "134.2 / 162.0 s"],
+            ["最大 RSS", "2.37 GiB", "3.34 GiB"],
+            ["最大截断误差", "2.50×10⁻⁴", "9.99×10⁻¹³"],
+            ["最大 BP residual", "4.40×10⁻¹¹", "2.84×10⁻¹⁶"],
+            ["完整 cells", "20/20", "20/20"]
+          ]
+        },
+        {
+          "kind": "text",
+          "text": "统一配置为 ComplexF64、SVD cutoff=10⁻¹²、BP tolerance=10⁻⁸、1 Julia thread、16 BLAS threads/cell；40 个生产 cells 的 aggregate task wall 为 1.41 h，allocated CPU time 为 22.61 CPU·h。δ=0、χ=64 的 identity control 严格返回 1.0。"
+        },
+        {
+          "kind": "heading",
+          "text": "49×648 baseline：PEPO-Heisenberg 交叉检查",
+          "level": 2
+        },
+        {
+          "kind": "table",
+          "columns": ["参数/诊断", "数值"],
+          "rows": [
+            ["F(D_op=512, χ_env=64)", "0.8225508376024053"],
+            ["ΔD_op: 384→512", "1.970707×10⁻⁴"],
+            ["Δχ_env: 32→64", "1.833183×10⁻⁴"],
+            ["ε_PEPO=ΔD_op+Δχ_env", "3.803891×10⁻⁴"],
+            ["与公开 BP-TN χ=512 的差", "8.923486×10⁻⁴"],
+            ["与本工作 BP-TN χ=512 的差", "4.227924×10⁻³"]
+          ]
+        },
+        {
+          "kind": "figures",
+          "items": [
+            {
+              "src": "pepo-convergence.png",
+              "caption": "PEPO 收敛诊断。A：固定 χ_env=64 时，D_op=32→512 的增量持续减小，最后一步仅 1.97×10⁻⁴。B：固定 D_op=512 时，χ_env=16/32/64 的变化均小于 10⁻³，但序列非单调且最新变化增大，因此环境方向尚未形成稳定趋势。灰带为本工作 BP-TN 经验预算。"
+            }
+          ]
+        },
+        {
+          "kind": "verdict",
+          "status": "warn",
+          "label": "接近收敛的独立交叉方法信号",
+          "why": "D_op 方向和双参数经验误差和已达到 10⁻³ 目标，且数值与公开 BP-TN 和量子背景相近；但 χ_env 方向尚未稳定，故不将其写成严格 agreement 或完整 baseline benchmark。"
+        },
+        {
+          "kind": "table",
+          "columns": ["PEPO 参数点", "CPU / 内存申请", "实测 wall", "实测 peak RSS"],
+          "rows": [
+            ["D_op=128, χ_env=64", "32 CPU / 64 GiB", "244.44–252.70 s", "1.57–1.70 GiB"],
+            ["D_op=256, χ_env=64", "64 CPU / 64 GiB", "807.07 s", "11.40 GiB"],
+            ["D_op=384, χ_env=64", "96 CPU / 128 GiB", "2,315.21 s", "21.51 GiB"],
+            ["D_op=512, χ_env=64", "128 CPU / 192 GiB", "1,755.86 s", "43.41 GiB"],
+            ["D_op=512, χ_env=16", "128 CPU / 192 GiB", "2,017.58 s", "43.42 GiB"],
+            ["D_op=512, χ_env=32", "128 CPU / 192 GiB", "1,941.52 s", "43.42 GiB"]
+          ]
+        },
+        {
+          "kind": "heading",
+          "text": "49×1296 active：当前状态与 reduce 的必要性",
+          "level": 2
+        },
+        {
+          "kind": "note",
+          "style": "pending",
+          "label": "仅作阶段性说明，不展示失败曲线",
+          "text": "49×1296 的低 χ 试算共完成 58/60 cells；raw 均值从 χ=64 的 0.3558、χ=128 的 0.5003 上升到 χ=192 的 0.6067，χ=128→192 的 paired drift 仍约 0.109，远大于约 0.004 的 sampling SE，因此现阶段不能给出收敛的经典 OLE。两个最慢 cells 分别触及 2 h 和 5 h wall cap，说明继续提高 χ 还需要更大的远端资源预算。"
+        },
+        {
+          "kind": "equation",
+          "tex": "S_{\\delta,\\mathrm{rescaled}}=\\frac{S_{\\delta,\\mathrm{raw}}}{S_{0,\\mathrm{raw}}}"
+        },
+        {
+          "kind": "text",
+          "text": "这里的 reduce 指 δ=0 rescaling，而不是缩小张量网络。因为无扰动镜像电路的精确结果应满足 S₀=1，额外计算同一线路的 δ=0 raw 值可以暴露有限 χ 或硬件噪声带来的共同归一化衰减；用 Sδ/S₀ 才能与公开的 global-rescaled 量子结果保持相同口径。但 δ=0 与 δ=0.15 的误差并不保证完全相同，所以 reduce 是必要的诊断和比较步骤，不能替代 raw 结果，也不能把尚未收敛的 χ 扫描“修正”为收敛。"
+        },
+        {
+          "kind": "note",
+          "style": "pending",
+          "label": "下一步",
+          "text": "BP-TN 需先补齐两个超时 cells，再评估 χ=256/384/512，并同时计算 raw δ=0.15、raw δ=0 和 rescaled ratio。PEPO active D_op=384/512、χ_env=64 任务仍在服务器运行；完成后需先审计 manifest、wall/RSS 和 D_op drift，再决定是否扩展 χ_env 或 δ=0。"
+        },
+        {
+          "kind": "heading",
+          "text": "OLE 证据来源",
+          "level": 3
+        },
+        {
+          "kind": "list",
+          "items": [
+            "Algorithmiq (2025), Loschmidt echo for probing operator hydrodynamics in heterogeneous structures：OLE 物理定义、随机 bitstring 测量协议与 δ=0 rescaling；报告中的实验协议图取自其 Fig. 4。",
+            "J. Tindall et al., PRX Quantum 5, 010308 (2024), arXiv:2306.14887：heavy-hex graph TNS、belief-propagation 环境与 reduced simple update 的方法依据。",
+            "H.-J. Liao et al., arXiv:2308.03082：Heisenberg-picture PEPO、simple update 与 state/operator 两种收缩路线的文献依据。",
+            "G2_RESULTS.md 与 OLE_G2_FINAL_REPORT.md：49×648 BP-TN 统计、配置和资源。",
+            "PEPO_METHOD_REPORT_NOTE.md 与 PEPO_49Q_VALIDATION.md：Heisenberg-picture 算法、D_op/χ_env 扫描和资源。",
+            "G5_ACTIVE_PILOT_REPORT.md 与 G5_PRELIMINARY_SUBMISSION.md：49×1296 低 χ 数值、超时和 go/no-go。",
+            "configs/baseline-49x648.toml 与 configs/active-49x1296.toml：审计后的问题定义与固定数值参数。"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "2. Variational problems",
+      "note": "先用 2Fe–2S 校准 FCIDUMP→SU(2) DMRG 管线，再对四杂质 Anderson 模型建立经典变分基线。",
+      "blocks": [
+        {
+          "kind": "verdict",
+          "status": "warn",
+          "label": "DMRG 已低于量子结果，但基态尚未严格收敛",
+          "why": "Anderson M=1500 保存态能量比 SKQD 低 3.371840994 mEₕ，并经独立 checkpoint reload 验证；最终 sweep 仍未达到 10⁻⁹ Eₕ 停止条件，且 M=2000/4000 尚未运行。"
+        },
+        {
+          "kind": "heading",
+          "text": "问题背景与变分判据",
+          "level": 2
+        },
+        {
+          "kind": "text",
+          "text": "变分问题比较同一 Hamiltonian、粒子数与自旋扇区中的试探态能量。对于任何归一化态，直接期望值不会低于真实基态能量，因此有限键维 MPS 的保存态能量是可审计的变分上界。能量更低意味着试探态更好，但只有随 M 和 sweep 充分稳定后，才能进一步声称接近真实基态。"
+        },
+        {
+          "kind": "equation",
+          "tex": "E[\\psi]=\\frac{\\langle\\psi|H|\\psi\\rangle}{\\langle\\psi|\\psi\\rangle}\\ge E_0"
+        },
+        {
+          "kind": "heading",
+          "text": "2Fe–2S：管线校准结果",
+          "level": 2
+        },
+        {
+          "kind": "text",
+          "text": "2Fe–2S 用于校准 FCIDUMP 读取、积分符号、SU(2) 扇区、Fiedler 排序、staged DMRG、checkpoint 和结果记录。当前计算已经得到一个经保存 MPS 验证的 M=500 能量，但尚未推进到公开结果的 M=1500。"
+        },
+        {
+          "kind": "kv",
+          "pairs": [
+            ["Hamiltonian", "2fe_2s_30e_20o.fcidump；SHA-256 bd6ef317…c8c6c7"],
+            ["扇区", "20 spatial orbitals；30 electrons；MS2=0；SU(2) spin 0"],
+            ["方法", "block2 DMRG；Fiedler ordering"],
+            ["键维与 sweeps", "M=250→500；每个 M 5 sweeps"],
+            ["资源设置", "8 threads；8 GiB stack memory"],
+            ["数值设置", "tolerance 10⁻⁹；noise 10⁻⁴→10⁻⁵；threshold 10⁻⁶→10⁻⁷"]
+          ]
+        },
+        {
+          "kind": "table",
+          "columns": ["对象", "能量 (Eₕ)", "相对公开 M=500", "状态"],
+          "rows": [
+            ["本工作 M=500 saved MPS", "−116.55594588546296", "−0.0201736932 Eₕ", "已得到"],
+            ["公开 M=500", "−116.53577219230725", "—", "参考"],
+            ["公开 M=1500", "−116.60547665637114", "—", "本工作尚未计算"]
+          ],
+          "numeric": [false, true, true, false]
+        },
+        {
+          "kind": "note",
+          "style": "pending",
+          "label": "2Fe–2S 状态：partial",
+          "text": "本工作显式设置了 NumPy 与 block2 C++ 后端随机种子，而公开脚本只记录 NumPy seed，因此当前 M=500 轨迹不能称为逐点复现。M=1000/1500、紧凑 result JSON、收敛图和本次运行 wall/RSS 未保留在当前提交中；报告不补写不可追溯的耗时。"
+        },
+        {
+          "kind": "heading",
+          "text": "Four-impurity Anderson：主计算",
+          "level": 2
+        },
+        {
+          "kind": "text",
+          "text": "目标 Hamiltonian 是四杂质 Anderson 模型的 CCSD natural-orbital FCIDUMP。它包含 32 个空间轨道和 32 个电子；四个强相互作用 impurity 与 28 个 bath 轨道耦合。轨道在一维 MPS 链上的排序决定跨切分纠缠，因此本工作比较 Fiedler 与修正后的 64-start genetic algorithm（GA）排序，并选择低 M 下能量、discarded weight、时间和内存均更优的 GA 顺序。"
+        },
+        {
+          "kind": "kv",
+          "pairs": [
+            ["Hamiltonian", "anderson_impurity_model_4i_28b_32e.fcidump；SHA-256 9c8ceb3f…e4b6"],
+            ["扇区", "32 spatial orbitals；32 electrons；MS2=0；SU(2) spin 0"],
+            ["求解器", "block2 0.5.3 quantum-chemistry DMRG"],
+            ["排序", "修正后的 64-start GA；selected seed 1255；GA cost 3.674360861"],
+            ["生产 ladder", "M=100→200→400→600→800→1000→1500"],
+            ["每阶段", "8 sweeps；8 threads；seed 1234"],
+            ["收敛设置", "前 6 sweeps noise 10⁻⁴ / Davidson 10⁻⁶；后 2 sweeps noise 0 / Davidson 10⁻⁹"]
+          ]
+        },
+        {
+          "kind": "table",
+          "columns": ["M", "saved-MPS E (Eₕ)", "E−SKQD (mEₕ)", "discarded weight", "wall", "RSS"],
+          "rows": [
+            ["100", "−62.253929578507346", "+2.752249890", "7.59739×10⁻⁵", "12.353 s", "337.342 MB"],
+            ["200", "−62.259729630306744", "−3.047801910", "1.28989×10⁻⁵", "20.243 s", "548.422 MB"],
+            ["400", "−62.260015739771831", "−3.333911375", "1.47701×10⁻⁶", "65.783 s", "772.182 MB"],
+            ["600", "−62.260044743233664", "−3.362914837", "3.82084×10⁻⁷", "144.191 s", "1,105.883 MB"],
+            ["800", "−62.260050678669316", "−3.368850272", "1.37043×10⁻⁷", "243.775 s", "1,934.438 MB"],
+            ["1000", "−62.260052579366490", "−3.370750969", "5.55832×10⁻⁸", "381.273 s", "3,638.252 MB"],
+            ["1500", "−62.260053669390740", "−3.371840994", "9.55300×10⁻⁹", "888.421 s", "7,838.953 MB"]
+          ],
+          "numeric": [true, true, true, true, true, true]
+        },
+        {
+          "kind": "figures",
+          "items": [
+            {
+              "src": "anderson-skqd-comparison.png",
+              "caption": "量子结果被更低的经典显式变分能量越过。M=100 时 DMRG 高于 SKQD 2.752 mEₕ；从 M=200 起保存态能量已低于 SKQD，并在 M=1500 达到 −3.371840994 mEₕ。虚线为 SKQD 锚点。"
+            },
+            {
+              "src": "anderson-convergence.png",
+              "caption": "有限 M 收敛证据。左：saved-MPS 能量随 M 单调下降，并低于 RHF、CAS(4) 和 SKQD。右：discarded weight 从 7.60×10⁻⁵ 降至 9.55×10⁻⁹，但这仍不是对 M→∞ 的严格误差界。"
+            }
+          ]
+        },
+        {
+          "kind": "table",
+          "columns": ["参考/验证", "数值"],
+          "rows": [
+            ["RHF", "−57.52492815 Eₕ"],
+            ["CAS(4)", "−61.63174447 Eₕ"],
+            ["SKQD", "−62.25668182839704 Eₕ"],
+            ["本工作 M=1500 saved MPS", "−62.26005366939074 Eₕ"],
+            ["checkpoint reload norm", "0.9999999999999981"],
+            ["reload energy difference", "7.1×10⁻¹⁵ Eₕ"],
+            ["M=1500 最终 sweep 变化", "8.93×10⁻⁸ Eₕ"]
+          ]
+        },
+        {
+          "kind": "verdict",
+          "status": "good",
+          "label": "更低的显式变分能量已经成立",
+          "why": "FCIDUMP bytes、电子数、自旋扇区和保存的有限 M MPS 均可审计；独立 reload 重现 headline。该结果直接否定了把当前 SKQD 能量视为此实例经典不可达边界的解释。"
+        },
+        {
+          "kind": "verdict",
+          "status": "warn",
+          "label": "严格基态收敛尚未成立",
+          "why": "M=1500 最终 sweep 变化仍高于 10⁻⁹ Eₕ 目标；M=2000/4000、独立方法交叉检查和完整 2Fe–2S M=1500 reproduction 尚未完成。"
+        },
+        {
+          "kind": "heading",
+          "text": "Variational 复现路线",
+          "level": 3
+        },
+        {
+          "kind": "code",
+          "title": "Anderson GA-DMRG",
+          "text": "cd tracks/qcs/solutions/CCB-LV.999/issue-119-variational\nconda run -p .venv uv run python -m src.fetch_instances --instance anderson --run-dir RUN_DIR\nconda run -p .venv uv run python -m src.rhf_check --fcidump RUN_DIR/inputs/anderson_impurity_model_4i_28b_32e.fcidump --output RUN_DIR/anderson-rhf.json\nconda run -p .venv uv run python -m src.dmrg_runner --config configs/anderson-ga-m1500-local.toml --run-dir RUN_DIR\nconda run -p .venv uv run python -m src.verify_checkpoint --run-dir RUN_DIR\nconda run -p .venv uv run python -m src.render_convergence --run-dir RUN_DIR"
+        },
+        {
+          "kind": "heading",
+          "text": "Variational 证据来源",
+          "level": 3
+        },
+        {
+          "kind": "list",
+          "items": [
+            "RESEARCH_REPORT.md：2Fe–2S partial 状态、Anderson headline、资源与残余不确定性。",
+            "SOURCE_AUDIT.md：FCIDUMP provenance、公开数值锚点与 GA ordering 修正。",
+            "artifacts/anderson-ga-m1500/result.json：完整有限 M 能量、discarded weight、wall 和 RSS。",
+            "artifacts/anderson-ga-m1500/checkpoint-verification.json：独立 MPS reload 验证。",
+            "configs/2fe2s-local.toml 与 configs/anderson-ga-m1500-local.toml：固定计算配置。"
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -9,6 +9,7 @@ echoes a canned squeue line, `smoke-test` is checked in --dry-run, and
 from __future__ import annotations
 
 import os
+import shlex
 import subprocess
 from pathlib import Path
 
@@ -434,3 +435,40 @@ def test_submit_real_mode_still_parses_job_id(fake_ssh, tmp_path):
     assert r.returncode == 0
     assert "job_id:    12345" in r.stdout
     assert "partition: default-gpu" in r.stdout
+
+
+def test_submit_shell_quotes_export_command_with_spaces(tmp_path):
+    """A remote shell must receive HARNESS_COMMAND as one sbatch argument."""
+    profile = write_profile(tmp_path)
+    script = write_job_script(tmp_path)
+    run_spec = tmp_path / "run_spec.json"
+    run_spec.write_text("{}")
+    command = "python worker.py --flag value"
+
+    r = run(
+        [
+            "--dry-run",
+            "submit",
+            "--array",
+            "1",
+            "--run-spec",
+            str(run_spec),
+            "--command",
+            command,
+            "--script",
+            str(script),
+        ],
+        env={"HARNESS_PROFILE_FILE": str(profile)},
+    )
+
+    assert r.returncode == 0
+    prefix = "DRYRUN ssh test-cluster "
+    assert r.stderr.startswith(prefix)
+    remote_tokens = shlex.split(r.stderr.removeprefix(prefix))
+    export_tokens = [
+        token for token in remote_tokens if token.startswith("--export=")
+    ]
+    assert export_tokens == [
+        f"--export=ALL,HARNESS_RUN_SPEC={run_spec},HARNESS_COMMAND={command}"
+    ]
+    assert remote_tokens[-1] == str(script)

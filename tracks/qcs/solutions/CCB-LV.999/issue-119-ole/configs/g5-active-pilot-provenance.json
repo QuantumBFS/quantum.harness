@@ -1,0 +1,13 @@
+{
+  "goal": "G5",
+  "tracker_issue": "https://github.com/quantum-advantage-tracker/quantum-advantage-tracker.github.io/issues/11",
+  "qasm_sha256": "3748e2c026c118f9d6c7499093ea43e41a45251b6bf8d3adb6fb056f718f6cc0",
+  "qasm_git_blob": "829be362d1526ea9afe8e13fe1594e2e00eaa2e2",
+  "issue_attachment_sha256": "d237a273c7cc233e9d64039ad06613af17eb472b19bda12f4ce458b9c4541645",
+  "qasm_exports_canonical_tnqs_equal": true,
+  "tnqs_version": "0.4.4",
+  "tnqs_commit": "b5d4089849de1cc23806aa8325e8db56a55f2e0b",
+  "seed_namespace": "issue119-ole-v1",
+  "runner": "tracks/qcs/solutions/CCB-LV.999/issue-119-ole/scripts/run_bp.jl",
+  "array_entrypoint": "tracks/qcs/solutions/CCB-LV.999/issue-119-ole/scripts/run_bp_array_cell.py"
+}
