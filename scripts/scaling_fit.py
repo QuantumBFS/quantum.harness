@@ -307,7 +307,7 @@ def quantile_ci(arr):
 def write_csv(path, form, params, cis, qof_label, qof_value, failed):
     os.makedirs(os.path.dirname(os.path.abspath(path)) or ".", exist_ok=True)
     with open(path, "w", newline="") as f:
-        w = csv.writer(f)
+        w = csv.writer(f, lineterminator="\n")
         w.writerow(["parameter", "value", "ci_lo", "ci_hi"])
         for name in params:
             lo, hi = cis.get(name, (float("nan"), float("nan")))
@@ -316,7 +316,7 @@ def write_csv(path, form, params, cis, qof_label, qof_value, failed):
         w.writerow(["failed_resamples", failed, "", ""])
 
 
-def make_plot(path, form, data, params, degree):
+def make_plot(path, form, data, params, degree, ylabel):
     os.makedirs(os.path.dirname(os.path.abspath(path)) or ".", exist_ok=True)
     L = data["L"]
     if form == "data-collapse":
@@ -330,10 +330,11 @@ def make_plot(path, form, data, params, degree):
             sel = L == Lval
             order = np.argsort(x[sel])
             ax.plot(x[sel][order], yy[sel][order], "o-", label=f"L={Lval:g}")
-        ax.set_xlabel("L^(1/nu) (param - h_c)")
-        ax.set_ylabel("obs * L^(gamma_over_nu)")
+        ax.set_xlabel("L^(1/nu) (param - h_c)", fontsize=12)
+        ax.set_ylabel("obs * L^(gamma_over_nu)", fontsize=12)
+        ax.tick_params(axis="both", labelsize=12)
         ax.set_title("data collapse")
-        ax.legend(fontsize=7)
+        ax.legend(fontsize=10)
     else:
         y, err = data["obs"], data["err"]
         if form == "power-law":
@@ -345,19 +346,32 @@ def make_plot(path, form, data, params, degree):
             names = [f"c{k}" for k in range(degree + 1)]
             model = full @ np.asarray([params[n] for n in names])
         resid = (y - model) / err
-        fig, (ax0, ax1) = plt.subplots(1, 2, figsize=(9, 4))
+        if form == "power-law":
+            fig, ax0 = plt.subplots(figsize=(5.5, 4.5))
+            ax1 = None
+        else:
+            fig, (ax0, ax1) = plt.subplots(1, 2, figsize=(9, 4))
         order = np.argsort(L)
         ax0.errorbar(L[order], y[order], yerr=err[order], fmt="o", label="data")
         ax0.plot(L[order], model[order], "-", label="fit")
-        ax0.set_xlabel("L")
-        ax0.set_ylabel("obs")
+        if form == "power-law":
+            ticks = np.unique(L[order])
+            ax0.set_xscale("log", base=2)
+            ax0.set_yscale("log")
+            ax0.set_xticks(ticks)
+            ax0.set_xticklabels([f"{value:g}" for value in ticks])
+        ax0.set_xlabel("L", fontsize=12)
+        ax0.set_ylabel(ylabel, fontsize=12)
+        ax0.tick_params(axis="both", labelsize=12)
         ax0.set_title(form)
-        ax0.legend(fontsize=8)
-        ax1.axhline(0.0, color="k", lw=0.8)
-        ax1.plot(L[order], resid[order], "o")
-        ax1.set_xlabel("L")
-        ax1.set_ylabel("(obs - model) / err")
-        ax1.set_title("normalized residuals")
+        ax0.legend(fontsize=10)
+        if ax1 is not None:
+            ax1.axhline(0.0, color="k", lw=0.8)
+            ax1.plot(L[order], resid[order], "o")
+            ax1.set_xlabel("L", fontsize=12)
+            ax1.set_ylabel("(obs - model) / err", fontsize=12)
+            ax1.tick_params(axis="both", labelsize=12)
+            ax1.set_title("normalized residuals")
     fig.tight_layout()
     fig.savefig(path, dpi=120)
     plt.close(fig)
@@ -386,6 +400,7 @@ def build_parser():
     p.add_argument("--size-col", default="L")
     p.add_argument("--obs-col", default="obs")
     p.add_argument("--err-col", default="err")
+    p.add_argument("--ylabel", default="obs", help="y-axis label for diagnostic plots")
     p.add_argument(
         "--param-col", default=None, help="parameter column (required for data-collapse)"
     )
@@ -426,7 +441,7 @@ def main(argv=None):
     qof_label = "collapse_residual" if args.form == "data-collapse" else "chi2_per_dof"
 
     write_csv(args.out_csv, args.form, params, cis, qof_label, qof, failed)
-    make_plot(args.out_png, args.form, data, params, args.degree)
+    make_plot(args.out_png, args.form, data, params, args.degree, args.ylabel)
 
     # Report: 2-3 lines, generic labels only.
     lines = []

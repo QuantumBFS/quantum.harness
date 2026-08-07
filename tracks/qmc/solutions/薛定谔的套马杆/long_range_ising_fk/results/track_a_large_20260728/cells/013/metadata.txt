@@ -1,0 +1,6 @@
+timestamp=2026-07-29T05:55:06.414
+hostname=f14r04
+julia=1.12.6
+slurm_job=22972084
+cell=13
+role=critical

@@ -1,0 +1,14 @@
+run = "clock_production_20260729"
+algorithm = "clock_factorized_metropolis"
+primary_run = "track_a_20260727"
+sigmas = [1.875, 2.0]
+sizes = [64, 128, 256, 512]
+seeds_per_point = 2
+beta = [0.336985, 0.344439]
+thermalization_sweeps = [50000, 100000, 200000, 300000]
+measurement_sweeps = 1000000
+blocks = 50
+normalization = "sum_j J_ij = 4"
+distance = "minimum-image square torus"
+comparable_observables = ["Qm", "chi"]
+excluded_observables = ["Rp"]

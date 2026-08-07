@@ -1,0 +1,180 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="750" viewBox="0 0 1120 750">
+<rect width="100%" height="100%" fill="white"/>
+<text x="560" y="27" text-anchor="middle" font-family="sans-serif" font-size="30.5">Fit-window stability of thermodynamic limits</text>
+<rect x="105" y="55" width="430" height="255" fill="none" stroke="#555"/>
+<line x1="140.0" y1="310" x2="140.0" y2="315" stroke="#555"/>
+<text x="140.0" y="331" text-anchor="middle" font-family="sans-serif" font-size="20.4">64</text>
+<line x1="260.0" y1="310" x2="260.0" y2="315" stroke="#555"/>
+<text x="260.0" y="331" text-anchor="middle" font-family="sans-serif" font-size="20.4">128</text>
+<line x1="380.0" y1="310" x2="380.0" y2="315" stroke="#555"/>
+<text x="380.0" y="331" text-anchor="middle" font-family="sans-serif" font-size="20.4">256</text>
+<line x1="500.0" y1="310" x2="500.0" y2="315" stroke="#555"/>
+<text x="500.0" y="331" text-anchor="middle" font-family="sans-serif" font-size="20.4">512</text>
+<line x1="105" y1="310.0" x2="535" y2="310.0" stroke="#e5e7eb"/>
+<text x="98" y="314.0" text-anchor="end" font-family="sans-serif" font-size="20.4">-0.25</text>
+<line x1="105" y1="246.2" x2="535" y2="246.2" stroke="#e5e7eb"/>
+<text x="98" y="250.2" text-anchor="end" font-family="sans-serif" font-size="20.4">0.54</text>
+<line x1="105" y1="182.5" x2="535" y2="182.5" stroke="#e5e7eb"/>
+<text x="98" y="186.5" text-anchor="end" font-family="sans-serif" font-size="20.4">1.32</text>
+<line x1="105" y1="118.8" x2="535" y2="118.8" stroke="#e5e7eb"/>
+<text x="98" y="122.8" text-anchor="end" font-family="sans-serif" font-size="20.4">2.11</text>
+<line x1="105" y1="55.0" x2="535" y2="55.0" stroke="#e5e7eb"/>
+<text x="98" y="59.0" text-anchor="end" font-family="sans-serif" font-size="20.4">2.90</text>
+<text x="113" y="73" font-family="sans-serif" font-size="20.4">σ=1.875</text>
+<text x="320.0" y="349" text-anchor="middle" font-family="sans-serif" font-size="27.2">Lₘᵢₙ</text>
+<text x="53" y="182.5" text-anchor="middle" font-family="sans-serif" font-size="20.4" transform="rotate(-90 53 182.5)">Rₚ,∞</text>
+<line x1="140.0" y1="295.9" x2="140.0" y2="272.1" stroke="#0f766e"/>
+<circle cx="140.0" cy="288.2" r="4" fill="#0f766e"/>
+<line x1="260.0" y1="297.8" x2="260.0" y2="94.9" stroke="#0f766e"/>
+<circle cx="260.0" cy="279.7" r="4" fill="#0f766e"/>
+<line x1="380.0" y1="128.8" x2="380.0" y2="90.8" stroke="#0f766e"/>
+<circle cx="380.0" cy="104.5" r="4" fill="#0f766e"/>
+<line x1="500.0" y1="264.8" x2="500.0" y2="63.2" stroke="#0f766e"/>
+<circle cx="500.0" cy="84.7" r="4" fill="#0f766e"/>
+<polyline points="140.0,288.2 260.0,279.7 380.0,104.5 500.0,84.7" fill="none" stroke="#0f766e" stroke-width="2"/>
+<line x1="140.0" y1="277.8" x2="140.0" y2="241.7" stroke="#c2410c"/>
+<rect x="136.0" y="259.5" width="8" height="8" fill="#c2410c"/>
+<line x1="260.0" y1="287.1" x2="260.0" y2="242.0" stroke="#c2410c"/>
+<rect x="256.0" y="250.9" width="8" height="8" fill="#c2410c"/>
+<line x1="380.0" y1="252.2" x2="380.0" y2="242.7" stroke="#c2410c"/>
+<rect x="376.0" y="242.9" width="8" height="8" fill="#c2410c"/>
+<line x1="500.0" y1="252.8" x2="500.0" y2="230.1" stroke="#c2410c"/>
+<rect x="496.0" y="233.9" width="8" height="8" fill="#c2410c"/>
+<polyline points="140.0,263.5 260.0,254.9 380.0,246.9 500.0,237.9" fill="none" stroke="#c2410c" stroke-width="2"/>
+<circle cx="350" cy="72" r="4" fill="#0f766e"/>
+<text x="359" y="76" font-family="sans-serif" font-size="20.4">power</text>
+<rect x="460" y="68" width="8" height="8" fill="#c2410c"/>
+<text x="474" y="76" font-family="sans-serif" font-size="20.4">log</text>
+<rect x="630" y="55" width="430" height="255" fill="none" stroke="#555"/>
+<line x1="665.0" y1="310" x2="665.0" y2="315" stroke="#555"/>
+<text x="665.0" y="331" text-anchor="middle" font-family="sans-serif" font-size="20.4">64</text>
+<line x1="785.0" y1="310" x2="785.0" y2="315" stroke="#555"/>
+<text x="785.0" y="331" text-anchor="middle" font-family="sans-serif" font-size="20.4">128</text>
+<line x1="905.0" y1="310" x2="905.0" y2="315" stroke="#555"/>
+<text x="905.0" y="331" text-anchor="middle" font-family="sans-serif" font-size="20.4">256</text>
+<line x1="1025.0" y1="310" x2="1025.0" y2="315" stroke="#555"/>
+<text x="1025.0" y="331" text-anchor="middle" font-family="sans-serif" font-size="20.4">512</text>
+<line x1="630" y1="310.0" x2="1060" y2="310.0" stroke="#e5e7eb"/>
+<text x="623" y="314.0" text-anchor="end" font-family="sans-serif" font-size="20.4">-0.25</text>
+<line x1="630" y1="246.2" x2="1060" y2="246.2" stroke="#e5e7eb"/>
+<text x="623" y="250.2" text-anchor="end" font-family="sans-serif" font-size="20.4">0.39</text>
+<line x1="630" y1="182.5" x2="1060" y2="182.5" stroke="#e5e7eb"/>
+<text x="623" y="186.5" text-anchor="end" font-family="sans-serif" font-size="20.4">1.02</text>
+<line x1="630" y1="118.8" x2="1060" y2="118.8" stroke="#e5e7eb"/>
+<text x="623" y="122.8" text-anchor="end" font-family="sans-serif" font-size="20.4">1.66</text>
+<line x1="630" y1="55.0" x2="1060" y2="55.0" stroke="#e5e7eb"/>
+<text x="623" y="59.0" text-anchor="end" font-family="sans-serif" font-size="20.4">2.30</text>
+<text x="638" y="73" font-family="sans-serif" font-size="20.4">σ=2.0</text>
+<text x="845.0" y="349" text-anchor="middle" font-family="sans-serif" font-size="27.2">Lₘᵢₙ</text>
+<text x="578" y="182.5" text-anchor="middle" font-family="sans-serif" font-size="20.4" transform="rotate(-90 578 182.5)">Rₚ,∞</text>
+<line x1="665.0" y1="271.4" x2="665.0" y2="232.6" stroke="#0f766e"/>
+<circle cx="665.0" cy="259.3" r="4" fill="#0f766e"/>
+<line x1="785.0" y1="286.0" x2="785.0" y2="245.8" stroke="#0f766e"/>
+<circle cx="785.0" cy="278.0" r="4" fill="#0f766e"/>
+<line x1="905.0" y1="290.3" x2="905.0" y2="277.3" stroke="#0f766e"/>
+<circle cx="905.0" cy="286.9" r="4" fill="#0f766e"/>
+<line x1="1025.0" y1="140.1" x2="1025.0" y2="66.9" stroke="#0f766e"/>
+<circle cx="1025.0" cy="90.7" r="4" fill="#0f766e"/>
+<polyline points="665.0,259.3 785.0,278.0 905.0,286.9 1025.0,90.7" fill="none" stroke="#0f766e" stroke-width="2"/>
+<line x1="665.0" y1="240.1" x2="665.0" y2="215.0" stroke="#c2410c"/>
+<rect x="661.0" y="212.2" width="8" height="8" fill="#c2410c"/>
+<line x1="785.0" y1="270.8" x2="785.0" y2="217.4" stroke="#c2410c"/>
+<rect x="781.0" y="251.3" width="8" height="8" fill="#c2410c"/>
+<line x1="905.0" y1="284.1" x2="905.0" y2="258.5" stroke="#c2410c"/>
+<rect x="901.0" y="273.3" width="8" height="8" fill="#c2410c"/>
+<line x1="1025.0" y1="241.9" x2="1025.0" y2="221.0" stroke="#c2410c"/>
+<rect x="1021.0" y="225.4" width="8" height="8" fill="#c2410c"/>
+<polyline points="665.0,216.2 785.0,255.3 905.0,277.3 1025.0,229.4" fill="none" stroke="#c2410c" stroke-width="2"/>
+<circle cx="875" cy="72" r="4" fill="#0f766e"/>
+<text x="884" y="76" font-family="sans-serif" font-size="20.4">power</text>
+<rect x="985" y="68" width="8" height="8" fill="#c2410c"/>
+<text x="999" y="76" font-family="sans-serif" font-size="20.4">log</text>
+<rect x="105" y="400" width="430" height="255" fill="none" stroke="#555"/>
+<line x1="140.0" y1="655" x2="140.0" y2="660" stroke="#555"/>
+<text x="140.0" y="676" text-anchor="middle" font-family="sans-serif" font-size="20.4">64</text>
+<line x1="260.0" y1="655" x2="260.0" y2="660" stroke="#555"/>
+<text x="260.0" y="676" text-anchor="middle" font-family="sans-serif" font-size="20.4">128</text>
+<line x1="380.0" y1="655" x2="380.0" y2="660" stroke="#555"/>
+<text x="380.0" y="676" text-anchor="middle" font-family="sans-serif" font-size="20.4">256</text>
+<line x1="500.0" y1="655" x2="500.0" y2="660" stroke="#555"/>
+<text x="500.0" y="676" text-anchor="middle" font-family="sans-serif" font-size="20.4">512</text>
+<line x1="105" y1="655.0" x2="535" y2="655.0" stroke="#e5e7eb"/>
+<text x="98" y="659.0" text-anchor="end" font-family="sans-serif" font-size="20.4">0.75</text>
+<line x1="105" y1="591.2" x2="535" y2="591.2" stroke="#e5e7eb"/>
+<text x="98" y="595.2" text-anchor="end" font-family="sans-serif" font-size="20.4">0.93</text>
+<line x1="105" y1="527.5" x2="535" y2="527.5" stroke="#e5e7eb"/>
+<text x="98" y="531.5" text-anchor="end" font-family="sans-serif" font-size="20.4">1.10</text>
+<line x1="105" y1="463.8" x2="535" y2="463.8" stroke="#e5e7eb"/>
+<text x="98" y="467.8" text-anchor="end" font-family="sans-serif" font-size="20.4">1.27</text>
+<line x1="105" y1="400.0" x2="535" y2="400.0" stroke="#e5e7eb"/>
+<text x="98" y="404.0" text-anchor="end" font-family="sans-serif" font-size="20.4">1.45</text>
+<text x="113" y="418" font-family="sans-serif" font-size="20.4">σ=1.875</text>
+<text x="320.0" y="694" text-anchor="middle" font-family="sans-serif" font-size="27.2">Lₘᵢₙ</text>
+<text x="53" y="527.5" text-anchor="middle" font-family="sans-serif" font-size="20.4" transform="rotate(-90 53 527.5)">Qₘ,∞</text>
+<line x1="140.0" y1="618.5" x2="140.0" y2="592.4" stroke="#0f766e"/>
+<circle cx="140.0" cy="609.0" r="4" fill="#0f766e"/>
+<line x1="260.0" y1="625.1" x2="260.0" y2="586.5" stroke="#0f766e"/>
+<circle cx="260.0" cy="616.1" r="4" fill="#0f766e"/>
+<line x1="380.0" y1="626.0" x2="380.0" y2="400.0" stroke="#0f766e"/>
+<circle cx="380.0" cy="610.1" r="4" fill="#0f766e"/>
+<line x1="500.0" y1="632.7" x2="500.0" y2="470.6" stroke="#0f766e"/>
+<circle cx="500.0" cy="627.1" r="4" fill="#0f766e"/>
+<polyline points="140.0,609.0 260.0,616.1 380.0,610.1 500.0,627.1" fill="none" stroke="#0f766e" stroke-width="2"/>
+<line x1="140.0" y1="591.9" x2="140.0" y2="546.3" stroke="#c2410c"/>
+<rect x="136.0" y="568.7" width="8" height="8" fill="#c2410c"/>
+<line x1="260.0" y1="608.1" x2="260.0" y2="550.7" stroke="#c2410c"/>
+<rect x="256.0" y="586.5" width="8" height="8" fill="#c2410c"/>
+<line x1="380.0" y1="609.4" x2="380.0" y2="548.7" stroke="#c2410c"/>
+<rect x="376.0" y="574.8" width="8" height="8" fill="#c2410c"/>
+<line x1="500.0" y1="627.5" x2="500.0" y2="555.0" stroke="#c2410c"/>
+<rect x="496.0" y="612.1" width="8" height="8" fill="#c2410c"/>
+<polyline points="140.0,572.7 260.0,590.5 380.0,578.8 500.0,616.1" fill="none" stroke="#c2410c" stroke-width="2"/>
+<circle cx="350" cy="417" r="4" fill="#0f766e"/>
+<text x="359" y="421" font-family="sans-serif" font-size="20.4">power</text>
+<rect x="460" y="413" width="8" height="8" fill="#c2410c"/>
+<text x="474" y="421" font-family="sans-serif" font-size="20.4">log</text>
+<rect x="630" y="400" width="430" height="255" fill="none" stroke="#555"/>
+<line x1="665.0" y1="655" x2="665.0" y2="660" stroke="#555"/>
+<text x="665.0" y="676" text-anchor="middle" font-family="sans-serif" font-size="20.4">64</text>
+<line x1="785.0" y1="655" x2="785.0" y2="660" stroke="#555"/>
+<text x="785.0" y="676" text-anchor="middle" font-family="sans-serif" font-size="20.4">128</text>
+<line x1="905.0" y1="655" x2="905.0" y2="660" stroke="#555"/>
+<text x="905.0" y="676" text-anchor="middle" font-family="sans-serif" font-size="20.4">256</text>
+<line x1="1025.0" y1="655" x2="1025.0" y2="660" stroke="#555"/>
+<text x="1025.0" y="676" text-anchor="middle" font-family="sans-serif" font-size="20.4">512</text>
+<line x1="630" y1="655.0" x2="1060" y2="655.0" stroke="#e5e7eb"/>
+<text x="623" y="659.0" text-anchor="end" font-family="sans-serif" font-size="20.4">0.75</text>
+<line x1="630" y1="591.2" x2="1060" y2="591.2" stroke="#e5e7eb"/>
+<text x="623" y="595.2" text-anchor="end" font-family="sans-serif" font-size="20.4">0.97</text>
+<line x1="630" y1="527.5" x2="1060" y2="527.5" stroke="#e5e7eb"/>
+<text x="623" y="531.5" text-anchor="end" font-family="sans-serif" font-size="20.4">1.20</text>
+<line x1="630" y1="463.8" x2="1060" y2="463.8" stroke="#e5e7eb"/>
+<text x="623" y="467.8" text-anchor="end" font-family="sans-serif" font-size="20.4">1.42</text>
+<line x1="630" y1="400.0" x2="1060" y2="400.0" stroke="#e5e7eb"/>
+<text x="623" y="404.0" text-anchor="end" font-family="sans-serif" font-size="20.4">1.65</text>
+<text x="638" y="418" font-family="sans-serif" font-size="20.4">σ=2.0</text>
+<text x="845.0" y="694" text-anchor="middle" font-family="sans-serif" font-size="27.2">Lₘᵢₙ</text>
+<text x="578" y="527.5" text-anchor="middle" font-family="sans-serif" font-size="20.4" transform="rotate(-90 578 527.5)">Qₘ,∞</text>
+<line x1="665.0" y1="612.7" x2="665.0" y2="595.1" stroke="#0f766e"/>
+<circle cx="665.0" cy="606.2" r="4" fill="#0f766e"/>
+<line x1="785.0" y1="622.7" x2="785.0" y2="598.0" stroke="#0f766e"/>
+<circle cx="785.0" cy="616.7" r="4" fill="#0f766e"/>
+<line x1="905.0" y1="625.9" x2="905.0" y2="611.8" stroke="#0f766e"/>
+<circle cx="905.0" cy="621.7" r="4" fill="#0f766e"/>
+<line x1="1025.0" y1="460.8" x2="1025.0" y2="430.7" stroke="#0f766e"/>
+<circle cx="1025.0" cy="444.1" r="4" fill="#0f766e"/>
+<polyline points="665.0,606.2 785.0,616.7 905.0,621.7 1025.0,444.1" fill="none" stroke="#0f766e" stroke-width="2"/>
+<line x1="665.0" y1="588.1" x2="665.0" y2="565.8" stroke="#c2410c"/>
+<rect x="661.0" y="569.3" width="8" height="8" fill="#c2410c"/>
+<line x1="785.0" y1="609.2" x2="785.0" y2="568.2" stroke="#c2410c"/>
+<rect x="781.0" y="592.8" width="8" height="8" fill="#c2410c"/>
+<line x1="905.0" y1="616.9" x2="905.0" y2="585.9" stroke="#c2410c"/>
+<rect x="901.0" y="604.7" width="8" height="8" fill="#c2410c"/>
+<line x1="1025.0" y1="577.8" x2="1025.0" y2="567.9" stroke="#c2410c"/>
+<rect x="1021.0" y="568.7" width="8" height="8" fill="#c2410c"/>
+<polyline points="665.0,573.3 785.0,596.8 905.0,608.7 1025.0,572.7" fill="none" stroke="#c2410c" stroke-width="2"/>
+<circle cx="875" cy="417" r="4" fill="#0f766e"/>
+<text x="884" y="421" font-family="sans-serif" font-size="20.4">power</text>
+<rect x="985" y="413" width="8" height="8" fill="#c2410c"/>
+<text x="999" y="421" font-family="sans-serif" font-size="20.4">log</text>
+</svg>

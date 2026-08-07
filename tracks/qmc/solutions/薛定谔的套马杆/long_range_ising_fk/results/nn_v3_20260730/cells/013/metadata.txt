@@ -1,0 +1,6 @@
+status=success
+kernel=exact_nearest_neighbor_fk
+boundary=periodic
+J=1
+beta=0.4406867935097715
+julia=1.12.5

@@ -1,0 +1,67 @@
+{
+  "status": "success",
+  "cell_id": "cell-0024",
+  "params": {
+    "L": 2048,
+    "seed": 106004
+  },
+  "settings": {
+    "model": "nearest_neighbor_square_ising",
+    "hamiltonian": "H=-sum_<ij> s_i s_j",
+    "coupling_J": 1.0,
+    "geometry": "LxL square lattice",
+    "boundary": "periodic square torus",
+    "beta": 0.44068679350977147,
+    "algorithm": "exact nearest-neighbor Swendsen-Wang/FK",
+    "entrypoint": "tracks/qmc/solutions/\u859b\u5b9a\u8c14\u7684\u5957\u9a6c\u6746/long_range_ising_fk/scripts/nn_large_point.jl",
+    "blocks": 50,
+    "thermalization_sweeps_by_size": {
+      "64": 5000,
+      "128": 5000,
+      "256": 5000,
+      "512": 4000,
+      "1024": 3000,
+      "2048": 2000,
+      "4096": 1000
+    },
+    "measurement_sweeps_by_size": {
+      "64": 200000,
+      "128": 200000,
+      "256": 150000,
+      "512": 100000,
+      "1024": 50000,
+      "2048": 20000,
+      "4096": 5000
+    },
+    "targets": {
+      "Qm": 0.856216,
+      "Rp": 0.0,
+      "eta": 0.25
+    },
+    "thermalization_sweeps": 2000,
+    "measurement_sweeps": 20000
+  },
+  "provenance": {
+    "run_id": "nn_large_20260730",
+    "purpose": "High-precision exact nearest-neighbor control for Qm, Rp, and eta",
+    "issue": "QuantumBFS/quantum.harness#86",
+    "base_commit": "26234d49bddd6005398d35361ff98b5efbba6b88",
+    "protocol": "strict NN J=1 at exact square-lattice beta_c; seven sizes; four independent seeds",
+    "source_sha256": "88521ce9d6e15e817e8e99837899317a4dc0e3e0a73951bdb45201edaff4b205"
+  },
+  "observables": {
+    "Qm": 0.8626233080356505,
+    "se_Qm": 0.004900403189500997,
+    "Rp": 0.044349999999999945,
+    "se_Rp": 0.024522148464319403,
+    "chi": 683772.9286721506,
+    "se_chi": 7405.683363124751,
+    "tau_m2": 6.687809194472599,
+    "runtime_s": 7960.696906089783
+  },
+  "evidence": [
+    "summary.csv",
+    "blocks.csv",
+    "metadata.txt"
+  ]
+}

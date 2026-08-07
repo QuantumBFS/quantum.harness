@@ -1,0 +1,34 @@
+{
+  "model": "nearest_neighbor_square_ising",
+  "hamiltonian": "H=-sum_<ij> s_i s_j",
+  "coupling_J": 1.0,
+  "geometry": "LxL square lattice",
+  "boundary": "periodic square torus",
+  "beta": 0.44068679350977147,
+  "algorithm": "exact nearest-neighbor Swendsen-Wang/FK",
+  "entrypoint": "tracks/qmc/solutions/薛定谔的套马杆/long_range_ising_fk/scripts/nn_large_point.jl",
+  "blocks": 50,
+  "thermalization_sweeps_by_size": {
+    "64": 5000,
+    "128": 5000,
+    "256": 5000,
+    "512": 4000,
+    "1024": 3000,
+    "2048": 2000,
+    "4096": 1000
+  },
+  "measurement_sweeps_by_size": {
+    "64": 200000,
+    "128": 200000,
+    "256": 150000,
+    "512": 100000,
+    "1024": 50000,
+    "2048": 20000,
+    "4096": 5000
+  },
+  "targets": {
+    "Qm": 0.856216,
+    "Rp": 0.0,
+    "eta": 0.25
+  }
+}
