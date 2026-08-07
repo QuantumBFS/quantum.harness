@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="400" font-family="sans-serif" font-size="12">
+<rect width="640" height="400" fill="white"/>
+<text x="320.0" y="20" text-anchor="middle" font-size="14">F2 — R_cost(N): structural (hollow = build-only) and realized (solved sizes)</text>
+<line x1="70" y1="350" x2="620" y2="350" stroke="black"/>
+<line x1="70" y1="40" x2="70" y2="350" stroke="black"/>
+<text x="70.0" y="368" text-anchor="middle">10</text>
+<text x="125.0" y="368" text-anchor="middle">12</text>
+<text x="180.0" y="368" text-anchor="middle">14</text>
+<text x="345.0" y="368" text-anchor="middle">20</text>
+<text x="510.0" y="368" text-anchor="middle">26</text>
+<text x="620.0" y="368" text-anchor="middle">30</text>
+<text x="62" y="354.0" text-anchor="end">0.33</text>
+<line x1="70" y1="350.0" x2="620" y2="350.0" stroke="#eee"/>
+<text x="62" y="292.0" text-anchor="end">0.57</text>
+<line x1="70" y1="288.0" x2="620" y2="288.0" stroke="#eee"/>
+<text x="62" y="230.0" text-anchor="end">0.81</text>
+<line x1="70" y1="226.0" x2="620" y2="226.0" stroke="#eee"/>
+<text x="62" y="167.99999999999997" text-anchor="end">1.04</text>
+<line x1="70" y1="163.99999999999997" x2="620" y2="163.99999999999997" stroke="#eee"/>
+<text x="62" y="106.00000000000003" text-anchor="end">1.28</text>
+<line x1="70" y1="102.00000000000003" x2="620" y2="102.00000000000003" stroke="#eee"/>
+<text x="62" y="44.0" text-anchor="end">1.52</text>
+<line x1="70" y1="40.0" x2="620" y2="40.0" stroke="#eee"/>
+<line x1="70" y1="175.22573432300965" x2="620" y2="175.22573432300965" stroke="red" stroke-dasharray="6,3"/>
+<text x="616" y="170.22573432300965" text-anchor="end" fill="red">1</text>
+<path d="M70.0,254.2 L125.0,276.4 L180.0,294.6 L345.0,336.0 L510.0,345.8 L620.0,348.3" fill="none" stroke="#1f77b4" stroke-width="2" />
+<circle cx="70.0" cy="254.2" r="5" fill="#1f77b4" stroke="#1f77b4" stroke-width="2"/>
+<circle cx="125.0" cy="276.4" r="5" fill="#1f77b4" stroke="#1f77b4" stroke-width="2"/>
+<circle cx="180.0" cy="294.6" r="5" fill="#1f77b4" stroke="#1f77b4" stroke-width="2"/>
+<circle cx="345.0" cy="336.0" r="5" fill="#1f77b4" stroke="#1f77b4" stroke-width="2"/>
+<circle cx="510.0" cy="345.8" r="5" fill="white" stroke="#1f77b4" stroke-width="2"/>
+<circle cx="620.0" cy="348.3" r="5" fill="white" stroke="#1f77b4" stroke-width="2"/>
+<text x="80" y="56" fill="#1f77b4">Direct D=2: structural C/A</text>
+<path d="M180.0,58.8 L345.0,214.9 L510.0,277.0 L620.0,297.7" fill="none" stroke="#7f7f7f" stroke-width="2" stroke-dasharray="5,4"/>
+<circle cx="180.0" cy="58.8" r="5" fill="#7f7f7f" stroke="#7f7f7f" stroke-width="2"/>
+<circle cx="345.0" cy="214.9" r="5" fill="#7f7f7f" stroke="#7f7f7f" stroke-width="2"/>
+<circle cx="510.0" cy="277.0" r="5" fill="white" stroke="#7f7f7f" stroke-width="2"/>
+<circle cx="620.0" cy="297.7" r="5" fill="white" stroke="#7f7f7f" stroke-width="2"/>
+<text x="80" y="72" fill="#7f7f7f">Additive D=4 n=6: structural C6/A</text>
+<path d="M70.0,181.9 L125.0,171.6 L180.0,210.2 L345.0,241.0" fill="none" stroke="#2ca02c" stroke-width="2" />
+<circle cx="70.0" cy="181.9" r="5" fill="#2ca02c" stroke="#2ca02c" stroke-width="2"/>
+<circle cx="125.0" cy="171.6" r="5" fill="#2ca02c" stroke="#2ca02c" stroke-width="2"/>
+<circle cx="180.0" cy="210.2" r="5" fill="#2ca02c" stroke="#2ca02c" stroke-width="2"/>
+<circle cx="345.0" cy="241.0" r="5" fill="#2ca02c" stroke="#2ca02c" stroke-width="2"/>
+<text x="80" y="88" fill="#2ca02c">Direct: realized wall C/A</text>
+<path d="M70.0,166.6 L125.0,177.4 L180.0,201.7 L345.0,303.2" fill="none" stroke="#d62728" stroke-width="2" />
+<circle cx="70.0" cy="166.6" r="5" fill="#d62728" stroke="#d62728" stroke-width="2"/>
+<circle cx="125.0" cy="177.4" r="5" fill="#d62728" stroke="#d62728" stroke-width="2"/>
+<circle cx="180.0" cy="201.7" r="5" fill="#d62728" stroke="#d62728" stroke-width="2"/>
+<circle cx="345.0" cy="303.2" r="5" fill="#d62728" stroke="#d62728" stroke-width="2"/>
+<text x="80" y="104" fill="#d62728">Direct: realized RSS C/A</text>
+<text x="320.0" y="392" text-anchor="middle">N (chain length)</text>
+<text x="16" y="200.0" transform="rotate(-90 16 200.0)" text-anchor="middle">ratio vs fine-rich comparator A</text>
+</svg>

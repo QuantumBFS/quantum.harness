@@ -1,0 +1,7 @@
+# holdout.csv — N=14 four-arm holdout (source: rg_selection/results/g4_arms.csv, run split light/heavy; classification per LAW eps_cmp)
+arm,E,pfeas,dfeas,mu,wall_s
+base,-0.44740635086878705,1.6e-8,7.2e-10,1.5e-11,23.3
+sel,-0.4474063509137459,1.6e-8,2.5e-9,1.5e-11,12.0
+rg,-0.44740634775937105,7.1e-8,9.4e-10,5.4e-11,381.4
+joint,-0.4474063453345483,8.4e-8,4.2e-10,4.9e-11,368.0
+classification,UNRESOLVED_NULL (D_joint=+5.5e-9 <= eps_cmp~1.5e-7; preregistered branch),,,,

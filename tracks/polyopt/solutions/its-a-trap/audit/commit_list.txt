@@ -1,0 +1,46 @@
+91af879 [polyopt] its-a-trap: Amendment 4/4A/4B/4C execution record — R1+R2+R3+R4b PASS, R4c killed mid-run, A200 CANCELLED by arbiter override; selection pilot freeze {B_bond_edge,B_half}; 4B.1 archive
+bef4dc6 [polyopt] its-a-trap: daytime override — pair 23009660 released (post-freeze, non-gating); record appended
+a80fc54 [polyopt] its-a-trap: Thursday data-freeze candidate — MASTER.csv (74 rows) + RESULTS_TABLES.md (generated from CSV only)
+f27403e [polyopt] its-a-trap: R-night documentation-only preservation (ruling #4) — directive status, prototype contract, preregistration
+4b2a8d2 [polyopt] its-a-trap: N=200 RELEASE RULING = BLOCKED (mechanical 02:30 law; no blind release)
+8893d60 [polyopt] its-a-trap: V3@N=14 GREEN (newwords exercised, mutation red) + machine-readable gates.csv/vcheck.csv
+a948a9b [polyopt] its-a-trap: 00:15 SMALL-N FREEZE REPORT (immutable) + frozen selection artifacts
+cebb8da [polyopt] its-a-trap: N=200 deployment kit — probe/pair runner, watchdog, G4b gate, probe max-time channel
+306b8a1 [polyopt] its-a-trap: arbiter-mandated vcheck suite + chunked-resume enumeration
+05e4af7 [polyopt] its-a-trap: G3 blocking corrections — tie-break declared, EXACT_ALL_SUBSETS_LE3 labels, resumable enum + tie-broken finalizer (parallel; run #1 untouched)
+bef4bbb [polyopt] its-a-trap: rg_selection GATE G2 GREEN (self-contained)
+8896fcb [polyopt] its-a-trap: governance — PLAN.md pointer + STANDING_OBLIGATIONS whitelist (at G1 green per rule 5)
+97e5cf5 [polyopt] its-a-trap: rg_selection GATE G1 GREEN
+b112e2b [polyopt] its-a-trap: Route A CLOSED (arbiter ruling) — findings of record + T1L lever condition
+599ec8d [polyopt] its-a-trap: rg_selection G0 — plan of record, frozen config, theorem contract, selection protocol, pool hash
+e4d6001 [polyopt] its-a-trap: DMRG variational upper bounds, N=100 PBC J1-J2 (probe order per plan)
+f7a15a3 [polyopt] its-a-trap: Route A Amendment 3 — additive pricing, pso twin cell, N=200 pre-position
+546fb6a [polyopt] its-a-trap: ROUTE_A_ACTIVE.md (Amendment 2, adaptive form)
+f1c82ad [polyopt] its-a-trap: governance split PLAN/LAW/HISTORY (arbiter directive)
+5e89867 [polyopt] its-a-trap: M2 D2 verdict (unresolved-positive) + D4 tensor; D4 arms exceed the laptop
+f41c3bd [polyopt] its-a-trap: two-parity ω-tower + 2-site VUMPS D=2 tensors (V-gates green)
+94750f6 [polyopt] its-a-trap: arbiter decisions — release v120/v160 right-sized, 2D via approved resort monkey-patch
+7e5d48c [polyopt] its-a-trap: M0-C GATE GREEN — 4/4 regression pairs exact
+64002ad [polyopt] its-a-trap: M0-C first-strike fixes — 4 missing fork aliases + worktree path
+1a41331 [polyopt] its-a-trap: 2D chain blocked by upstream bug — evidence + prepared fix
+4e0d7c1 [polyopt] its-a-trap: move SCNet jobs to xhacnormalb (CPU partition)
+57a3b05 [polyopt] its-a-trap: queue v4 — last local memory step (21G cgroup / 20.3 cap)
+a37f48d [polyopt] its-a-trap: method-lane night kit
+b246476 [polyopt] its-a-trap: xh5 partition fix (xhhgnormal), %4 array cap, v14 fingerprint cell
+906449d [polyopt] its-a-trap: pin working-tree state before method-lane worktree split
+3bae5b2 [polyopt] its-a-trap: widen SCNet payload to 22 cells (keep the cluster busy)
+9c229f9 [polyopt] its-a-trap: HPC bundle adapts to SCNet network reality
+d574e54 [polyopt] its-a-trap: queue v3 — J2@N=40 remainder at 19G cgroup / 18.5G cap
+e286276 [polyopt] its-a-trap: SCNet job bundle (ladder N=50-200 + J2@N=100)
+3ad0977 [polyopt] its-a-trap: ω-tower generator + first coupled hybrid runs (all gates green)
+07f920c GSB_cg textual fork (sha-pinned, tower seam + interface contract) + Table 4 refs
+94b5c82 queue v2: systemd-scoped cells, ladder 50/60/80, J2 sweep at N=40 (Table 4 refs)
+ba5f99e Track2 M0-A/B recon + THEOREM_CONTRACT + tower module, M1 gates green
+357fa3f targets queue: gap/ref columns, j1j2 encoding, ENV budgets, RSS-gated N=200
+d039125 bethe_ref: high-precision Bethe reference + 5-part validation gate (v2 one-sided criterion)
+eb4a006 literature contract: Kull III-D-2 + coarse-grained bootstrap vs QMBCertify
+77d1a0f overnight: rdm=8 N-scaling ladder + results
+b30c653 overnight: results tables generated from results.csv
+8c7ca8d overnight: harness + protocol results for #49
+aacfde8 overnight reproduction protocol for #49
+8b95732 [polyopt] its-a-trap: register challenge #49

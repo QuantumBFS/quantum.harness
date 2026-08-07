@@ -1,0 +1,3 @@
+timer_start=2026-07-30T10:16:43+08:00
+2026-07-30T10:22:30+08:00 BASELINE rc=0 elapsed=347s
+ARBITER-CHECKPOINT-STOP 2026-07-30T10:23:28+08:00: enumeration killed mid-BASELINE (completion mathematically impossible in window); FROZEN {B_bond_edge,B_half} = A200_FIXED_BUNDLE_PILOT

@@ -1,0 +1,5 @@
+gate,verdict,detail
+R1,PASS,"Core(rdm=false,lso=false) N=10 E=-0.451549606105 <= E0/N=-0.451544635449 pfeas=5.6e-09 dfeas=7.7e-09"
+R2,PASS,"V1 ED substitution: Gamma + omega blocks + link rows @ N=10 (chassis-independent)"
+R3,PASS,"link-sign mutation on rdm=false chassis -> mutated-E=0.0101621497 (core -0.4515496061, E0/N -0.4515446354)"
+R4b,PASS,"auto=-0.451549597105 pool=-0.451549597105 |dE|=0.0e+00<=eps_cmp=5.0e-07 blockhash_eq=true counts(auto<=pool)=true(nw 0<=0, scal 19431<=19431) eigmin=+3.5e-01"

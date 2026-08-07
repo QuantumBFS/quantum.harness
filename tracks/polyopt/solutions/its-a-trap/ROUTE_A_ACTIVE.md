@@ -1,0 +1,105 @@
+# ROUTE_A — CLOSED (arbiter ruling, Wed ~15:25)
+
+**Program status: CLOSED.** A2 arbitration, A3 confirm, A4 assault:
+CANCELLED as a program. No axis-rerouting ruling. e49p0v2 runs out and its
+row joins the reach table; no further screen cells.
+
+## Findings of record (consistency-only language)
+
+1. **H_reach confirmed on the rdm=10 axis**: gap 2.364e-5 at r=5 →
+   9.93e-6 at r=9 (v100e8hi2, N=100). The pre-registered prediction
+   ("e8 improves but does not reach 8.3e-6") held: residual 1.6e-6.
+   These results are CONSISTENT WITH Table 3 using an N-dependent reach
+   r ≈ N/2; the fixed-r=5 large-N deficit is explained by basis
+   undercoverage. (Never: "identified the paper's configuration".)
+2. **Memory laws** (N=100 measured): pso is the ~110 GB floor at r=5 and
+   scales MULTIPLICATIVELY with reach (r=50+pso3 > 246 GB); the r=50
+   Gram basis alone (+lso) exceeds 230 GB on any pso axis; rdm 10↔8 is
+   marginal (~113 vs >110 GB). The paper's 1-TB hardware is thereby
+   rationalized.
+3. **pso accuracy marginal**: huge at rdm=8, r=5 (Δ(pso)=1.55e-4);
+   marginal at rdm=10 (Remark 6.1's own usage pattern is consistent).
+4. A0 semantics: m-plateau at r=⌈N/2⌉; r>⌈N/2⌉ is a loud INFEASIBILITY
+   (separation-N wrap words), not a silent no-op.
+
+## Surviving conditional cell (OUTSIDE Route A — Wednesday decision-rule
+lever branch): T1L = N=200, rdm=10, pso=0, extra=23, CONFIG A otherwise.
+Auto-submit IFF the v200hi verdict = measured miss (gap > 1e-5):
+construction-only probe first, standard budgets, ONE row, no follow-ups.
+(v200hi death-without-row = resource-frontier branch → report, no
+auto-submit.)
+
+Everything below is the archived active text at closure time.
+---
+# [ARCHIVED] ROUTE_A_ACTIVE — the agent executes from THIS file alone
+(Amendment 2, adaptive form, Wed ~13:45. Rules by reference: ε_cmp, sign
+rules, terminology, claim language = LAW.md. Family birth deadline 22:00.)
+
+H_reach: the N=100 CONFIG A deficit (gap 2.364e-5 vs the paper's 8.3e-6) is
+two-body-basis reach undercoverage (r = extra+1 = 5 fixed vs paper r≈⌈N/2⌉).
+
+## A0 semantics gate — PASS (measured Wed 13:0x, routeA-20260729/step0)
+
+- m: 1819 (r=5) < 1890 (r=7) = 1890 (r=14): growth + wrap plateau ✓
+- E₅ = −0.4473967708 ≤ E₇ = −0.4473967065, Δ=+6.4e-8 > ε_cmp(≤4.4e-8) ✓
+- r=14 (> ⌈N/2⌉): INFEASIBILITY_CERTIFICATE — separation-N wrap words put
+  two letters on one site; loud model failure, NOT silent no-op. Safe
+  domain: r ≤ N/2. (Screen max extra=49 → r=50 = N/2 at N=100 ✓.)
+- Historical −0.4473967065 reproduced EXACTLY at rdm=8, pso=3, lso=true —
+  provenance note on the Tuesday scan; diagnostic only.
+
+## A1 first wave (SCNet, rdm=8, N=100) — THREE cells
+
+- ACTIVE: rA_e4 (22991017, baseline), rA_e24 (22991019), rA_e49 (22991021);
+  32c/110-cap, 64c/230-cap, 64c/230-cap.
+- HELD by this amendment: rA_e14 (22991018), rA_e34 (22991020) — the at-most-
+  ONE conditional fill releases 22991018 (early saturation) or 22991020
+  (still rising). Never both.
+- v100e8hi2 (rdm=10, r=9) is REASSIGNED to the rdm=10 reach curve
+  (r=5 [=v100hi], r=9 [=v100e8hi2], future r*); it is NOT an rdm=8 point.
+
+## A2 verdict (mechanical, in order)
+
+1. Nested-monotonicity gate FIRST: E₅ ≤ E₂₅ ≤ E₅₀ within ε_cmp.
+   Violation → audit basis nesting / wrap / parsing BEFORE interpretation.
+2. r* = min{r : Δ_r(r) ≥ 0.9·Δ_r(50)}, Δ_r(r) = E_{8,r} − E_{8,5}.
+3. At most ONE fill point: release e14 if early saturation, e34 if rising.
+4. No resolved gain → report VERBATIM: "no resolved reach gain was observed
+   on the rdm=8 screening relaxation; the hypothesis was not escalated to
+   the rdm=10 test" — a resource decision, never "H_reach rejected".
+
+## A3 confirm (after arbiter sees the A2 table) — AMENDMENT 3 pricing
+
+- m²-scaling pricing RETIRED. Estimator:
+  RSS(10, r*) ≈ RSS(e49) + [RSS(v100hi) − RSS(e4b)], second term ≤ 3 GB by
+  constraint monotonicity.
+- MANDATORY construction-only probe first, REPURPOSED: verify block-family
+  additivity (print nnz per family), log m, PSD block signature, build RSS;
+  abort if build alone nears the node limit.
+- Then ONE cell: N=100, rdm=10, extra = r*−1.
+- Readout: 3-point rdm=10 reach curve (r = 5, 9, r*) vs 8.3e-6.
+- Language: consistency-only (LAW.md Route A pre-written sentences).
+
+## Knob-ablation twin (Amendment 3) — SUBMITTED 22992924
+
+rA_e49p0: N=100, rdm=8, extra=49, pso=0, lso unchanged — "screen, minus
+pso, per Remark 6.1 precedent". Measures the pso accuracy marginal AND the
+memory saving at N=100. Joins the reach table as a knob-ablation row (not a
+new family). One knob per cell: lso is the SECOND ablation candidate, never
+bundled with the pso twin.
+If Δ(pso) ≤ ε_cmp at N=100 → the N=200 assault config becomes
+rdm=10 + extra=r*_200 + pso=0 (additive pricing); PRE-POSITIONED cellspec:
+  v200ra:200:extra=<r*_200-1>,pso=0    (rdm=10 default; arbiter GO tonight)
+Timing columns are NOT comparable across node tiers (32c/64c/128c) — every
+reach-table row carries a node-tier flag; wall/solve comparisons only
+within a tier.
+
+## A4 N=200
+
+Unchanged: fraction p = r*/50 deployment; requires confirm improvement AND
+budget AND Thursday freeze capacity. Arbiter GO required.
+
+## Report points
+
+(i) A0 — done (above). (ii) after A2: Δ_r/m/RSS table + r* + confirm price
+→ WAIT. Stop lines: no Route B; no N=200 large-reach without GO.

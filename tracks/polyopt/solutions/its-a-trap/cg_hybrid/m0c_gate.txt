@@ -1,0 +1,97 @@
+m0c_tail armed 2026-07-29T03:35:19+08:00; waiting for queue v3
+queue v3 finished; starting M0-C 2026-07-29T03:35:19+08:00
+=== m0c N=10 cfg=rdm8 variant=stock start 2026-07-29T03:35:19+08:00
+[36m[1m┌ [22m[39m[36m[1mInfo: [22m[39mGSB_cg_raw forked
+[36m[1m└ [22m[39m  sha256 = "bc33d5913868e4556651408495b93543e19cf704699ccabc4b5b4ad37f2ab96c"
+*********************************** QMBCertify ***********************************
+QMBCertify is launching...
+optimum = -0.4515446245785644
+M0C rdm8 stock N=10  E=-0.451544624579  wall=27.0s rss=1.20GB
+=== exit=0 2026-07-29T03:35:53+08:00
+=== m0c N=10 cfg=rdm8 variant=adapter start 2026-07-29T03:35:53+08:00
+[36m[1m┌ [22m[39m[36m[1mInfo: [22m[39mGSB_cg_raw forked
+[36m[1m└ [22m[39m  sha256 = "bc33d5913868e4556651408495b93543e19cf704699ccabc4b5b4ad37f2ab96c"
+*********************************** QMBCertify ***********************************
+QMBCertify is launching...
+optimum = -0.4515446245785644
+M0C rdm8 adapter N=10  E=-0.451544624579  wall=25.4s rss=1.13GB
+=== exit=0 2026-07-29T03:36:24+08:00
+=== m0c N=14 cfg=rdm8 variant=stock start 2026-07-29T03:36:24+08:00
+[36m[1m┌ [22m[39m[36m[1mInfo: [22m[39mGSB_cg_raw forked
+[36m[1m└ [22m[39m  sha256 = "bc33d5913868e4556651408495b93543e19cf704699ccabc4b5b4ad37f2ab96c"
+*********************************** QMBCertify ***********************************
+QMBCertify is launching...
+optimum = -0.44741047710079174
+M0C rdm8 stock N=14  E=-0.447410477101  wall=26.4s rss=1.35GB
+=== exit=0 2026-07-29T03:36:56+08:00
+=== m0c N=14 cfg=rdm8 variant=adapter start 2026-07-29T03:36:56+08:00
+[36m[1m┌ [22m[39m[36m[1mInfo: [22m[39mGSB_cg_raw forked
+[36m[1m└ [22m[39m  sha256 = "bc33d5913868e4556651408495b93543e19cf704699ccabc4b5b4ad37f2ab96c"
+*********************************** QMBCertify ***********************************
+QMBCertify is launching...
+optimum = -0.44741047710079174
+M0C rdm8 adapter N=14  E=-0.447410477101  wall=25.9s rss=1.29GB
+=== exit=0 2026-07-29T03:37:29+08:00
+=== m0c N=10 cfg=configA variant=stock start 2026-07-29T03:37:29+08:00
+[36m[1m┌ [22m[39m[36m[1mInfo: [22m[39mGSB_cg_raw forked
+[36m[1m└ [22m[39m  sha256 = "bc33d5913868e4556651408495b93543e19cf704699ccabc4b5b4ad37f2ab96c"
+*********************************** QMBCertify ***********************************
+QMBCertify is launching...
+optimum = -0.45154459452835116
+M0C configA stock N=10  E=-0.451544594528  wall=1957.4s rss=2.72GB
+=== exit=0 2026-07-29T04:10:13+08:00
+=== m0c N=10 cfg=configA variant=adapter start 2026-07-29T04:10:13+08:00
+[36m[1m┌ [22m[39m[36m[1mInfo: [22m[39mGSB_cg_raw forked
+[36m[1m└ [22m[39m  sha256 = "bc33d5913868e4556651408495b93543e19cf704699ccabc4b5b4ad37f2ab96c"
+*********************************** QMBCertify ***********************************
+QMBCertify is launching...
+optimum = -0.45154459452835116
+M0C configA adapter N=10  E=-0.451544594528  wall=2040.5s rss=2.60GB
+=== exit=0 2026-07-29T04:44:19+08:00
+=== m0c N=14 cfg=configA variant=stock start 2026-07-29T04:44:19+08:00
+[36m[1m┌ [22m[39m[36m[1mInfo: [22m[39mGSB_cg_raw forked
+[36m[1m└ [22m[39m  sha256 = "bc33d5913868e4556651408495b93543e19cf704699ccabc4b5b4ad37f2ab96c"
+*********************************** QMBCertify ***********************************
+QMBCertify is launching...
+optimum = -0.44739636848093645
+M0C configA stock N=14  E=-0.447396368481  wall=2155.0s rss=14.09GB
+=== exit=0 2026-07-29T05:20:21+08:00
+=== m0c N=14 cfg=configA variant=adapter start 2026-07-29T05:20:21+08:00
+[36m[1m┌ [22m[39m[36m[1mInfo: [22m[39mGSB_cg_raw forked
+[36m[1m└ [22m[39m  sha256 = "bc33d5913868e4556651408495b93543e19cf704699ccabc4b5b4ad37f2ab96c"
+*********************************** QMBCertify ***********************************
+QMBCertify is launching...
+optimum = -0.44739636848093645
+M0C configA adapter N=14  E=-0.447396368481  wall=2206.1s rss=13.94GB
+=== exit=0 2026-07-29T05:57:15+08:00
+== M1 tower gates ==
+G2 flow k=2->3 residual 0.00e+00 PASS
+G2 flow k=3->4 residual 0.00e+00 PASS
+G2 flow k=4->5 residual 0.00e+00 PASS
+E_lti(3)=-0.5000000090 (OPTIMAL)  E_lti(4)=-0.5000000000 (OPTIMAL)
+G1  sandwich: E_cg(4,U)=-0.5000000000 (OPTIMAL)  [lti3-1e-8 ≤ cg ≤ lti4+1e-8] PASS
+G1b strict oracle: E=-0.4999999997 (OPTIMAL) |Δ vs lti4|=2.78e-10 PASS
+    measured lossless-equality claim: |E_cg−E_lti4|=2.31e-11 (expected NONZERO — traced links are lossy; see GATE NOTE)
+E_cg(4, mps m=2) = -0.5000000001 (OPTIMAL)
+E_cg(5, mps m=2) = -0.4999999999 (OPTIMAL)
+E_cg(6, mps m=2) = -0.5000000010 (OPTIMAL)
+G4 monotone in n: PASS
+G3 ED N=8: tr(h ρ2)=-0.456386676117 vs E0/N=-0.456386676117 |Δ|=1.67e-16 PASS
+G3 LTI M=3 residual 1.11e-16 PASS
+G3 LTI M=4 residual 5.55e-17 PASS
+G3 LTI M=5 residual 5.55e-17 PASS
+G3 LTI M=6 residual 2.78e-17 PASS
+G3 T2 residual 2.78e-17 PASS
+G3 T3 M=4 residual 1.39e-17 PASS
+G3 ω_4 min-eig 5.87e-07 PASS
+G3 T3 M=5 residual 4.56e-18 PASS
+G3 ω_5 min-eig -3.84e-18 PASS
+M1 GATES: PASS (with GATE NOTE measured)
+M0C TAIL DONE 2026-07-29T05:57:32+08:00
+M0C rdm8 N=10: |E_adapter-E_GSB| = 0.000e+00  E_stock=-0.451544624579  PASS
+M0C rdm8 N=14: |E_adapter-E_GSB| = 0.000e+00  E_stock=-0.447410477101  PASS
+M0C configA N=10: |E_adapter-E_GSB| = 0.000e+00  E_stock=-0.451544594528  PASS
+M0C configA N=14: |E_adapter-E_GSB| = 0.000e+00  E_stock=-0.447396368481  PASS
+M0-C GATE GREEN
+provenance note: rows' git_diff_empty=false reflects UNTRACKED run outputs;
+tracked-source cleanliness verified post-hoc (git status -uno empty, no commits during window)

@@ -1,0 +1,1 @@
+{"S_star": ["B_bond_edge", "B_half"], "score_per_site": 3.8199700347352206e-9, "runner_up": "B_bond_half+B_half+B_pair_edge", "runner_up_score": 3.906975021283898e-9, "tie_break_rule_fired": "(b) lower gamma2_dim", "frozen_before_holdout": true, "n_rg": 6, "enumeration_mode": "EXACT_ALL_SUBSETS_LE3", "pool_hash": "8c3f55720dc81cabc683fd0ba6b92d0d3c2f93629afacfe6b4f62c526879a31c"}

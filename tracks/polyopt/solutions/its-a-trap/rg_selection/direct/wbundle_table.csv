@@ -1,0 +1,17 @@
+bundle,N,closure_words,gamma_prods,W_bundle_size
+B_pair_edge,10,1,3,0
+B_pair_edge,12,1,3,0
+B_pair_edge,14,1,3,0
+B_pair_edge,20,1,3,0
+B_half,10,1,4,0
+B_half,12,1,4,0
+B_half,14,1,4,0
+B_half,20,1,4,0
+B_bond_edge,10,2,4,0
+B_bond_edge,12,2,4,0
+B_bond_edge,14,2,4,0
+B_bond_edge,20,2,4,0
+B_bond_half,10,2,4,0
+B_bond_half,12,2,4,0
+B_bond_half,14,2,4,0
+B_bond_half,20,2,4,0

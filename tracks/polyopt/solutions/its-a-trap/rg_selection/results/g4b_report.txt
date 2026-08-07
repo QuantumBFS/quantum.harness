@@ -1,0 +1,2 @@
+run_small.jl g4b  PASS
+G4b space-eq   PASS  V_pool vs V_{S*} at N=14: |dE|=0.00e+00 sig_equal=true (E=-0.447406345335)

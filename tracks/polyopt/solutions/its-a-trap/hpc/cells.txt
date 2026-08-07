@@ -1,0 +1,33 @@
+# SCNet payload — one overnight_harness cellspec per line (label:N[:overrides]).
+# Priority order: Target-1 CONFIG A ladder first, then the Target-2 J2 sweep
+# at the ORIGINAL plan size N=100. The local 24 GB frontier killed everything
+# from N=50 up (CONFIG A) and N=100 pso=0; references: bethe_ref.json
+# (Target 1), MG exact −0.375 at J2=0.5 + Wednesday DMRG (Target 2).
+v50:50
+v60:60
+v80:80
+v100:100
+v140:140
+v200:200
+j100_0.5:100:model=j1j2,J2=0.5,pso=0
+j100_0.2:100:model=j1j2,J2=0.2,pso=0
+j100_1.0:100:model=j1j2,J2=1.0,pso=0
+j100_0.4:100:model=j1j2,J2=0.4,pso=0
+j100_0.6:100:model=j1j2,J2=0.6,pso=0
+j100_0.8:100:model=j1j2,J2=0.8,pso=0
+# wave 1b (keep the cluster busy — user directive 2026-07-28 22:50):
+# J2@N=40 backup for the local 19G rerun (published Table 4 refs)
+j40_0.2:40:model=j1j2,J2=0.2,pso=0
+j40_0.4:40:model=j1j2,J2=0.4,pso=0
+j40_0.6:40:model=j1j2,J2=0.6,pso=0
+j40_0.8:40:model=j1j2,J2=0.8,pso=0
+j40_1.0:40:model=j1j2,J2=1.0,pso=0
+# ladder densification (Bethe refs for 120/160 backfilled locally at merge)
+v120:120
+v160:160
+# the extra lever, measured ahead of Wednesday's near-miss decision rule
+v100e8:100:extra=8
+v200e8:200:extra=8
+# Remark 6.1 control (plan: run only if a slot is genuinely free — it is)
+j100c_0.2_pso3:100:model=j1j2,J2=0.2
+v14:14

@@ -1,0 +1,14 @@
+{
+  "frozen_at": "2026-07-29T18:10+08:00 (G0; Route-A results may not amend)",
+  "rdm": 8, "pso": 0, "lso": true, "d": 4,
+  "rho_deploy": 0.24,
+  "r_formula": "r(N) = max(2, round(0.12*N))",
+  "r_values": {"10": 2, "12": 2, "14": 2, "200": 24},
+  "extra_formula": "extra(N) = r(N) - 1",
+  "hamiltonian": {"supp": [[1,4]], "coe": [0.75], "normalization": "H = (1/4) sum_a sigma^a sigma^a per bond; per-site objective"},
+  "three_type": [1,1], "lattice": "chain",
+  "mosek": {"tol_pfeas": 1e-8, "tol_dfeas": 1e-8, "tol_relgap": 1e-8},
+  "quotient": "QMBCertify reduce! at commit be63c27 (translation, mirror, S3 Pauli permutation, sign symmetry)",
+  "mandatory_basis": "get_basis(d=4, extra=extra(N), three_type=[1,1]) families: 1-site, 3-site three_type, 2-site sep<=r(N), 4-site a2",
+  "training_N": [10, 12], "holdout_N": 14, "deployment_N": 200
+}

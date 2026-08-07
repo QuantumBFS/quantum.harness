@@ -1,0 +1,4 @@
+word,in_W_R,role
+"Int64[]",true,T2-link y-word (N=10)
+"[1, 4]",true,T2-link y-word (N=10)
+"[1, 7]",true,T2-link y-word (N=10)
