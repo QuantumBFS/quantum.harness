@@ -1,0 +1,33 @@
+Issue #230 sprint-extension provenance
+======================================
+
+Status
+------
+Research prototypes documented as the next certification frontier. The public
+self-contained certificate package and its formal headline do not depend on
+these prototypes.
+
+Source
+------
+Codex research task: 019fb143-0e59-7b32-8bcf-5f5f314af57e
+Research workspace sprint artifacts, 2026-07-30.
+
+Prototype methods
+-----------------
+1. Physics-gated tensor promotion checks transfer fixed-point residuals,
+   reduced-density-matrix Hermiticity, trace, positive semidefiniteness, local
+   spectral range, and normalization overlap before shallow/deep RG promotion.
+2. Staged D10-to-D14 promotion routes reproducible candidates through tensor
+   search, fixed-point and physical gates, shallow SDP, deep SDP, and exact
+   certificate freezing.
+3. Saved-dual direct freeze checks charge-block ordering, reconstructs float
+   slacks, performs scalar repair and rationalization, builds the exact witness,
+   and then invokes the standard proof gate without resolving the large SDP.
+
+Public-package boundary
+-----------------------
+The current PR publishes the audited algorithm description and this provenance
+record. The research-workspace prototype scripts and their targeted tests are
+outside the formal self-contained package. The formal depth-47 certificate is
+generated and verified entirely by the public xxzcert implementation included
+in the submission.

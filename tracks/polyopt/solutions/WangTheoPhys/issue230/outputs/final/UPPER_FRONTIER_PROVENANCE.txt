@@ -1,0 +1,45 @@
+Issue #230 exact rational-MPS contraction frontier
+==================================================
+
+Purpose
+-------
+
+This table records exact contractions of the same rational bond-32 MPS tensor
+and explicit boundary vectors used by the published 1,000-site upper proof.
+The block length is increased from 1,000 to 16,000 sites using an integer-matrix
+recurrence implemented with python-flint.  Every row is an exact variational
+upper endpoint for the stated finite repeated block.
+
+The 1,000-site row is embedded in the self-contained level-47 certificate.
+Rows above 1,000 sites document the exact contraction performance frontier and
+are kept separate from the submitted self-contained certificate.  This
+distinction lets reviewers compare algorithmic progress without changing the
+formally published two-sided claim.
+
+Source audit
+------------
+
+Each row in upper-contraction-frontier.csv records the SHA-256 of the original
+JSON result.  The source artifacts were collected on 2026-07-30 from the
+authorized Issue #230 sprint.  They contain the exact decimal upper endpoint,
+block length, bond dimension, wall time, and projected width against the
+published level-47 lower endpoint.  Remote absolute paths and account details
+are intentionally excluded from this public provenance record.
+
+Key result
+----------
+
+Increasing the exact block length from 1,000 to 16,000 sites changes the upper
+endpoint from
+
+  -0.4428702958784947210360110613724028607783910704995163883827803331086029
+
+to
+
+  -0.4430607504981654856861028802824184698518736079419318162450415042488710
+
+and reduces the distance from the independent Bethe enclosure from
+2.7688468145050968e-4 to 8.6430061779745030e-5, a factor of approximately
+3.20.  This is a performance result for the exact upper-bound engine; the
+submitted headline interval continues to use the independently verified
+1,000-site self-contained payload.
