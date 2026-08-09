@@ -1,0 +1,24 @@
+{
+  "acceptance_rules": {
+    "arithmetic": "exact-integer",
+    "expected_rank": 2,
+    "required_minor": {
+      "columns": [
+        0,
+        1
+      ],
+      "rows": [
+        0,
+        1
+      ]
+    }
+  },
+  "challenge_digest": "sha256:54b2d9624228c963dd2f358b2b0029a90d9a2e42b0a936d64d8286e9df476043",
+  "challenge_id": "issue133.new-04-schmidt-rank",
+  "digest": "sha256:8cf0e74924f5085a4445deeb131a04c38b1ad4a19b028faa36fa391c62af7910",
+  "frozen_at": "2026-07-30T12:20:00Z",
+  "frozen_before_solver": true,
+  "schema_version": "wangtheophys.issue133.gate.v1",
+  "verifier_entrypoint": "campaign_verifier.py",
+  "verifier_source_digest": "sha256:c853847ca37ccacb963b2d6ba3a87f34ca1101efa16106a11316887e03a255e8"
+}

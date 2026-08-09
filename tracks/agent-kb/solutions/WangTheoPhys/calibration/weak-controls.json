@@ -1,0 +1,17 @@
+[
+  {
+    "control_id": "control.repeat-known-result",
+    "novelty_score": 0.05,
+    "publishability_score": 0.05
+  },
+  {
+    "control_id": "control.no-executable-gate",
+    "novelty_score": 0.2,
+    "publishability_score": 0.1
+  },
+  {
+    "control_id": "control.non-tn-central",
+    "novelty_score": 0.1,
+    "publishability_score": 0.15
+  }
+]

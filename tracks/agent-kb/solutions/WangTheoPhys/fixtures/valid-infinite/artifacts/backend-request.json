@@ -1,0 +1,72 @@
+{
+  "schema_version": "tn-agent.tenpy.infinite-xxz-vumps.v1",
+  "capability_id": "tenpy.infinite_1d.vumps",
+  "plan_id": "sha256:583e130a0daa654eeecfe215f84196d37cb1792480d811dfc42f11b1cb25df60",
+  "model_family": "xxz",
+  "representation": "operator_sum",
+  "operators": [
+    "Sx_i*Sx_i+1",
+    "Sy_i*Sy_i+1",
+    "Sz_i",
+    "Sz_i*Sz_i+1"
+  ],
+  "boundary": "infinite",
+  "local_dimension": 2,
+  "unit_cell": 2,
+  "algorithm": "vumps",
+  "variant": "two_site",
+  "active_sites": 2,
+  "initial_state": "neel",
+  "allow_bond_growth": true,
+  "target_precision": 1e-06,
+  "seed": 2468,
+  "numerics": {
+    "max_bond_dim": 32,
+    "chi_schedule": [
+      16,
+      32
+    ],
+    "requested_cutoff": 1e-10,
+    "effective_svd_min": null,
+    "engine_cutoff": 0.0,
+    "max_sweeps": 4,
+    "min_sweeps": 2,
+    "entropy_tolerance": 1e-05,
+    "mixer": false,
+    "lanczos_maxiter": 8,
+    "lanczos_n_max": 32,
+    "checkpoint_every": 1,
+    "diagonal_gauge_frequency": 0,
+    "check_overlap": false
+  },
+  "finite_entanglement_fit": {
+    "enabled": true,
+    "min_chi": 16,
+    "max_chi": 32,
+    "entropy_statistic": "center"
+  },
+  "transfer_matrix": {
+    "compute": true,
+    "num_eigs": 4
+  },
+  "acceptance": {
+    "require_all_validators": false,
+    "energy_drift_max": 0.0002,
+    "variance_max": 0.0,
+    "canonical_residual_max": 1e-06,
+    "symmetry_residual_max": 0.0,
+    "reproducibility_max": 0.0
+  },
+  "requested_observables": [
+    "central_charge_fit",
+    "energy",
+    "entanglement_entropy",
+    "transfer_spectrum",
+    "variance"
+  ],
+  "coupling_jxy": 1.0,
+  "anisotropy_delta": 1.0,
+  "field_h": 0.0,
+  "conserve": "Sz",
+  "target_total_sz": 0
+}

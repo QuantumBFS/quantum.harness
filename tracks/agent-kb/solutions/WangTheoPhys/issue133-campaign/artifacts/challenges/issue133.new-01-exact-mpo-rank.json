@@ -1,0 +1,51 @@
+{
+  "challenge_id": "issue133.new-01-exact-mpo-rank",
+  "digest": "sha256:a83ab05993dd92593b3e8253966ed81d3eaf56dac1635b644ade6a808127b93a",
+  "frozen_at": "2026-07-30T12:20:00Z",
+  "input": {
+    "matrix": [
+      [
+        1,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        1,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0
+      ]
+    ]
+  },
+  "kind": "exact-rank",
+  "novelty_statement": "New live campaign item; not a #124-#128 calibration problem.",
+  "preregistered_gate": {
+    "arithmetic": "exact-integer",
+    "expected_rank": 2,
+    "required_minor": {
+      "columns": [
+        0,
+        1
+      ],
+      "rows": [
+        0,
+        1
+      ]
+    }
+  },
+  "schema_version": "wangtheophys.issue133.challenge.v1",
+  "title": "Exact minimal MPO rank of a frozen integer operator"
+}

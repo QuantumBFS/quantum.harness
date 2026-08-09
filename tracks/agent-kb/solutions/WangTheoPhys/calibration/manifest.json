@@ -1,0 +1,67 @@
+{
+  "allowed_source_snapshot_date": "2026-07-29",
+  "calibration_id": "calibration.quantumbfs-124-128",
+  "digest": "sha256:c6288ad94f77779acac9de5cf9488252ff5e4461180f94d479a7f7d98193f4ae",
+  "dimensions": [
+    "meaningful-gap-recovery",
+    "executable-nongameable-gate",
+    "strong-weak-separation",
+    "hidden-target-match"
+  ],
+  "schema_version": "tn-agent.factory-calibration-manifest.v1",
+  "targets": [
+    {
+      "issue_url": "https://github.com/QuantumBFS/quantum.harness/issues/124",
+      "literature_ids": [
+        "doi:10.1126/science.1201080",
+        "arxiv:2212.03014"
+      ],
+      "statement_digest": "sha256:94d4fa4fe643a74c6fe1f73149bf7fd604e0100a8fe7b555e5dcb2ccf65bd323",
+      "target_id": "quantumbfs.issue-124"
+    },
+    {
+      "issue_url": "https://github.com/QuantumBFS/quantum.harness/issues/125",
+      "literature_ids": [
+        "arxiv:2302.01941",
+        "arxiv:2211.05504"
+      ],
+      "statement_digest": "sha256:7886d909291de6820e5fabe974a6cb2af478a080f18e1695855ca57ca2ed4abc",
+      "target_id": "quantumbfs.issue-125"
+    },
+    {
+      "issue_url": "https://github.com/QuantumBFS/quantum.harness/issues/126",
+      "literature_ids": [
+        "doi:10.1103/PhysRevLett.59.799",
+        "doi:10.1103/PhysRevLett.124.177204"
+      ],
+      "statement_digest": "sha256:1605f6d8e5daa453cc290532b2be74176bbcab81f31c133fea7f28ccfe126841",
+      "target_id": "quantumbfs.issue-126"
+    },
+    {
+      "issue_url": "https://github.com/QuantumBFS/quantum.harness/issues/127",
+      "literature_ids": [
+        "arxiv:2002.01935",
+        "arxiv:2108.05665"
+      ],
+      "statement_digest": "sha256:19e785a54729eded1fcd7bcf6f1fce7f28b1f714c1c9fe69d52adf96704d8890",
+      "target_id": "quantumbfs.issue-127"
+    },
+    {
+      "issue_url": "https://github.com/QuantumBFS/quantum.harness/issues/128",
+      "literature_ids": [
+        "arxiv:1912.08854",
+        "doi:10.1103/PhysRevLett.128.210501"
+      ],
+      "statement_digest": "sha256:fe900176456fce9abcd4448d6d29fc47e3a42bdf353338d04a131b6bd62acdee",
+      "target_id": "quantumbfs.issue-128"
+    }
+  ],
+  "thresholds": {
+    "executable_gate": 0.8,
+    "hidden_target_match": 0.8,
+    "meaningful_gap_recovery": 0.8,
+    "minimum_match_similarity": 0.75,
+    "strong_weak_separation": 0.45
+  },
+  "weak_controls_digest": "sha256:67be7c53c4dbcd03c2c1d8f6306c631ecc65e2250f9ebde6670ecd567da05d35"
+}

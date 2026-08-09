@@ -1,0 +1,129 @@
+{
+  "counts": {
+    "human_accepted": 5,
+    "new_frozen_challenges": 5,
+    "refereed_publications": 0,
+    "rejected_negative_controls": 5,
+    "solved_exact_gates": 5
+  },
+  "digest": "sha256:931fb6977e1f3598c90250a364a2d07716d1a4b45743da775ae4b2d3ba908057",
+  "human_supervisor": {
+    "actor": "human.junkaiwang",
+    "actor_role": "human expert supervision"
+  },
+  "items": [
+    {
+      "certificate_digest": "sha256:e8440f2726e4358f83917be816db8c297dde7a6393d3c3c798a527c29acba053",
+      "certificate_path": "artifacts/certificates/issue133.new-01-exact-mpo-rank.json",
+      "challenge_digest": "sha256:a83ab05993dd92593b3e8253966ed81d3eaf56dac1635b644ade6a808127b93a",
+      "challenge_id": "issue133.new-01-exact-mpo-rank",
+      "challenge_path": "artifacts/challenges/issue133.new-01-exact-mpo-rank.json",
+      "gate_digest": "sha256:de14385b8c8c58e1266765aeee7233b649cac0becbcd8e649b387dc442c898ea",
+      "gate_path": "artifacts/gates/issue133.new-01-exact-mpo-rank.json",
+      "human_acceptance_digest": "sha256:cbd11366655b89f9347281dfd941a65cbba0cf252c725d2c5d37514c984a93fb",
+      "human_acceptance_path": "artifacts/human-acceptance/issue133.new-01-exact-mpo-rank.json",
+      "negative_control_path": "artifacts/negative-controls/issue133.new-01-exact-mpo-rank.json",
+      "observables": {
+        "exact_rank": 2,
+        "factor_inner_dimension": 2,
+        "minor_determinant": 1
+      },
+      "receipt_path": "artifacts/receipts/issue133.new-01-exact-mpo-rank.json",
+      "solved_receipt_digest": "sha256:7abaa0516f4b925c7cec90defbb6df431e0543a8b3594365a3955cd75f002ac4",
+      "title": "Exact minimal MPO rank of a frozen integer operator"
+    },
+    {
+      "certificate_digest": "sha256:a3de80a0f13f81a62977dff6ba3cc42a44c6cfd8c28cde5dac61efc3a34ac4eb",
+      "certificate_path": "artifacts/certificates/issue133.new-02-optimal-contraction.json",
+      "challenge_digest": "sha256:28cde54fda0535e7e3e563e2de38bd61f5764bb0b6c421e086444c770888da60",
+      "challenge_id": "issue133.new-02-optimal-contraction",
+      "challenge_path": "artifacts/challenges/issue133.new-02-optimal-contraction.json",
+      "gate_digest": "sha256:50638b00ada821953879eebc83525060b4662a496412ea84621cc38c0fec0e20",
+      "gate_path": "artifacts/gates/issue133.new-02-optimal-contraction.json",
+      "human_acceptance_digest": "sha256:724be8cb35071ff8f4b6ad97de66585ccfdf8927adc9ace43d494661103d67dd",
+      "human_acceptance_path": "artifacts/human-acceptance/issue133.new-02-optimal-contraction.json",
+      "negative_control_path": "artifacts/negative-controls/issue133.new-02-optimal-contraction.json",
+      "observables": {
+        "enumerated_parenthesizations": 5,
+        "minimum_cost": 56,
+        "optimal_count": 1
+      },
+      "receipt_path": "artifacts/receipts/issue133.new-02-optimal-contraction.json",
+      "solved_receipt_digest": "sha256:f9e27d6bccbaa7ab64b6ef1bc5c2cd5bddfa857fd95eb00e6b705638eb85b638",
+      "title": "Globally optimal contraction of a frozen four-tensor chain"
+    },
+    {
+      "certificate_digest": "sha256:fcc8a6c30d80a57111667051f0ccfae3d9103a1c717cbba67a6e49996168345e",
+      "certificate_path": "artifacts/certificates/issue133.new-03-transfer-gap.json",
+      "challenge_digest": "sha256:05ffc2b55fae676ce957a6c6b5dcd73d6fa9819a9fc072d730dd7b8c53eabf59",
+      "challenge_id": "issue133.new-03-transfer-gap",
+      "challenge_path": "artifacts/challenges/issue133.new-03-transfer-gap.json",
+      "gate_digest": "sha256:706352cadfcb1a6b9dcb25991ce2c44fc51289e3508d1a14bcc48f53433014b0",
+      "gate_path": "artifacts/gates/issue133.new-03-transfer-gap.json",
+      "human_acceptance_digest": "sha256:2eede6363bf3489d04179b5b9c073b5b94cdc25ee310a46a42e9764a2f671459",
+      "human_acceptance_path": "artifacts/human-acceptance/issue133.new-03-transfer-gap.json",
+      "negative_control_path": "artifacts/negative-controls/issue133.new-03-transfer-gap.json",
+      "observables": {
+        "basis_determinant": -2,
+        "eigenvalues_descending": [
+          4,
+          2,
+          1
+        ],
+        "spectral_gap": 2
+      },
+      "receipt_path": "artifacts/receipts/issue133.new-03-transfer-gap.json",
+      "solved_receipt_digest": "sha256:2095537877409ccb30017cf67ed48085dcec6a0ccbfe1031a8175544d2bb6c45",
+      "title": "Exact spectral gap of a frozen transfer matrix"
+    },
+    {
+      "certificate_digest": "sha256:5a27a20c5c5d98c4076edb361a7fa12032ac7fcc5022d6dab684d47603fdba1b",
+      "certificate_path": "artifacts/certificates/issue133.new-04-schmidt-rank.json",
+      "challenge_digest": "sha256:54b2d9624228c963dd2f358b2b0029a90d9a2e42b0a936d64d8286e9df476043",
+      "challenge_id": "issue133.new-04-schmidt-rank",
+      "challenge_path": "artifacts/challenges/issue133.new-04-schmidt-rank.json",
+      "gate_digest": "sha256:8cf0e74924f5085a4445deeb131a04c38b1ad4a19b028faa36fa391c62af7910",
+      "gate_path": "artifacts/gates/issue133.new-04-schmidt-rank.json",
+      "human_acceptance_digest": "sha256:4d68b2c91ddcb1aaefc930ebfe7cc3cfdec1b06c7a0b6f66007467a8e520a03d",
+      "human_acceptance_path": "artifacts/human-acceptance/issue133.new-04-schmidt-rank.json",
+      "negative_control_path": "artifacts/negative-controls/issue133.new-04-schmidt-rank.json",
+      "observables": {
+        "exact_rank": 2,
+        "factor_inner_dimension": 2,
+        "minor_determinant": 1
+      },
+      "receipt_path": "artifacts/receipts/issue133.new-04-schmidt-rank.json",
+      "solved_receipt_digest": "sha256:8097b130ef5016bb44b2ffc15d898e177ca67d9fdab4c0cf10ae9498425a0dac",
+      "title": "Exact Schmidt rank of a frozen bipartite coefficient tensor"
+    },
+    {
+      "certificate_digest": "sha256:88c3723ec810a41656ef3bdbb9d8e7a9b7f1e6da235cfc317434c9fc88da6a2e",
+      "certificate_path": "artifacts/certificates/issue133.new-05-mps-gauge-equivalence.json",
+      "challenge_digest": "sha256:bc2e46c1d7ad853ee4832d64d0ef8fc54a11a32ec5c500006dfd3341d51dc2a5",
+      "challenge_id": "issue133.new-05-mps-gauge-equivalence",
+      "challenge_path": "artifacts/challenges/issue133.new-05-mps-gauge-equivalence.json",
+      "gate_digest": "sha256:36e3bc93b3588f60d73a052b382b00afb8b2016d58b4c8abd3b5859650138286",
+      "gate_path": "artifacts/gates/issue133.new-05-mps-gauge-equivalence.json",
+      "human_acceptance_digest": "sha256:11a9d32a78bedb0e4b63ae78a30ac603e0b699f87c9c249484923edfd667ee35",
+      "human_acceptance_path": "artifacts/human-acceptance/issue133.new-05-mps-gauge-equivalence.json",
+      "negative_control_path": "artifacts/negative-controls/issue133.new-05-mps-gauge-equivalence.json",
+      "observables": {
+        "bond_dimension": 2,
+        "gauge_determinant": 1,
+        "verified_slices": 2
+      },
+      "receipt_path": "artifacts/receipts/issue133.new-05-mps-gauge-equivalence.json",
+      "solved_receipt_digest": "sha256:f5a6435a92a4c617db890a613a2b85e850f52754b576d12e0920faef35553676",
+      "title": "Exact gauge equivalence of two frozen MPS tensor sets"
+    }
+  ],
+  "limitations": "The campaign supplies human-supervised acceptance and exact machine gate evidence. QuantumBFS maintainers control upstream catalog/tier determination; refereed publication is 0.",
+  "replay_command": "python3 tracks/agent-kb/solutions/WangTheoPhys/issue133-campaign/run_campaign.py",
+  "schema_version": "wangtheophys.issue133.campaign.v1",
+  "solver_source_digest": "sha256:26d20189405377d7e92b86d9f635c7b310d75ac35ea2bee304e8d8fff028a4d3",
+  "status": "SUPERVISED_FIVE_NEW_PROBLEMS_SOLVED",
+  "submission_tier_1_evidence_complete": true,
+  "submission_tier_2_evidence_complete": true,
+  "upstream_catalog_determination": "PENDING_QUANTUMBFS_MAINTAINER_REVIEW",
+  "verifier_source_digest": "sha256:c853847ca37ccacb963b2d6ba3a87f34ca1101efa16106a11316887e03a255e8"
+}

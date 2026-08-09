@@ -1,0 +1,15 @@
+{
+  "acceptance_rules": {
+    "eigenvalue_order": "descending",
+    "required_positive_gap": true,
+    "requires_complete_eigenbasis": true
+  },
+  "challenge_digest": "sha256:05ffc2b55fae676ce957a6c6b5dcd73d6fa9819a9fc072d730dd7b8c53eabf59",
+  "challenge_id": "issue133.new-03-transfer-gap",
+  "digest": "sha256:706352cadfcb1a6b9dcb25991ce2c44fc51289e3508d1a14bcc48f53433014b0",
+  "frozen_at": "2026-07-30T12:20:00Z",
+  "frozen_before_solver": true,
+  "schema_version": "wangtheophys.issue133.gate.v1",
+  "verifier_entrypoint": "campaign_verifier.py",
+  "verifier_source_digest": "sha256:c853847ca37ccacb963b2d6ba3a87f34ca1101efa16106a11316887e03a255e8"
+}

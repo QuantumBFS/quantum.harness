@@ -1,0 +1,60 @@
+{
+  "challenge_id": "issue133.new-05-mps-gauge-equivalence",
+  "digest": "sha256:bc2e46c1d7ad853ee4832d64d0ef8fc54a11a32ec5c500006dfd3341d51dc2a5",
+  "frozen_at": "2026-07-30T12:20:00Z",
+  "input": {
+    "source_slices": [
+      [
+        [
+          1,
+          0
+        ],
+        [
+          0,
+          2
+        ]
+      ],
+      [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          0
+        ]
+      ]
+    ],
+    "target_slices": [
+      [
+        [
+          1,
+          -1
+        ],
+        [
+          0,
+          2
+        ]
+      ],
+      [
+        [
+          -1,
+          0
+        ],
+        [
+          1,
+          1
+        ]
+      ]
+    ]
+  },
+  "kind": "mps-gauge-equivalence",
+  "novelty_statement": "New live campaign item; not a #124-#128 calibration problem.",
+  "preregistered_gate": {
+    "arithmetic": "exact-integer",
+    "equation": "target_s = inverse_gauge * source_s * gauge",
+    "requires_exact_inverse": true
+  },
+  "schema_version": "wangtheophys.issue133.challenge.v1",
+  "title": "Exact gauge equivalence of two frozen MPS tensor sets"
+}

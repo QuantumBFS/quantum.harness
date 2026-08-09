@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/QuantumBFS/quantum.harness/blob/main/tracks/agent-kb/solutions/WangTheoPhys/contracts/validator-evidence-v1.schema.json",
+  "title": "WangTheoPhys Derived Validator Evidence v1",
+  "description": "Gate-derived required metrics and explicitly reported-only diagnostics, bound to primary, repeat, and preregistered-reference identities.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "request_digest",
+    "backend_result_digest",
+    "repeat_backend_result_digest",
+    "reference_artifact_digest",
+    "results",
+    "result_digest"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "wangtheophys.tn-validator-evidence.v1"
+    },
+    "request_digest": {
+      "$ref": "#/$defs/digest"
+    },
+    "backend_result_digest": {
+      "$ref": "#/$defs/digest"
+    },
+    "repeat_backend_result_digest": {
+      "$ref": "#/$defs/digest"
+    },
+    "reference_artifact_digest": {
+      "$ref": "#/$defs/digest"
+    },
+    "results": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 64,
+      "items": {
+        "$ref": "#/$defs/result"
+      }
+    },
+    "result_digest": {
+      "$ref": "#/$defs/digest"
+    }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:@-]{0,127}$"
+    },
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "metric",
+        "value",
+        "source"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "metric": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "value": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "source": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

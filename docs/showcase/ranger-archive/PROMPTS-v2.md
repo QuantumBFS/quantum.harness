@@ -1,0 +1,85 @@
+# Lost Science-Fiction Covers V2 — GPT Image Prompt Set
+
+## Shared production constraints
+
+Every image is an original panoramic cover illustration for a research pull request, approximately 2.5:1. It belongs to a different publishing era and must not inherit the visual style of the other covers. Show human presence through worn places and used objects rather than a posed protagonist. Make the referenced science-fiction work recognizable through an iconic ordinary setting or prop, but do not reproduce an existing cover, film frame, actor likeness, character costume, franchise logo, or proprietary spacecraft. The scientific subject appears as one physical anomaly inside an otherwise believable scene. No title, caption, readable prose, watermark, UI overlay, decorative outer-space background, generic neon network, recurring probe, or unnecessary glowing ring. Leave some visually quiet space suitable for later PR typography.
+
+## 01 — The First Ratio
+
+Use case: stylized-concept. Asset: wide PR cover. Create an original early-1970s large-format color landscape photograph inspired thematically by *2001: A Space Odyssey*. At cold dawn, a severe matte-black rectangular slab stands in a dew-covered green grassland. On one side, modest wooden survey stakes mark a triangular planting plot; on the other, stakes mark a honeycomb planting plot. A weathered canvas survey bag, folding brass ruler, muddy notebook, and thermos lie abandoned in the foreground, showing that a field researcher just stepped away. The brass rods quietly establish a √5-like proportional relation without displaying a formula. Pale sunrise, fog, real grass and mud, restrained composition, tactile analog film grain. No people, apes, spacecraft, desert, star field, text, logo, neon geometry, or copied movie frame.
+
+## 02 — The Planet Sings
+
+Use case: historical-scene. Asset: wide PR cover. Create an original 1960s Chinese gouache science-poster painting, thematically recalling *The Wandering Earth*. A snowbound northern school courtyard at blue winter morning: brick classrooms, bicycle tracks, bare poplar trees, and enormous planetary engine towers barely visible beyond ordinary rooftops. On a classroom windowsill sits a chipped enamel lunch bowl filled with water, a red wool scarf, chalk, and a small crystal radio. The water, the glass window, and distant engine exhaust all share the same subtle physical vibration pattern, expressing electron–phonon coupling from tabletop to planet. Opaque brushwork, faded revolutionary-era printing pigments, warm windows against cold snow. No slogan, legible characters, people, logos, deep-space view, circles, or generic luminous network.
+
+## 03 — The Untested Machine
+
+Use case: photorealistic-natural. Asset: wide PR cover. Create an original faded instant-film field photograph inspired by *The Martian*. Inside a cramped Mars greenhouse/workshop, red dust presses against a scratched window. A wooden bench holds sprouting potato trays, silver duct tape, a wrench, stained gloves, sample jars, and a newly repaired compact tensor-computing device with mismatched rust-colored parts. A row of simple physical test objects and indicator lamps shows repeated verification; one lamp is green, several earlier attempts are crossed out only as non-readable marks. Harsh practical habitat light, imperfect instant-film exposure, fingerprints, condensation, human improvisation everywhere. No astronaut, actor likeness, readable checklist text, title, logo, star field, abstract rings, or polished futuristic laboratory.
+
+## 04 — The Answer Came First
+
+Use case: illustration-story. Asset: wide PR cover. Create an original eccentric 1980s British comic-paperback illustration inspired by *The Hitchhiker’s Guide to the Galaxy*. Keep the composition on a rain-spattered roadside café table and the anonymous wet road beyond it; do not include a shopfront, signboard, menu, poster, advertising, or wall writing. The table holds a striped towel, chipped teacup, half-eaten toast, cheap ballpoint pen, and a wildly overfolded road atlas. A crumpled receipt shows only the large number 42. Hand-drawn arrows and absurd detours run backward from 42 through the atlas toward one completely blank square. Mustard yellow, petrol blue, tomato red, uneven ink outlines, dry visual humor, cheap offset-print texture. No other readable text, question mark, space scene, glowing portal, people, copyrighted logo, or exact cover imitation.
+
+## 05 — A Language That Refuses Falsehood
+
+Use case: stylized-concept. Asset: wide PR cover. Create an original 1950s three-color silkscreen book illustration inspired by *I, Robot*. An orderly drafting office after hours: green metal desk, manual typewriter, pencil sharpener, eraser crumbs, coffee stain, and an articulated brushed-metal hand resting beside three punched rule cards. A branching paper syntax diagram physically threads through the three cards; one well-formed branch reaches a finished stack, while a malformed red branch is mechanically clipped and dropped into a wastebasket. Flat cream, black, institutional green and safety red inks, slight registration errors, mid-century graphic economy. No humanoid robot face, actor, readable sentences, neon ring, star field, title, logo, or photoreal 3D render.
+
+## 06 — The Phase Remembers
+
+Use case: stylized-concept. Asset: wide PR cover. Create an original translucent watercolor and ink-wash illustration inspired by *Arrival*. A foggy Montana-like meadow outside a temporary language classroom at dawn; folding chair, rubber gloves, damp notebook, thermos, and a large rain-streaked glass panel show recent human work. On the glass is one imperfect black circular ink gesture, the only dominant circle in the series. Its beginning and end nearly meet, but a small iridescent offset at the seam records geometric phase after a closed journey. Soft gray fog, paper fibers, watery edges, muted violet and moss green. No aliens, people, helicopters, readable writing, repeated rings, outer space, logo, or copied film composition.
+
+## 07 — The Shape of State Space
+
+Use case: historical-scene. Asset: wide PR cover. Create an original 1880s hand-colored copper engraving inspired by *Flatland*. A Victorian study table holds spectacles, ruler, sealed letter, teacup, crumbs, and a checked linen tablecloth printed with tiny two-dimensional geometric inhabitants. At the center, the supposedly flat engraved grid physically lifts, folds, and becomes a gently curved surface while the ink figures remain trapped in two dimensions. Cross-hatched copper lines, ivory paper, restrained hand-applied vermilion, indigo, and sage pigments, antique book-plate imperfections. No circles as focal form, no neon, no computer graphics, no stars, no readable text, no modern objects.
+
+## 08 — The Horizon of Proof
+
+Use case: historical-scene. Asset: wide PR cover. Create an original medieval illuminated-manuscript and egg-tempera scene inspired by *Anathem*. A sunlit stone cloister contains an open proof book, wax tablet, brass divider, worn sandals, and an extinguished candle, but no visible monk. Two massive columns cast precisely separated shadows across the floor; between the shadow edges lies one narrow band of gold leaf representing a certified energy value bounded from below and above. Mineral blue, ochre, chalk white, cracked tempera, handmade vellum texture. No futuristic towers, outer space, equations, readable script, circles, neon glow, character portrait, or copied cover.
+
+## 09 — Rebuild the Tool Between Stars
+
+Use case: stylized-concept. Asset: wide PR cover. Create an original 1970s technical-airbrush paperback illustration inspired by *Project Hail Mary*. A cluttered interstellar laboratory workbench is divided by two visibly different environmental zones: one human side with coffee pouch, scorched circuit board, screwdriver and taped notes; one alien-compatible side with faceted transparent structural material and a handmade musical chime object. Across the bench, a fragile pale circuit has been rebuilt into a rugged rust-colored computational core. Warm amber practical light and cool ammonia-blue enclosure, analog airbrush gradients, slightly worn mass-market print. No astronaut, alien character, franchise ship, readable text, star-field background, central ring, logo, or glossy modern concept art.
+
+## 10 — The Efficient Path
+
+Use case: stylized-concept. Asset: wide PR cover. Create an original 1980s arcade-box screenprint inspired by *Ender’s Game*. An empty military-school dormitory desk after lights-out holds scuffed shoes, a juice carton, pencil stubs, and a small handheld tactical board with many cheap wooden fleet pieces. Most attempted routes are marked by tangled white grease-pencil strokes, but one extremely short gold move solves the formation using far fewer pieces. Electric cobalt, magenta, black, and gold, coarse halftone dots and dramatic diagonal composition. No child, actor, battle-room sphere, readable interface, logo, outer-space fleet, glowing ring, or contemporary 3D rendering.
+
+## 11 — What the Cycle Carries
+
+Use case: stylized-concept. Asset: wide PR cover. Create an original industrial photo-collage with shipping-label textures inspired by *The Expanse*. A worn asteroid cargo dock contains steel loading bays, scuffed floor paint, grease pencil, work gloves, ration tin, hand trolley, and a physical rectangular conveyor system. The conveyor completes a mechanical cycle back to its starting configuration, yet one sealed parcel has advanced exactly one numbered bay; bay numbers may be simple digits, with no other readable text. Rust, sodium-vapor orange, dirty ice blue, torn-paper collage edges. No circular gate, franchise logo, people, spaceship glamour shot, neon network, outer-space background, or copied production design.
+
+## 12 — Crossing the State-Space Horizon
+
+Use case: photorealistic-natural. Asset: wide PR cover. Create an original naturalistic 35mm rural cinema still thematically inspired by *Interstellar*. A lush green cornfield and grassy verge lead to a weathered white farmhouse under a huge late-afternoon sky. On the porch are a child’s handmade space model, dusty wristwatch, chalk, and a freestanding blackboard covered only in an abstract determinant-grid pattern, not readable equations. The grid’s straight rows subtly bend toward one small gravitational distortion high in the clouds. Warm sun on grass, approaching storm, real film grain, emotionally grounded American farm life. No people, actor likeness, branded tractor, spacecraft, black-hole close-up, glowing orbit, text, or copied movie frame.
+
+## 13 — The Path Without a Sign
+
+Use case: photorealistic-natural. Asset: wide PR cover. Create an original gritty 1970s Eastern European color documentary photograph inspired by *Roadside Picnic*. An overgrown rail yard after rain: rusted tracks, concrete pylons, weeds, muddy water, abandoned sandwich tin, cheap raincoat, survey flags, and boot prints. Along false routes, nuts and bolts float at impossible heights and shadows point the wrong way. One utterly ordinary trail of wet boot prints passes safely through the Zone without interference. Desaturated green, brown and oxidized orange, scratched film, low cloudy light. No stalker character, weapon, text, supernatural portal, circles, neon paths, star field, or polished game concept art.
+
+## 14 — The Ocean Answers Back
+
+Use case: historical-scene. Asset: wide PR cover. Create an original 1960s Polish art-film still inspired by *Solaris*. A quiet modernist dacha room contains an empty wooden chair, half-cut apple browning on a plate, rumpled blanket, analog oscilloscope, open drawer, and condensation on a wide window overlooking a strange silver ocean. The ocean surface repeats the oscilloscope waveform a moment later, as if the environment has learned the room’s critical fluctuation. Muted olive, tobacco brown, pearl gray, natural window light, subtle film dust and psychological stillness. No person, face, astronaut, spaceship, giant glowing ocean ring, text, logo, or copied Tarkovsky frame.
+
+## 15 — Memory Inside the Loop
+
+Use case: photorealistic-natural. Asset: wide PR cover. Create an original 1990s family-photo contact sheet with VHS color bleed, inspired by *Recursion*. Four adjacent rectangular photographs show the same modest kitchen at four dates: floral tablecloth, birthday candle, cassette recorder, refrigerator magnets without readable words, a child’s cup, and an empty chair. Objects from the earliest photograph physically leak into later frames—an old candle shadow appears before the candle, spilled milk reverses direction, the recorder’s red light persists—making memory visibly non-Markovian without using a circular loop. Flash photography, faded cyan and warm skinless domestic colors, date-stamp shapes but no readable date. No people, faces, text, spirals, cosmic background, or sleek sci-fi interface.
+
+## 16 — Gravity Chooses a Hand
+
+Use case: illustration-story. Asset: wide PR cover. Create an original contemporary Chinese literary-cover painting inspired by *Death’s End*. A sunlit golden wheat field grows from pure black crystalline soil inside an immense pale artificial habitat. An old silver reflective jacket and straw hat hang on a simple scarecrow at the left edge, suggesting a long-absent traveler. The field is split by one subtle vertical crease in the air: every wheat stalk on the left leans in straight parallel diagonal rows toward the far left, while every stalk on the right leans in straight parallel diagonal rows toward the far right, expressing opposite gravitational handedness. No spirals, circles, vortices, rings, braided coils, curved crop patterns, or concentric formations. Lyrical oil-and-gouache texture, warm harvest gold, ink-black crystalline foreground, pale silver accents, quiet sorrow. No visible character, spaceship, text, logo, star field, or recreation of an existing cover.
+
+## 17 — From Grains to Currents
+
+Use case: stylized-concept. Asset: wide PR cover. Create an original Japanese woodblock print with mineral pigments, inspired by *Dune*. A desert survey camp at high morning contains a wrapped water flask, folded indigo cloth, measuring poles, shaded notebook, and footprints being erased by wind. Close foreground grains are individually carved as dots; farther away they merge into sweeping river-like streamlines and one breaking fluid vortex around a rock, showing hydrodynamics emerging from particles. Sand gold, indigo, persimmon red and unprinted paper, visible wood grain, bold asymmetry. No person, worm, franchise costume, twin moons, text, glowing rings, photoreal 3D, or copied film imagery.
+
+## 18 — When the Forest Orders Itself
+
+Use case: stylized-concept. Asset: wide PR cover. Create an original rough charcoal drawing combined with black linocut, inspired by *The Dark Forest*. A snowy forest clearing at dusk contains a cold camp stove, closed radio notebook, thermos cup, one broken antenna, and rows of distant trunks. On the left, tree marks and falling snow are locally random; across the wide composition, almost imperceptibly, trunks, branches, animal tracks and radio scratches align into long-range order despite the cold silence. Carbon black, paper white, a trace of iron red, aggressive carved texture. No hunter, gun, people, planets, neon network, circles, glowing stars, readable text, or literal book-cover copy.
+
+## 19 — The Future Inside a Bound
+
+Use case: stylized-concept. Asset: wide PR cover. Create an original 1950s modernist paper collage inspired by *Foundation*. A vast public reading room beneath a layered city dome contains a green librarian’s lamp, empty spectacles, punched cards, paper timelines, scissors and archival boxes. Numerous paper strips branch toward different futures. A transparent amber drafting ruler forms a strict error boundary: only trajectories inside it remain crisp; strips outside become torn, misregistered, and unreliable. Cut-paper geometry, Bauhaus-era cream, burgundy, teal and amber, tactile glue shadows. No people, actor likeness, galaxy, spacecraft, glowing vault, circles as focus, readable text, logo, or glossy digital render.
+
+## 20 — The Seed of the Next Question
+
+Use case: stylized-concept. Asset: wide PR cover. Create an original 1960s two-color risograph educational-magazine illustration inspired by *The Last Question*. An empty classroom at sunrise contains chalk dust, wooden desks, a coat left on a chair, pencil shavings, and stacks of question cards—some stamped only with abstract checks or crosses, no readable words—feeding into a large electromechanical problem press assembled from school duplicators and early computers. After multiple physical validation gates, the machine releases one pristine blank card into the first ray of daylight: the seed of the next problem. Cobalt blue, fluorescent orange and warm paper, risograph misregistration, hopeful handmade machinery. No cosmic computer face, people, readable title, outer space, glowing ring, logo, or modern UI.

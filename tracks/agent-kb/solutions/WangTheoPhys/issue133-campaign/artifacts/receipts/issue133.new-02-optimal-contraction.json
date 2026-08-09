@@ -1,0 +1,33 @@
+{
+  "certificate_digest": "sha256:a3de80a0f13f81a62977dff6ba3cc42a44c6cfd8c28cde5dac61efc3a34ac4eb",
+  "challenge_digest": "sha256:28cde54fda0535e7e3e563e2de38bd61f5764bb0b6c421e086444c770888da60",
+  "challenge_id": "issue133.new-02-optimal-contraction",
+  "created_at": "2026-07-30T12:25:00Z",
+  "digest": "sha256:f9e27d6bccbaa7ab64b6ef1bc5c2cd5bddfa857fd95eb00e6b705638eb85b638",
+  "fresh_verifier_subprocess": true,
+  "gate_digest": "sha256:50638b00ada821953879eebc83525060b4662a496412ea84621cc38c0fec0e20",
+  "human_acceptance_digest": "sha256:724be8cb35071ff8f4b6ad97de66585ccfdf8927adc9ace43d494661103d67dd",
+  "negative_control": {
+    "certificate_digest": "sha256:9976b6a54a349ce9c312e241eaf64491a9d68bcbf9515aa19a4f2ad227b1211e",
+    "process_exit": 3,
+    "rejected": true,
+    "stderr": "global contraction optimum gate failed"
+  },
+  "positive_process_exit": 0,
+  "receipt_id": "solved-receipt-2",
+  "schema_version": "wangtheophys.issue133.solved-receipt.v1",
+  "solver_source_digest": "sha256:26d20189405377d7e92b86d9f635c7b310d75ac35ea2bee304e8d8fff028a4d3",
+  "verification": {
+    "accepted": true,
+    "certificate_digest": "sha256:a3de80a0f13f81a62977dff6ba3cc42a44c6cfd8c28cde5dac61efc3a34ac4eb",
+    "challenge_digest": "sha256:28cde54fda0535e7e3e563e2de38bd61f5764bb0b6c421e086444c770888da60",
+    "gate_digest": "sha256:50638b00ada821953879eebc83525060b4662a496412ea84621cc38c0fec0e20",
+    "observables": {
+      "enumerated_parenthesizations": 5,
+      "minimum_cost": 56,
+      "optimal_count": 1
+    },
+    "schema_version": "wangtheophys.issue133.verification.v1"
+  },
+  "verifier_source_digest": "sha256:c853847ca37ccacb963b2d6ba3a87f34ca1101efa16106a11316887e03a255e8"
+}

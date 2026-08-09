@@ -1,0 +1,207 @@
+{
+  "schema_version": "wangtheophys.tn-evidence.v1",
+  "experiment_digest": "sha256:09a3d34c8886fbf75ae0cebe324e916a9ac2d096fcf5546c22542131dcd38402",
+  "binding": {
+    "schema_version": "tn-agent.backend-binding.v1",
+    "capability_id": "tenpy.infinite_1d.vumps",
+    "adapter_id": "tenpy.v1",
+    "backend_id": "tenpy",
+    "request_schema": "tn-agent.tenpy.infinite-xxz-vumps.v1",
+    "result_schema": "tn-agent.backend-result.v1"
+  },
+  "execution": {
+    "schema_version": "tn-agent.execution-evidence.v1",
+    "status": "succeeded",
+    "return_code": 0,
+    "execution_handle": "fixture:infinite:primary",
+    "retryable": false,
+    "stdout_digest": "sha256:ba5226f2581a284e5171d6f235c08eeb537709c4dbcb0c3a90b4530a7dd633a1",
+    "stderr_digest": "sha256:76dcbfe7624517874bbf3765410e2f588877eb80ad42e92a823d2c21d3c94add",
+    "stdout_truncated": false,
+    "stderr_truncated": false
+  },
+  "repeat_execution": {
+    "schema_version": "tn-agent.execution-evidence.v1",
+    "status": "succeeded",
+    "return_code": 0,
+    "execution_handle": "fixture:infinite:repeat",
+    "retryable": false,
+    "stdout_digest": "sha256:f257797cb41fe5262fa60cee3d2f7d559fb7a28d1cdd6938648567299883349a",
+    "stderr_digest": "sha256:d034e30db09af58a309663aa53bc609b60f4f06d4f5fa805756f9df16f327051",
+    "stdout_truncated": false,
+    "stderr_truncated": false
+  },
+  "artifacts": [
+    {
+      "relative_path": "backend-request.json",
+      "digest": "sha256:a5566b0421829140ead78236f3a84e655d44c3e6f8167427fe0f429cd7583d97",
+      "size_bytes": 1671,
+      "media_type": "application/json",
+      "role": "backend_request"
+    },
+    {
+      "relative_path": "backend-raw-result.json",
+      "digest": "sha256:ef892045230c418b022ab3e43b33e2b4046ed9790aca62bb3161675e2ecbc38c",
+      "size_bytes": 2260,
+      "media_type": "application/json",
+      "role": "backend_raw_result"
+    },
+    {
+      "relative_path": "backend-result.json",
+      "digest": "sha256:25af845170948a00ba3c3a64ed705cb5051f145d979c68fc1fad00f00b220ac7",
+      "size_bytes": 4258,
+      "media_type": "application/json",
+      "role": "backend_result"
+    },
+    {
+      "relative_path": "backend-repeat-raw-result.json",
+      "digest": "sha256:caa3d44cb7272c0e44118bd413bc68fce1551385fa17c370c00d05761fcecb15",
+      "size_bytes": 2264,
+      "media_type": "application/json",
+      "role": "backend_repeat_raw_result"
+    },
+    {
+      "relative_path": "backend-repeat-result.json",
+      "digest": "sha256:d8afffee85201b2392b8bf87d9f5c8b318d72eafd860142dc06fccbf0903ddad",
+      "size_bytes": 4275,
+      "media_type": "application/json",
+      "role": "backend_repeat_result"
+    },
+    {
+      "relative_path": "energy-reference.json",
+      "digest": "sha256:6cacc4617490466b747b041270e6316ad90732c342441949bac118fc84652ef3",
+      "size_bytes": 622,
+      "media_type": "application/json",
+      "role": "energy_reference"
+    },
+    {
+      "relative_path": "validator-evidence.json",
+      "digest": "sha256:f63f87e3c0b467056aa4c379d135148db8ab158a8127cd592a3350a96f5ff818",
+      "size_bytes": 1914,
+      "media_type": "application/json",
+      "role": "validator_evidence"
+    },
+    {
+      "relative_path": "backend-stdout.log",
+      "digest": "sha256:ba5226f2581a284e5171d6f235c08eeb537709c4dbcb0c3a90b4530a7dd633a1",
+      "size_bytes": 26,
+      "media_type": "text/plain",
+      "role": "backend_stdout"
+    },
+    {
+      "relative_path": "backend-stderr.log",
+      "digest": "sha256:76dcbfe7624517874bbf3765410e2f588877eb80ad42e92a823d2c21d3c94add",
+      "size_bytes": 27,
+      "media_type": "text/plain",
+      "role": "backend_stderr"
+    },
+    {
+      "relative_path": "backend-repeat-stdout.log",
+      "digest": "sha256:f257797cb41fe5262fa60cee3d2f7d559fb7a28d1cdd6938648567299883349a",
+      "size_bytes": 25,
+      "media_type": "text/plain",
+      "role": "backend_repeat_stdout"
+    },
+    {
+      "relative_path": "backend-repeat-stderr.log",
+      "digest": "sha256:d034e30db09af58a309663aa53bc609b60f4f06d4f5fa805756f9df16f327051",
+      "size_bytes": 26,
+      "media_type": "text/plain",
+      "role": "backend_repeat_stderr"
+    }
+  ],
+  "observables": [
+    {
+      "name": "energy",
+      "status": "measured",
+      "evidence_digest": "sha256:25af845170948a00ba3c3a64ed705cb5051f145d979c68fc1fad00f00b220ac7"
+    },
+    {
+      "name": "variance",
+      "status": "backend_limited",
+      "evidence_digest": "sha256:25af845170948a00ba3c3a64ed705cb5051f145d979c68fc1fad00f00b220ac7"
+    },
+    {
+      "name": "entanglement_entropy",
+      "status": "measured",
+      "evidence_digest": "sha256:25af845170948a00ba3c3a64ed705cb5051f145d979c68fc1fad00f00b220ac7"
+    },
+    {
+      "name": "transfer_spectrum",
+      "status": "measured",
+      "evidence_digest": "sha256:25af845170948a00ba3c3a64ed705cb5051f145d979c68fc1fad00f00b220ac7"
+    },
+    {
+      "name": "central_charge_fit",
+      "status": "derived",
+      "evidence_digest": "sha256:25af845170948a00ba3c3a64ed705cb5051f145d979c68fc1fad00f00b220ac7"
+    }
+  ],
+  "validator_results": [
+    {
+      "id": "parse_consistency",
+      "status": "pass",
+      "reason_code": "VALIDATOR_PASS",
+      "metric_value": null,
+      "evidence_digest": "sha256:f63f87e3c0b467056aa4c379d135148db8ab158a8127cd592a3350a96f5ff818"
+    },
+    {
+      "id": "convergence",
+      "status": "pass",
+      "reason_code": "VALIDATOR_PASS",
+      "metric_value": 9.999999999998899e-05,
+      "evidence_digest": "sha256:f63f87e3c0b467056aa4c379d135148db8ab158a8127cd592a3350a96f5ff818"
+    },
+    {
+      "id": "variance",
+      "status": "backend_limited",
+      "reason_code": "BACKEND_LIMITED",
+      "metric_value": null,
+      "evidence_digest": "sha256:f63f87e3c0b467056aa4c379d135148db8ab158a8127cd592a3350a96f5ff818"
+    },
+    {
+      "id": "canonical_form",
+      "status": "reported_only",
+      "reason_code": "REPORTED_ONLY",
+      "metric_value": 0.001,
+      "evidence_digest": "sha256:f63f87e3c0b467056aa4c379d135148db8ab158a8127cd592a3350a96f5ff818"
+    },
+    {
+      "id": "symmetry_check",
+      "status": "reported_only",
+      "reason_code": "REPORTED_ONLY",
+      "metric_value": 1e-10,
+      "evidence_digest": "sha256:f63f87e3c0b467056aa4c379d135148db8ab158a8127cd592a3350a96f5ff818"
+    },
+    {
+      "id": "benchmark_compare",
+      "status": "pass",
+      "reason_code": "VALIDATOR_PASS",
+      "metric_value": 4.7180559945292355e-05,
+      "evidence_digest": "sha256:f63f87e3c0b467056aa4c379d135148db8ab158a8127cd592a3350a96f5ff818"
+    },
+    {
+      "id": "reproducibility",
+      "status": "reported_only",
+      "reason_code": "REPORTED_ONLY",
+      "metric_value": 1.0000000000010001e-05,
+      "evidence_digest": "sha256:f63f87e3c0b467056aa4c379d135148db8ab158a8127cd592a3350a96f5ff818"
+    },
+    {
+      "id": "artifact_completeness",
+      "status": "pass",
+      "reason_code": "VALIDATOR_PASS",
+      "metric_value": 0,
+      "evidence_digest": "sha256:f63f87e3c0b467056aa4c379d135148db8ab158a8127cd592a3350a96f5ff818"
+    }
+  ],
+  "provenance": {
+    "plan_id": "sha256:583e130a0daa654eeecfe215f84196d37cb1792480d811dfc42f11b1cb25df60",
+    "request_digest": "sha256:e8a0eed66378a47b078a99227b308775c34312b561efbb0988fd6e8beff4c064",
+    "backend_result_digest": "sha256:25af845170948a00ba3c3a64ed705cb5051f145d979c68fc1fad00f00b220ac7",
+    "repeat_backend_result_digest": "sha256:d8afffee85201b2392b8bf87d9f5c8b318d72eafd860142dc06fccbf0903ddad",
+    "generated_by": "fixtures/regenerate.py",
+    "generated_at": "2026-07-29T00:01:00Z"
+  },
+  "result_digest": "sha256:ed178a5c36c76fdc3c4e94f17a095b6e979bc8cf1067e16efefa49af7b430a01"
+}

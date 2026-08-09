@@ -1,0 +1,202 @@
+{
+  "schema_version": "wangtheophys.tn-experiment.v1",
+  "problem": {
+    "problem_id": "fixture-infinite-xxz-vumps",
+    "title": "Infinite XXZ VUMPS contract fixture",
+    "research_question": "Can the promoted infinite XXZ route produce evidence that satisfies its preregistered numerical and provenance gates while declaring backend-limited variance?",
+    "novelty_claim": "This is a contract fixture, not a claim of a new scientific result.",
+    "status": "test_fixture",
+    "task_family": "ground_state_1d_infinite"
+  },
+  "physics": {
+    "model": {
+      "representation": "operator_sum",
+      "family": "xxz",
+      "operators": [
+        "Sx_i*Sx_i+1",
+        "Sy_i*Sy_i+1",
+        "Sz_i*Sz_i+1",
+        "Sz_i"
+      ],
+      "couplings": {
+        "Jxy": 1.0,
+        "Delta": 1.0,
+        "h": 0.0
+      },
+      "onsite_terms": [],
+      "neighbor_range": 1
+    },
+    "lattice": {
+      "type": "chain",
+      "length": null,
+      "boundary": "infinite",
+      "local_dim": 2,
+      "unit_cell": 2
+    },
+    "symmetry": {
+      "U1_Sz": true,
+      "parity": false,
+      "translation": true,
+      "target_sector": {
+        "total_Sz": 0
+      }
+    },
+    "ansatz": {
+      "family": "mps",
+      "algorithm": "vumps",
+      "variant": "two_site",
+      "initial_state": "neel",
+      "allow_bond_growth": true,
+      "target_precision": 1e-06
+    }
+  },
+  "capability": {
+    "capability_id": "tenpy.infinite_1d.vumps",
+    "maturity": "experimental",
+    "known_limitations": [
+      "TeNPy UniformMPS is experimental.",
+      "Energy variance is backend-limited on this route.",
+      "The fixture does not count as a generated challenge problem."
+    ]
+  },
+  "backend_binding": {
+    "schema_version": "tn-agent.backend-binding.v1",
+    "capability_id": "tenpy.infinite_1d.vumps",
+    "adapter_id": "tenpy.v1",
+    "backend_id": "tenpy",
+    "request_schema": "tn-agent.tenpy.infinite-xxz-vumps.v1",
+    "result_schema": "tn-agent.backend-result.v1"
+  },
+  "numerics": {
+    "max_bond_dim": 32,
+    "cutoff": 1e-10,
+    "max_sweeps": 4,
+    "min_sweeps": 2,
+    "mixer": false,
+    "lanczos_maxiter": 8,
+    "checkpoint_every": 1,
+    "entropy_tolerance": 1e-05,
+    "finite_entanglement_fit": {
+      "enabled": true,
+      "min_chi": 16,
+      "max_chi": 32
+    },
+    "transfer_matrix": {
+      "compute": true,
+      "num_eigs": 4
+    },
+    "seed": 2468
+  },
+  "observables": [
+    "energy",
+    "variance",
+    "entanglement_entropy",
+    "transfer_spectrum",
+    "central_charge_fit"
+  ],
+  "validators": [
+    {
+      "id": "parse_consistency",
+      "policy": "required_pass",
+      "metric": null,
+      "operator": null,
+      "threshold": null
+    },
+    {
+      "id": "convergence",
+      "policy": "required_pass",
+      "metric": "energy_drift",
+      "operator": "max",
+      "threshold": 0.0002
+    },
+    {
+      "id": "variance",
+      "policy": "backend_limited",
+      "metric": null,
+      "operator": null,
+      "threshold": null
+    },
+    {
+      "id": "canonical_form",
+      "policy": "reported_only",
+      "metric": "canonical_residual",
+      "operator": null,
+      "threshold": null
+    },
+    {
+      "id": "symmetry_check",
+      "policy": "reported_only",
+      "metric": "symmetry_residual",
+      "operator": null,
+      "threshold": null
+    },
+    {
+      "id": "benchmark_compare",
+      "policy": "required_pass",
+      "metric": "benchmark_delta",
+      "operator": "max",
+      "threshold": 0.001
+    },
+    {
+      "id": "reproducibility",
+      "policy": "reported_only",
+      "metric": "reproduction_delta",
+      "operator": null,
+      "threshold": null
+    },
+    {
+      "id": "artifact_completeness",
+      "policy": "required_pass",
+      "metric": "missing_artifacts",
+      "operator": "equals",
+      "threshold": 0
+    }
+  ],
+  "acceptance": {
+    "mode": "all_required",
+    "required_validator_ids": [
+      "parse_consistency",
+      "convergence",
+      "benchmark_compare",
+      "artifact_completeness"
+    ],
+    "allowed_backend_limited_ids": [
+      "variance"
+    ],
+    "require_execution_success": true,
+    "reported_only_validator_ids": [
+      "canonical_form",
+      "symmetry_check",
+      "reproducibility"
+    ]
+  },
+  "provenance": {
+    "created_by": "WangTheoPhys",
+    "created_at": "2026-07-29T00:00:00Z",
+    "sources": [
+      {
+        "kind": "repository_skill",
+        "uri": "skills/method-mps/SKILL.md",
+        "sha256": "sha256:297e1df7bb54e403edf86b4e5b683a6774d0db78673cd0fc76dc116332dbf088"
+      },
+      {
+        "kind": "repository_skill",
+        "uri": "skills/using-tenpy/SKILL.md",
+        "sha256": "sha256:622b88619105cc0643bfde6d295377dd0c90ceee297119029362e47e80c14f5d"
+      }
+    ],
+    "generation_log_uri": "tracks/agent-kb/solutions/WangTheoPhys/README.md",
+    "human_gatekeeper_role": "Ratify the Hamiltonian, geometry, symmetry sector, target observable, and preregistered acceptance gate before execution."
+  },
+  "reference": {
+    "observable": "energy",
+    "value": -0.4431471805599453,
+    "units": "J",
+    "normalization": "per-site",
+    "source": {
+      "kind": "registered_artifact",
+      "uri": "energy-reference.json",
+      "sha256": "sha256:6cacc4617490466b747b041270e6316ad90732c342441949bac118fc84652ef3"
+    }
+  }
+}

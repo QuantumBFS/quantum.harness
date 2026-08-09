@@ -1,0 +1,58 @@
+{
+  "schema_version": "wangtheophys.tn-validator-evidence.v1",
+  "request_digest": "sha256:e8a0eed66378a47b078a99227b308775c34312b561efbb0988fd6e8beff4c064",
+  "backend_result_digest": "sha256:7f710c61dc85c250b0d77d5a98ebb1a51194ccbd18cb80df89be885392a9437e",
+  "repeat_backend_result_digest": "sha256:f166be6c9aa8fad1aa62e260b04e2e54328756f2fc89b653d106acebae2d6c50",
+  "reference_artifact_digest": "sha256:6cacc4617490466b747b041270e6316ad90732c342441949bac118fc84652ef3",
+  "results": [
+    {
+      "id": "parse_consistency",
+      "metric": null,
+      "value": null,
+      "source": "gate.primary_and_repeat_bundle_reconstruction"
+    },
+    {
+      "id": "convergence",
+      "metric": "energy_drift",
+      "value": 9.999999999998899e-05,
+      "source": "gate.primary_raw.convergence.energy_delta"
+    },
+    {
+      "id": "variance",
+      "metric": null,
+      "value": null,
+      "source": "reported.primary_raw.observables.variance"
+    },
+    {
+      "id": "canonical_form",
+      "metric": "canonical_residual",
+      "value": 0.001,
+      "source": "reported.primary_raw.convergence.canonical_residual"
+    },
+    {
+      "id": "symmetry_check",
+      "metric": "symmetry_residual",
+      "value": 1e-10,
+      "source": "reported.primary_raw.convergence.symmetry_residual"
+    },
+    {
+      "id": "benchmark_compare",
+      "metric": "benchmark_delta",
+      "value": 4.7180559945292355e-05,
+      "source": "gate.primary_energy_vs_preregistered_reference"
+    },
+    {
+      "id": "reproducibility",
+      "metric": "reproduction_delta",
+      "value": 1.0000000000010001e-05,
+      "source": "reported.primary_energy_vs_repeat_raw"
+    },
+    {
+      "id": "artifact_completeness",
+      "metric": "missing_artifacts",
+      "value": 0,
+      "source": "verified.required_artifact_roles"
+    }
+  ],
+  "result_digest": "sha256:06821077dc75b6573e4e85792cce37bffdab08878f7233bc446801277902d9a7"
+}

@@ -1,0 +1,15 @@
+{
+  "acceptance_rules": {
+    "arithmetic": "exact-integer",
+    "equation": "target_s = inverse_gauge * source_s * gauge",
+    "requires_exact_inverse": true
+  },
+  "challenge_digest": "sha256:bc2e46c1d7ad853ee4832d64d0ef8fc54a11a32ec5c500006dfd3341d51dc2a5",
+  "challenge_id": "issue133.new-05-mps-gauge-equivalence",
+  "digest": "sha256:36e3bc93b3588f60d73a052b382b00afb8b2016d58b4c8abd3b5859650138286",
+  "frozen_at": "2026-07-30T12:20:00Z",
+  "frozen_before_solver": true,
+  "schema_version": "wangtheophys.issue133.gate.v1",
+  "verifier_entrypoint": "campaign_verifier.py",
+  "verifier_source_digest": "sha256:c853847ca37ccacb963b2d6ba3a87f34ca1101efa16106a11316887e03a255e8"
+}

@@ -1,0 +1,29 @@
+{
+  "certificate": {
+    "gauge": [
+      [
+        2,
+        1
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "inverse_gauge": [
+      [
+        1,
+        -1
+      ],
+      [
+        0,
+        1
+      ]
+    ]
+  },
+  "challenge_digest": "sha256:bc2e46c1d7ad853ee4832d64d0ef8fc54a11a32ec5c500006dfd3341d51dc2a5",
+  "challenge_id": "issue133.new-05-mps-gauge-equivalence",
+  "digest": "sha256:3a4e3b1c3abdd6a4c94805e416e3cc6987936a03e937c821fd7c95f6f01234f5",
+  "gate_digest": "sha256:36e3bc93b3588f60d73a052b382b00afb8b2016d58b4c8abd3b5859650138286",
+  "schema_version": "wangtheophys.issue133.certificate.v1"
+}

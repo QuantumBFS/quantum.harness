@@ -1,0 +1,42 @@
+{
+  "challenge_id": "issue133.new-04-schmidt-rank",
+  "digest": "sha256:54b2d9624228c963dd2f358b2b0029a90d9a2e42b0a936d64d8286e9df476043",
+  "frozen_at": "2026-07-30T12:20:00Z",
+  "input": {
+    "matrix": [
+      [
+        1,
+        0,
+        1
+      ],
+      [
+        0,
+        1,
+        1
+      ],
+      [
+        1,
+        1,
+        2
+      ]
+    ]
+  },
+  "kind": "exact-rank",
+  "novelty_statement": "New live campaign item; not a #124-#128 calibration problem.",
+  "preregistered_gate": {
+    "arithmetic": "exact-integer",
+    "expected_rank": 2,
+    "required_minor": {
+      "columns": [
+        0,
+        1
+      ],
+      "rows": [
+        0,
+        1
+      ]
+    }
+  },
+  "schema_version": "wangtheophys.issue133.challenge.v1",
+  "title": "Exact Schmidt rank of a frozen bipartite coefficient tensor"
+}
