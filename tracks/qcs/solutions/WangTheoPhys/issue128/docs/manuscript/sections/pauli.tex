@@ -1,0 +1,102 @@
+\section{Concrete Pauli Evaluation and Translation Quotienting}
+\label{sec:pauli}
+
+After free-Lie extraction, the compiler substitutes the four checkerboard
+fragments of the square-lattice Heisenberg Hamiltonian.  This is the point at
+which generic commutator counting is replaced by exact model algebra.
+
+\subsection{Symplectic Pauli representation}
+
+Ignoring a separately stored phase, an $n$-qubit Pauli is represented by two
+bit strings $(x,z)\in\mathbb F_2^{2n}$ through the stabilizer/symplectic
+formalism \citep{gottesman1997stabilizer},
+$P=i^\kappa X^xZ^z$.  Multiplication is bitwise xor plus an exactly updated
+phase.  Two Paulis commute exactly when their symplectic product vanishes:
+\begin{equation}
+  [P(x,z),P(x',z')]=0
+  \quad\Longleftrightarrow\quad
+  x\!\cdot\!z'+z\!\cdot\!x'=0\pmod 2.
+  \label{eq:symplectic-commutation}
+\end{equation}
+Thus a nested commutator is evaluated without constructing a
+$2^{144}\times2^{144}$ matrix.  At each bracket, commuting pairs are deleted;
+anticommuting pairs produce the exact factor and phase.  Duplicate bit strings
+are combined before the next bracket.
+
+The local bond operator
+\begin{equation}
+ h_{uv}=\frac14(X_uX_v+Y_uY_v+Z_uZ_v)
+ \label{eq:bond-hamiltonian}
+\end{equation}
+has only three Pauli summands.  Each of the four fragments is a sum over a
+perfect matching of the periodic $12\times12$ lattice.  Terms within a
+matching commute and their exponentials reduce to independent two-qubit bond
+propagators.
+
+\subsection{Locality before enumeration}
+
+The support of $[P,Q]$ is contained in
+$\operatorname{supp}(P)\cup\operatorname{supp}(Q)$, and the bracket vanishes
+when the strings commute.  The implementation therefore carries connected
+bond clusters rather than global lattice objects.  A degree-$d$ nested
+commutator can touch only a bounded neighborhood of its seed bond.  Candidate
+bonds outside that neighborhood are never enumerated.  This converts a
+nominally exponential global construction into a finite local calculation
+followed by a translation-density factor.
+
+For the $L=12$ benchmark the supports fit inside the injectivity radius of the
+torus for the degrees used in the explicit ledger.  Periodic coordinates are
+nevertheless retained, and wraparound is checked rather than assumed away.
+This avoids silently importing an infinite-lattice result into a finite
+periodic instance.
+
+\subsection{Canonical translation representatives}
+
+Let $\tau_a$ translate a Pauli string by a lattice displacement $a$.  We
+choose the lexicographically least serialization among all translates as the
+orbit representative
+\begin{equation}
+  \operatorname{can}(P)=\min_{a\in\mathbb Z_L^2}\operatorname{serialize}(\tau_aP).
+  \label{eq:translation-canonical}
+\end{equation}
+The coefficient map is then aggregated by this key.  Canonicalization occurs
+before taking absolute values, so translated derivation paths that land on the
+same physical Pauli can cancel exactly.
+
+\begin{proposition}[Correctness of translation aggregation]
+\label{prop:translation}
+Let $Q=\sum_jc_jP_j$ be a translation-invariant operator written with a marked
+origin, and let $\bar c_P$ be the sum of all coefficients mapped to canonical
+representative $P$.  On an $L\times L$ periodic lattice,
+\begin{equation}
+  Q=\sum_{a\in\mathbb Z_L^2}\tau_a
+      \left(\sum_{P}\bar c_P P\right),
+\end{equation}
+with the conventional stabilizer multiplicities included in $\bar c_P$.
+\end{proposition}
+
+\begin{proof}
+Translation partitions the enumerated terms into disjoint group orbits.
+Within each orbit, linearity permits coefficient aggregation at a selected
+representative.  Re-expanding the orbit sum recovers every translated term
+with the same multiplicity.  The implementation records orbit and stabilizer
+counts, making the equality a finite combinatorial check.
+\end{proof}
+
+\subsection{Exact aggregation and interval coefficients}
+
+Every coefficient is an interval $[c^-,c^+]$ with rational endpoints.  When
+multiple derivation paths yield the same Pauli key, intervals are added first.
+Only then is an outward absolute upper bound formed:
+\begin{equation}
+  |[c^-,c^+]|_\uparrow=\max\{|c^-|,|c^+|\}.
+\end{equation}
+This order is essential.  Replacing $\sum_jc_j$ by $\sum_j|c_j|$ earlier would
+discard the formula-specific and model-specific cancellations that the
+compiler was designed to retain.
+
+The output of this pass is not merely a scalar norm.  It is a complete sparse
+ledger of canonical Pauli keys and coefficient enclosures.  That ledger can be
+hashed, independently replayed, regrouped by a future heuristic, or sampled
+for direct small-system matrix cross-checks.  These properties turn a
+one-off symbolic calculation into reusable evidence.

@@ -1,0 +1,107 @@
+\documentclass[11pt]{article}
+
+\usepackage[margin=0.82in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{booktabs,tabularx,array,longtable,multirow}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{enumitem}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{siunitx}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,fit,backgrounds}
+\usepackage[numbers,sort&compress]{natbib}
+\usepackage{hyperref}
+\usepackage[nameinlink,noabbrev]{cleveref}
+\usepackage{fancyhdr}
+\makeatletter
+\renewcommand{\theALG@line}{\thealgorithm.\arabic{ALG@line}}
+\providecommand*{\theHALG@line}{}
+\renewcommand*{\theHALG@line}{\thealgorithm.\arabic{ALG@line}}
+\makeatother
+
+\definecolor{certblue}{HTML}{2455A4}
+\definecolor{certgreen}{HTML}{2A7F62}
+\definecolor{certorange}{HTML}{D97706}
+\definecolor{certred}{HTML}{B42318}
+\hypersetup{
+  colorlinks=true,
+  linkcolor=certblue,
+  citecolor=certgreen,
+  urlcolor=certblue,
+  pdftitle={Proof-Carrying, Model-Aware Compilation of Rigorous Trotter Resource Bounds},
+  pdfauthor={Junkai Wang}
+}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{Proof-Carrying Trotter Resource Bounds}
+\fancyhead[R]{J. Wang}
+\fancyfoot[C]{\thepage}
+\setlength{\headheight}{14pt}
+\setlength{\parindent}{1.25em}
+\setlength{\parskip}{0.22em}
+\setlength{\emergencystretch}{3em}
+\setlist{itemsep=0.25em,topsep=0.35em}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{remark}[theorem]{Remark}
+
+\newcommand{\opnorm}[1]{\left\lVert #1\right\rVert}
+\newcommand{\paulinorm}[1]{\left\lVert #1\right\rVert_{1,\mathrm{P}}}
+\newcommand{\comm}[2]{\left[#1,#2\right]}
+\newcommand{\ad}{\operatorname{ad}}
+\newcommand{\eps}{\varepsilon}
+\newcommand{\cert}{\textsc{Cert}}
+\newcommand{\code}[1]{\texttt{#1}}
+\newcommand{\Rge}{R_{\ge 8}}
+
+\title{\textbf{Proof-Carrying, Model-Aware Compilation of\\
+Rigorous Trotter Resource Bounds}\\[0.4em]
+\large A Machine-Certified $4.050498\times$ Reduction for a\\
+Two-Dimensional Heisenberg Benchmark}
+\author{Junkai Wang\\
+\small WangTheoPhys / Wander Team\\
+\small Quantum Circuit Simulation Track\\
+\small \href{mailto:WangTheoPhys@outlook.com}{WangTheoPhys@outlook.com}}
+\date{July 31, 2026}
+
+\begin{document}
+\maketitle
+\input{sections/abstract}
+\tableofcontents
+\clearpage
+
+\input{sections/introduction}
+\input{sections/problem}
+\input{sections/baseline}
+\input{sections/compiler}
+\input{sections/free_lie}
+\input{sections/pauli}
+\input{sections/norm_certificate}
+\input{sections/finite_step}
+\input{sections/verification}
+\input{sections/results}
+\input{sections/related_work}
+\input{sections/limitations}
+\input{sections/reproducibility}
+\input{sections/conclusion}
+
+\appendix
+\input{sections/appendices}
+
+{\small
+\bibliographystyle{unsrtnat}
+\bibliography{references}
+}
+\end{document}

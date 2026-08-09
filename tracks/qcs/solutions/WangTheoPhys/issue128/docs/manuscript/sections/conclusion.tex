@@ -1,0 +1,26 @@
+\section{Conclusion}
+\label{sec:conclusion}
+
+We have presented a proof-carrying, model-aware compiler for rigorous
+product-formula resource bounds.  Its central design rule is simple: preserve
+algebraic structure until all formula-specific, model-specific, translational,
+and anticommuting relations have been exposed; apply irreversible norm
+inequalities only afterward; and emit enough evidence for an independent
+program to recheck the result.
+
+For the periodic $12\times12$ isotropic Heisenberg benchmark, this procedure
+certifies the original five-copy fourth-order Suzuki circuit at 97 steps.  The
+pinned general-theorem instantiation requires 393 steps under the common
+comparison protocol.  After deterministic stage merging and bond
+compilation, the corresponding group, bond, and CNOT resources fall by the
+exact factor $11791/2911=4.050498110614909\ldots$.  The result includes the
+rejected 96-step neighbor, D4--D7 contributions, a rational high-degree tail,
+full D4 anticommuting membership, resource arithmetic, and hash bindings.
+
+The broader lesson is not that one Hamiltonian has exhausted the possibilities
+of Trotter simulation.  It is that a general error theorem and a concrete gate
+estimate should be connected by a transparent compiler rather than a chain of
+unrecorded inequalities.  The current artifact occupies that middle layer.  A
+fivefold threshold remains a well-specified research target, but it will be
+claimed only after the missing D4, D8, and tail obligations close in the same
+machine-checkable form.

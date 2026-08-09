@@ -1,0 +1,108 @@
+\section{Certificate Architecture and Independent Verification}
+\label{sec:verification}
+
+Large symbolic calculations are difficult to trust by inspection.  We use a
+proof-carrying architecture: discovery may be complex, but the final claim is
+accepted only after a narrower verifier rechecks explicit evidence.
+
+\subsection{Trusted and untrusted components}
+
+\begin{figure}[t]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[
+ node distance=6mm and 10mm,
+ box/.style={draw,rounded corners,align=center,minimum height=9mm,minimum width=33mm},
+ untrusted/.style={box,fill=orange!10},
+ trusted/.style={box,fill=green!10},
+ arr/.style={-{Stealth[length=2mm]},thick}
+]
+\node[untrusted] (gen) {symbolic generator\\and grouping search};
+\node[untrusted,below=of gen] (hpc) {parallel/HPC discovery\\and cached ledgers};
+\node[box,right=of gen,yshift=-8mm,fill=blue!5] (bundle) {hashed certificate bundle\\JSON, groups, summaries};
+\node[trusted,right=of bundle] (fast) {fast verifier\\schema + arithmetic};
+\node[trusted,below=of fast] (deep) {deep replay\\algebra + group membership};
+\node[trusted,right=of fast,yshift=-8mm] (claim) {accepted claim\\or explicit failure};
+\draw[arr] (gen)--(bundle);
+\draw[arr] (hpc)--(bundle);
+\draw[arr] (bundle)--(fast);
+\draw[arr] (bundle)--(deep);
+\draw[arr] (fast)--(claim);
+\draw[arr] (deep)--(claim);
+\end{tikzpicture}
+}
+\caption{Trust boundary.  Parallel discovery and heuristic grouping are
+untrusted producers.  The accepted result depends on explicit evidence and
+two verification paths.}
+\label{fig:trust-boundary}
+\end{figure}
+
+The trusted claim comprises the mathematical lemmas in this paper, the small
+verification programs, exact integer/rational arithmetic, and the cryptographic
+binding between manifest and sidecars.  It does not require trusting the job
+scheduler, the heuristic's optimality, cached stdout, or a claimed successful
+HPC run.
+
+\subsection{Certificate contents}
+
+The schema-v3 certificate records:
+\begin{itemize}
+  \item the complete benchmark tuple, normalization, formula, time, tolerance,
+        and primary resource metric;
+  \item the pinned theorem instantiation used for the baseline;
+  \item coefficient precision policies and rational interval endpoints;
+  \item D4 group-certificate path, SHA-256 digest, term count, group count,
+        maximum size, and norm enclosure;
+  \item D4--D7 and tail contributions at the accepted integer;
+  \item the accepted and previous-step global-error rationals;
+  \item integer resource arithmetic and the exact improvement ratio; and
+  \item auxiliary audit results explicitly separated from the primary claim.
+\end{itemize}
+Large membership data are sidecars rather than embedded in prose.  The
+manifest hash prevents a reviewer from inadvertently validating a different
+file with the same name.
+
+\subsection{Fast and deep modes}
+
+Fast verification checks the schema, paths, hashes, integer identities,
+rational comparisons, resource formulas, and headline invariants.  It is
+intended for continuous integration and reviewer orientation.  Deep
+verification additionally replays coefficient aggregation, checks every group
+for exact coverage and pairwise anticommutation, verifies all rational square
+roots, and reproduces the finite-step sum.
+
+The two modes serve different purposes.  Fast verification answers whether a
+checked-in bundle is internally bound and arithmetically self-consistent.
+Deep verification answers whether the large algebraic witness supports its
+declared norm.  Neither mode treats a rounded decimal in a PDF as evidence.
+
+\subsection{Negative tests and failure localization}
+
+A certificate system is useful only if nearby corruptions fail.  The test
+suite mutates representative fields: a group member, a coefficient endpoint,
+the accepted step count, a resource total, and a sidecar digest.  Each mutation
+must cause a nonzero verifier result.  Further unit tests cover Pauli phase
+multiplication, symplectic commutation, periodic canonicalization, rational
+square-root enclosure, and the local 16-Pauli lemma.
+
+Failures are reported by layer.  A hash mismatch is distinguished from a
+schema error; a duplicate group member from a non-anticommuting pair; a failed
+tail precondition from an error-bound comparison.  This makes independent
+reproduction tractable: a reviewer need not rerun the entire discovery
+pipeline to diagnose a damaged artifact.
+
+\subsection{Claim classes}
+
+We label statements by evidence class:
+\begin{description}
+  \item[Certified.] Derived from a manifest-bound witness and accepted by the
+  verifier, such as the 97-step result and integer resource counts.
+  \item[Cross-checked.] Supported by a structurally independent small-system or
+  exhaustive local calculation, but not the main large-system proof.
+  \item[Conditional.] An arithmetic consequence under a stated future premise,
+  such as the norm budget required for a fivefold result.
+  \item[Prospective.] A research direction or engineering optimization with no
+  claimed current performance.
+\end{description}
+This vocabulary prevents an observed trend, a possible optimization, and a
+completed theorem from being conflated in the abstract or conclusion.

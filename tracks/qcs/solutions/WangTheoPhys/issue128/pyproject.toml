@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=70"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "trottercert"
+version = "0.1.0"
+description = "Machine-certified product-formula analysis for 2D Heisenberg models"
+requires-python = ">=3.11"
+dependencies = ["numpy>=2.0", "scipy>=1.13", "sympy>=1.13"]
+
+[project.optional-dependencies]
+test = ["pytest>=8"]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+addopts = "-m 'not slow'"
+markers = ["slow: long-running research reproduction test"]

@@ -1,0 +1,62 @@
+[identity]
+name = "xh5-acamtw"
+purpose = "Issue 128 exact-rational CPU sprint on hpccube Xiongheng"
+maintainer = "Wander"
+
+[connection]
+repo_path_remote = "/work/home/acamtw70yu/quantum-harness-issue128-hpc"
+login_shell = false
+
+[connection.ssh]
+alias = "xh5-acamtw"
+host = "xh5.hpccube.com"
+user = "acamtw70yu"
+port = 65061
+
+[scheduler]
+type = "slurm"
+default_partition = "xhacnormalb"
+
+[[partitions]]
+name = "xhacnormalb"
+class = "default-cpu"
+cores = 128
+memory = "513500M"
+max_wall = "333-08:00:00"
+gpu = ""
+
+[filesystem]
+home = "/work/home/acamtw70yu"
+scratch = ""
+project = "/work/home/acamtw70yu/quantum-harness-issue128-hpc"
+quota = ""
+
+[network]
+internet_from_login = true
+internet_from_compute = false
+
+[region]
+region = "mainland_china"
+
+[limits.hard]
+max_walltime = "06:00:00"
+max_nodes = 1
+max_cpus = 64
+max_array_size = 200
+
+[limits.soft]
+warn_walltime = "04:30:00"
+warn_cpus = 32
+unusual_partitions = []
+
+[limits.paths]
+allowed_roots = ["/work/home/acamtw70yu/quantum-harness-issue128-hpc/results"]
+
+[commands]
+squeue = "squeue -u $USER"
+sacct = "sacct --format=JobID,State,ExitCode,MaxRSS,Elapsed"
+sinfo = "sinfo -o '%P %a %.10l %.6D %.6t'"
+quota_command = "sacctmgr -n -P show assoc where user=$USER format=Account,Partition,QOS,GrpTRES,MaxTRES"
+
+[notes]
+text = "Live-probed 2026-07-31: account giggleliu, QOS user_acamtw70yu, CPU partition xhacnormalb, 128 cores and about 501 GiB per node. GPU partitions are intentionally excluded because the sprint is exact Python/Fraction work."

@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "benchmark": {
+    "model": "periodic_square_spin_half_isotropic_heisenberg",
+    "normalization": "(XX+YY+ZZ)/4",
+    "length": 12,
+    "time": [1, 1],
+    "tolerance": [1, 1000],
+    "primary_certified_metric": "local_propagator_count",
+    "secondary_metric": "generic_cnot_upper"
+  },
+  "proof": {
+    "reference_length": 6,
+    "scaling": "translation-invariant density times N",
+    "baseline_decomposition": "four_disjoint_bond_matchings",
+    "candidate_decomposition": "three_disjoint_L_path_cluster_colors",
+    "baseline_density": [21, 8],
+    "candidate_density": [13, 6],
+    "formula": "second_order_symmetric",
+    "single_step_bound": "C2*t^3",
+    "multi_step_bound": "C2*T^3/r^2"
+  },
+  "cost_model": {
+    "baseline_local_support": "two-site Heisenberg bond",
+    "candidate_local_support": "three-site L path with two Heisenberg bonds",
+    "baseline_cnots_per_local_propagator": 3,
+    "candidate_cnots_per_local_propagator": 9,
+    "candidate_cnot_value_is_a_generic_encoder_plus_SU4_upper_bound": true
+  },
+  "claimed_resources": {
+    "baseline_steps": 615,
+    "candidate_steps": 559,
+    "baseline_local_propagators": 265752,
+    "candidate_local_propagators": 107376,
+    "baseline_cnot_upper": 797256,
+    "candidate_cnot_upper": 966384
+  },
+  "claims": {
+    "local_propagator_improvement_exceeds_two": true,
+    "compiled_cnot_improvement_exceeds_two": false
+  }
+}

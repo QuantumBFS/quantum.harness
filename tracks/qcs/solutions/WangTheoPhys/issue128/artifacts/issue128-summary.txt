@@ -1,0 +1,28 @@
+ISSUE 128 FINAL RESULT SUMMARY
+================================
+
+BENCHMARK: periodic_square_spin_half_isotropic_heisenberg
+LATTICE: L=12, N=144
+NORMALIZATION: (XX+YY+ZZ)/4
+TIME: T=1; OPERATOR-NORM TOLERANCE: 1e-6
+
+PUBLISHED BASELINE: 393 steps, 11791 groups, 848952 bond propagators, 2546856 CNOT upper
+CERTIFIED RESULT: 4.050498110614909x
+  97 steps, 2911 groups, 209592 bond propagators, 628776 CNOT upper
+  exact ratio: 11791/2911
+  resource reduction: 75.31167839877873%
+  97-step error upper (outward decimal): 9.958938494314325e-7
+  96-step error upper (outward decimal): 1.050565873970784e-6
+  integer boundary: 97 accepted; 96 rejected
+
+EXACT D4: 75324 terms, 7576 groups, maximum size 10, cell bound 6.472926505087888e+0
+
+FIVEFOLD STATUS: NOT CERTIFIED
+  conditional arithmetic only: r=78, groups=2341, ratio=5.036736437419906x
+  verified D5 evidence: 605832 terms, 123106 groups, site bound 1.123706750025697e+1
+  No 78-step global error certificate is claimed or supplied.
+
+SOURCE BINDINGS
+  main certificate SHA-256: 0a09623ce3b292a3637065c870fb3153bbdcddce30aef968565c4db3ddfc7201
+  D4 sidecar SHA-256: a397414bb0229fb1ebdb38798aa781fb89dbb9d5cdbed94c7cd2e9120da62718
+  D5 sidecar SHA-256: c5e8968a93b4497b41fe42c0e364324388272e183e1fcd20a536bc988f5361dd

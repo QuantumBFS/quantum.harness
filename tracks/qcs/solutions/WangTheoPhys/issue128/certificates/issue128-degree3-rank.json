@@ -1,0 +1,10 @@
+{
+  "model": "periodic_4x4_square_spin_half_heisenberg",
+  "decomposition": "four_disjoint_bond_matchings",
+  "operators": "[H_a,[H_b,H_c]] for a,b,c in {0,1,2,3}",
+  "columns": 64,
+  "pauli_rows": 4128,
+  "exact_rational_rank": 20,
+  "free_lie_degree_three_dimension_for_four_generators": 20,
+  "representation_specific_rank_reduction": false
+}

@@ -1,0 +1,107 @@
+\section{Reproducibility and Artifact Protocol}
+\label{sec:reproducibility}
+
+The repository is organized so that a reader can first validate the headline
+claim in seconds and then choose progressively more expensive checks.  No
+private cluster is required to verify the submitted certificate.
+
+\subsection{Environment and commands}
+
+The reference implementation requires Python 3.11 or later and declares
+NumPy, SciPy, and SymPy dependencies.  From the \code{issue128} directory, the
+standard sequence is:
+\begin{verbatim}
+python -m pip install -e '.[test]'
+pytest -q
+PYTHONPATH=src python scripts/verify.py \
+  certificates/issue128-certificate.json
+PYTHONPATH=src python scripts/build_d5_certificate.py --verify-only
+PYTHONPATH=src python scripts/package_delivery.py --check
+shasum -a 256 -c artifacts/SHA256SUMS
+\end{verbatim}
+The expensive algebraic replay is requested explicitly:
+\begin{verbatim}
+PYTHONPATH=src python scripts/verify.py \
+  certificates/issue128-certificate.json --deep
+\end{verbatim}
+The main certificate can be regenerated with
+\begin{verbatim}
+PYTHONPATH=src python scripts/build_v3_certificate.py
+\end{verbatim}
+Long research-reproduction tests are marked \code{slow} and excluded by the
+default Pytest configuration.  This separation keeps ordinary continuous
+integration responsive without disguising the cost of complete regeneration.
+
+\subsection{Claim-to-evidence map}
+
+\begin{longtable}{@{}p{0.27\textwidth}p{0.36\textwidth}p{0.30\textwidth}@{}}
+\caption{Where each principal claim is established and how it is checked.}
+\label{tab:claim-map}\\
+\toprule
+Claim & Primary evidence & Independent check \\
+\midrule
+\endfirsthead
+\toprule
+Claim & Primary evidence & Independent check \\
+\midrule
+\endhead
+393-step pinned control & Baseline rational and center in
+\code{issue128-certificate.json} & Deep regeneration of all 31 centers \\
+97 accepted, 96 rejected & Exact global and previous-step rational pairs in
+the main certificate & Exact comparison against $1/10^6$ \\
+75,324 D4 terms and 7,576 groups & Hashed
+\code{issue128-d4-groups.json} & Coverage, symplectic pair checks, and rational
+square-root replay \\
+D4 bound 6.472926505087888 & Group membership and coefficient endpoints &
+Verifier squares each upper root and resums \\
+11,791 and 2,911 groups & Step counts plus $G(r)=30r+1$ & Direct integer
+identity checks \\
+Bond and CNOT totals & Cost-model fields and claimed-resource block &
+$72G(r)$ and $216G(r)$ recomputation \\
+4.050498$\times$ improvement & Exact pair $(11791,2911)$ & Fraction comparison,
+not rounded decimal \\
+Small-system consistency & Dense $2\times2$ artifact & Independent matrix
+exponential and operator norm \\
+D5 follow-up only & Hashed compressed D5 sidecar and summary status &
+\code{--verify-only}; explicit \code{not\_certified} fivefold status \\
+\bottomrule
+\end{longtable}
+
+\subsection{Immutable bindings}
+
+At the frozen delivery point the primary digests are
+\begin{align*}
+\mathrm{SHA256}(\text{main certificate})
+ &=\code{0a09623ce3b292a3637065c870fb3153b}\ldots,\\
+\mathrm{SHA256}(\text{D4 sidecar})
+ &=\code{a397414bb0229fb1ebdb38798aa781fb8}\ldots,\\
+\mathrm{SHA256}(\text{D5 sidecar})
+ &=\code{c5e8968a93b4497b41fe42c0e364324}\ldots.
+\end{align*}
+The complete 64-hex-character values are stored in the package manifest and
+summary.  A printed prefix is for human orientation only; verification uses
+the complete digest.
+
+The manuscript is a derived view and is not part of the frozen proof bundle.
+If the manuscript, figures, or wording changes, the mathematical claim remains
+bound to the same JSON and sidecars.  Conversely, any change to a certificate
+requires regeneration of its digest and all summaries that cite it.
+
+\subsection{Machine-readable and human-readable outputs}
+
+The delivery contains a main certificate JSON, large exact sidecars, a compact
+JSON summary, a plain-text summary, verification transcript, checksums, source
+code, tests, a short technical report, and this long-form manuscript.  The
+machine-readable objects are authoritative for exact numerators and
+denominators.  Human documents explain the method and use outward decimal
+summaries; they should never be parsed as the proof source.
+
+\subsection{Research integrity statement}
+
+Software-assisted symbolic algebra, exact arithmetic, automated tests, and
+language-model-assisted drafting were used in preparing the artifact and
+manuscript.  Scientific responsibility remains with the author.  Every
+headline numerical statement is checked against the frozen certificate by a
+separate manuscript validation script; literature statements are cited to
+their primary publications.  No generative system output is accepted as a
+mathematical witness without executable or deductive verification.

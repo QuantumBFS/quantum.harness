@@ -1,0 +1,103 @@
+\section{Introduction}
+\label{sec:introduction}
+
+Product formulas remain among the most transparent constructions for digital
+Hamiltonian simulation.  If $H=\sum_{\gamma=1}^{\Gamma}H_\gamma$, a product
+formula replaces $\exp(-itH)$ by a sequence of exponentials of simpler
+fragments $H_\gamma$.  The method needs no block encoding, can preserve the
+geometry of local interactions, and maps naturally to hardware with limited
+connectivity.  Its practical cost, however, is determined not merely by its
+formal order but by the constant in a rigorous finite-time error bound.  A
+factor lost in this constant is amplified when the bound is inverted to select
+an integer number of Trotter steps and then multiplied by every local
+propagator in every step.
+
+The modern commutator-scaling theory of Childs, Su, Tran, Wiebe, and Zhu
+provides a general foundation for such estimates
+\cite{childs2021trotter}.  It replaces purely norm-sum scaling by sums of
+nested commutators and thereby exploits locality and exact commutation.  This
+framework is sufficiently general to cover arbitrary order and many
+Hamiltonian classes, but a general theorem must remain conservative about the
+concrete algebra of a fixed model.  In a Pauli lattice, multiple formal
+commutator paths may evaluate to the same operator with opposite signs;
+translation-equivalent terms may repeat; and distinct surviving Paulis may
+anticommute, so their sum has a Euclidean rather than taxicab norm.  Applying a
+triangle inequality before these facts become visible irreversibly discards
+them.
+
+This paper studies the resulting ``last-mile'' problem:
+
+\begin{quote}
+Given a fixed local Hamiltonian, fragmentation, product formula, simulation
+time, error tolerance, and compilation model, how can one automatically
+produce a tighter \emph{machine-checkable} worst-case resource bound without
+changing the target quantum circuit family?
+\end{quote}
+
+Our answer is to treat error analysis as compilation.  The source program is
+the Hamiltonian and product formula.  The compiler lowers it through
+successive algebraic intermediate representations, performs semantics-
+preserving optimization passes, and emits a proof object.  In contrast with a
+normal circuit optimizer, the principal output is not a different sequence of
+quantum gates.  It is a smaller certified number of repetitions of the same
+sequence.  The design follows a proof-carrying principle: expensive symbolic
+search may be heuristic, but an accepted result must carry all data required
+for a simpler independent verifier to reconstruct the logical obligations.
+
+\subsection{Contributions}
+
+The main contributions are as follows.
+
+\begin{enumerate}
+\item \textbf{A multi-representation error compiler.}  We compute the
+  truncated logarithm of the complete product formula in a sparse free
+  associative algebra, project its homogeneous defects to free-Lie elements,
+  evaluate those elements in a concrete symplectic Pauli representation, and
+  finally emit exact rational certificate data.  Each lowering step has an
+  explicit invariant and can be checked independently.
+
+\item \textbf{Norm-last concrete evaluation.}  We canonicalize finite Pauli
+  configurations under lattice translation and combine identical Pauli
+  strings with exact coefficients before applying a final norm inequality.
+  This reverses the conventional expand-and-bound order and preserves
+  cancellations that are invisible at the level of abstract support counts.
+
+\item \textbf{Certified anticommuting norm compression.}  We construct a
+  graph whose vertices are leading-defect Pauli terms and whose edges encode
+  anticommutation.  An untrusted search partitions terms into pairwise-
+  anticommuting groups.  The certificate records the full partition and
+  outward rational square-root bounds; the verifier rechecks exact coverage
+  and every edge used.  For the principal instance, this lowers the D4
+  translation-cell bound from 20.160968407335066 to 6.472926505087888.
+
+\item \textbf{A nonasymptotic right-generator closure.}  We convert the
+  degree-five and degree-seven logarithmic defects into the right logarithmic
+  generator, retain degrees D4 through D7, use a Heisenberg-specific local
+  commutator lemma, and control all remaining degrees by a rational geometric
+  locality tail.  Thus the resource result does not rely on leading-order
+  extrapolation.
+
+\item \textbf{An independently reproducible finite-instance result.}  For a
+  $12\times12$ periodic Heisenberg lattice, the certificate accepts 97 steps
+  and rejects 96.  Relative to a pinned 393-step instantiation of the
+  published high-order theorem, this reduces merged group exponentials from
+  11,791 to 2,911.  A fast verifier, deep regeneration mode, small-system
+  dense cross-check, mutation tests, and a SHA-256 manifest support the claim.
+\end{enumerate}
+
+\subsection{Scope and nonclaims}
+
+The result is a finite-size constant-factor improvement, not a new asymptotic
+Hamiltonian-simulation complexity.  It applies to a uniform operator-norm
+guarantee for a fixed deterministic product formula.  Methods based on low-
+energy inputs, average-case norms, multi-product formulas, linear combinations
+of unitaries, extrapolation, or stochastic compensation solve different
+resource problems and may achieve stronger precision scaling under their own
+cost models.  We compare these directions in \cref{sec:related} but do not
+rank incomparable gate counts as a single global record.
+
+The exact D5 side study and the $r=78$ arithmetic indicate a possible
+fivefold threshold.  They do not establish it.  Throughout this manuscript,
+``certified'' refers only to statements accepted by the supplied rational
+certificate and verifier.  Numerical dense simulation is used solely as a
+cross-check, and conditional research estimates are labeled explicitly.

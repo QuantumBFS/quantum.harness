@@ -1,0 +1,141 @@
+\section{Related Work and Positioning}
+\label{sec:related}
+
+The relevant literature has diversified beyond a single sequence of tighter
+versions of the same bound.  Some works strengthen worst-case product-formula
+analysis; others restrict the state or error metric; still others change the
+simulation algorithm.  A meaningful position therefore requires a taxonomy
+rather than a one-dimensional ``SOTA'' label.
+
+\subsection{Direct product-formula bounds}
+
+Nearly optimal lattice simulation by high-order product formulas established
+the favorable scaling of local formulas for geometrically local Hamiltonians
+\citep{childs2019lattice}.  The commutator-scaling framework of Childs et al.
+then provided general explicit error representations in terms of nested
+commutators \citep{childs2021trotter}.  Model-specific evaluation has also
+been developed for the Fermi--Hubbard model \citep{schubert2023hubbard}, while
+strong-error analyses clarify the distinction between vector and operator
+convergence for unbounded or chemistry-motivated settings
+\citep{burgarth2024strong}.  Lower-bound work studies when cancellation cannot
+make the Trotter error arbitrarily smaller than upper estimates
+\citep{hahn2024lower}.
+
+Our work remains in this direct, deterministic, operator-norm branch.  It does
+not introduce a new asymptotic theorem.  Its contribution is an automated
+finite-instance sharpening layer after the general theorem has identified the
+relevant commutator structure.  The proof object retains concrete
+coefficients and Pauli relations that a broad theorem cannot economically
+tabulate.
+
+\subsection{Restricted-state and average-case guarantees}
+
+Low-energy-subspace simulation can replace global energy scales by effective
+low-energy quantities when the initial state is promised to lie in an
+appropriate sector \citep{sahinoglu2021lowenergy}.  Average-case analysis can
+also yield speedups under distributional or norm-averaged criteria
+\citep{chen2024average}.  These guarantees may be more relevant for a given
+application than a worst-case operator norm, but they answer a different
+question.  The present certificate makes no state promise and therefore
+remains uniform over all input states.
+
+\subsection{Changing the approximation family}
+
+Multi-product formulas combine several product-formula circuits to cancel
+leading errors.  Recent work supplies explicit commutator scaling, dynamic
+coefficient selection, and time-dependent extensions
+\citep{zhuk2024dynamic,aftab2024mpf,mizuta2026mpf,mizuta2026timedependent}.
+Chebyshev interpolation and randomized order-doubling similarly alter how
+approximants are combined \citep{rendon2024chebyshev,cho2024doubling}.
+Time-dependent product-formula constructions such as THRIFT exploit an
+interaction-picture decomposition \citep{bosse2025thrift}.  LCU-based Trotter
+compensation and error-mitigation approaches add coherent or classical
+correction layers \citep{zeng2025lcu,watson2025mitigation}; more recent nested-
+commutator compensation seeks polylogarithmic precision without ancillas
+\citep{wang2026hncc}.
+
+These methods can asymptotically or practically outperform repetition of a
+single deterministic Suzuki step.  Their costs include extra circuit
+variants, sampling, negative or complex weights, success amplification,
+ancillas, or different depth/gate accounting.  Our certified result keeps the
+original formula family fixed and reduces only the justified repetition
+count.  It is therefore complementary: the same proof-carrying norm compiler
+could in principle supply coefficient bounds to an extrapolation or
+compensation method, but such an extension is not established here.
+
+\subsection{Formula and ordering optimization}
+
+Optimized Trotter--Suzuki coefficient sets can lower the stage count or error
+constant relative to recursive constructions \citep{malezic2026schemes}.
+Commutation-aware ordering studies show that the placement of Heisenberg-type
+terms can materially change realized error \citep{tate2026ordering}.
+Practical error estimators trade some formal generality for computable
+instance-level predictions \citep{maxwell2026practical}.  Those directions
+optimize the source formula or estimate its behavior.  Here the source stage
+sequence is fixed and the novelty is in rigorously compiling its complete
+defect into a checkable upper bound.
+
+\begin{table}[p]
+\centering
+\small
+\caption{Methodological comparison.  ``Same target'' means a deterministic,
+uniform operator-norm certificate for the fixed formula and compilation model
+of \cref{sec:problem}.}
+\label{tab:literature-map}
+\begin{tabularx}{\textwidth}{@{}p{0.18\textwidth}p{0.18\textwidth}p{0.19\textwidth}p{0.18\textwidth}X@{}}
+\toprule
+Line of work & Main mechanism & Guarantee/cost change & Relation to our method &
+Same target? \\
+\midrule
+Commutator scaling \citep{childs2021trotter} & General nested-commutator error
+representation & Worst-case direct product formula & Supplies the pinned
+control and theoretical foundation & Yes, at theorem level \\
+Model-specific Hubbard bounds \citep{schubert2023hubbard} & Evaluate locality
+and commutators for another model & Model-aware direct bound & Similar
+model-specific philosophy; different Hamiltonian and certificate machinery &
+Partly \\
+Low-energy simulation \citep{sahinoglu2021lowenergy} & Restrict input energy
+sector & State-dependent promise & Could be combined with concrete algebra;
+not used here & No \\
+Average-case speedup \citep{chen2024average} & Weaken worst-case metric to an
+average & Distribution-dependent error & Orthogonal norm objective & No \\
+Dynamic/explicit MPF \citep{zhuk2024dynamic,aftab2024mpf,mizuta2026mpf} &
+Linear combination of several formula lengths & New coefficients, sampling or
+coherent combination & Our defect bounds may inform coefficients; current
+circuit family differs & No \\
+Interpolation / randomization \citep{rendon2024chebyshev,cho2024doubling} &
+Combine runs or random orderings & Changed estimator/algorithm & Potential
+outer layer around certified formulas & No \\
+THRIFT \citep{bosse2025thrift} & Time-dependent interaction-picture formula &
+Changed decomposition and circuit & Could benefit from proof-carrying
+instance analysis & No \\
+LCU/mitigation \citep{zeng2025lcu,watson2025mitigation,wang2026hncc} & Correct
+or cancel Trotter error & Ancilla, sampling, or compensation overhead & Uses
+error structure actively; ours only reduces safe repetitions & No \\
+Formula/ordering optimization \citep{malezic2026schemes,tate2026ordering} &
+Change stages, coefficients, or ordering & Different source circuit &
+Complementary front end to our compiler & No \\
+This work & Complete-formula Lie extraction, exact Pauli aggregation, verified
+anticommuting norms & Same formula; smaller certified repetition count &
+Finite-instance proof-carrying sharpening & Yes \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Position of the present result}
+
+Within the narrow target class, this work establishes a strong finite-instance
+result: a 4.050498$\times$ certified reduction over a pinned application of a
+published general theorem, while preserving the formula, operator-norm metric,
+and gate-accounting rule.  Its scientific role is best described as a
+\emph{model-aware proof compiler} between general theory and executable
+resource estimation.
+
+It would be inaccurate to call the result an unconditional global state of the
+art in Hamiltonian simulation.  More recent algorithms can have superior
+precision scaling or lower costs under changed assumptions.  Conversely,
+their headline numbers do not invalidate this result because they are not
+necessarily certificates for the same fixed deterministic circuit.  The
+paper's defensible novelty is the combination of full-formula symbolic
+cancellation, concrete Pauli norm compression, nonasymptotic closure, and an
+independently checkable artifact.

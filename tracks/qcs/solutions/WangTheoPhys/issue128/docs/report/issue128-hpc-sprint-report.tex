@@ -1,0 +1,145 @@
+\documentclass[10pt]{article}
+\usepackage[margin=0.72in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\hypersetup{
+  colorlinks=true,
+  urlcolor=blue!60!black,
+  linkcolor=blue!55!black,
+  pdftitle={Issue 128 Exact-D8 HPC Sprint: Interim Technical Supplement},
+  pdfauthor={Junkai Wang (WangTheoPhys)}
+}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.30em}
+
+\title{Issue 128 Exact-D8 HPC Sprint\\\large Interim Technical Supplement}
+\author{Junkai Wang (WangTheoPhys)}
+\date{31 July 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+This supplement records a six-hour, proof-directed HPC sprint following the
+machine-certified Issue 128 result.  The accepted claim remains frozen at
+$11791/2911=4.050498110614909\ldots$; no fivefold result is asserted here.
+The sprint computes the order-eight coefficient of the exact right generator
+as 31 independently checkable stage shards, runs the accepted deep verifier
+independently, and ranks 24 matching-color orders in an explicitly untrusted
+discovery path.  Every production artifact is atomic, hash-addressed, and
+bound to a source commit.  This is an interim execution report: the final
+claim gate remains closed until all shards are reduced and a complete global
+error ledger passes both fast and deep verification.
+\end{abstract}
+
+\section{Frozen result and research gate}
+
+For the periodic $12\times12$ isotropic Heisenberg benchmark at $T=1$ and
+global operator-norm tolerance $10^{-6}$, the certified fourth-order Suzuki
+result accepts $r=97$ and rejects $r=96$.  With $G(r)=30r+1$ merged group
+exponentials, the exact resource ratio is
+\[
+  \frac{G(393)}{G(97)}=\frac{11791}{2911}
+  =4.050498110614909\ldots .
+\]
+Fivefold arithmetic would require $r\le78$, but this arithmetic is not an
+error proof.  The present experiment targets one missing ingredient: a
+concrete exact order-eight right-generator coefficient map.  A new multiplier
+may be reported only if a complete D4--D8-plus global ledger at the proposed
+step count is at most $10^{-6}$ and independent verification succeeds.
+
+\section{Exact sharding algorithm}
+
+For stages $V_j(t)=\exp(-i a_j t H_{c_j})$ in the fixed 31-stage formula,
+linearity gives a decomposition of the right generator into 31 contributions.
+Each array task starts from $a_jH_{c_j}$ and conjugates it through all later
+stages, truncating only the formal series degree at eight.  Coefficients live
+exactly in $\mathbb{Q}[\alpha]/(\alpha^3-4)$; Pauli operators are canonicalized
+under the $2\times2$ translation cell before serialization.
+
+The shard format does not expose process-local registry bit indices.  Every
+Pauli string is encoded by physical integer coordinates and labels.  Canonical
+JSON and gzip with fixed metadata make repeated output byte-deterministic.
+The manifest records stage, order, timestamps, term counts, peak RSS, source
+commit, dirty flag, and SHA-256.  The reducer rejects a missing stage, wrong
+formula/order, mixed source state, corrupt hash, or duplicate stage.  It also
+requires forward and reverse exact reduction to produce identical maps.
+
+For a cubic coefficient $c=a_0+a_1\alpha+a_2\alpha^2$, an outward rational
+interval for $\alpha=\sqrt[3]{4}$ encloses $c$.  Summing the larger endpoint
+magnitudes yields a rigorous Pauli-$\ell_1$ upper bound.  This bound is a
+screening ingredient; it is not by itself the global $r=78$ certificate.
+
+\section{Execution contract}
+
+The production source is commit
+\texttt{e65c95f4ae76dc1a78e81715cac21cfd7a81dbf8}.  Jobs run on the
+\texttt{xhacnormalb} CPU partition under account \texttt{giggleliu} and QOS
+\texttt{user\_acamtw70yu}.  GPU partitions are intentionally excluded because
+the workload is sparse Python integer/rational algebra.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{@{}lllr@{}}
+\toprule
+Role & Slurm job & Per-task allocation & Limit \\
+\midrule
+Exact D8 array (31 stages) & 23044178 & 17 CPU, 64 GiB & 4:30 \\
+Independent verification & 23044196 & 9 CPU, 32 GiB & 4:30 \\
+Exact reducer & 23044212 & 26 CPU, 96 GiB & 1:15 \\
+Order screen (24 permutations) & 23044214 & 5 CPU, 16 GiB & 1:00 \\
+\bottomrule
+\end{tabular}
+\caption{Submitted Slurm work.  The reducer has an \texttt{afterok}
+dependency on the D8 array.}
+\end{table}
+
+The array first passed \texttt{sbatch --test-only}.  A four-cell remote smoke
+then completed the lightest stages and produced matching deterministic
+artifacts.  The partition's 3931 MiB-per-CPU memory rule was discovered by the
+test-only gate and reflected in all allocations.  Once production started,
+the voluntary array throttle was raised from 16 to 31; Slurm and QOS retained
+authority over placement and admission.
+
+\section{Verification evidence at launch}
+
+The local proof-preservation gate reported 93 passing tests and 11 deselected
+slow tests in 41.12 seconds.  A separate deep verifier run returned
+\texttt{valid=true} and \texttt{deep\_proof\_regenerated=true}, reproduced
+$393\to97$, and returned the exact ratio \texttt{11791/2911}.  At the first
+full-concurrency snapshot, the D8 run contained 28 running manifests, three
+complete manifests, and zero failures.  The light-stage completion times were
+approximately 5.61 seconds (stage 28), 0.171 seconds (stage 29), and 0.024
+seconds (stage 30).  These timings validate the transport and serialization
+path; they do not predict the much heavier early stages.
+
+The matching-order array is a separate discovery lane.  Its JSON records
+\texttt{trusted=false} and states that its purpose is discovery ranking.  A
+favorable ranking can nominate a formula for exact reconstruction but cannot
+enter the certificate directly.
+
+\section{Final adjudication protocol}
+
+The outcome will be classified as follows.
+\begin{enumerate}
+  \item If all 31 shards and exact reduction succeed, insert the resulting D8
+        upper bound into a complete $r=78$ ledger and rerun fast/deep checks.
+  \item If any task reaches OOM or walltime, retain successful shards and
+        scheduler evidence, retry only missing cells if time remains, and make
+        no inference from a partial sum.
+  \item If the complete ledger is at most $10^{-6}$, prepare a new independently
+        bound certificate before describing a fivefold result.
+  \item Otherwise publish the strict negative result or remaining numerical
+        gap, while keeping the certified 4.050498-fold result unchanged.
+\end{enumerate}
+
+\textbf{Interim status.}  This document records a running experiment, not a
+new performance claim.  The accepted result remains 4.050498-fold until the
+final gate above is closed.
+
+\end{document}

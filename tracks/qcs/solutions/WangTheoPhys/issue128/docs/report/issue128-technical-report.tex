@@ -1,0 +1,359 @@
+\documentclass[11pt]{article}
+
+\usepackage[margin=0.82in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{url}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue!55!black,
+  citecolor=blue!55!black,
+  urlcolor=blue!60!black,
+  pdftitle={Issue 128: A Machine-Certified 4.050498x Trotter Resource Reduction},
+  pdfauthor={Junkai Wang (WangTheoPhys)}
+}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.45em}
+\setlength{\emergencystretch}{2em}
+\newcommand{\opnorm}[1]{\left\lVert #1\right\rVert}
+\newcommand{\PauliLOne}{\ell_{1,\mathrm{Pauli}}}
+
+\title{\textbf{Issue 128: A Machine-Certified 4.050498$\times$\\
+Trotter Resource Reduction for a 2D Heisenberg Benchmark}}
+\author{Junkai Wang (WangTheoPhys)\\
+\small Quantum Circuit Simulation Track}
+\date{July 30, 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+We give an exact-rational, independently checkable certificate for simulating
+the periodic $12\times12$ spin-$1/2$ isotropic Heisenberg model to global
+operator-norm error at most $10^{-6}$ for time $T=1$.  The circuit is the same
+five-copy fourth-order Suzuki product formula, with the same four matching
+fragments and the same compilation cost model, on both sides of the
+comparison.  A pinned instantiation of the published high-order commutator
+bound requires 393 steps and 11,791 merged group exponentials.  Our certificate
+accepts 97 steps and rejects 96, requiring 2,911 merged group exponentials.
+The exact improvement is $11791/2911=4.050498110614909\ldots$, with a
+75.3117\% resource reduction.  The gain comes from delaying norm inequalities:
+we compute the formula logarithm, project it to Lie elements, evaluate the
+concrete lattice representation, combine identical Pauli strings, and certify
+pairwise-anticommuting groups before closing a finite-step right-generator
+ledger with a rational tail.  The result exceeds the challenge's twofold
+requirement by a factor of 2.025.  An exact degree-five side study is also
+included, but no 78-step global error certificate is claimed or supplied.
+\end{abstract}
+
+\section{Claim boundary and benchmark}
+
+The certified benchmark is
+\begin{equation}
+  H=\sum_{\langle i,j\rangle}
+  \frac{X_iX_j+Y_iY_j+Z_iZ_j}{4},
+  \qquad L=12,\quad N=L^2=144,\quad T=1,
+  \label{eq:hamiltonian}
+\end{equation}
+with periodic boundary conditions and target
+$\opnorm{U(T)-\widetilde U(T)}\le 10^{-6}$.  Horizontal and vertical bonds are
+split by parity into four commuting matchings.  A symmetric second-order step
+is composed five times to obtain the standard fourth-order Suzuki formula.
+After adjacent equal fragments are merged, an $r$-step simulation contains
+\begin{equation}
+  G(r)=30r+1
+  \label{eq:groups}
+\end{equation}
+group exponentials.  Each group has $N/2=72$ disjoint bond propagators, and we
+use the same upper bound of three CNOT gates per Heisenberg bond propagator on
+both sides.
+
+This report makes one principal claim: the supplied exact certificate proves
+that $r=97$ is sufficient, while its own error function rejects $r=96$.  The
+comparison fixes the Hamiltonian, product formula, fragmentation, time,
+tolerance, and cost model.  It therefore measures a proof/certification gain,
+not a change in physical problem or a favorable redefinition of cost.
+
+The published control is an interval instantiation of the high-order
+commutator framework of Childs, Su, Tran, Wiebe, and Zhu
+\cite{childs2021theory}, using the expansion-first local Pauli-$\ell_1$
+procedure also connected to later commutator-scaling work
+\cite{schubert2023trotter}.  All 31 admissible theorem centers were scanned;
+center 20 gives the lowest pinned control, 393 steps.  This control is stored
+in the main certificate rather than recomputed from a floating-point constant.
+
+\section{Where the improvement comes from}
+
+Let the four anti-Hermitian matching generators be $A_1,\ldots,A_4$, and let
+$S_4(t)$ denote one merged fourth-order step.  A conventional bound expands
+partial Hamiltonian sums into many nested commutators and applies triangle
+inequalities early.  That destroys cancellations before the concrete
+Heisenberg algebra is visible.  Our method reverses this order:
+
+\begin{enumerate}
+  \item compute the homogeneous free-associative-word logarithm of the complete
+        31-stage formula;
+  \item use the Dynkin--Specht--Wever map to project the degree-five and
+        degree-seven pieces into their Lie elements;
+  \item evaluate those Lie elements in the four-matching Heisenberg
+        representation on the infinite translation cell;
+  \item canonicalize translations and combine identical Pauli strings before
+        any final norm inequality;
+  \item partition the leading right-generator terms into exactly verified
+        pairwise-anticommuting groups; and
+  \item convert the logarithm to the right generator, retain degrees four
+        through seven explicitly, and bound the remaining degrees by a
+        rational geometric locality tail.
+\end{enumerate}
+
+If the Pauli strings in $K_g=\sum_j c_jP_j$ anticommute pairwise, then
+$K_g^2=(\sum_jc_j^2)I$, and hence
+\begin{equation}
+  \opnorm{K_g}=\sqrt{\sum_j |c_j|^2}.
+  \label{eq:anticommute}
+\end{equation}
+We use an outward rational upper bound for each square root.  The greedy
+grouping algorithm is only a discovery tool: the sidecar records every term,
+every group membership, and every group bound.  The verifier independently
+checks exact coverage and every symplectic anticommutation relation.  Thus a
+different grouping heuristic can change efficiency, but it cannot weaken the
+soundness of an accepted certificate.
+
+The submitted leading-defect sidecar contains 75,324 canonical Pauli terms in
+7,576 groups, with maximum group size 10.  The direct termwise cell bound
+20.160968407335066 is reduced to the certified grouped bound
+6.472926505087888, an improvement of 3.114660484942633 at the leading local
+norming step.
+
+\section{A Heisenberg-specific local lemma}
+
+The higher-degree ledger also benefits from an exact local observation.  For
+one normalized bond
+\begin{equation}
+  h=\frac{XX+YY+ZZ}{4},
+\end{equation}
+every phase-free two-qubit Pauli string anticommutes with either zero or
+exactly two of $XX$, $YY$, and $ZZ$.  Direct enumeration of the 16 local
+Pauli cases therefore gives
+\begin{equation}
+  \opnorm{[h,P]}_{\PauliLOne}
+  \le \opnorm{P}_{\PauliLOne},
+  \label{eq:locallemma}
+\end{equation}
+so the bond commutator growth constant is 1 rather than the generic
+triangle-inequality value $3/2$.  This is a small lemma with a large cumulative
+effect because it enters repeated support-growth estimates.  The verifier
+checks the complete local table exactly; it does not assume the lemma as an
+external analytic input.
+
+This separation of discovery and trust is important.  Symbolic search finds a
+compact representation and a strong grouping, while the trusted path uses
+integers, rational numbers, outward rational intervals, and exact symplectic
+Pauli multiplication.  Floating point is used only to rank candidates, print
+human-readable decimals, and perform a small dense sanity check.
+
+\section{Finite-step error certificate}
+
+Write the one-step logarithm as
+\begin{equation}
+  \log S_4(t)=tA+t^5B+t^7C+O(t^9),
+\end{equation}
+where $A=\sum_{j=1}^4 A_j$.  The exact right logarithmic generator has the
+low-degree expansion
+\begin{align}
+ S_4'(t)S_4(t)^{-1}-A
+ ={}&5t^4B+2t^5[A,B] \\
+ &+t^6\!\left(7C+\frac23[A,[A,B]]\right) \\
+ &+t^7\!\left(3[A,C]+\frac16[A,[A,[A,B]]]\right)
+ +R_{\ge8}(t).
+ \label{eq:rightgenerator}
+\end{align}
+The D4 term is evaluated with the exact anticommuting partition.  Degrees D5
+through D7 are bounded by the certified concrete coefficients and the local
+lemma.  Support growth, conjugation Taylor factorials, and the Duhamel
+integration factor make $R_{\ge8}$ an explicit rational geometric series.
+Nothing beyond degree seven is silently discarded.
+
+For $r=97$, the exact rational contributions have the following outward
+decimal renderings.
+
+\begin{table}[ht]
+\centering
+\caption{Certified global operator-norm error ledger at $r=97$.}
+\label{tab:errorledger}
+\begin{tabular}{@{}lr@{}}
+\toprule
+Right-generator contribution & Global upper bound \\
+\midrule
+Degree 4 & $5.264367936822258\times10^{-7}$ \\
+Degree 5 & $1.383487536744612\times10^{-7}$ \\
+Degree 6 & $1.579057000594835\times10^{-7}$ \\
+Degree 7 & $1.894657080691470\times10^{-8}$ \\
+Degree 8 and above & $1.542560312083473\times10^{-7}$ \\
+\midrule
+Total & $9.958938494314325\times10^{-7}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The underlying total is a rational number and is strictly below $10^{-6}$.
+At $r=96$, the outward decimal is
+$1.050565873970784\times10^{-6}$, strictly above the target.  The step boundary
+is checked by cross-multiplying integers, not by comparing rounded decimals.
+The printed decimal convention rounds positive certified upper bounds upward
+at 16 significant digits, so display conversion never understates the bound.
+
+\section{Resource result}
+
+Because both rows use the same 31-stage formula and compilation model, the
+resource comparison follows directly from Eq.~\eqref{eq:groups}.
+
+\begin{table}[ht]
+\centering
+\caption{Pinned rigorous control and certified result.}
+\label{tab:resources}
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+Resource & Published control & This work & Reduction \\
+\midrule
+Trotter steps & 393 & 97 & 75.32\% \\
+Merged group exponentials & 11,791 & 2,911 & 75.31\% \\
+Bond propagators & 848,952 & 209,592 & 75.31\% \\
+CNOT upper bound & 2,546,856 & 628,776 & 75.31\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The primary exact ratio is
+\begin{equation}
+  \frac{G(393)}{G(97)}=\frac{11791}{2911}
+  =4.050498110614909\ldots.
+\end{equation}
+The challenge asks for at least a twofold resource improvement.  The achieved
+ratio is 2.025249 times that requirement---equivalently, 202.5\% of the stated
+minimum ratio, or 102.5\% beyond it.  We call this a fourfold certified result,
+not a fivefold result.
+
+\section{Independent checks and negative results}
+
+The certificate is designed to be reviewable without trusting the search
+code.  The fast verifier checks the main certificate digest bindings, all
+75,324 D4 terms, exact coverage by 7,576 groups, every pairwise
+anticommutation relation, each rational square-root upper bound, the integer
+step boundary, and all resource arithmetic.  A deep mode regenerates the
+published control, the canonical leading-defect coefficients, the
+degree-seven majorant, and the finite tail from the formula.
+
+A degenerate $2\times2$ periodic-algebra cross-check gives actual dense
+spectral-norm error $9.128277711816321\times10^{-10}$, below its outward
+certificate $2.766666666666667\times10^{-8}$.  This is not used to infer the
+$12\times12$ result; it catches representation, stage-ordering, and
+normalization errors on a tractable instance.
+
+We also record routes that did not justify a stronger claim:
+\begin{itemize}
+  \item The degree-three Lie representation has exact rank 20, equal to the
+        free-Lie dimension $(4^3-4)/3=20$.  The four matching fragments thus
+        offer no free model-specific reduction of fourth-order conditions.
+  \item Standard recursive Suzuki orders 2, 4, 6, and 8 compile to 269,677,
+        36,361, 83,101, and 377,251 groups, respectively, under the audited
+        generic locality-tail bound.  Raising recursive order alone is worse.
+  \item A three-site SU(2) cluster decomposition improves local block counts
+        but not the conservative compiled CNOT bound after including the
+        three-site propagator cost.
+  \item Empirically optimized formulas were not substituted for a deterministic
+        worst-case certificate.  Their sampled constants cannot replace an
+        interval-certified comparison on this benchmark.
+\end{itemize}
+
+\section{Fivefold feasibility boundary}
+
+Fivefold arithmetic would require $G(r)\le\lfloor11791/5\rfloor$, hence
+$r\le78$.  Conditional on an accepted 78-step error proof,
+$G(78)=2341$ and $11791/2341=5.036736437419906\ldots$.  That arithmetic is not
+an error certificate.
+
+As a concrete follow-up, we generated and independently verified an exact
+degree-five sidecar with 605,832 canonical Pauli terms, 123,106 same-support
+pairwise-anticommuting groups, and site-density upper bound
+11.23706750025696.  This closes one useful algebraic subproblem and validates
+the streamed cubic-field machinery.  It does not close the global ledger at
+$r=78$: the translation-coupled D4 budget and explicit D8-plus delayed-tail
+certificate remain hard gates.  \textbf{No 78-step global error certificate is
+claimed or supplied.}
+
+The audit therefore gives a precise next research decision.  Rebuild the
+complete exact ledger at $r=78$ only after D4 and D8-plus gates are closed; if
+the sum is at most $10^{-6}$, fivefold can be claimed.  For tenfold, the
+current fourth-order ledger is off by hundreds even with the D4 contribution
+removed, so an effective order lift---for example a certified processor or a
+shorter sixth-order kernel---is required.
+
+\section{Reproduction and delivered evidence}
+
+From the \texttt{issue128} directory, a reviewer can run
+\begin{verbatim}
+python -m pip install -e '.[test]'
+pytest -q
+PYTHONPATH=src python scripts/verify.py \
+  certificates/issue128-certificate.json
+PYTHONPATH=src python scripts/build_d5_certificate.py --verify-only
+PYTHONPATH=src python scripts/package_delivery.py --check
+shasum -a 256 -c artifacts/SHA256SUMS
+\end{verbatim}
+
+The delivery contains: (i) the main exact-rational certificate; (ii) D4 and
+D5 sidecars bound by SHA-256; (iii) machine-readable JSON and plain-text result
+summaries; (iv) a captured verification transcript with exit codes; (v) this
+report and its source; (vi) regression tests; and (vii) one checksum manifest
+binding all reviewer-facing evidence.  The repository and pull request are the
+transport mechanism; the numerical claim is anchored in the exact artifacts
+and executable verification path.
+
+The three large proof inputs have fixed identities:
+\begin{center}
+\small
+\begin{tabularx}{\textwidth}{@{}lX@{}}
+\toprule
+Artifact & SHA-256 \\
+\midrule
+Main certificate &
+\texttt{0a09623ce3b292a3637065c870fb3153bbdcddce30aef968565c4db3ddfc7201} \\
+D4 sidecar &
+\texttt{a397414bb0229fb1ebdb38798aa781fb89dbb9d5cdbed94c7cd2e9120da62718} \\
+D5 sidecar &
+\texttt{c5e8968a93b4497b41fe42c0e364324388272e183e1fcd20a536bc988f5361dd} \\
+\bottomrule
+\end{tabularx}
+\end{center}
+The committed \texttt{artifacts/SHA256SUMS} file additionally binds the final
+PDF, report source, summaries, transcript, cross-check, and sidecars as one
+reviewer-facing package.
+
+\section{Conclusion}
+
+Issue 128's basic requirement is fully met for the fixed benchmark.  The
+certified resource count drops from 11,791 to 2,911 merged group exponentials,
+an exact 4.050498-fold improvement, without changing the circuit family or
+cost model.  The central algorithmic contribution is not merely a faster
+implementation: it is a tighter proof architecture that preserves concrete
+Lie/Pauli cancellation until exact local algebra and anticommutation can be
+used, then closes the remaining finite-step error with rational arithmetic.
+The supplied data, transcript, tests, and PDF are mutually hash-bound and
+independently reproducible.  Fivefold remains a clearly delimited follow-up,
+not part of the certified result.
+
+\bibliographystyle{unsrt}
+\bibliography{references}
+
+\end{document}
