@@ -1,0 +1,1 @@
+{"payload":{"account":"giggleliu","cpus_per_task":64,"gres":"gpu:NVIDIAA80080GBPCIeLC:8","memory":"480000M","nodes":1,"ntasks":1,"partition":"dzagnormal","qos":"user_jiangweiqi","wall_time":"24:00:00"},"payload_sha256":"b99c0cb8dce1e22b4871d78a6ed4fe725df59c994003ae4c2c2bd4b8d10f809c","schema":"challenge15.direct-qdeshell-profile.v1"}

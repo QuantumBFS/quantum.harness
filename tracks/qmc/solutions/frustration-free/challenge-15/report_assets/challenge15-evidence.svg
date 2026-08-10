@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc" viewBox="0 0 1440 980">
+<title id="title">Challenge 15 artifact evidence</title>
+<desc id="desc">Evidence dashboard showing complete N=6 CPU smoke coverage and seven measured Torch Pfaffian DCU test timings for job 719801. CPU diagnostic energies are deliberately omitted because they are pre-update smoke diagnostics, not an accepted physical gap.</desc>
+<metadata><report><title>Challenge 15 artifact evidence</title><generated>2026-07-30T10:17:18Z</generated><evidence-manifest-sha256>16b9b96140993edb043f4c76d88d9445d5083616e82491d3ecfdc7ea16751383</evidence-manifest-sha256><bundle-hash>2e0614c0643048bf82f56b34746ab2ec18cbabb8ddba6b5e3e947b3ffdba1405</bundle-hash><dcu-source-sha256>e9e2c69d7a1da701c054819bdf4068cd59d032a2fc959582c39ab6ec9e248f2b</dcu-source-sha256><cpu-source-git-sha>ee55cd55b24af684474923e9f4ec0a8517ad4626</cpu-source-git-sha><sources><source>&lt;ARTIFACT_ROOT&gt;/ee55cd5-n6-r1-2-4-8-cpu-smoke/seed-0/result.json</source><source>&lt;ARTIFACT_ROOT&gt;/ee55cd5-n6-r1-2-4-8-cpu-smoke/seed-1/result.json</source><source>&lt;ARTIFACT_ROOT&gt;/ee55cd5-n6-r1-2-4-8-cpu-smoke/seed-2/result.json</source><source>&lt;ARTIFACT_ROOT&gt;/ee55cd5-n6-r1-2-4-8-cpu-smoke/seed-3/result.json</source><source>&lt;ARTIFACT_ROOT&gt;/ee55cd5-n6-r1-2-4-8-cpu-smoke/seed-4/result.json</source><source>&lt;ARTIFACT_ROOT&gt;/dcu-task5-smoke/2e0614c0643048bf82f56b34746ab2ec18cbabb8ddba6b5e3e947b3ffdba1405/config.json</source><source>&lt;ARTIFACT_ROOT&gt;/dcu-task5-smoke/2e0614c0643048bf82f56b34746ab2ec18cbabb8ddba6b5e3e947b3ffdba1405/smoke-output.json</source><source>&lt;ARTIFACT_ROOT&gt;/dcu-task5-smoke/2e0614c0643048bf82f56b34746ab2ec18cbabb8ddba6b5e3e947b3ffdba1405/receipt.json</source><source>&lt;ARTIFACT_ROOT&gt;/dcu-task5-smoke/2e0614c0643048bf82f56b34746ab2ec18cbabb8ddba6b5e3e947b3ffdba1405/local-verification.json</source><source>&lt;ARTIFACT_ROOT&gt;/dcu-task5-smoke/2e0614c0643048bf82f56b34746ab2ec18cbabb8ddba6b5e3e947b3ffdba1405/slurm-accounting.txt</source><source>README.md</source><source>DESIGN.md</source><source>src/challenge15/carriers.py</source><source>src/challenge15/projector.py</source><source>src/challenge15/model.py</source><source>src/challenge15/chiral_source.py</source><source>src/challenge15/response_operator.py</source><source>src/challenge15/spectral_response.py</source><source>src/challenge15/torch_projector.py</source><source>production/runtime/dcu25.04-runtime-lock.json</source></sources><editorial-review-records><review-record-sha256>17957dfdc26490585d39d6caba9e5a0849820da83fc27e581388e41a3ac524e0</review-record-sha256><review-record-sha256>33a78245c3e9acb38c6b0513f023205ec47ba7ae97bdc270248e9461aff8b222</review-record-sha256><review-record-sha256>921e00eb513f84029ab8ce56d18dde274823e4f3d69ada2f80887d65e28f6c0f</review-record-sha256><review-record-sha256>ffaf060f0cdfd70839ef078c510d55d785db3e0e2a82a9f5e70a312d7fa1f4d7</review-record-sha256><review-record-sha256>9f6983467cd65f28ddc4dc2faf25cea0575ec84bb6d84d10141c88f7551e357c</review-record-sha256></editorial-review-records></report></metadata>
+<style>
+text { font-family: sans-serif; fill: #25313C; }
+.title { font-size: 30px; font-weight: 700; }
+.subtitle { font-size: 15px; fill: #5D6B76; }
+.section { font-size: 19px; font-weight: 700; }
+.label { font-size: 15px; font-weight: 700; }
+.body { font-size: 13px; }
+.small { font-size: 11px; fill: #5D6B76; }
+.mono { font-family: monospace; font-size: 10px; fill: #5D6B76; }
+.pill { font-size: 10px; font-weight: 700; fill: #FFFFFF; letter-spacing: .7px; }
+.panel { fill: #F5F7F8; stroke: #D6DEE3; stroke-width: 1.5; }
+.node { fill: #FFFFFF; stroke: #0072B2; stroke-width: 2; }
+.branch { fill: #FFFFFF; stroke: #5D6B76; stroke-width: 1.5; }
+.status.implemented { fill: #009E73; }
+.status.smoke { fill: #0072B2; }
+.status.pending { fill: #E69F00; }
+.status.blocked { fill: #B33A3A; }
+.flow { fill: none; stroke: #5D6B76; stroke-width: 2; marker-end: url(#arrow); }
+.branch-flow { fill: none; stroke: #5D6B76; stroke-width: 1.5; stroke-dasharray: 5 4; marker-end: url(#arrow); }
+.axis { stroke: #5D6B76; stroke-width: 1; }
+.grid { stroke: #D6DEE3; stroke-width: 1; }
+</style>
+<defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#5D6B76"/></marker></defs>
+<rect width="1440" height="980" fill="#FFFFFF"/>
+<text x="56" y="62" class="title" text-anchor="start">Challenge 15 artifact evidence</text>
+<text x="56" y="88" class="subtitle" text-anchor="start">Default source: canonical compact evidence manifest; optional raw-artifact audit available</text>
+<rect x="44" y="116" width="598" height="586" rx="14" class="panel"/>
+<text x="66" y="152" class="section" text-anchor="start">N=6 CPU smoke coverage</text>
+<text x="66" y="177" class="body" text-anchor="start">5 seeds × ranks 1, 2, 4, 8 = 20 completed smoke cells</text>
+<text x="225" y="208" class="label" text-anchor="middle">χ=1</text>
+<text x="311" y="208" class="label" text-anchor="middle">χ=2</text>
+<text x="397" y="208" class="label" text-anchor="middle">χ=4</text>
+<text x="483" y="208" class="label" text-anchor="middle">χ=8</text>
+<text x="144" y="261" class="label" text-anchor="end">seed 0</text>
+<rect x="182" y="224" width="78" height="52" rx="7" fill="#009E73" aria-label="Seed 0, rank 1: smoke completed"/>
+<text x="221" y="258" class="pill" text-anchor="middle">SMOKE</text>
+<rect x="268" y="224" width="78" height="52" rx="7" fill="#009E73" aria-label="Seed 0, rank 2: smoke completed"/>
+<text x="307" y="258" class="pill" text-anchor="middle">SMOKE</text>
+<rect x="354" y="224" width="78" height="52" rx="7" fill="#009E73" aria-label="Seed 0, rank 4: smoke completed"/>
+<text x="393" y="258" class="pill" text-anchor="middle">SMOKE</text>
+<rect x="440" y="224" width="78" height="52" rx="7" fill="#009E73" aria-label="Seed 0, rank 8: smoke completed"/>
+<text x="479" y="258" class="pill" text-anchor="middle">SMOKE</text>
+<text x="144" y="321" class="label" text-anchor="end">seed 1</text>
+<rect x="182" y="284" width="78" height="52" rx="7" fill="#009E73" aria-label="Seed 1, rank 1: smoke completed"/>
+<text x="221" y="318" class="pill" text-anchor="middle">SMOKE</text>
+<rect x="268" y="284" width="78" height="52" rx="7" fill="#009E73" aria-label="Seed 1, rank 2: smoke completed"/>
+<text x="307" y="318" class="pill" text-anchor="middle">SMOKE</text>
+<rect x="354" y="284" width="78" height="52" rx="7" fill="#009E73" aria-label="Seed 1, rank 4: smoke completed"/>
+<text x="393" y="318" class="pill" text-anchor="middle">SMOKE</text>
+<rect x="440" y="284" width="78" height="52" rx="7" fill="#009E73" aria-label="Seed 1, rank 8: smoke completed"/>
+<text x="479" y="318" class="pill" text-anchor="middle">SMOKE</text>
+<text x="144" y="381" class="label" text-anchor="end">seed 2</text>
+<rect x="182" y="344" width="78" height="52" rx="7" fill="#009E73" aria-label="Seed 2, rank 1: smoke completed"/>
+<text x="221" y="378" class="pill" text-anchor="middle">SMOKE</text>
+<rect x="268" y="344" width="78" height="52" rx="7" fill="#009E73" aria-label="Seed 2, rank 2: smoke completed"/>
+<text x="307" y="378" class="pill" text-anchor="middle">SMOKE</text>
+<rect x="354" y="344" width="78" height="52" rx="7" fill="#009E73" aria-label="Seed 2, rank 4: smoke completed"/>
+<text x="393" y="378" class="pill" text-anchor="middle">SMOKE</text>
+<rect x="440" y="344" width="78" height="52" rx="7" fill="#009E73" aria-label="Seed 2, rank 8: smoke completed"/>
+<text x="479" y="378" class="pill" text-anchor="middle">SMOKE</text>
+<text x="144" y="441" class="label" text-anchor="end">seed 3</text>
+<rect x="182" y="404" width="78" height="52" rx="7" fill="#009E73" aria-label="Seed 3, rank 1: smoke completed"/>
+<text x="221" y="438" class="pill" text-anchor="middle">SMOKE</text>
+<rect x="268" y="404" width="78" height="52" rx="7" fill="#009E73" aria-label="Seed 3, rank 2: smoke completed"/>
+<text x="307" y="438" class="pill" text-anchor="middle">SMOKE</text>
+<rect x="354" y="404" width="78" height="52" rx="7" fill="#009E73" aria-label="Seed 3, rank 4: smoke completed"/>
+<text x="393" y="438" class="pill" text-anchor="middle">SMOKE</text>
+<rect x="440" y="404" width="78" height="52" rx="7" fill="#009E73" aria-label="Seed 3, rank 8: smoke completed"/>
+<text x="479" y="438" class="pill" text-anchor="middle">SMOKE</text>
+<text x="144" y="501" class="label" text-anchor="end">seed 4</text>
+<rect x="182" y="464" width="78" height="52" rx="7" fill="#009E73" aria-label="Seed 4, rank 1: smoke completed"/>
+<text x="221" y="498" class="pill" text-anchor="middle">SMOKE</text>
+<rect x="268" y="464" width="78" height="52" rx="7" fill="#009E73" aria-label="Seed 4, rank 2: smoke completed"/>
+<text x="307" y="498" class="pill" text-anchor="middle">SMOKE</text>
+<rect x="354" y="464" width="78" height="52" rx="7" fill="#009E73" aria-label="Seed 4, rank 4: smoke completed"/>
+<text x="393" y="498" class="pill" text-anchor="middle">SMOKE</text>
+<rect x="440" y="464" width="78" height="52" rx="7" fill="#009E73" aria-label="Seed 4, rank 8: smoke completed"/>
+<text x="479" y="498" class="pill" text-anchor="middle">SMOKE</text>
+<text x="66" y="550" class="label" text-anchor="start">Interpretation boundary</text>
+<text x="66" y="578" class="body" text-anchor="start"><tspan x="66" dy="0">One training step per rank</tspan><tspan x="66" dy="22">Diagnostics are pre-update</tspan><tspan x="66" dy="22">Acceptance rates absent</tspan><tspan x="66" dy="22">production_accepted = false</tspan><tspan x="66" dy="22">Exact evaluation and all gates pending</tspan></text>
+<rect x="66" y="650" width="552" height="32" rx="7" class="branch"/>
+<text x="342" y="671" class="small" text-anchor="middle">CPU smoke energies intentionally not plotted as a physical gap</text>
+<rect x="670" y="116" width="726" height="586" rx="14" class="panel"/>
+<text x="692" y="152" class="section" text-anchor="start">DCU job 719801 — seven measured test timings</text>
+<text x="692" y="177" class="body" text-anchor="start">Torch Pfaffian successor smoke • wall-clock seconds per test</text>
+<line x1="914" y1="214" x2="914" y2="550" class="grid"/>
+<text x="914" y="572" class="small" text-anchor="middle">0.0</text>
+<line x1="981" y1="214" x2="981" y2="550" class="grid"/>
+<text x="981" y="572" class="small" text-anchor="middle">0.2</text>
+<line x1="1048" y1="214" x2="1048" y2="550" class="grid"/>
+<text x="1048" y="572" class="small" text-anchor="middle">0.4</text>
+<line x1="1115" y1="214" x2="1115" y2="550" class="grid"/>
+<text x="1115" y="572" class="small" text-anchor="middle">0.6</text>
+<line x1="1182" y1="214" x2="1182" y2="550" class="grid"/>
+<text x="1182" y="572" class="small" text-anchor="middle">0.8</text>
+<line x1="1249" y1="214" x2="1249" y2="550" class="grid"/>
+<text x="1249" y="572" class="small" text-anchor="middle">1.0</text>
+<line x1="1316" y1="214" x2="1316" y2="550" class="grid"/>
+<text x="1316" y="572" class="small" text-anchor="middle">1.2</text>
+<line x1="914" y1="214" x2="914" y2="550" class="axis"/>
+<line x1="914" y1="550" x2="1316" y2="550" class="axis"/>
+<text x="900" y="237" class="small" text-anchor="end">value parity (0–8)</text>
+<rect x="914" y="219" width="59.824" height="26" rx="4" fill="#0072B2" aria-label="value parity (0–8): 0.178578 seconds"/>
+<text x="981.824" y="237" class="small" text-anchor="start">0.179 s</text>
+<text x="900" y="283" class="small" text-anchor="end">singular reverse</text>
+<rect x="914" y="265" width="17.246" height="26" rx="4" fill="#0072B2" aria-label="singular reverse: 0.051480 seconds"/>
+<text x="939.246" y="283" class="small" text-anchor="start">0.051 s</text>
+<text x="900" y="329" class="small" text-anchor="end">torch.func JVP</text>
+<rect x="914" y="311" width="357.889" height="26" rx="4" fill="#0072B2" aria-label="torch.func JVP: 1.068326 seconds"/>
+<text x="1279.89" y="329" class="small" text-anchor="start">1.068 s</text>
+<text x="900" y="375" class="small" text-anchor="end">batched rev + JVP</text>
+<rect x="914" y="357" width="30.274" height="26" rx="4" fill="#0072B2" aria-label="batched rev + JVP: 0.090370 seconds"/>
+<text x="952.274" y="375" class="small" text-anchor="start">0.090 s</text>
+<text x="900" y="421" class="small" text-anchor="end">bordered odd</text>
+<rect x="914" y="403" width="1.095" height="26" rx="4" fill="#0072B2" aria-label="bordered odd: 0.003268 seconds"/>
+<text x="923.095" y="421" class="small" text-anchor="start">0.003 s</text>
+<text x="900" y="467" class="small" text-anchor="end">2nd-deriv rejection</text>
+<rect x="914" y="449" width="4.309" height="26" rx="4" fill="#0072B2" aria-label="2nd-deriv rejection: 0.012862 seconds"/>
+<text x="926.309" y="467" class="small" text-anchor="start">0.013 s</text>
+<text x="900" y="513" class="small" text-anchor="end">deterministic replay</text>
+<rect x="914" y="495" width="166.275" height="26" rx="4" fill="#0072B2" aria-label="deterministic replay: 0.496343 seconds"/>
+<text x="1088.28" y="513" class="small" text-anchor="start">0.496 s</text>
+<text x="1115" y="592" class="body" text-anchor="middle">measured wall-clock time (seconds)</text>
+<text x="692" y="626" class="small" text-anchor="start">Source: smoke-output.json timings_seconds; all seven statuses PASS.</text>
+<text x="692" y="648" class="small" text-anchor="start">Bars are individual test timings, not a benchmark suite total.</text>
+<rect x="44" y="726" width="1352" height="156" rx="14" class="panel"/>
+<text x="66" y="762" class="section" text-anchor="start">DCU runtime facts</text>
+<text x="66" y="794" class="label" text-anchor="start">Device</text>
+<text x="66" y="814" class="body" text-anchor="start">BW • cuda:0 • count 1</text>
+<text x="506" y="794" class="label" text-anchor="start">Runtime</text>
+<text x="506" y="814" class="body" text-anchor="start">Torch 2.4.1 • HIP 6.1.25065</text>
+<text x="946" y="794" class="label" text-anchor="start">Numerics</text>
+<text x="946" y="814" class="body" text-anchor="start">torch.complex128 • deterministic algorithms</text>
+<text x="66" y="842" class="label" text-anchor="start">Peak device memory</text>
+<text x="66" y="862" class="body" text-anchor="start">25,088 bytes (24.5 KiB)</text>
+<text x="506" y="842" class="label" text-anchor="start">Driver elapsed</text>
+<text x="506" y="862" class="body" text-anchor="start">9.555 s</text>
+<text x="946" y="842" class="label" text-anchor="start">Slurm job</text>
+<text x="946" y="862" class="body" text-anchor="start">COMPLETED 0:0 • elapsed 00:00:58 • 1 DCU</text>
+<text x="56" y="914" class="mono" text-anchor="start">Generated 2026-07-30T10:17:18Z  •  bundle 2e0614c0643048bf82f56b34746ab2ec18cbabb8ddba6b5e3e947b3ffdba1405</text>
+<text x="56" y="932" class="mono" text-anchor="start">DCU source SHA-256 e9e2c69d7a1da701c054819bdf4068cd59d032a2fc959582c39ab6ec9e248f2b</text>
+<text x="56" y="950" class="mono" text-anchor="start">CPU source git SHA ee55cd55b24af684474923e9f4ec0a8517ad4626</text>
+<text x="1384" y="932" class="small" text-anchor="end">Manifest and audited source paths embedded in metadata</text>
+</svg>

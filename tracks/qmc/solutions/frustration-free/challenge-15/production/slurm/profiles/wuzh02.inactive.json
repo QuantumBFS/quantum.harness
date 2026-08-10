@@ -1,0 +1,23 @@
+{
+  "controller": "wuzh02",
+  "active": false,
+  "scheduler": {
+    "partition": "UNAVAILABLE",
+    "account": "UNAVAILABLE",
+    "qos": "UNAVAILABLE",
+    "nodes": 1,
+    "ntasks": 1,
+    "cpus_per_task": 128,
+    "mem": "500000M",
+    "time": "24:00:00"
+  },
+  "allowed_roles": ["oracle", "exact", "reducer"],
+  "array_concurrency": 1,
+  "threads": 128,
+  "project_root": "/UNAVAILABLE",
+  "results_root": "/UNAVAILABLE",
+  "evidence": {
+    "status": "inactive-no-credentials",
+    "reason": "No audited WUZH02 access; values must be discovered before activation."
+  }
+}

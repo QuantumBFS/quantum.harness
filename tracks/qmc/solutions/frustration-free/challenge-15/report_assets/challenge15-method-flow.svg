@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc" viewBox="0 0 1440 900">
+<title id="title">Challenge 15 method and acceptance flow</title>
+<desc id="desc">Architecture from the physical sphere model through exact symmetry projection and shared neural states to evidence and acceptance gates. Branches distinguish implementation present, smoke-only evidence, pending acceptance, and a blocked later Torch JVP gate.</desc>
+<metadata><report><title>Challenge 15 method and acceptance flow</title><generated>2026-07-30T10:17:18Z</generated><evidence-manifest-sha256>16b9b96140993edb043f4c76d88d9445d5083616e82491d3ecfdc7ea16751383</evidence-manifest-sha256><bundle-hash>2e0614c0643048bf82f56b34746ab2ec18cbabb8ddba6b5e3e947b3ffdba1405</bundle-hash><dcu-source-sha256>e9e2c69d7a1da701c054819bdf4068cd59d032a2fc959582c39ab6ec9e248f2b</dcu-source-sha256><cpu-source-git-sha>ee55cd55b24af684474923e9f4ec0a8517ad4626</cpu-source-git-sha><sources><source>&lt;ARTIFACT_ROOT&gt;/ee55cd5-n6-r1-2-4-8-cpu-smoke/seed-0/result.json</source><source>&lt;ARTIFACT_ROOT&gt;/ee55cd5-n6-r1-2-4-8-cpu-smoke/seed-1/result.json</source><source>&lt;ARTIFACT_ROOT&gt;/ee55cd5-n6-r1-2-4-8-cpu-smoke/seed-2/result.json</source><source>&lt;ARTIFACT_ROOT&gt;/ee55cd5-n6-r1-2-4-8-cpu-smoke/seed-3/result.json</source><source>&lt;ARTIFACT_ROOT&gt;/ee55cd5-n6-r1-2-4-8-cpu-smoke/seed-4/result.json</source><source>&lt;ARTIFACT_ROOT&gt;/dcu-task5-smoke/2e0614c0643048bf82f56b34746ab2ec18cbabb8ddba6b5e3e947b3ffdba1405/config.json</source><source>&lt;ARTIFACT_ROOT&gt;/dcu-task5-smoke/2e0614c0643048bf82f56b34746ab2ec18cbabb8ddba6b5e3e947b3ffdba1405/smoke-output.json</source><source>&lt;ARTIFACT_ROOT&gt;/dcu-task5-smoke/2e0614c0643048bf82f56b34746ab2ec18cbabb8ddba6b5e3e947b3ffdba1405/receipt.json</source><source>&lt;ARTIFACT_ROOT&gt;/dcu-task5-smoke/2e0614c0643048bf82f56b34746ab2ec18cbabb8ddba6b5e3e947b3ffdba1405/local-verification.json</source><source>&lt;ARTIFACT_ROOT&gt;/dcu-task5-smoke/2e0614c0643048bf82f56b34746ab2ec18cbabb8ddba6b5e3e947b3ffdba1405/slurm-accounting.txt</source><source>README.md</source><source>DESIGN.md</source><source>src/challenge15/carriers.py</source><source>src/challenge15/projector.py</source><source>src/challenge15/model.py</source><source>src/challenge15/chiral_source.py</source><source>src/challenge15/response_operator.py</source><source>src/challenge15/spectral_response.py</source><source>src/challenge15/torch_projector.py</source><source>production/runtime/dcu25.04-runtime-lock.json</source></sources><editorial-review-records><review-record-sha256>17957dfdc26490585d39d6caba9e5a0849820da83fc27e581388e41a3ac524e0</review-record-sha256><review-record-sha256>33a78245c3e9acb38c6b0513f023205ec47ba7ae97bdc270248e9461aff8b222</review-record-sha256><review-record-sha256>921e00eb513f84029ab8ce56d18dde274823e4f3d69ada2f80887d65e28f6c0f</review-record-sha256><review-record-sha256>ffaf060f0cdfd70839ef078c510d55d785db3e0e2a82a9f5e70a312d7fa1f4d7</review-record-sha256><review-record-sha256>9f6983467cd65f28ddc4dc2faf25cea0575ec84bb6d84d10141c88f7551e357c</review-record-sha256></editorial-review-records></report></metadata>
+<style>
+text { font-family: sans-serif; fill: #25313C; }
+.title { font-size: 30px; font-weight: 700; }
+.subtitle { font-size: 15px; fill: #5D6B76; }
+.section { font-size: 19px; font-weight: 700; }
+.label { font-size: 15px; font-weight: 700; }
+.body { font-size: 13px; }
+.small { font-size: 11px; fill: #5D6B76; }
+.mono { font-family: monospace; font-size: 10px; fill: #5D6B76; }
+.pill { font-size: 10px; font-weight: 700; fill: #FFFFFF; letter-spacing: .7px; }
+.panel { fill: #F5F7F8; stroke: #D6DEE3; stroke-width: 1.5; }
+.node { fill: #FFFFFF; stroke: #0072B2; stroke-width: 2; }
+.branch { fill: #FFFFFF; stroke: #5D6B76; stroke-width: 1.5; }
+.status.implemented { fill: #009E73; }
+.status.smoke { fill: #0072B2; }
+.status.pending { fill: #E69F00; }
+.status.blocked { fill: #B33A3A; }
+.flow { fill: none; stroke: #5D6B76; stroke-width: 2; marker-end: url(#arrow); }
+.branch-flow { fill: none; stroke: #5D6B76; stroke-width: 1.5; stroke-dasharray: 5 4; marker-end: url(#arrow); }
+.axis { stroke: #5D6B76; stroke-width: 1; }
+.grid { stroke: #D6DEE3; stroke-width: 1; }
+</style>
+<defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#5D6B76"/></marker></defs>
+<rect width="1440" height="900" fill="#FFFFFF"/>
+<text x="56" y="62" class="title" text-anchor="start">Challenge 15 method and acceptance flow</text>
+<text x="56" y="88" class="subtitle" text-anchor="start">Editorial status constants from hashed repository/review records; execution facts from compact artifact evidence</text>
+<rect x="44" y="116" width="1352" height="410" rx="14" class="panel"/>
+<text x="66" y="150" class="section" text-anchor="start">Scientific data flow</text>
+<rect x="70" y="188" width="220" height="138" rx="12" class="node"/>
+<text x="88" y="223" class="label" text-anchor="start">Physical model</text>
+<text x="88" y="252" class="body" text-anchor="start"><tspan x="88" dy="0">ν=1/3 sphere</tspan><tspan x="88" dy="22">N electrons; 2Q=3(N−1)</tspan></text>
+<path d="M290 257 H320" class="flow"/>
+<rect x="326" y="188" width="220" height="138" rx="12" class="node"/>
+<text x="344" y="223" class="label" text-anchor="start">LLL Pfaffian carriers</text>
+<text x="344" y="252" class="body" text-anchor="start"><tspan x="344" dy="0">Holomorphic spinors</tspan><tspan x="344" dy="22">antisymmetric carrier bank</tspan></text>
+<path d="M546 257 H576" class="flow"/>
+<rect x="582" y="188" width="220" height="138" rx="12" class="node"/>
+<text x="600" y="223" class="label" text-anchor="start">Exact SU(2) projection</text>
+<text x="600" y="252" class="body" text-anchor="start"><tspan x="600" dy="0">M=0: L=0 and L=2</tspan><tspan x="600" dy="22">full L=2 multiplet</tspan></text>
+<path d="M802 257 H832" class="flow"/>
+<rect x="838" y="188" width="220" height="138" rx="12" class="node"/>
+<text x="856" y="223" class="label" text-anchor="start">Shared L=0 / L=2 NQS</text>
+<text x="856" y="252" class="body" text-anchor="start"><tspan x="856" dy="0">one parameter tree</tspan><tspan x="856" dy="22">rank χ=1,2,4,8</tspan></text>
+<path d="M1058 257 H1088" class="flow"/>
+<rect x="1094" y="188" width="220" height="138" rx="12" class="node"/>
+<text x="1112" y="223" class="label" text-anchor="start">Evaluation &amp; acceptance</text>
+<text x="1112" y="252" class="body" text-anchor="start"><tspan x="1112" dy="0">CPU/JAX • ED • VMC</tspan><tspan x="1112" dy="22">exact gates and provenance</tspan></text>
+<g aria-label="Status: implemented"><rect x="88" y="287" width="116" height="24" rx="12" class="status implemented"/><text x="146" y="304" class="pill" text-anchor="middle">IMPLEMENTED</text></g>
+<g aria-label="Status: implemented"><rect x="344" y="287" width="116" height="24" rx="12" class="status implemented"/><text x="402" y="304" class="pill" text-anchor="middle">IMPLEMENTED</text></g>
+<g aria-label="Status: implemented"><rect x="600" y="287" width="116" height="24" rx="12" class="status implemented"/><text x="658" y="304" class="pill" text-anchor="middle">IMPLEMENTED</text></g>
+<g aria-label="Status: implemented"><rect x="856" y="287" width="116" height="24" rx="12" class="status implemented"/><text x="914" y="304" class="pill" text-anchor="middle">IMPLEMENTED</text></g>
+<g aria-label="Status: pending"><rect x="1112" y="287" width="88" height="24" rx="12" class="status pending"/><text x="1156" y="304" class="pill" text-anchor="middle">PENDING</text></g>
+<path d="M692 326 V370 H282 V404" class="branch-flow"/>
+<path d="M948 326 V370 H720 V404" class="branch-flow"/>
+<rect x="100" y="404" width="364" height="96" rx="10" class="branch"/>
+<text x="120" y="434" class="label" text-anchor="start">Chiral-response branch</text>
+<text x="120" y="459" class="body" text-anchor="start">Exact spectral contraction and invariant pole grouping</text>
+<g aria-label="Status: implemented"><rect x="330" y="464" width="116" height="24" rx="12" class="status implemented"/><text x="388" y="481" class="pill" text-anchor="middle">IMPLEMENTED</text></g>
+<rect x="536" y="404" width="394" height="96" rx="10" class="branch"/>
+<text x="556" y="434" class="label" text-anchor="start">Torch projector branch</text>
+<text x="556" y="459" class="body" text-anchor="start">Exact M=0 / multiplet projection; CPU-focused tests</text>
+<g aria-label="Status: implemented"><rect x="796" y="464" width="116" height="24" rx="12" class="status implemented"/><text x="854" y="481" class="pill" text-anchor="middle">IMPLEMENTED</text></g>
+<rect x="1002" y="404" width="364" height="96" rx="10" class="branch"/>
+<text x="1022" y="434" class="label" text-anchor="start">Torch / DCU execution branch</text>
+<text x="1022" y="459" class="body" text-anchor="start">Pfaffian kernel attested on DCU; not full VMC</text>
+<g aria-label="Status: smoke-only"><rect x="1230" y="464" width="116" height="24" rx="12" class="status smoke"/><text x="1288" y="481" class="pill" text-anchor="middle">SMOKE-ONLY</text></g>
+<path d="M1216 326 V404" class="branch-flow"/>
+<rect x="44" y="550" width="1352" height="248" rx="14" class="panel"/>
+<text x="66" y="586" class="section" text-anchor="start">Acceptance boundary</text>
+<rect x="70" y="612" width="300" height="94" rx="10" class="branch"/>
+<text x="88" y="642" class="label" text-anchor="start">N=6 CPU/JAX evidence</text>
+<text x="88" y="667" class="body" text-anchor="start">5 seeds × 4 ranks; one pre-update step</text>
+<g aria-label="Status: smoke-only"><rect x="236" y="672" width="116" height="24" rx="12" class="status smoke"/><text x="294" y="689" class="pill" text-anchor="middle">SMOKE-ONLY</text></g>
+<rect x="402" y="612" width="300" height="94" rx="10" class="branch"/>
+<text x="420" y="642" class="label" text-anchor="start">ED and exact evaluation</text>
+<text x="420" y="667" class="body" text-anchor="start">No accepted exact-evaluation artifact present</text>
+<g aria-label="Status: pending"><rect x="596" y="672" width="88" height="24" rx="12" class="status pending"/><text x="640" y="689" class="pill" text-anchor="middle">PENDING</text></g>
+<rect x="734" y="612" width="300" height="94" rx="10" class="branch"/>
+<text x="752" y="642" class="label" text-anchor="start">Production VMC gates</text>
+<text x="752" y="667" class="body" text-anchor="start">Optimization, final statistics, all gates</text>
+<g aria-label="Status: pending"><rect x="928" y="672" width="88" height="24" rx="12" class="status pending"/><text x="972" y="689" class="pill" text-anchor="middle">PENDING</text></g>
+<rect x="1066" y="612" width="300" height="94" rx="10" class="branch"/>
+<text x="1084" y="642" class="label" text-anchor="start">Torch projector checkpoint/JVP gate</text>
+<text x="1084" y="667" class="body" text-anchor="start">Required before full Torch/DCU VMC execution</text>
+<g aria-label="Status: blocked"><rect x="1260" y="672" width="88" height="24" rx="12" class="status blocked"/><text x="1304" y="689" class="pill" text-anchor="middle">BLOCKED</text></g>
+<text x="70" y="742" class="body" text-anchor="start">Important: the DCU PASS covers seven Torch Pfaffian smoke tests only. It does not attest the full Torch projector/model/VMC path.</text>
+<text x="70" y="770" class="small" text-anchor="start">This blocked gate is the Torch projector checkpoint/JVP path, not the passing Pfaffian JVP primitive in job 719801.</text>
+<text x="56" y="832" class="mono" text-anchor="start">Generated 2026-07-30T10:17:18Z  •  bundle 2e0614c0643048bf82f56b34746ab2ec18cbabb8ddba6b5e3e947b3ffdba1405</text>
+<text x="56" y="850" class="mono" text-anchor="start">DCU source SHA-256 e9e2c69d7a1da701c054819bdf4068cd59d032a2fc959582c39ab6ec9e248f2b</text>
+<text x="56" y="868" class="mono" text-anchor="start">CPU source git SHA ee55cd55b24af684474923e9f4ec0a8517ad4626</text>
+<text x="1384" y="850" class="small" text-anchor="end">Manifest, source and editorial hashes embedded in metadata</text>
+</svg>
