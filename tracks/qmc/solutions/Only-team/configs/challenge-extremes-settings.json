@@ -1,0 +1,51 @@
+{
+  "Hamiltonian": "H = J1 sum_<i,j> sigma_z_i sigma_z_j - hTrfd sum_i sigma_x_i",
+  "J1": -1.0,
+  "J2": 0.0,
+  "boundary": "periodic",
+  "BetaT_rule": "L/hTrfd",
+  "IfSetDltau": true,
+  "FixedDltau": 0.013,
+  "nLocal": 1,
+  "nWolff": 5,
+  "nWarm": 10000,
+  "NmBin": 32,
+  "NSwep": 2000,
+  "NmMeaConfg": 10,
+  "discard_initial_bins": 1,
+  "trim_extrema": true,
+  "statistics_mode": "bin_sem",
+  "base_seed": 20260729,
+  "initial_state": "random",
+  "nprocs": 32,
+  "sizes": {
+    "min": {
+      "triangular": 8,
+      "honeycomb": 10
+    },
+    "max": {
+      "triangular": 48,
+      "honeycomb": 32
+    }
+  },
+  "fields": {
+    "triangular": [
+      4.76511,
+      4.76611,
+      4.76711,
+      4.76811,
+      4.76911,
+      4.77011,
+      4.77111
+    ],
+    "honeycomb": [
+      2.1295,
+      2.1305,
+      2.1315,
+      2.1325,
+      2.1335,
+      2.1345,
+      2.1355
+    ]
+  }
+}
