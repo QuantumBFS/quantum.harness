@@ -1,0 +1,6 @@
+numpy==2.0.2
+matplotlib==3.9.4
+Pillow==11.3.0
+reportlab==4.4.3
+pypdf==5.9.0
+pytest==8.3.5

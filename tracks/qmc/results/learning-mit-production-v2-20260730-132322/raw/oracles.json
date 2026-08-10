@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "dense": {
+    "width": 2,
+    "periods": 2,
+    "trajectories": 256,
+    "max_joint_probability_error": 1.0061396160665481e-16,
+    "max_covariance_error": 1.7763568394002505e-15,
+    "max_entropy_error": 3.164135620181696e-15,
+    "total_probability": 1.000000000000002
+  },
+  "physical_limits": {
+    "y_swap_residual": 6.123233995736767e-17,
+    "y_volume_law_fractions": [
+      0.9999999999999999,
+      1.0,
+      1.0
+    ],
+    "y_min_volume_law_fraction": 0.9999999999999999,
+    "x_entropy_densities": [
+      0.34657359032826607,
+      0.2310490602050048,
+      0.17328679515370515
+    ],
+    "x_entropy_density_decreases": true,
+    "passed": true
+  },
+  "negative_control": {
+    "born_mean": 2.3742609789394926,
+    "iid_mean": 2.5253913226117555,
+    "difference": 0.15113034367226286,
+    "z_score": 21.798482632393533,
+    "required_z_score": 3.0,
+    "streams_per_mode": 32,
+    "passed": true
+  },
+  "xy_block_residual": 6.123233995736767e-17,
+  "generic_block_residual": 0.15772961019105325,
+  "required_pass": true
+}

@@ -1,0 +1,19 @@
+base_seed = 122
+production_gates = false
+invariant_tolerance = 1.0e-9
+
+[runtime]
+target_seconds = 4
+ordinary_stop_seconds = 3
+hard_stop_seconds = 5
+finalize_reserve_seconds = 1
+
+[[stages]]
+name = "test"
+theta_pi = 0.5
+phi_pi = [0.21, 0.25]
+widths = [2, 4]
+streams = 1
+burn_in_layers_per_width = 1
+measurement_layers_per_width = 2
+block_layers_per_width = 1

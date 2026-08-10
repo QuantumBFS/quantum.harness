@@ -1,0 +1,29 @@
+base_seed = 122
+production_gates = false
+invariant_tolerance = 1.0e-9
+
+[runtime]
+target_seconds = 300
+ordinary_stop_seconds = 240
+hard_stop_seconds = 360
+finalize_reserve_seconds = 30
+
+[[stages]]
+name = "xy-pilot"
+theta_pi = 0.5
+phi_pi = [0.18, 0.24, 0.30]
+widths = [4, 8]
+streams = 2
+burn_in_layers_per_width = 2
+measurement_layers_per_width = 6
+block_layers_per_width = 2
+
+[[stages]]
+name = "diii-pilot"
+theta_pi = 0.45
+phi_pi = [0.06, 0.18, 0.34]
+widths = [4, 8]
+streams = 2
+burn_in_layers_per_width = 2
+measurement_layers_per_width = 6
+block_layers_per_width = 2

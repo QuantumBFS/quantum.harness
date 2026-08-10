@@ -1,0 +1,29 @@
+base_seed = 122
+production_gates = true
+invariant_tolerance = 1.0e-9
+
+[runtime]
+target_seconds = 3600
+ordinary_stop_seconds = 3300
+hard_stop_seconds = 5100
+finalize_reserve_seconds = 300
+
+[[stages]]
+name = "xy-coarse"
+theta_pi = 0.5
+phi_pi = [0.18, 0.21, 0.24, 0.25, 0.27, 0.30]
+widths = [8, 12, 16, 24]
+streams = 4
+burn_in_layers_per_width = 12
+measurement_layers_per_width = 40
+block_layers_per_width = 5
+
+[[stages]]
+name = "diii-coarse"
+theta_pi = 0.45
+phi_pi = [0.06, 0.10, 0.14, 0.18, 0.22, 0.26, 0.30, 0.34]
+widths = [8, 12, 16, 24]
+streams = 4
+burn_in_layers_per_width = 12
+measurement_layers_per_width = 40
+block_layers_per_width = 5
