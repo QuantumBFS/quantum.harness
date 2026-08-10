@@ -1,0 +1,13 @@
+{
+  "bethe_reference": "e_B=1/4-log(2)",
+  "certificate_path": "outputs/final/xxx_best/level_47_rg_d6_mps_d32_block_1000.json",
+  "certified_lower": "-0.443976567",
+  "certified_upper": "-0.4428702958784947210360110613724028607783",
+  "certified_width": "0.0011062711215052789639889386275971392217",
+  "frontier_status": "certified_calibration_frontier",
+  "normalization": "h=(XX+YY+ZZ)/4",
+  "passes_record_target": false,
+  "required_lower_at_current_upper": "-0.4431702958784947210360110613724028607783",
+  "required_upper_at_current_lower": "-0.443676567",
+  "target_width": "0.0003"
+}

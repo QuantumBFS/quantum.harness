@@ -1,0 +1,28 @@
+{
+  "anderson_proof": null,
+  "bethe": {
+    "lower": "-0.25",
+    "upper": "-0.25"
+  },
+  "block_size": 8,
+  "certified_lower": "-0.25",
+  "certified_upper": "-0.25",
+  "delta": "-1",
+  "level": 7,
+  "lower_method": "local-term-spectrum",
+  "lti_dual_proof": null,
+  "model_id": "xxz-spin-half-pauli-quarter-v1",
+  "provenance": {
+    "cvxpy_version": "1.9.2",
+    "generator": "xxzcert",
+    "git_commit": "ca462ccfd84affa158e7f53fd83d524b8444f24e",
+    "numpy_version": "2.5.1",
+    "python_version": "3.14.4",
+    "solver": "CLARABEL"
+  },
+  "rational_block_proof": null,
+  "raw_block_upper": "-0.22504174561849982",
+  "raw_lti_lower": "-0.25000000011777546",
+  "schema_version": "1.0",
+  "upper_method": "polarized-or-neel-product"
+}

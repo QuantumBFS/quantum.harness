@@ -1,0 +1,19 @@
+.venv/
+*.egg-info/
+__pycache__/
+.pytest_cache/
+outputs/final/audit.json
+
+# Local report build and visual-audit intermediates. Keep .tex/.bib/.md/.pdf.
+/technical-report-zh.*
+/tmp/
+docs/issue-230/*.aux
+docs/issue-230/*.bbl
+docs/issue-230/*.blg
+docs/issue-230/*.fdb_latexmk
+docs/issue-230/*.fls
+docs/issue-230/*.log
+docs/issue-230/*.out
+docs/issue-230/*.synctex*
+docs/issue-230/*.xdv
+docs/issue-230/missfont.log

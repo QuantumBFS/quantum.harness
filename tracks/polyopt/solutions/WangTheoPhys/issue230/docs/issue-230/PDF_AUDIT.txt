@@ -1,0 +1,28 @@
+Issue #230 technical-report PDF audit
+=====================================
+
+Artifact: docs/issue-230/technical-report-zh.pdf
+Build: latexmk -cd -xelatex -interaction=nonstopmode -halt-on-error docs/issue-230/technical-report-zh.tex
+Date: 2026-07-30 Asia/Shanghai
+
+Metadata
+--------
+Title: 从数值优化到可复核证明：Heisenberg/XXZ 链热力学能量密度的对称分块机器认证
+Author: Ranger Team
+Pages: 8
+Page size: A4 (595.28 x 841.89 pt)
+Bytes: 269305
+SHA-256: 420a29be57e108ddbd9538567690ba2572ac6e004127c02454d4364b7201ab3b
+
+Checks
+------
+- XeLaTeX/latexmk completed successfully.
+- Log scan found no undefined references/citations, LaTeX errors, overfull or
+  underfull boxes, fatal errors, or emergency stops.
+- pdftotext extraction retained the challenge-gate, prototype-boundary, and
+  references sections.
+- All 8 pages were rendered to PNG at 120 dpi and visually inspected.
+- Equations, tables, four evidence figures, headers, footers, Chinese glyphs,
+  code blocks, provenance path, and bibliography are legible and uncropped.
+
+Visual verdict: PASS (zero observed rendering defects).

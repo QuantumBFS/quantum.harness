@@ -1,0 +1,54 @@
+{
+  "anderson_proof": {
+    "eigenvalue_lower": {
+      "denominator": 10000000000,
+      "numerator": -13660254039
+    },
+    "sites": 3
+  },
+  "bethe": {
+    "lower": "-0.61722204597586571850342807010747492313385009765625",
+    "upper": "-0.6172220459758654964588231450761668384075164794921875"
+  },
+  "block_size": 4,
+  "certified_lower": "-0.68301270195",
+  "certified_upper": "-0.5465351654086267653970509730644794968235",
+  "delta": "2",
+  "level": 3,
+  "lower_method": "anderson-rational-ldl",
+  "lti_dual_proof": null,
+  "model_id": "xxz-spin-half-pauli-quarter-v1",
+  "provenance": {
+    "cvxpy_version": "1.9.2",
+    "generator": "xxzcert",
+    "git_commit": "ca462ccfd84affa158e7f53fd83d524b8444f24e",
+    "numpy_version": "2.5.1",
+    "python_version": "3.14.4",
+    "solver": "CLARABEL"
+  },
+  "rational_block_proof": {
+    "sites": 4,
+    "vector": [
+      0,
+      0,
+      0,
+      11178538,
+      0,
+      -60054249,
+      35616393,
+      0,
+      0,
+      35616393,
+      -60054249,
+      0,
+      11178538,
+      0,
+      0,
+      0
+    ]
+  },
+  "raw_block_upper": "-0.546535165408627",
+  "raw_lti_lower": "-0.6830127024897196",
+  "schema_version": "1.0",
+  "upper_method": "rational-repeated-block"
+}
