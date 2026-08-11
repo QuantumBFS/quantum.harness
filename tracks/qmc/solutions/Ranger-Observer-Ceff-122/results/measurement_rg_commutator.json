@@ -1,0 +1,322 @@
+{
+  "status": "exact local channel witness and finite critical-trajectory evidence complementing the thermodynamic central-charge analysis",
+  "model": "self-dual weak monitored Ising circuit",
+  "beta": 0.8813735870195429,
+  "tanh_beta": 0.7071067811865476,
+  "block_channel": "CNOT on each two-site block followed by tracing the syndrome; logical X pulls back to X1 X2",
+  "quantum_first": "weak logical-X measurement after block RG",
+  "record_first": "one or two physical weak-X outcomes followed by an optimized row-stochastic classical map",
+  "channel_level_x_eigenstate_family": [
+    {
+      "record_range": 1,
+      "tv_deficiency": 0.35355339059327373,
+      "kl_deficiency_nats": 0.2766516498602578,
+      "tv_stochastic_map": [
+        [
+          0.5,
+          0.5
+        ],
+        [
+          0.5,
+          0.5
+        ]
+      ],
+      "kl_stochastic_map": [
+        [
+          0.5,
+          0.5
+        ],
+        [
+          0.5,
+          0.5
+        ]
+      ],
+      "tv_optimizer_status": "Optimization terminated successfully. (HiGHS Status 7: Optimal)",
+      "kl_optimizer_status": "Optimization terminated successfully",
+      "half_diamond_distance": 0.35355339059327373,
+      "diamond_norm": 0.7071067811865475
+    },
+    {
+      "record_range": 2,
+      "tv_deficiency": 0.10355339059327376,
+      "kl_deficiency_nats": 0.032074586480101426,
+      "tv_stochastic_map": [
+        [
+          1.0,
+          -0.0
+        ],
+        [
+          -0.0,
+          1.0
+        ],
+        [
+          0.0,
+          1.0
+        ],
+        [
+          1.0,
+          -0.0
+        ]
+      ],
+      "kl_stochastic_map": [
+        [
+          0.9999999999999988,
+          1.3993820022301128e-15
+        ],
+        [
+          1.4450473003851296e-15,
+          0.9999999999999987
+        ],
+        [
+          3.02976025540391e-17,
+          1.0
+        ],
+        [
+          0.9999999999999994,
+          6.900695563487367e-16
+        ]
+      ],
+      "tv_optimizer_status": "Optimization terminated successfully. (HiGHS Status 7: Optimal)",
+      "kl_optimizer_status": "Optimization terminated successfully",
+      "half_diamond_distance": 0.10355339059327376,
+      "diamond_norm": 0.20710678118654752
+    }
+  ],
+  "critical_conditional_trajectory_family": [
+    {
+      "record_range": 1,
+      "tv_deficiency": 0.3509400930456931,
+      "kl_deficiency_nats": 0.2720734273888033,
+      "tv_stochastic_map": [
+        [
+          0.5030253770607065,
+          0.49697462293929345
+        ],
+        [
+          0.5002115221357266,
+          0.49978847786427344
+        ]
+      ],
+      "kl_stochastic_map": [
+        [
+          0.5037655494934928,
+          0.49623445050650716
+        ],
+        [
+          0.5002602106736929,
+          0.4997397893263072
+        ]
+      ],
+      "tv_optimizer_status": "Optimization terminated successfully. (HiGHS Status 7: Optimal)",
+      "kl_optimizer_status": "Optimization terminated successfully",
+      "length": 3,
+      "state_count": 49,
+      "trajectories": 12,
+      "rows": 4
+    },
+    {
+      "record_range": 2,
+      "tv_deficiency": 0.1029209108589093,
+      "kl_deficiency_nats": 0.03149641216175686,
+      "tv_stochastic_map": [
+        [
+          1.0,
+          0.0
+        ],
+        [
+          0.004918609116694617,
+          0.9950813908833054
+        ],
+        [
+          0.00028401519515730556,
+          0.9997159848048427
+        ],
+        [
+          0.9991677796579156,
+          0.0008322203420843636
+        ]
+      ],
+      "kl_stochastic_map": [
+        [
+          0.9999999999999997,
+          3.847892949227015e-16
+        ],
+        [
+          0.008144045393807725,
+          0.9918559546061924
+        ],
+        [
+          0.0005020735367813105,
+          0.9994979264632187
+        ],
+        [
+          0.9986000721871925,
+          0.0013999278128075015
+        ]
+      ],
+      "tv_optimizer_status": "Optimization terminated successfully. (HiGHS Status 7: Optimal)",
+      "kl_optimizer_status": "Optimization terminated successfully",
+      "length": 3,
+      "state_count": 49,
+      "trajectories": 12,
+      "rows": 4
+    },
+    {
+      "record_range": 1,
+      "tv_deficiency": 0.3462314783989288,
+      "kl_deficiency_nats": 0.2640670061121501,
+      "tv_stochastic_map": [
+        [
+          0.5195357836117105,
+          0.48046421638828946
+        ],
+        [
+          0.4361342527272086,
+          0.5638657472727914
+        ]
+      ],
+      "kl_stochastic_map": [
+        [
+          0.5234919439482113,
+          0.47650805605178864
+        ],
+        [
+          0.42462081009930425,
+          0.5753791899006957
+        ]
+      ],
+      "tv_optimizer_status": "Optimization terminated successfully. (HiGHS Status 7: Optimal)",
+      "kl_optimizer_status": "Optimization terminated successfully",
+      "length": 4,
+      "state_count": 49,
+      "trajectories": 12,
+      "rows": 4
+    },
+    {
+      "record_range": 2,
+      "tv_deficiency": 0.09943007439204354,
+      "kl_deficiency_nats": 0.028639278416523493,
+      "tv_stochastic_map": [
+        [
+          1.0,
+          0.0
+        ],
+        [
+          0.003629771579630847,
+          0.9963702284203692
+        ],
+        [
+          0.03387071946053222,
+          0.9661292805394678
+        ],
+        [
+          0.9736907047594588,
+          0.026309295240541104
+        ]
+      ],
+      "kl_stochastic_map": [
+        [
+          0.9999999999999999,
+          2.3190086772746826e-16
+        ],
+        [
+          0.006198963084059187,
+          0.9938010369159409
+        ],
+        [
+          0.05172175987853707,
+          0.948278240121463
+        ],
+        [
+          0.9590965677763016,
+          0.04090343222369854
+        ]
+      ],
+      "tv_optimizer_status": "Optimization terminated successfully. (HiGHS Status 7: Optimal)",
+      "kl_optimizer_status": "Optimization terminated successfully",
+      "length": 4,
+      "state_count": 49,
+      "trajectories": 12,
+      "rows": 4
+    },
+    {
+      "record_range": 1,
+      "tv_deficiency": 0.33143380314447723,
+      "kl_deficiency_nats": 0.24035013366371444,
+      "tv_stochastic_map": [
+        [
+          0.5236813207708533,
+          0.4763186792291468
+        ],
+        [
+          0.5130171385929017,
+          0.4869828614070984
+        ]
+      ],
+      "kl_stochastic_map": [
+        [
+          0.5286052063753061,
+          0.47139479362469394
+        ],
+        [
+          0.5152513081227151,
+          0.48474869187728475
+        ]
+      ],
+      "tv_optimizer_status": "Optimization terminated successfully. (HiGHS Status 7: Optimal)",
+      "kl_optimizer_status": "Optimization terminated successfully",
+      "length": 5,
+      "state_count": 49,
+      "trajectories": 12,
+      "rows": 4
+    },
+    {
+      "record_range": 2,
+      "tv_deficiency": 0.09941619994745463,
+      "kl_deficiency_nats": 0.028595653567360414,
+      "tv_stochastic_map": [
+        [
+          1.0,
+          0.0
+        ],
+        [
+          0.012464675769324418,
+          0.9875353242306756
+        ],
+        [
+          0.02118888973084898,
+          0.978811110269151
+        ],
+        [
+          0.9967591594370746,
+          0.0032408405629253535
+        ]
+      ],
+      "kl_stochastic_map": [
+        [
+          0.9999999999999997,
+          2.3046599113267844e-16
+        ],
+        [
+          0.01980951194564453,
+          0.9801904880543555
+        ],
+        [
+          0.03266954310988151,
+          0.9673304568901185
+        ],
+        [
+          0.9946709120469404,
+          0.005329087953059613
+        ]
+      ],
+      "tv_optimizer_status": "Optimization terminated successfully. (HiGHS Status 7: Optimal)",
+      "kl_optimizer_status": "Optimization terminated successfully",
+      "length": 5,
+      "state_count": 49,
+      "trajectories": 12,
+      "rows": 4
+    }
+  ],
+  "seed": 122
+}

@@ -1,0 +1,2423 @@
+{
+  "run_id": "ceffflow-production",
+  "run_dir": "results/ceffflow-production",
+  "result_root": "cells",
+  "axes_source": "configs/ceffflow/production_axes.json",
+  "cells": [
+    {
+      "cell_id": "cell-0001",
+      "settings": {
+        "model": "clean_ising",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "identity",
+          "parameter": 0.0
+        },
+        "steps": 20,
+        "burn_in": 0,
+        "block_size": 10,
+        "seed": 0,
+        "particles": 1
+      }
+    },
+    {
+      "cell_id": "cell-0002",
+      "settings": {
+        "model": "nishimori",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "identity",
+          "parameter": 0.0
+        },
+        "steps": 100000,
+        "burn_in": 2000,
+        "block_size": 500,
+        "seed": 0,
+        "particles": 1
+      }
+    },
+    {
+      "cell_id": "cell-0003",
+      "settings": {
+        "model": "nishimori",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "identity",
+          "parameter": 0.0
+        },
+        "steps": 100000,
+        "burn_in": 2000,
+        "block_size": 500,
+        "seed": 1,
+        "particles": 1
+      }
+    },
+    {
+      "cell_id": "cell-0004",
+      "settings": {
+        "model": "nishimori",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "identity",
+          "parameter": 0.0
+        },
+        "steps": 100000,
+        "burn_in": 2000,
+        "block_size": 500,
+        "seed": 2,
+        "particles": 1
+      }
+    },
+    {
+      "cell_id": "cell-0005",
+      "settings": {
+        "model": "nishimori",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "identity",
+          "parameter": 0.0
+        },
+        "steps": 100000,
+        "burn_in": 2000,
+        "block_size": 500,
+        "seed": 3,
+        "particles": 1
+      }
+    },
+    {
+      "cell_id": "cell-0006",
+      "settings": {
+        "model": "nishimori",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "identity",
+          "parameter": 0.0
+        },
+        "steps": 100000,
+        "burn_in": 2000,
+        "block_size": 500,
+        "seed": 4,
+        "particles": 1
+      }
+    },
+    {
+      "cell_id": "cell-0007",
+      "settings": {
+        "model": "nishimori",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "identity",
+          "parameter": 0.0
+        },
+        "steps": 100000,
+        "burn_in": 2000,
+        "block_size": 500,
+        "seed": 5,
+        "particles": 1
+      }
+    },
+    {
+      "cell_id": "cell-0008",
+      "settings": {
+        "model": "nishimori",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "identity",
+          "parameter": 0.0
+        },
+        "steps": 100000,
+        "burn_in": 2000,
+        "block_size": 500,
+        "seed": 6,
+        "particles": 1
+      }
+    },
+    {
+      "cell_id": "cell-0009",
+      "settings": {
+        "model": "nishimori",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "identity",
+          "parameter": 0.0
+        },
+        "steps": 100000,
+        "burn_in": 2000,
+        "block_size": 500,
+        "seed": 7,
+        "particles": 1
+      }
+    },
+    {
+      "cell_id": "cell-0010",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "identity",
+          "parameter": 0.0
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 0,
+        "particles": 1
+      }
+    },
+    {
+      "cell_id": "cell-0011",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "identity",
+          "parameter": 0.0
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 1,
+        "particles": 1
+      }
+    },
+    {
+      "cell_id": "cell-0012",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "identity",
+          "parameter": 0.0
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 2,
+        "particles": 1
+      }
+    },
+    {
+      "cell_id": "cell-0013",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "identity",
+          "parameter": 0.0
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 3,
+        "particles": 1
+      }
+    },
+    {
+      "cell_id": "cell-0014",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "identity",
+          "parameter": 0.0
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 4,
+        "particles": 1
+      }
+    },
+    {
+      "cell_id": "cell-0015",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "identity",
+          "parameter": 0.0
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 5,
+        "particles": 1
+      }
+    },
+    {
+      "cell_id": "cell-0016",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "identity",
+          "parameter": 0.0
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 6,
+        "particles": 1
+      }
+    },
+    {
+      "cell_id": "cell-0017",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "identity",
+          "parameter": 0.0
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 7,
+        "particles": 1
+      }
+    },
+    {
+      "cell_id": "cell-0018",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "confusion",
+          "parameter": 0.05
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 0,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0019",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "confusion",
+          "parameter": 0.05
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 1,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0020",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "confusion",
+          "parameter": 0.05
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 2,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0021",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "confusion",
+          "parameter": 0.05
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 3,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0022",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "confusion",
+          "parameter": 0.05
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 4,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0023",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "confusion",
+          "parameter": 0.05
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 5,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0024",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "confusion",
+          "parameter": 0.05
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 6,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0025",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "confusion",
+          "parameter": 0.05
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 7,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0026",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "confusion",
+          "parameter": 0.1
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 0,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0027",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "confusion",
+          "parameter": 0.1
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 1,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0028",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "confusion",
+          "parameter": 0.1
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 2,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0029",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "confusion",
+          "parameter": 0.1
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 3,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0030",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "confusion",
+          "parameter": 0.1
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 4,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0031",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "confusion",
+          "parameter": 0.1
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 5,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0032",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "confusion",
+          "parameter": 0.1
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 6,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0033",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "confusion",
+          "parameter": 0.1
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 7,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0034",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "confusion",
+          "parameter": 0.2
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 0,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0035",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "confusion",
+          "parameter": 0.2
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 1,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0036",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "confusion",
+          "parameter": 0.2
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 2,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0037",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "confusion",
+          "parameter": 0.2
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 3,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0038",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "confusion",
+          "parameter": 0.2
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 4,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0039",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "confusion",
+          "parameter": 0.2
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 5,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0040",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "confusion",
+          "parameter": 0.2
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 6,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0041",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "confusion",
+          "parameter": 0.2
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 7,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0042",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "confusion",
+          "parameter": 0.35
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 0,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0043",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "confusion",
+          "parameter": 0.35
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 1,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0044",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "confusion",
+          "parameter": 0.35
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 2,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0045",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "confusion",
+          "parameter": 0.35
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 3,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0046",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "confusion",
+          "parameter": 0.35
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 4,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0047",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "confusion",
+          "parameter": 0.35
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 5,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0048",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "confusion",
+          "parameter": 0.35
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 6,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0049",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "confusion",
+          "parameter": 0.35
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 7,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0050",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "confusion",
+          "parameter": 0.5
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 0,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0051",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "confusion",
+          "parameter": 0.5
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 1,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0052",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "confusion",
+          "parameter": 0.5
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 2,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0053",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "confusion",
+          "parameter": 0.5
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 3,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0054",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "confusion",
+          "parameter": 0.5
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 4,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0055",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "confusion",
+          "parameter": 0.5
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 5,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0056",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "confusion",
+          "parameter": 0.5
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 6,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0057",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "confusion",
+          "parameter": 0.5
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 7,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0058",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "erasure",
+          "parameter": 0.95
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 0,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0059",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "erasure",
+          "parameter": 0.95
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 1,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0060",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "erasure",
+          "parameter": 0.95
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 2,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0061",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "erasure",
+          "parameter": 0.95
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 3,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0062",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "erasure",
+          "parameter": 0.95
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 4,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0063",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "erasure",
+          "parameter": 0.95
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 5,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0064",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "erasure",
+          "parameter": 0.95
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 6,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0065",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "erasure",
+          "parameter": 0.95
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 7,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0066",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "erasure",
+          "parameter": 0.9
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 0,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0067",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "erasure",
+          "parameter": 0.9
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 1,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0068",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "erasure",
+          "parameter": 0.9
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 2,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0069",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "erasure",
+          "parameter": 0.9
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 3,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0070",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "erasure",
+          "parameter": 0.9
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 4,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0071",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "erasure",
+          "parameter": 0.9
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 5,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0072",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "erasure",
+          "parameter": 0.9
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 6,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0073",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "erasure",
+          "parameter": 0.9
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 7,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0074",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "erasure",
+          "parameter": 0.8
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 0,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0075",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "erasure",
+          "parameter": 0.8
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 1,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0076",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "erasure",
+          "parameter": 0.8
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 2,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0077",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "erasure",
+          "parameter": 0.8
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 3,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0078",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "erasure",
+          "parameter": 0.8
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 4,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0079",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "erasure",
+          "parameter": 0.8
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 5,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0080",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "erasure",
+          "parameter": 0.8
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 6,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0081",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "erasure",
+          "parameter": 0.8
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 7,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0082",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "erasure",
+          "parameter": 0.65
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 0,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0083",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "erasure",
+          "parameter": 0.65
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 1,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0084",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "erasure",
+          "parameter": 0.65
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 2,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0085",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "erasure",
+          "parameter": 0.65
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 3,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0086",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "erasure",
+          "parameter": 0.65
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 4,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0087",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "erasure",
+          "parameter": 0.65
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 5,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0088",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "erasure",
+          "parameter": 0.65
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 6,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0089",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "erasure",
+          "parameter": 0.65
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 7,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0090",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "erasure",
+          "parameter": 0.5
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 0,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0091",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "erasure",
+          "parameter": 0.5
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 1,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0092",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "erasure",
+          "parameter": 0.5
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 2,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0093",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "erasure",
+          "parameter": 0.5
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 3,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0094",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "erasure",
+          "parameter": 0.5
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 4,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0095",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "erasure",
+          "parameter": 0.5
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 5,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0096",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "erasure",
+          "parameter": 0.5
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 6,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0097",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "erasure",
+          "parameter": 0.5
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 7,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0098",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "erasure",
+          "parameter": 0.0
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 0,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0099",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "erasure",
+          "parameter": 0.0
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 1,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0100",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "erasure",
+          "parameter": 0.0
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 2,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0101",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "erasure",
+          "parameter": 0.0
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 3,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0102",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "erasure",
+          "parameter": 0.0
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 4,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0103",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "erasure",
+          "parameter": 0.0
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 5,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0104",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "erasure",
+          "parameter": 0.0
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 6,
+        "particles": 128
+      }
+    },
+    {
+      "cell_id": "cell-0105",
+      "settings": {
+        "model": "self_dual",
+        "lengths": [
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "channel": {
+          "kind": "erasure",
+          "parameter": 0.0
+        },
+        "steps": 2000,
+        "burn_in": 200,
+        "block_size": 100,
+        "seed": 7,
+        "particles": 128
+      }
+    }
+  ]
+}

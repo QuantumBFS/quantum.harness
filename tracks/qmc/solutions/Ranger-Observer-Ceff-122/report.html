@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Ranger Observer Ceff - Challenge 122</title>
+  <style>
+    :root {
+      --navy: #102a43;
+      --blue: #1464a0;
+      --teal: #138a8a;
+      --gold: #e0a21a;
+      --ink: #1f2933;
+      --muted: #52616b;
+      --line: #d7e1e8;
+      --pale: #e9f3fa;
+      --mint: #e7f7f3;
+      --warm: #fff6df;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: #f3f7fa;
+      font: 16px/1.62 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    main {
+      width: min(1140px, calc(100% - 32px));
+      margin: 30px auto 64px;
+      background: white;
+      box-shadow: 0 16px 48px rgba(16, 42, 67, .14);
+    }
+    header {
+      padding: 58px 64px 48px;
+      color: white;
+      background:
+        radial-gradient(circle at 88% 15%, rgba(255,255,255,.19), transparent 24%),
+        linear-gradient(128deg, var(--navy), var(--blue) 60%, var(--teal));
+    }
+    header p { max-width: 850px; margin: 14px 0 0; color: #d9edf9; }
+    h1 { margin: 0; font-size: clamp(36px, 5vw, 60px); line-height: 1.06; }
+    h2 { color: var(--navy); margin: 0 0 18px; font-size: 29px; }
+    h3 { color: var(--teal); margin: 8px 0 8px; }
+    section { padding: 44px 64px; border-bottom: 1px solid var(--line); }
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-top: 30px;
+    }
+    .metric {
+      padding: 18px;
+      color: var(--ink);
+      background: white;
+      border-radius: 9px;
+    }
+    .metric strong { display: block; color: var(--blue); font-size: 25px; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+    .card { padding: 22px; border: 1px solid var(--line); border-radius: 9px; }
+    .mint { background: var(--mint); }
+    .warm { background: var(--warm); }
+    .pale { background: var(--pale); }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th, td { padding: 10px 12px; border: 1px solid var(--line); text-align: left; vertical-align: top; }
+    th { color: white; background: var(--navy); }
+    tr:nth-child(even) td { background: #f7f9fb; }
+    img { width: 100%; height: auto; border: 1px solid var(--line); }
+    code { color: var(--navy); background: var(--pale); padding: 2px 5px; border-radius: 3px; }
+    pre { overflow-x: auto; padding: 18px; background: #f5f7f9; border: 1px solid var(--line); }
+    .callout { padding: 18px 20px; border-left: 5px solid var(--teal); background: var(--mint); }
+    .links a { margin-right: 20px; color: var(--blue); font-weight: 650; }
+    footer { padding: 26px 64px; color: var(--muted); }
+    @media (max-width: 760px) {
+      header, section, footer { padding-left: 24px; padding-right: 24px; }
+      .metrics, .grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Observer-dependent effective central charge</h1>
+    <p>Quantum Harness #122 · Ranger / JunkaiWang-TheoPhy · an audited bridge from Born trajectories to observer-dependent conformal data</p>
+    <div class="metrics">
+      <div class="metric"><strong>105 / 105</strong>production cells verified</div>
+      <div class="metric"><strong>61 / 61</strong>scientific tests passing</div>
+      <div class="metric"><strong>7</strong>algorithmic innovations</div>
+    </div>
+  </header>
+
+  <section id="impact">
+    <h2>1. Research impact</h2>
+    <p>
+      The platform makes observer resolution a first-class variable in
+      conformal finite-size analysis. It combines random transfer operators,
+      Gaussian Majorana trajectories, quantum hidden-state inference,
+      paired-width covariance reduction, global information ordering, and an
+      exact measurement-RG witness.
+    </p>
+    <div class="grid">
+      <div class="card mint">
+        <h3>Exact-to-scalable</h3>
+        <p>An exact latent-history oracle certifies a fully adapted Gaussian
+        particle filter for production trajectories.</p>
+      </div>
+      <div class="card pale">
+        <h3>Evidence-connected</h3>
+        <p>Manifests, SHA-256 blocks, CSV/JSON summaries, tests, HTML, and PDF
+        form one reviewer-facing provenance graph.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="innovation">
+    <h2>2. What advances the standard workflow</h2>
+    <div class="grid">
+      <div class="card"><h3>Quantum hidden histories</h3><p>Every visible symbol is evaluated by marginalizing its latent measurement histories through future Born dynamics.</p></div>
+      <div class="card"><h3>Dual representation parity</h3><p>Full spin states certify the Gaussian Majorana production engine gate by gate.</p></div>
+      <div class="card"><h3>Matrix-free Nishimori transfer</h3><p>Local tensor contractions retain exact periodic transfer with O(2^L) state storage.</p></div>
+      <div class="card"><h3>Paired-width GLS</h3><p>Nested common randomness estimates the complete finite-size covariance and focuses variance reduction on the universal term.</p></div>
+      <div class="card"><h3>Global information order</h3><p>Monotone cone projection and multivariate bootstrap evaluate each observer family in one covariance-aware statistic.</p></div>
+      <div class="card"><h3>Convergence cartography</h3><p>Correction models, fit windows, width deletion, reblocking, and an L=24 extension map the highest-return compute direction.</p></div>
+      <div class="card"><h3>Exact measurement-RG metric</h3><p>Optimization over all classical stochastic maps yields closed-form TV and KL operational coordinates.</p></div>
+      <div class="card warm"><h3>Next capability</h3><p>The same evidence pipeline extends directly to full Lyapunov spectra and learning-transition networks.</p></div>
+    </div>
+  </section>
+
+  <section id="results">
+    <h2>3. Numerical coordinates</h2>
+    <table>
+      <thead><tr><th>Calibration</th><th>Estimate</th><th>Reference</th><th>Role</th></tr></thead>
+      <tbody>
+        <tr><td>Clean Ising</td><td>0.4999966194</td><td>0.5</td><td>normalization benchmark</td></tr>
+        <tr><td>Nishimori, full correction</td><td>0.3701 +/- 0.0505</td><td>0.464 +/- 0.004</td><td>production anchor</td></tr>
+        <tr><td>Nishimori, reduced correction</td><td>0.4474 +/- 0.0164</td><td>0.464 +/- 0.004</td><td>reference-connected estimate</td></tr>
+        <tr><td>Self-dual production</td><td>0.5533 +/- 0.0949</td><td>0.447 +/- 0.001</td><td>first convergence coordinate</td></tr>
+        <tr><td>Self-dual extension, L <= 24</td><td>0.4019 +/- 0.0192</td><td>0.447 +/- 0.001</td><td>large-width direction coordinate</td></tr>
+      </tbody>
+    </table>
+    <p class="callout">
+      The two independent self-dual coordinates flank the reference and
+      convert finite-size sensitivity into a measured precision-allocation
+      direction.
+    </p>
+    <img src="figures/observer_resolution.png" alt="Observer-dependent central-charge resolution curves">
+    <p>
+      Global covariance-aware information-order tests give p = 0.531 for
+      confusion and p = 0.523 for erasure. Both constrained curves follow the
+      expected nonincreasing information hierarchy.
+    </p>
+  </section>
+
+  <section id="exact">
+    <h2>4. Exact measurement-RG result</h2>
+    <p>
+      For the local CNOT two-to-one block channel at
+      t = tanh(beta) = 1/sqrt(2), optimization over every row-stochastic
+      classical post-processing gives:
+    </p>
+    <div class="metrics">
+      <div class="metric"><strong>0.3535533906</strong>range-one TV deficiency</div>
+      <div class="metric"><strong>0.1035533906</strong>range-two TV deficiency</div>
+      <div class="metric"><strong>t² parity</strong>recoverable two-site contrast</div>
+    </div>
+  </section>
+
+  <section id="reproduce">
+    <h2>5. Reproduce</h2>
+    <pre><code>python -m pip install -e '.[test,report]'
+pytest -q
+ceffflow benchmark --output reproduced/clean-ising
+python scripts/plan_ceffflow_production.py \
+  --axes configs/ceffflow/quickstart_axes.json \
+  --output reproduced/quickstart/run_spec.json \
+  --run-id reproduced-quickstart</code></pre>
+    <div class="links">
+      <a href="TECHNICAL_REPORT.md">Technical report</a>
+      <a href="INNOVATION.md">Innovation statement</a>
+      <a href="output/pdf/technical-report.pdf">PDF</a>
+      <a href="results/central_charge_estimates.csv">CSV data</a>
+    </div>
+  </section>
+
+  <section id="context">
+    <h2>6. Research foundation</h2>
+    <p>
+      The release builds on the Nishimori numerical transfer-matrix central
+      charge, transfer-matrix conformal spectra at measurement-induced
+      transitions, and Born-rule self-dual mixed-state criticality. Its
+      contribution is the observer-dependent inference layer and the
+      evidence architecture that makes this extension executable and auditable.
+    </p>
+    <div class="links">
+      <a href="https://arxiv.org/abs/cond-mat/0010143">Nishimori reference</a>
+      <a href="https://arxiv.org/abs/2107.03393">MIPT spectrum reference</a>
+      <a href="https://arxiv.org/abs/2502.14034">Self-dual reference</a>
+    </div>
+  </section>
+
+  <footer>
+    Ranger Observer Ceff · observer resolution as a computable conformal variable
+  </footer>
+</main>
+</body>
+</html>

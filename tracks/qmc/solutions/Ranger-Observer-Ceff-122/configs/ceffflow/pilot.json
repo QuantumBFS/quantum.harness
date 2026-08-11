@@ -1,0 +1,94 @@
+{
+  "settings": [
+    {
+      "model": "clean_ising",
+      "lengths": [4, 6, 8, 10],
+      "channel": {"kind": "identity", "parameter": 0.0},
+      "steps": 20,
+      "burn_in": 0,
+      "block_size": 10,
+      "seed": 0,
+      "particles": 1
+    },
+    {
+      "model": "nishimori",
+      "lengths": [4, 6, 8, 10],
+      "channel": {"kind": "identity", "parameter": 0.0},
+      "steps": 400,
+      "burn_in": 40,
+      "block_size": 40,
+      "seed": 0,
+      "particles": 1
+    },
+    {
+      "model": "nishimori",
+      "lengths": [4, 6, 8, 10],
+      "channel": {"kind": "identity", "parameter": 0.0},
+      "steps": 400,
+      "burn_in": 40,
+      "block_size": 40,
+      "seed": 1,
+      "particles": 1
+    },
+    {
+      "model": "self_dual",
+      "lengths": [4, 6, 8, 10],
+      "channel": {"kind": "identity", "parameter": 0.0},
+      "steps": 200,
+      "burn_in": 20,
+      "block_size": 20,
+      "seed": 0,
+      "particles": 1
+    },
+    {
+      "model": "self_dual",
+      "lengths": [4, 6, 8, 10],
+      "channel": {"kind": "identity", "parameter": 0.0},
+      "steps": 200,
+      "burn_in": 20,
+      "block_size": 20,
+      "seed": 1,
+      "particles": 1
+    },
+    {
+      "model": "self_dual",
+      "lengths": [4, 6, 8, 10],
+      "channel": {"kind": "confusion", "parameter": 0.1},
+      "steps": 40,
+      "burn_in": 10,
+      "block_size": 10,
+      "seed": 0,
+      "particles": 16
+    },
+    {
+      "model": "self_dual",
+      "lengths": [4, 6, 8, 10],
+      "channel": {"kind": "confusion", "parameter": 0.1},
+      "steps": 40,
+      "burn_in": 10,
+      "block_size": 10,
+      "seed": 1,
+      "particles": 16
+    },
+    {
+      "model": "self_dual",
+      "lengths": [4, 6, 8, 10],
+      "channel": {"kind": "erasure", "parameter": 0.8},
+      "steps": 40,
+      "burn_in": 10,
+      "block_size": 10,
+      "seed": 0,
+      "particles": 16
+    },
+    {
+      "model": "self_dual",
+      "lengths": [4, 6, 8, 10],
+      "channel": {"kind": "erasure", "parameter": 0.8},
+      "steps": 40,
+      "burn_in": 10,
+      "block_size": 10,
+      "seed": 1,
+      "particles": 16
+    }
+  ]
+}

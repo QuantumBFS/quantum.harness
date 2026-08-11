@@ -1,0 +1,2 @@
+model,channel,parameter,information_loss,central_charge,standard_error,samples
+self_dual,identity,0.0,0.0,0.3426360534911521,0.05558741977557999,800
