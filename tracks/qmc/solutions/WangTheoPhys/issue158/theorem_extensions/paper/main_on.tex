@@ -1,0 +1,1150 @@
+\documentclass[aps,prb,twocolumn,groupedaddress,amsmath,amssymb,
+               superscriptaddress,nofootinbib,floatfix]{revtex4-2}
+
+\usepackage{bm}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{amsthm}
+\usepackage{array}
+
+\hypersetup{
+  colorlinks=true,
+  citecolor=blue!55!black,
+  linkcolor=blue!55!black,
+  urlcolor=blue!55!black,
+  pdftitle={A Finite-Volume Infrared Theorem for Classical O(n) Spin
+            Systems: Quantitative Vanishing of Continuous-Symmetry
+            Long-Range Order in Two Dimensions}
+}
+
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{corollary}{Corollary}
+\theoremstyle{definition}
+\newtheorem{assumption}{Assumption}
+
+\newcommand{\BZ}{\mathrm{BZ}}
+\newcommand{\dd}{\mathrm{d}}
+\newcommand{\cL}{c_L}
+\newcommand{\cinf}{c_\infty}
+\newcommand{\rhoLog}{\rho_{\log}}
+\newcommand{\kmin}{k_{\min}}
+\newcommand{\Torus}{\mathbb T}
+\newcommand{\Exp}{\mathbb E}
+
+\begin{document}
+
+\title{A Finite-Volume Infrared Theorem for Classical
+       \texorpdfstring{$O(n)$}{O(n)} Spin
+       Systems: Quantitative Vanishing of Continuous-Symmetry
+       Long-Range Order in Two Dimensions}
+
+\author{Authors withheld for internal draft}
+\affiliation{Affiliations to be finalized}
+\date{\today}
+
+\begin{abstract}
+We prove a finite-volume infrared theorem for classical hard-spin
+$O(n)$ models, $n\ge2$, with translation-invariant bilinear ferromagnetic
+interactions.  For a torus of volume $V=L^d$, let
+$E_L(q)=\sum_RJ_L(R)[1-\cos(q\cdot R)]$.  If $E_L$ converges uniformly to
+a continuous nonnegative kernel $E_\infty$ and
+\[
+ I(h)=\int_{\BZ}\frac{\dd^dq}{(2\pi)^d}
+ \frac{1}{h+E_\infty(q)}
+\]
+diverges as $h\downarrow0$, then
+\[
+ \lim_{h\downarrow0}\limsup_{L\to\infty}m_{L,h}=0,
+ \qquad
+ \lim_{L\to\infty}\langle|\bm M_L|^2\rangle_{L,0}=0
+\]
+at every finite temperature.  The proof uses divergence-free rotation
+generators on $S^{n-1}$.  The exact pair-energy second variation is a
+two-component internal-plane projection, and summing the $n-1$ transverse
+channels yields
+\[
+ 1\ge(n-1)T m_{L,h}^2
+ \frac1V\sum_q\frac1{h+E_L(q)}.
+\]
+An exponential-tilt lemma then connects this field-selected estimate to the
+zero-field squared magnetization measured in simulations.  In two
+dimensions the theorem covers finite-second-moment interactions and the
+marginal $J(R)\propto |R|^{-4}$ model, including the minimum-image,
+size-normalized torus sequence.  At the marginal point we further derive the
+rigorous asymptotic finite-size envelope
+\[
+ \langle|\bm M_L|^2\rangle_{L,0}
+ =O_{n,T}\!\left((\log\log L)^{-1/2}\right),
+\]
+which applies directly to the zero-field Monte Carlo observable as a rigorous
+asymptotic envelope.  A deterministic lattice audit through
+$L=8192$ reproduces the exact logarithmic kernel coefficient to better than
+$9.1\times10^{-7}$ along four momentum paths.  Public-data diagnostics for
+the $n=2$ application explain why a zero asymptote can look ordered over
+accessible sizes.  Its established domain is classical bounded hard spins
+with a divergent regulated infrared integral.  The resulting
+zero-magnetization phase supplies the starting point for correlation-law and
+topological-sector classification.
+\end{abstract}
+
+\maketitle
+
+\section{Introduction}
+
+The vanishing of continuous-symmetry breaking in low-dimensional systems is
+usually associated with the Mermin--Wagner theorem
+\cite{MerminWagner1966}.  Its classical formulation follows directly from a
+Bogoliubov inequality obtained by integration by parts in the Gibbs
+measure \cite{Mermin1967}.  For long-range interactions, the decisive object
+is the excitation kernel
+\begin{equation}
+ E(q)=\sum_RJ(R)[1-\cos(q\cdot R)]                      \label{eq:intro-kernel}
+\end{equation}
+and the infrared integral of its reciprocal
+\cite{Bruno2001,Messager1984,Ioffe2002}.
+
+Two qualifications are often compressed into the phrase ``continuous
+theory.''  First, the existence of a continuous global symmetry does not
+specify the single-site space, the interaction, or the small-momentum
+kernel.  Second, a theorem that rules out a field-selected one-point
+function does not by itself display the finite-volume route to
+\begin{equation}
+ \langle|\bm M_L|^2\rangle_{L,0},                       \label{eq:mc-M2}
+\end{equation}
+the zero-field observable extrapolated in Monte Carlo work.  At a marginal
+infrared boundary, this distinction matters because the thermodynamic
+limit can be approached more slowly than any visible power of $L$.
+
+The motivating example is the two-dimensional interaction
+\begin{equation}
+ J(r)\propto r^{-(2+\sigma)}.                           \label{eq:power-law}
+\end{equation}
+Recent simulations of the XY case reported ferromagnetic order up to
+$\sigma=2$ \cite{Xiao2025,Yao2025}.  At that endpoint,
+$J(r)\propto r^{-4}$ and
+\begin{equation}
+ E(q)\sim\rhoLog q^2\log(1/q).                          \label{eq:intro-marginal}
+\end{equation}
+The reciprocal integral diverges only as $\log\log L$.  The resulting
+finite-size sequence can remain close to a plateau at sizes far beyond
+current simulations.
+
+This article separates three statements.  The first is an abstract
+finite-volume theorem for hard-spin $O(n)$ systems in arbitrary spatial
+dimension.  The second verifies its hypotheses for two-dimensional
+short-range and marginal $1/r^4$ interactions.  The third uses deterministic
+kernel calculations and public simulation summaries to examine finite-size
+identifiability.  The numerical work is not a premise of the theorem.
+
+The extension from XY to $O(n)$ is not obtained by replacing the number
+$2$ with $n$.  Angular integration by parts must be replaced by rotation
+calculus on $S^{n-1}$; the pair second variation is a selected-plane
+projection rather than the full scalar product; and all $n-1$ transverse
+spectral budgets must be combined without overcounting.  We give those steps
+explicitly.  They close for unit-vector spins with bilinear ferromagnetic
+couplings.  They do not establish a theorem for unbounded fields, arbitrary
+target manifolds, frustrated interactions, or quantum models.
+
+\section{Model, hypotheses, and result}
+\label{sec:model}
+
+Let
+\begin{equation}
+ \Torus_L^d=(\mathbb Z/L\mathbb Z)^d,\qquad V=L^d,
+\end{equation}
+and assign a unit vector
+\begin{equation}
+ \bm S_x=(S_x^1,\ldots,S_x^n)\in S^{n-1},
+ \qquad n\ge2,                                         \label{eq:hard-spin}
+\end{equation}
+to every site.  The single-site measure is the normalized
+$SO(n)$-invariant surface measure.  We consider
+\begin{equation}
+ H_{L,h}
+ =
+ -\frac12\sum_{x\in\Torus_L^d}\sum_R
+ J_L(R)\,\bm S_x\cdot\bm S_{x+R}
+ -h\sum_xS_x^1,                                        \label{eq:H}
+\end{equation}
+with
+\begin{equation}
+ J_L(R)=J_L(-R)\ge0,\qquad J_L(0)=0.                   \label{eq:J-assumption}
+\end{equation}
+The factor $1/2$ compensates the directed-pair sum, including
+self-inverse torus displacements.
+
+At $T=\beta^{-1}>0$, define
+\begin{equation}
+ \bm M_L=\frac1V\sum_x\bm S_x,\qquad
+ m_{L,h}=\langle M_L^1\rangle_{L,h},                   \label{eq:magnetizations}
+\end{equation}
+and, for torus momentum $q$,
+\begin{equation}
+ E_L(q)=\sum_RJ_L(R)[1-\cos(q\cdot R)].                \label{eq:E_L}
+\end{equation}
+The fixed integer representatives of $R$ give a continuous periodic
+interpolation of $E_L$ on the Brillouin zone.
+
+\begin{assumption}[Uniform kernel limit]
+\label{ass:uniform}
+There is a continuous nonnegative periodic function $E_\infty$ such that
+\begin{equation}
+ \|E_L-E_\infty\|_\infty\longrightarrow0.              \label{eq:uniform}
+\end{equation}
+\end{assumption}
+
+\begin{assumption}[Regulated infrared divergence]
+\label{ass:ir}
+The integral
+\begin{equation}
+ I(h)=\int_{\BZ}\frac{\dd^dq}{(2\pi)^d}
+ \frac1{h+E_\infty(q)}                                 \label{eq:Ih}
+\end{equation}
+satisfies $I(h)\to\infty$ as $h\downarrow0$.
+\end{assumption}
+
+\begin{theorem}[Finite-volume hard-spin $O(n)$ criterion]
+\label{thm:main}
+Let $n\ge2$, $0<T<\infty$, and suppose
+Eqs.~\eqref{eq:J-assumption}, \eqref{eq:uniform}, and
+\eqref{eq:Ih} hold.  Then
+\begin{align}
+ \lim_{h\downarrow0}\limsup_{L\to\infty}m_{L,h}&=0,
+                                                               \label{eq:field-result}\\
+ \lim_{L\to\infty}
+ \langle|\bm M_L|^2\rangle_{L,0}&=0.                  \label{eq:zero-result}
+\end{align}
+At finite volume,
+\begin{equation}
+ 1\ge
+ (n-1)T\,m_{L,h}^{\,2}
+ \frac1V\sum_{q\in\mathcal Q_L}
+ \frac1{h+E_L(q)}.                                     \label{eq:master-bound}
+\end{equation}
+\end{theorem}
+
+Table~\ref{tab:scope} records the logical boundary of the result.  The
+abstract theorem is not restricted to $d=2$; its two-dimensional content
+comes from interactions for which Assumption~\ref{ass:ir} can be verified.
+
+\begin{table*}[t]
+\caption{\label{tab:scope}
+Hypotheses used by Theorem~\ref{thm:main}.  The right column lists changes
+that require a new argument rather than a change of notation.}
+\centering
+\renewcommand{\arraystretch}{1.18}
+\resizebox{0.98\textwidth}{!}{%
+\begin{tabular}{lll}
+\toprule
+Object & Assumption in the theorem & Outside the proved scope\\
+\midrule
+Single-site space &
+\shortstack[l]{$S^{n-1}$, finite $n\ge2$,\\normalized invariant measure} &
+\shortstack[l]{$n=1$, unbounded soft spins,\\a generic target manifold}\\
+\addlinespace[3pt]
+Interaction &
+\shortstack[l]{translation-invariant bilinear pair energy,\\$J_L(R)\ge0$} &
+\shortstack[l]{frustration, sign changes,\\random or multibody terms}\\
+\addlinespace[3pt]
+Thermodynamic input &
+\shortstack[l]{uniform kernel limit and divergent\\regulated reciprocal integral} &
+\shortstack[l]{size sequences without a kernel limit,\\or finite infrared integral}\\
+\addlinespace[3pt]
+Conclusion &
+\shortstack[l]{no vector LRO in a field-selected state;\\no zero-field $M_L^2$ intercept} &
+\shortstack[l]{no assertion about the exact\\correlation law or topological sector}\\
+\bottomrule
+\end{tabular}
+}
+\end{table*}
+
+\section{Rotation calculus on the sphere}
+\label{sec:rotation}
+
+For each transverse component $a=2,\ldots,n$, let
+\begin{equation}
+ \mathcal L_x^{1a}
+ =
+ S_x^1\frac{\partial}{\partial S_x^a}
+ -
+ S_x^a\frac{\partial}{\partial S_x^1}.                 \label{eq:generator}
+\end{equation}
+Equation~\eqref{eq:generator} denotes the derivative along the rotation
+orbit in the $(1,a)$ plane.  If $R_{1a}(t)\in SO(n)$ is that rotation, then
+\begin{equation}
+ \mathcal L^{1a}f(\bm S)
+ =
+ \left.\frac{\dd}{\dd t}f(R_{1a}(t)\bm S)\right|_{t=0}. \label{eq:orbit-derivative}
+\end{equation}
+The two relevant component identities are
+\begin{equation}
+ \mathcal L^{1a}S^1=-S^a,\qquad
+ \mathcal L^{1a}S^a=S^1.                               \label{eq:component-rotation}
+\end{equation}
+
+\begin{lemma}[Invariant-measure integration by parts]
+\label{lem:sphere-ibp}
+For a smooth function $f$ on $S^{n-1}$,
+\begin{equation}
+ \int_{S^{n-1}}\mathcal L^{1a}f\,\dd\omega=0.           \label{eq:sphere-ibp}
+\end{equation}
+\end{lemma}
+
+\begin{proof}
+Rotation invariance of $\omega$ gives
+\begin{equation}
+ \int f(R_{1a}(t)\bm S)\,\dd\omega(\bm S)
+ =
+ \int f(\bm S)\,\dd\omega(\bm S).
+\end{equation}
+Differentiate at $t=0$.  This proof also identifies the geometric
+subtlety: $\mathcal L^{1a}$ is a divergence-free Killing field.  An ambient
+coordinate derivative not tangent to the sphere would produce additional
+measure terms.
+\end{proof}
+
+Define
+\begin{equation}
+ D_q^a=\sum_xe^{iq\cdot x}\mathcal L_x^{1a},\qquad
+ A_q^a=\sum_xe^{-iq\cdot x}S_x^a.                      \label{eq:D-A}
+\end{equation}
+Applying Lemma~\ref{lem:sphere-ibp} to the product Gibbs measure gives
+\begin{align}
+ \langle D_q^aF\rangle
+ &=\beta\langle F D_q^aH\rangle,                       \label{eq:gibbs-ibp-one}\\
+ \langle D_{-q}^aD_q^aH\rangle
+ &=\beta\langle|D_q^aH|^2\rangle\ge0.                 \label{eq:gibbs-ibp-two}
+\end{align}
+The nonnegativity in Eq.~\eqref{eq:gibbs-ibp-two} is a Gibbs-averaged
+identity.  The configuration-level second variation need not be positive.
+
+\section{Finite-volume infrared estimate}
+\label{sec:finite-proof}
+
+\subsection{Classical Bogoliubov inequality}
+
+Set $F=A_q^a$ in Eq.~\eqref{eq:gibbs-ibp-one}.  Cauchy--Schwarz and
+Eq.~\eqref{eq:gibbs-ibp-two} yield
+\begin{equation}
+ \langle|A_q^a|^2\rangle
+ \langle D_{-q}^aD_q^aH\rangle
+ \ge
+ T|\langle D_q^aA_q^a\rangle|^2.                      \label{eq:classical-bog}
+\end{equation}
+The numerator is independent of $q$ and $a$:
+\begin{equation}
+ D_q^aA_q^a=\sum_xS_x^1,\qquad
+ \langle D_q^aA_q^a\rangle=Vm_{L,h}.                  \label{eq:numerator}
+\end{equation}
+
+\subsection{Exact pair-energy second variation}
+
+Let $s,t\in S^{n-1}$ denote a single pair and fix a transverse component
+$a$.  Define
+\begin{equation}
+ B=s_1t_a-s_at_1,\qquad C=s_1t_1+s_at_a.               \label{eq:B-C}
+\end{equation}
+For the generators acting on $s$ and $t$,
+\begin{equation}
+\begin{array}{ll}
+ \mathcal L_s(s\cdot t)=B,&
+ \mathcal L_t(s\cdot t)=-B,\\[1mm]
+ \mathcal L_sB=-C,&
+ \mathcal L_tB=C.
+\end{array}                                             \label{eq:pair-algebra}
+\end{equation}
+Consequently, for complex $u,v$,
+\begin{multline}
+ (\bar u\mathcal L_s+\bar v\mathcal L_t)
+ (u\mathcal L_s+v\mathcal L_t)(-J\,s\cdot t)\\
+ =
+ J|u-v|^2(s_1t_1+s_at_a).                              \label{eq:pair-variation}
+\end{multline}
+For $u=e^{iq\cdot x}$ and $v=e^{iq\cdot(x+R)}$,
+$|u-v|^2=2[1-\cos(q\cdot R)]$.  Combining this with the directed-pair
+factor in Eq.~\eqref{eq:H} gives
+\begin{align}
+ D_{-q}^aD_q^aH_{L,h}
+ ={}&h\sum_xS_x^1 \nonumber\\
+ &+\sum_{x,R}J_L(R)[1-\cos(q\cdot R)]\nonumber\\
+ &\quad\times
+ (S_x^1S_{x+R}^1+S_x^aS_{x+R}^a).                    \label{eq:exact-denominator}
+\end{align}
+
+The pair factor in Eq.~\eqref{eq:exact-denominator} is not
+$\bm S_x\cdot\bm S_{x+R}$.  It is the projection onto the internal
+$(1,a)$ plane.  Cauchy--Schwarz in that plane gives
+\begin{equation}
+ S_x^1S_y^1+S_x^aS_y^a\le1.                            \label{eq:projection-bound}
+\end{equation}
+It may also be negative.  Ferromagnetic positivity and
+$S_x^1\le1$ therefore imply the upper bound
+\begin{equation}
+ \langle D_{-q}^aD_q^aH_{L,h}\rangle
+ \le V[h+E_L(q)].                                      \label{eq:denominator-upper}
+\end{equation}
+Equations~\eqref{eq:classical-bog}, \eqref{eq:numerator}, and
+\eqref{eq:denominator-upper} give, for every transverse channel,
+\begin{equation}
+ \langle|A_q^a|^2\rangle
+ \ge
+ \frac{TVm_{L,h}^2}{h+E_L(q)}.                         \label{eq:channel-bound}
+\end{equation}
+
+\subsection{Summing the transverse budgets}
+
+Parseval's identity gives
+\begin{align}
+ \sum_{a=2}^n\sum_q|A_q^a|^2
+ &=
+ V\sum_x\sum_{a=2}^n(S_x^a)^2 \nonumber\\
+ &=
+ V\sum_x[1-(S_x^1)^2]\le V^2.                         \label{eq:parseval-budget}
+\end{align}
+Summing Eq.~\eqref{eq:channel-bound} over $q$ and over all $n-1$
+transverse components proves Eq.~\eqref{eq:master-bound}.
+
+This is the origin of the factor $n-1$.  It is not obtained by multiplying
+one inequality while keeping the same left-hand side; the combined
+transverse spectral weight has the single shared budget
+\eqref{eq:parseval-budget}.  For $n=2$ there is one transverse component and
+the formula reduces exactly to the XY bound.
+
+\section{Thermodynamic limit and the zero-field bridge}
+\label{sec:bridge}
+
+Fix $h>0$.  Assumption~\ref{ass:uniform} and
+\begin{equation}
+ \left|\frac1{h+x}-\frac1{h+y}\right|
+ \le\frac{|x-y|}{h^2},\qquad x,y\ge0,                  \label{eq:reciprocal-lipschitz}
+\end{equation}
+imply uniform convergence of the reciprocal kernels.  The momentum average
+is therefore a Riemann sum:
+\begin{equation}
+ \frac1V\sum_q\frac1{h+E_L(q)}
+ \longrightarrow I(h).                                \label{eq:riemann}
+\end{equation}
+Equation~\eqref{eq:master-bound} yields
+\begin{equation}
+ \limsup_{L\to\infty}m_{L,h}^2
+ \le\frac1{(n-1)T I(h)}.                               \label{eq:regulated-bound}
+\end{equation}
+Assumption~\ref{ass:ir} then proves Eq.~\eqref{eq:field-result}.
+
+It remains to reach Eq.~\eqref{eq:mc-M2}.  The following scalar statement is
+independent of the spin model.
+
+\begin{lemma}[Bounded symmetric exponential tilt]
+\label{lem:tilt}
+Let $X\in[-1,1]$ have a distribution symmetric under $X\mapsto-X$.  For
+$t\ge0$, let
+\begin{equation}
+ \Exp_t[f(X)]
+ =
+ \frac{\Exp[f(X)e^{tX}]}{\Exp[e^{tX}]}.
+\end{equation}
+Then
+\begin{equation}
+ \Exp_t[X]\ge\tanh(t)\,\Exp[X^2].                      \label{eq:tilt}
+\end{equation}
+\end{lemma}
+
+\begin{proof}
+Symmetry gives
+\begin{equation}
+ \Exp_t[X]
+ =
+ \frac{\Exp[X\sinh(tX)]}{\Exp[\cosh(tX)]}.
+\end{equation}
+For $0\le x\le1$, concavity of $\tanh$ gives
+$\tanh(tx)\ge x\tanh(t)$, and hence
+\begin{equation}
+ x\sinh(tx)\ge x^2\tanh(t)\cosh(tx).
+\end{equation}
+Both $x^2$ and $\cosh(tx)$ increase with $x$ on $[0,1]$; their covariance
+under the law of $|X|$ is nonnegative.  Thus
+\begin{equation}
+ \Exp[X^2\cosh(tX)]
+ \ge\Exp[X^2]\Exp[\cosh(tX)],
+\end{equation}
+which proves Eq.~\eqref{eq:tilt}.
+\end{proof}
+
+At $h=0$, $SO(n)$ invariance makes the magnetization second-moment tensor
+isotropic:
+\begin{equation}
+ \langle M_L^\alpha M_L^\gamma\rangle_{L,0}
+ =
+ \frac{\delta_{\alpha\gamma}}{n}
+ \langle|\bm M_L|^2\rangle_{L,0}.                      \label{eq:isotropic-M2}
+\end{equation}
+A rotation by $\pi$ in the $(1,2)$ plane makes the distribution of
+$X=M_L^1$ symmetric.  The field changes the zero-field Gibbs weight by
+$e^{\beta hVX}$.  Lemma~\ref{lem:tilt}, with $t=\beta hV$, therefore gives
+\begin{equation}
+ m_{L,h}
+ \ge
+ \frac1n\tanh(\beta hV)
+ \langle|\bm M_L|^2\rangle_{L,0}.                      \label{eq:bridge}
+\end{equation}
+At fixed $h>0$, the hyperbolic tangent tends to one, so
+\begin{equation}
+ \limsup_{L\to\infty}
+ \langle|\bm M_L|^2\rangle_{L,0}
+ \le n\limsup_{L\to\infty}m_{L,h}.                    \label{eq:bridge-limit}
+\end{equation}
+Taking $h\downarrow0$ only after the thermodynamic limit and using
+Eq.~\eqref{eq:regulated-bound} proves Eq.~\eqref{eq:zero-result}.
+
+\section{Two-dimensional consequences}
+\label{sec:2d}
+
+\subsection{Finite second moment}
+
+For a fixed interaction satisfying
+\begin{equation}
+ \sum_RJ(R)|R|^2<\infty,                               \label{eq:second-moment}
+\end{equation}
+the inequality $1-\cos u\le u^2/2$ gives
+\begin{equation}
+ E_\infty(q)
+ \le\frac{|q|^2}{2}\sum_RJ(R)|R|^2
+ =C|q|^2.                                              \label{eq:q2-bound}
+\end{equation}
+In $d=2$, the integral of $1/(h+Cq^2)$ diverges logarithmically as the field
+is removed.  Theorem~\ref{thm:main} therefore recovers the standard
+short-range no-order result for every finite $n\ge2$.
+
+\subsection{Marginal \texorpdfstring{$1/r^4$}{1/r4} interaction}
+
+Let
+\begin{equation}
+ J_\infty(R)=\frac{A}{|R|^4},
+ \qquad R\in\mathbb Z^2\setminus\{0\}.                 \label{eq:r4}
+\end{equation}
+Split the kernel at $|R|=|q|^{-1}$.  In the near region,
+\begin{align}
+ E_{<}(q)
+ &\le
+ \frac{A|q|^2}{2}
+ \sum_{0<|R|\le|q|^{-1}}\frac1{|R|^2} \nonumber\\
+ &\le C_1|q|^2\log\frac{C_2}{|q|}.                    \label{eq:near-bound}
+\end{align}
+In the far region,
+\begin{equation}
+ E_{>}(q)
+ \le2A\sum_{|R|>|q|^{-1}}\frac1{|R|^4}
+ \le C_3|q|^2.                                         \label{eq:far-bound}
+\end{equation}
+Hence
+\begin{equation}
+ E_\infty(q)
+ \le C|q|^2\log\frac{C'}{|q|},                         \label{eq:marginal-upper}
+\end{equation}
+and
+\begin{equation}
+ \int_0^\delta
+ \frac{k\,\dd k}{k^2\log(C'/k)}
+ =\infty.                                              \label{eq:loglog-divergence}
+\end{equation}
+The divergence is only $\log\log$, but it is sufficient for
+Theorem~\ref{thm:main}.
+
+The leading square-lattice coefficient follows from
+\begin{equation}
+ \sum_{0<|R|\le M}
+ \frac{R_iR_j}{|R|^4}
+ =
+ \pi\delta_{ij}\log M+O(1),                            \label{eq:tensor-sum}
+\end{equation}
+which gives
+\begin{equation}
+ E_\infty(q)
+ =
+ \frac{\pi A}{2}|q|^2\log\frac1{|q|}
+ +O(|q|^2).                                            \label{eq:exact-kernel}
+\end{equation}
+The exact coefficient is useful for convention checks; the upper bound
+\eqref{eq:marginal-upper} is enough for the theorem.
+
+\subsection{Minimum-image torus sequence}
+
+For the simulation convention, take even $L$ and let $D_L$ be the centered
+square of minimum-image representatives.  Define
+\begin{equation}
+ J_L(R)=\frac{\cL}{|R|^4},\qquad
+ \cL=\frac4{\displaystyle
+ \sum_{R\in D_L\setminus\{0\}}|R|^{-4}}.               \label{eq:MI}
+\end{equation}
+For the infinite lattice,
+\begin{equation}
+ \cinf=
+ \frac4{\displaystyle
+ \sum_{R\in\mathbb Z^2\setminus\{0\}}|R|^{-4}}
+ =
+ \frac6{\pi^2G}
+ =
+ 0.6637008046\ldots,                                   \label{eq:c-infinity}
+\end{equation}
+where $G$ is Catalan's constant.  The omitted tail is $O(L^{-2})$, and
+normalization of both interactions to total weight four gives
+\begin{equation}
+ \|J_L^0-J_\infty\|_{\ell^1}=O(L^{-2}),                \label{eq:l1}
+\end{equation}
+where $J_L^0$ is extended by zero outside $D_L$.  Therefore
+\begin{equation}
+ \sup_q|E_L(q)-E_\infty(q)|
+ \le2\|J_L^0-J_\infty\|_{\ell^1}
+ =O(L^{-2}).                                           \label{eq:uniform-MI}
+\end{equation}
+Assumption~\ref{ass:uniform} and the marginal infrared divergence both hold.
+
+\begin{corollary}[Two-dimensional minimum-image marginal model]
+\label{cor:MI}
+For the sequence \eqref{eq:MI}, every finite $n\ge2$, and every $T>0$,
+\begin{equation}
+ \lim_{L\to\infty}
+ \langle|\bm M_L|^2\rangle_{L,0}=0.                   \label{eq:MI-result}
+\end{equation}
+\end{corollary}
+
+\subsection{Quantitative finite-size envelope at marginality}
+
+The same finite-volume ingredients give more than the limiting statement in
+Corollary~\ref{cor:MI}.  They quantify the doubly logarithmic obstruction
+directly for the zero-field observable.
+
+\begin{lemma}[Marginal reciprocal sum]
+\label{lem:quantitative-sum}
+For $h_L=T/L^2$, define
+\begin{equation}
+ A_L(h_L)=\frac1{L^2}\sum_{q\in\mathcal Q_L}
+ \frac1{h_L+E_L(q)}.
+\label{eq:quantitative-A}
+\end{equation}
+For every fixed $T>0$, there are constants $a_T>0$ and $L_T<\infty$ such
+that, for every even $L\ge L_T$,
+\begin{equation}
+ A_L(T/L^2)\ge a_T\log\log L.
+\label{eq:quantitative-sum}
+\end{equation}
+\end{lemma}
+
+\begin{proof}
+Equations~\eqref{eq:marginal-upper} and \eqref{eq:uniform-MI} imply that
+there are constants $B,C,K>0$ such that, for all sufficiently large even
+$L$ and $0<|q|\le1/2$,
+\begin{equation}
+ E_L(q)\le \frac{B}{L^2}+C|q|^2\log\frac K{|q|}.
+\label{eq:finite-L-kernel-upper}
+\end{equation}
+Represent momenta by $q_k=2\pi k/L$ with $k\in D_L$.  Fix
+$0<\alpha<(4\pi\sqrt2)^{-1}$ and let
+\begin{equation}
+ \mathcal S_m=\{k\in D_L:\|k\|_\infty=m\},
+ \qquad1\le m\le\lfloor\alpha L\rfloor.
+\end{equation}
+Every such shell contains exactly $8m$ points, and its momenta satisfy
+$2\pi m/L\le|q_k|\le2\pi\sqrt2m/L\le1/2$.  After enlarging a constant
+$D_T<\infty$, Eq.~\eqref{eq:finite-L-kernel-upper} gives uniformly on these
+shells
+\begin{equation}
+ h_L+E_L(q_k)
+ \le\frac{D_T}{L^2}
+ m^2\log\frac{K'L}{m}.
+\end{equation}
+Discarding the nonnegative zero mode and summing the remaining shells yields
+\begin{align}
+ A_L(h_L)
+ &\ge\frac8{D_T}
+ \sum_{m=1}^{\lfloor\alpha L\rfloor}
+ \frac1{m\log(K'L/m)} \nonumber\\
+ &\ge\frac8{D_T}
+ \left[
+  \log\log(K'L)
+  -\log\log\!\left(\frac{2K'}{\alpha}\right)
+ \right].
+\label{eq:shell-loglog}
+\end{align}
+The last line follows by comparison with the integral of
+$[x\log(K'L/x)]^{-1}$; $K'$ may be enlarged so that this function is
+decreasing throughout the summation range.  Equation~\eqref{eq:quantitative-sum}
+follows for all sufficiently large $L$.  The omitted zero mode is exactly
+$L^{-2}h_L^{-1}=1/T$, so it contributes no logarithmic growth.
+\end{proof}
+
+\begin{corollary}[Quantitative absence of vector LRO]
+\label{cor:quantitative-no-lro}
+For every finite $n\ge2$ and every fixed $T>0$, there are
+$C_{n,T},L_{n,T}<\infty$ such that, for every even $L\ge L_{n,T}$,
+\begin{equation}
+ \boxed{\displaystyle
+ \langle|\bm M_L|^2\rangle_{L,0}
+ \le\frac{C_{n,T}}{\sqrt{\log\log L}}.}
+\label{eq:quantitative-M2}
+\end{equation}
+\end{corollary}
+
+\begin{proof}
+Apply Eq.~\eqref{eq:master-bound} at $h_L=T/L^2$ and use
+Lemma~\ref{lem:quantitative-sum}:
+\begin{equation}
+ m_{L,h_L}
+ \le\frac1{\sqrt{(n-1)T A_L(h_L)}}.
+\end{equation}
+The finite-volume bridge \eqref{eq:bridge} is valid for this $L$-dependent
+field.  Since $\beta h_LL^2=1$, it gives
+\begin{equation}
+ \langle|\bm M_L|^2\rangle_{L,0}
+ \le\frac{n}{\tanh(1)}m_{L,h_L}.
+\end{equation}
+Combining the last two displays with Eq.~\eqref{eq:quantitative-sum} proves
+Eq.~\eqref{eq:quantitative-M2}.
+\end{proof}
+
+Equation~\eqref{eq:quantitative-M2} is a rigorous asymptotic upper envelope.
+Its constants are not optimized, and it is neither a matching lower bound nor
+an exact finite-size decay law.
+
+\subsection{The boundary of the criterion}
+
+For Eq.~\eqref{eq:power-law} with $0<\sigma<2$,
+\begin{equation}
+ E(q)\asymp |q|^\sigma,\qquad
+ \int_0^\delta\frac{k\,\dd k}{k^\sigma}<\infty.        \label{eq:sigma-lt2}
+\end{equation}
+This is the complementary finite-integral regime.  For $\sigma=2$, the
+integral grows as $\log\log L$; for
+$\sigma>2$, the leading analytic kernel is $q^2$ and the growth is
+$\log L$.  Figure~\ref{fig:ir-regimes} displays these three cases using
+their continuum proxy kernels.
+
+\begin{figure*}[t]
+ \centering
+ \includegraphics[width=0.94\textwidth]
+ {paper/figures/on_infrared_regimes.pdf}
+ \caption{\label{fig:ir-regimes}
+ Two-dimensional infrared regimes represented by deterministic continuum
+ proxies.  (a) For $\sigma<2$, $E_\sigma(k)=k^\sigma$; at the marginal
+ point $E_2(k)=k^2\log(e/k)$; above it the leading analytic form is $k^2$.
+ (b) The radial reciprocal integral with $k_{\min}=2\pi/L$ approaches a
+ finite limit for $\sigma=1.75$, grows as $\log\log L$ for $\sigma=2$, and
+ as $\log L$ for $\sigma=2.25$.  These curves illustrate the theorem's
+ infrared hypothesis; they are neither Monte Carlo measurements nor proof
+ premises.}
+\end{figure*}
+
+\section{What changes from XY to \texorpdfstring{$O(n)$}{O(n)}}
+\label{sec:on-vs-xy}
+
+Table~\ref{tab:on-comparison} summarizes the points at which the
+generalization is substantive.  The sphere geometry introduces no extra
+term because the chosen derivatives preserve the single-site measure.
+There is also no odd--even obstruction in the present proof.  Each
+$(1,a)$ plane is treated separately, and the inequalities are summed only
+after they are established.  Odd--even effects in some soft-spin
+fluctuation spectra concern a different approximation and do not alter
+Eq.~\eqref{eq:master-bound} \cite{Nussinov2001}.
+
+\begin{table*}[t]
+\caption{\label{tab:on-comparison}
+The XY proof and its hard-spin $O(n)$ extension.  The theorem has a common
+no-LRO conclusion, but it does not assert that the remaining phases have
+the same correlations or topological defects.}
+\centering
+\renewcommand{\arraystretch}{1.18}
+\resizebox{0.98\textwidth}{!}{%
+\begin{tabular}{lll}
+\toprule
+Step & XY, $n=2$ & General hard-spin $O(n)$\\
+\midrule
+Single-site calculus &
+\shortstack[l]{one periodic angle and\\$\partial_{\theta_x}$} &
+\shortstack[l]{sphere rotations generated by\\$\mathcal L_x^{1a}$}\\
+\addlinespace[4pt]
+Measure identity &
+periodic integration by parts &
+\shortstack[l]{invariance of surface measure\\under $SO(n)$}\\
+\addlinespace[4pt]
+Pair second variation &
+the planar spin scalar product &
+\shortstack[l]{$S_x^1S_y^1+S_x^aS_y^a$,\\a selected-plane projection}\\
+\addlinespace[4pt]
+Transverse budget &
+\shortstack[l]{one channel,\\$V\sum_x\sin^2\theta_x$} &
+\shortstack[l]{$n-1$ channels with total budget\\
+$V\sum_x[1-(S_x^1)^2]$}\\
+\addlinespace[4pt]
+Zero-field tensor &
+\shortstack[l]{$\langle(M^1)^2\rangle=$\\$\langle|\bm M|^2\rangle/2$} &
+\shortstack[l]{$\langle(M^1)^2\rangle=$\\$\langle|\bm M|^2\rangle/n$}\\
+\addlinespace[4pt]
+Possible no-order physics &
+\shortstack[l]{BKT and marginal logarithmic\\scenarios are relevant} &
+\shortstack[l]{no common BKT or correlation-law\\conclusion follows for $n\ge3$}\\
+\bottomrule
+\end{tabular}
+}
+\end{table*}
+
+The hard-spin constraint is used twice.  It bounds the internal-plane
+projection in Eq.~\eqref{eq:projection-bound}, and it makes
+$M_L^1\in[-1,1]$ in Lemma~\ref{lem:tilt}.  A soft-spin $\phi^4$ theory may
+obey a related no-order theorem, but it requires moment control and a
+modified tilt argument.  Likewise, a general compact homogeneous space
+would require enough divergence-free symmetry generators and a
+model-specific second-variation bound.  Those extensions cannot be inferred
+from the notation $O(n)$ alone.
+
+The spatial kernel itself does not depend on $n$.  Once $J_L$ is fixed,
+the deterministic calculation of $E_L(q)$ is common to XY, Heisenberg, and
+higher-component spins.  The component count enters the proof through the
+factor $n-1$ and through the isotropic zero-field factor $1/n$.  No
+component-by-component Monte Carlo campaign is needed to verify the
+Fourier-kernel premise.
+
+\section{Deterministic lattice audit}
+\label{sec:kernel-audit}
+
+For the normalized square lattice,
+\begin{equation}
+ \rhoLog=\frac{\pi\cinf}{2}
+ =1.042538785978\ldots.                                \label{eq:rho-log}
+\end{equation}
+We evaluated the exact minimum-image sum with
+\begin{equation}
+ 1-\cos(q\cdot R)=2\sin^2\!\left(\frac{q\cdot R}{2}\right)             \label{eq:stable-phase}
+\end{equation}
+to avoid small-angle cancellation.  Sizes range from $L=32$ to $8192$,
+and the four fixed momentum-index paths are
+$(1,0)$, $(2,0)$, $(1,1)$, and $(2,1)$.
+
+Let
+\begin{equation}
+ Y_L(\bm n)=
+ \frac{E_L(2\pi\bm n/L)}{|2\pi\bm n/L|^2},
+\end{equation}
+and define the intercept-free dyadic slope
+\begin{equation}
+ \rho_{\mathrm{eff}}(L;\bm n)
+ =
+ \frac{Y_{2L}(\bm n)-Y_L(\bm n)}{\log2}.                \label{eq:rho-effective}
+\end{equation}
+At the largest dyadic pair, the four relative discrepancies from
+\eqref{eq:rho-log} lie between $8.16\times10^{-7}$ and
+$9.05\times10^{-7}$.  Direct use of $1-\cos$ and the stable
+formula \eqref{eq:stable-phase} differs by $2.38\times10^{-12}$ relative at
+$L=8192$.
+
+\begin{figure*}[t]
+ \centering
+ \includegraphics[width=0.96\textwidth]
+ {paper/figures/kernel_audit.pdf}
+ \caption{\label{fig:kernel}
+ Deterministic audit of the exact minimum-image sequence.
+ (a) $E_L(\bm q)/|\bm q|^2$ has the same logarithmic slope on four momentum
+ paths.  (b) The intercept-free slope
+ \eqref{eq:rho-effective} converges to $\rhoLog$ with a final relative
+ discrepancy below $9.1\times10^{-7}$.
+ (c) The $L^2$-scaled normalization corrections remain bounded; the
+ certified uniform-kernel comparison has the expected relative
+ $O(1/\log L)$ scale at $\kmin$.  The calculation audits the model
+ convention and implementation.  Corollary~\ref{cor:MI} is analytic.}
+\end{figure*}
+
+The minimum-image omission changes $E_L(\kmin)$ by $O(L^{-2})$, while the
+marginal kernel itself is $O(L^{-2}\log L)$.  Thus the relative convention
+effect is only $O(1/\log L)$.  It vanishes in the thermodynamic limit but is
+of the same form used in finite-size intercept extrapolations.
+
+\section{The \texorpdfstring{$n=2$}{n=2} finite-size application}
+\label{sec:xy-application}
+
+The theorem settles only the existence of a positive thermodynamic
+magnetization.  It does not fix the asymptotic correlation law at
+$\sigma=2$.  To see why accessible XY data can appear ordered, consider the
+scaling family
+\begin{equation}
+ C_L(Lx)=A[\ell+\phi(x)]^{-p},\qquad
+ \ell=\log(L/L_0),\quad p>0.                           \label{eq:log-family}
+\end{equation}
+Expanding at large $\ell$,
+\begin{equation}
+ C_L(Lx)=A\ell^{-p}
+ \left[1-\frac{p\phi(x)}{\ell}+O(\ell^{-2})\right].    \label{eq:log-expansion}
+\end{equation}
+The constant spatial term survives at zero momentum and cancels at a
+nonzero torus momentum.  Consequently,
+\begin{align}
+ \langle|\bm M_L|^2\rangle
+ &\sim A\ell^{-p},                                      \label{eq:M2-log}\\
+ \langle|\bm M_{\kmin}|^2\rangle
+ &\sim Bp\,\ell^{-p-1},                                \label{eq:Mk-log}\\
+ \chi_{\kmin}
+ &\sim BpL^2\ell^{-p-1},                               \label{eq:chi-log}\\
+ \left(\frac{\xi}{L}\right)^2
+ &\sim\frac{\ell}{p}.                                  \label{eq:xi-log}
+\end{align}
+For small $p$, Eqs.~\eqref{eq:chi-log}--\eqref{eq:xi-log} look like
+$L^2/\log L$ and $\log L$, while Eq.~\eqref{eq:M2-log} changes by only a few
+percent.
+
+The public Zenodo record \cite{YaoData2025} provides run-level means and
+reported uncertainties, not synchronized bin means or empirical
+cross-observable covariance.  We therefore treat the following calculations
+as identifiability diagnostics, not as a replacement for a covariance-aware
+reanalysis of the underlying measurements.  On 32 registered
+$(\beta,L_{\min})$ windows, AICc selects the logarithmic model in 29, a BKT
+model in two, and an ordered model in one.  Profiling a common correlation
+coefficient over $[-0.95,0.95]$ leaves 29 windows logarithmic-only, two
+logarithmic/ordered ambiguous, and one ordered-only.
+
+\begin{figure*}[t]
+ \centering
+ \includegraphics[width=0.93\textwidth]
+ {paper/figures/window_comparison.pdf}
+ \caption{\label{fig:windows}
+ Registered finite-size model comparison for the public XY summaries.
+ (a) AICc winners across inverse temperatures and lower fit cutoffs.
+ (b) Signed AICc separation between the BKT and logarithmic candidates.
+ The changing window contains genuine model-selection information: a
+ positive intercept obtained from a single cutoff is not an asymptotic
+ lower bound.  Missing synchronized covariance prevents this figure from
+ serving as a definitive statistical test.}
+\end{figure*}
+
+An exact Gaussian compact-phase calculation supplies a control with a known
+zero asymptote and the same marginal kernel.  Fitting those sequences to an
+ordered intercept form gives positive intercepts in all 12 combinations of
+four temperatures and three lower cutoffs.  The fitted values range from
+$0.504$ to $0.923$, despite the analytically known zero limit.
+
+\begin{figure*}[t]
+ \centering
+ \includegraphics[width=0.93\textwidth]
+ {paper/figures/gaussian_false_intercept.pdf}
+ \caption{\label{fig:gaussian}
+ Known-zero Gaussian control using the marginal kernel.
+ (a) The squared magnetization varies slowly over the simulated size range
+ while tending to zero analytically.  (b) An ordered-intercept fit returns a
+ positive $\widehat g_0$ in all 12 registered temperature/window
+ combinations.  The control demonstrates finite-window false positives; it
+ is not a claim that vortices or nonlinear effects are Gaussian.}
+\end{figure*}
+
+Synthetic recovery tests quantify the remaining overlap.  For
+$L_{\min}=256$, $L_{\max}=4096$, and the reported error scale, the correct
+recovery probabilities for logarithmic and BKT truths are only
+$0.738$--$0.829$ at $\beta=4,8$, whereas ordered truths are recovered with
+probability $0.935$--$0.970$.  This asymmetry explains why an
+ordered-looking plateau is easier to identify than an exceptionally slow
+zero asymptote.
+
+\begin{figure*}[t]
+ \centering
+ \includegraphics[width=0.93\textwidth]
+ {paper/figures/identifiability_covariance.pdf}
+ \caption{\label{fig:identifiability}
+ Sensitivity to unavailable covariance and finite-window identifiability.
+ (a) Winner sets obtained by profiling the registered covariance range.
+ (b) Synthetic recovery at $L_{\min}=256$ and $L_{\max}=4096$; the dashed
+ line marks a 90\% target.  Slow no-order alternatives remain below that
+ target at the public precision.  Synchronized bins or jackknife replicas
+ are required for a final joint likelihood.}
+\end{figure*}
+
+The theorem and these diagnostics answer different questions.
+Theorem~\ref{thm:main} excludes a positive thermodynamic intercept under its
+stated model hypotheses.  The fits explain how a finite data set can remain
+consistent with such an intercept.  They do not establish whether the
+ultimate $n=2$ correlations are logarithmic or algebraic.
+
+\section{Relation to rigorous results}
+\label{sec:literature}
+
+Mermin's classical inequality \cite{Mermin1967} provides the conceptual
+ancestor of Eqs.~\eqref{eq:gibbs-ibp-one}--\eqref{eq:classical-bog}.
+Nussinov \cite{Nussinov2001} formulates classical $O(n)$ rotations with
+\begin{equation}
+ L_{\alpha\gamma}
+ =
+ S_\alpha\partial_{S_\gamma}
+ -
+ S_\gamma\partial_{S_\alpha}
+\end{equation}
+and derives the invariant-measure integration by parts.  Some displayed
+steps there are specialized to $n=2$; the projected pair variation and
+the combined $n-1$ transverse budget in
+Eqs.~\eqref{eq:pair-variation}--\eqref{eq:parseval-budget} make the present
+finite-volume statement explicit for general hard spins.
+
+Bruno's theorem \cite{Bruno2001} is a quantum-spin magnetization result.
+Its Fourier criterion includes the marginal $d=2$, $\alpha=4$ point, but no
+formal $S\to\infty$ limit is needed here.  Messager,
+Miracle-Sol\'e, and Ruiz \cite{Messager1984} obtain pointwise correlation
+bounds for fixed $SO(n)$-symmetric long-range systems.  Ioffe, Shlosman,
+and Velenik \cite{Ioffe2002} prove invariance of Gibbs states for recurrent
+interaction walks under broad compact-symmetry hypotheses.  For
+$J(R)\propto r^{-4}$,
+\begin{equation}
+ 1-\widehat p(q)\propto q^2\log(1/q),
+\end{equation}
+and the associated walk is recurrent.  These results support the same
+no-symmetry-breaking conclusion in their respective infinite-volume
+settings.
+
+The contribution here is narrower in microscopic scope and more direct in
+finite-volume observables.  It permits an explicitly size-dependent
+minimum-image interaction sequence, keeps the physical order of limits, and
+ends at the zero-field squared magnetization without invoking an
+infinite-volume ergodic decomposition.
+
+\section{Limitations and open questions}
+\label{sec:limitations}
+
+The theorem proves absence of vector LRO.  It does not prove exponential
+clustering, a mass gap, a universal logarithmic exponent, or a common phase
+diagram for all $n$.  For $n=2$, a harmonic treatment of
+Eq.~\eqref{eq:intro-marginal} suggests
+\begin{equation}
+ C(r)\sim[\log r]^{-p(T)},                              \label{eq:spin-wave-log}
+\end{equation}
+but the compact field also contains vortices.  Renormalization-group
+analyses around a short-range BKT line give a local long-range eigenvalue
+\begin{equation}
+ \Delta_g=2-\sigma-\eta_{\rm sr},                       \label{eq:rg-eigenvalue}
+\end{equation}
+which is negative at $\sigma=2$ when $\eta_{\rm sr}>0$
+\cite{Giachetti2021}.  Recent coupled spin-wave--vortex work likewise
+supports persistence of BKT behavior \cite{Walther2026}.  Neither statement
+is an exact global theorem selecting the eventual correlation law.
+
+For $n\ge3$, the XY vortex mechanism does not carry over unchanged.  The
+finite-volume inequality rules out magnetization but supplies no
+$n$-independent replacement for the BKT description.  Establishing
+clustering or a correlation-length law requires additional methods.
+
+A soft-spin extension is plausible but not automatic.  One would need
+uniform control of the unbounded radial moments, a denominator estimate that
+survives the radial potential, and a replacement for the bounded tilt
+Lemma~\ref{lem:tilt}.  A target-manifold extension would require a family of
+measure-preserving Killing fields whose squared actions control the chosen
+order parameter.  Frustrated interactions would require an absolute-coupling
+kernel or a different denominator bound.  These are distinct theorems, not
+corollaries of Theorem~\ref{thm:main}.
+
+\section{Conclusion}
+
+The classical hard-spin $O(n)$ generalization closes without an XY-specific
+failure.  Its nontrivial ingredients are the invariant rotation calculus on
+$S^{n-1}$, the selected-plane form of the pair second variation, and the
+shared Parseval budget of all $n-1$ transverse modes.  Together they give the
+finite-volume estimate \eqref{eq:master-bound}.  Uniform kernel convergence
+and the regulated infrared divergence eliminate a field-selected
+magnetization, while the bounded exponential tilt transfers that conclusion
+to the zero-field squared magnetization.
+
+In two dimensions, finite-second-moment interactions and the marginal
+$1/r^4$ interaction satisfy the infrared hypothesis.  The precise
+minimum-image, size-normalized torus sequence converges uniformly to that
+fixed model, so its thermodynamic squared magnetization vanishes for every
+finite $n\ge2$ and $T>0$.  More quantitatively, the zero-field squared
+magnetization is bounded above by
+$C_{n,T}/\sqrt{\log\log L}$ for all sufficiently large even $L$.  This
+envelope makes the marginal obstruction explicit without claiming a sharp
+rate at accessible sizes.  The deterministic kernel calculation confirms
+the model convention and exact logarithmic coefficient; the public-data
+tests show why the XY finite-size sequence can nevertheless resemble a
+positive plateau.  The result is a generic theorem for the stated class of
+classical $O(n)$ spin systems, not a theorem for every two-dimensional
+continuous field theory.
+
+\begin{acknowledgments}
+Acknowledgments, funding information, and the final author list will be
+added before submission.
+\end{acknowledgments}
+
+\appendix
+
+\section{Matrix form of the pair identity}
+\label{app:matrix}
+
+Let $G^{1a}$ be the antisymmetric $n\times n$ matrix with
+\begin{equation}
+ G^{1a}_{1a}=-1,\qquad G^{1a}_{a1}=1,
+\end{equation}
+and all other entries zero.  For a column vector $s$,
+$G^{1a}s$ is tangent to $S^{n-1}$ and
+\begin{equation}
+ (G^{1a})^2=-P_{1a},
+\end{equation}
+where $P_{1a}$ projects onto the $(1,a)$ plane.  For
+$f(s,t)=-J\,s^\mathsf Tt$,
+\begin{align}
+ \partial_s^2f
+ &=-J[(G^{1a})^2s]^\mathsf Tt
+ =J\,s^\mathsf TP_{1a}t,\\
+ \partial_t^2f
+ &=-Js^\mathsf T(G^{1a})^2t
+ =J\,s^\mathsf TP_{1a}t,\\
+ \partial_s\partial_tf
+ &=-J(G^{1a}s)^\mathsf T(G^{1a}t)
+ =-J\,s^\mathsf TP_{1a}t.
+\end{align}
+The Hermitian Fourier combination is therefore
+\begin{align}
+ &|u|^2\partial_s^2f+\bar uv\,\partial_s\partial_tf
+ +\bar vu\,\partial_t\partial_sf+|v|^2\partial_t^2f\nonumber\\
+ &\qquad =
+ J|u-v|^2s^\mathsf TP_{1a}t,
+\end{align}
+which is Eq.~\eqref{eq:pair-variation}.  This derivation also shows that
+components orthogonal to the selected plane do not enter the second
+variation.
+
+\section{A covariance proof used in the tilt lemma}
+\label{app:covariance}
+
+For a real random variable $Q$ and nondecreasing functions $f$ and $g$, let
+$Q'$ be an independent copy.  Then
+\begin{align}
+ 2\operatorname{Cov}(f(Q),g(Q))
+ &=
+ \Exp\!\left\{[f(Q)-f(Q')]\right.\nonumber\\
+ &\qquad\left.\times[g(Q)-g(Q')]\right\}\ge0.           \label{eq:chebyshev}
+\end{align}
+Taking $Q=|X|$, $f(Q)=Q^2$, and $g(Q)=\cosh(tQ)$ proves the covariance step
+in Lemma~\ref{lem:tilt}.  Compactness enters through $Q\le1$ in the
+concavity bound $\tanh(tQ)\ge Q\tanh(t)$.
+
+\section{Reproducibility record}
+\label{app:reproducibility}
+
+The proof identities are checked by deterministic scripts for
+$n=2,3,4,8$.  The maximum residual in the pair second-variation identity is
+$2.7\times10^{-15}$, and the discrete transverse Parseval identity is
+verified to floating-point precision.  Negative projected-pair samples are
+included to guard against replacing the averaged positivity
+\eqref{eq:gibbs-ibp-two} by an incorrect pointwise statement.
+
+The committed machine-readable records are stored as
+\begin{center}
+\begin{minipage}{0.92\columnwidth}
+\ttfamily
+artifacts/on\_theorem\_audit.json\\
+artifacts/on\_infrared\_regimes.json\\
+artifacts/kernel\_audit.json
+\end{minipage}
+\end{center}
+The figure generator reads only these versioned records and writes vector
+PDFs with fixed metadata.  The numerical certificates are regression checks
+of algebra, conventions, and implementation; none is substituted for an
+analytic step in Theorem~\ref{thm:main}.
+
+\bibliography{paper/references}
+
+\end{document}
