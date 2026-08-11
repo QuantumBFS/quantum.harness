@@ -1,0 +1,9 @@
+L: 6
+t: 1.0
+delta: 0.5
+Delta: 0.3
+theta: 6.283185307179586
+N_up: 3
+N_down: 3
+full_spectrum: true
+output_dir: ../../results/baseline-ed

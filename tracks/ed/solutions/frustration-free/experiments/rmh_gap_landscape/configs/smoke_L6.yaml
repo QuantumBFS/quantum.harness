@@ -1,0 +1,11 @@
+L: 6
+U: 12.0
+t: 1.0
+n_delta: 13
+n_Delta: 17
+delta_min: -1.0
+delta_max: 1.0
+Delta_min: -8.0
+Delta_max: 8.0
+method: "dense"
+output_dir: "results/rmh_gap_landscape/L6_smoke"

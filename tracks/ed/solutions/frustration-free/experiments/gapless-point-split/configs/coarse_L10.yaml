@@ -1,0 +1,22 @@
+L: 10
+U_list: [0.0, 0.2, 0.5, 1.0]
+t: 1.0
+
+# Coarse scan grid (reduced resolution for L=10 due to cost)
+delta_min: -1.0
+delta_max: 1.0
+n_delta: 31
+Delta_min: -4.0
+Delta_max: 4.0
+n_Delta: 41
+
+# Refinement parameters
+refine:
+  eps: 0.01
+  delta_window: 0.2
+  Delta_window: 0.8
+  n_delta_fine: 21
+  n_Delta_fine: 21
+  merge_distance: 2
+
+method: "sparse"

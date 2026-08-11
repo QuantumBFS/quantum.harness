@@ -1,0 +1,17 @@
+[01/16] compact_start-0of1_ccw_uniform
+[02/16] compact_start-0of1_cw_uniform
+[03/16] reference_start-0of1_ccw_arclength
+[04/16] reference_start-0of1_ccw_modulated
+[05/16] reference_start-0of1_ccw_uniform
+[06/16] reference_start-0of1_cw_arclength
+[07/16] reference_start-0of1_cw_modulated
+[08/16] reference_start-0of1_cw_uniform
+[09/16] reference_start-1of2_ccw_uniform
+[10/16] reference_start-1of2_cw_uniform
+[11/16] reference_start-1of8_ccw_uniform
+[12/16] reference_start-1of8_cw_uniform
+[13/16] reference_start-5of8_ccw_uniform
+[14/16] reference_start-5of8_cw_uniform
+[15/16] wide-shift_start-0of1_ccw_uniform
+[16/16] wide-shift_start-0of1_cw_uniform
+{"cases": 16, "output": "results/response_delay"}
