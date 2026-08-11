@@ -1,0 +1,17 @@
+{
+  "complete": true,
+  "converged": true,
+  "interpretation": "independent coarse-backend diagnostic; not a convergence refinement",
+  "method": "coarse_uniform_tempo_vs_oqupy_cross_validation",
+  "metrics": {
+    "connected_correlation_relative_l1": 0.28171563084762685,
+    "continuous_heat_relative_l1": 0.51707850109946,
+    "phase_state_frobenius": 0.373843235587285
+  },
+  "oqupy_fingerprint": "1639ce757970ef3819ad72ab1cd7d40b2c1a3527f5e53a6b6d57c2fff34e847e",
+  "projected_odd_j_invariance": {
+    "coupling_frobenius_residual": 0.0,
+    "h0_frobenius_residual": 0.0
+  },
+  "uniform_fingerprint": "97688130575f00aa3234cef5ca7abff20ab1214cd5a472355cb3f7bd78b7a5a4"
+}

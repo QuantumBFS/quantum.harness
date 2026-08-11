@@ -1,0 +1,51 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "floquet-if-manybody"
+version = "0.1.0"
+description = "Reproducible N=2,3 study for quantum.harness issue 123"
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "AGPL-3.0-or-later"}
+dependencies = [
+  "numpy>=1.26,<2.0",
+  "scipy>=1.14",
+  "matplotlib>=3.9",
+  "PyYAML>=6.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.3",
+  "ruff>=0.9",
+  "mypy>=1.14",
+]
+nonmarkov = [
+  "oqupy==0.5.0",
+]
+
+[project.scripts]
+floquet-if = "floquet_if_manybody.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/floquet_if_manybody"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+ignore_missing_imports = true
+disallow_any_generics = false
+packages = ["floquet_if_manybody"]

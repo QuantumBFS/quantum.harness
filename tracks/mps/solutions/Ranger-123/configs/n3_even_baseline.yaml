@@ -1,0 +1,13 @@
+model:
+  n: 3
+  j: 0.5
+  omega: 1.0
+  drive_amplitude: 0.2
+  drive_frequency: 0.4450418679126287
+  normalization: bounded
+bath:
+  alpha: 0.05
+  cutoff: 2.5
+  temperature: 0.0
+sector: even
+method: floquet_markov

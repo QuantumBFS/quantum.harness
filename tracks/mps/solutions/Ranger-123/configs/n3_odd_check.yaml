@@ -1,0 +1,9 @@
+model:
+  n: 3
+  j: 1.0
+  omega: 1.0
+  drive_amplitude: 0.2
+  drive_frequency: 1.0
+  normalization: bounded
+sector: odd
+method: closed

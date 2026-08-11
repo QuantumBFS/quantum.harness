@@ -1,0 +1,31 @@
+{
+  "h0": {
+    "real": [[0.0, 0.5], [0.5, 0.0]],
+    "imag": [[0.0, 0.0], [0.0, 0.0]]
+  },
+  "coupling": {
+    "real": [[1.0, 0.0], [0.0, -1.0]],
+    "imag": [[0.0, 0.0], [0.0, 0.0]]
+  },
+  "model": {
+    "drive_amplitude": 0.2,
+    "drive_frequency": 1.0
+  },
+  "bath": {
+    "alpha": 0.01,
+    "cutoff": 2.5,
+    "temperature": 0.0
+  },
+  "controls": {
+    "steps_per_period": 8,
+    "tolerance": 0.001,
+    "phase_offsets": [0, 4],
+    "delay_steps": 4,
+    "auto_nc": false,
+    "memory_cutoff": 6,
+    "low_rank_svd": false,
+    "truncation": "rel",
+    "cap_rank": 100,
+    "max_rank": 1000
+  }
+}
