@@ -1,0 +1,7 @@
+clarabel>=0.10,<1
+cvxpy>=1.6,<2
+hypertiling>=1.3,<2
+matplotlib>=3.8,<4
+networkx>=3.2,<4
+numpy>=1.26,<3
+scipy>=1.11,<2

@@ -1,0 +1,845 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>From Five-Site Clusters to the Infinite Hyperbolic Lattice</title>
+  <style>
+    :root {
+      --ink: #18202a;
+      --muted: #56616e;
+      --paper: #f3f0e9;
+      --card: #fffdf8;
+      --navy: #17384f;
+      --blue: #2774a6;
+      --teal: #087f79;
+      --teal-pale: #dff3ef;
+      --orange: #d86b2b;
+      --orange-pale: #fae7d8;
+      --red: #a53636;
+      --red-pale: #f8dede;
+      --green: #347653;
+      --green-pale: #e0f1e6;
+      --purple: #68539b;
+      --purple-pale: #eee8fa;
+      --line: #d8d2c6;
+      --shadow: 0 16px 42px rgba(18, 35, 47, .10);
+      --sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --serif: Charter, "Bitstream Charter", Georgia, serif;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; scroll-padding-top: 1rem; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 10% 0%, rgba(8,127,121,.11), transparent 30rem),
+        radial-gradient(circle at 95% 30%, rgba(216,107,43,.08), transparent 26rem),
+        var(--paper);
+      font-family: var(--sans);
+      line-height: 1.58;
+    }
+    a { color: #075f7d; text-decoration-thickness: .08em; text-underline-offset: .16em; }
+    a:hover { color: var(--orange); }
+    h1, h2, h3 { color: var(--navy); line-height: 1.15; }
+    h1, h2 { font-family: var(--serif); }
+    h1 { margin: .2rem 0 1rem; font-size: clamp(2.6rem, 6vw, 5.8rem); letter-spacing: -.025em; }
+    h2 { margin: 0 0 1.2rem; font-size: clamp(2rem, 4vw, 3.4rem); }
+    h3 { margin: 1.35rem 0 .55rem; font-size: 1.18rem; }
+    p { margin: .65rem 0 1rem; }
+    ul, ol { padding-left: 1.35rem; }
+    li + li { margin-top: .4rem; }
+    code { font-family: var(--mono); font-size: .9em; }
+    strong { color: #102f45; }
+
+    .topbar {
+      position: fixed;
+      z-index: 20;
+      top: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: .58rem clamp(.8rem, 3vw, 2rem);
+      color: #e8f4f3;
+      background: rgba(20,48,65,.96);
+      border-bottom: 1px solid rgba(255,255,255,.12);
+      backdrop-filter: blur(12px);
+    }
+    .topbar strong { color: white; font-size: .86rem; }
+    .topbar nav { display: flex; gap: .25rem; flex-wrap: wrap; justify-content: flex-end; }
+    .topbar a { padding: .22rem .48rem; color: #cde1e0; font-size: .72rem; text-decoration: none; border-radius: .3rem; }
+    .topbar a:hover { color: white; background: rgba(255,255,255,.10); }
+
+    main { padding-top: 2.8rem; }
+    .slide {
+      width: min(1120px, calc(100% - 2rem));
+      min-height: min(760px, calc(100vh - 5rem));
+      margin: 1.15rem auto 2.2rem;
+      padding: clamp(1.5rem, 4.5vw, 4.5rem);
+      position: relative;
+      overflow: hidden;
+      background: rgba(255,253,248,.96);
+      border: 1px solid rgba(111,101,85,.19);
+      border-radius: 1.1rem;
+      box-shadow: var(--shadow);
+    }
+    .slide::after {
+      content: attr(data-slide);
+      position: absolute;
+      right: 1.3rem;
+      bottom: .8rem;
+      color: #9a958b;
+      font-family: var(--mono);
+      font-size: .72rem;
+    }
+    .title-slide {
+      display: grid;
+      align-content: center;
+      background:
+        linear-gradient(125deg, rgba(255,253,248,.97), rgba(255,253,248,.82)),
+        repeating-linear-gradient(60deg, rgba(8,127,121,.13) 0 1px, transparent 1px 38px);
+    }
+    .title-slide .subtitle { max-width: 56rem; color: var(--muted); font-family: var(--serif); font-size: clamp(1.12rem, 2vw, 1.55rem); }
+    .eyebrow { color: var(--teal); font-weight: 850; font-size: .76rem; letter-spacing: .15em; text-transform: uppercase; }
+    .byline { margin-top: 2rem; color: var(--muted); font-size: .88rem; }
+    .byline strong { color: var(--navy); }
+
+    .takeaway {
+      margin: 1.35rem 0;
+      padding: 1.05rem 1.2rem;
+      border-left: .38rem solid var(--orange);
+      border-radius: .2rem .65rem .65rem .2rem;
+      background: var(--orange-pale);
+      font-family: var(--serif);
+      font-size: 1.12rem;
+    }
+    .takeaway.good { border-left-color: var(--green); background: var(--green-pale); }
+    .takeaway.method { border-left-color: var(--teal); background: var(--teal-pale); }
+    .takeaway.caution { border-left-color: var(--red); background: var(--red-pale); }
+
+    .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.15rem; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
+    .card {
+      padding: 1rem 1.05rem;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: .72rem;
+      box-shadow: 0 5px 16px rgba(18,35,47,.045);
+    }
+    .card h3 { margin-top: .1rem; }
+    .card.atomic { border-top: .33rem solid var(--green); }
+    .card.rooted { border-top: .33rem solid var(--teal); }
+    .card.ed { border-top: .33rem solid var(--purple); }
+    .label {
+      display: inline-block;
+      margin-bottom: .45rem;
+      padding: .2rem .48rem;
+      border-radius: 999px;
+      color: white;
+      background: var(--navy);
+      font-size: .7rem;
+      font-weight: 800;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+    }
+    .label.exact { background: var(--green); }
+    .label.thermo { background: var(--teal); }
+    .label.diagnostic { background: var(--purple); }
+    .label.caution { background: var(--red); }
+
+    .equation {
+      margin: 1.05rem 0;
+      padding: 1rem;
+      overflow-x: auto;
+      color: #12334a;
+      background: #eef4f7;
+      border: 1px solid #cfdee5;
+      border-radius: .65rem;
+      font-family: var(--serif);
+      font-size: clamp(1rem, 2vw, 1.28rem);
+      text-align: center;
+    }
+    .equation small { display: block; margin-top: .45rem; color: var(--muted); font-family: var(--sans); font-size: .74rem; }
+
+    .table-wrap { overflow-x: auto; margin: 1rem 0; }
+    table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+    th, td { padding: .62rem .7rem; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+    th { color: var(--navy); background: #edf2f3; font-size: .76rem; letter-spacing: .025em; }
+    tr:last-child td { border-bottom: 0; }
+    td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+    .yes { color: var(--green); font-weight: 800; }
+    .no { color: var(--red); font-weight: 800; }
+    .partial { color: #a05d00; font-weight: 800; }
+
+    .diagram {
+      padding: .8rem;
+      background: linear-gradient(180deg, #fbfdfc, #f2f5f3);
+      border: 1px solid var(--line);
+      border-radius: .75rem;
+    }
+    .diagram svg { display: block; width: 100%; height: auto; }
+    .node { fill: white; stroke: var(--navy); stroke-width: 3; }
+    .root { fill: var(--orange); stroke: #9b451c; stroke-width: 3; }
+    .bond { stroke: var(--navy); stroke-width: 4; stroke-linecap: round; }
+    .outside { fill: #e4ebe9; stroke: #819894; stroke-width: 2; stroke-dasharray: 5 5; }
+    .fadebond { stroke: #9db0ac; stroke-width: 2.5; stroke-dasharray: 6 6; }
+    .svg-label { fill: var(--navy); font: 700 14px var(--sans); }
+    .svg-small { fill: var(--muted); font: 12px var(--sans); }
+
+    .flow { display: grid; grid-template-columns: 1fr auto 1fr auto 1fr; gap: .6rem; align-items: stretch; margin: 1.1rem 0; }
+    .flow .step { padding: .9rem; border: 1px solid var(--line); border-radius: .65rem; background: white; text-align: center; }
+    .flow .arrow { align-self: center; color: var(--orange); font-size: 1.7rem; font-weight: 900; }
+    .flow strong { display: block; margin-bottom: .25rem; }
+
+    .plot { display: block; width: 100%; padding: .35rem; background: white; border: 1px solid var(--line); border-radius: .7rem; }
+    .caption { margin-top: .4rem; color: var(--muted); font-size: .76rem; }
+
+    .status-line { display: flex; gap: .7rem; align-items: flex-start; margin: .7rem 0; }
+    .status-line .symbol { flex: 0 0 2rem; display: grid; place-items: center; height: 2rem; border-radius: 50%; color: white; background: var(--teal); font-weight: 900; }
+    .status-line.bad .symbol { background: var(--red); }
+    .status-line.unknown .symbol { background: #9a7215; }
+
+    .compare-band {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      margin: 1rem 0;
+      border: 1px solid var(--line);
+      border-radius: .8rem;
+      overflow: hidden;
+    }
+    .compare-band > div { padding: 1.1rem; }
+    .compare-band > div:first-child { background: var(--purple-pale); }
+    .compare-band > div:last-child { background: var(--teal-pale); }
+
+    .verdict {
+      padding: 1.3rem;
+      color: white;
+      background: linear-gradient(135deg, var(--navy), #19525b);
+      border-radius: .85rem;
+    }
+    .verdict strong { color: white; }
+    .verdict ul { margin-bottom: 0; }
+
+    .small { color: var(--muted); font-size: .82rem; }
+    .mono { font-family: var(--mono); }
+    .nowrap { white-space: nowrap; }
+    .center { text-align: center; }
+    .spacer { height: .4rem; }
+
+    @media (max-width: 850px) {
+      .topbar nav { display: none; }
+      .slide { width: min(100% - 1rem, 1120px); min-height: 0; padding: 1.35rem; border-radius: .75rem; }
+      .grid-2, .grid-3, .compare-band { grid-template-columns: 1fr; }
+      .flow { grid-template-columns: 1fr; }
+      .flow .arrow { transform: rotate(90deg); justify-self: center; }
+    }
+
+    @media print {
+      body { background: white; }
+      .topbar { display: none; }
+      main { padding: 0; }
+      .slide {
+        width: 100%;
+        min-height: 0;
+        margin: 0;
+        padding: 1.1cm;
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+        break-after: page;
+      }
+      .slide::after { right: .4cm; bottom: .2cm; }
+      a { color: inherit; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <strong>Issue #92 · many-body physics talk</strong>
+    <nav aria-label="Talk sections">
+      <a href="#answer">answer</a>
+      <a href="#model">model</a>
+      <a href="#ed-cluster">ED</a>
+      <a href="#sdp">SDP</a>
+      <a href="#atomic">atomic</a>
+      <a href="#rooted">rooted</a>
+      <a href="#results">results</a>
+      <a href="#verdict">verdict</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="slide title-slide" id="title" data-slide="00">
+      <div class="eyebrow">A report for many-body physicists</div>
+      <h1>From five-site clusters to the infinite hyperbolic lattice</h1>
+      <p class="subtitle">What our issue #92 prototype actually computes, why the SDP can speak about the thermodynamic limit without finite-size extrapolation, and why the present non-atomic numbers are not yet the final physics result.</p>
+      <div class="takeaway caution">
+        <strong>The honest headline:</strong> we now have the complete hierarchy engine and an exact-projected complete-level atomic validation, alongside the older weak thermodynamic test and finite-cluster diagnostics. We do <em>not</em> yet have verified non-atomic bulk-gap bounds or the completed Target 2 campaign requested by the challenge.
+      </div>
+      <p class="byline"><strong>Issue #92 research stage I</strong> · 29 July 2026 · Bose–Hubbard model with finite occupation cutoff</p>
+    </section>
+
+    <section class="slide" id="answer" data-slide="01">
+      <div class="eyebrow">Start with the answer</div>
+      <h2>We performed three calculations—but they answer three different questions</h2>
+      <div class="grid-3">
+        <article class="card atomic">
+          <span class="label exact">exact benchmark</span>
+          <h3>Atomic SDP</h3>
+          <p><strong>Physical system:</strong> the infinite lattice at <span class="nowrap">t = 0</span>, where every site decouples.</p>
+          <p><strong>Question:</strong> does the state-polynomial gap test recover the analytically known local particle/hole gap?</p>
+          <p><strong>Answer:</strong> yes, Δ = 0.5 for <span class="nowrap">U = 1, μ = 0.5</span>.</p>
+          <p class="small"><span class="yes">Thermodynamic:</span> yes, exactly for this factorized limit.</p>
+        </article>
+        <article class="card rooted">
+          <span class="label thermo">thermodynamic outer test</span>
+          <h3>Root-local outer test</h3>
+          <p><strong>Physical system:</strong> an unknown infinite-lattice ground state, represented only through local correlations near one root.</p>
+          <p><strong>Question:</strong> can any infinite, U(1)-invariant ground state with assumed gap γ satisfy these local constraints?</p>
+          <p><strong>Answer:</strong> low γ up to 0.10 is not excluded; the first level is too weak for the desired study.</p>
+          <p class="small"><span class="partial">Thermodynamic implication:</span> yes; <span class="partial">complete hierarchy:</span> no.</p>
+        </article>
+        <article class="card ed">
+          <span class="label diagnostic">finite diagnostic</span>
+          <h3>Finite ED</h3>
+          <p><strong>Physical system:</strong> one open radius-one cluster containing only 4 or 5 sites.</p>
+          <p><strong>Question:</strong> are the Hamiltonian signs, cutoffs, number sectors, local observables, and qualitative trends sensible?</p>
+          <p><strong>Answer:</strong> yes; increasing hopping lowers the finite-cluster gap and increases number fluctuations/coherence.</p>
+          <p class="small"><span class="no">Thermodynamic:</span> no bound and no extrapolation.</p>
+        </article>
+      </div>
+      <div class="takeaway">The previous report mixed these evidence classes. This talk keeps them separate from the beginning.</div>
+    </section>
+
+    <section class="slide" id="model" data-slide="02">
+      <div class="eyebrow">The physical target</div>
+      <h2>A bulk particle/hole gap in an infinite truncated Bose–Hubbard model</h2>
+      <div class="equation">
+        H = −t Σ<sub>⟨ij⟩</sub>(b<sub>i</sub><sup>†</sup>b<sub>j</sub> + b<sub>j</sub><sup>†</sup>b<sub>i</sub>)
+        + (U/2) Σ<sub>i</sub> n<sub>i</sub>(n<sub>i</sub>−1) − μ Σ<sub>i</sub> n<sub>i</sub>, &nbsp; U = 1
+      </div>
+      <div class="grid-2">
+        <div>
+          <h3>Physics</h3>
+          <ul>
+            <li><strong>Small t:</strong> repulsion favors roughly one boson per site—a unit-filling Mott state.</li>
+            <li><strong>Larger t:</strong> hopping favors delocalization, number fluctuations, and phase coherence.</li>
+            <li>The bulk gap measures the minimum energy cost of a localized bulk excitation above the infinite-volume ground state.</li>
+          </ul>
+          <p>We monitor density ρ<sub>0</sub> = ⟨n<sub>0</sub>⟩, unit-filling deviation F<sub>0</sub> = ⟨(n<sub>0</sub>−1)<sup>2</sup>⟩, and hopping coherence K<sub>0</sub>.</p>
+        </div>
+        <div>
+          <h3>Three infinite graphs</h3>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>geometry</th><th>coordination z</th><th>first local loop</th></tr></thead>
+              <tbody>
+                <tr><td>{8,3}</td><td class="num">3</td><td>octagon</td></tr>
+                <tr><td>{12,4}</td><td class="num">4</td><td>dodecagon</td></tr>
+                <tr><td>L({8,3})</td><td class="num">4</td><td>triangle</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="small">The line graph turns each edge of {8,3} into a site. Three parent edges meeting at a vertex become a triangle, producing a kagome-like local motif.</p>
+        </div>
+      </div>
+      <div class="takeaway method">The challenge is not merely to estimate a finite spectrum; it asks for an upper bound on the gap of the infinite cutoff Hamiltonian.</div>
+    </section>
+
+    <section class="slide" id="ed-cluster" data-slide="03">
+      <div class="eyebrow">What finite ED diagonalizes</div>
+      <h2>The “slice of lattice” is exactly one open radius-one ball</h2>
+      <div class="grid-3">
+        <div class="diagram">
+          <svg viewBox="0 0 260 235" role="img" aria-label="Four-site star for the radius-one ball of the 8,3 lattice">
+            <line class="bond" x1="130" y1="112" x2="130" y2="32"/>
+            <line class="bond" x1="130" y1="112" x2="55" y2="175"/>
+            <line class="bond" x1="130" y1="112" x2="205" y2="175"/>
+            <circle class="root" cx="130" cy="112" r="17"/>
+            <circle class="node" cx="130" cy="32" r="15"/>
+            <circle class="node" cx="55" cy="175" r="15"/>
+            <circle class="node" cx="205" cy="175" r="15"/>
+            <text class="svg-label" x="12" y="215">{8,3}: 4 sites, 3 bonds</text>
+          </svg>
+          <p class="caption">A star K<sub>1,3</sub>. The three outer sites have only one retained neighbor instead of their infinite-lattice degree three.</p>
+        </div>
+        <div class="diagram">
+          <svg viewBox="0 0 260 235" role="img" aria-label="Five-site star for the radius-one ball of the 12,4 lattice">
+            <line class="bond" x1="130" y1="110" x2="130" y2="30"/>
+            <line class="bond" x1="130" y1="110" x2="45" y2="110"/>
+            <line class="bond" x1="130" y1="110" x2="215" y2="110"/>
+            <line class="bond" x1="130" y1="110" x2="130" y2="190"/>
+            <circle class="root" cx="130" cy="110" r="17"/>
+            <circle class="node" cx="130" cy="30" r="15"/>
+            <circle class="node" cx="45" cy="110" r="15"/>
+            <circle class="node" cx="215" cy="110" r="15"/>
+            <circle class="node" cx="130" cy="190" r="15"/>
+            <text class="svg-label" x="8" y="225">{12,4}: 5 sites, 4 bonds</text>
+          </svg>
+          <p class="caption">A star K<sub>1,4</sub>. There is no dodecagonal loop inside this radius-one patch.</p>
+        </div>
+        <div class="diagram">
+          <svg viewBox="0 0 260 235" role="img" aria-label="Five-site bow-tie graph for the line graph radius-one ball">
+            <line class="bond" x1="130" y1="112" x2="55" y2="45"/>
+            <line class="bond" x1="130" y1="112" x2="55" y2="180"/>
+            <line class="bond" x1="55" y1="45" x2="55" y2="180"/>
+            <line class="bond" x1="130" y1="112" x2="205" y2="45"/>
+            <line class="bond" x1="130" y1="112" x2="205" y2="180"/>
+            <line class="bond" x1="205" y1="45" x2="205" y2="180"/>
+            <circle class="root" cx="130" cy="112" r="17"/>
+            <circle class="node" cx="55" cy="45" r="15"/>
+            <circle class="node" cx="55" cy="180" r="15"/>
+            <circle class="node" cx="205" cy="45" r="15"/>
+            <circle class="node" cx="205" cy="180" r="15"/>
+            <text class="svg-label" x="2" y="225">L({8,3}): 5 sites, 6 bonds</text>
+          </svg>
+          <p class="caption">Two triangles sharing the root. Unlike the two stars, this ED cluster already contains the line graph’s shortest loops.</p>
+        </div>
+      </div>
+      <div class="takeaway caution"><strong>Nothing outside the drawn solid bonds exists in the ED Hamiltonian.</strong> These are open clusters, not periodic hyperbolic quotients and not embedded bulk subsystems with an environment.</div>
+    </section>
+
+    <section class="slide" id="ed-method" data-slide="04">
+      <div class="eyebrow">ED algorithm in many-body language</div>
+      <h2>Exact grand-canonical diagonalization of those 4- and 5-site clusters</h2>
+      <div class="flow">
+        <div class="step"><strong>1 · Fix cutoff</strong>Each site has occupations 0,…,n<sub>max</sub>.</div>
+        <div class="arrow">→</div>
+        <div class="step"><strong>2 · Use U(1)</strong>Build the Hamiltonian separately in every total-particle sector N.</div>
+        <div class="arrow">→</div>
+        <div class="step"><strong>3 · Compare sectors</strong>Collect the two lowest energies across all N and form E<sub>1</sub>−E<sub>0</sub>.</div>
+      </div>
+      <div class="grid-2">
+        <div>
+          <h3>What is exact?</h3>
+          <ul>
+            <li>Every basis state |n<sub>1</sub>,…,n<sub>Nsite</sub>⟩ within the cutoff is included.</li>
+            <li>Every on-site term and every hopping bond drawn on the preceding slide is included.</li>
+            <li>The lowest grand-canonical excitation may change particle number or remain in the ground-state sector.</li>
+            <li>Root observables are evaluated in the exact finite-cluster ground vector.</li>
+          </ul>
+        </div>
+        <div>
+          <h3>How large?</h3>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>cluster</th><th class="num">sites</th><th class="num">full dimension at n<sub>max</sub>=3</th><th class="num">largest N block</th></tr></thead>
+              <tbody>
+                <tr><td>{8,3} star</td><td class="num">4</td><td class="num">4<sup>4</sup> = 256</td><td class="num">44</td></tr>
+                <tr><td>either 5-site cluster</td><td class="num">5</td><td class="num">4<sup>5</sup> = 1024</td><td class="num">155</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="small">The code diagonalizes all number blocks, not only a fixed-N sector, because μ is part of the Hamiltonian.</p>
+        </div>
+      </div>
+      <div class="takeaway method">ED supplies an independent, transparent check on the operator algebra and a finite-cluster picture of Mott-to-delocalized trends.</div>
+    </section>
+
+    <section class="slide" id="ed-results" data-slide="05">
+      <div class="eyebrow">Finite-cluster physics</div>
+      <h2>What ED tells us—and only us—about these open clusters</h2>
+      <div class="grid-2">
+        <div>
+          <h3>Finite gap at μ = 0.5 and n<sub>max</sub> = 3</h3>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>t</th><th class="num">{8,3}</th><th class="num">{12,4}</th><th class="num">L({8,3})</th></tr></thead>
+              <tbody>
+                <tr><td>0.03</td><td class="num">0.3991</td><td class="num">0.3834</td><td class="num">0.3474</td></tr>
+                <tr><td>0.05</td><td class="num">0.3357</td><td class="num">0.3104</td><td class="num">0.2505</td></tr>
+                <tr><td>0.06</td><td class="num">0.3054</td><td class="num">0.2755</td><td class="num">0.2048</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>On every cluster, hopping lowers the finite gap. At equal t, the line-graph bow tie has the smallest gap, consistent with its two extra neighbor-neighbor bonds providing more local kinetic pathways.</p>
+        </div>
+        <div>
+          <h3>Root observables at t = 0.06</h3>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>cluster</th><th class="num">ρ<sub>0</sub></th><th class="num">F<sub>0</sub></th><th class="num">K<sub>0</sub></th></tr></thead>
+              <tbody>
+                <tr><td>{8,3}</td><td class="num">1.0016</td><td class="num">0.0415</td><td class="num">0.4762</td></tr>
+                <tr><td>{12,4}</td><td class="num">1.0032</td><td class="num">0.0554</td><td class="num">0.4813</td></tr>
+                <tr><td>L({8,3})</td><td class="num">1.0038</td><td class="num">0.0739</td><td class="num">0.6031</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>The density remains close to one, while fluctuation and hopping coherence are largest on the line-graph cluster—qualitatively the most delocalized local motif.</p>
+        </div>
+      </div>
+      <img class="plot" src=".figures/finite_patch_gap_vs_t.png" alt="Finite open radius-one gaps versus hopping for the three clusters and three occupation cutoffs">
+      <p class="caption">Exact values for the finite clusters only. Curves for n<sub>max</sub>=2 and 3 are close; the hard-core cutoff n<sub>max</sub>=1 suppresses doublon-hole fluctuations and is qualitatively different near unit filling.</p>
+    </section>
+
+    <section class="slide" id="ed-limit" data-slide="06">
+      <div class="eyebrow">Thermodynamic interpretation of ED</div>
+      <h2>The ED numbers provide no upper or lower bound on the bulk gap</h2>
+      <div class="compare-band">
+        <div>
+          <h3>What ED legitimately provides</h3>
+          <ul>
+            <li>a sign and normalization check for the hopping Hamiltonian;</li>
+            <li>a check of the occupation cutoff and number-sector code;</li>
+            <li>exact finite-cluster density, fluctuation, and coherence;</li>
+            <li>a qualitative energy scale against which to judge whether an SDP upper bound is loose.</li>
+          </ul>
+        </div>
+        <div>
+          <h3>What it does not provide</h3>
+          <ul>
+            <li>no infinite-volume ground state;</li>
+            <li>no finite-size scaling—we used only radius one;</li>
+            <li>no rigorous upper or lower bulk-gap bound;</li>
+            <li>no controlled removal of hyperbolic boundary effects.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="diagram">
+          <svg viewBox="0 0 500 300" role="img" aria-label="Open hyperbolic ball with a large boundary shell">
+            <circle class="root" cx="250" cy="150" r="16"/>
+            <g class="fadebond">
+              <line x1="250" y1="150" x2="250" y2="85"/><line x1="250" y1="150" x2="190" y2="180"/><line x1="250" y1="150" x2="310" y2="180"/>
+              <line x1="250" y1="85" x2="210" y2="40"/><line x1="250" y1="85" x2="290" y2="40"/>
+              <line x1="190" y1="180" x2="130" y2="150"/><line x1="190" y1="180" x2="170" y2="245"/>
+              <line x1="310" y1="180" x2="370" y2="150"/><line x1="310" y1="180" x2="330" y2="245"/>
+            </g>
+            <circle class="node" cx="250" cy="85" r="13"/><circle class="node" cx="190" cy="180" r="13"/><circle class="node" cx="310" cy="180" r="13"/>
+            <circle class="outside" cx="210" cy="40" r="12"/><circle class="outside" cx="290" cy="40" r="12"/><circle class="outside" cx="130" cy="150" r="12"/><circle class="outside" cx="170" cy="245" r="12"/><circle class="outside" cx="370" cy="150" r="12"/><circle class="outside" cx="330" cy="245" r="12"/>
+            <text class="svg-label" x="20" y="280">outer shell remains a large fraction of a hyperbolic ball</text>
+          </svg>
+        </div>
+        <div>
+          <h3>Why hyperbolic open boundaries are especially dangerous</h3>
+          <p>The number of sites grows exponentially with radius, so a non-vanishing fraction remains near the boundary. An open-ball spectrum can therefore be dominated by boundary coordination and boundary modes even at large radius.</p>
+          <p>Our generated {12,4} balls contain 5, 17, and 53 sites at radii 1, 2, and 3; the newest shell contains 4, 12, and 36 sites respectively. The boundary is not becoming negligible in this sequence.</p>
+        </div>
+      </div>
+      <div class="takeaway caution">The finite ED values are useful physics diagnostics, but it would be wrong to present 0.305, 0.276, or 0.205 as estimates with a known relation to Δ<sub>bulk</sub>.</div>
+    </section>
+
+    <section class="slide" id="sdp" data-slide="07">
+      <div class="eyebrow">SDP without assuming SDP expertise</div>
+      <h2>Replace the infinite wavefunction by a consistency table of local correlations</h2>
+      <p>Instead of truncating the number of lattice sites, the method forgets the global wavefunction and retains expectation values such as ⟨A⟩ and ⟨A<sup>†</sup>B⟩ for selected local operators. These numbers must obey exact algebraic and positivity relations if they come from any quantum state.</p>
+      <div class="grid-2">
+        <div>
+          <h3>Why a positive-semidefinite matrix appears</h3>
+          <div class="equation">
+            M<sub>AB</sub> = ω(A<sup>†</sup>B) &nbsp; ⪰ &nbsp; 0
+            <small>because c<sup>†</sup>Mc = ω[(Σc<sub>A</sub>A)<sup>†</sup>(Σc<sub>B</sub>B)] ≥ 0</small>
+          </div>
+          <p>An SDP is simply a convex search over such correlation tables subject to linear equalities and positive-semidefinite matrix constraints.</p>
+        </div>
+        <div>
+          <h3>The assumed-gap condition</h3>
+          <div class="equation">
+            ½ω(A<sup>†</sup>[H,A] − [H,A<sup>†</sup>]A)
+            ≥ γ[ω(A<sup>†</sup>A) − |ω(A)|<sup>2</sup>]
+          </div>
+          <p>The left side is the excitation-energy quadratic form; the right side is γ times the variance. If the bulk gap is at least γ, this must hold for every local excitation operator A.</p>
+        </div>
+      </div>
+      <p>The term |ω(A)|<sup>2</sup> is nonlinear in the state. <strong>State-polynomial lifting</strong> introduces extra moment variables for products of expectation values, restoring a linear matrix problem at fixed γ.</p>
+      <div class="takeaway method">Conceptually, the SDP asks: “Could these local numbers belong to any infinite ground state whose local excitations all cost at least γ?”</div>
+    </section>
+
+    <section class="slide" id="locality" data-slide="08">
+      <div class="eyebrow">How a local calculation reaches the infinite lattice</div>
+      <h2>Locality removes the far-away Hamiltonian exactly—not approximately</h2>
+      <div class="grid-2">
+        <div class="diagram">
+          <svg viewBox="0 0 520 380" role="img" aria-label="A root and neighbors embedded in a continued infinite lattice">
+            <g class="fadebond">
+              <line x1="260" y1="190" x2="260" y2="95"/><line x1="260" y1="190" x2="170" y2="235"/><line x1="260" y1="190" x2="350" y2="235"/>
+              <line x1="260" y1="95" x2="205" y2="30"/><line x1="260" y1="95" x2="315" y2="30"/>
+              <line x1="170" y1="235" x2="80" y2="195"/><line x1="170" y1="235" x2="145" y2="335"/>
+              <line x1="350" y1="235" x2="440" y2="195"/><line x1="350" y1="235" x2="375" y2="335"/>
+            </g>
+            <g class="bond">
+              <line x1="260" y1="190" x2="260" y2="95"/><line x1="260" y1="190" x2="170" y2="235"/><line x1="260" y1="190" x2="350" y2="235"/>
+            </g>
+            <circle class="root" cx="260" cy="190" r="20"/>
+            <circle class="node" cx="260" cy="95" r="17"/><circle class="node" cx="170" cy="235" r="17"/><circle class="node" cx="350" cy="235" r="17"/>
+            <circle class="outside" cx="205" cy="30" r="14"/><circle class="outside" cx="315" cy="30" r="14"/><circle class="outside" cx="80" cy="195" r="14"/><circle class="outside" cx="145" cy="335" r="14"/><circle class="outside" cx="440" cy="195" r="14"/><circle class="outside" cx="375" cy="335" r="14"/>
+            <text class="svg-label" x="276" y="186">support of A</text>
+            <text class="svg-small" x="18" y="365">dashed exterior is still present in the physical system</text>
+          </svg>
+        </div>
+        <div>
+          <h3>Root-supported probe</h3>
+          <p>Let A act only at the orange root. Split the infinite Hamiltonian as</p>
+          <div class="equation">H = H<sub>touching root</sub> + H<sub>far away</sub>, &nbsp; [H<sub>far away</sub>, A] = 0.</div>
+          <p>Therefore [H,A] is computed exactly from the root on-site term and the z hopping terms incident to the root. We have not imposed an open boundary; far-away terms cancel from this particular commutator because they commute with A.</p>
+          <p>Every genuine infinite ground state supplies a local correlation table satisfying these constraints. If no such table exists, no such infinite state exists.</p>
+        </div>
+      </div>
+      <div class="takeaway good"><strong>This is the thermodynamic mechanism:</strong> retain the infinite-state quantifier, use locality to evaluate local commutators, and exclude impossible local restrictions. No finite-size extrapolation is involved.</div>
+    </section>
+
+    <section class="slide" id="atomic" data-slide="09">
+      <div class="eyebrow">Atomic SDP</div>
+      <h2>At t = 0, one site really is the infinite problem</h2>
+      <div class="grid-2">
+        <div>
+          <p>With no hopping, H = Σ<sub>i</sub>h<sub>i</sub> and all sites are independent. At U = 1 and μ = 0.5,</p>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>occupation r</th><th class="num">local energy e<sub>r</sub> = ½r(r−1)−0.5r</th><th>meaning</th></tr></thead>
+              <tbody>
+                <tr><td>0</td><td class="num">0</td><td>one hole relative to unit filling</td></tr>
+                <tr><td>1</td><td class="num">−0.5</td><td>unique local ground state</td></tr>
+                <tr><td>2</td><td class="num">0</td><td>one added particle</td></tr>
+                <tr><td>3</td><td class="num">1.5</td><td>higher excitation</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>The infinite ground state is |1,1,1,…⟩. A local particle or hole costs 0.5, so Δ<sub>bulk</sub> = 0.5.</p>
+        </div>
+        <div>
+          <h3>What the atomic code does</h3>
+          <ul>
+            <li>Represents the unknown U(1)-invariant one-site state by probabilities p<sub>r</sub>.</li>
+            <li>Introduces lifted variables P<sub>rs</sub> for products p<sub>r</sub>p<sub>s</sub>.</li>
+            <li>Imposes positivity, normalization, the exact finite matrix algebra, and the gap inequality for every one-site matrix unit |r⟩⟨s|.</li>
+            <li>Bisects the assumed γ to find the feasibility threshold.</li>
+          </ul>
+          <div class="equation">last feasible γ = 0.5000000000<br>first infeasible γ = 0.5000009537</div>
+          <p>The same bracket is recovered for n<sub>max</sub> = 1, 2, 3; the width is 9.54×10<sup>−7</sup>.</p>
+        </div>
+      </div>
+      <div class="takeaway good"><strong>Answer:</strong> the atomic SDP is an exact thermodynamic-limit check here because the model factorizes. The complete Julia hierarchy additionally verifies γ=0.51 by an exact Farkas certificate and encloses ρ<sub>0</sub>=1 in the exact projected interval [986498/986499, 5806375/5806374]. This validates the gap and observable-certificate machinery; it is not a nontrivial lattice calculation.</div>
+    </section>
+
+    <section class="slide" id="rooted" data-slide="10">
+      <div class="eyebrow">Root-local outer test</div>
+      <h2>An exact thermodynamic implication built from an incomplete set of local probes</h2>
+      <div class="grid-2">
+        <div>
+          <h3>What is represented</h3>
+          <ul>
+            <li>A pseudo-table of expectations on the root and its nearest neighbors—not a wavefunction on that window.</li>
+            <li>The exact cutoff algebra M<sub>nmax+1</sub>(ℂ) using matrix units E<sub>rs</sub>.</li>
+            <li>All one-site root probes A = Σ<sub>rs</sub>c<sub>rs</sub>E<sub>rs</sub><sup>(0)</sup>.</li>
+            <li>Only U(1)-invariant states; charged one-point functions are set to zero.</li>
+          </ul>
+        </div>
+        <div>
+          <h3>What is imposed</h3>
+          <ol>
+            <li>local positivity of the correlation table;</li>
+            <li>normalization and exact matrix-unit identities;</li>
+            <li>stationarity, ω([H,A]) = 0;</li>
+            <li>positive covariance;</li>
+            <li>the assumed-gap matrix at fixed γ.</li>
+          </ol>
+        </div>
+      </div>
+      <div class="compare-band">
+        <div>
+          <h3>Exact aspect</h3>
+          <p>If an infinite U(1)-invariant ground state has gap at least γ, its local moments must satisfy every constraint in this rooted model. Thus <strong>exact infeasibility would exclude γ directly in the thermodynamic limit.</strong></p>
+        </div>
+        <div>
+          <h3>Approximate/weak aspect</h3>
+          <p>We test only one-site root excitations and only a subset of the full state-polynomial hierarchy. A feasible pseudo-table need not extend to a real infinite state. Feasibility therefore proves nothing about the existence of a gap.</p>
+        </div>
+      </div>
+      <div class="takeaway caution">“Thermodynamic” does not mean “already accurate.” It describes the logical target of an infeasibility result, while the relaxation level controls how strong that result is.</div>
+    </section>
+
+    <section class="slide" id="logic" data-slide="11">
+      <div class="eyebrow">How to read an SDP run</div>
+      <h2>The certificate direction is the reverse of a usual variational gap estimate</h2>
+      <div class="status-line">
+        <div class="symbol">✓</div>
+        <div><strong>Feasible at γ.</strong> The relaxation found locally consistent pseudo-correlations. The gap may be above γ, below γ, or zero. We simply failed to rule γ out.</div>
+      </div>
+      <div class="status-line bad">
+        <div class="symbol">×</div>
+        <div><strong>Infeasible at γ.</strong> No local correlation table satisfies even these necessary conditions. In exact arithmetic, an infinite U(1)-invariant ground state cannot have gap ≥ γ, so Δ<sub>U(1)</sub> &lt; γ.</div>
+      </div>
+      <div class="status-line unknown">
+        <div class="symbol">?</div>
+        <div><strong>Solver error or inaccurate PSD violation.</strong> No scientific conclusion.</div>
+      </div>
+      <div class="equation">
+        Γ<sub>L,d</sub> = largest γ not yet excluded, &nbsp; Γ<sub>L,d</sub> ↓ Δ<sub>bulk</sub> as the full nested hierarchy grows.
+      </div>
+      <p>Our current rooted model is a valid necessary outer test but is <strong>not yet the complete nested (L,d) hierarchy</strong>. We should therefore call its endpoints first-level floating candidates, not a convergent sequence already demonstrated in code.</p>
+      <div class="takeaway method">This method produces <strong>upper bounds</strong> on the gap. It is not the ordinary ground-energy SDP that gives lower bounds on E<sub>0</sub>.</div>
+    </section>
+
+    <section class="slide" id="results" data-slide="12">
+      <div class="eyebrow">Thermodynamic root-local-test results</div>
+      <h2>The present level validates the construction but gives weak physics</h2>
+      <div class="grid-2">
+        <div>
+          <h3>Requested low-gap scan</h3>
+          <p>Across 135 fixed-γ models—three geometries, three cutoffs, the requested t and μ points, and γ = 0, 0.05, 0.10—there was <strong>no usable infeasibility</strong>.</p>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>solver outcome</th><th class="num">rows</th><th>interpretation</th></tr></thead>
+              <tbody>
+                <tr><td>optimal</td><td class="num">57</td><td>not excluded at this level</td></tr>
+                <tr><td>optimal_inaccurate</td><td class="num">54</td><td>mostly usable only with residual checks</td></tr>
+                <tr><td>solver_error</td><td class="num">24</td><td>unknown</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p><strong>Physics statement:</strong> this first relaxation cannot rule out gaps as small as 0.10. That is not evidence that the bulk gap is at least 0.10.</p>
+        </div>
+        <div>
+          <h3>Coarse hard-core probe at t = 0.06, μ = 0.5</h3>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>geometry</th><th>last sampled feasible</th><th>first clean floating infeasible</th></tr></thead>
+              <tbody>
+                <tr><td>{8,3}</td><td class="num">0.5</td><td class="num">0.6</td></tr>
+                <tr><td>{12,4}</td><td class="num">0.5</td><td class="num">0.8</td></tr>
+                <tr><td>L({8,3})</td><td class="num">0.5</td><td class="num">0.8</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>If independently verified, these would imply Δ<sub>U(1)</sub> &lt; 0.6 and &lt; 0.8 for the n<sub>max</sub>=1 models. At present they are floating Clarabel statuses without a verified dual certificate.</p>
+          <p>They are also loose: the corresponding finite-cluster n<sub>max</sub>=1 gaps are approximately 0.396, 0.380, and 0.346, though those ED values are not thermodynamic bounds.</p>
+        </div>
+      </div>
+      <div class="takeaway caution"><strong>Bottom line:</strong> no publishable non-atomic bulk-gap number has yet been obtained from this implementation.</div>
+    </section>
+
+    <section class="slide" id="geometry" data-slide="13">
+      <div class="eyebrow">What geometry the first SDP can see</div>
+      <h2>At root-only level, {12,4} and the line graph are mathematically identical</h2>
+      <div class="grid-2">
+        <div>
+          <p>For a root-supported A, neighbor-neighbor hopping terms commute with A. The gap commutator therefore sees only:</p>
+          <ul>
+            <li>the on-site root Hamiltonian;</li>
+            <li>the z bonds incident to the root;</li>
+            <li>the occupation cutoff and model parameters.</li>
+          </ul>
+          <p>Both {12,4} and L({8,3}) have z = 4, so their root-local outer tests are identical. The two triangles visible to finite ED do not enter a one-site commutator.</p>
+        </div>
+        <div>
+          <h3>Hard-core observable intervals at γ = 0.1</h3>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>geometry</th><th>ρ<sub>0</sub></th><th>F<sub>0</sub></th><th>K<sub>0</sub></th></tr></thead>
+              <tbody>
+                <tr><td>{8,3}</td><td>[0.955, 1]</td><td>[0, 0.045]</td><td>[0, 0.30]</td></tr>
+                <tr><td>{12,4}</td><td>[0.920, 1]</td><td>[0, 0.080]</td><td>[0, 0.40]</td></tr>
+                <tr><td>L({8,3})</td><td>[0.920, 1]</td><td>[0, 0.080]</td><td>[0, 0.40]</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="small">These are floating outer intervals over pseudo-states compatible with the assumed gap, not predictions of a unique observable value.</p>
+        </div>
+      </div>
+      <div class="takeaway method">A radius-two or multi-site excitation basis is the first level that can make loop structure—and hence the difference between the two z=4 lattices—enter the thermodynamic SDP.</div>
+    </section>
+
+    <section class="slide" id="comparison" data-slide="14">
+      <div class="eyebrow">Direct answers to the audience’s questions</div>
+      <h2>What object did each calculation solve?</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>question</th><th>finite ED</th><th>atomic SDP</th><th>root-local outer test</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>What is the system?</strong></td><td>One open 4- or 5-site graph.</td><td>Infinite t=0 lattice, reduced exactly to one independent site.</td><td>An unknown infinite state, represented by local pseudo-correlations.</td></tr>
+            <tr><td><strong>Is there a wavefunction?</strong></td><td>Yes, the exact finite-cluster eigenvector.</td><td>No global wavefunction; one-site probabilities and lifted moments.</td><td>No window wavefunction; a convex local correlation table.</td></tr>
+            <tr><td><strong>Where is the boundary?</strong></td><td>Outer sites are open and incomplete.</td><td>None is needed because sites decouple.</td><td>No physical boundary; far terms remain in the infinite model but commute with root probes.</td></tr>
+            <tr><td><strong>What gap is tested?</strong></td><td>E<sub>1</sub>−E<sub>0</sub> of the finite grand-canonical cluster.</td><td>Bulk local particle/hole gap in the factorized model.</td><td>Whether an infinite U(1)-invariant ground state could have bulk gap ≥ γ.</td></tr>
+            <tr><td><strong>Thermodynamic statement?</strong></td><td class="no">No.</td><td class="yes">Yes, exact at t=0.</td><td class="partial">Yes only when γ is excluded; present level is weak and numerics unverified.</td></tr>
+            <tr><td><strong>Current result?</strong></td><td>Clear finite-cluster delocalization trends.</td><td>Δ = 0.5 recovered to 10<sup>−6</sup>.</td><td>No γ≤0.10 excluded; coarse hard-core candidates only.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="takeaway">The atomic SDP and root-local outer test both address thermodynamic statements, but for different reasons: factorization makes the atomic problem exact; locality plus an infinite-state consistency test gives the root-local model its one-way thermodynamic implication.</div>
+    </section>
+
+    <section class="slide" id="verdict" data-slide="15">
+      <div class="eyebrow">Professor’s conclusion</div>
+      <h2>What has been accomplished, and what physics remains</h2>
+      <div class="grid-2">
+        <div class="verdict">
+          <h3 style="color:white">Established</h3>
+          <ul>
+            <li>Exact finite-cutoff bosonic matrix algebra, including the corrected truncated commutator.</li>
+            <li>Validated construction of the three hyperbolic local geometries.</li>
+            <li>An atomic state-polynomial SDP reproducing the exact thermodynamic gap.</li>
+            <li>A complete matrix-degree Definition 2.4 assembler with exact U(1) charge blocks, plus a separately labelled TS2 sparse family.</li>
+            <li>An exact ladder-degree cross-check basis obtained by charge-adapted graded row reduction, sharing the finite-matrix multiplication engine.</li>
+            <li>Clarabel and Mosek solve paths, six local-observable objectives, resumable bisection, and an independent algebraic dual checker.</li>
+            <li>An independent finite-cluster ED baseline and reproducible datasets.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Not yet established</h3>
+          <ul>
+            <li>No accepted production Γ<sub>L,d</sub> endpoint and therefore no demonstrated numerical convergence yet.</li>
+            <li>No geometry-sensitive thermodynamic comparison between {12,4} and L({8,3}).</li>
+            <li>No reliable n<sub>max</sub>=2 or 3 non-atomic upper-bound endpoint.</li>
+            <li>No unrestricted-state result beyond the U(1)-invariant sector.</li>
+            <li>No production infeasibility ray has yet passed the exact projection, 256-bit Arb, PSD, and positive-margin checks.</li>
+          </ul>
+        </div>
+      </div>
+      <h3>The next calculation that would change the physics conclusion</h3>
+      <ol>
+        <li>Install or point to a valid Mosek license on SCNet, then run the pinned SpectralGap.jl Ising reference; the runtime is prepared but neither host currently has a license.</li>
+        <li>Dry-assemble and resource-gate every requested complete or TS2 level on SCNet; the complete-hierarchy atomic certificate check has passed.</li>
+        <li>Run hard-core complete levels first, then cutoff-two baseline/TS2 and the labelled comparisons.</li>
+        <li>Save every dual ray and accept an excluded γ only after the independent checker passes.</li>
+        <li>Plot L-tightening and d-tightening separately; until those rows exist, do not draw a line that suggests convergence.</li>
+      </ol>
+      <div class="takeaway good"><strong>Research verdict:</strong> the primary matrix hierarchy is now implemented and structurally tested, but the scientific campaign is not complete. A formal COMPLETE level contains every Definition 2.4 monomial; TS2 is a practical sparse principal-submatrix level and will never be plotted as if it were formal completeness. Each excluded γ would mean that no U(1)-invariant KMS ground state can have bulk gap at least γ—not that a smaller gap has been proved.</div>
+    </section>
+
+    <section class="slide" id="sources" data-slide="16">
+      <div class="eyebrow">Sources and reproducibility</div>
+      <h2>Where the method, code, and raw evidence live</h2>
+      <div class="grid-2">
+        <div>
+          <h3>Primary scientific sources</h3>
+          <ol>
+            <li><a href="https://github.com/QuantumBFS/quantum.harness/issues/92">Quantum Harness issue #92</a>—model, geometries, parameter grid, and requested claims.</li>
+            <li>X. Xu et al., <a href="https://arxiv.org/abs/2606.03836"><em>The bulk spectral gap is semi-decidable</em></a>—thermodynamic state-polynomial hierarchy.</li>
+            <li>I. Klep et al., <a href="https://arxiv.org/abs/2301.12513"><em>State polynomials</em></a>—lifting nonlinear functions of quantum states.</li>
+            <li>X. Zhu et al., <a href="https://arxiv.org/abs/2103.15274"><em>Quantum phase transitions of interacting bosons on hyperbolic lattices</em></a>.</li>
+          </ol>
+        </div>
+        <div>
+          <h3>Local project artifacts</h3>
+          <ul>
+            <li><a href="ALGORITHM.md">full mathematical derivation</a></li>
+            <li><a href="status.md">central algorithm and Target 2 status</a></li>
+            <li><a href="REPORT.md">technical numerical report</a></li>
+            <li><a href="agent.md">agent handoff and decision log</a></li>
+            <li><a href="LEVEL_SPEC.md">frozen level and degree specification</a></li>
+            <li><a href="THIRD_PARTY.md">pinned software provenance</a></li>
+            <li><a href="julia/src/QuantumGapHierarchy.jl">Julia hierarchy implementation</a></li>
+            <li><a href="results/campaign_manifest.json">90-gap / 1,620-observable production manifest</a></li>
+            <li><a href="src/issue92/ed.py">finite ED implementation</a></li>
+            <li><a href="src/issue92/atomic_sdp.py">atomic SDP implementation</a></li>
+            <li><a href="src/issue92/rooted_sdp.py">root-local thermodynamic outer-test implementation</a></li>
+            <li><a href="results/finite_patch_ed.csv">finite ED data</a></li>
+            <li><a href="results/rooted_issue_fixed_gamma_scan.csv">fixed-γ rooted data</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="equation mono">make julia-setup &nbsp;&nbsp; make test &nbsp;&nbsp; make graphs &nbsp;&nbsp; make campaign</div>
+      <p class="center small">All 17 Python tests and 546 Julia assertions in the last accepted suite pass. No production row is silently substituted by finite ED, the root-local diagnostic, a floating infeasibility, or a missing campaign cell.</p>
+    </section>
+  </main>
+</body>
+</html>

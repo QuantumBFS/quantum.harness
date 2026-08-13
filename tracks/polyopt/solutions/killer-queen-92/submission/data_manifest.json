@@ -1,0 +1,308 @@
+{
+  "active_at_snapshot": [
+    "SCNet P4/P5 refinement array 41549521 and line-P4 midpoint 41550952 completed.",
+    "Optimized cutoff-two TS2 gate 41542822 was still running; 41544379 was dependency-queued.",
+    "No scheduler state is promoted to scientific evidence until a result JSON is fetched and re-aggregated."
+  ],
+  "aggregate_sources": [
+    {
+      "bytes": 68528,
+      "path": "results/deadline_analysis/gap_scan_trials.csv",
+      "sha256": "b77bc673e5d03555dca050f3a72d6d4c72d80fd5261bb415b80457b8efe88d98"
+    },
+    {
+      "bytes": 63137,
+      "path": "results/deadline_analysis/observable_objectives.csv",
+      "sha256": "8b4905207db7c904ec2e4894bf6f3557f119f2f9fb44cee515785d782e65cd45"
+    },
+    {
+      "bytes": 15841,
+      "path": "results/deadline_analysis/observable_intervals.csv",
+      "sha256": "5fe942d45f8304bc8106a15974d6ce813668db48ddc6219f74c097164146ad79"
+    },
+    {
+      "bytes": 13826,
+      "path": "results/deadline_analysis/working_intervals.csv",
+      "sha256": "dce309158894e958dcf7888e863d586b1a99c1e371a6b932721104b51466ec55"
+    },
+    {
+      "bytes": 2316,
+      "path": "results/deadline_analysis/level_sizes.csv",
+      "sha256": "3dc1578dde8a2e06088946f3d56c9a085e5679231fee2209aaf40de5303b1103"
+    },
+    {
+      "bytes": 241,
+      "path": "results/deadline_analysis/nestedness_checks.csv",
+      "sha256": "562ce56bb721e048076dea058e38da62780b7b0bdc90afb34927331694aa182a"
+    },
+    {
+      "bytes": 12852,
+      "path": "results/finite_patch_ed.csv",
+      "sha256": "9d0d81326e7ec7d0dfb1e366bc44846df11326a0cbb4b4decd73fc83174d876f"
+    },
+    {
+      "bytes": 344,
+      "path": "results/atomic_gap_brackets.csv",
+      "sha256": "965a27a958d02c7eee8ba68eaa0f1a12901882c6ca98efb70764a4f3f08fc6ef"
+    },
+    {
+      "bytes": 2332328,
+      "path": "results/atomic/julia-hierarchy-certificate.json",
+      "sha256": "5f493d99a0d35bf6193b6a2c866a6c5cad14d90fcb0a109812671e8d86531f42"
+    }
+  ],
+  "counts": {
+    "accepted_intervals": 2,
+    "accepted_one_sided_objectives": 26,
+    "certified_gap_upper_statements": 10,
+    "durable_fixed_gamma_rows": 166,
+    "exact_projected_observable_bounds": 3,
+    "feasible_fixed_gamma_rows": 76,
+    "fixed_gamma_rows": 212,
+    "floating_objectives": 100,
+    "interval_rows": 69,
+    "objective_errors": 8,
+    "observable_rows": 138,
+    "unknown_fixed_gamma_rows": 85,
+    "verified_excluded_fixed_gamma_rows": 51
+  },
+  "raw_campaign_directories": [
+    {
+      "bytes": 2332328,
+      "description": "Atomic-limit exact and numerical checks.",
+      "directory": "atomic",
+      "files": 1,
+      "role": "validation"
+    },
+    {
+      "bytes": 1360546,
+      "description": "Local/open-source solver pilots.",
+      "directory": "clarabel_pilots",
+      "files": 1,
+      "role": "diagnostic"
+    },
+    {
+      "bytes": 559833,
+      "description": "Canonical merged tables, plots, and live calculation report.",
+      "directory": "deadline_analysis",
+      "files": 11,
+      "role": "aggregate"
+    },
+    {
+      "bytes": 9054,
+      "description": "Complete cutoff-two solve attempt.",
+      "directory": "deadline_cutoff2_gaps",
+      "files": 2,
+      "role": "resource-gate"
+    },
+    {
+      "bytes": 8418,
+      "description": "Reduced-thread cutoff-two retry.",
+      "directory": "deadline_cutoff2_gaps_lowthreads",
+      "files": 1,
+      "role": "resource-gate"
+    },
+    {
+      "bytes": 8417,
+      "description": "QDLDL cutoff-two retry.",
+      "directory": "deadline_cutoff2_gaps_qdldl",
+      "files": 1,
+      "role": "resource-gate"
+    },
+    {
+      "bytes": 19317895,
+      "description": "Exact-projected representative observable bounds.",
+      "directory": "deadline_exact_observables",
+      "files": 3,
+      "role": "production"
+    },
+    {
+      "bytes": 282456915,
+      "description": "Hard-core transition refinement.",
+      "directory": "deadline_gap_refinement",
+      "files": 11,
+      "role": "production"
+    },
+    {
+      "bytes": 5550,
+      "description": "Supporting or superseded campaign evidence.",
+      "directory": "deadline_gap_retry",
+      "files": 2,
+      "role": "supporting"
+    },
+    {
+      "bytes": 3599,
+      "description": "Supporting or superseded campaign evidence.",
+      "directory": "deadline_gap_retry_cholmod",
+      "files": 2,
+      "role": "supporting"
+    },
+    {
+      "bytes": 8750747,
+      "description": "Alternate-thread exact-certificate retries.",
+      "directory": "deadline_gap_retry_mkl16",
+      "files": 2,
+      "role": "production"
+    },
+    {
+      "bytes": 5547,
+      "description": "Supporting or superseded campaign evidence.",
+      "directory": "deadline_gap_retry_mkl8",
+      "files": 2,
+      "role": "supporting"
+    },
+    {
+      "bytes": 154804122,
+      "description": "Initial hard-core fixed-gap scan.",
+      "directory": "deadline_gap_scans",
+      "files": 6,
+      "role": "production"
+    },
+    {
+      "bytes": 137064220,
+      "description": "Extended Target-2 geometry grid; may be updated by SCNet.",
+      "directory": "deadline_geometry_grid",
+      "files": 24,
+      "role": "production-live"
+    },
+    {
+      "bytes": 22153503,
+      "description": "Geometry P2 midpoint recovery.",
+      "directory": "deadline_geometry_micro",
+      "files": 3,
+      "role": "production"
+    },
+    {
+      "bytes": 24353137,
+      "description": "Geometry P2 parallel recovery.",
+      "directory": "deadline_geometry_parallel",
+      "files": 2,
+      "role": "production"
+    },
+    {
+      "bytes": 12026,
+      "description": "Supporting or superseded campaign evidence.",
+      "directory": "deadline_nested",
+      "files": 2,
+      "role": "supporting"
+    },
+    {
+      "bytes": 22814,
+      "description": "Hard-core nested-level solve attempts.",
+      "directory": "deadline_nested_mkl",
+      "files": 2,
+      "role": "resource-gate"
+    },
+    {
+      "bytes": 10538194,
+      "description": "P3 transition micro-scan.",
+      "directory": "deadline_p3_micro",
+      "files": 2,
+      "role": "production"
+    },
+    {
+      "bytes": 13688360,
+      "description": "P5 fine transition scan.",
+      "directory": "deadline_p5_fine",
+      "files": 2,
+      "role": "production"
+    },
+    {
+      "bytes": 74915934,
+      "description": "Remaining {8,3} Target-2 gap points.",
+      "directory": "deadline_remaining_target_gaps",
+      "files": 5,
+      "role": "production"
+    },
+    {
+      "bytes": 32168972,
+      "description": "Remaining {8,3} observable cells.",
+      "directory": "deadline_remaining_target_observables",
+      "files": 16,
+      "role": "production"
+    },
+    {
+      "bytes": 99686436,
+      "description": "P1/P3/P4/P5 transition refinements.",
+      "directory": "deadline_target_refinement",
+      "files": 9,
+      "role": "production"
+    },
+    {
+      "bytes": 28521,
+      "description": "Expression-only hierarchy assemblies and TS2 gates.",
+      "directory": "dry_levels",
+      "files": 16,
+      "role": "resource-gate"
+    },
+    {
+      "bytes": 21269,
+      "description": "Unsolved JuMP model-build measurements.",
+      "directory": "dry_models",
+      "files": 13,
+      "role": "resource-gate"
+    },
+    {
+      "bytes": 7812,
+      "description": "Radius-guarded graph windows.",
+      "directory": "graphs",
+      "files": 9,
+      "role": "input"
+    },
+    {
+      "bytes": 73811457,
+      "description": "Low-precision deadline observable runs.",
+      "directory": "presentation_pilots",
+      "files": 22,
+      "role": "diagnostic"
+    },
+    {
+      "bytes": 586,
+      "description": "Pinned upstream reproduction status.",
+      "directory": "reference",
+      "files": 1,
+      "role": "validation"
+    },
+    {
+      "bytes": 190469,
+      "description": "Scheduler logs; not scientific evidence by themselves.",
+      "directory": "slurm",
+      "files": 236,
+      "role": "operations"
+    },
+    {
+      "bytes": 1103019,
+      "description": "Earlier Python diagnostic tables.",
+      "directory": "tables",
+      "files": 5,
+      "role": "legacy-aggregate"
+    }
+  ],
+  "report_figures": [
+    {
+      "bytes": 109286,
+      "path": "submission/assets/target2_ed_trends.png",
+      "sha256": "9f657564d8f3e384bdf60806917dc18de5ee93a1c22158df3e31ea6ac2d2413a"
+    },
+    {
+      "bytes": 76080,
+      "path": "submission/assets/certified_gap_spans.png",
+      "sha256": "ae2d2dddb46b1c67c40a43bb4aad3690444efb615174faa2f3043df5ab2cc9fd"
+    }
+  ],
+  "schema": "issue92-submission-data-v1",
+  "scientific_scope": {
+    "claim_rule": "EXCLUDED appears only after exact projection, 256-bit interval/exact PSD checks, exact affine residual zero, and positive normalized Farkas margin.",
+    "classification_vocabulary": [
+      "FEASIBLE",
+      "EXCLUDED",
+      "UNKNOWN"
+    ],
+    "ed_rule": "Finite-cluster exact diagonalization is diagnostic only and is never reported as a thermodynamic bound.",
+    "feasibility_rule": "FEASIBLE is non-exclusion evidence at one finite hierarchy level; it is not a physical gap lower bound.",
+    "primary_basis_family": "complete",
+    "primary_encoding": "matrix",
+    "primary_symmetry": "U1_INVARIANT_KMS_STATES"
+  },
+  "snapshot_generated": "2026-07-30T18:56:35+08:00"
+}

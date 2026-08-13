@@ -1,0 +1,8 @@
+# Exact Python environment used for the committed numerical snapshot.
+clarabel==0.11.1
+cvxpy==1.9.2
+hypertiling==1.5.1
+matplotlib==3.11.1
+networkx==3.6.1
+numpy==2.5.1
+scipy==1.18.0
