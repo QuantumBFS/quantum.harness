@@ -1,0 +1,79 @@
+[identity]
+name = "wuzh02-jiangweiqi"
+purpose = "Wuzh02 CPU compute service"
+maintainer = "QuantumBFS"
+
+[connection]
+repo_path_remote = "/work/share/giggleliu/jiangweiqi/quantum.harness-challenge-194"
+login_shell = false
+
+[connection.ssh]
+alias = "wuzh02-jiangweiqi"
+
+[scheduler]
+type = "slurm"
+default_partition = "wzacnormal03"
+account = "giggleliu"
+qos = "user_jiangweiqi"
+
+[[partitions]]
+name = "wzacnormal03"
+class = "default-cpu"
+cores = 128
+memory = "255500M"
+def_mem_per_cpu = "1916M"
+max_wall = "333-00:00:00"
+
+[filesystem]
+home = "/work/home/jiangweiqi"
+scratch = "/work/share/giggleliu/jiangweiqi/results"
+project = "/work/share/giggleliu/jiangweiqi/quantum.harness-challenge-194"
+quota = ""
+
+[network]
+internet_from_login = false
+internet_from_compute = false
+
+[region]
+region = "mainland_china"
+
+[limits.hard]
+max_walltime = "24:00:00"
+max_nodes = 1
+max_cpus = 128
+max_array_size = 200
+
+[limits.soft]
+warn_walltime = "08:00:00"
+warn_cpus = 64
+unusual_partitions = []
+
+[limits.paths]
+allowed_roots = [
+  "/work/share/giggleliu/jiangweiqi/results",
+  "/work/share/giggleliu/jiangweiqi/quantum.harness-challenge-194/results",
+]
+
+[[gotchas]]
+symptom = "The cluster has no preinstalled project Python runtime"
+cause = "Wuzh02 login and compute nodes are offline"
+fix = "bootstrap portable CPython 3.12 and the exact manylinux2014 wheels offline"
+
+[[gotchas]]
+symptom = "Source or wheel bootstrap attempts contact the public internet"
+cause = "Neither login nor compute nodes have internet access"
+fix = "transfer source with a git bundle and stage all exact wheels before bootstrap"
+
+[[gotchas]]
+symptom = "The Challenge 194 validation cell exceeds default per-CPU memory"
+cause = "wzacnormal03 has DefMemPerCPU 1916M"
+fix = "request one CPU and 1800M per validation cell, below the 1916M default"
+
+[commands]
+squeue = "squeue -u $USER"
+sacct = "sacct --format=JobID,State,ExitCode,MaxRSS,Elapsed"
+sinfo = "sinfo -o '%P %a %.10l %.6D %.6t'"
+quota_command = "sacctmgr -n -P show assoc where user=$USER format=Account,Partition,QOS,GrpTRES,MaxTRES"
+
+[notes]
+text = "Use wzacnormal03 for the 120-cell Challenge 194 CPU array: one CPU, 1800M, and ten minutes per cell. Bootstrap the portable offline runtime before submission."

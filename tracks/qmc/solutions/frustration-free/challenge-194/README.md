@@ -1,0 +1,339 @@
+# Challenge 194: long-range q=1 random-cluster model
+
+This directory implements the pinned independent-edge finite-ring model from
+QuantumBFS/quantum.harness issue #194. It does not use Gori et al.'s
+minimum-image `C/r^(1+sigma)` convention.
+
+## Scope
+
+The validated production engine now supports the physical Pilot phase. Pilot
+data are exploratory window-selection data only; they make no transition,
+critical-point, critical-exponent, scaling, or universality claim.
+
+## Setup
+
+```bash
+uv sync \
+  --project tracks/qmc/solutions/frustration-free/challenge-194 \
+  --python 3.12
+```
+
+## Verify
+
+```bash
+uv run \
+  --project tracks/qmc/solutions/frustration-free/challenge-194 \
+  pytest -q
+```
+
+The accelerated sampler is accepted only when it agrees with analytic edge
+probabilities and exact small-system partition distributions.
+
+## Pilot P0 orchestration
+
+Build the immutable 96-cell run spec on the target compute runtime:
+
+```bash
+uv run scripts/run_pilot.py build-spec \
+  --validation-report /absolute/validation/report/report.json \
+  --output-root /absolute/shared/pilot-p0 \
+  --run-spec /absolute/shared/pilot-p0/run_spec.json
+```
+
+Inspect pending cells, run one zero-based cell, merge all completed cells, and
+verify a downloaded tree:
+
+```bash
+uv run scripts/run_pilot.py pending --run-spec /absolute/shared/pilot-p0/run_spec.json
+uv run scripts/run_pilot.py run-cell --run-spec /absolute/shared/pilot-p0/run_spec.json --cell-index 0
+uv run scripts/run_pilot.py merge --run-spec /absolute/shared/pilot-p0/run_spec.json
+uv run scripts/run_pilot.py verify --run-spec /downloaded/pilot-p0/run_spec.json
+```
+
+`scripts/pilot_array_slurm.sh` maps Slurm array IDs `1..96` to cell indices
+`0..95`, requires one CPU, and isolates the Numba cache per cell. Task 10's
+120-second/4-GiB capability gate and Task 11 optimization were explicitly
+waived after correctness validation. The benchmark status is
+`cancelled-without-capability-report`; this is not a passed performance gate.
+
+Download a completed Pilot root with checksummed, partial-safe `rsync`, then
+run the local semantic verifier:
+
+```bash
+scripts/download_pilot.sh \
+  wuzh02-jiangweiqi \
+  /work/share/giggleliu/jiangweiqi/results/challenge-194/pilot-p0-739880d \
+  /absolute/local/results/challenge-194/pilot-p0-739880d \
+  /absolute/path/to/challenge-194/.venv/bin/python
+```
+
+The local destination's real non-symlink parent must already exist, and the
+destination must be absent, empty, or the same resumable download. Equivalent
+absolute lexical spellings (repeated separators, `.` components, or trailing
+slashes) share one normalized destination and sibling state; `/` is rejected.
+The script never deletes source or destination files. It atomically claims a
+sibling `<local-root>.download-claim` directory and stores no-clobber source,
+verified-completion, and uniquely created transfer-log files under the real
+non-symlink sibling `<local-root>.download-state` directory. A completed root
+is only reverified: `rsync` is never invoked again. Unexpected claims are
+preserved for diagnosis, and all transfer-generated logs remain outside the
+immutable Pilot root.
+
+Legacy roots with the former sibling `.download-source` marker are verified
+before either normal source or completion state is published. Failed legacy
+verification writes only a read-only diagnostic under the external state
+directory; retries verify again without invoking `rsync`.
+
+## P0 analysis and P1 publication boundary
+
+The frozen P0 run spec binds historical `PILOT_PLAN.md` bytes, so current
+`HEAD` intentionally cannot republish its aggregation. Reproduce the installed
+analysis only from the exact historical publisher revision:
+
+```bash
+git worktree add --detach /tmp/challenge-194-p0-analysis-143d35a \
+  143d35ac52923cff2d24c43d304a75c2d04d3c66
+cd /tmp/challenge-194-p0-analysis-143d35a/tracks/qmc/solutions/frustration-free/challenge-194
+uv run python scripts/analyze_pilot.py analyze --run-spec \
+  /home/footman/code/quantum.harness-challenge-194/results/challenge-194/pilot-p0-739880d/run_spec.json \
+  --output /home/footman/code/quantum.harness-challenge-194/results/challenge-194/p0_analysis.json
+```
+
+That exact command returns `verified-existing` with analysis-document SHA256
+`e42ef6b9f82380305f80ceaba384bc29cb9fe2da0848d4c72a904f4cb4c8c7c8`.
+Current combined-v2 commands instead use the supported historical boundary:
+they deeply verify all frozen P0 cells and progress while requiring both exact
+P0 root hashes (`d17d3d...` run spec and `ea29a8...` progress) and the exact
+canonical P0 analysis file hash. The immutable analysis's embedded SHA256 is
+`e42ef6b9f82380305f80ceaba384bc29cb9fe2da0848d4c72a904f4cb4c8c7c8`;
+the SHA256 of the complete canonical file is
+`44083701db692304cd3aa054c8a9488b75674cead7cd6bf479c0a203cc1fa10b`.
+Inspect both without changing the artifact:
+
+```bash
+sha256sum /home/footman/code/quantum.harness-challenge-194/results/challenge-194/p0_analysis.json
+uv run python -c 'import json,sys; print(json.load(open(sys.argv[1], encoding="utf-8"))["analysis_document_sha256"])' \
+  /home/footman/code/quantum.harness-challenge-194/results/challenge-194/p0_analysis.json
+```
+
+The implemented P1 build command is:
+
+```bash
+uv run python scripts/analyze_pilot.py build-p1 --analysis \
+  /home/footman/code/quantum.harness-challenge-194/results/challenge-194/p0_analysis.json \
+  --output /home/footman/code/quantum.harness-challenge-194/results/challenge-194/p1_protocol.json
+```
+
+For the current P0 evidence it exits nonzero with
+`P0 extension required before P1 publication: 0.9, 1.0`.
+`p1_protocol.json does not exist`; P1 has not been published or executed.
+Do not run the verifier until a future successful build has created the
+protocol. After that successful build, the implemented verification command
+is:
+
+```bash
+uv run python scripts/analyze_pilot.py verify --analysis \
+  /home/footman/code/quantum.harness-challenge-194/results/challenge-194/p0_analysis.json \
+  --p1-protocol /home/footman/code/quantum.harness-challenge-194/results/challenge-194/p1_protocol.json
+```
+
+## Frozen P0 extension construction and execution
+
+The versioned P0 extension is complete and deeply verified: 96 cells and 96
+trajectories. It samples only sigma `0.9` and `1.0`; it does not alter
+the scientific engine, relax the selector, or authorize a claim.
+
+The checked-in `pilot_correctness_approval.json` authenticates approval/source
+revision `877ab9393f320bfe31ff74a26c3db1fb205d7ef3` and package
+`validation-prod-877ab93`: report SHA256
+`036b4b8a06164716aff5f40cc38ac4855a212026a556e1c5fe33ce32ce0babb8`,
+run-spec SHA256
+`5b3eea4c460e14a57aec9df606447137d787a5c66dd7e98e1dffdcf566f430e2`,
+protocol SHA256
+`c7e980eeadaf8ed75e4d20cebb1e2c5d5f57a1cfc329afa7678ae586f5b7f488`,
+check-registry SHA256
+`6e25ea41899544f2a9de3589beb1ee94b1f3dc505638b8f8e5164a4322b56a1d`,
+and scientific-engine SHA256
+`457fa669da897e59b03681039db6121fde4d7be9295bb46a743c8448875b3ee9`.
+Wuzh02 execution uses the repository-root interpreter proven by successful P0
+job `41506576`:
+`/work/share/giggleliu/jiangweiqi/quantum.harness-challenge-194/.venv/bin/python`.
+
+From the exact clean deployed repository, the compute-node build wrapper uses
+`HARNESS_RUN_SPEC` as the canonical P0 analysis path and derives the protocol,
+approved validation report, and output root from its parent:
+
+```bash
+sbatch \
+  --export=ALL,HARNESS_RUN_SPEC=/absolute/results/challenge-194/p0_analysis.json,HARNESS_ENTRYPOINT=/absolute/deployed/quantum.harness,HARNESS_COMMAND=/absolute/offline/python \
+  scripts/pilot_extension_build_slurm.sh
+```
+
+The wrapper verifies canonical analysis-file SHA256
+`44083701db692304cd3aa054c8a9488b75674cead7cd6bf479c0a203cc1fa10b`
+and runs these implemented commands:
+
+```bash
+/absolute/offline/python scripts/analyze_pilot.py build-p0-extension \
+  --analysis /absolute/results/challenge-194/p0_analysis.json \
+  --p0-evidence-root /absolute/results/challenge-194/pilot-p0-739880d \
+  --output /absolute/results/challenge-194/p0_extension_v1_protocol.json
+
+/absolute/offline/python scripts/run_pilot.py build-extension-spec \
+  --protocol /absolute/results/challenge-194/p0_extension_v1_protocol.json \
+  --validation-report /absolute/results/challenge-194/validation-prod-877ab93/report/report.json \
+  --analysis /absolute/results/challenge-194/p0_analysis.json \
+  --p0-evidence-root /absolute/results/challenge-194/pilot-p0-739880d \
+  --output-root /absolute/results/challenge-194/pilot-p0-extension-v1 \
+  --run-spec /absolute/results/challenge-194/pilot-p0-extension-v1/run_spec.json
+```
+
+`--p0-evidence-root` is mandatory at both construction stages. It must be an
+absolute canonical non-symlink directory containing the frozen
+`pilot-p0-739880d/run_spec.json` and `progress.json` bytes. These artifacts are
+never inferred from a checkout-local, gitignored `results/` tree; the canonical
+P0 analysis remains the separate explicit `--analysis` input.
+
+After the build succeeds, submit the immutable worker root with exact
+one-CPU, 1800-MiB, 40-minute resources. Slurm IDs `1..96` map to zero-based
+cell indices. The wrapper accepts only canonical decimal IDs in that range
+before performing arithmetic:
+
+```bash
+sbatch --array=1-2%2 \
+  --export=ALL,HARNESS_RUN_SPEC=/absolute/results/challenge-194/pilot-p0-extension-v1/run_spec.json,HARNESS_ENTRYPOINT=/absolute/deployed/quantum.harness,HARNESS_COMMAND=/absolute/offline/python \
+  scripts/pilot_extension_array_slurm.sh
+
+sbatch --array=3-32,49-80%16 \
+  --export=ALL,HARNESS_RUN_SPEC=/absolute/results/challenge-194/pilot-p0-extension-v1/run_spec.json,HARNESS_ENTRYPOINT=/absolute/deployed/quantum.harness,HARNESS_COMMAND=/absolute/offline/python \
+  scripts/pilot_extension_array_slurm.sh
+
+sbatch --array=33-48,81-96%8 \
+  --export=ALL,HARNESS_RUN_SPEC=/absolute/results/challenge-194/pilot-p0-extension-v1/run_spec.json,HARNESS_ENTRYPOINT=/absolute/deployed/quantum.harness,HARNESS_COMMAND=/absolute/offline/python \
+  scripts/pilot_extension_array_slurm.sh
+```
+
+The same schema-dispatched CLI reports pending cells, runs cells, merges all
+96 results, and verifies a downloaded extension:
+
+```bash
+/absolute/offline/python scripts/run_pilot.py pending --run-spec /absolute/results/challenge-194/pilot-p0-extension-v1/run_spec.json
+/absolute/offline/python scripts/run_pilot.py run-cell --run-spec /absolute/results/challenge-194/pilot-p0-extension-v1/run_spec.json --cell-index 0
+/absolute/offline/python scripts/run_pilot.py merge --run-spec /absolute/results/challenge-194/pilot-p0-extension-v1/run_spec.json
+/absolute/offline/python scripts/run_pilot.py verify --run-spec /absolute/download/pilot-p0-extension-v1/run_spec.json
+```
+
+After extension evidence exists and has been downloaded, run the immutable
+local analysis workflow below from this solution directory.
+The extension analysis is recomputed from its verified run root. The historical
+P0 analysis is authenticated by the exact dual root hashes and exact canonical
+analysis bytes described above; it is not recomputed under current `HEAD`.
+
+```bash
+uv run python scripts/run_pilot.py verify --run-spec \
+  /home/footman/code/quantum.harness-challenge-194/results/challenge-194/pilot-p0-extension-v1/run_spec.json
+
+uv run python scripts/analyze_pilot.py analyze-extension --run-spec \
+  /home/footman/code/quantum.harness-challenge-194/results/challenge-194/pilot-p0-extension-v1/run_spec.json \
+  --protocol /home/footman/code/quantum.harness-challenge-194/results/challenge-194/p0_extension_v1_protocol.json \
+  --output /home/footman/code/quantum.harness-challenge-194/results/challenge-194/p0_extension_v1_analysis.json
+```
+
+After the extension recomputation returns `verified-existing`, combine and
+select the fully authenticated evidence:
+
+```bash
+uv run python scripts/analyze_pilot.py combine --p0-analysis \
+  /home/footman/code/quantum.harness-challenge-194/results/challenge-194/p0_analysis.json \
+  --extension-analysis /home/footman/code/quantum.harness-challenge-194/results/challenge-194/p0_extension_v1_analysis.json \
+  --p0-evidence-root /home/footman/code/quantum.harness-challenge-194/results/challenge-194/pilot-p0-739880d \
+  --extension-run-spec /home/footman/code/quantum.harness-challenge-194/results/challenge-194/pilot-p0-extension-v1/run_spec.json \
+  --extension-protocol /home/footman/code/quantum.harness-challenge-194/results/challenge-194/p0_extension_v1_protocol.json \
+  --output /home/footman/code/quantum.harness-challenge-194/results/challenge-194/p0_combined_analysis_v2.json
+
+uv run python scripts/analyze_pilot.py select --analysis \
+  /home/footman/code/quantum.harness-challenge-194/results/challenge-194/p0_combined_analysis_v2.json \
+  --p0-analysis /home/footman/code/quantum.harness-challenge-194/results/challenge-194/p0_analysis.json \
+  --extension-analysis /home/footman/code/quantum.harness-challenge-194/results/challenge-194/p0_extension_v1_analysis.json \
+  --p0-evidence-root /home/footman/code/quantum.harness-challenge-194/results/challenge-194/pilot-p0-739880d \
+  --extension-run-spec /home/footman/code/quantum.harness-challenge-194/results/challenge-194/pilot-p0-extension-v1/run_spec.json \
+  --extension-protocol /home/footman/code/quantum.harness-challenge-194/results/challenge-194/p0_extension_v1_protocol.json \
+  --output /home/footman/code/quantum.harness-challenge-194/results/challenge-194/p0_combined_brackets_v2.json
+```
+
+The combined-v2 selector and builder never trust combined JSON alone. Both
+commands require the exact P0 and extension analyses and recompute full source
+validation. If every combined bracket is selected, build P1 with the same
+five trusted inputs:
+
+```bash
+uv run python scripts/analyze_pilot.py build-p1 --analysis \
+  /home/footman/code/quantum.harness-challenge-194/results/challenge-194/p0_combined_analysis_v2.json \
+  --p0-analysis /home/footman/code/quantum.harness-challenge-194/results/challenge-194/p0_analysis.json \
+  --extension-analysis /home/footman/code/quantum.harness-challenge-194/results/challenge-194/p0_extension_v1_analysis.json \
+  --p0-evidence-root /home/footman/code/quantum.harness-challenge-194/results/challenge-194/pilot-p0-739880d \
+  --extension-run-spec /home/footman/code/quantum.harness-challenge-194/results/challenge-194/pilot-p0-extension-v1/run_spec.json \
+  --extension-protocol /home/footman/code/quantum.harness-challenge-194/results/challenge-194/p0_extension_v1_protocol.json \
+  --output /home/footman/code/quantum.harness-challenge-194/results/challenge-194/p1_protocol.json
+```
+
+`combine`, combined-v2 `select`, and combined-v2 `build-p1` require all five
+trusted inputs shown above. They deeply verify both roots, validate the exact
+immutable extension protocol, recompute extension analysis, and require
+byte-identical supplied extension analysis before validating combined evidence.
+All descriptor reads are bounded and canonical; publication is immutable and
+no-clobber. A byte-identical retry returns
+`verified-existing`; changed installed bytes, malformed canonical input, or a
+scientific refusal exits nonzero without replacing or newly creating output.
+The legacy P0-analysis-v1 `build-p1 --analysis ... --output ...` form remains
+available only without either combined-source option. Mixed or extraneous
+source arguments fail closed.
+
+The completed extension root verifies 96 cells and 96 trajectories. Its
+protocol file SHA256 is
+`e363a60f842b11b32972c7a68ec1c5f237741bc45bc79ab8bf93f51f6760d84d`,
+embedded protocol SHA256 is
+`a37ab41f3224594e61f4eebbe292975aeec449b9ecb7893e3e54f18d82d53321`,
+run-spec SHA256 is
+`c1ca9b6c8ba751919c6d9337fe1cd4c09a57ed9b99abbb9d3ebfed7f89c3d32e`,
+and progress SHA256 is
+`c78d1fb03daf19297ef9e0617410c68a6a364bffc2f2888dfa9067e7e8d6b65f`.
+Task 11 observed the following immutable analysis identities:
+
+- extension analysis: document SHA256
+  `79232574d314348c29a40cd2fbb7690e96f3cae5f26843bd4f1cf07cb6a1f45b`,
+  file SHA256
+  `d8fdd60a6de83cf3818349d4440f49f4a38bb5acd7fff1dab9b56ded4da913e5`,
+  with 102 estimate rows;
+- combined analysis: document SHA256
+  `36f85c40e9159ef2e69742672c261769fb28d2f3c947780ba63e4ef5fe5975c3`,
+  file SHA256
+  `6c38e3e18a4577da41bc70c5610b5449e0316b1588291cb178e437099fb78929`,
+  with 282 estimate rows;
+- combined brackets: document SHA256
+  `098f19d8883097d5f1f274ce759416328c086958fa5301c034a0b46dcbd562df`,
+  file SHA256
+  `7a84d545b4526d94aa6f93ca4f0d264dcf01e518f2f9b04383921634786c9962`.
+
+The exact selected sigma `0.8` window remains
+`[0x1.f400000000000p-2, 0x1.3880000000000p-1]`, and the sigma `1.1`
+crossover window remains
+`[0x1.312d000000000p+0, 0x1.7d78400000000p+0]`. Sigma `0.9` and `1.0`
+both remain `requires_p0_extension` with reason
+`no_nonzero_interval_marked_by_both_estimators`. Therefore acceptance checks
+4 and 6 fail, `requires_p0_extension` is true, `p1_protocol.json` remains
+absent, and P1 is unresolved. No sampling or selection rule was changed.
+
+Publication is no-clobber. Repeating `analyze` or a future successful
+`build-p1` against byte-identical output returns `verified-existing`.
+Different installed bytes fail closed rather than being replaced. Pilot cell
+restart preserves `.partial` and `.intent` diagnostics, resumes only verified
+immutable batches, and deeply verifies an existing completed cell. A completed
+download is reverified without rerunning `rsync`.
+
+## Design and references
+
+- `DESIGN.md` pins the scientific and statistical protocol.
+- `PLAN.md` records the test-driven implementation sequence.
+- `PILOT_PLAN.md` freezes P0, provenance, resource, restart, and P1 boundaries.
+- `references/README.md` records source URLs and SHA256 hashes.

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1700 760">
+<title>Challenge 194 evidence workflow and unresolved status</title>
+<desc>Authenticated workflow ends at unresolved sigma 0.9 and 1.0 and P1 not published or run. Partial extension-v2 workspace files are outside the evidence chain.</desc>
+<style>text{font-family:'DejaVu Sans','Noto Sans CJK SC',sans-serif;fill:#17202a}.title{font-size:30px;font-weight:700}.box{fill:#f8fafc;stroke:#335c67;stroke-width:2}.blocked{fill:#fff1f2;stroke:#9b2226;stroke-width:2}.main{font-size:17px;font-weight:700}.sub{font-size:13px}.arrow{stroke:#335c67;stroke-width:3;fill:none}.dirty{fill:#fff8e7;stroke:#bb7b00;stroke-width:2;stroke-dasharray:8 6}.caption{font-size:12px}.boundary{font-size:15px;font-weight:700;fill:#9b2226}</style>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#335c67"/></marker></defs>
+<text x="60.0" y="55.0" class="title">挑战194：证据工作流与停止边界</text>
+<rect x="55" y="130" width="200" height="115" rx="12" class="box"/>
+<text x="70.0" y="174.0" class="main">Issue #194</text>
+<text x="70.0" y="208.0" class="sub">model contract</text>
+<line x1="255" y1="187" x2="273" y2="187" class="arrow" marker-end="url(#arrow)"/>
+<rect x="285" y="130" width="200" height="115" rx="12" class="box"/>
+<text x="300.0" y="174.0" class="main">correctness approval</text>
+<text x="300.0" y="208.0" class="sub">authenticated</text>
+<line x1="485" y1="187" x2="503" y2="187" class="arrow" marker-end="url(#arrow)"/>
+<rect x="515" y="130" width="200" height="115" rx="12" class="box"/>
+<text x="530.0" y="174.0" class="main">P0 complete</text>
+<text x="530.0" y="208.0" class="sub">exploratory · 96 cells</text>
+<line x1="715" y1="187" x2="733" y2="187" class="arrow" marker-end="url(#arrow)"/>
+<rect x="745" y="130" width="200" height="115" rx="12" class="box"/>
+<text x="760.0" y="174.0" class="main">extension v1 complete</text>
+<text x="760.0" y="208.0" class="sub">96 cells / 96 trajectories</text>
+<line x1="945" y1="187" x2="963" y2="187" class="arrow" marker-end="url(#arrow)"/>
+<rect x="975" y="130" width="200" height="115" rx="12" class="box"/>
+<text x="990.0" y="174.0" class="main">combined selector</text>
+<text x="990.0" y="208.0" class="sub">mean-based rules</text>
+<line x1="1175" y1="187" x2="1193" y2="187" class="arrow" marker-end="url(#arrow)"/>
+<rect x="1205" y="130" width="200" height="115" rx="12" class="blocked"/>
+<text x="1220.0" y="174.0" class="main">sigma=0.9,1.0</text>
+<text x="1220.0" y="208.0" class="sub">unresolved</text>
+<line x1="1405" y1="187" x2="1423" y2="187" class="arrow" marker-end="url(#arrow)"/>
+<rect x="1435" y="130" width="200" height="115" rx="12" class="blocked"/>
+<text x="1450.0" y="174.0" class="main">P1</text>
+<text x="1450.0" y="208.0" class="sub">未发布 / 未运行</text>
+<text x="1205.0" y="280.0" class="boundary">reason: no_nonzero_interval_marked_by_both_estimators</text>
+<rect x="535" y="340" width="630" height="145" rx="12" class="dirty"/>
+<text x="570.0" y="385.0" class="main">当前工作区：extension-v2 局部未提交工作</text>
+<text x="570.0" y="420.0" class="boundary">不属于本报告证据链；未声称运行</text>
+<text x="570.0" y="452.0" class="sub">受保护 dirty 路径数：5</text>
+<text x="60.0" y="545.0" class="caption">来源 pilot_correctness_approval.json · SHA256 29dc5d04fd18728ee46fffe90c70d98caa61032005974f354e2b4e0e6018a7ab</text>
+<text x="60.0" y="570.0" class="caption">来源 p0_analysis.json · SHA256 44083701db692304cd3aa054c8a9488b75674cead7cd6bf479c0a203cc1fa10b</text>
+<text x="60.0" y="595.0" class="caption">来源 p0_extension_v1_protocol.json · SHA256 e363a60f842b11b32972c7a68ec1c5f237741bc45bc79ab8bf93f51f6760d84d</text>
+<text x="60.0" y="620.0" class="caption">来源 p0_extension_v1_analysis.json · SHA256 d8fdd60a6de83cf3818349d4440f49f4a38bb5acd7fff1dab9b56ded4da913e5</text>
+<text x="60.0" y="645.0" class="caption">来源 p0_combined_analysis_v2.json · SHA256 6c38e3e18a4577da41bc70c5610b5449e0316b1588291cb178e437099fb78929</text>
+<text x="60.0" y="670.0" class="caption">来源 p0_combined_brackets_v2.json · SHA256 7a84d545b4526d94aa6f93ca4f0d264dcf01e518f2f9b04383921634786c9962</text>
+<text x="60.0" y="715.0" class="boundary">P0 / extension v1 are exploratory only; no P1, confirmatory, scaling, eta, or nu result follows.</text>
+</svg>
