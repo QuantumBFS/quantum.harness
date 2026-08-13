@@ -1,0 +1,90 @@
+{
+  "schema_version": 2,
+  "learner": "mdl-enumerator",
+  "expression": "(x * y)",
+  "description_cost": 3,
+  "minimum_unique": true,
+  "equal_cost_expression_count": 1,
+  "search": {
+    "schema_version": 1,
+    "config": {
+      "max_description_cost": 8,
+      "max_generated_expressions": 2000000,
+      "max_semantic_classes": 250000,
+      "max_alternatives_per_class": 8,
+      "timeout_millis": 30000,
+      "shift_amounts": [
+        1,
+        2,
+        3
+      ],
+      "enabled_binary_ops": [
+        "add",
+        "subtract",
+        "abs-diff",
+        "multiply",
+        "bit-xor",
+        "bit-and",
+        "bit-or",
+        "min",
+        "max"
+      ],
+      "enable_square": true
+    },
+    "termination": "found",
+    "costs": [
+      {
+        "description_cost": 1,
+        "generated_expressions": 4,
+        "evaluated_expressions": 4,
+        "retained_semantic_classes": 4
+      },
+      {
+        "description_cost": 2,
+        "generated_expressions": 16,
+        "evaluated_expressions": 11,
+        "retained_semantic_classes": 11
+      },
+      {
+        "description_cost": 3,
+        "generated_expressions": 172,
+        "evaluated_expressions": 81,
+        "retained_semantic_classes": 49
+      }
+    ],
+    "generated_expressions": 192,
+    "evaluated_expressions": 96,
+    "retained_semantic_classes": 64,
+    "description_cost": 3,
+    "minimum_unique": true,
+    "equal_cost_expression_count": 1,
+    "alternatives": [
+      "(x * y)"
+    ]
+  },
+  "operand_bits": 6,
+  "input_width": 12,
+  "output_width": 12,
+  "gate_count": 182,
+  "circuit_sha256": "f8d4f235c43e28749265ba12e68fba36bfd5671d966b132d20e766fdc729929c",
+  "training_scalar": {
+    "samples": 1200,
+    "gate_count": 182,
+    "exact_matches": 1200,
+    "correct_bits": 14400,
+    "total_bits": 14400
+  },
+  "training_packed": {
+    "samples": 1200,
+    "gate_count": 182,
+    "exact_matches": 1200,
+    "correct_bits": 14400,
+    "total_bits": 14400
+  },
+  "exhaustive_cases": 4096,
+  "exhaustive_mismatches": 0,
+  "prediction_rows": 1500,
+  "prediction_sha256": "c7b37413844bf0b10ebad0010046469f500354a22cc2ba95cbe42709f8e8337d",
+  "expected_commitment_sha256": "c7b37413844bf0b10ebad0010046469f500354a22cc2ba95cbe42709f8e8337d",
+  "commitment_matches": true
+}

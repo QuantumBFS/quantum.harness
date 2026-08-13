@@ -1,0 +1,162 @@
+{
+  "schema_version": 1,
+  "profile": "apple-m4-direct-ingestion",
+  "platform": "macOS-15.6-arm64-arm-64bit-Mach-O",
+  "processor": "Apple M4",
+  "rustc": "rustc 1.95.0 (59807616e 2026-04-14) (Homebrew)",
+  "repetitions": 5,
+  "cases": {
+    "add-8-100000": {
+      "packed": {
+        "wall_seconds": [
+          0.01,
+          0.01,
+          0.07,
+          0.02,
+          0.02
+        ],
+        "maximum_resident_bytes": [
+          5701632,
+          5799936,
+          5898240,
+          5832704,
+          5832704
+        ],
+        "median_wall_seconds": 0.02,
+        "median_maximum_resident_bytes": 5832704
+      },
+      "packed-legacy": {
+        "wall_seconds": [
+          0.04,
+          0.04,
+          0.03,
+          0.02,
+          0.03
+        ],
+        "maximum_resident_bytes": [
+          13926400,
+          13991936,
+          14057472,
+          13795328,
+          13942784
+        ],
+        "median_wall_seconds": 0.03,
+        "median_maximum_resident_bytes": 13942784
+      }
+    },
+    "add-8-1000000": {
+      "packed": {
+        "wall_seconds": [
+          0.19,
+          0.16,
+          0.13,
+          0.12,
+          0.14
+        ],
+        "maximum_resident_bytes": [
+          38961152,
+          39026688,
+          39026688,
+          39026688,
+          38993920
+        ],
+        "median_wall_seconds": 0.14,
+        "median_maximum_resident_bytes": 39026688
+      },
+      "packed-legacy": {
+        "wall_seconds": [
+          0.22,
+          0.34,
+          0.22,
+          0.2,
+          0.2
+        ],
+        "maximum_resident_bytes": [
+          144818176,
+          144900096,
+          144818176,
+          144801792,
+          144769024
+        ],
+        "median_wall_seconds": 0.22,
+        "median_maximum_resident_bytes": 144818176
+      }
+    },
+    "mul-4-100000": {
+      "packed": {
+        "wall_seconds": [
+          0.01,
+          0.01,
+          0.01,
+          0.01,
+          0.01
+        ],
+        "maximum_resident_bytes": [
+          5734400,
+          5734400,
+          5734400,
+          5734400,
+          5734400
+        ],
+        "median_wall_seconds": 0.01,
+        "median_maximum_resident_bytes": 5734400
+      },
+      "packed-legacy": {
+        "wall_seconds": [
+          0.02,
+          0.02,
+          0.02,
+          0.02,
+          0.02
+        ],
+        "maximum_resident_bytes": [
+          13746176,
+          13828096,
+          13860864,
+          13746176,
+          13746176
+        ],
+        "median_wall_seconds": 0.02,
+        "median_maximum_resident_bytes": 13746176
+      }
+    },
+    "mul-4-1000000": {
+      "packed": {
+        "wall_seconds": [
+          0.11,
+          0.12,
+          0.1,
+          0.09,
+          0.08
+        ],
+        "maximum_resident_bytes": [
+          39288832,
+          39288832,
+          39288832,
+          39190528,
+          39288832
+        ],
+        "median_wall_seconds": 0.1,
+        "median_maximum_resident_bytes": 39288832
+      },
+      "packed-legacy": {
+        "wall_seconds": [
+          0.22,
+          0.25,
+          0.22,
+          0.19,
+          0.2
+        ],
+        "maximum_resident_bytes": [
+          140656640,
+          140460032,
+          140541952,
+          140623872,
+          140525568
+        ],
+        "median_wall_seconds": 0.22,
+        "median_maximum_resident_bytes": 140541952
+      }
+    }
+  }
+}

@@ -1,0 +1,126 @@
+#!/usr/bin/env node
+
+import crypto from "node:crypto";
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const repo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const sourceRoot = path.join(repo, "challenge-71-occam");
+const destination = path.join(
+  sourceRoot,
+  "solutions/rewrite-it-in-rust/search",
+);
+const staging = path.join(repo, "target/occam71-submission-snapshot");
+const check = process.argv.slice(2).includes("--check");
+if (process.argv.length > (check ? 3 : 2)) {
+  throw new Error("usage: update-occam71-submission-snapshot [--check]");
+}
+
+const sha256 = (bytes) =>
+  crypto.createHash("sha256").update(bytes).digest("hex");
+const listFiles = (root) => {
+  if (!fs.existsSync(root)) return [];
+  const output = [];
+  const visit = (directory) => {
+    for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
+      const full = path.join(directory, entry.name);
+      if (entry.isDirectory()) visit(full);
+      else output.push(path.relative(root, full));
+    }
+  };
+  visit(root);
+  return output.sort();
+};
+
+fs.rmSync(staging, { recursive: true, force: true });
+fs.mkdirSync(path.join(staging, "src"), { recursive: true });
+fs.cpSync(path.join(sourceRoot, "src"), path.join(staging, "src"), {
+  recursive: true,
+});
+fs.copyFileSync(path.join(sourceRoot, "Cargo.toml"), path.join(staging, "Cargo.toml"));
+fs.copyFileSync(path.join(repo, "Cargo.lock"), path.join(staging, "Cargo.lock"));
+fs.appendFileSync(
+  path.join(staging, "Cargo.toml"),
+  "\n# Keep this copied package independent when nested in another checkout.\n[workspace]\n",
+);
+
+const rewrites = {
+  "src/research/process.rs": [
+    [
+      '../../../experiments/occam-generalization/tasks.json',
+      "../../../research/tasks.json",
+    ],
+  ],
+  "src/research/tasks.rs": [
+    [
+      '../../../experiments/occam-generalization/tasks.json',
+      "../../../research/tasks.json",
+    ],
+  ],
+};
+for (const [relative, replacements] of Object.entries(rewrites)) {
+  const file = path.join(staging, relative);
+  let source = fs.readFileSync(file, "utf8");
+  for (const [before, after] of replacements) {
+    if (!source.includes(before)) {
+      throw new Error(`snapshot rewrite source is absent in ${relative}`);
+    }
+    source = source.replaceAll(before, after);
+  }
+  fs.writeFileSync(file, source);
+}
+
+const generatedFiles = listFiles(staging);
+const conversion = {
+  schema_version: 1,
+  source: "challenge-71-occam",
+  generated_files: generatedFiles,
+  cargo_manifest_append:
+    "# Keep this copied package independent when nested in another checkout.\\n[workspace]",
+  rewrites,
+  files: Object.fromEntries(
+    generatedFiles.map((relative) => [
+      relative,
+      sha256(fs.readFileSync(path.join(staging, relative))),
+    ]),
+  ),
+};
+fs.writeFileSync(
+  path.join(staging, "conversion-manifest.json"),
+  `${JSON.stringify(conversion, null, 2)}\n`,
+);
+
+const parityFiles = [...generatedFiles, "conversion-manifest.json"];
+if (check) {
+  for (const relative of parityFiles) {
+    const actual = path.join(destination, relative);
+    const expected = path.join(staging, relative);
+    if (
+      !fs.existsSync(actual) ||
+      !fs.readFileSync(actual).equals(fs.readFileSync(expected))
+    ) {
+      throw new Error(`submission snapshot differs: ${relative}`);
+    }
+  }
+  const allowedExtras = new Set([
+    ".gitignore",
+    "run-all.sh",
+    "tests/release_artifacts.rs",
+  ]);
+  for (const relative of listFiles(destination)) {
+    if (relative.startsWith("target/")) continue;
+    if (!parityFiles.includes(relative) && !allowedExtras.has(relative)) {
+      throw new Error(`unexpected submission snapshot file: ${relative}`);
+    }
+  }
+  process.stdout.write("Occam submission source snapshot is reproducible.\n");
+} else {
+  fs.mkdirSync(destination, { recursive: true });
+  for (const relative of parityFiles) {
+    const target = path.join(destination, relative);
+    fs.mkdirSync(path.dirname(target), { recursive: true });
+    fs.copyFileSync(path.join(staging, relative), target);
+  }
+  process.stdout.write(`Updated Occam submission source snapshot at ${destination}\n`);
+}

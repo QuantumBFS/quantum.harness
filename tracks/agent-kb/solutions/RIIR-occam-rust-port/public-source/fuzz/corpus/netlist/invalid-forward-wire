@@ -1,0 +1,3 @@
+INPUTS 1
+w1 = XOR w2 x1
+OUTPUTS w1

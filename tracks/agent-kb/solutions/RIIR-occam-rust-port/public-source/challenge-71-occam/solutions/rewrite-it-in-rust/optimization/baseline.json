@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "source_tag": "v0.2.0",
+  "source_commit": "fc58c3a013c480ecbd12469b76266376d406fc99",
+  "gate_counts": {
+    "mystery-A": 37,
+    "mystery-B": 52,
+    "mystery-C": 168,
+    "mystery-D": 187
+  },
+  "circuit_sha256": {
+    "mystery-A": "cac11ee6ad87c22af5c23222325fc285433c802f012919f056c2cf07b5b6b83a",
+    "mystery-B": "27f291224e01c310759085602b09196a7293e71d3fa44f885da559f123332fb4",
+    "mystery-C": "d139bb17ebf4d4a1740c14ae20377432ce51d0f3754eb14e60db7d9d38da7565",
+    "mystery-D": "88ccefa31486021fb3653a9b111463c2df1a6c49a549fe61174d96a51eceb85b"
+  }
+}

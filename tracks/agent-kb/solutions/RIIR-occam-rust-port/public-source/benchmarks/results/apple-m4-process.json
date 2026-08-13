@@ -1,0 +1,237 @@
+{
+  "cases": {
+    "add-16-100000": {
+      "julia": {
+        "median_rss_bytes": 329433088,
+        "median_wall_seconds": 3.48,
+        "rss_bytes": [
+          328450048,
+          329433088,
+          326320128,
+          330399744,
+          329695232
+        ],
+        "wall_seconds": [
+          3.48,
+          3.56,
+          3.46,
+          3.52,
+          3.4
+        ]
+      },
+      "packed": {
+        "median_rss_bytes": 8962048,
+        "median_wall_seconds": 0.02,
+        "rss_bytes": [
+          8962048,
+          8962048,
+          8962048,
+          8962048,
+          8962048
+        ],
+        "wall_seconds": [
+          0.02,
+          0.03,
+          0.03,
+          0.02,
+          0.02
+        ]
+      },
+      "scalar": {
+        "median_rss_bytes": 18300928,
+        "median_wall_seconds": 0.07,
+        "rss_bytes": [
+          18268160,
+          18300928,
+          18415616,
+          18333696,
+          18300928
+        ],
+        "wall_seconds": [
+          0.07,
+          0.07,
+          0.07,
+          0.07,
+          0.07
+        ]
+      }
+    },
+    "add-8-100000": {
+      "julia": {
+        "median_rss_bytes": 325451776,
+        "median_wall_seconds": 2.59,
+        "rss_bytes": [
+          325451776,
+          324141056,
+          325828608,
+          325484544,
+          325025792
+        ],
+        "wall_seconds": [
+          2.59,
+          2.47,
+          2.73,
+          2.74,
+          2.47
+        ]
+      },
+      "packed": {
+        "median_rss_bytes": 5537792,
+        "median_wall_seconds": 0.02,
+        "rss_bytes": [
+          5636096,
+          5636096,
+          5537792,
+          5537792,
+          5537792
+        ],
+        "wall_seconds": [
+          0.02,
+          0.02,
+          0.01,
+          0.01,
+          0.02
+        ]
+      },
+      "scalar": {
+        "median_rss_bytes": 12763136,
+        "median_wall_seconds": 0.05,
+        "rss_bytes": [
+          12599296,
+          12566528,
+          12763136,
+          12795904,
+          12779520
+        ],
+        "wall_seconds": [
+          0.05,
+          0.05,
+          0.05,
+          0.05,
+          0.06
+        ]
+      }
+    },
+    "mul-4-100000": {
+      "julia": {
+        "median_rss_bytes": 322600960,
+        "median_wall_seconds": 4.3,
+        "rss_bytes": [
+          324304896,
+          320716800,
+          321404928,
+          322600960,
+          325369856
+        ],
+        "wall_seconds": [
+          4.29,
+          4.29,
+          4.3,
+          4.3,
+          4.32
+        ]
+      },
+      "packed": {
+        "median_rss_bytes": 5586944,
+        "median_wall_seconds": 0.01,
+        "rss_bytes": [
+          5685248,
+          5586944,
+          5586944,
+          5586944,
+          5586944
+        ],
+        "wall_seconds": [
+          0.01,
+          0.02,
+          0.01,
+          0.01,
+          0.01
+        ]
+      },
+      "scalar": {
+        "median_rss_bytes": 11698176,
+        "median_wall_seconds": 0.09,
+        "rss_bytes": [
+          11665408,
+          11698176,
+          11796480,
+          11796480,
+          11698176
+        ],
+        "wall_seconds": [
+          0.08,
+          0.09,
+          0.09,
+          0.09,
+          0.09
+        ]
+      }
+    },
+    "official-add-8": {
+      "julia": {
+        "median_rss_bytes": 314671104,
+        "median_wall_seconds": 1.49,
+        "rss_bytes": [
+          316276736,
+          315113472,
+          313081856,
+          312721408,
+          314671104
+        ],
+        "wall_seconds": [
+          2.32,
+          1.61,
+          1.45,
+          1.43,
+          1.49
+        ]
+      },
+      "packed": {
+        "median_rss_bytes": 1900544,
+        "median_wall_seconds": 0.0,
+        "rss_bytes": [
+          1900544,
+          1900544,
+          1982464,
+          1900544,
+          1900544
+        ],
+        "wall_seconds": [
+          0.0,
+          0.0,
+          0.01,
+          0.0,
+          0.0
+        ]
+      },
+      "scalar": {
+        "median_rss_bytes": 2064384,
+        "median_wall_seconds": 0.0,
+        "rss_bytes": [
+          2064384,
+          2064384,
+          2064384,
+          2064384,
+          2064384
+        ],
+        "wall_seconds": [
+          0.01,
+          0.0,
+          0.01,
+          0.0,
+          0.0
+        ]
+      }
+    }
+  },
+  "environment_snapshot": [
+    "utc=2026-07-27T17:57:50Z",
+    "power_source=Now drawing from 'Battery Power'",
+    "battery_state=6%; discharging",
+    "lowpowermode=0",
+    "system_load= 1:57  up 52 days, 14:25, 20 users, load averages: 12.18 15.37 14.50"
+  ],
+  "profile": "apple-m4",
+  "schema_version": 1
+}

@@ -1,0 +1,165 @@
+#!/usr/bin/env node
+
+import crypto from "node:crypto";
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { spawnSync } from "node:child_process";
+
+const repo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const solution = path.join(
+  repo,
+  "challenge-71-occam/solutions/rewrite-it-in-rust",
+);
+const generatedMdl = path.join(repo, "target/occam71-mdl");
+const study = path.join(repo, "experiments/occam-generalization");
+const staging = path.join(repo, "target/occam71-rooted-evidence");
+const check = process.argv.slice(2).includes("--check");
+if (process.argv.length > (check ? 3 : 2)) {
+  throw new Error("usage: root-occam-research-evidence [--check]");
+}
+
+const sha256 = (bytes) =>
+  crypto.createHash("sha256").update(bytes).digest("hex");
+const read = (file) => fs.readFileSync(file);
+const copy = (source, destination) => {
+  fs.mkdirSync(path.dirname(destination), { recursive: true });
+  fs.copyFileSync(source, destination);
+};
+const json = (value) => `${JSON.stringify(value, null, 2)}\n`;
+
+fs.rmSync(staging, { recursive: true, force: true });
+fs.mkdirSync(staging, { recursive: true });
+for (const directory of ["circuits", "predictions", "reports", "optimization"]) {
+  fs.cpSync(path.join(solution, directory), path.join(staging, directory), {
+    recursive: true,
+  });
+}
+
+const researchFiles = [
+  "config.json",
+  "tasks.json",
+  "aggregate.csv",
+  "aggregate.json",
+  "report.md",
+  "environment.json",
+  "manifest.json",
+  "figures/gates-vs-accuracy.svg",
+  "figures/fraction-vs-recovery.svg",
+  "figures/description-vs-gates.svg",
+];
+for (const relative of researchFiles) {
+  copy(path.join(study, relative), path.join(staging, "research", relative));
+}
+
+const officialMdlReports = {};
+for (const instance of [
+  "mystery-A",
+  "mystery-B",
+  "mystery-C",
+  "mystery-D",
+]) {
+  const generatedSource = path.join(generatedMdl, instance, "report.json");
+  const source =
+    check && !fs.existsSync(generatedSource)
+      ? path.join(solution, "mdl-reports", `${instance}.json`)
+      : generatedSource;
+  if (!fs.existsSync(source)) {
+    throw new Error(
+      `${source} is absent; run scripts/learn-occam71-mdl.sh first`,
+    );
+  }
+  const bytes = read(source);
+  const report = JSON.parse(bytes);
+  if (
+    report.schema_version !== 2 ||
+    report.learner !== "mdl-enumerator" ||
+    report.exhaustive_mismatches !== 0 ||
+    report.commitment_matches !== true
+  ) {
+    throw new Error(`${instance} MDL report is not release-grade`);
+  }
+  const relative = `mdl-reports/${instance}.json`;
+  copy(source, path.join(staging, relative));
+  officialMdlReports[instance] = {
+    report_path: relative,
+    report_sha256: sha256(bytes),
+    expression: report.expression,
+    description_cost: report.description_cost,
+    minimum_unique: report.minimum_unique,
+    compiled_gate_count: report.gate_count,
+  };
+}
+
+const studyManifestBytes = read(path.join(study, "manifest.json"));
+const studyManifest = JSON.parse(studyManifestBytes);
+const researchManifest = {
+  schema_version: 1,
+  protocol: "16 tasks × 8 fractions × 20 seeds × 8 methods",
+  trial_rows: studyManifest.trial_rows,
+  raw_matrix_sha256: studyManifest.files["raw.jsonl"],
+  study_manifest_path: "research/manifest.json",
+  study_manifest_sha256: sha256(studyManifestBytes),
+  official_mdl_reports: officialMdlReports,
+  limitations: [
+    "No universal learner or global circuit minimality is claimed.",
+    "Partial-logic baselines use conservative zero completion.",
+    "Normalized runtime and RSS fields are not performance measurements.",
+  ],
+};
+fs.writeFileSync(
+  path.join(staging, "research-manifest.json"),
+  json(researchManifest),
+);
+
+const command = spawnSync(
+  "cargo",
+  [
+    "run",
+    "--quiet",
+    "--release",
+    "-p",
+    "occam71_rust",
+    "--bin",
+    "occam71_rust",
+    "--manifest-path",
+    path.join(repo, "Cargo.toml"),
+    "--",
+    "write-manifest",
+    "--output-dir",
+    staging,
+  ],
+  { cwd: repo, encoding: "utf8" },
+);
+if (command.status !== 0) {
+  process.stderr.write(command.stdout);
+  process.stderr.write(command.stderr);
+  process.exit(command.status ?? 1);
+}
+
+const rootedFiles = [
+  ...researchFiles.map((relative) => `research/${relative}`),
+  ...Object.keys(officialMdlReports).map(
+    (instance) => `mdl-reports/${instance}.json`,
+  ),
+  "research-manifest.json",
+  "manifest.json",
+];
+if (check) {
+  for (const relative of rootedFiles) {
+    const actual = path.join(solution, relative);
+    const expected = path.join(staging, relative);
+    if (!fs.existsSync(actual) || !read(actual).equals(read(expected))) {
+      throw new Error(`rooted evidence differs: ${relative}`);
+    }
+  }
+  process.stdout.write("Rooted Occam research evidence is reproducible.\n");
+} else {
+  for (const directory of ["research", "mdl-reports"]) {
+    fs.rmSync(path.join(solution, directory), { recursive: true, force: true });
+  }
+  for (const relative of rootedFiles) {
+    copy(path.join(staging, relative), path.join(solution, relative));
+  }
+  process.stdout.write(`Rooted Occam research evidence at ${solution}\n`);
+}

@@ -1,0 +1,7 @@
+/target/
+/fuzz/target/
+/vendor/
+/benchmarks/generated/
+/benchmarks/results/raw/
+__pycache__/
+*.pyc

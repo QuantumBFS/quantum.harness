@@ -1,0 +1,102 @@
+{
+  "schema_version": 2,
+  "learner": "mdl-enumerator",
+  "expression": "(square(x) + square(y))",
+  "description_cost": 5,
+  "minimum_unique": true,
+  "equal_cost_expression_count": 1,
+  "search": {
+    "schema_version": 1,
+    "config": {
+      "max_description_cost": 8,
+      "max_generated_expressions": 2000000,
+      "max_semantic_classes": 250000,
+      "max_alternatives_per_class": 8,
+      "timeout_millis": 30000,
+      "shift_amounts": [
+        1,
+        2,
+        3
+      ],
+      "enabled_binary_ops": [
+        "add",
+        "subtract",
+        "abs-diff",
+        "multiply",
+        "bit-xor",
+        "bit-and",
+        "bit-or",
+        "min",
+        "max"
+      ],
+      "enable_square": true
+    },
+    "termination": "found",
+    "costs": [
+      {
+        "description_cost": 1,
+        "generated_expressions": 4,
+        "evaluated_expressions": 4,
+        "retained_semantic_classes": 4
+      },
+      {
+        "description_cost": 2,
+        "generated_expressions": 16,
+        "evaluated_expressions": 11,
+        "retained_semantic_classes": 11
+      },
+      {
+        "description_cost": 3,
+        "generated_expressions": 172,
+        "evaluated_expressions": 81,
+        "retained_semantic_classes": 49
+      },
+      {
+        "description_cost": 4,
+        "generated_expressions": 916,
+        "evaluated_expressions": 521,
+        "retained_semantic_classes": 339
+      },
+      {
+        "description_cost": 5,
+        "generated_expressions": 5548,
+        "evaluated_expressions": 3327,
+        "retained_semantic_classes": 1875
+      }
+    ],
+    "generated_expressions": 6656,
+    "evaluated_expressions": 3944,
+    "retained_semantic_classes": 2278,
+    "description_cost": 5,
+    "minimum_unique": true,
+    "equal_cost_expression_count": 1,
+    "alternatives": [
+      "(square(x) + square(y))"
+    ]
+  },
+  "operand_bits": 5,
+  "input_width": 10,
+  "output_width": 11,
+  "gate_count": 221,
+  "circuit_sha256": "ada199dc65a64fed9554998cbc60009c1b80aba016429c7d3e7ab5401d365ba4",
+  "training_scalar": {
+    "samples": 400,
+    "gate_count": 221,
+    "exact_matches": 400,
+    "correct_bits": 4400,
+    "total_bits": 4400
+  },
+  "training_packed": {
+    "samples": 400,
+    "gate_count": 221,
+    "exact_matches": 400,
+    "correct_bits": 4400,
+    "total_bits": 4400
+  },
+  "exhaustive_cases": 1024,
+  "exhaustive_mismatches": 0,
+  "prediction_rows": 624,
+  "prediction_sha256": "b445a717483303fa3c5d8a1f7abe81888b267b7c472121c9c464fa9766808580",
+  "expected_commitment_sha256": "b445a717483303fa3c5d8a1f7abe81888b267b7c472121c9c464fa9766808580",
+  "commitment_matches": true
+}

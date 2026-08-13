@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800">
+<rect width="1200" height="800" fill="white"/>
+<text x="600" y="42" text-anchor="middle" font-family="DejaVu Sans, sans-serif" font-size="26">Observed fraction vs semantic recovery</text>
+<line x1="90" y1="710" x2="1140" y2="710" stroke="#111827"/><line x1="90" y1="80" x2="90" y2="710" stroke="#111827"/>
+<polyline points="110,512.5 250,512.5 390,512.5 530,512.5 670,512.5 810,512.5 950,512.5 1090,512.5" fill="none" stroke="#2563eb" stroke-width="3"/><text x="930" y="100" fill="#2563eb" font-family="DejaVu Sans, sans-serif" font-size="15">legacy-registry</text>
+<polyline points="110,505 250,208.75 390,137.5000000000001 530,101.875 670,100 810,100 950,100 1090,100" fill="none" stroke="#dc2626" stroke-width="3"/><text x="930" y="124" fill="#dc2626" font-family="DejaVu Sans, sans-serif" font-size="15">mdl-enumerator</text>
+<polyline points="110,700 250,700 390,700 530,700 670,700 810,700 950,700 1090,700" fill="none" stroke="#16a34a" stroke-width="3"/><text x="930" y="148" fill="#16a34a" font-family="DejaVu Sans, sans-serif" font-size="15">abc-dont-care</text>
+<polyline points="110,700 250,700 390,700 530,700 670,700 810,700 950,700 1090,700" fill="none" stroke="#9333ea" stroke-width="3"/><text x="930" y="172" fill="#9333ea" font-family="DejaVu Sans, sans-serif" font-size="15">robdd</text>
+<polyline points="110,700 250,700 390,700 530,700 670,700 810,700 950,700 1090,700" fill="none" stroke="#ea580c" stroke-width="3"/><text x="930" y="196" fill="#ea580c" font-family="DejaVu Sans, sans-serif" font-size="15">sat-cegis</text>
+<polyline points="110,505 250,223.75 390,169.375 530,137.5 670,137.5 810,137.5 950,137.5 1090,137.5" fill="none" stroke="#0891b2" stroke-width="3"/><text x="930" y="220" fill="#0891b2" font-family="DejaVu Sans, sans-serif" font-size="15">grammar-evolution</text>
+<polyline points="110,700 250,700 390,700 530,700 670,700 810,700 950,700 1090,700" fill="none" stroke="#4b5563" stroke-width="3"/><text x="930" y="244" fill="#4b5563" font-family="DejaVu Sans, sans-serif" font-size="15">memorization</text>
+<polyline points="110,100 250,100 390,100 530,100 670,100 810,100 950,100 1090,100" fill="none" stroke="#111827" stroke-width="3"/><text x="930" y="268" fill="#111827" font-family="DejaVu Sans, sans-serif" font-size="15">oracle-expression</text>
+</svg>

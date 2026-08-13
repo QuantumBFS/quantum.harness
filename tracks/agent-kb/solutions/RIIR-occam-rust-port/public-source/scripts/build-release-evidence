@@ -1,0 +1,80 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+export LC_ALL=C
+
+repo_root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+cd "$repo_root"
+
+output_dir=${1:-"$repo_root/target/release-evidence"}
+commit=${2:-HEAD}
+
+commit=$(git rev-parse "$commit^{commit}")
+package_version=$(
+    git show "$commit:challenge-71-occam/Cargo.toml" |
+        awk -F'"' '/^version = / { print $2; exit }'
+)
+if [[ ! "$package_version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+    echo "invalid package version at $commit: $package_version" >&2
+    exit 1
+fi
+version="v$package_version"
+archive_name="occam-rust-port-$version-evidence.tar.gz"
+prefix="occam-rust-port-$version/"
+release_document="docs/releases/$version.md"
+
+mkdir -p "$output_dir"
+temporary=$(mktemp -d "${TMPDIR:-/tmp}/occam-release-package.XXXXXX")
+trap 'rm -rf "$temporary"' EXIT HUP INT TERM
+
+paths=(
+  README.md
+  CHANGELOG.md
+  challenge-71-occam/solutions/rewrite-it-in-rust
+  experiments/occam-generalization
+  experiments/occam-generalization-v2
+  docs/reports/2026-07-28-occam-mdl-generalization-completion.md
+  docs/reports/2026-07-28-occam-research-v2-completion.md
+  "$release_document"
+  tests/oracles/occam-v1.json
+  docs/oracle-results.md
+  docs/synthesis
+  benchmarks/results
+  benchmarks/experiments/2026-07-28-direct-ingestion-apple-m4
+  tools/abc/LOCK.json
+  tools/abc/LICENSE.url
+)
+
+for candidate in "${paths[@]}"; do
+    if ! git cat-file -e "$commit:$candidate" 2>/dev/null; then
+        echo "release allowlist path is absent at $commit: $candidate" >&2
+        exit 1
+    fi
+done
+
+git ls-tree -r --name-only "$commit" -- "${paths[@]}" |
+    while IFS= read -r file; do
+        digest=$(git show "$commit:$file" | shasum -a 256 | awk '{print $1}')
+        printf '%s  %s\n' "$digest" "$file"
+    done >"$temporary/SHA256SUMS"
+
+commit_time=$(git show -s --format=%cI "$commit")
+metadata=$(printf \
+    '{\n  "schema_version": 2,\n  "version": "%s",\n  "package_version": "%s",\n  "commit": "%s",\n  "commit_time": "%s",\n  "evidence_protocols": [\n    "occam-generalization-v1-immutable",\n    "occam-generalization-v2-measured-semantic"\n  ],\n  "contains_prebuilt_binaries": false,\n  "contains_abc_source_or_binary": false,\n  "contains_vendor_dataset": false\n}\n' \
+    "$version" "$package_version" "$commit" "$commit_time")
+sums=$(<"$temporary/SHA256SUMS")
+
+git archive \
+    --format=tar \
+    --prefix="$prefix" \
+    --add-virtual-file="${prefix}RELEASE.json:$metadata" \
+    --add-virtual-file="${prefix}SHA256SUMS:$sums" \
+    "$commit" \
+    "${paths[@]}" >"$temporary/evidence.tar"
+gzip -n -c "$temporary/evidence.tar" >"$output_dir/$archive_name"
+
+digest=$(shasum -a 256 "$output_dir/$archive_name" | awk '{print $1}')
+printf '%s  %s\n' "$digest" "$archive_name" \
+    >"$output_dir/$archive_name.sha256"
+printf 'version: %s\ncommit: %s\narchive: %s\nsha256: %s\n' \
+    "$version" "$commit" "$output_dir/$archive_name" "$digest"

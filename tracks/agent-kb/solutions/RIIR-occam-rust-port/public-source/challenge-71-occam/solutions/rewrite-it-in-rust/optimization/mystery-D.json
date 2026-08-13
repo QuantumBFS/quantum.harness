@@ -1,0 +1,4398 @@
+{
+  "schema_version": 1,
+  "baseline_gate_count": 187,
+  "abc": {
+    "schema_version": 1,
+    "baseline_gate_count": 187,
+    "accepted_candidates": 7,
+    "selected_flow": "compress2",
+    "selected_gate_count": 186,
+    "selected_circuit_sha256": "1222f95531ffa51f713de9b4617b96063b59d9433a3cf4bb5f41106bd6ba1206",
+    "flows": [
+      {
+        "name": "resyn",
+        "accepted": true,
+        "status": "accepted",
+        "abc_cec_equivalent": true,
+        "rust_exhaustive_cases": 1024,
+        "rust_exhaustive_mismatches": 0,
+        "official_gate_count": 189,
+        "circuit_sha256": "869cd6d5567ce9f27b1252b931398794d3f4b923b313598f1cf0e80e0359861f",
+        "stdout_sha256": "2b625dae139c783f49dbaf1ad1e2b9dd4a71908af62354b09c14131ce67cfa86",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diagnostic_tail": "======== ABC command line \"source flow.abc\"\nNetworks are equivalent.  Time = <normalized>\n\n"
+      },
+      {
+        "name": "resyn2",
+        "accepted": true,
+        "status": "accepted",
+        "abc_cec_equivalent": true,
+        "rust_exhaustive_cases": 1024,
+        "rust_exhaustive_mismatches": 0,
+        "official_gate_count": 186,
+        "circuit_sha256": "1222f95531ffa51f713de9b4617b96063b59d9433a3cf4bb5f41106bd6ba1206",
+        "stdout_sha256": "2b625dae139c783f49dbaf1ad1e2b9dd4a71908af62354b09c14131ce67cfa86",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diagnostic_tail": "======== ABC command line \"source flow.abc\"\nNetworks are equivalent.  Time = <normalized>\n\n"
+      },
+      {
+        "name": "resyn3",
+        "accepted": true,
+        "status": "accepted",
+        "abc_cec_equivalent": true,
+        "rust_exhaustive_cases": 1024,
+        "rust_exhaustive_mismatches": 0,
+        "official_gate_count": 188,
+        "circuit_sha256": "ac4050c2157c07d0e5ce0d4e1618d72c182b44fe933cfa86cceaff696e2a7d8f",
+        "stdout_sha256": "2b625dae139c783f49dbaf1ad1e2b9dd4a71908af62354b09c14131ce67cfa86",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diagnostic_tail": "======== ABC command line \"source flow.abc\"\nNetworks are equivalent.  Time = <normalized>\n\n"
+      },
+      {
+        "name": "compress",
+        "accepted": true,
+        "status": "accepted",
+        "abc_cec_equivalent": true,
+        "rust_exhaustive_cases": 1024,
+        "rust_exhaustive_mismatches": 0,
+        "official_gate_count": 189,
+        "circuit_sha256": "869cd6d5567ce9f27b1252b931398794d3f4b923b313598f1cf0e80e0359861f",
+        "stdout_sha256": "2b625dae139c783f49dbaf1ad1e2b9dd4a71908af62354b09c14131ce67cfa86",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diagnostic_tail": "======== ABC command line \"source flow.abc\"\nNetworks are equivalent.  Time = <normalized>\n\n"
+      },
+      {
+        "name": "compress2",
+        "accepted": true,
+        "status": "accepted",
+        "abc_cec_equivalent": true,
+        "rust_exhaustive_cases": 1024,
+        "rust_exhaustive_mismatches": 0,
+        "official_gate_count": 186,
+        "circuit_sha256": "1222f95531ffa51f713de9b4617b96063b59d9433a3cf4bb5f41106bd6ba1206",
+        "stdout_sha256": "2b625dae139c783f49dbaf1ad1e2b9dd4a71908af62354b09c14131ce67cfa86",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diagnostic_tail": "======== ABC command line \"source flow.abc\"\nNetworks are equivalent.  Time = <normalized>\n\n"
+      },
+      {
+        "name": "resyn2rs",
+        "accepted": true,
+        "status": "accepted",
+        "abc_cec_equivalent": true,
+        "rust_exhaustive_cases": 1024,
+        "rust_exhaustive_mismatches": 0,
+        "official_gate_count": 192,
+        "circuit_sha256": "973b6eecdd8077524c0cf91a53dce9e80e23c384d2c76ab39bf47a7a7aed2200",
+        "stdout_sha256": "2b625dae139c783f49dbaf1ad1e2b9dd4a71908af62354b09c14131ce67cfa86",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diagnostic_tail": "======== ABC command line \"source flow.abc\"\nNetworks are equivalent.  Time = <normalized>\n\n"
+      },
+      {
+        "name": "dc2",
+        "accepted": true,
+        "status": "accepted",
+        "abc_cec_equivalent": true,
+        "rust_exhaustive_cases": 1024,
+        "rust_exhaustive_mismatches": 0,
+        "official_gate_count": 187,
+        "circuit_sha256": "81e70243e52f5acdec55486a80259438eee214570eedf98951d3b505a8ccf9d6",
+        "stdout_sha256": "2b625dae139c783f49dbaf1ad1e2b9dd4a71908af62354b09c14131ce67cfa86",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diagnostic_tail": "======== ABC command line \"source flow.abc\"\nNetworks are equivalent.  Time = <normalized>\n\n"
+      }
+    ]
+  },
+  "peephole_baseline": {
+    "schema_version": 1,
+    "window_config": {
+      "min_gates": 3,
+      "max_gates": 3,
+      "max_inputs": 4,
+      "max_outputs": 2
+    },
+    "baseline_gate_count": 187,
+    "final_gate_count": 187,
+    "attempted_windows": 64,
+    "accepted_replacements": 0,
+    "termination": "attempt-limit",
+    "whole_circuit_cases": 1024,
+    "whole_circuit_mismatches": 0,
+    "final_circuit_sha256": "88ccefa31486021fb3653a9b111463c2df1a6c49a549fe61174d96a51eceb85b",
+    "attempts": [
+      {
+        "window_identity_sha256": "78c8c8af7e52381d70febe09376e018e382c81b7aa2b994c1f860d15deb17af3",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 1,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 8,
+            "clauses": 93,
+            "literals": 128
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 80,
+            "clauses": 856,
+            "literals": 2440
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 156,
+            "clauses": 1785,
+            "literals": 5216
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "25e02db1b9905bfc39401b312989e8a37583374fd1f55031847f25b21e1785c8",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 2,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 16,
+            "clauses": 186,
+            "literals": 256
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 90,
+            "clauses": 998,
+            "literals": 2668
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 168,
+            "clauses": 1980,
+            "literals": 5552
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "da8f00c32dceb294d72c5ea75568d3b490a881305017aeea518ae60f392fcc0d",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 2,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 16,
+            "clauses": 186,
+            "literals": 256
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 90,
+            "clauses": 998,
+            "literals": 2668
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 168,
+            "clauses": 1980,
+            "literals": 5552
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "48fe648067cd36c782a78b88980f7673e464f6b5759ca1f4deeb0274536c505d",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 1,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 8,
+            "clauses": 93,
+            "literals": 128
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 80,
+            "clauses": 856,
+            "literals": 2440
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 156,
+            "clauses": 1785,
+            "literals": 5216
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "dd8500e6969ef4dc5dae9aadb739233d9c1cfd07a186d65e453c85fafb07756d",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 1,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 8,
+            "clauses": 93,
+            "literals": 128
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 80,
+            "clauses": 856,
+            "literals": 2440
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 156,
+            "clauses": 1785,
+            "literals": 5216
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "b7113eea365b6cd5aa75a5189200e00cf1a25bb6cb0b4a355735dbf298d29afb",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 2,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 16,
+            "clauses": 186,
+            "literals": 256
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 90,
+            "clauses": 998,
+            "literals": 2668
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 168,
+            "clauses": 1980,
+            "literals": 5552
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "0f140186eadd12e3040d07be66d171e6d95e80c0e6d341d6482c81250ad4391a",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 2,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 16,
+            "clauses": 186,
+            "literals": 256
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 90,
+            "clauses": 998,
+            "literals": 2668
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 168,
+            "clauses": 1980,
+            "literals": 5552
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "ed147d1c400952b02eb6d31a03b5a0c356e25903112f4e6a4271907f35911d64",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 1,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 8,
+            "clauses": 93,
+            "literals": 128
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 80,
+            "clauses": 856,
+            "literals": 2440
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 156,
+            "clauses": 1785,
+            "literals": 5216
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "40038b895336d02473237ac5dc0da3e5af36903de960bc0b189b7a156fc96f90",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 2,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 16,
+            "clauses": 186,
+            "literals": 256
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 90,
+            "clauses": 998,
+            "literals": 2668
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 168,
+            "clauses": 1980,
+            "literals": 5552
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "96dbab3f93e90c8b206adca231428a050727a5de7d5bf7ab1b79882a682e7895",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 2,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 16,
+            "clauses": 186,
+            "literals": 256
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 90,
+            "clauses": 998,
+            "literals": 2668
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 168,
+            "clauses": 1980,
+            "literals": 5552
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "b2ff4c5861d9598efbfc1cd69a71c6d67e17018bd2018672bb66b1ce963b5984",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 1,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 8,
+            "clauses": 93,
+            "literals": 128
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 80,
+            "clauses": 856,
+            "literals": 2440
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 156,
+            "clauses": 1785,
+            "literals": 5216
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "99798ab8d60e72674ad050c2fc0be003cdf2b3745e5574a77afa7bd73a5f6747",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 2,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 16,
+            "clauses": 186,
+            "literals": 256
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 90,
+            "clauses": 998,
+            "literals": 2668
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 168,
+            "clauses": 1980,
+            "literals": 5552
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "ae329253c19925b75895605f974b9da9139ff44b9837b3892b86c7690f2359df",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 2,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 16,
+            "clauses": 186,
+            "literals": 256
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 90,
+            "clauses": 998,
+            "literals": 2668
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 168,
+            "clauses": 1980,
+            "literals": 5552
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "42627b0eaba93d6221252d49d6f476d89fafd62481766b69d99ba91a134e27bd",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 1,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 8,
+            "clauses": 93,
+            "literals": 128
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 80,
+            "clauses": 856,
+            "literals": 2440
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 156,
+            "clauses": 1785,
+            "literals": 5216
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "b164d4d56ff7e27c289b74caf4710c5be8a839a9e52ce29994591cbfd5ee5110",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 2,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 16,
+            "clauses": 186,
+            "literals": 256
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 90,
+            "clauses": 998,
+            "literals": 2668
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 168,
+            "clauses": 1980,
+            "literals": 5552
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "1a31542510a44e7c5acb2e2c6dff975eb8c64755324b2590378f3f91ef2662cf",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 2,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 16,
+            "clauses": 186,
+            "literals": 256
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 90,
+            "clauses": 998,
+            "literals": 2668
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 168,
+            "clauses": 1980,
+            "literals": 5552
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "d6dbeabefe263099266f2fbf516cf9555cbdd0b2a64008771e389673b5c8ee50",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 1,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 8,
+            "clauses": 93,
+            "literals": 128
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 80,
+            "clauses": 856,
+            "literals": 2440
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 156,
+            "clauses": 1785,
+            "literals": 5216
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "6e97483a1f942245181b7ce33a2b3466623a0c9c8de9a87de690c0d0b289ed1c",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 2,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 16,
+            "clauses": 186,
+            "literals": 256
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 90,
+            "clauses": 998,
+            "literals": 2668
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 168,
+            "clauses": 1980,
+            "literals": 5552
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "dcb41977475eb03efcfa97a233852fe03474e75645517a8d499b6a26212bfee6",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 2,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 16,
+            "clauses": 186,
+            "literals": 256
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 90,
+            "clauses": 998,
+            "literals": 2668
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 168,
+            "clauses": 1980,
+            "literals": 5552
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "1f2ad678daf659c40231ccdc3e341e279e86f66b59fd81ba99906223ad54ccc4",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 1,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 8,
+            "clauses": 93,
+            "literals": 128
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 80,
+            "clauses": 856,
+            "literals": 2440
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 156,
+            "clauses": 1785,
+            "literals": 5216
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "dfadcf29ca3d5a2084a88b26a47b00cfbc4e93b3eba436259f074c226ce6d23f",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 1,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 8,
+            "clauses": 93,
+            "literals": 128
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 80,
+            "clauses": 856,
+            "literals": 2440
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 156,
+            "clauses": 1785,
+            "literals": 5216
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "05c3dc65e249b895ba96bc0f61cc9bfd936a118723bccdd3c851fa102ef1ad59",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 2,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 16,
+            "clauses": 186,
+            "literals": 256
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 90,
+            "clauses": 998,
+            "literals": 2668
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 168,
+            "clauses": 1980,
+            "literals": 5552
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "de9b4d3af2c0c5a7a9dc27b344de6aad2dcbe9525d836bb0ef2163d581134f2d",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 2,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 16,
+            "clauses": 186,
+            "literals": 256
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 90,
+            "clauses": 998,
+            "literals": 2668
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 168,
+            "clauses": 1980,
+            "literals": 5552
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "3edd618cf54b2be498495a020e5ae2f425538ddb4c3d3a650b9c236d6a7d9b99",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 1,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 8,
+            "clauses": 93,
+            "literals": 128
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 80,
+            "clauses": 856,
+            "literals": 2440
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 156,
+            "clauses": 1785,
+            "literals": 5216
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "d35272fad62678276b93281937d6705121d6e3cd97eebb3e13dd8b7b8fa4ef06",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 1,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 8,
+            "clauses": 93,
+            "literals": 128
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 80,
+            "clauses": 856,
+            "literals": 2440
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 156,
+            "clauses": 1785,
+            "literals": 5216
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "e469e3fbfbfbe45161ec543bf4fb7a76c99d7a611dc5e47d9632619df71c2e4e",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 2,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 16,
+            "clauses": 186,
+            "literals": 256
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 90,
+            "clauses": 998,
+            "literals": 2668
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 168,
+            "clauses": 1980,
+            "literals": 5552
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "947eefdb58f1493d041576b6092ab6ce536c3113a38bfc9aa3cc0260989fa20b",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 2,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 16,
+            "clauses": 186,
+            "literals": 256
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 90,
+            "clauses": 998,
+            "literals": 2668
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 168,
+            "clauses": 1980,
+            "literals": 5552
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "03b35885062862d31b6d68951bdc6e64aa4275e0d75c2bb395af111b75d59f36",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 1,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 8,
+            "clauses": 93,
+            "literals": 128
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 80,
+            "clauses": 856,
+            "literals": 2440
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 156,
+            "clauses": 1785,
+            "literals": 5216
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "c89574020b0674be903e5915157d57b9ad0c8a92e20a964babe5a29f9adcd24d",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 1,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 8,
+            "clauses": 93,
+            "literals": 128
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 80,
+            "clauses": 856,
+            "literals": 2440
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 156,
+            "clauses": 1785,
+            "literals": 5216
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "ced15bff90d345aea955f1830d1e2b785485c590ef562b2a39c7a885d4d09ccf",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 2,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 16,
+            "clauses": 186,
+            "literals": 256
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 90,
+            "clauses": 998,
+            "literals": 2668
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 168,
+            "clauses": 1980,
+            "literals": 5552
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "cd67d49c4732c7e056703a0599b5d5c09c734bdf1fa232d1d357857ea94e6129",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 2,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 16,
+            "clauses": 186,
+            "literals": 256
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 90,
+            "clauses": 998,
+            "literals": 2668
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 168,
+            "clauses": 1980,
+            "literals": 5552
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "32f4b22b880089bd01f72ca8e21c61255cdc6b3168af3b1122c2a17183102f2c",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 1,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 8,
+            "clauses": 93,
+            "literals": 128
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 80,
+            "clauses": 856,
+            "literals": 2440
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 156,
+            "clauses": 1785,
+            "literals": 5216
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "acf7554e8e8afbd6b691d2ffaffffa5e6fe8e1a1bad490dd63153473ccf3dac1",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 2,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 16,
+            "clauses": 186,
+            "literals": 256
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 90,
+            "clauses": 998,
+            "literals": 2668
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 168,
+            "clauses": 1980,
+            "literals": 5552
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "8963b33b14208b969139b4ae8ec33f916c85a3cab30ad1065ed3fd639d41e328",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 2,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 16,
+            "clauses": 186,
+            "literals": 256
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 90,
+            "clauses": 998,
+            "literals": 2668
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 168,
+            "clauses": 1980,
+            "literals": 5552
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "7a52fcb469aa687216663e8a44732ee79a30fbe9eeae09daeb84ed075f992488",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 1,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 8,
+            "clauses": 93,
+            "literals": 128
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 80,
+            "clauses": 856,
+            "literals": 2440
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 156,
+            "clauses": 1785,
+            "literals": 5216
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "a557d54ca26e0ed20ce6a7cea961e1a78bd0578712c96c151d3bd67e464e7ceb",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 1,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 8,
+            "clauses": 93,
+            "literals": 128
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 80,
+            "clauses": 856,
+            "literals": 2440
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 156,
+            "clauses": 1785,
+            "literals": 5216
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "4f5d07b1173ecb7d11e81866e51fd2668dacfdcc75bec7568781aef0cc3c78bd",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 2,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 16,
+            "clauses": 186,
+            "literals": 256
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 90,
+            "clauses": 998,
+            "literals": 2668
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 168,
+            "clauses": 1980,
+            "literals": 5552
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "617234f851e816a8d038fb7ffac98a59e65c2b6d031800fb56d8b2c18eca4806",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 2,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 16,
+            "clauses": 186,
+            "literals": 256
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 90,
+            "clauses": 998,
+            "literals": 2668
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 168,
+            "clauses": 1980,
+            "literals": 5552
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "f2b102f3b57d7d82c7e9b31f24362f510c29dac31e0807546b6acd076bf7bfb9",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 1,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 8,
+            "clauses": 93,
+            "literals": 128
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 80,
+            "clauses": 856,
+            "literals": 2440
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 156,
+            "clauses": 1785,
+            "literals": 5216
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "ac4d9f13ffae012de397d31601fa6929cf5721dad76b5eb40177e20a5b37fa04",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 2,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 16,
+            "clauses": 186,
+            "literals": 256
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 90,
+            "clauses": 998,
+            "literals": 2668
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 168,
+            "clauses": 1980,
+            "literals": 5552
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "5b340bec163ed46e7b6748d3c5d41e43e85307868d41eb9cc93ef91d7dca2041",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 2,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 16,
+            "clauses": 186,
+            "literals": 256
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 90,
+            "clauses": 998,
+            "literals": 2668
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 168,
+            "clauses": 1980,
+            "literals": 5552
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "0baa8c16afe2bff6d1dc809ac3fe40394882983e02c52b52c93bb6dc8fcbf5b1",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 1,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 8,
+            "clauses": 93,
+            "literals": 128
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 80,
+            "clauses": 856,
+            "literals": 2440
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 156,
+            "clauses": 1785,
+            "literals": 5216
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "05377876229cb7ddb437380f02b080eaa4d2eb18755caadb89e7d9723976a27e",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 2,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 16,
+            "clauses": 186,
+            "literals": 256
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 90,
+            "clauses": 998,
+            "literals": 2668
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 168,
+            "clauses": 1980,
+            "literals": 5552
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "41e94cbeea0001717c2480b66f6c1e3baa8c7e5e3f02a998ddd6120c6c64a9e6",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 2,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 16,
+            "clauses": 186,
+            "literals": 256
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 90,
+            "clauses": 998,
+            "literals": 2668
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 168,
+            "clauses": 1980,
+            "literals": 5552
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "10c3f5e5883dc06708b36af872ed0e8930c67a2328e35b467bb959c17433eea6",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 1,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 8,
+            "clauses": 93,
+            "literals": 128
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 80,
+            "clauses": 856,
+            "literals": 2440
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 156,
+            "clauses": 1785,
+            "literals": 5216
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "ffc20f9191854292b5ee680f196719a6256ad80a8443426a6735b76f6b587439",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 1,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 8,
+            "clauses": 93,
+            "literals": 128
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 80,
+            "clauses": 856,
+            "literals": 2440
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 156,
+            "clauses": 1785,
+            "literals": 5216
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "9eadeb0fd0daa3b2a2f566085eb65bbf3ca9d55df04f00f9b00d563d7a5e7ae0",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 2,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 16,
+            "clauses": 186,
+            "literals": 256
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 90,
+            "clauses": 998,
+            "literals": 2668
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 168,
+            "clauses": 1980,
+            "literals": 5552
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "08645896c764a6b4d60adf2488a296a6b077c2d69ac13c208f664dc1cfa35b2b",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 2,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 16,
+            "clauses": 186,
+            "literals": 256
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 90,
+            "clauses": 998,
+            "literals": 2668
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 168,
+            "clauses": 1980,
+            "literals": 5552
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "9fa76173c2a6905b5ab40ed68a00b16ffa4357e3502d03c6262355f145d7aca6",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 1,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 8,
+            "clauses": 93,
+            "literals": 128
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 80,
+            "clauses": 856,
+            "literals": 2440
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 156,
+            "clauses": 1785,
+            "literals": 5216
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "d046988c0696f18dea6c049b5a9d405d5423c69a99d0ea8035ec012ceec6dfc3",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 1,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 8,
+            "clauses": 93,
+            "literals": 128
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 80,
+            "clauses": 856,
+            "literals": 2440
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 156,
+            "clauses": 1785,
+            "literals": 5216
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "cc0810653d9a6989c26ebed3033aa4f98bfb891ec131428ba8bc628dcdd67113",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 2,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 16,
+            "clauses": 186,
+            "literals": 256
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 90,
+            "clauses": 998,
+            "literals": 2668
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 168,
+            "clauses": 1980,
+            "literals": 5552
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "42b093dc56a251e565eb5e55299fdd45ccec4053b2f1c5a8762a9bddf7144f8f",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 2,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 16,
+            "clauses": 186,
+            "literals": 256
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 90,
+            "clauses": 998,
+            "literals": 2668
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 168,
+            "clauses": 1980,
+            "literals": 5552
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "df22e7a623652e2a3912f8145d86ee6313ea599499089b88ee6af8155492b88e",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 1,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 8,
+            "clauses": 93,
+            "literals": 128
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 80,
+            "clauses": 856,
+            "literals": 2440
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 156,
+            "clauses": 1785,
+            "literals": 5216
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "b7cb3cde3329c63d75df1af8704348d144fac15ef9acedf7bdd857b776ebee23",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 1,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 8,
+            "clauses": 93,
+            "literals": 128
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 80,
+            "clauses": 856,
+            "literals": 2440
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 156,
+            "clauses": 1785,
+            "literals": 5216
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "42c1deb0b37525c147a326ef10bd6553287622fa134707948f3268e76f10ddea",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 2,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 16,
+            "clauses": 186,
+            "literals": 256
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 90,
+            "clauses": 998,
+            "literals": 2668
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 168,
+            "clauses": 1980,
+            "literals": 5552
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "d11a27be78a1a1d638a4f1cfb4fc27820033effe8690705e3343de38592ae188",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 2,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 16,
+            "clauses": 186,
+            "literals": 256
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 90,
+            "clauses": 998,
+            "literals": 2668
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 168,
+            "clauses": 1980,
+            "literals": 5552
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "f5113beacc399baa64b22a74dfb6c9d0b3ff31fd3e3c0943e2ff42ab71459507",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 1,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 8,
+            "clauses": 93,
+            "literals": 128
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 80,
+            "clauses": 856,
+            "literals": 2440
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 156,
+            "clauses": 1785,
+            "literals": 5216
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "4c1c7caf817b5d871b121511221239df2bea042fbf35c357ce44ae1932f67b21",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 1,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 8,
+            "clauses": 93,
+            "literals": 128
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 80,
+            "clauses": 856,
+            "literals": 2440
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 156,
+            "clauses": 1785,
+            "literals": 5216
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "543b246f5096e238edf796dd7bfabb4483169ecf23a55a8240b9dbe17390e167",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 2,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 16,
+            "clauses": 186,
+            "literals": 256
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 90,
+            "clauses": 998,
+            "literals": 2668
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 168,
+            "clauses": 1980,
+            "literals": 5552
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "48b6ca25a93d337e25e642b314e17cf40d26dcad01650db9353a76767127ea45",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 2,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 16,
+            "clauses": 186,
+            "literals": 256
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 90,
+            "clauses": 998,
+            "literals": 2668
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 168,
+            "clauses": 1980,
+            "literals": 5552
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "8c92831e2eed4ec9b3238040ec6045edaad0f02471983b7952bbcd7c4bb103fc",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 1,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 8,
+            "clauses": 93,
+            "literals": 128
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 80,
+            "clauses": 856,
+            "literals": 2440
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 156,
+            "clauses": 1785,
+            "literals": 5216
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "7853b6b878ddc130ac5ff007e89d2b3fce559d50db7b10d9880f07af1ab59a7c",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 2,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 16,
+            "clauses": 186,
+            "literals": 256
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 90,
+            "clauses": 998,
+            "literals": 2668
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 168,
+            "clauses": 1980,
+            "literals": 5552
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "ff21cc14eb685c19162d339808d2442fb27681299df6529a94845c20c1b4d21b",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 2,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 16,
+            "clauses": 186,
+            "literals": 256
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 90,
+            "clauses": 998,
+            "literals": 2668
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 168,
+            "clauses": 1980,
+            "literals": 5552
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "6ab0d6aa3478dfe78b395ddb08a165fa8de01cf750b165bdd19dc446f7eed0d6",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 1,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 8,
+            "clauses": 93,
+            "literals": 128
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 80,
+            "clauses": 856,
+            "literals": 2440
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 156,
+            "clauses": 1785,
+            "literals": 5216
+          }
+        ]
+      }
+    ]
+  },
+  "peephole_abc": {
+    "schema_version": 1,
+    "window_config": {
+      "min_gates": 3,
+      "max_gates": 3,
+      "max_inputs": 4,
+      "max_outputs": 2
+    },
+    "baseline_gate_count": 186,
+    "final_gate_count": 186,
+    "attempted_windows": 61,
+    "accepted_replacements": 0,
+    "termination": "fixed-point",
+    "whole_circuit_cases": 1024,
+    "whole_circuit_mismatches": 0,
+    "final_circuit_sha256": "1222f95531ffa51f713de9b4617b96063b59d9433a3cf4bb5f41106bd6ba1206",
+    "attempts": [
+      {
+        "window_identity_sha256": "40a557b3c3504c349bd7da3baace61d027d5cc24ab082473d20beb3bf333ec90",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 2,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 16,
+            "clauses": 186,
+            "literals": 256
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 90,
+            "clauses": 998,
+            "literals": 2668
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 168,
+            "clauses": 1980,
+            "literals": 5552
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "da45264f03274a6c55279e369e7f9dd95ee9595246df932a030d3383ecadf92b",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 2,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 16,
+            "clauses": 186,
+            "literals": 256
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 90,
+            "clauses": 998,
+            "literals": 2668
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 168,
+            "clauses": 1980,
+            "literals": 5552
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "077f16b7fd1f6a510e922452ef8e9a9faaedd05f40f1458b05e73b9824f1c967",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 2,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 16,
+            "clauses": 186,
+            "literals": 256
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 90,
+            "clauses": 998,
+            "literals": 2668
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 168,
+            "clauses": 1980,
+            "literals": 5552
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "c2d3d2dbbf8d1241a9a50338c991a5a472e4b2542d3befe404ca1c1b9f593d0a",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 2,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 16,
+            "clauses": 186,
+            "literals": 256
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 90,
+            "clauses": 998,
+            "literals": 2668
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 168,
+            "clauses": 1980,
+            "literals": 5552
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "a75a423f3082db8755dc75980decc8985e400d61a5e082342fda590f4b976f70",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 1,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 8,
+            "clauses": 93,
+            "literals": 128
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 80,
+            "clauses": 856,
+            "literals": 2440
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 156,
+            "clauses": 1785,
+            "literals": 5216
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "907f666e3a02660c2ef2131836af15ffcefcac20f36cb48e3af458160f6ffe87",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 2,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 16,
+            "clauses": 186,
+            "literals": 256
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 90,
+            "clauses": 998,
+            "literals": 2668
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 168,
+            "clauses": 1980,
+            "literals": 5552
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "4938c0baafa65bdf5b82eb1a0d73b2a8fbf07643a4c167457d277a3f169abf4a",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 2,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 16,
+            "clauses": 186,
+            "literals": 256
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 90,
+            "clauses": 998,
+            "literals": 2668
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 168,
+            "clauses": 1980,
+            "literals": 5552
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "49ef9d2b459f72238e366b24978eaaf7271f755712a68ad2a63db939d185ed76",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 1,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 8,
+            "clauses": 93,
+            "literals": 128
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 80,
+            "clauses": 856,
+            "literals": 2440
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 156,
+            "clauses": 1785,
+            "literals": 5216
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "173600f152c34f27f06618b02a6d1cebb79ea233aea56f163c222cde52a0da16",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 2,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 16,
+            "clauses": 186,
+            "literals": 256
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 90,
+            "clauses": 998,
+            "literals": 2668
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 168,
+            "clauses": 1980,
+            "literals": 5552
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "8aa2226ac35dd000482b5946c73351155ddb93f7f17f628270cdd7f9c10e88e9",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 2,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 16,
+            "clauses": 186,
+            "literals": 256
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 90,
+            "clauses": 998,
+            "literals": 2668
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 168,
+            "clauses": 1980,
+            "literals": 5552
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "5f7ebff8167e8a42b192a51dbc297dee5646e453e0f5fdfc93a205064b8faf7b",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 1,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 8,
+            "clauses": 93,
+            "literals": 128
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 80,
+            "clauses": 856,
+            "literals": 2440
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 156,
+            "clauses": 1785,
+            "literals": 5216
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "ca6735ec968a40a4505bb543024903527a26958f4d62289ff05df107654c9efb",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 1,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 8,
+            "clauses": 93,
+            "literals": 128
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 80,
+            "clauses": 856,
+            "literals": 2440
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 156,
+            "clauses": 1785,
+            "literals": 5216
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "404a4d06ab5fdfe1ce0903627588f657417748cb574fb92ac0289cf18d59a655",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 1,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 8,
+            "clauses": 93,
+            "literals": 128
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 80,
+            "clauses": 856,
+            "literals": 2440
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 156,
+            "clauses": 1785,
+            "literals": 5216
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "76a61e0317cc6630fcea0bc02d0bb4bbabca500a82334e296660f37e7bf513ff",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 2,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 16,
+            "clauses": 186,
+            "literals": 256
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 90,
+            "clauses": 998,
+            "literals": 2668
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 168,
+            "clauses": 1980,
+            "literals": 5552
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "e094e30dad4e5b301aa4ac546c0d4b3c83ef757eda5612367143cc1393e20758",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 2,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 16,
+            "clauses": 186,
+            "literals": 256
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 90,
+            "clauses": 998,
+            "literals": 2668
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 168,
+            "clauses": 1980,
+            "literals": 5552
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "90cbb91c5cfe3f77f24d104af12950e687d927b6ef267d2c9a718d56bfac22c6",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 1,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 8,
+            "clauses": 93,
+            "literals": 128
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 80,
+            "clauses": 856,
+            "literals": 2440
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 156,
+            "clauses": 1785,
+            "literals": 5216
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "eb79eb9be4118a67c5a3a30185c16b8a4b9c8a7fd3d3b4d9348af7cdfc1111db",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 1,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 8,
+            "clauses": 93,
+            "literals": 128
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 80,
+            "clauses": 856,
+            "literals": 2440
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 156,
+            "clauses": 1785,
+            "literals": 5216
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "10b19799c5a66071b4ea897fbd9ab0e0e60095a93adbf29a7d2b586aa3b9da24",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 2,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 16,
+            "clauses": 186,
+            "literals": 256
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 90,
+            "clauses": 998,
+            "literals": 2668
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 168,
+            "clauses": 1980,
+            "literals": 5552
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "b128ade57bdfc7d36e709ae43d6d0ec4f5fd052b7d61aa35096424638f65e538",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 2,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 16,
+            "clauses": 186,
+            "literals": 256
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 90,
+            "clauses": 998,
+            "literals": 2668
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 168,
+            "clauses": 1980,
+            "literals": 5552
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "c3122e8086d97e1845ac298fc4cc83e06afced6d2520a5eaf866887f015d26ed",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 1,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 8,
+            "clauses": 93,
+            "literals": 128
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 80,
+            "clauses": 856,
+            "literals": 2440
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 156,
+            "clauses": 1785,
+            "literals": 5216
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "475c7c09af89fd5167cb7c9d1425236e46017b4694fc716d2bd4c08d6d5412b4",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 1,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 8,
+            "clauses": 93,
+            "literals": 128
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 80,
+            "clauses": 856,
+            "literals": 2440
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 156,
+            "clauses": 1785,
+            "literals": 5216
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "a6c5530c1402acba2cc769e3f1ae07d91ff752a994ae95c1fab2958f7beecebb",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 2,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 16,
+            "clauses": 186,
+            "literals": 256
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 90,
+            "clauses": 998,
+            "literals": 2668
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 168,
+            "clauses": 1980,
+            "literals": 5552
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "047ace0533ed0faf8dd22746ac14c1397009bacf91a89f9c3d156a1db9c1686d",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 2,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 16,
+            "clauses": 186,
+            "literals": 256
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 90,
+            "clauses": 998,
+            "literals": 2668
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 168,
+            "clauses": 1980,
+            "literals": 5552
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "8e5bf70008ab34428afe2d9027eb0de701019ee61443fdfe484c9f4dae490aa3",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 1,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 8,
+            "clauses": 93,
+            "literals": 128
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 80,
+            "clauses": 856,
+            "literals": 2440
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 156,
+            "clauses": 1785,
+            "literals": 5216
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "c6e9f51c9a23c4f441b04abfefa41608de95ed9b2632a42b256715431d27cb1a",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 1,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 8,
+            "clauses": 93,
+            "literals": 128
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 80,
+            "clauses": 856,
+            "literals": 2440
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 156,
+            "clauses": 1785,
+            "literals": 5216
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "374b7371cc8f7900dd8d28341e2d92f0910fcc46a1bddd99e1e8fb2cd98ce5cb",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 2,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 16,
+            "clauses": 186,
+            "literals": 256
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 90,
+            "clauses": 998,
+            "literals": 2668
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 168,
+            "clauses": 1980,
+            "literals": 5552
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "4371640e97258e83ec5d95cd2ef7f4522be4068b779e6f81dff60880156e88cd",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 2,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 16,
+            "clauses": 186,
+            "literals": 256
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 90,
+            "clauses": 998,
+            "literals": 2668
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 168,
+            "clauses": 1980,
+            "literals": 5552
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "33466a73fdc111b25d05305a28d8ba021420fef50b9083ff4ff3dad3798ca912",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 1,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 8,
+            "clauses": 93,
+            "literals": 128
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 80,
+            "clauses": 856,
+            "literals": 2440
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 156,
+            "clauses": 1785,
+            "literals": 5216
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "4e849f3ee1a169738bf681844c1944c0bc791ef8d3c2e69f9897a033e734b4e3",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 1,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 8,
+            "clauses": 93,
+            "literals": 128
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 80,
+            "clauses": 856,
+            "literals": 2440
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 156,
+            "clauses": 1785,
+            "literals": 5216
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "8f40a8061e0642f9bd883b818606f9a351b34831c57be10d7a454aba8fd64b26",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 2,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 16,
+            "clauses": 186,
+            "literals": 256
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 90,
+            "clauses": 998,
+            "literals": 2668
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 168,
+            "clauses": 1980,
+            "literals": 5552
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "babd9f51ceeca1effc4ac5a2214f2af2078dfe214142a596aebf1d1ab50f18b9",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 2,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 16,
+            "clauses": 186,
+            "literals": 256
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 90,
+            "clauses": 998,
+            "literals": 2668
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 168,
+            "clauses": 1980,
+            "literals": 5552
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "08d0c9eec6515fa3b3c471389ecfebb8b13255fa1721127d50ad74fdf2d99f8d",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 1,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 8,
+            "clauses": 93,
+            "literals": 128
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 80,
+            "clauses": 856,
+            "literals": 2440
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 156,
+            "clauses": 1785,
+            "literals": 5216
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "6d3de0453bfdf842fb2ebdad6aeed18a3202a6f5ccf463aae7e7af0d0104c446",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 1,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 8,
+            "clauses": 93,
+            "literals": 128
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 80,
+            "clauses": 856,
+            "literals": 2440
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 156,
+            "clauses": 1785,
+            "literals": 5216
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "0ee2cb908e1b7728458c6da1fab24b1c5bb2ce998a4db6877979aa7387980d96",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 1,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 8,
+            "clauses": 93,
+            "literals": 128
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 80,
+            "clauses": 856,
+            "literals": 2440
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 156,
+            "clauses": 1785,
+            "literals": 5216
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "690ef3f871ce317823717403e3752c1bd65c14a419bd80d4531e46276671f726",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 2,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 16,
+            "clauses": 186,
+            "literals": 256
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 90,
+            "clauses": 998,
+            "literals": 2668
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 168,
+            "clauses": 1980,
+            "literals": 5552
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "4d1902b6960130341dbffc4b80590ca82f0e69b029f55a2d426d509fcbbb16c6",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 2,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 16,
+            "clauses": 186,
+            "literals": 256
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 90,
+            "clauses": 998,
+            "literals": 2668
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 168,
+            "clauses": 1980,
+            "literals": 5552
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "3def894fab74c92c3175ca74e4bf9a9f9f5c86fd195aa7b6dd5942920333a751",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 1,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 8,
+            "clauses": 93,
+            "literals": 128
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 80,
+            "clauses": 856,
+            "literals": 2440
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 156,
+            "clauses": 1785,
+            "literals": 5216
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "3c4bc0d2ffb9b1369fdd43d6ba8dbaa6f9182dfbc6a285befff0f7bad368a6ce",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 1,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 8,
+            "clauses": 93,
+            "literals": 128
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 80,
+            "clauses": 856,
+            "literals": 2440
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 156,
+            "clauses": 1785,
+            "literals": 5216
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "242b75efa0f7018ce02ddf26c1b546cce297c5dd4d39c5b26fb7801dee9fad4e",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 2,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 16,
+            "clauses": 186,
+            "literals": 256
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 90,
+            "clauses": 998,
+            "literals": 2668
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 168,
+            "clauses": 1980,
+            "literals": 5552
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "64d15b5c887cdf4897af434b0f52a2f97924569fd60fce798ed9122c34fe534c",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 2,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 16,
+            "clauses": 186,
+            "literals": 256
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 90,
+            "clauses": 998,
+            "literals": 2668
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 168,
+            "clauses": 1980,
+            "literals": 5552
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "a8947713ff1097d520f14076e4587b7155eae847a1059413729c051ea2234d59",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 1,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 8,
+            "clauses": 93,
+            "literals": 128
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 80,
+            "clauses": 856,
+            "literals": 2440
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 156,
+            "clauses": 1785,
+            "literals": 5216
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "65a05fd36318a2eb725b3d98d19ba23415014ac0dbb3e0b4296b7e3a9ab184ff",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 1,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 8,
+            "clauses": 93,
+            "literals": 128
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 80,
+            "clauses": 856,
+            "literals": 2440
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 156,
+            "clauses": 1785,
+            "literals": 5216
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "caf3908376fd7e706a036eaefbdb8d5a1c56140cdfe42faee4b217665bd1304e",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 2,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 16,
+            "clauses": 186,
+            "literals": 256
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 90,
+            "clauses": 998,
+            "literals": 2668
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 168,
+            "clauses": 1980,
+            "literals": 5552
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "ab10a0a90d1fc1b2f8235b4da49ce34f1ab639f5ff947d36ceca63c3169385df",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 2,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 16,
+            "clauses": 186,
+            "literals": 256
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 90,
+            "clauses": 998,
+            "literals": 2668
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 168,
+            "clauses": 1980,
+            "literals": 5552
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "cbdb6acfbfd29333d1a45fabb9d71ebc3b5e7192920fb6021e7ef8864f424eb2",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 1,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 8,
+            "clauses": 93,
+            "literals": 128
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 80,
+            "clauses": 856,
+            "literals": 2440
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 156,
+            "clauses": 1785,
+            "literals": 5216
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "03507dd0feca8c3d9fb81f545733b4c496d8338462a815e7fee440eb8ecd9268",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 1,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 8,
+            "clauses": 93,
+            "literals": 128
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 80,
+            "clauses": 856,
+            "literals": 2440
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 156,
+            "clauses": 1785,
+            "literals": 5216
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "c6a2752eb61aa3b3a75dd7ffbbcf6b34080a728376f2b3486ea6ccd5208d8f84",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 2,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 16,
+            "clauses": 186,
+            "literals": 256
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 90,
+            "clauses": 998,
+            "literals": 2668
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 168,
+            "clauses": 1980,
+            "literals": 5552
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "b45a764da2130420e1391880042a32c5e26e872cd872b0a2116b48ae120c5aae",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 2,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 16,
+            "clauses": 186,
+            "literals": 256
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 90,
+            "clauses": 998,
+            "literals": 2668
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 168,
+            "clauses": 1980,
+            "literals": 5552
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "87f70aacb2203c9aed2f5e3047d0585fca8a5d3d78f896aaffe1c3887471d242",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 1,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 8,
+            "clauses": 93,
+            "literals": 128
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 80,
+            "clauses": 856,
+            "literals": 2440
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 156,
+            "clauses": 1785,
+            "literals": 5216
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "9d0472a5fe86f6faa6659797613cf050b3dca0486ecaa2fba6d0b411d2ab62f5",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 1,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 8,
+            "clauses": 93,
+            "literals": 128
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 80,
+            "clauses": 856,
+            "literals": 2440
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 156,
+            "clauses": 1785,
+            "literals": 5216
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "581b835cd958c9a03241dd9e0ae687241b5cf4291eb20919c19d70e6c9d40e39",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 2,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 16,
+            "clauses": 186,
+            "literals": 256
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 90,
+            "clauses": 998,
+            "literals": 2668
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 168,
+            "clauses": 1980,
+            "literals": 5552
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "f743a8dcc94c20eceb6b526a9bfb818cc3305eccc55b700124337abff1a43c5a",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 2,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 16,
+            "clauses": 186,
+            "literals": 256
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 90,
+            "clauses": 998,
+            "literals": 2668
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 168,
+            "clauses": 1980,
+            "literals": 5552
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "a56200a021edfa9f898c4c5d2595dde3033607c1989aee1e2026a62dead8c60e",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 1,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 8,
+            "clauses": 93,
+            "literals": 128
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 80,
+            "clauses": 856,
+            "literals": 2440
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 156,
+            "clauses": 1785,
+            "literals": 5216
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "e8ebbf8944cdcf4d150f9ccd3b9ba2c263b158866d6453a194331a1e1d8be4f0",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 1,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 8,
+            "clauses": 93,
+            "literals": 128
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 80,
+            "clauses": 856,
+            "literals": 2440
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 156,
+            "clauses": 1785,
+            "literals": 5216
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "544a1611735559808717110462f49c0f72d106a551a32a21b48f35f8c2e9b24f",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 1,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 8,
+            "clauses": 93,
+            "literals": 128
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 80,
+            "clauses": 856,
+            "literals": 2440
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 156,
+            "clauses": 1785,
+            "literals": 5216
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "3c987a9238e99f5a7a6abdee5b1a26bee97b3d3075e3c966f9aa11284001bb79",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 2,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 16,
+            "clauses": 186,
+            "literals": 256
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 90,
+            "clauses": 998,
+            "literals": 2668
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 168,
+            "clauses": 1980,
+            "literals": 5552
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "ca467181193fc16f1ac910c1b59fe7fa59cd7fe3ec24f50e8fc7227d0dc2f4bb",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 2,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 16,
+            "clauses": 186,
+            "literals": 256
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 90,
+            "clauses": 998,
+            "literals": 2668
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 168,
+            "clauses": 1980,
+            "literals": 5552
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "5cfea41b3d3a87dea04922ae3294b90b006858699b143e94d027402a66fef47a",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 1,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 8,
+            "clauses": 93,
+            "literals": 128
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 80,
+            "clauses": 856,
+            "literals": 2440
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 156,
+            "clauses": 1785,
+            "literals": 5216
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "25d02e5b7658b618871c0630b45b86d06caf5ef7bdb05389ae6c2694e1f3e1c4",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 2,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 16,
+            "clauses": 186,
+            "literals": 256
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 90,
+            "clauses": 998,
+            "literals": 2668
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 168,
+            "clauses": 1980,
+            "literals": 5552
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "163a1396c843010026f94d6e2d64f83b52ca379fba9115bfd14cbb2d8a1832c0",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 2,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 16,
+            "clauses": 186,
+            "literals": 256
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 90,
+            "clauses": 998,
+            "literals": 2668
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 168,
+            "clauses": 1980,
+            "literals": 5552
+          }
+        ]
+      },
+      {
+        "window_identity_sha256": "6e784b206fa0df266373f709dc74820829680aa727289a9bcbaa17e97c625665",
+        "original_window_gates": 3,
+        "boundary_inputs": 4,
+        "boundary_outputs": 1,
+        "status": "no-circuit-within-bound",
+        "candidate_window_gates": null,
+        "candidate_whole_gates": null,
+        "whole_circuit_mismatches": null,
+        "accepted": false,
+        "bounds": [
+          {
+            "gate_bound": 0,
+            "status": "unsat",
+            "variables": 8,
+            "clauses": 93,
+            "literals": 128
+          },
+          {
+            "gate_bound": 1,
+            "status": "unsat",
+            "variables": 80,
+            "clauses": 856,
+            "literals": 2440
+          },
+          {
+            "gate_bound": 2,
+            "status": "unsat",
+            "variables": 156,
+            "clauses": 1785,
+            "literals": 5216
+          }
+        ]
+      }
+    ]
+  },
+  "selected_source": "abc",
+  "selected_gate_count": 186,
+  "selected_circuit_sha256": "1222f95531ffa51f713de9b4617b96063b59d9433a3cf4bb5f41106bd6ba1206",
+  "exhaustive_cases": 1024,
+  "exhaustive_mismatches": 0
+}

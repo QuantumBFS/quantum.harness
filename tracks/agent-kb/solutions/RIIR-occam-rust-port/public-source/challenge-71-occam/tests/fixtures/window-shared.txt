@@ -1,0 +1,11 @@
+INPUTS 4
+w1 = XOR x1 x2
+w2 = AND x1 x2
+w3 = XOR x3 x4
+w4 = AND x3 x4
+w5 = XOR w1 w3
+w6 = AND w1 w3
+w7 = OR w2 w6
+w8 = XOR w5 w7
+w9 = OR w4 w7
+OUTPUTS w8 w9

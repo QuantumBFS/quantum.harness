@@ -1,0 +1,64 @@
+[package]
+name = "occam71-fuzz"
+version = "0.0.0"
+publish = false
+edition = "2024"
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "0.4"
+occam71_rust = { path = "../challenge-71-occam" }
+
+[workspace]
+members = ["."]
+
+[[bin]]
+name = "dataset"
+path = "fuzz_targets/dataset.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "packed_dataset"
+path = "fuzz_targets/packed_dataset.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "netlist"
+path = "fuzz_targets/netlist.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "parse_evaluate"
+path = "fuzz_targets/parse_evaluate.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "test_inputs"
+path = "fuzz_targets/test_inputs.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "learner"
+path = "fuzz_targets/learner.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "mapped_blif"
+path = "fuzz_targets/mapped_blif.rs"
+test = false
+doc = false
+bench = false

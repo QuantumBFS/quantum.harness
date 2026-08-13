@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "profile": "apple-m4",
+  "date": "2026-07-28",
+  "machine": "MacBook Air",
+  "processor": "Apple M4",
+  "physical_cores": 10,
+  "logical_cores": 10,
+  "memory_bytes": 17179869184,
+  "operating_system": "macOS 15.6 (24G84)",
+  "architecture": "arm64",
+  "rust": "rustc 1.95.0 (59807616e 2026-04-14) (Homebrew)",
+  "julia": "julia version 1.12.6",
+  "rust_batches": 5,
+  "rust_warmups_per_batch": 5,
+  "rust_iterations_per_batch": 30,
+  "process_repetitions": 5,
+  "process_measurement": "macOS /usr/bin/time -l",
+  "notes": [
+    "Power source, low-power mode, and system load are captured immediately before each suite.",
+    "Julia process measurements include startup, JIT compilation, parsing, evaluation, and output."
+  ]
+}

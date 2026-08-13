@@ -1,0 +1,185 @@
+#!/usr/bin/env python3
+import argparse
+import json
+from pathlib import Path
+
+CASES = (
+    ("add-8-100000", "add-8", "100,000"),
+    ("add-8-1000000", "add-8", "1,000,000"),
+    ("mul-4-100000", "mul-4", "100,000"),
+    ("mul-4-1000000", "mul-4", "1,000,000"),
+)
+
+
+def milliseconds(value):
+    return value / 1_000_000
+
+
+def render(results):
+    process = json.loads((results / "process.json").read_text())
+    if process.get("schema_version") != 1 or process.get("repetitions") != 5:
+        raise SystemExit("invalid process summary")
+
+    reports = {}
+    for key, _, _ in CASES:
+        report = json.loads((results / f"{key}.json").read_text())
+        if report.get("schema_version") != 3 or report.get("backend") != "packed":
+            raise SystemExit(f"invalid benchmark report for {key}")
+        if (
+            report["correct_bits"] != report["total_bits"]
+            or report["exact_matches"] != report["samples"]
+            or len(report["raw_iterations_ns"]) != 150
+        ):
+            raise SystemExit(f"non-exact or incomplete benchmark report for {key}")
+        for field in (
+            "scalar_dataset_parse_iterations_ns",
+            "legacy_pack_iterations_ns",
+            "direct_packed_parse_iterations_ns",
+            "compilation_iterations_ns",
+        ):
+            if len(report.get(field, ())) != 5:
+                raise SystemExit(f"incomplete {field} for {key}")
+        reports[key] = report
+
+    lines = [
+        "# Direct Packed Ingestion Benchmark",
+        "",
+        "Date: 2026-07-28",
+        "",
+        "Implementation: raw CSV bytes → flat `PackedDataset` columns",
+        "",
+        f"- Platform: {process['platform']}",
+        f"- Processor: {process['processor']}",
+        f"- Rust: `{process['rustc']}`",
+        "- Evaluator: compiled packed execution plan",
+        "- Timing: five preprocessing measurements, five batches of 30 evaluator measurements, and five fresh-process repetitions",
+        "- Correctness: every case has exact bit and sample metrics",
+        "",
+        "| Case | Samples | Legacy parse+pack (ms) | Direct packed parse (ms) | Legacy/direct time ratio | Evaluate median (ms) | One-shot (ms) |",
+        "|---|---:|---:|---:|---:|---:|---:|",
+    ]
+    for key, label, samples in CASES:
+        report = reports[key]
+        legacy = report["scalar_dataset_parse_ns"] + report["legacy_pack_ns"]
+        direct = report["direct_packed_parse_ns"]
+        lines.append(
+            f"| {label} | {samples} | {milliseconds(legacy):.3f} | "
+            f"{milliseconds(direct):.3f} | {legacy / direct:.2f}× | "
+            f"{milliseconds(report['evaluation']['median_ns']):.3f} | "
+            f"{milliseconds(report['one_shot_ns']):.3f} |"
+        )
+
+    lines.extend(
+        [
+            "",
+            "| Case | Samples | Direct RSS (MiB) | Legacy RSS (MiB) | RSS reduction | Direct process wall (s) | Legacy process wall (s) |",
+            "|---|---:|---:|---:|---:|---:|---:|",
+        ]
+    )
+    for key, label, samples in CASES:
+        case = process["cases"][key]
+        direct = case["packed"]
+        legacy = case["packed-legacy"]
+        direct_rss = direct["median_maximum_resident_bytes"]
+        legacy_rss = legacy["median_maximum_resident_bytes"]
+        lines.append(
+            f"| {label} | {samples} | {direct_rss / 2**20:.2f} | "
+            f"{legacy_rss / 2**20:.2f} | {legacy_rss / direct_rss:.2f}× | "
+            f"{direct['median_wall_seconds']:.3f} | "
+            f"{legacy['median_wall_seconds']:.3f} |"
+        )
+
+    time_ratios = []
+    rss_ratios = []
+    direct_process_not_slower = True
+    for key, _, _ in CASES:
+        report = reports[key]
+        legacy_time = (
+            report["scalar_dataset_parse_ns"] + report["legacy_pack_ns"]
+        )
+        time_ratios.append(legacy_time / report["direct_packed_parse_ns"])
+        case = process["cases"][key]
+        direct_process = case["packed"]
+        legacy_process = case["packed-legacy"]
+        rss_ratios.append(
+            legacy_process["median_maximum_resident_bytes"]
+            / direct_process["median_maximum_resident_bytes"]
+        )
+        direct_process_not_slower &= (
+            direct_process["median_wall_seconds"]
+            <= legacy_process["median_wall_seconds"]
+        )
+
+    if min(time_ratios) >= 1:
+        timing_decision = (
+            "Direct parsing is a CPU-time win in all four parsing medians "
+            f"(legacy/direct is {min(time_ratios):.2f}–{max(time_ratios):.2f}×)."
+        )
+    elif max(time_ratios) < 1:
+        timing_decision = (
+            "Direct parsing is not a CPU-time win in these four parsing medians "
+            f"(legacy/direct is {min(time_ratios):.2f}–{max(time_ratios):.2f}×)."
+        )
+    else:
+        timing_decision = (
+            "Direct parsing time is mixed across the four medians "
+            f"(legacy/direct is {min(time_ratios):.2f}–{max(time_ratios):.2f}×), "
+            "so retention is not based on a uniform CPU-time improvement."
+        )
+
+    process_decision = (
+        "equal or lower end-to-end process time in every case"
+        if direct_process_not_slower
+        else "mixed end-to-end process time"
+    )
+    parse_dominates = all(
+        report["direct_packed_parse_ns"] > report["evaluation"]["median_ns"]
+        for report in reports.values()
+    )
+    lines.extend(
+        [
+            "",
+            "## Decision",
+            "",
+            "Direct packed parsing is the production path because it avoids materializing "
+            "one `Vec<bool>` pair per sample while preserving the exact flat layout produced "
+            "by the legacy path.",
+            "",
+            f"{timing_decision} It reduces fresh-process peak RSS by "
+            f"{min(rss_ratios):.2f}–{max(rss_ratios):.2f}× and has "
+            f"{process_decision}. The retention decision is therefore grounded in "
+            "bounded memory behavior.",
+            "",
+            (
+                "After the evaluator optimizations, direct CSV ingestion is now slower than "
+                "one evaluator pass in all four cases; the bottleneck has therefore moved from "
+                "Boolean circuit execution to text ingestion."
+                if parse_dominates
+                else "Text ingestion and evaluation remain comparable in at least one case."
+            ),
+            "",
+            "Each JSON file beside this report retains all 150 evaluator timings plus scalar "
+            "parse, legacy pack, direct parse, compilation, and one-shot timings. "
+            "`process.json` retains every fresh-process wall-time and RSS observation.",
+            "",
+        ]
+    )
+    return "\n".join(lines)
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--results", type=Path, required=True)
+    parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--check", action="store_true")
+    args = parser.parse_args()
+    rendered = render(args.results)
+    if args.check:
+        if not args.output.exists() or args.output.read_text() != rendered:
+            raise SystemExit(f"{args.output} is stale")
+    else:
+        args.output.write_text(rendered)
+
+
+if __name__ == "__main__":
+    main()

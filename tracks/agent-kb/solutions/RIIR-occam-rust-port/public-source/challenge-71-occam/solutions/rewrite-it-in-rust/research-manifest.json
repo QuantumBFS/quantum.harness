@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "protocol": "16 tasks × 8 fractions × 20 seeds × 8 methods",
+  "trial_rows": 20480,
+  "raw_matrix_sha256": "15990cfc98dd86024b446e1108a58b93d7163e8e5b7accbed4957e2ae35cd846",
+  "study_manifest_path": "research/manifest.json",
+  "study_manifest_sha256": "3d31eb6a01fd5deb1c44b583267b29793b10cd24ff2a11295469e340e3acd042",
+  "official_mdl_reports": {
+    "mystery-A": {
+      "report_path": "mdl-reports/mystery-A.json",
+      "report_sha256": "bc6e402e55544b2c3d3fc54a928e66e862f0671d560011e70fbea6ea02a5e0be",
+      "expression": "(x + y)",
+      "description_cost": 3,
+      "minimum_unique": true,
+      "compiled_gate_count": 37
+    },
+    "mystery-B": {
+      "report_path": "mdl-reports/mystery-B.json",
+      "report_sha256": "bbb478d0fde1d2fba17e990b90a9070c03b153d162a035bb202fb62ecea68b0d",
+      "expression": "abs(x - y)",
+      "description_cost": 4,
+      "minimum_unique": true,
+      "compiled_gate_count": 52
+    },
+    "mystery-C": {
+      "report_path": "mdl-reports/mystery-C.json",
+      "report_sha256": "ceb82c9af97328aaa329cf2f0473adf7cdb64ec1710a913de0cb4054338f5bf7",
+      "expression": "(x * y)",
+      "description_cost": 3,
+      "minimum_unique": true,
+      "compiled_gate_count": 182
+    },
+    "mystery-D": {
+      "report_path": "mdl-reports/mystery-D.json",
+      "report_sha256": "52f158ed0b132ee955b9b36284c3e602067307c990cc3a2b8fb19d20d341cc42",
+      "expression": "(square(x) + square(y))",
+      "description_cost": 5,
+      "minimum_unique": true,
+      "compiled_gate_count": 221
+    }
+  },
+  "limitations": [
+    "No universal learner or global circuit minimality is claimed.",
+    "Partial-logic baselines use conservative zero completion.",
+    "Normalized runtime and RSS fields are not performance measurements."
+  ]
+}

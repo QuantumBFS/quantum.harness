@@ -1,0 +1,68 @@
+{
+  "schema_version": 2,
+  "solution": "rewrite-it-in-rust",
+  "learner": "mdl-enumerator",
+  "baseline_tag": "v0.2.0",
+  "instances": [
+    {
+      "instance": "mystery-A",
+      "family": "add",
+      "gate_count": 37,
+      "training_rows": 2000,
+      "prediction_rows": 2000,
+      "circuit_path": "circuits/mystery-A.txt",
+      "circuit_sha256": "143f1e3987d853f30b7adb6bd8981c4e6bffb5cad25dc5ad5b35b9525095d9af",
+      "prediction_path": "predictions/mystery-A/test_outputs.csv",
+      "prediction_sha256": "51e3f026def41778ecd0d7dcaee9f970b9937488e6716891932b73824c16d4c7",
+      "expected_commitment_sha256": "51e3f026def41778ecd0d7dcaee9f970b9937488e6716891932b73824c16d4c7",
+      "report_path": "reports/mystery-A.json",
+      "report_sha256": "f7e1d995f57c461b310ef96eb3c0f3cacfd46edd3baba188d1bc78b1968f6744"
+    },
+    {
+      "instance": "mystery-B",
+      "family": "abs-diff",
+      "gate_count": 50,
+      "training_rows": 1500,
+      "prediction_rows": 2000,
+      "circuit_path": "circuits/mystery-B.txt",
+      "circuit_sha256": "6cf9e2c8995d66b9c63efe3df0e6e67b62618077907555ab4ef5adb4c318ad90",
+      "prediction_path": "predictions/mystery-B/test_outputs.csv",
+      "prediction_sha256": "e2c9d0e23ee36bfc0f12d7f39fdfe2ca5a8abe8eb194fec56500733694b75c28",
+      "expected_commitment_sha256": "e2c9d0e23ee36bfc0f12d7f39fdfe2ca5a8abe8eb194fec56500733694b75c28",
+      "report_path": "reports/mystery-B.json",
+      "report_sha256": "3062208898583ef422291f7c5fd2ca6b321836e4296e85f47483b2711b1ee968"
+    },
+    {
+      "instance": "mystery-C",
+      "family": "multiply",
+      "gate_count": 167,
+      "training_rows": 1200,
+      "prediction_rows": 1500,
+      "circuit_path": "circuits/mystery-C.txt",
+      "circuit_sha256": "f1d5838a3198b304f671c7479f619fba86ca63bc364b0ac2b0f7fd036fd3cf78",
+      "prediction_path": "predictions/mystery-C/test_outputs.csv",
+      "prediction_sha256": "c7b37413844bf0b10ebad0010046469f500354a22cc2ba95cbe42709f8e8337d",
+      "expected_commitment_sha256": "c7b37413844bf0b10ebad0010046469f500354a22cc2ba95cbe42709f8e8337d",
+      "report_path": "reports/mystery-C.json",
+      "report_sha256": "e88e97faceeec1bc2fa1a52bbc7eca185d64dbd966e790566c6a5a020383eacf"
+    },
+    {
+      "instance": "mystery-D",
+      "family": "sum-of-squares",
+      "gate_count": 186,
+      "training_rows": 400,
+      "prediction_rows": 624,
+      "circuit_path": "circuits/mystery-D.txt",
+      "circuit_sha256": "1222f95531ffa51f713de9b4617b96063b59d9433a3cf4bb5f41106bd6ba1206",
+      "prediction_path": "predictions/mystery-D/test_outputs.csv",
+      "prediction_sha256": "b445a717483303fa3c5d8a1f7abe81888b267b7c472121c9c464fa9766808580",
+      "expected_commitment_sha256": "b445a717483303fa3c5d8a1f7abe81888b267b7c472121c9c464fa9766808580",
+      "report_path": "reports/mystery-D.json",
+      "report_sha256": "1585ab7796c5ef94ba04e6c8184563215863c71760aa905e3d283371433bbf9c"
+    }
+  ],
+  "optimization_report_path": "optimization/report.json",
+  "optimization_report_sha256": "960484ba8cdfc51ecf2d42140b41dfbf8163178250951e461fcac590ae1d4788",
+  "research_manifest_path": "research-manifest.json",
+  "research_manifest_sha256": "d8b5ad1183943a2f445169bf2487e8fc0103b4f78a65b44b198da83eb74047aa"
+}
