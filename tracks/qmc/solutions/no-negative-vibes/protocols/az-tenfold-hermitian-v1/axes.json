@@ -1,0 +1,17 @@
+{
+  "case": [
+    "az_a",
+    "az_ai",
+    "az_bdi",
+    "az_d",
+    "az_diii",
+    "az_aii",
+    "az_cii",
+    "az_c",
+    "az_ci",
+    "az_aiii"
+  ],
+  "depth": [1, 2, 3, 4, 8, 16],
+  "scale": [0.25, 0.75, 1.5],
+  "seed": [2101, 2102, 2103, 2104]
+}

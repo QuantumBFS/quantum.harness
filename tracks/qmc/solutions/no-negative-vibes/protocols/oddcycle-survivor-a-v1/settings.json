@@ -1,0 +1,265 @@
+{
+  "schema": "oddcycle-survivor-a-settings-v1",
+  "protocol_id": "oddcycle-survivor-a-v1",
+  "protocol_seed": 20260730,
+  "plan": {
+    "batch_manifest_path": "protocols/oddcycle-survivor-a-v1/batch-manifest.json",
+    "implementation_plan_path": "docs/superpowers/plans/2026-07-30-survivor-a-hamiltonian-search.md",
+    "implementation_plan_sha256": "bbf20c95fbbb0e0d61f906349019a578b49728920b56490ef7a706cefc8b9a25",
+    "launch_manifest_path": "protocols/oddcycle-survivor-a-v1/launch.json"
+  },
+  "source": {
+    "design_path": "docs/superpowers/specs/2026-07-30-survivor-a-hamiltonian-reverse-construction-design.md",
+    "design_commit": "a6a01105258e073b9c971c4205b0f81c678efde7",
+    "result_path": "protocols/oddcycle-local-hs-v1/result.json",
+    "result_sha256": "12e8ac1e0dcb8b06130556b9ea91392e558521ca20d3b7aeb71413fa77b5d01c",
+    "survivor_label": "A",
+    "source_cell_id": "portfolio-l2",
+    "source_cell_payload_sha256": "b93465d16f4c9d796bac26104b035ae74f85c1e1e297cc94ff2cb8e4373e2c42",
+    "source_raw_file_sha256": "c16d32355448d9bd89e282323fbaa64852a408edc8439404feb82ff5bc21cae7",
+    "sample_index": 122,
+    "sample_seed": 20260730,
+    "exact_shift": 42,
+    "exact_vacuum_value": {
+      "denominator": 1,
+      "numerator": 44
+    },
+    "exact_minimum_row_margin": {
+      "denominator": 15625,
+      "numerator": 12213
+    }
+  },
+  "execution": {
+    "cpu_machine": {
+      "host_label": "frankzhangyi-dell",
+      "logical_cpus": 64,
+      "machine_role": "cpu",
+      "output_root_template": "/home/jzb/runs/nnv-survivor-a-v1/{code_commit}/{settings_sha256}",
+      "ssh_alias_from_wsl": "nnv-cpu-worker",
+      "workers": 62
+    },
+    "environment": {
+      "MKL_NUM_THREADS": "1",
+      "NUMEXPR_NUM_THREADS": "1",
+      "OMP_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1",
+      "PYTHONHASHSEED": "0"
+    },
+    "local_windows_scientific_compute": false,
+    "required_runtime_platform": "linux",
+    "scientific_subcommands": [
+      "analyze",
+      "catalog",
+      "freeze-manifest",
+      "freeze-launch",
+      "search-shard",
+      "portfolio-shard",
+      "promote",
+      "collect"
+    ],
+    "wsl": {
+      "logical_cpus": 16,
+      "machine_role": "wsl",
+      "output_root_template": "/home/zibojin/code/nnv-survivor-a-v1/{code_commit}/{settings_sha256}",
+      "workers": 14
+    }
+  },
+  "analysis": {
+    "decimal_places": [
+      80,
+      120,
+      180
+    ],
+    "exact_spd_gate": "strict-symmetric-diagonal-dominance",
+    "forbidden_nonzero_gate": "certified-interval-excludes-zero",
+    "localities": [
+      "path-edge",
+      "ring-edge",
+      "path-arc3",
+      "ring-arc3",
+      "cluster-two-body"
+    ],
+    "matrix_exponential_replay_tolerance_by_decimal_places": {
+      "80": "1e-60",
+      "120": "1e-90",
+      "180": "1e-140"
+    }
+  },
+  "column_catalog": {
+    "anchor_max_word_length": 4,
+    "coverage_quota_per_length": 128,
+    "full_numerical_catalog": true,
+    "leakage_cancellation_quota_per_length": 256,
+    "locality_ratio_quota_per_length": 256,
+    "maximum_word_length": 6,
+    "new_word_lengths": [
+      5,
+      6
+    ],
+    "selected_exact_catalog": true,
+    "target_alignment_quota_per_length": 256,
+    "tie_break": [
+      "word_length",
+      "word",
+      "transpose_word",
+      "matrix_orbit_key"
+    ]
+  },
+  "targets": {
+    "c5_grid": {
+      "P": [
+        "-1",
+        "-1/2",
+        "0",
+        "1/2",
+        "1"
+      ],
+      "V": [
+        "-2",
+        "-1",
+        "-1/2",
+        "0",
+        "1/2",
+        "1",
+        "2"
+      ],
+      "X": [
+        "-2",
+        "-1",
+        "-1/2",
+        "0",
+        "1/2",
+        "1",
+        "2"
+      ],
+      "exclude_all_interactions_zero": true,
+      "hopping": "1",
+      "sign_pattern": [
+        -1,
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    "include_first_target_library": true,
+    "projected_localities": [
+      "ring-edge",
+      "ring-arc3",
+      "cluster-two-body"
+    ],
+    "projected_orbit_counts": [
+      8,
+      12,
+      16,
+      24
+    ],
+    "rational_max_denominator": 1000000
+  },
+  "route1": {
+    "column_sets": [
+      "anchor-selected",
+      "full-l6"
+    ],
+    "free_objectives": "all-permitted-two-body-signed",
+    "localities": [
+      "path-edge",
+      "ring-edge",
+      "path-arc3",
+      "ring-arc3",
+      "cluster-two-body"
+    ],
+    "numerical_active_tolerance": 1e-10,
+    "numerical_residual_tolerance": 1e-09,
+    "shard_count": 62,
+    "target_sets": [
+      "first-library",
+      "survivor-projected",
+      "c5-grid"
+    ]
+  },
+  "route2": {
+    "center": "survivor-a",
+    "exact_shift_rule": {
+      "extra_integer_slack_choices": [
+        0,
+        1,
+        2,
+        4
+      ],
+      "rule": "floor(max_row_requirement)+1+extra_integer_slack"
+    },
+    "interaction_norm_floor": 0.05,
+    "lexicographic_objective": [
+      "cluster_two_body_leakage_over_interaction",
+      "higher_body_norm_over_interaction",
+      "ring_arc3_leakage_over_interaction",
+      "negative_interaction_norm",
+      "negative_gaussian_grade_distance",
+      "sample_index"
+    ],
+    "normalization": "divide-transfer-by-exact-vacuum-value",
+    "rng": {
+      "algorithm": "numpy.random.PCG64",
+      "cell_seed_formula": "uint64(first16hex(sha256('20260730:route2:' + strategy + ':' + sample_index)))"
+    },
+    "sample_count": 16384,
+    "sample_index_end_exclusive": 16384,
+    "sample_index_start": 0,
+    "shard_count": 62,
+    "strategies": [
+      {
+        "exact_rational_rule": "multiply each of 12 Survivor-A weights by 2^k then renormalize",
+        "id": "log-rational-perturbation",
+        "integer_exponent_max": 4,
+        "integer_exponent_min": -4,
+        "sample_index_end_exclusive": 4096,
+        "sample_index_start": 0
+      },
+      {
+        "active_source_ray_count_max": 12,
+        "active_source_ray_count_min": 2,
+        "exact_rational_rule": "uniform integer numerators then renormalize",
+        "id": "sparse-support-perturbation",
+        "numerator_max": 64,
+        "numerator_min": 1,
+        "sample_index_end_exclusive": 8192,
+        "sample_index_start": 4096
+      },
+      {
+        "exact_rational_rule": "retain all source rays, inject selected new rays with integer numerators, then renormalize",
+        "id": "new-word-injection",
+        "injected_ray_count_max": 8,
+        "injected_ray_count_min": 1,
+        "numerator_max": 32,
+        "numerator_min": 1,
+        "sample_index_end_exclusive": 12288,
+        "sample_index_start": 8192,
+        "selected_new_ray_source": "selected-catalog-length5-and-length6"
+      },
+      {
+        "bucket_rule": "choose one selected ray from each nonempty body-order/support bucket before filling uniformly",
+        "exact_rational_rule": "uniform integer numerators then renormalize",
+        "id": "support-stratified-perturbation",
+        "numerator_max": 32,
+        "numerator_min": 1,
+        "sample_index_end_exclusive": 16384,
+        "sample_index_start": 12288
+      }
+    ],
+    "terminal_rejections": [
+      "exact-spd-gate-failed",
+      "interaction-norm-below-0.05",
+      "nonfinite-logarithm-diagnostic",
+      "log-reconstruction-residual-above-1e-10"
+    ]
+  },
+  "promotion": {
+    "exact_active_ray_limit": 48,
+    "require_arbitrary_history_replay": true,
+    "require_exact_forbidden_zero": true,
+    "require_exact_full_fock_replay": true,
+    "require_exact_nonzero_two_body": true,
+    "require_strictly_positive_active_weights": true
+  }
+}

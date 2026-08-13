@@ -1,0 +1,383 @@
+{
+  "schema": "oddcycle-local-hs-settings-v1",
+  "seed": 20260730,
+  "portfolio_sample_count": 2048,
+  "promotion_active_ray_limit": 32,
+  "numerical_active_tolerance": 1E-10,
+  "numerical_residual_tolerance": 1E-9,
+  "python_hash_seed": 0,
+  "cells": [
+    {
+      "id": "hportfolio-cpu-0",
+      "mode": "portfolio",
+      "max_word_length": 4,
+      "seed": 20270000
+    },
+    {
+      "id": "hportfolio-cpu-1",
+      "mode": "portfolio",
+      "max_word_length": 4,
+      "seed": 20270001
+    },
+    {
+      "id": "hportfolio-cpu-2",
+      "mode": "portfolio",
+      "max_word_length": 4,
+      "seed": 20270002
+    },
+    {
+      "id": "hportfolio-cpu-3",
+      "mode": "portfolio",
+      "max_word_length": 4,
+      "seed": 20270003
+    },
+    {
+      "id": "hportfolio-cpu-4",
+      "mode": "portfolio",
+      "max_word_length": 4,
+      "seed": 20270004
+    },
+    {
+      "id": "hportfolio-cpu-5",
+      "mode": "portfolio",
+      "max_word_length": 4,
+      "seed": 20270005
+    },
+    {
+      "id": "hportfolio-cpu-6",
+      "mode": "portfolio",
+      "max_word_length": 4,
+      "seed": 20270006
+    },
+    {
+      "id": "hportfolio-cpu-7",
+      "mode": "portfolio",
+      "max_word_length": 4,
+      "seed": 20270007
+    },
+    {
+      "id": "hportfolio-cpu-8",
+      "mode": "portfolio",
+      "max_word_length": 4,
+      "seed": 20270008
+    },
+    {
+      "id": "hportfolio-cpu-9",
+      "mode": "portfolio",
+      "max_word_length": 4,
+      "seed": 20270009
+    },
+    {
+      "id": "hportfolio-cpu-10",
+      "mode": "portfolio",
+      "max_word_length": 4,
+      "seed": 20270010
+    },
+    {
+      "id": "hportfolio-cpu-11",
+      "mode": "portfolio",
+      "max_word_length": 4,
+      "seed": 20270011
+    },
+    {
+      "id": "hportfolio-cpu-12",
+      "mode": "portfolio",
+      "max_word_length": 4,
+      "seed": 20270012
+    },
+    {
+      "id": "hportfolio-cpu-13",
+      "mode": "portfolio",
+      "max_word_length": 4,
+      "seed": 20270013
+    },
+    {
+      "id": "hportfolio-cpu-14",
+      "mode": "portfolio",
+      "max_word_length": 4,
+      "seed": 20270014
+    },
+    {
+      "id": "hportfolio-cpu-15",
+      "mode": "portfolio",
+      "max_word_length": 4,
+      "seed": 20270015
+    },
+    {
+      "id": "hportfolio-cpu-16",
+      "mode": "portfolio",
+      "max_word_length": 4,
+      "seed": 20270016
+    },
+    {
+      "id": "hportfolio-cpu-17",
+      "mode": "portfolio",
+      "max_word_length": 4,
+      "seed": 20270017
+    },
+    {
+      "id": "hportfolio-cpu-18",
+      "mode": "portfolio",
+      "max_word_length": 4,
+      "seed": 20270018
+    },
+    {
+      "id": "hportfolio-cpu-19",
+      "mode": "portfolio",
+      "max_word_length": 4,
+      "seed": 20270019
+    },
+    {
+      "id": "hportfolio-cpu-20",
+      "mode": "portfolio",
+      "max_word_length": 4,
+      "seed": 20270020
+    },
+    {
+      "id": "hportfolio-cpu-21",
+      "mode": "portfolio",
+      "max_word_length": 4,
+      "seed": 20270021
+    },
+    {
+      "id": "hportfolio-cpu-22",
+      "mode": "portfolio",
+      "max_word_length": 4,
+      "seed": 20270022
+    },
+    {
+      "id": "hportfolio-cpu-23",
+      "mode": "portfolio",
+      "max_word_length": 4,
+      "seed": 20270023
+    },
+    {
+      "id": "hportfolio-cpu-24",
+      "mode": "portfolio",
+      "max_word_length": 4,
+      "seed": 20270024
+    },
+    {
+      "id": "hportfolio-cpu-25",
+      "mode": "portfolio",
+      "max_word_length": 4,
+      "seed": 20270025
+    },
+    {
+      "id": "hportfolio-cpu-26",
+      "mode": "portfolio",
+      "max_word_length": 4,
+      "seed": 20270026
+    },
+    {
+      "id": "hportfolio-cpu-27",
+      "mode": "portfolio",
+      "max_word_length": 4,
+      "seed": 20270027
+    },
+    {
+      "id": "hportfolio-cpu-28",
+      "mode": "portfolio",
+      "max_word_length": 4,
+      "seed": 20270028
+    },
+    {
+      "id": "hportfolio-cpu-29",
+      "mode": "portfolio",
+      "max_word_length": 4,
+      "seed": 20270029
+    },
+    {
+      "id": "hportfolio-cpu-30",
+      "mode": "portfolio",
+      "max_word_length": 4,
+      "seed": 20270030
+    },
+    {
+      "id": "hportfolio-cpu-31",
+      "mode": "portfolio",
+      "max_word_length": 4,
+      "seed": 20270031
+    },
+    {
+      "id": "hportfolio-cpu-32",
+      "mode": "portfolio",
+      "max_word_length": 4,
+      "seed": 20270032
+    },
+    {
+      "id": "hportfolio-cpu-33",
+      "mode": "portfolio",
+      "max_word_length": 4,
+      "seed": 20270033
+    },
+    {
+      "id": "hportfolio-cpu-34",
+      "mode": "portfolio",
+      "max_word_length": 4,
+      "seed": 20270034
+    },
+    {
+      "id": "hportfolio-cpu-35",
+      "mode": "portfolio",
+      "max_word_length": 4,
+      "seed": 20270035
+    },
+    {
+      "id": "hportfolio-cpu-36",
+      "mode": "portfolio",
+      "max_word_length": 4,
+      "seed": 20270036
+    },
+    {
+      "id": "hportfolio-cpu-37",
+      "mode": "portfolio",
+      "max_word_length": 4,
+      "seed": 20270037
+    },
+    {
+      "id": "hportfolio-cpu-38",
+      "mode": "portfolio",
+      "max_word_length": 4,
+      "seed": 20270038
+    },
+    {
+      "id": "hportfolio-cpu-39",
+      "mode": "portfolio",
+      "max_word_length": 4,
+      "seed": 20270039
+    },
+    {
+      "id": "hportfolio-cpu-40",
+      "mode": "portfolio",
+      "max_word_length": 4,
+      "seed": 20270040
+    },
+    {
+      "id": "hportfolio-cpu-41",
+      "mode": "portfolio",
+      "max_word_length": 4,
+      "seed": 20270041
+    },
+    {
+      "id": "hportfolio-cpu-42",
+      "mode": "portfolio",
+      "max_word_length": 4,
+      "seed": 20270042
+    },
+    {
+      "id": "hportfolio-cpu-43",
+      "mode": "portfolio",
+      "max_word_length": 4,
+      "seed": 20270043
+    },
+    {
+      "id": "hportfolio-cpu-44",
+      "mode": "portfolio",
+      "max_word_length": 4,
+      "seed": 20270044
+    },
+    {
+      "id": "hportfolio-cpu-45",
+      "mode": "portfolio",
+      "max_word_length": 4,
+      "seed": 20270045
+    },
+    {
+      "id": "hportfolio-cpu-46",
+      "mode": "portfolio",
+      "max_word_length": 4,
+      "seed": 20270046
+    },
+    {
+      "id": "hportfolio-cpu-47",
+      "mode": "portfolio",
+      "max_word_length": 4,
+      "seed": 20270047
+    },
+    {
+      "id": "hportfolio-cpu-48",
+      "mode": "portfolio",
+      "max_word_length": 4,
+      "seed": 20270048
+    },
+    {
+      "id": "hportfolio-cpu-49",
+      "mode": "portfolio",
+      "max_word_length": 4,
+      "seed": 20270049
+    },
+    {
+      "id": "hportfolio-cpu-50",
+      "mode": "portfolio",
+      "max_word_length": 4,
+      "seed": 20270050
+    },
+    {
+      "id": "hportfolio-cpu-51",
+      "mode": "portfolio",
+      "max_word_length": 4,
+      "seed": 20270051
+    },
+    {
+      "id": "hportfolio-cpu-52",
+      "mode": "portfolio",
+      "max_word_length": 4,
+      "seed": 20270052
+    },
+    {
+      "id": "hportfolio-cpu-53",
+      "mode": "portfolio",
+      "max_word_length": 4,
+      "seed": 20270053
+    },
+    {
+      "id": "hportfolio-cpu-54",
+      "mode": "portfolio",
+      "max_word_length": 4,
+      "seed": 20270054
+    },
+    {
+      "id": "hportfolio-cpu-55",
+      "mode": "portfolio",
+      "max_word_length": 4,
+      "seed": 20270055
+    },
+    {
+      "id": "hportfolio-cpu-56",
+      "mode": "portfolio",
+      "max_word_length": 4,
+      "seed": 20270056
+    },
+    {
+      "id": "hportfolio-cpu-57",
+      "mode": "portfolio",
+      "max_word_length": 4,
+      "seed": 20270057
+    },
+    {
+      "id": "hportfolio-cpu-58",
+      "mode": "portfolio",
+      "max_word_length": 4,
+      "seed": 20270058
+    },
+    {
+      "id": "hportfolio-cpu-59",
+      "mode": "portfolio",
+      "max_word_length": 4,
+      "seed": 20270059
+    },
+    {
+      "id": "hportfolio-cpu-60",
+      "mode": "portfolio",
+      "max_word_length": 4,
+      "seed": 20270060
+    },
+    {
+      "id": "hportfolio-cpu-61",
+      "mode": "portfolio",
+      "max_word_length": 4,
+      "seed": 20270061
+    }
+  ]
+}

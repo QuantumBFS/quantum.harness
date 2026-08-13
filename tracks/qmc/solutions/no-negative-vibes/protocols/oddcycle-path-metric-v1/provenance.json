@@ -1,0 +1,25 @@
+{
+  "schema": "oddcycle-path-metric-provenance-v1",
+  "status": "frozen",
+  "runner": "oracle.oddcycle_joint_words",
+  "exact_publication_replay": "oracle.oddcycle_final_certificate",
+  "production_hosts": {
+    "wsl": {
+      "logical_cores": 12,
+      "workers_used_for_depth14_hodge": 10,
+      "cores_reserved": 2
+    },
+    "cpu_machine": {
+      "address": "redacted-in-public-provenance",
+      "logical_cores": 64,
+      "maximum_workers": 62,
+      "cores_reserved": 2
+    }
+  },
+  "historical_exact_word_count_through_depth12": 22369620,
+  "historical_hodge_word_count_at_depth14": 268435456,
+  "notes": [
+    "Exact certificates, not empirical scans, support the theorem.",
+    "Private host credentials and addresses are intentionally excluded."
+  ]
+}

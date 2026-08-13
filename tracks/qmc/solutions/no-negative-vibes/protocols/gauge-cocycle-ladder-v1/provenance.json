@@ -1,0 +1,8 @@
+{
+  "ansatz_boundary": "edge-electric Gauss law plus affine gauge-only phases",
+  "exact_arithmetic": "GF(2) integer bit masks and exhaustive finite-state enumeration",
+  "known_literature_boundary": "does not classify modified-Gauss-law exact bosonization",
+  "protocol": "gauge-cocycle-ladder-v1",
+  "purpose": "test whether a local gauge phase cancels overlap fermion signs without a Wilson string",
+  "source_commit": "b4d50afd47040bffbb06c934e85886052f3b4fe5"
+}

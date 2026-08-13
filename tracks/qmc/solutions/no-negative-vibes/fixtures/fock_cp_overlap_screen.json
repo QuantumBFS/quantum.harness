@@ -1,0 +1,87 @@
+{
+  "families": {
+    "bdg": {
+      "basis_dimension": 42,
+      "cells": 260,
+      "conditional_span_rank_range": [
+        0,
+        9
+      ],
+      "hermiticity_preserving_dimension_range": [
+        1,
+        12
+      ],
+      "maximum_bridge_nullspace_projection": 6.980656370442376e-15,
+      "surviving_bridge_cells": 0
+    },
+    "number-conserving": {
+      "basis_dimension": 24,
+      "cells": 260,
+      "conditional_span_rank_range": [
+        0,
+        3
+      ],
+      "hermiticity_preserving_dimension_range": [
+        1,
+        7
+      ],
+      "maximum_bridge_nullspace_projection": 4.6041885013767436e-15,
+      "surviving_bridge_cells": 0
+    }
+  },
+  "geometry": {
+    "blocks": [
+      [
+        0,
+        1,
+        2,
+        3
+      ],
+      [
+        2,
+        3,
+        4,
+        5
+      ]
+    ],
+    "bridge_edges": [
+      [
+        0,
+        4
+      ],
+      [
+        1,
+        5
+      ]
+    ],
+    "modes": 6
+  },
+  "interpretation": {
+    "closed": "identity and contiguous Klein-Hodge circuits of depth at most two",
+    "open": "general non-Klein Fock-CP similarities and scalable circuit towers",
+    "reason": "every bridge coefficient is absent from the Hermiticity-preserving nullspace before the conditional-CP semidefinite gate"
+  },
+  "protocol": "fock-cp-overlap-v1",
+  "rank_relative_tolerance": 1e-10,
+  "random_samples_per_cell": 32,
+  "schema_version": 1,
+  "source_commit": "5f92b1d96185c2a14fa0ed189563c648f6413694",
+  "summary": {
+    "cells": 520,
+    "families": 2,
+    "maximum_bridge_nullspace_projection": 6.980656370442376e-15,
+    "sampled_bridge_ccp_cells": 0,
+    "surviving_bridge_cells": 0,
+    "tensorizations": 20,
+    "transforms": 13
+  },
+  "transform_catalog": {
+    "contiguous_starts": [
+      0,
+      1,
+      2
+    ],
+    "includes_identity": true,
+    "maximum_depth": 2
+  }
+}

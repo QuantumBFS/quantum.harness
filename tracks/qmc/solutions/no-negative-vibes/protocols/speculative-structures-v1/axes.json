@@ -1,0 +1,19 @@
+{
+  "case": [
+    "odd_monomial_c3",
+    "odd_monomial_c5",
+    "even_monomial_v4",
+    "odd_block_tn_c3",
+    "linf_contract4",
+    "linf_moving_metric4",
+    "reciprocal_parabolic4",
+    "reciprocal_bicoupled4",
+    "lusztig_d4_positive",
+    "lusztig_d4_signed",
+    "commuting_dense4",
+    "near_commuting4"
+  ],
+  "depth": [2, 3, 4, 8, 16],
+  "scale": [0.5, 1.0, 2.0, 3.0],
+  "seed": [9101, 9102, 9103, 9104]
+}

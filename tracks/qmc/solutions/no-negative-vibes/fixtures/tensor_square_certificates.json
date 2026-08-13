@@ -1,0 +1,85 @@
+{
+  "exact_independent_field_counterexample": {
+    "base_factors": [
+      [
+        [
+          2,
+          -3
+        ],
+        [
+          -3,
+          7
+        ]
+      ],
+      [
+        [
+          4,
+          4
+        ],
+        [
+          4,
+          5
+        ]
+      ]
+    ],
+    "onsite_diagonal": [
+      "16",
+      "1",
+      "1/8",
+      "1/16"
+    ],
+    "weight": "-155085/32"
+  },
+  "general_theorem": {
+    "factors": "B_l = X_l tensor X_l with real square X_l",
+    "history_closure": "product_l B_l = X_tot tensor X_tot",
+    "weight_factorization": "product_i(1+lambda_i^2) product_(i<j)(1+lambda_i lambda_j)^2",
+    "weight_sign": "nonnegative"
+  },
+  "locality_counts": [
+    {
+      "base_dimension": 2,
+      "lifted_diagonal_support": 2,
+      "lifted_hopping_edges": 4
+    },
+    {
+      "base_dimension": 3,
+      "lifted_diagonal_support": 6,
+      "lifted_hopping_edges": 6
+    },
+    {
+      "base_dimension": 5,
+      "lifted_diagonal_support": 14,
+      "lifted_hopping_edges": 10
+    },
+    {
+      "base_dimension": 8,
+      "lifted_diagonal_support": 26,
+      "lifted_hopping_edges": 16
+    }
+  ],
+  "plaquette": {
+    "commutator_norm": 0.9468634384474545,
+    "field_coupling": 0.6,
+    "hopping": 1.1,
+    "kappa": 0.5936889715940044,
+    "minimum_second_order_minor": -0.4866284690030308,
+    "repulsive_gate_coupling": 1.1873779431880087,
+    "short_histories": 510,
+    "short_history_negative_count": 0,
+    "time_step": 0.2
+  },
+  "protocol": "tensor-square-plaquette-v1",
+  "schema_version": 1,
+  "source_commit": "37f69a3992925b598b8c2a75428185012678af7c",
+  "split_reduction": {
+    "metric": "epsilon tensor epsilon",
+    "metric_signature": [
+      2,
+      2
+    ],
+    "relation": "B^T eta B = det(X)^2 eta for B=X tensor X",
+    "unit_determinant_class": "O(2,2)"
+  },
+  "two_by_two_formula": "(1+delta)^2 ((1-delta)^2 + tau^2)"
+}

@@ -1,0 +1,44 @@
+{
+  "alphabet": {
+    "determinant": 8,
+    "dimension": 5,
+    "letter_count": 4,
+    "points": [
+      "1/1000",
+      "4/5"
+    ]
+  },
+  "boundary": {
+    "diagonal_blocks_zero": true,
+    "off_diagonal_block": "k*I_5"
+  },
+  "commutant": {
+    "ambient_dimension": 25,
+    "constraint_rank": 24,
+    "nullity": 1,
+    "scalar_only": true
+  },
+  "compatibility": {
+    "boundary_sign": 1,
+    "compatible": false,
+    "wei_sign": -1
+  },
+  "dual": {
+    "exact_cancellation": true,
+    "nonstrict_gaps_forced_to_zero": true,
+    "normalization_trace": {
+      "denominator": 1,
+      "numerator": 1
+    },
+    "positive_definite_multipliers": 4
+  },
+  "environment": {
+    "python": "3.11.15",
+    "sympy": "1.14.0"
+  },
+  "exact_certificate_sha256": "0290bd707ab6aa729c2ad87526beae74168dbc554aa4b424e9fead3c62163ed6",
+  "exact_replay_wall_seconds": 0.564422099996591,
+  "schema": "oddcycle-majorana-wei-no-go-v1",
+  "source_commit": "6aba2a6c05384b09ca853444f7ba86ee24c12c15",
+  "status": "exact-no-wei-contraction-certificate"
+}

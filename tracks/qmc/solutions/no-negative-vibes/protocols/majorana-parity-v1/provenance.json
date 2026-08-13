@@ -1,0 +1,17 @@
+{
+  "protocol": "majorana-parity-v1",
+  "precision": "numpy-scipy-float64-with-positive-frobenius-rescaling",
+  "weight": "Tr[(1 +/- parity) product_l exp(gamma^T A_l gamma / 4)] / 2",
+  "purpose": "test a dimension-dependent parity-sector refinement of Majorana reflection positivity",
+  "convention": {
+    "reflection_structures": "canonical J1/J2",
+    "majorana_order": "gamma_(2j)=Z^j X_j and gamma_(2j+1)=Z^j Y_j",
+    "fermion_parity": "P=(-i)^m product_j gamma_j",
+    "orientation_warning": "an orientation-reversing Majorana relabeling can exchange the even and odd labels"
+  },
+  "sources": [
+    "https://arxiv.org/abs/1601.01994",
+    "https://arxiv.org/abs/1403.7824",
+    "https://arxiv.org/abs/2408.10311"
+  ]
+}

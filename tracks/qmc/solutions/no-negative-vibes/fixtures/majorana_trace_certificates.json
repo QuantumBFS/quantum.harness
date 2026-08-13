@@ -1,0 +1,96 @@
+{
+  "schema_version": 2,
+  "number_format": "SymPy-compatible exact expressions",
+  "weight_convention": "p = Tr(product_l exp(gamma^T A_l gamma / 4))",
+  "determinant_relation": "p^2 = det(I + product_l exp(A_l))",
+  "cases": [
+    {
+      "id": "opposite_majorana_cones_depth_two_negative",
+      "family": "two Majorana reflection cones with shared J1",
+      "relative_angle": "pi",
+      "j1": [
+        ["0", "0", "1", "0"],
+        ["0", "0", "0", "1"],
+        ["1", "0", "0", "0"],
+        ["0", "1", "0", "0"]
+      ],
+      "j2_first": [
+        ["0", "0", "-1", "0"],
+        ["0", "0", "0", "-1"],
+        ["1", "0", "0", "0"],
+        ["0", "1", "0", "0"]
+      ],
+      "j2_second": [
+        ["0", "0", "1", "0"],
+        ["0", "0", "0", "1"],
+        ["-1", "0", "0", "0"],
+        ["0", "-1", "0", "0"]
+      ],
+      "generators_in_product_order": [
+        [
+          ["0", "sqrt(pi**2 + 1)", "0", "0"],
+          ["-sqrt(pi**2 + 1)", "0", "0", "2*I"],
+          ["0", "0", "0", "sqrt(pi**2 + 1)"],
+          ["0", "-2*I", "-sqrt(pi**2 + 1)", "0"]
+        ],
+        [
+          ["0", "0", "0", "0"],
+          ["0", "0", "0", "-2*I"],
+          ["0", "0", "0", "0"],
+          ["0", "2*I", "0", "0"]
+        ]
+      ],
+      "expected_trace_weight": "2 - 2*cosh(1)",
+      "expected_sign": "negative",
+      "expected_determinant_square": "(2 - 2*cosh(1))**2",
+      "exact_relations": [
+        "A_l^T = -A_l",
+        "J1^T A_l J1 = conjugate(A_l)",
+        "i(J2_l A_l - conjugate(A_l) J2_l) is negative semidefinite",
+        "J2_second = -J2_first",
+        "the odd-parity Fock blocks cancel and contribute trace 2",
+        "the even-parity product contributes -2*cosh(1)"
+      ]
+    },
+    {
+      "id": "arbitrarily_small_shared_reality_angle_negative",
+      "family": "two rank-one Majorana reflection cones with shared J1",
+      "relative_angle": "theta",
+      "parameter_constraints": [
+        "q > 0",
+        "0 < theta < pi"
+      ],
+      "first_blocks": {
+        "B": [
+          ["0", "pi - I*q"],
+          ["-pi + I*q", "0"]
+        ],
+        "C": [
+          ["q", "I*q"],
+          ["-I*q", "q"]
+        ]
+      },
+      "second_unrotated_blocks": {
+        "B": [
+          ["0", "I*q"],
+          ["-I*q", "0"]
+        ],
+        "C": [
+          ["q", "I*q"],
+          ["-I*q", "q"]
+        ]
+      },
+      "second_cone_rotation": "shared_reality_rotation(block_size=2, angle=theta)",
+      "expected_trace_weight": "-4*sin(theta)*sinh(q)**2",
+      "expected_sign": "negative",
+      "exact_relations": [
+        "C has eigenvalues 0 and 2*q and is positive semidefinite",
+        "both generators share the canonical J1 reality structure",
+        "the second J2 is the first J2 rotated through theta",
+        "the even-parity Fock trace contribution is -2",
+        "the odd-parity Fock trace contribution is 2 - 4*sin(theta)*sinh(q)**2",
+        "the total trace is strictly negative for every q > 0 and 0 < theta < pi"
+      ]
+    }
+  ]
+}

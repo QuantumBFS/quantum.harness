@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "protocol": "overlap-klein-v1",
+  "modes": 6,
+  "blocks": [[0, 1, 2, 3], [2, 3, 4, 5]],
+  "families": ["number-conserving", "bdg"],
+  "masks": ["rings-bridges", "rings-diagonals-bridges"],
+  "anchor_signs": [-1, 1],
+  "exact_field": "Q(sqrt(2))",
+  "blas_threads": 1,
+  "worker_policy": "max(1, logical_cpus-2)"
+}

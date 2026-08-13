@@ -1,0 +1,22 @@
+{
+  "case": [
+    "tn_path4_sym",
+    "tn_path6_sym",
+    "tn_path4_asym",
+    "tn_path6_asym",
+    "tn_path4_common_gauge",
+    "tn_path4_slice_gauge",
+    "metzler_cycle4_sym",
+    "metzler_star4_sym",
+    "metzler_dense4_sym",
+    "split_cone22",
+    "split_mixed005",
+    "split_mixed02",
+    "split_mixed05",
+    "block_upper_split11",
+    "block_bicoupled_split11"
+  ],
+  "depth": [2, 3, 4, 8, 16, 32],
+  "scale": [0.5, 1.0, 2.0, 3.0],
+  "seed": [7301, 7302, 7303, 7304]
+}

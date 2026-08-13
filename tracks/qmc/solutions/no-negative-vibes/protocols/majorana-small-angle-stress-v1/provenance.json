@@ -1,0 +1,16 @@
+{
+  "protocol": "majorana-small-angle-stress-v1",
+  "precision": "numpy-scipy-float64 with positive Fock-product rescaling",
+  "majorana_dimension": "2 * block_size",
+  "fock_dimension": "2 ** block_size",
+  "generator_norm": "frobenius(A) = sqrt(2 * block_size) * scale",
+  "weight": "continuous Spin trace Tr(product_l exp(gamma^T A_l gamma / 4))",
+  "candidate": "small relative rotations between two Majorana-positive J2 cones with a common J1 reality structure",
+  "purpose": "stress the zero-hit angles left by majorana-shared-reality-cones-v2 using larger generators and depths",
+  "interpretation": "negative trace falsifies the fixed-angle two-cone union; zero hits remain inconclusive",
+  "sources": [
+    "https://github.com/QuantumBFS/quantum.harness/issues/121",
+    "https://arxiv.org/abs/1601.01994",
+    "https://arxiv.org/abs/1712.09412"
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "protocol": "frontier-semigroups-v1",
+  "precision": "numpy-scipy-float64",
+  "weight": "det(I + product_l exp(A_l))",
+  "purpose": "rapid falsification of structured semigroup relaxations; survival is not a proof",
+  "candidate_principles": [
+    "totally-nonnegative path evolutions",
+    "time-slice-dependent gauge relaxations",
+    "Metzler graph extensions",
+    "mixed split-contraction cones",
+    "upper-triangular and bidirectional block couplings"
+  ],
+  "sources": [
+    "https://github.com/QuantumBFS/quantum.harness/issues/121",
+    "https://arxiv.org/abs/1712.09412",
+    "https://arxiv.org/abs/1802.09590"
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "matrix_dimension": [5],
+  "alphabet_size": [4],
+  "exhaustive_depths": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+  "random_depths": [1, 2, 5, 10, 20, 30, 40],
+  "random_samples": [100000],
+  "rng_seeds": [923771]
+}

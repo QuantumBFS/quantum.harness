@@ -1,0 +1,8 @@
+{
+  "short_word_depth": 6,
+  "max_level_matrices": 2000000,
+  "determinant_tolerance": 1e-10,
+  "sdp_solver": "CLARABEL",
+  "sdp_validation_tolerance": 1e-7,
+  "time_orientation_tolerance": 1e-7
+}

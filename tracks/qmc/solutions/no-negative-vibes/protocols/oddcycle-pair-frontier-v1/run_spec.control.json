@@ -1,0 +1,24 @@
+{
+  "run_id": "oddcycle-pair-frontier-control-v1",
+  "settings": {
+    "short_word_depth": 6,
+    "sdp_solver": "CLARABEL",
+    "sdp_validation_tolerance": 1e-7,
+    "time_orientation_tolerance": 1e-7
+  },
+  "provenance": {
+    "protocol": "oddcycle-pair-frontier-v1",
+    "fixture": "successful-control"
+  },
+  "cells": [
+    {
+      "cell_id": "control-p_low-0.001-p_high-0.8-q-1-r-1",
+      "params": {
+        "p_low": 0.001,
+        "p_high": 0.8,
+        "q": 1.0,
+        "r": 1.0
+      }
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "case": [
+    "azcone_bdi_split",
+    "azcone_bdi_two_sided",
+    "azcone_aii_kramers",
+    "azcone_diii_phs",
+    "azcone_diii_generic",
+    "azcone_cii_kramers",
+    "azcone_cii_generic"
+  ],
+  "depth": [2, 3, 4, 8, 16],
+  "scale": [0.5, 1.0, 2.0, 3.0],
+  "seed": [9401, 9402, 9403, 9404]
+}

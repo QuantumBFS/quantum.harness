@@ -1,0 +1,7 @@
+{
+  "modes": [2, 3, 4, 5, 6],
+  "depth": 4,
+  "scale": 3.0,
+  "seed": 20260728,
+  "samples_per_mode": 128
+}

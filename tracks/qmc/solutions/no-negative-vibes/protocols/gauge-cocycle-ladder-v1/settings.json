@@ -1,0 +1,12 @@
+{
+  "closed_word_maximum_depth": 8,
+  "exhaustive_columns": [
+    2,
+    3
+  ],
+  "scaling_columns": {
+    "maximum": 10,
+    "minimum": 2
+  },
+  "target": "central rung"
+}

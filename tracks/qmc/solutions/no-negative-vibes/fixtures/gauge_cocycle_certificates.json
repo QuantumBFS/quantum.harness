@@ -1,0 +1,114 @@
+{
+  "ansatz": {
+    "gauss_law": "n_v = q_v + sum_(e incident v) a_e mod 2",
+    "hop_update": "toggle n_left, n_right, and a_edge",
+    "phase_family": "affine GF(2) function of electric link bits",
+    "scope": "open two-row ladders with row-major fermion ordering"
+  },
+  "central_rung_scaling": [
+    {
+      "columns": 2,
+      "link_variables": 4,
+      "locality_radius": 1,
+      "phase_support": 2,
+      "rung_column": 0,
+      "rung_variables_in_phase": 1
+    },
+    {
+      "columns": 3,
+      "link_variables": 7,
+      "locality_radius": 1,
+      "phase_support": 4,
+      "rung_column": 1,
+      "rung_variables_in_phase": 2
+    },
+    {
+      "columns": 4,
+      "link_variables": 10,
+      "locality_radius": 2,
+      "phase_support": 5,
+      "rung_column": 1,
+      "rung_variables_in_phase": 3
+    },
+    {
+      "columns": 5,
+      "link_variables": 13,
+      "locality_radius": 2,
+      "phase_support": 6,
+      "rung_column": 2,
+      "rung_variables_in_phase": 4
+    },
+    {
+      "columns": 6,
+      "link_variables": 16,
+      "locality_radius": 3,
+      "phase_support": 7,
+      "rung_column": 2,
+      "rung_variables_in_phase": 5
+    },
+    {
+      "columns": 7,
+      "link_variables": 19,
+      "locality_radius": 3,
+      "phase_support": 8,
+      "rung_column": 3,
+      "rung_variables_in_phase": 6
+    },
+    {
+      "columns": 8,
+      "link_variables": 22,
+      "locality_radius": 4,
+      "phase_support": 9,
+      "rung_column": 3,
+      "rung_variables_in_phase": 7
+    },
+    {
+      "columns": 9,
+      "link_variables": 25,
+      "locality_radius": 4,
+      "phase_support": 10,
+      "rung_column": 4,
+      "rung_variables_in_phase": 8
+    },
+    {
+      "columns": 10,
+      "link_variables": 28,
+      "locality_radius": 5,
+      "phase_support": 11,
+      "rung_column": 4,
+      "rung_variables_in_phase": 9
+    }
+  ],
+  "overlapping_plaquettes": {
+    "closed_legal_words_depth_1_to_8": [
+      0,
+      448,
+      0,
+      3840,
+      0,
+      40768,
+      0,
+      480768
+    ],
+    "gauge_states": 128,
+    "gauss_law_failures": 0,
+    "legal_transitions": 448,
+    "reverse_phase_failures": 0,
+    "sign_failures": 0
+  },
+  "protocol": "gauge-cocycle-ladder-v1",
+  "schema_version": 1,
+  "source_commit": "b4d50afd47040bffbb06c934e85886052f3b4fe5",
+  "square": {
+    "gauge_states": 16,
+    "gauss_law_failures": 0,
+    "legal_transitions": 32,
+    "reverse_phase_failures": 0,
+    "sign_failures": 0
+  },
+  "status": {
+    "algebraic_sign_cancellation": "passed",
+    "local_scalability": "failed",
+    "reason": "central rung phase contains all L-1 other rung variables"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "protocol": "speculative-structures-v1",
+  "precision": "numpy-scipy-float64",
+  "weight": "det(I + product_l B_l), with B_l=exp(A_l)",
+  "purpose": "first aggressive falsification batch for representation-positive and discrete-routing semigroups",
+  "candidate_principles": [
+    "odd-order positive-monomial routing",
+    "odd-cycle block-TN wreath products",
+    "common weighted l-infinity contraction",
+    "reciprocal parabolic factorization",
+    "split D4 Lusztig positivity",
+    "dense commuting algebras"
+  ],
+  "sources": [
+    "https://github.com/QuantumBFS/quantum.harness/issues/121",
+    "https://arxiv.org/abs/math/9811100",
+    "https://arxiv.org/abs/math/9912128",
+    "https://arxiv.org/abs/1712.09412"
+  ]
+}

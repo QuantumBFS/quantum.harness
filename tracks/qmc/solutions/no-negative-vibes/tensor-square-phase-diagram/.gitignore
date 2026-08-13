@@ -1,0 +1,12 @@
+# Private machine/run coordination
+/COMPUTE_RUNBOOK.md
+/AGENT_HANDOFF.md
+
+# Large or transient compute outputs
+/results/raw/
+/results/**/checkpoint/
+*.log
+*.pid
+__pycache__/
+.pytest_cache/
+

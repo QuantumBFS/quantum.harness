@@ -1,0 +1,123 @@
+{
+  "schema_version": 1,
+  "protocol": "majorana-parity-v1",
+  "source_oracle": "oracle.majorana_parity",
+  "source_oracle_version": "0.1.0",
+  "generated_on": "2026-07-28",
+  "convention": {
+    "reflection_structures": "canonical J1/J2",
+    "majorana_order": "gamma_(2j)=Z^j X_j and gamma_(2j+1)=Z^j Y_j",
+    "fermion_parity": "P=(-i)^m product_j gamma_j",
+    "orientation_warning": "an orientation-reversing Majorana relabeling can exchange the even and odd labels"
+  },
+  "shared_params": {
+    "depth": 4,
+    "scale": 3.0,
+    "seed": 20260728,
+    "histories_per_mode": 128
+  },
+  "history_count": 640,
+  "traces_per_history": [
+    "even_sector",
+    "odd_sector",
+    "full_fock"
+  ],
+  "interpretation": "zero failures in the conjectured sector are numerical evidence, not a proof",
+  "cells": [
+    {
+      "modes": 2,
+      "protected_sector": "odd",
+      "counts": {
+        "even": {"positive": 89, "negative": 39, "complex": 0, "uncertain": 0},
+        "odd": {"positive": 128, "negative": 0, "complex": 0, "uncertain": 0},
+        "total": {"positive": 128, "negative": 0, "complex": 0, "uncertain": 0}
+      },
+      "min_normalized_real": {
+        "even": -0.0543706914105734,
+        "odd": 0.37160092257136423,
+        "total": 0.36547983875827655
+      },
+      "max_abs_normalized_imag": {
+        "even": 1.3877787807814457e-17,
+        "odd": 0.0,
+        "total": 1.3877787807814457e-17
+      }
+    },
+    {
+      "modes": 3,
+      "protected_sector": "even",
+      "counts": {
+        "even": {"positive": 128, "negative": 0, "complex": 0, "uncertain": 0},
+        "odd": {"positive": 77, "negative": 51, "complex": 0, "uncertain": 0},
+        "total": {"positive": 128, "negative": 0, "complex": 0, "uncertain": 0}
+      },
+      "min_normalized_real": {
+        "even": 0.5398985554893119,
+        "odd": -0.031177791488236486,
+        "total": 0.5496383781605463
+      },
+      "max_abs_normalized_imag": {
+        "even": 2.0816681711721685e-15,
+        "odd": 4.163336342344337e-17,
+        "total": 2.076464000744238e-15
+      }
+    },
+    {
+      "modes": 4,
+      "protected_sector": "even",
+      "counts": {
+        "even": {"positive": 128, "negative": 0, "complex": 0, "uncertain": 0},
+        "odd": {"positive": 94, "negative": 34, "complex": 0, "uncertain": 0},
+        "total": {"positive": 128, "negative": 0, "complex": 0, "uncertain": 0}
+      },
+      "min_normalized_real": {
+        "even": 0.41694919371970196,
+        "odd": -0.04204842786522331,
+        "total": 0.41910719305825317
+      },
+      "max_abs_normalized_imag": {
+        "even": 3.3306690738754696e-16,
+        "odd": 3.2959746043559335e-17,
+        "total": 3.3241638608405566e-16
+      }
+    },
+    {
+      "modes": 5,
+      "protected_sector": "odd",
+      "counts": {
+        "even": {"positive": 80, "negative": 48, "complex": 0, "uncertain": 0},
+        "odd": {"positive": 128, "negative": 0, "complex": 0, "uncertain": 0},
+        "total": {"positive": 128, "negative": 0, "complex": 0, "uncertain": 0}
+      },
+      "min_normalized_real": {
+        "even": -0.03471379389978033,
+        "odd": 0.4214914731051733,
+        "total": 0.42863667446932024
+      },
+      "max_abs_normalized_imag": {
+        "even": 5.193328406205566e-17,
+        "odd": 1.1310397063368782e-15,
+        "total": 1.1301723445988898e-15
+      }
+    },
+    {
+      "modes": 6,
+      "protected_sector": "odd",
+      "counts": {
+        "even": {"positive": 96, "negative": 32, "complex": 0, "uncertain": 0},
+        "odd": {"positive": 128, "negative": 0, "complex": 0, "uncertain": 0},
+        "total": {"positive": 128, "negative": 0, "complex": 0, "uncertain": 0}
+      },
+      "min_normalized_real": {
+        "even": -0.02333521125291549,
+        "odd": 0.3571913078825985,
+        "total": 0.3535731383513883
+      },
+      "max_abs_normalized_imag": {
+        "even": 2.8406096919120216e-17,
+        "odd": 3.608224830031759e-16,
+        "total": 3.651592916931179e-16
+      }
+    }
+  ]
+}

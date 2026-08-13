@@ -1,0 +1,5 @@
+{
+  "rank_relative_tolerance": 1e-10,
+  "samples": 32,
+  "seed": 20260729
+}

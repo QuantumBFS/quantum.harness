@@ -1,0 +1,17 @@
+{
+  "protocol": "majorana-shared-reality-cones-v2",
+  "precision": "numpy-scipy-float64 with positive Fock-product rescaling",
+  "majorana_dimension": "2 * block_size",
+  "fock_dimension": "2 ** block_size",
+  "generator_norm": "frobenius(A) = sqrt(2 * block_size) * scale",
+  "weight": "continuous Spin trace Tr(product_l exp(gamma^T A_l gamma / 4))",
+  "cross_check": "weight^2 = det(I + product_l exp(A_l)); checks with condition number above 1e6 or relative disagreement above 1e-8 are flagged rather than trusted",
+  "candidate": "alternate two Majorana-reflection-positive cones that share J1 but whose J2 structures differ by a relative rotation",
+  "interpretation": "negative trace falsifies closure of the two-cone union; zero hits are not a positivity proof",
+  "exact_anchor": "fixtures/majorana_trace_certificates.json",
+  "sources": [
+    "https://github.com/QuantumBFS/quantum.harness/issues/121",
+    "https://arxiv.org/abs/1601.01994",
+    "https://arxiv.org/abs/1712.09412"
+  ]
+}
