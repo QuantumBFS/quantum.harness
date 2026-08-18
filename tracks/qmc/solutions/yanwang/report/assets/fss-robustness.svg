@@ -1,0 +1,1220 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="958.79952pt" height="578.63952pt" viewBox="0 0 958.79952 578.63952" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>yanwang148 challenge report</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="fss-robustness-figure_1">
+  <g id="fss-robustness-patch_1">
+   <path d="M 0 578.63952
+L 958.79952 578.63952
+L 958.79952 0
+L 0 0
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="fss-robustness-axes_1">
+   <g id="fss-robustness-patch_2">
+    <path d="M 119.647031 539.114207
+L 474.64776 539.114207
+L 474.64776 45.055871
+L 119.647031 45.055871
+z
+" style="fill: #ffffff"/>
+   </g>
+   <g id="fss-robustness-patch_3">
+    <path d="M 277.440582 539.114207
+L 431.982737 539.114207
+L 431.982737 45.055871
+L 277.440582 45.055871
+z
+" clip-path="url(#fss-robustness-pcb217277f8)" style="fill: #b8651e; opacity: 0.11; stroke: #b8651e; stroke-linejoin: miter"/>
+   </g>
+   <g id="fss-robustness-matplotlib.axis_1">
+    <g id="fss-robustness-xtick_1">
+     <g id="fss-robustness-line2d_1">
+      <path d="M 133.891275 539.114207
+L 133.891275 45.055871
+" clip-path="url(#fss-robustness-pcb217277f8)" style="fill: none; stroke: #e6e3da; stroke-opacity: 0.9; stroke-width: 0.75; stroke-linecap: square"/>
+     </g>
+     <g id="fss-robustness-line2d_2">
+      <defs>
+       <path id="fss-robustness-mf0816c0a75" d="M 0 0
+L 0 3.5
+" style="stroke: #000000; stroke-width: 0.8"/>
+      </defs>
+      <g>
+       <use xlink:href="#fss-robustness-mf0816c0a75" x="133.891275" y="539.114207" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="fss-robustness-text_1">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: middle" x="133.891275" y="553.285223" transform="rotate(-0 133.891275 553.285223)">−8</text>
+     </g>
+    </g>
+    <g id="fss-robustness-xtick_2">
+     <g id="fss-robustness-line2d_3">
+      <path d="M 189.096371 539.114207
+L 189.096371 45.055871
+" clip-path="url(#fss-robustness-pcb217277f8)" style="fill: none; stroke: #e6e3da; stroke-opacity: 0.9; stroke-width: 0.75; stroke-linecap: square"/>
+     </g>
+     <g id="fss-robustness-line2d_4">
+      <g>
+       <use xlink:href="#fss-robustness-mf0816c0a75" x="189.096371" y="539.114207" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="fss-robustness-text_2">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: middle" x="189.096371" y="553.285223" transform="rotate(-0 189.096371 553.285223)">−6</text>
+     </g>
+    </g>
+    <g id="fss-robustness-xtick_3">
+     <g id="fss-robustness-line2d_5">
+      <path d="M 244.301467 539.114207
+L 244.301467 45.055871
+" clip-path="url(#fss-robustness-pcb217277f8)" style="fill: none; stroke: #e6e3da; stroke-opacity: 0.9; stroke-width: 0.75; stroke-linecap: square"/>
+     </g>
+     <g id="fss-robustness-line2d_6">
+      <g>
+       <use xlink:href="#fss-robustness-mf0816c0a75" x="244.301467" y="539.114207" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="fss-robustness-text_3">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: middle" x="244.301467" y="553.285223" transform="rotate(-0 244.301467 553.285223)">−4</text>
+     </g>
+    </g>
+    <g id="fss-robustness-xtick_4">
+     <g id="fss-robustness-line2d_7">
+      <path d="M 299.506563 539.114207
+L 299.506563 45.055871
+" clip-path="url(#fss-robustness-pcb217277f8)" style="fill: none; stroke: #e6e3da; stroke-opacity: 0.9; stroke-width: 0.75; stroke-linecap: square"/>
+     </g>
+     <g id="fss-robustness-line2d_8">
+      <g>
+       <use xlink:href="#fss-robustness-mf0816c0a75" x="299.506563" y="539.114207" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="fss-robustness-text_4">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: middle" x="299.506563" y="553.285223" transform="rotate(-0 299.506563 553.285223)">−2</text>
+     </g>
+    </g>
+    <g id="fss-robustness-xtick_5">
+     <g id="fss-robustness-line2d_9">
+      <path d="M 354.711659 539.114207
+L 354.711659 45.055871
+" clip-path="url(#fss-robustness-pcb217277f8)" style="fill: none; stroke: #e6e3da; stroke-opacity: 0.9; stroke-width: 0.75; stroke-linecap: square"/>
+     </g>
+     <g id="fss-robustness-line2d_10">
+      <g>
+       <use xlink:href="#fss-robustness-mf0816c0a75" x="354.711659" y="539.114207" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="fss-robustness-text_5">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: middle" x="354.711659" y="553.285223" transform="rotate(-0 354.711659 553.285223)">0</text>
+     </g>
+    </g>
+    <g id="fss-robustness-xtick_6">
+     <g id="fss-robustness-line2d_11">
+      <path d="M 409.916755 539.114207
+L 409.916755 45.055871
+" clip-path="url(#fss-robustness-pcb217277f8)" style="fill: none; stroke: #e6e3da; stroke-opacity: 0.9; stroke-width: 0.75; stroke-linecap: square"/>
+     </g>
+     <g id="fss-robustness-line2d_12">
+      <g>
+       <use xlink:href="#fss-robustness-mf0816c0a75" x="409.916755" y="539.114207" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="fss-robustness-text_6">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: middle" x="409.916755" y="553.285223" transform="rotate(-0 409.916755 553.285223)">2</text>
+     </g>
+    </g>
+    <g id="fss-robustness-xtick_7">
+     <g id="fss-robustness-line2d_13">
+      <path d="M 465.121852 539.114207
+L 465.121852 45.055871
+" clip-path="url(#fss-robustness-pcb217277f8)" style="fill: none; stroke: #e6e3da; stroke-opacity: 0.9; stroke-width: 0.75; stroke-linecap: square"/>
+     </g>
+     <g id="fss-robustness-line2d_14">
+      <g>
+       <use xlink:href="#fss-robustness-mf0816c0a75" x="465.121852" y="539.114207" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="fss-robustness-text_7">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: middle" x="465.121852" y="553.285223" transform="rotate(-0 465.121852 553.285223)">4</text>
+     </g>
+    </g>
+    <g id="fss-robustness-text_8">
+     <!-- $(h_c-h_c^{\rm primary})\times10^4$ -->
+     <g transform="translate(256.669896 568.49952)">
+      <text>
+       <tspan x="0" y="-0.864062" style="font-size: 10.5px; font-family: 'STIXGeneral'">(</tspan>
+       <tspan x="14.010469" y="-0.864062" style="font-size: 10.5px; font-family: 'STIXGeneral'">−</tspan>
+       <tspan x="52.962856" y="-0.864062" style="font-size: 10.5px; font-family: 'STIXGeneral'">)</tspan>
+       <tspan x="57.975548" y="-0.864062" style="font-size: 10.5px; font-family: 'STIXGeneral'">×</tspan>
+       <tspan x="66.211751" y="-0.864062" style="font-size: 10.5px; font-family: 'STIXGeneral'">1</tspan>
+       <tspan x="71.461751" y="-0.864062" style="font-size: 10.5px; font-family: 'STIXGeneral'">0</tspan>
+       <tspan x="3.49649" y="-0.864062" style="font-style: italic; font-size: 10.5px; font-family: 'STIXGeneral'">h</tspan>
+       <tspan x="22.719176" y="-0.864062" style="font-style: italic; font-size: 10.5px; font-family: 'STIXGeneral'">h</tspan>
+       <tspan x="8.74649" y="0.589063" style="font-style: italic; font-size: 7.35px; font-family: 'STIXGeneral'">c</tspan>
+       <tspan x="27.969176" y="2.042188" style="font-style: italic; font-size: 7.35px; font-family: 'STIXGeneral'">c</tspan>
+       <tspan x="29.208394" y="-4.739063" style="font-size: 7.35px; font-family: 'STIXGeneral'">p</tspan>
+       <tspan x="32.883394" y="-4.739063" style="font-size: 7.35px; font-family: 'STIXGeneral'">r</tspan>
+       <tspan x="35.330938" y="-4.739063" style="font-size: 7.35px; font-family: 'STIXGeneral'">i</tspan>
+       <tspan x="37.374232" y="-4.739063" style="font-size: 7.35px; font-family: 'STIXGeneral'">m</tspan>
+       <tspan x="43.092536" y="-4.739063" style="font-size: 7.35px; font-family: 'STIXGeneral'">a</tspan>
+       <tspan x="46.355938" y="-4.739063" style="font-size: 7.35px; font-family: 'STIXGeneral'">r</tspan>
+       <tspan x="48.803481" y="-4.739063" style="font-size: 7.35px; font-family: 'STIXGeneral'">y</tspan>
+       <tspan x="76.881283" y="-4.739062" style="font-size: 7.35px; font-family: 'STIXGeneral'">4</tspan>
+      </text>
+     </g>
+    </g>
+   </g>
+   <g id="fss-robustness-matplotlib.axis_2">
+    <g id="fss-robustness-ytick_1">
+     <g id="fss-robustness-line2d_15">
+      <defs>
+       <path id="fss-robustness-m4245f22ea4" d="M 0 0
+L -3.5 0
+" style="stroke: #000000; stroke-width: 0.8"/>
+      </defs>
+      <g>
+       <use xlink:href="#fss-robustness-m4245f22ea4" x="119.647031" y="67.513068" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="fss-robustness-text_9">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: end" x="112.647031" y="71.098576" transform="rotate(-0 112.647031 71.098576)">primary · historical inner</text>
+     </g>
+    </g>
+    <g id="fss-robustness-ytick_2">
+     <g id="fss-robustness-line2d_16">
+      <g>
+       <use xlink:href="#fss-robustness-m4245f22ea4" x="119.647031" y="88.900875" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="fss-robustness-text_10">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: end" x="112.647031" y="92.486382" transform="rotate(-0 112.647031 92.486382)">outer field window</text>
+     </g>
+    </g>
+    <g id="fss-robustness-ytick_3">
+     <g id="fss-robustness-line2d_17">
+      <g>
+       <use xlink:href="#fss-robustness-m4245f22ea4" x="119.647031" y="110.288681" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="fss-robustness-text_11">
+      <!-- $L_{\min}$=8 -->
+      <g transform="translate(83.387031 113.874189)">
+       <text>
+        <tspan x="0" y="-0.921875" style="font-style: italic; font-size: 9.5px; font-family: 'STIXGeneral'">L</tspan>
+        <tspan x="5.281998" y="0.4" style="font-size: 6.65px; font-family: 'STIXGeneral'">m</tspan>
+        <tspan x="10.455692" y="0.4" style="font-size: 6.65px; font-family: 'STIXGeneral'">i</tspan>
+        <tspan x="12.304385" y="0.4" style="font-size: 6.65px; font-family: 'STIXGeneral'">n</tspan>
+        <tspan x="16.07" y="-0.921875" style="font-size: 9.5px; font-family: 'Iowan Old Style'">=</tspan>
+        <tspan x="23.983574" y="-0.921875" style="font-size: 9.5px; font-family: 'Iowan Old Style'">8</tspan>
+       </text>
+      </g>
+     </g>
+    </g>
+    <g id="fss-robustness-ytick_4">
+     <g id="fss-robustness-line2d_18">
+      <g>
+       <use xlink:href="#fss-robustness-m4245f22ea4" x="119.647031" y="131.676488" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="fss-robustness-text_12">
+      <!-- $L_{\min}$=10 -->
+      <g transform="translate(78.067031 135.261996)">
+       <text>
+        <tspan x="0" y="-0.9375" style="font-style: italic; font-size: 9.5px; font-family: 'STIXGeneral'">L</tspan>
+        <tspan x="5.281998" y="0.384375" style="font-size: 6.65px; font-family: 'STIXGeneral'">m</tspan>
+        <tspan x="10.455692" y="0.384375" style="font-size: 6.65px; font-family: 'STIXGeneral'">i</tspan>
+        <tspan x="12.304385" y="0.384375" style="font-size: 6.65px; font-family: 'STIXGeneral'">n</tspan>
+        <tspan x="16.07" y="-0.9375" style="font-size: 9.5px; font-family: 'Iowan Old Style'">=</tspan>
+        <tspan x="23.983574" y="-0.9375" style="font-size: 9.5px; font-family: 'Iowan Old Style'">1</tspan>
+        <tspan x="29.267021" y="-0.9375" style="font-size: 9.5px; font-family: 'Iowan Old Style'">0</tspan>
+       </text>
+      </g>
+     </g>
+    </g>
+    <g id="fss-robustness-ytick_5">
+     <g id="fss-robustness-line2d_19">
+      <g>
+       <use xlink:href="#fss-robustness-m4245f22ea4" x="119.647031" y="153.064295" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="fss-robustness-text_13">
+      <!-- $L_{\min}$=12 -->
+      <g transform="translate(78.067031 156.649803)">
+       <text>
+        <tspan x="0" y="-0.9375" style="font-style: italic; font-size: 9.5px; font-family: 'STIXGeneral'">L</tspan>
+        <tspan x="5.281998" y="0.384375" style="font-size: 6.65px; font-family: 'STIXGeneral'">m</tspan>
+        <tspan x="10.455692" y="0.384375" style="font-size: 6.65px; font-family: 'STIXGeneral'">i</tspan>
+        <tspan x="12.304385" y="0.384375" style="font-size: 6.65px; font-family: 'STIXGeneral'">n</tspan>
+        <tspan x="16.07" y="-0.9375" style="font-size: 9.5px; font-family: 'Iowan Old Style'">=</tspan>
+        <tspan x="23.983574" y="-0.9375" style="font-size: 9.5px; font-family: 'Iowan Old Style'">1</tspan>
+        <tspan x="29.267021" y="-0.9375" style="font-size: 9.5px; font-family: 'Iowan Old Style'">2</tspan>
+       </text>
+      </g>
+     </g>
+    </g>
+    <g id="fss-robustness-ytick_6">
+     <g id="fss-robustness-line2d_20">
+      <g>
+       <use xlink:href="#fss-robustness-m4245f22ea4" x="119.647031" y="174.452102" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="fss-robustness-text_14">
+      <!-- $L_{\min}$=14 -->
+      <g transform="translate(78.067031 178.03761)">
+       <text>
+        <tspan x="0" y="-0.9375" style="font-style: italic; font-size: 9.5px; font-family: 'STIXGeneral'">L</tspan>
+        <tspan x="5.281998" y="0.384375" style="font-size: 6.65px; font-family: 'STIXGeneral'">m</tspan>
+        <tspan x="10.455692" y="0.384375" style="font-size: 6.65px; font-family: 'STIXGeneral'">i</tspan>
+        <tspan x="12.304385" y="0.384375" style="font-size: 6.65px; font-family: 'STIXGeneral'">n</tspan>
+        <tspan x="16.07" y="-0.9375" style="font-size: 9.5px; font-family: 'Iowan Old Style'">=</tspan>
+        <tspan x="23.983574" y="-0.9375" style="font-size: 9.5px; font-family: 'Iowan Old Style'">1</tspan>
+        <tspan x="29.267021" y="-0.9375" style="font-size: 9.5px; font-family: 'Iowan Old Style'">4</tspan>
+       </text>
+      </g>
+     </g>
+    </g>
+    <g id="fss-robustness-ytick_7">
+     <g id="fss-robustness-line2d_21">
+      <g>
+       <use xlink:href="#fss-robustness-m4245f22ea4" x="119.647031" y="195.839909" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="fss-robustness-text_15">
+      <!-- $L_{\min}$=16 -->
+      <g transform="translate(78.067031 199.425416)">
+       <text>
+        <tspan x="0" y="-0.9375" style="font-style: italic; font-size: 9.5px; font-family: 'STIXGeneral'">L</tspan>
+        <tspan x="5.281998" y="0.384375" style="font-size: 6.65px; font-family: 'STIXGeneral'">m</tspan>
+        <tspan x="10.455692" y="0.384375" style="font-size: 6.65px; font-family: 'STIXGeneral'">i</tspan>
+        <tspan x="12.304385" y="0.384375" style="font-size: 6.65px; font-family: 'STIXGeneral'">n</tspan>
+        <tspan x="16.07" y="-0.9375" style="font-size: 9.5px; font-family: 'Iowan Old Style'">=</tspan>
+        <tspan x="23.983574" y="-0.9375" style="font-size: 9.5px; font-family: 'Iowan Old Style'">1</tspan>
+        <tspan x="29.267021" y="-0.9375" style="font-size: 9.5px; font-family: 'Iowan Old Style'">6</tspan>
+       </text>
+      </g>
+     </g>
+    </g>
+    <g id="fss-robustness-ytick_8">
+     <g id="fss-robustness-line2d_22">
+      <g>
+       <use xlink:href="#fss-robustness-m4245f22ea4" x="119.647031" y="217.227715" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="fss-robustness-text_16">
+      <!-- $L_{\max}$=20 -->
+      <g transform="translate(76.927031 220.813223)">
+       <text>
+        <tspan x="0" y="-0.9375" style="font-style: italic; font-size: 9.5px; font-family: 'STIXGeneral'">L</tspan>
+        <tspan x="5.281998" y="0.384375" style="font-size: 6.65px; font-family: 'STIXGeneral'">m</tspan>
+        <tspan x="10.455692" y="0.384375" style="font-size: 6.65px; font-family: 'STIXGeneral'">a</tspan>
+        <tspan x="13.408282" y="0.384375" style="font-size: 6.65px; font-family: 'STIXGeneral'">x</tspan>
+        <tspan x="17.173897" y="-0.9375" style="font-size: 9.5px; font-family: 'Iowan Old Style'">=</tspan>
+        <tspan x="25.087471" y="-0.9375" style="font-size: 9.5px; font-family: 'Iowan Old Style'">2</tspan>
+        <tspan x="30.370918" y="-0.9375" style="font-size: 9.5px; font-family: 'Iowan Old Style'">0</tspan>
+       </text>
+      </g>
+     </g>
+    </g>
+    <g id="fss-robustness-ytick_9">
+     <g id="fss-robustness-line2d_23">
+      <g>
+       <use xlink:href="#fss-robustness-m4245f22ea4" x="119.647031" y="238.615522" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="fss-robustness-text_17">
+      <!-- $L_{\max}$=28 -->
+      <g transform="translate(76.927031 242.20103)">
+       <text>
+        <tspan x="0" y="-0.921875" style="font-style: italic; font-size: 9.5px; font-family: 'STIXGeneral'">L</tspan>
+        <tspan x="5.281998" y="0.4" style="font-size: 6.65px; font-family: 'STIXGeneral'">m</tspan>
+        <tspan x="10.455692" y="0.4" style="font-size: 6.65px; font-family: 'STIXGeneral'">a</tspan>
+        <tspan x="13.408282" y="0.4" style="font-size: 6.65px; font-family: 'STIXGeneral'">x</tspan>
+        <tspan x="17.173897" y="-0.921875" style="font-size: 9.5px; font-family: 'Iowan Old Style'">=</tspan>
+        <tspan x="25.087471" y="-0.921875" style="font-size: 9.5px; font-family: 'Iowan Old Style'">2</tspan>
+        <tspan x="30.370918" y="-0.921875" style="font-size: 9.5px; font-family: 'Iowan Old Style'">8</tspan>
+       </text>
+      </g>
+     </g>
+    </g>
+    <g id="fss-robustness-ytick_10">
+     <g id="fss-robustness-line2d_24">
+      <g>
+       <use xlink:href="#fss-robustness-m4245f22ea4" x="119.647031" y="260.003329" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="fss-robustness-text_18">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: end" x="112.647031" y="263.588837" transform="rotate(-0 112.647031 263.588837)">omit L6</text>
+     </g>
+    </g>
+    <g id="fss-robustness-ytick_11">
+     <g id="fss-robustness-line2d_25">
+      <g>
+       <use xlink:href="#fss-robustness-m4245f22ea4" x="119.647031" y="281.391136" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="fss-robustness-text_19">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: end" x="112.647031" y="284.976643" transform="rotate(-0 112.647031 284.976643)">omit L8</text>
+     </g>
+    </g>
+    <g id="fss-robustness-ytick_12">
+     <g id="fss-robustness-line2d_26">
+      <g>
+       <use xlink:href="#fss-robustness-m4245f22ea4" x="119.647031" y="302.778942" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="fss-robustness-text_20">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: end" x="112.647031" y="306.36445" transform="rotate(-0 112.647031 306.36445)">omit L10</text>
+     </g>
+    </g>
+    <g id="fss-robustness-ytick_13">
+     <g id="fss-robustness-line2d_27">
+      <g>
+       <use xlink:href="#fss-robustness-m4245f22ea4" x="119.647031" y="324.166749" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="fss-robustness-text_21">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: end" x="112.647031" y="327.752257" transform="rotate(-0 112.647031 327.752257)">omit L12</text>
+     </g>
+    </g>
+    <g id="fss-robustness-ytick_14">
+     <g id="fss-robustness-line2d_28">
+      <g>
+       <use xlink:href="#fss-robustness-m4245f22ea4" x="119.647031" y="345.554556" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="fss-robustness-text_22">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: end" x="112.647031" y="349.140064" transform="rotate(-0 112.647031 349.140064)">omit L14</text>
+     </g>
+    </g>
+    <g id="fss-robustness-ytick_15">
+     <g id="fss-robustness-line2d_29">
+      <g>
+       <use xlink:href="#fss-robustness-m4245f22ea4" x="119.647031" y="366.942363" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="fss-robustness-text_23">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: end" x="112.647031" y="370.527871" transform="rotate(-0 112.647031 370.527871)">omit L16</text>
+     </g>
+    </g>
+    <g id="fss-robustness-ytick_16">
+     <g id="fss-robustness-line2d_30">
+      <g>
+       <use xlink:href="#fss-robustness-m4245f22ea4" x="119.647031" y="388.33017" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="fss-robustness-text_24">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: end" x="112.647031" y="391.915677" transform="rotate(-0 112.647031 391.915677)">omit L18</text>
+     </g>
+    </g>
+    <g id="fss-robustness-ytick_17">
+     <g id="fss-robustness-line2d_31">
+      <g>
+       <use xlink:href="#fss-robustness-m4245f22ea4" x="119.647031" y="409.717976" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="fss-robustness-text_25">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: end" x="112.647031" y="413.303484" transform="rotate(-0 112.647031 413.303484)">omit L20</text>
+     </g>
+    </g>
+    <g id="fss-robustness-ytick_18">
+     <g id="fss-robustness-line2d_32">
+      <g>
+       <use xlink:href="#fss-robustness-m4245f22ea4" x="119.647031" y="431.105783" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="fss-robustness-text_26">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: end" x="112.647031" y="434.691291" transform="rotate(-0 112.647031 434.691291)">omit L24</text>
+     </g>
+    </g>
+    <g id="fss-robustness-ytick_19">
+     <g id="fss-robustness-line2d_33">
+      <g>
+       <use xlink:href="#fss-robustness-m4245f22ea4" x="119.647031" y="452.49359" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="fss-robustness-text_27">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: end" x="112.647031" y="456.079098" transform="rotate(-0 112.647031 456.079098)">omit L28</text>
+     </g>
+    </g>
+    <g id="fss-robustness-ytick_20">
+     <g id="fss-robustness-line2d_34">
+      <g>
+       <use xlink:href="#fss-robustness-m4245f22ea4" x="119.647031" y="473.881397" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="fss-robustness-text_28">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: end" x="112.647031" y="477.466905" transform="rotate(-0 112.647031 477.466905)">omit L32</text>
+     </g>
+    </g>
+    <g id="fss-robustness-ytick_21">
+     <g id="fss-robustness-line2d_35">
+      <g>
+       <use xlink:href="#fss-robustness-m4245f22ea4" x="119.647031" y="495.269204" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="fss-robustness-text_29">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: end" x="112.647031" y="498.854711" transform="rotate(-0 112.647031 498.854711)">add mixed correction</text>
+     </g>
+    </g>
+    <g id="fss-robustness-ytick_22">
+     <g id="fss-robustness-line2d_36">
+      <g>
+       <use xlink:href="#fss-robustness-m4245f22ea4" x="119.647031" y="516.65701" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="fss-robustness-text_30">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: end" x="112.647031" y="520.242518" transform="rotate(-0 112.647031 520.242518)">modern · all sizes</text>
+     </g>
+    </g>
+   </g>
+   <g id="fss-robustness-line2d_37">
+    <path d="M 354.711659 539.114207
+L 354.711659 45.055871
+" clip-path="url(#fss-robustness-pcb217277f8)" style="fill: none; stroke: #333333; stroke-width: 1.2; stroke-linecap: square"/>
+   </g>
+   <g id="fss-robustness-LineCollection_1">
+    <path d="M 337.052244 67.513068
+L 372.371074 67.513068
+" clip-path="url(#fss-robustness-pcb217277f8)" style="fill: none; stroke: #b8651e; stroke-opacity: 0.92; stroke-width: 1.35"/>
+    <path d="M 340.216687 88.900875
+L 366.555426 88.900875
+" clip-path="url(#fss-robustness-pcb217277f8)" style="fill: none; stroke: #b8651e; stroke-opacity: 0.92; stroke-width: 1.35"/>
+    <path d="M 347.37419 110.288681
+L 399.146055 110.288681
+" clip-path="url(#fss-robustness-pcb217277f8)" style="fill: none; stroke: #b8651e; stroke-opacity: 0.92; stroke-width: 1.35"/>
+    <path d="M 322.591511 131.676488
+L 400.825981 131.676488
+" clip-path="url(#fss-robustness-pcb217277f8)" style="fill: none; stroke: #b8651e; stroke-opacity: 0.92; stroke-width: 1.35"/>
+    <path d="M 237.687146 153.064295
+L 360.126805 153.064295
+" clip-path="url(#fss-robustness-pcb217277f8)" style="fill: none; stroke: #b8651e; stroke-opacity: 0.92; stroke-width: 1.35"/>
+    <path d="M 179.297413 174.452102
+L 375.583751 174.452102
+" clip-path="url(#fss-robustness-pcb217277f8)" style="fill: none; stroke: #b8651e; stroke-opacity: 0.92; stroke-width: 1.35"/>
+    <path d="M 135.783428 195.839909
+L 458.511363 195.839909
+" clip-path="url(#fss-robustness-pcb217277f8)" style="fill: none; stroke: #b8651e; stroke-opacity: 0.92; stroke-width: 1.35"/>
+    <path d="M 238.219636 217.227715
+L 396.128996 217.227715
+" clip-path="url(#fss-robustness-pcb217277f8)" style="fill: none; stroke: #b8651e; stroke-opacity: 0.92; stroke-width: 1.35"/>
+    <path d="M 333.808011 238.615522
+L 383.767004 238.615522
+" clip-path="url(#fss-robustness-pcb217277f8)" style="fill: none; stroke: #b8651e; stroke-opacity: 0.92; stroke-width: 1.35"/>
+    <path d="M 347.37419 260.003329
+L 399.146055 260.003329
+" clip-path="url(#fss-robustness-pcb217277f8)" style="fill: none; stroke: #b8651e; stroke-opacity: 0.92; stroke-width: 1.35"/>
+    <path d="M 344.243213 281.391136
+L 383.882975 281.391136
+" clip-path="url(#fss-robustness-pcb217277f8)" style="fill: none; stroke: #b8651e; stroke-opacity: 0.92; stroke-width: 1.35"/>
+    <path d="M 334.896233 302.778942
+L 371.801469 302.778942
+" clip-path="url(#fss-robustness-pcb217277f8)" style="fill: none; stroke: #b8651e; stroke-opacity: 0.92; stroke-width: 1.35"/>
+    <path d="M 336.95347 324.166749
+L 372.256235 324.166749
+" clip-path="url(#fss-robustness-pcb217277f8)" style="fill: none; stroke: #b8651e; stroke-opacity: 0.92; stroke-width: 1.35"/>
+    <path d="M 336.676091 345.554556
+L 372.18973 345.554556
+" clip-path="url(#fss-robustness-pcb217277f8)" style="fill: none; stroke: #b8651e; stroke-opacity: 0.92; stroke-width: 1.35"/>
+    <path d="M 332.527618 366.942363
+L 369.652398 366.942363
+" clip-path="url(#fss-robustness-pcb217277f8)" style="fill: none; stroke: #b8651e; stroke-opacity: 0.92; stroke-width: 1.35"/>
+    <path d="M 330.700716 388.33017
+L 368.077477 388.33017
+" clip-path="url(#fss-robustness-pcb217277f8)" style="fill: none; stroke: #b8651e; stroke-opacity: 0.92; stroke-width: 1.35"/>
+    <path d="M 336.838378 409.717976
+L 373.90872 409.717976
+" clip-path="url(#fss-robustness-pcb217277f8)" style="fill: none; stroke: #b8651e; stroke-opacity: 0.92; stroke-width: 1.35"/>
+    <path d="M 339.05622 431.105783
+L 374.850334 431.105783
+" clip-path="url(#fss-robustness-pcb217277f8)" style="fill: none; stroke: #b8651e; stroke-opacity: 0.92; stroke-width: 1.35"/>
+    <path d="M 333.885878 452.49359
+L 371.695567 452.49359
+" clip-path="url(#fss-robustness-pcb217277f8)" style="fill: none; stroke: #b8651e; stroke-opacity: 0.92; stroke-width: 1.35"/>
+    <path d="M 333.808011 473.881397
+L 383.767004 473.881397
+" clip-path="url(#fss-robustness-pcb217277f8)" style="fill: none; stroke: #b8651e; stroke-opacity: 0.92; stroke-width: 1.35"/>
+    <path d="M 336.896276 495.269204
+L 372.334778 495.269204
+" clip-path="url(#fss-robustness-pcb217277f8)" style="fill: none; stroke: #b8651e; stroke-opacity: 0.92; stroke-width: 1.35"/>
+    <path d="M 336.166086 516.65701
+L 371.326474 516.65701
+" clip-path="url(#fss-robustness-pcb217277f8)" style="fill: none; stroke: #b8651e; stroke-opacity: 0.92; stroke-width: 1.35"/>
+   </g>
+   <g id="fss-robustness-line2d_38">
+    <defs>
+     <path id="fss-robustness-m65187f6991" d="M 0 2.5
+L 0 -2.5
+" style="stroke: #b8651e; stroke-opacity: 0.92"/>
+    </defs>
+    <g clip-path="url(#fss-robustness-pcb217277f8)">
+     <use xlink:href="#fss-robustness-m65187f6991" x="337.052244" y="67.513068" style="fill: #b8651e; fill-opacity: 0.92; stroke: #b8651e; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m65187f6991" x="340.216687" y="88.900875" style="fill: #b8651e; fill-opacity: 0.92; stroke: #b8651e; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m65187f6991" x="347.37419" y="110.288681" style="fill: #b8651e; fill-opacity: 0.92; stroke: #b8651e; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m65187f6991" x="322.591511" y="131.676488" style="fill: #b8651e; fill-opacity: 0.92; stroke: #b8651e; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m65187f6991" x="237.687146" y="153.064295" style="fill: #b8651e; fill-opacity: 0.92; stroke: #b8651e; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m65187f6991" x="179.297413" y="174.452102" style="fill: #b8651e; fill-opacity: 0.92; stroke: #b8651e; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m65187f6991" x="135.783428" y="195.839909" style="fill: #b8651e; fill-opacity: 0.92; stroke: #b8651e; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m65187f6991" x="238.219636" y="217.227715" style="fill: #b8651e; fill-opacity: 0.92; stroke: #b8651e; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m65187f6991" x="333.808011" y="238.615522" style="fill: #b8651e; fill-opacity: 0.92; stroke: #b8651e; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m65187f6991" x="347.37419" y="260.003329" style="fill: #b8651e; fill-opacity: 0.92; stroke: #b8651e; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m65187f6991" x="344.243213" y="281.391136" style="fill: #b8651e; fill-opacity: 0.92; stroke: #b8651e; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m65187f6991" x="334.896233" y="302.778942" style="fill: #b8651e; fill-opacity: 0.92; stroke: #b8651e; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m65187f6991" x="336.95347" y="324.166749" style="fill: #b8651e; fill-opacity: 0.92; stroke: #b8651e; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m65187f6991" x="336.676091" y="345.554556" style="fill: #b8651e; fill-opacity: 0.92; stroke: #b8651e; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m65187f6991" x="332.527618" y="366.942363" style="fill: #b8651e; fill-opacity: 0.92; stroke: #b8651e; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m65187f6991" x="330.700716" y="388.33017" style="fill: #b8651e; fill-opacity: 0.92; stroke: #b8651e; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m65187f6991" x="336.838378" y="409.717976" style="fill: #b8651e; fill-opacity: 0.92; stroke: #b8651e; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m65187f6991" x="339.05622" y="431.105783" style="fill: #b8651e; fill-opacity: 0.92; stroke: #b8651e; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m65187f6991" x="333.885878" y="452.49359" style="fill: #b8651e; fill-opacity: 0.92; stroke: #b8651e; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m65187f6991" x="333.808011" y="473.881397" style="fill: #b8651e; fill-opacity: 0.92; stroke: #b8651e; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m65187f6991" x="336.896276" y="495.269204" style="fill: #b8651e; fill-opacity: 0.92; stroke: #b8651e; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m65187f6991" x="336.166086" y="516.65701" style="fill: #b8651e; fill-opacity: 0.92; stroke: #b8651e; stroke-opacity: 0.92"/>
+    </g>
+   </g>
+   <g id="fss-robustness-line2d_39">
+    <g clip-path="url(#fss-robustness-pcb217277f8)">
+     <use xlink:href="#fss-robustness-m65187f6991" x="372.371074" y="67.513068" style="fill: #b8651e; fill-opacity: 0.92; stroke: #b8651e; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m65187f6991" x="366.555426" y="88.900875" style="fill: #b8651e; fill-opacity: 0.92; stroke: #b8651e; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m65187f6991" x="399.146055" y="110.288681" style="fill: #b8651e; fill-opacity: 0.92; stroke: #b8651e; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m65187f6991" x="400.825981" y="131.676488" style="fill: #b8651e; fill-opacity: 0.92; stroke: #b8651e; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m65187f6991" x="360.126805" y="153.064295" style="fill: #b8651e; fill-opacity: 0.92; stroke: #b8651e; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m65187f6991" x="375.583751" y="174.452102" style="fill: #b8651e; fill-opacity: 0.92; stroke: #b8651e; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m65187f6991" x="458.511363" y="195.839909" style="fill: #b8651e; fill-opacity: 0.92; stroke: #b8651e; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m65187f6991" x="396.128996" y="217.227715" style="fill: #b8651e; fill-opacity: 0.92; stroke: #b8651e; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m65187f6991" x="383.767004" y="238.615522" style="fill: #b8651e; fill-opacity: 0.92; stroke: #b8651e; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m65187f6991" x="399.146055" y="260.003329" style="fill: #b8651e; fill-opacity: 0.92; stroke: #b8651e; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m65187f6991" x="383.882975" y="281.391136" style="fill: #b8651e; fill-opacity: 0.92; stroke: #b8651e; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m65187f6991" x="371.801469" y="302.778942" style="fill: #b8651e; fill-opacity: 0.92; stroke: #b8651e; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m65187f6991" x="372.256235" y="324.166749" style="fill: #b8651e; fill-opacity: 0.92; stroke: #b8651e; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m65187f6991" x="372.18973" y="345.554556" style="fill: #b8651e; fill-opacity: 0.92; stroke: #b8651e; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m65187f6991" x="369.652398" y="366.942363" style="fill: #b8651e; fill-opacity: 0.92; stroke: #b8651e; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m65187f6991" x="368.077477" y="388.33017" style="fill: #b8651e; fill-opacity: 0.92; stroke: #b8651e; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m65187f6991" x="373.90872" y="409.717976" style="fill: #b8651e; fill-opacity: 0.92; stroke: #b8651e; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m65187f6991" x="374.850334" y="431.105783" style="fill: #b8651e; fill-opacity: 0.92; stroke: #b8651e; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m65187f6991" x="371.695567" y="452.49359" style="fill: #b8651e; fill-opacity: 0.92; stroke: #b8651e; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m65187f6991" x="383.767004" y="473.881397" style="fill: #b8651e; fill-opacity: 0.92; stroke: #b8651e; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m65187f6991" x="372.334778" y="495.269204" style="fill: #b8651e; fill-opacity: 0.92; stroke: #b8651e; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m65187f6991" x="371.326474" y="516.65701" style="fill: #b8651e; fill-opacity: 0.92; stroke: #b8651e; stroke-opacity: 0.92"/>
+    </g>
+   </g>
+   <g id="fss-robustness-line2d_40">
+    <defs>
+     <path id="fss-robustness-m42b6a80f31" d="M 0 2.3
+C 0.609967 2.3 1.195034 2.057657 1.626346 1.626346
+C 2.057657 1.195034 2.3 0.609967 2.3 0
+C 2.3 -0.609967 2.057657 -1.195034 1.626346 -1.626346
+C 1.195034 -2.057657 0.609967 -2.3 0 -2.3
+C -0.609967 -2.3 -1.195034 -2.057657 -1.626346 -1.626346
+C -2.057657 -1.195034 -2.3 -0.609967 -2.3 0
+C -2.3 0.609967 -2.057657 1.195034 -1.626346 1.626346
+C -1.195034 2.057657 -0.609967 2.3 0 2.3
+z
+" style="stroke: #b8651e; stroke-opacity: 0.92"/>
+    </defs>
+    <g clip-path="url(#fss-robustness-pcb217277f8)">
+     <use xlink:href="#fss-robustness-m42b6a80f31" x="354.711659" y="67.513068" style="fill: #b8651e; fill-opacity: 0.92; stroke: #b8651e; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m42b6a80f31" x="353.386056" y="88.900875" style="fill: #b8651e; fill-opacity: 0.92; stroke: #b8651e; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m42b6a80f31" x="373.260123" y="110.288681" style="fill: #b8651e; fill-opacity: 0.92; stroke: #b8651e; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m42b6a80f31" x="361.708746" y="131.676488" style="fill: #b8651e; fill-opacity: 0.92; stroke: #b8651e; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m42b6a80f31" x="298.906975" y="153.064295" style="fill: #b8651e; fill-opacity: 0.92; stroke: #b8651e; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m42b6a80f31" x="277.440582" y="174.452102" style="fill: #b8651e; fill-opacity: 0.92; stroke: #b8651e; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m42b6a80f31" x="297.147396" y="195.839909" style="fill: #b8651e; fill-opacity: 0.92; stroke: #b8651e; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m42b6a80f31" x="317.174316" y="217.227715" style="fill: #b8651e; fill-opacity: 0.92; stroke: #b8651e; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m42b6a80f31" x="358.787508" y="238.615522" style="fill: #b8651e; fill-opacity: 0.92; stroke: #b8651e; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m42b6a80f31" x="373.260123" y="260.003329" style="fill: #b8651e; fill-opacity: 0.92; stroke: #b8651e; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m42b6a80f31" x="364.063094" y="281.391136" style="fill: #b8651e; fill-opacity: 0.92; stroke: #b8651e; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m42b6a80f31" x="353.348851" y="302.778942" style="fill: #b8651e; fill-opacity: 0.92; stroke: #b8651e; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m42b6a80f31" x="354.604852" y="324.166749" style="fill: #b8651e; fill-opacity: 0.92; stroke: #b8651e; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m42b6a80f31" x="354.43291" y="345.554556" style="fill: #b8651e; fill-opacity: 0.92; stroke: #b8651e; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m42b6a80f31" x="351.090008" y="366.942363" style="fill: #b8651e; fill-opacity: 0.92; stroke: #b8651e; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m42b6a80f31" x="349.389097" y="388.33017" style="fill: #b8651e; fill-opacity: 0.92; stroke: #b8651e; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m42b6a80f31" x="355.373549" y="409.717976" style="fill: #b8651e; fill-opacity: 0.92; stroke: #b8651e; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m42b6a80f31" x="356.953277" y="431.105783" style="fill: #b8651e; fill-opacity: 0.92; stroke: #b8651e; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m42b6a80f31" x="352.790723" y="452.49359" style="fill: #b8651e; fill-opacity: 0.92; stroke: #b8651e; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m42b6a80f31" x="358.787508" y="473.881397" style="fill: #b8651e; fill-opacity: 0.92; stroke: #b8651e; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m42b6a80f31" x="354.615527" y="495.269204" style="fill: #b8651e; fill-opacity: 0.92; stroke: #b8651e; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m42b6a80f31" x="353.74628" y="516.65701" style="fill: #b8651e; fill-opacity: 0.92; stroke: #b8651e; stroke-opacity: 0.92"/>
+    </g>
+   </g>
+   <g id="fss-robustness-patch_4">
+    <path d="M 119.647031 539.114208
+L 119.647031 45.055871
+" style="fill: none; stroke: #333333; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="fss-robustness-patch_5">
+    <path d="M 119.647031 539.114207
+L 474.64776 539.114207
+" style="fill: none; stroke: #333333; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="fss-robustness-text_31">
+    <text style="font-weight: 700; font-size: 12.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: start" x="119.647031" y="39.055871" transform="rotate(-0 119.647031 39.055871)">(a) Triangular lattice</text>
+   </g>
+   <g id="fss-robustness-PathCollection_1">
+    <defs>
+     <path id="fss-robustness-m749a9f8328" d="M 0 -5.123475
+L -1.150292 -1.583241
+L -4.872715 -1.583241
+L -1.861211 0.604744
+L -3.011503 4.144979
+L -0 1.956993
+L 3.011503 4.144979
+L 1.861211 0.604744
+L 4.872715 -1.583241
+L 1.150292 -1.583241
+z
+" style="stroke: #1a1a1a"/>
+    </defs>
+    <g clip-path="url(#fss-robustness-pcb217277f8)">
+     <use xlink:href="#fss-robustness-m749a9f8328" x="354.711659" y="67.513068" style="fill: #1a1a1a; stroke: #1a1a1a"/>
+    </g>
+   </g>
+   <g id="fss-robustness-legend_1">
+    <g id="fss-robustness-patch_6">
+     <path d="M 274.57776 528.675614
+L 274.57776 528.675614
+L 274.57776 522.375614
+L 274.57776 522.375614
+z
+" style="fill: #b8651e; opacity: 0.11; stroke: #b8651e; stroke-linejoin: miter"/>
+    </g>
+    <g id="fss-robustness-text_32">
+     <text style="font-size: 9px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: start" x="274.57776" y="528.675614" transform="rotate(-0 274.57776 528.675614)">shaded: ± systematic envelope (2.80 axis units)</text>
+    </g>
+   </g>
+  </g>
+  <g id="fss-robustness-axes_2">
+   <g id="fss-robustness-patch_7">
+    <path d="M 596.598791 539.114207
+L 951.59952 539.114207
+L 951.59952 45.055871
+L 596.598791 45.055871
+z
+" style="fill: #ffffff"/>
+   </g>
+   <g id="fss-robustness-patch_8">
+    <path d="M 699.878629 539.114207
+L 860.446013 539.114207
+L 860.446013 45.055871
+L 699.878629 45.055871
+z
+" clip-path="url(#fss-robustness-p8a7da6ce9b)" style="fill: #1f5cd6; opacity: 0.11; stroke: #1f5cd6; stroke-linejoin: miter"/>
+   </g>
+   <g id="fss-robustness-matplotlib.axis_3">
+    <g id="fss-robustness-xtick_8">
+     <g id="fss-robustness-line2d_41">
+      <path d="M 652.308793 539.114207
+L 652.308793 45.055871
+" clip-path="url(#fss-robustness-p8a7da6ce9b)" style="fill: none; stroke: #e6e3da; stroke-opacity: 0.9; stroke-width: 0.75; stroke-linecap: square"/>
+     </g>
+     <g id="fss-robustness-line2d_42">
+      <g>
+       <use xlink:href="#fss-robustness-mf0816c0a75" x="652.308793" y="539.114207" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="fss-robustness-text_33">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: middle" x="652.308793" y="553.285223" transform="rotate(-0 652.308793 553.285223)">−4</text>
+     </g>
+    </g>
+    <g id="fss-robustness-xtick_9">
+     <g id="fss-robustness-line2d_43">
+      <path d="M 716.235557 539.114207
+L 716.235557 45.055871
+" clip-path="url(#fss-robustness-p8a7da6ce9b)" style="fill: none; stroke: #e6e3da; stroke-opacity: 0.9; stroke-width: 0.75; stroke-linecap: square"/>
+     </g>
+     <g id="fss-robustness-line2d_44">
+      <g>
+       <use xlink:href="#fss-robustness-mf0816c0a75" x="716.235557" y="539.114207" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="fss-robustness-text_34">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: middle" x="716.235557" y="553.285223" transform="rotate(-0 716.235557 553.285223)">−2</text>
+     </g>
+    </g>
+    <g id="fss-robustness-xtick_10">
+     <g id="fss-robustness-line2d_45">
+      <path d="M 780.162321 539.114207
+L 780.162321 45.055871
+" clip-path="url(#fss-robustness-p8a7da6ce9b)" style="fill: none; stroke: #e6e3da; stroke-opacity: 0.9; stroke-width: 0.75; stroke-linecap: square"/>
+     </g>
+     <g id="fss-robustness-line2d_46">
+      <g>
+       <use xlink:href="#fss-robustness-mf0816c0a75" x="780.162321" y="539.114207" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="fss-robustness-text_35">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: middle" x="780.162321" y="553.285223" transform="rotate(-0 780.162321 553.285223)">0</text>
+     </g>
+    </g>
+    <g id="fss-robustness-xtick_11">
+     <g id="fss-robustness-line2d_47">
+      <path d="M 844.089085 539.114207
+L 844.089085 45.055871
+" clip-path="url(#fss-robustness-p8a7da6ce9b)" style="fill: none; stroke: #e6e3da; stroke-opacity: 0.9; stroke-width: 0.75; stroke-linecap: square"/>
+     </g>
+     <g id="fss-robustness-line2d_48">
+      <g>
+       <use xlink:href="#fss-robustness-mf0816c0a75" x="844.089085" y="539.114207" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="fss-robustness-text_36">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: middle" x="844.089085" y="553.285223" transform="rotate(-0 844.089085 553.285223)">2</text>
+     </g>
+    </g>
+    <g id="fss-robustness-xtick_12">
+     <g id="fss-robustness-line2d_49">
+      <path d="M 908.015849 539.114207
+L 908.015849 45.055871
+" clip-path="url(#fss-robustness-p8a7da6ce9b)" style="fill: none; stroke: #e6e3da; stroke-opacity: 0.9; stroke-width: 0.75; stroke-linecap: square"/>
+     </g>
+     <g id="fss-robustness-line2d_50">
+      <g>
+       <use xlink:href="#fss-robustness-mf0816c0a75" x="908.015849" y="539.114207" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="fss-robustness-text_37">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: middle" x="908.015849" y="553.285223" transform="rotate(-0 908.015849 553.285223)">4</text>
+     </g>
+    </g>
+    <g id="fss-robustness-text_38">
+     <!-- $(h_c-h_c^{\rm primary})\times10^5$ -->
+     <g transform="translate(733.621656 568.49952)">
+      <text>
+       <tspan x="0" y="-0.83125" style="font-size: 10.5px; font-family: 'STIXGeneral'">(</tspan>
+       <tspan x="14.010469" y="-0.83125" style="font-size: 10.5px; font-family: 'STIXGeneral'">−</tspan>
+       <tspan x="52.962856" y="-0.83125" style="font-size: 10.5px; font-family: 'STIXGeneral'">)</tspan>
+       <tspan x="57.975548" y="-0.83125" style="font-size: 10.5px; font-family: 'STIXGeneral'">×</tspan>
+       <tspan x="66.211751" y="-0.83125" style="font-size: 10.5px; font-family: 'STIXGeneral'">1</tspan>
+       <tspan x="71.461751" y="-0.83125" style="font-size: 10.5px; font-family: 'STIXGeneral'">0</tspan>
+       <tspan x="3.49649" y="-0.83125" style="font-style: italic; font-size: 10.5px; font-family: 'STIXGeneral'">h</tspan>
+       <tspan x="22.719176" y="-0.83125" style="font-style: italic; font-size: 10.5px; font-family: 'STIXGeneral'">h</tspan>
+       <tspan x="8.74649" y="0.621875" style="font-style: italic; font-size: 7.35px; font-family: 'STIXGeneral'">c</tspan>
+       <tspan x="27.969176" y="2.075" style="font-style: italic; font-size: 7.35px; font-family: 'STIXGeneral'">c</tspan>
+       <tspan x="29.208394" y="-4.70625" style="font-size: 7.35px; font-family: 'STIXGeneral'">p</tspan>
+       <tspan x="32.883394" y="-4.70625" style="font-size: 7.35px; font-family: 'STIXGeneral'">r</tspan>
+       <tspan x="35.330938" y="-4.70625" style="font-size: 7.35px; font-family: 'STIXGeneral'">i</tspan>
+       <tspan x="37.374232" y="-4.70625" style="font-size: 7.35px; font-family: 'STIXGeneral'">m</tspan>
+       <tspan x="43.092536" y="-4.70625" style="font-size: 7.35px; font-family: 'STIXGeneral'">a</tspan>
+       <tspan x="46.355938" y="-4.70625" style="font-size: 7.35px; font-family: 'STIXGeneral'">r</tspan>
+       <tspan x="48.803481" y="-4.70625" style="font-size: 7.35px; font-family: 'STIXGeneral'">y</tspan>
+       <tspan x="76.881283" y="-4.70625" style="font-size: 7.35px; font-family: 'STIXGeneral'">5</tspan>
+      </text>
+     </g>
+    </g>
+   </g>
+   <g id="fss-robustness-matplotlib.axis_4">
+    <g id="fss-robustness-ytick_23">
+     <g id="fss-robustness-line2d_51">
+      <g>
+       <use xlink:href="#fss-robustness-m4245f22ea4" x="596.598791" y="67.513068" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="fss-robustness-text_39">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: end" x="589.598791" y="71.098576" transform="rotate(-0 589.598791 71.098576)">primary · historical inner</text>
+     </g>
+    </g>
+    <g id="fss-robustness-ytick_24">
+     <g id="fss-robustness-line2d_52">
+      <g>
+       <use xlink:href="#fss-robustness-m4245f22ea4" x="596.598791" y="95.584564" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="fss-robustness-text_40">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: end" x="589.598791" y="99.170072" transform="rotate(-0 589.598791 99.170072)">outer field window</text>
+     </g>
+    </g>
+    <g id="fss-robustness-ytick_25">
+     <g id="fss-robustness-line2d_53">
+      <g>
+       <use xlink:href="#fss-robustness-m4245f22ea4" x="596.598791" y="123.656061" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="fss-robustness-text_41">
+      <!-- $L_{\min}$=12 -->
+      <g transform="translate(555.018791 127.241568)">
+       <text>
+        <tspan x="0" y="-0.9375" style="font-style: italic; font-size: 9.5px; font-family: 'STIXGeneral'">L</tspan>
+        <tspan x="5.281998" y="0.384375" style="font-size: 6.65px; font-family: 'STIXGeneral'">m</tspan>
+        <tspan x="10.455692" y="0.384375" style="font-size: 6.65px; font-family: 'STIXGeneral'">i</tspan>
+        <tspan x="12.304385" y="0.384375" style="font-size: 6.65px; font-family: 'STIXGeneral'">n</tspan>
+        <tspan x="16.07" y="-0.9375" style="font-size: 9.5px; font-family: 'Iowan Old Style'">=</tspan>
+        <tspan x="23.983574" y="-0.9375" style="font-size: 9.5px; font-family: 'Iowan Old Style'">1</tspan>
+        <tspan x="29.267021" y="-0.9375" style="font-size: 9.5px; font-family: 'Iowan Old Style'">2</tspan>
+       </text>
+      </g>
+     </g>
+    </g>
+    <g id="fss-robustness-ytick_26">
+     <g id="fss-robustness-line2d_54">
+      <g>
+       <use xlink:href="#fss-robustness-m4245f22ea4" x="596.598791" y="151.727557" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="fss-robustness-text_42">
+      <!-- $L_{\min}$=14 -->
+      <g transform="translate(555.018791 155.313065)">
+       <text>
+        <tspan x="0" y="-0.9375" style="font-style: italic; font-size: 9.5px; font-family: 'STIXGeneral'">L</tspan>
+        <tspan x="5.281998" y="0.384375" style="font-size: 6.65px; font-family: 'STIXGeneral'">m</tspan>
+        <tspan x="10.455692" y="0.384375" style="font-size: 6.65px; font-family: 'STIXGeneral'">i</tspan>
+        <tspan x="12.304385" y="0.384375" style="font-size: 6.65px; font-family: 'STIXGeneral'">n</tspan>
+        <tspan x="16.07" y="-0.9375" style="font-size: 9.5px; font-family: 'Iowan Old Style'">=</tspan>
+        <tspan x="23.983574" y="-0.9375" style="font-size: 9.5px; font-family: 'Iowan Old Style'">1</tspan>
+        <tspan x="29.267021" y="-0.9375" style="font-size: 9.5px; font-family: 'Iowan Old Style'">4</tspan>
+       </text>
+      </g>
+     </g>
+    </g>
+    <g id="fss-robustness-ytick_27">
+     <g id="fss-robustness-line2d_55">
+      <g>
+       <use xlink:href="#fss-robustness-m4245f22ea4" x="596.598791" y="179.799053" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="fss-robustness-text_43">
+      <!-- $L_{\min}$=16 -->
+      <g transform="translate(555.018791 183.384561)">
+       <text>
+        <tspan x="0" y="-0.9375" style="font-style: italic; font-size: 9.5px; font-family: 'STIXGeneral'">L</tspan>
+        <tspan x="5.281998" y="0.384375" style="font-size: 6.65px; font-family: 'STIXGeneral'">m</tspan>
+        <tspan x="10.455692" y="0.384375" style="font-size: 6.65px; font-family: 'STIXGeneral'">i</tspan>
+        <tspan x="12.304385" y="0.384375" style="font-size: 6.65px; font-family: 'STIXGeneral'">n</tspan>
+        <tspan x="16.07" y="-0.9375" style="font-size: 9.5px; font-family: 'Iowan Old Style'">=</tspan>
+        <tspan x="23.983574" y="-0.9375" style="font-size: 9.5px; font-family: 'Iowan Old Style'">1</tspan>
+        <tspan x="29.267021" y="-0.9375" style="font-size: 9.5px; font-family: 'Iowan Old Style'">6</tspan>
+       </text>
+      </g>
+     </g>
+    </g>
+    <g id="fss-robustness-ytick_28">
+     <g id="fss-robustness-line2d_56">
+      <g>
+       <use xlink:href="#fss-robustness-m4245f22ea4" x="596.598791" y="207.87055" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="fss-robustness-text_44">
+      <!-- $L_{\max}$=28 -->
+      <g transform="translate(553.878791 211.456058)">
+       <text>
+        <tspan x="0" y="-0.921875" style="font-style: italic; font-size: 9.5px; font-family: 'STIXGeneral'">L</tspan>
+        <tspan x="5.281998" y="0.4" style="font-size: 6.65px; font-family: 'STIXGeneral'">m</tspan>
+        <tspan x="10.455692" y="0.4" style="font-size: 6.65px; font-family: 'STIXGeneral'">a</tspan>
+        <tspan x="13.408282" y="0.4" style="font-size: 6.65px; font-family: 'STIXGeneral'">x</tspan>
+        <tspan x="17.173897" y="-0.921875" style="font-size: 9.5px; font-family: 'Iowan Old Style'">=</tspan>
+        <tspan x="25.087471" y="-0.921875" style="font-size: 9.5px; font-family: 'Iowan Old Style'">2</tspan>
+        <tspan x="30.370918" y="-0.921875" style="font-size: 9.5px; font-family: 'Iowan Old Style'">8</tspan>
+       </text>
+      </g>
+     </g>
+    </g>
+    <g id="fss-robustness-ytick_29">
+     <g id="fss-robustness-line2d_57">
+      <g>
+       <use xlink:href="#fss-robustness-m4245f22ea4" x="596.598791" y="235.942046" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="fss-robustness-text_45">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: end" x="589.598791" y="239.527554" transform="rotate(-0 589.598791 239.527554)">omit L10</text>
+     </g>
+    </g>
+    <g id="fss-robustness-ytick_30">
+     <g id="fss-robustness-line2d_58">
+      <g>
+       <use xlink:href="#fss-robustness-m4245f22ea4" x="596.598791" y="264.013543" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="fss-robustness-text_46">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: end" x="589.598791" y="267.59905" transform="rotate(-0 589.598791 267.59905)">omit L12</text>
+     </g>
+    </g>
+    <g id="fss-robustness-ytick_31">
+     <g id="fss-robustness-line2d_59">
+      <g>
+       <use xlink:href="#fss-robustness-m4245f22ea4" x="596.598791" y="292.085039" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="fss-robustness-text_47">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: end" x="589.598791" y="295.670547" transform="rotate(-0 589.598791 295.670547)">omit L14</text>
+     </g>
+    </g>
+    <g id="fss-robustness-ytick_32">
+     <g id="fss-robustness-line2d_60">
+      <g>
+       <use xlink:href="#fss-robustness-m4245f22ea4" x="596.598791" y="320.156535" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="fss-robustness-text_48">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: end" x="589.598791" y="323.742043" transform="rotate(-0 589.598791 323.742043)">omit L16</text>
+     </g>
+    </g>
+    <g id="fss-robustness-ytick_33">
+     <g id="fss-robustness-line2d_61">
+      <g>
+       <use xlink:href="#fss-robustness-m4245f22ea4" x="596.598791" y="348.228032" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="fss-robustness-text_49">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: end" x="589.598791" y="351.81354" transform="rotate(-0 589.598791 351.81354)">omit L18</text>
+     </g>
+    </g>
+    <g id="fss-robustness-ytick_34">
+     <g id="fss-robustness-line2d_62">
+      <g>
+       <use xlink:href="#fss-robustness-m4245f22ea4" x="596.598791" y="376.299528" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="fss-robustness-text_50">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: end" x="589.598791" y="379.885036" transform="rotate(-0 589.598791 379.885036)">omit L20</text>
+     </g>
+    </g>
+    <g id="fss-robustness-ytick_35">
+     <g id="fss-robustness-line2d_63">
+      <g>
+       <use xlink:href="#fss-robustness-m4245f22ea4" x="596.598791" y="404.371025" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="fss-robustness-text_51">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: end" x="589.598791" y="407.956533" transform="rotate(-0 589.598791 407.956533)">omit L24</text>
+     </g>
+    </g>
+    <g id="fss-robustness-ytick_36">
+     <g id="fss-robustness-line2d_64">
+      <g>
+       <use xlink:href="#fss-robustness-m4245f22ea4" x="596.598791" y="432.442521" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="fss-robustness-text_52">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: end" x="589.598791" y="436.028029" transform="rotate(-0 589.598791 436.028029)">omit L28</text>
+     </g>
+    </g>
+    <g id="fss-robustness-ytick_37">
+     <g id="fss-robustness-line2d_65">
+      <g>
+       <use xlink:href="#fss-robustness-m4245f22ea4" x="596.598791" y="460.514018" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="fss-robustness-text_53">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: end" x="589.598791" y="464.099525" transform="rotate(-0 589.598791 464.099525)">omit L32</text>
+     </g>
+    </g>
+    <g id="fss-robustness-ytick_38">
+     <g id="fss-robustness-line2d_66">
+      <g>
+       <use xlink:href="#fss-robustness-m4245f22ea4" x="596.598791" y="488.585514" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="fss-robustness-text_54">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: end" x="589.598791" y="492.171022" transform="rotate(-0 589.598791 492.171022)">add mixed correction</text>
+     </g>
+    </g>
+    <g id="fss-robustness-ytick_39">
+     <g id="fss-robustness-line2d_67">
+      <g>
+       <use xlink:href="#fss-robustness-m4245f22ea4" x="596.598791" y="516.65701" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="fss-robustness-text_55">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: end" x="589.598791" y="520.242518" transform="rotate(-0 589.598791 520.242518)">modern · all sizes</text>
+     </g>
+    </g>
+   </g>
+   <g id="fss-robustness-line2d_68">
+    <path d="M 780.162321 539.114207
+L 780.162321 45.055871
+" clip-path="url(#fss-robustness-p8a7da6ce9b)" style="fill: none; stroke: #333333; stroke-width: 1.2; stroke-linecap: square"/>
+   </g>
+   <g id="fss-robustness-LineCollection_2">
+    <path d="M 726.600798 67.513068
+L 833.723844 67.513068
+" clip-path="url(#fss-robustness-p8a7da6ce9b)" style="fill: none; stroke: #1f5cd6; stroke-opacity: 0.92; stroke-width: 1.35"/>
+    <path d="M 731.437763 95.584564
+L 810.083221 95.584564
+" clip-path="url(#fss-robustness-p8a7da6ce9b)" style="fill: none; stroke: #1f5cd6; stroke-opacity: 0.92; stroke-width: 1.35"/>
+    <path d="M 678.40266 123.656061
+L 812.310421 123.656061
+" clip-path="url(#fss-robustness-p8a7da6ce9b)" style="fill: none; stroke: #1f5cd6; stroke-opacity: 0.92; stroke-width: 1.35"/>
+    <path d="M 612.735188 151.727557
+L 787.022069 151.727557
+" clip-path="url(#fss-robustness-p8a7da6ce9b)" style="fill: none; stroke: #1f5cd6; stroke-opacity: 0.92; stroke-width: 1.35"/>
+    <path d="M 653.778919 179.799053
+L 891.87374 179.799053
+" clip-path="url(#fss-robustness-p8a7da6ce9b)" style="fill: none; stroke: #1f5cd6; stroke-opacity: 0.92; stroke-width: 1.35"/>
+    <path d="M 783.608648 207.87055
+L 935.463123 207.87055
+" clip-path="url(#fss-robustness-p8a7da6ce9b)" style="fill: none; stroke: #1f5cd6; stroke-opacity: 0.92; stroke-width: 1.35"/>
+    <path d="M 678.40266 235.942046
+L 812.310421 235.942046
+" clip-path="url(#fss-robustness-p8a7da6ce9b)" style="fill: none; stroke: #1f5cd6; stroke-opacity: 0.92; stroke-width: 1.35"/>
+    <path d="M 727.593376 264.013543
+L 834.742568 264.013543
+" clip-path="url(#fss-robustness-p8a7da6ce9b)" style="fill: none; stroke: #1f5cd6; stroke-opacity: 0.92; stroke-width: 1.35"/>
+    <path d="M 710.3085 292.085039
+L 819.796612 292.085039
+" clip-path="url(#fss-robustness-p8a7da6ce9b)" style="fill: none; stroke: #1f5cd6; stroke-opacity: 0.92; stroke-width: 1.35"/>
+    <path d="M 733.734204 320.156535
+L 846.375407 320.156535
+" clip-path="url(#fss-robustness-p8a7da6ce9b)" style="fill: none; stroke: #1f5cd6; stroke-opacity: 0.92; stroke-width: 1.35"/>
+    <path d="M 739.264667 348.228032
+L 852.867176 348.228032
+" clip-path="url(#fss-robustness-p8a7da6ce9b)" style="fill: none; stroke: #1f5cd6; stroke-opacity: 0.92; stroke-width: 1.35"/>
+    <path d="M 717.790769 376.299528
+L 829.158934 376.299528
+" clip-path="url(#fss-robustness-p8a7da6ce9b)" style="fill: none; stroke: #1f5cd6; stroke-opacity: 0.92; stroke-width: 1.35"/>
+    <path d="M 725.950368 404.371025
+L 835.376435 404.371025
+" clip-path="url(#fss-robustness-p8a7da6ce9b)" style="fill: none; stroke: #1f5cd6; stroke-opacity: 0.92; stroke-width: 1.35"/>
+    <path d="M 686.422538 432.442521
+L 801.828532 432.442521
+" clip-path="url(#fss-robustness-p8a7da6ce9b)" style="fill: none; stroke: #1f5cd6; stroke-opacity: 0.92; stroke-width: 1.35"/>
+    <path d="M 783.608648 460.514018
+L 935.463123 460.514018
+" clip-path="url(#fss-robustness-p8a7da6ce9b)" style="fill: none; stroke: #1f5cd6; stroke-opacity: 0.92; stroke-width: 1.35"/>
+    <path d="M 726.389461 488.585514
+L 833.922618 488.585514
+" clip-path="url(#fss-robustness-p8a7da6ce9b)" style="fill: none; stroke: #1f5cd6; stroke-opacity: 0.92; stroke-width: 1.35"/>
+    <path d="M 718.193405 516.65701
+L 824.787799 516.65701
+" clip-path="url(#fss-robustness-p8a7da6ce9b)" style="fill: none; stroke: #1f5cd6; stroke-opacity: 0.92; stroke-width: 1.35"/>
+   </g>
+   <g id="fss-robustness-line2d_69">
+    <defs>
+     <path id="fss-robustness-m5bfc3588c2" d="M 0 2.5
+L 0 -2.5
+" style="stroke: #1f5cd6; stroke-opacity: 0.92"/>
+    </defs>
+    <g clip-path="url(#fss-robustness-p8a7da6ce9b)">
+     <use xlink:href="#fss-robustness-m5bfc3588c2" x="726.600798" y="67.513068" style="fill: #1f5cd6; fill-opacity: 0.92; stroke: #1f5cd6; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m5bfc3588c2" x="731.437763" y="95.584564" style="fill: #1f5cd6; fill-opacity: 0.92; stroke: #1f5cd6; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m5bfc3588c2" x="678.40266" y="123.656061" style="fill: #1f5cd6; fill-opacity: 0.92; stroke: #1f5cd6; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m5bfc3588c2" x="612.735188" y="151.727557" style="fill: #1f5cd6; fill-opacity: 0.92; stroke: #1f5cd6; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m5bfc3588c2" x="653.778919" y="179.799053" style="fill: #1f5cd6; fill-opacity: 0.92; stroke: #1f5cd6; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m5bfc3588c2" x="783.608648" y="207.87055" style="fill: #1f5cd6; fill-opacity: 0.92; stroke: #1f5cd6; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m5bfc3588c2" x="678.40266" y="235.942046" style="fill: #1f5cd6; fill-opacity: 0.92; stroke: #1f5cd6; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m5bfc3588c2" x="727.593376" y="264.013543" style="fill: #1f5cd6; fill-opacity: 0.92; stroke: #1f5cd6; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m5bfc3588c2" x="710.3085" y="292.085039" style="fill: #1f5cd6; fill-opacity: 0.92; stroke: #1f5cd6; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m5bfc3588c2" x="733.734204" y="320.156535" style="fill: #1f5cd6; fill-opacity: 0.92; stroke: #1f5cd6; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m5bfc3588c2" x="739.264667" y="348.228032" style="fill: #1f5cd6; fill-opacity: 0.92; stroke: #1f5cd6; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m5bfc3588c2" x="717.790769" y="376.299528" style="fill: #1f5cd6; fill-opacity: 0.92; stroke: #1f5cd6; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m5bfc3588c2" x="725.950368" y="404.371025" style="fill: #1f5cd6; fill-opacity: 0.92; stroke: #1f5cd6; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m5bfc3588c2" x="686.422538" y="432.442521" style="fill: #1f5cd6; fill-opacity: 0.92; stroke: #1f5cd6; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m5bfc3588c2" x="783.608648" y="460.514018" style="fill: #1f5cd6; fill-opacity: 0.92; stroke: #1f5cd6; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m5bfc3588c2" x="726.389461" y="488.585514" style="fill: #1f5cd6; fill-opacity: 0.92; stroke: #1f5cd6; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m5bfc3588c2" x="718.193405" y="516.65701" style="fill: #1f5cd6; fill-opacity: 0.92; stroke: #1f5cd6; stroke-opacity: 0.92"/>
+    </g>
+   </g>
+   <g id="fss-robustness-line2d_70">
+    <g clip-path="url(#fss-robustness-p8a7da6ce9b)">
+     <use xlink:href="#fss-robustness-m5bfc3588c2" x="833.723844" y="67.513068" style="fill: #1f5cd6; fill-opacity: 0.92; stroke: #1f5cd6; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m5bfc3588c2" x="810.083221" y="95.584564" style="fill: #1f5cd6; fill-opacity: 0.92; stroke: #1f5cd6; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m5bfc3588c2" x="812.310421" y="123.656061" style="fill: #1f5cd6; fill-opacity: 0.92; stroke: #1f5cd6; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m5bfc3588c2" x="787.022069" y="151.727557" style="fill: #1f5cd6; fill-opacity: 0.92; stroke: #1f5cd6; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m5bfc3588c2" x="891.87374" y="179.799053" style="fill: #1f5cd6; fill-opacity: 0.92; stroke: #1f5cd6; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m5bfc3588c2" x="935.463123" y="207.87055" style="fill: #1f5cd6; fill-opacity: 0.92; stroke: #1f5cd6; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m5bfc3588c2" x="812.310421" y="235.942046" style="fill: #1f5cd6; fill-opacity: 0.92; stroke: #1f5cd6; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m5bfc3588c2" x="834.742568" y="264.013543" style="fill: #1f5cd6; fill-opacity: 0.92; stroke: #1f5cd6; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m5bfc3588c2" x="819.796612" y="292.085039" style="fill: #1f5cd6; fill-opacity: 0.92; stroke: #1f5cd6; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m5bfc3588c2" x="846.375407" y="320.156535" style="fill: #1f5cd6; fill-opacity: 0.92; stroke: #1f5cd6; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m5bfc3588c2" x="852.867176" y="348.228032" style="fill: #1f5cd6; fill-opacity: 0.92; stroke: #1f5cd6; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m5bfc3588c2" x="829.158934" y="376.299528" style="fill: #1f5cd6; fill-opacity: 0.92; stroke: #1f5cd6; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m5bfc3588c2" x="835.376435" y="404.371025" style="fill: #1f5cd6; fill-opacity: 0.92; stroke: #1f5cd6; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m5bfc3588c2" x="801.828532" y="432.442521" style="fill: #1f5cd6; fill-opacity: 0.92; stroke: #1f5cd6; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m5bfc3588c2" x="935.463123" y="460.514018" style="fill: #1f5cd6; fill-opacity: 0.92; stroke: #1f5cd6; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m5bfc3588c2" x="833.922618" y="488.585514" style="fill: #1f5cd6; fill-opacity: 0.92; stroke: #1f5cd6; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-m5bfc3588c2" x="824.787799" y="516.65701" style="fill: #1f5cd6; fill-opacity: 0.92; stroke: #1f5cd6; stroke-opacity: 0.92"/>
+    </g>
+   </g>
+   <g id="fss-robustness-line2d_71">
+    <defs>
+     <path id="fss-robustness-mf46bb18e38" d="M 0 2.3
+C 0.609967 2.3 1.195034 2.057657 1.626346 1.626346
+C 2.057657 1.195034 2.3 0.609967 2.3 0
+C 2.3 -0.609967 2.057657 -1.195034 1.626346 -1.626346
+C 1.195034 -2.057657 0.609967 -2.3 0 -2.3
+C -0.609967 -2.3 -1.195034 -2.057657 -1.626346 -1.626346
+C -2.057657 -1.195034 -2.3 -0.609967 -2.3 0
+C -2.3 0.609967 -2.057657 1.195034 -1.626346 1.626346
+C -1.195034 2.057657 -0.609967 2.3 0 2.3
+z
+" style="stroke: #1f5cd6; stroke-opacity: 0.92"/>
+    </defs>
+    <g clip-path="url(#fss-robustness-p8a7da6ce9b)">
+     <use xlink:href="#fss-robustness-mf46bb18e38" x="780.162321" y="67.513068" style="fill: #1f5cd6; fill-opacity: 0.92; stroke: #1f5cd6; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-mf46bb18e38" x="770.760492" y="95.584564" style="fill: #1f5cd6; fill-opacity: 0.92; stroke: #1f5cd6; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-mf46bb18e38" x="745.35654" y="123.656061" style="fill: #1f5cd6; fill-opacity: 0.92; stroke: #1f5cd6; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-mf46bb18e38" x="699.878629" y="151.727557" style="fill: #1f5cd6; fill-opacity: 0.92; stroke: #1f5cd6; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-mf46bb18e38" x="772.82633" y="179.799053" style="fill: #1f5cd6; fill-opacity: 0.92; stroke: #1f5cd6; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-mf46bb18e38" x="859.535885" y="207.87055" style="fill: #1f5cd6; fill-opacity: 0.92; stroke: #1f5cd6; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-mf46bb18e38" x="745.35654" y="235.942046" style="fill: #1f5cd6; fill-opacity: 0.92; stroke: #1f5cd6; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-mf46bb18e38" x="781.167972" y="264.013543" style="fill: #1f5cd6; fill-opacity: 0.92; stroke: #1f5cd6; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-mf46bb18e38" x="765.052556" y="292.085039" style="fill: #1f5cd6; fill-opacity: 0.92; stroke: #1f5cd6; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-mf46bb18e38" x="790.054806" y="320.156535" style="fill: #1f5cd6; fill-opacity: 0.92; stroke: #1f5cd6; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-mf46bb18e38" x="796.065921" y="348.228032" style="fill: #1f5cd6; fill-opacity: 0.92; stroke: #1f5cd6; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-mf46bb18e38" x="773.474852" y="376.299528" style="fill: #1f5cd6; fill-opacity: 0.92; stroke: #1f5cd6; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-mf46bb18e38" x="780.663402" y="404.371025" style="fill: #1f5cd6; fill-opacity: 0.92; stroke: #1f5cd6; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-mf46bb18e38" x="744.125535" y="432.442521" style="fill: #1f5cd6; fill-opacity: 0.92; stroke: #1f5cd6; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-mf46bb18e38" x="859.535885" y="460.514018" style="fill: #1f5cd6; fill-opacity: 0.92; stroke: #1f5cd6; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-mf46bb18e38" x="780.15604" y="488.585514" style="fill: #1f5cd6; fill-opacity: 0.92; stroke: #1f5cd6; stroke-opacity: 0.92"/>
+     <use xlink:href="#fss-robustness-mf46bb18e38" x="771.490602" y="516.65701" style="fill: #1f5cd6; fill-opacity: 0.92; stroke: #1f5cd6; stroke-opacity: 0.92"/>
+    </g>
+   </g>
+   <g id="fss-robustness-patch_9">
+    <path d="M 596.598791 539.114208
+L 596.598791 45.055871
+" style="fill: none; stroke: #333333; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="fss-robustness-patch_10">
+    <path d="M 596.598791 539.114207
+L 951.59952 539.114207
+" style="fill: none; stroke: #333333; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="fss-robustness-text_56">
+    <text style="font-weight: 700; font-size: 12.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: start" x="596.598791" y="39.055871" transform="rotate(-0 596.598791 39.055871)">(b) Honeycomb lattice</text>
+   </g>
+   <g id="fss-robustness-PathCollection_2">
+    <g clip-path="url(#fss-robustness-p8a7da6ce9b)">
+     <use xlink:href="#fss-robustness-m749a9f8328" x="780.162321" y="67.513068" style="fill: #1a1a1a; stroke: #1a1a1a"/>
+    </g>
+   </g>
+   <g id="fss-robustness-legend_2">
+    <g id="fss-robustness-patch_11">
+     <path d="M 751.52952 528.675614
+L 751.52952 528.675614
+L 751.52952 522.375614
+L 751.52952 522.375614
+z
+" style="fill: #1f5cd6; opacity: 0.11; stroke: #1f5cd6; stroke-linejoin: miter"/>
+    </g>
+    <g id="fss-robustness-text_57">
+     <text style="font-size: 9px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: start" x="751.52952" y="528.675614" transform="rotate(-0 751.52952 528.675614)">shaded: ± systematic envelope (2.51 axis units)</text>
+    </g>
+   </g>
+  </g>
+  <g id="fss-robustness-text_58">
+   <text style="font-weight: 700; font-size: 16px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: middle" x="479.39976" y="19.31" transform="rotate(-0 479.39976 19.31)">Finite-size-scaling conclusions remain stable across accepted analysis variants</text>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="fss-robustness-pcb217277f8">
+   <rect x="119.647031" y="45.055871" width="355.000729" height="494.058337"/>
+  </clipPath>
+  <clipPath id="fss-robustness-p8a7da6ce9b">
+   <rect x="596.598791" y="45.055871" width="355.000729" height="494.058337"/>
+  </clipPath>
+ </defs>
+</svg>

@@ -1,0 +1,581 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="858.019377pt" height="361.19952pt" viewBox="0 0 858.019377 361.19952" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>yanwang148 challenge report</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="critical-field-comparison-figure_1">
+  <g id="critical-field-comparison-patch_1">
+   <path d="M 0 361.19952
+L 858.019377 361.19952
+L 858.019377 0
+L 0 0
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="critical-field-comparison-axes_1">
+   <g id="critical-field-comparison-patch_2">
+    <path d="M 156.642109 322.86202
+L 423.774546 322.86202
+L 423.774546 44.930871
+L 156.642109 44.930871
+z
+" style="fill: #ffffff"/>
+   </g>
+   <g id="critical-field-comparison-patch_3">
+    <path d="M 208.271312 322.86202
+L 284.38335 322.86202
+L 284.38335 44.930871
+L 208.271312 44.930871
+z
+" clip-path="url(#critical-field-comparison-p7ce5d15796)" style="fill: #6b6b6b; opacity: 0.1; stroke: #6b6b6b; stroke-linejoin: miter"/>
+   </g>
+   <g id="critical-field-comparison-matplotlib.axis_1">
+    <g id="critical-field-comparison-xtick_1">
+     <g id="critical-field-comparison-line2d_1">
+      <path d="M 157.529953 322.86202
+L 157.529953 44.930871
+" clip-path="url(#critical-field-comparison-p7ce5d15796)" style="fill: none; stroke: #e6e3da; stroke-opacity: 0.9; stroke-width: 0.75; stroke-linecap: square"/>
+     </g>
+     <g id="critical-field-comparison-line2d_2">
+      <defs>
+       <path id="critical-field-comparison-mf0816c0a75" d="M 0 0
+L 0 3.5
+" style="stroke: #000000; stroke-width: 0.8"/>
+      </defs>
+      <g>
+       <use xlink:href="#critical-field-comparison-mf0816c0a75" x="157.529953" y="322.86202" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="critical-field-comparison-text_1">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: middle" x="157.529953" y="337.033036" transform="rotate(-0 157.529953 337.033036)">4.7679</text>
+     </g>
+    </g>
+    <g id="critical-field-comparison-xtick_2">
+     <g id="critical-field-comparison-line2d_3">
+      <path d="M 199.814419 322.86202
+L 199.814419 44.930871
+" clip-path="url(#critical-field-comparison-p7ce5d15796)" style="fill: none; stroke: #e6e3da; stroke-opacity: 0.9; stroke-width: 0.75; stroke-linecap: square"/>
+     </g>
+     <g id="critical-field-comparison-line2d_4">
+      <g>
+       <use xlink:href="#critical-field-comparison-mf0816c0a75" x="199.814419" y="322.86202" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="critical-field-comparison-text_2">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: middle" x="199.814419" y="337.033036" transform="rotate(-0 199.814419 337.033036)">4.7680</text>
+     </g>
+    </g>
+    <g id="critical-field-comparison-xtick_3">
+     <g id="critical-field-comparison-line2d_5">
+      <path d="M 242.098884 322.86202
+L 242.098884 44.930871
+" clip-path="url(#critical-field-comparison-p7ce5d15796)" style="fill: none; stroke: #e6e3da; stroke-opacity: 0.9; stroke-width: 0.75; stroke-linecap: square"/>
+     </g>
+     <g id="critical-field-comparison-line2d_6">
+      <g>
+       <use xlink:href="#critical-field-comparison-mf0816c0a75" x="242.098884" y="322.86202" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="critical-field-comparison-text_3">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: middle" x="242.098884" y="337.033036" transform="rotate(-0 242.098884 337.033036)">4.7681</text>
+     </g>
+    </g>
+    <g id="critical-field-comparison-xtick_4">
+     <g id="critical-field-comparison-line2d_7">
+      <path d="M 284.38335 322.86202
+L 284.38335 44.930871
+" clip-path="url(#critical-field-comparison-p7ce5d15796)" style="fill: none; stroke: #e6e3da; stroke-opacity: 0.9; stroke-width: 0.75; stroke-linecap: square"/>
+     </g>
+     <g id="critical-field-comparison-line2d_8">
+      <g>
+       <use xlink:href="#critical-field-comparison-mf0816c0a75" x="284.38335" y="322.86202" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="critical-field-comparison-text_4">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: middle" x="284.38335" y="337.033036" transform="rotate(-0 284.38335 337.033036)">4.7682</text>
+     </g>
+    </g>
+    <g id="critical-field-comparison-xtick_5">
+     <g id="critical-field-comparison-line2d_9">
+      <path d="M 326.667815 322.86202
+L 326.667815 44.930871
+" clip-path="url(#critical-field-comparison-p7ce5d15796)" style="fill: none; stroke: #e6e3da; stroke-opacity: 0.9; stroke-width: 0.75; stroke-linecap: square"/>
+     </g>
+     <g id="critical-field-comparison-line2d_10">
+      <g>
+       <use xlink:href="#critical-field-comparison-mf0816c0a75" x="326.667815" y="322.86202" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="critical-field-comparison-text_5">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: middle" x="326.667815" y="337.033036" transform="rotate(-0 326.667815 337.033036)">4.7683</text>
+     </g>
+    </g>
+    <g id="critical-field-comparison-xtick_6">
+     <g id="critical-field-comparison-line2d_11">
+      <path d="M 368.952281 322.86202
+L 368.952281 44.930871
+" clip-path="url(#critical-field-comparison-p7ce5d15796)" style="fill: none; stroke: #e6e3da; stroke-opacity: 0.9; stroke-width: 0.75; stroke-linecap: square"/>
+     </g>
+     <g id="critical-field-comparison-line2d_12">
+      <g>
+       <use xlink:href="#critical-field-comparison-mf0816c0a75" x="368.952281" y="322.86202" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="critical-field-comparison-text_6">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: middle" x="368.952281" y="337.033036" transform="rotate(-0 368.952281 337.033036)">4.7684</text>
+     </g>
+    </g>
+    <g id="critical-field-comparison-xtick_7">
+     <g id="critical-field-comparison-line2d_13">
+      <path d="M 411.236747 322.86202
+L 411.236747 44.930871
+" clip-path="url(#critical-field-comparison-p7ce5d15796)" style="fill: none; stroke: #e6e3da; stroke-opacity: 0.9; stroke-width: 0.75; stroke-linecap: square"/>
+     </g>
+     <g id="critical-field-comparison-line2d_14">
+      <g>
+       <use xlink:href="#critical-field-comparison-mf0816c0a75" x="411.236747" y="322.86202" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="critical-field-comparison-text_7">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: middle" x="411.236747" y="337.033036" transform="rotate(-0 411.236747 337.033036)">4.7685</text>
+     </g>
+    </g>
+    <g id="critical-field-comparison-text_8">
+     <!-- $h_c/J$ -->
+     <g transform="translate(281.913328 351.353192)">
+      <text>
+       <tspan x="0" y="-0.484375" style="font-style: italic; font-size: 10.5px; font-family: 'STIXGeneral'">h</tspan>
+       <tspan x="11.916768" y="-0.484375" style="font-style: italic; font-size: 10.5px; font-family: 'STIXGeneral'">J</tspan>
+       <tspan x="5.25" y="0.96875" style="font-style: italic; font-size: 7.35px; font-family: 'STIXGeneral'">c</tspan>
+       <tspan x="8.997777" y="-0.484375" style="font-size: 10.5px; font-family: 'STIXGeneral'">/</tspan>
+      </text>
+     </g>
+    </g>
+   </g>
+   <g id="critical-field-comparison-matplotlib.axis_2">
+    <g id="critical-field-comparison-ytick_1">
+     <g id="critical-field-comparison-line2d_15">
+      <defs>
+       <path id="critical-field-comparison-m4245f22ea4" d="M 0 0
+L -3.5 0
+" style="stroke: #000000; stroke-width: 0.8"/>
+      </defs>
+      <g>
+       <use xlink:href="#critical-field-comparison-m4245f22ea4" x="156.642109" y="57.564105" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="critical-field-comparison-text_9">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: end" x="149.642109" y="61.149612" transform="rotate(-0 149.642109 61.149612)">Dedicated SSE · this work</text>
+     </g>
+    </g>
+    <g id="critical-field-comparison-ytick_2">
+     <g id="critical-field-comparison-line2d_16">
+      <g>
+       <use xlink:href="#critical-field-comparison-m4245f22ea4" x="156.642109" y="183.896445" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="critical-field-comparison-text_10">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: end" x="149.642109" y="187.491602" transform="rotate(-0 149.642109 187.491602)">Independent CT-QMC · this work</text>
+     </g>
+    </g>
+    <g id="critical-field-comparison-ytick_3">
+     <g id="critical-field-comparison-line2d_17">
+      <g>
+       <use xlink:href="#critical-field-comparison-m4245f22ea4" x="156.642109" y="310.228786" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="critical-field-comparison-text_11">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: end" x="149.642109" y="313.814294" transform="rotate(-0 149.642109 313.814294)">Blöte–Deng CT-QMC · 2002</text>
+     </g>
+    </g>
+   </g>
+   <g id="critical-field-comparison-patch_4">
+    <path d="M 156.642109 322.86202
+L 156.642109 44.930871
+" style="fill: none; stroke: #333333; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="critical-field-comparison-patch_5">
+    <path d="M 156.642109 322.86202
+L 423.774546 322.86202
+" style="fill: none; stroke: #333333; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="critical-field-comparison-LineCollection_1">
+    <path d="M 168.784493 57.564105
+L 411.632162 57.564105
+" clip-path="url(#critical-field-comparison-p7ce5d15796)" style="fill: none; stroke: #b8651e; stroke-width: 2"/>
+   </g>
+   <g id="critical-field-comparison-line2d_18">
+    <defs>
+     <path id="critical-field-comparison-ma7721b0761" d="M 0 4
+L 0 -4
+" style="stroke: #b8651e"/>
+    </defs>
+    <g clip-path="url(#critical-field-comparison-p7ce5d15796)">
+     <use xlink:href="#critical-field-comparison-ma7721b0761" x="168.784493" y="57.564105" style="fill: #b8651e; stroke: #b8651e"/>
+    </g>
+   </g>
+   <g id="critical-field-comparison-line2d_19">
+    <g clip-path="url(#critical-field-comparison-p7ce5d15796)">
+     <use xlink:href="#critical-field-comparison-ma7721b0761" x="411.632162" y="57.564105" style="fill: #b8651e; stroke: #b8651e"/>
+    </g>
+   </g>
+   <g id="critical-field-comparison-LineCollection_2">
+    <path d="M 201.132126 183.896445
+L 386.579317 183.896445
+" clip-path="url(#critical-field-comparison-p7ce5d15796)" style="fill: none; stroke: #1e7d3c; stroke-width: 2"/>
+   </g>
+   <g id="critical-field-comparison-line2d_20">
+    <defs>
+     <path id="critical-field-comparison-m77dbf58062" d="M 0 4
+L 0 -4
+" style="stroke: #1e7d3c"/>
+    </defs>
+    <g clip-path="url(#critical-field-comparison-p7ce5d15796)">
+     <use xlink:href="#critical-field-comparison-m77dbf58062" x="201.132126" y="183.896445" style="fill: #1e7d3c; stroke: #1e7d3c"/>
+    </g>
+   </g>
+   <g id="critical-field-comparison-line2d_21">
+    <g clip-path="url(#critical-field-comparison-p7ce5d15796)">
+     <use xlink:href="#critical-field-comparison-m77dbf58062" x="386.579317" y="183.896445" style="fill: #1e7d3c; stroke: #1e7d3c"/>
+    </g>
+   </g>
+   <g id="critical-field-comparison-LineCollection_3">
+    <path d="M 208.271312 310.228786
+L 284.38335 310.228786
+" clip-path="url(#critical-field-comparison-p7ce5d15796)" style="fill: none; stroke: #6b6b6b; stroke-width: 2"/>
+   </g>
+   <g id="critical-field-comparison-line2d_22">
+    <defs>
+     <path id="critical-field-comparison-m2a9b419912" d="M 0 4
+L 0 -4
+" style="stroke: #6b6b6b"/>
+    </defs>
+    <g clip-path="url(#critical-field-comparison-p7ce5d15796)">
+     <use xlink:href="#critical-field-comparison-m2a9b419912" x="208.271312" y="310.228786" style="fill: #6b6b6b; stroke: #6b6b6b"/>
+    </g>
+   </g>
+   <g id="critical-field-comparison-line2d_23">
+    <g clip-path="url(#critical-field-comparison-p7ce5d15796)">
+     <use xlink:href="#critical-field-comparison-m2a9b419912" x="284.38335" y="310.228786" style="fill: #6b6b6b; stroke: #6b6b6b"/>
+    </g>
+   </g>
+   <g id="critical-field-comparison-text_12">
+    <text style="font-weight: 700; font-size: 12.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: start" x="156.642109" y="38.930871" transform="rotate(-0 156.642109 38.930871)">(a) Triangular lattice</text>
+   </g>
+   <g id="critical-field-comparison-line2d_24">
+    <defs>
+     <path id="critical-field-comparison-md6a46c3b54" d="M 0 3.25
+C 0.86191 3.25 1.688635 2.907559 2.298097 2.298097
+C 2.907559 1.688635 3.25 0.86191 3.25 0
+C 3.25 -0.86191 2.907559 -1.688635 2.298097 -2.298097
+C 1.688635 -2.907559 0.86191 -3.25 0 -3.25
+C -0.86191 -3.25 -1.688635 -2.907559 -2.298097 -2.298097
+C -2.907559 -1.688635 -3.25 -0.86191 -3.25 0
+C -3.25 0.86191 -2.907559 1.688635 -2.298097 2.298097
+C -1.688635 2.907559 -0.86191 3.25 0 3.25
+z
+" style="stroke: #b8651e"/>
+    </defs>
+    <g clip-path="url(#critical-field-comparison-p7ce5d15796)">
+     <use xlink:href="#critical-field-comparison-md6a46c3b54" x="290.208328" y="57.564105" style="fill: #b8651e; stroke: #b8651e"/>
+    </g>
+   </g>
+   <g id="critical-field-comparison-line2d_25">
+    <defs>
+     <path id="critical-field-comparison-mb25d1b149c" d="M -3.25 3.25
+L 3.25 3.25
+L 3.25 -3.25
+L -3.25 -3.25
+z
+" style="stroke: #1e7d3c; stroke-linejoin: miter"/>
+    </defs>
+    <g clip-path="url(#critical-field-comparison-p7ce5d15796)">
+     <use xlink:href="#critical-field-comparison-mb25d1b149c" x="293.855721" y="183.896445" style="fill: #1e7d3c; stroke: #1e7d3c; stroke-linejoin: miter"/>
+    </g>
+   </g>
+   <g id="critical-field-comparison-line2d_26">
+    <defs>
+     <path id="critical-field-comparison-mfab54f4fca" d="M -0 4.596194
+L 4.596194 0
+L 0 -4.596194
+L -4.596194 -0
+z
+" style="stroke: #6b6b6b; stroke-linejoin: miter"/>
+    </defs>
+    <g clip-path="url(#critical-field-comparison-p7ce5d15796)">
+     <use xlink:href="#critical-field-comparison-mfab54f4fca" x="246.327331" y="310.228786" style="fill: #6b6b6b; stroke: #6b6b6b; stroke-linejoin: miter"/>
+    </g>
+   </g>
+  </g>
+  <g id="critical-field-comparison-axes_2">
+   <g id="critical-field-comparison-patch_6">
+    <path d="M 583.667084 322.86202
+L 850.79952 322.86202
+L 850.79952 44.930871
+L 583.667084 44.930871
+z
+" style="fill: #ffffff"/>
+   </g>
+   <g id="critical-field-comparison-patch_7">
+    <path d="M 717.244164 322.86202
+L 756.926957 322.86202
+L 756.926957 44.930871
+L 717.244164 44.930871
+z
+" clip-path="url(#critical-field-comparison-p8c43ebcd04)" style="fill: #6b6b6b; opacity: 0.1; stroke: #6b6b6b; stroke-linejoin: miter"/>
+   </g>
+   <g id="critical-field-comparison-matplotlib.axis_3">
+    <g id="critical-field-comparison-xtick_8">
+     <g id="critical-field-comparison-line2d_27">
+      <path d="M 588.275089 322.86202
+L 588.275089 44.930871
+" clip-path="url(#critical-field-comparison-p8c43ebcd04)" style="fill: none; stroke: #e6e3da; stroke-opacity: 0.9; stroke-width: 0.75; stroke-linecap: square"/>
+     </g>
+     <g id="critical-field-comparison-line2d_28">
+      <g>
+       <use xlink:href="#critical-field-comparison-mf0816c0a75" x="588.275089" y="322.86202" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="critical-field-comparison-text_13">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: middle" x="588.275089" y="337.033036" transform="rotate(-0 588.275089 337.033036)">2.1322</text>
+     </g>
+    </g>
+    <g id="critical-field-comparison-xtick_9">
+     <g id="critical-field-comparison-line2d_29">
+      <path d="M 637.87858 322.86202
+L 637.87858 44.930871
+" clip-path="url(#critical-field-comparison-p8c43ebcd04)" style="fill: none; stroke: #e6e3da; stroke-opacity: 0.9; stroke-width: 0.75; stroke-linecap: square"/>
+     </g>
+     <g id="critical-field-comparison-line2d_30">
+      <g>
+       <use xlink:href="#critical-field-comparison-mf0816c0a75" x="637.87858" y="322.86202" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="critical-field-comparison-text_14">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: middle" x="637.87858" y="337.033036" transform="rotate(-0 637.87858 337.033036)">2.1323</text>
+     </g>
+    </g>
+    <g id="critical-field-comparison-xtick_10">
+     <g id="critical-field-comparison-line2d_31">
+      <path d="M 687.48207 322.86202
+L 687.48207 44.930871
+" clip-path="url(#critical-field-comparison-p8c43ebcd04)" style="fill: none; stroke: #e6e3da; stroke-opacity: 0.9; stroke-width: 0.75; stroke-linecap: square"/>
+     </g>
+     <g id="critical-field-comparison-line2d_32">
+      <g>
+       <use xlink:href="#critical-field-comparison-mf0816c0a75" x="687.48207" y="322.86202" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="critical-field-comparison-text_15">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: middle" x="687.48207" y="337.033036" transform="rotate(-0 687.48207 337.033036)">2.1324</text>
+     </g>
+    </g>
+    <g id="critical-field-comparison-xtick_11">
+     <g id="critical-field-comparison-line2d_33">
+      <path d="M 737.085561 322.86202
+L 737.085561 44.930871
+" clip-path="url(#critical-field-comparison-p8c43ebcd04)" style="fill: none; stroke: #e6e3da; stroke-opacity: 0.9; stroke-width: 0.75; stroke-linecap: square"/>
+     </g>
+     <g id="critical-field-comparison-line2d_34">
+      <g>
+       <use xlink:href="#critical-field-comparison-mf0816c0a75" x="737.085561" y="322.86202" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="critical-field-comparison-text_16">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: middle" x="737.085561" y="337.033036" transform="rotate(-0 737.085561 337.033036)">2.1325</text>
+     </g>
+    </g>
+    <g id="critical-field-comparison-xtick_12">
+     <g id="critical-field-comparison-line2d_35">
+      <path d="M 786.689051 322.86202
+L 786.689051 44.930871
+" clip-path="url(#critical-field-comparison-p8c43ebcd04)" style="fill: none; stroke: #e6e3da; stroke-opacity: 0.9; stroke-width: 0.75; stroke-linecap: square"/>
+     </g>
+     <g id="critical-field-comparison-line2d_36">
+      <g>
+       <use xlink:href="#critical-field-comparison-mf0816c0a75" x="786.689051" y="322.86202" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="critical-field-comparison-text_17">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: middle" x="786.689051" y="337.033036" transform="rotate(-0 786.689051 337.033036)">2.1326</text>
+     </g>
+    </g>
+    <g id="critical-field-comparison-xtick_13">
+     <g id="critical-field-comparison-line2d_37">
+      <path d="M 836.292541 322.86202
+L 836.292541 44.930871
+" clip-path="url(#critical-field-comparison-p8c43ebcd04)" style="fill: none; stroke: #e6e3da; stroke-opacity: 0.9; stroke-width: 0.75; stroke-linecap: square"/>
+     </g>
+     <g id="critical-field-comparison-line2d_38">
+      <g>
+       <use xlink:href="#critical-field-comparison-mf0816c0a75" x="836.292541" y="322.86202" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="critical-field-comparison-text_18">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: middle" x="836.292541" y="337.033036" transform="rotate(-0 836.292541 337.033036)">2.1327</text>
+     </g>
+    </g>
+    <g id="critical-field-comparison-text_19">
+     <!-- $h_c/J$ -->
+     <g transform="translate(708.938302 351.353192)">
+      <text>
+       <tspan x="0" y="-0.484375" style="font-style: italic; font-size: 10.5px; font-family: 'STIXGeneral'">h</tspan>
+       <tspan x="11.916768" y="-0.484375" style="font-style: italic; font-size: 10.5px; font-family: 'STIXGeneral'">J</tspan>
+       <tspan x="5.25" y="0.96875" style="font-style: italic; font-size: 7.35px; font-family: 'STIXGeneral'">c</tspan>
+       <tspan x="8.997777" y="-0.484375" style="font-size: 10.5px; font-family: 'STIXGeneral'">/</tspan>
+      </text>
+     </g>
+    </g>
+   </g>
+   <g id="critical-field-comparison-matplotlib.axis_4">
+    <g id="critical-field-comparison-ytick_4">
+     <g id="critical-field-comparison-line2d_39">
+      <g>
+       <use xlink:href="#critical-field-comparison-m4245f22ea4" x="583.667084" y="57.564105" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="critical-field-comparison-text_20">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: end" x="576.667084" y="61.149612" transform="rotate(-0 576.667084 61.149612)">Dedicated SSE · this work</text>
+     </g>
+    </g>
+    <g id="critical-field-comparison-ytick_5">
+     <g id="critical-field-comparison-line2d_40">
+      <g>
+       <use xlink:href="#critical-field-comparison-m4245f22ea4" x="583.667084" y="183.896445" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="critical-field-comparison-text_21">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: end" x="576.667084" y="187.491602" transform="rotate(-0 576.667084 187.491602)">Independent CT-QMC · this work</text>
+     </g>
+    </g>
+    <g id="critical-field-comparison-ytick_6">
+     <g id="critical-field-comparison-line2d_41">
+      <g>
+       <use xlink:href="#critical-field-comparison-m4245f22ea4" x="583.667084" y="310.228786" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="critical-field-comparison-text_22">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: end" x="576.667084" y="313.814294" transform="rotate(-0 576.667084 313.814294)">Blöte–Deng CT-QMC · 2002</text>
+     </g>
+    </g>
+   </g>
+   <g id="critical-field-comparison-patch_8">
+    <path d="M 583.667084 322.86202
+L 583.667084 44.930871
+" style="fill: none; stroke: #333333; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="critical-field-comparison-patch_9">
+    <path d="M 583.667084 322.86202
+L 850.79952 322.86202
+" style="fill: none; stroke: #333333; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="critical-field-comparison-LineCollection_4">
+    <path d="M 719.331415 57.564105
+L 749.286104 57.564105
+" clip-path="url(#critical-field-comparison-p8c43ebcd04)" style="fill: none; stroke: #1f5cd6; stroke-width: 2"/>
+   </g>
+   <g id="critical-field-comparison-line2d_42">
+    <defs>
+     <path id="critical-field-comparison-m987b09bb29" d="M 0 4
+L 0 -4
+" style="stroke: #1f5cd6"/>
+    </defs>
+    <g clip-path="url(#critical-field-comparison-p8c43ebcd04)">
+     <use xlink:href="#critical-field-comparison-m987b09bb29" x="719.331415" y="57.564105" style="fill: #1f5cd6; stroke: #1f5cd6"/>
+    </g>
+   </g>
+   <g id="critical-field-comparison-line2d_43">
+    <g clip-path="url(#critical-field-comparison-p8c43ebcd04)">
+     <use xlink:href="#critical-field-comparison-m987b09bb29" x="749.286104" y="57.564105" style="fill: #1f5cd6; stroke: #1f5cd6"/>
+    </g>
+   </g>
+   <g id="critical-field-comparison-LineCollection_5">
+    <path d="M 595.809467 183.896445
+L 838.657137 183.896445
+" clip-path="url(#critical-field-comparison-p8c43ebcd04)" style="fill: none; stroke: #1e7d3c; stroke-width: 2"/>
+   </g>
+   <g id="critical-field-comparison-line2d_44">
+    <g clip-path="url(#critical-field-comparison-p8c43ebcd04)">
+     <use xlink:href="#critical-field-comparison-m77dbf58062" x="595.809467" y="183.896445" style="fill: #1e7d3c; stroke: #1e7d3c"/>
+    </g>
+   </g>
+   <g id="critical-field-comparison-line2d_45">
+    <g clip-path="url(#critical-field-comparison-p8c43ebcd04)">
+     <use xlink:href="#critical-field-comparison-m77dbf58062" x="838.657137" y="183.896445" style="fill: #1e7d3c; stroke: #1e7d3c"/>
+    </g>
+   </g>
+   <g id="critical-field-comparison-LineCollection_6">
+    <path d="M 717.244164 310.228786
+L 756.926957 310.228786
+" clip-path="url(#critical-field-comparison-p8c43ebcd04)" style="fill: none; stroke: #6b6b6b; stroke-width: 2"/>
+   </g>
+   <g id="critical-field-comparison-line2d_46">
+    <g clip-path="url(#critical-field-comparison-p8c43ebcd04)">
+     <use xlink:href="#critical-field-comparison-m2a9b419912" x="717.244164" y="310.228786" style="fill: #6b6b6b; stroke: #6b6b6b"/>
+    </g>
+   </g>
+   <g id="critical-field-comparison-line2d_47">
+    <g clip-path="url(#critical-field-comparison-p8c43ebcd04)">
+     <use xlink:href="#critical-field-comparison-m2a9b419912" x="756.926957" y="310.228786" style="fill: #6b6b6b; stroke: #6b6b6b"/>
+    </g>
+   </g>
+   <g id="critical-field-comparison-text_23">
+    <text style="font-weight: 700; font-size: 12.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: start" x="583.667084" y="38.930871" transform="rotate(-0 583.667084 38.930871)">(b) Honeycomb lattice</text>
+   </g>
+   <g id="critical-field-comparison-line2d_48">
+    <defs>
+     <path id="critical-field-comparison-m92fe2b3b27" d="M 0 3.25
+C 0.86191 3.25 1.688635 2.907559 2.298097 2.298097
+C 2.907559 1.688635 3.25 0.86191 3.25 0
+C 3.25 -0.86191 2.907559 -1.688635 2.298097 -2.298097
+C 1.688635 -2.907559 0.86191 -3.25 0 -3.25
+C -0.86191 -3.25 -1.688635 -2.907559 -2.298097 -2.298097
+C -2.907559 -1.688635 -3.25 -0.86191 -3.25 0
+C -3.25 0.86191 -2.907559 1.688635 -2.298097 2.298097
+C -1.688635 2.907559 -0.86191 3.25 0 3.25
+z
+" style="stroke: #1f5cd6"/>
+    </defs>
+    <g clip-path="url(#critical-field-comparison-p8c43ebcd04)">
+     <use xlink:href="#critical-field-comparison-m92fe2b3b27" x="734.30876" y="57.564105" style="fill: #1f5cd6; stroke: #1f5cd6"/>
+    </g>
+   </g>
+   <g id="critical-field-comparison-line2d_49">
+    <g clip-path="url(#critical-field-comparison-p8c43ebcd04)">
+     <use xlink:href="#critical-field-comparison-mb25d1b149c" x="717.233302" y="183.896445" style="fill: #1e7d3c; stroke: #1e7d3c; stroke-linejoin: miter"/>
+    </g>
+   </g>
+   <g id="critical-field-comparison-line2d_50">
+    <g clip-path="url(#critical-field-comparison-p8c43ebcd04)">
+     <use xlink:href="#critical-field-comparison-mfab54f4fca" x="737.085561" y="310.228786" style="fill: #6b6b6b; stroke: #6b6b6b; stroke-linejoin: miter"/>
+    </g>
+   </g>
+  </g>
+  <g id="critical-field-comparison-text_24">
+   <text style="font-weight: 700; font-size: 16px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: middle" x="428.99976" y="19.31" transform="rotate(-0 428.99976 19.31)">Independent implementations converge on the trusted critical-field region</text>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="critical-field-comparison-p7ce5d15796">
+   <rect x="156.642109" y="44.930871" width="267.132436" height="277.931149"/>
+  </clipPath>
+  <clipPath id="critical-field-comparison-p8c43ebcd04">
+   <rect x="583.667084" y="44.930871" width="267.132436" height="277.931149"/>
+  </clipPath>
+ </defs>
+</svg>

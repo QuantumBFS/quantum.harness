@@ -1,0 +1,721 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="829.19952pt" height="353.99952pt" viewBox="0 0 829.19952 353.99952" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>yanwang148 challenge report</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="ratio-evidence-figure_1">
+  <g id="ratio-evidence-patch_1">
+   <path d="M 0 353.99952
+L 829.19952 353.99952
+L 829.19952 0
+L 0 0
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="ratio-evidence-axes_1">
+   <g id="ratio-evidence-patch_2">
+    <path d="M 108.586953 312.584207
+L 479.566053 312.584207
+L 479.566053 46.278214
+L 108.586953 46.278214
+z
+" style="fill: #ffffff"/>
+   </g>
+   <g id="ratio-evidence-matplotlib.axis_1">
+    <g id="ratio-evidence-xtick_1">
+     <g id="ratio-evidence-line2d_1">
+      <path d="M 140.599642 312.584207
+L 140.599642 46.278214
+" clip-path="url(#ratio-evidence-pe361e6ec59)" style="fill: none; stroke: #e6e3da; stroke-opacity: 0.9; stroke-width: 0.75; stroke-linecap: square"/>
+     </g>
+     <g id="ratio-evidence-line2d_2">
+      <defs>
+       <path id="ratio-evidence-mf0816c0a75" d="M 0 0
+L 0 3.5
+" style="stroke: #000000; stroke-width: 0.8"/>
+      </defs>
+      <g>
+       <use xlink:href="#ratio-evidence-mf0816c0a75" x="140.599642" y="312.584207" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="ratio-evidence-text_1">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: middle" x="140.599642" y="326.755223" transform="rotate(-0 140.599642 326.755223)">−3</text>
+     </g>
+    </g>
+    <g id="ratio-evidence-xtick_2">
+     <g id="ratio-evidence-line2d_3">
+      <path d="M 201.583813 312.584207
+L 201.583813 46.278214
+" clip-path="url(#ratio-evidence-pe361e6ec59)" style="fill: none; stroke: #e6e3da; stroke-opacity: 0.9; stroke-width: 0.75; stroke-linecap: square"/>
+     </g>
+     <g id="ratio-evidence-line2d_4">
+      <g>
+       <use xlink:href="#ratio-evidence-mf0816c0a75" x="201.583813" y="312.584207" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="ratio-evidence-text_2">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: middle" x="201.583813" y="326.755223" transform="rotate(-0 201.583813 326.755223)">−2</text>
+     </g>
+    </g>
+    <g id="ratio-evidence-xtick_3">
+     <g id="ratio-evidence-line2d_5">
+      <path d="M 262.567984 312.584207
+L 262.567984 46.278214
+" clip-path="url(#ratio-evidence-pe361e6ec59)" style="fill: none; stroke: #e6e3da; stroke-opacity: 0.9; stroke-width: 0.75; stroke-linecap: square"/>
+     </g>
+     <g id="ratio-evidence-line2d_6">
+      <g>
+       <use xlink:href="#ratio-evidence-mf0816c0a75" x="262.567984" y="312.584207" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="ratio-evidence-text_3">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: middle" x="262.567984" y="326.755223" transform="rotate(-0 262.567984 326.755223)">−1</text>
+     </g>
+    </g>
+    <g id="ratio-evidence-xtick_4">
+     <g id="ratio-evidence-line2d_7">
+      <path d="M 323.552155 312.584207
+L 323.552155 46.278214
+" clip-path="url(#ratio-evidence-pe361e6ec59)" style="fill: none; stroke: #e6e3da; stroke-opacity: 0.9; stroke-width: 0.75; stroke-linecap: square"/>
+     </g>
+     <g id="ratio-evidence-line2d_8">
+      <g>
+       <use xlink:href="#ratio-evidence-mf0816c0a75" x="323.552155" y="312.584207" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="ratio-evidence-text_4">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: middle" x="323.552155" y="326.755223" transform="rotate(-0 323.552155 326.755223)">0</text>
+     </g>
+    </g>
+    <g id="ratio-evidence-xtick_5">
+     <g id="ratio-evidence-line2d_9">
+      <path d="M 384.536326 312.584207
+L 384.536326 46.278214
+" clip-path="url(#ratio-evidence-pe361e6ec59)" style="fill: none; stroke: #e6e3da; stroke-opacity: 0.9; stroke-width: 0.75; stroke-linecap: square"/>
+     </g>
+     <g id="ratio-evidence-line2d_10">
+      <g>
+       <use xlink:href="#ratio-evidence-mf0816c0a75" x="384.536326" y="312.584207" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="ratio-evidence-text_5">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: middle" x="384.536326" y="326.755223" transform="rotate(-0 384.536326 326.755223)">1</text>
+     </g>
+    </g>
+    <g id="ratio-evidence-xtick_6">
+     <g id="ratio-evidence-line2d_11">
+      <path d="M 445.520497 312.584207
+L 445.520497 46.278214
+" clip-path="url(#ratio-evidence-pe361e6ec59)" style="fill: none; stroke: #e6e3da; stroke-opacity: 0.9; stroke-width: 0.75; stroke-linecap: square"/>
+     </g>
+     <g id="ratio-evidence-line2d_12">
+      <g>
+       <use xlink:href="#ratio-evidence-mf0816c0a75" x="445.520497" y="312.584207" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="ratio-evidence-text_6">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: middle" x="445.520497" y="326.755223" transform="rotate(-0 445.520497 326.755223)">2</text>
+     </g>
+    </g>
+    <g id="ratio-evidence-text_7">
+     <!-- $(R-\sqrt{5})\times10^{4}$ -->
+     <g transform="translate(261.159003 344.06952)">
+      <text>
+       <tspan x="0" y="-0.666875" style="font-size: 10.5px; font-family: 'STIXGeneral'">(</tspan>
+       <tspan x="11.428189" y="-0.666875" style="font-size: 10.5px; font-family: 'STIXGeneral'">−</tspan>
+       <tspan x="20.136896" y="-0.666875" style="font-size: 10.5px; font-family: 'STIXGeneral'">√</tspan>
+       <tspan x="31.193399" y="-0.78125" style="font-size: 10.5px; font-family: 'STIXGeneral'">5</tspan>
+       <tspan x="37.755899" y="-0.666875" style="font-size: 10.5px; font-family: 'STIXGeneral'">)</tspan>
+       <tspan x="42.768591" y="-0.666875" style="font-size: 10.5px; font-family: 'STIXGeneral'">×</tspan>
+       <tspan x="51.004794" y="-0.666875" style="font-size: 10.5px; font-family: 'STIXGeneral'">1</tspan>
+       <tspan x="56.254794" y="-0.666875" style="font-size: 10.5px; font-family: 'STIXGeneral'">0</tspan>
+       <tspan x="3.49649" y="-0.666875" style="font-style: italic; font-size: 10.5px; font-family: 'STIXGeneral'">R</tspan>
+       <tspan x="61.674326" y="-4.541875" style="font-size: 7.35px; font-family: 'STIXGeneral'">4</tspan>
+      </text>
+      <rect x="29.880899" y="-11.6875" width="7.875" height="0.65625"/>
+     </g>
+    </g>
+   </g>
+   <g id="ratio-evidence-matplotlib.axis_2">
+    <g id="ratio-evidence-ytick_1">
+     <g id="ratio-evidence-line2d_13">
+      <defs>
+       <path id="ratio-evidence-m4245f22ea4" d="M 0 0
+L -3.5 0
+" style="stroke: #000000; stroke-width: 0.8"/>
+      </defs>
+      <g>
+       <use xlink:href="#ratio-evidence-m4245f22ea4" x="108.586953" y="58.383032" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="ratio-evidence-text_8">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: end" x="101.586953" y="61.96854" transform="rotate(-0 101.586953 61.96854)">Dedicated SSE</text>
+     </g>
+    </g>
+    <g id="ratio-evidence-ytick_2">
+     <g id="ratio-evidence-line2d_14">
+      <g>
+       <use xlink:href="#ratio-evidence-m4245f22ea4" x="108.586953" y="300.47939" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="ratio-evidence-text_9">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: end" x="101.586953" y="304.074546" transform="rotate(-0 101.586953 304.074546)">Independent CT-QMC</text>
+     </g>
+    </g>
+   </g>
+   <g id="ratio-evidence-LineCollection_1">
+    <path d="M 171.347976 58.383032
+L 367.84691 58.383032
+" clip-path="url(#ratio-evidence-pe361e6ec59)" style="fill: none; stroke: #9db9f5; stroke-opacity: 0.62; stroke-width: 10"/>
+    <path d="M 125.449639 300.47939
+L 462.703366 300.47939
+" clip-path="url(#ratio-evidence-pe361e6ec59)" style="fill: none; stroke: #9db9f5; stroke-opacity: 0.62; stroke-width: 10"/>
+   </g>
+   <g id="ratio-evidence-line2d_15">
+    <path d="M 323.552155 312.584207
+L 323.552155 46.278214
+" clip-path="url(#ratio-evidence-pe361e6ec59)" style="fill: none; stroke: #b8651e; stroke-width: 2.2; stroke-linecap: square"/>
+   </g>
+   <g id="ratio-evidence-patch_3">
+    <path d="M 108.586953 312.584207
+L 108.586953 46.278214
+" style="fill: none; stroke: #333333; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="ratio-evidence-patch_4">
+    <path d="M 108.586953 312.584207
+L 479.566053 312.584207
+" style="fill: none; stroke: #333333; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="ratio-evidence-LineCollection_2">
+    <path d="M 248.394664 58.383032
+L 290.800222 58.383032
+" clip-path="url(#ratio-evidence-pe361e6ec59)" style="fill: none; stroke: #1f5cd6; stroke-width: 2.3"/>
+    <path d="M 229.337654 300.47939
+L 358.815351 300.47939
+" clip-path="url(#ratio-evidence-pe361e6ec59)" style="fill: none; stroke: #1f5cd6; stroke-width: 2.3"/>
+   </g>
+   <g id="ratio-evidence-line2d_16">
+    <defs>
+     <path id="ratio-evidence-m987b09bb29" d="M 0 4
+L 0 -4
+" style="stroke: #1f5cd6"/>
+    </defs>
+    <g clip-path="url(#ratio-evidence-pe361e6ec59)">
+     <use xlink:href="#ratio-evidence-m987b09bb29" x="248.394664" y="58.383032" style="fill: #1f5cd6; stroke: #1f5cd6"/>
+     <use xlink:href="#ratio-evidence-m987b09bb29" x="229.337654" y="300.47939" style="fill: #1f5cd6; stroke: #1f5cd6"/>
+    </g>
+   </g>
+   <g id="ratio-evidence-line2d_17">
+    <g clip-path="url(#ratio-evidence-pe361e6ec59)">
+     <use xlink:href="#ratio-evidence-m987b09bb29" x="290.800222" y="58.383032" style="fill: #1f5cd6; stroke: #1f5cd6"/>
+     <use xlink:href="#ratio-evidence-m987b09bb29" x="358.815351" y="300.47939" style="fill: #1f5cd6; stroke: #1f5cd6"/>
+    </g>
+   </g>
+   <g id="ratio-evidence-text_10">
+    <text style="font-weight: 700; font-size: 10px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: start; fill: #143b87" x="276.597443" y="48.383032" transform="rotate(-0 276.597443 48.383032)">0.55σ</text>
+   </g>
+   <g id="ratio-evidence-text_11">
+    <text style="font-weight: 700; font-size: 10px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: start; fill: #143b87" x="301.076503" y="290.47939" transform="rotate(-0 301.076503 290.47939)">0.17σ</text>
+   </g>
+   <g id="ratio-evidence-text_12">
+    <text style="font-weight: 700; font-size: 12.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: start" x="108.586953" y="40.278214" transform="rotate(-0 108.586953 40.278214)">Two independent routes agree with √5</text>
+   </g>
+   <g id="ratio-evidence-line2d_18">
+    <defs>
+     <path id="ratio-evidence-m0c344333bb" d="M 0 3.5
+C 0.928211 3.5 1.81853 3.131218 2.474874 2.474874
+C 3.131218 1.81853 3.5 0.928211 3.5 0
+C 3.5 -0.928211 3.131218 -1.81853 2.474874 -2.474874
+C 1.81853 -3.131218 0.928211 -3.5 0 -3.5
+C -0.928211 -3.5 -1.81853 -3.131218 -2.474874 -2.474874
+C -3.131218 -1.81853 -3.5 -0.928211 -3.5 0
+C -3.5 0.928211 -3.131218 1.81853 -2.474874 2.474874
+C -1.81853 3.131218 -0.928211 3.5 0 3.5
+z
+" style="stroke: #1f5cd6"/>
+    </defs>
+    <g clip-path="url(#ratio-evidence-pe361e6ec59)">
+     <use xlink:href="#ratio-evidence-m0c344333bb" x="269.597443" y="58.383032" style="fill: #1f5cd6; stroke: #1f5cd6"/>
+     <use xlink:href="#ratio-evidence-m0c344333bb" x="294.076503" y="300.47939" style="fill: #1f5cd6; stroke: #1f5cd6"/>
+    </g>
+   </g>
+   <g id="ratio-evidence-legend_1">
+    <g id="ratio-evidence-line2d_19">
+     <path d="M 359.853397 166.159023
+L 368.853397 166.159023
+L 377.853397 166.159023
+" style="fill: none; stroke: #b8651e; stroke-width: 2.2; stroke-linecap: square"/>
+    </g>
+    <g id="ratio-evidence-text_13">
+     <!-- $\sqrt{5}$ -->
+     <g transform="translate(385.053397 169.309023)">
+      <text>
+       <tspan x="0" y="-0.71" style="font-size: 9px; font-family: 'STIXGeneral'">√</tspan>
+       <tspan x="9.47699" y="-0.25" style="font-size: 9px; font-family: 'STIXGeneral'">5</tspan>
+      </text>
+      <rect x="8.35199" y="-9.875" width="6.75" height="0.5625"/>
+     </g>
+    </g>
+    <g id="ratio-evidence-LineCollection_3">
+     <path d="M 364.353397 179.792617
+L 373.353397 179.792617
+" style="fill: none; stroke: #9db9f5; stroke-opacity: 0.62; stroke-width: 10"/>
+    </g>
+    <g id="ratio-evidence-text_14">
+     <text style="font-size: 9px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: start" x="385.053397" y="182.942617" transform="rotate(-0 385.053397 182.942617)">total uncertainty</text>
+    </g>
+    <g id="ratio-evidence-LineCollection_4">
+     <path d="M 364.353397 193.424805
+L 373.353397 193.424805
+" style="fill: none; stroke: #1f5cd6; stroke-width: 2.3"/>
+    </g>
+    <g id="ratio-evidence-line2d_20">
+     <g>
+      <use xlink:href="#ratio-evidence-m987b09bb29" x="364.353397" y="193.424805" style="fill: #1f5cd6; stroke: #1f5cd6"/>
+     </g>
+    </g>
+    <g id="ratio-evidence-line2d_21">
+     <g>
+      <use xlink:href="#ratio-evidence-m987b09bb29" x="373.353397" y="193.424805" style="fill: #1f5cd6; stroke: #1f5cd6"/>
+     </g>
+    </g>
+    <g id="ratio-evidence-line2d_22"/>
+    <g id="ratio-evidence-line2d_23">
+     <g>
+      <use xlink:href="#ratio-evidence-m0c344333bb" x="368.853397" y="193.424805" style="fill: #1f5cd6; stroke: #1f5cd6"/>
+     </g>
+    </g>
+    <g id="ratio-evidence-text_15">
+     <text style="font-size: 9px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: start" x="385.053397" y="196.574805" transform="rotate(-0 385.053397 196.574805)">statistical uncertainty</text>
+    </g>
+   </g>
+  </g>
+  <g id="ratio-evidence-axes_2">
+   <g id="ratio-evidence-patch_5">
+    <path d="M 525.21624 312.584207
+L 821.99952 312.584207
+L 821.99952 46.278214
+L 525.21624 46.278214
+z
+" style="fill: #ffffff"/>
+   </g>
+   <g id="ratio-evidence-matplotlib.axis_3">
+    <g id="ratio-evidence-xtick_7">
+     <g id="ratio-evidence-line2d_24">
+      <path d="M 548.00635 312.584207
+L 548.00635 46.278214
+" clip-path="url(#ratio-evidence-p552e128a15)" style="fill: none; stroke: #e6e3da; stroke-opacity: 0.9; stroke-width: 0.75; stroke-linecap: square"/>
+     </g>
+     <g id="ratio-evidence-line2d_25">
+      <g>
+       <use xlink:href="#ratio-evidence-mf0816c0a75" x="548.00635" y="312.584207" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="ratio-evidence-text_16">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: middle" x="548.00635" y="326.755223" transform="rotate(-0 548.00635 326.755223)">−3</text>
+     </g>
+    </g>
+    <g id="ratio-evidence-xtick_8">
+     <g id="ratio-evidence-line2d_26">
+      <path d="M 589.873527 312.584207
+L 589.873527 46.278214
+" clip-path="url(#ratio-evidence-p552e128a15)" style="fill: none; stroke: #e6e3da; stroke-opacity: 0.9; stroke-width: 0.75; stroke-linecap: square"/>
+     </g>
+     <g id="ratio-evidence-line2d_27">
+      <g>
+       <use xlink:href="#ratio-evidence-mf0816c0a75" x="589.873527" y="312.584207" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="ratio-evidence-text_17">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: middle" x="589.873527" y="326.755223" transform="rotate(-0 589.873527 326.755223)">−2</text>
+     </g>
+    </g>
+    <g id="ratio-evidence-xtick_9">
+     <g id="ratio-evidence-line2d_28">
+      <path d="M 631.740703 312.584207
+L 631.740703 46.278214
+" clip-path="url(#ratio-evidence-p552e128a15)" style="fill: none; stroke: #e6e3da; stroke-opacity: 0.9; stroke-width: 0.75; stroke-linecap: square"/>
+     </g>
+     <g id="ratio-evidence-line2d_29">
+      <g>
+       <use xlink:href="#ratio-evidence-mf0816c0a75" x="631.740703" y="312.584207" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="ratio-evidence-text_18">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: middle" x="631.740703" y="326.755223" transform="rotate(-0 631.740703 326.755223)">−1</text>
+     </g>
+    </g>
+    <g id="ratio-evidence-xtick_10">
+     <g id="ratio-evidence-line2d_30">
+      <path d="M 673.60788 312.584207
+L 673.60788 46.278214
+" clip-path="url(#ratio-evidence-p552e128a15)" style="fill: none; stroke: #e6e3da; stroke-opacity: 0.9; stroke-width: 0.75; stroke-linecap: square"/>
+     </g>
+     <g id="ratio-evidence-line2d_31">
+      <g>
+       <use xlink:href="#ratio-evidence-mf0816c0a75" x="673.60788" y="312.584207" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="ratio-evidence-text_19">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: middle" x="673.60788" y="326.755223" transform="rotate(-0 673.60788 326.755223)">0</text>
+     </g>
+    </g>
+    <g id="ratio-evidence-xtick_11">
+     <g id="ratio-evidence-line2d_32">
+      <path d="M 715.475057 312.584207
+L 715.475057 46.278214
+" clip-path="url(#ratio-evidence-p552e128a15)" style="fill: none; stroke: #e6e3da; stroke-opacity: 0.9; stroke-width: 0.75; stroke-linecap: square"/>
+     </g>
+     <g id="ratio-evidence-line2d_33">
+      <g>
+       <use xlink:href="#ratio-evidence-mf0816c0a75" x="715.475057" y="312.584207" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="ratio-evidence-text_20">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: middle" x="715.475057" y="326.755223" transform="rotate(-0 715.475057 326.755223)">1</text>
+     </g>
+    </g>
+    <g id="ratio-evidence-xtick_12">
+     <g id="ratio-evidence-line2d_34">
+      <path d="M 757.342234 312.584207
+L 757.342234 46.278214
+" clip-path="url(#ratio-evidence-p552e128a15)" style="fill: none; stroke: #e6e3da; stroke-opacity: 0.9; stroke-width: 0.75; stroke-linecap: square"/>
+     </g>
+     <g id="ratio-evidence-line2d_35">
+      <g>
+       <use xlink:href="#ratio-evidence-mf0816c0a75" x="757.342234" y="312.584207" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="ratio-evidence-text_21">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: middle" x="757.342234" y="326.755223" transform="rotate(-0 757.342234 326.755223)">2</text>
+     </g>
+    </g>
+    <g id="ratio-evidence-xtick_13">
+     <g id="ratio-evidence-line2d_36">
+      <path d="M 799.20941 312.584207
+L 799.20941 46.278214
+" clip-path="url(#ratio-evidence-p552e128a15)" style="fill: none; stroke: #e6e3da; stroke-opacity: 0.9; stroke-width: 0.75; stroke-linecap: square"/>
+     </g>
+     <g id="ratio-evidence-line2d_37">
+      <g>
+       <use xlink:href="#ratio-evidence-mf0816c0a75" x="799.20941" y="312.584207" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="ratio-evidence-text_22">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: middle" x="799.20941" y="326.755223" transform="rotate(-0 799.20941 326.755223)">3</text>
+     </g>
+    </g>
+    <g id="ratio-evidence-text_23">
+     <!-- variant $(R-\sqrt{5})\times10^{4}$ -->
+     <g transform="translate(623.05038 344.06952)">
+      <text>
+       <tspan x="0" y="-0.666875" style="font-size: 10.5px; font-family: 'Iowan Old Style'">v</tspan>
+       <tspan x="5.157715" y="-0.666875" style="font-size: 10.5px; font-family: 'Iowan Old Style'">a</tspan>
+       <tspan x="10.207764" y="-0.666875" style="font-size: 10.5px; font-family: 'Iowan Old Style'">r</tspan>
+       <tspan x="14.304199" y="-0.666875" style="font-size: 10.5px; font-family: 'Iowan Old Style'">i</tspan>
+       <tspan x="17.421387" y="-0.666875" style="font-size: 10.5px; font-family: 'Iowan Old Style'">a</tspan>
+       <tspan x="22.471436" y="-0.666875" style="font-size: 10.5px; font-family: 'Iowan Old Style'">n</tspan>
+       <tspan x="28.603271" y="-0.666875" style="font-size: 10.5px; font-family: 'Iowan Old Style'">t</tspan>
+       <tspan x="32.381836" y="-0.666875" style="font-size: 10.5px; font-family: 'Iowan Old Style'"> </tspan>
+       <tspan x="35.299072" y="-0.666875" style="font-size: 10.5px; font-family: 'STIXGeneral'">(</tspan>
+       <tspan x="46.727261" y="-0.666875" style="font-size: 10.5px; font-family: 'STIXGeneral'">−</tspan>
+       <tspan x="55.435968" y="-0.666875" style="font-size: 10.5px; font-family: 'STIXGeneral'">√</tspan>
+       <tspan x="66.492471" y="-0.78125" style="font-size: 10.5px; font-family: 'STIXGeneral'">5</tspan>
+       <tspan x="73.054971" y="-0.666875" style="font-size: 10.5px; font-family: 'STIXGeneral'">)</tspan>
+       <tspan x="78.067664" y="-0.666875" style="font-size: 10.5px; font-family: 'STIXGeneral'">×</tspan>
+       <tspan x="86.303867" y="-0.666875" style="font-size: 10.5px; font-family: 'STIXGeneral'">1</tspan>
+       <tspan x="91.553867" y="-0.666875" style="font-size: 10.5px; font-family: 'STIXGeneral'">0</tspan>
+       <tspan x="38.795563" y="-0.666875" style="font-style: italic; font-size: 10.5px; font-family: 'STIXGeneral'">R</tspan>
+       <tspan x="96.973398" y="-4.541875" style="font-size: 7.35px; font-family: 'STIXGeneral'">4</tspan>
+      </text>
+      <rect x="65.179971" y="-11.6875" width="7.875" height="0.65625"/>
+     </g>
+    </g>
+   </g>
+   <g id="ratio-evidence-matplotlib.axis_4">
+    <g id="ratio-evidence-ytick_3">
+     <g id="ratio-evidence-line2d_38">
+      <g>
+       <use xlink:href="#ratio-evidence-m4245f22ea4" x="525.21624" y="312.584207" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="ratio-evidence-text_24">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: end" x="518.21624" y="316.169715" transform="rotate(-0 518.21624 316.169715)">0</text>
+     </g>
+    </g>
+    <g id="ratio-evidence-ytick_4">
+     <g id="ratio-evidence-line2d_39">
+      <g>
+       <use xlink:href="#ratio-evidence-m4245f22ea4" x="525.21624" y="271.34441" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="ratio-evidence-text_25">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: end" x="518.21624" y="274.929918" transform="rotate(-0 518.21624 274.929918)">20</text>
+     </g>
+    </g>
+    <g id="ratio-evidence-ytick_5">
+     <g id="ratio-evidence-line2d_40">
+      <g>
+       <use xlink:href="#ratio-evidence-m4245f22ea4" x="525.21624" y="230.104612" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="ratio-evidence-text_26">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: end" x="518.21624" y="233.69012" transform="rotate(-0 518.21624 233.69012)">40</text>
+     </g>
+    </g>
+    <g id="ratio-evidence-ytick_6">
+     <g id="ratio-evidence-line2d_41">
+      <g>
+       <use xlink:href="#ratio-evidence-m4245f22ea4" x="525.21624" y="188.864815" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="ratio-evidence-text_27">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: end" x="518.21624" y="192.450322" transform="rotate(-0 518.21624 192.450322)">60</text>
+     </g>
+    </g>
+    <g id="ratio-evidence-ytick_7">
+     <g id="ratio-evidence-line2d_42">
+      <g>
+       <use xlink:href="#ratio-evidence-m4245f22ea4" x="525.21624" y="147.625017" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="ratio-evidence-text_28">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: end" x="518.21624" y="151.210525" transform="rotate(-0 518.21624 151.210525)">80</text>
+     </g>
+    </g>
+    <g id="ratio-evidence-ytick_8">
+     <g id="ratio-evidence-line2d_43">
+      <g>
+       <use xlink:href="#ratio-evidence-m4245f22ea4" x="525.21624" y="106.385219" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="ratio-evidence-text_29">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: end" x="518.21624" y="109.970727" transform="rotate(-0 518.21624 109.970727)">100</text>
+     </g>
+    </g>
+    <g id="ratio-evidence-ytick_9">
+     <g id="ratio-evidence-line2d_44">
+      <g>
+       <use xlink:href="#ratio-evidence-m4245f22ea4" x="525.21624" y="65.145422" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="ratio-evidence-text_30">
+      <text style="font-size: 9.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: end" x="518.21624" y="68.73093" transform="rotate(-0 518.21624 68.73093)">120</text>
+     </g>
+    </g>
+    <g id="ratio-evidence-text_31">
+     <text style="font-size: 10.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: middle" x="495.72124" y="179.431211" transform="rotate(-90 495.72124 179.431211)">accepted fit combinations</text>
+    </g>
+   </g>
+   <g id="ratio-evidence-patch_6">
+    <path d="M 538.706389 312.584207
+L 808.509371 312.584207
+L 808.509371 46.278214
+L 538.706389 46.278214
+z
+" clip-path="url(#ratio-evidence-p552e128a15)" style="fill: #9db9f5; opacity: 0.23; stroke: #9db9f5; stroke-linejoin: miter"/>
+   </g>
+   <g id="ratio-evidence-patch_7">
+    <path d="M 570.705245 312.584207
+L 575.709741 312.584207
+L 575.709741 308.460228
+L 570.705245 308.460228
+z
+" clip-path="url(#ratio-evidence-p552e128a15)" style="fill: #1f5cd6; opacity: 0.84; stroke: #ffffff; stroke-linejoin: miter"/>
+   </g>
+   <g id="ratio-evidence-patch_8">
+    <path d="M 575.709741 312.584207
+L 580.714237 312.584207
+L 580.714237 308.460228
+L 575.709741 308.460228
+z
+" clip-path="url(#ratio-evidence-p552e128a15)" style="fill: #1f5cd6; opacity: 0.84; stroke: #ffffff; stroke-linejoin: miter"/>
+   </g>
+   <g id="ratio-evidence-patch_9">
+    <path d="M 580.714237 312.584207
+L 585.718734 312.584207
+L 585.718734 289.902319
+L 580.714237 289.902319
+z
+" clip-path="url(#ratio-evidence-p552e128a15)" style="fill: #1f5cd6; opacity: 0.84; stroke: #ffffff; stroke-linejoin: miter"/>
+   </g>
+   <g id="ratio-evidence-patch_10">
+    <path d="M 585.718734 312.584207
+L 590.72323 312.584207
+L 590.72323 302.274258
+L 585.718734 302.274258
+z
+" clip-path="url(#ratio-evidence-p552e128a15)" style="fill: #1f5cd6; opacity: 0.84; stroke: #ffffff; stroke-linejoin: miter"/>
+   </g>
+   <g id="ratio-evidence-patch_11">
+    <path d="M 590.72323 312.584207
+L 595.727726 312.584207
+L 595.727726 294.026299
+L 590.72323 294.026299
+z
+" clip-path="url(#ratio-evidence-p552e128a15)" style="fill: #1f5cd6; opacity: 0.84; stroke: #ffffff; stroke-linejoin: miter"/>
+   </g>
+   <g id="ratio-evidence-patch_12">
+    <path d="M 595.727726 312.584207
+L 600.732223 312.584207
+L 600.732223 273.4064
+L 595.727726 273.4064
+z
+" clip-path="url(#ratio-evidence-p552e128a15)" style="fill: #1f5cd6; opacity: 0.84; stroke: #ffffff; stroke-linejoin: miter"/>
+   </g>
+   <g id="ratio-evidence-patch_13">
+    <path d="M 600.732223 312.584207
+L 605.736719 312.584207
+L 605.736719 306.398238
+L 600.732223 306.398238
+z
+" clip-path="url(#ratio-evidence-p552e128a15)" style="fill: #1f5cd6; opacity: 0.84; stroke: #ffffff; stroke-linejoin: miter"/>
+   </g>
+   <g id="ratio-evidence-patch_14">
+    <path d="M 605.736719 312.584207
+L 610.741216 312.584207
+L 610.741216 296.088288
+L 605.736719 296.088288
+z
+" clip-path="url(#ratio-evidence-p552e128a15)" style="fill: #1f5cd6; opacity: 0.84; stroke: #ffffff; stroke-linejoin: miter"/>
+   </g>
+   <g id="ratio-evidence-patch_15">
+    <path d="M 610.741216 312.584207
+L 615.745712 312.584207
+L 615.745712 296.088288
+L 610.741216 296.088288
+z
+" clip-path="url(#ratio-evidence-p552e128a15)" style="fill: #1f5cd6; opacity: 0.84; stroke: #ffffff; stroke-linejoin: miter"/>
+   </g>
+   <g id="ratio-evidence-patch_16">
+    <path d="M 615.745712 312.584207
+L 620.750208 312.584207
+L 620.750208 312.584207
+L 615.745712 312.584207
+z
+" clip-path="url(#ratio-evidence-p552e128a15)" style="fill: #1f5cd6; opacity: 0.84; stroke: #ffffff; stroke-linejoin: miter"/>
+   </g>
+   <g id="ratio-evidence-patch_17">
+    <path d="M 620.750208 312.584207
+L 625.754705 312.584207
+L 625.754705 269.28242
+L 620.750208 269.28242
+z
+" clip-path="url(#ratio-evidence-p552e128a15)" style="fill: #1f5cd6; opacity: 0.84; stroke: #ffffff; stroke-linejoin: miter"/>
+   </g>
+   <g id="ratio-evidence-patch_18">
+    <path d="M 625.754705 312.584207
+L 630.759201 312.584207
+L 630.759201 289.902319
+L 625.754705 289.902319
+z
+" clip-path="url(#ratio-evidence-p552e128a15)" style="fill: #1f5cd6; opacity: 0.84; stroke: #ffffff; stroke-linejoin: miter"/>
+   </g>
+   <g id="ratio-evidence-patch_19">
+    <path d="M 630.759201 312.584207
+L 635.763697 312.584207
+L 635.763697 203.298744
+L 630.759201 203.298744
+z
+" clip-path="url(#ratio-evidence-p552e128a15)" style="fill: #1f5cd6; opacity: 0.84; stroke: #ffffff; stroke-linejoin: miter"/>
+   </g>
+   <g id="ratio-evidence-patch_20">
+    <path d="M 635.763697 312.584207
+L 640.768194 312.584207
+L 640.768194 58.959452
+L 635.763697 58.959452
+z
+" clip-path="url(#ratio-evidence-p552e128a15)" style="fill: #1f5cd6; opacity: 0.84; stroke: #ffffff; stroke-linejoin: miter"/>
+   </g>
+   <g id="ratio-evidence-patch_21">
+    <path d="M 640.768194 312.584207
+L 645.77269 312.584207
+L 645.77269 211.546703
+L 640.768194 211.546703
+z
+" clip-path="url(#ratio-evidence-p552e128a15)" style="fill: #1f5cd6; opacity: 0.84; stroke: #ffffff; stroke-linejoin: miter"/>
+   </g>
+   <g id="ratio-evidence-patch_22">
+    <path d="M 645.77269 312.584207
+L 650.777187 312.584207
+L 650.777187 242.476552
+L 645.77269 242.476552
+z
+" clip-path="url(#ratio-evidence-p552e128a15)" style="fill: #1f5cd6; opacity: 0.84; stroke: #ffffff; stroke-linejoin: miter"/>
+   </g>
+   <g id="ratio-evidence-patch_23">
+    <path d="M 650.777187 312.584207
+L 655.781683 312.584207
+L 655.781683 283.716349
+L 650.777187 283.716349
+z
+" clip-path="url(#ratio-evidence-p552e128a15)" style="fill: #1f5cd6; opacity: 0.84; stroke: #ffffff; stroke-linejoin: miter"/>
+   </g>
+   <g id="ratio-evidence-patch_24">
+    <path d="M 655.781683 312.584207
+L 660.786179 312.584207
+L 660.786179 308.460228
+L 655.781683 308.460228
+z
+" clip-path="url(#ratio-evidence-p552e128a15)" style="fill: #1f5cd6; opacity: 0.84; stroke: #ffffff; stroke-linejoin: miter"/>
+   </g>
+   <g id="ratio-evidence-patch_25">
+    <path d="M 525.21624 312.584207
+L 525.21624 46.278214
+" style="fill: none; stroke: #333333; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="ratio-evidence-patch_26">
+    <path d="M 525.21624 312.584207
+L 821.99952 312.584207
+" style="fill: none; stroke: #333333; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="ratio-evidence-line2d_45">
+    <path d="M 673.60788 312.584207
+L 673.60788 46.278214
+" clip-path="url(#ratio-evidence-p552e128a15)" style="fill: none; stroke: #b8651e; stroke-width: 2.2; stroke-linecap: square"/>
+   </g>
+   <g id="ratio-evidence-text_32">
+    <text style="font-weight: 700; font-size: 12.5px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: start" x="525.21624" y="40.278214" transform="rotate(-0 525.21624 40.278214)">374 pre-registered fit combinations</text>
+   </g>
+   <g id="ratio-evidence-legend_2">
+    <g id="ratio-evidence-patch_27">
+     <path d="M 533.31624 61.171808
+L 551.31624 61.171808
+L 551.31624 54.871808
+L 533.31624 54.871808
+z
+" style="fill: #9db9f5; opacity: 0.23; stroke: #9db9f5; stroke-linejoin: miter"/>
+    </g>
+    <g id="ratio-evidence-text_33">
+     <text style="font-size: 9px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: start" x="558.51624" y="61.171808" transform="rotate(-0 558.51624 61.171808)">primary ±2σ total</text>
+    </g>
+   </g>
+  </g>
+  <g id="ratio-evidence-text_34">
+   <text style="font-weight: 700; font-size: 16px; font-family: 'Iowan Old Style', 'Source Serif 4', 'Charter', 'Cambria', 'Georgia', 'DejaVu Serif', serif; text-anchor: middle; fill: #1a1a1a" x="414.59976" y="20.0675" transform="rotate(-0 414.59976 20.0675)">The √5 relation survives the full uncertainty stress test</text>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="ratio-evidence-pe361e6ec59">
+   <rect x="108.586953" y="46.278214" width="370.9791" height="266.305993"/>
+  </clipPath>
+  <clipPath id="ratio-evidence-p552e128a15">
+   <rect x="525.21624" y="46.278214" width="296.78328" height="266.305993"/>
+  </clipPath>
+ </defs>
+</svg>

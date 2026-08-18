@@ -1,0 +1,612 @@
+[
+  {
+    "binder_difference_se": [
+      0.00014674173633720937,
+      0.00014628510612755476,
+      0.00014879438390154464,
+      0.00014570088595597112,
+      0.00015370309264115835
+    ],
+    "binder_differences": [
+      0.0040426816392763465,
+      0.0044789674157234005,
+      0.0047717149726871355,
+      0.0053870830872237985,
+      0.0052326710595891335
+    ],
+    "bootstrap_failed_fraction": 1.0,
+    "bootstrap_failures": 100000,
+    "bootstrap_resamples": 100000,
+    "bootstrap_successes": 0,
+    "chi2": 3.4077630077865,
+    "chi2_per_dof": 1.70388150389325,
+    "crossing": null,
+    "crossing_ci95": [
+      null,
+      null
+    ],
+    "crossing_se": null,
+    "degrees_of_freedom": 2,
+    "difference_orientation": "Q_small_minus_Q_large",
+    "endpoint_bracketed": false,
+    "estimator_id": "spacetime_binder_q",
+    "field_window": [
+      4.76611,
+      4.76711,
+      4.76811,
+      4.76911,
+      4.77011
+    ],
+    "fields": [
+      4.76611,
+      4.76711,
+      4.76811,
+      4.76911,
+      4.77011
+    ],
+    "passed": false,
+    "polynomial_coefficients": [
+      0.004907360950571265,
+      0.3307736247226081,
+      -60.898895980934434
+    ],
+    "polynomial_degree": 2,
+    "positive_slope_required": true,
+    "root_count_in_window": 0,
+    "size_pair": [
+      6,
+      8
+    ],
+    "slope": null,
+    "slope_passed": false
+  },
+  {
+    "binder_difference_se": [
+      0.00015648375345124973,
+      0.00015553786934773852,
+      0.00015156113606009142,
+      0.0001573625433908235,
+      0.00015702574321590685
+    ],
+    "binder_differences": [
+      0.0019459233892821226,
+      0.0023744469223915265,
+      0.0027522833538529135,
+      0.0027190386723228155,
+      0.0035259283719172307
+    ],
+    "bootstrap_failed_fraction": 1.0,
+    "bootstrap_failures": 100000,
+    "bootstrap_resamples": 100000,
+    "bootstrap_successes": 0,
+    "chi2": 4.771526033836653,
+    "chi2_per_dof": 2.3857630169183266,
+    "crossing": null,
+    "crossing_ci95": [
+      null,
+      null
+    ],
+    "crossing_se": null,
+    "degrees_of_freedom": 2,
+    "difference_orientation": "Q_small_minus_Q_large",
+    "endpoint_bracketed": false,
+    "estimator_id": "spacetime_binder_q",
+    "field_window": [
+      4.76611,
+      4.76711,
+      4.76811,
+      4.76911,
+      4.77011
+    ],
+    "fields": [
+      4.76611,
+      4.76711,
+      4.76811,
+      4.76911,
+      4.77011
+    ],
+    "passed": false,
+    "polynomial_coefficients": [
+      0.002619849387228435,
+      0.35051002126106834,
+      23.039518156412818
+    ],
+    "polynomial_degree": 2,
+    "positive_slope_required": true,
+    "root_count_in_window": 0,
+    "size_pair": [
+      8,
+      10
+    ],
+    "slope": null,
+    "slope_passed": false
+  },
+  {
+    "binder_difference_se": [
+      0.0001709386613974024,
+      0.0001608493292808566,
+      0.0001578887807101656,
+      0.00017202982939738479,
+      0.00016136426432518473
+    ],
+    "binder_differences": [
+      0.0008773285333949499,
+      0.0011598673083240696,
+      0.0016404891176280412,
+      0.0021164327468652377,
+      0.0024758119365441145
+    ],
+    "bootstrap_failed_fraction": 1.0,
+    "bootstrap_failures": 100000,
+    "bootstrap_resamples": 100000,
+    "bootstrap_successes": 0,
+    "chi2": 0.36522612167721147,
+    "chi2_per_dof": 0.18261306083860573,
+    "crossing": null,
+    "crossing_ci95": [
+      null,
+      null
+    ],
+    "crossing_se": null,
+    "degrees_of_freedom": 2,
+    "difference_orientation": "Q_small_minus_Q_large",
+    "endpoint_bracketed": false,
+    "estimator_id": "spacetime_binder_q",
+    "field_window": [
+      4.76611,
+      4.76711,
+      4.76811,
+      4.76911,
+      4.77011
+    ],
+    "fields": [
+      4.76611,
+      4.76711,
+      4.76811,
+      4.76911,
+      4.77011
+    ],
+    "passed": false,
+    "polynomial_coefficients": [
+      0.0016306347540197689,
+      0.41544565984912896,
+      10.57473301915361
+    ],
+    "polynomial_degree": 2,
+    "positive_slope_required": true,
+    "root_count_in_window": 0,
+    "size_pair": [
+      10,
+      12
+    ],
+    "slope": null,
+    "slope_passed": false
+  },
+  {
+    "binder_difference_se": [
+      0.0001759427291449277,
+      0.00017020422666948277,
+      0.00016407445647285442,
+      0.00018505106662858263,
+      0.00016759369208076103
+    ],
+    "binder_differences": [
+      0.00028039111673872075,
+      0.0006921223709893676,
+      0.001309601790090098,
+      0.0019675581556202193,
+      0.002222828410764377
+    ],
+    "bootstrap_failed_fraction": 0.91264,
+    "bootstrap_failures": 91264,
+    "bootstrap_resamples": 100000,
+    "bootstrap_successes": 8736,
+    "chi2": 1.2067966160794235,
+    "chi2_per_dof": 0.6033983080397117,
+    "crossing": null,
+    "crossing_ci95": [
+      4.766113282047794,
+      4.766372443050891
+    ],
+    "crossing_se": 7.00532842283316e-05,
+    "degrees_of_freedom": 2,
+    "difference_orientation": "Q_small_minus_Q_large",
+    "endpoint_bracketed": false,
+    "estimator_id": "spacetime_binder_q",
+    "field_window": [
+      4.76611,
+      4.76711,
+      4.76811,
+      4.76911,
+      4.77011
+    ],
+    "fields": [
+      4.76611,
+      4.76711,
+      4.76811,
+      4.76911,
+      4.77011
+    ],
+    "passed": false,
+    "polynomial_coefficients": [
+      0.0013255723176560754,
+      0.514149228528423,
+      -18.455822419217913
+    ],
+    "polynomial_degree": 2,
+    "positive_slope_required": true,
+    "root_count_in_window": 0,
+    "size_pair": [
+      12,
+      14
+    ],
+    "slope": null,
+    "slope_passed": false
+  },
+  {
+    "binder_difference_se": [
+      0.00018013195635083678,
+      0.00017449832126693052,
+      0.00017284571083492201,
+      0.00018700197941041638,
+      0.00018105662360622855
+    ],
+    "binder_differences": [
+      -0.0001839181245884003,
+      0.0006642800735847665,
+      0.000995665600019624,
+      0.0011457040922033812,
+      0.0019014184092328579
+    ],
+    "bootstrap_failed_fraction": 0.32191,
+    "bootstrap_failures": 32191,
+    "bootstrap_resamples": 100000,
+    "bootstrap_successes": 67809,
+    "chi2": 3.9030001268744754,
+    "chi2_per_dof": 1.9515000634372377,
+    "crossing": 4.766244933315473,
+    "crossing_ci95": [
+      4.766124886004134,
+      4.766675498259633
+    ],
+    "crossing_se": 0.0001492014399941244,
+    "degrees_of_freedom": 2,
+    "difference_orientation": "Q_small_minus_Q_large",
+    "endpoint_bracketed": true,
+    "estimator_id": "spacetime_binder_q",
+    "field_window": [
+      4.76611,
+      4.76711,
+      4.76811,
+      4.76911,
+      4.77011
+    ],
+    "fields": [
+      4.76611,
+      4.76711,
+      4.76811,
+      4.76911,
+      4.77011
+    ],
+    "passed": false,
+    "polynomial_coefficients": [
+      0.000968881075579584,
+      0.4655999943142781,
+      -28.893717603188858
+    ],
+    "polynomial_degree": 2,
+    "positive_slope_required": true,
+    "root_count_in_window": 1,
+    "size_pair": [
+      14,
+      16
+    ],
+    "slope": 0.573377414501944,
+    "slope_passed": true
+  },
+  {
+    "binder_difference_se": [
+      0.00018516139372083513,
+      0.00018296957574962,
+      0.00018355787768456963,
+      0.0001825740547139701,
+      0.0001914136790853572
+    ],
+    "binder_differences": [
+      -0.0001952796200211937,
+      0.00016869215512260727,
+      0.0005863476073523222,
+      0.0012831091328504574,
+      0.0016344076595439239
+    ],
+    "bootstrap_failed_fraction": 0.09978,
+    "bootstrap_failures": 9978,
+    "bootstrap_resamples": 100000,
+    "bootstrap_successes": 90022,
+    "chi2": 0.7771660841933008,
+    "chi2_per_dof": 0.3885830420966504,
+    "crossing": 4.766649333684949,
+    "crossing_ci95": [
+      4.766195494470698,
+      4.767176739374757
+    ],
+    "crossing_se": 0.000247751086538946,
+    "degrees_of_freedom": 2,
+    "difference_orientation": "Q_small_minus_Q_large",
+    "endpoint_bracketed": true,
+    "estimator_id": "spacetime_binder_q",
+    "field_window": [
+      4.76611,
+      4.76711,
+      4.76811,
+      4.76911,
+      4.77011
+    ],
+    "fields": [
+      4.76611,
+      4.76711,
+      4.76811,
+      4.76911,
+      4.77011
+    ],
+    "passed": false,
+    "polynomial_coefficients": [
+      0.0006592584461332898,
+      0.4785396707156423,
+      18.62079830196028
+    ],
+    "polynomial_degree": 2,
+    "positive_slope_required": true,
+    "root_count_in_window": 1,
+    "size_pair": [
+      16,
+      18
+    ],
+    "slope": 0.4241421250375804,
+    "slope_passed": true
+  },
+  {
+    "binder_difference_se": [
+      0.00018469844842233625,
+      0.00018816935975728906,
+      0.0001856370880051126,
+      0.00019268154943787475,
+      0.00018828821024526775
+    ],
+    "binder_differences": [
+      -0.0008548135080144181,
+      -0.0001591832471279364,
+      0.00039325014850555284,
+      0.0010115572288161845,
+      0.001311342208556887
+    ],
+    "bootstrap_failed_fraction": 0.0,
+    "bootstrap_failures": 0,
+    "bootstrap_resamples": 100000,
+    "bootstrap_successes": 100000,
+    "chi2": 0.2245327583664313,
+    "chi2_per_dof": 0.11226637918321565,
+    "crossing": 4.767358443140821,
+    "crossing_ci95": [
+      4.767016729671128,
+      4.767773753597781
+    ],
+    "crossing_se": 0.00019302492832806237,
+    "degrees_of_freedom": 2,
+    "difference_orientation": "Q_small_minus_Q_large",
+    "endpoint_bracketed": true,
+    "estimator_id": "spacetime_binder_q",
+    "field_window": [
+      4.76611,
+      4.76711,
+      4.76811,
+      4.76911,
+      4.77011
+    ],
+    "fields": [
+      4.76611,
+      4.76711,
+      4.76811,
+      4.76911,
+      4.77011
+    ],
+    "passed": true,
+    "polynomial_coefficients": [
+      0.0004423128690664948,
+      0.5499222090700648,
+      -51.368844853192826
+    ],
+    "polynomial_degree": 2,
+    "positive_slope_required": true,
+    "root_count_in_window": 1,
+    "size_pair": [
+      18,
+      20
+    ],
+    "slope": 0.6271354244651418,
+    "slope_passed": true
+  },
+  {
+    "binder_difference_se": [
+      0.0001967257235813263,
+      0.00018821601027163475,
+      0.0001901524074180125,
+      0.00020169376887985358,
+      0.00018921680473723133
+    ],
+    "binder_differences": [
+      -0.0018804827773734045,
+      -0.0004526301442622227,
+      0.0007690198472720677,
+      0.0017479479973431244,
+      0.003404274485362402
+    ],
+    "bootstrap_failed_fraction": 0.0,
+    "bootstrap_failures": 0,
+    "bootstrap_resamples": 100000,
+    "bootstrap_successes": 100000,
+    "chi2": 2.3495787187438792,
+    "chi2_per_dof": 1.1747893593719396,
+    "crossing": 4.767561955032244,
+    "crossing_ci95": [
+      4.767373231365317,
+      4.767764866468151
+    ],
+    "crossing_se": 0.00010004671571535311,
+    "degrees_of_freedom": 2,
+    "difference_orientation": "Q_small_minus_Q_large",
+    "endpoint_bracketed": true,
+    "estimator_id": "spacetime_binder_q",
+    "field_window": [
+      4.76611,
+      4.76711,
+      4.76811,
+      4.76911,
+      4.77011
+    ],
+    "fields": [
+      4.76611,
+      4.76711,
+      4.76811,
+      4.76911,
+      4.77011
+    ],
+    "passed": true,
+    "polynomial_coefficients": [
+      0.000696529304890423,
+      1.2786412059426082,
+      14.062018893072826
+    ],
+    "polynomial_degree": 2,
+    "positive_slope_required": true,
+    "root_count_in_window": 1,
+    "size_pair": [
+      20,
+      24
+    ],
+    "slope": 1.2632279685609327,
+    "slope_passed": true
+  },
+  {
+    "binder_difference_se": [
+      0.00020695196558940938,
+      0.00019447264367391476,
+      0.0001988058276971846,
+      0.0001999883603647136,
+      0.0001946279908290114
+    ],
+    "binder_differences": [
+      -0.002107605768478127,
+      -0.0008837002013322159,
+      0.0004307740807046878,
+      0.0020711379948863406,
+      0.0029847156762217164
+    ],
+    "bootstrap_failed_fraction": 0.0,
+    "bootstrap_failures": 0,
+    "bootstrap_resamples": 100000,
+    "bootstrap_successes": 100000,
+    "chi2": 2.2839331615804994,
+    "chi2_per_dof": 1.1419665807902497,
+    "crossing": 4.767702155976545,
+    "crossing_ci95": [
+      4.767513221566499,
+      4.767904183450815
+    ],
+    "crossing_se": 9.999416796358144e-05,
+    "degrees_of_freedom": 2,
+    "difference_orientation": "Q_small_minus_Q_large",
+    "endpoint_bracketed": true,
+    "estimator_id": "spacetime_binder_q",
+    "field_window": [
+      4.76611,
+      4.76711,
+      4.76811,
+      4.76911,
+      4.77011
+    ],
+    "fields": [
+      4.76611,
+      4.76711,
+      4.76811,
+      4.76911,
+      4.77011
+    ],
+    "passed": true,
+    "polynomial_coefficients": [
+      0.000539673743782385,
+      1.3142925060603863,
+      -21.92780711018129
+    ],
+    "polynomial_degree": 2,
+    "positive_slope_required": true,
+    "root_count_in_window": 1,
+    "size_pair": [
+      24,
+      28
+    ],
+    "slope": 1.3321787562150973,
+    "slope_passed": true
+  },
+  {
+    "binder_difference_se": [
+      0.00020933256588927097,
+      0.00020025415123246324,
+      0.00020484829005280031,
+      0.00020012016760606572,
+      0.00019847748676777766
+    ],
+    "binder_differences": [
+      -0.002498839806228781,
+      -0.0010924086497986485,
+      0.00038766222517772064,
+      0.001739336722972773,
+      0.003238158714473638
+    ],
+    "bootstrap_failed_fraction": 0.0,
+    "bootstrap_failures": 0,
+    "bootstrap_resamples": 100000,
+    "bootstrap_successes": 100000,
+    "chi2": 0.0929743769801244,
+    "chi2_per_dof": 0.0464871884900622,
+    "crossing": 4.767868121500144,
+    "crossing_ci95": [
+      4.76768249150708,
+      4.768061389444431
+    ],
+    "crossing_se": 9.70089750137232e-05,
+    "degrees_of_freedom": 2,
+    "difference_orientation": "Q_small_minus_Q_large",
+    "endpoint_bracketed": true,
+    "estimator_id": "spacetime_binder_q",
+    "field_window": [
+      4.76611,
+      4.76711,
+      4.76811,
+      4.76911,
+      4.77011
+    ],
+    "fields": [
+      4.76611,
+      4.76711,
+      4.76811,
+      4.76911,
+      4.77011
+    ],
+    "passed": true,
+    "polynomial_coefficients": [
+      0.0003457786252168738,
+      1.4306051908260664,
+      4.341702765705682
+    ],
+    "polynomial_degree": 2,
+    "positive_slope_required": true,
+    "root_count_in_window": 1,
+    "size_pair": [
+      28,
+      32
+    ],
+    "slope": 1.428504861722488,
+    "slope_passed": true
+  }
+]

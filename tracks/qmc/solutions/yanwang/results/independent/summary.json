@@ -1,0 +1,40 @@
+{
+  "schema_version": "yanwang148.independent-pilot-summary.v1",
+  "data_class": "pilot-scaling",
+  "production_result": false,
+  "implementation_id": "ALPS-looper-continuous-time-QMC",
+  "source_qmc_commit": "4a42b12bb318e009e87550b3316ab00f1bde08f6",
+  "analysis_commit": "cb0c12f7fdfa6fc262cd4eabd1f2cdfcd39d8a87",
+  "diagnostic_job_id": "89525",
+  "bootstrap_job_id": "89526",
+  "cell_count": 2016,
+  "pooled_point_count": 126,
+  "bootstrap_resamples": 100000,
+  "bootstrap_successes": {
+    "honeycomb": 100000,
+    "triangular": 100000
+  },
+  "lattices": {
+    "honeycomb": {
+      "hc": 2.132459978101218,
+      "statistical_uncertainty": 0.00005722195129081892,
+      "systematic_uncertainty": 0.00023800682751673463,
+      "chi2": 9.497343848052864,
+      "degrees_of_freedom": 13,
+      "p_value": 0.7344305096482703
+    },
+    "triangular": {
+      "hc": 4.768222401539932,
+      "statistical_uncertainty": 0.0001867475676724392,
+      "systematic_uncertainty": 0.00011494070738038431,
+      "chi2": 16.352928594483902,
+      "degrees_of_freedom": 13,
+      "p_value": 0.23059590219804596
+    }
+  },
+  "ratio_computed_during_single_lattice_analysis": false,
+  "conjectured_value_used": false,
+  "report_sha256": "d9e2122fd2e3577d9c5dd73f57eb7333124a56073bb5a288782935964568c15d",
+  "sha256sums_verified": true,
+  "interpretation": "Independent pilot cross-method check only; model-rescue choices were developed on pilot data and are not final production evidence."
+}

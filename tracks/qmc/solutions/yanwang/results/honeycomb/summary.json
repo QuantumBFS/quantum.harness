@@ -1,0 +1,41 @@
+{
+  "schema_version": "yanwang148.lattice-baseline-summary.v1",
+  "lattice": "honeycomb",
+  "run_id": "20260729-122148-blote-deng-honeycomb-narrow-baseline",
+  "data_class": "baseline",
+  "production_result": false,
+  "source_commit": "a46d066c2fae325088e509ae22ce9307f68ae92c",
+  "analysis_commit": "820796ae6981d0e2ab2f30b36905570f0be92571",
+  "slurm_job_id": "89413",
+  "cell_count": 4320,
+  "primary_fit": {
+    "fit_id": "historical-inner-all-sizes",
+    "accepted": true,
+    "hc": 2.132494402004776,
+    "statistical_uncertainty": 0.000016757151341977625,
+    "systematic_uncertainty": 0.000025117395940021936,
+    "total_uncertainty_quadrature": 0.000030194133534608554,
+    "chi2": 19.121099386598623,
+    "degrees_of_freedom": 21,
+    "p_value": 0.5773718194498196
+  },
+  "gates": {
+    "technical": true,
+    "crossing": true,
+    "primary_fit": true,
+    "baseline_reference_hc": true,
+    "pilot_promotion": false,
+    "failed_check": {
+      "name": "accepted-variant-shifts",
+      "observed": 27.56690325053872,
+      "threshold": 2.0
+    }
+  },
+  "bootstrap_resamples": 100000,
+  "local_artifacts": {
+    "report_sha256": "d5ea8711aa3b9d7e0764d55ba0f99258b29d871a36a08aabec25de428f07e00f",
+    "primary_fit_sha256": "4b3236ae177694a5b312887186a670a320158d2b14debb6807b04387c55816b4",
+    "sha256sums_verified": true
+  },
+  "interpretation": "Controlled baseline reproduction only; not final verdict production."
+}

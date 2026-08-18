@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1040" height="350" viewBox="0 0 1040 350" role="img" aria-labelledby="title desc">
+  <title id="title">Triangular and honeycomb lattice critical-field ratio</title>
+  <desc id="desc">Triangular lattice with coordination six, honeycomb lattice with coordination three, and the independently measured critical-field ratio compared with square root of five.</desc>
+  <rect width="1040" height="350" fill="#ffffff"/>
+
+  <g font-family="Georgia, 'Times New Roman', serif" fill="#202124">
+    <text x="520" y="34" text-anchor="middle" font-size="23" font-weight="700">Two lattices, one unexpectedly simple ratio</text>
+
+    <g stroke="#6f98d4" stroke-width="2.2" fill="none" stroke-linecap="round">
+      <path d="M105 92H305 M80 137H280 M55 182H255"/>
+      <path d="M105 92L80 137L55 182 M155 92L130 137L105 182 M205 92L180 137L155 182 M255 92L230 137L205 182 M305 92L280 137L255 182"/>
+      <path d="M105 92L130 137L155 182 M155 92L180 137L205 182 M205 92L230 137L255 182 M255 92L280 137"/>
+    </g>
+    <g fill="#d97706">
+      <circle cx="105" cy="92" r="4"/><circle cx="155" cy="92" r="4"/><circle cx="205" cy="92" r="4"/><circle cx="255" cy="92" r="4"/><circle cx="305" cy="92" r="4"/>
+      <circle cx="80" cy="137" r="4"/><circle cx="130" cy="137" r="4"/><circle cx="180" cy="137" r="4"/><circle cx="230" cy="137" r="4"/><circle cx="280" cy="137" r="4"/>
+      <circle cx="55" cy="182" r="4"/><circle cx="105" cy="182" r="4"/><circle cx="155" cy="182" r="4"/><circle cx="205" cy="182" r="4"/><circle cx="255" cy="182" r="4"/>
+    </g>
+    <rect x="111" y="50" width="138" height="26" rx="13" fill="#fff4e5" stroke="#e7a34a"/>
+    <text x="180" y="68" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="700" fill="#9a5700">coordination 6</text>
+    <text x="180" y="229" text-anchor="middle" font-size="21" font-weight="700">Triangular lattice</text>
+    <text x="180" y="259" text-anchor="middle" font-size="17" fill="#4b5563"><tspan font-style="italic">h</tspan><tspan baseline-shift="sub" font-size="11">c</tspan><tspan baseline-shift="baseline"> / J = 4.7682138</tspan></text>
+
+    <rect x="365" y="116" width="310" height="112" rx="18" fill="#f7f9fc" stroke="#bdcbe0" stroke-width="1.5"/>
+    <text x="520" y="146" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="700" letter-spacing="1.1" fill="#315f9e">INDEPENDENT TWO-ROUTE QMC</text>
+    <text x="520" y="192" text-anchor="middle" font-size="29"><tspan font-style="italic">h</tspan><tspan baseline-shift="sub" font-size="18">c</tspan><tspan baseline-shift="super" font-size="16">tri</tspan><tspan baseline-shift="baseline" font-size="29"> / </tspan><tspan font-style="italic">h</tspan><tspan baseline-shift="sub" font-size="18">c</tspan><tspan baseline-shift="super" font-size="16">hc</tspan><tspan baseline-shift="baseline" font-size="29"> ≈ √5</tspan></text>
+
+    <g stroke="#398b8b" stroke-width="2.2" fill="none" stroke-linejoin="round">
+      <path d="M790 92L826 113L826 155L790 176L754 155L754 113Z"/>
+      <path d="M862 92L898 113L898 155L862 176L826 155L826 113Z"/>
+      <path d="M826 155L862 176L862 218L826 239L790 218L790 176Z"/>
+    </g>
+    <g fill="#0f5d5d">
+      <circle cx="790" cy="92" r="4"/><circle cx="826" cy="113" r="4"/><circle cx="826" cy="155" r="4"/><circle cx="790" cy="176" r="4"/><circle cx="754" cy="155" r="4"/><circle cx="754" cy="113" r="4"/>
+      <circle cx="862" cy="92" r="4"/><circle cx="898" cy="113" r="4"/><circle cx="898" cy="155" r="4"/><circle cx="862" cy="176" r="4"/>
+      <circle cx="862" cy="218" r="4"/><circle cx="826" cy="239" r="4"/><circle cx="790" cy="218" r="4"/>
+    </g>
+    <rect x="757" y="50" width="138" height="26" rx="13" fill="#e6f5f3" stroke="#65a8a2"/>
+    <text x="826" y="68" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="700" fill="#0f5d5d">coordination 3</text>
+    <text x="826" y="274" text-anchor="middle" font-size="21" font-weight="700">Honeycomb lattice</text>
+    <text x="826" y="304" text-anchor="middle" font-size="17" fill="#4b5563"><tspan font-style="italic">h</tspan><tspan baseline-shift="sub" font-size="11">c</tspan><tspan baseline-shift="baseline"> / J = 2.1324944</tspan></text>
+
+    <text x="520" y="337" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#667085">Periodic lattices · Pauli convention · critical fields fitted independently</text>
+  </g>
+</svg>
