@@ -1,0 +1,109 @@
+{
+  "schema_version": 1,
+  "run": "sim-to-real-noise-sweep-v1",
+  "setup": {
+    "epsilon": 0.3,
+    "shot_budgets": [
+      4096,
+      16384,
+      65536,
+      262144
+    ],
+    "trials": 10,
+    "max_queries": 1000,
+    "target_infidelity": 0.001,
+    "n_steps": 256,
+    "perturbation_seed": 113
+  },
+  "environment": {
+    "python": "3.13.3 (v3.13.3:6280bb54784, Apr  8 2025, 10:47:54) [Clang 15.0.0 (clang-1500.3.9.4)]",
+    "platform": "macOS-26.5-arm64-arm-64bit-Mach-O",
+    "jax": "0.7.1",
+    "numpy": "2.2.5",
+    "scipy": "1.15.3",
+    "devices": [
+      "TFRT_CPU_0"
+    ]
+  },
+  "wall_seconds": 86.64105895801913,
+  "summaries": [
+    {
+      "shots_per_query": 4096,
+      "method": "model_top_15",
+      "success_rate": 0.0,
+      "censored_query_median": 1001.0,
+      "query_median_successes": null,
+      "shots_median_successes": null,
+      "best_infidelity_median": 0.003272759152385729
+    },
+    {
+      "shots_per_query": 4096,
+      "method": "raw_full_40",
+      "success_rate": 0.0,
+      "censored_query_median": 1001.0,
+      "query_median_successes": null,
+      "shots_median_successes": null,
+      "best_infidelity_median": 0.009421553341639688
+    },
+    {
+      "shots_per_query": 16384,
+      "method": "model_top_15",
+      "success_rate": 0.4,
+      "censored_query_median": 1001.0,
+      "query_median_successes": 44.0,
+      "shots_median_successes": 720896.0,
+      "best_infidelity_median": 0.0015004066513676362
+    },
+    {
+      "shots_per_query": 16384,
+      "method": "raw_full_40",
+      "success_rate": 0.1,
+      "censored_query_median": 1001.0,
+      "query_median_successes": 208.0,
+      "shots_median_successes": 3407872.0,
+      "best_infidelity_median": 0.00909948037406666
+    },
+    {
+      "shots_per_query": 65536,
+      "method": "model_top_15",
+      "success_rate": 0.9,
+      "censored_query_median": 53.5,
+      "query_median_successes": 51.0,
+      "shots_median_successes": 3342336.0,
+      "best_infidelity_median": 0.0006055214304028778
+    },
+    {
+      "shots_per_query": 65536,
+      "method": "raw_full_40",
+      "success_rate": 0.2,
+      "censored_query_median": 1001.0,
+      "query_median_successes": 292.5,
+      "shots_median_successes": 19169280.0,
+      "best_infidelity_median": 0.007307470627767265
+    },
+    {
+      "shots_per_query": 262144,
+      "method": "model_top_15",
+      "success_rate": 0.9,
+      "censored_query_median": 41.0,
+      "query_median_successes": 40.0,
+      "shots_median_successes": 10485760.0,
+      "best_infidelity_median": 0.00022833407941519335
+    },
+    {
+      "shots_per_query": 262144,
+      "method": "raw_full_40",
+      "success_rate": 0.0,
+      "censored_query_median": 1001.0,
+      "query_median_successes": null,
+      "shots_median_successes": null,
+      "best_infidelity_median": 0.00473495892300857
+    }
+  ],
+  "artifacts": [
+    "noise_sweep.csv",
+    "noise_summary.csv",
+    "success_vs_shots.png"
+  ],
+  "rerun": "python3 tracks/qcs/solutions/Fermichen99/run_noise_sweep.py"
+}

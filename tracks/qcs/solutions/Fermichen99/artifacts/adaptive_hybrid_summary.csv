@@ -1,0 +1,4 @@
+epsilon,method,maximum_dimension,runs,certified_success_rate,latent_success_rate,censored_certified_query_q25,censored_certified_query_median,censored_certified_query_q75,best_exact_infidelity_median,stopped_nominal_coordinate,stopped_relinearized_1,stopped_relinearized_2,stopped_relinearized_3,stopped_failed
+0.1,adaptive_hybrid_k15_to_k20,20,15,1.0,1.0,97.0,97.0,97.0,0.00018603349057655372,15,0,0,0,0
+0.3,adaptive_hybrid_k15_to_k20,20,15,1.0,1.0,330.0,330.0,330.0,0.00013092645417944748,0,15,0,0,0
+0.5,adaptive_hybrid_k15_to_k20,20,15,1.0,1.0,330.0,330.0,425.0,0.00031774200016776444,0,11,4,0,0

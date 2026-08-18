@@ -1,0 +1,86 @@
+{
+  "schema_version": 1,
+  "run": "sim-to-real-generator-coverage-v1",
+  "question": "How many model-Hessian parameter directions are required to cover all d^2-1 true endpoint-generator directions?",
+  "definition": {
+    "reference": "15-dimensional right-singular subspace of the true endpoint Jacobian at the model-optimal pulse",
+    "candidate": "leading k model-Hessian eigenvectors",
+    "coverage_spectrum": "squared principal cosines between reference and candidate",
+    "certificate": "minimum coverage is the worst covered linear combination of true generator directions",
+    "required_k": "smallest k whose minimum coverage reaches the threshold"
+  },
+  "setup": {
+    "dim": 4,
+    "generator_dimension": 15,
+    "pulse_parameters": 40,
+    "epsilons": [
+      0.0,
+      0.01,
+      0.02,
+      0.03,
+      0.05,
+      0.075,
+      0.1,
+      0.125,
+      0.15,
+      0.175,
+      0.2,
+      0.25,
+      0.3,
+      0.35,
+      0.4,
+      0.5,
+      0.6,
+      0.75,
+      1.0,
+      1.5,
+      2.0
+    ],
+    "perturbation_seeds": [
+      113,
+      211,
+      307,
+      401,
+      503
+    ],
+    "thresholds": [
+      0.9,
+      0.95,
+      0.99
+    ],
+    "minimum_k": 15,
+    "maximum_k": 40,
+    "n_steps": 256,
+    "measurement_noise": "none; epsilon is structural model-device mismatch, not finite-shot noise"
+  },
+  "small_gap_power_law": {
+    "samples": 30,
+    "maximum_epsilon": 0.1,
+    "exponent": 2.000192966245779,
+    "coefficient": 2.0570513977081206,
+    "r_squared_log_space": 0.931206149644333
+  },
+  "environment": {
+    "python": "3.13.3 (v3.13.3:6280bb54784, Apr  8 2025, 10:47:54) [Clang 15.0.0 (clang-1500.3.9.4)]",
+    "platform": "macOS-26.5-arm64-arm-64bit-Mach-O",
+    "jax": "0.7.1",
+    "numpy": "2.2.5",
+    "scipy": "1.15.3",
+    "devices": [
+      "TFRT_CPU_0"
+    ]
+  },
+  "wall_seconds": 31.527540708018932,
+  "artifacts": [
+    "coverage_by_k.csv",
+    "required_k.csv",
+    "required_k_summary.csv",
+    "fixed15_summary.csv",
+    "small_gap_fit.json",
+    "fixed15_coverage_vs_epsilon.png",
+    "required_k_vs_epsilon.png",
+    "coverage_heatmap.png",
+    "small_gap_scaling.png"
+  ],
+  "rerun": "python3 tracks/qcs/solutions/Fermichen99/run_generator_coverage.py"
+}

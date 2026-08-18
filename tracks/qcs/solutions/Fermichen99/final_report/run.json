@@ -1,0 +1,116 @@
+{
+  "schema_version": 1,
+  "run": "sim-to-real-challenge-report-final",
+  "status": "completed",
+  "challenge": {
+    "number": 113,
+    "title": "Sim-to-Real for Quantum Gates",
+    "url": "https://github.com/QuantumBFS/quantum.harness/issues/113",
+    "track": "quantum control / differentiable programming"
+  },
+  "question": "Can model-Hessian directions reduce expensive query-only gate calibration, and what fails as the model-device gap grows?",
+  "method": {
+    "exact": false,
+    "name": "Model-informed derivative-free closed-loop calibration",
+    "tool": "JAX model derivatives, finite-shot black-box device, coordinate scans, and SciPy COBYQA",
+    "note": "An open-loop model optimum supplies the leading Hessian directions. The device returns only a finite-shot scalar gate loss. Closed-loop optimization is restricted to a model-defined affine subspace; a failed device-only certificate may trigger a model-side basis update at the current pulse.",
+    "settings": {
+      "targets": [
+        "single-qubit X",
+        "two-qubit CNOT"
+      ],
+      "pulse_parameters": [
+        20,
+        40
+      ],
+      "shots_per_query": 65536,
+      "target_infidelity": 0.001,
+      "certificate": "7 repeated queries; Wilson upper bound with z=1.96 (conservative relative to a nominal one-sided 95% bound)",
+      "held_out_devices_per_epsilon": 15
+    }
+  },
+  "information_boundary": "The online optimizer receives only scalar finite-shot losses. Held-out Hamiltonians, mismatch strength, endpoint Jacobians, gradients, and exact fidelities are hidden and used only for offline scoring.",
+  "mismatch": {
+    "definition": "H0,true = H0 + epsilon DeltaH",
+    "normalization": "Frobenius norm of DeltaH equals the Frobenius norm of H0",
+    "epsilons": [
+      0.1,
+      0.3,
+      0.5
+    ]
+  },
+  "figures": [
+    {
+      "id": "Figure 1",
+      "plots": "Intrinsic Hessian rank and single-qubit closed-loop query efficiency",
+      "results": {
+        "figure": "figure1_intrinsic_dimension.png",
+        "match": "pass",
+        "why": "Observed ranks equal d^2-1 for d=2 and d=4; for the single-qubit device at epsilon=0.3, the informed k=3 space certifies all runs with a 25-query median, while random k=3 certifies none and the raw 20-dimensional space needs a 126-query median.",
+        "numbers": {
+          "single_qubit_rank": 3,
+          "two_qubit_rank": 15,
+          "single_qubit_informed_k3_success": 1.0,
+          "single_qubit_informed_k3_median_queries": 25,
+          "single_qubit_random_k3_success": 0.0,
+          "single_qubit_raw_k20_success": 1.0,
+          "single_qubit_raw_k20_median_queries": 126
+        }
+      }
+    },
+    {
+      "id": "Figure 2",
+      "plots": "Fixed-space failure under drift mismatch and device-triggered adaptive recovery",
+      "results": {
+        "figure": "figure2_closed_loop_answer.png",
+        "match": "pass",
+        "why": "At epsilon=0.5, fixed nominal k=15 certifies only 20% of runs; increasing the fixed dimension improves success but costs more queries. Triggered k=15-to-20 relinearization certifies all 45 held-out runs across epsilon=0.1, 0.3, and 0.5.",
+        "numbers": {
+          "adaptive_total_runs": 45,
+          "adaptive_certified_success": 1.0,
+          "adaptive_median_queries_by_epsilon": {
+            "0.1": 97,
+            "0.3": 330,
+            "0.5": 330
+          },
+          "fixed_nominal_k15_success_at_epsilon_0.5": 0.2,
+          "fixed_nominal_k30_success_at_epsilon_0.5": 0.9333333333,
+          "fixed_ensemble_k30_success_at_epsilon_0.5": 1.0,
+          "fixed_ensemble_k30_median_queries_at_epsilon_0.5": 579
+        }
+      }
+    }
+  ],
+  "estimate": [
+    {
+      "run_point": "Intrinsic-rank check",
+      "wall_time": "4.6 s",
+      "memory": "CPU run; not separately profiled"
+    },
+    {
+      "run_point": "Single-qubit closed loop",
+      "wall_time": "15.4 s",
+      "memory": "CPU run; not separately profiled"
+    },
+    {
+      "run_point": "Two-qubit fixed spaces",
+      "wall_time": "258.1 s",
+      "memory": "CPU run; not separately profiled"
+    },
+    {
+      "run_point": "Two-qubit adaptive loop",
+      "wall_time": "206.5 s",
+      "memory": "CPU run; not separately profiled"
+    }
+  ],
+  "artifacts": [
+    "figure1_intrinsic_dimension.png",
+    "figure2_closed_loop_answer.png",
+    "figure1_data.csv",
+    "figure2_data.csv",
+    "manifest.json",
+    "report.json",
+    "report.html"
+  ],
+  "rerun": "See manifest.json for the source runs and minimal reproduction code."
+}

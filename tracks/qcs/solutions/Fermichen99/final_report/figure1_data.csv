@@ -1,0 +1,9 @@
+panel,system,epsilon,strategy,dimension,runs,certified_success_rate,censored_query_q25,censored_query_median,censored_query_q75,parameter_dimension,predicted_rank,observed_hessian_rank,observed_jacobian_rank
+b,single-qubit X,,local spectrum,,,,,,,20,3,3,3
+b,two-qubit CNOT,,local spectrum,,,,,,,40,15,15,15
+c,single-qubit X,0.3,fixed nominal Hessian,1,15,0.0,501,501,501,20,3,,
+c,single-qubit X,0.3,fixed nominal Hessian,2,15,0.0,501,501,501,20,3,,
+c,single-qubit X,0.3,fixed nominal Hessian,3,15,1.0,25,25,48,20,3,,
+c,single-qubit X,0.3,fixed nominal Hessian,4,15,1.0,30,31,58.5,20,3,,
+c,single-qubit X,0.3,random subspace,3,15,0.0,501,501,501,20,3,,
+c,single-qubit X,0.3,raw parameter space,20,15,1.0,125.5,126,247.5,20,3,,

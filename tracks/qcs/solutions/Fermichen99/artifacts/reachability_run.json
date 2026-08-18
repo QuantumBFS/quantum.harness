@@ -1,0 +1,524 @@
+{
+  "schema_version": 1,
+  "run": "sim-to-real-reachability-v1",
+  "purpose": "Privileged gradient-based reachability diagnostic; not a black-box calibration result.",
+  "setup": {
+    "dim": 4,
+    "target": "CNOT",
+    "n_params": 40,
+    "n_steps": 256,
+    "epsilons": [
+      0.0,
+      0.003,
+      0.01,
+      0.03,
+      0.1,
+      0.3,
+      0.5,
+      1.0,
+      2.0
+    ],
+    "mismatch": "H0_true = H0 + epsilon * V",
+    "perturbation_seed": 113,
+    "perturbation_normalization": "traceless Hermitian; ||V||F=||H0||F",
+    "random_subspace_seed": 191,
+    "target_infidelity": 0.001
+  },
+  "environment": {
+    "python": "3.13.3 (v3.13.3:6280bb54784, Apr  8 2025, 10:47:54) [Clang 15.0.0 (clang-1500.3.9.4)]",
+    "platform": "macOS-26.5-arm64-arm-64bit-Mach-O",
+    "jax": "0.7.1",
+    "numpy": "2.2.5",
+    "scipy": "1.15.3",
+    "devices": [
+      "TFRT_CPU_0"
+    ]
+  },
+  "wall_seconds": 28.21873562503606,
+  "records": [
+    {
+      "epsilon": 0.0,
+      "warm_loss": 6.727951529228449e-14,
+      "hessian_seconds": 1.363737209001556,
+      "model_true_top15_overlap": {
+        "mean": 0.9999999999999988,
+        "minimum": 0.9999999999999964,
+        "largest_angle_degrees": 3.4150945850063763e-06
+      },
+      "methods": {
+        "full_40": {
+          "loss": 6.7390537594747e-14,
+          "success": true,
+          "iterations": 0,
+          "evaluations": 1,
+          "message": "Optimization terminated successfully.",
+          "wall_seconds": 0.2411543329944834
+        },
+        "model_top_15": {
+          "loss": 3.8746783559417963e-14,
+          "success": true,
+          "iterations": 1,
+          "evaluations": 2,
+          "message": "Optimization terminated successfully.",
+          "wall_seconds": 0.24657616601325572
+        },
+        "top_15_plus_5": {
+          "loss": 3.8968828164342995e-14,
+          "success": true,
+          "iterations": 1,
+          "evaluations": 2,
+          "message": "Optimization terminated successfully.",
+          "wall_seconds": 0.23370199999772012
+        },
+        "random_15": {
+          "loss": 6.7390537594747e-14,
+          "success": true,
+          "iterations": 0,
+          "evaluations": 1,
+          "message": "Optimization terminated successfully.",
+          "wall_seconds": 0.2212286660214886
+        },
+        "bottom_15": {
+          "loss": 6.7390537594747e-14,
+          "success": true,
+          "iterations": 0,
+          "evaluations": 1,
+          "message": "Optimization terminated successfully.",
+          "wall_seconds": 0.21965108305448666
+        }
+      },
+      "region": "A: open-loop transfer"
+    },
+    {
+      "epsilon": 0.003,
+      "warm_loss": 2.007763741151969e-06,
+      "hessian_seconds": 0.5323090839665383,
+      "model_true_top15_overlap": {
+        "mean": 0.9999943315075632,
+        "minimum": 0.9999456113068355,
+        "largest_angle_degrees": 0.4225527001128931
+      },
+      "methods": {
+        "full_40": {
+          "loss": 1.4765966227514582e-14,
+          "success": true,
+          "iterations": 45,
+          "evaluations": 46,
+          "message": "Optimization terminated successfully.",
+          "wall_seconds": 0.33939045801525936
+        },
+        "model_top_15": {
+          "loss": 3.1086244689504383e-15,
+          "success": true,
+          "iterations": 46,
+          "evaluations": 47,
+          "message": "Optimization terminated successfully.",
+          "wall_seconds": 0.34788445802405477
+        },
+        "top_15_plus_5": {
+          "loss": 2.6645352591003757e-15,
+          "success": true,
+          "iterations": 46,
+          "evaluations": 47,
+          "message": "Optimization terminated successfully.",
+          "wall_seconds": 0.3453621250228025
+        },
+        "random_15": {
+          "loss": 1.176836406102666e-13,
+          "success": true,
+          "iterations": 89,
+          "evaluations": 90,
+          "message": "Optimization terminated successfully.",
+          "wall_seconds": 0.47004883299814537
+        },
+        "bottom_15": {
+          "loss": 3.660100620361817e-07,
+          "success": true,
+          "iterations": 298,
+          "evaluations": 317,
+          "message": "Optimization terminated successfully.",
+          "wall_seconds": 1.082227042003069
+        }
+      },
+      "region": "A: open-loop transfer"
+    },
+    {
+      "epsilon": 0.01,
+      "warm_loss": 2.2325367517228578e-05,
+      "hessian_seconds": 0.5672372920089401,
+      "model_true_top15_overlap": {
+        "mean": 0.9999373643803792,
+        "minimum": 0.9994014597703061,
+        "largest_angle_degrees": 1.4018858064062016
+      },
+      "methods": {
+        "full_40": {
+          "loss": 1.199040866595169e-14,
+          "success": true,
+          "iterations": 46,
+          "evaluations": 47,
+          "message": "Optimization terminated successfully.",
+          "wall_seconds": 0.3491502500255592
+        },
+        "model_top_15": {
+          "loss": 1.1213252548714081e-14,
+          "success": true,
+          "iterations": 46,
+          "evaluations": 47,
+          "message": "Optimization terminated successfully.",
+          "wall_seconds": 0.3505979580222629
+        },
+        "top_15_plus_5": {
+          "loss": 8.992806499463768e-15,
+          "success": true,
+          "iterations": 46,
+          "evaluations": 47,
+          "message": "Optimization terminated successfully.",
+          "wall_seconds": 0.35124816600000486
+        },
+        "random_15": {
+          "loss": 2.886579864025407e-15,
+          "success": true,
+          "iterations": 92,
+          "evaluations": 93,
+          "message": "Optimization terminated successfully.",
+          "wall_seconds": 0.47472291701706126
+        },
+        "bottom_15": {
+          "loss": 3.538849023154711e-06,
+          "success": true,
+          "iterations": 283,
+          "evaluations": 297,
+          "message": "Optimization terminated successfully.",
+          "wall_seconds": 1.0374531660345383
+        }
+      },
+      "region": "A: open-loop transfer"
+    },
+    {
+      "epsilon": 0.03,
+      "warm_loss": 0.0002013411955179567,
+      "hessian_seconds": 0.5559929159935564,
+      "model_true_top15_overlap": {
+        "mean": 0.9994419020213007,
+        "minimum": 0.9947149028009153,
+        "largest_angle_degrees": 4.169004975590219
+      },
+      "methods": {
+        "full_40": {
+          "loss": 3.1086244689504383e-15,
+          "success": true,
+          "iterations": 47,
+          "evaluations": 48,
+          "message": "Optimization terminated successfully.",
+          "wall_seconds": 0.34796516702044755
+        },
+        "model_top_15": {
+          "loss": 3.1086244689504383e-15,
+          "success": true,
+          "iterations": 47,
+          "evaluations": 48,
+          "message": "Optimization terminated successfully.",
+          "wall_seconds": 0.3554648329736665
+        },
+        "top_15_plus_5": {
+          "loss": 3.3306690738754696e-15,
+          "success": true,
+          "iterations": 47,
+          "evaluations": 48,
+          "message": "Optimization terminated successfully.",
+          "wall_seconds": 0.3587227079551667
+        },
+        "random_15": {
+          "loss": 2.3425705819590803e-14,
+          "success": true,
+          "iterations": 94,
+          "evaluations": 95,
+          "message": "Optimization terminated successfully.",
+          "wall_seconds": 0.49736700003268197
+        },
+        "bottom_15": {
+          "loss": 2.48080196821876e-05,
+          "success": true,
+          "iterations": 250,
+          "evaluations": 264,
+          "message": "Optimization terminated successfully.",
+          "wall_seconds": 0.9773169590043835
+        }
+      },
+      "region": "A: open-loop transfer"
+    },
+    {
+      "epsilon": 0.1,
+      "warm_loss": 0.0022506335300467306,
+      "hessian_seconds": 0.5405570839648135,
+      "model_true_top15_overlap": {
+        "mean": 0.9934396270791812,
+        "minimum": 0.9371759687447182,
+        "largest_angle_degrees": 14.515814904522472
+      },
+      "methods": {
+        "full_40": {
+          "loss": 6.661338147750939e-15,
+          "success": true,
+          "iterations": 47,
+          "evaluations": 48,
+          "message": "Optimization terminated successfully.",
+          "wall_seconds": 0.36812358401948586
+        },
+        "model_top_15": {
+          "loss": 1.7430501486614958e-14,
+          "success": true,
+          "iterations": 47,
+          "evaluations": 48,
+          "message": "Optimization terminated successfully.",
+          "wall_seconds": 0.370862916985061
+        },
+        "top_15_plus_5": {
+          "loss": 1.7319479184152442e-14,
+          "success": true,
+          "iterations": 47,
+          "evaluations": 48,
+          "message": "Optimization terminated successfully.",
+          "wall_seconds": 0.3779071669559926
+        },
+        "random_15": {
+          "loss": 7.471800955727304e-14,
+          "success": true,
+          "iterations": 106,
+          "evaluations": 109,
+          "message": "Optimization terminated successfully.",
+          "wall_seconds": 0.5532117919647135
+        },
+        "bottom_15": {
+          "loss": 4.704804736432866e-05,
+          "success": true,
+          "iterations": 200,
+          "evaluations": 210,
+          "message": "Optimization terminated successfully.",
+          "wall_seconds": 0.8614917080267332
+        }
+      },
+      "region": "B: fixed top-15 calibrates"
+    },
+    {
+      "epsilon": 0.3,
+      "warm_loss": 0.020385201350453075,
+      "hessian_seconds": 0.6289049169863574,
+      "model_true_top15_overlap": {
+        "mean": 0.913177690061162,
+        "minimum": 0.03820507930445187,
+        "largest_angle_degrees": 78.72833334369352
+      },
+      "methods": {
+        "full_40": {
+          "loss": 4.884981308350689e-15,
+          "success": true,
+          "iterations": 49,
+          "evaluations": 50,
+          "message": "Optimization terminated successfully.",
+          "wall_seconds": 0.3914844169630669
+        },
+        "model_top_15": {
+          "loss": 8.881784197001252e-16,
+          "success": true,
+          "iterations": 50,
+          "evaluations": 51,
+          "message": "Optimization terminated successfully.",
+          "wall_seconds": 0.39188212499720976
+        },
+        "top_15_plus_5": {
+          "loss": -6.661338147750939e-16,
+          "success": true,
+          "iterations": 50,
+          "evaluations": 51,
+          "message": "Optimization terminated successfully.",
+          "wall_seconds": 0.37617858400335535
+        },
+        "random_15": {
+          "loss": 0.0018992649025917352,
+          "success": true,
+          "iterations": 89,
+          "evaluations": 90,
+          "message": "Optimization terminated successfully.",
+          "wall_seconds": 0.49444783298531547
+        },
+        "bottom_15": {
+          "loss": 0.0014052916251110492,
+          "success": true,
+          "iterations": 150,
+          "evaluations": 158,
+          "message": "Optimization terminated successfully.",
+          "wall_seconds": 0.6955156670301221
+        }
+      },
+      "region": "B: fixed top-15 calibrates"
+    },
+    {
+      "epsilon": 0.5,
+      "warm_loss": 0.05598200072397286,
+      "hessian_seconds": 0.571226166037377,
+      "model_true_top15_overlap": {
+        "mean": 0.8803369310484583,
+        "minimum": 0.005085964277535893,
+        "largest_angle_degrees": 85.91042565252384
+      },
+      "methods": {
+        "full_40": {
+          "loss": 2.808864252301646e-14,
+          "success": true,
+          "iterations": 48,
+          "evaluations": 49,
+          "message": "Optimization terminated successfully.",
+          "wall_seconds": 0.37333995796507224
+        },
+        "model_top_15": {
+          "loss": 1.2656542480726785e-14,
+          "success": true,
+          "iterations": 50,
+          "evaluations": 51,
+          "message": "Optimization terminated successfully.",
+          "wall_seconds": 0.37430762499570847
+        },
+        "top_15_plus_5": {
+          "loss": 5.96189764223709e-14,
+          "success": true,
+          "iterations": 49,
+          "evaluations": 50,
+          "message": "Optimization terminated successfully.",
+          "wall_seconds": 0.37156291701830924
+        },
+        "random_15": {
+          "loss": 0.005678535206389057,
+          "success": true,
+          "iterations": 87,
+          "evaluations": 88,
+          "message": "Optimization terminated successfully.",
+          "wall_seconds": 0.4848491250304505
+        },
+        "bottom_15": {
+          "loss": 1.887379141862766e-15,
+          "success": true,
+          "iterations": 144,
+          "evaluations": 158,
+          "message": "Optimization terminated successfully.",
+          "wall_seconds": 0.6945340830134228
+        }
+      },
+      "region": "B: fixed top-15 calibrates"
+    },
+    {
+      "epsilon": 1.0,
+      "warm_loss": 0.19961952770245306,
+      "hessian_seconds": 0.5661815830389969,
+      "model_true_top15_overlap": {
+        "mean": 0.8028828602175279,
+        "minimum": 0.003363356537018528,
+        "largest_angle_degrees": 86.67529715596116
+      },
+      "methods": {
+        "full_40": {
+          "loss": 4.3076653355456074e-14,
+          "success": true,
+          "iterations": 47,
+          "evaluations": 48,
+          "message": "Optimization terminated successfully.",
+          "wall_seconds": 0.38435187499271706
+        },
+        "model_top_15": {
+          "loss": 3.2085445411667024e-14,
+          "success": true,
+          "iterations": 61,
+          "evaluations": 63,
+          "message": "Optimization terminated successfully.",
+          "wall_seconds": 0.4081912919646129
+        },
+        "top_15_plus_5": {
+          "loss": 4.207745263329343e-14,
+          "success": true,
+          "iterations": 54,
+          "evaluations": 55,
+          "message": "Optimization terminated successfully.",
+          "wall_seconds": 0.3918593330308795
+        },
+        "random_15": {
+          "loss": 0.002056986433096264,
+          "success": true,
+          "iterations": 115,
+          "evaluations": 119,
+          "message": "Optimization terminated successfully.",
+          "wall_seconds": 0.5687734999810345
+        },
+        "bottom_15": {
+          "loss": 1.0225154056797692e-13,
+          "success": true,
+          "iterations": 173,
+          "evaluations": 179,
+          "message": "Optimization terminated successfully.",
+          "wall_seconds": 0.7422572919749655
+        }
+      },
+      "region": "B: fixed top-15 calibrates"
+    },
+    {
+      "epsilon": 2.0,
+      "warm_loss": 0.46764705630870085,
+      "hessian_seconds": 0.5549697499955073,
+      "model_true_top15_overlap": {
+        "mean": 0.640913085523186,
+        "minimum": 0.005976475732176495,
+        "largest_angle_degrees": 85.56617288033162
+      },
+      "methods": {
+        "full_40": {
+          "loss": 1.84297022087776e-14,
+          "success": true,
+          "iterations": 46,
+          "evaluations": 47,
+          "message": "Optimization terminated successfully.",
+          "wall_seconds": 0.3548942499910481
+        },
+        "model_top_15": {
+          "loss": 1.0735856648125264e-13,
+          "success": true,
+          "iterations": 122,
+          "evaluations": 137,
+          "message": "Optimization terminated successfully.",
+          "wall_seconds": 0.6181588750332594
+        },
+        "top_15_plus_5": {
+          "loss": 9.547918011776346e-15,
+          "success": true,
+          "iterations": 66,
+          "evaluations": 67,
+          "message": "Optimization terminated successfully.",
+          "wall_seconds": 0.42186916596256196
+        },
+        "random_15": {
+          "loss": 5.573319583618286e-14,
+          "success": true,
+          "iterations": 117,
+          "evaluations": 120,
+          "message": "Optimization terminated successfully.",
+          "wall_seconds": 0.5649815000360832
+        },
+        "bottom_15": {
+          "loss": 6.850076061937216e-14,
+          "success": true,
+          "iterations": 137,
+          "evaluations": 149,
+          "message": "Optimization terminated successfully.",
+          "wall_seconds": 0.6382569170091301
+        }
+      },
+      "region": "B: fixed top-15 calibrates"
+    }
+  ],
+  "artifacts": [
+    "reachability.csv",
+    "reachability_data.npz",
+    "reachability_vs_epsilon.png",
+    "subspace_rotation_vs_epsilon.png"
+  ],
+  "rerun": "python3 tracks/qcs/solutions/Fermichen99/run_reachability.py --n-steps 256"
+}

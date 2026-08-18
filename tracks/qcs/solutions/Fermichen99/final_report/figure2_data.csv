@@ -1,0 +1,16 @@
+panel,epsilon,strategy,dimension,runs,certified_success_rate,censored_query_q25,censored_query_median,censored_query_q75,query_budget
+a,0.1,fixed nominal,15,15,1.0,235,238,241,700
+a,0.1,fixed nominal,20,15,1.0,309.5,313,328,700
+a,0.1,fixed nominal,30,15,1.0,451.5,461,506.5,700
+a,0.5,fixed nominal,15,15,0.2,701,701,701,700
+a,0.5,fixed nominal,20,15,0.6,404,414,701,700
+a,0.5,fixed nominal,30,15,0.9333333333,566.5,599,620.5,700
+b,0.1,fixed nominal,15,15,1.0,235,238,241,700
+b,0.3,fixed nominal,15,15,0.8,256,259,275,700
+b,0.5,fixed nominal,15,15,0.2,701,701,701,700
+b,0.1,fixed ensemble,30,15,1.0,454.5,506,512,700
+b,0.3,fixed ensemble,30,15,1.0,549.5,572,583.5,700
+b,0.5,fixed ensemble,30,15,1.0,566.5,579,609,700
+b,0.1,triggered adaptive,20,15,1.0,97,97,97,700
+b,0.3,triggered adaptive,20,15,1.0,330,330,330,700
+b,0.5,triggered adaptive,20,15,1.0,330,330,425,700
