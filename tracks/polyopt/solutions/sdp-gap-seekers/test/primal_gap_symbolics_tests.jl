@@ -1,0 +1,397 @@
+include(joinpath(@__DIR__, "..", "src", "PrimalGapSymbolics.jl"))
+using .PrimalGapSymbolics
+
+@testset "exact primal gap-SDP symbolic entries" begin
+    _, x = pauli_word([(1, :X)])
+    _, y = pauli_word([(1, :Y)])
+    _, z = pauli_word([(1, :Z)])
+    identity = PauliWord()
+
+    bare_x = StateMonomial(PauliWord[], x)
+    bare_y = StateMonomial(PauliWord[], y)
+    scalar_x = StateMonomial([x], identity)
+    scalar_y = StateMonomial([y], identity)
+
+    z_moment = moment_key([z])
+    xy_moment = moment_key([x, y])
+
+    xy_positive = positive_entry(bare_x, bare_y)
+    yx_positive = positive_entry(bare_y, bare_x)
+    @test polynomial_coefficient(xy_positive, z_moment) == im
+    @test polynomial_coefficient(yx_positive, z_moment) == -im
+    @test yx_positive == adjoint_polynomial(xy_positive)
+
+    covariance = covariance_product_entry(bare_x, bare_y)
+    @test polynomial_coefficient(covariance, xy_moment) == 1
+    @test polynomial_coefficient(covariance, z_moment) == 0
+    @test covariance == covariance_product_entry(scalar_x, scalar_y)
+
+    @test moment_key([y, x]) == xy_moment
+    @test moment_key_string(moment_key()) == "moment=[]"
+    @test moment_key_string(xy_moment) == "moment=[1X|1Y]"
+    @test moment_degree(xy_moment) == 2
+end
+
+@testset "one-site Hamiltonian hand checks" begin
+    _, x = pauli_word([(1, :X)])
+    _, y = pauli_word([(1, :Y)])
+    _, z = pauli_word([(1, :Z)])
+    identity = PauliWord()
+
+    hamiltonian = [
+        LocalPauliTerm(1//1 + 0//1 * im, z, :test, Site(0, 0)),
+    ]
+    bare_x = StateMonomial(PauliWord[], x)
+    bare_identity = StateMonomial(PauliWord[], identity)
+
+    # [Z,X] = 2iY.
+    stationarity = stationarity_entry(bare_x, hamiltonian)
+    @test polynomial_coefficient(stationarity, moment_key([y])) == 2im
+    @test length(stationarity.terms) == 1
+
+    # 1/2 (X[Z,X] - [Z,X]X) = -2Z.
+    energy_xx = gap_energy_entry(bare_x, bare_x, hamiltonian)
+    @test polynomial_coefficient(energy_xx, moment_key([z])) == -2
+    @test length(energy_xx.terms) == 1
+
+    # The variance part is -gamma * (1 - ζ(X)^2).
+    gap_xx = gap_entry(bare_x, bare_x, hamiltonian, 1//3)
+    @test polynomial_coefficient(gap_xx, moment_key([z])) == -2
+    @test polynomial_coefficient(gap_xx, moment_key()) == -1//3
+    @test polynomial_coefficient(gap_xx, moment_key([x, x])) == 1//3
+    @test length(gap_xx.terms) == 3
+
+    # The identity direction has zero energy and zero variance.
+    @test iszero(gap_entry(
+        bare_identity,
+        bare_identity,
+        hamiltonian,
+        1//3,
+    ))
+end
+
+include(joinpath(@__DIR__, "..", "src", "PrimalGapAssembly.jl"))
+using .PrimalGapAssembly
+include(joinpath(@__DIR__, "..", "src", "PrimalGapJuMP.jl"))
+using .PrimalGapJuMP
+using JuMP
+
+@testset "canonical stationarity equality handling" begin
+    _, x = pauli_word([(1, :X)])
+    _, y = pauli_word([(1, :Y)])
+    _, z = pauli_word([(1, :Z)])
+    hamiltonian = [
+        LocalPauliTerm(1//1 + 0//1 * im, z, :test, Site(0, 0)),
+    ]
+    identity = StateMonomial(PauliWord[], PauliWord())
+    bare_x = StateMonomial(PauliWord[], x)
+    duplicate_x = StateMonomial([y], x)
+
+    equalities = canonical_stationarity_equalities(
+        [identity, bare_x, bare_x],
+        hamiltonian,
+    )
+    @test length(equalities) == 1
+    @test polynomial_coefficient(only(equalities), moment_key([y])) == 1
+
+    # Multiplication by the scalar state symbol ζ(Y) is a distinct constraint.
+    with_scalar_multiplier = canonical_stationarity_equalities(
+        [bare_x, duplicate_x],
+        hamiltonian,
+    )
+    @test length(with_scalar_multiplier) == 2
+    @test any(
+        polynomial_coefficient(equality, moment_key([y, y])) == 1
+        for equality in with_scalar_multiplier
+    )
+end
+
+@testset "complete inner-state stationarity selection" begin
+    patch = square_patch_geometry(1)
+    model = shastry_sutherland_model(0//1)
+    problem = GapProblem(
+        patch,
+        model,
+        1//1,
+        2;
+        basis_mode=:structured,
+        basis_spec=StructuredBasisSpec(:full_state_polynomial, 1),
+    )
+    bare_spec = StationaritySpec(:bare_inner_pauli, 1)
+    full_spec = StationaritySpec(:full_inner_state, 1)
+    bare = stationarity_candidates(problem, bare_spec)
+    full = stationarity_candidates(problem, full_spec)
+
+    @test length(bare) == 4
+    @test length(full) == 22
+    @test issubset(Set(bare), Set(full))
+    @test length(unique(full)) == length(full)
+    @test issorted(state_monomial_degree.(full))
+    @test all(entry -> state_monomial_degree(entry) <= 2, full)
+    @test any(length(entry.state_symbols) == 2 for entry in full)
+    @test any(
+        length(entry.state_symbols) == 1 &&
+        !isempty(entry.operator_word.ops)
+        for entry in full
+    )
+    @test_throws ArgumentError StationaritySpec(:unknown_stationarity, 1)
+end
+
+@testset "small exact primal assembly manifest" begin
+    site = Site(0, 0)
+    patch = LocalPatch(
+        "one-site-algebra-test",
+        0,
+        [site],
+        Dict(site => 1),
+        [1],
+    )
+    template = PauliInteractionTemplate(
+        [site],
+        [:Z],
+        1//1,
+        :test,
+    )
+    model = TranslationInvariantPauliModel(
+        "one-site-z-test",
+        [template],
+    )
+    problem = GapProblem(
+        patch,
+        model,
+        1//3,
+        2;
+        basis_mode=:structured,
+        basis_spec=StructuredBasisSpec(:one_symbol_lift, 1),
+    )
+
+    assembled = assemble_primal_gap(problem)
+    repeated = assemble_primal_gap(problem)
+    @test assembled.schema == "primal-gap-assembly-v1"
+    @test length(assembled.positive_basis.entries) == 7
+    @test length(assembled.gap_basis.entries) == 7
+    @test length(assembled.hamiltonian_terms) == 1
+    @test length(assembled.stationarity_equalities) == 2
+    @test first(assembled.moments) == moment_key()
+    @test all(key -> moment_degree(key) <= 4, assembled.moments)
+    @test assembled.moments_sha256 == repeated.moments_sha256
+    @test assembled.coefficient_map_sha256 ==
+          repeated.coefficient_map_sha256
+    @test assembled.assembly_sha256 == repeated.assembly_sha256
+
+    changed_gamma = GapProblem(
+        patch,
+        model,
+        1//2,
+        2;
+        basis_mode=:structured,
+        basis_spec=StructuredBasisSpec(:one_symbol_lift, 1),
+    )
+    changed = assemble_primal_gap(changed_gamma)
+    @test changed.problem_sha256 != assembled.problem_sha256
+    @test changed.coefficient_map_sha256 !=
+          assembled.coefficient_map_sha256
+    @test changed.assembly_sha256 != assembled.assembly_sha256
+
+    jump_model = build_jump_primal(assembled)
+    @test JuMP.num_variables(jump_model.model) == length(assembled.moments)
+    @test JuMP.num_constraints(
+        jump_model.model;
+        count_variable_in_set_constraints=false,
+    ) == 5
+    @test JuMP.name(jump_model.normalization_constraint) == "normalization"
+    @test JuMP.name(jump_model.positive_constraint) == "positive_psd"
+    @test JuMP.name(jump_model.gap_constraint) == "gap_psd"
+    @test JuMP.name.(jump_model.stationarity_constraints) ==
+          ["stationarity[1]", "stationarity[2]"]
+    @test jump_model.assembly_sha256 == assembled.assembly_sha256
+    @test JuMP.constraint_object(jump_model.positive_constraint).set isa
+          JuMP.MOI.HermitianPositiveSemidefiniteConeTriangle
+    @test JuMP.constraint_object(jump_model.gap_constraint).set isa
+          JuMP.MOI.HermitianPositiveSemidefiniteConeTriangle
+    @test JuMP.constraint_object(
+        jump_model.positive_constraint,
+    ).set.side_dimension == 7
+    @test JuMP.constraint_object(
+        jump_model.gap_constraint,
+    ).set.side_dimension == 7
+end
+
+@testset "Square Rung A exact primal assembly" begin
+    problem = GapProblem(
+        square_patch_geometry(1),
+        square_j1j2_model(1//2),
+        0//1,
+        2;
+        basis_mode=:structured,
+        basis_spec=StructuredBasisSpec(:bare_weight_one, 1),
+    )
+    assembled = assemble_primal_gap(problem)
+    repeated = assemble_primal_gap(problem)
+
+    @test length(assembled.positive_basis.entries) == 28
+    @test length(assembled.gap_basis.entries) == 4
+    @test length(assembled.hamiltonian_terms) == 60
+    @test length(assembled.stationarity_equalities) == 3
+    @test length(assembled.moments) == 352
+    @test maximum(moment_degree, assembled.moments) == 2
+    @test assembled.problem_sha256 ==
+          "0943a4f7c3786e927f71e5f122c5256ced291fed08f5ea1c884eb59f92f7f687"
+    @test assembled.moments_sha256 ==
+          "25ca49cbb527bd2d531469a26f9f5fcbd84d3d35c666fb27b8cb46819c544e5c"
+    @test assembled.coefficient_map_sha256 ==
+          "16fca8dbad3e2cfd6a0c47bfa8e4c6fa9c39710caeb07ff974009e919edcb051"
+    @test assembled.assembly_sha256 ==
+          "4ffed703ab3d84660bf03fd5bf7f524ec0bd697560f304b9cb5a08de863125a5"
+    @test repeated.assembly_sha256 == assembled.assembly_sha256
+
+    terms = assembled.hamiltonian_terms
+    for left in assembled.positive_basis.entries
+        for right in assembled.positive_basis.entries
+            @test positive_entry(right, left) ==
+                  adjoint_polynomial(positive_entry(left, right))
+        end
+    end
+    for left in assembled.gap_basis.entries
+        for right in assembled.gap_basis.entries
+            @test gap_entry(right, left, terms, problem.gamma) ==
+                  adjoint_polynomial(
+                      gap_entry(left, right, terms, problem.gamma),
+                  )
+        end
+    end
+
+    jump_model = build_jump_primal(assembled)
+    @test JuMP.num_variables(jump_model.model) == 352
+    @test JuMP.num_constraints(
+        jump_model.model;
+        count_variable_in_set_constraints=false,
+    ) == 6
+    @test JuMP.constraint_object(
+        jump_model.positive_constraint,
+    ).set.side_dimension == 28
+    @test JuMP.constraint_object(
+        jump_model.gap_constraint,
+    ).set.side_dimension == 4
+
+    for (
+        gamma,
+        expected_problem_sha256,
+        expected_coefficient_map_sha256,
+        expected_assembly_sha256,
+    ) in (
+        (
+            1//4,
+            "8ba2500719e5a95631146873a6dbb66f5c2add1fe03f09b8c85eb88df194b1d5",
+            "34b83db3b9520bebe5521696dc55f7be68faea8e88089f854488a809588be744",
+            "2b39589d6f06c6ae4c821ef07ec7529673065fb2f2f4b66afe9039f2b25ed034",
+        ),
+        (
+            2//1,
+            "a1cf3ae5128fa3b1b72d2277acb206b171d8932d0ac17ade52abcb984d73d2ab",
+            "a59c801946409c14240456c08f5e04b5e4fdaf4cbff8100dbdd7fe20589b13cd",
+            "581b6835a9543604889b01a6c5a3bae2d080d02705fd2641dd3ba135d4237243",
+        ),
+    )
+        positive_problem = GapProblem(
+            square_patch_geometry(1),
+            square_j1j2_model(1//2),
+            gamma,
+            2;
+            basis_mode=:structured,
+            basis_spec=StructuredBasisSpec(:bare_weight_one, 1),
+        )
+        positive_assembly = assemble_primal_gap(positive_problem)
+        @test length(positive_assembly.moments) == 358
+        @test positive_assembly.moments_sha256 ==
+              "2e54406141ab180f99002dcab8486c4552db05543656ed43c9553d41cd8a90f2"
+        @test positive_assembly.problem_sha256 ==
+              expected_problem_sha256
+        @test positive_assembly.coefficient_map_sha256 ==
+              expected_coefficient_map_sha256
+        @test positive_assembly.assembly_sha256 ==
+              expected_assembly_sha256
+        @test positive_assembly.positive_basis.sha256 ==
+              assembled.positive_basis.sha256
+        @test positive_assembly.gap_basis.sha256 ==
+              assembled.gap_basis.sha256
+    end
+@testset "small complete primal assembly manifest" begin
+    site = Site(0, 0)
+    patch = LocalPatch(
+        "one-site-complete-test",
+        0,
+        [site],
+        Dict(site => 1),
+        [1],
+    )
+    template = PauliInteractionTemplate(
+        [site],
+        [:Z],
+        1//1,
+        :test,
+    )
+    model = TranslationInvariantPauliModel(
+        "one-site-complete-z-test",
+        [template],
+    )
+    problem = GapProblem(
+        patch,
+        model,
+        1//3,
+        2;
+        basis_mode=:structured,
+        basis_spec=StructuredBasisSpec(:full_state_polynomial, 1),
+    )
+    spec = StationaritySpec(:full_inner_state, 1)
+    assembled = assemble_primal_gap(problem; stationarity_spec=spec)
+    repeated = assemble_primal_gap(problem; stationarity_spec=spec)
+
+    @test length(assembled.positive_basis.entries) == 22
+    @test length(assembled.gap_basis.entries) == 7
+    @test assembled.positive_basis.is_complete
+    @test assembled.gap_basis.is_complete
+    @test assembled.stationarity_spec.family == :full_inner_state
+    @test occursin(
+        "all canonical state-polynomial monomials",
+        assembled.stationarity_selection_rule,
+    )
+    @test assembled.moments_sha256 == repeated.moments_sha256
+    @test assembled.coefficient_map_sha256 ==
+          repeated.coefficient_map_sha256
+    @test assembled.assembly_sha256 == repeated.assembly_sha256
+end
+
+@testset "exactness and Hermitian matrix relations" begin
+    patch = square_patch_geometry(1)
+    model = square_j1j2_model(1//2)
+    terms = instantiate_terms(model, patch)
+    problem = GapProblem(
+        patch,
+        model,
+        1//10,
+        2;
+        basis_mode=:structured,
+        basis_spec=StructuredBasisSpec(:one_symbol_lift, 1),
+    )
+    positive_basis = basis_manifest(problem, :positive).entries
+    gap_basis = basis_manifest(problem, :gap).entries
+
+    selected_positive = positive_basis[1:12]
+    for left in selected_positive, right in selected_positive
+        @test positive_entry(right, left) ==
+              adjoint_polynomial(positive_entry(left, right))
+    end
+
+    for left in gap_basis, right in gap_basis
+        @test gap_entry(right, left, terms, problem.gamma) ==
+              adjoint_polynomial(gap_entry(left, right, terms, problem.gamma))
+    end
+
+    @test_throws ArgumentError gap_entry(
+        first(gap_basis),
+        first(gap_basis),
+        terms,
+        0.1,
+    )
+end

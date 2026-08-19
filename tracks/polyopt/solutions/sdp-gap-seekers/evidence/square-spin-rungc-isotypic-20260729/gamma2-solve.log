@@ -1,0 +1,56 @@
+[square-full-spin-isotypic-solve] validating immutable full-spin isotypic MOF, runmeta, and SHA256SUMS
+[square-full-spin-isotypic-solve] validating fixed setup, six exact reductions, and source hashes
+[square-full-spin-isotypic-solve] reloading MOF and validating 9 named real PSD cones
+[square-full-spin-isotypic-solve] preflight passed; attaching Mosek with threads=16, time_limit=1200s
+[square-full-spin-isotypic-solve] optimize! started
+Problem
+  Name                   :                 
+  Objective sense        : minimize        
+  Type                   : CONIC (conic optimization problem)
+  Constraints            : 1               
+  Affine conic cons.     : 9 (6104 rows)
+  Disjunctive cons.      : 0               
+  Cones                  : 0               
+  Scalar variables       : 3250            
+  Matrix variables       : 0               
+  Integer variables      : 0               
+
+Optimizer started.
+Presolve started.
+Linear dependency checker started.
+Linear dependency checker terminated.
+Eliminator started.
+Freed constraints in eliminator : 0
+Eliminator terminated.
+Eliminator started.
+Freed constraints in eliminator : 0
+Eliminator terminated.
+Eliminator - tries                  : 2                 time                   : 0.00            
+Lin. dep.  - tries                  : 1                 time                   : 0.00            
+Lin. dep.  - primal attempts        : 1                 successes              : 1               
+Lin. dep.  - dual attempts          : 0                 successes              : 0               
+Lin. dep.  - primal deps.           : 0                 dual deps.             : 0               
+Presolve terminated. Time: 0.01    
+Optimizer  - threads                : 16              
+Optimizer  - solved problem         : the primal      
+Optimizer  - Constraints            : 6104            
+Optimizer  - Cones                  : 1               
+Optimizer  - Scalar variables       : 3251              conic                  : 3250            
+Optimizer  - Semi-definite variables: 8                 scalarized             : 6103            
+Factor     - setup time             : 1.58            
+Factor     - dense det. time        : 0.16              GP order time          : 0.53            
+Factor     - nonzeros before factor : 2.47e+06          after factor           : 8.54e+06        
+Factor     - dense dim.             : 2                 flops                  : 1.46e+10        
+Factor     - GP saved nzs           : 2.66e+06          GP saved flops         : 1.14e+10        
+ITE PFEAS    DFEAS    GFEAS    PRSTATUS   POBJ              DOBJ              MU       TIME  
+0   1.0e+00  1.0e+00  1.0e+00  0.00e+00   0.000000000e+00   0.000000000e+00   1.0e+00  1.65  
+1   4.1e-01  4.1e-01  2.6e-01  6.71e-01   0.000000000e+00   -3.244527922e-02  4.1e-01  2.16  
+2   8.9e-03  8.9e-03  7.7e-04  9.05e-01   0.000000000e+00   -2.533849604e-03  8.9e-03  2.70  
+3   9.9e-05  9.9e-05  1.1e-06  1.01e+00   0.000000000e+00   4.076396537e-06   9.9e-05  3.23  
+4   5.1e-13  4.4e-13  1.0e-19  1.00e+00   0.000000000e+00   -4.288499709e-13  4.4e-13  3.79  
+Optimizer terminated. Time: 3.80    
+
+[square-full-spin-isotypic-solve] optimize! returned after 12.3s
+[square-full-spin-isotypic-solve] exporting exact IEEE-754 primal variable bits
+[square-full-spin-isotypic-solve] reconstructing all 9 real symmetric PSD blocks
+[square-full-spin-isotypic-solve] result written to /public/home/iint_sjds/quantum.harness-square-spin-e7c83b2/tracks/polyopt/solutions/sdp-gap-seekers/results/square-spin-rungc-gamma2-20260729-r1/points/gamma-2/solve/result.toml

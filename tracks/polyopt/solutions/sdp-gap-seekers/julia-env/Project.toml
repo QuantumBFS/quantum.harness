@@ -1,0 +1,15 @@
+# SDP-gap solution environment (team-local).
+# The repo-root shared julia-env/ is left at upstream (tensor-network / ED deps);
+# this project carries only the SDP-toolchain dependencies for this solution.
+# Manifest.toml is gitignored — see docs/reproducibility.md for the exact
+# clean-checkout sequence (SpectralGap.jl path dependency + patch).
+[deps]
+Clarabel = "61c947e1-3e6d-4ee4-985a-eec8c727bd6e"
+DynamicPolynomials = "7c1d4256-1411-5781-91ec-d7bc3513ac07"
+JuMP = "4076af6c-e467-56ae-b986-b466b2749572"
+Mosek = "6405355b-0ac2-5fba-af84-adbd65488c0e"
+MosekTools = "1ec41992-ff65-5c91-ac43-2df89e9693a4"
+NCTSSoS = "bfd54a76-f566-4979-8478-f7e03b9d19fb"
+QMBCertify = "71df4310-1531-11eb-256d-190d0a52716f"
+SpectralGap = "2cd8220c-fa98-40a0-8d32-c3094c958e9c"
+StarAlgebras = "0c0c59c1-dc5f-42e9-9a8b-b5dc384a6cd1"

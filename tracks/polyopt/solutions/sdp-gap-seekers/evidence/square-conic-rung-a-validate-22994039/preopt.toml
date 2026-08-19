@@ -1,0 +1,11 @@
+attach_wall_seconds = 5.075967073440552
+linear_constraint_count = 4
+peak_process_rss_kib_after_attach = 578268
+scalar_matrix_nonzero_count = 49
+scalar_variable_count = 352
+schema_version = "square-primal-mosek-preopt-v1"
+semidefinite_constraint_nonzero_count = 0
+semidefinite_dimensions = []
+semidefinite_variable_count = 0
+solve_form = "mosek_default"
+solve_form_parameter = -1

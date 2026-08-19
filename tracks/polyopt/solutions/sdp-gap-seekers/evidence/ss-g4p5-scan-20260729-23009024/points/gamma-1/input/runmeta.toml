@@ -1,0 +1,286 @@
+claim_level = "solver_free_exact_equivalent_full_spin_isotypic_real_reduction"
+created_at_utc = "2026-07-29T13:31:14.461Z"
+optimizer_attached = false
+output_relative = "tracks/polyopt/solutions/sdp-gap-seekers/results/ss-g4p5-scan-20260729/points/gamma-1/input"
+schema_version = "shastry-sutherland-full-spin-isotypic-real-mof-runmeta-v1"
+solver_invoked = false
+
+[exact_conjugation_reduction]
+assembly_sha256 = "b464a82a3bfca73008a4cfc9df1d632cada6274336b5a37c26b86db73d46725f"
+coefficient_map_sha256 = "f552132bf00809f472f63c658a8e13ec139a2247c195b0933fbd3de867f5dd62"
+eliminated_conjugation_odd_moment_count = 2448
+equality_count = 0
+gap_block_dimensions = [1, 1, 1]
+moment_count = 16660
+positive_block_dimensions = [108, 81, 81, 81, 109, 81, 81, 81]
+real_psd_triangle_entries = 31810
+schema = "primal-gap-exact-v4-conjugation-real-reduction-v1"
+
+[exact_full_spin_cone_reduction]
+assembly_sha256 = "af019fc605ea7f669271606daf3f6beb642463ec84ec5a231d3d999bf53f0468"
+coefficient_map_sha256 = "09fe9258a552dce0cc58117fe264f8f294ffefcd1716c8dd2385f26384c21649"
+eliminated_unused_moment_count = 0
+equality_count = 0
+gap_block_dimensions = [1]
+gauge_mixed_entries_zero = true
+gauge_mixed_entry_count = 0
+gauge_phase_classes_aligned = true
+gauge_phases_well_formed = true
+maximum_psd_side_dimension = 73
+moment_count = 3250
+orbit_block_count = 3
+orbit_block_dimensions = [1, 81, 81]
+orbit_congruence_exact = true
+orbit_entry_count = 6643
+orbit_projection_exact = true
+positive_block_dimensions = [72, 36, 36, 45, 73, 36, 36, 45]
+real_psd_triangle_entries = 10064
+removed_orbit_cone_count = 3
+schema = "primal-gap-exact-v4-conjugation-real-full-spin-cone-orbit-reduction-v1"
+stable_bases_invertible = true
+stable_basis_dimensions = [1, 81, 81]
+stable_cross_blocks_zero = true
+stable_cross_entry_count = 3240
+truth_checks_exhaustive = true
+
+[exact_full_spin_isotypic_reduction]
+assembly_sha256 = "519b4823312e684db6dd97adf35124bef85c5accd04b25237eafe5e81c63094b"
+bases_invertible = true
+basis_dimensions = [108, 109]
+coefficient_map_sha256 = "c923ce485198c5b3a780149df1d3682086d8b3fdc02b792697d9facf707bd916"
+conjugation_rows_even = true
+cross_blocks_zero = true
+cross_entry_count = 7848
+eliminated_unused_moment_count = 0
+equality_count = 0
+gap_block_dimensions = [1]
+involution_exact = true
+maximum_psd_side_dimension = 45
+moment_count = 3250
+positive_block_dimensions = [36, 36, 36, 45, 37, 36, 36, 45]
+real_psd_triangle_entries = 6104
+row_actions_unsigned = true
+schema = "primal-gap-exact-v4-conjugation-real-full-spin-isotypic-v1"
+singleton_orbit_count = 1
+source_block_dimensions = [108, 109]
+standard_block_dimensions = [36, 36]
+standard_blocks_proportional = true
+standard_proportionality_factor = 3
+standard_relation_entry_count = 1332
+triple_orbit_count = 72
+trivial_block_dimensions = [36, 37]
+truth_checks_exhaustive = true
+
+[exact_full_spin_reduction]
+assembly_sha256 = "a413cb9c58f28ee04ab02fa775af4fc993b7905290c6942d41c200282075605f"
+coefficient_check_count = 190860
+coefficient_covariant = true
+coefficient_map_sha256 = "7de7a0da67e7abe03668f8bb5987380513ce53e96b51f1584e1570d092484233"
+conjugation_action_unsigned = true
+conjugation_inventory_closed = true
+eliminated_from_conjugation_moment_count = 13410
+eliminated_from_spin_axis_moment_count = 5553
+equality_count = 0
+equality_space_invariant = true
+gap_block_dimensions = [1, 1]
+hamiltonian_invariant = true
+maximum_psd_side_dimension = 81
+moment_count = 3250
+positive_block_dimensions = [72, 36, 81, 36, 45, 73, 36, 81, 36, 45]
+real_psd_triangle_entries = 16707
+schema = "primal-gap-exact-v4-conjugation-real-full-spin-permutation-v1"
+truth_checks_exhaustive = true
+
+[exact_spin_axis_reduction]
+assembly_sha256 = "25ec104bed8b30e59f03a1b47f1b66fdc49b1c8458c5821062a51bf8ba8cde67"
+coefficient_count = 31810
+coefficient_covariant = true
+coefficient_map_sha256 = "7a8f4f1f7b186c650c122229f0f706615be1ddb9712ccf50a71e215a9fe3d4bd"
+eliminated_spin_axis_moment_count = 7857
+equality_count = 0
+equality_space_invariant = true
+gap_block_dimensions = [1, 1]
+hamiltonian_invariant = true
+maximum_psd_side_dimension = 81
+moment_count = 8803
+positive_block_dimensions = [72, 36, 81, 36, 45, 73, 36, 81, 36, 45]
+real_psd_triangle_entries = 16707
+schema = "primal-gap-exact-v4-conjugation-real-spin-axis-involution-v1"
+stable_cross_blocks_zero = true
+stable_cross_entry_count = 8460
+truth_checks_exhaustive = true
+
+[exact_v4_reduction]
+assembly_sha256 = "18dd54af97cc96c192e251af527aa5b2c5a35a2bcc06486c608af763cfa495f6"
+coefficient_map_sha256 = "2c50e414f92105024dd068f7171d5f2524ac0ffc9e64325f0f6cbd5a909b4a19"
+eliminated_moment_count = 55494
+equality_count = 3
+gap_block_dimensions = [1, 1, 1]
+moment_count = 19108
+positive_block_dimensions = [108, 81, 81, 81, 109, 81, 81, 81]
+schema = "primal-gap-exact-v4-reduction-v1"
+
+[mof]
+bytes = 1869579
+filename = "model.mof.json"
+sha256 = "b0f037486d1c3066872392e3d031a62cc62161cdd29095948acedc65ab4341ef"
+
+[replay]
+constraint_count_excluding_variable_sets = 10
+passed = true
+psd_cone_type = "PositiveSemidefiniteConeTriangle"
+psd_constraint_count = 9
+variable_count = 3250
+
+    [replay.psd_block_dimensions]
+    isotypic_full_spin_gap_gap_active_rx1_ry0_eigen_minus_real_psd = 1
+    isotypic_full_spin_positive_centered_rx0_ry0_s3_standard_representative_real_psd = 36
+    isotypic_full_spin_positive_centered_rx0_ry0_s3_trivial_real_psd = 36
+    isotypic_full_spin_positive_centered_rx1_ry0_eigen_minus_real_psd = 45
+    isotypic_full_spin_positive_centered_rx1_ry0_eigen_plus_real_psd = 36
+    isotypic_full_spin_positive_scalar_rx0_ry0_s3_standard_representative_real_psd = 36
+    isotypic_full_spin_positive_scalar_rx0_ry0_s3_trivial_real_psd = 37
+    isotypic_full_spin_positive_scalar_rx1_ry0_eigen_minus_real_psd = 45
+    isotypic_full_spin_positive_scalar_rx1_ry0_eigen_plus_real_psd = 36
+
+[runtime]
+julia_version = "1.11.5"
+jump_version = "1.31.1"
+mathoptinterface_version = "1.51.2"
+
+[setup]
+degree_d = 2
+model = "shastry-sutherland"
+patch_level = 1
+physical_boundary_condition = "none-local-consistency-window"
+state_class = "unrestricted"
+
+    [setup.g_square_over_dimer]
+    canonical = "4//5"
+    denominator = "5"
+    float64 = 0.8
+    numerator = "4"
+
+    [setup.gamma]
+    canonical = "1//1"
+    denominator = "1"
+    float64 = 1.0
+    numerator = "1"
+
+[source]
+dirty_paths_at_build = []
+git_branch = "ss-scan-f1fb24c"
+git_commit = "f1fb24ceb1a6ba110abbcb06307a9833bc90b524"
+git_tree = "e6288e6214d0e1cd6cd4a97535d4a80d99de99fe"
+
+    [source.files_sha256]
+    "tracks/polyopt/solutions/sdp-gap-seekers/scripts/build_shastry_sutherland_full_spin_isotypic_reduced_mof.jl" = "a46114cde68d1f40b63dbc258ab99e13284e7251010e3a4b3b035cd3324bff24"
+    "tracks/polyopt/solutions/sdp-gap-seekers/src/ConjugationSymmetryReduction.jl" = "7c1a00658b9c645136565a4e3a891b530d922d0a40433a03498d610d74fc8fe2"
+    "tracks/polyopt/solutions/sdp-gap-seekers/src/ExactSymmetryReduction.jl" = "e04a1e545db567fd4bae8f65fdbe34b5d5490a3abb7cf03f4b5ad346bc04a496"
+    "tracks/polyopt/solutions/sdp-gap-seekers/src/FullSpinConeReducedPrimalGapJuMP.jl" = "64dfc4eacfb5f2553dd81ca113f52f1e19ceefd11981cfbe9e2c7c343efd9a88"
+    "tracks/polyopt/solutions/sdp-gap-seekers/src/FullSpinConeReduction.jl" = "0cbb398d60625333b6124ecc8d0be50778538f1ede02bab9203f293840e239d0"
+    "tracks/polyopt/solutions/sdp-gap-seekers/src/FullSpinIsotypicPrimalGapJuMP.jl" = "0e3d1531304dc1746d0a5b8e43a59a2c79654b8399e826f67db952497de62bff"
+    "tracks/polyopt/solutions/sdp-gap-seekers/src/FullSpinIsotypicReduction.jl" = "dcbe4467b25fabc6f80efe6cf062308f6e23f677c46a9ea5a7af73e3806cd4d3"
+    "tracks/polyopt/solutions/sdp-gap-seekers/src/FullSpinPermutationPrimalGapJuMP.jl" = "59780a4b93f06455be5a7b0e9ea2e9596a7664456274a229c9ed3c4da8d4a44b"
+    "tracks/polyopt/solutions/sdp-gap-seekers/src/FullSpinPermutationReduction.jl" = "837f1b42e94a09348d7cd26bae3c6f5f4161e09af6dc665ed830b498323d01ae"
+    "tracks/polyopt/solutions/sdp-gap-seekers/src/GenericGapModel.jl" = "0b2837ef7f4b956c483ea962da721a52433755573671efbeb7ca776f512393ab"
+    "tracks/polyopt/solutions/sdp-gap-seekers/src/PrimalGapAssembly.jl" = "f6939cb9ed825752cf59dbbc12b931396fd5951136633100a00d746d79ec9dde"
+    "tracks/polyopt/solutions/sdp-gap-seekers/src/PrimalGapJuMP.jl" = "bbf044ce8269cd15da7f31301a47bce3e845a9685d5200f007c1a5af30ea9f29"
+    "tracks/polyopt/solutions/sdp-gap-seekers/src/PrimalGapSymbolics.jl" = "8490772806bff5136fe4985ffddd7253ec2dc4bbe3c98afa88fa3970a50f5f45"
+    "tracks/polyopt/solutions/sdp-gap-seekers/src/ReducedPrimalGapAssembly.jl" = "3977939f1e5072d7f87c488338138b6f80ba0ed66fb7572f369172913e038b10"
+    "tracks/polyopt/solutions/sdp-gap-seekers/src/SpinAxisInvolutionPrimalGapJuMP.jl" = "a6d5feff6d5efe22f384201be83381ce4628d9e758a6120e11e9870659c7f610"
+    "tracks/polyopt/solutions/sdp-gap-seekers/src/SpinAxisInvolutionReduction.jl" = "eac3ead9b9a30542df31b68e1f0c1da85861bb05d7fe125f6c54f30e287deb42"
+    "tracks/polyopt/solutions/sdp-gap-seekers/src/SquareJ1J2Prototype.jl" = "df0664547c9de0b2a79406f3dce6c46a0ed07dca157562c166a8592fae83e829"
+
+[source_assembly]
+assembly_sha256 = "d6879b41c113067f8e1889a0038a654127b31d60922b5c22beb074428583a168"
+gap_dimension = 7
+moment_count = 74602
+positive_dimension = 703
+problem_sha256 = "f81c01587a758d8cfa18b2c88f937ee998c38aa6680692adcbb34e1058903b59"
+schema = "primal-gap-assembly-v1"
+stationarity_equality_count = 3
+
+[timing.conjugation_reduction]
+allocated_bytes = 1746907720
+gc_seconds = 0.416531291
+peak_process_rss_kib_after_step = 1022624
+wall_seconds = 2.307467429
+
+[timing.exact_v4_reduction]
+allocated_bytes = 17117364376
+gc_seconds = 3.796134687
+peak_process_rss_kib_after_step = 1022624
+wall_seconds = 22.068935381
+
+[timing.full_spin_cone_reduction]
+allocated_bytes = 923805032
+gc_seconds = 0.246693135
+peak_process_rss_kib_after_step = 1022624
+wall_seconds = 1.346124203
+
+[timing.full_spin_cone_truth]
+allocated_bytes = 913935328
+gc_seconds = 0.239141738
+peak_process_rss_kib_after_step = 1022624
+wall_seconds = 1.385945829
+
+[timing.full_spin_isotypic_reduction]
+allocated_bytes = 855096296
+gc_seconds = 0.237972559
+peak_process_rss_kib_after_step = 1022624
+wall_seconds = 1.258045553
+
+[timing.full_spin_isotypic_truth]
+allocated_bytes = 2095088720
+gc_seconds = 0.552039954
+peak_process_rss_kib_after_step = 1022624
+wall_seconds = 2.938973403
+
+[timing.full_spin_reduction]
+allocated_bytes = 1371406840
+gc_seconds = 0.449650072
+peak_process_rss_kib_after_step = 1022624
+wall_seconds = 2.162241414
+
+[timing.full_spin_truth]
+allocated_bytes = 8673186128
+gc_seconds = 2.022245206
+peak_process_rss_kib_after_step = 1022624
+wall_seconds = 12.546105574
+
+[timing.jump_build]
+allocated_bytes = 879728856
+gc_seconds = 0.244067797
+peak_process_rss_kib_after_step = 1022624
+wall_seconds = 1.740741825
+
+[timing.mof_reload]
+allocated_bytes = 832649000
+gc_seconds = 0.08189103
+peak_process_rss_kib_after_step = 1022624
+wall_seconds = 7.617111417
+
+[timing.mof_write]
+allocated_bytes = 866838392
+gc_seconds = 0.166075238
+peak_process_rss_kib_after_step = 1022624
+wall_seconds = 11.198891764
+
+[timing.source_assembly]
+allocated_bytes = 2693194168
+gc_seconds = 0.840158744
+peak_process_rss_kib_after_step = 1022624
+wall_seconds = 4.729257407
+
+[timing.spin_axis_reduction]
+allocated_bytes = 1128239128
+gc_seconds = 0.258603474
+peak_process_rss_kib_after_step = 1022624
+wall_seconds = 1.578460024
+
+[timing.spin_axis_truth]
+allocated_bytes = 2595116504
+gc_seconds = 0.715709243
+peak_process_rss_kib_after_step = 1022624
+wall_seconds = 3.700972864

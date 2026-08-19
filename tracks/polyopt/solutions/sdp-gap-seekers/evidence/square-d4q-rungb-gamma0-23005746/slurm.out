@@ -1,0 +1,28 @@
+[square-conic-sbatch] run_id=square-conic-d4q-rungb-g0p5-gamma0-23005746
+[square-conic-sbatch] host=a02r04n02
+[square-conic-sbatch] started=2026-07-29T09:36:09Z
+[square-conic-sbatch] basis=bare_operator g=1//2 gamma=0//1
+[square-conic-sbatch] pos_dim=352 gap_dim=4
+[square-conic-sbatch] cpus=32
+[square-conic-sbatch] building SquareGapConic MOF (solver-free)
+[square-d4-conic-mof] bundle path: results/_build-square-conic-d4q-rungb-g0p5-gamma0-23005746; no optimizer will be attached
+[square-d4-conic-mof] assembly: moments=12826, equalities=3, sha=42680482704462a18f3bb6a994d540ebf43cb008430cfc43f50d6afe33ae64b2
+[square-d4-conic-mof] D4 basis: A1=70,A2=24,B1=45,B2=45,E=168; build=0.089s
+[square-d4-conic-mof] D4 JuMP model: blocks=5, variables=1831 (orig moments=12826, after D4 moment-orbit quotient)
+[square-d4-conic-mof] MOF written: bytes=4098487, sha256=56bdd76ebc8d7b1df86fdce23491467dfdf654edc48e293b2cd0e7f3fb8b2063
+[square-d4-conic-mof] independent MOF reload checks passed
+[square-d4-conic-mof] runmeta and checksums written; bundle complete
+model.mof.json: OK
+runmeta.toml: OK
+[square-conic-sbatch] solving via Mosek
+[square-primal-solve] validating Gate B MOF and runmeta
+[square-primal-solve] reading MOF
+[square-primal-solve] attaching Mosek; threads=32, time_limit=2400s
+[square-primal-solve] copying bridged model to Mosek
+[square-primal-solve] Mosek task attached after 5.172s
+[square-primal-solve] Mosek task: scalar_variables=1831, constraints=4, PSD_dimensions=Int32[], solve_form=dual
+[square-primal-solve] optimize! started (solve form left to Mosek default)
+[square-primal-solve] optimize! returned after 1701.649s
+[square-primal-solve] result written to results/square-conic-d4q-rungb-g0p5-gamma0-23005746/result.toml
+[square-conic-sbatch] solver_exit=0
+[square-conic-sbatch] finished=2026-07-29T10:06:54Z

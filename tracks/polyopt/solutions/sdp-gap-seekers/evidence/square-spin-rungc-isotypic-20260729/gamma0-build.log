@@ -1,0 +1,15 @@
+[square-full-spin-isotypic-mof] exact source assembly
+[square-full-spin-isotypic-mof] exact V4 and facial reduction
+[square-full-spin-isotypic-mof] exact conjugation projection and realification
+[square-full-spin-isotypic-mof] exhaustive order-two spin-axis truth gate
+[square-full-spin-isotypic-mof] exact order-two spin-axis block reduction
+[square-full-spin-isotypic-mof] exhaustive full spin-permutation truth gate
+[square-full-spin-isotypic-mof] exact full spin-permutation moment quotient
+[square-full-spin-isotypic-mof] exhaustive full-spin cone-redundancy truth gate
+[square-full-spin-isotypic-mof] exact full-spin nontrivial-character cone reduction
+[square-full-spin-isotypic-mof] exhaustive full-spin trivial-isotypic truth gate
+[square-full-spin-isotypic-mof] exact full-spin trivial-isotypic reduction
+[square-full-spin-isotypic-mof] optimizer-free full-spin isotypic JuMP model
+[square-full-spin-isotypic-mof] write MOF
+[square-full-spin-isotypic-mof] reload and verify full-spin isotypic MOF
+[square-full-spin-isotypic-mof] complete; moments=3250, psd_blocks=9, real_psd_entries=6104, mof_bytes=1869687, sha256=847ab1e7bbcee5476f2f8f01eb2ade3283094a3f733dcf37d0c25bdf73b9d84c

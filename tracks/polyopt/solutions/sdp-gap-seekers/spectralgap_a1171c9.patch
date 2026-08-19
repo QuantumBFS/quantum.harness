@@ -1,0 +1,233 @@
+diff --git a/Project.toml b/Project.toml
+old mode 100644
+new mode 100755
+index 62e90a7..84926f4
+--- a/Project.toml
++++ b/Project.toml
+@@ -4,10 +4,12 @@ authors = ["Jie Wang <wangjie212@amss.ac.cn>"]
+ version = "0.3.0"
+ 
+ [deps]
++Clarabel = "61c947e1-3e6d-4ee4-985a-eec8c727bd6e"
+ JuMP = "4076af6c-e467-56ae-b986-b466b2749572"
+ LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+ MathOptInterface = "b8f27783-ece8-5eb3-8dc8-9495eed66fee"
+ MosekTools = "1ec41992-ff65-5c91-ac43-2df89e9693a4"
++Serialization = "9e88b42a-f829-5b0c-bbe9-9e923198166b"
+ 
+ [compat]
+ MathOptInterface = "1.48.0"
+diff --git a/src/SpectralGap.jl b/src/SpectralGap.jl
+old mode 100644
+new mode 100755
+index c384283..8b27a46
+--- a/src/SpectralGap.jl
++++ b/src/SpectralGap.jl
+@@ -3,10 +3,20 @@ module SpectralGap
+ using MathOptInterface
+ using JuMP
+ using MosekTools
++using Clarabel
+ using LinearAlgebra
+ 
+ export ncpoly, certify_Ising_gap, certify_Ising_gap_nosignsymmetry, certify_Heisenberg_kagome_gap, certify_Heisenberg_kagome_gap_nosignsymmetry
+ 
++# Solver selection: Mosek if available (MOSEKBINDIR set), else Clarabel
++function _select_optimizer()
++    if haskey(ENV, "MOSEKBINDIR") || haskey(ENV, "MOSEK_PLATFORM")
++        return Mosek.Optimizer
++    else
++        return Clarabel.Optimizer
++    end
++end
++
+ include("basicfunction.jl")
+ include("sdp.jl")
+ include("strengthening.jl")
+diff --git a/src/sdp.jl b/src/sdp.jl
+old mode 100644
+new mode 100755
+index ed6716a..fa15692
+--- a/src/sdp.jl
++++ b/src/sdp.jl
+@@ -1,4 +1,4 @@
+-function certify_Ising_gap(N::Int, H::ncpoly, gamma, d::Int; lso=6, QUIET=false)
++function certify_Ising_gap(N::Int, H::ncpoly, gamma, d::Int; lso=6, QUIET=false, optimizer=optimizer_with_attributes(Mosek.Optimizer), export_cert=nothing)
+     println("********************************** SpectralGap **********************************")
+     println("SpectralGap is launching...")
+     basis = [get_basis(N, d, label=i) for i in [1,2]]
+@@ -48,7 +48,7 @@ function certify_Ising_gap(N::Int, H::ncpoly, gamma, d::Int; lso=6, QUIET=false)
+         println("There are $(length(tsupp)) affine constraints.")
+         println("Assembling the SDP...")
+     end
+-    model = Model(optimizer_with_attributes(Mosek.Optimizer))
++    model = Model(optimizer)
+     set_optimizer_attribute(model, MOI.Silent(), QUIET)
+     cons = [AffExpr(0) for i=1:length(tsupp)]
+     pos = Vector{Symmetric{VariableRef}}(undef, length(basis))
+@@ -133,8 +133,7 @@ function certify_Ising_gap(N::Int, H::ncpoly, gamma, d::Int; lso=6, QUIET=false)
+     #     add_to_expression!(cons[Locb], -μ)
+     # end
+     @objective(model, Max, λ)
+-    @constraint(model, cons .== 0)
+-    # @constraint(model, con, cons==zeros(length(cons)))
++    con_eq = @constraint(model, cons .== 0)
+     if QUIET == false
+         println("Solving the SDP...")
+     end
+@@ -145,25 +144,82 @@ function certify_Ising_gap(N::Int, H::ncpoly, gamma, d::Int; lso=6, QUIET=false)
+         println("SDP solving time: $time seconds.")
+     end
+     status = termination_status(model)
++    _pstatus = primal_status(model)
++    _dstatus = dual_status(model)
++    _objv = objective_value(model)
+     @show status
+-    # dual_var = -dual(con)
+-    # mmat = Vector{Matrix{ComplexF16}}(undef, length(basis))
+-    # for i = 1:length(basis)
+-    #     mmat[i] = zeros(ComplexF16, lb[i], lb[i])
+-    #     for j = 1:lb[i], k = 1:lb[i]
+-    #         @inbounds bi,c = reduce!([basis[i][j][1]; basis[i][k][1]], N)
+-    #         if c != 0
+-    #             if isempty(bi)
+-    #                 Locb = bfind(tsupp, sort([basis[i][j][2]; basis[i][k][2]]))
+-    #             else
+-    #                 Locb = bfind(tsupp, sort([basis[i][j][2]; basis[i][k][2]; [bi]]))
+-    #             end
+-    #             mmat[i][j,k] = c*dual_var[Locb]
+-    #         end
+-    #     end
+-    # end
++    # §8 primal-ray extraction (CORRECTED per advisor review 2026-07-28).
++    # This is a Max-λ / homogeneous-equality SOS conic problem. When Mosek
++    # reports primal_status = INFEASIBILITY_CERTIFICATE it has found an unbounded
++    # improving ray of the *primal* model; the ray lives in the VARIABLE VALUES
++    # value.(pos/gpos/λ), NOT in dual(con_eq) (the earlier dual() attempt read
++    # the wrong side and returned degenerate zeros). A valid infeasibility/
++    # dual-infeasibility certificate requires ALL of:
++    #   (a) λ_ray > 0                (genuine improving direction)
++    #   (b) every pos[i] ⪰ 0          (ray stays in the positivity cone)
++    #   (c) every gpos[l] ⪰ 0         (ray stays in the gap cone)
++    #   (d) cons residual ≈ 0         (the homogeneous affine identity holds)
++    # (d) is evaluated by JuMP's value.(cons), independent of the solver flag.
++    # NOTE: under SLOW_PROGRESS the ray is a candidate only; (a)-(d) must pass
++    # and ideally be re-checked with rational/interval post-processing.
++    cert_ray = nothing
++    cert_artifact = nothing
++    if _pstatus == MathOptInterface.INFEASIBILITY_CERTIFICATE ||
++       _pstatus == MathOptInterface.NEARLY_INFEASIBILITY_CERTIFICATE
++        lam_ray = value(λ)
++        pos_min_eig = [lb[i] > 0 ? minimum(real.(eigvals(Hermitian(value.(pos[i]))))) : NaN
++                       for i in eachindex(basis)]
++        gpos_min_eig = [lgb[l] > 0 ? minimum(real.(eigvals(Hermitian(value.(gpos[l]))))) : NaN
++                        for l in eachindex(gbasis)]
++        cons_res = maximum(abs, value.(cons))
++        cert_ray = (lambda=lam_ray, pos_min_eig=pos_min_eig,
++                    gpos_min_eig=gpos_min_eig, cons_residual=cons_res)
++        # PORTABLE CERTIFICATE ARTIFACT (advisor recheck: ONE source of truth).
++        # The verifier must reconstruct EVERYTHING from the single vector x =
++        # ray_values via explicit index maps -- no separately-exported float
++        # matrices or scalar lambda (those created an unsound verifier that
++        # checked three unbound copies). Schema:
++        #   x = ray_values (length nvars) -- the sole primal ray
++        #   affine_map = sparse A as (constraint_k, var_position, coef)
++        #   affine_constants (all 0 for this homogeneous model)
++        #   c = objective vector (Max lambda -> c = e_{lambda_pos})
++        #   pos_var_positions[i][j,k] / gap_var_positions[l][j,k] -> position in x
++        #   lambda_var_position -> position in x
++        # The verifier rebuilds Gram matrices from x via the index maps, checks
++        # symmetry (aliasing), PSD, A*x + constants = 0, and c'x > 0.
++        all_vars = all_variables(model)
++        nvars = length(all_vars)
++        vidx = Dict(var => idx for (idx, var) in enumerate(all_vars))
++        x = value.(all_vars)
++        affmap = Tuple{Int,Int,Float64}[]
++        for k in eachindex(cons)
++            for (var, coef) in pairs(cons[k].terms)
++                push!(affmap, (k, vidx[var], Float64(coef)))
++            end
++        end
++        lambda_pos = vidx[λ]
++        cvec = zeros(Float64, nvars); cvec[lambda_pos] = 1.0
++        pos_varpos = Matrix{Int}[]
++        for i in eachindex(basis)
++            push!(pos_varpos, lb[i] > 0 ? [vidx[pos[i][j, k]] for j in 1:lb[i], k in 1:lb[i]] : zeros(Int, 0, 0))
++        end
++        gap_varpos = Matrix{Int}[]
++        for l in eachindex(gbasis)
++            push!(gap_varpos, lgb[l] > 0 ? [vidx[gpos[l][j, k]] for j in 1:lgb[l], k in 1:lgb[l]] : zeros(Int, 0, 0))
++        end
++        cert_artifact = (schema_version=1, N=N, gamma=Float64(gamma), d=d, lso=lso,
++                         termination=string(status), primal=string(_pstatus),
++                         dual=string(_dstatus), objective=Float64(_objv),
++                         nvars=nvars, nconstraints=length(cons),
++                         affine_constants=[Float64(cons[k].constant) for k in eachindex(cons)],
++                         affine_map=affmap, c=cvec,
++                         pos_var_positions=pos_varpos, gap_var_positions=gap_varpos,
++                         pos_sizes=copy(lb), gap_sizes=copy(lgb),
++                         lambda_var_position=lambda_pos, ray_values=x)
++    end
+     flag = status == MathOptInterface.OPTIMAL ? 1 : 0
+-    return flag
++    return (flag=flag, termination=status, primal=_pstatus, dual=_dstatus, objective=_objv,
++            cert_ray=cert_ray, cert_artifact=cert_artifact)
+ end
+ 
+ function certify_Ising_gap_nosignsymmetry(N::Int, H::ncpoly, gamma, d::Int; lso=6, QUIET=false)
+@@ -339,9 +395,12 @@ function certify_Ising_gap_nosignsymmetry(N::Int, H::ncpoly, gamma, d::Int; lso=
+         println("SDP solving time: $time seconds.")
+     end
+     status = termination_status(model)
++    _pstatus = primal_status(model)
++    _dstatus = dual_status(model)
++    _objv = objective_value(model)
+     @show status
+     flag = status == MathOptInterface.OPTIMAL ? 1 : 0
+-    return flag
++    return (flag=flag, termination=status, primal=_pstatus, dual=_dstatus, objective=_objv)
+ end
+ 
+ function certify_Heisenberg_kagome_gap(N::Int, H::ncpoly, triples, edges, inner_triples, inner_edges, gamma, d::Int; lso=4, QUIET=false)
+@@ -398,6 +457,7 @@ function certify_Heisenberg_kagome_gap(N::Int, H::ncpoly, triples, edges, inner_
+     cons = [AffExpr(0) for i=1:length(tsupp)]
+     pos = Vector{Symmetric{VariableRef}}(undef, length(basis))
+     for i = 1:length(basis)
++        lb[i] > 0 || continue
+         pos[i] = @variable(model, [1:lb[i], 1:lb[i]], PSD)
+         for j = 1:lb[i], k = j:lb[i]
+             @inbounds bi,c = reduce!([basis[i][j][1]; basis[i][k][1]], N, realify=true, model="kagome")
+@@ -417,6 +477,7 @@ function certify_Heisenberg_kagome_gap(N::Int, H::ncpoly, triples, edges, inner_
+     end
+     gpos = Vector{Symmetric{VariableRef}}(undef, length(gbasis))
+     for l = 1:length(gbasis)
++        lgb[l] > 0 || continue
+         gpos[l] = @variable(model, [1:lgb[l], 1:lgb[l]], PSD)
+         for i = 1:lgb[l], j = i:lgb[l]
+             bis,coes = PSDstate_entry(gbasis[l][i][1], gbasis[l][j][1], H, N, realify=true, model="kagome")
+@@ -494,9 +555,12 @@ function certify_Heisenberg_kagome_gap(N::Int, H::ncpoly, triples, edges, inner_
+         println("SDP solving time: $time seconds.")
+     end
+     status = termination_status(model)
++    _pstatus = primal_status(model)
++    _dstatus = dual_status(model)
++    _objv = objective_value(model)
+     @show status
+     flag = status == MathOptInterface.OPTIMAL ? 1 : 0
+-    return flag
++    return (flag=flag, termination=status, primal=_pstatus, dual=_dstatus, objective=_objv)
+ end
+ 
+ function certify_Heisenberg_kagome_gap_nosignsymmetry(N::Int, H::ncpoly, triples, edges, inner_triples, inner_edges, gamma, d::Int; obj=nothing, lso=4, QUIET=false)
+@@ -690,7 +754,10 @@ function certify_Heisenberg_kagome_gap_nosignsymmetry(N::Int, H::ncpoly, triples
+         println("SDP solving time: $time seconds.")
+     end
+     status = termination_status(model)
++    _pstatus = primal_status(model)
++    _dstatus = dual_status(model)
++    _objv = objective_value(model)
+     @show status
+     flag = status == MathOptInterface.OPTIMAL ? 1 : 0
+-    return flag,value(λ)
++    return (flag=flag, value=value(λ), termination=status, primal=_pstatus, dual=_dstatus, objective=_objv)
+ end

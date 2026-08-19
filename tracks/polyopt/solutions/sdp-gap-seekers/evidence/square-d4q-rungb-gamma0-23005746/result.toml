@@ -1,0 +1,60 @@
+classification = "feasible_candidate"
+completed = true
+finished_at_utc = "2026-07-29T10:06:49.625Z"
+input_assembly_sha256 = "42680482704462a18f3bb6a994d540ebf43cb008430cfc43f50d6afe33ae64b2"
+input_moment_count = 12826
+input_problem_sha256 = "9b3bab25902a392602261ae8f3fc48a276d5a54c51ba340f2f7fdd70432f536f"
+model_path = "results/_build-square-conic-d4q-rungb-g0p5-gamma0-23005746/model.mof.json"
+mof_sha256 = "56bdd76ebc8d7b1df86fdce23491467dfdf654edc48e293b2cd0e7f3fb8b2063"
+peak_process_rss_kib = 90748332
+runmeta_path = "results/_build-square-conic-d4q-rungb-g0p5-gamma0-23005746/runmeta.toml"
+schema_version = "square-primal-smoke-result-v1"
+started_at_utc = "2026-07-29T09:38:06.109Z"
+threads = 32
+time_limit_seconds = 2400
+total_wall_seconds = 1723.4423289299011
+
+[launch_expectation]
+basis_family = "bare_operator"
+gamma_canonical = "0//1"
+gap_dimension = 4
+positive_dimension = 352
+
+[runtime]
+hostname = "a02r04n02"
+julia_executable = "/work/home/iint_sjds/julia-1.11.5/bin/julia"
+julia_version = "1.11.5"
+jump_version = "1.31.1"
+mathoptinterface_version = "1.51.2"
+mosek_version = "11.2.0"
+mosektools_version = "0.15.10"
+slurm_cpus_per_task = "32"
+slurm_job_id = "23005746"
+
+[solver]
+solve_wall_seconds = 1701.6494238376617
+
+    [solver.dual_objective_value]
+    available = true
+    value = -4.505336345877113e-14
+
+    [solver.objective_value]
+    available = true
+    value = 0.0
+
+    [solver.relative_gap]
+    available = true
+    value = 0.0004505336345877113
+
+    [solver.solver_reported_solve_time_seconds]
+    available = true
+    value = 1700.5001739151776
+
+[statuses]
+dual = "FEASIBLE_POINT"
+has_duals = true
+has_values = true
+primal = "FEASIBLE_POINT"
+raw = "Mosek.MSK_SOL_STA_OPTIMAL"
+result_count = 1
+termination = "OPTIMAL"

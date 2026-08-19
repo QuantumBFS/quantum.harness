@@ -1,0 +1,53 @@
+{
+  "boundary": "periodic-torus",
+  "bulk_bound_claim": false,
+  "dimer_bonds": 8,
+  "eigensolver": {
+    "initial_vector": "normalized [1,2,...,dimension]",
+    "levels_requested_per_sector": 4,
+    "method": "scipy.sparse.linalg.eigsh",
+    "tolerance": 1e-11
+  },
+  "energy_per_site_sz0": -0.37499999999999983,
+  "exact_g0_check": true,
+  "finite_torus_sz1_gap": 0.9999999999999956,
+  "g": 0.0,
+  "generator": "scripts/shastry_sutherland_ed.py",
+  "ground_energy_sz0": -5.999999999999997,
+  "lowest_energy_sz1": -5.000000000000002,
+  "lx": 4,
+  "ly": 4,
+  "model": "shastry-sutherland",
+  "normalization": "J_dimer=1; H=sum J_ij S_i dot S_j",
+  "runtime": {
+    "numpy_version": "2.2.6",
+    "scipy_version": "1.15.2"
+  },
+  "schema_version": "shastry-sutherland-finite-torus-ed-v1",
+  "sectors": {
+    "0": {
+      "dimension": 12870,
+      "ground_residual": 6.5656933972638255e-15,
+      "lowest_energies": [
+        -5.999999999999997,
+        -5.000000000000003,
+        -4.999999999999999,
+        -4.999999999999998
+      ],
+      "nnz": 287430
+    },
+    "1": {
+      "dimension": 11440,
+      "ground_residual": 3.2166215795505827e-15,
+      "lowest_energies": [
+        -5.000000000000002,
+        -5.000000000000001,
+        -4.999999999999995,
+        -4.0
+      ],
+      "nnz": 251680
+    }
+  },
+  "sites": 16,
+  "square_bonds": 32
+}

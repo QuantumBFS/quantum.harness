@@ -1,0 +1,86 @@
+# Exact SO(3) `l=2` cone-congruence gate
+
+## Purpose
+
+The exact nontrivial-character stabilizer split retains four discrete pieces
+of each continuous-spin `l=2` multiplicity space: one S3-standard cone in the
+trivial V4 character and one stabilizer-plus cone in each of the three
+nontrivial V4 characters. Their dimensions agree, but dimension agreement is
+not a coefficient proof and does not authorize removing a PSD constraint.
+
+The direct 38-cone solve reached 509,850,832 KiB before iteration zero. The
+next decision-relevant question is therefore whether these four cones become
+the same affine PSD matrix after the already-proved exact SO(3) rank-four
+moment projection.
+
+## Fail-closed test
+
+For each positive family and spatial parity, the implementation:
+
+1. erases spin-axis labels from every underlying state-polynomial row while
+   retaining sites, state-symbol grouping, operator support, spatial parity,
+   and exact integer combination coefficients;
+2. requires a unique bijection from every nontrivial stabilizer-plus row to
+   the S3-standard multiplicity row with the same spin-blind signature;
+3. reconstructs both affine matrix entries exactly;
+4. applies `T_xxxx = T_xxyy + T_xyxy + T_xyyx` entrywise; and
+5. expands each row into the common integer source basis and computes its
+   exact squared norm; and
+6. verifies the positive diagonal congruence
+   `T_ij = sqrt(n_i n_j / m_i m_j) R_ij` entrywise.
+
+If a scale product is irrational, both rational polynomial entries must be
+exactly zero. Unit-equal, nonunit-scaled, irrational-zero, sign-opposite, and
+unmatched entries are counted separately. Only zero opposite and zero
+unmatched entries set the truth result to exact. There are 12 target blocks
+and 940,050 mapped triangle entries at `L=2,d=2`. Cone removal is guarded by
+the exact result and is disabled in the truth-only jobs.
+
+## L=1 controls
+
+SCNet job `118194879`, source commit `81a1875`, proved all 12 spin-blind row
+maps bijective. All six centered target blocks were entrywise equal after the
+SO(3) projection. The six scalar blocks had 1,107 entries that were neither
+equal nor sign-opposite under unit scaling. This disproves naïve equality but
+did not by itself disprove congruence: scalar stabilizer rows can be singleton
+or two-row combinations and therefore carry different exact integer norms.
+No cone was removed by `118194879`.
+
+SCNet job `118195346`, source commit `7850757`, tested the norm-derived
+positive diagonal congruence and disproved it for the scalar blocks. Each
+scalar-minus block has 30 rows with norm ratio 1 and 3 rows with ratio 1/2;
+all 465 ordinary/ordinary entries pass and all 96 entries touching an
+exceptional row fail. Each scalar-plus block has 42 ordinary rows and 6
+ratio-1/2 rows; all 903 ordinary/ordinary entries pass and all 273 incident
+entries fail. Zero entries were repaired by scaling and there were no sign-
+opposite matches. The centered blocks still pass exactly. Therefore the L=2
+gate is not authorized: the exceptional scalar rows require a different
+multiplicity-basis map or their cones must be retained.
+
+## Exceptional-row search
+
+The next fail-closed gate retains the proved ratio-1 row map and searches the
+small exceptional sets only. A target/reference exceptional pair is a
+candidate when one nonzero rational signed scale reproduces every mixed entry
+against the fixed ordinary rows and squares correctly on the diagonal. An
+incrementally pruned bijection search then replays every entry of the
+exceptional submatrix. A complete solution proves the exact congruence
+`T = D P R Pᵀ D`, where `P` is a permutation and `D` is an invertible real
+diagonal matrix. This changes basis inside the SDP cone; it does not constrain
+the state. If no solution exists, expanded spin-aware signatures and the full
+candidate graph are written before the gate fails.
+
+SCNet L=1 job `118195948`, source `e81c463`, found exactly one solution in
+every scalar block. The exceptional permutation is the identity, while every
+exceptional row has rational scale 1/2. The affected rows are 16,24,31 in the
+33-side scalar-minus blocks and 22,31,38,42,46,48 in the 48-side scalar-plus
+blocks. This resolves all 1,107 direct mismatches and leaves zero final
+unmatched or opposite entries over 15,822 comparisons. The Euclidean row-norm
+ratio 1/2 therefore did not supply the congruence scale via its square root;
+the coefficient algebra fixes the scale itself to 1/2. L=1 now authorizes the
+separate L=2 truth audit, not cone deletion by itself.
+
+If the gate passes, removing the three duplicate `l=2` copies per group would
+change the retained inventory from 2,540,067 to 1,600,017 packed entries while
+keeping the maximum side 490. This is an exact formulation hypothesis until
+the coefficient job passes; it is not feasibility or spectral-gap evidence.

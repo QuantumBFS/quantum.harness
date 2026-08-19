@@ -1,0 +1,23 @@
+command: julia --startup-file=no --history-file=no --project=julia-env tracks/polyopt/solutions/sdp-gap-seekers/scripts/check_d4_coefficient_gates.jl
+source_commit: 5f79c9358f8f6a4a73502147c2b94f8c1071c8b1
+julia_version: julia version 1.11.5
+run_at_utc: 2026-07-29T10:24:58Z
+dirty: M Ion.lock
+dirty:?? tracks/polyopt/solutions/sdp-gap-seekers/ADVISOR_CURRENT_STATUS_REVIEW_2026-07-29.md
+dirty:?? tracks/polyopt/solutions/sdp-gap-seekers/ADVISOR_ONE_DAY_DELIVERY_STRATEGY_2026-07-29.md
+dirty:?? tracks/polyopt/solutions/sdp-gap-seekers/ADVISOR_RECHECK_2026-07-29_COMMIT_3338706.md
+dirty:?? tracks/polyopt/solutions/sdp-gap-seekers/evidence/d4-coefficient-gates-5f79c93/
+---stdout---
+=== gate 1: group closure + Hamiltonian D4-invariant (from check_d4_orbits) ===
+d4_group_closed	true
+hamiltonian_d4_invariant	true
+=== gate 2: moment inventory D4-closed ===
+moment_closure	closed=true missing=0
+=== gate 3: positive M coefficient-map D4-covariance (exact) ===
+positive_m_covariance	checked=497024 violations=0
+=== gate 4: gap K/G_moment/G_product D4-covariance (exact) ===
+gap_covariance	checked=80 violations=0
+=== gate 6: off-irrep Q' M Q cancellation (sampled, exact) ===
+off_irrep_cancellation	pairs=10 entries_checked=1440 violations=0
+=== summary ===
+ALL_D4_COEFFICIENT_GATES_PASS	true

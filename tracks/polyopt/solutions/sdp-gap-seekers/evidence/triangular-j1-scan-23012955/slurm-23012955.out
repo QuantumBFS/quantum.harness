@@ -1,0 +1,229 @@
+[tri-gamma-scan] run_id=triangular-j1-scan-20260729
+[tri-gamma-scan] job_id=23012955
+[tri-gamma-scan] gammas=0 1 2
+[tri-gamma-scan] commit=d73545d
+[tri-gamma-scan] started=2026-07-29T15:26:43Z
+[tri-gamma-scan] gamma=0 build started
+[tri-full-spin-isotypic-mof] exact source assembly
+[tri-full-spin-isotypic-mof] exact V4 and facial reduction
+[tri-full-spin-isotypic-mof] exact conjugation projection and realification
+[tri-full-spin-isotypic-mof] exhaustive order-two spin-axis truth gate
+[tri-full-spin-isotypic-mof] exact order-two spin-axis block reduction
+[tri-full-spin-isotypic-mof] exhaustive full spin-permutation truth gate
+[tri-full-spin-isotypic-mof] exact full spin-permutation moment quotient
+[tri-full-spin-isotypic-mof] exhaustive full-spin cone-redundancy truth gate
+[tri-full-spin-isotypic-mof] exact full-spin nontrivial-character cone reduction
+[tri-full-spin-isotypic-mof] exhaustive full-spin trivial-isotypic truth gate
+[tri-full-spin-isotypic-mof] exact full-spin trivial-isotypic reduction
+[tri-full-spin-isotypic-mof] optimizer-free full-spin isotypic JuMP model
+[tri-full-spin-isotypic-mof] write MOF
+[tri-full-spin-isotypic-mof] reload and verify full-spin isotypic MOF
+[tri-full-spin-isotypic-mof] complete; moments=3250, psd_blocks=9, real_psd_entries=6104, mof_bytes=1869474, sha256=c1650211f51bd82f47634f8d448206df02e7d2caa32e0c49650a356f3c27538f
+[tri-gamma-scan] gamma=0 solve started
+[tri-full-spin-isotypic-solve] validating immutable full-spin isotypic MOF, runmeta, and SHA256SUMS
+[tri-full-spin-isotypic-solve] validating fixed setup, six exact reductions, and source hashes
+[tri-full-spin-isotypic-solve] reloading MOF and validating 9 named real PSD cones
+[tri-full-spin-isotypic-solve] preflight passed; attaching Mosek with threads=16, time_limit=1200s
+[tri-full-spin-isotypic-solve] optimize! started
+Problem
+  Name                   :                 
+  Objective sense        : minimize        
+  Type                   : CONIC (conic optimization problem)
+  Constraints            : 1               
+  Affine conic cons.     : 9 (6104 rows)
+  Disjunctive cons.      : 0               
+  Cones                  : 0               
+  Scalar variables       : 3250            
+  Matrix variables       : 0               
+  Integer variables      : 0               
+
+Optimizer started.
+Presolve started.
+Linear dependency checker started.
+Linear dependency checker terminated.
+Eliminator started.
+Freed constraints in eliminator : 0
+Eliminator terminated.
+Eliminator started.
+Freed constraints in eliminator : 0
+Eliminator terminated.
+Eliminator - tries                  : 2                 time                   : 0.00            
+Lin. dep.  - tries                  : 1                 time                   : 0.00            
+Lin. dep.  - primal attempts        : 1                 successes              : 1               
+Lin. dep.  - dual attempts          : 0                 successes              : 0               
+Lin. dep.  - primal deps.           : 0                 dual deps.             : 0               
+Presolve terminated. Time: 0.01    
+Optimizer  - threads                : 16              
+Optimizer  - solved problem         : the primal      
+Optimizer  - Constraints            : 6104            
+Optimizer  - Cones                  : 1               
+Optimizer  - Scalar variables       : 3251              conic                  : 3250            
+Optimizer  - Semi-definite variables: 8                 scalarized             : 6103            
+Factor     - setup time             : 1.29            
+Factor     - dense det. time        : 0.14              GP order time          : 0.52            
+Factor     - nonzeros before factor : 2.47e+06          after factor           : 8.29e+06        
+Factor     - dense dim.             : 2                 flops                  : 1.36e+10        
+Factor     - GP saved nzs           : 2.99e+06          GP saved flops         : 1.27e+10        
+ITE PFEAS    DFEAS    GFEAS    PRSTATUS   POBJ              DOBJ              MU       TIME  
+0   1.0e+00  1.0e+00  1.0e+00  0.00e+00   0.000000000e+00   0.000000000e+00   1.0e+00  1.32  
+1   4.1e-01  4.1e-01  2.6e-01  6.73e-01   0.000000000e+00   -3.319975180e-02  4.1e-01  1.67  
+2   2.8e-03  2.8e-03  9.2e-05  9.08e-01   0.000000000e+00   -2.006133289e-03  2.8e-03  2.22  
+3   1.6e-09  1.6e-09  3.1e-14  1.00e+00   0.000000000e+00   -1.389961260e-09  1.6e-09  2.73  
+Optimizer terminated. Time: 2.75    
+
+[tri-full-spin-isotypic-solve] optimize! returned after 9.249s
+[tri-full-spin-isotypic-solve] exporting exact IEEE-754 primal variable bits
+[tri-full-spin-isotypic-solve] reconstructing all 9 real symmetric PSD blocks
+[tri-full-spin-isotypic-solve] result written to /work/home/iint_sjds/triangular.harness/tracks/polyopt/solutions/sdp-gap-seekers/results/triangular-j1-scan-20260729/points/gamma-0/solve/result.toml
+[tri-gamma-scan] gamma=1 build started
+[tri-full-spin-isotypic-mof] exact source assembly
+[tri-full-spin-isotypic-mof] exact V4 and facial reduction
+[tri-full-spin-isotypic-mof] exact conjugation projection and realification
+[tri-full-spin-isotypic-mof] exhaustive order-two spin-axis truth gate
+[tri-full-spin-isotypic-mof] exact order-two spin-axis block reduction
+[tri-full-spin-isotypic-mof] exhaustive full spin-permutation truth gate
+[tri-full-spin-isotypic-mof] exact full spin-permutation moment quotient
+[tri-full-spin-isotypic-mof] exhaustive full-spin cone-redundancy truth gate
+[tri-full-spin-isotypic-mof] exact full-spin nontrivial-character cone reduction
+[tri-full-spin-isotypic-mof] exhaustive full-spin trivial-isotypic truth gate
+[tri-full-spin-isotypic-mof] exact full-spin trivial-isotypic reduction
+[tri-full-spin-isotypic-mof] optimizer-free full-spin isotypic JuMP model
+[tri-full-spin-isotypic-mof] write MOF
+[tri-full-spin-isotypic-mof] reload and verify full-spin isotypic MOF
+[tri-full-spin-isotypic-mof] complete; moments=3250, psd_blocks=9, real_psd_entries=6104, mof_bytes=1869686, sha256=f50dab2127aad67a2b81a893d3cd7f40e2135cdc141e4f4142e2c303dd37aeeb
+[tri-gamma-scan] gamma=1 solve started
+[tri-full-spin-isotypic-solve] validating immutable full-spin isotypic MOF, runmeta, and SHA256SUMS
+[tri-full-spin-isotypic-solve] validating fixed setup, six exact reductions, and source hashes
+[tri-full-spin-isotypic-solve] reloading MOF and validating 9 named real PSD cones
+[tri-full-spin-isotypic-solve] preflight passed; attaching Mosek with threads=16, time_limit=1200s
+[tri-full-spin-isotypic-solve] optimize! started
+Problem
+  Name                   :                 
+  Objective sense        : minimize        
+  Type                   : CONIC (conic optimization problem)
+  Constraints            : 1               
+  Affine conic cons.     : 9 (6104 rows)
+  Disjunctive cons.      : 0               
+  Cones                  : 0               
+  Scalar variables       : 3250            
+  Matrix variables       : 0               
+  Integer variables      : 0               
+
+Optimizer started.
+Presolve started.
+Linear dependency checker started.
+Linear dependency checker terminated.
+Eliminator started.
+Freed constraints in eliminator : 0
+Eliminator terminated.
+Eliminator started.
+Freed constraints in eliminator : 0
+Eliminator terminated.
+Eliminator - tries                  : 2                 time                   : 0.00            
+Lin. dep.  - tries                  : 1                 time                   : 0.00            
+Lin. dep.  - primal attempts        : 1                 successes              : 1               
+Lin. dep.  - dual attempts          : 0                 successes              : 0               
+Lin. dep.  - primal deps.           : 0                 dual deps.             : 0               
+Presolve terminated. Time: 0.00    
+Optimizer  - threads                : 16              
+Optimizer  - solved problem         : the primal      
+Optimizer  - Constraints            : 6104            
+Optimizer  - Cones                  : 1               
+Optimizer  - Scalar variables       : 3251              conic                  : 3250            
+Optimizer  - Semi-definite variables: 8                 scalarized             : 6103            
+Factor     - setup time             : 1.41            
+Factor     - dense det. time        : 0.17              GP order time          : 0.63            
+Factor     - nonzeros before factor : 2.47e+06          after factor           : 8.96e+06        
+Factor     - dense dim.             : 2                 flops                  : 1.67e+10        
+Factor     - GP saved nzs           : 2.42e+06          GP saved flops         : 1.01e+10        
+ITE PFEAS    DFEAS    GFEAS    PRSTATUS   POBJ              DOBJ              MU       TIME  
+0   1.0e+00  1.0e+00  1.0e+00  0.00e+00   0.000000000e+00   0.000000000e+00   1.0e+00  1.43  
+1   4.1e-01  4.1e-01  2.6e-01  6.69e-01   0.000000000e+00   -3.173331910e-02  4.1e-01  1.78  
+2   5.6e-03  5.6e-03  3.3e-04  9.05e-01   0.000000000e+00   -2.668072378e-03  5.6e-03  2.34  
+3   2.5e-07  2.5e-07  1.0e-10  1.00e+00   0.000000000e+00   -1.146019209e-07  2.5e-07  2.88  
+4   3.5e-13  5.0e-14  2.0e-17  1.00e+00   0.000000000e+00   -2.638151965e-14  5.0e-14  3.19  
+Optimizer terminated. Time: 3.20    
+
+[tri-full-spin-isotypic-solve] optimize! returned after 9.511s
+[tri-full-spin-isotypic-solve] exporting exact IEEE-754 primal variable bits
+[tri-full-spin-isotypic-solve] reconstructing all 9 real symmetric PSD blocks
+[tri-full-spin-isotypic-solve] result written to /work/home/iint_sjds/triangular.harness/tracks/polyopt/solutions/sdp-gap-seekers/results/triangular-j1-scan-20260729/points/gamma-1/solve/result.toml
+[tri-gamma-scan] gamma=2 build started
+[tri-full-spin-isotypic-mof] exact source assembly
+[tri-full-spin-isotypic-mof] exact V4 and facial reduction
+[tri-full-spin-isotypic-mof] exact conjugation projection and realification
+[tri-full-spin-isotypic-mof] exhaustive order-two spin-axis truth gate
+[tri-full-spin-isotypic-mof] exact order-two spin-axis block reduction
+[tri-full-spin-isotypic-mof] exhaustive full spin-permutation truth gate
+[tri-full-spin-isotypic-mof] exact full spin-permutation moment quotient
+[tri-full-spin-isotypic-mof] exhaustive full-spin cone-redundancy truth gate
+[tri-full-spin-isotypic-mof] exact full-spin nontrivial-character cone reduction
+[tri-full-spin-isotypic-mof] exhaustive full-spin trivial-isotypic truth gate
+[tri-full-spin-isotypic-mof] exact full-spin trivial-isotypic reduction
+[tri-full-spin-isotypic-mof] optimizer-free full-spin isotypic JuMP model
+[tri-full-spin-isotypic-mof] write MOF
+[tri-full-spin-isotypic-mof] reload and verify full-spin isotypic MOF
+[tri-full-spin-isotypic-mof] complete; moments=3250, psd_blocks=9, real_psd_entries=6104, mof_bytes=1869686, sha256=9bb3e8b79b06c8857178f0d6a16952be9ca31d0528cafea992b5f80e2a692900
+[tri-gamma-scan] gamma=2 solve started
+[tri-full-spin-isotypic-solve] validating immutable full-spin isotypic MOF, runmeta, and SHA256SUMS
+[tri-full-spin-isotypic-solve] validating fixed setup, six exact reductions, and source hashes
+[tri-full-spin-isotypic-solve] reloading MOF and validating 9 named real PSD cones
+[tri-full-spin-isotypic-solve] preflight passed; attaching Mosek with threads=16, time_limit=1200s
+[tri-full-spin-isotypic-solve] optimize! started
+Problem
+  Name                   :                 
+  Objective sense        : minimize        
+  Type                   : CONIC (conic optimization problem)
+  Constraints            : 1               
+  Affine conic cons.     : 9 (6104 rows)
+  Disjunctive cons.      : 0               
+  Cones                  : 0               
+  Scalar variables       : 3250            
+  Matrix variables       : 0               
+  Integer variables      : 0               
+
+Optimizer started.
+Presolve started.
+Linear dependency checker started.
+Linear dependency checker terminated.
+Eliminator started.
+Freed constraints in eliminator : 0
+Eliminator terminated.
+Eliminator started.
+Freed constraints in eliminator : 0
+Eliminator terminated.
+Eliminator - tries                  : 2                 time                   : 0.00            
+Lin. dep.  - tries                  : 1                 time                   : 0.00            
+Lin. dep.  - primal attempts        : 1                 successes              : 1               
+Lin. dep.  - dual attempts          : 0                 successes              : 0               
+Lin. dep.  - primal deps.           : 0                 dual deps.             : 0               
+Presolve terminated. Time: 0.01    
+Optimizer  - threads                : 16              
+Optimizer  - solved problem         : the primal      
+Optimizer  - Constraints            : 6104            
+Optimizer  - Cones                  : 1               
+Optimizer  - Scalar variables       : 3251              conic                  : 3250            
+Optimizer  - Semi-definite variables: 8                 scalarized             : 6103            
+Factor     - setup time             : 1.45            
+Factor     - dense det. time        : 0.24              GP order time          : 0.55            
+Factor     - nonzeros before factor : 2.47e+06          after factor           : 8.96e+06        
+Factor     - dense dim.             : 2                 flops                  : 1.67e+10        
+Factor     - GP saved nzs           : 2.42e+06          GP saved flops         : 1.01e+10        
+ITE PFEAS    DFEAS    GFEAS    PRSTATUS   POBJ              DOBJ              MU       TIME  
+0   1.0e+00  1.0e+00  1.0e+00  0.00e+00   0.000000000e+00   0.000000000e+00   1.0e+00  1.47  
+1   4.1e-01  4.1e-01  2.6e-01  6.71e-01   0.000000000e+00   -3.244762081e-02  4.1e-01  1.78  
+2   9.4e-03  9.4e-03  8.3e-04  9.05e-01   0.000000000e+00   -2.634781709e-03  9.4e-03  2.29  
+3   7.7e-05  7.7e-05  7.2e-07  1.01e+00   0.000000000e+00   2.288917102e-06   7.7e-05  2.63  
+4   3.2e-13  7.8e-14  7.7e-21  1.00e+00   0.000000000e+00   -7.632422049e-14  7.8e-14  3.12  
+Optimizer terminated. Time: 3.12    
+
+[tri-full-spin-isotypic-solve] optimize! returned after 9.559s
+[tri-full-spin-isotypic-solve] exporting exact IEEE-754 primal variable bits
+[tri-full-spin-isotypic-solve] reconstructing all 9 real symmetric PSD blocks
+[tri-full-spin-isotypic-solve] result written to /work/home/iint_sjds/triangular.harness/tracks/polyopt/solutions/sdp-gap-seekers/results/triangular-j1-scan-20260729/points/gamma-2/solve/result.toml
+[tri-gamma-scan] summary
+gamma	build_exit	solve_exit	classification
+0	0	0	feasible_residual_checked_float
+1	0	0	feasible_residual_checked_float
+2	0	0	feasible_residual_checked_float
+[tri-gamma-scan] finished=2026-07-29T15:37:57Z
