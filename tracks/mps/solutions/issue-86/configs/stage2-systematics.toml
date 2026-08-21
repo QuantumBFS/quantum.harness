@@ -1,0 +1,49 @@
+# MPO systematic: compare these P=12 points with the P=16 baseline.
+[[sweeps]]
+model = "long_range"
+sigmas = [1.75]
+lengths = [32, 64]
+gammas = [1.52, 1.54, 1.56, 1.58, 1.60]
+chis = [64]
+poles = [12]
+tolerance = 1.0e-9
+maxiter = 40
+excited = false
+seed = 86
+
+[[sweeps]]
+model = "long_range"
+sigmas = [2.0]
+lengths = [32, 64]
+gammas = [1.38, 1.40, 1.42, 1.44, 1.46]
+chis = [64]
+poles = [12]
+tolerance = 1.0e-9
+maxiter = 40
+excited = false
+seed = 86
+
+# MPS systematic: three points around each literature crossing.
+[[sweeps]]
+model = "long_range"
+sigmas = [1.75]
+lengths = [32, 64]
+gammas = [1.555, 1.5609, 1.567]
+chis = [128]
+poles = [16]
+tolerance = 1.0e-9
+maxiter = 50
+excited = false
+seed = 86
+
+[[sweeps]]
+model = "long_range"
+sigmas = [2.0]
+lengths = [32, 64]
+gammas = [1.415, 1.4208, 1.427]
+chis = [128]
+poles = [16]
+tolerance = 1.0e-9
+maxiter = 50
+excited = false
+seed = 86

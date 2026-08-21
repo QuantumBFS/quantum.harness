@@ -1,0 +1,422 @@
+{
+  "cells": [
+    {
+      "cell_id": "adaptive-c130c1921c600211e979f3d04c7644c0",
+      "params": {
+        "L": 32,
+        "chi": 64,
+        "excited": false,
+        "gamma": 1.565,
+        "maxiter": 40,
+        "model": "long_range",
+        "poles": 12,
+        "seed": 86,
+        "sigma": 1.75,
+        "tolerance": 1.0e-9
+      },
+      "resource_class": "A",
+      "stage": "adaptive"
+    },
+    {
+      "cell_id": "adaptive-e6088c09c49e5191b97ba06abd8fd421",
+      "params": {
+        "L": 64,
+        "chi": 64,
+        "excited": false,
+        "gamma": 1.565,
+        "maxiter": 40,
+        "model": "long_range",
+        "poles": 12,
+        "seed": 86,
+        "sigma": 1.75,
+        "tolerance": 1.0e-9
+      },
+      "resource_class": "A",
+      "stage": "adaptive"
+    },
+    {
+      "cell_id": "adaptive-33ff4824fcda089790f380d78ac37cac",
+      "params": {
+        "L": 8,
+        "chi": 64,
+        "excited": false,
+        "gamma": 1.59,
+        "maxiter": 40,
+        "model": "long_range",
+        "poles": 16,
+        "seed": 86,
+        "sigma": 1.75,
+        "tolerance": 1.0e-9
+      },
+      "resource_class": "A",
+      "stage": "adaptive"
+    },
+    {
+      "cell_id": "adaptive-889a7dc0a8bd94680a7fe89dcb94afa1",
+      "params": {
+        "L": 16,
+        "chi": 64,
+        "excited": false,
+        "gamma": 1.59,
+        "maxiter": 40,
+        "model": "long_range",
+        "poles": 16,
+        "seed": 86,
+        "sigma": 1.75,
+        "tolerance": 1.0e-9
+      },
+      "resource_class": "A",
+      "stage": "adaptive"
+    },
+    {
+      "cell_id": "adaptive-bfebbc6dd33da36eb1ddc79104cd02da",
+      "params": {
+        "L": 16,
+        "chi": 64,
+        "excited": false,
+        "gamma": 1.565,
+        "maxiter": 40,
+        "model": "long_range",
+        "poles": 16,
+        "seed": 86,
+        "sigma": 1.75,
+        "tolerance": 1.0e-9
+      },
+      "resource_class": "A",
+      "stage": "adaptive"
+    },
+    {
+      "cell_id": "adaptive-9dc5974e565ee3a2799f201ab776af30",
+      "params": {
+        "L": 32,
+        "chi": 64,
+        "excited": false,
+        "gamma": 1.565,
+        "maxiter": 40,
+        "model": "long_range",
+        "poles": 16,
+        "seed": 86,
+        "sigma": 1.75,
+        "tolerance": 1.0e-9
+      },
+      "resource_class": "A",
+      "stage": "adaptive"
+    },
+    {
+      "cell_id": "adaptive-26d113e238c7f43c02109efd8a35b708",
+      "params": {
+        "L": 24,
+        "chi": 64,
+        "excited": false,
+        "gamma": 1.565,
+        "maxiter": 40,
+        "model": "long_range",
+        "poles": 16,
+        "seed": 86,
+        "sigma": 1.75,
+        "tolerance": 1.0e-9
+      },
+      "resource_class": "A",
+      "stage": "adaptive"
+    },
+    {
+      "cell_id": "adaptive-74dc3504529da41aa2d55d6263dc9b62",
+      "params": {
+        "L": 48,
+        "chi": 64,
+        "excited": false,
+        "gamma": 1.565,
+        "maxiter": 40,
+        "model": "long_range",
+        "poles": 16,
+        "seed": 86,
+        "sigma": 1.75,
+        "tolerance": 1.0e-9
+      },
+      "resource_class": "A",
+      "stage": "adaptive"
+    },
+    {
+      "cell_id": "adaptive-8110261f6992d87555eda7ffca25b373",
+      "params": {
+        "L": 32,
+        "chi": 64,
+        "excited": false,
+        "gamma": 1.5625,
+        "maxiter": 40,
+        "model": "long_range",
+        "poles": 16,
+        "seed": 86,
+        "sigma": 1.75,
+        "tolerance": 1.0e-9
+      },
+      "resource_class": "A",
+      "stage": "adaptive"
+    },
+    {
+      "cell_id": "adaptive-308d97b42ca7da90fc9a9ace02d22ef3",
+      "params": {
+        "L": 64,
+        "chi": 64,
+        "excited": false,
+        "gamma": 1.5625,
+        "maxiter": 40,
+        "model": "long_range",
+        "poles": 16,
+        "seed": 86,
+        "sigma": 1.75,
+        "tolerance": 1.0e-9
+      },
+      "resource_class": "A",
+      "stage": "adaptive"
+    },
+    {
+      "cell_id": "adaptive-fdec8e210c5b76e1f49504a3d66e160b",
+      "params": {
+        "L": 32,
+        "chi": 128,
+        "excited": false,
+        "gamma": 1.562425,
+        "maxiter": 50,
+        "model": "long_range",
+        "poles": 16,
+        "seed": 86,
+        "sigma": 1.75,
+        "tolerance": 1.0e-9
+      },
+      "resource_class": "B",
+      "stage": "adaptive"
+    },
+    {
+      "cell_id": "adaptive-6d6a74edfd0b171d4fc0bbe49773a7c0",
+      "params": {
+        "L": 64,
+        "chi": 128,
+        "excited": false,
+        "gamma": 1.562425,
+        "maxiter": 50,
+        "model": "long_range",
+        "poles": 16,
+        "seed": 86,
+        "sigma": 1.75,
+        "tolerance": 1.0e-9
+      },
+      "resource_class": "B",
+      "stage": "adaptive"
+    },
+    {
+      "cell_id": "adaptive-015b98151f93d69c1d38d41f66ada8de",
+      "params": {
+        "L": 32,
+        "chi": 64,
+        "excited": false,
+        "gamma": 1.4249999999999998,
+        "maxiter": 40,
+        "model": "long_range",
+        "poles": 12,
+        "seed": 86,
+        "sigma": 2.0,
+        "tolerance": 1.0e-9
+      },
+      "resource_class": "A",
+      "stage": "adaptive"
+    },
+    {
+      "cell_id": "adaptive-41518838f7574e4ee4d434659a22c635",
+      "params": {
+        "L": 64,
+        "chi": 64,
+        "excited": false,
+        "gamma": 1.4249999999999998,
+        "maxiter": 40,
+        "model": "long_range",
+        "poles": 12,
+        "seed": 86,
+        "sigma": 2.0,
+        "tolerance": 1.0e-9
+      },
+      "resource_class": "A",
+      "stage": "adaptive"
+    },
+    {
+      "cell_id": "adaptive-495dbaaa80074e647966c725d49d9a27",
+      "params": {
+        "L": 8,
+        "chi": 64,
+        "excited": false,
+        "gamma": 1.45,
+        "maxiter": 40,
+        "model": "long_range",
+        "poles": 16,
+        "seed": 86,
+        "sigma": 2.0,
+        "tolerance": 1.0e-9
+      },
+      "resource_class": "A",
+      "stage": "adaptive"
+    },
+    {
+      "cell_id": "adaptive-155dacbd9d8f1411e58fc2a7e54ca885",
+      "params": {
+        "L": 16,
+        "chi": 64,
+        "excited": false,
+        "gamma": 1.45,
+        "maxiter": 40,
+        "model": "long_range",
+        "poles": 16,
+        "seed": 86,
+        "sigma": 2.0,
+        "tolerance": 1.0e-9
+      },
+      "resource_class": "A",
+      "stage": "adaptive"
+    },
+    {
+      "cell_id": "adaptive-884018692712e0b021491e4088233f64",
+      "params": {
+        "L": 16,
+        "chi": 64,
+        "excited": false,
+        "gamma": 1.4249999999999998,
+        "maxiter": 40,
+        "model": "long_range",
+        "poles": 16,
+        "seed": 86,
+        "sigma": 2.0,
+        "tolerance": 1.0e-9
+      },
+      "resource_class": "A",
+      "stage": "adaptive"
+    },
+    {
+      "cell_id": "adaptive-1a95e0be1f418ce2a4252f410b70ed5d",
+      "params": {
+        "L": 32,
+        "chi": 64,
+        "excited": false,
+        "gamma": 1.4249999999999998,
+        "maxiter": 40,
+        "model": "long_range",
+        "poles": 16,
+        "seed": 86,
+        "sigma": 2.0,
+        "tolerance": 1.0e-9
+      },
+      "resource_class": "A",
+      "stage": "adaptive"
+    },
+    {
+      "cell_id": "adaptive-36e739497fa61fc560eada6b207836e0",
+      "params": {
+        "L": 24,
+        "chi": 64,
+        "excited": false,
+        "gamma": 1.4249999999999998,
+        "maxiter": 40,
+        "model": "long_range",
+        "poles": 16,
+        "seed": 86,
+        "sigma": 2.0,
+        "tolerance": 1.0e-9
+      },
+      "resource_class": "A",
+      "stage": "adaptive"
+    },
+    {
+      "cell_id": "adaptive-b49dbdca59868aad69ae1b52101e698a",
+      "params": {
+        "L": 48,
+        "chi": 64,
+        "excited": false,
+        "gamma": 1.4249999999999998,
+        "maxiter": 40,
+        "model": "long_range",
+        "poles": 16,
+        "seed": 86,
+        "sigma": 2.0,
+        "tolerance": 1.0e-9
+      },
+      "resource_class": "A",
+      "stage": "adaptive"
+    },
+    {
+      "cell_id": "adaptive-b0d114456e59de2978508f0acc85a30e",
+      "params": {
+        "L": 32,
+        "chi": 64,
+        "excited": false,
+        "gamma": 1.4224999999999999,
+        "maxiter": 40,
+        "model": "long_range",
+        "poles": 16,
+        "seed": 86,
+        "sigma": 2.0,
+        "tolerance": 1.0e-9
+      },
+      "resource_class": "A",
+      "stage": "adaptive"
+    },
+    {
+      "cell_id": "adaptive-2c4ac0d4dc2eb8244b434367893c7d26",
+      "params": {
+        "L": 64,
+        "chi": 64,
+        "excited": false,
+        "gamma": 1.4224999999999999,
+        "maxiter": 40,
+        "model": "long_range",
+        "poles": 16,
+        "seed": 86,
+        "sigma": 2.0,
+        "tolerance": 1.0e-9
+      },
+      "resource_class": "A",
+      "stage": "adaptive"
+    },
+    {
+      "cell_id": "adaptive-685a0937616a0a985c01020de238889e",
+      "params": {
+        "L": 32,
+        "chi": 128,
+        "excited": false,
+        "gamma": 1.4223500000000002,
+        "maxiter": 50,
+        "model": "long_range",
+        "poles": 16,
+        "seed": 86,
+        "sigma": 2.0,
+        "tolerance": 1.0e-9
+      },
+      "resource_class": "B",
+      "stage": "adaptive"
+    },
+    {
+      "cell_id": "adaptive-26ea18f9fabee97123289ef3ae950320",
+      "params": {
+        "L": 64,
+        "chi": 128,
+        "excited": false,
+        "gamma": 1.4223500000000002,
+        "maxiter": 50,
+        "model": "long_range",
+        "poles": 16,
+        "seed": 86,
+        "sigma": 2.0,
+        "tolerance": 1.0e-9
+      },
+      "resource_class": "B",
+      "stage": "adaptive"
+    }
+  ],
+  "metadata": {
+    "boundary": "periodic image sum via Hurwitz zeta",
+    "code_commit": "486b2673baa11d44a1048fbf9fd36751189889d7",
+    "created_utc": "2026-07-29T18:30:10.727",
+    "hamiltonian": "-sum_{i<j} J_L(|i-j|) Z_i Z_j - Gamma sum_i X_i",
+    "jobs_total": 24,
+    "run_id": "issue-86-adaptive",
+    "schema_version": 1,
+    "stage": "adaptive"
+  }
+}

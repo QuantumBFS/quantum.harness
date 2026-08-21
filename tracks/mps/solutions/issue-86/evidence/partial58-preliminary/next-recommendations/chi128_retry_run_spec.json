@@ -1,0 +1,151 @@
+{
+  "cells": [
+    {
+      "cell_id": "chi128-retry-3c1dde5f4ffbbe9a9f3ee87622e5f548",
+      "params": {
+        "L": 32,
+        "chi": 128,
+        "excited": false,
+        "gamma": 1.42,
+        "maxiter": 100,
+        "model": "long_range",
+        "poles": 16,
+        "seed": 86,
+        "sigma": 2.0,
+        "tolerance": 1.0e-11
+      },
+      "resource_class": "B",
+      "stage": "chi128-retry"
+    },
+    {
+      "cell_id": "chi128-retry-11f42c66d34a9d51f46fac8a711a7630",
+      "params": {
+        "L": 32,
+        "chi": 128,
+        "excited": false,
+        "gamma": 1.4249999999999998,
+        "maxiter": 100,
+        "model": "long_range",
+        "poles": 16,
+        "seed": 86,
+        "sigma": 2.0,
+        "tolerance": 1.0e-11
+      },
+      "resource_class": "B",
+      "stage": "chi128-retry"
+    },
+    {
+      "cell_id": "chi128-retry-fd005da531a83536ab1e66c8f9e45ce6",
+      "params": {
+        "L": 32,
+        "chi": 128,
+        "excited": false,
+        "gamma": 1.56,
+        "maxiter": 100,
+        "model": "long_range",
+        "poles": 16,
+        "seed": 86,
+        "sigma": 1.75,
+        "tolerance": 1.0e-11
+      },
+      "resource_class": "B",
+      "stage": "chi128-retry"
+    },
+    {
+      "cell_id": "chi128-retry-7dec6f9d7001851e4ed13301e813e3eb",
+      "params": {
+        "L": 32,
+        "chi": 128,
+        "excited": false,
+        "gamma": 1.565,
+        "maxiter": 100,
+        "model": "long_range",
+        "poles": 16,
+        "seed": 86,
+        "sigma": 1.75,
+        "tolerance": 1.0e-11
+      },
+      "resource_class": "B",
+      "stage": "chi128-retry"
+    },
+    {
+      "cell_id": "chi128-retry-fa4419592715007335f102db44b4a5dc",
+      "params": {
+        "L": 64,
+        "chi": 128,
+        "excited": false,
+        "gamma": 1.42,
+        "maxiter": 100,
+        "model": "long_range",
+        "poles": 16,
+        "seed": 86,
+        "sigma": 2.0,
+        "tolerance": 1.0e-11
+      },
+      "resource_class": "B",
+      "stage": "chi128-retry"
+    },
+    {
+      "cell_id": "chi128-retry-f5f3f57d7c0c5a065fcd0043ca4b0740",
+      "params": {
+        "L": 64,
+        "chi": 128,
+        "excited": false,
+        "gamma": 1.4249999999999998,
+        "maxiter": 100,
+        "model": "long_range",
+        "poles": 16,
+        "seed": 86,
+        "sigma": 2.0,
+        "tolerance": 1.0e-11
+      },
+      "resource_class": "B",
+      "stage": "chi128-retry"
+    },
+    {
+      "cell_id": "chi128-retry-4a0e1a3851a8db3c1cad985917f691e9",
+      "params": {
+        "L": 64,
+        "chi": 128,
+        "excited": false,
+        "gamma": 1.56,
+        "maxiter": 100,
+        "model": "long_range",
+        "poles": 16,
+        "seed": 86,
+        "sigma": 1.75,
+        "tolerance": 1.0e-11
+      },
+      "resource_class": "B",
+      "stage": "chi128-retry"
+    },
+    {
+      "cell_id": "chi128-retry-6b67bbe28eab864d185621108e0c4b2f",
+      "params": {
+        "L": 64,
+        "chi": 128,
+        "excited": false,
+        "gamma": 1.565,
+        "maxiter": 100,
+        "model": "long_range",
+        "poles": 16,
+        "seed": 86,
+        "sigma": 1.75,
+        "tolerance": 1.0e-11
+      },
+      "resource_class": "B",
+      "stage": "chi128-retry"
+    }
+  ],
+  "metadata": {
+    "automatic_submission": false,
+    "boundary": "periodic image sum via Hurwitz zeta",
+    "code_commit": "486b2673baa11d44a1048fbf9fd36751189889d7",
+    "created_utc": "2026-07-29T19:08:58.015",
+    "hamiltonian": "-sum_{i<j} J_L(|i-j|) Z_i Z_j - Gamma sum_i X_i",
+    "jobs_total": 8,
+    "run_id": "issue-86-chi128-retry",
+    "schema_version": 1,
+    "stage": "chi128-retry"
+  }
+}

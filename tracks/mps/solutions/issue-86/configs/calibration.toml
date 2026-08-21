@@ -1,0 +1,11 @@
+[[sweeps]]
+model = "long_range"
+sigmas = [1.75]
+lengths = [32]
+gammas = [1.5609]
+chis = [64]
+poles = [16]
+tolerance = 1.0e-9
+maxiter = 30
+excited = false
+seed = 86

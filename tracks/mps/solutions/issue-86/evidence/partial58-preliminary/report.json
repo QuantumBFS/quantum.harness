@@ -1,0 +1,253 @@
+{
+  "eyebrow": "MPS Challenge · Track B validation floor",
+  "lede": "Validation-floor pipeline completed with a finite-size preliminary scientific status.",
+  "sections": [
+    {
+      "blocks": [
+        {
+          "kind": "text",
+          "text": "Issue 86 asks where long-range interactions change the universality of the one-dimensional transverse-field Ising chain. This run targets the published critical-point validation floor for two long-range exponents."
+        },
+        {
+          "blocks": [
+            {
+              "kind": "text",
+              "text": "Reliable critical fields anchor later exponent extraction. Reproducing them also tests the finite-size Hamiltonian convention, tensor-network approximation, convergence controls, and recoverable cluster workflow together."
+            }
+          ],
+          "kind": "card",
+          "title": "Significance"
+        },
+        {
+          "kind": "kv",
+          "pairs": [
+            [
+              "Issue",
+              "QuantumBFS/quantum.harness #86"
+            ],
+            [
+              "Track",
+              "B · DMRG critical-point validation"
+            ],
+            [
+              "Published anchors",
+              "sigma=1.75 and sigma=2.0"
+            ],
+            [
+              "Computed sizes",
+              "paired crossings through (32,64)"
+            ]
+          ]
+        }
+      ],
+      "title": "Challenge"
+    },
+    {
+      "blocks": [
+        {
+          "kind": "badge",
+          "style": "neutral",
+          "text": "Controlled tensor-network approximation"
+        },
+        {
+          "kind": "kv",
+          "pairs": [
+            [
+              "Method",
+              "finite-system DMRG crossing analysis"
+            ],
+            [
+              "Tool",
+              "MPSKit.jl, MPSKitModels.jl, TensorKit.jl"
+            ],
+            [
+              "Interaction",
+              "Hurwitz-zeta periodic image sum"
+            ],
+            [
+              "MPO",
+              "sum-of-exponentials representation"
+            ]
+          ]
+        },
+        {
+          "kind": "equation",
+          "tex": "H=-\\sum_{i<j}J_L(|i-j|)Z_iZ_j-\\Gamma\\sum_iX_i"
+        },
+        {
+          "kind": "text",
+          "text": "The workflow combines ED and nearest-neighbour anchors, finite-size correlation-ratio crossings, strict convergence retries, and explicit chi, pole, interpolation, and finite-size uncertainty components. Each Slurm unit writes an independently recoverable manifest."
+        },
+        {
+          "columns": [
+            "Stage",
+            "Purpose",
+            "Maximum scale"
+          ],
+          "kind": "table",
+          "rows": [
+            [
+              "Stage 1",
+              "anchors and initial grid",
+              "L=64"
+            ],
+            [
+              "Stage 2",
+              "crossing and systematic scans",
+              "L=64"
+            ],
+            [
+              "L16 correction",
+              "complete all four size pairs",
+              "L=16"
+            ],
+            [
+              "Follow-up",
+              "adaptive points and strict retries",
+              "chi=128"
+            ]
+          ]
+        }
+      ],
+      "title": "Approach"
+    },
+    {
+      "blocks": [
+        {
+          "kind": "verdict",
+          "label": "pipeline validation / finite-size preliminary result",
+          "status": "warn",
+          "why": "The label follows the recorded bracket, drift, reference, uncertainty, NN-anchor, convergence, and adaptive-queue gates."
+        },
+        {
+          "kind": "kv",
+          "pairs": [
+            [
+              "Follow-up manifests",
+              "58/69 (A 54/65; B 4/4)"
+            ],
+            [
+              "Strict chi=64 retries",
+              "38 completed; residual 38/38 pass; variance 0/38 pass"
+            ],
+            [
+              "chi=128 adaptive",
+              "4/4 pass"
+            ],
+            [
+              "Slurm terminal incidents",
+              "TIMEOUT jobs 22994149, 23002669, 23005744; startup configuration failure 23004760"
+            ]
+          ]
+        },
+        {
+          "columns": [
+            "sigma",
+            "estimate",
+            "published Gamma_c",
+            "largest bracket",
+            "v1→v2 movement",
+            "reference covered"
+          ],
+          "kind": "table",
+          "numeric": [
+            true,
+            true,
+            true,
+            true,
+            true,
+            false
+          ],
+          "rows": [
+            [
+              "1.75",
+              "1.5621218124408882",
+              "1.5609 ± 0.0003",
+              "0.004999999999999893",
+              "0.00015151516261568965",
+              "yes"
+            ],
+            [
+              "2.0",
+              "1.4220051612456117",
+              "1.4208 ± 0.0002",
+              "0.004999999999999893",
+              "0.00014822400098490895",
+              "yes"
+            ]
+          ]
+        },
+        {
+          "items": [
+            {
+              "caption": "Finite-size crossing drift for sigma=1.75, with the published critical field shown as the comparison anchor.",
+              "src": "finite_size_sigma1.75.png"
+            },
+            {
+              "caption": "Finite-size crossing drift for sigma=2.0, including the full and smallest-size-removed fits.",
+              "src": "finite_size_sigma2.0.png"
+            }
+          ],
+          "kind": "figures"
+        },
+        {
+          "items": [
+            {
+              "caption": "Nearest-neighbour gap scaling audit. Agreement with Gamma_c=1 and z=1 validates the analysis route against the exactly known limit.",
+              "src": "nn_gap_scaling.png"
+            }
+          ],
+          "kind": "figures"
+        },
+        {
+          "items": [
+            "The largest computed long-range system is L=64.",
+            "Long-range dynamic exponent z and gamma/nu were not measured.",
+            "The sigma=1.6 and sigma=1.8 rows required for the full Track B boundary were not computed.",
+            "Expansion recommendations are recorded without automatic submission."
+          ],
+          "kind": "list",
+          "title": "Declared scope limits"
+        }
+      ],
+      "title": "Results"
+    },
+    {
+      "blocks": [
+        {
+          "blocks": [
+            {
+              "kind": "text",
+              "text": "The calculation keeps the finite periodic interaction convention explicit through a Hurwitz-zeta image sum while compressing it into an audited sum-of-exponentials MPO."
+            }
+          ],
+          "kind": "card",
+          "title": "What's innovative"
+        },
+        {
+          "blocks": [
+            {
+              "kind": "text",
+              "text": "Two published long-range critical fields, the ED checks, and the nearest-neighbour anchor are carried through one quality-aware analysis with visible uncertainty components."
+            }
+          ],
+          "kind": "card",
+          "title": "Significance of output"
+        },
+        {
+          "blocks": [
+            {
+              "kind": "text",
+              "text": "Per-unit manifests and one-time same-spec recovery make large tensor-network scans auditable and resumable. The remaining z, gamma/nu, sigma, and scale extensions are isolated as explicit recommendations."
+            }
+          ],
+          "kind": "card",
+          "title": "Broader impact"
+        }
+      ],
+      "title": "Highlight"
+    }
+  ],
+  "title": "Issue 86: Track B long-range TFIM critical points",
+  "url": "https://github.com/QuantumBFS/quantum.harness/issues/86"
+}

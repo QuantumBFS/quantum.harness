@@ -1,0 +1,47 @@
+{
+  "automatic_submission": false,
+  "created_utc": "2026-07-29T19:08:59.439",
+  "deferred_quality": {
+    "cells": 55,
+    "file": "deferred_quality.csv"
+  },
+  "reason_map": "next-recommendations/reason_map.csv",
+  "resource_advice": {
+    "A": {
+      "array_concurrency": 4,
+      "cpus_per_cell": 8,
+      "memory_gb_per_cell": 16,
+      "wall_hours": 4
+    },
+    "B": {
+      "array_concurrency": 4,
+      "cpus_per_cell": 16,
+      "memory_gb_per_cell": 32,
+      "wall_hours": 4
+    }
+  },
+  "source_adaptive_cells": 24,
+  "successful_parameters_excluded": true,
+  "tiers": {
+    "chi128_retry": {
+      "cells": 8,
+      "reason": "manually review bond-dimension drift at the current largest-size crossing endpoints",
+      "run_spec": "next-recommendations/chi128_retry_run_spec.json"
+    },
+    "chi256_last_resort": {
+      "cells": 0,
+      "reason": "disabled in the preliminary closeout scope",
+      "run_spec": "next-recommendations/chi256_last_resort_run_spec.json"
+    },
+    "l128_contingency": {
+      "cells": 0,
+      "reason": "disabled in the preliminary closeout scope",
+      "run_spec": "next-recommendations/l128_contingency_run_spec.json"
+    },
+    "remaining_adaptive": {
+      "cells": 4,
+      "reason": "refine the current largest-size crossing midpoint",
+      "run_spec": "next-recommendations/remaining_adaptive_run_spec.json"
+    }
+  }
+}
