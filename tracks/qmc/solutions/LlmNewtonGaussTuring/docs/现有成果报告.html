@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>横场伊辛模型数值方法与几何相位研究成果报告</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.2.0/github-markdown.min.css">
+<script>
+MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\(', '\)']],
+    displayMath: [['$$', '$$'], ['\[', '\]']]
+  },
+  svg: {
+    fontCache: 'global'
+  }
+};
+</script>
+<script type="text/javascript" id="MathJax-script" async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+</script>
+<style>
+  body {
+    box-sizing: border-box;
+    min-width: 200px;
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 45px;
+    background-color: #ffffff;
+    color: #24292f;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC", Helvetica, Arial, sans-serif;
+  }
+  @media (max-width: 767px) {
+    body {
+      padding: 15px;
+    }
+  }
+  img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 1.5rem auto;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  }
+  table {
+    margin: 1.5rem auto;
+    width: 100%;
+    display: table;
+  }
+  th, td {
+    padding: 8px 12px;
+    text-align: center;
+  }
+</style>
+</head>
+<body><article class="markdown-body">
+<header id="title-block-header">
+<h1 class="title">横场伊辛模型数值方法与几何相位研究成果报告</h1>
+</header>
+<h1
+id="横场伊辛模型数值方法与几何相位研究成果报告">横场伊辛模型数值方法与几何相位研究成果报告</h1>
+<p>日期：2026-07-30</p>
+<h2 id="摘要">摘要</h2>
+<p>本报告总结关于横场伊辛模型的两项数值研究成果。</p>
+<p>第一项工作为主要内容，研究随机级数展开方法中三种算符更新算法（
+cluster 算法、 loop 算法与 local worldline line
+算法）的实现与性能比较。原始研究目标为检验三角晶格与蜂窝晶格铁磁横场伊辛模型的零温临界横场比值是否等于
+<span class="math inline">\(\sqrt{5}\)</span>
+。受限于计算资源，在目标精度要求下未能完成最终比值判定。核心成果为基于
+C++17
+统一实现的算符更新算法框架、有限温度精确对角化交叉检验集合、自相关与单扫墙钟时间基准数据，以及基于晶格着色的空间并行方案。</p>
+<p>第二项工作为附带内容，研究二维方晶格横场伊辛模型在 Kolodrubetz
+全局旋转参数化下的基态 Berry 相与 Berry 曲率密度。通过无矩阵复 Lanczos
+精确对角化与 Resolvent 共轭梯度算法将计算规模扩展至 <span
+class="math inline">\(L=5\)</span> （ 25 个格点），推导并验证了 Berry
+曲率与横场磁化率的解析恒等式 <span
+class="math inline">\(F_{\theta\Omega} = -\frac{1}{2} \chi_x\)</span>
+，证明了 Rydberg 激光相位参数化下 Berry
+曲率严格为零的物理结论，拟合反比矩复现了动力学指数 <span
+class="math inline">\(z=0.9999 \approx 1\)</span> ，并完成了 <span
+class="math inline">\(D=2\)</span> 键维下无限张量网络（ iPEPS
+）基态能量的精确对比。</p>
+<p>所有源代码、计算参数、测试脚本与数据均已归档保存，具备可审查与可复现条件。</p>
+<h2 id="challenge-148随机级数展开更新算法比较与临界场研究">1. Challenge
+148：随机级数展开更新算法比较与临界场研究</h2>
+<h3 id="研究对象与主要进展">1.1 研究对象与主要进展</h3>
+<p>研究体系为铁磁横场伊辛模型：</p>
+<p><span class="math display">\[
+H = -J \sum_{\langle i,j \rangle} \sigma_i^z \sigma_j^z - \Gamma \sum_i
+\sigma_i^x
+\]</span></p>
+<p>其中 <span class="math inline">\(J=1\)</span> ，横场参数 <span
+class="math inline">\(\Gamma = h\)</span>
+。原始研究目标为判定三角晶格与蜂窝晶格的零温临界横场比值：</p>
+<p><span class="math display">\[
+R = \frac{h_c^{\triangle}}{h_c^{\mathrm{hex}}} \stackrel{?}{=} \sqrt{5}
+\]</span></p>
+<p>目标精度要求 <span class="math inline">\(\sigma_R \le 1.2 \times
+10^{-5}\)</span>
+。在现有计算资源条件下，有限尺寸标度的独立采样块不足，导致外推误差无法达到预设精度门限，未能在有限时间内完成最终的比值判定。</p>
+<p>在研究过程中完成的工作与成果包括： 1. 基于 C++17
+实现了三种统一数据结构的随机级数展开（ SSE ）更新算法： cluster 算法、
+loop 算法与 line 算法。 2. 建立全谱精确对角化（ ED
+）验证集合，对三种算法在 <span class="math inline">\(\beta=2\)</span>
+条件下的能量与磁化强度等观测量进行了交叉检验。 3.
+定量测量了各算法在不同晶格与观测量下的自相关时间与单扫墙钟时间，计算了有效样本率。
+4. 在 Julia 语言原型中实现了基于晶格着色的 line
+更新空间并行方案，测试了颜色核的强扩展性能。</p>
+<h3 id="三种更新算法实现">1.2 三种更新算法实现</h3>
+<p>随机级数展开方法将量子配分函数展开为高温算符序列。三种更新算法共享晶格构造、算符存储数组、对角更新例程与测量模块：</p>
+<ul>
+<li>cluster
+算法：通过键算符将相连的世界线段连接为簇，并进行整体随机翻转。该算法能够有效消除磁化强度的长波自相关，但仅适用于纵向场
+<span class="math inline">\(B=0\)</span> 的情形。</li>
+<li>loop 算法：基于 merge-unmerge
+转移规则构造闭合环路翻转。该算法具备处理非零纵向场 <span
+class="math inline">\(B \neq 0\)</span>
+的能力，但在零纵向场条件下的单扫计算开销较高。</li>
+<li>line 算法：逐格点构造局部世界线段，并采用 heat-bath
+概率进行翻转：</li>
+</ul>
+<p><span class="math display">\[
+P_{\mathrm{accept}} = \frac{R}{1+R}
+\]</span></p>
+<p>针对晶格几何，蜂窝晶格可划分为 2 种颜色，三角晶格在尺寸为 3
+的倍数时可按如下公式划分为 3 种颜色：</p>
+<p><span class="math display">\[
+c(x,y) = (x+2y) \bmod 3
+\]</span></p>
+<p>同色格点之间不共享相互作用键，这为线段翻转提供了空间并行条件。</p>
+<h3 id="精确对角化交叉检验">1.3 精确对角化交叉检验</h3>
+<p>为保证算法实现的正确性，使用全谱精确对角化计算 <span
+class="math inline">\(\beta=2\)</span> 时的热力学平均值。三角晶格采用
+<span class="math inline">\(3\times 2\)</span> 周期簇（ 6
+格点），蜂窝晶格采用 <span class="math inline">\(2\times 2\)</span>
+原胞（ 8 格点）。三种更新算法均运行 5000 扫热化与 20000 扫测量。</p>
+<p>比较的可观测量包括能量密度 <span class="math inline">\(E/N\)</span>
+、横场磁化强度 <span class="math inline">\(m_x\)</span> 与磁化强度二次方
+<span class="math inline">\(m^2\)</span> 。测试结果显示， 18
+项比较的绝对标准化偏差均小于 4 倍标准误差门限（最大偏差为 1.45
+），排除了算法实现中的基本错误。</p>
+<figure>
+<img src="figures/challenge148_ed_validation.png"
+alt="三种 C++ 更新与有限温度 ED 的比较" />
+<figcaption aria-hidden="true">三种 C++ 更新与有限温度 ED
+的比较</figcaption>
+</figure>
+<p>图
+1：三种更新算法计算结果相对精确对角化数值的绝对标准化偏差。虚线标记 4
+倍标准误差门限。</p>
+<h3 id="自相关时间与计算效率">1.4 自相关时间与计算效率</h3>
+<p>在三角晶格（ <span class="math inline">\(L=12, \beta=24,
+h=4.76811\)</span> ）与蜂窝晶格（ <span class="math inline">\(N=128,
+\beta=16, h=2.13250\)</span>
+）上开展了性能测定。计算指标采用每秒有效样本数（ ESS/s ）：</p>
+<p><span class="math display">\[
+\mathrm{ESS/s} = \frac{1}{2\tau_{\mathrm{int}} t_{\mathrm{sweep}}}
+\]</span></p>
+<p>其中 <span class="math inline">\(\tau_{\mathrm{int}}\)</span>
+为自相关时间，<span class="math inline">\(t_{\mathrm{sweep}}\)</span>
+为单扫墙钟时间。</p>
+<p>表 1：三种更新算法在三角晶格与蜂窝晶格上的计算性能比较</p>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+</colgroup>
+<thead>
+<tr>
+<th>晶格类型</th>
+<th>可观测量</th>
+<th>cluster 算法 ESS/s</th>
+<th>loop 算法 ESS/s</th>
+<th>line 算法 ESS/s</th>
+<th>单扫时间 (ms)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>三角晶格</td>
+<td>能量 <span class="math inline">\(E\)</span></td>
+<td>29.91 ± 2.34</td>
+<td>13.10 ± 1.61</td>
+<td>34.56 ± 3.09</td>
+<td>line: 3.45 / cluster: 3.85 / loop: 9.45</td>
+</tr>
+<tr>
+<td>三角晶格</td>
+<td>磁化强度 <span class="math inline">\(m^2\)</span></td>
+<td>1.55 ± 0.33</td>
+<td>0.39 ± 0.04</td>
+<td>0.80 ± 0.24</td>
+<td>line: 3.45 / cluster: 3.85 / loop: 9.45</td>
+</tr>
+<tr>
+<td>蜂窝晶格</td>
+<td>能量 <span class="math inline">\(E\)</span></td>
+<td>232.19 ± 11.15</td>
+<td>122.69 ± 4.93</td>
+<td>287.73 ± 10.29</td>
+<td>line: 0.89 / cluster: 1.05 / loop: 2.14</td>
+</tr>
+<tr>
+<td>蜂窝晶格</td>
+<td>磁化强度 <span class="math inline">\(m^2\)</span></td>
+<td>4.77 ± 0.59</td>
+<td>1.30 ± 0.52</td>
+<td>2.44 ± 0.29</td>
+<td>line: 0.89 / cluster: 1.05 / loop: 2.14</td>
+</tr>
+</tbody>
+</table>
+<p>测试数据表明， line
+算法的单扫墙钟时间最短，在能量观测量上的有效样本率比 cluster 算法高约
+15% 至 24% 。然而对于 <span class="math inline">\(m^2\)</span>
+等长波磁化涨落观测量， cluster
+算法通过整体翻转使得自相关时间大幅缩短，有效样本率达到 line 算法的 1.7
+至 2.0 倍。 loop 算法在零纵向场下的综合效率最低。</p>
+<figure>
+<img src="figures/challenge148_update_performance.png"
+alt="三种 C++ 更新的有效样本率与单扫成本" />
+<figcaption aria-hidden="true">三种 C++
+更新的有效样本率与单扫成本</figcaption>
+</figure>
+<p>图
+2：三种更新算法在不同观测量下的有效样本率（对数刻度）与单扫墙钟时间。</p>
+<h3 id="晶格着色并行测试">1.5 晶格着色并行测试</h3>
+<p>在 Julia 原型代码中实现了 line 更新的颜色类并行。测试表明， 8
+线程下颜色更新核在三角晶格获得 4.90 倍加速，在蜂窝晶格获得 2.51
+倍加速。但受限于对角更新与测量模块的串行执行，完整单扫加速比降低至 1.66
+倍（三角）与 1.20 倍（蜂窝）。</p>
+<figure>
+<img src="figures/scaling.png"
+alt="line 更新的颜色核和完整单扫强扩展" />
+<figcaption aria-hidden="true">line
+更新的颜色核和完整单扫强扩展</figcaption>
+</figure>
+<p>图 3： line 更新在 Julia
+语言原型中的并行强扩展曲线。左图为颜色更新核加速比，右图为完整单扫加速比。</p>
+<h3 id="未完成原因与后续优化空间">1.6 未完成原因与后续优化空间</h3>
+<p>临界场比值判定未完成的原因在于：有限尺寸标度模拟中独立采样块数量不足，导致临界外推结果的统计误差偏大，无法达到判定比值所需的精度门限。</p>
+<p>后续优化空间包括： 1. 在 C++
+框架中实现对角更新与格点列表构造的并行化，降低串行部分比例。 2. 结合
+cluster 算法在磁化强度更新上的优势与 line
+算法在能量更新上的高效性，设计混合更新策略。 3. 将 loop
+算法扩展应用于非零纵向场 <span class="math inline">\(B \neq 0\)</span>
+的相图计算。</p>
+<h2 id="challenge-73二维方晶格横场伊辛模型的-berry-相与曲率">2.
+Challenge 73：二维方晶格横场伊辛模型的 Berry 相与曲率</h2>
+<h3 id="问题描述与计算方法">2.1 问题描述与计算方法</h3>
+<p>研究二维方晶格横场伊辛模型在 Kolodrubetz 全局旋转参数化下的基态 Berry
+相与 Berry 曲率密度：</p>
+<p><span class="math display">\[
+H(\theta, \Omega) = R_x(\theta) H_0(\Omega) R_x^\dagger(\theta), \quad
+R_x(\theta) = \exp\left(-\frac{i\theta}{2} \sum_i X_i\right)
+\]</span></p>
+<p>其中：</p>
+<p><span class="math display">\[
+H_0(\Omega) = -J \sum_{\langle i,j \rangle} Z_i Z_j - \Omega \sum_i X_i
+\]</span></p>
+<p>数值计算采用了两种互补路线：其一是 Fukui-Hatsugai-Suzuki (FHS) 离散
+Wilson 回路公式；其二是基于无矩阵实对称 Lanczos 与投影共轭梯度
+(Resolvent CG) 的求解路线。 Resolvent
+路线避免了参数网格离散化误差，并将计算规模扩展至 <span
+class="math inline">\(L=5\)</span> (25 个格点， Hilbert 空间维数 <span
+class="math inline">\(1.68 \times 10^7\)</span> )。</p>
+<h3 id="berry-曲率密度计算结果">2.2 Berry 曲率密度计算结果</h3>
+<p>针对 <span class="math inline">\(L=2, 3, 4, 5\)</span>
+的二维方晶格计算了单格点 Berry 曲率密度 <span
+class="math inline">\(\bar{F}_{\theta\Omega} = F_{\theta\Omega} /
+N\)</span> 。</p>
+<p>表 2：不同晶格尺寸下方晶格 Berry 曲率密度 <span
+class="math inline">\(\bar{F}_{\theta\Omega}\)</span> 随横场 <span
+class="math inline">\(\Omega/J\)</span> 的变化</p>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+</colgroup>
+<thead>
+<tr>
+<th>横场 <span class="math inline">\(\Omega/J\)</span></th>
+<th><span class="math inline">\(L=2\)</span> (<span
+class="math inline">\(N=4\)</span>)</th>
+<th><span class="math inline">\(L=3\)</span> (<span
+class="math inline">\(N=9\)</span>)</th>
+<th><span class="math inline">\(L=4\)</span> (<span
+class="math inline">\(N=16\)</span>)</th>
+<th><span class="math inline">\(L=5\)</span> (<span
+class="math inline">\(N=25\)</span>)</th>
+<th>尺寸收敛特征</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1.0</td>
+<td>-0.1791</td>
+<td>-0.1303</td>
+<td>-0.1291</td>
+<td>-0.1291</td>
+<td>快速收敛</td>
+</tr>
+<tr>
+<td>2.0</td>
+<td>-0.1493</td>
+<td>-0.1832</td>
+<td>-0.1553</td>
+<td>-0.1461</td>
+<td>有限尺寸涨落</td>
+</tr>
+<tr>
+<td>2.5</td>
+<td>-0.0952</td>
+<td>-0.1606</td>
+<td>-0.1967</td>
+<td>-0.1933</td>
+<td>临界区附近涨落</td>
+</tr>
+<tr>
+<td>3.0</td>
+<td>-0.0571</td>
+<td>-0.0841</td>
+<td>-0.1038</td>
+<td>-0.1203</td>
+<td>临界区附近涨落</td>
+</tr>
+<tr>
+<td>3.044 (<span class="math inline">\(\Omega_c\)</span>)</td>
+<td>-0.0546</td>
+<td>-0.0786</td>
+<td>-0.0946</td>
+<td>-0.1065</td>
+<td>临界点数值</td>
+</tr>
+<tr>
+<td>3.5</td>
+<td>-0.0350</td>
+<td>-0.0399</td>
+<td>-0.0376</td>
+<td>-0.0337</td>
+<td>逐步收敛</td>
+</tr>
+<tr>
+<td>4.0</td>
+<td>-0.0224</td>
+<td>-0.0208</td>
+<td>-0.0172</td>
+<td>-0.0148</td>
+<td>快速收敛</td>
+</tr>
+<tr>
+<td>5.0</td>
+<td>-0.0105</td>
+<td>-0.0077</td>
+<td>-0.0061</td>
+<td>-0.0055</td>
+<td>快速收敛</td>
+</tr>
+</tbody>
+</table>
+<p>数值结果显示， Berry 曲率密度在所有横场强度下均为负值。在强横场极限
+<span class="math inline">\(\Omega \to \infty\)</span>
+下，曲率逐渐趋于零。有限尺寸效应最显著的区域集中在临界场 <span
+class="math inline">\(\Omega_c/J \approx 3.044\)</span>
+附近，体现了量子相变点附近的几何响应增强特征。</p>
+<figure>
+<img src="figures/c73_berry_curvature_vs_omega.png"
+alt="Berry 曲率密度随 Omega 变化" />
+<figcaption aria-hidden="true">Berry 曲率密度随 Omega 变化</figcaption>
+</figure>
+<p>图 4：不同晶格尺寸下方晶格 Berry 曲率密度随横场 <span
+class="math inline">\(\Omega\)</span> 的变化曲线。</p>
+<h3 id="响应函数恒等式与物理理解">2.3 响应函数恒等式与物理理解</h3>
+<p>通过参数化求导推导得出 Berry 曲率与横场磁化率的二阶响应恒等式：</p>
+<p><span class="math display">\[
+F_{\theta\Omega} = \frac{1}{2} \frac{\partial^2 E_0}{\partial \Omega^2}
+= -\frac{1}{2} \chi_x
+\]</span></p>
+<p>其中 <span class="math inline">\(\chi_x\)</span>
+为系统的横场磁化率。</p>
+<p>由于横场磁化率作为二阶响应函数恒满足非负条件 <span
+class="math inline">\(\chi_x \ge 0\)</span> ，因此恒有 <span
+class="math inline">\(F_{\theta\Omega} \le 0\)</span>
+。这一解析恒等式解释了数值计算中 Berry 曲率恒为负值的必然性。</p>
+<p>通过 Resolvent 路线计算谱函数的反比矩 <span class="math inline">\(M_1
+= -F_{\theta\Omega}\)</span> 与 <span class="math inline">\(M_2 =
+\chi_F\)</span> ，平均响应能隙 <span
+class="math inline">\(M_1/M_2\)</span> 在 <span
+class="math inline">\(L=2\)</span> 至 <span
+class="math inline">\(L=5\)</span> 范围内拟合得到动力学指数 <span
+class="math inline">\(z = 0.9999\)</span> ，精确复现了 <span
+class="math inline">\((2+1)\mathrm{D}\)</span> 伊辛普适类的 <span
+class="math inline">\(z=1\)</span> 理论预测。</p>
+<h3 id="rydberg-参数化严格结果">2.4 Rydberg 参数化严格结果</h3>
+<p>研究了第二种参数化方式（ Rydberg 激光相位参数化）：</p>
+<p><span class="math display">\[
+H^{\mathrm{Ryd}}(\phi, \Omega) = -J \sum_{\langle i,j \rangle} Z_i Z_j -
+\Omega \sum_i (\cos\phi \, X_i + \sin\phi \, Y_i)
+\]</span></p>
+<p>绕 <span class="math inline">\(Z\)</span> 轴的整体旋转操作与 Ising
+键项对易。推导证明该参数化下的 Berry 联络分量相互独立，因此导出：</p>
+<p><span class="math display">\[
+F_{\phi\Omega}^{\mathrm{Ryd}} \equiv 0
+\]</span></p>
+<p>FHS Wilson 回路数值计算在 1D 链与 2D 方晶格上测得的 Berry
+相相位在数值精度范围内（小于 <span
+class="math inline">\(10^{-13}\)</span>
+）严格为零，与解析证明完全吻合。这表明量子态流形的几何曲率依赖于参数化路径的选择。</p>
+<h3 id="热力学极限外推与张量网络验证">2.5
+热力学极限外推与张量网络验证</h3>
+<p>在顺磁相区间利用 <span class="math inline">\(1/L\)</span> 线性标度将
+Berry 曲率密度外推至热力学极限 <span class="math inline">\(L \to
+\infty\)</span> 。外推结果显示：在 <span
+class="math inline">\(\Omega=4.0\)</span> 时外推值为 <span
+class="math inline">\(-0.0110(11)\)</span> ，在 <span
+class="math inline">\(\Omega=5.0\)</span> 时为 <span
+class="math inline">\(-0.0020(1)\)</span>
+。随着横场增大，曲率趋于零，与完全极化基态的几何性质一致。</p>
+<figure>
+<img src="figures/c73_tl_extrapolation.png" alt="热力学极限外推" />
+<figcaption aria-hidden="true">热力学极限外推</figcaption>
+</figure>
+<p>图 5：顺磁相区域 Berry 曲率密度的 <span
+class="math inline">\(1/L\)</span> 线性有限尺寸外推。</p>
+<p>在无限张量网络（ iPEPS ）方法中，使用 PEPSKit.jl 在 <span
+class="math inline">\(D=2\)</span> 键维下计算得到基态能量密度为 <span
+class="math inline">\(E/N = -2.12566\)</span> ，与 <span
+class="math inline">\(L=4\)</span> 精确对角化数值 <span
+class="math inline">\(-2.126\)</span> 相比，相对偏差仅为 0.01%
+。环境维度在 <span class="math inline">\(\chi=4\)</span> 至 <span
+class="math inline">\(\chi=8\)</span> 之间收敛良好（能量变化小于 <span
+class="math inline">\(10^{-7}\)</span> ）。更高键维 <span
+class="math inline">\(D \ge 3\)</span> 的计算受限于即时编译超时。</p>
+<h3 id="成果不足与后续方向">2.6 成果不足与后续方向</h3>
+<p>Challenge 73 完成了 Berry 相、 Berry
+曲率密度、响应函数恒等式、动力学指数验证与 Rydberg
+严格零曲率的求解。不足之处在于：未实现慢演化下的非绝热有限速率修正，未包含非零纵向场
+<span class="math inline">\(\Delta \neq 0\)</span>
+的完整二维参数扫描，且张量网络高键维计算尚未完成。</p>
+<p>后续优化方向包括：利用响应函数恒等式直接计算更大尺寸系统的 Berry
+曲率，在临界点附近加密采样，并实现基于时域演化的非绝热动力学修正。</p>
+<h2 id="结论">3. 结论</h2>
+<p>本研究在横场伊辛模型的量子蒙特卡洛算法与基态几何相位两个方向取得了阶段性成果。在
+Challenge 148
+中，实现了三种随机级数展开更新算法，建立了精确对角化交叉检验与自相关性能基准，揭示了单扫墙钟时间与自相关时间在不同观测量下的竞争机制。在
+Challenge 73 中，计算了二维方晶格基态 Berry 曲率密度，建立了 Berry
+曲率与横场磁化率的解析恒等式，复现了 <span
+class="math inline">\(z=1\)</span> 动力学指数，证明了 Rydberg
+参数化下曲率严格为零的特性，并通过 iPEPS 张量网络验证了基态能量。</p>
+<p>所有源代码、计算参数、测试脚本与输出数据均已保存在仓库指定目录下，具备可审查与可复现条件。</p>
+</article></body>
+</html>
