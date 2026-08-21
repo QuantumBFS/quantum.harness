@@ -1,0 +1,10 @@
+{
+  "lx": 10,
+  "ly": 10,
+  "J": 1.0,
+  "boundary": "open",
+  "operator": "pauli",
+  "thermal_sweeps": 1000,
+  "measure_sweeps": 8000,
+  "bins": 80
+}

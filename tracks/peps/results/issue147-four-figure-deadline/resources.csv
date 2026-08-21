@@ -1,0 +1,3 @@
+beta,wall_seconds,peak_memory_bytes,hermiticity_residual,iterations,max_bond
+0.025,79.48799250274897,160702464,0.0,0,4
+0.05,3538.6367586031556,10453929984,0.0,0,4

@@ -1,0 +1,87 @@
+{
+  "run_id": "issue147-qmc-reproducible-production",
+  "run_dir": "tracks/peps/results/issue147-qmc-reproducible-production",
+  "settings": {
+    "lx": 10,
+    "ly": 10,
+    "J": 1.0,
+    "boundary": "open",
+    "operator": "pauli",
+    "thermal_sweeps": 4000,
+    "measure_sweeps": 128000,
+    "bins": 80
+  },
+  "provenance": {
+    "protocol": "issue147-h3-v5-reproducible-production",
+    "design": "docs/superpowers/specs/2026-07-30-qmc-reproducible-production-design.md",
+    "prefix_run_id": "issue147-qmc-production",
+    "source_sha256": {
+      "qh147/qmc.py": "c371b412240d111288cbf1ba6f3ce7f5d0179d57fb69d4fa9a1c9099707a694c",
+      "qh147/qmc_mapping.py": "022bd693b54ed683435514378f624f57a235f46f36c3c4958eabfea346f8ca4f",
+      "scripts/run_cell.py": "5a3e02dfe3f07d0bb4b5c6f812de4659c957613b78a30f3ef53f8422cd2c6db9",
+      "configs/qmc-reference.json": "56d5046eff86322ad61cdfbc640863b48eac5ea12fb66603625402c7b0faeac4"
+    }
+  },
+  "cells": [
+    {
+      "cell_id": "cell-0001",
+      "params": {"h": 3.0, "beta": 0.5, "M": 32, "chain": 0},
+      "settings": {"thermal_sweeps": 4000, "expected_seed": 148900}
+    },
+    {
+      "cell_id": "cell-0002",
+      "params": {"h": 3.0, "beta": 0.5, "M": 32, "chain": 1},
+      "settings": {"thermal_sweeps": 4000, "expected_seed": 148901}
+    },
+    {
+      "cell_id": "cell-0003",
+      "params": {"h": 3.0, "beta": 0.5, "M": 32, "chain": 2},
+      "settings": {"thermal_sweeps": 4000, "expected_seed": 148902}
+    },
+    {
+      "cell_id": "cell-0004",
+      "params": {"h": 3.0, "beta": 0.5, "M": 32, "chain": 3},
+      "settings": {"thermal_sweeps": 4000, "expected_seed": 148903}
+    },
+    {
+      "cell_id": "cell-0005",
+      "params": {"h": 3.0, "beta": 0.5, "M": 64, "chain": 0},
+      "settings": {"thermal_sweeps": 4000, "expected_seed": 148910}
+    },
+    {
+      "cell_id": "cell-0006",
+      "params": {"h": 3.0, "beta": 0.5, "M": 64, "chain": 1},
+      "settings": {"thermal_sweeps": 4000, "expected_seed": 148911}
+    },
+    {
+      "cell_id": "cell-0007",
+      "params": {"h": 3.0, "beta": 0.5, "M": 64, "chain": 2},
+      "settings": {"thermal_sweeps": 4000, "expected_seed": 148912}
+    },
+    {
+      "cell_id": "cell-0008",
+      "params": {"h": 3.0, "beta": 0.5, "M": 64, "chain": 3},
+      "settings": {"thermal_sweeps": 4000, "expected_seed": 148913}
+    },
+    {
+      "cell_id": "cell-0009",
+      "params": {"h": 3.0, "beta": 0.5, "M": 128, "chain": 0},
+      "settings": {"thermal_sweeps": 16000, "expected_seed": 148920}
+    },
+    {
+      "cell_id": "cell-0010",
+      "params": {"h": 3.0, "beta": 0.5, "M": 128, "chain": 1},
+      "settings": {"thermal_sweeps": 16000, "expected_seed": 148921}
+    },
+    {
+      "cell_id": "cell-0011",
+      "params": {"h": 3.0, "beta": 0.5, "M": 128, "chain": 2},
+      "settings": {"thermal_sweeps": 16000, "expected_seed": 148922}
+    },
+    {
+      "cell_id": "cell-0012",
+      "params": {"h": 3.0, "beta": 0.5, "M": 128, "chain": 3},
+      "settings": {"thermal_sweeps": 16000, "expected_seed": 148923}
+    }
+  ]
+}
