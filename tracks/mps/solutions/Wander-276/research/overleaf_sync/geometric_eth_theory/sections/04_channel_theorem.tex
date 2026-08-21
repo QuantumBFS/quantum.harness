@@ -1,0 +1,167 @@
+\section{Independent channels: exact statement and limited consequence}
+\label{sec:channel_theorem}
+\label{sec:channel-theorem}
+
+We now isolate the part of the analysis that is a theorem.  Let
+\begin{equation}
+ \mathcal V=\operatorname{Hom}(P\mathcal H,Q\mathcal H)
+ \label{eq:response_space}
+\end{equation}
+at a fixed base point.  Cumulants of a complex matrix in $\mathcal V$ are
+defined on the underlying real vector space; complex trace words are obtained
+by complexifying the resulting real multilinear tensors.  This convention
+retains holomorphic, antiholomorphic, and mixed contractions and is
+equivalent to retaining both tensors in
+Eq.~\eqref{eq:covariance_pseudocovariance}.
+
+\paragraph{Theorem 1 (weighted cumulant additivity).}
+Let $Y_1,\ldots,Y_n\in\mathcal V$ be mutually independent centered complex
+random matrices, and let $w_1,\ldots,w_n\in\mathbb R$ be deterministic.  For
+an order-$k$ statement, assume that every real-linear projection under
+consideration has a finite $k$th absolute moment.  All channels must occupy
+the same response space, or be identified with it by a fixed map independent
+of the outcome.  Then, for $Z$ in
+Eq.~\eqref{eq:random_channel_model},
+\begin{equation}
+ \boxed{
+ \kappa_k(Z)=\sum_{\alpha=1}^{n}
+ w_\alpha^k\kappa_k(Y_\alpha)} .
+ \label{eq:cumulant_additivity}
+\end{equation}
+The equality is a finite-$n$ tensor identity.  It is not a central-limit
+approximation.
+
+To see the result, let $t$ be any real-linear test field on $\mathcal V$.
+Independence factorizes the characteristic function and hence its logarithm,
+\begin{equation}
+ \log\mathbb E e^{it(Z)}
+ =\sum_{\alpha=1}^{n}
+ \log\mathbb E e^{iw_\alpha t(Y_\alpha)} .
+ \label{eq:log_characteristic_additivity}
+\end{equation}
+Taking $k$ derivatives at the origin supplies $w_\alpha^k$ and produces no
+mixed-channel connected term.  Polarization over distinct test fields proves
+Eq.~\eqref{eq:cumulant_additivity}.  A detailed realification proof is given
+in the Supplemental Material.
+
+At second order, with $y_\alpha=\operatorname{vec}(Y_\alpha)$, the ordinary
+covariance and pseudocovariance are
+\begin{equation}
+ C_\alpha=\mathbb E[y_\alpha y_\alpha^\dagger],
+ \qquad
+ \Pi_\alpha=\mathbb E[y_\alpha y_\alpha^T],
+ \label{eq:channel_second_moments}
+\end{equation}
+and independence gives
+\begin{equation}
+ C_Z=\sum_\alpha w_\alpha^2C_\alpha,
+ \qquad
+ \Pi_Z=\sum_\alpha w_\alpha^2\Pi_\alpha.
+ \label{eq:weighted_second_moments}
+\end{equation}
+The connected fourth tensor must subtract the Wick tensor constructed from
+both $C_Z$ and $\Pi_Z$.  Pairwise uncorrelated channels are insufficient for
+Theorem~1: mixed fourth cumulants can remain when independence fails.
+
+The participation number of the deterministic weights is
+\begin{equation}
+ N_{\mathrm{eff}}
+ =\frac{\left(\sum_\alpha w_\alpha^2\right)^2}
+ {\sum_\alpha w_\alpha^4} .
+ \label{eq:effective_channel_number}
+\end{equation}
+For $L^2$-normalized equal weights it equals $n$.  Concentrated weights can
+make it much smaller than the nominal channel count.  Theorem~1 alone does
+not produce an inverse-$N_{\mathrm{eff}}$ law because the tensors
+$\kappa_4(Y_\alpha)$ need not be equal or even comparable.
+
+\paragraph{Corollary 1 (conditional fourth-cumulant law).}
+Assume in addition that the tested channel contraction is variance
+normalized, every channel has a finite fourth moment, and the standardized
+fourth cumulants are identical,
+$\kappa_4(Y_\alpha)=K_4$.  Then
+\begin{equation}
+ \frac{\kappa_4(Z)}
+ {\left(\sum_\alpha w_\alpha^2\right)^2}
+ =\frac{K_4}{N_{\mathrm{eff}}} .
+ \label{eq:inverse_neff_law}
+\end{equation}
+If instead $\|\kappa_4(Y_\alpha)\|\le K$ in one fixed tensor norm, then
+\begin{equation}
+ \frac{\|\kappa_4(Z)\|}
+ {\left(\sum_\alpha w_\alpha^2\right)^2}
+ \le\frac{K}{N_{\mathrm{eff}}} .
+ \label{eq:inverse_neff_bound}
+\end{equation}
+For unequal known channel cumulants, the executable prediction is
+\begin{equation}
+ \kappa_{4,\mathrm{pred}}(Z)
+ =\frac{\sum_\alpha w_\alpha^4\kappa_4(Y_\alpha)}
+ {\left(\sum_\alpha w_\alpha^2\right)^2} .
+ \label{eq:unequal_channel_prediction}
+\end{equation}
+No exponent is fitted in Eqs.~\eqref{eq:inverse_neff_law}--
+\eqref{eq:unequal_channel_prediction}.
+
+The analytic implementation was checked with a fixed non-Gaussian complex
+matrix population having zero mean, unit variance, zero population
+pseudocovariance, finite fourth moment, and standardized fourth cumulant
+$K_4=8$.  Equal and linearly unequal weights were evaluated at
+$n=4,8,16,32,64$ using $50{,}000$ matrices and $25$ uncertainty blocks.  The
+largest direct relative error from
+Eq.~\eqref{eq:unequal_channel_prediction} was $\ChannelTheoryMaximumRelativeError$, below the
+registered $0.08$ implementation threshold.  This oracle verifies the code
+path under data generated from the theorem assumptions.  It is not evidence
+that the response channels of a physical Hamiltonian are independent.
+
+The second exact statement concerns only accessibility of the fiber.
+Given response matrices $X_a$, define the unital star-closed algebra
+\begin{equation}
+ \mathcal A_X
+ =\operatorname{alg}^{*}\{X_a^\dagger X_b:a,b\}
+ \subseteq\operatorname{End}_{\mathbb C}(P\mathcal H)
+ \label{eq:response_algebra}
+\end{equation}
+and its commutant
+\begin{equation}
+ \mathcal A_X'
+ =\{M:[M,A]=0\ \text{for every }A\in\mathcal A_X\} .
+ \label{eq:response_commutant}
+\end{equation}
+
+\paragraph{Proposition 1 (commutant criterion).}
+For a finite-dimensional complex star algebra,
+$\mathcal A_X'=\mathbb C I_D$ implies that $\mathcal A_X$ acts irreducibly on
+the protected fiber.  Burnside's theorem then gives
+\begin{equation}
+ \mathcal A_X=\operatorname{End}_{\mathbb C}(P\mathcal H).
+ \label{eq:burnside_response}
+\end{equation}
+A nonscalar commutant therefore rules out an unrestricted full-matrix mixing
+ansatz until its invariant blocks are resolved.  The converse use relevant
+to statistics is forbidden: a scalar commutant does not imply independent
+channels, Gaussianity, suppression of connected cumulants, locality,
+thermalization, or ETH.  A deterministic pair of matrices can generate the
+full matrix algebra.
+
+The theorem and proposition leave several explicit failure branches.  Mixed
+connected tensors modify Eq.~\eqref{eq:cumulant_additivity} for correlated
+channels.  Without finite fourth moments, the statistic in
+Eq.~\eqref{eq:inverse_neff_law} is undefined.  If
+$\max_\alpha w_\alpha^2/\sum_\beta w_\beta^2$ does not decrease, nominal
+channel proliferation does not imply growing $N_{\mathrm{eff}}$.  Unresolved
+symmetry blocks produce a nonscalar commutant; nonstationary tangent
+populations invalidate a comparison based only on $N_{\mathrm{eff}}$; and a
+closing external gap invalidates the isolated-projector response.  Finally,
+omitting pseudocovariance removes the third Wick pairing and changes the null
+being tested.
+
+These limitations are active in the result boundary.  The analytic audit and
+exact index construction passed, but the prospectively sealed chiral random
+tangent validation did not remain inside its fixed channel-law band.  The
+selected branch is therefore \texttt{random\_channel\_failure}.  Retrospective
+data from other protected models lack documented independent response units
+and cannot repair that prospective failure.  We retain
+Eqs.~\eqref{eq:cumulant_additivity}--\eqref{eq:burnside_response} as exact
+conditional statements and reject the stronger inference that they establish
+Geometric ETH for exactly degenerate quantum-state bundles.

@@ -1,0 +1,283 @@
+{
+  "all_checks_pass": true,
+  "arrays_file": "xcube_geometric_control_v11.npz",
+  "arrays_sha256": "03f652249918d62f6b3aa273a1677abb1843792f458d979fd5d412372288e41d",
+  "cases": [
+    {
+      "checks": {
+        "coefficient_geometry_zero": true,
+        "degeneracy_formula": true,
+        "dense_transport_identity": true,
+        "stabilizer_rank_formula": true,
+        "transport_curvature_scalar": true,
+        "transport_geometry_structured": true
+      },
+      "coefficient_control": {
+        "berry_curvature": 0.0,
+        "checks": {
+          "fixed_commuting_generators": true,
+          "positive_coefficients_preserve_ground_eigenspace": true,
+          "projector_is_parameter_independent": true,
+          "zero_berry_curvature": true,
+          "zero_quantum_metric": true
+        },
+        "ground_dimension": 512,
+        "length": 2,
+        "logical_qubits": 9,
+        "n_qubits": 24,
+        "projector_derivative_norm": 0.0,
+        "quantum_metric": 0.0,
+        "stabilizer_rank": 15
+      },
+      "ground_dimension": 512,
+      "length": 2,
+      "logical_qubits": 9,
+      "n_qubits": 24,
+      "runtime_seconds": 0.0011031249996449333,
+      "stabilizer_count": 32,
+      "stabilizer_rank": 15,
+      "transport_control": {
+        "both_generators_detectable": true,
+        "checks": {
+          "both_errors_detectable": true,
+          "generators_anticommute": true,
+          "local_generators": true,
+          "ordered_product_is_stabilizer": true,
+          "scalar_curvature": true,
+          "unitary_conjugation_is_isospectral": true,
+          "zero_connected_curvature_variance": true
+        },
+        "connected_curvature_variance": 0.0,
+        "curvature_distinct_eigenvalues": 1,
+        "curvature_eigenvalue": -0.5,
+        "curvature_multiplicity": 512,
+        "exactly_isospectral": true,
+        "gap_preserved": true,
+        "generator_supports": [
+          1,
+          4
+        ],
+        "generators_anticommute": true,
+        "infinitesimal_holonomy_phase_density": -0.5,
+        "length": 2,
+        "n_qubits": 24,
+        "product_is_stabilizer": true
+      }
+    },
+    {
+      "checks": {
+        "coefficient_geometry_zero": true,
+        "degeneracy_formula": true,
+        "dense_transport_identity": true,
+        "stabilizer_rank_formula": true,
+        "transport_curvature_scalar": true,
+        "transport_geometry_structured": true
+      },
+      "coefficient_control": {
+        "berry_curvature": 0.0,
+        "checks": {
+          "fixed_commuting_generators": true,
+          "positive_coefficients_preserve_ground_eigenspace": true,
+          "projector_is_parameter_independent": true,
+          "zero_berry_curvature": true,
+          "zero_quantum_metric": true
+        },
+        "ground_dimension": 32768,
+        "length": 3,
+        "logical_qubits": 15,
+        "n_qubits": 81,
+        "projector_derivative_norm": 0.0,
+        "quantum_metric": 0.0,
+        "stabilizer_rank": 66
+      },
+      "ground_dimension": 32768,
+      "length": 3,
+      "logical_qubits": 15,
+      "n_qubits": 81,
+      "runtime_seconds": 0.0052179169997543795,
+      "stabilizer_count": 108,
+      "stabilizer_rank": 66,
+      "transport_control": {
+        "both_generators_detectable": true,
+        "checks": {
+          "both_errors_detectable": true,
+          "generators_anticommute": true,
+          "local_generators": true,
+          "ordered_product_is_stabilizer": true,
+          "scalar_curvature": true,
+          "unitary_conjugation_is_isospectral": true,
+          "zero_connected_curvature_variance": true
+        },
+        "connected_curvature_variance": 0.0,
+        "curvature_distinct_eigenvalues": 1,
+        "curvature_eigenvalue": -0.5,
+        "curvature_multiplicity": 32768,
+        "exactly_isospectral": true,
+        "gap_preserved": true,
+        "generator_supports": [
+          1,
+          4
+        ],
+        "generators_anticommute": true,
+        "infinitesimal_holonomy_phase_density": -0.5,
+        "length": 3,
+        "n_qubits": 81,
+        "product_is_stabilizer": true
+      }
+    },
+    {
+      "checks": {
+        "coefficient_geometry_zero": true,
+        "degeneracy_formula": true,
+        "dense_transport_identity": true,
+        "stabilizer_rank_formula": true,
+        "transport_curvature_scalar": true,
+        "transport_geometry_structured": true
+      },
+      "coefficient_control": {
+        "berry_curvature": 0.0,
+        "checks": {
+          "fixed_commuting_generators": true,
+          "positive_coefficients_preserve_ground_eigenspace": true,
+          "projector_is_parameter_independent": true,
+          "zero_berry_curvature": true,
+          "zero_quantum_metric": true
+        },
+        "ground_dimension": 2097152,
+        "length": 4,
+        "logical_qubits": 21,
+        "n_qubits": 192,
+        "projector_derivative_norm": 0.0,
+        "quantum_metric": 0.0,
+        "stabilizer_rank": 171
+      },
+      "ground_dimension": 2097152,
+      "length": 4,
+      "logical_qubits": 21,
+      "n_qubits": 192,
+      "runtime_seconds": 0.04024229199967522,
+      "stabilizer_count": 256,
+      "stabilizer_rank": 171,
+      "transport_control": {
+        "both_generators_detectable": true,
+        "checks": {
+          "both_errors_detectable": true,
+          "generators_anticommute": true,
+          "local_generators": true,
+          "ordered_product_is_stabilizer": true,
+          "scalar_curvature": true,
+          "unitary_conjugation_is_isospectral": true,
+          "zero_connected_curvature_variance": true
+        },
+        "connected_curvature_variance": 0.0,
+        "curvature_distinct_eigenvalues": 1,
+        "curvature_eigenvalue": -0.5,
+        "curvature_multiplicity": 2097152,
+        "exactly_isospectral": true,
+        "gap_preserved": true,
+        "generator_supports": [
+          1,
+          4
+        ],
+        "generators_anticommute": true,
+        "infinitesimal_holonomy_phase_density": -0.5,
+        "length": 4,
+        "n_qubits": 192,
+        "product_is_stabilizer": true
+      }
+    },
+    {
+      "checks": {
+        "coefficient_geometry_zero": true,
+        "degeneracy_formula": true,
+        "dense_transport_identity": true,
+        "stabilizer_rank_formula": true,
+        "transport_curvature_scalar": true,
+        "transport_geometry_structured": true
+      },
+      "coefficient_control": {
+        "berry_curvature": 0.0,
+        "checks": {
+          "fixed_commuting_generators": true,
+          "positive_coefficients_preserve_ground_eigenspace": true,
+          "projector_is_parameter_independent": true,
+          "zero_berry_curvature": true,
+          "zero_quantum_metric": true
+        },
+        "ground_dimension": 134217728,
+        "length": 5,
+        "logical_qubits": 27,
+        "n_qubits": 375,
+        "projector_derivative_norm": 0.0,
+        "quantum_metric": 0.0,
+        "stabilizer_rank": 348
+      },
+      "ground_dimension": 134217728,
+      "length": 5,
+      "logical_qubits": 27,
+      "n_qubits": 375,
+      "runtime_seconds": 0.2506764160007151,
+      "stabilizer_count": 500,
+      "stabilizer_rank": 348,
+      "transport_control": {
+        "both_generators_detectable": true,
+        "checks": {
+          "both_errors_detectable": true,
+          "generators_anticommute": true,
+          "local_generators": true,
+          "ordered_product_is_stabilizer": true,
+          "scalar_curvature": true,
+          "unitary_conjugation_is_isospectral": true,
+          "zero_connected_curvature_variance": true
+        },
+        "connected_curvature_variance": 0.0,
+        "curvature_distinct_eigenvalues": 1,
+        "curvature_eigenvalue": -0.5,
+        "curvature_multiplicity": 134217728,
+        "exactly_isospectral": true,
+        "gap_preserved": true,
+        "generator_supports": [
+          1,
+          4
+        ],
+        "generators_anticommute": true,
+        "infinitesimal_holonomy_phase_density": -0.5,
+        "length": 5,
+        "n_qubits": 375,
+        "product_is_stabilizer": true
+      }
+    }
+  ],
+  "configuration": {
+    "boundary_conditions": "periodic",
+    "deformations": [
+      "positive_stabilizer_reweighting",
+      "local_isospectral_unitary_transport"
+    ],
+    "lengths": [
+      2,
+      3,
+      4,
+      5
+    ],
+    "model": "X-cube stabilizer code"
+  },
+  "dense_toy_audit": {
+    "checks": {
+      "curvature_identity": true,
+      "isospectral_transport": true,
+      "projector_rank_two": true
+    },
+    "curvature_error": 0.0,
+    "projector_rank": 2,
+    "spectrum_error": 1.1102230246251565e-16
+  },
+  "environment": {
+    "numpy": "2.4.2",
+    "platform": "macOS-15.6-arm64-arm-64bit-Mach-O",
+    "python": "3.14.4"
+  },
+  "generated_utc": "2026-08-15T23:26:28.473341+00:00",
+  "runtime_seconds": 0.3005292920006468,
+  "version": "v11"
+}

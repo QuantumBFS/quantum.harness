@@ -1,0 +1,158 @@
+\section{BPS sectors, black-hole diagnostics, and protected geometry}
+\label{sec:bps-black-holes}
+
+The motivation for a geometric formulation of eigenstate thermalization is
+particularly sharp in a supersymmetric sector.  Ordinary spectral diagnostics
+are built from the relative positions of distinct energy levels.  In a BPS
+sector at fixed charges, however, supersymmetry fixes the energy through the
+central-charge bound.  The protected states then form a degenerate eigenspace,
+and the spacing distribution contains no information beyond the imposed
+degeneracy.  This is a different obstruction from the failure of a finite-size
+random-matrix fit: the relevant spacings vanish identically before any
+statistical analysis is performed.  The standard ETH constructions of
+Refs.~\cite{deutsch1991,srednicki1994} and the spectral-chaos criterion of
+Ref.~\cite{bohigas1984} therefore do not, by themselves, provide a diagnostic
+for this problem.
+
+The natural object is the bundle of protected states over the space of
+couplings.  Let $H(\lambda)$ be a family of Hamiltonians, let
+$P(\lambda)$ project onto a fixed-charge BPS eigenspace of rank $D$, and write
+$Q=1-P$.  When the eigenspace remains isolated from the non-BPS spectrum, its
+off-fiber response is
+\begin{equation}
+ X_\mu=Q\,\partial_\mu P\,P,
+ \qquad
+ (X_\mu)_{ma}=\frac{\langle m|\partial_\mu H|a\rangle}{E_{\mathrm{BPS}}-E_m},
+ \label{eq:bps-projector-response}
+\end{equation}
+where $|a\rangle$ belongs to the protected fiber and $|m\rangle$ belongs to
+its complement.  The connection on the fiber and its curvature are
+\begin{equation}
+ (A_\mu)_{ab}=i\langle a|\partial_\mu b\rangle,
+ \qquad
+ F_{\mu\nu}=\partial_\mu A_\nu-\partial_\nu A_\mu-i[A_\mu,A_\nu].
+ \label{eq:bps-berry-curvature}
+\end{equation}
+Under a change of frame in the degenerate fiber, $F_{\mu\nu}$ transforms by
+conjugation.  Its eigenvalues, traces of powers, and holonomies are therefore
+the appropriate gauge-covariant observables.  The construction is the
+degenerate-state extension of the Berry phase and the Wilczek--Zee connection
+\cite{berry1984,wilczekzee1984}; it is also the object proposed specifically
+for BPS chaos in Ref.~\cite{chen2024bps}.
+
+\subsection{What is known about smooth and black-hole-motivated sectors}
+
+The distinction between smooth horizonless states and black-hole microstates
+is a statement about the geometry represented by a particular family of
+states, not a consequence of BPS protection alone.  D-brane counting and the
+AdS/CFT correspondence provide the setting in which supersymmetric black-hole
+microstates can be compared with states represented by smooth geometries
+\cite{stromingervafa1996,maldacena1998ads}.  They do not imply that every
+protected multiplet has the same response statistics.
+
+The direct Berry-curvature comparison is supplied by
+Ref.~\cite{chen2026berry}.  For the studied $1/2$-BPS states in the D1/D5 CFT,
+which are used there as smooth, horizonless examples, the curvature under
+marginal deformations is non-random and is often exactly zero at generic
+coupling.  The qualification ``often'' is essential: the result concerns the
+sectors and deformations analyzed in that work, not every D1/D5 state or every
+possible tangent direction.  The same source studies $\mathcal{N}=4$ SYM and
+finds vanishing curvature for the analyzed $1/4$-BPS sectors at generic
+  coupling \cite{chen2026berry}.  In both cases the conclusion is a statement about the matrix
+curvature of a degenerate bundle.  It is not the claim that the corresponding
+Hamiltonian is integrable, nor that a vanishing curvature proves the absence
+of all forms of quantum chaos.
+
+The contrast is with the paper's black-hole-motivated examples.  In
+$\mathcal{N}=2$ super-JT gravity, the Berry-curvature calculation gives
+random-matrix-like curvature statistics; in the $\mathcal{N}=2$ SYK model,
+explicit numerical calculations give the same qualitative behavior
+\cite{chen2026berry}.  The word ``like'' matters.  The statement concerns the
+statistics of the curvature matrix after the specified deformation and
+symmetry prescription.  It does not say that the entries form an independent
+Gaussian ensemble, that the distribution is Haar invariant, or that the
+result is insensitive to the choice of moduli coordinates.  The gauge-invariant
+content is carried by conjugation-invariant functions of $F$, while the
+observable distribution may retain correlations between tangent directions.
+
+This distinction is also visible in the relation between monotone and
+fortuitous BPS states.  Supersymmetric SYK constructions and their protected
+sectors are described in Refs.~\cite{fu2017susy,maldacenastanford2016}; the
+finite-size appearance of additional relations is discussed in
+Ref.~\cite{chang2024fortuity}.  The label ``fortuitous'' is a statement about
+which BPS states exist at a given value of the number of degrees of freedom.
+It is not itself a proof of random curvature.  Conversely, a monotone state
+is not defined by $F=0$.  The curvature comparison in
+Ref.~\cite{chen2026berry} supplies the additional calculation needed to
+separate the two response behaviors.
+
+\subsection{The \texorpdfstring{$\mathcal{N}=2$}{N=2} SYK and super-JT comparison}
+
+The SYK model is useful here because it supplies a controlled large-$N$
+setting with a well-developed low-energy description.  The random
+spin-interaction precursor was introduced by Sachdev and Ye
+\cite{sachdevye1993}.  The modern SYK analysis identifies an emergent
+near-conformal regime and a reparametrization soft mode
+\cite{maldacenastanford2016}; supersymmetric variants and their protected
+sectors are constructed in Ref.~\cite{fu2017susy}.  These facts establish why
+SYK is a useful model for testing a geometric diagnostic.  They do not turn an
+SYK calculation into a theorem about higher-dimensional black holes.
+
+The low-energy gravity comparison is similarly conditional.  Nearly-AdS$_2$
+ dynamics is governed by a Schwarzian sector in the standard treatment
+\cite{maldacenastanfordyang2016}, and the Schwarzian path integral and its
+correlators have controlled formulations
+\cite{stanfordwitten2017,mertens2017schwarzian}.  The direct statement relevant
+to this paper is narrower: the $\mathcal{N}=2$ super-JT calculation in
+Ref.~\cite{chen2026berry} produces random-matrix-like Berry curvature for the
+protected states considered there.  Neither this calculation nor the SYK
+numerics establishes that all supersymmetric black-hole microstates have a
+universal curvature distribution.
+
+The usual ETH language remains useful as a comparison of observables, not as a
+replacement for the geometric calculation.  ETH concerns matrix elements of
+operators in energy eigenstates, whereas the present object is a connection on
+an exactly degenerate fiber.  SYK ETH studies
+\cite{sonner2017syketh} and gravitational moment constructions
+\cite{pollack2020gravityeth} help relate the two settings, but neither source
+proves a Berry-curvature ETH statement.  The difference is especially
+important at zero temperature, where a protected energy is fixed by a charge
+constraint while the state bundle may still have nontrivial holonomy.
+
+\subsection{A bounded relation to ``It from ETH''}
+
+The phrase ``It from ETH'' refers here only to the construction of
+Ref.~\cite{itfrometh2025}, which studies multi-interval entanglement and
+replica-wormhole structures in a large-$c$ BCFT ensemble.  That work is a
+relevant conceptual neighbor because it connects statistical information in a
+boundary ensemble to geometric data in a gravitational description.  It does
+not calculate the non-Abelian Berry curvature of a BPS state bundle, and it
+does not validate the finite-channel law tested below.  We therefore use the
+reference only to delimit a possible future bridge between state-bundle
+geometry, entanglement data, and replica constructions.  No author attribution
+other than the official record is made here, and no unresolved name is inserted
+into the bibliography.
+
+\subsection{Claim boundary for the present manuscript}
+
+The direct evidence can be summarized without turning a model comparison into
+a universal black-hole statement:
+\begin{enumerate}
+  \item the ordinary spectrum is silent inside an exactly degenerate BPS
+  fiber;
+  \item the cited D1/D5 and $\mathcal{N}=4$ SYM calculations provide
+  non-random or vanishing curvature in the stated smooth/horizonless sectors;
+  \item the cited $\mathcal{N}=2$ SYK and super-JT calculations provide
+  random-matrix-like curvature in the stated black-hole-motivated models;
+  \item the $\mathcal{N}=2$ SYK moduli-space calculation provides quantized
+  Chern data, including exponentially large first Chern numbers in specified
+  large-$N$ sectors \cite{chen2026berry}; and
+  \item these results motivate tests of geometric response in additional
+  protected systems, but do not establish that black holes satisfy an
+  asymptotic or model-independent geometric-response law, ordinary ETH, or a
+  thermalization law.
+\end{enumerate}
+
+This boundary is the one used in the remainder of the paper.  In particular,
+the black-hole language identifies a falsifiable target class of models; it is
+not used as an assumption that supplies the missing statistical closure.

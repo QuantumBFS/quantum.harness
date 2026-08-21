@@ -1,0 +1,44 @@
+{
+  "caption_data": {
+    "panel_a": "P/Q block decomposition of a tangent Hamiltonian; exact degeneracy sets the traceless intrafiber block S_a to zero but does not set V_a to zero.",
+    "panel_b": "The off-fiber block determines the complement response, QGT, metric, and non-Abelian curvature.",
+    "panel_c": "Audited examples separate frozen, scalar, structured/reducible, and stochastic finite-size response classes."
+  },
+  "classification": {
+    "frozen": "xcube_coefficient_reweighting",
+    "scalar": "xcube_unitary_transport",
+    "stochastic_finite_size": [
+      "moore_read",
+      "laughlin"
+    ],
+    "structured_reducible": "lattice_susy"
+  },
+  "dimensions_inches": [
+    7.0,
+    5.6
+  ],
+  "dpi": 300,
+  "outputs": {
+    "pdf": {
+      "path": "overleaf_sync/exactly_degenerate_quantum_chaos_prb/figures/figure_1_protection_mixing_v13.pdf",
+      "sha256": "4616b02032b3c05103eba68b97f59428018e2a931a7b85aa99a9338e92c9657d"
+    },
+    "png": {
+      "path": "01_task_folder/task_05/script/output/paper1_prb_v13/figure_1_protection_mixing_v13.png",
+      "sha256": "1fcb8e4f5fccfd25f109fa8a8cb91190851590bf97ba1890b4a4cd26576a1041"
+    }
+  },
+  "panel_labels": [
+    "a",
+    "b",
+    "c"
+  ],
+  "source_hash": "95c4b13c5c9ca3c42eda11fd7bef8f0bf6c2e0f86d8a7f1233cd400f1ae0e5f1",
+  "version": "v13",
+  "visual_audit": {
+    "class_encoding": "header + mathematical criterion + model label + hatch",
+    "color_is_not_the_only_class_encoding": true,
+    "labels_not_clipped": true,
+    "preview_inspected_at_original_resolution": true
+  }
+}

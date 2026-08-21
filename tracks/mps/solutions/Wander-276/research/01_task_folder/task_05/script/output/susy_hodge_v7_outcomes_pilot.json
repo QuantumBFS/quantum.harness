@@ -1,0 +1,106 @@
+{
+  "arrays_sha256": "1dd2ac57a58f35d51c94b7b1b145aba60a5054ccef3debbdc0aa353961349a02",
+  "cases": [
+    {
+      "N": 8,
+      "collapsed_null_quantiles": [
+        0.2881793195620301,
+        0.29243105649287354,
+        0.2966028983154999
+      ],
+      "hodge_null_quantiles": [
+        0.3065421612499292,
+        0.3119337066430775,
+        0.317444931738227
+      ],
+      "median_hodge_balance": 0.07040982426906839,
+      "panel_kind": "isotropic",
+      "physical_quantiles": [
+        0.2993447558423871,
+        0.3473456476442244,
+        0.4322302561333196
+      ],
+      "realizations": 64,
+      "sector": "adjacent"
+    },
+    {
+      "N": 8,
+      "collapsed_null_quantiles": [
+        0.30675082164265327,
+        0.3110016133852661,
+        0.31641085299065735
+      ],
+      "hodge_null_quantiles": [
+        0.3284194758414989,
+        0.3346004660957313,
+        0.34072193396722594
+      ],
+      "median_hodge_balance": 0.07146412252958581,
+      "panel_kind": "sparse",
+      "physical_quantiles": [
+        0.3844510982929914,
+        0.4214201895221874,
+        0.4982959082592322
+      ],
+      "realizations": 64,
+      "sector": "adjacent"
+    },
+    {
+      "N": 8,
+      "collapsed_null_quantiles": [
+        0.20851992269328554,
+        0.20985659397817102,
+        0.21130151129640332
+      ],
+      "hodge_null_quantiles": [
+        0.21950045494638384,
+        0.22107646417990767,
+        0.2227747317965349
+      ],
+      "median_hodge_balance": 1.0,
+      "panel_kind": "isotropic",
+      "physical_quantiles": [
+        0.2041486515751545,
+        0.2144978352258034,
+        0.2252050450502445
+      ],
+      "realizations": 64,
+      "sector": "central"
+    },
+    {
+      "N": 8,
+      "collapsed_null_quantiles": [
+        0.2233835859189909,
+        0.22530952276630742,
+        0.22771245812229202
+      ],
+      "hodge_null_quantiles": [
+        0.2422130093899726,
+        0.24490167076808161,
+        0.24753062987171096
+      ],
+      "median_hodge_balance": 1.0,
+      "panel_kind": "sparse",
+      "physical_quantiles": [
+        0.2713435732191344,
+        0.3588778773960463,
+        0.4403876895074276
+      ],
+      "realizations": 64,
+      "sector": "central"
+    }
+  ],
+  "checks": {
+    "complete_group_partition": true,
+    "finite_physical_and_nulls": true,
+    "null_sample_counts": true,
+    "safe_aggregate_preexists": true
+  },
+  "generated_utc": "2026-08-01T15:36:10.725028+00:00",
+  "null_draws_per_realization": 128,
+  "null_samples": 2000,
+  "passed": true,
+  "safe_covariates_sha256": "e432c45725925bf44a128a2afdf8bb6a2d5da86ea53bfdcb45e0efc9ae4d9516",
+  "uncertainty_unit": "complete_disorder_realization",
+  "version": "v7"
+}

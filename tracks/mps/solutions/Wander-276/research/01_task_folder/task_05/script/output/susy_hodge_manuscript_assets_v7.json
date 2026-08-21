@@ -1,0 +1,25 @@
+{
+  "checks": {
+    "complete_pilot_grid": true,
+    "complete_primary_pair": true,
+    "figure_copy_exact": true,
+    "figure_manifest_matches_sources": true,
+    "publishable_registered_branch": true,
+    "result_macro_enabled": true
+  },
+  "generated_utc": "2026-08-04T01:30:55.991534+00:00",
+  "inputs": {
+    "figure_susy_hodge_geometric_eth_v7.json": "c7e1e142242c2481cb8346af72b8ff8d2b6ef40a4f4c04943890f504eb70949d",
+    "figure_susy_hodge_geometric_eth_v7.pdf": "f081c5f162778e5e45a48adba1ea08c37e8521c725725922a0ec3a35bda74a54",
+    "susy_hodge_v7_N14_inference.json": "177643e07fc6cf210362fc1077070bd1f0ba316b6805042a626de3f96c55a627",
+    "susy_hodge_v7_outcomes_pilot_combined.json": "152084fc502e38074ed0d8163f8582c01b9e5de46c12a53d2ced4994d1a74617"
+  },
+  "outputs": {
+    "figure_susy_hodge_geometric_eth_v7.pdf": "f081c5f162778e5e45a48adba1ea08c37e8521c725725922a0ec3a35bda74a54",
+    "results_v7.tex": "a1257d1744f1085ee518a36ca9ed2574dec608cb7f71c766a082745f3acc858d"
+  },
+  "passed": true,
+  "prediction_sha256": "fc300dc7e4bdc1be157919e458ac868d3468533cce31108f23c9fba4f7e9f102",
+  "selected_branch": "cohomological_non_gaussian_class",
+  "version": "v7"
+}

@@ -1,0 +1,35 @@
+cff-version: 1.2.0
+message: "Cite the paper whose results or code you use; this record describes the combined v13/v14 repository package."
+title: "Chaos of Quantum Geometry: Two-Paper Exact-Degeneracy Release"
+type: software
+authors:
+  - family-names: Wang
+    given-names: Thomas J.
+  - family-names: OkongOyangO
+repository-code: "https://github.com/JunkaiWang-TheoPhy/Chaos-of-Quantum-Geometry"
+url: "https://github.com/JunkaiWang-TheoPhy/Chaos-of-Quantum-Geometry"
+version: 2.0.0
+date-released: 2026-08-21
+license: GPL-3.0-only
+abstract: "A reproducible two-paper study of non-Abelian geometric response under exact spectral degeneracy. Paper I gives finite-size mechanism-resolved evidence. Paper II proves a conditional weighted-channel cumulant identity and reports a failed prospective N_eff closure test without claiming an established Geometric ETH."
+keywords:
+  - quantum chaos
+  - exact degeneracy
+  - non-Abelian Berry curvature
+  - geometric ETH
+  - protected quantum states
+references:
+  - type: article
+    authors:
+      - family-names: Wang
+        given-names: Thomas J.
+      - family-names: OkongOyangO
+    title: "Exactly Degenerate Quantum Chaos: Non-Abelian Quantum Geometry as a Probe"
+    year: 2026
+  - type: article
+    authors:
+      - family-names: Wang
+        given-names: Thomas J.
+      - family-names: OkongOyangO
+    title: "Geometric Response of Exactly Degenerate Quantum State Bundles"
+    year: 2026

@@ -1,0 +1,115 @@
+\section{Stabilizer counterexamples}
+\label{sec:stabilizer}
+
+The X-cube model provides an exact control in which the protected rank grows
+rapidly but the quantum geometry is fully determined by the tangent algebra.
+On the three-torus its dependent stabilizer relations leave $6L-3$ logical
+qubits and ground-space dimension $2^{6L-3}$
+\cite{vijay2016xcube}.  Neither a large $D$ nor a moving projector is therefore
+sufficient to produce random-matrix curvature.  Figure~\ref{fig:mechanisms}(d)
+shows two deformations that separate these possibilities without allocating
+the exponentially large ground-space matrix.
+
+The calculation is performed in the binary symplectic representation.  Each
+Pauli stabilizer is a row $(\bm x|\bm z)$ over $\mathbb F_2$, commutation is a
+symplectic inner product, and row reduction determines the number of
+independent constraints.  This proves the logical-qubit count without
+diagonalizing a $2^{3L^3}$-dimensional Hamiltonian.  It also exposes the
+relation responsible for the transported curvature: the ordered product of
+the chosen local generators is reduced against the stabilizer row space,
+rather than inferred from a small-system spectrum.
+
+\subsection{Positive coefficient reweighting}
+
+First vary the positive coefficients multiplying the commuting stabilizers
+while keeping the Pauli generators fixed.  The simultaneous $+1$ eigenspace
+does not depend on those coefficients as long as none crosses zero.  Hence the
+projector is parameter independent,
+\begin{equation}
+ \partial_aP=0,
+ \qquad X_a=0,
+ \qquad g_{ab}=F_{ab}=0.
+ \label{eq:xcube-flat-control}
+\end{equation}
+The registered coefficient reweighting curvature is exactly
+\XCubeCoefficientCurvature.  This is stronger than a small numerical
+residual: it follows from the common stabilizer eigenspace.  The deformation
+changes excitation energies and may change the gap scale, yet it cannot
+rotate the protected subspace.  Energy dependence outside the fiber and
+geometry of the fiber are independent data.
+
+This control also identifies the relevant failure boundary.  A coefficient
+passing through zero removes one constraint and closes the corresponding
+gap; a logical operator added within the ground space makes $PHP$ nonscalar
+and splits the exact multiplet.  Neither operation belongs to the open,
+constant-rank family of Eq.~\eqref{eq:xcube-flat-control}.
+
+Generic local Pauli fields need not split the torus ground space at first
+order because a detectable error maps it out of the code space.  Their
+finite-size splitting appears only at the perturbative order at which a
+noncontractible logical operator is assembled.  That exponentially or
+high-order small splitting is physically important for code stability, but
+it is distinct from exact degeneracy at the commuting-projector point.  Our
+controls stay on paths for which the algebra certifies exact equality of all
+ground energies.
+
+\subsection{Local isospectral unitary transport}
+
+The second deformation conjugates the full commuting-projector Hamiltonian
+by local unitaries.  Let
+\begin{equation}
+ H(\lambda_1,\lambda_2)=UHU^\dagger,
+ \qquad
+ U=e^{-i\lambda_1G_1}e^{-i\lambda_2G_2}.
+ \label{eq:xcube-unitary-transport}
+\end{equation}
+The spectrum, degeneracy, and gap are then preserved exactly, while
+$P(\boldsymbol\lambda)=UPU^\dagger$ moves.  The registered local Pauli
+generators are individually detectable, anticommute, and have an ordered
+product equal to a stabilizer up to phase.  Their commutator therefore acts
+centrally on the code space.  The curvature is nonzero but scalar,
+\begin{equation}
+ F_{12}=\XCubeTransportCurvatureEigenvalue\,P,
+ \qquad
+ D^{-1}\Tr\!\left[
+   \bigl(F_{12}-D^{-1}\Tr(F_{12})P\bigr)^2
+ \right]=\XCubeTransportConnectedVariance.
+ \label{eq:xcube-scalar-curvature}
+\end{equation}
+The dense low-rank toy audit fixes the sign in
+Eq.~\eqref{eq:xcube-scalar-curvature}; the production statement follows from
+binary symplectic identities for every opened size.  Thus unitary transport
+is exactly isospectral and geometrically nontrivial, but its non-Abelian
+curvature contains no fluctuating eigenvalue sector.  Parallel transport
+around an infinitesimal loop gives a common phase rather than relative
+mixing within the code space.
+
+Because the two generators anticommute, their ordered infinitesimal
+transports do not cancel.  Because their product is a stabilizer, however,
+the resulting commutator has the same action on every code state.  This is a
+concrete example of noncommuting motion in the ambient Hilbert space whose
+projection to the fiber lies in the center.  It rules out the converse
+shortcut that any noncommuting deformation must generate a fluctuating
+non-Abelian spectrum.
+
+The scalar curvature is compatible with a nonzero metric: the projector can
+move in the ambient Hilbert space even though the commutator of two accessible
+motions becomes central after restriction to the fiber.  What vanishes is the
+traceless curvature component used for level-repulsion and connected-variance
+tests.  This distinction prevents a nonzero Berry phase from being mistaken
+for stochastic non-Abelian mixing.
+
+The connected variance vanishes because the response algebra collapses to
+the center on the protected fiber.  There is no ensemble of fluctuating
+curvature matrices to which a Jacobi or Gaussian comparison should be
+applied.  The complete-covariance gate is not applicable to this exact
+control; labeling it ``passed'' or ``failed'' would confuse deterministic
+centrality with a statistical null.
+
+Together, the two X-cube paths exclude two shortcuts in interpreting the
+other models.  The flat path shows that exact degeneracy can coexist with no
+projector response.  The unitary transport path shows that nonzero response
+and curvature can coexist with zero connected variance.  Thus large exact
+degeneracy is not sufficient for geometric chaos; one must also establish a
+noncentral accessible response algebra and then test its statistics with an
+appropriate sampling measure.

@@ -1,0 +1,119 @@
+\section{Protected fibers and off-fiber response}
+\label{sec:protected-response}
+
+Let $H(\boldsymbol\lambda)$ be a differentiable family of self-adjoint
+Hamiltonians.  Throughout this paper, $E_0(\boldsymbol\lambda)$ denotes an
+isolated eigenvalue of constant multiplicity $D$ on the parameter region under
+consideration, and $P(\boldsymbol\lambda)$ is its constant rank $D$ spectral
+projector.  We write
+$Q=1-P$ and assume a nonzero spectral gap
+$\Delta=\operatorname{dist}[E_0,\operatorname{spec}(QHQ)]$.  These assumptions
+are stronger than observing a numerically narrow band: they ensure that the
+projector is differentiable and that the inverse of $H-E_0$ on $Q\cH$ is
+bounded.  No response formula below is continued through a point at which the
+rank changes or the spectral gap closes.
+
+\subsection{The splitting and mixing blocks}
+
+For a coordinate $\lambda^a$, set $h_a=\partial_aH$.  The two blocks of $h_a$
+that are relevant to the protected fiber are
+\begin{equation}
+ S_a=Ph_aP-\frac{\Tr(Ph_aP)}{D}P,
+ \qquad
+ V_a=Qh_aP .
+ \label{eq:splitting}
+\end{equation}
+The Hermitian operator $S_a$ is the traceless intrafiber splitting channel,
+whereas $V_a$ maps the protected fiber into its orthogonal complement.  If the
+eigenvalue remains exactly $D$-fold degenerate along the path, differentiating
+$HP=E_0P$ and projecting with $P$ on both sides gives
+$Ph_aP=(\partial_aE_0)P$, hence $S_a=0$.  This is a local necessary condition
+for an exactness-preserving path.  It is not, by itself, a claim that an
+arbitrary linear perturbation with $S_a=0$ preserves the degeneracy at finite
+amplitude; the finite path must continue to satisfy the rank and gap
+conditions.
+
+Crucially, $S_a=0$ imposes no corresponding condition on $V_a$.  Exact
+degeneracy fixes the restriction of the Hamiltonian to $P\cH$, but it does not
+fix how that subspace is embedded in the full Hilbert space.  This distinction
+also works in the opposite direction.  An intervention supported entirely in
+$P\cH$ can make $S_a$ nonzero, and can even produce random-matrix level
+statistics inside the multiplet, while keeping the projector fixed.  Such an
+intervention changes intrafiber energies but produces no quantum geometry.
+
+\subsection{Reduced response of an isolated fiber}
+
+Under the assumptions above, the reduced resolvent
+\[
+ R_Q=Q\bigl[Q(H-E_0)Q\bigr]^{-1}Q
+\]
+exists and satisfies $\lVert R_Q\rVert\leq\Delta^{-1}$.  Projecting the
+derivative of $HP=E_0P$ from $P\cH$ to $Q\cH$ gives the off-fiber response
+\begin{equation}
+ X_a=Q(\partial_aP)P=-R_QV_a .
+ \label{eq:response}
+\end{equation}
+Thus a large response can arise either from a large coupling matrix element
+$V_a$ or from a small excitation denominator.  The distinction matters when
+systems with different gaps are compared: an unnormalized response does not,
+by itself, measure more effective mixing channels.  Equation~\eqref{eq:response}
+also makes the domain of the calculation explicit.  It is an adiabatic
+response of an isolated spectral subspace, not a prescription for following a
+collection of levels after that subspace touches the rest of the spectrum.
+
+The matrix-valued quantum geometric tensor is the operator on $P\cH$
+\begin{equation}
+ \mathcal Q_{ab}
+ =P(\partial_aP)Q(\partial_bP)P
+ =X_a^\dagger X_b,
+ \qquad
+ g_{ab}=\frac{\mathcal Q_{ab}+\mathcal Q_{ba}}{2}.
+ \label{eq:qgt}
+\end{equation}
+The diagonal $g_{aa}=X_a^\dagger X_a$ is positive semidefinite, and its rank
+counts the fiber directions resolved by tangent $a$, subject to the gap
+weighting in $R_Q$.  Unlike the scalar quantum metric of a nondegenerate
+state, the off-diagonal $g_{ab}$ is generally a matrix inside the protected
+multiplet; no analogous rank interpretation is assigned to it.
+
+Choose a local orthonormal frame $\Psi=(|u_1\rangle,\ldots,|u_D\rangle)$ for
+$P\cH$.  With the canonical convention
+$A_a=i\Psi^\dagger\partial_a\Psi$, the non-Abelian Berry curvature is
+\begin{equation}
+ \begin{split}
+ F_{ab}&=\partial_aA_b-\partial_bA_a-i[A_a,A_b]\\
+ &=i(\mathcal Q_{ab}-\mathcal Q_{ba})
+ =i\,P[\partial_aP,\partial_bP]P .
+ \end{split}
+ \label{eq:curvature}
+\end{equation}
+For $D=1$, this convention reduces to
+$F_{ab}=-2\operatorname{Im}\mathcal Q_{ab}$.  Equations~\eqref{eq:qgt} and
+\eqref{eq:curvature} are therefore the symmetric and antisymmetric parts of
+the same off-fiber response.
+
+\subsection{Gauge covariance and observable contractions}
+
+A change of frame $\Psi\mapsto\Psi U(\boldsymbol\lambda)$ leaves the projector
+unchanged but sends
+\begin{align}
+ A_a&\mapsto U^\dagger A_aU+iU^\dagger\partial_aU,\nonumber\\
+ F_{ab}&\mapsto U^\dagger F_{ab}U,
+ &\mathcal Q_{ab}&\mapsto U^\dagger\mathcal Q_{ab}U.
+\end{align}
+The connection transforms inhomogeneously, while the curvature and QGT are
+gauge covariant.  Raw entries of $A_a$ are consequently not primary
+observables in our statistical tests.  The eigenvalues of a fixed Hermitian
+curvature component, traces such as $\Tr F_{ab}^k$, and closed words such as
+$\Tr(\mathcal Q_{ab}\mathcal Q_{cd})$ are gauge invariant.  When rectangular
+response matrices are used computationally, their fiber-frame representation
+transforms as $X_a\mapsto X_aU$; every reported contraction closes the fiber
+indices and has the corresponding invariant or covariant transformation law.
+
+This establishes the separation used throughout the paper.  The condition
+$S_a=0$ protects the eigenvalue to first order, whereas $V_a$ and the reduced
+resolvent determine the motion of the protected fiber.  A fixed projector has
+$X_a=g_{ab}=F_{ab}=0$.  A moving projector can instead have scalar,
+block-reducible, or fully resolved curvature.  Which of these cases displays
+random-matrix correlations is a statistical question, not a consequence of
+the degeneracy alone.

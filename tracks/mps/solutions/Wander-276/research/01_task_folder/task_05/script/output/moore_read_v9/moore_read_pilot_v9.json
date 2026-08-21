@@ -1,0 +1,310 @@
+{
+  "all_checks_pass": true,
+  "cases": [
+    {
+      "basis_dimension": 126,
+      "case": {
+        "N": 4,
+        "expected_rank": 42,
+        "n_flux": 6,
+        "theta_x": 0.0,
+        "theta_y": 0.0
+      },
+      "constraint_nnz": 12096,
+      "constraint_shape": [
+        216,
+        126
+      ],
+      "external_gap": 1.6728499771781185,
+      "internal_bandwidth": 5.944540910308791e-15,
+      "kernel_checks": {
+        "factor_is_nonempty": true,
+        "internal_bandwidth": true,
+        "kernel_count": true,
+        "kernel_orthonormality": true,
+        "kernel_residual": true,
+        "open_external_gap": true
+      },
+      "kernel_residual_norm": 1.8777624665564364e-14,
+      "observed_rank": 42,
+      "panels": [
+        {
+          "A_left": 1.2254307743819417,
+          "B_right": 0.8709005444885806,
+          "R4": 0.5221788062401552,
+          "arrays_sha256": "3f61887b53ee1531d50d278259a1ba4f9e3486b96493f9d49b8d6d5f245e5ad0",
+          "basis_dimension": 126,
+          "case": {
+            "N": 4,
+            "expected_rank": 42,
+            "n_flux": 6,
+            "theta_x": 0.0,
+            "theta_y": 0.0
+          },
+          "channels_saved": true,
+          "checkpoint_reused": false,
+          "checks": {
+            "fiber_tangent_zero": true,
+            "finite_wick_statistic": true,
+            "full_channel_support": true,
+            "kernel_checkpoint": true,
+            "kernel_leakage": true,
+            "response_identity": true
+          },
+          "generated_utc": "2026-08-15T23:08:51.558872+00:00",
+          "kernel_identity_hash": "dee7d68b1f4452bdab6c7d5164ece726de4096b25efcd6498d31149a47cea537",
+          "maximum_kernel_leakage": 6.858979570210784e-15,
+          "maximum_relative_residual": 2.414896204471975e-15,
+          "operator_class": "guiding_density",
+          "panel": 0,
+          "panel_kind": "local_guiding_density",
+          "panel_seed": 2026085609,
+          "panel_size": 8,
+          "rank": 42,
+          "runtime_seconds": 0.048118040999725054,
+          "tangent_fiber_norm": 5.616734618754421e-15,
+          "version": "v9"
+        },
+        {
+          "A_left": 1.1763582926451754,
+          "B_right": 0.8524445577885577,
+          "R4": 0.48111541130555435,
+          "arrays_sha256": "e8ce316b8d5f92400fe72470795352674b1b4ca9b326c514dc0a5f3886f7a865",
+          "basis_dimension": 126,
+          "case": {
+            "N": 4,
+            "expected_rank": 42,
+            "n_flux": 6,
+            "theta_x": 0.0,
+            "theta_y": 0.0
+          },
+          "channels_saved": true,
+          "checkpoint_reused": false,
+          "checks": {
+            "fiber_tangent_zero": true,
+            "finite_wick_statistic": true,
+            "full_channel_support": true,
+            "kernel_checkpoint": true,
+            "kernel_leakage": true,
+            "response_identity": true
+          },
+          "generated_utc": "2026-08-15T23:08:51.607349+00:00",
+          "kernel_identity_hash": "dee7d68b1f4452bdab6c7d5164ece726de4096b25efcd6498d31149a47cea537",
+          "maximum_kernel_leakage": 6.858979570210784e-15,
+          "maximum_relative_residual": 2.414896204471975e-15,
+          "operator_class": "guiding_density",
+          "panel": 1,
+          "panel_kind": "local_guiding_density",
+          "panel_seed": 2026085609,
+          "panel_size": 8,
+          "rank": 42,
+          "runtime_seconds": 0.04831775000002381,
+          "tangent_fiber_norm": 5.377698772318994e-15,
+          "version": "v9"
+        },
+        {
+          "A_left": 1.49064416258393,
+          "B_right": 0.9175137285923531,
+          "R4": 0.5858437735465243,
+          "arrays_sha256": "f5ee2f124910e3cffe9997ca3eb68d061efc7773aa252130fac3efcb7b506af3",
+          "basis_dimension": 126,
+          "case": {
+            "N": 4,
+            "expected_rank": 42,
+            "n_flux": 6,
+            "theta_x": 0.0,
+            "theta_y": 0.0
+          },
+          "channels_saved": true,
+          "checkpoint_reused": false,
+          "checks": {
+            "fiber_tangent_zero": true,
+            "finite_wick_statistic": true,
+            "full_channel_support": true,
+            "kernel_checkpoint": true,
+            "kernel_leakage": true,
+            "response_identity": true
+          },
+          "generated_utc": "2026-08-15T23:08:51.654452+00:00",
+          "kernel_identity_hash": "dee7d68b1f4452bdab6c7d5164ece726de4096b25efcd6498d31149a47cea537",
+          "maximum_kernel_leakage": 6.769460260646161e-15,
+          "maximum_relative_residual": 2.315317822825088e-15,
+          "operator_class": "guiding_density",
+          "panel": -1,
+          "panel_kind": "structured_line",
+          "panel_seed": 2026085609,
+          "panel_size": 8,
+          "rank": 42,
+          "runtime_seconds": 0.046841000000313215,
+          "tangent_fiber_norm": 5.3770256405414865e-15,
+          "version": "v9"
+        }
+      ]
+    },
+    {
+      "basis_dimension": 1716,
+      "case": {
+        "N": 6,
+        "expected_rank": 120,
+        "n_flux": 8,
+        "theta_x": 0.0,
+        "theta_y": 0.0
+      },
+      "constraint_nnz": 921600,
+      "constraint_shape": [
+        7680,
+        1716
+      ],
+      "external_gap": 1.5351550662956022,
+      "internal_bandwidth": 4.635269192533639e-14,
+      "kernel_checks": {
+        "factor_is_nonempty": true,
+        "internal_bandwidth": true,
+        "kernel_count": true,
+        "kernel_orthonormality": true,
+        "kernel_residual": true,
+        "open_external_gap": true
+      },
+      "kernel_residual_norm": 3.5641992789816497e-13,
+      "observed_rank": 120,
+      "panels": [
+        {
+          "A_left": 1.1435675742992581,
+          "B_right": 0.4134781276647081,
+          "R4": 0.3357624017269094,
+          "arrays_sha256": "fcfcb545cebfc93525c7fdd0b4eb504dd2c781ce8265bf6eca2879fa7bf1d803",
+          "basis_dimension": 1716,
+          "case": {
+            "N": 6,
+            "expected_rank": 120,
+            "n_flux": 8,
+            "theta_x": 0.0,
+            "theta_y": 0.0
+          },
+          "channels_saved": true,
+          "checkpoint_reused": false,
+          "checks": {
+            "fiber_tangent_zero": true,
+            "finite_wick_statistic": true,
+            "full_channel_support": true,
+            "kernel_checkpoint": true,
+            "kernel_leakage": true,
+            "response_identity": true
+          },
+          "generated_utc": "2026-08-15T23:08:57.884349+00:00",
+          "kernel_identity_hash": "b86f90077af4e5c89386fdd07dff0e8c4556d03d734b5bae11a3e744d9354ab7",
+          "maximum_kernel_leakage": 1.896665569731594e-14,
+          "maximum_relative_residual": 1.4266228621613012e-14,
+          "operator_class": "guiding_density",
+          "panel": 0,
+          "panel_kind": "local_guiding_density",
+          "panel_seed": 2026087609,
+          "panel_size": 8,
+          "rank": 120,
+          "runtime_seconds": 2.8563091250007346,
+          "tangent_fiber_norm": 4.4326174855668626e-14,
+          "version": "v9"
+        },
+        {
+          "A_left": 1.0692540564704425,
+          "B_right": 0.39697258631276805,
+          "R4": 0.28284124786403325,
+          "arrays_sha256": "212c0b1fe0c8e58668eff18111790ab2ff786967b5921414b9074b860c5650ad",
+          "basis_dimension": 1716,
+          "case": {
+            "N": 6,
+            "expected_rank": 120,
+            "n_flux": 8,
+            "theta_x": 0.0,
+            "theta_y": 0.0
+          },
+          "channels_saved": true,
+          "checkpoint_reused": false,
+          "checks": {
+            "fiber_tangent_zero": true,
+            "finite_wick_statistic": true,
+            "full_channel_support": true,
+            "kernel_checkpoint": true,
+            "kernel_leakage": true,
+            "response_identity": true
+          },
+          "generated_utc": "2026-08-15T23:09:00.741010+00:00",
+          "kernel_identity_hash": "b86f90077af4e5c89386fdd07dff0e8c4556d03d734b5bae11a3e744d9354ab7",
+          "maximum_kernel_leakage": 1.9061394494534855e-14,
+          "maximum_relative_residual": 1.4255044751481955e-14,
+          "operator_class": "guiding_density",
+          "panel": 1,
+          "panel_kind": "local_guiding_density",
+          "panel_seed": 2026087609,
+          "panel_size": 8,
+          "rank": 120,
+          "runtime_seconds": 2.8551952090001578,
+          "tangent_fiber_norm": 4.4480715424213846e-14,
+          "version": "v9"
+        },
+        {
+          "A_left": 1.2370824592613097,
+          "B_right": 0.4622523141928652,
+          "R4": 0.39008828355082925,
+          "arrays_sha256": "4b1e945d44b3a8cd003d334cb8d724443f1dff8fdb23dbd818b0cb4ec61c2f68",
+          "basis_dimension": 1716,
+          "case": {
+            "N": 6,
+            "expected_rank": 120,
+            "n_flux": 8,
+            "theta_x": 0.0,
+            "theta_y": 0.0
+          },
+          "channels_saved": true,
+          "checkpoint_reused": false,
+          "checks": {
+            "fiber_tangent_zero": true,
+            "finite_wick_statistic": true,
+            "full_channel_support": true,
+            "kernel_checkpoint": true,
+            "kernel_leakage": true,
+            "response_identity": true
+          },
+          "generated_utc": "2026-08-15T23:09:03.600577+00:00",
+          "kernel_identity_hash": "b86f90077af4e5c89386fdd07dff0e8c4556d03d734b5bae11a3e744d9354ab7",
+          "maximum_kernel_leakage": 1.8987456637317002e-14,
+          "maximum_relative_residual": 1.42786906566688e-14,
+          "operator_class": "guiding_density",
+          "panel": -1,
+          "panel_kind": "structured_line",
+          "panel_seed": 2026087609,
+          "panel_size": 8,
+          "rank": 120,
+          "runtime_seconds": 2.85837758299931,
+          "tangent_fiber_norm": 4.4482151359720504e-14,
+          "version": "v9"
+        }
+      ]
+    }
+  ],
+  "configuration": {
+    "cases": [
+      [
+        4,
+        6
+      ],
+      [
+        6,
+        8
+      ]
+    ],
+    "operator_class": "guiding_density",
+    "panel_size": 8,
+    "panels": 2,
+    "seed": 2026081609
+  },
+  "environment": {
+    "numpy": "2.4.2",
+    "platform": "macOS-15.6-arm64-arm-64bit-Mach-O",
+    "python": "3.14.4",
+    "scipy": "1.18.0"
+  },
+  "generated_utc": "2026-08-15T23:09:03.611560+00:00",
+  "runtime_seconds": 12.110046209000757,
+  "version": "v9"
+}

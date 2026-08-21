@@ -1,0 +1,28 @@
+{
+  "checks": {
+    "branch_is_domain_limited": true,
+    "complete_covariance_passed": true,
+    "figure_copy_exact": true,
+    "inference_passed": true,
+    "lattice_susy_no_registered_positive_case": true,
+    "moore_read_positive_both_sizes": true,
+    "resource_audit_passed": true,
+    "xcube_exact_control": true
+  },
+  "generated_utc": "2026-08-16T00:25:14.138171+00:00",
+  "inputs": {
+    "cross_complete_covariance_v12.json": "9f5357061d9281a25483c4315da3a09c77762091e1c6754c59a8880ec16fe0e6",
+    "cross_mechanism_assets_v12.json": "2909f5dce07a8ef75e0f364748ba33522b1fbc1dcf91b574e25c46b79ad8dc51",
+    "cross_mechanism_geometric_eth_v12.json": "18933c332747e9a134536dc06fceed5751e5575595e315e50c2f0d93e6005b86",
+    "figure_cross_mechanism_geometric_eth_v12.pdf": "5011834c5627709a23cb682f6d8aa5e2b932f68e6ba1035b116a6bcff89c5cc9",
+    "moore_read_resource_estimate_v9.json": "9ad3ea126231c116ccbee00d6b871c4a7c1b67939b792beddc06a58fc6bbf6d7"
+  },
+  "outputs": {
+    "cross_mechanism_v12.pdf": "5011834c5627709a23cb682f6d8aa5e2b932f68e6ba1035b116a6bcff89c5cc9",
+    "mechanism_table_v12.tex": "11ea0635b0336a6d24d46f2e5d9bf0e2b77e68a22ada8198c4b8c4522c6b2d52",
+    "results_v12.tex": "f01bdcc4e3f60624ecc65d7f24e83027ce7df6dbcd433c1f740913130786fcab"
+  },
+  "passed": true,
+  "selected_branch": "domain_limited_geometric_eth",
+  "version": "v12"
+}

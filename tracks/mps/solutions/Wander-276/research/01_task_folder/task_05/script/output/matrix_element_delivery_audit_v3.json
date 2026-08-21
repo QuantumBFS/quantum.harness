@@ -1,0 +1,59 @@
+{
+  "arrays_sha256": "c817a758fd03710483883840758a28ba2d5d9c74270a8f30ad71874a6336262c",
+  "checkpoint_hashes": {
+    "output/matrix_element_v3_checkpoints/N3_site_response_v3.json": "dfb2aeb2d03b1a0ffaff37a4c3b275142bb8d1747e7793c31843e520567cc842",
+    "output/matrix_element_v3_checkpoints/N3_site_response_v3.npz": "3c3736d0b00d5406dc7eae33a532c2d014ce7af4551bbf9df865e3aa0d94e7db",
+    "output/matrix_element_v3_checkpoints/N4_site_response_v3.json": "1efc0052ea61c84ff5a7ef88fe3f46c3d997dd5dd5ee116314cfc523144e820f",
+    "output/matrix_element_v3_checkpoints/N4_site_response_v3.npz": "b0211c60560b60e1d2355bc8b839e38fa44232d8e2f5cf0481dcb479d912b0cc",
+    "output/matrix_element_v3_checkpoints/N5_site_response_v3.json": "2e850a0e13807a99b138af22d0c5d5bb81c7f907adc46689051927021708683c",
+    "output/matrix_element_v3_checkpoints/N5_site_response_v3.npz": "c974be5d3a89167b20f12c0119b0ab85cffad0bb94a484bac182974cbe2d1690"
+  },
+  "checks": {
+    "all_case_checks": true,
+    "all_runner_checks": true,
+    "branch_recomputed": true,
+    "checkpoint_provenance": true,
+    "figure_pdf_hash": true,
+    "figure_png_hash": true,
+    "figure_source_hash": true,
+    "fixed_two_quasiholes": true,
+    "gauge_invariance": true,
+    "kernel_residuals": true,
+    "n2_exclusion": true,
+    "npz_hash": true,
+    "panel_counts": true,
+    "panel_size": true,
+    "reference_counts": true,
+    "registered_sequence": true,
+    "resolvent_residuals": true,
+    "task_isolation": true
+  },
+  "figure": {
+    "pdf": "output/figure_6_wick_factorization_v3.pdf",
+    "pdf_sha256": "57efed4dfd0fb77858c52980e50c468d064300505dcdfb0a635ce47f89ce0c1e",
+    "png": "output/figure_6_wick_factorization_v3.png",
+    "png_sha256": "7cf914a353f9849b86299669c99577c16c9994d7d7814c6dad2e2537698035ce"
+  },
+  "generated_utc": "2026-07-28T17:53:50.429230+00:00",
+  "passed": true,
+  "registered_cases": [
+    [
+      3,
+      8,
+      16
+    ],
+    [
+      4,
+      10,
+      25
+    ],
+    [
+      5,
+      12,
+      36
+    ]
+  ],
+  "result_branch": "deformed_geometric_eth",
+  "result_sha256": "bbacad6f795559f417c1e39c034a6fe51669fd509a983099c10965fb68ee34a3",
+  "version": "v3"
+}

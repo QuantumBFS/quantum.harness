@@ -1,0 +1,77 @@
+{
+  "schema_version": 2,
+  "version": "v2",
+  "inputs": {
+    "/Users/thomasjwang/Documents/GitHub/Chaos-of-Quantum-Geometry/01_task_folder/task_05/script/output/spectral_silence_v2.json": "5a2da65d83ded56a0fbebb23f69d5c26bd41382ebaa5f32a333fb239bffd5778",
+    "/Users/thomasjwang/Documents/GitHub/Chaos-of-Quantum-Geometry/01_task_folder/task_05/script/output/spectral_silence_v2.npz": "f85e2fe87b8a21aa8b0961e962c84557276020d80bc7a06cfab5464da187bcd9",
+    "/Users/thomasjwang/Documents/GitHub/Chaos-of-Quantum-Geometry/01_task_folder/task_05/script/output/spectral_silence_statistics_v2.json": "2808020357176fa6f60d0280c509e2dea18b8d472c8a9090f8b6f619a1dfe706",
+    "/Users/thomasjwang/Documents/GitHub/Chaos-of-Quantum-Geometry/01_task_folder/task_05/script/output/spectral_silence_statistics_v2.npz": "ef2bf7bdfea65e595def17d8b08ac0786a86afeb4e57aea71c7472504b7c773e"
+  },
+  "figures": {
+    "figure_1": {
+      "pdf": "/Users/thomasjwang/Documents/GitHub/Chaos-of-Quantum-Geometry/01_task_folder/task_05/script/output/figure_1_spectral_silence_v2.pdf",
+      "png": "/Users/thomasjwang/Documents/GitHub/Chaos-of-Quantum-Geometry/01_task_folder/task_05/script/output/figure_1_spectral_silence_v2.png",
+      "pdf_sha256": "b3c5967fb225d6a3adaa52adff34017bec1034111fa9cc669d33af661aa70d8a",
+      "png_sha256": "5c02927662ca4b2b1c7a9a072873ac49c76f02df7d06537fdac4cf3f34c35167",
+      "width_inches": 7.0,
+      "png_width_pixels": 2100,
+      "dpi": 300
+    },
+    "figure_2": {
+      "pdf": "/Users/thomasjwang/Documents/GitHub/Chaos-of-Quantum-Geometry/01_task_folder/task_05/script/output/figure_2_falsification_triangle_v2.pdf",
+      "png": "/Users/thomasjwang/Documents/GitHub/Chaos-of-Quantum-Geometry/01_task_folder/task_05/script/output/figure_2_falsification_triangle_v2.png",
+      "pdf_sha256": "3a573402c85fb6c39dfd3439f468a5c9a5369bbd8379b23fdd6cec68c1b31658",
+      "png_sha256": "8227f7fee24eeb038a1f85bd2cc27b6be8c7221d402d3ff92a81029041a64dbf",
+      "width_inches": 7.0,
+      "png_width_pixels": 2100,
+      "dpi": 300
+    },
+    "figure_3": {
+      "pdf": "/Users/thomasjwang/Documents/GitHub/Chaos-of-Quantum-Geometry/01_task_folder/task_05/script/output/figure_3_independent_channels_v2.pdf",
+      "png": "/Users/thomasjwang/Documents/GitHub/Chaos-of-Quantum-Geometry/01_task_folder/task_05/script/output/figure_3_independent_channels_v2.png",
+      "pdf_sha256": "28bad44f157c0fdc418d9c56ba218e245890d6e3bea327bcd8ff5f0dfa145d95",
+      "png_sha256": "c1d14697b983bf1fb18c3e21a37a8f3bb564a35ff3a155ee749410b2c85a62b8",
+      "width_inches": 7.0,
+      "png_width_pixels": 2100,
+      "dpi": 300
+    },
+    "figure_4": {
+      "pdf": "/Users/thomasjwang/Documents/GitHub/Chaos-of-Quantum-Geometry/01_task_folder/task_05/script/output/figure_4_geometric_hierarchy_v2.pdf",
+      "png": "/Users/thomasjwang/Documents/GitHub/Chaos-of-Quantum-Geometry/01_task_folder/task_05/script/output/figure_4_geometric_hierarchy_v2.png",
+      "pdf_sha256": "56367dc2c3d2cd1c9d9c5af0e5b6a1b62bb635c8d9115dffb71d2f633b5aeef2",
+      "png_sha256": "c6dec6fe962dedc72aa75134883791bc72b0c9dda2ee8eed9bcc29edbb4a0f99",
+      "width_inches": 7.0,
+      "png_width_pixels": 2100,
+      "dpi": 300
+    },
+    "figure_5": {
+      "pdf": "/Users/thomasjwang/Documents/GitHub/Chaos-of-Quantum-Geometry/01_task_folder/task_05/script/output/figure_5_jacobi_atoms_v2.pdf",
+      "png": "/Users/thomasjwang/Documents/GitHub/Chaos-of-Quantum-Geometry/01_task_folder/task_05/script/output/figure_5_jacobi_atoms_v2.png",
+      "pdf_sha256": "80f9a9ed0073ca4bc2253417ccba816875469a6bfef5c3217353c77eaa7bc1f8",
+      "png_sha256": "d96c8889f31c2dd9a31de8706d18f19fc6e1f8ad9847782da12ed3523d1fb278",
+      "width_inches": 7.0,
+      "png_width_pixels": 2100,
+      "dpi": 300
+    }
+  },
+  "generated_tex": {
+    "numbers": "/Users/thomasjwang/Documents/GitHub/Chaos-of-Quantum-Geometry/01_task_folder/task_05/script/output/generated_numbers_v2.tex",
+    "tables": "/Users/thomasjwang/Documents/GitHub/Chaos-of-Quantum-Geometry/01_task_folder/task_05/script/output/generated_tables_v2.tex"
+  },
+  "scientific_annotations": {
+    "energy_raw": 50.0,
+    "energy_connected": 0.0,
+    "local_g": 0.2,
+    "ramp_g": 0.4,
+    "number_extent": 1.0,
+    "D800_atom_each": 120,
+    "D800_connected_plateau": 0.7
+  },
+  "checks": {
+    "source_artifacts_pass": true,
+    "five_figures_generated": true,
+    "all_pdf_png_pairs_exist": true,
+    "registered_annotations_exact": true
+  },
+  "all_checks_pass": true
+}

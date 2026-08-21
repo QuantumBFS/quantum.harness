@@ -1,0 +1,79 @@
+\section{Exact geometric modes and the Jacobi plateau}
+\label{sec:rank}
+
+The \(D=50\) lattice calculation lies in the atom-free regime \(D<M\).
+To test Eq.~\eqref{eq:atom-plateau}, we use an independent exact
+root-response construction that reaches both sides of the capacity boundary.
+For \(N=3\) particles in \(n\) orbitals, the cyclic Laughlin zero-mode
+dimension and one-tangent descendant capacity are
+\begin{equation}
+ D(n)=\frac{n}{n-3}\binom{n-3}{3},\qquad
+ M(n)=2n(n-3).
+ \label{eq:root-dimensions}
+\end{equation}
+Two independently sampled one-body response maps are assembled in the
+monomial root basis and whitened by a thin QR factorization.
+This directly produces the row isometry in
+Eq.~\eqref{eq:isometry-compression} as an independent construction from the
+physical Kapit--Mueller calculation.
+
+The registered sequence contains \(\RootMatricesTotal\) matrices at
+\[
+ D=16,\ 50,\ 112,\ 210,\ 352,\ 546,\ 800 .
+\]
+It is a finite-rank sequence at fixed particle number \(N=3\), designed to
+resolve the exact capacity transition.
+At \(D=546\), \(M=540\) and the atom theorem requires six levels at each
+boundary.
+At the endpoint \((D,M)=(\LargestRankVTwo,\LargestChannels)\), it requires
+\(\LargestAtomEachVTwo\) levels at each boundary and leaves
+\(k=560\) continuously distributed levels.
+
+\begin{figure*}[t]
+ \includegraphics[width=\textwidth]{figure_5_jacobi_atoms_v2.pdf}
+ \caption{
+ \textbf{Exact boundary atoms reshape the connected plateau while the
+ continuous sector retains the Jacobi ramp.}
+ (a) Full-spectrum connected curvature SFF at the first capacity crossing,
+ \(D=546,M=540\), with six exact levels at each of \(\lambda=\pm1\).
+ (b) Endpoint \(D=800,M=680\), with \(120\) atoms per boundary.
+ The full physical root-response curve follows the full Jacobi prediction,
+ while removing the algebraically identified atoms restores the
+ unit continuous-sector plateau.
+ (c) Across the seven-rank sequence, the exact full connected plateau is
+ \(k/D\); it falls as the deterministic atom weight
+ \(2(D-M)_+/D\) grows.
+ (d) Raw, non-unfolded endpoint SFF separated into atom--atom,
+ atom--continuum, and continuum--continuum terms according to
+ Eq.~\eqref{eq:atom-raw-decomposition}.
+ Their sum closes the full raw form factor to \(1.14\times10^{-13}\).
+ }
+ \label{fig:jacobi-atoms}
+\end{figure*}
+
+The endpoint plateau is therefore fixed analytically:
+\begin{equation}
+ K_{F,c}^{\rm full}(\infty)
+ =\frac{2M-D}{D}
+ =\LargestConnectedPlateau .
+ \label{eq:endpoint-plateau}
+\end{equation}
+The reference curve is obtained in two independent ways: evaluation of the
+determinantal kernel in Eq.~\eqref{eq:finite-jacobi-sff} and matrix-beta
+sampling of the Jacobi ensemble.
+The response spectra are generated independently from both references.
+
+This result refines the meaning of random-matrix-like curvature.
+The full one-point measure at \(D>M\) contains a finite mass fixed at
+\(\pm1\), while the atom-stripped sector displays Jacobi repulsion and its
+finite-rank ramp.
+The exact modes record a dimension-theorem intersection of the accessible row
+space with the two polarizations of \(J\); the ramp probes correlations in the
+remaining orientation.
+Exact geometry and chaotic geometry are therefore compatible within
+orthogonal sectors of the same degenerate manifold.
+
+The algebraic atom count also strengthens the analysis.  Counts are fixed from
+\((D,M)\) before eigenvalues are examined, their numerical positions are
+audited afterward, and both full and continuous-sector normalizations are
+reported.

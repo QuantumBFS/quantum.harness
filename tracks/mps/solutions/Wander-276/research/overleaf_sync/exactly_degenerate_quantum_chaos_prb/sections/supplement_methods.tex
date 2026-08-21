@@ -1,0 +1,239 @@
+\section{Gauge-covariant response and statistical estimators}
+\label{app:methods}
+
+This section records the projector identities and statistical contractions
+used in the main text.  They are stated independently of any particular parent
+Hamiltonian so that model-dependent exactness and gap checks can be audited
+separately from the response calculation.
+
+\subsection{Differentiation of an isolated spectral projector}
+
+Assume that $H(\boldsymbol\lambda)$ is $C^1$ in a neighborhood of the base
+point and has a rank-$D$ eigenprojector $P$ separated from $Q=1-P$ by
+$\Delta>0$.  Differentiating $P^2=P$ gives
+\[
+ P(\partial_aP)P=0,
+ \qquad
+ Q(\partial_aP)Q=0,
+\]
+so $\partial_aP$ is off diagonal in the $P/Q$ decomposition.  Differentiating
+$HP=E_0P$, multiplying by $Q$ on the left and $P$ on the right, and using
+$QHP=0$ yields
+\[
+ Q(H-E_0)Q\,Q(\partial_aP)P=-Q(\partial_aH)P.
+\]
+The inverse on $Q\cH$ gives
+\begin{equation}
+ X_a=Q(\partial_aP)P
+ =-Q\bigl[Q(H-E_0)Q\bigr]^{-1}Q(\partial_aH)P.
+ \label{eq:supp-response}
+\end{equation}
+Hermiticity supplies the
+other block, $P(\partial_aP)Q=X_a^\dagger$, hence
+\[
+ \partial_aP=X_a+X_a^\dagger.
+\]
+The norm estimate
+$\lVert X_a\rVert\leq\lVert Q(\partial_aH)P\rVert/\Delta$
+is useful as a conditioning check, not as a prediction for the distribution
+of response matrix elements.
+
+The same identities follow from the Riesz formula
+\[
+ P=-\frac{1}{2\pi i}\oint_\Gamma(H-z)^{-1}\,dz,
+\]
+where $\Gamma$ encloses only $E_0$.  This representation makes clear that the
+construction is independent of a basis chosen inside the degenerate fiber.
+It also states the failure mode precisely: if no contour separates the target
+cluster from the remaining spectrum, a fixed-rank adiabatic projector is no
+longer defined by this prescription.
+
+\subsection{Frame transformations and closed response words}
+
+In a local frame $\Psi$, the rectangular response is
+$x_a=Q(\partial_aP)\Psi$.  Under $\Psi\mapsto\Psi U$,
+\[
+ x_a\mapsto x_aU,
+ \qquad
+ x_a^\dagger x_b\mapsto U^\dagger x_a^\dagger x_bU.
+\]
+Consequently, a trace word is independent of the frame whenever its fiber
+indices form a closed cycle.  Examples include
+\[
+ \Tr(x_a^\dagger x_b),\qquad
+ \Tr(x_a^\dagger x_bx_c^\dagger x_d),\qquad
+ \Tr(F_{ab}F_{cd}).
+\]
+An individual entry of $x_a$ is covariant and can be used inside an estimator
+whose contractions transform consistently.  It is not, on its own, a
+gauge-invariant measurement.  An individual entry of the connection is even
+less suitable because of the inhomogeneous derivative term in its gauge
+transformation.
+
+For ensembles at a common base projector, one frame is fixed before sampling
+the tangent panel; a subsequent frame change is applied to every panel.  For
+independent Hamiltonians, there is generally no canonical identification of
+their protected fibers.  Such ensembles are compared through invariant scalar
+statistics unless a parallel-transport or polar-overlap identification is
+specified before the data are opened.
+
+\subsection{Complete complex Wick tensor}
+
+Let $(X_a)_{\alpha i}$ denote the response from fiber index $i$ to complement
+index $\alpha$, after centering and the registered channel whitening.  Define
+the full entry covariance and pseudocovariance by
+\[
+ C_{ab;\alpha i,\beta j}
+ =\mathbb E\bigl[(X_a)_{\alpha i}(X_b)_{\beta j}^{*}\bigr],
+ \qquad
+\Pi_{ab;\alpha i,\beta j}
+ =\mathbb E\bigl[(X_a)_{\alpha i}(X_b)_{\beta j}\bigr].
+\]
+No tensor-product decomposition of these arrays is assumed.  The physical
+four-point tensor in these indices is
+\begin{equation}
+ T_{abcd}=\frac{1}{D}\sum_{\alpha,\beta,i,j}
+ \mathbb E\bigl[
+ (X_a)_{\alpha i}^{*}(X_b)_{\alpha j}
+ (X_c)_{\beta j}^{*}(X_d)_{\beta i}
+ \bigr].
+ \label{eq:supp-fourpoint}
+\end{equation}
+Applying the three Wick pairings to Eq.~\eqref{eq:supp-fourpoint} gives
+\begin{align}
+ W_{abcd}=\frac{1}{D}\sum_{\alpha,\beta,i,j}\Bigl[{}
+ &C_{ba;\alpha j,\alpha i}C_{dc;\beta i,\beta j}
+ \nonumber\\
+ &+\Pi_{ac;\alpha i,\beta j}^{*}\Pi_{bd;\alpha j,\beta i}
+ \nonumber\\
+ &+C_{da;\beta i,\alpha i}C_{bc;\alpha j,\beta j}
+ \Bigr].
+ \label{eq:supp-wick}
+\end{align}
+The first and third lines pair one conjugated entry with one unconjugated
+entry.  The middle line pairs the two conjugated entries with each other and
+the two unconjugated entries with each other; it is exactly the contribution
+controlled by the pseudocovariance.  Equation~\eqref{eq:supp-wick} is therefore
+valid for a general zero-mean complex Gaussian vector.  The two-pairing formula
+is recovered only after the additional condition $\Pi=0$ has been established.
+
+The augmented covariance
+\[
+ \Gamma=
+ \begin{pmatrix}
+ C&\Pi\\
+ \Pi^*&C^*
+ \end{pmatrix}
+\]
+must be positive semidefinite.  Complete whitening can be implemented as a
+real-linear transformation on the support of $\Gamma$.  Equivalently, one can
+retain the original response coordinates and subtract
+$W(C,\Pi)$.  We use the latter representation because it keeps the physical
+tangent labels visible.  Exact null directions are removed according to a
+rank tolerance fixed by the second-moment audit, never by minimizing the
+fourth-order residual.
+
+\subsection{Pair-split estimator and jackknife uncertainty}
+
+Let $r=1,\ldots,R$ label the declared statistical units.  For a
+fixed-Hamiltonian tangent-panel calculation, each $r$ is one complete panel
+treated as exchangeable conditional on the common base Hamiltonian, not one
+channel or one matrix entry.  Write $T^{(r)}$ for its physical
+four-point trace and let $W^{(r,s)}$ denote the three-pairing Wick tensor whose
+two second-moment factors are taken from distinct units $r\ne s$.  The
+pair-split estimator is
+\[
+ \widehat{\mathcal K}
+ =\frac{1}{R}\sum_{r=1}^{R}T^{(r)}
+ -\frac{1}{R(R-1)}\sum_{r\ne s}W^{(r,s)}.
+\]
+Using distinct units in the quadratic products removes the leading
+same-sample plug-in bias.  The ordered-pair form above is equivalent to an
+unordered-pair average after symmetrizing $W^{(r,s)}$ and $W^{(s,r)}$.
+
+For a registered scalar functional
+$\widehat\theta=\mathcal L(\widehat{\mathcal K})$, delete unit $r$, recompute
+the entire estimator as $\widehat\theta_{(-r)}$, and form the delete-one
+pseudovalues
+\[
+ p_r=R\widehat\theta-(R-1)\widehat\theta_{(-r)},
+ \qquad
+ \overline p=R^{-1}\sum_r p_r.
+\]
+The reported jackknife standard error is
+\[
+ \operatorname{SE}_{\mathrm J}
+ =\left[\frac{1}{R(R-1)}
+ \sum_{r=1}^{R}(p_r-\overline p)^2\right]^{1/2}.
+\]
+This uncertainty is conditional on exchangeability of the declared units.  A
+panel jackknife at one Hamiltonian measures variation within that tangent
+construction; it cannot be relabeled as disorder or Hamiltonian uncertainty.
+
+\subsection{Exact finite-population centering and frozen inference split}
+
+The corrected complete-cumulant calculation uses 24 registered panels in
+each case.  Centering is performed before the split by an exactly evaluated
+mean of the finite tangent population, not by a sample average over the same
+panels used for inference.  For a Moore--Read system with $N_\phi$ guiding
+centers, the population consists of the $N_\phi^2$ torus anchors.  Linearity
+of the protected response gives
+\[
+ \overline X_a=X\!\left(
+ N_\phi^{-2}\sum_{x,y}G_{x,y}
+ \right),
+\]
+and the uniform average of the traceless guiding-density generators vanishes.
+For the local lattice-supercharge protocol, we enumerate the ordered
+coordinate marginals generated by the registered randomized ordering and
+average their projector responses.  This accounts for the nonzero population
+mean of that discrete tangent construction.
+
+After subtracting $\overline X_a$, panels $0,\ldots,11$ determine the Hermitian
+channel Gram matrix.  Its positive inverse square root is frozen and applied
+to the disjoint inference panels $12,\ldots,23$.  The training Gram after
+whitening is required to agree with the $2\times2$ identity, and singular or
+ill-conditioned channel support fails closed.  Interchanging the two halves
+defines a reverse split, but its result is descriptive: it is not pooled and
+does not carry a claim gate.
+
+Let $\widehat\theta$ be the fixed scalar contraction of the centered complete
+cumulant and $s_{\mathrm J}$ its delete-one jackknife error from the twelve
+inference panels.  We form $t=\widehat\theta/s_{\mathrm J}$ and compare it with
+a Student-$t_{11}$ reference.  Since five primary cases were registered, the
+one-sided family level $0.05$ is implemented by the Bonferroni per-case level
+$0.01$.  A case passes only if its one-sided $p$ value is below $0.01$ and the
+corresponding one-sided lower bound is positive.  This gate is conditional on
+exchangeability of complete panels at the fixed Hamiltonian and does not
+estimate Hamiltonian-to-Hamiltonian fluctuations.
+
+\subsection{Form-factor normalization and finite-rank references}
+
+For a Hermitian matrix with eigenvalues $f_i$, our raw and connected form
+factors are
+\[
+ K_{\mathrm{raw}}(\tau)=D^{-1}\mathbb E
+ \left|\sum_{i=1}^{D}e^{-i\tau f_i}\right|^2,
+ \qquad
+ K_c(\tau)=K_{\mathrm{raw}}(\tau)
+ -D^{-1}\left|\mathbb E\sum_{i=1}^{D}e^{-i\tau f_i}\right|^2.
+\]
+For exactly degenerate shifted energies, all $f_i=0$, so the disconnected
+piece exhausts the raw form factor and $K_c=0$.  For curvature eigenvalues,
+the same subtraction removes the one-point density and retains the connected
+two-level correlation.
+
+When the null is a finite complex-Jacobi point process on $[-1,1]$, its
+continuous joint density has the form
+\[
+ p(\{f_i\})\propto
+ \prod_{i<j}(f_i-f_j)^2
+ \prod_i(1-f_i)^{\alpha}(1+f_i)^{\beta}.
+\]
+The finite-rank kernel is constructed from orthonormal Jacobi polynomials, and
+the connected form factor is the Fourier transform of the corresponding
+connected two-point function.  If the compression dimensions force exact
+boundary atoms, those deterministic eigenvalues are separated before the
+continuous kernel is compared.  This reference tests a specified finite-$D$
+compression ensemble; agreement over a registered interval is not an
+asymptotic universality statement.

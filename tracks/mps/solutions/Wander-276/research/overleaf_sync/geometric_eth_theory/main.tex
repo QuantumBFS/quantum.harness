@@ -1,0 +1,98 @@
+\documentclass[aps,prb,reprint,superscriptaddress,longbibliography,floatfix]{revtex4-2}
+\pdftrailerid{}
+
+\usepackage{amsmath,amssymb,bm,mathtools}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{graphicx}
+\usepackage{microtype}
+\usepackage{xcolor}
+\usepackage{placeins}
+\usepackage[colorlinks=true,citecolor=blue!55!black,linkcolor=blue!55!black,urlcolor=blue!55!black]{hyperref}
+
+\input{generated/results_v14.tex}
+
+\hypersetup{
+  pdftitle={\PaperIITitle},
+  pdfauthor={Thomas J. Wang; OkongOyangO}
+}
+
+\newcommand{\Tr}{\operatorname{Tr}}
+\newcommand{\End}{\operatorname{End}}
+\newcommand{\Hom}{\operatorname{Hom}}
+\newcommand{\Var}{\operatorname{Var}}
+\newcommand{\cH}{\mathcal H}
+\newcommand{\cE}{\mathcal E}
+\newcommand{\cA}{\mathcal A}
+\newcommand{\cM}{\mathcal M}
+\newcommand{\cQ}{\mathcal Q}
+
+\begin{document}
+
+\title{\PaperIITitle}
+
+\author{Thomas J. Wang}
+\email{WangTheoPhys@outlook.com}
+\affiliation{Tsinghua University, Beijing 100084, China}
+
+\author{OkongOyangO}
+\affiliation{The Pennsylvania State University, University Park, Pennsylvania 16802, USA}
+
+\date{\today}
+
+\begin{abstract}
+An exactly degenerate multiplet has no internal level spacings, but its projector can carry a non-Abelian quantum geometry over coupling space.  We ask when this geometry admits an eigenstate-thermalization-type statistical closure.  For independent centered complex response channels with deterministic weights, we derive exact finite-channel cumulant additivity, including ordinary covariance and pseudocovariance, and obtain a conditional fourth-cumulant law proportional to $N_{\rm eff}^{-1}$.  A separate response-algebra criterion identifies irreducibility but does not imply Gaussian statistics.  We test the conditional law prospectively in a chiral rectangular-kernel ensemble with index-protected nullity $D=n_a-n_b$.  The prediction, estimator, development band, three validation sizes, and control rule were hashed before validation.  All exact-nullity, gap, response, gauge, and covariance gates pass.  Nevertheless, the random-class values of $N_{\rm eff}R_4^{\mathrm{full}}$ are $\ChiralRandomOnePoint$, $\ChiralRandomTwoPoint$, and $\ChiralRandomThreePoint$, all above the frozen band $[\ChiralBandLower,\ChiralBandUpper]$; local and repeated-cell controls separate still more strongly.  Thus $N_{\rm eff}$ alone does not close the fourth-order response statistics in this registered ensemble.  The test does not distinguish a failure of channel independence, standardized-cumulant comparability, or finite-size tangent closure.  We formulate the resulting bounded geometric-response program for BPS sectors and black-hole-motivated models without claiming thermalization, universality, or a completed geometric ETH.
+\end{abstract}
+
+\maketitle
+
+\input{sections/01_eth_failure.tex}
+
+\begin{figure*}[t]
+  \includegraphics[width=\textwidth]{figures/figure_1_eth_to_bundle_v14.pdf}
+  \caption{\label{fig:eth-to-bundle}From spectral ETH to a degenerate state bundle.  Conventional ETH resolves energy eigenstates and organizes matrix elements by mean energy and energy difference.  Exact degeneracy removes that internal spectral coordinate.  The replacement considered here is the off-fiber response $X_a=-R_Q(\partial_aH)P$, whose bilinears give the non-Abelian quantum geometric tensor.  The rightmost column separates exact definitions, statistical assumptions, and quantities that remain unproved.}
+\end{figure*}
+
+\input{sections/02_bundle_geometry.tex}
+\input{sections/03_geometric_eth_ansatz.tex}
+
+\begin{figure*}[t]
+  \includegraphics[width=\textwidth]{figures/figure_2_response_algebra_v14.pdf}
+  \caption{\label{fig:response-algebra}Accessible response algebras.  The generators $X_a^\dagger X_b$ can be frozen, central, reducible, or irreducible on the protected fiber.  A nonscalar commutant identifies invariant blocks and forbids an unresolved full-matrix ansatz.  A scalar commutant removes that obstruction but does not imply Gaussianity, cumulant decay, thermalization, or ETH.}
+\end{figure*}
+
+\input{sections/04_channel_theorem.tex}
+
+\begin{figure*}[t]
+  \includegraphics[width=\textwidth]{figures/figure_3_covariance_closure_v14.pdf}
+  \caption{\label{fig:covariance-closure}Hierarchy of complex statistical closure.  Centering is followed by the ordinary covariance $C$ and pseudocovariance $\Pi$; together they determine all three Wick pairings.  The connected fourth tensor is the residual after those pairings.  For independent weighted channels it is additive exactly.  The $N_{\rm eff}^{-1}$ specialization additionally assumes comparable standardized single-channel cumulants; the chiral calculation rejects the combined finite-size specialization without isolating which assumption fails.}
+\end{figure*}
+
+\input{sections/05_protection_classes.tex}
+\input{sections/06_chiral_test.tex}
+
+\begin{figure*}[t]
+  \includegraphics[width=\textwidth]{figures/figure_6_effective_channel_test_v14.pdf}
+  \caption{\label{fig:effective-channel-test}Prospective chiral-index test.  The shaded band is fixed from the three development sizes before validation.  Markers and simultaneous intervals show means over 64 independent base matrices after averaging 16 tangents within each base.  All three dense-random validation points lie above the sealed band, selecting \PaperIIBranch.  Local and repeated-cell controls satisfy the separately frozen separation rule.  Intervals report base-bootstrap uncertainty and do not alter the point-estimate decision.}
+\end{figure*}
+
+\input{sections/07_bps_black_holes.tex}
+
+\begin{figure*}[t]
+  \includegraphics[width=\textwidth]{figures/figure_5_bps_comparison_v14.pdf}
+  \caption{\label{fig:bps-comparison}Source-bounded comparison of protected sectors.  Each row is generated from the primary-source audit and labels whether the cited work contains a calculation, numerical observation, or conjectural application.  Smooth/horizonless and black-hole-motivated entries are not treated as two samples from a common ensemble.  The comparison motivates response observables but supplies no title-gate evidence for the chiral channel law.}
+\end{figure*}
+
+\input{sections/08_topology.tex}
+
+\begin{figure*}[t]
+  \includegraphics[width=\textwidth]{figures/figure_4_topology_statistics_v14.pdf}
+  \caption{\label{fig:topology-statistics}Topology and non-Abelian statistics constrain different parts of the bundle.  The trace curvature fixes the determinant-line $U(1)$ Chern class, whereas traceless $SU(D)$ curvature controls internal holonomy and connected matrix statistics.  A fixed Chern number neither enforces nor excludes random non-Abelian geometry; topology is a global integral constraint, while statistical closure concerns the distribution of local matrix-valued response.}
+\end{figure*}
+
+\input{sections/09_predictions.tex}
+\input{sections/10_discussion.tex}
+
+\bibliography{references}
+
+\end{document}

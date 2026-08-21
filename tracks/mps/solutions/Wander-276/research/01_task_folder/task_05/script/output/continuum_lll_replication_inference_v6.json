@@ -1,0 +1,499 @@
+{
+  "branch": "parent_dependent_geometry",
+  "checks": {
+    "N5_prediction_seal": true,
+    "complete_outcome_grid": true,
+    "complete_prediction_grids": true,
+    "finite_bootstrap": true,
+    "pilot_prediction_seal": true,
+    "registered_branch": true
+  },
+  "claim_boundary": "Both microscopic parents retain positive Laughlin constraints and the same exact constraint-transport mechanism. The result tests parent dependence, not universality across protection mechanisms.",
+  "configuration": {
+    "bootstrap_replicates": 10000,
+    "bootstrap_seed": 2026080207,
+    "classes": [
+      "guiding_density",
+      "magnetic_bond",
+      "magnetic_current"
+    ],
+    "production": true,
+    "registered_prediction_level": 0.975,
+    "secondary_observation_interval_level": 0.975,
+    "sizes": [
+      3,
+      4,
+      5
+    ]
+  },
+  "fully_predictive_models": [],
+  "generated_utc": "2026-08-01T14:33:37.961913+00:00",
+  "npz_sha256": "4070c768c17d26506cdf022387d44821c0bf1c6d8869cb9ea771e8a326cdfd31",
+  "pilot_supported_models": [
+    "inverse_rank_class_amplitude",
+    "shared_power_external",
+    "common_plateau_external"
+  ],
+  "scores": {
+    "common_plateau_external": {
+      "cases": [
+        {
+          "N": 3,
+          "complete_panel_observation_interval_secondary": [
+            0.1719567062449958,
+            0.1922781660087761
+          ],
+          "observed_delta4": 0.18263536634098237,
+          "operator_class": "guiding_density",
+          "predicted_delta4": 0.17488769119507336,
+          "registered_covered": false,
+          "registered_prediction_interval": [
+            0.17460220248720307,
+            0.17510355174821188
+          ],
+          "secondary_interval_overlap": true
+        },
+        {
+          "N": 3,
+          "complete_panel_observation_interval_secondary": [
+            0.18108931294698327,
+            0.2025476270301078
+          ],
+          "observed_delta4": 0.19378584070307214,
+          "operator_class": "magnetic_bond",
+          "predicted_delta4": 0.19686731756401832,
+          "registered_covered": false,
+          "registered_prediction_interval": [
+            0.19391678978145033,
+            0.20226393901173
+          ],
+          "secondary_interval_overlap": true
+        },
+        {
+          "N": 3,
+          "complete_panel_observation_interval_secondary": [
+            0.19836810298587831,
+            0.2175361154299529
+          ],
+          "observed_delta4": 0.2066988079822889,
+          "operator_class": "magnetic_current",
+          "predicted_delta4": 0.1802923918714481,
+          "registered_covered": false,
+          "registered_prediction_interval": [
+            0.17979839363536276,
+            0.18099112092729555
+          ],
+          "secondary_interval_overlap": false
+        },
+        {
+          "N": 4,
+          "complete_panel_observation_interval_secondary": [
+            0.1382580875938679,
+            0.15186712366982227
+          ],
+          "observed_delta4": 0.14775040613963955,
+          "operator_class": "guiding_density",
+          "predicted_delta4": 0.11501550065018498,
+          "registered_covered": false,
+          "registered_prediction_interval": [
+            0.11435190079263063,
+            0.11568133488809194
+          ],
+          "secondary_interval_overlap": false
+        },
+        {
+          "N": 4,
+          "complete_panel_observation_interval_secondary": [
+            0.141500782443306,
+            0.15716698356545736
+          ],
+          "observed_delta4": 0.14929835119161364,
+          "operator_class": "magnetic_bond",
+          "predicted_delta4": 0.12502807169164265,
+          "registered_covered": false,
+          "registered_prediction_interval": [
+            0.1235405420538506,
+            0.12760003449732857
+          ],
+          "secondary_interval_overlap": false
+        },
+        {
+          "N": 4,
+          "complete_panel_observation_interval_secondary": [
+            0.14148539222391338,
+            0.15782385087860165
+          ],
+          "observed_delta4": 0.14954501367751194,
+          "operator_class": "magnetic_current",
+          "predicted_delta4": 0.11771689366306842,
+          "registered_covered": false,
+          "registered_prediction_interval": [
+            0.11706312427697012,
+            0.11850668739660038
+          ],
+          "secondary_interval_overlap": false
+        },
+        {
+          "N": 5,
+          "complete_panel_observation_interval_secondary": [
+            0.0946915669430426,
+            0.11067293078538568
+          ],
+          "observed_delta4": 0.10502782796991439,
+          "operator_class": "guiding_density",
+          "predicted_delta4": 0.09307590043371838,
+          "registered_covered": false,
+          "registered_prediction_interval": [
+            0.09226174695208927,
+            0.09393656368468886
+          ],
+          "secondary_interval_overlap": false
+        },
+        {
+          "N": 5,
+          "complete_panel_observation_interval_secondary": [
+            0.09754163256904176,
+            0.11133555927214195
+          ],
+          "observed_delta4": 0.10680613457603563,
+          "operator_class": "magnetic_bond",
+          "predicted_delta4": 0.09853452026884846,
+          "registered_covered": false,
+          "registered_prediction_interval": [
+            0.09748166873896154,
+            0.10005323112532216
+          ],
+          "secondary_interval_overlap": true
+        },
+        {
+          "N": 5,
+          "complete_panel_observation_interval_secondary": [
+            0.09543398904118404,
+            0.10751969863122923
+          ],
+          "observed_delta4": 0.09945025922317474,
+          "operator_class": "magnetic_current",
+          "predicted_delta4": 0.09449871630048702,
+          "registered_covered": false,
+          "registered_prediction_interval": [
+            0.09370983777332816,
+            0.09538874447000101
+          ],
+          "secondary_interval_overlap": false
+        }
+      ],
+      "registered_all_cases_covered": false,
+      "secondary_all_intervals_overlap": false
+    },
+    "inverse_rank_class_amplitude": {
+      "cases": [
+        {
+          "N": 3,
+          "complete_panel_observation_interval_secondary": [
+            0.1719567062449958,
+            0.1922781660087761
+          ],
+          "observed_delta4": 0.18263536634098237,
+          "operator_class": "guiding_density",
+          "predicted_delta4": 0.17512212981802558,
+          "registered_covered": false,
+          "registered_prediction_interval": [
+            0.17483525309259523,
+            0.1753376668321025
+          ],
+          "secondary_interval_overlap": true
+        },
+        {
+          "N": 3,
+          "complete_panel_observation_interval_secondary": [
+            0.18108931294698327,
+            0.2025476270301078
+          ],
+          "observed_delta4": 0.19378584070307214,
+          "operator_class": "magnetic_bond",
+          "predicted_delta4": 0.20776644827189358,
+          "registered_covered": false,
+          "registered_prediction_interval": [
+            0.20510489257302852,
+            0.212881588711376
+          ],
+          "secondary_interval_overlap": false
+        },
+        {
+          "N": 3,
+          "complete_panel_observation_interval_secondary": [
+            0.19836810298587831,
+            0.2175361154299529
+          ],
+          "observed_delta4": 0.2066988079822889,
+          "operator_class": "magnetic_current",
+          "predicted_delta4": 0.182536725659932,
+          "registered_covered": false,
+          "registered_prediction_interval": [
+            0.18204229960550017,
+            0.18324459346027389
+          ],
+          "secondary_interval_overlap": false
+        },
+        {
+          "N": 4,
+          "complete_panel_observation_interval_secondary": [
+            0.1382580875938679,
+            0.15186712366982227
+          ],
+          "observed_delta4": 0.14775040613963955,
+          "operator_class": "guiding_density",
+          "predicted_delta4": 0.11207816308353637,
+          "registered_covered": false,
+          "registered_prediction_interval": [
+            0.11189456197926094,
+            0.11221610677254559
+          ],
+          "secondary_interval_overlap": false
+        },
+        {
+          "N": 4,
+          "complete_panel_observation_interval_secondary": [
+            0.141500782443306,
+            0.15716698356545736
+          ],
+          "observed_delta4": 0.14929835119161364,
+          "operator_class": "magnetic_bond",
+          "predicted_delta4": 0.1329705268940119,
+          "registered_covered": false,
+          "registered_prediction_interval": [
+            0.13126713124673825,
+            0.13624421677528065
+          ],
+          "secondary_interval_overlap": false
+        },
+        {
+          "N": 4,
+          "complete_panel_observation_interval_secondary": [
+            0.14148539222391338,
+            0.15782385087860165
+          ],
+          "observed_delta4": 0.14954501367751194,
+          "operator_class": "magnetic_current",
+          "predicted_delta4": 0.11682350442235649,
+          "registered_covered": false,
+          "registered_prediction_interval": [
+            0.1165070717475201,
+            0.11727653981457528
+          ],
+          "secondary_interval_overlap": false
+        },
+        {
+          "N": 5,
+          "complete_panel_observation_interval_secondary": [
+            0.0946915669430426,
+            0.11067293078538568
+          ],
+          "observed_delta4": 0.10502782796991439,
+          "operator_class": "guiding_density",
+          "predicted_delta4": 0.07783205769690026,
+          "registered_covered": false,
+          "registered_prediction_interval": [
+            0.07771171152156262,
+            0.07792121777636377
+          ],
+          "secondary_interval_overlap": false
+        },
+        {
+          "N": 5,
+          "complete_panel_observation_interval_secondary": [
+            0.09754163256904176,
+            0.11133555927214195
+          ],
+          "observed_delta4": 0.10680613457603563,
+          "operator_class": "magnetic_bond",
+          "predicted_delta4": 0.09234064367639715,
+          "registered_covered": false,
+          "registered_prediction_interval": [
+            0.09125351507053181,
+            0.09442024416519856
+          ],
+          "secondary_interval_overlap": false
+        },
+        {
+          "N": 5,
+          "complete_panel_observation_interval_secondary": [
+            0.09543398904118404,
+            0.10751969863122923
+          ],
+          "observed_delta4": 0.09945025922317474,
+          "operator_class": "magnetic_current",
+          "predicted_delta4": 0.08112743362663645,
+          "registered_covered": false,
+          "registered_prediction_interval": [
+            0.08092432878496814,
+            0.08143302925071846
+          ],
+          "secondary_interval_overlap": false
+        }
+      ],
+      "registered_all_cases_covered": false,
+      "secondary_all_intervals_overlap": false
+    },
+    "shared_power_external": {
+      "cases": [
+        {
+          "N": 3,
+          "complete_panel_observation_interval_secondary": [
+            0.1719567062449958,
+            0.1922781660087761
+          ],
+          "observed_delta4": 0.18263536634098237,
+          "operator_class": "guiding_density",
+          "predicted_delta4": 0.17479446575584429,
+          "registered_covered": false,
+          "registered_prediction_interval": [
+            0.17450569472621516,
+            0.17501084054105268
+          ],
+          "secondary_interval_overlap": true
+        },
+        {
+          "N": 3,
+          "complete_panel_observation_interval_secondary": [
+            0.18108931294698327,
+            0.2025476270301078
+          ],
+          "observed_delta4": 0.19378584070307214,
+          "operator_class": "magnetic_bond",
+          "predicted_delta4": 0.194719793435364,
+          "registered_covered": true,
+          "registered_prediction_interval": [
+            0.19223987423513017,
+            0.19941727846198692
+          ],
+          "secondary_interval_overlap": true
+        },
+        {
+          "N": 3,
+          "complete_panel_observation_interval_secondary": [
+            0.19836810298587831,
+            0.2175361154299529
+          ],
+          "observed_delta4": 0.2066988079822889,
+          "operator_class": "magnetic_current",
+          "predicted_delta4": 0.18090441924814116,
+          "registered_covered": false,
+          "registered_prediction_interval": [
+            0.18041629042276738,
+            0.18161014256838742
+          ],
+          "secondary_interval_overlap": false
+        },
+        {
+          "N": 4,
+          "complete_panel_observation_interval_secondary": [
+            0.1382580875938679,
+            0.15186712366982227
+          ],
+          "observed_delta4": 0.14775040613963955,
+          "operator_class": "guiding_density",
+          "predicted_delta4": 0.11987739313556753,
+          "registered_covered": false,
+          "registered_prediction_interval": [
+            0.11919827850242869,
+            0.1205551622264153
+          ],
+          "secondary_interval_overlap": false
+        },
+        {
+          "N": 4,
+          "complete_panel_observation_interval_secondary": [
+            0.141500782443306,
+            0.15716698356545736
+          ],
+          "observed_delta4": 0.14929835119161364,
+          "operator_class": "magnetic_bond",
+          "predicted_delta4": 0.13367882006236936,
+          "registered_covered": false,
+          "registered_prediction_interval": [
+            0.13189800246918768,
+            0.13703859720296158
+          ],
+          "secondary_interval_overlap": false
+        },
+        {
+          "N": 4,
+          "complete_panel_observation_interval_secondary": [
+            0.14148539222391338,
+            0.15782385087860165
+          ],
+          "observed_delta4": 0.14954501367751194,
+          "operator_class": "magnetic_current",
+          "predicted_delta4": 0.12437579588305914,
+          "registered_covered": false,
+          "registered_prediction_interval": [
+            0.1236430915022778,
+            0.12528859565742598
+          ],
+          "secondary_interval_overlap": false
+        },
+        {
+          "N": 5,
+          "complete_panel_observation_interval_secondary": [
+            0.0946915669430426,
+            0.11067293078538568
+          ],
+          "observed_delta4": 0.10502782796991439,
+          "operator_class": "guiding_density",
+          "predicted_delta4": 0.090535185021726,
+          "registered_covered": false,
+          "registered_prediction_interval": [
+            0.08973455917746047,
+            0.09136218134178987
+          ],
+          "secondary_interval_overlap": false
+        },
+        {
+          "N": 5,
+          "complete_panel_observation_interval_secondary": [
+            0.09754163256904176,
+            0.11133555927214195
+          ],
+          "observed_delta4": 0.10680613457603563,
+          "operator_class": "magnetic_bond",
+          "predicted_delta4": 0.10086306354546205,
+          "registered_covered": false,
+          "registered_prediction_interval": [
+            0.09943145433915632,
+            0.10329355810270048
+          ],
+          "secondary_interval_overlap": true
+        },
+        {
+          "N": 5,
+          "complete_panel_observation_interval_secondary": [
+            0.09543398904118404,
+            0.10751969863122923
+          ],
+          "observed_delta4": 0.09945025922317474,
+          "operator_class": "magnetic_current",
+          "predicted_delta4": 0.09382744314098647,
+          "registered_covered": false,
+          "registered_prediction_interval": [
+            0.09300570071598274,
+            0.09478313849758792
+          ],
+          "secondary_interval_overlap": false
+        }
+      ],
+      "registered_all_cases_covered": false,
+      "secondary_all_intervals_overlap": false
+    }
+  },
+  "secondary_calibration_cannot_change_branch": true,
+  "source_hashes": {
+    "N5_outcome_json": "83cd9cbe2fc772b4a84d242df73f2edec642f59455fd0ecb1859723396a5b7de",
+    "N5_outcome_npz": "d46febaa0be206d3c76f0f4897b5d7d010be7d310f66a89c7afdf1fe433b90c9",
+    "N5_prediction": "21f9745eda383630ff51f4124bdbafe59ce2b98d7b087358602f46e4305771d1",
+    "pilot_outcome_json": "4fd99b2086d1080d7a63471e9f10ae26c3ae57349f3b614c19e71db4aec3cee4",
+    "pilot_outcome_npz": "ef9ec71c3b5df3668493694d1c798325bb170b4db7c37738f65b7c69973e4ea2",
+    "pilot_prediction": "93549e39cf9ca51320ad20bcbd48f031f74d9f915ac3e85c5bba3038855befa7"
+  },
+  "version": "v6"
+}

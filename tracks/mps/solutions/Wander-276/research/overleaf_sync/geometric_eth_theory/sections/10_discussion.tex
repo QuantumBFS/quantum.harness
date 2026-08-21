@@ -1,0 +1,196 @@
+\section{Discussion and limitations}
+\label{sec:discussion}
+
+The calculation developed here separates a mathematical statement from a
+statistical one.  A degenerate eigenspace defines a vector bundle over a
+coupling manifold, and its projector has a gauge-covariant response.  Under
+independent centered channels, weighted cumulants add exactly.  Neither fact
+requires a random-matrix assumption.  The additional assertion that the
+complete fourth cumulant closes at an inverse effective-channel scale was
+tested in a sealed prospective chiral ensemble and failed its random primary
+branch.  The appropriate conclusion is therefore a bounded geometric-response
+theory, not an asymptotic or model-independent theorem for protected-state
+ensembles.
+
+\subsection{What the present work establishes}
+
+The first result is a change of diagnostic object.  In ordinary ETH, one
+studies matrix elements between energy eigenstates and their smooth dependence
+on energy, with the random component suppressed according to the Hilbert-space
+size \cite{deutsch1991,srednicki1994}.  Spectral chaos supplies a related but
+distinct test through level fluctuations \cite{bohigas1984,atas2013}.  Both
+constructions require nontrivial spectral variation.  For a protected rank-$D$
+fiber at one BPS energy, the repeated eigenvalue is fixed by the symmetry
+constraint.  The information that remains is how $P(\lambda)$ is embedded in
+the full Hilbert space and how it is transported around a loop.
+
+The second result is the gauge-covariant formulation of that information.  The
+off-fiber response $X_\mu=Q(\partial_\mu P)P$ and the non-Abelian curvature
+$F_{\mu\nu}$ are invariantly defined up to the natural action of the fiber
+frame group.  This extends the Abelian geometric phase
+\cite{berry1984} to degenerate multiplets through the Wilczek--Zee connection
+\cite{wilczekzee1984}, while Kato's projector transport supplies a frame-free
+description \cite{kato1950}.  A nonzero response is therefore compatible with
+exact energy degeneracy; it does not require splitting the protected level.
+
+The third result is a precise conditional channel statement.  The cumulant
+identity is exact for independent centered channels, while the
+$N_{\mathrm{eff}}^{-1}$ scaling requires comparable standardized channel
+cumulants and a fixed complete covariance prescription.  The response-algebra
+commutant can diagnose unresolved invariant blocks, but a scalar commutant does
+not imply a Gaussian field, ETH, or thermalization.  This distinction prevents
+an algebraic irreducibility check from being mistaken for statistical closure.
+
+The fourth result is negative but informative.  The chiral-index parent has an
+exact kernel and passes the index, gap, response-equation, and sealing checks.
+Its random-channel validation nevertheless falls outside the frozen
+development band.  Because the random branch was the primary prospective test,
+the theory gate is false.  The local and structured controls separate from the
+random band, so the outcome is not explained by an across-the-board failure of
+the numerical construction.  It remains ambiguous whether the failure comes
+from channel correlations, noncomparable channel cumulants, finite-rank
+geometry, or an incomplete model of the tangent ensemble.  That ambiguity is a
+result to be resolved, not a license to reinterpret the outcome as a positive
+universal law.
+
+\subsection{Relation to the BPS and black-hole literature}
+
+The BPS application has a clear evidentiary boundary.  The direct source
+\cite{chen2026berry} finds non-random and often vanishing Berry curvature for
+the studied $1/2$-BPS D1/D5 horizonless sectors, and vanishing curvature for the
+studied $1/4$-BPS $\mathcal{N}=4$ SYM sectors at generic coupling.  The same
+source reports random-matrix-like Berry curvature in its $\mathcal{N}=2$
+super-JT calculation and in explicit $\mathcal{N}=2$ SYK numerics.  It also
+reports exponentially large first Chern numbers in specified large-$N$
+sectors of the $\mathcal{N}=2$ SYK moduli space.  These are direct results of
+that reference, with the model, deformation, sector, and finite-$N$
+qualifications stated in Secs.~\ref{sec:bps-black-holes} and
+\ref{sec:topology}; they are not additional numerical results obtained by the
+present chiral test.
+
+The distinction between evidence and interpretation matters because the
+black-hole label carries physical assumptions.  D-brane microstate counting
+and holographic duality establish important examples and the setting for
+comparing BPS states with black-hole geometries
+\cite{stromingervafa1996,maldacena1998ads}.  They do not imply that every
+supersymmetric black-hole sector has a constant-rank bundle over a useful
+moduli space, a positive external gap throughout that space, or a universal
+curvature ensemble.  Those are precisely the hypotheses a future calculation
+would have to check.
+
+The SYK and JT references sharpen rather than remove this boundary.  SYK has a
+controlled large-$N$ conformal regime and a soft-mode description
+\cite{maldacenastanford2016,fu2017susy}; nearly-AdS$_2$ and Schwarzian analyses
+provide the corresponding low-energy gravitational language
+\cite{maldacenastanfordyang2016,stanfordwitten2017,mertens2017schwarzian}.
+Random-matrix behavior of conventional black-hole spectral observables is also
+well studied in matrix-integral and gravity settings
+\cite{cotler2017rmt,saad2019jt}.  None of these results, alone, proves a
+universal Berry-curvature distribution for supersymmetric black holes.  The
+direct Berry-curvature evidence remains the source-specific calculation of
+Ref.~\cite{chen2026berry}.
+
+\subsection{Why local randomness does not erase topology}
+
+The topology calculation supplies the sharpest reason to avoid a purely local
+random-matrix interpretation.  On a closed two-cycle in the regular moduli
+space, $\int\operatorname{Tr}F/(2\pi)$ is an integer.  The many-body Hall
+conductance construction and its lattice implementation make clear that this
+integer is a global property of a parameter-dependent state bundle
+\cite{niu1985,fukui2005}.  In the $\mathcal{N}=2$ SYK example, the
+source reports local random-matrix-like curvature together with quantized
+Chern data and exponentially large values in selected sectors
+\cite{chen2026berry}.  The global constraint is therefore a form of memory
+that is invisible to a one-point eigenvalue statistic.
+
+This observation also changes how a geometric ETH ansatz should be formulated
+if it is revisited.  A candidate field ensemble must specify both the local
+law of $F$ and the allowed bundle topology.  A random compression or Jacobi
+ensemble can be a local null model for relative subspace orientation
+\cite{collins2005,zyczkowski2000}, but it is not a model of a full moduli-space
+bundle until its transition functions, singular loci, and Chern constraints
+are defined.  A local fit that ignores these data can succeed while describing
+the wrong global object.
+
+\subsection{Relation to OTOCs, subsystem ETH, and ``It from ETH''}
+
+The geometric response should not be advertised as a replacement for every
+chaos diagnostic.  OTOCs probe operator growth and dynamical commutators;
+generalized ETH analyses emphasize the higher matrix-element correlations
+needed to reproduce them \cite{foinikurchan2019}.  Subsystem ETH instead
+formulates thermalization in terms of reduced density matrices
+\cite{dymarsky2016subsystemeth,lashkari2016cfteth}.  Parametric eigenstate
+deformation provides a closer precedent because it treats motion in coupling
+space as a chaos-sensitive observable \cite{pandey2020}.  Even there, the
+observable and the limiting procedure differ from a non-Abelian curvature of
+an exactly degenerate fiber.
+
+The cited ``It from ETH'' construction connects a large-$c$ BCFT ensemble to
+multi-interval entanglement and replica-wormhole structures
+\cite{itfrometh2025}.  It is conceptually compatible with asking how statistical
+information can be encoded in geometric data, but it is not a Berry-curvature
+calculation and does not validate the chiral channel law.  In this manuscript
+it is therefore a bounded neighboring direction, not evidence for a theorem.
+
+\subsection{What would be required for a stronger claim}
+
+Several missing ingredients would have to be supplied before the phrase
+``Geometric ETH'' could denote an asymptotic or universal statement:
+\begin{enumerate}
+  \item a single protection mechanism with a sequence of growing protected
+  ranks, rather than a collection of sequences whose algebra and tangent
+  prescription change together;
+  \item a fixed operator or deformation class, stated in physical units, with
+  a controlled positive external gap and a documented treatment of symmetry
+  sectors;
+  \item independent Hamiltonian or disorder realizations whenever the claim
+  concerns an ensemble, instead of treating many tangent directions at one
+  base Hamiltonian as independent samples;
+  \item complete real-augmented covariance and pseudocovariance estimation,
+  including the uncertainty associated with the actual independent sampling
+  unit;
+  \item local-statistics convergence, a topology audit of the regular moduli
+  space, and a preregistered scaling observable; and
+  \item a positive validation against a frozen prediction in which the
+  threshold, channel map, and normalization are not refit after the result is
+  opened.
+\end{enumerate}
+The present chiral failure shows why each condition matters.  Increasing the
+ambient Hilbert-space dimension alone does not establish an effective-channel
+limit, and a successful control separation cannot compensate for failure of
+the primary random branch.
+
+A future black-hole calculation would additionally need to state what plays
+the role of the coupling manifold, how the BPS fiber is selected at fixed
+charges, which singular loci are removed, and which observable is compared to
+the model results.  Only after these data are fixed could one ask whether the
+random-matrix-like curvature found in the studied $\mathcal{N}=2$ SYK and
+super-JT models survives in a new supersymmetric black-hole construction
+\cite{chen2026berry}.  The appropriate output of such a study could be a
+conditional test, a counterexample, or a mechanism-dependent classification;
+none is assumed in advance.
+
+\subsection{Conclusion}
+\label{sec:discussion-conclusion}
+
+Exactly degenerate energies do not make state motion unobservable.  The
+projector, its off-fiber response, its non-Abelian curvature, and its global
+holonomy remain well-defined whenever the protected rank and external gap are
+controlled.  This supplies a meaningful geometric question in a regime where
+ordinary level statistics are silent.
+
+The present paper establishes the formal response and the exact finite-channel
+cumulant identity under stated independence assumptions.  It does not
+establish the proposed random-channel closure: the sealed chiral validation
+failed, so the theory gate is false.  It therefore does not establish an
+asymptotic, universal, thermalizing, or black-hole Geometric ETH, and the
+positive title ``The Geometric ETH'' is not justified by the current evidence.
+
+The defensible conclusion is narrower.  Non-Abelian quantum geometry is a
+well-defined probe of how an exactly degenerate protected subspace moves, and
+the literature contains a source-specific contrast between non-random or flat
+curvature in the studied smooth/horizonless BPS sectors and random-matrix-like
+curvature in the studied $\mathcal{N}=2$ SYK and super-JT models
+\cite{chen2026berry}.  Turning that contrast into a general law remains an
+open, falsifiable problem whose next step is a mechanism-controlled validation
+with independent sampling and topology preserved.

@@ -1,0 +1,33 @@
+% AUTO-GENERATED FILE. DO NOT EDIT.
+% Paper I model table (v13)
+% registry-payload-sha256: 95c4b13c5c9ca3c42eda11fd7bef8f0bf6c2e0f86d8a7f1233cd400f1ae0e5f1
+% source centered_complete_covariance_v13: ea75047473001032c1875a02944329d3db054e788945f7882d88154a7a1ee3fc
+% source continuum_lll_replication_inference_v6: 21ac615ff44ddc466a1feb5c3d6f411bde9c3d34f06fb9dc570b6e77766193b6
+% source cross_complete_covariance_v12: 9f5357061d9281a25483c4315da3a09c77762091e1c6754c59a8880ec16fe0e6
+% source cross_mechanism_geometric_eth_v12: 18933c332747e9a134536dc06fceed5751e5575595e315e50c2f0d93e6005b86
+% source lattice_susy_pilot_v10: 1a5705686a2f37f5b06216d43d8539cf15c9d6bcb92feba74e3030661d5886e8
+% source matrix_element_geometric_eth_v3: bbacad6f795559f417c1e39c034a6fe51669fd509a983099c10965fb68ee34a3
+% source moore_read_pilot_v9: 3024f210ca9995f57e21c9a84750a00db274b19eb63b7ee5227add45c451071e
+% source spectral_silence_v2: 5a2da65d83ded56a0fbebb23f69d5c26bd41382ebaa5f32a333fb239bffd5778
+% source susy_hodge_v7_N14_inference: 177643e07fc6cf210362fc1077070bd1f0ba316b6805042a626de3f96c55a627
+% source topological_holonomy_v3: ff15e7cd2f947b43da5a5973bb82c50319b164877883d187c7c46b2a073823c6
+% source xcube_geometric_control_v11: c75f8a27b263d71aaf1535ed0ab54f248c67335836c3543e1b95642d1ee3cc84
+% source protected_scaling_inference_v4: unavailable (not tracked in delivery branch)
+
+\begin{table*}[t]
+\caption{Mechanisms that protect exact degeneracy and the evidence currently available for geometric statistics. The centered three-pairing statistic is denoted \(R_4^{\mathrm{full}}\). Its primary gates use exact registered finite-ensemble means, a Student-\(t_{11}\) finite-sample reference, and Bonferroni control over five cases. A missing calculation is written as \(\text{not tested}\), not as a null result.}
+\label{tab:model-evidence}
+\begin{ruledtabular}
+\begin{tabular}{@{}p{0.10\textwidth}p{0.18\textwidth}p{0.13\textwidth}p{0.09\textwidth}p{0.14\textwidth}p{0.10\textwidth}p{0.08\textwidth}@{}}
+Model & Degeneracy mechanism & Geometric role & \(\substack{\text{Sampled}\\D}\) & \(\substack{R_4^{\mathrm{full}}\\\text{primary split}}\) & \(\substack{\text{Independent}\\\text{ensemble}}\) & Run state \\
+\hline
+% canonical column: \(R_4^{\mathrm{full}}\), primary split
+% canonical Moore--Read status: N=4: not passed; N=6: passed (finite-rank)
+Laughlin parents & two-body FQH parent & finite-size stochastic geometry & 16, 25, 36 & \(\text{not tested}\) & \(\text{not tested}\) & \(\text{complete}\) \\ % MODELROW:laughlin; centered-full-r4=not-tested; independent-ensemble=not-tested; production=complete
+$\mathcal{N}=2$ SYK & random supercharge cohomology & finite-size stochastic geometry & \(\text{not tested}\) & \(\text{not tested}\) & \(\text{not tested}\) & \(\text{complete}\) \\ % MODELROW:susy_syk; centered-full-r4=not-tested; independent-ensemble=not-tested; production=complete
+Moore--Read parent & three-body clustered FQH parent & finite-size stochastic geometry & 42, 120 & \(\substack{N=4:\\ \text{not passed}\\N=6:\\ \text{passed}\\ \text{finite rank}}\) & \(\text{not tested}\) & \(\text{pilot only}\) \\ % MODELROW:moore_read; centered-full-r4=N4-not-passed-N6-passed-finite-rank; independent-ensemble=not-tested; production=pilot-only
+Lattice $\mathcal{N}=2$ SUSY & independence complex cohomology & finite-size structured geometry & 2, 4, 8 & \(\substack{m=1,2,3:\\\text{not passed}}\) & \(\text{not tested}\) & \(\text{pilot only}\) \\ % MODELROW:lattice_susy; centered-full-r4=m1-m2-m3-not-passed; independent-ensemble=not-tested; production=pilot-only
+X-cube control & commuting projector subsystem code & exact structured control & \(\text{not tested}\) & \(\substack{\text{not}\\\text{applicable}}\) & \(\substack{\text{not}\\\text{applicable}}\) & \(\text{complete}\) \\ % MODELROW:xcube; centered-full-r4=not-applicable; independent-ensemble=not-applicable; production=complete
+\end{tabular}
+\end{ruledtabular}
+\end{table*}

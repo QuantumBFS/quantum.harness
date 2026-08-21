@@ -1,0 +1,32 @@
+\section{Protection classes and response algebras}
+\label{sec:protection-classes}
+
+Exact degeneracy is a kinematic condition, not a probability distribution.  A useful classification must therefore keep two questions separate: what enforces the multiplicity of the protected fiber, and what algebra is generated when the fiber is moved.  Table~\ref{tab:protection-classes} gives six illustrative mechanisms organized by this distinction; it is not an exhaustive literature classification.  The entries are not universality classes.  In particular, two Hamiltonians with the same nullity formula can have different commutants, and two response families with scalar commutants can have different fourth cumulants.
+
+\begin{table*}[t]
+\caption{\label{tab:protection-classes}Illustrative, non-exhaustive mechanisms that produce an exactly degenerate subspace.  The protection law determines the existence and dimension of the fiber, whereas the accessible tangent set determines the response algebra.  Neither column by itself fixes a random-matrix ensemble.}
+\input{generated/protection_classes_v14.tex}
+\end{table*}
+
+For a common-kernel parent Hamiltonian, positivity and frustration freedom give
+\begin{equation}
+ H(\lambda)=\sum_j A_j(\lambda)^\dagger A_j(\lambda),\qquad
+ \mathcal E_\lambda=\bigcap_j\ker A_j(\lambda).
+ \label{eq:common-kernel}
+\end{equation}
+The dimension of $\mathcal E_\lambda$ can remain constant even when its embedding in the ambient Hilbert space changes.  Fractional-quantum-Hall clustering states and the Kapit--Mueller lattice parent provide common-kernel examples~\cite{laughlin1983,mooreread1991,kapitmueller2010}.  In the response problem considered here, a boundary twist is treated as a deformation of the constraint family and may move that kernel.  The parent construction does not say whether $X_a^\dagger X_b$ is central, block diagonal, or irreducible.
+
+In a cohomological system,
+\begin{equation}
+ H=\{Q,Q^\dagger\},\qquad Q^2=0,
+ \label{eq:cohomological-parent}
+\end{equation}
+and the zero modes represent cohomology classes.  Lattice $\mathcal N=2$ models supply a concrete many-body realization~\cite{fendley2003,huijse2010supsym}; supersymmetric SYK supplies a random-coupling protected model~\cite{fu2017susy}.  The exact and coexact complements need not contribute equally to the response.  Their imbalance is visible as a nonscalar commutant or as Hodge-resolved covariance, even when the total zero-mode rank is large.
+
+Commuting-projector stabilizer Hamiltonians represent the opposite extreme.  Positive coefficient changes can leave every stabilizer eigenspace fixed, so $\partial_aP=0$ and all geometric observables vanish.  An isospectral conjugation can move the same code space while producing a central curvature.  The X-cube code supplies a three-dimensional subsystem example with size-dependent exact degeneracy~\cite{vijay2016xcube}.  These solvable paths show why a moving projector and nonzero curvature are not sufficient conditions for stochastic non-Abelian geometry.
+
+Symmetry and integrability protect multiplets in a different way.  Before any statistical statement is made, the fiber must be resolved into irreducible symmetry or charge sectors.  Otherwise the commutant contains the unresolved projectors by construction.  The criterion $\mathcal A_X'=\mathbb C I_D$ is consequently a statement about an already resolved fiber.  It eliminates one algebraic obstruction to full-matrix mixing but does not establish Gaussian closure.
+
+The chiral/index class is especially useful for a prospective test because its nullity is fixed by a rectangular matrix index, while the tangent distribution can be specified independently.  It is neither a fractional-quantum-Hall parent nor a supersymmetric cohomology model.  We now use this class to test whether the effective-channel variable derived in Sec.~\ref{sec:channel-theorem} closes the fourth cumulant of a new exactly degenerate ensemble.
+
+The finite-size calculations behind the condensed-matter entries in this comparison are reported in the companion Paper I~\cite{wang2026exactdegenerate}.  The present paper imports its frozen evidence registry only for mechanism labels and bounded cross-model context; it does not import the companion prose or treat those retrospective cases as validation data for the chiral prediction.

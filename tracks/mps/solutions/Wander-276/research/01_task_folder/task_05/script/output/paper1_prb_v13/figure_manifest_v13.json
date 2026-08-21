@@ -1,0 +1,278 @@
+{
+  "all_checks_pass": true,
+  "checks": {
+    "all_previews_300_dpi": true,
+    "all_source_hashes_nonempty": true,
+    "all_vector_pdf": true,
+    "exactly_seven_records": true,
+    "no_source_output_collisions": true
+  },
+  "figures": {
+    "1": {
+      "caption_data": {
+        "panel_a": "P/Q block decomposition of a tangent Hamiltonian; exact degeneracy sets the traceless intrafiber block S_a to zero but does not set V_a to zero.",
+        "panel_b": "The off-fiber block determines the complement response, QGT, metric, and non-Abelian curvature.",
+        "panel_c": "Audited examples separate frozen, scalar, structured/reducible, and stochastic finite-size response classes."
+      },
+      "dimensions_inches": [
+        7.0,
+        5.6
+      ],
+      "dpi": 300,
+      "mode": "generated_separately",
+      "outputs": {
+        "pdf": {
+          "path": "overleaf_sync/exactly_degenerate_quantum_chaos_prb/figures/figure_1_protection_mixing_v13.pdf",
+          "sha256": "4616b02032b3c05103eba68b97f59428018e2a931a7b85aa99a9338e92c9657d"
+        },
+        "png": {
+          "path": "01_task_folder/task_05/script/output/paper1_prb_v13/figure_1_protection_mixing_v13.png",
+          "sha256": "1fcb8e4f5fccfd25f109fa8a8cb91190851590bf97ba1890b4a4cd26576a1041"
+        }
+      },
+      "source_hashes": {
+        "01_task_folder/task_05/script/output/paper1_prb_v13/evidence_registry_v13.json": "e765054e95ba99e57b403c3061a38204a10cca147227b2a35d12559816e7290f"
+      },
+      "vector_pdf": true,
+      "visual_audit": "Reviewed in Task 4 at original resolution; block labels, response chain, and four textured classes are unclipped."
+    },
+    "2": {
+      "caption_data": {
+        "claim": "Exact energy degeneracy makes connected spectral statistics silent while projector geometry remains resolved.",
+        "panels": [
+          "energy SFF",
+          "curvature spectra",
+          "curvature SFF",
+          "long-range residual"
+        ],
+        "uncertainty_unit": "complete physical panel against registered finite-Jacobi ensembles"
+      },
+      "dimensions_inches": [
+        7.0,
+        5.15
+      ],
+      "dpi": 300,
+      "mode": "vector_text_correction",
+      "outputs": {
+        "pdf": {
+          "path": "overleaf_sync/exactly_degenerate_quantum_chaos_prb/figures/figure_2_spectral_silence_v13.pdf",
+          "sha256": "6ede79aab7f7add3df5c40dc7ae8083de29eb50c226b59c41046d3db21242159"
+        },
+        "png": {
+          "path": "01_task_folder/task_05/script/output/paper1_prb_v13/figure_2_spectral_silence_v13.png",
+          "sha256": "78f9ad33eebde82e3de29e97d92cbfeceecd9ed2aaca9cd7d43189192da4fc82"
+        }
+      },
+      "source_hashes": {
+        "01_task_folder/task_05/script/output/figure_1_spectral_silence_v2.pdf": "b3c5967fb225d6a3adaa52adff34017bec1034111fa9cc669d33af661aa70d8a",
+        "01_task_folder/task_05/script/output/spectral_silence_statistics_v2.json": "2808020357176fa6f60d0280c509e2dea18b8d472c8a9090f8b6f619a1dfe706",
+        "01_task_folder/task_05/script/output/spectral_silence_statistics_v2.npz": "ef2bf7bdfea65e595def17d8b08ac0786a86afeb4e57aea71c7472504b7c773e",
+        "01_task_folder/task_05/script/output/spectral_silence_v2.json": "5a2da65d83ded56a0fbebb23f69d5c26bd41382ebaa5f32a333fb239bffd5778"
+      },
+      "source_transform": {
+        "font_policy": "source fonts outlined; corrected title uses embedded TrueType",
+        "from": "Ramp universal, long range nonuniversal",
+        "kind": "single_vector_text_correction",
+        "source_pdf_unchanged": true,
+        "to": "Finite-D ramp agreement, long-range excess"
+      },
+      "vector_pdf": true,
+      "visual_audit": "The vector-safe v13 title correction is legible at 100% double-column width; all four source panels remain unclipped."
+    },
+    "3": {
+      "caption_data": {
+        "claim": "Local curvature correlations become compatible before the form-factor ramp, while long-range memory survives.",
+        "panels": [
+          "residual flow",
+          "local/ramp onset",
+          "registered ramp window",
+          "number-variance memory"
+        ],
+        "uncertainty_unit": "complete orbit or ensemble draw as registered in spectral_silence_statistics_v2"
+      },
+      "dimensions_inches": [
+        7.0,
+        5.0
+      ],
+      "dpi": 300,
+      "mode": "vector_font_outlines",
+      "outputs": {
+        "pdf": {
+          "path": "overleaf_sync/exactly_degenerate_quantum_chaos_prb/figures/figure_3_geometric_hierarchy_v13.pdf",
+          "sha256": "191d5227f92091be56ce216ec2711ccfcfb56c8d65e54f4836874b06b8865787"
+        },
+        "png": {
+          "path": "01_task_folder/task_05/script/output/paper1_prb_v13/figure_3_geometric_hierarchy_v13.png",
+          "sha256": "428064265759e1b994576cb0483e066e7e9a0841fd619f774c399acd23cd968a"
+        }
+      },
+      "source_hashes": {
+        "01_task_folder/task_05/script/output/figure_4_geometric_hierarchy_v2.pdf": "56367dc2c3d2cd1c9d9c5af0e5b6a1b62bb635c8d9115dffb71d2f633b5aeef2",
+        "01_task_folder/task_05/script/output/spectral_silence_statistics_v2.json": "2808020357176fa6f60d0280c509e2dea18b8d472c8a9090f8b6f619a1dfe706",
+        "01_task_folder/task_05/script/output/spectral_silence_statistics_v2.npz": "ef2bf7bdfea65e595def17d8b08ac0786a86afeb4e57aea71c7472504b7c773e",
+        "01_task_folder/task_05/script/output/spectral_silence_v2.json": "5a2da65d83ded56a0fbebb23f69d5c26bd41382ebaa5f32a333fb239bffd5778"
+      },
+      "source_transform": {
+        "kind": "vector_font_outlines",
+        "reason": "remove Type 3 fonts without rasterizing plotted artwork",
+        "source_pdf_unchanged": true
+      },
+      "vector_pdf": true,
+      "visual_audit": "Heat map, onset markers, and long-range residual labels remain distinguishable at 100% width."
+    },
+    "4": {
+      "caption_data": {
+        "claim": "Intrafiber spectral scrambling and off-fiber projector motion are independent response channels.",
+        "panels": [
+          "PHP interpolation",
+          "fixed projector",
+          "off-fiber interpolation",
+          "two-axis classification"
+        ],
+        "uncertainty_unit": "registered interpolation endpoint ensemble"
+      },
+      "dimensions_inches": [
+        7.0,
+        5.0
+      ],
+      "dpi": 300,
+      "mode": "vector_font_outlines",
+      "outputs": {
+        "pdf": {
+          "path": "overleaf_sync/exactly_degenerate_quantum_chaos_prb/figures/figure_4_independent_channels_v13.pdf",
+          "sha256": "cd1c73fef01e5bee688b7afe569a8932ddb56da77e5e0c58fc64c7ce8ccb12e5"
+        },
+        "png": {
+          "path": "01_task_folder/task_05/script/output/paper1_prb_v13/figure_4_independent_channels_v13.png",
+          "sha256": "6c0b68985b67d6f6892d64093c98c041024d04f5e14b34dfe19a53866652024a"
+        }
+      },
+      "source_hashes": {
+        "01_task_folder/task_05/script/output/figure_3_independent_channels_v2.pdf": "28bad44f157c0fdc418d9c56ba218e245890d6e3bea327bcd8ff5f0dfa145d95",
+        "01_task_folder/task_05/script/output/spectral_silence_statistics_v2.json": "2808020357176fa6f60d0280c509e2dea18b8d472c8a9090f8b6f619a1dfe706",
+        "01_task_folder/task_05/script/output/spectral_silence_statistics_v2.npz": "ef2bf7bdfea65e595def17d8b08ac0786a86afeb4e57aea71c7472504b7c773e",
+        "01_task_folder/task_05/script/output/spectral_silence_v2.json": "5a2da65d83ded56a0fbebb23f69d5c26bd41382ebaa5f32a333fb239bffd5778"
+      },
+      "source_transform": {
+        "kind": "vector_font_outlines",
+        "reason": "remove Type 3 fonts without rasterizing plotted artwork",
+        "source_pdf_unchanged": true
+      },
+      "vector_pdf": true,
+      "visual_audit": "The two interpolation axes and fixed-projector control are legible; line style and marker shape supplement color."
+    },
+    "5": {
+      "caption_data": {
+        "claim": "The historical separable proper-complex two-pairing Wick null leaves a finite residual in the lattice FCI, while the continuum-LLL no-refit law fails across tangent classes.",
+        "limitation": "The v3 lattice statistic uses the historical two-pairing null. The two parents are compared through the same normalized four-channel observable, not pooled into one uncertainty estimate.",
+        "panels": [
+          "lattice-FCI separable proper-complex Wick residual",
+          "residual to the two-pairing null",
+          "continuum-LLL tangent classes",
+          "sealed no-refit residual"
+        ],
+        "uncertainty_unit": "24 physical panels against the restricted separable proper-complex two-pairing null for the lattice FCI; complete-panel bootstrap and registered prediction intervals for continuum LLL"
+      },
+      "dimensions_inches": [
+        7.0,
+        5.6
+      ],
+      "dpi": 300,
+      "mode": "recomposed",
+      "outputs": {
+        "pdf": {
+          "path": "overleaf_sync/exactly_degenerate_quantum_chaos_prb/figures/figure_5_wick_parent_dependence_v13.pdf",
+          "sha256": "ef827e5c785ca559664ee07f02fa24ddeac8b8ecf61951121b4c8e3fb135237a"
+        },
+        "png": {
+          "path": "01_task_folder/task_05/script/output/paper1_prb_v13/figure_5_wick_parent_dependence_v13.png",
+          "sha256": "17a65d801cc61b307f93f509e3a5c3c7a7feb1114e2a7e2269da1c8f2bf43506"
+        }
+      },
+      "source_hashes": {
+        "01_task_folder/task_05/script/output/continuum_lll_replication_inference_v6.json": "21ac615ff44ddc466a1feb5c3d6f411bde9c3d34f06fb9dc570b6e77766193b6",
+        "01_task_folder/task_05/script/output/matrix_element_geometric_eth_v3.json": "bbacad6f795559f417c1e39c034a6fe51669fd509a983099c10965fb68ee34a3",
+        "01_task_folder/task_05/script/output/matrix_element_geometric_eth_v3.npz": "c817a758fd03710483883840758a28ba2d5d9c74270a8f30ad71874a6336262c"
+      },
+      "vector_pdf": true,
+      "visual_audit": "The historical separable proper-complex two-pairing null is named explicitly; all four recomposed panels are unclipped and the two parents are not visually pooled."
+    },
+    "6": {
+      "caption_data": {
+        "claim": "Chern number and the exact spectrum remain fixed while non-Abelian Wilson-loop statistics change without reaching CUE.",
+        "panels": [
+          "fixed Chern and gap",
+          "determinant winding",
+          "Wilson gap ratio",
+          "Wilson form factor"
+        ],
+        "uncertainty_unit": "registered isospectral deformation and CUE reference draws"
+      },
+      "dimensions_inches": [
+        7.0,
+        5.25
+      ],
+      "dpi": 300,
+      "mode": "copied_byte_preserving",
+      "outputs": {
+        "pdf": {
+          "path": "overleaf_sync/exactly_degenerate_quantum_chaos_prb/figures/figure_6_fixed_chern_holonomy_v13.pdf",
+          "sha256": "11e101309d975a61a3efedb1025c2552149c7f1a6f72433594f4adb1c0a16258"
+        },
+        "png": {
+          "path": "01_task_folder/task_05/script/output/paper1_prb_v13/figure_6_fixed_chern_holonomy_v13.png",
+          "sha256": "23cd53b51ca922e8a5ece233472f721ec994257597ad92b871aa9ab52e2e0520"
+        }
+      },
+      "source_hashes": {
+        "01_task_folder/task_05/script/output/figure_7_topological_holonomy_v3.pdf": "11e101309d975a61a3efedb1025c2552149c7f1a6f72433594f4adb1c0a16258",
+        "01_task_folder/task_05/script/output/topological_holonomy_v3.json": "ff15e7cd2f947b43da5a5973bb82c50319b164877883d187c7c46b2a073823c6",
+        "01_task_folder/task_05/script/output/topological_holonomy_v3.npz": "f459fa37facf82c6f67c44f4961749095fb0817516ff16d6ca6814bbaf952208"
+      },
+      "vector_pdf": true,
+      "visual_audit": "Chern, winding, Wilson-gap, and Wilson-SFF panels remain legible; the CUE band does not obscure data markers."
+    },
+    "7": {
+      "caption_data": {
+        "claim": "With exact population centering and a frozen 12/12 whitening split, the Bonferroni-corrected directional gate is positive only at finite-rank Moore-Read N6; lattice SUSY is not resolved.",
+        "inference_contract": "The reverse split is descriptive and not pooled. Bonferroni family alpha = 0.05; per-case alpha = 0.01 over five registered primary cases, using a one-sided Student-t11 finite-sample reference.",
+        "limitation": "finite-rank boundary: N6-only denotes the displayed Moore-Read rank-120 case; the other four registered primary cases do not pass. Moore-Read N6 Student-t11 one-sided p = 0.00272 and familywise lower = 0.03916.",
+        "panel_a_statistic": "The v9/v10 local_R4 data use the historical separable proper-complex two-pairing residual R4^(2pair).",
+        "panel_c_statistic": "The centered-whitened complete cumulant uses exact population centering; only the 2x2 channel whitening map is fitted on the 12-panel training half before evaluation on 12 disjoint inference panels.",
+        "panels": [
+          "historical two-pairing residuals",
+          "centered covariance: finite-rank N6-only; lattice SUSY not resolved",
+          "exact-population-centered and whitened primary estimates",
+          "exact X-cube controls"
+        ],
+        "population_mean_contract": "Moore-Read uses the exact uniform average over all torus guiding-density anchors (zero); lattice SUSY uses exact enumeration of the registered ordered local-coordinate channel marginals.",
+        "uncertainty_unit": "Directional estimate plus or minus delete-one jackknife standard error over the 12 primary inference tangent panels."
+      },
+      "dimensions_inches": [
+        7.0,
+        5.6
+      ],
+      "dpi": 300,
+      "mode": "recomposed",
+      "outputs": {
+        "pdf": {
+          "path": "overleaf_sync/exactly_degenerate_quantum_chaos_prb/figures/figure_7_cross_mechanism_v13.pdf",
+          "sha256": "c2ab11696e9385495d4607ccf8b6948b3e9fc9c88590b6faa8104e674b9f1dcf"
+        },
+        "png": {
+          "path": "01_task_folder/task_05/script/output/paper1_prb_v13/figure_7_cross_mechanism_v13.png",
+          "sha256": "081fb7fb58709a65d8cfc6f1b671ecdcac50972bbb919c509cb41f262e66c82c"
+        }
+      },
+      "source_hashes": {
+        "01_task_folder/task_05/script/output/cross_mechanism_geometric_eth_v12.json": "18933c332747e9a134536dc06fceed5751e5575595e315e50c2f0d93e6005b86",
+        "01_task_folder/task_05/script/output/paper1_prb_v13/centered_complete_covariance_v13.json": "ea75047473001032c1875a02944329d3db054e788945f7882d88154a7a1ee3fc",
+        "01_task_folder/task_05/script/output/paper1_prb_v13/evidence_registry_v13.json": "e765054e95ba99e57b403c3061a38204a10cca147227b2a35d12559816e7290f",
+        "01_task_folder/task_05/script/output/xcube_v11/xcube_geometric_control_v11.json": "c75f8a27b263d71aaf1535ed0ab54f248c67335836c3543e1b95642d1ee3cc84"
+      },
+      "vector_pdf": true,
+      "visual_audit": "The 2x2 recomposition keeps model names readable; panel (a) retains the historical two-pairing residual, panel (b) reports finite-rank N6-only and lattice SUSY not resolved, and panel (c) marks the sole passing primary case with a filled star while open family-specific markers denote failures."
+    }
+  },
+  "version": "v13"
+}

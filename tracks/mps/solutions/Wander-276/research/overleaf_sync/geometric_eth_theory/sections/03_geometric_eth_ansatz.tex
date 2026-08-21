@@ -1,0 +1,139 @@
+\section{A hierarchy of geometric statistical statements}
+\label{sec:geometric_eth_ansatz}
+
+The bundle construction specifies observables but not a probability law.  A
+statistical statement requires an ensemble and a limiting procedure.  We
+therefore consider a sequence indexed by $L$, where $L$ may denote particle
+number, volume, fiber rank, or another explicitly stated control.  Within
+each $L$, all exact symmetries and invariant blocks are resolved before
+samples are pooled.  A sample may be a disorder realization, a base point in
+a stationary parameter ensemble, or a Hamiltonian drawn from a specified
+population.  These choices are not interchangeable and must be recorded as
+part of the definition.
+
+Let $a$ label an accessible tangent direction and write
+$x_a=\operatorname{vec}(X_a)$ in a local frame.  We subtract the population
+mean and apply a deterministic normalization chosen without using the
+higher-order outcomes under test:
+\begin{equation}
+ z_a=W_L\left(x_a-\mathbb E x_a\right).
+ \label{eq:normalized_response}
+\end{equation}
+Here $W_L$ may remove a scalar variance or whiten a fixed symmetry-resolved
+support.  A frame change acts linearly on $z_a$; the tensors below transform
+covariantly, while the final statements are made for their invariant
+contractions.  Outcome-dependent whitening, post-selection of tangents, and
+refitting $W_L$ after inspecting fourth-order data are excluded.
+
+Complex response variables require two second-moment tensors.  Suppressing
+the tangent label, define
+\begin{equation}
+ C_{ij}=\mathbb E[z_i z_j^*],
+ \qquad
+ \Pi_{ij}=\mathbb E[z_i z_j].
+ \label{eq:covariance_pseudocovariance}
+\end{equation}
+We use $\Pi$ for pseudocovariance in the manuscript to avoid collision with
+the spectral projector $P$.  A proper complex population has $\Pi=0$, but
+properness must be checked rather than imposed.  For a centered complex
+Gaussian vector the representative fourth moment is
+\begin{equation}
+ \mathbb E[z_i z_j^*z_k z_l^*]
+ =C_{ij}C_{kl}+C_{il}C_{kj}+\Pi_{ik}\Pi_{jl}^* .
+ \label{eq:three_wick_pairings}
+\end{equation}
+The right-hand side contains all three Wick pairings.  Subtracting only the
+two covariance pairings defines an incomplete null whenever $\Pi\ne0$.
+Equivalently, one may realify $z$ into $(\operatorname{Re}z,
+\operatorname{Im}z)$ and use its full real covariance.
+
+We next define three levels of a possible Geometric-ETH statement.  They are
+definitions of claims, not results of the present calculation.
+
+\paragraph{Weak geometric closure.}
+A sequence has weak geometric closure for a stated set of tangents and
+invariant observables if: (i) the centered, normalized two-point tensors
+$(C_L,\Pi_L)$ have deterministic limits on their resolved support; and (ii)
+the selected quadratic gauge invariants, such as
+$D^{-1}\operatorname{Tr}\widetilde F_{\mu\nu}^2$ or contractions of
+$\mathcal Q_{\mu\nu}$, concentrate around the values determined by those
+limits.  This definition makes no Gaussian assertion and places no condition
+on connected cumulants of order four and above.  It is weaker than ordinary
+ETH because it contains neither the smooth diagonal function
+$\overline O(E)$ nor a thermalization statement.
+
+\paragraph{Strong geometric closure.}
+A sequence has strong geometric closure if it has weak closure and, after
+complete whitening on every symmetry-resolved support, every fixed
+finite-dimensional real-linear projection has a Gaussian limit:
+\begin{equation}
+ \kappa_k\!\left(
+ f_1(z_L),\ldots,f_k(z_L)
+ \right)\longrightarrow0,
+ \qquad k\ge3,
+ \label{eq:strong_geometric_closure}
+\end{equation}
+for all fixed test functionals for which the required moments exist.  The
+limiting complex Gaussian is specified by both $C$ and $\Pi$.  We additionally
+require the accessible response algebra to have no unresolved invariant
+block in the fiber.  This irreducibility condition is necessary for a
+full-matrix law, but it does not imply
+Eq.~\eqref{eq:strong_geometric_closure}.  Strong geometric closure remains a
+statement about parameter-space response, not about real-time thermalization.
+
+\paragraph{Deformed geometric closure.}
+A sequence has deformed geometric closure if the complete second moments
+stabilize but specified connected tensors retain a reproducible structure
+after whitening.  Examples include a fixed improper-complex component,
+channel-dependent fourth cumulants, locality blocks, unequal gap weights in
+Eq.~\eqref{eq:kato_response}, or a nonzero limiting connected tensor.  The
+deformation must be stated before comparison and carried by measured tensors
+or a specified probability law.  Calling any non-Gaussian residual
+``deformed'' without such a prediction would be tautological.  A reducible
+symmetry mixture is also not a deformation; the blocks must first be
+separated.
+
+These definitions distinguish covariance closure, Gaussian closure, and
+structured non-Gaussian closure.  The distinction matters because a
+Wishart-like QGT can arise whenever $X_a$ is approximately Gaussian, whereas
+curvature is a difference of correlated bilinears and can preserve memory of
+$\Pi$, unequal channel weights, or local constraints.  Agreement of an
+eigenvalue histogram with a familiar random-matrix curve tests only the
+particular marginal shown.  Strong closure requires the complete covariance
+and higher connected tensors, not a single spectral statistic.
+
+The model used for the exact result below is more restrictive than any of
+these definitions.  It assumes that a normalized response can be decomposed
+as
+\begin{equation}
+ Z=\sum_{\alpha=1}^{n}w_\alpha Y_\alpha,
+ \qquad \mathbb E Y_\alpha=0,
+ \label{eq:random_channel_model}
+\end{equation}
+where the $Y_\alpha$ are independent complex random matrices in one common
+response space and the real weights $w_\alpha$ are deterministic.  We call
+Eq.~\eqref{eq:random_channel_model} the \emph{independent-channel model}.
+It is not a consequence of exact degeneracy, a spectral gap, or an
+irreducible response algebra.  Establishing it for a physical family requires
+identifying the independent units and showing that mixed connected
+cumulants are absent or controlled.
+
+The distinction between definition and model fixes the logic of the paper.
+Section~\ref{sec:channel_theorem} derives an exact property of
+Eq.~\eqref{eq:random_channel_model}.  The numerical oracle checks the
+implementation on synthetic channels drawn from the assumed population.
+The chiral calculation then asks prospectively whether a new protected model
+obeys the resulting fixed prediction.  It does not: the random tangent class
+misses the sealed validation band.  Consequently neither weak, strong, nor
+deformed geometric closure is established here for a general physical model
+class.  The failed test instead identifies independence and channel
+stationarity as substantive hypotheses rather than consequences of a large
+degenerate subspace.
+
+For later reference, we reserve \emph{Geometric ETH} for the conjecture that
+an explicitly specified family has at least weak closure and, after all
+protection-induced structures are accounted for, approaches either the
+strong or a preregistered deformed class.  This conjecture can be true for one
+protection and tangent ensemble and false for another.  No asymptotic,
+universal, gravitational, or thermalization form of the conjecture follows
+from the finite-channel theorem.

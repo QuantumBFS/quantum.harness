@@ -1,0 +1,36 @@
+{
+  "artifact_hashes": {
+    "cross_mechanism_manuscript_assets_v12.json": "7ee833f6aac8eeb0136c77d07ca8537d138c3d03f5d8cf452088cbad58a6cbae",
+    "cross_mechanism_v12.pdf": "5011834c5627709a23cb682f6d8aa5e2b932f68e6ba1035b116a6bcff89c5cc9",
+    "main.log": "292645f3164274c5edd81845f8a22675cd042f4c550a05b83abe7ed4916a4da1",
+    "main.pdf": "c0b1581c82a0333f41fa7fef8557e662fbaee020a35929d5bb382373d58a34f7",
+    "main.tex": "bdb5ac1d24745ed685fc2c53608e0e4c8b2e56ca0c95c393e8ebe26ebfaa99f2",
+    "mechanism_dependent_geometric_eth_supplement_v12.pdf": "db75fdc679002903ef9057a33543ee3737918c4b6fc9722aaef582247037d7ff",
+    "mechanism_dependent_geometric_eth_v12.pdf": "c0b1581c82a0333f41fa7fef8557e662fbaee020a35929d5bb382373d58a34f7",
+    "mechanism_table_v12.tex": "11ea0635b0336a6d24d46f2e5d9bf0e2b77e68a22ada8198c4b8c4522c6b2d52",
+    "results_v12.tex": "f01bdcc4e3f60624ecc65d7f24e83027ce7df6dbcd433c1f740913130786fcab",
+    "supplement.log": "d6adb0c4290d2b91a724610b97f0f5a6d20fc4b895270d99ed24f27fc3bb815a",
+    "supplement.pdf": "db75fdc679002903ef9057a33543ee3737918c4b6fc9722aaef582247037d7ff",
+    "supplement.tex": "2da9ed3953bb7e1683b39f8f0b6e5766c15bcc613321e8888cbc061300f9c6cc"
+  },
+  "checks": {
+    "archived_main_exact": true,
+    "archived_supplement_exact": true,
+    "asset_manifest_passed": true,
+    "claim_boundary_present": true,
+    "clean_main_log": true,
+    "clean_supplement_log": true,
+    "compiled_main_pdf": true,
+    "compiled_supplement_pdf": true,
+    "figure_hash": true,
+    "generated_results_hash": true,
+    "generated_table_hash": true,
+    "main_uses_generated_results": true,
+    "supplement_uses_generated_results": true,
+    "supplement_uses_generated_table": true
+  },
+  "generated_utc": "2026-08-16T00:27:43.464836+00:00",
+  "passed": true,
+  "selected_branch": "domain_limited_geometric_eth",
+  "version": "v12"
+}

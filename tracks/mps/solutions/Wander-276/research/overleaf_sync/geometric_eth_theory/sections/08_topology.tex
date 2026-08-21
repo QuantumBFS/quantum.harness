@@ -1,0 +1,157 @@
+\section{Topology of the protected-state bundle}
+\label{sec:topology}
+
+Local curvature statistics do not exhaust the information carried by a
+degenerate state bundle.  The bundle can be locally close to a random matrix
+field and still obey global quantization conditions imposed by the topology of
+the moduli space.  This distinction is central to the geometric formulation:
+local eigenvalue repulsion is a statement about a matrix at one point, whereas
+a Chern number is an integral constraint on a family of matrices over a closed
+cycle.  The two statements can coexist, but neither implies the other.
+
+\subsection{The bundle and its gauge-covariant curvature}
+
+Let $\mathcal{M}_{\mathrm{reg}}$ denote a connected region of coupling space
+on which the protected rank is constant and the external gap remains open.
+The BPS eigenspaces form a rank-$D$ complex vector bundle
+\begin{equation}
+ \mathcal{E}_{\mathrm{BPS}}\longrightarrow\mathcal{M}_{\mathrm{reg}},
+ \qquad
+ \mathcal{E}_{\mathrm{BPS}}|_{\lambda}=\operatorname{im}P(\lambda).
+ \label{eq:topological-bps-bundle}
+\end{equation}
+Choose a local orthonormal frame $|a(\lambda)\rangle$ for the fiber.  The
+Berry connection and curvature are
+\begin{equation}
+ (A_\mu)_{ab}=i\langle a|\partial_\mu b\rangle,
+ \qquad
+ F_{\mu\nu}=\partial_\mu A_\nu-\partial_\nu A_\mu-i[A_\mu,A_\nu].
+ \label{eq:topological-connection}
+\end{equation}
+Under a frame change $|a\rangle\mapsto|b\rangle U_{ba}(\lambda)$, one has
+$A\mapsto U^{-1}AU+iU^{-1}dU$ and $F\mapsto U^{-1}FU$.  Consequently,
+$\operatorname{Tr}F$ and the eigenvalues of $F$ are frame independent,
+although the individual matrix entries are not.  This is the non-Abelian
+extension of the adiabatic phase and the geometric metric construction
+\cite{berry1984,wilczekzee1984,provostvallee1980}.  Kato's projector
+transport gives the corresponding formulation without choosing a frame
+\cite{kato1950}.
+
+The topology is meaningful only after the domain has been specified.  If a
+submanifold of $\mathcal{M}$ contains a point where an additional BPS state
+enters the protected sector, or where the external gap closes, the rank-$D$
+bundle is not defined across that point.  One must excise the singular locus
+and work on $\mathcal{M}_{\mathrm{reg}}$.  Treating the excised locus as an
+ordinary point would confuse a change of bundle rank with a large but finite
+curvature.
+
+\subsection{Chern data as an integral constraint}
+
+For a closed oriented two-cycle $\Sigma\subset\mathcal{M}_{\mathrm{reg}}$, the
+first Chern number of the determinant line bundle is
+\begin{equation}
+ c_1(\mathcal{E}_{\mathrm{BPS}};\Sigma)
+ =\frac{1}{2\pi}\int_{\Sigma}\operatorname{Tr}F\in\mathbb{Z},
+ \label{eq:first-chern-bps}
+\end{equation}
+with the normalization in Eq.~\eqref{eq:topological-connection}.  The
+many-body formulation of quantized Hall response established that the same
+type of integral can be defined over a parameter torus even when the fiber is
+an interacting many-body ground-state sector
+\cite{niu1985}.  On a discretized parameter space, link variables
+provide a gauge-invariant numerical implementation of the corresponding
+integer \cite{fukui2005}.
+
+Equation~\eqref{eq:first-chern-bps} is stronger than a statement about the
+mean or variance of a local curvature entry.  Small perturbations of the
+curvature that preserve the bundle and the cycle cannot change the integer.
+Conversely, a change in the integer requires a singularity, a change of cycle,
+or a loss of the rank-protection and gap assumptions.  This is why a random
+matrix comparison must be made together with a topology audit: a genuinely
+independent field of matrices would not, without additional constraints,
+reproduce the quantized flux of a nontrivial bundle.
+
+For a flat connection on a contractible patch, $F=0$ implies that the local
+first Chern integral vanishes.  This local implication should not be promoted
+to a statement that the entire moduli space is topologically trivial.  A flat
+connection may have nontrivial holonomy on a non-simply-connected domain, and
+the domain itself may acquire nontrivial cycles after singular strata are
+removed.
+
+\subsection{Topology in the \texorpdfstring{$\mathcal{N}=2$}{N=2} SYK moduli space}
+
+The direct topological calculation relevant here is the $\mathcal{N}=2$ SYK
+analysis of Ref.~\cite{chen2026berry}.  The paper identifies special loci in
+the coupling space where additional BPS states appear, studies the regular
+moduli space obtained after their removal, and integrates the Berry curvature
+over candidate two-spheres.  It reports quantized Chern numbers and finds that
+the generic-point curvature matrix can resemble a random matrix while its
+integral remains constrained by Eq.~\eqref{eq:first-chern-bps}.
+
+For the family of two-spheres and charge sectors analyzed there, the reported
+first Chern number is
+\begin{equation}
+ c_1^{(r)}
+ =\frac{1}{2\pi}\int_{\Sigma}\operatorname{Tr}F^{(r)}
+ =\binom{N}{r+3}-\binom{N}{r-3}.
+ \label{eq:syk-chern-formula}
+\end{equation}
+The formula is an empirical result of the stated moduli-space construction;
+the source reports checks through $N=10$ and does not claim a systematic
+classification of all cycles.  In particular, the even-$N$ sector $r=N/2$
+has vanishing value in the formula and must not be included in a blanket
+statement that every large-$N$ sector carries an exponentially large integer.
+
+For the neighboring even sector $r=N/2-1$, Eq.~\eqref{eq:syk-chern-formula}
+gives the large-$N$ estimate
+\begin{equation}
+ c_1^{(N/2-1)}
+ \sim 24\sqrt{\frac{2}{\pi}}\,N^{-3/2}2^N,
+ \qquad N\to\infty,
+ \label{eq:syk-chern-asymptotic}
+\end{equation}
+as reported in Ref.~\cite{chen2026berry}.  The appropriate wording is thus
+that the studied $\mathcal{N}=2$ SYK family contains exponentially large first
+Chern numbers in specified large-$N$ sectors.  It is not correct to state,
+without these qualifications, that all Chern numbers of $\mathcal{N}=2$ SYK are
+exponential or that the asymptotic formula has been proved for every cycle.
+
+The mechanism is transparent in the bundle language.  The singular strata
+act as sources of Berry flux because the protected rank changes when they are
+approached.  A two-sphere that avoids the singular strata can nevertheless
+enclose them in the ambient coupling space, giving a nonzero integral of
+$\operatorname{Tr}F$.  The local curvature away from the strata can therefore
+show random-matrix-like eigenvalue statistics while the global flux remains an
+integer.  This is a concrete form of structured geometric randomness: local
+randomness and global topological memory are not mutually exclusive
+\cite{chen2026berry}.
+
+\subsection{Topology versus local random-matrix statistics}
+
+There are three logically distinct tests for a protected bundle:
+\begin{enumerate}
+  \item a local test, such as eigenvalue repulsion or a distribution of
+  curvature invariants at one point;
+  \item a transport test, such as a Wilson loop or a non-Abelian holonomy; and
+  \item a global test, such as a Chern number on a specified cycle.
+\end{enumerate}
+The Jacobi and random-compression ensembles provide useful local reference
+models for the first test \cite{collins2005,zyczkowski2000}.  They do not
+encode the topology of the parameter space.  The Chern integral supplies an
+independent check that can reject a naive identification of the curvature
+field with an unconstrained collection of independent random matrices.
+
+This point also limits the interpretation of non-Abelian curvature in the
+smooth sectors.  If the direct calculation finds $F=0$ for a particular
+family, then the first Chern integral over any cycle contained in that flat
+region is zero.  The result does not exclude nontrivial topology elsewhere in
+the full moduli space, nor does it imply that a different BPS multiplet has a
+flat connection.  The source-specific sector and deformation prescription
+must accompany every such statement \cite{chen2026berry}.
+
+Likewise, a random-matrix-like local spectrum in $\mathcal{N}=2$ SYK or
+super-JT does not erase the Chern constraint.  A geometric response ansatz
+that is intended to describe a full moduli space must preserve both properties:
+the local distribution of $F$ and the integral quantization of its curvature.
+The next section formulates this as a conditional prediction rather than as a
+theorem about BPS black holes.

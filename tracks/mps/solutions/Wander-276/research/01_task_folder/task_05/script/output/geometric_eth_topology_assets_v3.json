@@ -1,0 +1,24 @@
+{
+  "generated_utc": "2026-07-30T11:23:45.133228+00:00",
+  "git_commit": "854fe38e71d93c24fa02ec3db3f8363db27067d6",
+  "input_hashes": {
+    "output/figure_6_wick_factorization_v3.pdf": "214191d7b885e6638758df3d6d245efada7b67e17dddf9362b89aa6f16639ade",
+    "output/figure_7_topological_holonomy_v3.pdf": "11e101309d975a61a3efedb1025c2552149c7f1a6f72433594f4adb1c0a16258",
+    "output/matrix_element_delivery_audit_v3.json": "64974e1b3db8bc15dccd16041ce06912c076281cba2234c557868ef72bbf4769",
+    "output/matrix_element_geometric_eth_v3.json": "bbacad6f795559f417c1e39c034a6fe51669fd509a983099c10965fb68ee34a3",
+    "output/topological_holonomy_delivery_audit_v3.json": "224d546389ccd4cec53343c6db789d449b988eda88f8b8efee84628b8892f42b",
+    "output/topological_holonomy_v3.json": "ff15e7cd2f947b43da5a5973bb82c50319b164877883d187c7c46b2a073823c6"
+  },
+  "matrix_branch": "deformed_geometric_eth",
+  "output_hashes": {
+    "output/generated_numbers_v3.tex": "c2be6699d9f461342c2b320aa647628dd28ddde05cc7d41b15e74d5cd135e5dd",
+    "output/generated_tables_v3.tex": "de39deac3dcac0b9bcc84f51b46d94dbfcf47f094ad457cdf3c4835ae940e6c8"
+  },
+  "overleaf_hashes": {
+    "overleaf_sync/geometric_eth_large_scale/generated/generated_numbers_v3.tex": "c2be6699d9f461342c2b320aa647628dd28ddde05cc7d41b15e74d5cd135e5dd",
+    "overleaf_sync/geometric_eth_large_scale/generated/generated_tables_v3.tex": "de39deac3dcac0b9bcc84f51b46d94dbfcf47f094ad457cdf3c4835ae940e6c8"
+  },
+  "source_sha256": "0eeeba6cafe8bee7b706e29c707170503be13beb200809afc4b2c0bc482c9824",
+  "topology_branch": "fixed_chern_deformed_holonomy",
+  "version": "v3"
+}

@@ -1,0 +1,40 @@
+{
+  "claim_boundary": "Paper I contributes qualitative mechanism comparisons only; it does not validate the v14 channel law",
+  "excluded_models": {
+    "lattice_susy": {
+      "eligible": false,
+      "historical_role": "finite_size_structured_geometry",
+      "reason": "independent Hamiltonian/disorder ensemble is incomplete; independent-unit response covariance arrays are absent; exchangeable independent units are undocumented"
+    },
+    "laughlin": {
+      "eligible": false,
+      "historical_role": "finite_size_stochastic_geometry",
+      "reason": "independent Hamiltonian/disorder ensemble is incomplete; independent-unit response covariance arrays are absent; exchangeable independent units are undocumented"
+    },
+    "moore_read": {
+      "eligible": false,
+      "historical_role": "finite_size_stochastic_geometry",
+      "reason": "independent Hamiltonian/disorder ensemble is incomplete; independent-unit response covariance arrays are absent; exchangeable independent units are undocumented"
+    },
+    "susy_syk": {
+      "eligible": false,
+      "historical_role": "finite_size_stochastic_geometry",
+      "reason": "independent Hamiltonian/disorder ensemble is incomplete; independent-unit response covariance arrays are absent; exchangeable independent units are undocumented"
+    },
+    "xcube": {
+      "eligible": false,
+      "historical_role": "exact_structured_control",
+      "reason": "independent Hamiltonian/disorder ensemble is incomplete; independent-unit response covariance arrays are absent; exchangeable independent units are undocumented"
+    }
+  },
+  "imputed_values": [],
+  "mapped_cases": [],
+  "mapping_rule": "compute N_eff only from stored response covariances indexed by documented independent units",
+  "retrospective_support_used_for_title_gate": false,
+  "schema": "geometric_eth_archival_effective_channel_inference_v14",
+  "source_hashes": {
+    "01_task_folder/task_05/script/analyze_geometric_eth_effective_channels_v14.py": "0f6928e34e6c0d49e92fcd7490fc01fa62a98348f9f3af190e92d6a6200bbd34",
+    "01_task_folder/task_05/script/output/paper1_prb_v13/evidence_registry_v13.json": "e765054e95ba99e57b403c3061a38204a10cca147227b2a35d12559816e7290f"
+  },
+  "version": "v14"
+}

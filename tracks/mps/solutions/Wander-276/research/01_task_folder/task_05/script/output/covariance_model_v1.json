@@ -1,0 +1,108 @@
+{
+  "schema_version": 1,
+  "version": "v1",
+  "generated_utc": "2026-07-28T08:35:01.334711+00:00",
+  "physical_source": "output/physical_ensemble_v1.npz",
+  "rank": 50,
+  "ambient_channel_dimension": 340,
+  "diagnostic_training_rows": 1024,
+  "validation_model_samples_per_floor": 500,
+  "haar_samples": 10000,
+  "deformed_samples": 10000,
+  "candidate_floors": [
+    0.002,
+    0.005,
+    0.01,
+    0.02,
+    0.05
+  ],
+  "validation_scores": {
+    "0.002": {
+      "density_l1": 0.14054999999999995,
+      "gap_ratio_difference": 0.0001337885374536052,
+      "selection_score": 0.14061689426872676
+    },
+    "0.005": {
+      "density_l1": 0.14185,
+      "gap_ratio_difference": 0.0013064576588432963,
+      "selection_score": 0.14250322882942165
+    },
+    "0.01": {
+      "density_l1": 0.1407,
+      "gap_ratio_difference": 0.0011040805555783129,
+      "selection_score": 0.14125204027778915
+    },
+    "0.02": {
+      "density_l1": 0.13401999999999997,
+      "gap_ratio_difference": 0.0010018203538736392,
+      "selection_score": 0.1345209101769368
+    },
+    "0.05": {
+      "density_l1": 0.13036999999999999,
+      "gap_ratio_difference": 0.0032966862379868456,
+      "selection_score": 0.1320183431189934
+    }
+  },
+  "selected_floor": 0.05,
+  "training_geometry": {
+    "relative_frobenius_anisotropy": 0.8674296800010756,
+    "mean_participation_fraction": 0.6249384337585719,
+    "mean_absolute_polarization": 0.10582485400941818,
+    "mean_frame_overlap": 12.838378948780079,
+    "haar_frame_overlap": 7.352941176470588,
+    "mean_principal_angle": 1.090552974857078,
+    "entry_fourth_ratio": 3.3265653199216167
+  },
+  "held_out_test": {
+    "density_l1": {
+      "physical_vs_haar": 0.290988,
+      "physical_vs_deformed": 0.12372,
+      "relative_improvement": 0.5748278279516682
+    },
+    "mean_gap_ratio": {
+      "physical": 0.5998059753041982,
+      "haar": 0.5993947881902579,
+      "deformed": 0.5992000762838173,
+      "physical_deformed_absolute_difference": 0.0006058990203808845
+    },
+    "moments": {
+      "2": {
+        "physical": 0.21333728237401392,
+        "haar": 0.1470329624468636,
+        "deformed": 0.2288735165413742
+      },
+      "4": {
+        "physical": 0.08526589406637701,
+        "haar": 0.04006200648662462,
+        "deformed": 0.09085355137498939
+      },
+      "6": {
+        "physical": 0.04124804321462224,
+        "haar": 0.013230352490666987,
+        "deformed": 0.04258851856463834
+      },
+      "8": {
+        "physical": 0.021965666304063044,
+        "haar": 0.004816973570731376,
+        "deformed": 0.021708694165391427
+      }
+    },
+    "result_branch": "leading_covariance_capture"
+  },
+  "checks": {
+    "train_validation_test_disjoint": true,
+    "covariance_fit_uses_requested_training_rows": true,
+    "all_candidate_floors_scored": true,
+    "selected_floor_is_registered": true,
+    "model_shapes_match": true,
+    "all_spectra_bounded": true,
+    "branch_registered": true
+  },
+  "all_checks_pass": true,
+  "runtime_seconds": 76.13895270897774,
+  "environment": {
+    "python": "3.12.11",
+    "numpy": "2.3.5",
+    "platform": "macOS-15.6-arm64-arm-64bit"
+  }
+}

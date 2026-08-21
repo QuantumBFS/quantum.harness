@@ -1,0 +1,122 @@
+\section{Introduction}
+\label{sec:introduction}
+
+Quantum chaos is usually inferred from the spectrum.  After resolving exact
+symmetries, nearby levels in a nonintegrable many-body Hamiltonian repel, and
+longer-range correlations approach the appropriate random-matrix ensemble.
+The same spectral viewpoint underlies much of the connection between quantum
+chaos and the eigenstate thermalization hypothesis (ETH)
+\cite{srednicki1994,dalessio2016}.  Wave-function chaos can also appear as
+universal spectral correlations among reduced-density-matrix eigenvalues,
+distinct from the energy-level point process \cite{chenludwig2018}.  The
+practical starting point is nevertheless usually a nondegenerate sequence of
+energies.
+
+An exactly degenerate manifold removes that starting point.  Let a rank-$D$
+subspace have energy $E_0$ and remain separated from its complement by a
+positive gap.  Within this subspace every level spacing is zero.  Unfolding is
+undefined, the spacing ratio is trivial, and the contribution of the manifold
+to the spectral form factor is silent about how its states mix: it depends on
+$D$ and $E_0$, not on the orientation of the subspace in the ambient Hilbert
+space.  This spectral silence does not classify the Hamiltonian as integrable
+or chaotic.  Exact equality of energies can follow from symmetry multiplets, a
+common kernel of positive constraints, supercharge cohomology, or dependent
+commuting stabilizers.  Each mechanism can coexist with a large and highly
+structured complement.
+
+The missing information is carried by the motion of the spectral projector.
+For a smooth family $H(\boldsymbol\lambda)$, denote the protected projector by
+$P(\boldsymbol\lambda)$ and its complement by $Q=1-P$.  Kato's formulation of
+adiabatic transport makes $P$, rather than a basis chosen inside its range,
+the natural object \cite{kato1950}.  The Abelian geometric phase
+\cite{berry1984}, its non-Abelian extension for degenerate multiplets
+\cite{wilczekzee1984}, and the quantum metric
+\cite{provostvallee1980} all arise from derivatives of this projector.  The
+rectangular operator
+\[
+ X_a=Q(\partial_aP)P
+\]
+is the off-fiber projector response: it records how a coupling displacement
+rotates protected states into the positive-energy complement.  Products
+$X_a^\dagger X_b$ form the non-Abelian quantum geometric tensor, and their
+antisymmetric part gives a curvature acting within the protected fiber.
+Unlike raw Berry-connection entries, its spectrum and traced contractions are
+gauge invariant.
+
+Geometry has already proved sensitive to chaos in nondegenerate many-body
+eigenstates \cite{pandey2020}.  More directly relevant here, non-Abelian
+Berry curvature was proposed as a chaos probe for exactly degenerate BPS
+microstates, where conventional level statistics cannot resolve dynamics
+inside the protected sector \cite{chen2026}.  We ask the corresponding
+condensed-matter question: what statistical structure can the projector
+response retain when degeneracy is enforced algebraically, rather than
+obtained by tuning unresolved levels together?  The aim is not to replace
+spectral chaos by a single geometric number.  It is to determine which
+features of random-matrix behavior survive in the geometry, which remain
+sensitive to the parent Hamiltonian, and which exact mechanisms force a
+structured negative control.
+
+Two distinctions are essential.  The first separates protection from mixing.
+For $h_a=\partial_aH$, the traceless intrafiber perturbation
+\[
+ S_a=Ph_aP-\frac{\Tr(Ph_aP)}{D}P
+\]
+tests first-order splitting, whereas $X_a$ tests motion of the subspace.
+Along an exactness-preserving transport, $S_a=0$ and the rank and external gap
+remain fixed, yet $X_a$ can be nonzero.  Degeneracy and geometric mixing are
+therefore independent response channels.  This observation also prevents a
+common false inference: a frustration-free or supersymmetric parent need not
+have trivial geometry merely because its protected energy is pinned exactly.
+
+The second distinction concerns how a tangent is realized.  An
+exactness-preserving transport is a finite family of constraints or generators
+for which the common kernel stays exactly degenerate.  In the clustered Hall
+parents studied below, differentiating an invertible transport of the constraint
+map gives $S_a=0$ identically.  By contrast, the Laughlin fixed-parent
+base-point probes apply local potentials at a single exact parent.  They
+define the linear response of an isolated rank-$D$ cluster, but a generic
+finite displacement splits that cluster.  We keep these two constructions
+separate: holonomy and finite-path statements use only the first, while the
+second supports only base-point response statistics.
+
+Once the spectrum is silent, the statistical question also divides into
+scales.  At the local level we compare curvature eigenvalues with the
+finite-rank complex Jacobi process associated with products and compressions
+of random subspaces \cite{collins2005}.  Jacobi-like local eigenvalue
+repulsion is evidence for correlated mixing within one curvature matrix; it
+does not imply that all response entries are independent Gaussian variables.
+At the matrix level the two-point covariance and pseudocovariance retain the
+tangent labels, complement indices, fiber indices, and parent Hamiltonian.
+At fourth order one must subtract all three complex Wick contractions using
+that complete covariance.  We refer to the surviving dependence of global
+statistics on this tensor structure as global covariance memory.  Local
+random-matrix-like repulsion and global covariance memory are compatible, and
+their coexistence is one of the central finite-size observations tested here.
+
+Our comparison is organized by the origin of exact degeneracy.  Two-body
+Laughlin zero modes are realized in the Kapit--Mueller Chern band and in an
+independent continuum lowest-Landau-level construction.  Three-body
+Moore--Read zero modes change the clustering constraint and greatly enlarge
+the protected rank.  A random cubic supercharge and a local lattice
+$\mathcal N=2$ supercharge realize two inequivalent cohomological kernels.
+The periodic X-cube stabilizer code supplies an exactly soluble structured
+control.  Topological stability under gapped local deformations motivates the
+use of projector transport in the Hall setting \cite{hastingswen2005}, but
+topology alone does not determine the local curvature statistics.  The models
+therefore vary the protection algebra, the locality of the tangent, and the
+accessible response channels rather than serving as interchangeable
+realizations of one ensemble.
+
+The corrected fourth-order comparison is narrower than the model list. After exact population centering for each registered finite ensemble, channel whitening on a frozen 12-panel training split, and complete three-pairing Wick subtraction on 12 held-out panels, only the registered finite-rank Moore--Read $N=6$ case passes the positive directional gate under a Student-$t_{11}$ reference with a Bonferroni correction over five primary cases. Moore--Read $N=4$ and the lattice-SUSY ranks $D=2,4,8$ do not pass. No corresponding centered full-cumulant statement is assigned to the Laughlin or random-SYK production data. This pattern establishes neither Gaussian closure in the nonpassing cases nor a common ensemble across mechanisms; it fixes the claim boundary of the global comparison.
+
+The resulting claim is deliberately finite.  We find finite-rank,
+cross-mechanism evidence that exact spectral degeneracy can coexist with an
+informative and, in several stochastic sectors, locally Jacobi-like quantum
+geometry.  The response nevertheless remembers its constraint algebra and
+operator class through its covariance and branch structure.  The X-cube
+control makes the distinction sharp: coefficient deformations have zero
+projector curvature, while a chosen unitary transport has deterministic
+curvature whose connected variance vanishes.  Thus exact degeneracy alone
+does not produce geometric chaos.
+
+These calculations do not constitute an asymptotic Geometric ETH theorem. They neither establish a common scaling limit nor identify a single model/operator class that can be held fixed across all mechanisms. The complete-covariance inference is accepted only for the registered Moore--Read $N=6$ cell whose statistical-unit and familywise gates pass; nonpassing and untested cells are not promoted to conclusions. Section~\ref{sec:protected-response} develops the protected response formalism, Sec.~\ref{sec:statistics} fixes the hierarchy of statistics and inference units, and Sec.~\ref{sec:models} defines the exact mechanisms and tangent classes. The remaining sections present the mechanism-resolved calculations, the topological comparison, and the limits of the geometric interpretation.

@@ -1,0 +1,141 @@
+{
+  "schema_version": 2,
+  "version": "v2",
+  "generated_utc": "2026-07-28T11:29:38.897180+00:00",
+  "source_sha256": {
+    "json": "5a2da65d83ded56a0fbebb23f69d5c26bd41382ebaa5f32a333fb239bffd5778",
+    "npz": "f85e2fe87b8a21aa8b0961e962c84557276020d80bc7a06cfab5464da187bcd9"
+  },
+  "bootstrap_replicates": 10000,
+  "registered_windows": {
+    "tau_minimum": 0.25,
+    "tau_maximum": 1.5,
+    "number_minimum": 0.25,
+    "number_maximum": 8.0
+  },
+  "outcomes": {
+    "physical_tau_compatibility_onset": 0.25,
+    "number_variance_compatibility_extent": 1.0,
+    "g_tau_compatibility_onsets": [
+      null,
+      1.399999976158142,
+      1.5,
+      1.4500000476837158,
+      1.024999976158142,
+      0.2750000059604645,
+      0.8999999761581421
+    ],
+    "first_g_with_registered_jacobi_window": 0.4000000059604645,
+    "first_g_with_haar_gap_ratio_interval": 0.20000000298023224,
+    "haar_gap_ratio_interval": {
+      "mean": 0.5993947881902579,
+      "lower": 0.598440251571675,
+      "upper": 0.6003493248088408
+    },
+    "tau_0p5": {
+      "structured": 4.476404067904201,
+      "physical": 0.5017409899698693,
+      "haar": 0.4948949510949673,
+      "analytic_jacobi": 0.5011683106422424
+    },
+    "number_variance_L8_residual": {
+      "mean": 0.12582170628628764,
+      "lower": 0.11427897037387218,
+      "upper": 0.13736444219870309
+    },
+    "energy_gap_ratio_endpoints": {
+      "poisson": 0.3856450915336609,
+      "poisson_lower": 0.38392218947410583,
+      "poisson_upper": 0.38736799359321594,
+      "gue": 0.598677396774292,
+      "gue_lower": 0.5972064733505249,
+      "gue_upper": 0.6001482605934143
+    }
+  },
+  "band_metadata": {
+    "structured": {
+      "form": {
+        "units": 12,
+        "method": "hierarchical_seed_block_bootstrap",
+        "critical_value": 3.4960832643510504
+      },
+      "ratio": {
+        "units": 12,
+        "method": "hierarchical_seed_block_bootstrap",
+        "critical_value": 0.0
+      },
+      "ratio_mean": {
+        "units": 12,
+        "method": "hierarchical_seed_block_bootstrap",
+        "critical_value": 0.0
+      },
+      "number": {
+        "units": 12,
+        "method": "hierarchical_seed_block_bootstrap",
+        "critical_value": 2.8067219883324737
+      }
+    },
+    "physical": {
+      "form": {
+        "units": 8,
+        "method": "hierarchical_seed_block_bootstrap",
+        "critical_value": 3.1830849400111756
+      },
+      "ratio": {
+        "units": 8,
+        "method": "hierarchical_seed_block_bootstrap",
+        "critical_value": 3.090094391348137
+      },
+      "ratio_mean": {
+        "units": 8,
+        "method": "hierarchical_seed_block_bootstrap",
+        "critical_value": 1.9471131504449375
+      },
+      "number": {
+        "units": 8,
+        "method": "hierarchical_seed_block_bootstrap",
+        "critical_value": 2.94711193455672
+      }
+    },
+    "haar": {
+      "form": {
+        "units": 10000,
+        "method": "matrix_gaussian_multiplier_bootstrap",
+        "critical_value": 3.540496824229081
+      },
+      "ratio": {
+        "units": 10000,
+        "method": "matrix_gaussian_multiplier_bootstrap",
+        "critical_value": 3.354487268047646
+      },
+      "ratio_mean": {
+        "units": 10000,
+        "method": "matrix_gaussian_multiplier_bootstrap",
+        "critical_value": 1.9407651464529883
+      },
+      "number": {
+        "units": 10000,
+        "method": "matrix_gaussian_multiplier_bootstrap",
+        "critical_value": 3.0706918319132255
+      }
+    }
+  },
+  "checks": {
+    "source_artifact_passes": true,
+    "structured_control_rejects_jacobi": true,
+    "physical_has_registered_jacobi_window": true,
+    "geometry_axis_crossover_resolved": true,
+    "local_to_ramp_hierarchy_resolved": true,
+    "spectral_axis_confidence_separated": true,
+    "fixed_projector_invariance_retained": true,
+    "long_range_memory_resolved": true,
+    "atom_plateau_data_retained": true
+  },
+  "all_checks_pass": true,
+  "runtime_seconds": 101.95342445799997,
+  "environment": {
+    "python": "3.12.11",
+    "numpy": "2.3.5",
+    "platform": "macOS-15.6-arm64-arm-64bit"
+  }
+}

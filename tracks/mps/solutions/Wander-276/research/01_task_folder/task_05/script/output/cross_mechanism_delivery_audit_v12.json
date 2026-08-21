@@ -1,0 +1,15 @@
+{
+  "checks": {
+    "asset_checks_passed": true,
+    "asset_hashes_match": true,
+    "claim_is_provisional": true,
+    "figure_formats": true,
+    "inference_passed": true,
+    "missing_gates_disclosed": true,
+    "registered_branch": true
+  },
+  "generated_utc": "2026-08-15T23:39:11.902582+00:00",
+  "passed": true,
+  "selected_branch": "domain_limited_geometric_eth",
+  "version": "v12"
+}

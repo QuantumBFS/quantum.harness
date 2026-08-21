@@ -1,0 +1,177 @@
+\section{Discussion and limitations}
+\label{sec:discussion}
+
+\subsection{What the finite-rank comparison establishes}
+
+The calculations answer a question that cannot be posed through ordinary
+level statistics.  When a parent Hamiltonian has a rank-$D$ eigenspace pinned
+to one energy, neither its zero spacings nor its spectral form factor
+distinguishes a rigid projector from one that rotates strongly under local
+changes of couplings.  The non-Abelian quantum geometric tensor resolves this
+difference because it measures virtual excursions from the protected fiber
+into the gapped complement.  The relevant randomness is therefore randomness
+of the embedding $P(\boldsymbol\lambda)\subset\mathcal H$, not randomness of
+the repeated eigenvalue $E_0$.
+
+Across clustered Hall parents and cohomological kernels, the response is
+nontrivial even though the protected energies remain equal at the accepted
+base point or along an exact transported family.  Several finite-rank
+curvature spectra display Jacobi-like local eigenvalue repulsion.  This is the
+part of the result that most closely resembles an ordinary random-matrix
+criterion: nearby curvature eigenvalues avoid one another after the
+finite-$D$ density is treated correctly.  It is also the narrowest part of the
+claim.  The comparison does not show that the full response matrix is drawn
+from an invariant Jacobi ensemble.  Its channel covariance, pseudocovariance,
+and exact/coexact or stabilizer branch structure remain visible at larger
+scales.
+
+We use \emph{geometric chaos} for this combination of noncommuting projector
+response, stochastic local curvature correlations, and a nontrivial
+complement channel.  The phrase does not assert that the parent Hamiltonian
+thermalizes.  Indeed, the protected sector has no internal energy differences
+on which a conventional ETH ansatz could act.  What is measured is the
+sensitivity and correlation structure of the degenerate subspace under a
+declared tangent ensemble.  This meaning is consistent with the use of
+eigenstate deformation as a chaos-sensitive observable \cite{pandey2020} and
+with the proposal to use Berry curvature inside BPS multiplets
+\cite{chen2026}, while remaining agnostic about long-time relaxation.
+
+\subsection{Protection, mixing, and the meaning of a tangent}
+
+The separation between $S_a$ and $X_a$ is more than a bookkeeping device.
+$S_a$ asks whether a perturbation resolves energies inside the fiber;
+$X_a=Q(\partial_aP)P$ asks whether it changes the fiber's embedding.  An
+exactly transported parent can have $S_a=0$ and large $X_a$, whereas a scalar
+rescaling can have both responses trivial.  Conversely, an arbitrary local
+potential can split the fiber and rotate its spectral cluster at the same
+time.  Calling all three operations \emph{deformations of the parent} would
+erase the physical distinction on which the geometric test rests.
+
+Accordingly, finite-path claims in this work come only from
+exactness-preserving transport.  For the Laughlin and Moore--Read generator
+panels, the constraint map is transported unitarily, the kernel rank remains
+fixed, and the differentiated identity gives $S_a=0$.  Closed paths can then
+support a Wilczek--Zee holonomy \cite{wilczekzee1984}; its non-Abelian part
+contains information not fixed by the first Chern number.  In a gapped
+topological phase, quasiadiabatic continuation supplies the broader setting
+for such projector motion \cite{hastingswen2005}, although our exact parent
+paths are more restrictive than a generic phase-preserving deformation.
+
+The Laughlin local-potential panels are fixed-parent base-point probes.
+Their $Q(\partial_aH)P$ matrices are well defined because the rank-$D$
+spectral cluster is isolated at the parent, but a generic finite potential
+does not preserve exact equality of its eigenvalues.  These panels can test
+local response statistics at the exact point; they cannot support a claim
+about a globally degenerate bundle away from it.  This boundary is especially
+important when interpreting a large curvature response: sensitivity of an
+isolated cluster is not by itself protection of a degenerate multiplet.
+
+\subsection{Local Jacobi behavior and global memory}
+
+A finite Jacobi process is an appropriate reference for eigenvalues generated
+by the relative orientation of random subspaces \cite{collins2005}.  Agreement
+with its local repulsion law tests correlations within a single whitened
+curvature matrix.  It does not test every index of $X_a$, nor does it remove
+the covariance between tangent directions.  The analogy with standard
+spectral chaos must therefore stop before one equates a local point process
+with a complete matrix distribution.
+
+This separation explains why Jacobi-like local eigenvalue repulsion can
+coexist with global covariance memory.  A clustered parent restricts which
+complement states are reached by a local generator.  A supercharge resolves
+the response into exact and coexact branches.  A stabilizer algebra confines
+the response to a small commutant-determined sector.  These restrictions
+survive covariance whitening unless the whitening includes the complete entry
+covariance and pseudocovariance with the correct independent sampling unit.
+They can also generate fourth-order structure that is invisible in a
+nearest-neighbor spacing histogram.
+
+For that reason, the four-point analysis uses all three complex Wick pairings
+and treats the full fixed-Hamiltonian tangent panel as one statistical object.
+Matrix entries and pairs of labels within that panel are not independent
+realizations.  A nonzero raw connected estimate obtained by resampling them as
+if they were independent would measure pseudoreplication as readily as
+non-Gaussian physics. The final evidence registry therefore uses the exactly enumerated population mean of each registered finite ensemble, a channel whitener fitted on a frozen 12-panel training split, and the complete three-pairing statistic on 12 held-out panels. The primary inference treats those held-out panels as exchangeable conditional on the fixed base Hamiltonian, uses a Student-$t_{11}$ reference, and applies a Bonferroni familywise correction over the five registered Moore--Read and lattice-SUSY cases. The reverse 12/12 split is descriptive and is not pooled with the primary inference.
+
+Only the registered finite-rank Moore--Read $N=6$ case passes this corrected gate: its directional estimate is $\MooreReadNSixFullRFourDirectionalEstimate$, and its familywise one-sided lower bound is $\MooreReadNSixFullRFourFamilywiseLower>0$. The Moore--Read $N=4$ lower bound remains negative, as do those for lattice-SUSY ranks $D=2,4,8$. No positive complete-cumulant statement is made for those nonpassing cases, and nonpassing is not evidence for Gaussianity. The Laughlin and random-SYK production data have not been evaluated with this corrected statistic. The $N=6$ result is therefore evidence for a population-centered fourth-order residual in one finite-rank, fixed-base tangent ensemble; it is not evidence for an independent-Hamiltonian ensemble or a common large-rank law.
+
+\subsection{What is mechanism dependent}
+
+The cross-mechanism comparison contains both positive and negative cases.
+Two- and three-body clustering produce large common kernels whose response is
+set by forbidden coincidence channels.  Random-supercharge cohomology gives a
+dense coupling-space ensemble with exact and coexact Hodge branches.  The
+local lattice supercharge preserves cohomology but has a different locality
+and a much smaller sequence of protected ranks.  These systems need not share
+a covariance tensor, and the present data do not support pooling their
+uncertainties into one scaling curve.
+
+The X-cube model is the decisive structured control.  Changing coefficients
+of fixed commuting stabilizers leaves the eigenprojector unchanged, so the
+coefficient-space curvature is zero.  Under a specified local unitary
+transport the projector moves and its curvature can be nonzero, but the
+curvature eigenvalue is deterministic and its connected variance vanishes.
+This example separates three propositions that are sometimes conflated:
+macroscopic exact degeneracy, nonzero geometric response, and stochastic
+geometric chaos.  Neither of the first two implies the third.
+
+The continuum and Kapit--Mueller Laughlin calculations give a second kind of
+control.  They share two-body clustering but differ microscopically.  Agreement
+of a local statistic across them is evidence that the effect is not solely a
+lattice artifact; disagreement of a global covariance contraction is allowed
+because the tangent realization and complement spectrum differ.  Parent
+dependence is consequently part of the result rather than an error bar to be
+averaged away.
+
+\subsection{Relation to Geometric ETH}
+
+For the finite systems studied here, \emph{Geometric ETH} is an organizing name
+for a hierarchy of tests, not a theorem.  The weakest level is informative
+geometry under exact degeneracy.  A stronger, domain-limited level adds local
+random-matrix-like correlations for a specified protection mechanism and
+tangent class.  An asymptotic statement would require a sequence with growing
+protected rank, a fixed normalization and operator class, controlled external
+gaps, converged local statistics, and decay or convergence of the
+covariance-whitened connected tensors.  None of these requirements can be
+replaced by increasing the ambient Hilbert-space dimension alone.
+
+Our result is finite-rank, cross-mechanism evidence.  It is not an asymptotic
+Geometric ETH theorem and not a universal Geometric ETH theorem.  In
+particular, an independent model/operator class has not been established:
+the available sequences change either the protection algebra, the tangent
+panel, or both.  We also do not demonstrate thermalization, a Lyapunov
+exponent, an out-of-time-order growth regime, or equivalence to the usual ETH
+ansatz for few-body observables.  Those are distinct dynamical propositions.
+
+These limitations indicate what would raise the claim.  Within one mechanism,
+one must extend a fixed operator prescription through a substantially larger
+rank sequence and preserve a positive external gap.  Independent Hamiltonian
+or disorder realizations must replace fixed-base panels wherever an ensemble
+claim requires them.  Complete covariance and pseudocovariance must be
+estimated with uncertainty at that realization level.  Only after these
+conditions are met would it be meaningful to test a common large-$D$ law.
+Until then, mechanism-complete sampling is more informative than adding an
+unbounded list of models with incompatible tangent definitions.
+
+\subsection{Conclusion}
+\label{sec:conclusion}
+
+Exactly degenerate energies do not make quantum chaos unobservable; they move
+the question from eigenvalue spacings to the geometry of the protected
+projector.  The response $X_a=Q(\partial_aP)P$ remains finite when the
+intrafiber splitting channel vanishes, and its non-Abelian curvature separates
+rigid protected fibers from stochastically mixing ones.  Across clustered Hall
+parents, random and local cohomological models, and the X-cube control, we find
+finite-rank, cross-mechanism evidence for a hierarchy in which locally
+Jacobi-like curvature can retain parent- and operator-dependent covariance at
+larger scales.
+
+The hierarchy is the main conclusion.  Local repulsion is not full Gaussian
+closure; nonzero curvature is not stochasticity; base-point sensitivity is not
+finite-path protection; and exact degeneracy is not thermalization.  The
+negative stabilizer result is as important as the stochastic cases because it
+shows that exact protection does not automatically generate a random geometry.
+The positive statements are therefore conditional on the declared mechanism,
+tangent class, protected rank, and statistical unit.
+
+The present evidence supports a finite-size, domain-limited use of the term Geometric ETH. It leaves the asymptotic problem open. Establishing that stronger statement will require growing-rank sequences with an unchanged operator prescription and independent-ensemble covariance closure. Results from the corrected full-cumulant gate are restricted to Moore--Read $N=6$; Moore--Read $N=4$ and lattice-SUSY $D=2,4,8$ do not pass, while Laughlin and random SYK remain untested by that statistic. This finite-rank result does not establish an asymptotic or universal Geometric ETH. Within these boundaries, non-Abelian quantum geometry provides information precisely where the degenerate spectrum does not.

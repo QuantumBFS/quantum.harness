@@ -1,0 +1,31 @@
+{
+  "claim_boundary": [
+    "a finite-channel cumulant identity is exact under its assumptions",
+    "the failed prospective validation forbids claiming that those assumptions close the chiral response ensemble",
+    "archival comparisons are retrospective and cannot rescue the prospective title gate",
+    "no asymptotic, universal, thermalization, or black-hole theorem is established"
+  ],
+  "components": {
+    "analytic_channel_theorem": true,
+    "archival_agreement_required": false,
+    "archival_used_for_title_gate": false,
+    "exact_chiral_index_and_seal": true,
+    "quantitative_prediction_available": true,
+    "random_chiral_validation": false,
+    "structured_control_separation": true
+  },
+  "failure_reason": "the prospective random chiral validation did not satisfy the sealed channel-law band",
+  "forbidden_positive_title": "The Geometric ETH: Statistical Closure on Degenerate Quantum State Bundles",
+  "passed": false,
+  "positive_claim_allowed": false,
+  "schema": "geometric_eth_theory_gate_v14",
+  "selected_branch": "random_channel_failure",
+  "selected_title": "Geometric Response of Exactly Degenerate Quantum State Bundles",
+  "source_hashes": {
+    "01_task_folder/task_05/script/analyze_geometric_eth_effective_channels_v14.py": "0f6928e34e6c0d49e92fcd7490fc01fa62a98348f9f3af190e92d6a6200bbd34",
+    "01_task_folder/task_05/script/output/geometric_eth_theory_v14/channel_theory_v14.json": "5e49999bf8ebedb0bbc1f03ecfe505fbaed158acc713420e725c56954b5a0d1a",
+    "01_task_folder/task_05/script/output/geometric_eth_theory_v14/chiral_inference_v14.json": "f32663bf36f3180cc68bb57a19dbe4248c95c6042f06f8f2f7b363b68b926c86",
+    "01_task_folder/task_05/script/output/geometric_eth_theory_v14/effective_channel_inference_v14.json": "a6d5e578cbe4546b6db8c99e84b47d2d95d36a31e1dc2bbe0038b0bcdd3c1b8c"
+  },
+  "version": "v14"
+}

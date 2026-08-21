@@ -1,0 +1,72 @@
+{
+  "alias_audit_sha256": "f70681610ee709917ddbf67a6e37801fafe5b203391430d7c090467c3af3ec02",
+  "arrays_sha256": "f459fa37facf82c6f67c44f4961749095fb0817516ff16d6ca6814bbaf952208",
+  "checks": {
+    "alias_artifacts_present": true,
+    "alias_failure_retained": true,
+    "alias_hashes": true,
+    "branch_recomputed": true,
+    "checkpoint:output/topology_v3_checkpoints/N3_mesh16_twist_bundle_v3.json": true,
+    "checkpoint:output/topology_v3_checkpoints/N3_mesh16_twist_bundle_v3.npz": true,
+    "checkpoint:output/topology_v3_checkpoints/N3_mesh20_twist_bundle_v3.json": true,
+    "checkpoint:output/topology_v3_checkpoints/N3_mesh20_twist_bundle_v3.npz": true,
+    "checkpoint:output/topology_v3_checkpoints/N4_mesh16_twist_bundle_v3.json": true,
+    "checkpoint:output/topology_v3_checkpoints/N4_mesh16_twist_bundle_v3.npz": true,
+    "checkpoint:output/topology_v3_checkpoints/N4_mesh20_twist_bundle_v3.json": true,
+    "checkpoint:output/topology_v3_checkpoints/N4_mesh20_twist_bundle_v3.npz": true,
+    "chern_fixed": true,
+    "cue_reference_count": true,
+    "deformed_but_non_cue": true,
+    "determinant_trace_agreement": true,
+    "exact_isospectral_construction": true,
+    "figure_pdf_hash": true,
+    "figure_png_hash": true,
+    "figure_source_json_hash": true,
+    "figure_source_npz_hash": true,
+    "gauge_invariance": true,
+    "mesh_agreement": true,
+    "positive_gap_branch_overlap": true,
+    "registered_g_grid": true,
+    "registered_generator_seeds": true,
+    "registered_meshes": true,
+    "registered_sizes": true,
+    "result_npz_hash": true,
+    "runner_checks": true,
+    "size_0_commuting_control": true,
+    "size_0_cue_count": true,
+    "size_0_loop_shapes": true,
+    "size_0_seed_shapes": true,
+    "size_1_commuting_control": true,
+    "size_1_cue_count": true,
+    "size_1_loop_shapes": true,
+    "size_1_seed_shapes": true,
+    "supported_branch": true
+  },
+  "figure": {
+    "pdf": "output/figure_7_topological_holonomy_v3.pdf",
+    "pdf_sha256": "11e101309d975a61a3efedb1025c2552149c7f1a6f72433594f4adb1c0a16258",
+    "png": "output/figure_7_topological_holonomy_v3.png",
+    "png_sha256": "4c19bc37413ea4cdbece1ef84023b505d3d279264e2107601907cb72d2d731ff"
+  },
+  "generated_utc": "2026-07-28T17:54:42.800600+00:00",
+  "passed": true,
+  "registered_meshes": [
+    16,
+    20
+  ],
+  "registered_sizes": [
+    [
+      3,
+      8,
+      16
+    ],
+    [
+      4,
+      10,
+      25
+    ]
+  ],
+  "result_branch": "fixed_chern_deformed_holonomy",
+  "result_sha256": "ff15e7cd2f947b43da5a5973bb82c50319b164877883d187c7c46b2a073823c6",
+  "version": "v3"
+}

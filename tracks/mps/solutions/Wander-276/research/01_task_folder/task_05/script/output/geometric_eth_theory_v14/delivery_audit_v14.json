@@ -1,0 +1,427 @@
+{
+  "documents": {
+    "main": {
+      "byte_reproducible": true,
+      "delivery_path": "01_task_folder/task_05/script/output/geometric_eth_theory_v14/geometric_response_exactly_degenerate_bundles_v14.pdf",
+      "delivery_sha256": "45984eed2daa8df1c741a5924287664a3c0b9508389be8681232a91ed54c0d20",
+      "fonts": {
+        "font_records": 49,
+        "passed": true,
+        "type3": [],
+        "unembedded": []
+      },
+      "latex_log": {
+        "fatal": 0,
+        "overfull": 0,
+        "passed": true,
+        "pdf_string_warnings": 0,
+        "undefined": 0
+      },
+      "mode_0644": true,
+      "page_contract": "15--22 page detailed PRB/PRD article",
+      "page_contract_passed": true,
+      "pages": 18,
+      "passed": true,
+      "render_180_dpi": {
+        "blank_pages": [],
+        "dpi": 180,
+        "page_hashes": [
+          {
+            "page": 1,
+            "sha256": "c8cfd049e52c65e72464fe2f144205d952c6a609c4d1f47ad5f90e3c6d2101af"
+          },
+          {
+            "page": 2,
+            "sha256": "b8c88e2a8c83a62c6550511c70b7310cc49ae81344b0d2301361d32c71b5e717"
+          },
+          {
+            "page": 3,
+            "sha256": "df682d81ae9d5eb5b5c83c24c8b6272a1d1085419338b585220a072f34bac971"
+          },
+          {
+            "page": 4,
+            "sha256": "59c8909a70c6a90e4dbee25df80237e3cf6efd012a6cc6acc62ab9f9c5cb3869"
+          },
+          {
+            "page": 5,
+            "sha256": "c5b80e187cfd3d176a2f86a07056d5f37aeec0b00e2dffd795539bcba86dc002"
+          },
+          {
+            "page": 6,
+            "sha256": "b428613229dc2bfd09bd92cacc4cc731025f21bf22fa403fbf41de1b98439d95"
+          },
+          {
+            "page": 7,
+            "sha256": "0fa80138519f85b4bd5700014fa38755895810909966afe4907e3289f961afe9"
+          },
+          {
+            "page": 8,
+            "sha256": "9bc60a495fa2f838290e30accd526bea311f5e8c003fd7b5663b3d1fb5baf4c6"
+          },
+          {
+            "page": 9,
+            "sha256": "72ad11c57ea9048d72ddb9d038eaede109849b8ce90523942219ea1041151eef"
+          },
+          {
+            "page": 10,
+            "sha256": "220d267f525b0f9ebab7ee2369f63def73a2737ed05ed197f0ce2956faa97b9a"
+          },
+          {
+            "page": 11,
+            "sha256": "3668525bbfa2df9995666d6aa196c5d6501a6f4ebf70f422197863f6b77e8538"
+          },
+          {
+            "page": 12,
+            "sha256": "e0567a697571968027dd00b0a2924cc9b936b7b17380d01dc2523d081cd4e07c"
+          },
+          {
+            "page": 13,
+            "sha256": "054044255001f2bc5666f9bfa0c99b07d52fe3dd9daae95a11115e82ec248b2e"
+          },
+          {
+            "page": 14,
+            "sha256": "225f289cbbb2dc2c54e95e1a5dde12e2364b431b690a0d9f05ae2e7b68423b08"
+          },
+          {
+            "page": 15,
+            "sha256": "7e92d7882445671c56adaffc509d1985c65178414beb82edc1799f7e2063b131"
+          },
+          {
+            "page": 16,
+            "sha256": "bb3fd981a69dbc807c13ec332ffed74b6337d60a437dafe673bc3fff11876d7a"
+          },
+          {
+            "page": 17,
+            "sha256": "1f9e3894871e3cc1a63a21d6886d1ee1e7e07b883729dafc48e412a852067b07"
+          },
+          {
+            "page": 18,
+            "sha256": "65d7eecb03a09da8660e881bc98bb22c21b625b97bb727e0c4069c7be4b25850"
+          }
+        ],
+        "passed": true,
+        "rendered_pages": 18
+      },
+      "render_300_dpi": {
+        "blank_pages": [],
+        "dpi": 300,
+        "page_hashes": [
+          {
+            "page": 1,
+            "sha256": "9b61c69890c7828f6f48d5fed6f039c86cf00235d5a4cd3490a344a8d130e7aa"
+          },
+          {
+            "page": 2,
+            "sha256": "4666c2370b354fa7e87fb8073bf8cf1dca621f265208c469e18615831d74e388"
+          },
+          {
+            "page": 3,
+            "sha256": "ebb1946cc961383f751713dacac0a245db516a32f68ad959a4753992791e7189"
+          },
+          {
+            "page": 4,
+            "sha256": "c8978132f10d22122ad0344eb01a977d2cacb15e6a43bda0268b0f4e6b783c66"
+          },
+          {
+            "page": 5,
+            "sha256": "699c9f826425f9e7b523d709665abe87942dc14b7212cfc56e41f835140fbe95"
+          },
+          {
+            "page": 6,
+            "sha256": "5c472a471a797f074ff699d2ea54f76c9785aea482b9693ed238987a88dfd54b"
+          },
+          {
+            "page": 7,
+            "sha256": "e7d1c16440313121fb60ce866269491ccc8cf1aaf3deb3f76d6afb0c11efe816"
+          },
+          {
+            "page": 8,
+            "sha256": "ffd7ae0319e530c22d45c758a87daa721b12f09ad54ad55ed1b936c135ba33f9"
+          },
+          {
+            "page": 9,
+            "sha256": "c8408bb75fc2b9aa460e6cb1260b704a0f30f9aa574e6e3894e5d3ede1aabe09"
+          },
+          {
+            "page": 10,
+            "sha256": "9d728bcc836bca4a9dbae07d3795d55f7838fa6bce214b3672f7cb2fa7aa9533"
+          },
+          {
+            "page": 11,
+            "sha256": "585041664a68a69f81d4cb933fcebd3c35556717b544d342018050cb8842ece1"
+          },
+          {
+            "page": 12,
+            "sha256": "48317460afd32438cafe975ad078d0de1c0ef7b1e26fa8bae79b9cc66762255d"
+          },
+          {
+            "page": 13,
+            "sha256": "d6de3f638a9a36b73b4404baa2480441a49ce38be03c5e27d5e628edc3702b90"
+          },
+          {
+            "page": 14,
+            "sha256": "2bbc5d02264e35d7c37449ad3003a69ba06233df3ac0b32777dd5407b7515af9"
+          },
+          {
+            "page": 15,
+            "sha256": "3a50eaab1e1cc420d667a4aea1755968c1f7c981385aa3cf92a7e9ea304539f9"
+          },
+          {
+            "page": 16,
+            "sha256": "ae9e3d678b346f8fb1a3471d1776eb8d9b334e44116f4777b70ce82ea0236bfb"
+          },
+          {
+            "page": 17,
+            "sha256": "41ce1e48d1823635c5836124e04c7f84d8a8ca38f164c5314389ff806443c596"
+          },
+          {
+            "page": 18,
+            "sha256": "9f34dd6bb650cab612ee68406791c60b3601a1255f7e3770da1e653fa5119cf9"
+          }
+        ],
+        "passed": true,
+        "rendered_pages": 18
+      },
+      "sha256": "45984eed2daa8df1c741a5924287664a3c0b9508389be8681232a91ed54c0d20",
+      "visual_audit": {
+        "passed": true,
+        "reviewed_dpi": [
+          180,
+          300
+        ],
+        "verdict": "All rendered pages were reviewed in the final delivery; no clipping, overlap, blank page, or unreadable table was found."
+      }
+    },
+    "supplement": {
+      "byte_reproducible": true,
+      "delivery_path": "01_task_folder/task_05/script/output/geometric_eth_theory_v14/geometric_response_exactly_degenerate_bundles_supplement_v14.pdf",
+      "delivery_sha256": "ab98b5a39117c7f412df4e62c0b76eb7e31e85ac6911af7c7ff0039fd83d18c9",
+      "fonts": {
+        "font_records": 16,
+        "passed": true,
+        "type3": [],
+        "unembedded": []
+      },
+      "latex_log": {
+        "fatal": 0,
+        "overfull": 0,
+        "passed": true,
+        "pdf_string_warnings": 0,
+        "undefined": 0
+      },
+      "mode_0644": true,
+      "page_contract": "nonempty supplemental material",
+      "page_contract_passed": true,
+      "pages": 8,
+      "passed": true,
+      "render_180_dpi": {
+        "blank_pages": [],
+        "dpi": 180,
+        "page_hashes": [
+          {
+            "page": 1,
+            "sha256": "0c9360e255244982f3a64696901997020f739efde0a272064940b022e74432e6"
+          },
+          {
+            "page": 2,
+            "sha256": "a1ddc9e5199345ff15998f92a2276cb12b1676c4756a3b7c955701c2dbbf63eb"
+          },
+          {
+            "page": 3,
+            "sha256": "3b1884d187650def670f076c3faa5dc448774a56e0e0e9c7a6ed0e8c80403955"
+          },
+          {
+            "page": 4,
+            "sha256": "6a03042ce3c35b26440de1aa73351b600ab2cb6bfd3f4fd08be31816b30a6d33"
+          },
+          {
+            "page": 5,
+            "sha256": "d6431421e5846e0dc41fa63cbe918390745777af31f7cfcc3c4b1b66c0ca52c6"
+          },
+          {
+            "page": 6,
+            "sha256": "85f7da38b255a2ead220bb43136ea6ae9d3e1e895aebbe1bf8c3caeb575529a0"
+          },
+          {
+            "page": 7,
+            "sha256": "c273eea85a1698a4b7d52b9bbc0bd7a170ae043b1cc4aa5a34dd7275f46cfe93"
+          },
+          {
+            "page": 8,
+            "sha256": "1848249a68481baf48901a92fe3663d3f67abc848e2eb3eb15f0a602cd70d3fd"
+          }
+        ],
+        "passed": true,
+        "rendered_pages": 8
+      },
+      "render_300_dpi": {
+        "blank_pages": [],
+        "dpi": 300,
+        "page_hashes": [
+          {
+            "page": 1,
+            "sha256": "4813e8fd7adfa8a78ae3be27af8829038c4127932dab2fc2d2e8184e59acb41f"
+          },
+          {
+            "page": 2,
+            "sha256": "6fc67f9349efb42c4156d6b1e18484af7cc06f56cca620cf9d038b8fad4ae195"
+          },
+          {
+            "page": 3,
+            "sha256": "d9e19582313d24364b532f2e03d113ab85479637c84443a8f1907c1554b7a163"
+          },
+          {
+            "page": 4,
+            "sha256": "e31d159445b465a187124c7e321db598a27a65f2e4441de556b2aaf4cb25c7e4"
+          },
+          {
+            "page": 5,
+            "sha256": "b5136740111e88ecd2a5d2d4d07dfa02a2a0c6809181935e4d74e1027e85741d"
+          },
+          {
+            "page": 6,
+            "sha256": "e3fa2dede36eabf9e31981ca806ba5fb19ef9a9497018bf026b190186be205cc"
+          },
+          {
+            "page": 7,
+            "sha256": "c21c6eee158715f16f4d5f92df960f05fca9ff3af7a5e72fa68b013eb8c630da"
+          },
+          {
+            "page": 8,
+            "sha256": "067c71ccc21f58396a122834cccd9ceb0bf26040678b6dd894002512d066a1ce"
+          }
+        ],
+        "passed": true,
+        "rendered_pages": 8
+      },
+      "sha256": "ab98b5a39117c7f412df4e62c0b76eb7e31e85ac6911af7c7ff0039fd83d18c9",
+      "visual_audit": {
+        "passed": true,
+        "reviewed_dpi": [
+          180,
+          300
+        ],
+        "verdict": "All rendered pages were reviewed in the final delivery; no clipping, overlap, blank page, or unreadable table was found."
+      }
+    }
+  },
+  "gates": {
+    "citations": {
+      "audit_sha256": "c346e1335984fd7526b14df36d0334df5eef35bb4a414dc0506a673993a7f778",
+      "bibliography_sha256": "b20c374a67487ab79f6844f1a559fea5ba458074fbcf8c8395ca6af783475ae0",
+      "citation_count": 43,
+      "missing_from_audit": [],
+      "missing_from_bibliography": [],
+      "passed": true
+    },
+    "claim_boundaries": {
+      "passed": true,
+      "positive_overclaim_hits": [],
+      "required_negative_boundaries": {
+        "N_eff alone rejected": true,
+        "failed prospective validation": true,
+        "no asymptotic claim": true,
+        "no black-hole theorem": true,
+        "no thermalization claim": true,
+        "no universal claim": true
+      }
+    },
+    "existing_archives": {
+      "documents": {
+        "main": {
+          "exists": true,
+          "expected_sha256": "45984eed2daa8df1c741a5924287664a3c0b9508389be8681232a91ed54c0d20",
+          "observed_sha256": "45984eed2daa8df1c741a5924287664a3c0b9508389be8681232a91ed54c0d20",
+          "passed": true
+        },
+        "supplement": {
+          "exists": true,
+          "expected_sha256": "ab98b5a39117c7f412df4e62c0b76eb7e31e85ac6911af7c7ff0039fd83d18c9",
+          "observed_sha256": "ab98b5a39117c7f412df4e62c0b76eb7e31e85ac6911af7c7ff0039fd83d18c9",
+          "passed": true
+        }
+      },
+      "passed": true,
+      "status": "registered_archive"
+    },
+    "figure_manifest": {
+      "figure_count": 6,
+      "malformed": [],
+      "mismatched": [],
+      "missing": [],
+      "modes_0644": true,
+      "passed": true,
+      "sha256": "f3883cc8057fdc5663c94bf66e8881a3e471ff05074152aea7f56b4c7adb34e9",
+      "source_conflicts": [],
+      "source_hashes": {
+        "checked_count": 6,
+        "malformed": [],
+        "mismatched": [],
+        "missing": [],
+        "passed": true
+      }
+    },
+    "generated_inputs": {
+      "files_checked": 2,
+      "matches_rebuild": {
+        "protection_classes_v14.tex": true,
+        "results_v14.tex": true
+      },
+      "passed": true
+    },
+    "title_gate": {
+      "branch": "random_channel_failure",
+      "gate_value": false,
+      "passed": true,
+      "selected_title": "Geometric Response of Exactly Degenerate Quantum State Bundles",
+      "sha256": "1fe0da5b45c414179ce1f466f6eef01ac1260304ce7a414e3608177ca19e4255",
+      "source_hashes": {
+        "checked_count": 4,
+        "malformed": [],
+        "mismatched": [],
+        "missing": [],
+        "passed": true
+      }
+    }
+  },
+  "generated_utc": "2026-08-21T00:00:00+00:00",
+  "passed": true,
+  "schema": "geometric_eth_theory_delivery_v14",
+  "selected_branch": "random_channel_failure",
+  "selected_title": "Geometric Response of Exactly Degenerate Quantum State Bundles",
+  "source_hashes": {
+    "01_task_folder/task_05/script/output/geometric_eth_theory_v14/channel_theory_v14.json": "5e49999bf8ebedb0bbc1f03ecfe505fbaed158acc713420e725c56954b5a0d1a",
+    "01_task_folder/task_05/script/output/geometric_eth_theory_v14/chiral_inference_v14.json": "f32663bf36f3180cc68bb57a19dbe4248c95c6042f06f8f2f7b363b68b926c86",
+    "01_task_folder/task_05/script/output/geometric_eth_theory_v14/chiral_outcomes_v14.json": "3e193018582377cd47fa3db0a3b6c84d1e8d43c1ed719ab7122479a3ff02a8bf",
+    "01_task_folder/task_05/script/output/geometric_eth_theory_v14/chiral_prediction_v14.json": "529b7a68af0b3d357c66556616d8f668ca0b2d7291ac96b1e9a0dc8bc62a187e",
+    "01_task_folder/task_05/script/output/geometric_eth_theory_v14/figure_manifest_v14.json": "f3883cc8057fdc5663c94bf66e8881a3e471ff05074152aea7f56b4c7adb34e9",
+    "01_task_folder/task_05/script/output/geometric_eth_theory_v14/theory_gate_v14.json": "1fe0da5b45c414179ce1f466f6eef01ac1260304ce7a414e3608177ca19e4255",
+    "01_task_folder/task_05/script/verify_geometric_eth_theory_v14.py": "04090f8f17234891f37a87a9cab857c417458bd3ae7f063e7354607d2edfb10d",
+    "docs/literature/2026-08-17-geometric-eth-bps-black-hole-audit.md": "c346e1335984fd7526b14df36d0334df5eef35bb4a414dc0506a673993a7f778",
+    "overleaf_sync/geometric_eth_theory/figures/figure_1_eth_to_bundle_v14.pdf": "57b025a421a09deb615abb3fb92c1187ee50edc03e5d9ec16a4c2b77f148788f",
+    "overleaf_sync/geometric_eth_theory/figures/figure_2_response_algebra_v14.pdf": "8e2c68eb2cf69af1cc92a831611f3cb242320151fd6a045c5b4c49429fb7ea59",
+    "overleaf_sync/geometric_eth_theory/figures/figure_3_covariance_closure_v14.pdf": "817868a1615e259b1839e3ac7a9d5cbb4b9731bcf96ca6d4faf810d63277299e",
+    "overleaf_sync/geometric_eth_theory/figures/figure_4_topology_statistics_v14.pdf": "27fcb8c4996c65a9eec0739e1c331ddc12c20a539e8e8997ae2fa790e2582bc1",
+    "overleaf_sync/geometric_eth_theory/figures/figure_5_bps_comparison_v14.pdf": "7d3c89ecce66003dae34378fb5e2fdc14e0c604c194b0fc6de4941dbd67a072f",
+    "overleaf_sync/geometric_eth_theory/figures/figure_6_effective_channel_test_v14.pdf": "a251b49d1936b998a0a7ff0e654fc5fff2f40ffece1cc0c9941b8f0fb96774aa",
+    "overleaf_sync/geometric_eth_theory/main.tex": "3a85b84438fc452d27bf11a029c1437f13a685f1b870b060a62922388050ab18",
+    "overleaf_sync/geometric_eth_theory/references.bib": "b20c374a67487ab79f6844f1a559fea5ba458074fbcf8c8395ca6af783475ae0",
+    "overleaf_sync/geometric_eth_theory/sections/01_eth_failure.tex": "adc4cd288cfb4e8c25c6cc29d0383c72496df01392ef5b9846e286c8682f3826",
+    "overleaf_sync/geometric_eth_theory/sections/02_bundle_geometry.tex": "6c8407937b50857d16d6791e439f6e7dda7c5323ba854ae5a0230d5232ef796d",
+    "overleaf_sync/geometric_eth_theory/sections/03_geometric_eth_ansatz.tex": "6c5e55b3f7c86660ed2065e17df89f83e3858b1a658eaa0b2bc58a7473031a47",
+    "overleaf_sync/geometric_eth_theory/sections/04_channel_theorem.tex": "49cc01066e765650048eff729bb2972ab3a7cb0196a383bd2f2f8681adc2e34d",
+    "overleaf_sync/geometric_eth_theory/sections/05_protection_classes.tex": "252beb67af4e885bac440e918bc16b11084dbe8f63bbeeb53fc37d34d021a5a6",
+    "overleaf_sync/geometric_eth_theory/sections/06_chiral_test.tex": "7c0092ca32f58165a4655fa40d7b09438fb5295908568a896f40b232dc7f42bf",
+    "overleaf_sync/geometric_eth_theory/sections/07_bps_black_holes.tex": "3d7aebfc60c894890b0c8f5530fe45691a6f4559ba40e03c9ba3e463477d0b1b",
+    "overleaf_sync/geometric_eth_theory/sections/08_topology.tex": "555c944f76820612b698c7c068758e0210aef348ac3838b191a9899396ab3b1a",
+    "overleaf_sync/geometric_eth_theory/sections/09_predictions.tex": "b85fbd28ca4aa602436650699fa42445d03fc59e01ef4e4dbce7ed8f362dee7b",
+    "overleaf_sync/geometric_eth_theory/sections/10_discussion.tex": "b01bfc5f52a004add3eb9f024fc013b14ad0535605ef25c166260144d9c49f70",
+    "overleaf_sync/geometric_eth_theory/supplement.tex": "1262a9d2f2745188c978a5c6bfff0cc0d3ad0eb7ac34535a456311a7c47ca695",
+    "overleaf_sync/geometric_eth_theory/supplement_sections/appendix_channel_theorem.tex": "bd476b3fb1cff77157547e64b86152bef24a1a22fed1b23bc98e7efe8199aa64",
+    "overleaf_sync/geometric_eth_theory/supplement_sections/channel_cumulants.tex": "a19c7e122ef78b6152a09d5cf43e4bea74c3986f7c455d41893c329b35e18ecb",
+    "overleaf_sync/geometric_eth_theory/supplement_sections/chiral_protocol.tex": "f419610be77b48a2e5a6d6afe8b409d9b9d76fc5d5042d8f79537a93bd255477",
+    "overleaf_sync/geometric_eth_theory/supplement_sections/commutant.tex": "097d5bfdf3f6226841b6a299660d731963a692bf5b1ecd309a61a574aea89a5d",
+    "overleaf_sync/geometric_eth_theory/supplement_sections/literature_scope.tex": "84c7be24325b1d766fb2620280a9e3944353dd2f3ae180b37839e2ebf13f27ce"
+  },
+  "version": "v14"
+}

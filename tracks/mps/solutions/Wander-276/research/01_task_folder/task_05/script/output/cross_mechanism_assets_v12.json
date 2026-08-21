@@ -1,0 +1,17 @@
+{
+  "caption": "Cross-mechanism evidence for exact-degeneracy quantum geometry. (a) Opened Moore\u2013Read and lattice-SUSY covariance-matched four-channel residuals. (b) Exact-fiber, response, complete-covariance, and production gates are reported separately; yellow complete-covariance cells are conditional panel-ensemble results and gray cells remain pending. (c) X-cube coefficient changes have zero curvature, whereas local isospectral transport has scalar curvature -1/2 and zero connected variance.",
+  "checks": {
+    "complete_covariance_gate_is_explicit": true,
+    "structured_control_is_separate": true,
+    "three_distinct_evidence_panels": true,
+    "vector_and_raster_outputs": true
+  },
+  "claim_status": "provisional_opened_cross_mechanism_result",
+  "figure_pdf": "figure_cross_mechanism_geometric_eth_v12.pdf",
+  "figure_pdf_sha256": "5011834c5627709a23cb682f6d8aa5e2b932f68e6ba1035b116a6bcff89c5cc9",
+  "figure_png": "figure_cross_mechanism_geometric_eth_v12.png",
+  "figure_png_sha256": "03f3443a849440a472675b7891a566dfcc8a843ffe05b8821f0dd3a5c5c564be",
+  "selected_branch": "domain_limited_geometric_eth",
+  "source_inference": "cross_mechanism_geometric_eth_v12.json",
+  "version": "v12"
+}

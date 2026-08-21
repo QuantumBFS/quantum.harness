@@ -1,0 +1,161 @@
+\section{Statistical tests of geometric chaos}
+\label{sec:statistics}
+
+No single statistic is sufficient to identify chaos in a degenerate fiber.
+We therefore use a hierarchy of tests.  Exact energy degeneracy supplies the
+null result at the spectral level.  Curvature eigenvalues test local and
+mesoscopic correlations of one geometric component.  Response trace words
+then test whether the joint distribution of several physical tangent channels
+is fixed by its complete two-point structure.  The hierarchy prevents a local
+level-repulsion result from being promoted into a statement about Gaussian
+closure or a thermodynamic limit.
+
+\subsection{Spectral silence and curvature spectra}
+
+For a protected multiplet, shift the common energy $E_0$ separately in each
+sample and define
+\[
+ Z_E(t)=\Tr_P e^{-it(H-E_0)}.
+\]
+Exact degeneracy gives $Z_E(t)=D$.  With the normalization used here,
+\begin{align}
+ K_{E,\mathrm{raw}}(t)&=D^{-1}\mathbb E|Z_E(t)|^2=D,\nonumber\\
+ K_{E,c}(t)&=D^{-1}\left(\mathbb E|Z_E(t)|^2
+ -|\mathbb EZ_E(t)|^2\right)=0.
+\end{align}
+The equalities are algebraic and contain no dynamical inference.  In
+particular, an energy ramp can be manufactured only by splitting the protected
+multiplet or by mixing it with states outside the isolated fiber.
+
+The curvature retains a nontrivial spectrum.  For a registered tangent pair
+$(a,b)$, we remove its scalar part and fix its scale by
+\[
+ \widetilde F_{ab}=F_{ab}-D^{-1}(\Tr F_{ab})P,
+ \qquad
+ \sigma_{ab}^2=D^{-1}\Tr(\widetilde F_{ab}^{2}).
+\]
+Samples with $\sigma_{ab}=0$ are recorded as scalar controls rather than
+silently normalized.  Otherwise $\widehat F_{ab}=\widetilde F_{ab}/\sigma_{ab}$
+has a dimensionless spectrum.  We compare its adjacent-gap ratios, connected
+form factor, and number variance with finite-dimensional reference ensembles.
+For example, if $Z_F(\tau)=\Tr e^{-i\tau\widehat F_{ab}}$, then
+\[
+ K_{F,c}(\tau)=D^{-1}\left(
+ \mathbb E|Z_F(\tau)|^2-|\mathbb EZ_F(\tau)|^2\right).
+\]
+The expectation is over the declared ensemble, not over eigenvalues of one
+matrix.  Adjacent gaps within a common spectrum are correlated observations;
+uncertainty intervals are therefore formed by resampling complete matrices or
+complete registered panels.
+
+Local repulsion and a finite-$D$ form-factor ramp test correlations within one
+curvature component.  They do not test the joint distribution of different
+tangent directions.  Nor do they determine whether deviations at longer
+scales follow from a nontrivial covariance, a low-rank response algebra, or a
+connected higher moment.  Those questions require matrix-element
+contractions.
+
+\subsection{Channel whitening and the four-point tensor}
+
+Let $a=1,\ldots,M$ label a physical tangent family fixed before examining the
+outcome.  At a common base projector, set
+$Y_a=X_a-\mathbb E X_a$ and define its channel Gram matrix
+\[
+ G_{ab}=D^{-1}\mathbb E\Tr(Y_a^\dagger Y_b).
+\]
+We whiten on the registered support of $G$, using its Moore--Penrose inverse
+when an exact null channel has been identified independently of the fourth
+moment.  The resulting responses are denoted $\widehat X_a$.  Channel
+whitening removes an overall choice of tangent coordinates, but it does not
+assume that covariance factorizes between tangent, complement, and fiber
+indices.
+
+For the Moore--Read and lattice-supercharge panels, the mean is not fitted on
+the inference sample.  It is evaluated exactly for the finite registered
+tangent population: the uniform torus average over all guiding-center anchors
+for Moore--Read, and the enumerated ordered local-coordinate marginals for the
+lattice supercharge.  Panels 0--11 determine only the $2\times2$ channel
+whitener; the frozen map is applied to panels 12--23, which form the primary
+inference set.  The reversed split is recorded as a descriptive replication
+and is not pooled with the primary estimate.
+
+The gauge-invariant four-channel tensor is
+\begin{equation}
+ T_{abcd}=\frac{1}{D}\,
+ \mathbb E\Tr\!\left(
+ \widehat X_a^\dagger\widehat X_b
+ \widehat X_c^\dagger\widehat X_d
+ \right).
+ \label{eq:fourpoint}
+\end{equation}
+A Gaussian comparison must reproduce the complete second moments of the
+vectorized response.  If $z$ stacks all complement, fiber, and channel indices,
+these moments are the covariance $C=\mathbb E(zz^\dagger)$ and the
+pseudocovariance $\Pi=\mathbb E(zz^T)$.  The latter need not vanish for a
+complex response ensemble.  We write their channel-indexed blocks as
+$C_{ab}$ and $\Pi_{ab}$, with all ambient indices retained inside each block.
+Isserlis' theorem therefore contains three Wick
+pairings.  Suppressing the contracted ambient indices, their tensor structure
+is
+\[
+ W_{abcd}=[C_{ab}C_{cd}]
+ +[\Pi_{ac}^{*}\Pi_{bd}]
+ +[C_{ad}C_{cb}].
+\]
+Keeping only the first and third terms imposes a proper-complex null that the
+physical tangent ensemble need not satisfy.  Likewise, replacing each bracket
+by a product of scalar channel covariances imposes an additional separability
+assumption.  Neither restriction is part of the complete Gaussian comparison.
+
+We define the connected fourth-order response by
+\begin{equation}
+ \mathcal K_{abcd}=T_{abcd}-W_{abcd},
+ \qquad
+ R_4^{\mathrm{full}}=\frac{\lVert\mathcal K\rVert_F}{\lVert W\rVert_F}.
+ \label{eq:wickresidual}
+\end{equation}
+The ratio is reported only when $\lVert W\rVert_F$ passes the registered
+nonzero-scale gate.  A scalar projection of $\mathcal K$ can be more powerful
+than its norm, but its direction and sign must be fixed without reference to
+the opened data.  A statistically resolved nonzero population contraction of
+$\mathcal K$ rejects the matched Gaussian null for the stated ensemble and
+tangent class; a nonzero finite-sample point estimate alone does not.  Such a
+rejection does not identify a unique microscopic mechanism, and it does not
+show that the residual survives as $D\rightarrow\infty$.
+
+The registered scalar direction is tested in five primary cases.  We use the
+one-sided Student-$t$ reference with $11$ degrees of freedom for the twelve
+panel pseudovalues and control the family error at $0.05$ by a Bonferroni
+threshold of $0.01$ per case.  This finite-sample gate, rather than the normal
+approximation stored with the earlier raw-moment calculation, determines
+whether a cell enters the claim table.
+
+\subsection{Inference units and claim levels}
+
+Every uncertainty statement names its declared statistical unit.  The
+appropriate unit may be an independent disorder realization, an independently
+drawn Hamiltonian, or a fixed-Hamiltonian tangent panel whose construction is
+treated as exchangeable under a frozen protocol conditional on the common
+base Hamiltonian.  These cases answer different
+questions.  Eigenvalues and matrix elements drawn from the same response
+matrix are not independent samples, and tangent directions evaluated at one
+fixed projector do not estimate Hamiltonian-to-Hamiltonian fluctuations.
+Pooling such quantities would understate uncertainty without adding an
+independent physical realization.
+
+For fixed-base panels, products entering the Wick tensor are estimated with
+distinct panels, giving a U-statistic rather than a same-panel plug-in product.
+Uncertainty is obtained from delete-one-panel pseudovalues, as detailed in the
+Supplemental Material.  For disorder or independent-Hamiltonian ensembles,
+the same construction is applied with the full realization as the deleted
+unit.  Comparisons between models retain their native units unless a matched
+sampling protocol has been carried out.
+
+We consequently distinguish three levels of evidence.  Curvature
+level repulsion is a finite-size statement about local eigenvalue
+correlations.  Agreement of $T_{abcd}$ with the complete $W_{abcd}$ tests
+fourth-order closure for a specified tangent ensemble.  Geometric ETH in an
+asymptotic sense would require a growing-rank sequence, a fixed
+operator class, and controlled decay of all covariance-whitened connected
+cumulants.  The calculations in this paper are reported at the first two
+levels only where their respective gates have actually been evaluated.

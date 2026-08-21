@@ -1,0 +1,193 @@
+\section{Spectral silence and geometric correlations in Laughlin manifolds}
+\label{sec:laughlin-results}
+
+\subsection{A degenerate spectrum with a resolved projector response}
+
+We begin with the obstruction that motivates the geometric calculation.  In
+the registered spectral-silence instance, the zero-mode projector has rank
+$D=\SpectralFiberRank$.  Its numerical bandwidth is
+$\SpectralKernelBandwidth$, whereas the first state outside the fiber lies at
+the positive gap $\SpectralExternalGap$.  The former is a residual audit and
+the latter is the scale that permits a reduced resolvent; neither is obtained
+by unfolding a narrow band.  Within the accepted fiber all energies are
+exactly equal at the algebraic parent, up to the reported solver residual.
+
+The energy form factor consequently contains no information about the
+orientation of $P$.  With the normalization used in Fig.~\ref{fig:spectral},
+the raw contribution is the constant rank $D$, and the connected energy
+spectral form factor vanishes.  This remains true for every tangent panel
+because the energy calculation uses only the repeated eigenvalue.  It does not
+imply a vanishing response: the same projector has nonzero
+$X_a=Q(\partial_aP)P$ under the registered constraint or local-potential
+tangents.
+
+Figure~\ref{fig:spectral}(b) makes this separation visible without invoking a
+single scalar summary.  A structured curvature, a physical curvature panel,
+and a finite-$D$ Jacobi reference can have the same matrix rank while having
+clearly different eigenvalue configurations.  The physical spectrum fills
+the allowed interval and shows local repulsion, whereas the structured
+control occupies a much smaller set.  Rank and exact energy degeneracy are
+therefore insufficient to determine the curvature point process.
+
+The curvature form factor provides a second comparison.  Over the registered
+finite-$D$ window, the physical curve follows the Jacobi reference ramp within
+the uncertainty obtained from complete reference draws.  At longer scales the
+difference need not remain small.  Figure~\ref{fig:spectral}(d) and
+Fig.~\ref{fig:hierarchy}(d) show the surviving form-factor and number-variance
+residuals.  We describe this as finite-rank ramp agreement with long-range
+memory.  The statement is tied to the displayed rank, normalization, and
+tangent ensemble; it is not an asymptotic or universal claim.
+
+\subsection{The order in which correlations appear}
+
+To separate local and mesoscopic scales, the registered interpolation varies
+the strength $g$ of the geometric scrambling while leaving the comparison
+protocol fixed.  Figure~\ref{fig:hierarchy}(a) plots the curvature-form-factor
+residual over Fourier scale and $g$.  The residual becomes small first in a
+restricted interval of Fourier scales.  This flow is not uniform: a local
+spacing criterion becomes compatible with the finite-$D$ reference before
+the first registered ramp window appears, as summarized in
+Fig.~\ref{fig:hierarchy}(b).
+
+The ordering is physically useful.  Nearest-neighbor repulsion tests only the
+shortest correlations of the curvature eigenvalues.  A ramp requires
+correlations across a wider part of the point process, and number variance
+integrates correlations over a still longer window.  Agreement of the first
+statistic thus need not force agreement of the other two.  In the physical
+panel, the registered ramp residual becomes compatible with the finite-$D$
+reference over the shaded window in Fig.~\ref{fig:hierarchy}(c), while the
+number-variance difference grows beyond the marked local scale in panel (d).
+
+The uncertainty unit changes with neither Fourier time nor window length.  A
+complete physical orbit or a complete ensemble draw is one realization; the
+many eigenvalues and time samples within it are correlated observations.  In
+particular, treating every curvature eigenvalue as an independent sample
+would artificially narrow the bands in Figs.~\ref{fig:spectral} and
+\ref{fig:hierarchy}.  The complete physical panel is the statistical unit
+throughout this local-to-global comparison.
+
+This hierarchy supplies the precise sense in which the geometry is
+Jacobi-like.  It refers to local repulsion and a registered finite-rank ramp,
+not to equality of the entire joint distribution with an invariant ensemble.
+The long-range residual is evidence that the response retains information
+about its physical construction after the local spectrum has become
+compatible with the reference.
+
+\subsection{Intrafiber and off-fiber interventions}
+
+The separation between energy and geometry can also be imposed rather than
+inferred.  Figure~\ref{fig:channels} compares two interventions on the same
+block decomposition.  The intrafiber interpolation changes $PHP$.  Its level
+statistics approach the registered GUE interval, but the projector is held
+fixed.  The norm $\lVert P_\alpha-P_0\rVert_F$ and the curvature-spectrum
+error remain at numerical zero, so this operation changes the spectral
+channel without moving the quantum geometry.
+
+The complementary interpolation changes the off-fiber block
+$P(\partial H)Q+\mathrm{H.c.}$ while leaving the intrafiber intervention
+absent.  The curvature gap statistic rapidly enters its Haar--Jacobi
+reference interval.  Thus intrafiber spectral scrambling and off-fiber
+projector motion are independent response channels.  Here
+\emph{independent} means independently controllable in the block
+intervention; it does not mean that estimators measured from one physical
+panel are independent random variables.
+
+The four quadrants in Fig.~\ref{fig:channels}(d) are therefore all logically
+possible: neither channel may be random-matrix-like, either one can be
+compatible while the other remains structured, or both can be compatible.
+An exactly degenerate parent begins with a silent intrafiber spectrum, but it
+is not forced into the geometrically structured quadrant.  This constructed
+control also prevents us from interpreting agreement in the curvature
+spectrum as indirect evidence that an unmeasured energy spectrum has become
+chaotic.
+
+\subsection{Historical Wick residual and the complete-cumulant boundary}
+
+We next turn from curvature eigenvalues to response matrix elements.  The
+Kapit--Mueller calculations use particle numbers $N=3,4,5$, with the audited
+quantities collected here to expose the finite-size range:
+\begin{table}[b]
+\caption{\label{tab:laughlin-matrix}
+Kapit--Mueller zero-mode ranks, external gaps, and the historical
+four-channel residual.  Every number is supplied by the generated v13
+registry macros.  The last two columns refer to the restricted separable
+proper-complex two-pairing null, not to the corrected complete cumulant.}
+\begin{ruledtabular}
+\begin{tabular}{ccccc}
+$N$ & $D$ & $\Delta$ & $R_4^{\rm 2pair}$ &
+$R_4^{\rm 2pair}-R_{4,\mathrm{Wick}}^{\rm 2pair}$ \\
+\hline
+$3$ & \LaughlinNThreeRank & \LaughlinNThreeExternalGap
+& \LaughlinNThreePhysicalTwoPairRFour & \LaughlinNThreeFourthMomentExcess \\
+$4$ & \LaughlinNFourRank & \LaughlinNFourExternalGap
+& \LaughlinNFourPhysicalTwoPairRFour & \LaughlinNFourFourthMomentExcess \\
+$5$ & \LaughlinNFiveRank & \LaughlinNFiveExternalGap
+& \LaughlinNFivePhysicalTwoPairRFour & \LaughlinNFiveFourthMomentExcess \\
+\end{tabular}
+\end{ruledtabular}
+\end{table}
+The corresponding Fock-space dimensions are
+\LaughlinNThreeBasisDimension, \LaughlinNFourBasisDimension, and
+\LaughlinNFiveBasisDimension.  Kernel count, gap, gauge invariance, leakage,
+and resolvent gates pass for each row before the matrix statistic is formed.
+
+The statistic in Table~\ref{tab:laughlin-matrix} and
+Figs.~\ref{fig:wick}(a,b) is historical.  Its Gaussian null assumes a
+separable covariance and a proper complex response, for which the
+pseudocovariance pairing is set to zero.  It consequently subtracts two Wick
+pairings.  The physical local-density panels and the structured Fourier panel
+lie above that restricted null over the registered sizes.  Their residuals
+decrease with $N$, as do the generated excesses in the last column.
+
+This is a valid rejection of the stated restricted null, but it is not the
+corrected complete cumulant of Eq.~\eqref{eq:wickresidual}.  A positive
+historical two-pairing residual can be produced by nonseparable two-point
+covariance or nonzero pseudocovariance without any connected four-point
+cumulant.  We therefore do not call Figs.~\ref{fig:wick}(a,b) a detection of
+non-Gaussian closure failure.  A corrected claim would require the full entry
+covariance, all three complex Wick pairings, and uncertainty over declared
+independent units.  The Laughlin row in Table~\ref{tab:model-evidence} records
+that this complete-covariance gate has not been tested.
+
+The physical error bars in Fig.~\ref{fig:wick}(a) use
+\RawMomentResidualRealizationCount\ complete local-density panels.  One entire panel,
+not one entry of $X_a$ or one pair of indices, is resampled.  The Fourier
+panel is shown as a structured comparison and is not pooled with the local
+panels to manufacture an uncertainty estimate.
+
+\subsection{Parent dependence within two-body clustering}
+
+The continuum lowest-Landau-level calculation preserves the same two-body
+Laughlin constraint mechanism but changes the microscopic orbitals and the
+realization of the physical tangents.  Figure~\ref{fig:wick}(c) displays
+guiding-density, magnetic-bond, and magnetic-current panels separately.  For
+the size-indexed registry branch, the exported connected excesses are
+\ContinuumLaughlinNThreeConnectedExcess,
+\ContinuumLaughlinNFourConnectedExcess, and
+\ContinuumLaughlinNFiveConnectedExcess.  The figure, rather than those three
+representative macros, resolves the full operator-class dependence and its
+complete-panel bootstrap interval.
+
+The comparison between the Kapit--Mueller and continuum LLL parents is
+deliberately not a pooled test.  Both possess a positive factorized
+$V_0$ parent and the same exact constraint-transport identity, but their
+complement spectra and local generator maps differ.  Agreement would have
+supported a parent-insensitive scalar law within this protection mechanism;
+the registered outcome instead selects parent dependence.
+
+Specifically, the sealed common-plateau prediction was evaluated without
+refitting on the three continuum tangent classes and three registered sizes.
+Figure~\ref{fig:wick}(d) reports that zero of nine registered predictions
+cover their corresponding observed points.  The error bars there are
+complete-panel observation-bootstrap intervals; the registered prediction is
+not adjusted after seeing the continuum outcomes.
+
+The no-refit failure has a narrow meaning.  It rejects that particular scalar
+law as a simultaneous description of the displayed operator classes and
+sizes.  It does not imply the absence of finite-size decay: all three
+continuum classes decrease over the shown range.  It also does not show that
+no refitted function could describe the data, that the two microscopic
+parents occupy different phases, or that two-body clustering lacks a common
+local curvature regime.  The result is parent and operator dependence of the
+tested four-channel observable at finite rank.  It supplies no universality
+or asymptotic conclusion.

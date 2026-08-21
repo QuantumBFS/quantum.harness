@@ -1,0 +1,177 @@
+\section{Conditional predictions and falsification criteria}
+\label{sec:predictions}
+
+The theory and numerical gates impose a strict distinction between an exact
+finite-channel identity and a statistical closure hypothesis.  For independent
+centered response channels $Y_\alpha$ in one common response space, with fixed
+weights $w_\alpha$, the cumulants of
+\begin{equation}
+ Z=\sum_{\alpha}w_\alpha Y_\alpha
+ \label{eq:conditional-channel-sum}
+\end{equation}
+obey the exact algebraic relation
+\begin{equation}
+ \kappa_k(Z)=\sum_{\alpha}w_\alpha^k\kappa_k(Y_\alpha).
+ \label{eq:conditional-cumulant-law}
+\end{equation}
+This identity follows from independence and does not require a large number
+of channels.  It is therefore not the part of the proposal that is at risk in
+the numerical test.  The additional claim is that, after complete complex
+covariance and pseudocovariance normalization, comparable channel cumulants
+produce a fourth-order scale controlled by
+\begin{equation}
+ N_{\mathrm{eff}}
+ =\frac{\left(\sum_\alpha w_\alpha^2\right)^2}
+ {\sum_\alpha w_\alpha^4},
+ \qquad
+ \frac{\kappa_4(Z)}{\left(\sum_\alpha w_\alpha^2\right)^2}
+ \propto N_{\mathrm{eff}}^{-1}.
+ \label{eq:conditional-neff}
+\end{equation}
+The proportionality in Eq.~\eqref{eq:conditional-neff} is conditional on
+channel comparability, absence of a dominant weight, and an outcome-independent
+whitening map.  It is not an exponent to be fitted after the data are seen.
+
+The use of higher moments is motivated by the limitations of the leading ETH
+ansatz.  Ordinary ETH concerns diagonal smoothness and off-diagonal matrix
+elements in an energy basis \cite{deutsch1991,srednicki1994}.  Correlations
+needed for out-of-time-order observables and multi-operator products require
+additional information beyond a two-point covariance
+\cite{foinikurchan2019,pappalardi2022}.  The geometric version makes the same
+separation in a different space: it asks whether the tangent response of an
+exactly degenerate fiber has a closed distribution after its complete
+real-augmented covariance is fixed.
+
+\subsection{Status of the prospective chiral test}
+
+The chiral rectangular-kernel ensemble was the prospective test of this
+statistical closure.  Its exact-index and projector-response checks passed,
+and the channel-whitening construction was well defined on all registered
+validation cases.  Those algebraic checks establish that the numerical object
+was an isolated, exactly degenerate kernel response.  They do not establish
+that its tangent channels are independent or that their fourth cumulants are
+comparable.
+
+The sealed prediction was fixed from the three development sizes
+$(n_b,n_a)=(16,24),(24,36),(32,48)$.  The resulting simultaneous band for the
+covariance-whitened complete standardized fourth cumulant was
+\begin{equation}
+ \ChiralBandLower\;\leq\;N_{\mathrm{eff}}R_4^{\mathrm{full}}
+ \;\leq\;\ChiralBandUpper.
+ \label{eq:chiral-frozen-band}
+\end{equation}
+The three sealed random-class validation point estimates at
+$(48,72)$, $(64,96)$, and $(96,144)$ were, respectively,
+\begin{equation}
+ \ChiralRandomOnePoint,\qquad \ChiralRandomTwoPoint,\qquad
+ \ChiralRandomThreePoint.
+ \label{eq:chiral-random-outcomes}
+\end{equation}
+Thus the primary random-channel prediction failed.  The bootstrap interval
+for the first validation size overlaps the upper edge of the development band,
+whereas the intervals at the two larger sizes are displaced above it; the
+registered rule nevertheless evaluates the primary prediction using the fixed
+point estimates and does not widen the band after unsealing.  The local and
+structured controls separate from the random development band, but this does
+not rescue the failed random-channel branch.  The resulting theory gate is
+therefore false.
+
+This failure has a precise interpretation.  It is evidence against the
+particular finite-size closure hypothesis, with its selected tangent ensemble,
+whitening prescription, and sealed statistic.  It is not a disproof of the
+algebraic cumulant identity in Eq.~\eqref{eq:conditional-cumulant-law}.  Nor
+does it identify the source of the discrepancy: correlated channels,
+noncomparable single-channel cumulants, finite-size geometry, or residual
+multivariate covariance and pseudocovariance tensor structure not captured by
+the scalar pooled statistic can all produce the observed departure.  A failed
+closure test must not be relabeled as evidence for a different universal law.
+
+The result also fixes the manuscript's title and conclusion boundary.  The
+positive title and theorem-level conclusion ``The Geometric ETH'' are not
+licensed by the present gate.  The bounded result is a conditional geometric
+response theory for exactly degenerate state bundles, together with a failed
+prospective random-channel validation.  The distinction is substantive: a
+finite exact identity can remain useful even when the proposed ensemble does
+not obey its expected fourth-order scaling.
+
+\subsection{Predictions that remain testable}
+
+The failed gate does not leave the theory without predictions.  It changes them
+from universal assertions to conditional tests with explicit failure modes.
+
+\paragraph{Gauge-covariant response.}
+For any protected rank-$D$ bundle, a change of fiber frame sends
+$F_{\mu\nu}\mapsto U^{-1}F_{\mu\nu}U$.  A valid numerical comparison must
+therefore be formulated in terms of eigenvalues, traces of powers, singular
+values, holonomies, or complete tensors transformed covariantly.  A change in
+the histogram of individual matrix entries under a frame rotation is not a
+physical effect.  This prediction is the direct geometric content of the
+Berry/Wilczek--Zee construction \cite{berry1984,wilczekzee1984} and of the BPS
+proposal \cite{chen2026berry}.
+
+\paragraph{Conditional inverse-participation scaling.}
+If a new protected model supplies independently indexed channels, an
+outcome-independent channel map, finite fourth moments, and a non-dominant
+weight profile, then Eq.~\eqref{eq:conditional-neff} predicts that the
+complete standardized fourth cumulant is controlled by
+$\sum_\alpha w_\alpha^4$.  The test must freeze the covariance and
+pseudocovariance prescription before the validation data are opened.  A
+failure should be reported as a failure of that channel class, not absorbed by
+refitting an exponent or changing the effective-channel definition.
+
+\paragraph{Topology-constrained local statistics.}
+In a model with a constant-rank protected bundle and non-contractible cycles,
+the local curvature law and the Chern integral must be tested together.  The
+$\mathcal{N}=2$ SYK calculation provides a concrete target: it reports
+random-matrix-like local curvature and, in specified sectors, exponentially
+large first Chern numbers \cite{chen2026berry}.  A future ensemble that matches
+the local spectrum but violates integer flux is not a valid model of the same
+bundle.  Conversely, integer flux alone does not imply random local
+statistics.
+
+\paragraph{Protected-sector comparison.}
+For a matched marginal-deformation prescription, the cited D1/D5 and
+$\mathcal{N}=4$ SYM sectors provide a non-random/flat comparison, while the
+cited $\mathcal{N}=2$ SYK and super-JT calculations provide a random-matrix-like
+comparison \cite{chen2026berry}.  A new calculation should hold fixed the
+definition of the protected fiber, the external-gap criterion, the tangent
+normalization, and the gauge-invariant observable before comparing these
+classes.  It must not infer a black-hole label solely from a finite histogram.
+
+\paragraph{A conditional black-hole test.}
+Suppose a future supersymmetric black-hole construction supplies an exactly
+degenerate BPS bundle, a controlled moduli-space deformation, and a positive
+external gap over the sampled region.  Then one can test whether its curvature
+invariants follow the random-matrix-like behavior found in the model studies
+of $\mathcal{N}=2$ SYK and super-JT \cite{chen2026berry}.  The prediction is
+conditional on those three inputs.  It does not assert that all black holes
+have such a bundle, that their curvature is universal, or that curvature
+statistics imply thermalization.
+
+\subsection{A preregistered falsification protocol}
+
+The following checks are sufficient to falsify the conditional geometric
+response ansatz for a specified model without conflating distinct hypotheses:
+\begin{enumerate}
+  \item verify the exact index, constant protected rank, and positive external
+  gap on every sampled base point;
+  \item freeze the tangent ensemble, channel identification, covariance,
+  pseudocovariance, and normalization on a development sample;
+  \item define the complete real-augmented fourth cumulant, including all
+  complex Wick pairings, before the validation sample is generated;
+  \item use independent Hamiltonian or disorder realizations whenever the
+  claim concerns an ensemble rather than tangent directions at one fixed
+  Hamiltonian;
+  \item compare the held-out statistic with the sealed prediction without
+  fitting a size exponent or widening the acceptance band; and
+  \item test a structured control with the same fiber rank, tangent count, and
+  normalization, so that a failure can be distinguished from a generic
+  estimator defect.
+\end{enumerate}
+
+The chiral v14 study satisfies the first and the sealing requirements but fails
+the random primary prediction.  It therefore supplies a falsification record,
+not a positive Geometric ETH validation.  The next useful calculation is not a
+larger claim; it is a mechanism-resolved replication that changes one source
+of structure at a time and records whether the random-channel failure follows
+the response algebra, the tangent ensemble, or the topology of the bundle.

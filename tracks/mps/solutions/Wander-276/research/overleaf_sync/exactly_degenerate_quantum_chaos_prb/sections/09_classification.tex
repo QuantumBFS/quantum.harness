@@ -1,0 +1,154 @@
+\section{Protection, mixing, and statistical classes}
+\label{sec:classification}
+
+The examples above suggest a classification with three logically independent
+entries.  The \emph{protection class} records why a rank-$D$ multiplet is
+exactly degenerate.  The \emph{mixing class} records which directions of the
+Grassmannian are reached by the allowed Hamiltonian tangents.  The
+\emph{statistical class} records the measure under which a statement about
+those directions is made.  Keeping these columns separate is necessary:
+protection does not determine mixing, and mixing at one base Hamiltonian does
+not determine Hamiltonian-to-Hamiltonian statistics.
+
+\subsection{Response algebra and commutant}
+
+At a fixed protected projector define the accessible off-fiber space and its
+fiber algebra by
+\begin{align}
+ \mathfrak X
+ &=\operatorname{span}\{X_a\}
+   \subset\operatorname{Hom}(P\cH,Q\cH),
+ \nonumber\\
+ \mathfrak A_X
+ &=\operatorname{alg}\{X_a^\dagger X_b\}_{a,b}
+   \subset\operatorname{End}(P\cH).
+ \label{eq:response-algebra}
+\end{align}
+The response rank is the dimension of $\mathfrak X$ after exact tangent-null
+directions are removed.  It measures the number of accessible projector
+velocities, not the degeneracy $D$ itself.  The commutant
+\begin{equation}
+ \mathfrak C_X=\{M\in\operatorname{End}(P\cH):
+ [M,A]=0\ \text{for all }A\in\mathfrak A_X\}
+ \label{eq:response-commutant}
+\end{equation}
+records exact block structure invisible to an eigenvalue histogram of one
+curvature matrix.  A large commutant signals conserved subblocks or repeated
+representations.  A scalar algebra has the entire endomorphism algebra as its
+commutant; an irreducible full matrix algebra has only the center.  These are
+algebraic statements and should be established before a random-matrix law is
+fitted.
+
+The Hermitian curvature combination
+$i(X_a^\dagger X_b-X_b^\dagger X_a)$ belongs to $\mathfrak A_X$.  Its
+centrality is therefore another useful coordinate.  We distinguish a fixed projector ($\mathfrak X=0$), central
+curvature ($F_{ab}\propto P$), structured or reducible response (nonzero
+$\mathfrak X$ with an exact branch or block decomposition), and finite-size
+stochastic response (noncentral matrices with measured ensemble
+fluctuations).  The last label is empirical and rank-specific.  It does not
+mean that $\mathfrak A_X$ has been proved to become a free or invariant random
+algebra as $D\rightarrow\infty$.
+
+\subsection{Protection class}
+
+Constraint-kernel protection occurs when $H=C^\dagger C$ and the common
+nullity of the constraints is constant.  The Laughlin and Moore--Read parents
+fall in this class, with two- and three-body clustering conditions,
+respectively.  Exactness-preserving transport rotates $C$ together with its
+kernel; a generic fixed-parent perturbation can instead produce a nonscalar
+$P(\partial H)P$ and split the fiber.  The same protection class consequently
+permits both a finite exact path and a splitting probe, depending on the
+tangent.
+
+Cohomological protection occurs for a nilpotent $Q$ and
+$H=\{Q,Q^\dagger\}$.  Harmonic representatives identify the zero modes with
+$Q$-cohomology.  The random cubic supercharge and the independence-complex
+lattice model share this origin, but their tangent spaces and sampling units
+are not the same.  The Hodge decomposition adds an exact/coexact branch
+structure to $\mathfrak X$.  A Gaussian comparison that ignores that branch
+structure tests a different null from one that conditions on it.
+
+Stabilizer protection follows from a commuting Pauli constraint algebra and
+its dependent relations.  In X-cube, positive coefficient changes leave the
+common eigenspace fixed, whereas unitary conjugation moves it isospectrally.
+The protected rank is exponentially large in a linear system size, yet the
+opened transport curvature remains central.  This example directly separates
+the count of protected states from the complexity of their accessible
+geometry.
+
+A quasi-degenerate isolated cluster, such as the checkerboard replication,
+belongs to none of these exact classes at finite size.  It can test whether a
+geometric trend survives an internal bandwidth, but it cannot support the
+algebraic spectral-silence statement used for an exact kernel.
+
+\subsection{Mixing class}
+
+The frozen class has $\partial_aP=0$.  X-cube coefficient reweighting is the
+exact example; changing $PHP$ inside a fixed subspace can also alter spectral
+statistics without changing the projector.  Such a tangent provides no
+geometric chaos datum, regardless of $D$.
+
+The central class has $X_a\neq0$ for some tangents but
+$F_{ab}=f_{ab}P$ on the protected fiber.  X-cube unitary transport realizes
+this case.  It produces a Berry phase density and can have a nonzero quantum
+metric, but all states in the fiber see the same infinitesimal holonomy.  The
+traceless curvature and its connected variance vanish.
+
+The structured class has a noncentral response subject to a proper invariant
+decomposition.  Local lattice SUSY supplies exact and coexact Hodge branches;
+structured Laughlin and Moore--Read generator lines restrict the accessible
+operator span.  Here a response rank alone is inadequate.  The commutant,
+branch weights, and channel covariance must be retained in the null model.
+Failure of a naive isotropic comparison can reflect omitted two-point
+structure rather than a connected higher moment.
+
+The stochastic class is assigned only when an ensemble of noncentral
+responses has been measured.  The finite Laughlin panels, the Moore--Read
+fixed-base panels, and random-supercharge realizations exhibit such
+fluctuations under their registered protocols.  Their higher-order status is
+not uniform: the rank-\MooreReadNSixRank\ Moore--Read case passes the centered
+full-cumulant direction; the smaller Moore--Read and lattice cases do not;
+SUSY SYK rejects a separable Hodge-Gaussian null but lacks a complete
+entrywise-covariance test.  ``Finite-size stochastic response'' is therefore
+a mixing description, not a universal closure claim.
+
+\subsection{Statistical class and claim level}
+
+Deterministic algebraic controls form the first statistical class.  Their
+results---zero projector derivative, scalar curvature, or a vanishing
+connected variance---follow from exact identities.  They need numerical
+audits of implementation and sign, but no bootstrap population is created by
+repeating eigenvalues inside the code space.
+
+Fixed-base tangent populations form the second class.  Moore--Read and local
+lattice SUSY use complete panels treated as exchangeable conditional on a
+common Hamiltonian.  Exact finite-population centering and a training-only
+whitener prevent the same inference panels from selecting their own null.
+The resulting jackknife quantifies panel-to-panel variation at that base.  It
+does not quantify variation across disorder, parent Hamiltonians, or
+topological phases.
+
+Independent disorder realizations form the third class.  The random
+supercharge calculation samples the couplings anew, so one realization is a
+Hamiltonian-level unit.  Its historical sealed prediction is stronger than a
+same-Hamiltonian resampling statement, but its covariance null is narrower
+than the full complex Gaussian law.  Statistical independence of the units
+does not repair a misspecified covariance model.
+
+Loop or moduli-space sampling forms a fourth class for global observables.
+Wilson loops and Chern numbers compare transported frames over extended
+parameter cycles.  Repeated mesh points on one loop are not independent
+realizations, and the loop parameter is not physical time.  These global
+objects can retain structure even when a local curvature statistic resembles
+a finite random-matrix reference.
+
+This classification fixes the order of a geometric-chaos claim.  One first
+states the protection mechanism and verifies a constant-rank gap.  One then
+specifies the tangent class, computes the response rank, and identifies the
+commutant or branch structure of $\mathfrak A_X$.  Only after that does one
+choose a statistical class, match the complete relevant two-point structure,
+and test the higher-order status.  An asymptotic Geometric ETH would require
+these ingredients along a growing-rank sequence with a fixed operator class
+and controlled connected cumulants.  The independent model/operator ensemble
+has not been established here, and the present finite-rank comparisons do not
+supply that theorem.

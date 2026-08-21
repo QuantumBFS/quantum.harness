@@ -1,0 +1,10 @@
+\section{Sequential and sealed protocol}
+\label{sec:protocol}
+
+We study central \(r=N/2\) and adjacent \(r=N/2-1\) sectors at even \(N\). Each coupling realization supplies a sparse coordinate panel and an independent isotropic panel, both projected away from the complex radial line and orthonormalized before any four-channel result is inspected. The complete disorder realization is the uncertainty unit: tangent entries and tensor components are never resampled as independent observations.
+
+The sequential pilot uses \(N=8,10,12\). Each realization is split into a safe metadata/array checkpoint and an outcome sidecar. The safe checkpoint contains the BPS rank, positive gap, numerical residuals, Hodge signature, covariance spectra, seeds, and source hashes, but no four-channel value. Per-realization Gaussian banks are generated from this safe file. A null replicate selects one bank draw per realization and takes their median; the physical uncertainty is a nonparametric bootstrap of complete-realization medians.
+
+The held-out \(N=14\) computation is more restrictive. All safe response and null checkpoints must pass before the collapsed and Hodge numerical prediction intervals are written atomically. The prediction JSON is sealed by SHA-256. No scheduler dependency invokes the unseal command. Only a separate explicit action may validate the seal, open the sidecars, and score the central/adjacent sparse pair. The isotropic pair is secondary and cannot change the primary branch.
+
+The registered branches are: simultaneous coverage by both nulls; coverage only by the Hodge null; rejection of both with reproducible response memory; statistical indistinguishability from the decomposable structured control; or feasibility failure. A decomposable three-form recovers exact curvature atoms \(0,\pm\alpha^{-2}\) with analytic multiplicities, and a one-sided synthetic response reproduces the accepted Laughlin Gaussian null exactly. These controls test the algebra and implementation independently of the generic-coupling outcome.

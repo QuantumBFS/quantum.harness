@@ -1,0 +1,275 @@
+\section{Three-body clustering and cohomological response}
+\label{sec:cohomology}
+
+Figure~\ref{fig:mechanisms} compares three protected constructions for which
+the response is nonzero: a three-body clustering kernel, a random
+supercharge, and a local lattice supercharge.  The common feature is an
+exactly degenerate zero-energy fiber separated from its complement.  The
+origin of that fiber and the sampling measure are different.  We therefore
+compare the algebra and the statistical result within each model before
+placing their evidence cells next to one another.  In particular, a tangent
+panel at one fixed Hamiltonian is not interchangeable with an independent
+disorder realization.
+
+\subsection{Moore--Read: an exact moving kernel}
+
+The Moore--Read parent is a sum of positive three-particle constraints,
+Eq.~\eqref{eq:moore-read-parent}.  The states in its kernel obey the same
+three-body clustering condition at exactly zero energy
+\cite{mooreread1991,zhang2023parent}.  For the fixed-four-quasihole sequence
+$N_\phi=N+2$, the two opened systems have $(N,D)=(4,
+\MooreReadNFourRank)$ and $(6,\MooreReadNSixRank)$.  The first positive
+energies, \MooreReadNFourExternalGap\ and
+\MooreReadNSixExternalGap, respectively, verify that the response is taken
+for an isolated projector rather than for a numerically selected portion of
+a continuum.
+
+The guiding-density directions are an exactness-preserving generator
+transport.  If $G_a$ is lifted to the $N$-particle Fock space by
+$\Gamma_N(G_a)$, differentiation of the transported constraint gives
+\begin{equation}
+ (\partial_aH)P=-H\Gamma_N(G_a)P,
+ \qquad
+ X_a=Q\Gamma_N(G_a)P.
+ \label{eq:mr-generator-response}
+\end{equation}
+Thus $S_a=P(\partial_aH)P=0$, while the off-fiber block $X_a$ is generally
+nonzero.  This identity is checked against the parent action and complement
+leakage for every stored panel.  It matters conceptually: the response is not
+the derivative of a multiplet that immediately splits.  It is the derivative
+of an exactly degenerate kernel that moves under a finite invertible
+constraint path.
+
+The finite-size calculations used two related, but inequivalent, fourth-order
+statistics.  The historical two-pairing residual in
+Fig.~\ref{fig:mechanisms}(a) subtracts a separable proper-complex Gaussian
+prediction.  Its local-panel medians are
+\MooreReadNFourLocalTwoPairRFour\ and
+\MooreReadNSixLocalTwoPairRFour; the structured-line controls are
+\MooreReadNFourStructuredTwoPairRFour\ and
+\MooreReadNSixStructuredTwoPairRFour.  Those values describe the old
+$R_4^{2\mathrm{pair}}$ observable.  They neither include the
+pseudocovariance pairing nor reproduce an arbitrary entrywise covariance, so
+they are not a test of the complete Gaussian law.
+
+The v12 raw, uncentered three-pairing calculation is also retained only for
+provenance.  Its response arrays were neither population-centered nor
+channel-whitened before the moment subtraction.  The corresponding raw
+estimates, \MooreReadNFourRawMomentResidualEstimate\ and
+\MooreReadNSixRawMomentResidualEstimate, cannot be interpreted as connected
+cumulants.  A nonzero raw value may contain the finite-population mean and is
+therefore claim-ineligible even when a nominal normal-reference probability
+is small.  Figure~\ref{fig:mechanisms}(b) marks this distinction explicitly:
+``exact fiber and response'' and ``centered complete covariance'' are
+separate evidence questions.
+
+For the corrected $R_4^{\mathrm{full}}$ calculation, one fixed-base tangent
+panel is the statistical unit.  Each system has a registered finite
+population of torus guiding-density anchors, and linearity gives its exact
+population mean before any panels are assigned to inference.  The mean
+vanishes for the uniform traceless guiding-density population; it is not
+estimated from the observed inference half.  The \FullRFourTrainingCount\
+panels in the training half determine only the $2\times2$ channel Gram
+matrix.  Its inverse square root is then frozen and applied to the disjoint
+\FullRFourInferenceCount\ panels.  We refer to this as the frozen 12/12
+split.  The training half alone fixes the whitening transformation.  All
+three Wick pairings, including the pseudocovariance term, are subtracted from
+the inference-panel U-statistic.
+
+Uncertainty is obtained by deleting one complete inference panel and
+recomputing the contraction.  The registered scalar direction is tested with
+a Student-$t$ reference with \FullRFourStudentTDegreesOfFreedom\ degrees of
+freedom.  A Bonferroni correction controls the family level
+\FullRFourFamilyAlpha\ across five registered primary cases
+(\FullRFourPrimaryFamilySize\ in total), giving per-case level
+\FullRFourPerCaseAlpha.  This protocol
+is conditional on exchangeability of the fixed-base panels; it is not an
+estimate over Moore--Read Hamiltonians or over parent-Hamiltonian families.
+
+At $N=4$, $D=\MooreReadNFourRank$, the directional estimate is
+\MooreReadNFourFullRFourDirectionalEstimate, while the familywise one-sided
+lower bound is \MooreReadNFourFullRFourFamilywiseLower.  The registered
+positive-direction gate does not pass.  At $N=6$,
+$D=\MooreReadNSixRank$, the corresponding estimate is
+\MooreReadNSixFullRFourDirectionalEstimate\ and the familywise lower bound is
+\MooreReadNSixFullRFourFamilywiseLower; this case passes.  The positive cell
+in Fig.~\ref{fig:mechanisms}(c) is consequently a finite-rank $N=6$ result.
+It is not an asymptotic statement, and the absence of a pass at $N=4$ forbids
+a monotone scaling claim from these two ranks alone.  The reverse split is
+descriptive and is not pooled with the primary split, even where its point
+estimate has the same sign.
+
+This result establishes a connected fourth-order response contraction at
+one rank for the stated tangent population after complete covariance and
+pseudocovariance subtraction.  It does not establish that all fourth-order
+components are nonzero, that the effect persists with $D$, or that different
+three-body parents share the same law.  It also does not identify a dynamical
+Lyapunov exponent: the measured object is the geometry of an exactly
+degenerate projector over coupling space.
+
+There are two further reasons not to read the $N=4,6$ comparison as a fit.
+First, the ambient occupation-space dimensions and the protected ranks change
+together, so a change in the scalar contraction cannot be assigned uniquely
+to $D$.  Second, the response channels are generated by a discrete torus
+population whose geometry also changes with $N_\phi$.  An asymptotic test
+would have to hold the operator prescription fixed in physical units, open
+additional ranks, and preregister the scaling quantity before examining the
+new outcomes.  Here the two cases instead test whether the same finite-panel
+protocol can be carried out at two nontrivial ranks and whether its familywise
+gate is resolved in either one.
+
+The fixed-base qualification does not contradict exact transport.  Every
+$G_a$ defines a finite isospectral constraint path, but the collection of
+panels is evaluated at the same base parent and base projector.  The
+jackknife therefore samples the registered distribution of tangent
+directions through one point of the projector bundle.  It does not sample
+different points along a path, and it does not absorb the correlation among
+channels within one panel into the sample count.  This distinction is why
+the full response tensor of a panel, rather than each generator or matrix
+entry, is deleted in the uncertainty calculation.
+
+\subsection{Random-supercharge cohomology}
+
+The random supersymmetric model replaces a clustering ideal by a chain
+complex.  A cubic nilpotent supercharge $Q$ maps a charge-$r$ sector to the
+charge-$(r-3)$ sector, and
+\begin{equation}
+ H_r=Q_{r+3}Q_{r+3}^{\dagger}+Q_r^{\dagger}Q_r
+ \label{eq:syk-hodge-laplacian}
+\end{equation}
+is its Hodge Laplacian.  Its zero modes are harmonic representatives of
+$Q$-cohomology, $\ker Q_r/\operatorname{im}Q_{r+3}$, and hence are annihilated
+by both $Q$ and $Q^\dagger$ \cite{fu2017susy}.  Exact degeneracy follows from
+nilpotency and positivity, not from spatial locality.  This is the finite
+supersymmetric sector in which non-Abelian Berry curvature was previously
+proposed as a chaos probe \cite{chen2026}.
+
+Let $\Pi_-=Q_{r+3}Q_{r+3}^{\dagger}H_r^+$ and
+$\Pi_+=Q_r^{\dagger}Q_rH_r^+$ be the orthogonal projectors onto the exact and
+coexact positive-energy subspaces, where $H_r^+$ is the Moore--Penrose inverse
+of $H_r$ on the complement of its kernel.  Differentiating the two Hodge terms
+then separates the response into $X_a^-=\Pi_-X_a$ and
+$X_a^+=\Pi_+X_a$,
+\begin{equation}
+ X_a=X_a^{-}\oplus X_a^{+},
+ \qquad
+ \langle X_a^{-},X_b^{+}\rangle_{\mathrm{HS}}=0.
+ \label{eq:hodge-response-split}
+\end{equation}
+Here the direct resolvent response and the sum of the two branch responses
+are checked independently.  The branch weights, channel covariances, and
+left/right covariance spectra can therefore be used to build a
+Hodge-resolved Gaussian comparison without opening the fourth-order outcome.
+This branch structure is physical information imposed by the complex; it
+should not be discarded by replacing the full response with an isotropic
+rectangular matrix.
+
+The registered $N=14$ test used a complete independent disorder realization
+as the uncertainty unit.  The adjacent- and central-charge sparse panels have
+observed median historical residuals
+\SusySykNFourteenMedianOne\ and
+\SusySykNFourteenMedianTwo.  Before those outcomes were unsealed, the null
+distribution was generated from the stored two-point Hodge signatures.  The
+held-out medians lie outside both the collapsed and Hodge-resolved prediction
+intervals.  This rejects the frozen separable proper-complex Gaussian null
+for the registered response statistic.
+
+The qualifier ``separable'' is essential.  That null matches marginal
+channel, target, external, and exact/coexact covariance spectra, but it is not
+the complete entrywise covariance $C$ together with pseudocovariance $\Pi$.
+Consequently, its rejection can arise from a connected fourth cumulant or
+from nonseparable two-point structure omitted by the null.  The random-SYK
+cell for centered $R_4^{\mathrm{full}}$ remains not tested.  We do not use the
+historical residual to claim complete-covariance non-Gaussianity, and we do
+not pool its independent-realization bootstrap with the fixed-base panel
+jackknife used for Moore--Read.
+
+This separation also identifies the useful next test.  Random couplings
+supply genuine Hamiltonian-to-Hamiltonian sampling, whereas the Moore--Read
+calculation supplies an exact moving-kernel path at one parent.  A common
+claim would require the same centered full-covariance observable and a
+matched tangent prescription in both ensembles.  Those cells are absent from
+the present registry.
+
+The Hodge split also changes the meaning of apparent isotropy.  Unitary
+rotations within the exact image and within the coexact image may leave all
+stored covariance spectra invariant while changing correlations between the
+two embedded subspaces and the protected fiber.  A collapsed null that keeps
+only the total left and right spectra forgets even more information.  The
+sealed v7 comparison was designed to ask whether these progressively richer
+separable nulls predicted the held-out median.  Their failure is reproducible
+evidence for covariance memory beyond those summaries; it is deliberately
+not relabeled as the complete cumulant of Sec.~\ref{sec:statistics}.
+
+\subsection{Local lattice cohomology}
+
+The lattice construction retains the Hodge mechanism but changes both
+locality and sampling.  On a union of $m$ six-site cycles, the nilpotent
+supercharge acts on the independence complex, and its harmonic sector has
+ranks $D=\LatticeSusyMOneRank$, \LatticeSusyMTwoRank, and
+\LatticeSusyMThreeRank\ for $m=1,2,3$.  The corresponding positive gaps are
+\LatticeSusyMOneExternalGap, \LatticeSusyMTwoExternalGap, and
+\LatticeSusyMThreeExternalGap.  Local changes of the site couplings move the
+harmonic projector.  The response again splits into exact and coexact
+branches; their measured local-panel balance factors are
+\LatticeSusyMOneHodgeBalance, \LatticeSusyMTwoHodgeBalance, and
+\LatticeSusyMThreeHodgeBalance.  Thus the local family is neither a
+fixed-projector control nor a single-branch rectangular ensemble.
+
+Panel (a) shows the historical two-pairing residual for local and isotropic
+tangents.  The local values
+\LatticeSusyMOneLocalTwoPairRFour,
+\LatticeSusyMTwoLocalTwoPairRFour, and
+\LatticeSusyMThreeLocalTwoPairRFour\ differ from their isotropic counterparts
+\LatticeSusyMOneIsotropicTwoPairRFour,
+\LatticeSusyMTwoIsotropicTwoPairRFour, and
+\LatticeSusyMThreeIsotropicTwoPairRFour.  These finite-size differences show
+that the accessible tangent class matters.  As in Moore--Read, however, the
+old $R_4^{2\mathrm{pair}}$ numbers do not answer the complete-covariance
+question.  The v12 raw estimates are likewise uncentered and are not used for
+a claim.
+
+The corrected calculation uses the exact population mean obtained by
+enumerating the registered ordered local-coordinate marginals.  This mean is
+nontrivial because the discrete local-tangent construction is not symmetric
+entry by entry.  After population centering, the same frozen 12/12 split,
+training-only channel whitening, three-pairing U-statistic, Student-$t$
+reference, and five-case Bonferroni family are used.  This alignment makes the
+Moore--Read and lattice rows comparable at the level of the estimator, but it
+does not turn the lattice panels into independent graph realizations.
+
+Disjoint cycle components make the algebraic rank sequence exactly auditable,
+but they also impose a tensor-product ancestry on the cohomology.  Increasing
+$m$ simultaneously adds degrees of freedom and repeats a local building
+block.  The sequence is therefore useful for checking how a known branch
+structure enters the response and the estimator; it is not a connected-
+lattice thermodynamic sequence.  A claim of locality-driven universality
+would require connected graphs, a matched local tangent density, and an
+independent ensemble at each size.  None of those missing conditions can be
+replaced by treating the many coordinate pairs at one graph as independent
+Hamiltonians.
+
+The primary directional estimates are
+\LatticeSusyMOneFullRFourDirectionalEstimate,
+\LatticeSusyMTwoFullRFourDirectionalEstimate, and
+\LatticeSusyMThreeFullRFourDirectionalEstimate.  Their familywise lower
+bounds are \LatticeSusyMOneFullRFourFamilywiseLower,
+\LatticeSusyMTwoFullRFourFamilywiseLower, and
+\LatticeSusyMThreeFullRFourFamilywiseLower.  None of the three registered
+positive-direction gates passes; failure of the positive-direction gate does
+not prove Gaussianity.  It supplies neither an equivalence test nor a
+two-sided upper bound on every component of $\mathcal K$.  A negative point
+estimate in a preselected direction may coexist with a nonzero cumulant in a
+different direction, and a small finite panel family may lack power.  The
+reverse split is descriptive here as well.
+
+The appropriate conclusion is therefore asymmetric.  Local lattice
+cohomology supports an exact, moving, branch-reducible projector with
+nontrivial response, but the registered positive full-cumulant contraction is
+not resolved for $D=\LatticeSusyMOneRank,
+\LatticeSusyMTwoRank,\LatticeSusyMThreeRank$.  Moore--Read resolves that
+contraction only in the displayed rank-\MooreReadNSixRank\ case.  Random
+supercharge SYK rejects a narrower separable null using independent disorder
+realizations, while its complete entrywise-covariance cell remains open.
+These are three different statements, not three measurements of a universal
+number.

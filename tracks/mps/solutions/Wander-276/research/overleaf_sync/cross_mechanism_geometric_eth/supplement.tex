@@ -1,0 +1,107 @@
+\documentclass[aps,prb,onecolumn,superscriptaddress,longbibliography,floatfix]{revtex4-2}
+
+\usepackage{amsmath,amssymb,bm}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{microtype}
+\usepackage{xcolor}
+\usepackage{placeins}
+\usepackage[colorlinks=true,citecolor=blue!55!black,linkcolor=blue!55!black,urlcolor=blue!55!black]{hyperref}
+\hypersetup{pdftitle={Supplement: Mechanism-Dependent Geometric ETH under Exact Degeneracy},pdfauthor={Thomas J. Wang; OKongOYangO}}
+
+\input{generated/results_v12.tex}
+\newcommand{\Tr}{\operatorname{Tr}}
+\newcommand{\cQ}{\mathcal Q}
+\newcommand{\cK}{\mathcal K}
+
+\begin{document}
+
+\title{Supplemental Material for ``Mechanism-Dependent Geometric ETH under Exact Degeneracy''}
+
+\author{Thomas J. Wang}
+\email{WangTheoPhys@outlook.com}
+\affiliation{Tsinghua University, Beijing 100084, China}
+
+\author{OKongOYangO}
+\affiliation{The Pennsylvania State University, University Park, Pennsylvania 16802, USA}
+
+\date{\today}
+
+\maketitle
+
+\section{Gauge-covariant response}
+\label{app:response}
+
+Let \(P\) project onto the exact zero-energy fiber and \(\bar P=1-P\). Differentiating \(HP=0\) and projecting onto \(\bar P\) gives \(\bar P(\partial_aP)P=-\bar PH^+\bar P(\partial_aH)P\), where \(H^+\) is the inverse on the positive-energy complement. With \(X_a=\bar PH^+\bar P(\partial_aH)P\), the sign disappears from every quadratic response. In a local frame of the fiber,
+\begin{equation}
+\cQ_{ab}=X_a^\dagger X_b,\qquad g_{ab}=\frac{\cQ_{ab}+\cQ_{ba}}{2},\qquad F_{ab}=i(\cQ_{ab}-\cQ_{ba}).
+\label{eq:supp-qgt}
+\end{equation}
+If the fiber frame changes by \(U\), then \(X_a\mapsto X_aU^\dagger\), so \(\cQ_{ab}\mapsto U\cQ_{ab}U^\dagger\). Traced products and eigenvalues are therefore gauge invariant.
+
+The response convention uses the complete positive complement. A numerically small internal bandwidth, by itself, would not suffice: every opened kernel also passes its expected-rank, residual, orthonormality, and positive-gap checks before any fourth-order statistic is evaluated.
+
+\section{Moore--Read coherent-state parent}
+\label{app:mr}
+
+For \(N\) bosons in \(N_\phi\) lowest-Landau-level orbitals, define one coherent annihilation operator \(b_x=\sum_j\phi_{xj}b_j\) at each point of an \(N_\phi\times N_\phi\) magnetic-translation orbit. The constraint matrix stacks \(C_x=b_x^3/\sqrt{3!}\) from the \(N\)-particle basis to the \((N-3)\)-particle basis. The parent is stored as \(H=C^\dagger C\), so its zero modes are the right kernel of the sparse factor. The full-column-rank coherent frame resolves the translational three-body constraint while avoiding assembly of a dense many-body Hamiltonian.
+
+The opened fixed-four-quasihole cases have basis dimensions \(\MRNFourBasis\) and \(\MRNSixBasis\), exact zero-mode ranks \(\MRNFourRank\) and \(\MRNSixRank\), and first positive eigenvalues \(\MRNFourGap\) and \(\MRNSixGap\). The observed ranks agree with the cyclic \((2,2)\)-admissible root count associated with the bosonic Moore--Read parent \cite{mooreread1991,zhang2023parent}. Every local panel contains normalized guiding-center-density tangents, and every response vector is checked against the factorized linear equation before inclusion.
+
+The opened panel medians are \(R_4=\MRNFourRFour\) and \(\MRNSixRFour\). These are descriptive within-panel residuals. The inferential result instead uses all \PanelPairCount\ unordered pairs of the \PanelCount\ panels, as described in Sec.~\ref{app:statistics}.
+
+\input{generated/mechanism_table_v12.tex}
+\FloatBarrier
+
+\section{Lattice supersymmetry and the Hodge split}
+\label{app:lattice-susy}
+
+On a graph \(G\), the constrained creation operator \(d_i^\dagger=c_i^\dagger\prod_{j\sim i}(1-n_j)\) defines \(Q=\sum_i z_i d_i^\dagger\). Fermionic signs and the hard-core constraint give \(Q^2=0\). In fixed charge \(f\),
+\begin{equation}
+H_f=Q_{f-1}Q_{f-1}^\dagger+Q_f^\dagger Q_f,
+\label{eq:hodge}
+\end{equation}
+so the zero modes represent \(Q\)-cohomology classes \cite{fendley2003lattice,huijse2010cohomology}. The positive complement splits orthogonally into exact and coexact images. Differentiating both terms in Eq.~\eqref{eq:hodge} supplies two response branches; their direct sum is checked against the full pseudoinverse response.
+
+For a disjoint union of \(m=\LatticeCycleSizes\) six-site cycles in charge \(2m\), the fixed-charge basis dimensions are \(\LatticeBasisDims\) and the cohomology ranks are \(\LatticeRanks\). Both exact and coexact branches are nonzero. The registered directional estimates are \(\LatticeCumulants\), with one-sided \(p\)-values \(\LatticePValues\). The corresponding full normalized cumulant norms are \(\LatticeCumulantNorms\). Thus the negative gate concerns one frozen direction and does not imply a vanishing tensor.
+
+Disjoint cycles were chosen because the cohomology rank and Hodge decomposition can be audited exactly while the fiber dimension grows. They do not test spatial mixing on a connected lattice. A connected graph family is required before claiming a local supersymmetric thermodynamic class.
+
+\section{X-cube controls}
+\label{app:xcube}
+
+The periodic X-cube stabilizer table has \(3L^3\) edge qubits. Binary symplectic elimination gives stabilizer rank \(3L^3-(6L-3)\), hence ground-space dimension \(2^{6L-3}\) for every opened \(L=\XCubeLengths\). Positive coefficient changes in a fixed commuting stabilizer Hamiltonian preserve every common eigenspace; consequently \(\partial_aP=0\), \(g=0\), and \(F=0\).
+
+For the moving-projector control, choose a vertex-plane stabilizer \(S\) containing edge \(e\) and Hermitian generators \(G=X_e/2\), \(K=iX_eS/2\). Both Pauli operators are detectable, their product differs from \(S\) by a phase, and they anticommute. With \(P(\lambda,\mu)=e^{-i\lambda G}e^{-i\mu K}P e^{i\mu K}e^{i\lambda G}\), direct Pauli algebra gives
+\begin{equation}
+iP[\partial_\lambda P,\partial_\mu P]P=-\frac{1}{2}P.
+\label{eq:supp-xcube}
+\end{equation}
+The curvature therefore has one distinct eigenvalue with multiplicity \(2^{6L-3}\) and connected variance \(\XCubeConnectedVariance\). A two-qubit dense realization verifies both Eq.~\eqref{eq:supp-xcube} and exact isospectrality to machine precision; the production sizes use only the binary-symplectic proof and never allocate the exponentially large ground space.
+
+\section{Complete covariance and conditional inference}
+\label{app:statistics}
+
+Let \(r=1,\ldots,R\) label tangent panels at one fixed parent Hamiltonian, with \(R=\PanelCount\). After whitening the tangent-label covariance, define \(T^{(r)}_{abcd}=D^{-1}\Tr(X_a^{(r)\dagger}X_b^{(r)}X_c^{(r)\dagger}X_d^{(r)})\). For each distinct ordered pair \(r\ne s\), the code evaluates all three complex Wick contractions in a common ambient Hilbert space. Their average is subtracted from \(R^{-1}\sum_rT^{(r)}\) to obtain \(\widehat\cK\). The implementation uses every one of the \(R(R-1)/2=\PanelPairCount\) unordered pairs and explicitly symmetrizes the two orders.
+
+The registered scalar is the real projection of \(\widehat\cK\) onto the unit tensor proportional to \(\delta_{ab}\delta_{cd}+\delta_{ad}\delta_{cb}\), normalized by the Frobenius norm of the complete Wick tensor. Delete-one cumulants produce jackknife pseudovalues and their standard error. The Moore--Read values have \(z=\MRNFourZ\) and \(\MRNSixZ\), with one-sided \(p=\MRNFourP\) and \(\MRNSixP\). An independently generated augmented-covariance Gaussian oracle agrees with the factorized three-pairing implementation to relative error below the registered numerical tolerance.
+
+Panels are deterministically seeded samples from a local tangent construction while the Hamiltonian and protected projector remain fixed. The reported \(p\)-values are therefore conditional on treating those panels as exchangeable. They quantify reproducibility over that panel family; they do not estimate disorder-to-disorder or Hamiltonian-to-Hamiltonian uncertainty. No asymptotic statement uses these \(p\)-values.
+
+\section{Moore--Read production boundary}
+\label{app:resources}
+
+Exact combinatorics give the staged \(N=8\), \(N_\phi=10\) case a basis dimension \(\MRNEightBasis\), zero-mode rank \(\MRNEightRank\), and \(\MRNEightConstraintNNZ\) nonzero constraint entries. One factorized parent action requires an estimated \(\MRNEightActionProducts\) nonzero scalar products, placing this case inside the registered benchmark budget but not predicting its wall time. It remains a pending production calculation rather than an opened scientific result.
+
+At \(N=10\), \(N_\phi=12\), the corresponding counts are basis dimension \(\MRNTenBasis\), rank \(\MRNTenRank\), \(\MRNTenConstraintNNZ\) constraint entries, and \(\MRNTenActionProducts\) nonzero scalar products per parent action. The final sparse-memory lower bound fits the registered node allocation, but the per-action work exceeds the frozen compute gate. This size therefore requires a solver reformulation rather than a larger allocation of the same kernel code.
+
+\section{Claim boundary and reproducibility}
+\label{app:claims}
+
+The established statements are: exact ranks and gaps for the opened Moore--Read and lattice-SUSY cases; exact X-cube degeneracy formulas and two structured geometric controls; positive covariance-complete Moore--Read panel cumulants at both opened sizes; and failure of the same positive direction in all three opened lattice-SUSY sizes. The calculations do not establish asymptotic Geometric ETH, cross-mechanism universality, independent-Hamiltonian covariance inference for the new models, or a Moore--Read \(N=8\) result.
+
+Every number in this supplement is generated from compact JSON artifacts by the manuscript-asset script. The source manifest binds the inference, complete-covariance, figure, and resource-estimate hashes to the generated TeX and copied vector figure. The delivery verifier rejects a changed input, mismatched branch, incomplete PDF, nonidentical archive, or LaTeX log containing unresolved references or layout overflow.
+
+\bibliography{references}
+
+\end{document}

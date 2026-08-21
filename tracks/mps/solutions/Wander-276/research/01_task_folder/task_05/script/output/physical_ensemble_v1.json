@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "version": "v1",
+  "generated_utc": "2026-07-28T08:33:44.010905+00:00",
+  "physical_case": {
+    "N": 3,
+    "n": 10,
+    "D": 50,
+    "M": 170
+  },
+  "sample_count": 20000,
+  "seed": 20260728110,
+  "seed_blocks": 8,
+  "split": {
+    "train": 12000,
+    "validation": 4000,
+    "test": 4000,
+    "split_seed": 20260728111
+  },
+  "parent": {
+    "kernel_bandwidth": 5.782554623436307e-16,
+    "external_gap": 0.10667223401027637
+  },
+  "jacobi_parameters": {
+    "interior_dimension": 50,
+    "exponent": 120,
+    "plus_atoms": 0,
+    "minus_atoms": 0
+  },
+  "observed_exact_atoms": 0,
+  "checks": {
+    "registered_rank_is_50": true,
+    "parent_kernel_exact": true,
+    "parent_gap_open": true,
+    "all_active_ranks_are_full": true,
+    "all_curvature_ranks_are_full": true,
+    "normalized_spectra_bounded": true,
+    "no_exact_atoms": true,
+    "split_complete_and_disjoint": true,
+    "all_seed_blocks_nonempty": true
+  },
+  "all_checks_pass": true,
+  "runtime_seconds": 60.13297541701468,
+  "environment": {
+    "python": "3.12.11",
+    "numpy": "2.3.5",
+    "platform": "macOS-15.6-arm64-arm-64bit"
+  }
+}

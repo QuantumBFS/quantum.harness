@@ -1,0 +1,302 @@
+{
+  "all_checks_pass": true,
+  "claim_status": "provisional_opened_cross_mechanism_result",
+  "complete_covariance_missing": [
+    "laughlin",
+    "susy_syk"
+  ],
+  "complete_covariance_source": {
+    "path": "output/cross_complete_covariance_v12.json",
+    "sha256": "9f5357061d9281a25483c4315da3a09c77762091e1c6754c59a8880ec16fe0e6"
+  },
+  "established": [
+    "exact degeneracy and projector-motion audits pass in all opened models",
+    "X-cube coefficient reweighting has exactly zero geometry",
+    "X-cube local isospectral transport has scalar curvature and zero connected variance",
+    "Moore--Read N=4 and N=6 have positive fixed-direction complete-covariance panel cumulants",
+    "lattice-SUSY complete-covariance panel cumulants do not pass the fixed positive-direction gate at m=1,2,3"
+  ],
+  "generated_utc": "2026-08-15T23:39:11.058996+00:00",
+  "models": {
+    "lattice_susy": {
+      "cases": [
+        {
+          "external_gap": 0.17454072637070503,
+          "fiber_rank": 2,
+          "hodge_balance_local": 0.660962614339643,
+          "isotropic_R4": 0.6064442251287722,
+          "local_R4": 0.5381949192469915,
+          "size": 1
+        },
+        {
+          "external_gap": 0.30663782333892153,
+          "fiber_rank": 4,
+          "hodge_balance_local": 0.5054455268869047,
+          "isotropic_R4": 0.45406292123817765,
+          "local_R4": 0.435534038668057,
+          "size": 2
+        },
+        {
+          "external_gap": 0.1461975068655602,
+          "fiber_rank": 8,
+          "hodge_balance_local": 0.2458391144128959,
+          "isotropic_R4": 0.35365135093945493,
+          "local_R4": 0.41910381251004536,
+          "size": 3
+        }
+      ],
+      "checks_pass": true,
+      "complete_covariance": {
+        "lattice_susy_m1": {
+          "ambient_dimension": 9,
+          "checks": {
+            "complete_unordered_pair_grid": true,
+            "finite_complete_cumulant": true,
+            "nonzero_jackknife_variance": true,
+            "nonzero_wick_normalizer": true,
+            "oracle_agreement": true,
+            "three_wick_pairings": true
+          },
+          "directional_estimate": -0.16404913522596132,
+          "fiber_rank": 2,
+          "label_count": 2,
+          "normalized_cumulant_norm": 0.25622024849854025,
+          "one_sided_interval_low": -0.30250973477262294,
+          "one_sided_p_value": 0.9743424132741645,
+          "oracle_relative_error": 1.1436360895360203e-15,
+          "pairing_count": 3,
+          "positive_directional_gate": false,
+          "realization_count": 24,
+          "standard_error": 0.08417806744499255,
+          "unordered_pair_count": 276,
+          "z_score": -1.948834657354919
+        },
+        "lattice_susy_m2": {
+          "ambient_dimension": 105,
+          "checks": {
+            "complete_unordered_pair_grid": true,
+            "finite_complete_cumulant": true,
+            "nonzero_jackknife_variance": true,
+            "nonzero_wick_normalizer": true,
+            "oracle_agreement": true,
+            "three_wick_pairings": true
+          },
+          "directional_estimate": -0.14796081635841685,
+          "fiber_rank": 4,
+          "label_count": 2,
+          "normalized_cumulant_norm": 0.20521262553225936,
+          "one_sided_interval_low": -0.22342568109572614,
+          "one_sided_p_value": 0.9993701278122527,
+          "oracle_relative_error": null,
+          "pairing_count": 3,
+          "positive_directional_gate": false,
+          "realization_count": 24,
+          "standard_error": 0.04587938008634475,
+          "unordered_pair_count": 276,
+          "z_score": -3.224995980328317
+        },
+        "lattice_susy_m3": {
+          "ambient_dimension": 1389,
+          "checks": {
+            "complete_unordered_pair_grid": true,
+            "finite_complete_cumulant": true,
+            "nonzero_jackknife_variance": true,
+            "nonzero_wick_normalizer": true,
+            "oracle_agreement": true,
+            "three_wick_pairings": true
+          },
+          "directional_estimate": 0.16865522344590225,
+          "fiber_rank": 8,
+          "label_count": 2,
+          "normalized_cumulant_norm": 0.29060309173470866,
+          "one_sided_interval_low": -0.01952963773431496,
+          "one_sided_p_value": 0.0702202876002431,
+          "oracle_relative_error": null,
+          "pairing_count": 3,
+          "positive_directional_gate": false,
+          "realization_count": 24,
+          "standard_error": 0.11440827201688095,
+          "unordered_pair_count": 276,
+          "z_score": 1.4741523534331256
+        }
+      },
+      "complete_covariance_computed": true,
+      "complete_covariance_gate": false,
+      "mechanism": "independence_complex_cohomology",
+      "opened_complete": true,
+      "production_complete": false,
+      "response_convention": "Q(H-E0)^-1Q(dH)P",
+      "role": "stochastic_geometry",
+      "source": {
+        "path": "output/lattice_susy_v10/lattice_susy_pilot_v10.json",
+        "sha256": "1a5705686a2f37f5b06216d43d8539cf15c9d6bcb92feba74e3030661d5886e8"
+      }
+    },
+    "laughlin": {
+      "checks_pass": true,
+      "complete_covariance_computed": false,
+      "complete_covariance_gate": false,
+      "connected_excess_by_size": {
+        "3": 0.19378584070307214,
+        "4": 0.14929835119161364,
+        "5": 0.10502782796991439
+      },
+      "mechanism": "two_body_FQH_parent",
+      "opened_complete": true,
+      "production_complete": true,
+      "reported_branch": "parent_dependent_geometry",
+      "response_convention": "Q(H-E0)^-1Q(dH)P",
+      "role": "stochastic_geometry",
+      "source": {
+        "path": "output/continuum_lll_replication_inference_v6.json",
+        "sha256": "21ac615ff44ddc466a1feb5c3d6f411bde9c3d34f06fb9dc570b6e77766193b6"
+      }
+    },
+    "moore_read": {
+      "cases": [
+        {
+          "external_gap": 1.6728499771781185,
+          "fiber_rank": 42,
+          "local_R4": [
+            0.5221788062401552,
+            0.48111541130555435
+          ],
+          "local_R4_median": 0.5016471087728548,
+          "size": 4,
+          "structured_R4": 0.5858437735465243
+        },
+        {
+          "external_gap": 1.5351550662956022,
+          "fiber_rank": 120,
+          "local_R4": [
+            0.3357624017269094,
+            0.28284124786403325
+          ],
+          "local_R4_median": 0.3093018247954713,
+          "size": 6,
+          "structured_R4": 0.39008828355082925
+        }
+      ],
+      "checks_pass": true,
+      "complete_covariance": {
+        "moore_read_N4": {
+          "ambient_dimension": 126,
+          "checks": {
+            "complete_unordered_pair_grid": true,
+            "finite_complete_cumulant": true,
+            "nonzero_jackknife_variance": true,
+            "nonzero_wick_normalizer": true,
+            "oracle_agreement": true,
+            "three_wick_pairings": true
+          },
+          "directional_estimate": 0.19087579458395687,
+          "fiber_rank": 42,
+          "label_count": 2,
+          "normalized_cumulant_norm": 0.22779717464406887,
+          "one_sided_interval_low": 0.1451999161808175,
+          "one_sided_p_value": 3.1276651234175277e-12,
+          "oracle_relative_error": null,
+          "pairing_count": 3,
+          "positive_directional_gate": true,
+          "realization_count": 24,
+          "standard_error": 0.027768962328759805,
+          "unordered_pair_count": 276,
+          "z_score": 6.8737100192710585
+        },
+        "moore_read_N6": {
+          "ambient_dimension": 1716,
+          "checks": {
+            "complete_unordered_pair_grid": true,
+            "finite_complete_cumulant": true,
+            "nonzero_jackknife_variance": true,
+            "nonzero_wick_normalizer": true,
+            "oracle_agreement": true,
+            "three_wick_pairings": true
+          },
+          "directional_estimate": 0.1936047681092922,
+          "fiber_rank": 120,
+          "label_count": 2,
+          "normalized_cumulant_norm": 0.2510935247935431,
+          "one_sided_interval_low": 0.1527653132018437,
+          "one_sided_p_value": 3.1536978480695536e-15,
+          "oracle_relative_error": null,
+          "pairing_count": 3,
+          "positive_directional_gate": true,
+          "realization_count": 24,
+          "standard_error": 0.024828625622535946,
+          "unordered_pair_count": 276,
+          "z_score": 7.797643375538472
+        }
+      },
+      "complete_covariance_computed": true,
+      "complete_covariance_gate": true,
+      "mechanism": "three_body_clustered_FQH_parent",
+      "opened_complete": true,
+      "production_complete": false,
+      "response_convention": "Q(H-E0)^-1Q(dH)P",
+      "role": "stochastic_geometry",
+      "source": {
+        "path": "output/moore_read_v9/moore_read_pilot_v9.json",
+        "sha256": "3024f210ca9995f57e21c9a84750a00db274b19eb63b7ee5227add45c451071e"
+      }
+    },
+    "susy_syk": {
+      "N14_observed_medians": [
+        0.3015287195325017,
+        0.3749925716126603
+      ],
+      "checks_pass": true,
+      "complete_covariance_computed": false,
+      "complete_covariance_gate": false,
+      "mechanism": "random_supercharge_cohomology",
+      "opened_complete": true,
+      "production_complete": true,
+      "reported_branch": "cohomological_non_gaussian_class",
+      "response_convention": "Q(H-E0)^-1Q(dH)P",
+      "role": "stochastic_geometry",
+      "source": {
+        "path": "output/susy_hodge_v7_N14_inference.json",
+        "sha256": "177643e07fc6cf210362fc1077070bd1f0ba316b6805042a626de3f96c55a627"
+      }
+    },
+    "xcube": {
+      "checks_pass": true,
+      "coefficient_curvature": 0.0,
+      "complete_covariance_computed": "not_applicable_exact_control",
+      "complete_covariance_gate": "not_applicable_exact_control",
+      "mechanism": "commuting_projector_subsystem_code",
+      "opened_complete": true,
+      "production_complete": true,
+      "response_convention": "Q(H-E0)^-1Q(dH)P",
+      "role": "structured_control",
+      "source": {
+        "path": "output/xcube_v11/xcube_geometric_control_v11.json",
+        "sha256": "c75f8a27b263d71aaf1535ed0ab54f248c67335836c3543e1b95642d1ee3cc84"
+      },
+      "transport_connected_variance": 0.0,
+      "transport_curvature_eigenvalue": -0.5
+    }
+  },
+  "not_established": [
+    "asymptotic Geometric ETH",
+    "cross-mechanism universality of a scaling law",
+    "complete-covariance inference from independent Hamiltonian or disorder realizations for Moore--Read or lattice SUSY",
+    "Moore--Read N=8 production result"
+  ],
+  "null_parameters_refit": false,
+  "observable": "covariance_whitened_connected_four_channel_response",
+  "production_missing": [
+    "moore_read",
+    "lattice_susy"
+  ],
+  "prospective_cases_opened": false,
+  "registered_branches": [
+    "cross_model_geometric_eth",
+    "domain_limited_geometric_eth",
+    "parent_dependent_geometry",
+    "no_geometric_eth_for_registered_tangents"
+  ],
+  "response_convention": "Q(H-E0)^-1Q(dH)P",
+  "selected_branch": "domain_limited_geometric_eth",
+  "version": "v12"
+}

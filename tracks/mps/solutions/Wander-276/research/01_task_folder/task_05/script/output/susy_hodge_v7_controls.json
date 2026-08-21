@@ -1,0 +1,87 @@
+{
+  "checks": {
+    "N6_curvature_atoms": true,
+    "N6_diagonal_multiplicities": true,
+    "N6_off_diagonal_multiplicities": true,
+    "N8_decomposable_rank": true,
+    "N8_open_gap": true,
+    "one_sided_exact_regression": true
+  },
+  "decomposable_N6": {
+    "alpha": 1.7,
+    "bps_rank": 18,
+    "diagonal_eigenvalues": [
+      -0.34602076124567477,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.34602076124567477
+    ],
+    "diagonal_max_atom_error": 0.0,
+    "diagonal_multiplicities": {
+      "negative": 1,
+      "positive": 1,
+      "zero": 16
+    },
+    "gap": 2.8899999999999997,
+    "off_diagonal_eigenvalues": [
+      -0.34602076124567477,
+      -0.34602076124567477,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.34602076124567477,
+      0.34602076124567477
+    ],
+    "off_diagonal_max_atom_error": 0.0,
+    "off_diagonal_multiplicities": {
+      "negative": 2,
+      "positive": 2,
+      "zero": 14
+    }
+  },
+  "decomposable_N8": {
+    "bps_rank": 60,
+    "expected_rank": 60,
+    "gap": 2.8899999999999997,
+    "kernel_residual": 0.0
+  },
+  "one_sided_regression": {
+    "max_absolute_difference": 0.0,
+    "samples": 32,
+    "seed": 211
+  },
+  "passed": true,
+  "sources": {
+    "generate_susy_hodge_controls_v7.py": "0ef460da3541e242af5ed569cec6d2ef5cf54cd360e847e7bd3172447dac1d82",
+    "lgeth/hodge_response.py": "dad431f6a3873b2cb5542c07efd9b9c29f96f0375947f81947998783f362469e",
+    "lgeth/hodge_wick.py": "f80fc96fa1408c0df2e15d4f804bac17feef9c59e9fbc511dd5052ef591e04c7",
+    "lgeth/susy_cohomology.py": "4b8c6d62f45a7de1a696fcba7228a575cf1745ab82968732ef3d6238bbf9672a",
+    "lgeth/wick_channels.py": "e1faedf5c98f660756e077445a88d05013bc6810f5b0f69aa8fc0dc6fe13469b"
+  },
+  "version": "v7"
+}

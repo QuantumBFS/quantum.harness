@@ -1,0 +1,53 @@
+\section{Matrix-element geometry and fixed-Chern holonomy}
+\label{sec:matrix-topology}
+
+The curvature spectrum establishes a geometric correlation hierarchy. We now resolve its matrix-element mechanism and its relation to the topology of the full bundle while preserving the exact zero modes.
+
+\subsection{A gauge-invariant matrix-element test}
+
+Fixed local operators supply an independent test of Gaussian response statistics, because Gaussian tangent coefficients would make \(X[V]\) Gaussian by linearity. We use eight simple mean-zero local density operators in each panel and form the resolvent-dressed maps \(X_\mu=R_QQV_\mu P\). After whitening their measured label covariance, the primary observable is the invariant tensor in Eq.~\eqref{eq:invariant-four-channel-tensor}. Its two covariance-matched Gaussian contractions are derived in Appendix~\ref{app:matrix-topology}; generalized ETH likewise elevates higher matrix-element correlations beyond entrywise statistics \cite{foinikurchan2019,pappalardi2022}.
+
+The finite-size reference is a distribution of \(R_4\) at matched \((D,M,m)\). For every physical panel we generate Gaussian response tensors with the measured target and external covariance spectra, whiten them by the same algorithm, and compare the normalized residual in Eq.~\eqref{eq:wick-residual-appendix}. Complete panels are the resampling units. Independent target- and complement-frame rotations change the raw entries while \(T\), \(T^{\rm Wick}\), and \(R_4\) remain invariant.
+
+\begin{figure*}[t]
+ \includegraphics[width=\textwidth]{figure_6_wick_factorization_v3.pdf}
+ \caption{\textbf{Gauge-invariant four-channel Wick test on a genuine many-body sequence.} (a) Fixed-two-quasihole manifolds \((N,n_\phi,D)=(3,8,16),(4,10,25),(5,12,36)\), including the external gap and full Hilbert-space dimension. (b) Physical local-density and structured Fourier residuals against covariance-matched finite-\((D,M,m)\) Gaussian intervals. (c) The physical excess over the Gaussian median decreases with \(N\) and remains resolved at \(N=5\). (d) Measured target anisotropy and effective external dimension entering the two Wick coefficients. Intervals resample 24 complete operator panels or 2000 complete Gaussian tensors, with every matrix retained as one observation.}
+ \label{fig:wick-factorization}
+\end{figure*}
+
+Figure~\ref{fig:wick-factorization} uses the true sequence \(n_\phi=2N+2\). The Hilbert space reaches \(\LargestManyBodyDimension\) states and the zero-mode rank reaches \(D=\LargestManyBodyRank\). The median physical residual decreases from \(0.37093\) to \(0.24715\) to \(\LargestNRFour\), while the matched Gaussian median decreases from \(0.21708\) to \(0.14638\) to \(\LargestGaussianRFour\). At the largest size the physical excess is \(\LargestRFourExcess\), resolved relative to the Gaussian interval \([\LargestGaussianRFourLow,\LargestGaussianRFourHigh]\).
+
+\MatrixElementBranchText\ This selects the registered branch \texttt{\MatrixElementBranch}: progressive Gaussianization with a resolved connected operator-channel component. The \(N=3,4,5\) sequence supplies the finite-size baseline for an \(N=6\) scaling test.
+
+\subsection{A closed surface at fixed spectrum and Chern class}
+
+For the topology test, the parameter space is the complete twist torus \(T^2_{\theta_x,\theta_y}\). Starting from the physical projected-contact parent, define
+\begin{equation}
+ \begin{aligned}
+ \mathcal U_g(\theta)
+ &=e^{ig\sin\theta_xG_x}e^{ig\sin\theta_yG_y},\\
+ H_g(\theta)
+ &=\mathcal U_g(\theta)H_0(\theta)\mathcal U_g^\dagger(\theta),
+ \end{aligned}
+ \label{eq:main-isospectral-orbit}
+\end{equation}
+where \(G_x,G_y\) are deterministic nearest-neighbor Hermitian one-body generators. The bosonic lift is globally periodic. Hence the complete spectrum and gap are identical for every \(g\), and \(\mathcal U_g\) is a bundle isomorphism that preserves \(C_1\). Nevertheless the connection acquires the projected one-form in Eq.~\eqref{eq:connection-shift}, so non-Abelian Wilson holonomy may change.
+
+Polar-unitary links and plaquette products implement the lattice connection \cite{fukui2005}. We retain determinant topology separately from relative Wilson eigenphases. The circular adjacent-gap ratio is branch free, and the Wilson form factor
+\begin{equation}
+ K_W(k)=\frac{1}{D}\left|\Tr W^k\right|^2
+ \label{eq:wilson-form-factor}
+\end{equation}
+is invariant under a common phase. Both are compared with 10000 independently sampled CUE matrices at the same \(D\). Random local \(U(D)\) frame gauges provide dedicated invariance tests and remain separate from physical scrambling.
+
+\begin{figure*}[t]
+ \includegraphics[width=\textwidth]{figure_7_topological_holonomy_v3.pdf}
+ \caption{\textbf{Fixed Chern topology with deformed non-Abelian Wilson holonomy.} (a) The periodic ambient orbit leaves \(C_1=6,10\) and the external gaps fixed for \(N=3,4\). (b) For \(N=4\), accumulated branch-resolved determinant flux has winding ten at both endpoints, while its local distribution over the transverse twist changes. (c) Seed-cluster intervals of the Wilson circular gap ratio move significantly with \(g\) and occupy a structured range distinct from CUE; a commuting-generator path supplies the reference. (d) The \(N=4\) Wilson SFF at \(g=0\), \(g=1\), and the commuting endpoint compared with the independently sampled CUE mean and simultaneous band. Eight complete noncommuting generator seeds are resampled as clusters.}
+ \label{fig:topological-holonomy}
+\end{figure*}
+
+The accepted \(\TopologyPrimaryMesh\times\TopologyPrimaryMesh\) and \(\TopologyConvergenceMesh\times\TopologyConvergenceMesh\) meshes give \(C_1=\TopologyNThreeChern\) for \(N=3\) and \(C_1=\TopologyNFourChern\) for \(N=4\), with external gaps \(\TopologyNThreeGap\) and \(\TopologyNFourGap\). The minimum accepted determinant-branch margin is \(\TopologyMinimumBranchMargin\), the minimum neighboring-overlap singular value is \(\TopologyMinimumOverlap\), and the maximum random-gauge Wilson-phase error is \(\TopologyGaugeError\). A retained \(12\times12\) preflight identifies a branch alias for one \(N=4,g=1\) seed and motivates the converged \(16/20\) mesh pair.
+
+Under noncommuting generators, the seed-cluster confidence interval for the change in \(\langle r_W\rangle\) is \([\TopologyNThreeGapChangeLow,\TopologyNThreeGapChangeHigh]\) at \(N=3\) and \([\TopologyNFourGapChangeLow,\TopologyNFourGapChangeHigh]\) at \(N=4\). Both intervals are strictly positive. At \(g=1\), the medians \(\TopologyNThreeFinalGapRatio\) and \(\TopologyNFourFinalGapRatio\) occupy a structured range below the CUE medians \(\TopologyNThreeCUERatio\) and \(\TopologyNFourCUERatio\), accompanied by a distinct Wilson SFF.
+
+\TopologyBranchText\ The selected branch is therefore \texttt{\TopologyBranch}: fixed determinant-bundle topology coexists with tunably deformed, structured non-Abelian holonomy. Together with Fig.~\ref{fig:wick-factorization}, it identifies two complementary memories beyond curvature eigenvalue repulsion: a resolved four-channel cumulant and a structured Wilson sector distinct from CUE.

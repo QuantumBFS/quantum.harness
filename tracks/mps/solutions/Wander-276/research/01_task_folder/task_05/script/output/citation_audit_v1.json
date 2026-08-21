@@ -1,0 +1,1266 @@
+{
+  "all_checks_pass": true,
+  "article": "From Local Repulsion to Global Geometry: Large-Scale Tests of Geometric ETH",
+  "bibliography": "overleaf_sync/geometric_eth_large_scale/references.bib",
+  "bibliography_records": 35,
+  "errors": [],
+  "missing_bibliography_keys": [],
+  "records": [
+    {
+      "arxiv": null,
+      "author_matches": {
+        "Berry": true
+      },
+      "authors": [
+        "Berry"
+      ],
+      "checks": {
+        "authors": true,
+        "identifier_in_bib": true,
+        "title": true,
+        "year": true
+      },
+      "doi": "10.1098/rspa.1984.0023",
+      "key": "berry1984",
+      "observed": {
+        "authors": [
+          "Michael Berry"
+        ],
+        "identifier": "https://doi.org/10.1098/rspa.1984.0023",
+        "metadata_source": "OpenAlex DOI resolution",
+        "title": "Quantal phase factors accompanying adiabatic changes",
+        "year": 1984
+      },
+      "section": "geometric foundations",
+      "title": "Quantal phase factors accompanying adiabatic changes",
+      "title_similarity": 1.0,
+      "verified": true,
+      "year": 1984
+    },
+    {
+      "arxiv": null,
+      "author_matches": {
+        "Wilczek": true,
+        "Zee": true
+      },
+      "authors": [
+        "Wilczek",
+        "Zee"
+      ],
+      "checks": {
+        "authors": true,
+        "identifier_in_bib": true,
+        "title": true,
+        "year": true
+      },
+      "doi": "10.1103/PhysRevLett.52.2111",
+      "key": "wilczekzee1984",
+      "observed": {
+        "authors": [
+          "Frank Wilczek",
+          "A. Zee"
+        ],
+        "identifier": "https://doi.org/10.1103/physrevlett.52.2111",
+        "metadata_source": "OpenAlex DOI resolution",
+        "title": "Appearance of Gauge Structure in Simple Dynamical Systems",
+        "year": 1984
+      },
+      "section": "geometric foundations",
+      "title": "Appearance of gauge structure in simple dynamical systems",
+      "title_similarity": 1.0,
+      "verified": true,
+      "year": 1984
+    },
+    {
+      "arxiv": null,
+      "author_matches": {
+        "Provost": true,
+        "Vallee": true
+      },
+      "authors": [
+        "Provost",
+        "Vallee"
+      ],
+      "checks": {
+        "authors": true,
+        "identifier_in_bib": true,
+        "title": true,
+        "year": true
+      },
+      "doi": "10.1007/BF02193559",
+      "key": "provostvallee1980",
+      "observed": {
+        "authors": [
+          "Jean-Pierre Provost",
+          "G. Vall\u00e9e"
+        ],
+        "identifier": "https://doi.org/10.1007/bf02193559",
+        "metadata_source": "OpenAlex DOI resolution",
+        "title": "Riemannian structure on manifolds of quantum states",
+        "year": 1980
+      },
+      "section": "geometric foundations",
+      "title": "Riemannian structure on manifolds of quantum states",
+      "title_similarity": 1.0,
+      "verified": true,
+      "year": 1980
+    },
+    {
+      "arxiv": null,
+      "author_matches": {
+        "Kato": true
+      },
+      "authors": [
+        "Kato"
+      ],
+      "checks": {
+        "authors": true,
+        "identifier_in_bib": true,
+        "title": true,
+        "year": true
+      },
+      "doi": "10.1143/JPSJ.5.435",
+      "key": "kato1950",
+      "observed": {
+        "authors": [
+          "Tosio Kato"
+        ],
+        "identifier": "https://doi.org/10.1143/jpsj.5.435",
+        "metadata_source": "OpenAlex DOI resolution",
+        "title": "On the Adiabatic Theorem of Quantum Mechanics",
+        "year": 1950
+      },
+      "section": "isolated-projector formalism",
+      "title": "On the adiabatic theorem of quantum mechanics",
+      "title_similarity": 1.0,
+      "verified": true,
+      "year": 1950
+    },
+    {
+      "arxiv": "2604.23287",
+      "author_matches": {
+        "Chen": true,
+        "Colin-Ellerin": true,
+        "Mamroud": true,
+        "Papadodimas": true
+      },
+      "authors": [
+        "Chen",
+        "Colin-Ellerin",
+        "Mamroud",
+        "Papadodimas"
+      ],
+      "checks": {
+        "authors": true,
+        "identifier_in_bib": true,
+        "title": true,
+        "year": true
+      },
+      "doi": null,
+      "key": "chen2026",
+      "observed": {
+        "authors": [
+          "Yiming Chen",
+          "Sean Colin-Ellerin",
+          "Ohad Mamroud",
+          "Kyriakos Papadodimas"
+        ],
+        "identifier": "https://arxiv.org/abs/2604.23287",
+        "metadata_source": "arXiv Atom API",
+        "title": "Chaos of Berry curvature for BPS microstates",
+        "year": 2026
+      },
+      "section": "geometric chaos motivation",
+      "title": "Chaos of Berry curvature for BPS microstates",
+      "title_similarity": 1.0,
+      "verified": true,
+      "year": 2026
+    },
+    {
+      "arxiv": null,
+      "author_matches": {
+        "Laughlin": true
+      },
+      "authors": [
+        "Laughlin"
+      ],
+      "checks": {
+        "authors": true,
+        "identifier_in_bib": true,
+        "title": true,
+        "year": true
+      },
+      "doi": "10.1103/PhysRevLett.50.1395",
+      "key": "laughlin1983",
+      "observed": {
+        "authors": [
+          "R. B. Laughlin"
+        ],
+        "identifier": "https://doi.org/10.1103/physrevlett.50.1395",
+        "metadata_source": "OpenAlex DOI resolution",
+        "title": "Anomalous Quantum Hall Effect: An Incompressible Quantum Fluid with Fractionally Charged Excitations",
+        "year": 1983
+      },
+      "section": "Laughlin zero modes",
+      "title": "Anomalous quantum Hall effect: An incompressible quantum fluid with fractionally charged excitations",
+      "title_similarity": 1.0,
+      "verified": true,
+      "year": 1983
+    },
+    {
+      "arxiv": null,
+      "author_matches": {
+        "Haldane": true
+      },
+      "authors": [
+        "Haldane"
+      ],
+      "checks": {
+        "authors": true,
+        "identifier_in_bib": true,
+        "title": true,
+        "year": true
+      },
+      "doi": "10.1103/PhysRevLett.51.605",
+      "key": "haldane1983",
+      "observed": {
+        "authors": [
+          "F. D. M. Haldane"
+        ],
+        "identifier": "https://doi.org/10.1103/physrevlett.51.605",
+        "metadata_source": "OpenAlex DOI resolution",
+        "title": "Fractional Quantization of the Hall Effect: A Hierarchy of Incompressible Quantum Fluid States",
+        "year": 1983
+      },
+      "section": "fractional quantum Hall hierarchy",
+      "title": "Fractional quantization of the Hall effect: A hierarchy of incompressible quantum fluid states",
+      "title_similarity": 1.0,
+      "verified": true,
+      "year": 1983
+    },
+    {
+      "arxiv": null,
+      "author_matches": {
+        "Bernevig": true,
+        "Haldane": true
+      },
+      "authors": [
+        "Bernevig",
+        "Haldane"
+      ],
+      "checks": {
+        "authors": true,
+        "identifier_in_bib": true,
+        "title": true,
+        "year": true
+      },
+      "doi": "10.1103/PhysRevLett.100.246802",
+      "key": "bernevighaldane2008",
+      "observed": {
+        "authors": [
+          "B. Andrei Bernevig",
+          "F. D. M. Haldane"
+        ],
+        "identifier": "https://doi.org/10.1103/physrevlett.100.246802",
+        "metadata_source": "OpenAlex DOI resolution",
+        "title": "Model Fractional Quantum Hall States and Jack Polynomials",
+        "year": 2008
+      },
+      "section": "generalized exclusion rules",
+      "title": "Model fractional quantum Hall states and Jack polynomials",
+      "title_similarity": 1.0,
+      "verified": true,
+      "year": 2008
+    },
+    {
+      "arxiv": null,
+      "author_matches": {
+        "Chen": true,
+        "Seidel": true
+      },
+      "authors": [
+        "Chen",
+        "Seidel"
+      ],
+      "checks": {
+        "authors": true,
+        "identifier_in_bib": true,
+        "title": true,
+        "year": true
+      },
+      "doi": "10.1103/PhysRevB.91.085103",
+      "key": "chenseidel2015",
+      "observed": {
+        "authors": [
+          "Li Chen",
+          "Alexander Seidel"
+        ],
+        "identifier": "https://doi.org/10.1103/physrevb.91.085103",
+        "metadata_source": "OpenAlex DOI resolution",
+        "title": "Algebraic approach to the study of zero modes of Haldane pseudopotentials",
+        "year": 2015
+      },
+      "section": "zero-mode algebra",
+      "title": "Algebraic approach to the study of zero modes of Haldane pseudopotentials",
+      "title_similarity": 1.0,
+      "verified": true,
+      "year": 2015
+    },
+    {
+      "arxiv": null,
+      "author_matches": {
+        "Moore": true,
+        "Read": true
+      },
+      "authors": [
+        "Moore",
+        "Read"
+      ],
+      "checks": {
+        "authors": true,
+        "identifier_in_bib": true,
+        "title": true,
+        "year": true
+      },
+      "doi": "10.1016/0550-3213(91)90407-O",
+      "key": "mooreread1991",
+      "observed": {
+        "authors": [
+          "Gregory Moore",
+          "Nicholas Read"
+        ],
+        "identifier": "https://doi.org/10.1016/0550-3213(91)90407-o",
+        "metadata_source": "OpenAlex DOI resolution",
+        "title": "Nonabelions in the fractional quantum hall effect",
+        "year": 1991
+      },
+      "section": "higher clustering",
+      "title": "Nonabelions in the fractional quantum Hall effect",
+      "title_similarity": 1.0,
+      "verified": true,
+      "year": 1991
+    },
+    {
+      "arxiv": null,
+      "author_matches": {
+        "Read": true,
+        "Rezayi": true
+      },
+      "authors": [
+        "Read",
+        "Rezayi"
+      ],
+      "checks": {
+        "authors": true,
+        "identifier_in_bib": true,
+        "title": true,
+        "year": true
+      },
+      "doi": "10.1103/PhysRevB.59.8084",
+      "key": "readrezayi1999",
+      "observed": {
+        "authors": [
+          "N. Read",
+          "E. H. Rezayi"
+        ],
+        "identifier": "https://doi.org/10.1103/physrevb.59.8084",
+        "metadata_source": "OpenAlex DOI resolution",
+        "title": "Beyond paired quantum Hall states: Parafermions and incompressible states in the first excited Landau level",
+        "year": 1999
+      },
+      "section": "higher clustering",
+      "title": "Beyond paired quantum Hall states: Parafermions and incompressible states in the first excited Landau level",
+      "title_similarity": 1.0,
+      "verified": true,
+      "year": 1999
+    },
+    {
+      "arxiv": null,
+      "author_matches": {
+        "Chen": true,
+        "Fanmao Zhang": true,
+        "Matheus Schossler": true,
+        "Seidel": true
+      },
+      "authors": [
+        "Fanmao Zhang",
+        "Matheus Schossler",
+        "Seidel",
+        "Chen"
+      ],
+      "checks": {
+        "authors": true,
+        "identifier_in_bib": true,
+        "title": true,
+        "year": true
+      },
+      "doi": "10.1103/PhysRevB.108.075142",
+      "key": "zhang2023",
+      "observed": {
+        "authors": [
+          "Fanmao Zhang",
+          "Matheus Schossler",
+          "Alexander Seidel",
+          "Li Chen"
+        ],
+        "identifier": "https://doi.org/10.1103/physrevb.108.075142",
+        "metadata_source": "OpenAlex DOI resolution",
+        "title": "From frustration-free parent Hamiltonians to off-diagonal long-range order: Moore-Read and related states in second quantization",
+        "year": 2023
+      },
+      "section": "clustered root spaces",
+      "title": "From frustration-free parent Hamiltonians to off-diagonal long-range order: Moore-Read and related states in second quantization",
+      "title_similarity": 1.0,
+      "verified": true,
+      "year": 2023
+    },
+    {
+      "arxiv": null,
+      "author_matches": {
+        "Mazaheri": true,
+        "Nussinov": true,
+        "Ortiz": true,
+        "Seidel": true
+      },
+      "authors": [
+        "Mazaheri",
+        "Ortiz",
+        "Nussinov",
+        "Seidel"
+      ],
+      "checks": {
+        "authors": true,
+        "identifier_in_bib": true,
+        "title": true,
+        "year": true
+      },
+      "doi": "10.1103/PhysRevB.91.085115",
+      "key": "mazaheri2015",
+      "observed": {
+        "authors": [
+          "Tahereh Mazaheri",
+          "Gerardo Ort\u00edz",
+          "Zohar Nussinov",
+          "Alexander Seidel"
+        ],
+        "identifier": "https://doi.org/10.1103/physrevb.91.085115",
+        "metadata_source": "OpenAlex DOI resolution",
+        "title": "Zero modes, bosonization, and topological quantum order: The Laughlin state in second quantization",
+        "year": 2015
+      },
+      "section": "zero-mode algebra",
+      "title": "Zero modes, bosonization, and topological quantum order: The Laughlin state in second quantization",
+      "title_similarity": 1.0,
+      "verified": true,
+      "year": 2015
+    },
+    {
+      "arxiv": null,
+      "author_matches": {
+        "Kapit": true,
+        "Mueller": true
+      },
+      "authors": [
+        "Kapit",
+        "Mueller"
+      ],
+      "checks": {
+        "authors": true,
+        "identifier_in_bib": true,
+        "title": true,
+        "year": true
+      },
+      "doi": "10.1103/PhysRevLett.105.215303",
+      "key": "kapitmueller2010",
+      "observed": {
+        "authors": [
+          "Eliot Kapit",
+          "Erich J. Mueller"
+        ],
+        "identifier": "https://doi.org/10.1103/physrevlett.105.215303",
+        "metadata_source": "OpenAlex DOI resolution",
+        "title": "Exact Parent Hamiltonian for the Quantum Hall States in a Lattice",
+        "year": 2010
+      },
+      "section": "lattice validation",
+      "title": "Exact parent Hamiltonian for the quantum Hall states in a lattice",
+      "title_similarity": 1.0,
+      "verified": true,
+      "year": 2010
+    },
+    {
+      "arxiv": null,
+      "author_matches": {
+        "Lee": true,
+        "Qi": true
+      },
+      "authors": [
+        "Lee",
+        "Qi"
+      ],
+      "checks": {
+        "authors": true,
+        "identifier_in_bib": true,
+        "title": true,
+        "year": true
+      },
+      "doi": "10.1103/PhysRevB.90.085103",
+      "key": "leeqi2014",
+      "observed": {
+        "authors": [
+          "Ching Hua Lee",
+          "Xiao-Liang Qi"
+        ],
+        "identifier": "https://doi.org/10.1103/physrevb.90.085103",
+        "metadata_source": "OpenAlex DOI resolution",
+        "title": "Lattice construction of pseudopotential Hamiltonians for fractional Chern insulators",
+        "year": 2014
+      },
+      "section": "lattice pseudopotentials",
+      "title": "Lattice construction of pseudopotential Hamiltonians for fractional Chern insulators",
+      "title_similarity": 1.0,
+      "verified": true,
+      "year": 2014
+    },
+    {
+      "arxiv": null,
+      "author_matches": {
+        "Chamon": true,
+        "Mudry": true,
+        "Neupert": true,
+        "Santos": true
+      },
+      "authors": [
+        "Neupert",
+        "Santos",
+        "Chamon",
+        "Mudry"
+      ],
+      "checks": {
+        "authors": true,
+        "identifier_in_bib": true,
+        "title": true,
+        "year": true
+      },
+      "doi": "10.1103/PhysRevLett.106.236804",
+      "key": "neupert2011",
+      "observed": {
+        "authors": [
+          "Titus Neupert",
+          "Luiz H. Santos",
+          "Claudio Chamon",
+          "Christopher Mudry"
+        ],
+        "identifier": "https://doi.org/10.1103/physrevlett.106.236804",
+        "metadata_source": "OpenAlex DOI resolution",
+        "title": "Fractional Quantum Hall States at Zero Magnetic Field",
+        "year": 2011
+      },
+      "section": "fractional Chern insulators",
+      "title": "Fractional quantum Hall states at zero magnetic field",
+      "title_similarity": 1.0,
+      "verified": true,
+      "year": 2011
+    },
+    {
+      "arxiv": null,
+      "author_matches": {
+        "Bravyi": true,
+        "Hastings": true,
+        "Michalakis": true
+      },
+      "authors": [
+        "Bravyi",
+        "Hastings",
+        "Michalakis"
+      ],
+      "checks": {
+        "authors": true,
+        "identifier_in_bib": true,
+        "title": true,
+        "year": true
+      },
+      "doi": "10.1063/1.3490195",
+      "key": "bravyi2010",
+      "observed": {
+        "authors": [
+          "Sergey Bravyi",
+          "Matthew B. Hastings",
+          "Spyridon Michalakis"
+        ],
+        "identifier": "https://doi.org/10.1063/1.3490195",
+        "metadata_source": "OpenAlex DOI resolution",
+        "title": "Topological quantum order: Stability under local perturbations",
+        "year": 2010
+      },
+      "section": "gapped-phase stability",
+      "title": "Topological quantum order: Stability under local perturbations",
+      "title_similarity": 1.0,
+      "verified": true,
+      "year": 2010
+    },
+    {
+      "arxiv": null,
+      "author_matches": {
+        "Bachmann": true,
+        "Michalakis": true,
+        "Nachtergaele": true,
+        "Sims": true
+      },
+      "authors": [
+        "Bachmann",
+        "Michalakis",
+        "Nachtergaele",
+        "Sims"
+      ],
+      "checks": {
+        "authors": true,
+        "identifier_in_bib": true,
+        "title": true,
+        "year": true
+      },
+      "doi": "10.1007/s00220-011-1380-0",
+      "key": "bachmann2011",
+      "observed": {
+        "authors": [
+          "Sven Bachmann",
+          "Spyridon Michalakis",
+          "Bruno Nachtergaele",
+          "Robert Sims"
+        ],
+        "identifier": "https://doi.org/10.1007/s00220-011-1380-0",
+        "metadata_source": "OpenAlex DOI resolution",
+        "title": "Automorphic Equivalence within Gapped Phases of Quantum Lattice Systems",
+        "year": 2011
+      },
+      "section": "gapped-phase transport",
+      "title": "Automorphic equivalence within gapped phases of quantum lattice systems",
+      "title_similarity": 1.0,
+      "verified": true,
+      "year": 2011
+    },
+    {
+      "arxiv": null,
+      "author_matches": {
+        "Cirac": true,
+        "David Perez": true,
+        "Schuch": true
+      },
+      "authors": [
+        "Schuch",
+        "David Perez",
+        "Cirac"
+      ],
+      "checks": {
+        "authors": true,
+        "identifier_in_bib": true,
+        "title": true,
+        "year": true
+      },
+      "doi": "10.1103/PhysRevB.84.165139",
+      "key": "schuch2011",
+      "observed": {
+        "authors": [
+          "Norbert Schuch",
+          "David P\u00e9rez-Garc\u0131\u0301a",
+          "J. I. Cirac"
+        ],
+        "identifier": "https://doi.org/10.1103/physrevb.84.165139",
+        "metadata_source": "OpenAlex DOI resolution",
+        "title": "Classifying quantum phases using matrix product states and projected entangled pair states",
+        "year": 2011
+      },
+      "section": "phase classification",
+      "title": "Classifying quantum phases using matrix product states and projected entangled pair states",
+      "title_similarity": 1.0,
+      "verified": true,
+      "year": 2011
+    },
+    {
+      "arxiv": null,
+      "author_matches": {
+        "Hastings": true,
+        "Wen": true
+      },
+      "authors": [
+        "Hastings",
+        "Wen"
+      ],
+      "checks": {
+        "authors": true,
+        "identifier_in_bib": true,
+        "title": true,
+        "year": true
+      },
+      "doi": "10.1103/PhysRevB.72.045141",
+      "key": "hastingswen2005",
+      "observed": {
+        "authors": [
+          "M. B. Hastings",
+          "Xiao-Gang Wen"
+        ],
+        "identifier": "https://doi.org/10.1103/physrevb.72.045141",
+        "metadata_source": "OpenAlex DOI resolution",
+        "title": "Quasiadiabatic continuation of quantum states: The stability of topological ground-state degeneracy and emergent gauge invariance",
+        "year": 2005
+      },
+      "section": "gapped-projector transport",
+      "title": "Quasiadiabatic continuation of quantum states: The stability of topological ground-state degeneracy and emergent gauge invariance",
+      "title_similarity": 1.0,
+      "verified": true,
+      "year": 2005
+    },
+    {
+      "arxiv": null,
+      "author_matches": {
+        "Collins": true
+      },
+      "authors": [
+        "Collins"
+      ],
+      "checks": {
+        "authors": true,
+        "identifier_in_bib": true,
+        "title": true,
+        "year": true
+      },
+      "doi": "10.1007/s00440-005-0428-5",
+      "key": "collins2005",
+      "observed": {
+        "authors": [
+          "Beno\u00eet Collins"
+        ],
+        "identifier": "https://doi.org/10.1007/s00440-005-0428-5",
+        "metadata_source": "OpenAlex DOI resolution",
+        "title": "Product of random projections, Jacobi ensembles and universality problems arising from free probability",
+        "year": 2005
+      },
+      "section": "Jacobi null model",
+      "title": "Product of random projections, Jacobi ensembles and universality problems arising from free probability",
+      "title_similarity": 1.0,
+      "verified": true,
+      "year": 2005
+    },
+    {
+      "arxiv": null,
+      "author_matches": {
+        "Sommers": true,
+        "Zyczkowski": true
+      },
+      "authors": [
+        "Zyczkowski",
+        "Sommers"
+      ],
+      "checks": {
+        "authors": true,
+        "identifier_in_bib": true,
+        "title": true,
+        "year": true
+      },
+      "doi": "10.1088/0305-4470/33/10/307",
+      "key": "zyczkowski2000",
+      "observed": {
+        "authors": [
+          "Karol Zyczkowski",
+          "Hans-J\u00fcrgen Sommers"
+        ],
+        "identifier": "https://doi.org/10.1088/0305-4470/33/10/307",
+        "metadata_source": "OpenAlex DOI resolution",
+        "title": "Truncations of random unitary matrices",
+        "year": 2000
+      },
+      "section": "Haar compressions",
+      "title": "Truncations of random unitary matrices",
+      "title_similarity": 1.0,
+      "verified": true,
+      "year": 2000
+    },
+    {
+      "arxiv": null,
+      "author_matches": {
+        "Atas": true,
+        "Bogomolny": true,
+        "Giraud": true,
+        "Roux": true
+      },
+      "authors": [
+        "Atas",
+        "Bogomolny",
+        "Giraud",
+        "Roux"
+      ],
+      "checks": {
+        "authors": true,
+        "identifier_in_bib": true,
+        "title": true,
+        "year": true
+      },
+      "doi": "10.1103/PhysRevLett.110.084101",
+      "key": "atas2013",
+      "observed": {
+        "authors": [
+          "Y. Y. Atas",
+          "E. Bogomolny",
+          "Olivier Giraud",
+          "Guillaume Roux"
+        ],
+        "identifier": "https://doi.org/10.1103/physrevlett.110.084101",
+        "metadata_source": "OpenAlex DOI resolution",
+        "title": "Distribution of the Ratio of Consecutive Level Spacings in Random Matrix Ensembles",
+        "year": 2013
+      },
+      "section": "local spectral statistics",
+      "title": "Distribution of the ratio of consecutive level spacings in random matrix ensembles",
+      "title_similarity": 1.0,
+      "verified": true,
+      "year": 2013
+    },
+    {
+      "arxiv": null,
+      "author_matches": {
+        "Niu": true,
+        "Thouless": true,
+        "Wu": true
+      },
+      "authors": [
+        "Niu",
+        "Thouless",
+        "Wu"
+      ],
+      "checks": {
+        "authors": true,
+        "identifier_in_bib": true,
+        "title": true,
+        "year": true
+      },
+      "doi": "10.1103/PhysRevB.31.3372",
+      "key": "niuthoulesswu1985",
+      "observed": {
+        "authors": [
+          "Qian Niu",
+          "D. J. Thouless",
+          "Yong-Shi Wu"
+        ],
+        "identifier": "https://doi.org/10.1103/physrevb.31.3372",
+        "metadata_source": "OpenAlex DOI resolution",
+        "title": "Quantized Hall conductance as a topological invariant",
+        "year": 1985
+      },
+      "section": "many-body topology",
+      "title": "Quantized Hall conductance as a topological invariant",
+      "title_similarity": 1.0,
+      "verified": true,
+      "year": 1985
+    },
+    {
+      "arxiv": null,
+      "author_matches": {
+        "Kolodrubetz": true,
+        "Mehta": true,
+        "Polkovnikov": true,
+        "Sels": true
+      },
+      "authors": [
+        "Kolodrubetz",
+        "Sels",
+        "Mehta",
+        "Polkovnikov"
+      ],
+      "checks": {
+        "authors": true,
+        "identifier_in_bib": true,
+        "title": true,
+        "year": true
+      },
+      "doi": "10.1016/j.physrep.2017.07.001",
+      "key": "kolodrubetz2017",
+      "observed": {
+        "authors": [
+          "Michael Kolodrubetz",
+          "Dries Sels",
+          "Pankaj Mehta",
+          "Anatoli Polkovnikov"
+        ],
+        "identifier": "https://doi.org/10.1016/j.physrep.2017.07.001",
+        "metadata_source": "OpenAlex DOI resolution",
+        "title": "Geometry and non-adiabatic response in quantum and classical systems",
+        "year": 2017
+      },
+      "section": "quantum geometric response",
+      "title": "Geometry and non-adiabatic response in quantum and classical systems",
+      "title_similarity": 1.0,
+      "verified": true,
+      "year": 2017
+    },
+    {
+      "arxiv": null,
+      "author_matches": {
+        "Bohigas": true,
+        "Giannoni": true,
+        "Schmit": true
+      },
+      "authors": [
+        "Bohigas",
+        "Giannoni",
+        "Schmit"
+      ],
+      "checks": {
+        "authors": true,
+        "identifier_in_bib": true,
+        "title": true,
+        "year": true
+      },
+      "doi": "10.1103/PhysRevLett.52.1",
+      "key": "bohigas1984",
+      "observed": {
+        "authors": [
+          "O. Bohigas",
+          "M.J. Giannoni",
+          "C. Schmit"
+        ],
+        "identifier": "https://doi.org/10.1103/physrevlett.52.1",
+        "metadata_source": "OpenAlex DOI resolution",
+        "title": "Characterization of Chaotic Quantum Spectra and Universality of Level Fluctuation Laws",
+        "year": 1984
+      },
+      "section": "random-matrix quantum chaos",
+      "title": "Characterization of chaotic quantum spectra and universality of level fluctuation laws",
+      "title_similarity": 1.0,
+      "verified": true,
+      "year": 1984
+    },
+    {
+      "arxiv": null,
+      "author_matches": {
+        "Deutsch": true
+      },
+      "authors": [
+        "Deutsch"
+      ],
+      "checks": {
+        "authors": true,
+        "identifier_in_bib": true,
+        "title": true,
+        "year": true
+      },
+      "doi": "10.1103/PhysRevA.43.2046",
+      "key": "deutsch1991",
+      "observed": {
+        "authors": [
+          "J. M. Deutsch"
+        ],
+        "identifier": "https://doi.org/10.1103/physreva.43.2046",
+        "metadata_source": "OpenAlex DOI resolution",
+        "title": "Quantum statistical mechanics in a closed system",
+        "year": 1991
+      },
+      "section": "eigenstate thermalization",
+      "title": "Quantum statistical mechanics in a closed system",
+      "title_similarity": 1.0,
+      "verified": true,
+      "year": 1991
+    },
+    {
+      "arxiv": null,
+      "author_matches": {
+        "Srednicki": true
+      },
+      "authors": [
+        "Srednicki"
+      ],
+      "checks": {
+        "authors": true,
+        "identifier_in_bib": true,
+        "title": true,
+        "year": true
+      },
+      "doi": "10.1103/PhysRevE.50.888",
+      "key": "srednicki1994",
+      "observed": {
+        "authors": [
+          "Mark Srednicki"
+        ],
+        "identifier": "https://doi.org/10.1103/physreve.50.888",
+        "metadata_source": "OpenAlex DOI resolution",
+        "title": "Chaos and quantum thermalization",
+        "year": 1994
+      },
+      "section": "eigenstate thermalization",
+      "title": "Chaos and quantum thermalization",
+      "title_similarity": 1.0,
+      "verified": true,
+      "year": 1994
+    },
+    {
+      "arxiv": null,
+      "author_matches": {
+        "D'Alessio": true,
+        "Kafri": true,
+        "Polkovnikov": true,
+        "Rigol": true
+      },
+      "authors": [
+        "D'Alessio",
+        "Kafri",
+        "Polkovnikov",
+        "Rigol"
+      ],
+      "checks": {
+        "authors": true,
+        "identifier_in_bib": true,
+        "title": true,
+        "year": true
+      },
+      "doi": "10.1080/00018732.2016.1198134",
+      "key": "dalessio2016",
+      "observed": {
+        "authors": [
+          "Luca D'Alessio",
+          "Yariv Kafri",
+          "Anatoli Polkovnikov",
+          "Marcos Rigol"
+        ],
+        "identifier": "https://doi.org/10.1080/00018732.2016.1198134",
+        "metadata_source": "OpenAlex DOI resolution",
+        "title": "From quantum chaos and eigenstate thermalization to statistical mechanics and thermodynamics",
+        "year": 2016
+      },
+      "section": "ETH review",
+      "title": "From quantum chaos and eigenstate thermalization to statistical mechanics and thermodynamics",
+      "title_similarity": 1.0,
+      "verified": true,
+      "year": 2016
+    },
+    {
+      "arxiv": null,
+      "author_matches": {
+        "Foini": true,
+        "Kurchan": true
+      },
+      "authors": [
+        "Foini",
+        "Kurchan"
+      ],
+      "checks": {
+        "authors": true,
+        "identifier_in_bib": true,
+        "title": true,
+        "year": true
+      },
+      "doi": "10.1103/PhysRevE.99.042139",
+      "key": "foinikurchan2019",
+      "observed": {
+        "authors": [
+          "Laura Foini",
+          "Jorge Kurchan"
+        ],
+        "identifier": "https://doi.org/10.1103/physreve.99.042139",
+        "metadata_source": "OpenAlex DOI resolution",
+        "title": "Eigenstate thermalization hypothesis and out of time order correlators",
+        "year": 2019
+      },
+      "section": "higher matrix-element correlations",
+      "title": "Eigenstate thermalization hypothesis and out of time order correlators",
+      "title_similarity": 1.0,
+      "verified": true,
+      "year": 2019
+    },
+    {
+      "arxiv": null,
+      "author_matches": {
+        "Foini": true,
+        "Kurchan": true,
+        "Pappalardi": true
+      },
+      "authors": [
+        "Pappalardi",
+        "Foini",
+        "Kurchan"
+      ],
+      "checks": {
+        "authors": true,
+        "identifier_in_bib": true,
+        "title": true,
+        "year": true
+      },
+      "doi": "10.1103/PhysRevLett.129.170603",
+      "key": "pappalardi2022",
+      "observed": {
+        "authors": [
+          "Silvia Pappalardi",
+          "Laura Foini",
+          "Jorge Kurchan"
+        ],
+        "identifier": "https://doi.org/10.1103/physrevlett.129.170603",
+        "metadata_source": "OpenAlex DOI resolution",
+        "title": "Eigenstate Thermalization Hypothesis and Free Probability",
+        "year": 2022
+      },
+      "section": "full ETH and free cumulants",
+      "title": "Eigenstate Thermalization Hypothesis and Free Probability",
+      "title_similarity": 1.0,
+      "verified": true,
+      "year": 2022
+    },
+    {
+      "arxiv": null,
+      "author_matches": {
+        "Fukui": true,
+        "Hatsugai": true,
+        "Suzuki": true
+      },
+      "authors": [
+        "Fukui",
+        "Hatsugai",
+        "Suzuki"
+      ],
+      "checks": {
+        "authors": true,
+        "identifier_in_bib": true,
+        "title": true,
+        "year": true
+      },
+      "doi": "10.1143/JPSJ.74.1674",
+      "key": "fukui2005",
+      "observed": {
+        "authors": [
+          "Takahiro Fukui",
+          "Yasuhiro Hatsugai",
+          "Hiroshi Suzuki"
+        ],
+        "identifier": "https://doi.org/10.1143/jpsj.74.1674",
+        "metadata_source": "OpenAlex DOI resolution",
+        "title": "Chern Numbers in Discretized Brillouin Zone: Efficient Method of Computing (Spin) Hall Conductances",
+        "year": 2005
+      },
+      "section": "discrete Chern links",
+      "title": "Chern Numbers in Discretized Brillouin Zone: Efficient Method of Computing (Spin) Hall Conductances",
+      "title_similarity": 1.0,
+      "verified": true,
+      "year": 2005
+    },
+    {
+      "arxiv": null,
+      "author_matches": {
+        "Chen": true,
+        "Ludwig": true
+      },
+      "authors": [
+        "Chen",
+        "Ludwig"
+      ],
+      "checks": {
+        "authors": true,
+        "identifier_in_bib": true,
+        "title": true,
+        "year": true
+      },
+      "doi": "10.1103/PhysRevB.98.064309",
+      "key": "chenludwig2018",
+      "observed": {
+        "authors": [
+          "Xiao Chen",
+          "Andreas W. W. Ludwig"
+        ],
+        "identifier": "https://doi.org/10.1103/physrevb.98.064309",
+        "metadata_source": "OpenAlex DOI resolution",
+        "title": "Universal spectral correlations in the chaotic wave function and the development of quantum chaos",
+        "year": 2018
+      },
+      "section": "non-energy spectral correlations",
+      "title": "Universal spectral correlations in the chaotic wave function, and the development of quantum chaos",
+      "title_similarity": 1.0,
+      "verified": true,
+      "year": 2018
+    },
+    {
+      "arxiv": null,
+      "author_matches": {
+        "Campbell": true,
+        "Claeys": true,
+        "Pandey": true,
+        "Polkovnikov": true,
+        "Sels": true
+      },
+      "authors": [
+        "Pandey",
+        "Claeys",
+        "Campbell",
+        "Polkovnikov",
+        "Sels"
+      ],
+      "checks": {
+        "authors": true,
+        "identifier_in_bib": true,
+        "title": true,
+        "year": true
+      },
+      "doi": "10.1103/PhysRevX.10.041017",
+      "key": "pandey2020",
+      "observed": {
+        "authors": [
+          "Mohit Pandey",
+          "Pieter W. Claeys",
+          "David Campbell",
+          "Anatoli Polkovnikov",
+          "Dries Sels"
+        ],
+        "identifier": "https://doi.org/10.1103/physrevx.10.041017",
+        "metadata_source": "OpenAlex DOI resolution",
+        "title": "Adiabatic Eigenstate Deformations as a Sensitive Probe for Quantum Chaos",
+        "year": 2020
+      },
+      "section": "adiabatic deformation chaos diagnostic",
+      "title": "Adiabatic eigenstate deformations as a sensitive probe for quantum chaos",
+      "title_similarity": 1.0,
+      "verified": true,
+      "year": 2020
+    },
+    {
+      "arxiv": "2411.11968",
+      "author_matches": {
+        "Gorsky": true,
+        "Gritsev": true,
+        "Polkovnikov": true,
+        "Sharipov": true,
+        "Tiutiakina": true
+      },
+      "authors": [
+        "Sharipov",
+        "Tiutiakina",
+        "Gorsky",
+        "Gritsev",
+        "Polkovnikov"
+      ],
+      "checks": {
+        "authors": true,
+        "identifier_in_bib": true,
+        "title": true,
+        "year": true
+      },
+      "doi": null,
+      "key": "sharipov2024",
+      "observed": {
+        "authors": [
+          "Rustem Sharipov",
+          "Anastasiia Tiutiakina",
+          "Alexander Gorsky",
+          "Vladimir Gritsev",
+          "Anatoli Polkovnikov"
+        ],
+        "identifier": "https://arxiv.org/abs/2411.11968",
+        "metadata_source": "arXiv Atom API",
+        "title": "Hilbert space geometry and quantum chaos",
+        "year": 2024
+      },
+      "section": "Hilbert-space geometry",
+      "title": "Hilbert space geometry and quantum chaos",
+      "title_similarity": 1.0,
+      "verified": true,
+      "year": 2024
+    }
+  ],
+  "registered_records": 35,
+  "schema_version": 1,
+  "unregistered_bibliography_keys": []
+}

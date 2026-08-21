@@ -1,0 +1,138 @@
+{
+  "all_checks_pass": true,
+  "cases": {
+    "lattice_susy_m1": {
+      "ambient_dimension": 9,
+      "checks": {
+        "complete_unordered_pair_grid": true,
+        "finite_complete_cumulant": true,
+        "nonzero_jackknife_variance": true,
+        "nonzero_wick_normalizer": true,
+        "oracle_agreement": true,
+        "three_wick_pairings": true
+      },
+      "directional_estimate": -0.16404913522596132,
+      "fiber_rank": 2,
+      "label_count": 2,
+      "normalized_cumulant_norm": 0.25622024849854025,
+      "one_sided_interval_low": -0.30250973477262294,
+      "one_sided_p_value": 0.9743424132741645,
+      "oracle_relative_error": 1.1436360895360203e-15,
+      "pairing_count": 3,
+      "positive_directional_gate": false,
+      "realization_count": 24,
+      "standard_error": 0.08417806744499255,
+      "unordered_pair_count": 276,
+      "z_score": -1.948834657354919
+    },
+    "lattice_susy_m2": {
+      "ambient_dimension": 105,
+      "checks": {
+        "complete_unordered_pair_grid": true,
+        "finite_complete_cumulant": true,
+        "nonzero_jackknife_variance": true,
+        "nonzero_wick_normalizer": true,
+        "oracle_agreement": true,
+        "three_wick_pairings": true
+      },
+      "directional_estimate": -0.14796081635841685,
+      "fiber_rank": 4,
+      "label_count": 2,
+      "normalized_cumulant_norm": 0.20521262553225936,
+      "one_sided_interval_low": -0.22342568109572614,
+      "one_sided_p_value": 0.9993701278122527,
+      "oracle_relative_error": null,
+      "pairing_count": 3,
+      "positive_directional_gate": false,
+      "realization_count": 24,
+      "standard_error": 0.04587938008634475,
+      "unordered_pair_count": 276,
+      "z_score": -3.224995980328317
+    },
+    "lattice_susy_m3": {
+      "ambient_dimension": 1389,
+      "checks": {
+        "complete_unordered_pair_grid": true,
+        "finite_complete_cumulant": true,
+        "nonzero_jackknife_variance": true,
+        "nonzero_wick_normalizer": true,
+        "oracle_agreement": true,
+        "three_wick_pairings": true
+      },
+      "directional_estimate": 0.16865522344590225,
+      "fiber_rank": 8,
+      "label_count": 2,
+      "normalized_cumulant_norm": 0.29060309173470866,
+      "one_sided_interval_low": -0.01952963773431496,
+      "one_sided_p_value": 0.0702202876002431,
+      "oracle_relative_error": null,
+      "pairing_count": 3,
+      "positive_directional_gate": false,
+      "realization_count": 24,
+      "standard_error": 0.11440827201688095,
+      "unordered_pair_count": 276,
+      "z_score": 1.4741523534331256
+    },
+    "moore_read_N4": {
+      "ambient_dimension": 126,
+      "checks": {
+        "complete_unordered_pair_grid": true,
+        "finite_complete_cumulant": true,
+        "nonzero_jackknife_variance": true,
+        "nonzero_wick_normalizer": true,
+        "oracle_agreement": true,
+        "three_wick_pairings": true
+      },
+      "directional_estimate": 0.19087579458395687,
+      "fiber_rank": 42,
+      "label_count": 2,
+      "normalized_cumulant_norm": 0.22779717464406887,
+      "one_sided_interval_low": 0.1451999161808175,
+      "one_sided_p_value": 3.1276651234175277e-12,
+      "oracle_relative_error": null,
+      "pairing_count": 3,
+      "positive_directional_gate": true,
+      "realization_count": 24,
+      "standard_error": 0.027768962328759805,
+      "unordered_pair_count": 276,
+      "z_score": 6.8737100192710585
+    },
+    "moore_read_N6": {
+      "ambient_dimension": 1716,
+      "checks": {
+        "complete_unordered_pair_grid": true,
+        "finite_complete_cumulant": true,
+        "nonzero_jackknife_variance": true,
+        "nonzero_wick_normalizer": true,
+        "oracle_agreement": true,
+        "three_wick_pairings": true
+      },
+      "directional_estimate": 0.1936047681092922,
+      "fiber_rank": 120,
+      "label_count": 2,
+      "normalized_cumulant_norm": 0.2510935247935431,
+      "one_sided_interval_low": 0.1527653132018437,
+      "one_sided_p_value": 3.1536978480695536e-15,
+      "oracle_relative_error": null,
+      "pairing_count": 3,
+      "positive_directional_gate": true,
+      "realization_count": 24,
+      "standard_error": 0.024828625622535946,
+      "unordered_pair_count": 276,
+      "z_score": 7.797643375538472
+    }
+  },
+  "generated_utc": "2026-08-15T23:39:01.329581+00:00",
+  "protocol": {
+    "claim_boundary": "Inference is conditional on panel exchangeability and does not replace an independent disorder or Hamiltonian ensemble.",
+    "direction": "fixed_two_Kronecker_invariants",
+    "family_alpha": 0.05,
+    "label_count": 2,
+    "null_parameters_refit": false,
+    "realization_count": 24,
+    "realization_unit": "fixed-base local tangent panel",
+    "wick_pairings": 3
+  },
+  "runtime_seconds": 26.703908375000537,
+  "version": "v12"
+}

@@ -1,0 +1,95 @@
+{
+  "papers": {
+    "paper_i": {
+      "audit_path": "01_task_folder/task_05/script/output/paper1_prb_v13/delivery_audit_v13.json",
+      "audit_sha256": "228ed018ef78cb7be0fe2283a94e91beb318f6818a6271f1e3b71d5ce0c5f2db",
+      "claim": "Finite-size, mechanism-resolved evidence that non-Abelian projector geometry remains informative under exact spectral degeneracy.",
+      "delivery_branch": "passed",
+      "documents": {
+        "main": {
+          "audit_sha256": "257b1c10e75f7104d4a70afbd3b9c9056e197036a5f4c216f3789af8c513746a",
+          "exists": true,
+          "hash_matches_audit": true,
+          "path": "01_task_folder/task_05/script/output/paper1_prb_v13/exactly_degenerate_quantum_chaos_v13.pdf",
+          "sha256": "257b1c10e75f7104d4a70afbd3b9c9056e197036a5f4c216f3789af8c513746a"
+        },
+        "supplement": {
+          "audit_sha256": "63d20a5149fd3f7f85c9f0a2e3b7c3be2025d1699508be7c14760a234af909a1",
+          "exists": true,
+          "hash_matches_audit": true,
+          "path": "01_task_folder/task_05/script/output/paper1_prb_v13/exactly_degenerate_quantum_chaos_supplement_v13.pdf",
+          "sha256": "63d20a5149fd3f7f85c9f0a2e3b7c3be2025d1699508be7c14760a234af909a1"
+        }
+      },
+      "errors": [],
+      "passed": true,
+      "positive_title_gate": true,
+      "recorded_plan_deviation": {
+        "delivered_pages": 23,
+        "delivery_contract": "20--26",
+        "original_page_estimate": "14--18",
+        "superseding_human_request": "detailed complete PRB long form"
+      },
+      "title": "Exactly Degenerate Quantum Chaos: Non-Abelian Quantum Geometry as a Probe",
+      "version": "v13"
+    },
+    "paper_ii": {
+      "audit_path": "01_task_folder/task_05/script/output/geometric_eth_theory_v14/delivery_audit_v14.json",
+      "audit_sha256": "a68e1ee1949046e74822845bb241c1d048e0949150e5042127ddbc33c1722bac",
+      "claim": "An exact finite-channel cumulant theorem is proved under stated independence assumptions; the sealed chiral-index specialization fails, so N_eff alone is insufficient for the registered ensemble.",
+      "delivery_branch": "random_channel_failure",
+      "documents": {
+        "main": {
+          "audit_sha256": "45984eed2daa8df1c741a5924287664a3c0b9508389be8681232a91ed54c0d20",
+          "exists": true,
+          "hash_matches_audit": true,
+          "path": "01_task_folder/task_05/script/output/geometric_eth_theory_v14/geometric_response_exactly_degenerate_bundles_v14.pdf",
+          "sha256": "45984eed2daa8df1c741a5924287664a3c0b9508389be8681232a91ed54c0d20"
+        },
+        "supplement": {
+          "audit_sha256": "ab98b5a39117c7f412df4e62c0b76eb7e31e85ac6911af7c7ff0039fd83d18c9",
+          "exists": true,
+          "hash_matches_audit": true,
+          "path": "01_task_folder/task_05/script/output/geometric_eth_theory_v14/geometric_response_exactly_degenerate_bundles_supplement_v14.pdf",
+          "sha256": "ab98b5a39117c7f412df4e62c0b76eb7e31e85ac6911af7c7ff0039fd83d18c9"
+        }
+      },
+      "errors": [],
+      "passed": true,
+      "positive_title_gate": false,
+      "rejected_positive_title": "The Geometric ETH: Statistical Closure on Degenerate Quantum State Bundles",
+      "title": "Geometric Response of Exactly Degenerate Quantum State Bundles",
+      "version": "v14"
+    }
+  },
+  "passed": true,
+  "planning_contracts": {
+    "paper_i_implementation": {
+      "path": "docs/superpowers/plans/2026-08-17-exactly-degenerate-quantum-chaos-prb.md",
+      "sha256": "6799591a8607e9c3325e0efb061121f8584d57f0735dc52ceafeb7c91c7b5026"
+    },
+    "paper_ii_implementation": {
+      "path": "docs/superpowers/plans/2026-08-17-geometric-eth-theory-paper.md",
+      "sha256": "729a8d11bb925d7bbdf2c241aff50235e9c939c3e3c5b6987c16437c9d85d676"
+    },
+    "two_paper_design": {
+      "path": "docs/plans/2026-08-17-two-paper-geometric-eth-design.md",
+      "sha256": "c4ddf142acc3d1dcf2c906c319190e434d6ac758658e2db89a33c9fa5b80e2e2"
+    }
+  },
+  "reproduction": {
+    "cross_paper_audit": "python3 01_task_folder/task_05/script/verify_two_paper_delivery_v14.py",
+    "paper_i": "bash 01_task_folder/task_05/script/run_paper1_prb_delivery_v13.sh",
+    "paper_ii": "bash 01_task_folder/task_05/script/run_geometric_eth_theory_delivery_v14.sh"
+  },
+  "schema": "two_paper_geometric_response_delivery_v14",
+  "shared_claim_boundary": {
+    "asymptotic_geometric_eth_established": false,
+    "black_hole_theorem_established": false,
+    "exact_degeneracy_geometry_program_delivered": true,
+    "independent_cross_model_ensemble_established": false,
+    "reason": "Paper I is finite-size and mechanism resolved. Paper II's exact theorem is conditional, while its preregistered physical closure test selected random_channel_failure.",
+    "universal_geometric_eth_established": false
+  },
+  "version": "v14"
+}

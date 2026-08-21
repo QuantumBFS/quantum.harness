@@ -1,0 +1,399 @@
+{
+  "schema_version": 1,
+  "version": "v1",
+  "generated_utc": "2026-07-28T08:35:27.297185+00:00",
+  "sources": {
+    "physical": "output/physical_ensemble_v1.npz",
+    "covariance": "output/covariance_model_v1.npz",
+    "scaling_json": "output/rank_scaling_v1.json",
+    "scaling_npz": "output/rank_scaling_v1.npz"
+  },
+  "bootstrap_replicates": 10000,
+  "kde_bandwidth": 0.025,
+  "bulk_fraction": 0.7,
+  "unfolding": "ensemble_cdf",
+  "physical_test_matrices": 4000,
+  "haar_matrices": 10000,
+  "deformed_matrices": 10000,
+  "ensemble_inference": {
+    "physical": {
+      "density": {
+        "method": "hierarchical_seed_block_bootstrap",
+        "units": 8,
+        "replicates": 10000,
+        "critical_value": 3.20338214267544
+      },
+      "ratio": {
+        "method": "hierarchical_seed_block_bootstrap",
+        "units": 8,
+        "replicates": 10000,
+        "critical_value": 3.0832997163539098
+      },
+      "number": {
+        "method": "hierarchical_seed_block_bootstrap",
+        "units": 8,
+        "replicates": 10000,
+        "critical_value": 2.93361552097013
+      },
+      "rigidity": {
+        "method": "hierarchical_seed_block_bootstrap",
+        "units": 8,
+        "replicates": 10000,
+        "critical_value": 2.4258957632023197
+      },
+      "form_factor": {
+        "method": "hierarchical_seed_block_bootstrap",
+        "units": 8,
+        "replicates": 10000,
+        "critical_value": 3.119216763022093
+      },
+      "moments": {
+        "method": "hierarchical_seed_block_bootstrap",
+        "units": 8,
+        "replicates": 10000,
+        "critical_value": 2.0712875866961724
+      }
+    },
+    "haar": {
+      "density": {
+        "method": "matrix_gaussian_multiplier_bootstrap",
+        "units": 10000,
+        "replicates": 10000,
+        "critical_value": 3.496117356219921
+      },
+      "ratio": {
+        "method": "matrix_gaussian_multiplier_bootstrap",
+        "units": 10000,
+        "replicates": 10000,
+        "critical_value": 3.3269343403439935
+      },
+      "number": {
+        "method": "matrix_gaussian_multiplier_bootstrap",
+        "units": 10000,
+        "replicates": 10000,
+        "critical_value": 3.072114654056266
+      },
+      "rigidity": {
+        "method": "matrix_gaussian_multiplier_bootstrap",
+        "units": 10000,
+        "replicates": 10000,
+        "critical_value": 2.5803117901830324
+      },
+      "form_factor": {
+        "method": "matrix_gaussian_multiplier_bootstrap",
+        "units": 10000,
+        "replicates": 10000,
+        "critical_value": 3.332542228935703
+      },
+      "moments": {
+        "method": "matrix_gaussian_multiplier_bootstrap",
+        "units": 10000,
+        "replicates": 10000,
+        "critical_value": 2.2001004874536636
+      }
+    },
+    "deformed": {
+      "density": {
+        "method": "matrix_gaussian_multiplier_bootstrap",
+        "units": 10000,
+        "replicates": 10000,
+        "critical_value": 3.504655558936284
+      },
+      "ratio": {
+        "method": "matrix_gaussian_multiplier_bootstrap",
+        "units": 10000,
+        "replicates": 10000,
+        "critical_value": 3.31320817913214
+      },
+      "number": {
+        "method": "matrix_gaussian_multiplier_bootstrap",
+        "units": 10000,
+        "replicates": 10000,
+        "critical_value": 3.0768485442365634
+      },
+      "rigidity": {
+        "method": "matrix_gaussian_multiplier_bootstrap",
+        "units": 10000,
+        "replicates": 10000,
+        "critical_value": 2.5903174878666997
+      },
+      "form_factor": {
+        "method": "matrix_gaussian_multiplier_bootstrap",
+        "units": 10000,
+        "replicates": 10000,
+        "critical_value": 3.306019333609717
+      },
+      "moments": {
+        "method": "matrix_gaussian_multiplier_bootstrap",
+        "units": 10000,
+        "replicates": 10000,
+        "critical_value": 2.168573586332979
+      }
+    }
+  },
+  "sensitivity": {
+    "bandwidth": {
+      "0.015": {
+        "physical_haar_l1": 0.2897552812148236,
+        "physical_deformed_l1": 0.11925885317861315
+      },
+      "0.02": {
+        "physical_haar_l1": 0.2890566597095776,
+        "physical_deformed_l1": 0.1171495215074651
+      },
+      "0.025": {
+        "physical_haar_l1": 0.288139806709111,
+        "physical_deformed_l1": 0.11496766292027316
+      },
+      "0.035": {
+        "physical_haar_l1": 0.28561721500638493,
+        "physical_deformed_l1": 0.11068893240177029
+      },
+      "0.05": {
+        "physical_haar_l1": 0.28003252938851136,
+        "physical_deformed_l1": 0.1049230997005546
+      }
+    },
+    "bulk_fraction": {
+      "0.5": {
+        "physical": 0.6003157300811033,
+        "haar": 0.5996822463592252,
+        "deformed": 0.5990315721255308
+      },
+      "0.6": {
+        "physical": 0.5999422924577897,
+        "haar": 0.5995455819841864,
+        "deformed": 0.5993426191682945
+      },
+      "0.7": {
+        "physical": 0.5998059753041982,
+        "haar": 0.5993947881902579,
+        "deformed": 0.5992000762838173
+      },
+      "0.8": {
+        "physical": 0.599727711873032,
+        "haar": 0.5994696812918004,
+        "deformed": 0.5991753696779304
+      },
+      "0.9": {
+        "physical": 0.5997151649619297,
+        "haar": 0.5995203341794094,
+        "deformed": 0.5991788297224815
+      }
+    },
+    "unfolding": {
+      "ensemble_cdf": {
+        "physical": 0.599832009518958,
+        "haar": 0.599404451204649,
+        "deformed": 0.5991995692807472
+      },
+      "polynomial": {
+        "physical": 0.5998390697704098,
+        "haar": 0.5993986311163013,
+        "deformed": 0.5992531443200949
+      }
+    },
+    "ratio_binning": {
+      "30": {
+        "physical_haar_l1": 0.008883333333333328,
+        "physical_deformed_l1": 0.009641666666666679
+      },
+      "50": {
+        "physical_haar_l1": 0.013162500000000028,
+        "physical_deformed_l1": 0.013350000000000013
+      },
+      "70": {
+        "physical_haar_l1": 0.015739583333333335,
+        "physical_deformed_l1": 0.014724999999999988
+      }
+    }
+  },
+  "finite_size_fits": {
+    "density_l1": {
+      "models": {
+        "D^-1/2": {
+          "offset": 1.6667053205509537e-26,
+          "amplitude": 1.4614965615076556,
+          "exponent": 0.5,
+          "offset_standard_error": 0.0004963817861996122,
+          "weighted_rss": 2891.442910814757,
+          "loo_rmse": 0.034660129227237164,
+          "prediction": [
+            0.3653741403769139,
+            0.2066868258645771,
+            0.13809844441875968,
+            0.10085284421937078,
+            0.07789802846617341,
+            0.0625462788265822,
+            0.051671706466144274
+          ]
+        },
+        "D^-1": {
+          "offset": 0.05148978706046747,
+          "amplitude": 6.8213708154014725,
+          "exponent": 1.0,
+          "offset_standard_error": 0.000264295186581437,
+          "weighted_rss": 4526.5892991329065,
+          "loo_rmse": 0.11475470893223697,
+          "prediction": [
+            0.4778254630230595,
+            0.18791720336849693,
+            0.11239488362655205,
+            0.08397250522904592,
+            0.07086868142240348,
+            0.06398314020222841,
+            0.060016500579719315
+          ]
+        },
+        "free": {
+          "offset": 7.454752309592727e-18,
+          "amplitude": 2.2680489602906104,
+          "exponent": 0.5928672289325054,
+          "offset_standard_error": 0.0013518350982931982,
+          "exponent_standard_error": 0.005815311562728218,
+          "weighted_rss": 206.59855840284953,
+          "loo_rmse": 0.021877548856190882,
+          "prediction": [
+            0.4382976559321891,
+            0.22304309709333994,
+            0.13827326405369,
+            0.09525432573380731,
+            0.0701278837144649,
+            0.0540580789595275,
+            0.043102802602347896
+          ]
+        }
+      },
+      "best_by_loo": "free"
+    },
+    "gap_ratio_difference": {
+      "models": {
+        "D^-1/2": {
+          "offset": 2.2095563788202477e-17,
+          "amplitude": 0.05826727156844323,
+          "exponent": 0.5,
+          "offset_standard_error": 0.0007067359024412413,
+          "weighted_rss": 63.08735283320601,
+          "loo_rmse": 0.0077758086970606335,
+          "prediction": [
+            0.01456681789211083,
+            0.00824023656945689,
+            0.005505739648013066,
+            0.004020823734623085,
+            0.00310565600961977,
+            0.00249360902376983,
+            0.002060059142364239
+          ]
+        },
+        "D^-1": {
+          "offset": 0.0009268891235324555,
+          "amplitude": 0.4224132072039323,
+          "exponent": 1.0,
+          "offset_standard_error": 0.00039172194388101587,
+          "weighted_rss": 19.67912233098509,
+          "loo_rmse": 0.004853533410891864,
+          "prediction": [
+            0.027327714573778222,
+            0.0093751532676111,
+            0.004698435616424708,
+            0.002938380586408324,
+            0.002126926643998172,
+            0.0017005396861770202,
+            0.0014549056325373708
+          ]
+        },
+        "free": {
+          "offset": 0.0020703667001237412,
+          "amplitude": 1.6968325987737591,
+          "exponent": 1.4765676600076514,
+          "offset_standard_error": 0.0004892027465701063,
+          "exponent_standard_error": 0.24779108727448396,
+          "weighted_rss": 13.18696218410215,
+          "loo_rmse": 0.008100869175413155,
+          "prediction": [
+            0.03036306535263875,
+            0.00733047680995051,
+            0.0036692984946185094,
+            0.0027023783577071765,
+            0.002365145643177657,
+            0.0022245327921723967,
+            0.0021580728829987787
+          ]
+        }
+      },
+      "best_by_loo": "D^-1"
+    },
+    "participation_deficit": {
+      "models": {
+        "D^-1/2": {
+          "offset": 0.0006986501281554937,
+          "amplitude": 1.0222401999472197,
+          "exponent": 0.5,
+          "offset_standard_error": 0.00015442710062179112,
+          "weighted_rss": 7170.950197400536,
+          "loo_rmse": 0.01682487910648122,
+          "prediction": [
+            0.25625870011496044,
+            0.14526524560498974,
+            0.09729126974362999,
+            0.07123992566403732,
+            0.05518423585721792,
+            0.04444649207154212,
+            0.03684029899736406
+          ]
+        },
+        "D^-1": {
+          "offset": 0.04303281657000455,
+          "amplitude": 3.710942190947265,
+          "exponent": 1.0,
+          "offset_standard_error": 8.659665035357202e-05,
+          "weighted_rss": 48684.63639312415,
+          "loo_rmse": 0.1103934918337845,
+          "prediction": [
+            0.2749667035042086,
+            0.11725166038894985,
+            0.07616622898917655,
+            0.06070396986022962,
+            0.053575265976104736,
+            0.049829413989321884,
+            0.04767149430868863
+          ]
+        },
+        "free": {
+          "offset": 5.086266769807968e-15,
+          "amplitude": 0.9255415658178124,
+          "exponent": 0.47750056107292504,
+          "offset_standard_error": 0.0006001684363802755,
+          "exponent_standard_error": 0.003251116326187298,
+          "weighted_rss": 6479.237840635457,
+          "loo_rmse": 0.02907716929733699,
+          "prediction": [
+            0.24627932820097742,
+            0.14293441128872927,
+            0.09725079762674695,
+            0.07203356541561141,
+            0.05628859091001392,
+            0.04564412698307686,
+            0.0380337221893311
+          ]
+        }
+      },
+      "best_by_loo": "D^-1/2"
+    }
+  },
+  "checks": {
+    "registered_bootstrap_count": true,
+    "physical_uses_seed_block_hierarchy": true,
+    "reference_uses_matrix_level_inference": true,
+    "covariance_improvement_bandwidth_stable": true,
+    "all_size_fits_registered": true,
+    "all_curves_finite": true
+  },
+  "all_checks_pass": true,
+  "runtime_seconds": 22.81690737500321,
+  "environment": {
+    "python": "3.12.11",
+    "numpy": "2.3.5",
+    "platform": "macOS-15.6-arm64-arm-64bit"
+  }
+}

@@ -1,0 +1,87 @@
+\section{A hierarchy of geometric correlation scales}
+\label{sec:hierarchy}
+
+The intervention data allow a scale-resolved statement stronger than a
+single endpoint comparison.
+For each \(g\), we subtract the exact finite-\(D\) Jacobi curve and test the
+entire residual process with a simultaneous band.
+For the physical ensemble we repeat the same procedure using eight
+independently seeded blocks.
+Long-range rigidity is tested independently through the number variance
+\begin{equation}
+ \Sigma^2(L)=
+ \left\langle\bigl[N_\xi(x,L)-L\bigr]^2\right\rangle ,
+ \label{eq:number-variance}
+\end{equation}
+where \(N_\xi(x,L)\) counts unfolded curvature levels in a sliding interval of
+length \(L\).
+
+\begin{figure*}[t]
+ \includegraphics[width=\textwidth]{figure_4_geometric_hierarchy_v2.pdf}
+ \caption{
+ \textbf{Controlled hierarchy from structured to random projector geometry.}
+ (a) Residual connected SFF
+ \(K_{F,c}(\tau;g)-K_{J,c}^{(50)}(\tau)\) along the tangent-scrambling
+ interpolation.
+ (b) Root-mean-square residual over the preregistered range
+ \(0.25\leq\tau\leq1.5\).
+ The local adjacent-gap statistic reaches the Haar interval at
+ \(g=\GeometricLocalOnset\), while the first nontrivial registered SFF
+ compatibility window occurs at \(g=\GeometricRampOnset\).
+ (c) Physical random-local-tangent residual with a simultaneous 95\% band;
+ it is compatible with the exact finite-\(D\) curve throughout the registered
+ range.
+ (d) Physical-minus-Haar number variance.
+ Short windows are compatible through \(L=\NumberVarianceExtent\), but the
+ positive long-range residual is resolved thereafter.
+ Onset lines summarize confidence sets on the sampled grids.
+ }
+ \label{fig:geometric-hierarchy}
+\end{figure*}
+
+Three conclusions follow from Fig.~\ref{fig:geometric-hierarchy}.
+First, a small interpolation away from Fourier structure generates local
+level repulsion, while the two-level correlation curve becomes active at a
+larger interpolation strength.
+The registered local and ramp onsets are
+\begin{equation}
+ g_{\rm local}=\GeometricLocalOnset,\qquad
+ g_{\rm ramp}=\GeometricRampOnset .
+ \label{eq:g-onsets}
+\end{equation}
+Second, at the physical random-local endpoint the residual band contains zero
+for every registered \(\tau\in[0.25,1.5]\).
+This is a curve-level finite-\(D\) test; it is more restrictive than matching
+the value or slope at one point.
+
+Third, long-range rigidity defines an additional scale.  The physical number
+variance follows the Haar reference through \(L=\NumberVarianceExtent\), and
+at \(L=8\) Eq.~\eqref{eq:number-residual} resolves a positive simultaneous
+interval.
+The curvature point process therefore loses information in the ordered
+sequence
+\begin{equation}
+ \begin{aligned}
+ \text{local }P(r)
+ &\ \prec\ \text{finite-\(D\) SFF ramp}\\
+ &\ \prec\ \text{long-range }\Sigma^2(L)
+ \end{aligned}
+ \label{eq:geometric-correlation-hierarchy}
+\end{equation}
+where \(A\prec B\) means that \(A\) becomes compatible with the invariant
+reference at a weaker scrambling or shorter correlation scale.
+
+Equation~\eqref{eq:geometric-correlation-hierarchy} defines a geometric
+Thouless hierarchy in the precise sense of confidence-resolved correlation
+lengths in an unfolded curvature spectrum.  Mapping these geometric scales to
+transport, scrambling, and real-time diffusion is a promising dynamical
+extension.
+
+Our geometric-ETH statement is operational and complementary to
+energy-resolved ETH: after removal of a deterministic
+metric envelope, local and intermediate-range correlations of the
+projector-response spectrum approach those of a finite invariant point
+process.
+The held-out one-point covariance improvement and the surviving number
+variance show that higher Grassmannian information remains measurable.  The
+result is covariance-deformed geometric ergodicity.

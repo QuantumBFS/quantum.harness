@@ -1,0 +1,111 @@
+{
+  "schema_version": 1,
+  "article": "From Local Repulsion to Global Geometry: Large-Scale Tests of Geometric ETH",
+  "checks": {
+    "physical_registered_scale": true,
+    "covariance_registered_scale": true,
+    "rank_cases_and_samples_exact": true,
+    "largest_rank_present": true,
+    "exact_atom_counts": true,
+    "interior_statistics_strip_atoms": true,
+    "matrix_level_inference_only": true,
+    "statistics_checks_pass": true,
+    "figure_inputs_hashed": true,
+    "figure_outputs_hashed": true,
+    "figures_synchronized": true,
+    "generated_inputs_synchronized": true,
+    "citation_metadata_verified": true,
+    "all_citation_keys_resolve": true,
+    "chen_seed_is_cited": true,
+    "article_pdf_archived": true,
+    "pdf_page_count_in_contract": true,
+    "pdf_title_metadata": true,
+    "pdf_author_metadata": true,
+    "pdf_affiliations_visible": true,
+    "all_pdf_pages_rendered": true,
+    "no_undefined_control_sequence": true,
+    "no_undefined_references": true,
+    "no_undefined_citations": true,
+    "no_overfull_boxes": true,
+    "no_stuck_floats": true,
+    "pytest_complete_if_recorded": true
+  },
+  "all_checks_pass": true,
+  "pdf": {
+    "path": "overleaf_sync/geometric_eth_large_scale/main.pdf",
+    "sha256": "aae68de7569aae83c7ff500718ab0e3635595f050f5b7afc0d60a0e63db55417",
+    "pages": 10,
+    "title": "From Local Repulsion to Global Geometry: Large-Scale Tests of Geometric ETH",
+    "author": "Thomas J. Wang; OKongOYangO"
+  },
+  "rendered_pages": [
+    {
+      "page": 1,
+      "width": 1275,
+      "height": 1650,
+      "sha256": "aa0fb67735805e9f5e3d754193608fec935428e67b981cb3cd50a93b2b4d3152"
+    },
+    {
+      "page": 2,
+      "width": 1275,
+      "height": 1650,
+      "sha256": "a812221603d15a3f8b584d32bb93af67d81176bd619f0dc5596ec804b9eebdf8"
+    },
+    {
+      "page": 3,
+      "width": 1275,
+      "height": 1650,
+      "sha256": "99cbec18f7249447f0abbc5d764a2af5b37222f3e33e7779a30e34bb5f4130ac"
+    },
+    {
+      "page": 4,
+      "width": 1275,
+      "height": 1650,
+      "sha256": "f0ed164a3680a6ba2f90f6c084267d4e11998a5b64118b81cd0185d0d174fbfb"
+    },
+    {
+      "page": 5,
+      "width": 1275,
+      "height": 1650,
+      "sha256": "2178d837d24cdb6202eb6b2505b90822fe892327387760728e101fdeaf59ce1e"
+    },
+    {
+      "page": 6,
+      "width": 1275,
+      "height": 1650,
+      "sha256": "067f12f179f909026b765c6306e870a2a60a331c34e1a435a51dec9c4683d4f9"
+    },
+    {
+      "page": 7,
+      "width": 1275,
+      "height": 1650,
+      "sha256": "9e867911fd9c3f9da19cbffaa2ba6f0755672741bf144637d5c24725cba042a2"
+    },
+    {
+      "page": 8,
+      "width": 1275,
+      "height": 1650,
+      "sha256": "6cb4e03169e76dbf4f326b7d6e361a76b33f1b8823b53682be96f3cd30128575"
+    },
+    {
+      "page": 9,
+      "width": 1275,
+      "height": 1650,
+      "sha256": "cf4085b74db94bf62e56842c23ccf9ff5c72a7d5c2d0021bd46588cd2d1b972a"
+    },
+    {
+      "page": 10,
+      "width": 1275,
+      "height": 1650,
+      "sha256": "dbab6f650e5083bc73b2ecc954a84ed49e8bb97ef6a651b561e06eb72c0a988c"
+    }
+  ],
+  "pytest_passed": 14,
+  "registered_scale": {
+    "physical_matrices": 20000,
+    "haar_matrices": 10000,
+    "deformed_matrices": 10000,
+    "root_matrices": 8750,
+    "maximum_rank": 800
+  }
+}

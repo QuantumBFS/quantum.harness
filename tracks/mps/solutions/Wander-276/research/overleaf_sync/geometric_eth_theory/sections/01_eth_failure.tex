@@ -1,0 +1,92 @@
+\section{What fails when the spectrum is exactly degenerate}
+\label{sec:eth_failure}
+
+The eigenstate thermalization hypothesis (ETH) is a statement about matrix
+elements of observables in an energy eigenbasis.  In a microcanonical window,
+its usual form is
+\begin{align}
+ O_{mn}&=\overline O(\overline E)\delta_{mn}
+ +e^{-S(\overline E)/2}f_O(\overline E,\omega)R_{mn},
+ \label{eq:conventional_eth}
+ \\
+ \overline E&=\frac{E_m+E_n}{2},\qquad
+ \omega=E_m-E_n .\nonumber
+\end{align}
+Here $O$ is a few-body operator, $S$ is the thermodynamic entropy in the
+chosen symmetry sector, and $R_{mn}$ is a fluctuating quantity with smooth
+local second moments.  Equation~\eqref{eq:conventional_eth} is useful because
+it relates an energy-basis statement to equilibrium expectation values and,
+with additional assumptions, to thermalization of isolated many-body
+systems~\cite{deutsch1991,srednicki1994,rigol2008,dalessio2016}.  Level
+statistics, spectral form factors, and operator matrix elements then give
+different, though not equivalent, views of the same nonintegrable dynamics.
+
+An exactly degenerate protected sector removes the spectral coordinate on
+which Eq.~\eqref{eq:conventional_eth} is organized.  Let
+$H(\boldsymbol\lambda)$ possess a rank-$D$ eigenspace
+\begin{equation}
+ H(\boldsymbol\lambda)P(\boldsymbol\lambda)
+ =E_0(\boldsymbol\lambda)P(\boldsymbol\lambda),
+ \qquad \operatorname{rank}P=D,
+ \label{eq:protected_projector}
+\end{equation}
+separated from its complement by a nonzero gap.  For any two states in the
+range of $P$, one has $\omega=0$.  More importantly, the Hamiltonian does not
+select a basis within the fiber: an orthonormal frame
+$\Psi=(|\psi_1\rangle,\ldots,|\psi_D\rangle)$ may be replaced by
+$\Psi U$ for arbitrary $U\in U(D)$.  Individual entries $O_{mn}$ inside the
+degenerate block consequently depend on that choice.  Coincident levels also
+make spacing ratios and the usual spectral form factor silent within the
+protected sector.  This is a kinematic obstruction, not evidence for or
+against chaos.
+
+Exact degeneracy occurs for several logically distinct reasons.  Illustrative
+examples, discussed with their sources in Sec.~\ref{sec:protection-classes},
+include a symmetry-enforced finite multiplet, the common kernel of a
+frustration-free parent Hamiltonian, supersymmetric cohomology, commuting
+stabilizer constraints, and an index-protected rectangular-kernel null space.
+These mechanisms fix
+the energy but do not fix how the protected subspace changes when couplings
+are varied.  Two Hamiltonian families can therefore have identical protected
+spectra and sharply different projector geometry.  Conversely, a complicated
+projector response does not by itself imply conventional ETH, since no
+thermal observable or late-time state has yet entered the statement.
+
+The natural variable is the family of projectors
+$P(\boldsymbol\lambda)$ over a parameter manifold $\mathcal M$.  Couplings
+$\lambda^\mu$ may be boundary twists, exactly marginal couplings, local
+Hamiltonian coefficients, or other controls that preserve the isolated
+multiplet.  The derivative $\partial_\mu P$ measures motion of the subspace in
+the ambient Hilbert space.  It is invariant under a change of frame within
+the fiber and remains defined when every protected energy is exactly equal.
+Adiabatic eigenstate deformation has also been used as a sensitive probe of
+ordinary quantum chaos away from exact degeneracy~\cite{pandey2020}; here the
+projector formulation is essential because the relevant object is a
+non-Abelian bundle.
+
+This change of variable generalizes only the statistical question in ETH.
+It asks whether normalized, symmetry-resolved responses of a protected
+subspace obey a reproducible probability law.  It does \emph{not} replace
+energy conservation by parameter-space motion, and it does not turn a Berry
+curvature distribution into a proof of thermalization.  In particular, the
+following implications are not assumed:
+\begin{align}
+ \text{random projector geometry}
+ &\not\Rightarrow \text{thermalization},\nonumber\\
+ \text{exact degeneracy}
+ &\not\Rightarrow \text{integrability},
+ \label{eq:no_eth_implication}
+\end{align}
+and a scalar response-algebra commutant will not be treated as a sufficient
+condition for either Gaussian statistics or ETH.
+
+Our use of the phrase \emph{Geometric ETH} is therefore conditional.  It
+denotes a proposed hierarchy of statistical closure statements for
+gauge-covariant response variables, defined in
+Sec.~\ref{sec:geometric_eth_ansatz}.  One finite-channel identity within that
+hierarchy is exact and is proved in Sec.~\ref{sec:channel_theorem}.  The
+random-channel closure required to promote that identity to a physical
+ensemble statement was tested prospectively in a chiral index model and did
+not pass its sealed validation criterion.  The result of the present work is
+thus a theorem with explicit hypotheses and a falsified model-level
+extrapolation, not an establishment of Geometric ETH.

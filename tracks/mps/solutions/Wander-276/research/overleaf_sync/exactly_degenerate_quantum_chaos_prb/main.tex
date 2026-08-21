@@ -1,0 +1,177 @@
+\documentclass[aps,prb,reprint,superscriptaddress,longbibliography,floatfix]{revtex4-2}
+\pdftrailerid{}
+
+\usepackage{amsmath,amssymb,bm}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{microtype}
+\usepackage{xcolor}
+\usepackage{placeins}
+\usepackage[colorlinks=true,citecolor=blue!55!black,linkcolor=blue!55!black,urlcolor=blue!55!black]{hyperref}
+
+\hypersetup{
+  pdftitle={Exactly Degenerate Quantum Chaos: Non-Abelian Quantum Geometry as a Probe},
+  pdfauthor={Thomas J. Wang; OkongOyangO}
+}
+
+\input{generated/results_v13.tex}
+
+\newcommand{\Tr}{\operatorname{Tr}}
+\newcommand{\cH}{\mathcal H}
+\newcommand{\cQ}{\mathcal Q}
+\newcommand{\cA}{\mathcal A}
+\newcommand{\cK}{\mathcal K}
+
+\begin{document}
+
+\title{Exactly Degenerate Quantum Chaos: Non-Abelian Quantum Geometry as a Probe}
+
+\author{Thomas J. Wang}
+\email{WangTheoPhys@outlook.com}
+\affiliation{Tsinghua University, Beijing 100084, China}
+
+\author{OkongOyangO}
+\affiliation{The Pennsylvania State University, University Park, Pennsylvania 16802, USA}
+
+\date{\today}
+
+\begin{abstract}
+Exact degeneracy makes ordinary level statistics spectrally silent: within a protected rank-$D$ manifold the connected energy spectral form factor vanishes identically. It does not, however, fix how the degenerate subspace moves through Hilbert space. We formulate this motion through the non-Abelian quantum geometric tensor of the protected projector and separate protection and mixing: the traceless intrafiber response may vanish while the off-fiber response remains nonzero. We compare two- and three-body fractional-quantum-Hall parents, random and local supersymmetric cohomology, and an X-cube stabilizer control. Finite-$D$ curvature spectra show Jacobi-like local repulsion in several stochastic sectors, whereas longer-range correlations and four-point contractions retain parent- and covariance-dependent memory. For the complete fourth-order test, we subtract the exactly enumerated population mean of each registered finite ensemble, fit the channel whitener on 12 frozen panels, and evaluate 12 held-out panels with all three complex Wick pairings. With a Student-$t_{11}$ reference and a Bonferroni correction over five cases, only Moore--Read $N=6$ passes the positive directional gate; Moore--Read $N=4$ and lattice-SUSY ranks $D=2,4,8$ do not. The X-cube control has either zero curvature or deterministic scalar curvature with zero connected variance. These results establish a finite-rank, mechanism-dependent geometric distinction inside spectrally silent manifolds, not an asymptotic or universal Geometric ETH.
+\end{abstract}
+
+\maketitle
+
+\input{sections/01_introduction.tex}
+
+\begin{figure*}[t]
+  \includegraphics[width=\textwidth]{figures/figure_1_protection_mixing_v13.pdf}
+  \caption{\label{fig:protection}Protection and mixing channels under exact degeneracy. (a) The tangent $\partial_aH$ is decomposed with respect to the protected projector $P$ and its complement $Q$. Exact first-order protection constrains the traceless intrafiber block $S_a=P(\partial_aH)P-s_aP$, where $s_a=D^{-1}\Tr[P(\partial_aH)P]$, but leaves the off-fiber mixing $V_a=Q(\partial_aH)P$ unrestricted. (b) The reduced resolvent converts this mixing into the Kato response $X_a=-R_QV_a$, from which $\mathcal Q_{ab}=X_a^\dagger X_b$, $g_{ab}$, and $F_{ab}$ follow; hence $S_a=0$ does not imply $X_a=0$. (c) The audited responses divide into frozen, scalar, structured/reducible, and stochastic finite-size classes. X-cube coefficient reweighting and unitary transport realize the first two classes, the local lattice-$\mathcal N=2$ supercharge resolves into exact/coexact branches, and the clustered Hall parents provide the stochastic examples. The classification concerns projector response and does not assign level statistics or thermalization to the protected manifold.}
+\end{figure*}
+
+\input{sections/02_protected_response.tex}
+\input{sections/03_statistics.tex}
+\input{sections/04_models.tex}
+
+\begin{figure*}[t]
+  \includegraphics[width=\textwidth]{figures/figure_2_spectral_silence_v13.pdf}
+  \caption{\label{fig:spectral}
+  Spectral silence and resolved projector geometry.  (a) For the
+  rank-$\SpectralFiberRank$ zero-mode manifold, whose audited bandwidth and
+  external gap are $\SpectralKernelBandwidth$ and $\SpectralExternalGap$, the
+  raw energy form factor is constant and its connected part vanishes.
+  (b) Metric-normalized curvature spectra for a structured panel, a physical
+  panel, and the finite-$D$ Jacobi reference at the same rank.  (c) The
+  physical curvature form factor follows the registered finite-$D$ ramp,
+  whereas the structured control does not.  (d) Physical-minus-reference
+  residual; the inset shows the accumulated number-variance excess.  Shading
+  denotes uncertainty from complete physical panels or registered
+  finite-Jacobi draws, not independent curvature eigenvalues.
+  }
+\end{figure*}
+
+\begin{figure*}[t]
+  \includegraphics[width=\textwidth]{figures/figure_3_geometric_hierarchy_v13.pdf}
+  \caption{\label{fig:hierarchy}
+  Local-to-global hierarchy of curvature correlations.  (a) Difference
+  between the physical and finite-$D$ Jacobi connected form factors versus
+  Fourier scale $\tau$ and geometric-scrambling strength $g$.  (b) The local
+  spacing-ratio criterion becomes compatible before the first registered
+  ramp window.  (c) In that window the physical ramp residual is consistent
+  with the finite-rank reference.  (d) The connected number-variance
+  difference grows beyond the marked local scale, retaining long-range
+  memory.  Curves and bands use a complete orbit or ensemble draw as the
+  uncertainty unit; repeated $\tau$, window-length, and eigenvalue samples
+  within one draw are not treated as independent.
+  }
+\end{figure*}
+
+\begin{figure*}[t]
+  \includegraphics[width=\textwidth]{figures/figure_4_independent_channels_v13.pdf}
+  \caption{\label{fig:channels}
+  Independently controllable spectral and geometric channels.  (a) An
+  intrafiber interpolation changes $PHP$ and brings its gap statistic to the
+  registered Haar/GUE interval.  (b) The projector and curvature spectrum
+  remain fixed to numerical precision during that intervention.  (c) A
+  separate off-fiber interpolation changes $P(\partial H)Q+\mathrm{H.c.}$ and
+  brings the curvature statistic to its Haar--Jacobi interval without using
+  the intrafiber interpolation.  (d) The two axes permit structured,
+  spectral-only, geometric-only, and jointly compatible regimes.
+  Uncertainty bands are formed from the registered interpolation-endpoint
+  ensemble.  \emph{Independent} here means separately tunable response
+  channels, not independent entries of one response matrix.
+  }
+\end{figure*}
+
+\begin{figure*}[t]
+  \includegraphics[width=\textwidth]{figures/figure_5_wick_parent_dependence_v13.pdf}
+  \caption{\label{fig:wick}
+  Restricted Wick residuals and parent dependence.  (a) Kapit--Mueller
+  local-density and Fourier panels compared through the historical
+  two-pairing residual under a separable proper-complex Gaussian null.
+  (b) Residual relative to that two-pairing median.  This is not the corrected
+  complete cumulant, which
+  requires the full covariance, pseudocovariance, and all three complex Wick
+  pairings.  (c) Continuum-LLL connected excess for guiding-density,
+  magnetic-bond, and magnetic-current panels; error bars bootstrap complete
+  physical panels.  (d) Observed-minus-predicted residual for the sealed
+  no-refit common-plateau law.  The registered point coverage is zero of nine.
+  This rejects that law across the displayed classes and sizes; it does not
+  reject finite-size decay or all refitted forms.  The two parents are not
+  pooled into one uncertainty estimate.
+  }
+\end{figure*}
+
+\input{sections/05_laughlin_results.tex}
+
+\begin{figure*}[t]
+  \includegraphics[width=\textwidth]{figures/figure_6_fixed_chern_holonomy_v13.pdf}
+  \caption{\label{fig:holonomy}
+  Non-Abelian holonomy along an exactly isospectral, fixed-Chern transport.
+  (a) The ranks, first Chern numbers, and positive external gaps remain fixed
+  under ambient unitary deformation.  (b) For
+  $N=4$, $D=\HolonomyNFourRank$, the determinant Wilson-loop flow deforms
+  while retaining winding $\HolonomyNFourChernNumber$.  (c) The internal
+  Wilson gap ratio changes for noncommuting generators, while the commuting
+  control remains structured; neither endpoint enters the CUE reference band.
+  (d) The normalized Wilson form factor likewise retains non-CUE peaks.
+  Marker intervals use the registered generator ensemble, and the gray CUE
+  uncertainty bands use independent circular-unitary reference draws.
+  Topology and the exact energy spectrum are unchanged throughout.
+  }
+\end{figure*}
+
+\input{sections/06_topology.tex}
+
+\begin{figure*}[t]
+  \includegraphics[width=\textwidth]{figures/figure_7_cross_mechanism_v13.pdf}
+  \caption{\label{fig:mechanisms}
+  Mechanism-resolved response under exact degeneracy.  (a) historical
+  two-pairing residual $R_4^{2\mathrm{pair}}$ for local and isotropic lattice
+  SUSY panels and two local Moore--Read panels.  This statistic uses a
+  separable proper-complex null and is not the corrected complete cumulant.
+  (b) Evidence cells are kept separate: exact fiber and nonzero response,
+  production status, centered complete covariance, and an independent
+  model/operator ensemble are different gates.  (c) Directional estimates
+  of the exact-population-centered complete cumulant use a frozen 12/12
+  split, training-only $2\times2$ channel whitening, all three Wick pairings,
+  and delete-one-panel errors.  The filled star marks the sole familywise
+  finite-rank pass, Moore--Read $N=6$; open markers do not pass.  The reverse
+  split is descriptive and not pooled.  (d) X-cube coefficient reweighting
+  has zero curvature, whereas local unitary transport has deterministic
+  scalar curvature and zero connected variance.  These are exact structured
+  controls, not Gaussian samples.
+  }
+\end{figure*}
+
+\input{sections/07_cohomology.tex}
+\input{sections/08_stabilizer.tex}
+\input{sections/09_classification.tex}
+\input{sections/10_discussion.tex}
+
+\begin{acknowledgments}
+Numerical data, exact-rank audits, frozen inference splits, and source hashes accompany the reproducibility package. We thank the Quantum Harness community for discussions of numerical validation and the scope of the claims.
+\end{acknowledgments}
+
+\bibliography{references}
+
+\end{document}

@@ -1,0 +1,191 @@
+{
+  "archived_pdf_sha256": "a75377f76acd78eb3354e186a57933abdf11abbbe5e9a8abd43482ca8c4e05ad",
+  "checks": {
+    "affiliations_visible": true,
+    "all_pages_rendered_180dpi": true,
+    "asset_branches_exact": true,
+    "citation_audit_passes": true,
+    "code_and_data_availability_visible": true,
+    "condensed_matter_mechanism_visible": true,
+    "generated_assets_synchronized": true,
+    "latex_boxes_within_width": true,
+    "latex_citations_resolved": true,
+    "latex_control_sequences_resolved": true,
+    "latex_floats_placed": true,
+    "latex_references_resolved": true,
+    "matrix_audit_passes": true,
+    "matrix_branch_exact": true,
+    "matrix_result_visible": true,
+    "pdf_archive_byte_identical": true,
+    "pdf_author_metadata": true,
+    "pdf_page_count": true,
+    "pdf_title_metadata": true,
+    "scientific_scope_visible": true,
+    "seven_figures_present_and_synchronized": true,
+    "theory_audit_passes": true,
+    "topology_audit_passes": true,
+    "topology_branch_exact": true,
+    "topology_result_visible": true
+  },
+  "figures": [
+    {
+      "exists": true,
+      "name": "figure_1_spectral_silence_v2.pdf",
+      "sha256": "b3c5967fb225d6a3adaa52adff34017bec1034111fa9cc669d33af661aa70d8a",
+      "source_hash_matches": true
+    },
+    {
+      "exists": true,
+      "name": "figure_2_falsification_triangle_v2.pdf",
+      "sha256": "3a573402c85fb6c39dfd3439f468a5c9a5369bbd8379b23fdd6cec68c1b31658",
+      "source_hash_matches": true
+    },
+    {
+      "exists": true,
+      "name": "figure_3_independent_channels_v2.pdf",
+      "sha256": "28bad44f157c0fdc418d9c56ba218e245890d6e3bea327bcd8ff5f0dfa145d95",
+      "source_hash_matches": true
+    },
+    {
+      "exists": true,
+      "name": "figure_4_geometric_hierarchy_v2.pdf",
+      "sha256": "56367dc2c3d2cd1c9d9c5af0e5b6a1b62bb635c8d9115dffb71d2f633b5aeef2",
+      "source_hash_matches": true
+    },
+    {
+      "exists": true,
+      "name": "figure_5_jacobi_atoms_v2.pdf",
+      "sha256": "80f9a9ed0073ca4bc2253417ccba816875469a6bfef5c3217353c77eaa7bc1f8",
+      "source_hash_matches": true
+    },
+    {
+      "exists": true,
+      "name": "figure_6_wick_factorization_v3.pdf",
+      "sha256": "57efed4dfd0fb77858c52980e50c468d064300505dcdfb0a635ce47f89ce0c1e",
+      "source_hash_matches": true
+    },
+    {
+      "exists": true,
+      "name": "figure_7_topological_holonomy_v3.pdf",
+      "sha256": "11e101309d975a61a3efedb1025c2552149c7f1a6f72433594f4adb1c0a16258",
+      "source_hash_matches": true
+    }
+  ],
+  "generated_utc": "2026-07-28T17:56:25.073072+00:00",
+  "main_pdf_sha256": "a75377f76acd78eb3354e186a57933abdf11abbbe5e9a8abd43482ca8c4e05ad",
+  "matrix_branch": "deformed_geometric_eth",
+  "page_count": 17,
+  "passed": true,
+  "rendered_pages": [
+    {
+      "height": 1980,
+      "page": 1,
+      "sha256": "9bea520991372f8dfe6bc823d71f475b1ec5f90148ba78b49c39907c733d38af",
+      "width": 1530
+    },
+    {
+      "height": 1980,
+      "page": 2,
+      "sha256": "c1041945968ceb54fe736585414d6369f489589b2c84caa856aa6f25ec4209c3",
+      "width": 1530
+    },
+    {
+      "height": 1980,
+      "page": 3,
+      "sha256": "46d310514722ff1162231e77d8a992956c64eaf2666b33c65a434d5d7209772e",
+      "width": 1530
+    },
+    {
+      "height": 1980,
+      "page": 4,
+      "sha256": "a1cf60f8a747c2bb108b5a7e59f56fcb92be05be5139998fd2301b9ce2ee02d5",
+      "width": 1530
+    },
+    {
+      "height": 1980,
+      "page": 5,
+      "sha256": "3b059a18b797e5ff71aca74d3b5f052f30849b295246cc0a87c75fdef15e6108",
+      "width": 1530
+    },
+    {
+      "height": 1980,
+      "page": 6,
+      "sha256": "4c50fe354fbe90baca936139a682d45e0f8b52ba13ab5c6aec451c5ba6f7f17a",
+      "width": 1530
+    },
+    {
+      "height": 1980,
+      "page": 7,
+      "sha256": "726f3feabc501c57f6f3f5b1b5d57771a256f9cb235d079f5c32fef828a361ee",
+      "width": 1530
+    },
+    {
+      "height": 1980,
+      "page": 8,
+      "sha256": "10552afcd0e4f62875f835f34c1bbca96d2e8385b3edddeb406978c396d6a34c",
+      "width": 1530
+    },
+    {
+      "height": 1980,
+      "page": 9,
+      "sha256": "c0b7e4951b8bdd83f7b9ca572468dcfbb1a0b05ed64e1129ad38d289413c7075",
+      "width": 1530
+    },
+    {
+      "height": 1980,
+      "page": 10,
+      "sha256": "5bcbf2270ea5b896f77d50366bbdb2deb56e09ea0093322f2dd5c1b8cce1698d",
+      "width": 1530
+    },
+    {
+      "height": 1980,
+      "page": 11,
+      "sha256": "d3e66b6142c34ff99c114301931f3f512bdce63a2fe99c99c6fcc7bc9ac28ed7",
+      "width": 1530
+    },
+    {
+      "height": 1980,
+      "page": 12,
+      "sha256": "d50fd9311b0b0c24ec23d48c51c254e19ca25ed017f6ce54e91662ad92dcd4b0",
+      "width": 1530
+    },
+    {
+      "height": 1980,
+      "page": 13,
+      "sha256": "2ead3f1c9124366142d201d870519b78fddcb087461c570cc5ce914e3dbbaa9b",
+      "width": 1530
+    },
+    {
+      "height": 1980,
+      "page": 14,
+      "sha256": "aa814376a5e0b0641e49c08e4d2358925b5b1da851b356f74dccc1392acb5a53",
+      "width": 1530
+    },
+    {
+      "height": 1980,
+      "page": 15,
+      "sha256": "3b5be1f1448f69ba571edd18af599ed21f53e419284c08a9fce4d7fbb52f8d4b",
+      "width": 1530
+    },
+    {
+      "height": 1980,
+      "page": 16,
+      "sha256": "4e7511ef8a4698e3696d0c7728230b1f44262acba439399cddf1a5d108779aa8",
+      "width": 1530
+    },
+    {
+      "height": 1980,
+      "page": 17,
+      "sha256": "31811a36736f793937f5e030655edb700cdaa87e2222a609f5857f4e1a5d06a9",
+      "width": 1530
+    }
+  ],
+  "source_hashes": {
+    "overleaf_sync/geometric_eth_large_scale/appendices/matrix-element-topology-v3.tex": "353063581810778af33a48926f91c99ec61ef06793ee18f50cea986cb559c1df",
+    "overleaf_sync/geometric_eth_large_scale/main.tex": "8ecbe5e96c7e2607593550aa7ea4be31b278b23c07c0e4d64fa2bbcc9ebb5ffb",
+    "overleaf_sync/geometric_eth_large_scale/references.bib": "06f716aa69d80021030ff8683c18b7521d792d1ae6851b73e2e17eb1c93cb9bf",
+    "overleaf_sync/geometric_eth_large_scale/sections/08-matrix-elements-topology.tex": "4ce73de2129c97a608e94ecc85cedd89310207f5389ac43e67424624194bee32"
+  },
+  "topology_branch": "fixed_chern_deformed_holonomy",
+  "version": "v3"
+}

@@ -1,0 +1,79 @@
+\section{A sealed chiral-index test}
+\label{sec:chiral-test}
+
+\subsection{Exact kernel and horizontal response}
+
+Let $T\in\mathbb C^{n_b\times n_a}$ have full row rank, with $n_a>n_b$, and define
+\begin{equation}
+ H_T=\begin{pmatrix}0&T^\dagger\\ T&0\end{pmatrix},\qquad
+ \Gamma=\begin{pmatrix}I_{n_a}&0\\0&-I_{n_b}\end{pmatrix}.
+ \label{eq:chiral-hamiltonian}
+\end{equation}
+The anticommutator $\{H_T,\Gamma\}$ vanishes.  The index fixes an exactly degenerate zero-energy fiber of rank
+\begin{equation}
+ D=\dim\ker T=n_a-n_b,
+ \label{eq:chiral-index}
+\end{equation}
+and the external gap is the smallest singular value $\sigma_{\min}(T)$.  If $K$ is an $n_a\times D$ orthonormal frame for $\ker T$, differentiating $TK=0$ along a tangent $\dot T$ and imposing the horizontal gauge $K^\dagger\dot K=0$ gives
+\begin{equation}
+ \dot K=-T^\dagger(TT^\dagger)^{-1}\dot T K.
+ \label{eq:chiral-response}
+\end{equation}
+Equation~\eqref{eq:chiral-response} is the exact off-fiber response.  It uses only the rectangular factor and its reduced singular system; the dense $(n_a+n_b)$-dimensional Hamiltonian is unnecessary in production.
+
+For every base matrix we verify the index, kernel residual, frame orthonormality, positive gap, horizontal-gauge equation, centered finite difference of the projector, and covariance under independent unitary changes of the two sublattice bases.  Across \ChiralSafeBaseCount{} registered base/class records the gap lies between \ChiralGapMinimum{} and \ChiralGapMaximum{}.  The largest relative projector finite-difference error is \ChiralMaximumFiniteDifferenceError, the largest gauge-covariance error is \ChiralMaximumGaugeError, and the largest whitening identity error is \ChiralMaximumWhiteningError.
+
+\subsection{Tangent populations and effective channels}
+
+The base factor has independent proper-complex Gaussian entries with variance scaled by $n_a^{-1}$.  We compare three tangent populations at equal Frobenius norm and equal channel count.  The \emph{random} population has independent dense proper-complex entries.  The \emph{local} population is supported in a fixed-width band around the map from the $n_b$ rows to the $n_a$ columns.  The \emph{structured} population repeats one $4\times6$ complex cell across the rectangular factor.  Base and tangent seed streams are disjoint across the three populations.
+
+Writing $T=U\Sigma V^\dagger$, the response strength carried by singular row $i$ for a tangent $a$ is
+\begin{equation}
+ q_{ia}=\sum_{\mu=1}^{D}
+ \frac{|(U^\dagger\dot T_aK)_{i\mu}|^2}{\sigma_i^2},
+ \qquad
+ N_{{\rm eff},a}=\frac{(\sum_i q_{ia})^2}{\sum_i q_{ia}^2}.
+ \label{eq:chiral-neff}
+\end{equation}
+This participation ratio is fixed before the fourth moment is evaluated.  At each base, the 16 tangent responses are centered over their matrix entries and transformed by the same registered tangent-channel covariance-whitening rule.  For each resulting complex scalar sample $z$, define $\mu_z=\langle z\rangle$, $\delta z=z-\mu_z$, and $v=\langle|\delta z|^2\rangle$.  We subtract the complete Gaussian Wick tensor and report the dimensionless statistic
+\begin{equation}
+ R_4^{\mathrm{full}}
+ =\frac{\kappa_4^{\mathrm{conn}}}{v^2}
+ =\frac{\langle|\delta z|^4\rangle}{v^2}-2-
+ \frac{|\langle(\delta z)^2\rangle|^2}{v^2}.
+ \label{eq:chiral-complete-cumulant}
+\end{equation}
+The pseudocovariance term in Eq.~\eqref{eq:chiral-complete-cumulant} is essential: an improper real Gaussian sample viewed as complex has zero complete cumulant but would give a spurious residual under a proper-complex two-pairing subtraction.
+
+\subsection{Prediction seal}
+
+The complete development grid consists of \ChiralDevelopmentSizes{}, with \ChiralBasesPerSize{} independent bases and \ChiralTangentsPerBase{} tangents per base and class.  It was opened before the validation calculation and used only to form the simultaneous random-class band
+\begin{equation}
+ N_{\rm eff}R_4^{\mathrm{full}}\in
+ [\ChiralBandLower,\ChiralBandUpper].
+ \label{eq:sealed-band}
+\end{equation}
+The prediction file, its source hashes, the statistic, the three validation sizes \ChiralValidationSizes{}, the estimator, and the branch precedence were then written and hashed before any validation outcome existed.  The primary decision uses the point estimate obtained by averaging the 16 tangent statistics within each base and then averaging the 64 base means.  All three random-class validation estimates must lie inside Eq.~\eqref{eq:sealed-band}.  Ten thousand base-bootstrap replicates provide Bonferroni simultaneous intervals for reporting only; they do not widen the sealed band.
+
+A control is declared separated only if the same local or structured class has a bootstrap interval disjoint from the band at at least two of the three validation sizes, including $(n_b,n_a)=(96,144)$.  The four branches, in precedence order, are feasibility failure, random-channel failure, deformed locality, and channel-law validation.  Thus exactness cannot be rescued by a favorable statistic, and a failed random prediction cannot be reclassified after inspecting the controls.
+
+\subsection{Validation result}
+
+Figure~\ref{fig:effective-channel-test} shows the sealed result.  The random-class estimates are
+\begin{align}
+ (48,72):&\quad \ChiralRandomOnePoint
+ [\ChiralRandomOneLow,\ChiralRandomOneHigh],\nonumber\\
+ (64,96):&\quad \ChiralRandomTwoPoint
+ [\ChiralRandomTwoLow,\ChiralRandomTwoHigh],\nonumber\\
+ (96,144):&\quad \ChiralRandomThreePoint
+ [\ChiralRandomThreeLow,\ChiralRandomThreeHigh].
+ \label{eq:random-validation-values}
+\end{align}
+Every point lies above the frozen upper boundary \ChiralBandUpper.  The registered random-channel prediction therefore fails at all three validation sizes, selecting \PaperIIBranch.  The local estimates, \ChiralLocalOnePoint, \ChiralLocalTwoPoint, and \ChiralLocalThreePoint, also lie above the band.  The repeated-cell estimates, \ChiralStructuredOnePoint, \ChiralStructuredTwoPoint, and \ChiralStructuredThreePoint, are much larger.  Both controls satisfy the predeclared separation rule, but control separation cannot overturn the failed primary prediction.
+
+The failure does not contradict weighted cumulant additivity.  That theorem predicts
+\begin{equation}
+ \kappa_4^{\mathrm{conn}}(Z)=\sum_i w_i^4\kappa_{4,i}^{\mathrm{conn}},
+ \label{eq:chiral-general-weighted-law}
+\end{equation}
+whereas the reduction to a single constant divided by $N_{\rm eff}$ additionally requires channel independence and comparable standardized single-channel cumulants.  Equation~\eqref{eq:chiral-neff} retains the variance weights $q_i$ but not possible dependence of $\kappa_{4,i}^{\mathrm{conn}}$ on the singular values, the kernel frame, or the tangent support.  The validation establishes only that $N_{\rm eff}$ is insufficient for this registered finite-size ensemble.  It does not distinguish correlated channels, noncomparable standardized channel cumulants, finite-rank geometry, or tangent-specific effects.  Any amended closure law must preregister an additional observable that separates these possibilities.  We do not fit such an observable to the opened validation data.

@@ -1,0 +1,22 @@
+\section{Chiral-index construction and sealed protocol}
+\label{app:chiral-protocol}
+
+For a full-row-rank factor $T$, a full singular-value decomposition $T=U\Sigma V^\dagger$ supplies the kernel frame $K=V_{[:,n_b:]}$.  Production responses are evaluated by solving
+\begin{equation}
+ (TT^\dagger)Y_a=\dot T_aK,
+ \qquad \dot K_a=-T^\dagger Y_a,
+\end{equation}
+for all 16 tangents in one block.  We do not diagonalize the dense chiral Hamiltonian in production.  Dense diagonalization is retained as an independent small-size oracle for the index and gap.
+
+At every base, the first tangent is also checked through the centered difference
+\begin{equation}
+ \frac{P(T+\epsilon\dot T)-P(T-\epsilon\dot T)}{2\epsilon},
+ \qquad \epsilon=2\times10^{-6},
+\end{equation}
+against the analytic derivative.  Gauge covariance is tested after independent unitary changes of basis on the two sublattices.  Aggregation is refused unless every base passes the rank, gap, kernel, orthonormality, response-equation, horizontal-gauge, finite-difference, gauge-covariance, tangent-normalization, and whitening gates.
+
+The development and validation grids are disjoint in matrix dimensions and seed streams.  The prediction file records the source hashes of the theory audit, parent, runner, and sealing script.  The validation runner checks those hashes and the prediction sidecar before producing any outcome tensor.  It refuses an existing outcome path and requires the outcome timestamp to be later than the seal timestamp.
+
+The base matrix is the uncertainty unit.  Each base contributes the mean of its 16 tangent values.  The reported interval resamples 64 base means with replacement for 10,000 replicates.  The two-sided percentile bounds use Bonferroni quantiles $0.05/(2\times3)$ and $1-0.05/(2\times3)$ within each tangent class across the three validation sizes.  These intervals were registered for reporting and control separation; the random primary decision uses only whether each point estimate lies in the frozen development band.
+
+The complete calculation contains three validation dimensions, three tangent classes, 64 bases per dimension and class, and 16 tangents per base.  It produces 576 independently gated base records and 9,216 tangent observations.  No exponent, band endpoint, covariance threshold, control rule, or branch precedence is fitted after validation.

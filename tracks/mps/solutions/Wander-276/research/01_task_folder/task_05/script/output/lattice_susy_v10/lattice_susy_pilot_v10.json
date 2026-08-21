@@ -1,0 +1,271 @@
+{
+  "all_checks_pass": true,
+  "cases": [
+    {
+      "basis_dimension": 9,
+      "charge": 2,
+      "cycles": 1,
+      "external_gap": 0.17454072637070503,
+      "kernel_checks": {
+        "complete_harmonic_rank": true,
+        "kernel_residual": true,
+        "nilpotent_supercharge": true,
+        "open_external_gap": true,
+        "orthonormal_frame": true,
+        "two_nonempty_hodge_maps": true,
+        "zero_internal_bandwidth": true
+      },
+      "kernel_residual": 1.8725254630266253e-16,
+      "nilpotency_residual": 3.469446951953614e-18,
+      "observed_rank": 2,
+      "orthogonality_error": 1.2281462409043536e-15,
+      "panels": {
+        "isotropic": {
+          "A_left": 1.019364956404697,
+          "B_right": 0.6016192876447769,
+          "R4": 0.6064442251287722,
+          "arrays_file": "cycle_union_m1_isotropic_v10.npz",
+          "arrays_sha256": "e72e523eff204a2c925494d513e0649616c5186c8164e9eda87be5ab62942106",
+          "branch_sum_relative_error": 0.0,
+          "checks": {
+            "branch_sum": true,
+            "direct_resolvent": true,
+            "finite_response": true,
+            "finite_wick_statistic": true,
+            "full_channel_support": true,
+            "hodge_orthogonality": true,
+            "nontrivial_projector_motion": true,
+            "target_leakage": true,
+            "two_nonzero_hodge_branches": true
+          },
+          "direct_relative_error": 3.719849762396476e-16,
+          "hodge_balance": 0.621314278488821,
+          "kind": "isotropic",
+          "minus_weight": 10.042328533526682,
+          "orthogonality_relative_error": 8.836973734195363e-16,
+          "panel_size": 4,
+          "plus_weight": 2.3911087962958577,
+          "response_norm": 3.5261079577662593,
+          "target_leakage": 2.3166783005581696e-16
+        },
+        "local": {
+          "A_left": 1.004299972098789,
+          "B_right": 0.5364518446035709,
+          "R4": 0.5381949192469915,
+          "arrays_file": "cycle_union_m1_local_v10.npz",
+          "arrays_sha256": "7d805c9cfc8fc20b86117d6791248fa0aaddb3c76bf9dd0b620e8fee74ce2f47",
+          "branch_sum_relative_error": 0.0,
+          "checks": {
+            "branch_sum": true,
+            "direct_resolvent": true,
+            "finite_response": true,
+            "finite_wick_statistic": true,
+            "full_channel_support": true,
+            "hodge_orthogonality": true,
+            "nontrivial_projector_motion": true,
+            "target_leakage": true,
+            "two_nonzero_hodge_branches": true
+          },
+          "direct_relative_error": 3.507718476849137e-16,
+          "hodge_balance": 0.660962614339643,
+          "kind": "local",
+          "minus_weight": 10.056791985009307,
+          "orthogonality_relative_error": 9.043330817869258e-16,
+          "panel_size": 4,
+          "plus_weight": 2.655067892381508,
+          "response_norm": 3.5653695288694576,
+          "target_leakage": 2.29685838376158e-16
+        }
+      },
+      "projector_motion_norm": 3.5653695288694576,
+      "runtime_seconds": 0.0099541669987957,
+      "vertices": 6,
+      "zero_internal_bandwidth": 1.1350924816022168e-16
+    },
+    {
+      "basis_dimension": 105,
+      "charge": 4,
+      "cycles": 2,
+      "external_gap": 0.30663782333892153,
+      "kernel_checks": {
+        "complete_harmonic_rank": true,
+        "kernel_residual": true,
+        "nilpotent_supercharge": true,
+        "open_external_gap": true,
+        "orthonormal_frame": true,
+        "two_nonempty_hodge_maps": true,
+        "zero_internal_bandwidth": true
+      },
+      "kernel_residual": 2.3042489663710688e-15,
+      "nilpotency_residual": 2.1832375384005982e-16,
+      "observed_rank": 4,
+      "orthogonality_error": 1.5331562754904677e-14,
+      "panels": {
+        "isotropic": {
+          "A_left": 1.0025211908786373,
+          "B_right": 0.2653352967412116,
+          "R4": 0.45406292123817765,
+          "arrays_file": "cycle_union_m2_isotropic_v10.npz",
+          "arrays_sha256": "2d21aef66eea1c8c1e91601f2fd9eb84ed819ae2a93693d5fc35c5b901a0bd82",
+          "branch_sum_relative_error": 0.0,
+          "checks": {
+            "branch_sum": true,
+            "direct_resolvent": true,
+            "finite_response": true,
+            "finite_wick_statistic": true,
+            "full_channel_support": true,
+            "hodge_orthogonality": true,
+            "nontrivial_projector_motion": true,
+            "target_leakage": true,
+            "two_nonzero_hodge_branches": true
+          },
+          "direct_relative_error": 1.049790377821118e-15,
+          "hodge_balance": 0.5364264243936696,
+          "kind": "isotropic",
+          "minus_weight": 29.891909359881765,
+          "orthogonality_relative_error": 7.503939128834892e-16,
+          "panel_size": 8,
+          "plus_weight": 5.675439614615318,
+          "response_norm": 5.963836766251829,
+          "target_leakage": 2.7962792801804254e-16
+        },
+        "local": {
+          "A_left": 1.009569486178695,
+          "B_right": 0.26377790212960683,
+          "R4": 0.435534038668057,
+          "arrays_file": "cycle_union_m2_local_v10.npz",
+          "arrays_sha256": "6b6a34ab3e8d1462322f73ef8a593ba1ecf44f370b47f0c0845d171a0980e72d",
+          "branch_sum_relative_error": 0.0,
+          "checks": {
+            "branch_sum": true,
+            "direct_resolvent": true,
+            "finite_response": true,
+            "finite_wick_statistic": true,
+            "full_channel_support": true,
+            "hodge_orthogonality": true,
+            "nontrivial_projector_motion": true,
+            "target_leakage": true,
+            "two_nonzero_hodge_branches": true
+          },
+          "direct_relative_error": 1.0049326123598497e-15,
+          "hodge_balance": 0.5054455268869047,
+          "kind": "local",
+          "minus_weight": 31.075687050878408,
+          "orthogonality_relative_error": 1.1138639404967925e-15,
+          "panel_size": 8,
+          "plus_weight": 5.414277478181711,
+          "response_norm": 6.040692388216777,
+          "target_leakage": 2.8193872521437984e-16
+        }
+      },
+      "projector_motion_norm": 6.040692388216777,
+      "runtime_seconds": 0.040245124999273685,
+      "vertices": 12,
+      "zero_internal_bandwidth": 7.642896058698432e-16
+    },
+    {
+      "basis_dimension": 1389,
+      "charge": 6,
+      "cycles": 3,
+      "external_gap": 0.1461975068655602,
+      "kernel_checks": {
+        "complete_harmonic_rank": true,
+        "kernel_residual": true,
+        "nilpotent_supercharge": true,
+        "open_external_gap": true,
+        "orthonormal_frame": true,
+        "two_nonempty_hodge_maps": true,
+        "zero_internal_bandwidth": true
+      },
+      "kernel_residual": 7.41717107130661e-15,
+      "nilpotency_residual": 1.0309183805423666e-15,
+      "observed_rank": 8,
+      "orthogonality_error": 1.268343943158314e-13,
+      "panels": {
+        "isotropic": {
+          "A_left": 1.0059558920151708,
+          "B_right": 0.25796375706523733,
+          "R4": 0.35365135093945493,
+          "arrays_file": "cycle_union_m3_isotropic_v10.npz",
+          "arrays_sha256": "5ea8ead9233bbf97fce042516785398e42ea0c502a7016ec48acb575a5dc8e91",
+          "branch_sum_relative_error": 0.0,
+          "checks": {
+            "branch_sum": true,
+            "direct_resolvent": true,
+            "finite_response": true,
+            "finite_wick_statistic": true,
+            "full_channel_support": true,
+            "hodge_orthogonality": true,
+            "nontrivial_projector_motion": true,
+            "target_leakage": true,
+            "two_nonzero_hodge_branches": true
+          },
+          "direct_relative_error": 2.2705842915291926e-15,
+          "hodge_balance": 0.41107072813146966,
+          "kind": "isotropic",
+          "minus_weight": 81.17248983618106,
+          "orthogonality_relative_error": 7.940634570350874e-16,
+          "panel_size": 8,
+          "plus_weight": 10.681868551276336,
+          "response_norm": 9.584067945682433,
+          "target_leakage": 3.545569755827731e-16
+        },
+        "local": {
+          "A_left": 1.0181021699765138,
+          "B_right": 0.2724703302119212,
+          "R4": 0.41910381251004536,
+          "arrays_file": "cycle_union_m3_local_v10.npz",
+          "arrays_sha256": "8fd5b53d307ad249ee7b12523d99c9c94ff4ed26063dd92924b0c86fae57f7d2",
+          "branch_sum_relative_error": 0.0,
+          "checks": {
+            "branch_sum": true,
+            "direct_resolvent": true,
+            "finite_response": true,
+            "finite_wick_statistic": true,
+            "full_channel_support": true,
+            "hodge_orthogonality": true,
+            "nontrivial_projector_motion": true,
+            "target_leakage": true,
+            "two_nonzero_hodge_branches": true
+          },
+          "direct_relative_error": 1.9227245406013733e-15,
+          "hodge_balance": 0.2458391144128959,
+          "kind": "local",
+          "minus_weight": 99.81681155830802,
+          "orthogonality_relative_error": 7.900416352419303e-16,
+          "panel_size": 8,
+          "plus_weight": 7.029163249455755,
+          "response_norm": 10.33663266290157,
+          "target_leakage": 3.600433698574036e-16
+        }
+      },
+      "projector_motion_norm": 10.33663266290157,
+      "runtime_seconds": 3.935620582999036,
+      "vertices": 18,
+      "zero_internal_bandwidth": 3.0646789239048182e-15
+    }
+  ],
+  "configuration": {
+    "cycles": [
+      1,
+      2,
+      3
+    ],
+    "graph_family": "disjoint_union_C6",
+    "panel_kinds": [
+      "local",
+      "isotropic"
+    ],
+    "seed": 2026081610,
+    "zero_mode_origin": "independence_complex_cohomology"
+  },
+  "environment": {
+    "numpy": "2.4.2",
+    "platform": "macOS-15.6-arm64-arm-64bit-Mach-O",
+    "python": "3.14.4",
+    "scipy": "1.18.0"
+  },
+  "generated_utc": "2026-08-15T23:22:02.804168+00:00",
+  "runtime_seconds": 3.9883308749995194,
+  "version": "v10"
+}

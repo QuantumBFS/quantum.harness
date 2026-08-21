@@ -1,0 +1,72 @@
+{
+  "checks": {
+    "complete_primary_pair": true,
+    "complete_realization_uncertainty": true,
+    "prediction_precedes_unseal": true,
+    "registered_branch_resolved": true,
+    "valid_prediction_seal": true
+  },
+  "pair_coverage": {
+    "collapsed": false,
+    "hodge": false
+  },
+  "passed": true,
+  "physical_bootstrap_replicates": 10000,
+  "prediction_sha256": "fc300dc7e4bdc1be157919e458ac868d3468533cce31108f23c9fba4f7e9f102",
+  "primary_pair": [
+    {
+      "N": 14,
+      "collapsed_covered": false,
+      "collapsed_prediction_interval": [
+        0.11178894327406741,
+        0.11182073355743845,
+        0.11185243656607288
+      ],
+      "hodge_covered": false,
+      "hodge_prediction_interval": [
+        0.11234396147287215,
+        0.11242666326099385,
+        0.11251284962232763
+      ],
+      "observed_median": 0.3015287195325017,
+      "panel_kind": "sparse",
+      "physical_bootstrap_interval": [
+        0.2915274750468075,
+        0.3120611443736316
+      ],
+      "realizations": 24,
+      "robust_outside_both": true,
+      "sector": "adjacent"
+    },
+    {
+      "N": 14,
+      "collapsed_covered": false,
+      "collapsed_prediction_interval": [
+        0.1113377289462959,
+        0.11134480106449174,
+        0.11135301768590472
+      ],
+      "hodge_covered": false,
+      "hodge_prediction_interval": [
+        0.11133252105193724,
+        0.11133957071189352,
+        0.11134819894894332
+      ],
+      "observed_median": 0.3749925716126603,
+      "panel_kind": "sparse",
+      "physical_bootstrap_interval": [
+        0.3689804933327322,
+        0.38047305142967947
+      ],
+      "realizations": 24,
+      "robust_outside_both": true,
+      "sector": "central"
+    }
+  ],
+  "robust_non_gaussian_excess": true,
+  "scored_utc": "2026-08-04T01:18:16.350778+00:00",
+  "selected_branch": "cohomological_non_gaussian_class",
+  "structured_indistinguishable": false,
+  "unsealed_utc": "2026-08-04T01:18:16.227834+00:00",
+  "version": "v7"
+}

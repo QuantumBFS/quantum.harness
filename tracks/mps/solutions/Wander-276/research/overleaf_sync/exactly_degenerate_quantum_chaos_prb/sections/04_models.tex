@@ -1,0 +1,258 @@
+\section{Exact-degeneracy mechanisms and model families}
+\label{sec:models}
+
+The models are grouped by the algebra that fixes the protected rank, rather
+than by spatial dimension or by the statistic that is eventually measured.
+This organization is necessary because the same dimension $D$ can arise from
+a common kernel, a cohomology group, or dependent stabilizer constraints, and
+these mechanisms impose different restrictions on the response matrices.  In
+every numerical case we identify the kernel first, verify a positive gap to
+its complement, and only then construct tangent responses.  The ranks and gap
+audits used in the comparison are imported from the generated evidence table,
+not transcribed into the prose.
+
+\subsection{Constraint kernels and clustered Hall parents}
+
+A frustration-free parent can be written in terms of a constraint map $C$
+as
+\begin{equation}
+ H_{\mathrm{par}}=C^\dagger C
+ =\sum_\alpha C_\alpha^\dagger C_\alpha,
+ \qquad
+ \ker H_{\mathrm{par}}=\bigcap_\alpha\ker C_\alpha.
+ \label{eq:factor-parent}
+\end{equation}
+Positivity pins every state in this common kernel to exactly zero energy.  It
+does not fix the orientation of the kernel when the constraints change.  If
+$C(\boldsymbol\lambda)$ has constant nullity and its smallest nonzero singular
+value remains positive, Eq.~\eqref{eq:factor-parent} supplies precisely the
+constant-rank, gapped projector family assumed in Sec.~\ref{sec:protected-response}.
+
+\paragraph*{Two-body clustering and the Kapit--Mueller realization.}
+The Laughlin state supplies the two-body clustering mechanism
+\cite{laughlin1983}.  In a lowest Landau level or a Chern band, the bosonic
+$V_0$ pseudopotential may be factorized as
+\begin{equation}
+ H_{\mathrm L}=V_0\sum_R A_R^\dagger A_R,
+ \qquad
+ A_R|\Psi_0\rangle=0,
+ \label{eq:laughlin-parent}
+\end{equation}
+where $A_R$ annihilates a pair in the forbidden relative-angular-momentum
+channel and $R$ labels its center-of-mass translate.  Quasihole zero modes are
+common null vectors of all $A_R$; their admissible-root counting is fixed by
+the $(1,2)$ clustering rule \cite{bernevighaldane2008}, and the zero-mode
+property admits a purely second-quantized formulation \cite{chenseidel2015}.
+
+Our lattice realization uses $N$ bosons on a square torus with $n_\phi$
+orbitals in the exactly flat lowest Kapit--Mueller Chern band
+\cite{kapitmueller2010}.  The Hilbert space is the fixed-particle-number
+bosonic Fock space after projection to that band.  The boundary conditions are
+magnetic-periodic; boundary twists are introduced only when the closed twist
+torus is explicitly studied.  Projecting the onsite repulsion gives the
+positive two-body parent in Eq.~\eqref{eq:laughlin-parent}.  The protected rank
+is the generated quasihole count in Table~\ref{tab:model-evidence}, and a case
+is retained only when its first positive many-body eigenvalue gives a positive
+gap over the entire registered parameter set.
+
+We use two logically distinct tangent classes.  The first is
+\emph{exactness-preserving constraint/generator transport}.  A smooth
+one-particle unitary $U(\boldsymbol\lambda)$, lifted to the fixed-$N$ Fock
+space as $\Gamma_N[U]$, defines
+$C(\boldsymbol\lambda)=C_0\Gamma_N[U(\boldsymbol\lambda)]^\dagger$ and
+$H(\boldsymbol\lambda)=C(\boldsymbol\lambda)^\dagger
+C(\boldsymbol\lambda)$.  Consequently $S_a=0$ along the path, the nullity is
+constant, and the transported kernel remains exactly degenerate.  Statements
+about finite-path parallel transport, holonomy, and protection mixing belong
+to this class.
+
+The second class comprises the \emph{v2/v3 Laughlin fixed-parent
+local-potential panels}.  At the exact parent, structured Fourier and random
+local potentials enter through $Q(\partial_aH)P$.  They define the linear
+response of the isolated rank-$D$ cluster at the exact parent, but generally
+do not preserve exact degeneracy away from the base point.  Curvature spectra
+and four-channel statistics obtained from these panels are therefore
+base-point response statements, not claims about a finite exact path.  An
+intrafiber intervention is used only as the fixed-projector spectral control.
+Together, the two classes make the Laughlin parent a spatially local,
+large-rank comparison between exact transport and stochastic projector
+response protected at the base point by two-body clustering.
+
+A term with a nonscalar $P\delta HP$ breaks Laughlin exactness.  Concrete
+examples are residual band dispersion, a generic projected potential
+$\sum_{\bm x}\mu_{\bm x}n_{\bm x}$, or an interaction component outside the
+common $V_0$ kernel.  Such terms need not destroy the surrounding fractional
+Hall phase, but at finite size they remove the exact zero-energy equality that
+is required here.  Truncating the ideal Kapit--Mueller hopping can likewise
+replace the exact flat band by a narrow band; this distinction concerns exact
+degeneracy, not phase stability.
+
+\paragraph*{Three-body clustering and Moore--Read zero modes.}
+The bosonic Moore--Read parent changes the order of the local constraint
+\cite{mooreread1991}.  We work in the fixed-$N$ bosonic Fock space of
+$N_\phi$ continuum lowest-Landau-level orbitals on a square torus.  On a
+complete magnetic-translation orbit of coherent states, the factorized parent
+is
+\begin{equation}
+ H_{\mathrm{MR}}=\sum_x C_x^\dagger C_x,
+ \qquad
+ C_x=\frac{1}{\sqrt{3!}}\left(\sum_j\phi_{xj}b_j\right)^3.
+ \label{eq:moore-read-parent}
+\end{equation}
+Every zero mode vanishes when three particles coincide.  The fixed-four-
+quasihole sequence uses $N_\phi=N+2$ with periodic boundary conditions.  Its
+protected rank is obtained from the cyclic $(2,2)$ admissible count and
+checked against the numerical nullity; the corresponding generated ranks and
+positive gaps appear in Table~\ref{tab:model-evidence}.  The factorized
+second-quantized construction is also the basis for the sparse numerical
+representation \cite{zhang2023parent}.
+
+The tangent class consists of normalized guiding-center generators organized
+into local panels.  Each Hermitian one-body generator $G_a$ differentiates an
+invertible transport of the three-body constraint map.  Write
+$\Gamma_a=\Gamma_N(G_a)$.  On the protected fiber, the resulting tangent and
+response obey
+\begin{equation}
+ (\partial_aH)P=-H\Gamma_aP,
+ \qquad
+ X_a=Q\Gamma_aP,
+ \qquad S_a=0.
+ \label{eq:moore-read-transport}
+\end{equation}
+Thus the v9 Moore--Read guiding-center panels are exactness-preserving
+generator transports, even though their response is evaluated analytically
+at the registered parent.  Their curvature and four-channel statistics
+describe tangents to an exactly degenerate parent family, rather than generic
+splitting probes.  This model's role in the comparison is to change the
+clustering order and the zero-mode structure without introducing a
+supercharge or a stabilizer algebra.  A generic two-body pseudopotential
+$\delta H_2=\sum_R u_R A_R^\dagger A_R$, or any other term with nonscalar
+$P\delta H_2P$, breaks Moore--Read exactness.  Landau-level mixing and an
+incomplete three-body constraint orbit have the same effect at the level of
+the ideal parent problem.
+
+\subsection{Cohomological kernels}
+
+\paragraph*{Random-supercharge cohomology.}
+The random-supercharge model is zero dimensional: its Hilbert space is the
+fermionic Fock space of $N$ complex modes, resolved into fixed-charge sectors.
+There is no spatial boundary condition.  For a generic complex three-form
+$C_{ijk}$, define
+\begin{equation}
+ \begin{aligned}
+ Q(C)&=\sum_{i<j<k}C_{ijk}\psi_i\psi_j\psi_k,
+ &Q^2&=0,\\
+ H_{\mathrm{SUSY}}&=\{Q,Q^\dagger\}.
+ \end{aligned}
+ \label{eq:random-supercharge}
+\end{equation}
+This is the complex $\mathcal N=2$ SYK construction
+\cite{fu2017susy}.  Positivity implies that the protected fiber in a charge
+sector is
+$\ker Q\cap\ker Q^\dagger$, equivalently the space of harmonic
+representatives of $Q$-cohomology.  Its protected rank is calculated from the
+charge-resolved cohomology and verified by exact nullity in every checkpoint.
+Because the opened calculation contains two charge sectors and many coupling
+realizations rather than one common $D$ sequence, the v13 cross-model table
+leaves its single ``sampled $D$'' cell as not tested instead of selecting a
+representative rank after the fact.  The positive gap is the smallest nonzero
+Hodge-Laplacian eigenvalue in the same charge sector and is audited separately
+for every realization.
+
+The tangent class consists of sparse and isotropic variations $\delta C$ of
+the cubic supercharge.  Differentiating $H$ separates the response into the
+orthogonal exact and coexact images of $Q$ and $Q^\dagger$.  The role in the
+comparison is a dense, nonlocal cohomological mechanism with an ensemble of
+independent coupling realizations.  Deforming $Q$ within the nilpotent cubic
+family preserves nonnegative energy and normally preserves the generic
+cohomology rank, although the rank may jump at singular coupling loci.  By
+contrast, adding a generic charge-preserving interaction $W$ that is not part
+of an anticommutator and has nonscalar $PWP$ breaks random-supercharge
+exactness by splitting the harmonic multiplet.
+
+\paragraph*{Independence-complex cohomology on a lattice.}
+For a graph $G$, let
+$d_i^\dagger=c_i^\dagger\prod_{j\sim i}(1-n_j)$ create a fermion only when its
+neighboring vertices are empty.  The allowed Hilbert space at charge $f$ is
+therefore the vector space spanned by size-$f$ independent sets.  With complex
+site couplings $z_i$,
+\begin{equation}
+ Q=\sum_i z_i d_i^\dagger,
+ \qquad Q^2=0,
+ \qquad H_{\mathrm{SUSY}}=\{Q,Q^\dagger\}.
+ \label{eq:lattice-supercharge}
+\end{equation}
+This is the local lattice-$\mathcal N=2$ construction
+\cite{fendley2003lattice}; its zero modes are computed by
+independence-complex cohomology \cite{huijse2010cohomology}.
+
+The controlled family used here is $G=\bigsqcup_{s=1}^{m}C_6$, a disjoint
+union of six-site rings, in charge sector $f=2m$.  Each component has periodic
+boundary conditions; different rings have no connecting edge.  The protected
+rank is $2^m$ and is checked directly against the zero-eigenvalue count, while
+the first positive eigenvalue supplies the gap gate.  Local tangent panels
+vary the site couplings after projecting out the component-wise rescaling
+directions; isotropic panels provide a matched control.  Both panels retain
+the exact/coexact Hodge decomposition.  The role in the comparison is an
+exactly auditable local cohomology sequence, not a connected-lattice
+thermodynamic limit.
+
+An unconstrained hopping term
+$\delta H_t=\sum_{\langle ij\rangle}t_{ij}c_i^\dagger c_j+\mathrm{H.c.}$ or a
+nonuniform onsite potential generally cannot be written as the same Hodge
+Laplacian.  When its restriction to the harmonic fiber is nonscalar it breaks
+lattice-SUSY exactness.  Altering the exclusion projector so that the proposed
+supercharge is no longer nilpotent removes the cohomological protection more
+directly.
+
+\subsection{Commuting stabilizers}
+
+The X-cube model places one qubit on every edge of an $L\times L\times L$
+cubic three-torus.  Its Hilbert space has $3L^3$ qubits and periodic boundary
+conditions in all three directions.  With cube $X$ stabilizers $A_c$ and
+vertex-plane $Z$ stabilizers $B_v^{\mu\nu}$, the Hamiltonian is
+\begin{equation}
+ H_{\mathrm{XC}}=-\sum_c J_cA_c
+ -\sum_{v,\mu\nu}K_v^{\mu\nu}B_v^{\mu\nu},
+ \qquad J_c,K_v^{\mu\nu}>0.
+ \label{eq:xcube-parent}
+\end{equation}
+All stabilizers commute \cite{vijay2016xcube}.  Their dependent relations on
+the torus leave $6L-3$ logical qubits, hence protected rank $2^{6L-3}$.
+Positive coefficients retain the same simultaneous $+1$ eigenspace and a
+positive gap.  Coefficient reweighting is therefore a fixed-projector tangent
+class.  A separate local unitary conjugation transports the projector while
+preserving the entire spectrum; it supplies the scalar-curvature control.
+The role in the comparison is an exact structured counterexample rather than
+a stochastic ensemble.
+
+Setting a stabilizer coefficient through zero closes the corresponding gap
+and changes the constraint count.  Adding a logical membrane operator
+$-h\overline Z$ acts nontrivially within the ground space and breaks X-cube
+exactness immediately; a generic local Pauli field produces the same finite-
+size splitting only at the perturbative order needed to implement a logical
+operator.  This makes the distinction between a protected phase and exact
+finite-size degeneracy explicit.
+
+\subsection{Quasi-degenerate checkerboard replication}
+
+The checkerboard calculation uses bosons in the projected lower band of a
+short-range, two-sublattice $C=1$ hopping model on a periodic torus.  Boundary
+twists enter the physical hopping matrix as seam phases before the band
+projection.  The hopping amplitudes realize a nearly flat isolated band
+\cite{sun:2011:flat}, and interactions produce an FCI-like low-energy
+multiplet \cite{regnault:2011:fci}.  Bond-magnitude, bond-phase, and site-
+potential disorder define the tangent path, and the onsite contact interaction
+is projected into the deformed lower band at each parameter point.  The
+selected low-energy cluster
+has a nonzero internal bandwidth and remains separated from higher states by
+a positive external gap.
+
+Accordingly, checkerboard FCI is a quasi-degenerate replication of the local
+geometric-statistics trend, not an exact-zero-mode mechanism.  Its protected
+rank means the dimension of the tracked isolated cluster, not the nullity of a
+frustration-free parent.  It tests sensitivity to short-range Chern-band
+microscopics; it is not included when statements require exact spectral
+silence.
+
+\input{generated/model_table_v13.tex}

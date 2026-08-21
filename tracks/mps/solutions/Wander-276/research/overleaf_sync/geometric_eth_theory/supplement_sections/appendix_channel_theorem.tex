@@ -1,0 +1,245 @@
+\section{Cumulants, effective channels, and the commutant test}
+\label{supp:channel_theorem}
+
+This appendix proves the finite-channel statements used in the main text and
+fixes the complex covariance convention.  None of the arguments assumes a
+large fiber rank, a thermodynamic limit, or an ETH ansatz.
+
+\subsection{Realification and weighted cumulants}
+
+Let $\mathcal V$ be a finite-dimensional complex vector space and
+$\mathcal V_{\mathbb R}$ its realification.  Choose a real basis and denote
+the real coordinate vector of $Y\in\mathcal V$ by $y_{\mathbb R}$.  For a
+real dual vector $t$, define
+\begin{equation}
+ \Phi_Y(t)=\mathbb E\exp\!\left(i\langle t,y_{\mathbb R}\rangle\right),
+ \qquad
+ K_Y(t)=\log\Phi_Y(t).
+ \label{supp:eq:cumulant_generator}
+\end{equation}
+In a neighborhood of the origin where the required derivatives exist, the
+order-$k$ cumulant tensor is
+\begin{equation}
+ \kappa_k(Y)[t_1,\ldots,t_k]
+ =\left.\frac{1}{i^k}
+ \partial_{s_1}\cdots\partial_{s_k}
+ K_Y\!\left(\sum_{r=1}^{k}s_rt_r\right)
+ \right|_{s_1=\cdots=s_k=0} .
+ \label{supp:eq:cumulant_definition}
+\end{equation}
+Finite $k$th absolute moments of the tested real-linear projections are
+sufficient for the derivative statement used here.  This construction is
+real multilinear.  Extending it complex linearly recovers cumulants written
+with $Y$ and $Y^\dagger$ in any chosen order.
+
+Suppose $Y_1,\ldots,Y_n$ are mutually independent and take values in the same
+$\mathcal V$.  A fixed outcome-independent linear identification may be used
+if the original channel spaces differ.  For deterministic real weights and
+$Z=\sum_\alpha w_\alpha Y_\alpha$, independence gives
+\begin{align}
+ \Phi_Z(t)
+ &=\prod_{\alpha=1}^{n}\Phi_{Y_\alpha}(w_\alpha t),\nonumber\\
+ K_Z(t)
+ &=\sum_{\alpha=1}^{n}K_{Y_\alpha}(w_\alpha t).
+ \label{supp:eq:cgf_factorization}
+\end{align}
+Substitution of Eq.~\eqref{supp:eq:cgf_factorization} into
+Eq.~\eqref{supp:eq:cumulant_definition} yields
+\begin{equation}
+ \kappa_k(Z)[t_1,\ldots,t_k]
+ =\sum_{\alpha=1}^{n}w_\alpha^k
+ \kappa_k(Y_\alpha)[t_1,\ldots,t_k].
+ \label{supp:eq:weighted_cumulant_proof}
+\end{equation}
+Since Eq.~\eqref{supp:eq:weighted_cumulant_proof} holds for arbitrary test
+fields, it proves the tensor identity quoted in the main text.  Centering is
+required for the simple
+second-moment formulas and normalized fourth statistics used in the paper;
+the abstract additivity of cumulants itself also holds for noncentered
+variables when their first cumulants are retained.
+
+Mutual independence is essential.  Pairwise independence suffices only up to
+orders controlled by the corresponding joint laws, and zero cross covariance
+does not remove a mixed fourth cumulant.  If the channel weights depend on
+the observed $Y_\alpha$, Eq.~\eqref{supp:eq:cgf_factorization} likewise does
+not apply.
+
+\subsection{Complete complex Wick subtraction}
+
+For a centered complex vector $z$, our conventions are
+\begin{equation}
+ C_{ij}=\mathbb E[z_i z_j^*],
+ \qquad
+ \Pi_{ij}=\mathbb E[z_i z_j].
+ \label{supp:eq:complex_second_moments}
+\end{equation}
+The covariance is Hermitian positive semidefinite and the pseudocovariance is
+complex symmetric.  In terms of $z=u+iv$, the pair $(C,\Pi)$ contains the
+same information as the full real covariance of $(u,v)$.  In particular,
+$\Pi=0$ is a property of a proper complex population, not a convention that
+can be imposed after sampling.
+
+For the ordering $z_i z_j^*z_k z_l^*$, Isserlis contraction of a centered
+complex Gaussian gives
+\begin{equation}
+ W_{i\bar j k\bar l}
+ =C_{ij}C_{kl}+C_{il}C_{kj}+\Pi_{ik}\Pi_{jl}^*.
+ \label{supp:eq:complex_wick_tensor}
+\end{equation}
+The corresponding connected tensor is
+\begin{equation}
+ \Gamma_{i\bar j k\bar l}
+ =\mathbb E[z_i z_j^*z_k z_l^*]
+ -W_{i\bar j k\bar l}.
+ \label{supp:eq:complete_connected_tensor}
+\end{equation}
+Other index orderings follow from the same realified covariance and contain
+the analogous three pairings.  The scalar contraction used by the executable
+oracle is
+\begin{align}
+ \widehat\kappa_4^{\mathrm{conn}}
+ &=\mathbb E|z|^4
+ -2(\mathbb E|z|^2)^2
+ -|\mathbb E z^2|^2,\nonumber\\
+ \widehat R_4^{\mathrm{full}}
+ &=\frac{\widehat\kappa_4^{\mathrm{conn}}}
+ {(\mathbb E|z|^2)^2} .
+ \label{supp:eq:scalar_complete_kappa}
+\end{align}
+Equation~\eqref{supp:eq:scalar_complete_kappa} displays explicitly why
+ordinary covariance alone is not a complete Gaussian null.
+
+For independent centered channel vectors $y_\alpha$, direct expansion gives
+\begin{equation}
+ C_Z=\sum_\alpha w_\alpha^2 C_\alpha,
+ \qquad
+ \Pi_Z=\sum_\alpha w_\alpha^2\Pi_\alpha.
+ \label{supp:eq:weighted_cp}
+\end{equation}
+At fourth order, all terms involving two distinct independent channels are
+exactly the Wick pairings constructed from Eq.~\eqref{supp:eq:weighted_cp}.
+They cancel in Eq.~\eqref{supp:eq:complete_connected_tensor}, leaving only
+$\sum_\alpha w_\alpha^4\Gamma_\alpha$, as required by the general cumulant
+proof.
+
+\subsection{Participation number and covariance eigenvalues}
+
+Put
+\begin{equation}
+ q_\alpha=\frac{w_\alpha^2}{\sum_\beta w_\beta^2},
+ \qquad \sum_\alpha q_\alpha=1 .
+ \label{supp:eq:normalized_channel_power}
+\end{equation}
+Then
+\begin{equation}
+ N_{\mathrm{eff}}=\frac{1}{\sum_\alpha q_\alpha^2}.
+ \label{supp:eq:participation_ratio}
+\end{equation}
+This is the inverse participation ratio of the channel powers, not a fitted
+sample size.  If the independent, variance-normalized channels define
+orthogonal directions in a channel-label covariance matrix
+$G=\operatorname{diag}(q_1,\ldots,q_n)$, then
+\begin{equation}
+ N_{\mathrm{eff}}
+ =\frac{(\operatorname{Tr}G)^2}{\operatorname{Tr}G^2}
+ =\frac{(\sum_r g_r)^2}{\sum_r g_r^2},
+ \label{supp:eq:covariance_eigen_neff}
+\end{equation}
+where $g_r$ are the eigenvalues of $G$.  This eigenvalue form explains the
+usual covariance participation ratio.
+
+Equation~\eqref{supp:eq:covariance_eigen_neff} must not be applied blindly to
+the covariance of the flattened physical response.  Overlapping channel
+tensors can have a response covariance whose eigenvalues do not identify the
+independent units.  For correlated channel labels one can define the
+descriptive quantity
+$(\operatorname{Tr}R)^2/\operatorname{Tr}R^2$ from a label covariance $R$,
+but the mixed connected tensors omitted from
+Eq.~\eqref{supp:eq:weighted_cumulant_proof} remain.  Thus a covariance
+participation ratio does not restore the theorem when independence is absent.
+
+If every channel has the same variance-normalized connected tensor $K_4$,
+Eq.~\eqref{supp:eq:weighted_cumulant_proof} and
+Eq.~\eqref{supp:eq:participation_ratio} give
+\begin{equation}
+ \frac{\kappa_4(Z)}{(\sum_\alpha w_\alpha^2)^2}
+ =K_4\sum_\alpha q_\alpha^2
+ =\frac{K_4}{N_{\mathrm{eff}}}.
+ \label{supp:eq:neff_derivation}
+\end{equation}
+If only $\|\kappa_4(Y_\alpha)\|\le K$ is known, the triangle inequality gives
+the corresponding $K/N_{\mathrm{eff}}$ bound.  If the tensors are known but
+unequal, they must remain inside the weighted sum; replacing them by one
+average is an additional modeling assumption.
+
+\subsection{Commutant as a linear system}
+
+Let $A_1,\ldots,A_m$ be generators of $\mathcal A_X$, for example the
+products $X_a^\dagger X_b$ together with the adjoints needed for star closure.
+A matrix $M$ lies in the commutant precisely when
+\begin{equation}
+ MA_r-A_rM=0,
+ \qquad r=1,\ldots,m .
+ \label{supp:eq:commutator_equations}
+\end{equation}
+With column-major vectorization,
+\begin{equation}
+ \operatorname{vec}(MA_r-A_rM)
+ =\left(A_r^T\otimes I-I\otimes A_r\right)
+ \operatorname{vec}M .
+ \label{supp:eq:commutator_superoperator}
+\end{equation}
+Stacking the superoperators in
+Eq.~\eqref{supp:eq:commutator_superoperator} gives a finite linear system.
+Its complex nullity is $\dim\mathcal A_X'$.  The executable audit evaluates
+that nullity by a singular-value decomposition at a stated tolerance.  For
+two Pauli generators it returns one; for one nondegenerate diagonal generator
+it returns two; for the identity alone it returns four.
+
+For completeness, suppose $\mathcal A_X$ is a finite-dimensional complex
+star algebra and has a nontrivial invariant subspace.  Star closure makes its
+orthogonal complement invariant as well, and the orthogonal projection onto
+the subspace is a nonscalar member of $\mathcal A_X'$.  Hence a scalar
+commutant implies irreducibility.  Burnside's theorem then identifies an
+irreducible unital complex matrix algebra with the full endomorphism algebra.
+This argument is algebraic.  It contains no distribution, cumulant, or
+large-size statement and therefore supplies no implication from
+irreducibility to ETH.
+
+\subsection{Executable oracle and claim boundary}
+
+The synthetic channel population uses independent entries
+\begin{equation}
+ y=\frac{B\,\xi}{\sqrt p},
+ \qquad
+ \Pr(B=1)=p=0.1,
+ \qquad
+ \xi\in\{1,i,-1,-i\}
+ \label{supp:eq:oracle_population}
+\end{equation}
+with the four phases equally likely.  It has
+$\mathbb Ey=0$, $\mathbb E|y|^2=1$, $\mathbb Ey^2=0$, and
+\begin{equation}
+ \kappa_4(y)=\mathbb E|y|^4-2=\frac{1}{p}-2=8 .
+ \label{supp:eq:oracle_kappa}
+\end{equation}
+The audit draws $50{,}000$ complex $2\times2$ matrices, uses $25$ blocks for
+uncertainty, and evaluates equal and linearly unequal weights for
+$n=4,8,16,32,64$.  Its maximum relative discrepancy from the fixed
+Eq.~\eqref{supp:eq:neff_derivation} prediction is $\ChannelTheoryMaximumRelativeError$; the
+registered implementation threshold is $0.08$.  The exponent is not fitted.
+
+All pass/fail decisions use the unrounded double-precision calculation.  A
+recursive ten-significant-digit quantization is applied only when serializing
+the JSON record and computing its portable scientific hash; nonfinite values
+are rejected.  This serialization convention has no effect on the numerical
+gate.
+
+The derivation fails or changes in any of the following cases: mutually
+correlated channels, absent fourth moments, outcome-dependent weights,
+unresolved symmetry blocks, a size-dependent tangent population, a dominant
+weight that prevents $N_{\mathrm{eff}}$ from growing, or a closing external
+gap.  These are hypotheses to test, not technical qualifications that may be
+discarded after observing a mismatch.  In the prospective chiral calculation
+the fixed random-channel validation fails, so the synthetic oracle and exact
+proof cannot be promoted to a physical Geometric-ETH conclusion.

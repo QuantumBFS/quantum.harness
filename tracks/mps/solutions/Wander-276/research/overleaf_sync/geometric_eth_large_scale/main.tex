@@ -1,0 +1,68 @@
+\documentclass[aps,prb,reprint,superscriptaddress,longbibliography,floatfix]{revtex4-2}
+
+\usepackage{amsmath,amssymb,bm}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{microtype}
+\usepackage{xcolor}
+\usepackage[colorlinks=true,citecolor=blue!55!black,linkcolor=blue!55!black,urlcolor=blue!55!black]{hyperref}
+\hypersetup{
+  pdftitle={Spectral Silence and Geometric Chaos in an Exactly Degenerate Topological Manifold},
+  pdfauthor={Thomas J. Wang; OKongOYangO},
+  pdfsubject={Exact degeneracy, non-Abelian Berry curvature, geometric chaos, and finite Jacobi form factors}
+}
+
+\graphicspath{{figures/}}
+\input{generated/generated_numbers_v1.tex}
+\input{generated/generated_numbers_v2.tex}
+\input{generated/generated_numbers_v3.tex}
+\input{generated/generated_tables_v3.tex}
+
+\newcommand{\Tr}{\operatorname{Tr}}
+\newcommand{\rank}{\operatorname{rank}}
+\newcommand{\cH}{\mathcal{H}}
+\newcommand{\cS}{\mathcal{S}}
+\newcommand{\dd}{\mathrm{d}}
+
+\begin{document}
+
+\title{Spectral Silence and Geometric Chaos in an\texorpdfstring{\\}{ }
+Exactly Degenerate Topological Manifold}
+
+\author{Thomas J. Wang}
+\affiliation{Tsinghua University, Beijing 100084, China}
+
+\author{OKongOYangO}
+\affiliation{The Pennsylvania State University, University Park, Pennsylvania 16802, USA}
+
+\date{\today}
+
+\begin{abstract}
+Exact degeneracy silences every internal level-spacing diagnostic and elevates quantum geometry into the primary signal. We establish an independently testable hierarchy of projector correlations in a bosonic fractional-quantum-Hall zero-mode manifold. The energy spectral form factor obeys the exact identities \(K_{E,\mathrm{raw}}=D\) and \(K_{E,c}=0\), while the quantum-metric-normalized non-Abelian Berry curvature follows the finite-\(D\) complex-Jacobi ramp over a registered window. Structured-tangent and fixed-projector interventions resolve geometric chaos independently from active rank and intramultiplet spectral statistics; exact boundary atoms at \(D>M\) yield the analytic connected plateau \(k/D\). We then introduce a matrix-element Geometric-ETH test. On the genuine fixed-two-quasihole sequence \(N=3,4,5\), a covariance-whitened, gauge-invariant four-channel residual decreases to \(R_4=\LargestNRFour\) and retains a resolved connected component relative to its matched Gaussian interval, selecting deformed Geometric ETH. On the closed twist torus, a smooth periodic ambient conjugation preserves the complete spectrum, gap, and Chern numbers \(C_1=6,10\) for \(N=3,4\), while Wilson gap ratios change significantly and occupy a structured universality class distinct from circular-unitary transport. Exact degeneracy therefore reveals three complementary geometric layers: finite-Jacobi local correlations, operator-channel memory, and tunable non-Abelian holonomy inside one fixed topological class.
+\end{abstract}
+
+\maketitle
+
+\input{sections/01-introduction.tex}
+\input{sections/02-ensembles.tex}
+\input{sections/03-physical-law.tex}
+\input{sections/04-covariance-eth.tex}
+\input{sections/05-rank-crossover.tex}
+\input{sections/06-thouless-hierarchy.tex}
+\input{sections/08-matrix-elements-topology.tex}
+\input{sections/07-conclusion.tex}
+
+\appendix
+\input{appendices/numerical-methods.tex}
+\input{appendices/matrix-element-topology-v3.tex}
+
+\section*{Code and data availability}
+The public repository \url{https://github.com/JunkaiWang-TheoPhy/Chaos-of-Quantum-Geometry} contains the complete source, tests, seven figures, generated tables, compact numerical artifacts, and the audited article. From \texttt{01\_task\_folder/task\_05/script}, \texttt{bash run\_quick\_verify\_v1.sh} verifies the release contract and focused analytic tests, while \texttt{bash run\_full\_recompute\_v1.sh} executes the complete production pipeline. The machine-readable \texttt{output/release\_manifest\_v1.json} records every Git-resident artifact and every production array with its path, byte size, SHA-256 hash, storage class, and producing command.
+
+\begin{acknowledgments}
+The numerical artifacts, fixed train--validation--test split, matrix-level uncertainty estimates, and figure-generation scripts are retained with the source of this manuscript.
+\end{acknowledgments}
+
+\bibliography{references}
+
+\end{document}

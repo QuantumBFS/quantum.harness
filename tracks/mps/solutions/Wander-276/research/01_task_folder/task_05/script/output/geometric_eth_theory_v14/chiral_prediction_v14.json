@@ -1,0 +1,182 @@
+{
+  "branch_precedence": [
+    "feasibility_failure",
+    "random_channel_failure",
+    "deformed_locality_class",
+    "channel_law_validated"
+  ],
+  "channel_theory_contract": {
+    "maximum_relative_error": 0.04433547544,
+    "schema": "geometric_eth_channel_theory_v14",
+    "scientific_payload_sha256": "82910cdb55251497c488d6ef82e25d088bb23c60c1dfab027a8f0db6cac8db38"
+  },
+  "execution_provenance": {
+    "calibration_mode": "production_development",
+    "class_seeds": {
+      "local": {
+        "base": 14002101,
+        "tangent": 14002201
+      },
+      "random": {
+        "base": 14001101,
+        "tangent": 14001201
+      },
+      "structured": {
+        "base": 14003101,
+        "tangent": 14003201
+      }
+    },
+    "executed_base_count": 64,
+    "executed_development_sizes": [
+      [
+        16,
+        24
+      ],
+      [
+        24,
+        36
+      ],
+      [
+        32,
+        48
+      ]
+    ],
+    "executed_tangent_count": 16
+  },
+  "primary_prediction": {
+    "bootstrap_intervals_are_reporting_only": true,
+    "bootstrap_intervals_do_not_expand_primary_band": true,
+    "complete_complex_wick_subtraction": "kappa4_over_v_squared_equals_m4_over_v_squared_minus_2_minus_normalized_pseudocovariance_magnitude_squared",
+    "controls": "local and repeated-cell classes are not required to enter the random-channel band",
+    "decision": "all three random-class validation point estimates must lie inside the closed development-derived simultaneous band",
+    "estimator": "at each size, average the 16 registered tangent statistics within each of 64 bases, then average those 64 base means",
+    "no_validation_refit_of_development_band_or_thresholds": true,
+    "observable_side_self_normalization": "at each base, apply the registered covariance-whitening rule and center each flattened observation before computing its variance and pseudocovariance",
+    "rule": "the random tangent class must remain inside the frozen simultaneous band at all three validation sizes",
+    "simultaneous_band": {
+      "construction": "envelope_of_Bonferroni_normal_intervals_over_base_means",
+      "development_case_count": 3,
+      "development_safe_summary": {
+        "n_b16_n_a24": {
+          "base_count": 64,
+          "mean_used_only_for_band_construction": 0.5555963459961492,
+          "standard_error_used_only_for_band_construction": 0.045099561060939465
+        },
+        "n_b24_n_a36": {
+          "base_count": 64,
+          "mean_used_only_for_band_construction": 0.9676423188641308,
+          "standard_error_used_only_for_band_construction": 0.04740681992412776
+        },
+        "n_b32_n_a48": {
+          "base_count": 64,
+          "mean_used_only_for_band_construction": 1.117039369580538,
+          "standard_error_used_only_for_band_construction": 0.04935992165927649
+        }
+      },
+      "family_alpha": 0.05,
+      "lower": 0.4476289078355786,
+      "normal_quantile": 2.39397979981851,
+      "upper": 1.2352060249534702
+    },
+    "statistic": "N_eff_times_covariance_whitened_complete_standardized_fourth_cumulant"
+  },
+  "registered_analysis": {
+    "base_bootstrap": {
+      "class_order": [
+        "random",
+        "local",
+        "structured"
+      ],
+      "draws_per_replicate": 64,
+      "family_alpha": 0.05,
+      "interval": "two-sided Bonferroni percentile simultaneous interval within each class across the three validation sizes",
+      "lower_quantile": 0.008333333333333333,
+      "master_seed": 20260821,
+      "replicates": 10000,
+      "resampling_unit": "base_mean_over_16_registered_tangents",
+      "seed_derivation": "numpy SeedSequence(master_seed).spawn(9), consumed in class-major then validation-size-major order",
+      "size_order": [
+        [
+          48,
+          72
+        ],
+        [
+          64,
+          96
+        ],
+        [
+          96,
+          144
+        ]
+      ],
+      "upper_quantile": 0.9916666666666667
+    },
+    "branch_rules": {
+      "channel_law_validated": "the random primary prediction passes but the structured-control separation criterion fails",
+      "deformed_locality_class": "the random primary prediction and structured-control separation criterion both pass",
+      "feasibility_failure": "any exact-index or seal gate fails",
+      "random_channel_failure": "exact and seal gates pass but the random primary prediction fails"
+    },
+    "structured_control_separation": {
+      "criterion": "there exists one eligible class whose registered 95% base-bootstrap interval is disjoint from the frozen random development band at at least two of three validation sizes, including (96,144)",
+      "eligible_classes": [
+        "local",
+        "structured"
+      ],
+      "minimum_disjoint_sizes": 2,
+      "must_include_size": [
+        96,
+        144
+      ],
+      "required_for_title_gate": true,
+      "strict_disjointness": "interval_upper < band_lower or interval_lower > band_upper"
+    }
+  },
+  "registered_grid": {
+    "bases_per_size": 64,
+    "development_sizes": [
+      [
+        16,
+        24
+      ],
+      [
+        24,
+        36
+      ],
+      [
+        32,
+        48
+      ]
+    ],
+    "tangent_classes": [
+      "random",
+      "local",
+      "structured"
+    ],
+    "tangents_per_base": 16,
+    "validation_sizes": [
+      [
+        48,
+        72
+      ],
+      [
+        64,
+        96
+      ],
+      [
+        96,
+        144
+      ]
+    ]
+  },
+  "schema": "chiral_kernel_prediction_v14",
+  "scientific_payload_sha256": "1a64964168d5505bdcff464af8778fa0a10224cbbe2e77f0bb80905a996cb52e",
+  "sealed_utc": "2026-08-21T04:50:55.324231+00:00",
+  "source_hashes": {
+    "01_task_folder/task_05/script/lgeth/chiral_kernel_parent.py": "bc7f0c5db4775c885f86bca9696d0882b5e4ce43b0a790499a0d2fdbc44c5a4f",
+    "01_task_folder/task_05/script/output/geometric_eth_theory_v14/channel_theory_v14.json": "5e49999bf8ebedb0bbc1f03ecfe505fbaed158acc713420e725c56954b5a0d1a",
+    "01_task_folder/task_05/script/run_chiral_kernel_geometric_eth_v14.py": "fba70e1d66f25bfe47489eff592504dd0661159276ee6721f5958f4416ae5407",
+    "01_task_folder/task_05/script/seal_chiral_kernel_prediction_v14.py": "210ef75f011a69b94db1bbf0dda00b81ec5d3ada61b6bbd6d36ac6e2caa7caee"
+  },
+  "version": "v14"
+}

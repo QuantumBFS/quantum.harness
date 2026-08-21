@@ -1,0 +1,59 @@
+{
+  "arrays_sha256": "17b0b7facbdc23d3f8f3d48a47ce974aa1fe6b7727e2ed102921c81cf93f83bd",
+  "basis_dimension": 126,
+  "case": {
+    "N": 4,
+    "expected_rank": 42,
+    "n_flux": 6,
+    "theta_x": 0.0,
+    "theta_y": 0.0
+  },
+  "checkpoint_reused": false,
+  "checks": {
+    "factor_is_nonempty": true,
+    "internal_bandwidth": true,
+    "kernel_count": true,
+    "kernel_orthonormality": true,
+    "kernel_residual": true,
+    "open_external_gap": true
+  },
+  "constraint_nnz": 12096,
+  "constraint_shape": [
+    216,
+    126
+  ],
+  "external_gap": 1.6728499771781185,
+  "generated_utc": "2026-08-15T23:08:51.510833+00:00",
+  "identity": {
+    "case": {
+      "N": 4,
+      "expected_rank": 42,
+      "n_flux": 6,
+      "theta_x": 0.0,
+      "theta_y": 0.0
+    },
+    "coherent_grid": [
+      6,
+      6
+    ],
+    "parent": "continuum_lll_coherent_three_body",
+    "seed": 2026081609,
+    "sources": {
+      "lgeth/combinatorics.py": "9996a5c532e422ee0a41ce5c89770ed6b475ef05f7d6f7682584d99e65f283bb",
+      "lgeth/moore_read_audit.py": "6f1b49d48d14f446afe18e4cff52d2197044de9180aa8de37e11adc5b7c2719d",
+      "lgeth/moore_read_parent.py": "f478467ad43b777a97c2ba42df688d9cb4a66cf15c509bc6aa9f8d29343d7498",
+      "lgeth/protected_generator_response.py": "a250fdcd282a1e1bfcdac94395ba1e188a12cae6b0c462dfab694bc5702bda93",
+      "lgeth/wick_channels.py": "e1faedf5c98f660756e077445a88d05013bc6810f5b0f69aa8fc0dc6fe13469b",
+      "run_moore_read_geometric_eth_v9.py": "981c59c67c093bcbfd71db647db5d3065d5fac6aa2c030a99dc348f33881728d"
+    },
+    "version": "v9"
+  },
+  "identity_hash": "dee7d68b1f4452bdab6c7d5164ece726de4096b25efcd6498d31149a47cea537",
+  "internal_bandwidth": 5.944540910308791e-15,
+  "kernel_method": "factored_dense_audit",
+  "kernel_orthonormality_error": 9.645261284805916e-15,
+  "kernel_residual_norm": 1.8777624665564364e-14,
+  "observed_rank": 42,
+  "runtime_seconds": 0.008799958000054175,
+  "version": "v9"
+}

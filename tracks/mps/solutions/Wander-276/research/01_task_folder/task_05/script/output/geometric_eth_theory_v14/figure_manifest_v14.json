@@ -1,0 +1,191 @@
+{
+  "checks": {
+    "all_outputs_hashed": true,
+    "all_sources_hashed": true,
+    "canonical_width_7_inches": true,
+    "conceptual_and_data_kinds_distinguished": true,
+    "previews_300_dpi": true,
+    "visual_audits_recorded": true
+  },
+  "figure_count": 6,
+  "figures": {
+    "figure_1_eth_to_bundle_v14": {
+      "canonical_height_inches": 3.35,
+      "canonical_width_inches": 7.0,
+      "kind": "conceptual",
+      "outputs": {
+        "pdf": {
+          "path": "overleaf_sync/geometric_eth_theory/figures/figure_1_eth_to_bundle_v14.pdf",
+          "sha256": "57b025a421a09deb615abb3fb92c1187ee50edc03e5d9ec16a4c2b77f148788f"
+        },
+        "png": {
+          "path": "overleaf_sync/geometric_eth_theory/figures/figure_1_eth_to_bundle_v14.png",
+          "sha256": "95e0820a7a1bf82b624faeecbf8a5bb9bf6548e1e85361a63edf05e6909b95d7"
+        }
+      },
+      "panel_labels": [
+        "(a)",
+        "(b)"
+      ],
+      "preview_dpi": 300,
+      "source_hashes": {
+        "docs/plans/2026-08-17-geometric-eth-theorem-specification.md": "71557052818a3f2c92ee32fc7fc2ff202b7f93b02ec68fe606badc86c206f724"
+      },
+      "visual_audit": {
+        "passed": true,
+        "reviewed_at_canonical_width": true,
+        "verdict": "Reviewed at final 7-inch width: the ETH/bundle mapping, equations, and assumption/result labels are legible and unclipped."
+      }
+    },
+    "figure_2_response_algebra_v14": {
+      "canonical_height_inches": 3.45,
+      "canonical_width_inches": 7.0,
+      "kind": "conceptual",
+      "outputs": {
+        "pdf": {
+          "path": "overleaf_sync/geometric_eth_theory/figures/figure_2_response_algebra_v14.pdf",
+          "sha256": "8e2c68eb2cf69af1cc92a831611f3cb242320151fd6a045c5b4c49429fb7ea59"
+        },
+        "png": {
+          "path": "overleaf_sync/geometric_eth_theory/figures/figure_2_response_algebra_v14.png",
+          "sha256": "70c7d8bd51a0149f8712ec4b1af26622ff9dac35c499aad862196f91cedf047b"
+        }
+      },
+      "panel_labels": [
+        "(a)",
+        "(b)",
+        "(c)"
+      ],
+      "preview_dpi": 300,
+      "source_hashes": {
+        "01_task_folder/task_05/script/output/geometric_eth_theory_v14/channel_theory_v14.json": "5e49999bf8ebedb0bbc1f03ecfe505fbaed158acc713420e725c56954b5a0d1a",
+        "docs/plans/2026-08-17-geometric-eth-theorem-specification.md": "71557052818a3f2c92ee32fc7fc2ff202b7f93b02ec68fe606badc86c206f724"
+      },
+      "visual_audit": {
+        "passed": true,
+        "reviewed_at_canonical_width": true,
+        "verdict": "Reviewed at final 7-inch width: all four algebra classes, commutant conditions, and branch arrows are separated without overlap."
+      }
+    },
+    "figure_3_covariance_closure_v14": {
+      "canonical_height_inches": 3.55,
+      "canonical_width_inches": 7.0,
+      "kind": "conceptual",
+      "outputs": {
+        "pdf": {
+          "path": "overleaf_sync/geometric_eth_theory/figures/figure_3_covariance_closure_v14.pdf",
+          "sha256": "817868a1615e259b1839e3ac7a9d5cbb4b9731bcf96ca6d4faf810d63277299e"
+        },
+        "png": {
+          "path": "overleaf_sync/geometric_eth_theory/figures/figure_3_covariance_closure_v14.png",
+          "sha256": "f04658289484e1f73d0e7690e2aa4063a1f683454e251c2b47996f2e51992bd3"
+        }
+      },
+      "panel_labels": [
+        "(a)",
+        "(b)",
+        "(c)"
+      ],
+      "preview_dpi": 300,
+      "source_hashes": {
+        "docs/plans/2026-08-17-geometric-eth-theorem-specification.md": "71557052818a3f2c92ee32fc7fc2ff202b7f93b02ec68fe606badc86c206f724"
+      },
+      "visual_audit": {
+        "passed": true,
+        "reviewed_at_canonical_width": true,
+        "verdict": "Reviewed at final 7-inch width: the three complex Wick pairings and strong/deformed/failure branches are readable without relying on color."
+      }
+    },
+    "figure_4_topology_statistics_v14": {
+      "canonical_height_inches": 3.45,
+      "canonical_width_inches": 7.0,
+      "kind": "conceptual",
+      "outputs": {
+        "pdf": {
+          "path": "overleaf_sync/geometric_eth_theory/figures/figure_4_topology_statistics_v14.pdf",
+          "sha256": "27fcb8c4996c65a9eec0739e1c331ddc12c20a539e8e8997ae2fa790e2582bc1"
+        },
+        "png": {
+          "path": "overleaf_sync/geometric_eth_theory/figures/figure_4_topology_statistics_v14.png",
+          "sha256": "46ed9c6db501e04b4fca28030e86f2a504ff778144093233e0835f113160636a"
+        }
+      },
+      "panel_labels": [
+        "(a)",
+        "(b)"
+      ],
+      "preview_dpi": 300,
+      "source_hashes": {
+        "docs/literature/2026-08-17-geometric-eth-bps-black-hole-audit.md": "c346e1335984fd7526b14df36d0334df5eef35bb4a414dc0506a673993a7f778",
+        "docs/plans/2026-08-17-geometric-eth-theorem-specification.md": "71557052818a3f2c92ee32fc7fc2ff202b7f93b02ec68fe606badc86c206f724"
+      },
+      "visual_audit": {
+        "passed": true,
+        "reviewed_at_canonical_width": true,
+        "verdict": "Reviewed at final 7-inch width: trace-Chern and traceless-holonomy sectors are visually distinct and all mathematical labels are intact."
+      }
+    },
+    "figure_5_bps_comparison_v14": {
+      "canonical_height_inches": 4.84,
+      "canonical_width_inches": 7.0,
+      "kind": "source_audited_comparison",
+      "outputs": {
+        "pdf": {
+          "path": "overleaf_sync/geometric_eth_theory/figures/figure_5_bps_comparison_v14.pdf",
+          "sha256": "7d3c89ecce66003dae34378fb5e2fdc14e0c604c194b0fc6de4941dbd67a072f"
+        },
+        "png": {
+          "path": "overleaf_sync/geometric_eth_theory/figures/figure_5_bps_comparison_v14.png",
+          "sha256": "a45371d72ba09a436657c2ab05a9aef18b2b357c30e9ead5e58f089c82045948"
+        }
+      },
+      "panel_labels": [
+        "(a)"
+      ],
+      "preview_dpi": 300,
+      "source_hashes": {
+        "01_task_folder/task_05/script/output/geometric_eth_theory_v14/theory_gate_v14.json": "1fe0da5b45c414179ce1f466f6eef01ac1260304ce7a414e3608177ca19e4255",
+        "docs/literature/2026-08-17-geometric-eth-bps-black-hole-audit.md": "c346e1335984fd7526b14df36d0334df5eef35bb4a414dc0506a673993a7f778"
+      },
+      "visual_audit": {
+        "passed": true,
+        "reviewed_at_canonical_width": true,
+        "verdict": "Reviewed at final 7-inch width: every model, source key, calculation status, and claim boundary stays within its table cell."
+      }
+    },
+    "figure_6_effective_channel_test_v14": {
+      "canonical_height_inches": 3.85,
+      "canonical_width_inches": 7.0,
+      "kind": "quantitative_data",
+      "outputs": {
+        "pdf": {
+          "path": "overleaf_sync/geometric_eth_theory/figures/figure_6_effective_channel_test_v14.pdf",
+          "sha256": "a251b49d1936b998a0a7ff0e654fc5fff2f40ffece1cc0c9941b8f0fb96774aa"
+        },
+        "png": {
+          "path": "overleaf_sync/geometric_eth_theory/figures/figure_6_effective_channel_test_v14.png",
+          "sha256": "06ff967c706a857898a25c789484d9770f751fd926ca7bff72603576ea5da7db"
+        }
+      },
+      "panel_labels": [
+        "(a)",
+        "(b)"
+      ],
+      "preview_dpi": 300,
+      "source_hashes": {
+        "01_task_folder/task_05/script/output/geometric_eth_theory_v14/chiral_inference_v14.json": "f32663bf36f3180cc68bb57a19dbe4248c95c6042f06f8f2f7b363b68b926c86",
+        "01_task_folder/task_05/script/output/geometric_eth_theory_v14/effective_channel_inference_v14.json": "a6d5e578cbe4546b6db8c99e84b47d2d95d36a31e1dc2bbe0038b0bcdd3c1b8c",
+        "01_task_folder/task_05/script/output/geometric_eth_theory_v14/theory_gate_v14.json": "1fe0da5b45c414179ce1f466f6eef01ac1260304ce7a414e3608177ca19e4255"
+      },
+      "visual_audit": {
+        "passed": true,
+        "reviewed_at_canonical_width": true,
+        "verdict": "Reviewed at final 7-inch width: the frozen band, three random failures, both control classes, and zero archival mappings are explicit."
+      }
+    }
+  },
+  "generator": "01_task_folder/task_05/script/make_geometric_eth_theory_figures_v14.py",
+  "generator_sha256": "8aa437b79c49f50a00cbe27bc6cfab465e3f6847e475283343119c7d699db61d",
+  "schema": "geometric_eth_theory_figure_manifest_v14",
+  "version": "v14"
+}

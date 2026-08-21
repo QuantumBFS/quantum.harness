@@ -1,0 +1,117 @@
+\section{Independent spectral and geometric interventions}
+\label{sec:covariance}
+
+The preceding comparison could still admit a weak interpretation: perhaps the
+energy and curvature statistics are merely two correlated consequences of a
+single hidden randomness.
+We now intervene on the two blocks of a parameter-dependent Hamiltonian
+separately.
+The decomposition
+\begin{equation}
+ H=PHP+PHQ+QHP+QHQ
+ \label{eq:block-decomposition}
+\end{equation}
+shows why this is possible.
+Internal energy spacings are controlled by \(PHP\), whereas the projector
+response in Eq.~\eqref{eq:channel} is controlled by
+\(P(\partial_\mu H)Q\), the complement resolvent, and their adjoints.
+These are logically distinct data.
+
+\subsection{Changing energy statistics at fixed projector}
+
+For the spectral intervention we use an effective \(D\times D\) fiber
+Hamiltonian
+\begin{equation}
+ h_\alpha=\sqrt{1-\alpha^2}\,h_{\rm P}+\alpha h_{\rm GUE},
+ \qquad 0\leq\alpha\leq1 ,
+ \label{eq:spectral-interpolation}
+\end{equation}
+where \(h_{\rm P}\) has independent exponential spacings and
+\(h_{\rm GUE}\) is an independent complex Gaussian Hermitian matrix.
+Both are centered and matched in Hilbert--Schmidt norm before interpolation.
+We embed \(0.1h_\alpha\) in a fixed target block and place a diagonal
+complement between energies \(2\) and \(3\).
+The external gap stays open throughout, and diagonalization verifies
+\begin{equation}
+ \max_\alpha\|P_\alpha-P_0\|_F=1.15\times10^{-14}.
+ \label{eq:projector-invariance}
+\end{equation}
+The tangent channels and a reference curvature spectrum are held fixed.
+This effective causal control supplies a clean spectral axis; a local
+microscopic realization defines a complementary future program.
+
+Across \(\SpectralSamplesPerPoint\) matrices per value of \(\alpha\), the
+energy adjacent-gap ratio changes from
+\begin{equation}
+ \langle r_E\rangle_{\alpha=0}=\PoissonEndpointRatio,\qquad
+ \langle r_E\rangle_{\alpha=1}=\GUEEndpointRatio ,
+ \label{eq:energy-axis}
+\end{equation}
+while the stored curvature spectrum is unchanged to machine precision.
+Thus conventional spectral chaos evolves at exactly fixed target-projector
+geometry.
+
+\subsection{Changing geometry at fixed exactly degenerate parent}
+
+The complementary intervention leaves the Kapit--Mueller parent, its exact
+zero energy, its projector, and its external gap fixed.
+For each structured Fourier direction \(v_{\bm q}\) and an independent random
+local direction \(\eta_v\), define
+\begin{equation}
+ \begin{aligned}
+ \widetilde v_g&={\cal N}_G\!\left[
+ \sqrt{1-g}\,v_{\bm q}+\sqrt g\,\eta_v\right],\\
+ \widetilde w_g&={\cal N}_G\!\left[
+ \sqrt{1-g}\,w_{\bm q}+\sqrt g\,\eta_w\right],
+ \end{aligned}
+ \label{eq:geometric-interpolation}
+\end{equation}
+where \({\cal N}_G\) mean-centers and normalizes in the physical tangent
+Gram matrix.
+The square-root weights make \(g\) a variance fraction before the final
+normalization.
+We sample \(\GeometricSamplesPerPoint\) independent tangent pairs at each
+positive registered \(g\), maintaining active rank \(50\) throughout.
+
+\begin{figure*}[t]
+ \includegraphics[width=\textwidth]{figure_3_independent_channels_v2.pdf}
+ \caption{
+ \textbf{Energy chaos and projector-geometric chaos are independent
+ channels.}
+ (a) Mean energy adjacent-gap ratio under the effective fixed-projector
+ interpolation in Eq.~\eqref{eq:spectral-interpolation}; it crosses from
+ Poisson to the GUE/Haar interval.
+ (b) The target-projector distance remains at diagonalization roundoff and
+ the supplied curvature spectrum is exactly invariant.
+ (c) At fixed exactly degenerate parent, scrambling only the tangent channels
+ in Eq.~\eqref{eq:geometric-interpolation} changes the curvature gap ratio.
+ Its simultaneous interval first overlaps the Haar--Jacobi interval at
+ \(g=\GeometricLocalOnset\); the first registered nontrivial SFF window occurs
+ at \(g=\GeometricRampOnset\).
+ (d) Logical \(2\times2\) classification.
+ Spectral and geometric chaos can occur separately or together; the original
+ topological flat band occupies the energy-silent/geometrically chaotic
+ quadrant.
+ Bands are 95\% simultaneous intervals over the registered interpolation
+ grids.
+ }
+ \label{fig:independent-channels}
+\end{figure*}
+
+Figure~\ref{fig:independent-channels} gives the operational separation.
+Changing \(PHP\) moves horizontally in panel (d) at fixed
+\(P(\partial H)Q\).  Changing local tangent structure moves vertically at
+fixed exactly degenerate parent.  Consequently, a Jacobi-like curvature
+spectrum directly diagnoses the embedding and response of the degenerate
+subspace.
+It diagnoses how the degenerate subspace is embedded in and responds to its
+surrounding Hilbert space.
+
+The intervention also supplies an ordering test.
+The mean curvature gap-ratio interval first overlaps the Haar reference at
+\(g=\GeometricLocalOnset\), whereas compatibility with the exact finite-\(D\)
+SFF over a registered nonzero \(\tau\) interval first occurs at
+\(g=\GeometricRampOnset\).
+These onsets are confidence-set definitions on a discrete grid.  They
+demonstrate that local repulsion is established before the broader two-level
+ramp under controlled tangent interpolation.

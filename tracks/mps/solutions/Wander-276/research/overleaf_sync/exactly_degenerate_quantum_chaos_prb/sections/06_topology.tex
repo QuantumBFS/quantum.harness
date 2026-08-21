@@ -1,0 +1,111 @@
+\section{Geometry and topology at fixed Chern class}
+\label{sec:topology}
+
+The local curvature statistics studied above do not determine the topology of
+the protected bundle, and the converse is also false.  To separate these
+levels, we transport the Laughlin constraint map over the boundary-twist torus
+$(\theta_x,\theta_y)$ while applying a periodic ambient unitary deformation
+of strength $g$.  At every twist and every accepted $g$,
+\[
+ H_g(\boldsymbol\theta)
+ =\mathcal V_g(\boldsymbol\theta)
+ H_0(\boldsymbol\theta)
+ \mathcal V_g^\dagger(\boldsymbol\theta).
+\]
+This is an exactness-preserving path rather than a fixed-parent probe.  The
+many-body spectrum is identical point by point on the twist torus, the
+protected rank stays fixed, and the external gap never closes.
+
+\subsection{Fixed rank, gap, and first Chern number}
+
+The two registered bundles have ranks \HolonomyNThreeRank\ and
+\HolonomyNFourRank.  Their minimum gaps over the twist mesh and deformation
+family are respectively \HolonomyNThreeMinimumGap\ and
+\HolonomyNFourMinimumGap.  In addition to checking the kernel residual at
+each vertex, we require the smallest singular value of every neighboring-frame
+overlap to exceed \HolonomyNThreeMinimumOverlapSingularValue\ for the first
+bundle and \HolonomyNFourMinimumOverlapSingularValue\ for the second.  These
+overlap floors exclude a mesh on which the polar parallel transport becomes
+ill-conditioned.
+
+The determinant line bundle is unchanged along the deformation.  The
+discretized trace curvature gives first Chern numbers
+\HolonomyNThreeChernNumber\ and \HolonomyNFourChernNumber\ for the two ranks,
+with the same integers on the primary and convergence meshes.
+Figure~\ref{fig:holonomy}(a) shows these constants together with the open
+external gaps.  The computation also compares the determinant Wilson-loop
+phase with the integrated trace curvature; their agreement is a gauge
+invariant check that the mesh winding and the plaquette Chern calculation
+refer to the same Abelian sector.
+
+Panel (b) illustrates this constraint for the rank-\HolonomyNFourRank\
+bundle.  The determinant phase flow changes shape between the endpoints, but
+its net winding remains \HolonomyNFourChernNumber.  Thus topology fixes the
+integer winding, not its distribution along the transverse twist.  The same
+distinction appears already at the level of local curvature: matrices can
+redistribute their traceless part while preserving the integral of
+$\Tr F_{\theta_x\theta_y}$.
+
+\subsection{Non-Abelian holonomy inside a fixed topological sector}
+
+For each fixed transverse twist, the polar factors of adjacent frame overlaps
+are multiplied around the $\theta_x$ cycle to form a Wilson matrix
+$W_x(\theta_y)$.  A frame change conjugates $W_x$, so its eigenphases, gap
+ratio, and normalized spectral form factor are gauge invariant.  The
+determinant of $W_x$ probes the Abelian winding discussed above; relative
+eigenphases probe the internal $SU(D)$ holonomy.
+
+The internal holonomy changes under noncommuting ambient generators even
+though the energy spectrum and Chern number do not.  The median Wilson gap
+ratio moves from \HolonomyNThreeBaseGapRatio\ to
+\HolonomyNThreeFinalGapRatioMedian\ in the rank-\HolonomyNThreeRank\ bundle
+and from \HolonomyNFourBaseGapRatio\ to
+\HolonomyNFourFinalGapRatioMedian\ in the rank-\HolonomyNFourRank\ bundle.
+The registered generator ensemble, rather than individual Wilson
+eigenphases, is the uncertainty unit in this comparison.
+
+This change is statistically resolved relative to its generator-to-generator
+spread, but it does not carry the Wilson spectrum to the circular unitary
+ensemble (CUE).  Figure~\ref{fig:holonomy}(c) places the endpoint gap ratios
+below the CUE reference band, and panel (d) shows that the Wilson form factor
+retains pronounced structured peaks.  The largest registered deformation is
+therefore not CUE-compatible.  The commuting-generator control remains near
+the undeformed curve, confirming that the observed change uses the
+noncommuting part of the transport rather than the Chern calculation or an
+uncontrolled change of spectrum.
+
+The result has two immediate consequences.  First, a fixed first Chern number
+does not fix the non-Abelian holonomy.  Bundles with the same rank, energy
+spectrum, external gap, and Chern integer can have distinguishable internal
+Wilson spectra.  Second, changing the holonomy within that sector does not by
+itself produce Haar statistics.  Topological protection supplies the bundle
+on which the geometric observable is defined; it neither forbids internal
+mixing nor guarantees random-matrix closure.
+
+The isospectral construction is important for this interpretation.  Had the
+gap or protected rank changed with $g$, the holonomy shift could have been
+attributed to a changing spectral cluster.  Had only a fixed-parent tangent
+been evaluated, there would be no finite exactly degenerate bundle on which
+to define the closed Wilson loop.  Here the equality
+$H_g=\mathcal V_gH_0\mathcal V_g^\dagger$ holds over the complete twist torus,
+so the difference between Abelian topology and non-Abelian geometry is
+measured within one exact transported family.
+
+Gauge covariance is checked separately from mesh convergence.  Random
+unitaries applied to every local frame change individual link matrices but
+leave the Chern integer and Wilson eigenphases invariant.  Increasing the
+twist mesh reproduces the accepted integers and endpoint winding, while the
+overlap singular-value gate controls the stability of the polar factors.
+These checks matter because a smooth-looking eigenphase flow can otherwise
+hide a branch-cut or coarse-mesh error.  The reported holonomy change survives
+all three tests: random frame rotation, mesh refinement, and an open external
+gap.
+
+These two finite-rank bundles do not define a large-$D$ sequence.  The Chern
+integers also differ between the two particle numbers, so they cannot be used
+as evidence for size-independent Wilson statistics at a single fixed
+topological charge.  What is established is a controlled counterexample to
+the implication that a fixed Chern class fixes internal holonomy.  Testing an
+asymptotic geometric law at fixed topology would require a growing-rank
+sequence with the same topological sector, tangent prescription, mesh
+convergence criteria, and independent generator ensemble.

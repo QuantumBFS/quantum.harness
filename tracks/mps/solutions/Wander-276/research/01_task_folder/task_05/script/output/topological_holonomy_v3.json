@@ -1,0 +1,332 @@
+{
+  "checkpoint_hashes": {
+    "output/topology_v3_checkpoints/N3_mesh16_twist_bundle_v3.json": "f540829edc6f8903eca596873e145b19900533c2a4f0e8a63d5bd0d70091e56a",
+    "output/topology_v3_checkpoints/N3_mesh16_twist_bundle_v3.npz": "3618cca495411df6d1e6811e66fe7e108a17e6f81605cca6af4b3c09cf0541d8",
+    "output/topology_v3_checkpoints/N3_mesh20_twist_bundle_v3.json": "93f199f1053c9c3da2ff6fc2410236e62914a31502c0b5cb11bdf1317ed9da54",
+    "output/topology_v3_checkpoints/N3_mesh20_twist_bundle_v3.npz": "db1a4af4eb28a79df92369463ca00dc0c131535b01ec0483ee0214d2b73fb6e6",
+    "output/topology_v3_checkpoints/N4_mesh16_twist_bundle_v3.json": "cba044e2b0171b4fc59a4226d59ed21e6cdb828e89d9fd6f95c5ee7fc83a9129",
+    "output/topology_v3_checkpoints/N4_mesh16_twist_bundle_v3.npz": "1fba58f6126a2f9a52d08c175871c52a912e6cdcc409d67aafe2c3a7ac02b46d",
+    "output/topology_v3_checkpoints/N4_mesh20_twist_bundle_v3.json": "80d51533991111a29775a72f98ad94184d146d9f10d970b5429c7389ac85834d",
+    "output/topology_v3_checkpoints/N4_mesh20_twist_bundle_v3.npz": "d756a5ef23d8ac6e4f77e556ad4694e4724abd9711a7f4565ae43540c22b4f30"
+  },
+  "checks": {
+    "branch_margin": true,
+    "cue_reference_count": true,
+    "determinant_trace_agreement": true,
+    "gap_open": true,
+    "isospectral_orbit": true,
+    "kernel_count": true,
+    "mesh_chern_agreement": true,
+    "mesh_chern_integer": true,
+    "overlap_floor": true,
+    "random_gauge_invariance": true
+  },
+  "configuration": {
+    "commuting_seed": 20260728499,
+    "convergence_mesh": 20,
+    "cue_samples": 10000,
+    "g_values": [
+      0.0,
+      0.25,
+      0.5,
+      0.75,
+      1.0
+    ],
+    "generator_seeds": [
+      20260728400,
+      20260728401,
+      20260728402,
+      20260728403,
+      20260728404,
+      20260728405,
+      20260728406,
+      20260728407
+    ],
+    "mesh_upgrade_rationale": "mesh12 aliases one N4 seed at g=1; mesh16 and mesh20 are the accepted converged pair",
+    "primary_mesh": 16,
+    "production": true,
+    "sizes": [
+      [
+        3,
+        8,
+        16
+      ],
+      [
+        4,
+        10,
+        25
+      ]
+    ],
+    "workers": 4
+  },
+  "environment": {
+    "numpy": "2.3.5",
+    "platform": "macOS-15.6-arm64-arm-64bit",
+    "python": "3.12.11"
+  },
+  "generated_utc": "2026-07-28T17:02:36.097544+00:00",
+  "mesh_alias_audit": {
+    "json": "output/topological_holonomy_mesh12_alias_audit_v3.json",
+    "json_sha256": "f70681610ee709917ddbf67a6e37801fafe5b203391430d7c090467c3af3ec02",
+    "npz": "output/topological_holonomy_mesh12_alias_audit_v3.npz",
+    "npz_sha256": "06c649b89a6e3760a817807283dce4f0f7f3c474dd324e86433844ca2b781bae"
+  },
+  "npz_sha256": "f459fa37facf82c6f67c44f4961749095fb0817516ff16d6ca6814bbaf952208",
+  "random_gauge_errors": {
+    "chern_error": 1.4210854715202004e-14,
+    "wilson_phase_error": 6.854278595401724e-15
+  },
+  "result_branch": "fixed_chern_deformed_holonomy",
+  "runtime_seconds": 796.3286967079985,
+  "sizes": [
+    {
+      "N": 3,
+      "all_chern_equal": true,
+      "base_chern_convergence": 5.999999999999992,
+      "base_chern_integer": 6,
+      "base_chern_primary": 6.000000000000008,
+      "base_form_factor_residual": 2.0007870666635097,
+      "base_gap_ratio": 0.28849403034174614,
+      "commuting_chern_range": [
+        5.999999999999999,
+        6.000000000000008
+      ],
+      "convergence_endpoint_chern_range": [
+        5.999999999999983,
+        6.000000000000016
+      ],
+      "convergence_mesh": 20,
+      "cue_compatible_at_largest_g": false,
+      "cue_form_simultaneous_critical": 4.040319013665091,
+      "cue_gap_ratio_interval": [
+        0.45932310720759545,
+        0.6015274327754949,
+        0.7321866384754452
+      ],
+      "cue_nonplateau_stop": 8,
+      "determinant_phase_x_base": [
+        -6.462178297730347e-15,
+        -2.337076810780534,
+        1.6062193961189957,
+        -0.7389241033561584,
+        -3.09104560882685,
+        0.8323221348637835,
+        -1.5347369839765668,
+        2.375762084784151,
+        -8.881784197001252e-15,
+        -2.3757620847841574,
+        1.534736983976565,
+        -0.832322134863787,
+        3.091045608826843,
+        0.7389241033561496,
+        -1.606219396118986,
+        2.337076810780528
+      ],
+      "determinant_phase_x_final_seed0": [
+        2.2454878906793443,
+        -0.6765328698615356,
+        2.9222577932068208,
+        0.506283531479143,
+        -1.7287481156963305,
+        2.3982202399393886,
+        0.24404002542339498,
+        -1.9242454473982291,
+        2.2092297311502707,
+        0.07181419435803017,
+        -2.096843280217749,
+        1.9961433339912085,
+        -0.1652234238114643,
+        -2.3336217017658676,
+        1.5979775293091036,
+        -1.0937149906959105
+      ],
+      "final_form_factor_residual_interval": [
+        1.8026889455555912,
+        1.8920963483955333,
+        1.9803746894500902
+      ],
+      "final_gap_ratio_interval": [
+        0.3083682088396634,
+        0.3211490061571388,
+        0.35753863754806864
+      ],
+      "form_factor_improvement_interval": [
+        0.06688879916463916,
+        0.10420257129969823,
+        0.14329861946049058
+      ],
+      "gap_change_interval": [
+        0.02776830512270827,
+        0.0380030887409316,
+        0.05068408673223983
+      ],
+      "gap_ratio_by_g": [
+        [
+          0.28849403034174614,
+          0.28849403034174614,
+          0.28849403034174614
+        ],
+        [
+          0.2954969911688561,
+          0.2986664021663044,
+          0.30136521326735277
+        ],
+        [
+          0.2989874811158394,
+          0.3086268711805841,
+          0.31860295516441334
+        ],
+        [
+          0.29455671175218856,
+          0.3133798587975503,
+          0.3312152066135331
+        ],
+        [
+          0.3083682088396634,
+          0.3211490061571388,
+          0.35753863754806864
+        ]
+      ],
+      "holonomy_change_significant": true,
+      "isospectrality_mode": "exact_coordinate_identity_under_periodic_ambient_conjugation",
+      "maximum_determinant_trace_difference": 1.7763568394002505e-15,
+      "maximum_energy_spectrum_error": 0.0,
+      "maximum_gap_error": 0.0,
+      "minimum_branch_margin": 2.0664262050334177,
+      "minimum_external_gap": 0.05174136811818207,
+      "minimum_overlap_singular_value": 0.8532507186567644,
+      "n_flux": 8,
+      "primary_chern_range": [
+        5.999999999999991,
+        6.0000000000000115
+      ],
+      "primary_mesh": 16,
+      "rank": 16
+    },
+    {
+      "N": 4,
+      "all_chern_equal": true,
+      "base_chern_convergence": 10.000000000000007,
+      "base_chern_integer": 10,
+      "base_chern_primary": 10.000000000000004,
+      "base_form_factor_residual": 2.725204138515438,
+      "base_gap_ratio": 0.3099772541531685,
+      "commuting_chern_range": [
+        9.999999999999982,
+        10.000000000000004
+      ],
+      "convergence_endpoint_chern_range": [
+        9.999999999999964,
+        10.000000000000021
+      ],
+      "convergence_mesh": 20,
+      "cue_compatible_at_largest_g": false,
+      "cue_form_simultaneous_critical": 4.453446695467018,
+      "cue_gap_ratio_interval": [
+        0.48664305097240024,
+        0.6007916301768441,
+        0.7091120263514404
+      ],
+      "cue_nonplateau_stop": 12,
+      "determinant_phase_x_base": [
+        -1.7763568394002505e-15,
+        2.3723134790334774,
+        -1.5410064219030393,
+        0.8243320772045875,
+        -3.099436177829827,
+        -0.7464370735867197,
+        1.6006246643735051,
+        -2.3400483253279285,
+        -2.398081733190338e-14,
+        2.340048325327913,
+        -1.6006246643735318,
+        0.7464370735867267,
+        3.0994361778298165,
+        -0.8243320772046141,
+        1.5410064219030215,
+        -2.372313479033476
+      ],
+      "determinant_phase_x_final_seed0": [
+        -1.2453699057580307,
+        1.699692311154675,
+        -1.0345417125113257,
+        2.5600415168037567,
+        -0.5986221458250972,
+        1.7915371175110564,
+        -2.9348347145056235,
+        -2.05293137072418,
+        -1.2035350383211592,
+        0.443577218399921,
+        3.0728988239887145,
+        -0.17002422802931377,
+        2.68128750827685,
+        -1.1709851664332374,
+        0.883025072000674,
+        2.8031697851003554
+      ],
+      "final_form_factor_residual_interval": [
+        2.4849772114027777,
+        2.7074328640368925,
+        2.7786443943635883
+      ],
+      "final_gap_ratio_interval": [
+        0.32378757501780847,
+        0.3317537354489108,
+        0.34410932074928857
+      ],
+      "form_factor_improvement_interval": [
+        -0.012558663084553612,
+        0.06566834713787378,
+        0.1529437569546682
+      ],
+      "gap_change_interval": [
+        0.01804628131689567,
+        0.02304091398107431,
+        0.028350326857310683
+      ],
+      "gap_ratio_by_g": [
+        [
+          0.3099772541531685,
+          0.3099772541531685,
+          0.3099772541531685
+        ],
+        [
+          0.2991934892150269,
+          0.3018554335669982,
+          0.30570759750854193
+        ],
+        [
+          0.3012063402387577,
+          0.3084508324490812,
+          0.3142702991463689
+        ],
+        [
+          0.30691564668956783,
+          0.31377435769419126,
+          0.3254795233842568
+        ],
+        [
+          0.32378757501780847,
+          0.3317537354489108,
+          0.34410932074928857
+        ]
+      ],
+      "holonomy_change_significant": true,
+      "isospectrality_mode": "exact_coordinate_identity_under_periodic_ambient_conjugation",
+      "maximum_determinant_trace_difference": 3.552713678800501e-15,
+      "maximum_energy_spectrum_error": 0.0,
+      "maximum_gap_error": 0.0,
+      "minimum_branch_margin": 1.179800007321263,
+      "minimum_external_gap": 0.09469522123228812,
+      "minimum_overlap_singular_value": 0.8369320542808095,
+      "n_flux": 10,
+      "primary_chern_range": [
+        9.99999999999998,
+        10.000000000000027
+      ],
+      "primary_mesh": 16,
+      "rank": 25
+    }
+  ],
+  "version": "v3"
+}

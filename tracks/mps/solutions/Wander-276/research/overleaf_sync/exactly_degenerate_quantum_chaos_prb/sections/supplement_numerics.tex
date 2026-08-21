@@ -1,0 +1,195 @@
+\section{Numerical methods, audits, and extended results}
+\label{app:numerics}
+
+This section specifies how the protected spaces and tangent responses are
+constructed.  Numerical values, including ranks, gaps, residuals, basis
+dimensions, and production status, enter through the generated v13 macros and
+tables.  The procedures below define those quantities and the gates applied to
+them; they do not infer a missing gate from a visually narrow spectrum.
+
+\subsection{Common kernel and response audit}
+
+For a factorized parent, we assemble or apply the rectangular constraint map
+$C$ and solve for its right kernel.  For a cohomological parent, we construct
+the charge-resolved Hodge Laplacian and solve its zero eigenspace.  For a
+stabilizer code, the protected rank follows from binary symplectic elimination
+rather than from allocating the exponentially large state space.  In every
+dense or sparse eigensolve the accepted projector frame $U_P$ must satisfy
+\[
+ \lVert U_P^\dagger U_P-I_D\rVert<\epsilon_{\mathrm{orth}},
+ \qquad
+ \lVert HU_P-E_0U_P\rVert_F<\epsilon_{\mathrm{ker}}.
+\]
+The observed rank must equal the independently calculated protected rank.  We
+then locate the first eigenvalue outside the target fiber and require a
+positive gap.  An internal bandwidth smaller than a numerical tolerance is
+reported as a residual check; it is not substituted for the algebraic kernel
+condition.
+
+Response vectors are obtained by applying the complement inverse to
+$Q(\partial_aH)P$.  Dense cases use the stored positive-energy eigenbasis.
+Factorized large cases solve shifted or projected linear systems without
+forming $H=C^\dagger C$ densely.  Each response is checked for target leakage,
+linear-system residual, and stability under the registered solver shift.
+Tangent panels are normalized with their own two-point Gram matrix before a
+four-channel quantity is evaluated.
+
+\subsection{Kapit--Mueller and continuum $V_0$ parents}
+
+The Kapit--Mueller single-particle hopping is assembled on a square magnetic
+torus, including its magnetic-periodic winding phases.  The lowest isolated
+band is diagonalized, and its orbital frame is used to map onsite boson pairs
+into the projected $N$-particle Fock basis.  The columns of the resulting pair
+constraint factor encode the pair annihilators $A_R$ of the $V_0$ parent.
+Kernel vectors are computed from the factor,
+then checked against the explicitly applied positive parent.  Quasihole ranks
+are computed from cyclic $(1,2)$ admissible configurations before the
+eigensolve and are compared with the observed nullity.
+
+For the independent continuum check, $N$ bosons occupy $n_\phi$ Landau-gauge
+orbitals on a square torus.  Magnetic translates of the periodic Gaussian
+give a factorized $V_0$ pair map from the $N$-particle basis to the
+$(N-2)$-particle basis.  This code path shares neither the Kapit--Mueller
+hopping builder nor its orbital projection.  Agreement of the protected count
+therefore checks the two-body clustering mechanism across two microscopic
+realizations, whereas disagreement of higher response statistics remains an
+allowed parent dependence.
+
+Density tangents are diagonal one-body operators in real space.  Bond and
+current tangents are respectively the Hermitian and anti-Hermitian quadratures
+of a hopping link.  For the exactness-preserving constraint/generator
+transport, the one-body generator is lifted to the fixed-$N$ Fock space and
+applied to both the constraint factor and the projector.  We verify $S_a=0$
+along the path and compare the transported kernel with a direct kernel solve.
+The v6 protected-generator results belong to exact transport.  Only this
+calculation supports finite-path and holonomy conclusions.  For twist-bundle
+calculations, every mesh edge stores the overlap singular values needed for
+polar parallel transport; a mesh is rejected if the target rank or external
+gap changes at any twist.
+
+The v2/v3 Laughlin fixed-parent local-potential panels are evaluated
+separately.  Their structured or random local potentials are applied only at
+the accepted exact parent, and their response is computed from
+$Q(\partial_aH)P$ for the isolated rank-$D$ cluster.  These probes generally
+do not preserve exact degeneracy away from the base point and therefore do
+not establish a finite exact path.  Their admissible conclusions are the
+base-point curvature spectrum, covariance, and four-channel statistics.
+
+\subsection{Moore--Read coherent-state constraint map}
+
+In the $N$-boson occupation basis of $N_\phi$ torus orbitals, each coherent
+annihilator $b_x=\sum_j\phi_{xj}b_j$ is cubed and divided by $\sqrt{3!}$.
+Stacking $C_x$ over an $N_\phi\times N_\phi$ magnetic-translation orbit gives
+a sparse map from the $N$-particle Hilbert space to the $(N-3)$-particle
+space.  The parent is applied as two sparse multiplications, $v\mapsto
+C^\dagger(Cv)$.  The expected rank is computed from cyclic $(2,2)$ admissible
+configurations before the solver is run.
+
+The opened cases use periodic boundary conditions and the fixed-four-
+quasihole relation $N_\phi=N+2$.  The stored kernel audit contains the basis
+dimension, constraint shape and nonzero count, observed and expected ranks,
+zero-band width, first positive eigenvalue, residual norm, and orthonormality
+error.  The v9 Moore--Read guiding-center panels are exactness-preserving
+generator transports.  For each one-body generator $G_a$, the differentiated
+constraint-intertwiner identity gives
+$(\partial_aH)P=-H\Gamma_N(G_a)P$ and
+$X_a=Q\Gamma_N(G_a)P$ in the main-text Kato convention.  The historical v9 routine stores instead
+$\widetilde X_a=-Q\Gamma_N(G_a)P=-X_a$, because its solver variable is
+$R_Q(\partial_aH)P$.  It checks the parent-action residual of
+$\widetilde X_a$, complement leakage, and the condition
+\texttt{fiber\_tangent\_zero}, which is the numerical $S_a=0$ test.  The
+registered quadratic and fourth-order contractions are invariant under this
+common sign, but the distinction is retained for response-factor provenance.
+The v9 panels are therefore not generic splitting probes.  Larger staged
+cases remain marked pending until the same gates are passed; resource
+estimates are not converted into scientific results.
+
+\subsection{Random cubic supercharge}
+
+For $N$ complex fermion modes, a charge-$r$ basis is stored as ordered bit
+strings of Hamming weight $r$.  Fermionic parity signs are included when the
+cubic annihilation operator
+$Q(C)=\sum_{i<j<k}C_{ijk}\psi_i\psi_j\psi_k$ is assembled.
+The charge-restricted Hamiltonian is the corresponding block of
+$Q^\dagger Q+QQ^\dagger$.  A coupling realization is accepted only if
+nilpotency, Hermiticity, the expected cohomology rank, a positive complement,
+kernel residual, and orthogonality all pass independently.
+
+Couplings are normalized complex three-forms.  The registered sizes and
+central or adjacent charge sectors are stored with independent realization
+seeds.  Sparse tangent panels vary a fixed subset of $C_{ijk}$; isotropic
+panels vary all cubic couplings with the same norm.  The response is evaluated
+both from the direct Hamiltonian derivative and from its exact and coexact
+Hodge branches.  We require the two branches to be orthogonal and their sum to
+reproduce the direct response.  The random-supercharge calculation has
+independent coupling realizations for its registered separable null tests, but
+the v13 evidence table leaves complete nonseparable covariance closure
+untested.
+
+\subsection{Lattice supercharge on cycle unions}
+
+For $G=\bigsqcup_{s=1}^{m}C_6$, an occupation bit string is retained only when
+no graph edge has both endpoints occupied.  The charge-$f$ basis thus
+enumerates the size-$f$ faces of the independence complex.  The sparse map
+$Q_f:\cH_f\rightarrow\cH_{f+1}$ includes the Jordan--Wigner parity associated
+with the canonical vertex order.  Direct multiplication verifies
+$Q_{f+1}Q_f=0$.  In sector $f=2m$ we diagonalize
+\[
+ H_f=Q_{f-1}Q_{f-1}^\dagger+Q_f^\dagger Q_f.
+\]
+The first $2^m$ eigenvectors must exhaust the numerical kernel, and the next
+eigenvalue must be positive.
+
+Complex site couplings are normalized separately on each six-site ring.
+Candidate local or isotropic tangent vectors are projected orthogonally to
+every component-wise rescaling direction, then orthonormalized.  This removes
+the trivial deformation that merely rescales one Hodge block.  Derivatives of
+both terms in $H_f$ give exact and coexact response branches.  We compare
+their sum with the direct resolvent derivative and check mutual
+orthogonality, target leakage, and nonzero branch weights.  The statistical
+unit in the complete-covariance calculation is one full fixed-base tangent
+panel.  It is not an independent graph or Hamiltonian realization.
+For the corrected v13 calculation, the mean of the local-panel population is
+obtained by exact enumeration of the ordered coordinate-channel marginals.
+The first twelve panels then determine only the channel whitener, while the
+remaining twelve panels enter the primary complete-cumulant estimator.
+
+\subsection{X-cube binary-symplectic construction}
+
+Edges of the periodic cubic lattice are indexed by position and one of three
+directions.  A Pauli operator is represented by a binary row $(\bm x|\bm z)$.
+The symplectic inner product verifies that every cube-$X$ row commutes with
+every vertex-plane-$Z$ row.  Gaussian elimination over $\mathbb F_2$ gives the
+stabilizer rank, logical-qubit count, and hence the protected rank without
+constructing a $2^{3L^3}$-dimensional vector.
+
+For positive coefficient reweighting, the stabilizer table and common $+1$
+eigenspace are identical at every parameter value, so $\partial_aP=0$ follows
+algebraically.  For the moving-projector control, two local Pauli generators
+are selected whose product differs from a stabilizer only by phase.  Their
+support, anticommutation, detectability, exact isospectrality, and gap
+preservation are checked in the binary representation.  A small dense Pauli
+realization independently checks the sign of the curvature.  Production
+sizes use the algebraic proof and never allocate the ground-space matrix.
+
+\subsection{Checkerboard low-energy cluster}
+
+The checkerboard control is built from a two-sublattice short-range hopping
+matrix on a torus.  Complex nearest-neighbor and real longer-range hoppings
+produce an isolated lower Chern band.  At every boundary twist, the lowest
+single-particle band frame is recomputed and the onsite boson contact
+interaction is projected into its complete fixed-$N$ occupation basis.  This
+is the same projected-contact convention used for the growing-rank
+Kapit--Mueller comparison, but with an independently constructed hopping
+matrix.  Boundary twists are inserted as Peierls phases on seam-crossing bonds
+before the projection.  The tracked multiplet is selected by dimension and
+continuity over the twist mesh.  Acceptance requires its internal width to
+remain smaller than its external separation, but the width is not required to
+vanish.
+
+Bond-magnitude, bond-phase, and zero-mean onsite disorder define the
+deformation.  Neighboring subspaces are compared by singular values and polar
+parallel transport before their curvature increments are formed.  Because the
+cluster is only quasi-degenerate, its energy statistics remain meaningful and
+are reported separately from the exactly degenerate parents.  No checkerboard
+result is used to establish a common-kernel, cohomology, or stabilizer claim.
