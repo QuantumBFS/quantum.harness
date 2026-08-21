@@ -1,0 +1,55 @@
+{
+  "status": "complete",
+  "sigma": 0.4,
+  "alpha": 0.5,
+  "r_fit": 2048,
+  "lengths": [
+    64,
+    96
+  ],
+  "acceptance_threshold_max_relative_error": 0.01,
+  "source": {
+    "path": "sigma-0p4/fit-summary.json",
+    "sha256": "54f3abe6c701655786a21c88ba7f89d381fd37d9dfe663d2a2c87ee3841efa6f"
+  },
+  "by_K": {
+    "24": {
+      "kernel_max_relative_error": 2.0809296286117274e-08,
+      "kernel_rms_relative_error": 5.858232438937541e-09,
+      "finite_ring": {
+        "64": {
+          "max_relative_error": 0.060040013886258084,
+          "rms_relative_error": 0.044169808960997904,
+          "maximum_distance": 32
+        },
+        "96": {
+          "max_relative_error": 0.07061180139307018,
+          "rms_relative_error": 0.051810292190360256,
+          "maximum_distance": 48
+        }
+      }
+    },
+    "32": {
+      "kernel_max_relative_error": 5.5613652572006345e-09,
+      "kernel_rms_relative_error": 8.269229614050879e-10,
+      "finite_ring": {
+        "64": {
+          "max_relative_error": 0.05999919011721651,
+          "rms_relative_error": 0.044139774976311455,
+          "maximum_distance": 32
+        },
+        "96": {
+          "max_relative_error": 0.07056378892942441,
+          "rms_relative_error": 0.05177506310924378,
+          "maximum_distance": 48
+        }
+      }
+    }
+  },
+  "decision": {
+    "K32_below_threshold": false,
+    "selected_K": null,
+    "run_sigma_0p4_dmrg": false,
+    "action": "document_as_mpo_limited_validation"
+  }
+}

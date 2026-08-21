@@ -1,0 +1,43 @@
+{
+  "status": "approved",
+  "hamiltonian": "periodic-hurwitz-zeta-long-range-tfim",
+  "operator_convention": "rotated-xz-periodized-v1",
+  "num_exponentials": 24,
+  "alpha": 0.5,
+  "r_fit": 2048,
+  "approximate_mpo_compression": false,
+  "exact_zero_pruning": true,
+  "chi_validation": {
+    "sigma": [1.70, 1.75, 1.80, 2.00],
+    "length": 64,
+    "sector": "even",
+    "chi": 128,
+    "Gamma_endpoints": {
+      "1.70": [1.55, 1.60],
+      "1.75": [1.55, 1.60],
+      "1.80": [1.50, 1.55],
+      "2.00": [1.40, 1.45]
+    },
+    "R_xi_shift_threshold": 0.0001,
+    "require_same_D_sigma_signs": true,
+    "require_same_crossing_bracket": true
+  },
+  "gap_validation": {
+    "sigma": [1.75, 1.80, 2.00],
+    "lengths": [32, 64],
+    "sector": "odd",
+    "chi": 64,
+    "Gamma_endpoints": {
+      "1.75": [1.55, 1.60],
+      "1.80": [1.50, 1.55],
+      "2.00": [1.40, 1.45]
+    },
+    "interpolate_to_existing_broad_Gamma_x": true,
+    "unstable_cells_request_selective_chi128_only": true
+  },
+  "excluded": {
+    "K32": true,
+    "L128": true,
+    "Gamma_refinement": true
+  }
+}

@@ -1,0 +1,1658 @@
+[
+  {
+    "sigma": 1.5,
+    "L": 32,
+    "Gamma": 1.55,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 1.1495166733748243e-10,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 1.5,
+    "L": 32,
+    "Gamma": 1.6,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 1.4025310366558126e-10,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 1.5,
+    "L": 32,
+    "Gamma": 1.65,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 1.5773308119491373e-10,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 1.5,
+    "L": 32,
+    "Gamma": 1.7,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 1.5992582797087529e-10,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 1.5,
+    "L": 32,
+    "Gamma": 1.75,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 1.369863812038113e-10,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 1.5,
+    "L": 32,
+    "Gamma": 1.8,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 1.0638727434807354e-10,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 1.5,
+    "L": 64,
+    "Gamma": 1.4,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 1.1312065546173104e-10,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 1.5,
+    "L": 64,
+    "Gamma": 1.45,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 1.9659912001898096e-10,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 1.5,
+    "L": 64,
+    "Gamma": 1.5,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 3.18180596233867e-10,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 1.5,
+    "L": 64,
+    "Gamma": 1.5,
+    "code": "discarded_weight",
+    "sector": "even",
+    "value": 1.639516860664342e-08,
+    "threshold": 1e-08
+  },
+  {
+    "sigma": 1.5,
+    "L": 64,
+    "Gamma": 1.5,
+    "code": "sweep_cap_reached",
+    "sector": "even",
+    "value": 31,
+    "threshold": 30
+  },
+  {
+    "sigma": 1.5,
+    "L": 64,
+    "Gamma": 1.55,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 5.219168797095641e-10,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 1.5,
+    "L": 64,
+    "Gamma": 1.55,
+    "code": "discarded_weight",
+    "sector": "even",
+    "value": 2.8821978773244047e-08,
+    "threshold": 1e-08
+  },
+  {
+    "sigma": 1.5,
+    "L": 64,
+    "Gamma": 1.6,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 8.680461427210273e-10,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 1.5,
+    "L": 64,
+    "Gamma": 1.6,
+    "code": "discarded_weight",
+    "sector": "even",
+    "value": 4.60904068273009e-08,
+    "threshold": 1e-08
+  },
+  {
+    "sigma": 1.5,
+    "L": 64,
+    "Gamma": 1.65,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 1.281694310770294e-09,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 1.5,
+    "L": 64,
+    "Gamma": 1.65,
+    "code": "discarded_weight",
+    "sector": "even",
+    "value": 6.777235715344659e-08,
+    "threshold": 1e-08
+  },
+  {
+    "sigma": 1.5,
+    "L": 64,
+    "Gamma": 1.7,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 1.8137952205738432e-09,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 1.5,
+    "L": 64,
+    "Gamma": 1.7,
+    "code": "discarded_weight",
+    "sector": "even",
+    "value": 8.914929042403602e-08,
+    "threshold": 1e-08
+  },
+  {
+    "sigma": 1.5,
+    "L": 64,
+    "Gamma": 1.7,
+    "code": "sweep_cap_reached",
+    "sector": "even",
+    "value": 31,
+    "threshold": 30
+  },
+  {
+    "sigma": 1.5,
+    "L": 64,
+    "Gamma": 1.75,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 1.7477208148680015e-09,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 1.5,
+    "L": 64,
+    "Gamma": 1.75,
+    "code": "discarded_weight",
+    "sector": "even",
+    "value": 8.647230169989818e-08,
+    "threshold": 1e-08
+  },
+  {
+    "sigma": 1.5,
+    "L": 64,
+    "Gamma": 1.75,
+    "code": "sweep_cap_reached",
+    "sector": "even",
+    "value": 31,
+    "threshold": 30
+  },
+  {
+    "sigma": 1.5,
+    "L": 64,
+    "Gamma": 1.8,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 1.1961001822961208e-09,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 1.5,
+    "L": 64,
+    "Gamma": 1.8,
+    "code": "discarded_weight",
+    "sector": "even",
+    "value": 6.624702335596802e-08,
+    "threshold": 1e-08
+  },
+  {
+    "sigma": 1.5,
+    "L": 64,
+    "Gamma": 1.8,
+    "code": "sweep_cap_reached",
+    "sector": "even",
+    "value": 31,
+    "threshold": 30
+  },
+  {
+    "sigma": 1.5,
+    "L": 64,
+    "Gamma": 1.85,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 7.189213249956763e-10,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 1.5,
+    "L": 64,
+    "Gamma": 1.85,
+    "code": "discarded_weight",
+    "sector": "even",
+    "value": 4.683900760460712e-08,
+    "threshold": 1e-08
+  },
+  {
+    "sigma": 1.5,
+    "L": 64,
+    "Gamma": 1.9,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 4.417808074456687e-10,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 1.5,
+    "L": 64,
+    "Gamma": 1.9,
+    "code": "discarded_weight",
+    "sector": "even",
+    "value": 3.323993352998097e-08,
+    "threshold": 1e-08
+  },
+  {
+    "sigma": 1.6,
+    "L": 32,
+    "Gamma": 1.5,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 1.0753244968842414e-10,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 1.6,
+    "L": 32,
+    "Gamma": 1.55,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 1.296907493162401e-10,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 1.6,
+    "L": 32,
+    "Gamma": 1.6,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 1.4177191250850446e-10,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 1.6,
+    "L": 32,
+    "Gamma": 1.65,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 1.358325991799865e-10,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 1.6,
+    "L": 32,
+    "Gamma": 1.7,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 1.1227196488410713e-10,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 1.6,
+    "L": 64,
+    "Gamma": 1.35,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 1.121863945407594e-10,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 1.6,
+    "L": 64,
+    "Gamma": 1.4,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 1.9705227838446258e-10,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 1.6,
+    "L": 64,
+    "Gamma": 1.4,
+    "code": "discarded_weight",
+    "sector": "even",
+    "value": 1.1467220837463063e-08,
+    "threshold": 1e-08
+  },
+  {
+    "sigma": 1.6,
+    "L": 64,
+    "Gamma": 1.4,
+    "code": "sweep_cap_reached",
+    "sector": "even",
+    "value": 31,
+    "threshold": 30
+  },
+  {
+    "sigma": 1.6,
+    "L": 64,
+    "Gamma": 1.45,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 3.179515248192993e-10,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 1.6,
+    "L": 64,
+    "Gamma": 1.45,
+    "code": "discarded_weight",
+    "sector": "even",
+    "value": 1.9956088872667342e-08,
+    "threshold": 1e-08
+  },
+  {
+    "sigma": 1.6,
+    "L": 64,
+    "Gamma": 1.5,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 5.578939447054093e-10,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 1.6,
+    "L": 64,
+    "Gamma": 1.5,
+    "code": "discarded_weight",
+    "sector": "even",
+    "value": 3.567947216674782e-08,
+    "threshold": 1e-08
+  },
+  {
+    "sigma": 1.6,
+    "L": 64,
+    "Gamma": 1.55,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 9.724704896285398e-10,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 1.6,
+    "L": 64,
+    "Gamma": 1.55,
+    "code": "discarded_weight",
+    "sector": "even",
+    "value": 5.664957785195471e-08,
+    "threshold": 1e-08
+  },
+  {
+    "sigma": 1.6,
+    "L": 64,
+    "Gamma": 1.6,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 1.434650153779464e-09,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 1.6,
+    "L": 64,
+    "Gamma": 1.6,
+    "code": "discarded_weight",
+    "sector": "even",
+    "value": 8.459761547670785e-08,
+    "threshold": 1e-08
+  },
+  {
+    "sigma": 1.6,
+    "L": 64,
+    "Gamma": 1.6,
+    "code": "sweep_cap_reached",
+    "sector": "even",
+    "value": 31,
+    "threshold": 30
+  },
+  {
+    "sigma": 1.6,
+    "L": 64,
+    "Gamma": 1.65,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 1.6170732060982773e-09,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 1.6,
+    "L": 64,
+    "Gamma": 1.65,
+    "code": "discarded_weight",
+    "sector": "even",
+    "value": 9.31119200953169e-08,
+    "threshold": 1e-08
+  },
+  {
+    "sigma": 1.6,
+    "L": 64,
+    "Gamma": 1.65,
+    "code": "sweep_cap_reached",
+    "sector": "even",
+    "value": 31,
+    "threshold": 30
+  },
+  {
+    "sigma": 1.6,
+    "L": 64,
+    "Gamma": 1.7,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 1.2039699476752076e-09,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 1.6,
+    "L": 64,
+    "Gamma": 1.7,
+    "code": "discarded_weight",
+    "sector": "even",
+    "value": 7.536229034421502e-08,
+    "threshold": 1e-08
+  },
+  {
+    "sigma": 1.6,
+    "L": 64,
+    "Gamma": 1.75,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 7.14171900779377e-10,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 1.6,
+    "L": 64,
+    "Gamma": 1.75,
+    "code": "discarded_weight",
+    "sector": "even",
+    "value": 5.290329767451688e-08,
+    "threshold": 1e-08
+  },
+  {
+    "sigma": 1.6,
+    "L": 64,
+    "Gamma": 1.8,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 4.246025141836594e-10,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 1.6,
+    "L": 64,
+    "Gamma": 1.8,
+    "code": "discarded_weight",
+    "sector": "even",
+    "value": 3.672482704283969e-08,
+    "threshold": 1e-08
+  },
+  {
+    "sigma": 1.6,
+    "L": 64,
+    "Gamma": 1.85,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 2.705187749974469e-10,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 1.6,
+    "L": 64,
+    "Gamma": 1.85,
+    "code": "discarded_weight",
+    "sector": "even",
+    "value": 2.5840814956186443e-08,
+    "threshold": 1e-08
+  },
+  {
+    "sigma": 1.6,
+    "L": 64,
+    "Gamma": 1.85,
+    "code": "sweep_cap_reached",
+    "sector": "even",
+    "value": 31,
+    "threshold": 30
+  },
+  {
+    "sigma": 1.6,
+    "L": 64,
+    "Gamma": 1.9,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 1.6926675880924507e-10,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 1.6,
+    "L": 64,
+    "Gamma": 1.9,
+    "code": "discarded_weight",
+    "sector": "even",
+    "value": 1.877450659392713e-08,
+    "threshold": 1e-08
+  },
+  {
+    "sigma": 1.7,
+    "L": 32,
+    "Gamma": 1.5,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 1.1732047083535227e-10,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 1.7,
+    "L": 32,
+    "Gamma": 1.55,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 1.2497307011057876e-10,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 1.7,
+    "L": 32,
+    "Gamma": 1.6,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 1.1407161255901471e-10,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 1.7,
+    "L": 64,
+    "Gamma": 1.3,
+    "code": "sweep_cap_reached",
+    "sector": "even",
+    "value": 31,
+    "threshold": 30
+  },
+  {
+    "sigma": 1.7,
+    "L": 64,
+    "Gamma": 1.35,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 1.7602679198329327e-10,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 1.7,
+    "L": 64,
+    "Gamma": 1.35,
+    "code": "discarded_weight",
+    "sector": "even",
+    "value": 1.2267429967779143e-08,
+    "threshold": 1e-08
+  },
+  {
+    "sigma": 1.7,
+    "L": 64,
+    "Gamma": 1.35,
+    "code": "sweep_cap_reached",
+    "sector": "even",
+    "value": 31,
+    "threshold": 30
+  },
+  {
+    "sigma": 1.7,
+    "L": 64,
+    "Gamma": 1.4,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 2.986910783299726e-10,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 1.7,
+    "L": 64,
+    "Gamma": 1.4,
+    "code": "discarded_weight",
+    "sector": "even",
+    "value": 2.2315954165644405e-08,
+    "threshold": 1e-08
+  },
+  {
+    "sigma": 1.7,
+    "L": 64,
+    "Gamma": 1.45,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 5.216961727686677e-10,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 1.7,
+    "L": 64,
+    "Gamma": 1.45,
+    "code": "discarded_weight",
+    "sector": "even",
+    "value": 3.996844460476604e-08,
+    "threshold": 1e-08
+  },
+  {
+    "sigma": 1.7,
+    "L": 64,
+    "Gamma": 1.5,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 9.26677399136173e-10,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 1.7,
+    "L": 64,
+    "Gamma": 1.5,
+    "code": "discarded_weight",
+    "sector": "even",
+    "value": 6.47095195021535e-08,
+    "threshold": 1e-08
+  },
+  {
+    "sigma": 1.7,
+    "L": 64,
+    "Gamma": 1.55,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 1.3405264889920192e-09,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 1.7,
+    "L": 64,
+    "Gamma": 1.55,
+    "code": "discarded_weight",
+    "sector": "even",
+    "value": 9.245911535582692e-08,
+    "threshold": 1e-08
+  },
+  {
+    "sigma": 1.7,
+    "L": 64,
+    "Gamma": 1.6,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 1.272167321954806e-09,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 1.7,
+    "L": 64,
+    "Gamma": 1.6,
+    "code": "discarded_weight",
+    "sector": "even",
+    "value": 8.998063872072136e-08,
+    "threshold": 1e-08
+  },
+  {
+    "sigma": 1.7,
+    "L": 64,
+    "Gamma": 1.65,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 8.119304518170259e-10,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 1.7,
+    "L": 64,
+    "Gamma": 1.65,
+    "code": "discarded_weight",
+    "sector": "even",
+    "value": 6.492347627288811e-08,
+    "threshold": 1e-08
+  },
+  {
+    "sigma": 1.7,
+    "L": 64,
+    "Gamma": 1.7,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 4.672074186929432e-10,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 1.7,
+    "L": 64,
+    "Gamma": 1.7,
+    "code": "discarded_weight",
+    "sector": "even",
+    "value": 4.347183864573125e-08,
+    "threshold": 1e-08
+  },
+  {
+    "sigma": 1.7,
+    "L": 64,
+    "Gamma": 1.75,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 2.9110630125138406e-10,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 1.7,
+    "L": 64,
+    "Gamma": 1.75,
+    "code": "discarded_weight",
+    "sector": "even",
+    "value": 2.995087519426829e-08,
+    "threshold": 1e-08
+  },
+  {
+    "sigma": 1.7,
+    "L": 64,
+    "Gamma": 1.75,
+    "code": "sweep_cap_reached",
+    "sector": "even",
+    "value": 31,
+    "threshold": 30
+  },
+  {
+    "sigma": 1.7,
+    "L": 64,
+    "Gamma": 1.8,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 1.6882836557858027e-10,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 1.7,
+    "L": 64,
+    "Gamma": 1.8,
+    "code": "discarded_weight",
+    "sector": "even",
+    "value": 2.0947705790093896e-08,
+    "threshold": 1e-08
+  },
+  {
+    "sigma": 1.7,
+    "L": 64,
+    "Gamma": 1.85,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 1.0078132740430616e-10,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 1.7,
+    "L": 64,
+    "Gamma": 1.85,
+    "code": "discarded_weight",
+    "sector": "even",
+    "value": 1.4605897942405582e-08,
+    "threshold": 1e-08
+  },
+  {
+    "sigma": 1.7,
+    "L": 64,
+    "Gamma": 1.9,
+    "code": "discarded_weight",
+    "sector": "even",
+    "value": 1.051248084775758e-08,
+    "threshold": 1e-08
+  },
+  {
+    "sigma": 1.75,
+    "L": 32,
+    "Gamma": 1.45,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 1.0065644216217799e-10,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 1.75,
+    "L": 32,
+    "Gamma": 1.5,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 1.1628477541360597e-10,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 1.75,
+    "L": 32,
+    "Gamma": 1.55,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 1.1379149880906443e-10,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 1.75,
+    "L": 64,
+    "Gamma": 1.3,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 1.1607119058689755e-10,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 1.75,
+    "L": 64,
+    "Gamma": 1.3,
+    "code": "sweep_cap_reached",
+    "sector": "even",
+    "value": 31,
+    "threshold": 30
+  },
+  {
+    "sigma": 1.75,
+    "L": 64,
+    "Gamma": 1.35,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 2.095019900745411e-10,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 1.75,
+    "L": 64,
+    "Gamma": 1.35,
+    "code": "discarded_weight",
+    "sector": "even",
+    "value": 1.5487118541443636e-08,
+    "threshold": 1e-08
+  },
+  {
+    "sigma": 1.75,
+    "L": 64,
+    "Gamma": 1.4,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 3.569898473580167e-10,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 1.75,
+    "L": 64,
+    "Gamma": 1.4,
+    "code": "discarded_weight",
+    "sector": "even",
+    "value": 2.5875450693037516e-08,
+    "threshold": 1e-08
+  },
+  {
+    "sigma": 1.75,
+    "L": 64,
+    "Gamma": 1.45,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 6.747006432491565e-10,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 1.75,
+    "L": 64,
+    "Gamma": 1.45,
+    "code": "discarded_weight",
+    "sector": "even",
+    "value": 4.5864573182496385e-08,
+    "threshold": 1e-08
+  },
+  {
+    "sigma": 1.75,
+    "L": 64,
+    "Gamma": 1.5,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 1.1134185580494668e-09,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 1.75,
+    "L": 64,
+    "Gamma": 1.5,
+    "code": "discarded_weight",
+    "sector": "even",
+    "value": 7.559766589988972e-08,
+    "threshold": 1e-08
+  },
+  {
+    "sigma": 1.75,
+    "L": 64,
+    "Gamma": 1.5,
+    "code": "sweep_cap_reached",
+    "sector": "even",
+    "value": 31,
+    "threshold": 30
+  },
+  {
+    "sigma": 1.75,
+    "L": 64,
+    "Gamma": 1.55,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 1.2786114828111232e-09,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 1.75,
+    "L": 64,
+    "Gamma": 1.55,
+    "code": "discarded_weight",
+    "sector": "even",
+    "value": 8.60508139208881e-08,
+    "threshold": 1e-08
+  },
+  {
+    "sigma": 1.75,
+    "L": 64,
+    "Gamma": 1.6,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 9.007758291132461e-10,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 1.75,
+    "L": 64,
+    "Gamma": 1.6,
+    "code": "discarded_weight",
+    "sector": "even",
+    "value": 6.719236845551719e-08,
+    "threshold": 1e-08
+  },
+  {
+    "sigma": 1.75,
+    "L": 64,
+    "Gamma": 1.65,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 5.164357007464957e-10,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 1.75,
+    "L": 64,
+    "Gamma": 1.65,
+    "code": "discarded_weight",
+    "sector": "even",
+    "value": 4.564416685148405e-08,
+    "threshold": 1e-08
+  },
+  {
+    "sigma": 1.75,
+    "L": 64,
+    "Gamma": 1.7,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 3.1330587917018e-10,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 1.75,
+    "L": 64,
+    "Gamma": 1.7,
+    "code": "discarded_weight",
+    "sector": "even",
+    "value": 3.14007967080815e-08,
+    "threshold": 1e-08
+  },
+  {
+    "sigma": 1.75,
+    "L": 64,
+    "Gamma": 1.7,
+    "code": "sweep_cap_reached",
+    "sector": "even",
+    "value": 31,
+    "threshold": 30
+  },
+  {
+    "sigma": 1.75,
+    "L": 64,
+    "Gamma": 1.75,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 1.779775773838429e-10,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 1.75,
+    "L": 64,
+    "Gamma": 1.75,
+    "code": "discarded_weight",
+    "sector": "even",
+    "value": 2.152902661539715e-08,
+    "threshold": 1e-08
+  },
+  {
+    "sigma": 1.75,
+    "L": 64,
+    "Gamma": 1.8,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 1.0333458038571084e-10,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 1.75,
+    "L": 64,
+    "Gamma": 1.8,
+    "code": "discarded_weight",
+    "sector": "even",
+    "value": 1.5109023192896696e-08,
+    "threshold": 1e-08
+  },
+  {
+    "sigma": 1.75,
+    "L": 64,
+    "Gamma": 1.85,
+    "code": "discarded_weight",
+    "sector": "even",
+    "value": 1.0739527994685213e-08,
+    "threshold": 1e-08
+  },
+  {
+    "sigma": 1.8,
+    "L": 32,
+    "Gamma": 1.45,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 1.0268456869669862e-10,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 1.8,
+    "L": 32,
+    "Gamma": 1.5,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 1.0878561832086514e-10,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 1.8,
+    "L": 64,
+    "Gamma": 1.3,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 1.338978784965647e-10,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 1.8,
+    "L": 64,
+    "Gamma": 1.3,
+    "code": "discarded_weight",
+    "sector": "even",
+    "value": 1.1197594645190852e-08,
+    "threshold": 1e-08
+  },
+  {
+    "sigma": 1.8,
+    "L": 64,
+    "Gamma": 1.35,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 2.3565802047723825e-10,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 1.8,
+    "L": 64,
+    "Gamma": 1.35,
+    "code": "discarded_weight",
+    "sector": "even",
+    "value": 1.961215890864254e-08,
+    "threshold": 1e-08
+  },
+  {
+    "sigma": 1.8,
+    "L": 64,
+    "Gamma": 1.4,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 4.5822857644887414e-10,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 1.8,
+    "L": 64,
+    "Gamma": 1.4,
+    "code": "discarded_weight",
+    "sector": "even",
+    "value": 3.4645845917088116e-08,
+    "threshold": 1e-08
+  },
+  {
+    "sigma": 1.8,
+    "L": 64,
+    "Gamma": 1.45,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 8.471931914141859e-10,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 1.8,
+    "L": 64,
+    "Gamma": 1.45,
+    "code": "discarded_weight",
+    "sector": "even",
+    "value": 6.261441721865086e-08,
+    "threshold": 1e-08
+  },
+  {
+    "sigma": 1.8,
+    "L": 64,
+    "Gamma": 1.5,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 1.193179302355088e-09,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 1.8,
+    "L": 64,
+    "Gamma": 1.5,
+    "code": "discarded_weight",
+    "sector": "even",
+    "value": 8.404889166297061e-08,
+    "threshold": 1e-08
+  },
+  {
+    "sigma": 1.8,
+    "L": 64,
+    "Gamma": 1.55,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 9.988708243533749e-10,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 1.8,
+    "L": 64,
+    "Gamma": 1.55,
+    "code": "discarded_weight",
+    "sector": "even",
+    "value": 7.481055375625764e-08,
+    "threshold": 1e-08
+  },
+  {
+    "sigma": 1.8,
+    "L": 64,
+    "Gamma": 1.6,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 5.901713161939577e-10,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 1.8,
+    "L": 64,
+    "Gamma": 1.6,
+    "code": "discarded_weight",
+    "sector": "even",
+    "value": 5.1131810428269675e-08,
+    "threshold": 1e-08
+  },
+  {
+    "sigma": 1.8,
+    "L": 64,
+    "Gamma": 1.65,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 3.4813846235231675e-10,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 1.8,
+    "L": 64,
+    "Gamma": 1.65,
+    "code": "discarded_weight",
+    "sector": "even",
+    "value": 3.4563479618583013e-08,
+    "threshold": 1e-08
+  },
+  {
+    "sigma": 1.8,
+    "L": 64,
+    "Gamma": 1.65,
+    "code": "sweep_cap_reached",
+    "sector": "even",
+    "value": 31,
+    "threshold": 30
+  },
+  {
+    "sigma": 1.8,
+    "L": 64,
+    "Gamma": 1.7,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 1.9306997050479333e-10,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 1.8,
+    "L": 64,
+    "Gamma": 1.7,
+    "code": "discarded_weight",
+    "sector": "even",
+    "value": 2.3546776312026206e-08,
+    "threshold": 1e-08
+  },
+  {
+    "sigma": 1.8,
+    "L": 64,
+    "Gamma": 1.75,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 1.0927169103484029e-10,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 1.8,
+    "L": 64,
+    "Gamma": 1.75,
+    "code": "discarded_weight",
+    "sector": "even",
+    "value": 1.6341049379138733e-08,
+    "threshold": 1e-08
+  },
+  {
+    "sigma": 1.8,
+    "L": 64,
+    "Gamma": 1.8,
+    "code": "discarded_weight",
+    "sector": "even",
+    "value": 1.1434048692485234e-08,
+    "threshold": 1e-08
+  },
+  {
+    "sigma": 1.9,
+    "L": 64,
+    "Gamma": 1.25,
+    "code": "discarded_weight",
+    "sector": "even",
+    "value": 1.0332043792462032e-08,
+    "threshold": 1e-08
+  },
+  {
+    "sigma": 1.9,
+    "L": 64,
+    "Gamma": 1.3,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 1.90831646326173e-10,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 1.9,
+    "L": 64,
+    "Gamma": 1.3,
+    "code": "discarded_weight",
+    "sector": "even",
+    "value": 1.898489660064421e-08,
+    "threshold": 1e-08
+  },
+  {
+    "sigma": 1.9,
+    "L": 64,
+    "Gamma": 1.35,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 3.7504401694379806e-10,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 1.9,
+    "L": 64,
+    "Gamma": 1.35,
+    "code": "discarded_weight",
+    "sector": "even",
+    "value": 3.553233011502322e-08,
+    "threshold": 1e-08
+  },
+  {
+    "sigma": 1.9,
+    "L": 64,
+    "Gamma": 1.4,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 7.294262800609656e-10,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 1.9,
+    "L": 64,
+    "Gamma": 1.4,
+    "code": "discarded_weight",
+    "sector": "even",
+    "value": 6.729119010549171e-08,
+    "threshold": 1e-08
+  },
+  {
+    "sigma": 1.9,
+    "L": 64,
+    "Gamma": 1.45,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 1.034488159536455e-09,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 1.9,
+    "L": 64,
+    "Gamma": 1.45,
+    "code": "discarded_weight",
+    "sector": "even",
+    "value": 9.228787765873821e-08,
+    "threshold": 1e-08
+  },
+  {
+    "sigma": 1.9,
+    "L": 64,
+    "Gamma": 1.5,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 8.188529291443297e-10,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 1.9,
+    "L": 64,
+    "Gamma": 1.5,
+    "code": "discarded_weight",
+    "sector": "even",
+    "value": 7.97246549958173e-08,
+    "threshold": 1e-08
+  },
+  {
+    "sigma": 1.9,
+    "L": 64,
+    "Gamma": 1.55,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 4.644020733698179e-10,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 1.9,
+    "L": 64,
+    "Gamma": 1.55,
+    "code": "discarded_weight",
+    "sector": "even",
+    "value": 5.239997854735391e-08,
+    "threshold": 1e-08
+  },
+  {
+    "sigma": 1.9,
+    "L": 64,
+    "Gamma": 1.6,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 2.646384785145333e-10,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 1.9,
+    "L": 64,
+    "Gamma": 1.6,
+    "code": "discarded_weight",
+    "sector": "even",
+    "value": 3.4502208187404465e-08,
+    "threshold": 1e-08
+  },
+  {
+    "sigma": 1.9,
+    "L": 64,
+    "Gamma": 1.65,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 1.392828285774286e-10,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 1.9,
+    "L": 64,
+    "Gamma": 1.65,
+    "code": "discarded_weight",
+    "sector": "even",
+    "value": 2.3319540309419113e-08,
+    "threshold": 1e-08
+  },
+  {
+    "sigma": 1.9,
+    "L": 64,
+    "Gamma": 1.7,
+    "code": "discarded_weight",
+    "sector": "even",
+    "value": 1.537252437483563e-08,
+    "threshold": 1e-08
+  },
+  {
+    "sigma": 1.9,
+    "L": 64,
+    "Gamma": 1.75,
+    "code": "discarded_weight",
+    "sector": "even",
+    "value": 1.1270539968063656e-08,
+    "threshold": 1e-08
+  },
+  {
+    "sigma": 2.0,
+    "L": 64,
+    "Gamma": 1.25,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 1.3325249633065948e-10,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 2.0,
+    "L": 64,
+    "Gamma": 1.25,
+    "code": "discarded_weight",
+    "sector": "even",
+    "value": 1.6655971932251537e-08,
+    "threshold": 1e-08
+  },
+  {
+    "sigma": 2.0,
+    "L": 64,
+    "Gamma": 1.3,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 2.9292824042068866e-10,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 2.0,
+    "L": 64,
+    "Gamma": 1.3,
+    "code": "discarded_weight",
+    "sector": "even",
+    "value": 3.243200791974242e-08,
+    "threshold": 1e-08
+  },
+  {
+    "sigma": 2.0,
+    "L": 64,
+    "Gamma": 1.35,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 5.86330237762924e-10,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 2.0,
+    "L": 64,
+    "Gamma": 1.35,
+    "code": "discarded_weight",
+    "sector": "even",
+    "value": 6.398219410305504e-08,
+    "threshold": 1e-08
+  },
+  {
+    "sigma": 2.0,
+    "L": 64,
+    "Gamma": 1.35,
+    "code": "sweep_cap_reached",
+    "sector": "even",
+    "value": 31,
+    "threshold": 30
+  },
+  {
+    "sigma": 2.0,
+    "L": 64,
+    "Gamma": 1.4,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 8.87241946146505e-10,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 2.0,
+    "L": 64,
+    "Gamma": 1.4,
+    "code": "discarded_weight",
+    "sector": "even",
+    "value": 9.425925067224422e-08,
+    "threshold": 1e-08
+  },
+  {
+    "sigma": 2.0,
+    "L": 64,
+    "Gamma": 1.45,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 7.155157600732075e-10,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 2.0,
+    "L": 64,
+    "Gamma": 1.45,
+    "code": "discarded_weight",
+    "sector": "even",
+    "value": 8.39876296112254e-08,
+    "threshold": 1e-08
+  },
+  {
+    "sigma": 2.0,
+    "L": 64,
+    "Gamma": 1.5,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 4.0662601153652964e-10,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 2.0,
+    "L": 64,
+    "Gamma": 1.5,
+    "code": "discarded_weight",
+    "sector": "even",
+    "value": 5.3644531453186126e-08,
+    "threshold": 1e-08
+  },
+  {
+    "sigma": 2.0,
+    "L": 64,
+    "Gamma": 1.5,
+    "code": "sweep_cap_reached",
+    "sector": "even",
+    "value": 30,
+    "threshold": 30
+  },
+  {
+    "sigma": 2.0,
+    "L": 64,
+    "Gamma": 1.55,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 2.1728336047731196e-10,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 2.0,
+    "L": 64,
+    "Gamma": 1.55,
+    "code": "discarded_weight",
+    "sector": "even",
+    "value": 3.3737106170088564e-08,
+    "threshold": 1e-08
+  },
+  {
+    "sigma": 2.0,
+    "L": 64,
+    "Gamma": 1.55,
+    "code": "sweep_cap_reached",
+    "sector": "even",
+    "value": 31,
+    "threshold": 30
+  },
+  {
+    "sigma": 2.0,
+    "L": 64,
+    "Gamma": 1.6,
+    "code": "relative_variance",
+    "sector": "even",
+    "value": 1.0693290228692778e-10,
+    "threshold": 1e-10
+  },
+  {
+    "sigma": 2.0,
+    "L": 64,
+    "Gamma": 1.6,
+    "code": "discarded_weight",
+    "sector": "even",
+    "value": 2.2246080405655806e-08,
+    "threshold": 1e-08
+  },
+  {
+    "sigma": 2.0,
+    "L": 64,
+    "Gamma": 1.65,
+    "code": "discarded_weight",
+    "sector": "even",
+    "value": 1.4499201422857129e-08,
+    "threshold": 1e-08
+  },
+  {
+    "sigma": 2.0,
+    "L": 64,
+    "Gamma": 1.65,
+    "code": "sweep_cap_reached",
+    "sector": "even",
+    "value": 31,
+    "threshold": 30
+  },
+  {
+    "sigma": 2.0,
+    "L": 64,
+    "Gamma": 1.7,
+    "code": "discarded_weight",
+    "sector": "even",
+    "value": 1.0046805977283753e-08,
+    "threshold": 1e-08
+  }
+]

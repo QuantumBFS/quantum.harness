@@ -1,0 +1,329 @@
+{
+  "model": "periodic-long-range-tfim",
+  "sigma": 1.8,
+  "Gamma": 1.5288,
+  "field_role": "external_published_benchmark",
+  "gap_records": [
+    {
+      "L": 16,
+      "Gamma": 1.5288,
+      "E_even": -28.104085122254766,
+      "E_odd": -27.83870160936677,
+      "gap": 0.2653835128879969,
+      "even_diagnostics": {
+        "accepted": true,
+        "flags": [],
+        "energy": -28.104085122254766,
+        "relative_variance": 4.605971648569207e-15,
+        "discarded_weight": 1.1937207856458067e-13,
+        "reached_chi": 128,
+        "sweeps": 14,
+        "wall_seconds": 48.92454504700072,
+        "max_sweeps": 30,
+        "refinement_requested": false
+      },
+      "odd_diagnostics": {
+        "accepted": true,
+        "flags": [],
+        "energy": -27.83870160936677,
+        "relative_variance": 1.1735516851712735e-15,
+        "discarded_weight": 1.1995503524263599e-13,
+        "reached_chi": 128,
+        "sweeps": 14,
+        "wall_seconds": 49.01230373399994,
+        "max_sweeps": 30,
+        "refinement_requested": false
+      },
+      "accepted": true
+    },
+    {
+      "L": 32,
+      "Gamma": 1.5288,
+      "E_even": -56.07915917795979,
+      "E_odd": -55.93507365101489,
+      "gap": 0.14408552694489885,
+      "even_diagnostics": {
+        "accepted": true,
+        "flags": [],
+        "energy": -56.07915917795979,
+        "relative_variance": 4.3293130143682433e-13,
+        "discarded_weight": 7.596984153826871e-11,
+        "reached_chi": 128,
+        "sweeps": 15,
+        "wall_seconds": 195.7358948129986,
+        "max_sweeps": 30,
+        "refinement_requested": false
+      },
+      "odd_diagnostics": {
+        "accepted": true,
+        "flags": [],
+        "energy": -55.93507365101489,
+        "relative_variance": 1.7009790092549027e-12,
+        "discarded_weight": 6.717274971235259e-10,
+        "reached_chi": 128,
+        "sweeps": 15,
+        "wall_seconds": 204.47585878300015,
+        "max_sweeps": 30,
+        "refinement_requested": false
+      },
+      "accepted": true
+    },
+    {
+      "L": 64,
+      "Gamma": 1.5288,
+      "E_even": -112.08547598045243,
+      "E_odd": -112.00808024871017,
+      "gap": 0.07739573174225711,
+      "even_diagnostics": {
+        "accepted": true,
+        "flags": [],
+        "energy": -112.08547598045243,
+        "relative_variance": 1.672326195554173e-11,
+        "discarded_weight": 2.3048380746139034e-09,
+        "reached_chi": 128,
+        "sweeps": 18,
+        "wall_seconds": 593.6473374189991,
+        "max_sweeps": 30,
+        "refinement_requested": false
+      },
+      "odd_diagnostics": {
+        "accepted": true,
+        "flags": [],
+        "energy": -112.00808024871017,
+        "relative_variance": 1.4602156353444182e-11,
+        "discarded_weight": 7.049977727146682e-08,
+        "reached_chi": 128,
+        "sweeps": 18,
+        "wall_seconds": 553.8837291130003,
+        "max_sweeps": 30,
+        "refinement_requested": false
+      },
+      "accepted": true
+    },
+    {
+      "L": 96,
+      "Gamma": 1.5288,
+      "E_even": -168.1063561016886,
+      "E_odd": -168.0527820544027,
+      "gap": 0.05357404728587767,
+      "even_diagnostics": {
+        "accepted": true,
+        "flags": [],
+        "energy": -168.1063561016886,
+        "relative_variance": 5.793912889318339e-11,
+        "discarded_weight": 9.49630458758033e-09,
+        "reached_chi": 128,
+        "sweeps": 22,
+        "wall_seconds": 1021.6152307459997,
+        "max_sweeps": 30,
+        "refinement_requested": false
+      },
+      "odd_diagnostics": {
+        "accepted": true,
+        "flags": [],
+        "energy": -168.0527820544027,
+        "relative_variance": 4.788967889957557e-11,
+        "discarded_weight": 7.244544599204235e-08,
+        "reached_chi": 128,
+        "sweeps": 18,
+        "wall_seconds": 904.6041395299999,
+        "max_sweeps": 30,
+        "refinement_requested": false
+      },
+      "accepted": true
+    },
+    {
+      "L": 128,
+      "Gamma": 1.5288,
+      "E_even": -224.13120935209304,
+      "E_odd": -224.09001302944347,
+      "gap": 0.04119632264956863,
+      "even_diagnostics": {
+        "accepted": false,
+        "flags": [
+          "relative_variance"
+        ],
+        "energy": -224.13120935209304,
+        "relative_variance": 1.1066249320520326e-10,
+        "discarded_weight": 2.4488579413611274e-08,
+        "reached_chi": 128,
+        "sweeps": 21,
+        "wall_seconds": 1372.7751523340012,
+        "max_sweeps": 30,
+        "refinement_requested": false
+      },
+      "odd_diagnostics": {
+        "accepted": true,
+        "flags": [],
+        "energy": -224.09001302944347,
+        "relative_variance": 9.278218700164708e-11,
+        "discarded_weight": 9.083625497110451e-08,
+        "reached_chi": 128,
+        "sweeps": 22,
+        "wall_seconds": 1380.3671005939996,
+        "max_sweeps": 30,
+        "refinement_requested": false
+      },
+      "accepted": false
+    }
+  ],
+  "gap_scaling": {
+    "z_eff": {
+      "pairs": [
+        "16_32",
+        "32_64",
+        "64_96",
+        "96_128"
+      ],
+      "effective_lengths": [
+        22.627416997969522,
+        45.254833995939045,
+        78.38367176906169,
+        110.85125168440814
+      ],
+      "values": [
+        0.8811533177473871,
+        0.8965995162156252,
+        0.9072713480885044,
+        0.9132156197902845
+      ]
+    },
+    "direct": {
+      "amplitude": 3.197500685363282,
+      "exponent": 0.8958850328928746,
+      "predicted_gaps": [
+        0.26672122429342515,
+        0.1433406298305972,
+        0.07703375018115793,
+        0.05357023079376531,
+        0.04139927858546598
+      ],
+      "log_residuals": [
+        -0.005028010954101658,
+        0.005183235863805757,
+        0.004687993763083931,
+        7.124024133409179e-05,
+        -0.004914458914118569
+      ],
+      "residual_sum_squares": 9.828109528766711e-05,
+      "residual_rms": 0.004433533473149088,
+      "residual_degrees_of_freedom": 3,
+      "interpretation": "direct_log_linear_gap_regression"
+    },
+    "correction_sensitivity": {
+      "power": {
+        "form": "power",
+        "estimate": 0.9189480126037431,
+        "coefficient": -0.8805739169816933,
+        "coordinate_values": [
+          0.044194173824159216,
+          0.022097086912079608,
+          0.012757759076995721,
+          0.009021097956087904
+        ],
+        "predicted_values": [
+          0.8800317758516334,
+          0.8994898942276883,
+          0.9077138627214043,
+          0.9110042690410752
+        ],
+        "residuals": [
+          0.0011215418957537526,
+          -0.002890378012063155,
+          -0.0004425146328999041,
+          0.0022113507492093065
+        ],
+        "residual_sum_squares": 1.4698032612908177e-05,
+        "residual_rms": 0.0019169006633696604,
+        "residual_degrees_of_freedom": 2,
+        "coordinate_role": "sensitivity_only",
+        "known_correction_exponent_assumed": false
+      },
+      "log": {
+        "form": "log",
+        "estimate": 0.9749309500103763,
+        "coefficient": -0.29425250527456337,
+        "coordinate_values": [
+          0.3205988979753252,
+          0.2623081892525388,
+          0.22927283904203807,
+          0.21239588122711095
+        ],
+        "predicted_values": [
+          0.8805939210928727,
+          0.8977461081687825,
+          0.9074668427308449,
+          0.9124329298493004
+        ],
+        "residuals": [
+          0.0005593966545144324,
+          -0.001146591953157361,
+          -0.00019549464234047687,
+          0.0007826899409841825
+        ],
+        "residual_sum_squares": 2.2784194230288054e-06,
+        "residual_rms": 0.0007547217074903844,
+        "residual_degrees_of_freedom": 2,
+        "coordinate_role": "sensitivity_only",
+        "known_correction_exponent_assumed": false
+      },
+      "interpretation": "finite_size_sensitivity_not_statistical_model_selection"
+    },
+    "length_convention": "L_eff=sqrt(L1*L2)"
+  },
+  "published_comparison": {
+    "source": "Shiratani-Todo arXiv:2305.14121",
+    "z_power_approx": 0.93,
+    "z_log_approx": 1.0,
+    "role": "validation_comparison_only"
+  },
+  "precision_reproduction_claim": false,
+  "status": "complete_with_warnings",
+  "convergence_warnings": [
+    {
+      "L": 128,
+      "sector": "even",
+      "flags": [
+        "relative_variance"
+      ]
+    }
+  ],
+  "mpo_provenance": {
+    "fit": {
+      "K": 24,
+      "alpha": 0.5,
+      "r_fit": 2048,
+      "fit_hash": "19ab09df247debadbc75aaaa3d77cd9418e00f7ffbf1b397ecb944d8e539d54a"
+    },
+    "mpo": {
+      "pruned": true,
+      "active_channels": [
+        0,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        23
+      ],
+      "chi": 44,
+      "approximate_compression": false
+    },
+    "code_hash": "70940b36f60de517a64156b2bf61c06270abc090bdf2b1be44ba1acdbd5672e0",
+    "cells_audited": 10
+  }
+}

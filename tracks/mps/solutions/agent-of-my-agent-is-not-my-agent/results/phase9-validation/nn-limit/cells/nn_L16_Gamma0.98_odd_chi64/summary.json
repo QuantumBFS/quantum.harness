@@ -1,0 +1,48 @@
+{
+  "status": "success",
+  "settings": {
+    "model": "nearest-neighbor-tfim",
+    "sigma": null,
+    "length": 16,
+    "gamma": 0.98,
+    "sector": "odd",
+    "sectors": [
+      "odd"
+    ],
+    "chi_schedule": [
+      64
+    ],
+    "max_sweeps": 30,
+    "direct_only": true
+  },
+  "model": {
+    "hamiltonian": "-sum_i Z_i Z_(i+1) - Gamma sum_i X_i",
+    "length": 16,
+    "Gamma": 0.98,
+    "interaction_boundary": "periodic",
+    "mps_boundary": "finite-open",
+    "operator_convention": "rotated-xz-parity-v1",
+    "physical_X": "TeNPy Sigmaz",
+    "physical_Z": "TeNPy Sigmax",
+    "exact_model_hash": "8b52763ea74a3a7d8efa2af3221198347bdad7dc8a9f0a83b2d1382d4d5f3675"
+  },
+  "code_hash": "c1c94921399202ca63c5a0ff280de0b6087ef5f0b63bec3d609d474f7b853bd9",
+  "mpo": {
+    "chi": 4,
+    "exact_zero_pruning": false,
+    "approximate_compression": false,
+    "setup_seconds": 0.019402846000048157
+  },
+  "direct": {
+    "odd": {
+      "requested_chi": 64,
+      "energy": -20.125232440297598,
+      "variance": 3.410605131648481e-13,
+      "discarded_weight": 6.1300097565373965e-15,
+      "reached_chi": 64,
+      "sweeps": 9,
+      "wall_seconds": 3.9636510660002386
+    }
+  },
+  "raw_observables": {}
+}

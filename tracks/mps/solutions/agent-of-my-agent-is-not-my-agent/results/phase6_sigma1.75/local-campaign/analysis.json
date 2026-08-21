@@ -1,0 +1,57 @@
+{
+  "status": "pilot_complete_refinement_required",
+  "sigma": 1.75,
+  "sizes": [
+    32,
+    64
+  ],
+  "gammas": [
+    1.555,
+    1.56,
+    1.565
+  ],
+  "r_xi": {
+    "32": [
+      0.35319631215318614,
+      0.34477686295251586,
+      0.33661533930370907
+    ],
+    "64": [
+      0.3659580736964494,
+      0.34962100307183774,
+      0.33413656974275696
+    ]
+  },
+  "crossing": {
+    "gamma": 1.5633075241473828,
+    "left_gamma": 1.56,
+    "right_gamma": 1.565,
+    "fraction": 0.6615048294765579,
+    "interpretation": "provisional_two_size_pilot"
+  },
+  "gaps": {
+    "32": 0.15309921006404892,
+    "64": 0.08246281685016754,
+    "z_eff_32_64": 0.8926511908286028,
+    "interpretation": "diagnostic_only"
+  },
+  "runtime": {
+    "mean_even_seconds_L32": 176.2872532273333,
+    "mean_even_seconds_L64": 580.8221979233331,
+    "empirical_length_exponent": 1.7201684297343527,
+    "projected_even_seconds_L128": 1913.6631799773527,
+    "projected_even_odd_seconds_L128": 3827.3263599547054
+  },
+  "convergence": {
+    "L64_even_discarded": 2.5315324355751346e-09,
+    "L64_odd_discarded": 4.310058620414346e-08,
+    "targeted_refinement_required": true,
+    "reason": "L64 discarded weights exceed 1e-9 gap gate"
+  },
+  "mpo": {
+    "K": 24,
+    "active_channels": 21,
+    "chi": 44,
+    "approximate_compression": false
+  }
+}

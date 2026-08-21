@@ -1,0 +1,76 @@
+{
+  "mps_pairs": [
+    {
+      "gamma": 1.56,
+      "chi128_even": "results/phase6_sigma1.75/local-campaign/L64_Gamma1.560_even/summary.json",
+      "chi128_odd": "results/phase6_sigma1.75/local-campaign/L64_Gamma1.560_odd/summary.json",
+      "chi256_even": "results/phase6_sigma1.75/validated-local-reproduction/K24_chi256/L64_Gamma1.560_even/summary.json",
+      "chi256_odd": "results/phase6_sigma1.75/validated-local-reproduction/K24_chi256/L64_Gamma1.560_odd/summary.json"
+    },
+    {
+      "gamma": 1.565,
+      "chi128_even": "results/phase6_sigma1.75/local-campaign/L64_Gamma1.565_even/summary.json",
+      "chi128_odd": "results/phase6_sigma1.75/validated-local-reproduction/K24_chi128/L64_Gamma1.565_odd/summary.json",
+      "chi256_even": "results/phase6_sigma1.75/validated-local-reproduction/K24_chi256/L64_Gamma1.565_even/summary.json",
+      "chi256_odd": "results/phase6_sigma1.75/validated-local-reproduction/K24_chi256/L64_Gamma1.565_odd/summary.json"
+    }
+  ],
+  "k_cells": [
+    {
+      "K": 24,
+      "L": 32,
+      "Gamma": 1.56,
+      "even": "results/phase6_sigma1.75/physics-pilot/L32_Gamma1.560/summary.json",
+      "odd": "results/phase6_sigma1.75/physics-pilot/L32_Gamma1.560/summary.json"
+    },
+    {
+      "K": 24,
+      "L": 32,
+      "Gamma": 1.565,
+      "even": "results/phase6_sigma1.75/local-campaign/L32_Gamma1.565_even/summary.json",
+      "odd": "results/phase6_sigma1.75/validated-local-reproduction/K24_chi128/L32_Gamma1.565_odd/summary.json"
+    },
+    {
+      "K": 24,
+      "L": 64,
+      "Gamma": 1.56,
+      "even": "results/phase6_sigma1.75/local-campaign/L64_Gamma1.560_even/summary.json",
+      "odd": "results/phase6_sigma1.75/local-campaign/L64_Gamma1.560_odd/summary.json"
+    },
+    {
+      "K": 24,
+      "L": 64,
+      "Gamma": 1.565,
+      "even": "results/phase6_sigma1.75/local-campaign/L64_Gamma1.565_even/summary.json",
+      "odd": "results/phase6_sigma1.75/validated-local-reproduction/K24_chi128/L64_Gamma1.565_odd/summary.json"
+    },
+    {
+      "K": 32,
+      "L": 32,
+      "Gamma": 1.56,
+      "even": "results/phase6_sigma1.75/validated-local-reproduction/K32_chi128/L32_Gamma1.560_even/summary.json",
+      "odd": "results/phase6_sigma1.75/validated-local-reproduction/K32_chi128/L32_Gamma1.560_odd/summary.json"
+    },
+    {
+      "K": 32,
+      "L": 32,
+      "Gamma": 1.565,
+      "even": "results/phase6_sigma1.75/validated-local-reproduction/K32_chi128/L32_Gamma1.565_even/summary.json",
+      "odd": "results/phase6_sigma1.75/validated-local-reproduction/K32_chi128/L32_Gamma1.565_odd/summary.json"
+    },
+    {
+      "K": 32,
+      "L": 64,
+      "Gamma": 1.56,
+      "even": "results/phase6_sigma1.75/validated-local-reproduction/K32_chi128/L64_Gamma1.560_even/summary.json",
+      "odd": "results/phase6_sigma1.75/validated-local-reproduction/K32_chi128/L64_Gamma1.560_odd/summary.json"
+    },
+    {
+      "K": 32,
+      "L": 64,
+      "Gamma": 1.565,
+      "even": "results/phase6_sigma1.75/validated-local-reproduction/K32_chi128/L64_Gamma1.565_even/summary.json",
+      "odd": "results/phase6_sigma1.75/validated-local-reproduction/K32_chi128/L64_Gamma1.565_odd/summary.json"
+    }
+  ]
+}

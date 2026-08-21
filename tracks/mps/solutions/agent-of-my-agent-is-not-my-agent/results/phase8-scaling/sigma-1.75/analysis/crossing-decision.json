@@ -1,0 +1,59 @@
+{
+  "sigma": 1.75,
+  "Gamma_x_32_64": 1.567903945227973,
+  "endpoint_R_xi": {
+    "L64": [
+      0.3831356897689369,
+      0.2482957594806043
+    ],
+    "L128": [
+      0.42314837211285217,
+      0.1924798589063721
+    ]
+  },
+  "Gamma_endpoints": [
+    1.55,
+    1.6
+  ],
+  "differences": [
+    -0.04001268234391525,
+    0.05581590057423222
+  ],
+  "status": "resolved",
+  "fraction": 0.4175443393344584,
+  "Gamma_x": 1.570877216966723,
+  "crossing_resolution": 0.025000000000000022,
+  "Gamma_x_64_128": 1.570877216966723,
+  "common_field": {
+    "primary": "power",
+    "gap_field": 1.5738504887054727,
+    "power": {
+      "form": "power",
+      "estimate": 1.5738504887054727,
+      "coefficient": -0.19028939127998967,
+      "residual_degrees_of_freedom": 0,
+      "interpretation": "two_point_sensitivity_extrapolation",
+      "coordinate_role": "sensitivity_only",
+      "known_correction_exponent_assumed": false
+    },
+    "log": {
+      "form": "log",
+      "estimate": 1.585743575660472,
+      "coefficient": -0.06182744768259056,
+      "residual_degrees_of_freedom": 0,
+      "interpretation": "two_point_sensitivity_extrapolation",
+      "coordinate_role": "sensitivity_only",
+      "known_correction_exponent_assumed": false
+    },
+    "spread": 0.011893086954999355,
+    "propagated_to_gap_uncertainty": false,
+    "correction_coordinates_are_sensitivity_only": true,
+    "known_correction_exponent_assumed": false
+  },
+  "inputs": {
+    "crossing_spec": "results/phase8-scaling/sigma-1.75/crossing-L128/run_spec.json",
+    "crossing_spec_sha256": "dfa92f5647028d5616193a477d40e275f9fea07675849b70b5051690fe2560aa",
+    "phase7_decision": "results/phase7-crossover/broad/decisions/sigma-1.75.json",
+    "phase7_decision_sha256": "d065a445ec3f0b0b249991e88760c1b69a373a120c4163d0714890a4c4fffad7"
+  }
+}

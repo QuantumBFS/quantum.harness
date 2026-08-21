@@ -1,0 +1,89 @@
+{
+  "status": "success",
+  "settings": {
+    "model": "nearest-neighbor-tfim",
+    "sigma": null,
+    "length": 32,
+    "gamma": 1.0,
+    "sector": "even",
+    "sectors": [
+      "even"
+    ],
+    "chi_schedule": [
+      64
+    ],
+    "max_sweeps": 30,
+    "direct_only": true
+  },
+  "model": {
+    "hamiltonian": "-sum_i Z_i Z_(i+1) - Gamma sum_i X_i",
+    "length": 32,
+    "Gamma": 1.0,
+    "interaction_boundary": "periodic",
+    "mps_boundary": "finite-open",
+    "operator_convention": "rotated-xz-parity-v1",
+    "physical_X": "TeNPy Sigmaz",
+    "physical_Z": "TeNPy Sigmax",
+    "exact_model_hash": "6a01a10b83e0475ff4e6ce58426c1c2b4941a03c4528ad1fc5ad108b3708a2bb"
+  },
+  "code_hash": "c1c94921399202ca63c5a0ff280de0b6087ef5f0b63bec3d609d474f7b853bd9",
+  "mpo": {
+    "chi": 4,
+    "exact_zero_pruning": false,
+    "approximate_compression": false,
+    "setup_seconds": 0.034388171000500733
+  },
+  "direct": {
+    "even": {
+      "requested_chi": 64,
+      "energy": -40.76003249385162,
+      "variance": 3.528157321852632e-09,
+      "discarded_weight": 1.1945261654720219e-11,
+      "reached_chi": 64,
+      "sweeps": 8,
+      "wall_seconds": 8.040221708999525
+    }
+  },
+  "raw_observables": {
+    "correlations": [
+      1.0,
+      0.6368755077203414,
+      0.5412493086473351,
+      0.4910440310247817,
+      0.45859887653489917,
+      0.4354564889511022,
+      0.41801108408569143,
+      0.4044191183794039,
+      0.3936239005828225,
+      0.3849706041274067,
+      0.37803072322281095,
+      0.3725132456548385,
+      0.3682161001997601,
+      0.3649980707373084,
+      0.36276192758363507,
+      0.3614441432739117,
+      0.36100876303854723,
+      0.3614441432739117,
+      0.36276192758363507,
+      0.3649980707373084,
+      0.3682161001997601,
+      0.37251324565483845,
+      0.37803072322281095,
+      0.3849706041274067,
+      0.3936239005828225,
+      0.40441911837940386,
+      0.4180110840856914,
+      0.4354564889511022,
+      0.45859887653489917,
+      0.4910440310247817,
+      0.5412493086473351,
+      0.6368755077203414
+    ],
+    "s_zero": 14.105435024490646,
+    "s_k_min": 1.954625150849005,
+    "k_min": 0.19634954084936207,
+    "xi": 12.718586499200338,
+    "r_xi": 0.39745582810001057,
+    "correlation_definition": "full physical Z-Z correlation without connected subtraction; evaluated as TeNPy Sigmax-Sigmax"
+  }
+}

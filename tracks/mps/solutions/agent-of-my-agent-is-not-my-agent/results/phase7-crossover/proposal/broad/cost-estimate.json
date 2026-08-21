@@ -1,0 +1,112 @@
+{
+  "basis": "measured local chi=128 medians scaled to chi=64",
+  "scaling": {
+    "time_formula": "(64/128)^3",
+    "memory_formula": "(64/128)^2",
+    "time_chi_factor": 0.125,
+    "memory_chi_factor": 0.25
+  },
+  "calibration": {
+    "L32_even": {
+      "samples": 1,
+      "median_wall_seconds_chi128": 179.244418258,
+      "estimated_wall_seconds_chi64": 22.40555228225,
+      "median_peak_memory_gib_chi128": 1.3,
+      "estimated_peak_memory_gib_chi64": 0.325,
+      "paths": [
+        "results/phase6_sigma1.75/local-campaign/L32_Gamma1.565_even/summary.json"
+      ],
+      "code_hashes": [
+        "1730eb8c57655114672a301a08d5224b95424b3cf1df960398516b292d8b7294"
+      ],
+      "hardware": [
+        {
+          "mode": "local",
+          "memory_bound_source": "validated-local-reproduction/report.md",
+          "memory_bound_note": "conservative chi=128 campaign-wide peak bound"
+        }
+      ]
+    },
+    "L32_odd": {
+      "samples": 1,
+      "median_wall_seconds_chi128": 214.88426135999907,
+      "estimated_wall_seconds_chi64": 26.860532669999884,
+      "median_peak_memory_gib_chi128": 1.3,
+      "estimated_peak_memory_gib_chi64": 0.325,
+      "paths": [
+        "results/phase6_sigma1.75/validated-local-reproduction/K24_chi128/L32_Gamma1.565_odd/summary.json"
+      ],
+      "code_hashes": [
+        "485ce654123c6b1ff4ea9530c9f0a0b4537511075f5c462cbd7d223bd5bef91c"
+      ],
+      "hardware": [
+        {
+          "mode": "local",
+          "memory_bound_source": "validated-local-reproduction/report.md",
+          "memory_bound_note": "conservative chi=128 campaign-wide peak bound"
+        }
+      ]
+    },
+    "L64_even": {
+      "samples": 1,
+      "median_wall_seconds_chi128": 590.9019505119995,
+      "estimated_wall_seconds_chi64": 73.86274381399994,
+      "median_peak_memory_gib_chi128": 1.3,
+      "estimated_peak_memory_gib_chi64": 0.325,
+      "paths": [
+        "results/phase6_sigma1.75/local-campaign/L64_Gamma1.565_even/summary.json"
+      ],
+      "code_hashes": [
+        "1730eb8c57655114672a301a08d5224b95424b3cf1df960398516b292d8b7294"
+      ],
+      "hardware": [
+        {
+          "mode": "local",
+          "memory_bound_source": "validated-local-reproduction/report.md",
+          "memory_bound_note": "conservative chi=128 campaign-wide peak bound"
+        }
+      ]
+    },
+    "L64_odd": {
+      "samples": 1,
+      "median_wall_seconds_chi128": 566.0645565489995,
+      "estimated_wall_seconds_chi64": 70.75806956862493,
+      "median_peak_memory_gib_chi128": 1.3,
+      "estimated_peak_memory_gib_chi64": 0.325,
+      "paths": [
+        "results/phase6_sigma1.75/validated-local-reproduction/K24_chi128/L64_Gamma1.565_odd/summary.json"
+      ],
+      "code_hashes": [
+        "3b610791d046f23c45f415be294a2f9b9dc512e38037a68696879f886a215307"
+      ],
+      "hardware": [
+        {
+          "mode": "local",
+          "memory_bound_source": "validated-local-reproduction/report.md",
+          "memory_bound_note": "conservative chi=128 campaign-wide peak bound"
+        }
+      ]
+    }
+  },
+  "stages": {
+    "broad": {
+      "cells": 210,
+      "central_wall_seconds": 10108.171090106243
+    },
+    "refinement": {
+      "maximum_new_even_cells": 56,
+      "central_wall_seconds": 2695.5122906949982
+    },
+    "gaps": {
+      "maximum_odd_cells": 28,
+      "central_wall_seconds": 1366.6604313407474
+    }
+  },
+  "combined": {
+    "maximum_cells": 294,
+    "central_wall_seconds": 14170.34381214199,
+    "safety_wall_seconds": 28340.68762428398,
+    "estimated_peak_memory_gib": 0.325
+  },
+  "safety_factor": 2.0
+}

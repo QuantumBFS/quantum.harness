@@ -1,0 +1,378 @@
+{
+  "sigma": 1.75,
+  "critical_field": {
+    "primary": "power",
+    "gap_field": 1.5738504887054727,
+    "power": {
+      "form": "power",
+      "estimate": 1.5738504887054727,
+      "coefficient": -0.19028939127998967,
+      "residual_degrees_of_freedom": 0,
+      "interpretation": "two_point_sensitivity_extrapolation",
+      "coordinate_role": "sensitivity_only",
+      "known_correction_exponent_assumed": false
+    },
+    "log": {
+      "form": "log",
+      "estimate": 1.585743575660472,
+      "coefficient": -0.06182744768259056,
+      "residual_degrees_of_freedom": 0,
+      "interpretation": "two_point_sensitivity_extrapolation",
+      "coordinate_role": "sensitivity_only",
+      "known_correction_exponent_assumed": false
+    },
+    "spread": 0.011893086954999355,
+    "propagated_to_gap_uncertainty": false,
+    "correction_coordinates_are_sensitivity_only": true,
+    "known_correction_exponent_assumed": false
+  },
+  "crossings": [
+    {
+      "size_pair": "32_64",
+      "Gamma_x": 1.567903945227973,
+      "resolution": 0.025000000000000022
+    },
+    {
+      "size_pair": "64_128",
+      "Gamma_x": 1.570877216966723,
+      "resolution": 0.025000000000000022
+    }
+  ],
+  "gaps": {
+    "16": 0.30142209727391034,
+    "32": 0.17534293425457292,
+    "64": 0.10614546598533536,
+    "96": 0.0818121973100574,
+    "128": 0.06948948304440705
+  },
+  "z": {
+    "lengths": [
+      16,
+      32,
+      64,
+      96,
+      128
+    ],
+    "gaps": [
+      0.30142209727391034,
+      0.17534293425457292,
+      0.10614546598533536,
+      0.0818121973100574,
+      0.06948948304440705
+    ],
+    "z_eff": {
+      "pairs": [
+        "16_32",
+        "32_64",
+        "64_96",
+        "96_128"
+      ],
+      "effective_lengths": [
+        22.627416997969522,
+        45.254833995939045,
+        78.38367176906169,
+        110.85125168440814
+      ],
+      "values": [
+        0.7816058890002416,
+        0.7241365481913752,
+        0.6421862815999292,
+        0.5674699311399389
+      ]
+    },
+    "regression": {
+      "power": {
+        "form": "power",
+        "estimate": 0.5588182833067891,
+        "coefficient": 5.451627962641031,
+        "coordinate_values": [
+          0.044194173824159216,
+          0.022097086912079608,
+          0.012757759076995721,
+          0.009021097956087904
+        ],
+        "predicted_values": [
+          0.7997484771123937,
+          0.6792833802095914,
+          0.6283688394315764,
+          0.6079979531779217
+        ],
+        "residuals": [
+          -0.01814258811215208,
+          0.04485316798178374,
+          0.01381744216835279,
+          -0.04052802203798278
+        ],
+        "residual_sum_squares": 0.004174402459796303,
+        "residual_rms": 0.0323048079231107,
+        "residual_degrees_of_freedom": 2,
+        "coordinate_role": "sensitivity_only",
+        "known_correction_exponent_assumed": false
+      },
+      "log": {
+        "form": "log",
+        "estimate": 0.2001960419658768,
+        "coefficient": 1.868689918362685,
+        "coordinate_values": [
+          0.3205988979753252,
+          0.2623081892525388,
+          0.22927283904203807,
+          0.21239588122711095
+        ],
+        "predicted_values": [
+          0.7992959704505541,
+          0.6903687107260672,
+          0.6286358848381239,
+          0.5970980839167372
+        ],
+        "residuals": [
+          -0.017690081450312478,
+          0.03376783746530798,
+          0.01355039676180525,
+          -0.02962815277679831
+        ],
+        "residual_sum_squares": 0.0025146465181697907,
+        "residual_rms": 0.025073125643653757,
+        "residual_degrees_of_freedom": 2,
+        "coordinate_role": "sensitivity_only",
+        "known_correction_exponent_assumed": false
+      },
+      "spread": 0.35862224134091225,
+      "leave_L16_out": {
+        "power": {
+          "form": "power",
+          "estimate": 0.4783840468526168,
+          "coefficient": 11.364783877848899,
+          "coordinate_values": [
+            0.022097086912079608,
+            0.012757759076995721,
+            0.009021097956087904
+          ],
+          "predicted_values": [
+            0.729512663938445,
+            0.6233732215283383,
+            0.5809068754644603
+          ],
+          "residuals": [
+            -0.005376115747069865,
+            0.018813060071590892,
+            -0.01343694432452136
+          ],
+          "residual_sum_squares": 0.0005633853225634668,
+          "residual_rms": 0.013703835504016954,
+          "residual_degrees_of_freedom": 1,
+          "coordinate_role": "sensitivity_only",
+          "known_correction_exponent_assumed": false
+        },
+        "log": {
+          "form": "log",
+          "estimate": -0.07064196996273665,
+          "coefficient": 3.0479958103701823,
+          "coordinate_values": [
+            0.2623081892525388,
+            0.22927283904203807,
+            0.21239588122711095
+          ],
+          "predicted_values": [
+            0.7288722919047905,
+            0.6281806828690726,
+            0.5767397861573804
+          ],
+          "residuals": [
+            -0.004735743713415341,
+            0.014005598730856605,
+            -0.009269855017441486
+          ],
+          "residual_sum_squares": 0.0003045142763733102,
+          "residual_rms": 0.010074957011873718,
+          "residual_degrees_of_freedom": 1,
+          "coordinate_role": "sensitivity_only",
+          "known_correction_exponent_assumed": false
+        },
+        "spread": 0.5490260168153535
+      },
+      "interpretation": "deterministic_finite_size_sensitivity_regression",
+      "shared_gap_correlations_ignored": true
+    }
+  },
+  "chi128_baseline_gaps": {
+    "96": 0.08181231853146187,
+    "128": 0.06948993596785158
+  },
+  "targeted_refinement": [
+    {
+      "L": 96,
+      "chi128_energy": -171.74004997243563,
+      "chi256_energy": -171.74005009365703,
+      "energy_shift": -1.212214044699067e-07,
+      "chi128_gap": 0.08181231853146187,
+      "chi256_gap": 0.0818121973100574,
+      "gap_shift": -1.212214044699067e-07,
+      "chi128_variance": 1.5899786376394331e-06,
+      "chi256_variance": 2.5789631763473153e-08,
+      "chi128_discarded_weight": 1.4778166832358136e-07,
+      "chi256_discarded_weight": 8.161927833495935e-10,
+      "chi128_reached_chi": 128,
+      "chi256_reached_chi": 256,
+      "chi256_wall_seconds": 1429.525654317
+    },
+    {
+      "L": 128,
+      "chi128_energy": -229.01540071825227,
+      "chi256_energy": -229.0154011711757,
+      "energy_shift": -4.529234445271868e-07,
+      "chi128_gap": 0.06948993596785158,
+      "chi256_gap": 0.06948948304440705,
+      "gap_shift": -4.529234445271868e-07,
+      "chi128_variance": 5.597285053227097e-06,
+      "chi256_variance": 1.1651718523353338e-07,
+      "chi128_discarded_weight": 2.065233870424168e-07,
+      "chi256_discarded_weight": 2.6881496869120067e-09,
+      "chi128_reached_chi": 128,
+      "chi256_reached_chi": 256,
+      "chi256_wall_seconds": 2035.2104832310001
+    }
+  ],
+  "published_comparison": {
+    "authors": "Sora Shiratani and Synge Todo",
+    "arxiv": "2305.14121v4",
+    "url": "https://arxiv.org/abs/2305.14121",
+    "table": 2,
+    "sigma": 1.75,
+    "Gamma_c": 1.5609,
+    "Gamma_c_uncertainty": 0.0003,
+    "z_power": 0.91,
+    "z_power_uncertainty": 0.02,
+    "z_log": 0.98,
+    "z_log_uncertainty": 0.03,
+    "L_max": 362
+  },
+  "susceptibility_gamma_over_nu": "not_measured",
+  "equal_time_structure_factor": {
+    "role": "auxiliary_diagnostic",
+    "susceptibility_exponent_claimed": false,
+    "rows": [
+      {
+        "L": 16,
+        "S_eq_zero": 6.36817978781138,
+        "S_k_min": 1.2233819667034929,
+        "xi": 5.2557826612634075,
+        "R_xi": 0.32848641632896297,
+        "role": "auxiliary_diagnostic"
+      },
+      {
+        "L": 32,
+        "S_eq_zero": 10.055984115792743,
+        "S_k_min": 1.9716611598080322,
+        "xi": 10.329365934039723,
+        "R_xi": 0.32279268543874134,
+        "role": "auxiliary_diagnostic"
+      },
+      {
+        "L": 64,
+        "S_eq_zero": 15.52949850188376,
+        "S_k_min": 3.2613920312458946,
+        "xi": 19.76340614194648,
+        "R_xi": 0.30880322096791374,
+        "role": "auxiliary_diagnostic"
+      },
+      {
+        "L": 96,
+        "S_eq_zero": 19.645291386675062,
+        "S_k_min": 4.438533961719148,
+        "xi": 28.28573177330784,
+        "R_xi": 0.29464303930529,
+        "role": "auxiliary_diagnostic"
+      },
+      {
+        "L": 128,
+        "S_eq_zero": 22.902986674878537,
+        "S_k_min": 5.561048649511429,
+        "xi": 35.978592748859256,
+        "R_xi": 0.28108275585046294,
+        "role": "auxiliary_diagnostic"
+      }
+    ]
+  },
+  "uncertainty": {
+    "MPO": {
+      "source": "Phase 6 K=24 to K=32 comparison",
+      "max_abs_gap_shift": 4.851315509313281e-07,
+      "max_abs_R_xi_shift": 1.1446152365368611e-06
+    },
+    "MPS": {
+      "source": "Phase 6 chi=128 to chi=256 comparison",
+      "max_abs_gap_shift": 2.7740725272451527e-09,
+      "max_abs_R_xi_shift": 4.998282310264557e-08
+    },
+    "finite_size": {
+      "source": "Phase 8 five-size correction-coordinate sensitivity",
+      "z_power_log_spread": 0.35862224134091225
+    },
+    "critical_field_propagation": {
+      "status": "not_fully_propagated",
+      "reason": "only two finite-size crossings are available"
+    },
+    "phase8_acceptance_protocol": {
+      "relative_variance_limit": 1e-10,
+      "discarded_weight_limit": 1e-07,
+      "previous_discarded_weight_limit": 1e-08,
+      "changed_after_L64_odd_observation": true,
+      "triggering_L64_odd_discarded_weight": 5.49e-08,
+      "triggering_state_variance_and_energy_convergence_passed": true,
+      "scope": "Phase 8 sigma=1.75 gap study only",
+      "L128_even_warning": {
+        "accepted_with_warning": true,
+        "nominal_relative_variance_target": 1e-10,
+        "observed_relative_variance": 1.0506516483687316e-10,
+        "energy_stability_limit": 1e-12,
+        "source_energy": -229.0848906542208,
+        "continued_energy": -229.08489065422012,
+        "energy_shift": 6.821210263296962e-13
+      }
+    },
+    "phase8_targeted_refinement": {
+      "source": "Phase 8 audited chi=128 to chi=256 odd-sector refinements",
+      "by_size": {
+        "96": {
+          "chi128_energy": -171.74004997243563,
+          "chi256_energy": -171.74005009365703,
+          "energy_shift": -1.212214044699067e-07,
+          "chi128_gap": 0.08181231853146187,
+          "chi256_gap": 0.0818121973100574,
+          "gap_shift": -1.212214044699067e-07,
+          "chi128_variance": 1.5899786376394331e-06,
+          "chi256_variance": 2.5789631763473153e-08,
+          "chi128_discarded_weight": 1.4778166832358136e-07,
+          "chi256_discarded_weight": 8.161927833495935e-10,
+          "chi128_reached_chi": 128,
+          "chi256_reached_chi": 256,
+          "chi256_wall_seconds": 1429.525654317
+        },
+        "128": {
+          "chi128_energy": -229.01540071825227,
+          "chi256_energy": -229.0154011711757,
+          "energy_shift": -4.529234445271868e-07,
+          "chi128_gap": 0.06948993596785158,
+          "chi256_gap": 0.06948948304440705,
+          "gap_shift": -4.529234445271868e-07,
+          "chi128_variance": 5.597285053227097e-06,
+          "chi256_variance": 1.1651718523353338e-07,
+          "chi128_discarded_weight": 2.065233870424168e-07,
+          "chi256_discarded_weight": 2.6881496869120067e-09,
+          "chi128_reached_chi": 128,
+          "chi256_reached_chi": 256,
+          "chi256_wall_seconds": 2035.2104832310001
+        }
+      },
+      "max_abs_energy_shift": 4.529234445271868e-07,
+      "max_abs_gap_shift": 4.529234445271868e-07
+    }
+  },
+  "limitations": [
+    "maximum size is L=128",
+    "published QMC comparison reaches L=362",
+    "critical-field power/log sensitivity is not fully propagated into gaps",
+    "susceptibility gamma/nu is outside the DMRG scope"
+  ]
+}

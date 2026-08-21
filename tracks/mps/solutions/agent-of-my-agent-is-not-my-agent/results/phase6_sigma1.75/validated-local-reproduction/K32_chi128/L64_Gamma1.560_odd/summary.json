@@ -1,0 +1,79 @@
+{
+  "status": "success",
+  "settings": {
+    "sigma": 1.75,
+    "length": 64,
+    "gamma": 1.56,
+    "num_exponentials": 32,
+    "alpha": 0.5,
+    "r_fit": 2048,
+    "chi_schedule": [
+      128
+    ],
+    "max_sweeps": 30,
+    "sectors": [
+      "odd"
+    ],
+    "direct_only": true,
+    "initial_checkpoint_root": null,
+    "initial_chi": 128
+  },
+  "fit": {
+    "K": 32,
+    "alpha": 0.5,
+    "r_fit": 2048,
+    "fit_hash": "f694393f75a4369d4354ce3966702dcff06d9f2cf2ec78899bd22beb52fd5631"
+  },
+  "code_hash": "485ce654123c6b1ff4ea9530c9f0a0b4537511075f5c462cbd7d223bd5bef91c",
+  "mpo": {
+    "pruned": true,
+    "active_channels": [
+      0,
+      1,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      31
+    ],
+    "chi": 60,
+    "setup_seconds": 3.654364052999881,
+    "approximate_compression": false
+  },
+  "direct": {
+    "odd": {
+      "requested_chi": 128,
+      "energy": -113.80660993806269,
+      "variance": 1.9408616935834289e-07,
+      "discarded_weight": 7.979489553136151e-08,
+      "reached_chi": 128,
+      "sweeps": 18,
+      "wall_seconds": 786.2689813209981
+    }
+  },
+  "staged": {},
+  "initialization": {},
+  "raw_observables": {}
+}
