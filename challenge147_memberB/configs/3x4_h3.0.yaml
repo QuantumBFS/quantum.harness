@@ -1,0 +1,30 @@
+# B 角色 METTS 3x4 (N=12) ED-feasible harder check: validates that the dense
+# backend still matches ED at the largest ED-feasible size. N=12 -> dim 4096,
+# still cheap for the dense vector + sparse H. Beyond N=12 ED refuses and the
+# cross-check moves to QMC (side A) + the MPS backend (smoke test).
+Lx: 3
+Ly: 4
+h: 3.0
+J: 1.0
+boundary: OBC
+betas: [0.1, 0.3, 0.5, 0.8, 1.0]
+
+n_warmup: 30
+n_production: 1500
+n_chains: 1
+seed: 20260731
+basis: Z
+antithetic_z2: false
+
+evolve_mode: trotter
+dtau: 0.05
+trotter_order: 2
+max_bond_dim: 64
+trunc_tol: 1.0e-10
+
+backend: dense
+out_dir: metts_runs/3x4_h3.0_trotter
+write_traces: false
+label: 3x4_h3.0_trotter
+prob_tol: 1.0e-9
+mem_guard: true
