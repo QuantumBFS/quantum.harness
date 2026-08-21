@@ -1,0 +1,1 @@
+{"schema_version":1,"lattice":"honeycomb","L":48,"J":1.0,"h":2.1325,"c":1.0,"replica":7,"seed":"u64:35074846e6514bee","thermalization_sweeps":10000,"measurement_sweeps":2000,"base_bin_size":100,"checkpoint_interval_bins":5,"output_path":"ra-honeycomb-L0048-r007-67653fbb.json"}

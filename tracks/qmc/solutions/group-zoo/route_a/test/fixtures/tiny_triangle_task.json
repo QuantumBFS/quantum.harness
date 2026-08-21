@@ -1,0 +1,1 @@
+{"schema_version":1,"lattice":"triangle","L":3,"J":1.0,"h":4.76811,"c":1.0,"replica":1,"seed":"u64:0000000000024415","thermalization_sweeps":20,"measurement_sweeps":40,"base_bin_size":5,"checkpoint_interval_bins":2,"output_path":"result.json"}

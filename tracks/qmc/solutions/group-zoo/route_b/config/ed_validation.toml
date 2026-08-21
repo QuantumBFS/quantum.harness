@@ -1,0 +1,27 @@
+schema = 1
+source = "docs/challenge-148-route-b-ed-baseline.md"
+reference = "route_b/test/fixtures/ed_reference.json"
+reference_sha256 = "89372f4232fc567a2ad530dccb964d2a6b6f68999f65d030881c22fd8dda1053"
+hamiltonian = "H=-J sum_<ij> sigma_z(i)sigma_z(j)-h sum_i sigma_x(i)"
+rotated_hamiltonian = "H=-J sum_<ij> sigma_x(i)sigma_x(j)-h sum_i sigma_z(i)"
+omega_g = "beta*N"
+J = 1.0
+replicas = 4
+warmup_bins = 64
+retained_bins = 64
+visits_per_bin = 2048
+checkpoint_every = 8
+tau_multipliers = [1.0, 1.0, 1.0]
+production_authorized = false
+
+[systems.honeycomb]
+L = 2
+sites = 8
+bonds = 12
+h = 2.1325
+
+[systems.triangle]
+L = 3
+sites = 9
+bonds = 27
+h = 4.76811
