@@ -1,0 +1,8 @@
+{
+  "p": 0.17,
+  "base_seed": 122170,
+  "burn_in_multiplier": 4,
+  "record_multiplier": 24,
+  "samples_per_cell": 1000,
+  "samples_per_family_width": 25000
+}

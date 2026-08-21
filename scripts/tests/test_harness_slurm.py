@@ -434,3 +434,56 @@ def test_submit_real_mode_still_parses_job_id(fake_ssh, tmp_path):
     assert r.returncode == 0
     assert "job_id:    12345" in r.stdout
     assert "partition: default-gpu" in r.stdout
+
+
+def test_submit_array_applies_explicit_concurrency_cap(tmp_path):
+    profile = write_profile(tmp_path)
+    script = write_job_script(tmp_path)
+    spec = tmp_path / "run_spec.json"
+    spec.write_text('{"cells": [{"cell_id": "cell-0001"}]}')
+    r = run(
+        [
+            "--dry-run",
+            "submit",
+            "--script",
+            str(script),
+            "--array",
+            "300",
+            "--max-concurrent",
+            "100",
+            "--run-spec",
+            str(spec),
+            "--command",
+            "python3 worker.py",
+        ],
+        env={"HARNESS_PROFILE_FILE": str(profile)},
+    )
+    assert r.returncode == 0
+    assert "--array=1-300%100" in r.stderr
+
+
+@pytest.mark.parametrize(
+    ("size", "cap"), [("0", "1"), ("10", "0"), ("10", "11")]
+)
+def test_submit_rejects_invalid_array_concurrency(tmp_path, size, cap):
+    profile = write_profile(tmp_path)
+    script = write_job_script(tmp_path)
+    r = run(
+        [
+            "--dry-run",
+            "submit",
+            "--script",
+            str(script),
+            "--array",
+            size,
+            "--max-concurrent",
+            cap,
+            "--run-spec",
+            "run_spec.json",
+            "--command",
+            "python3 worker.py",
+        ],
+        env={"HARNESS_PROFILE_FILE": str(profile)},
+    )
+    assert r.returncode != 0
+    assert "array" in r.stderr.lower()

@@ -1,0 +1,154 @@
+{
+  "l2_Lmin4": {
+    "central_charge": 0.4775088318293949,
+    "central_charge_linear_se": 0.0012280852875968696,
+    "coefficients": [
+      -1.7309819418145773,
+      -0.2500230396832452
+    ],
+    "include_l4": false,
+    "sizes": [
+      4,
+      5,
+      6,
+      8,
+      9,
+      10,
+      12
+    ],
+    "weighted_residual_norm": 3.8950819915027335
+  },
+  "l2_Lmin5": {
+    "central_charge": 0.47139096252928103,
+    "central_charge_linear_se": 0.0020497425013583912,
+    "coefficients": [
+      -1.731030249907837,
+      -0.2468197308084351
+    ],
+    "include_l4": false,
+    "sizes": [
+      5,
+      6,
+      8,
+      9,
+      10,
+      12
+    ],
+    "weighted_residual_norm": 1.128974258432274
+  },
+  "l2_Lmin6": {
+    "central_charge": 0.4706679686429948,
+    "central_charge_linear_se": 0.0035349678749405627,
+    "coefficients": [
+      -1.731034806490058,
+      -0.24644117209481062
+    ],
+    "include_l4": false,
+    "sizes": [
+      6,
+      8,
+      9,
+      10,
+      12
+    ],
+    "weighted_residual_norm": 1.1007103116966848
+  },
+  "l2_Lmin8": {
+    "central_charge": 0.4650030172494065,
+    "central_charge_linear_se": 0.008903117085210768,
+    "coefficients": [
+      -1.7310651662454664,
+      -0.2434750104813039
+    ],
+    "include_l4": false,
+    "sizes": [
+      8,
+      9,
+      10,
+      12
+    ],
+    "weighted_residual_norm": 0.8549441059823323
+  },
+  "l4_Lmin4": {
+    "central_charge": 0.4584632629543646,
+    "central_charge_linear_se": 0.005321549206997372,
+    "coefficients": [
+      -1.7310843256722441,
+      -0.24005080313970625,
+      -0.15013534107012722
+    ],
+    "include_l4": true,
+    "sizes": [
+      4,
+      5,
+      6,
+      8,
+      9,
+      10,
+      12
+    ],
+    "weighted_residual_norm": 1.2814922117673606
+  },
+  "l4_Lmin5": {
+    "central_charge": 0.46617960730063485,
+    "central_charge_linear_se": 0.011424083980641021,
+    "coefficients": [
+      -1.731052635088404,
+      -0.2440910715915082,
+      -0.05868786763962282
+    ],
+    "include_l4": true,
+    "sizes": [
+      5,
+      6,
+      8,
+      9,
+      10,
+      12
+    ],
+    "weighted_residual_norm": 1.0293529239204684
+  },
+  "l4_Lmin6": {
+    "central_charge": 0.45787873226780623,
+    "central_charge_linear_se": 0.02199724686745043,
+    "coefficients": [
+      -1.7310818430718686,
+      -0.23974474358792464,
+      -0.18835115924750312
+    ],
+    "include_l4": true,
+    "sizes": [
+      6,
+      8,
+      9,
+      10,
+      12
+    ],
+    "weighted_residual_norm": 0.9298249359377057
+  },
+  "l4_Lmin8": {
+    "central_charge": 0.5012039499765834,
+    "central_charge_linear_se": 0.07389533642799727,
+    "coefficients": [
+      -1.7309677357313615,
+      -0.2624297745327701,
+      0.8459269207207264
+    ],
+    "include_l4": true,
+    "sizes": [
+      8,
+      9,
+      10,
+      12
+    ],
+    "weighted_residual_norm": 0.6981385854748066
+  },
+  "reported": {
+    "bootstrap_samples": 2000,
+    "bootstrap_se": 0.0051650570181553685,
+    "central_charge": 0.4584632629543646,
+    "fit_envelope_lower": 0.45787873226780623,
+    "fit_envelope_upper": 0.5012039499765834,
+    "primary_fit": "l4_Lmin4"
+  }
+}

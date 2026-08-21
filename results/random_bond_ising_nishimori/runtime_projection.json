@@ -1,0 +1,37 @@
+{
+  "achieved_target_all": false,
+  "max_local_seconds": 600.0,
+  "pilot_runtime_seconds": 4332.856739624,
+  "preliminary": true,
+  "production_launched": false,
+  "projected_production_seconds": 3295650.5054756254,
+  "projected_total_seconds": 3295650.5054756254,
+  "target_free_energy_se": 0.0001,
+  "width_projections": [
+    {
+      "L": 8,
+      "projected_runtime_seconds": 339.63144216980305,
+      "required_retained_rows": 1166400
+    },
+    {
+      "L": 10,
+      "projected_runtime_seconds": 2.397279528799996,
+      "required_retained_rows": 6000
+    },
+    {
+      "L": 12,
+      "projected_runtime_seconds": 2.0453007240000005,
+      "required_retained_rows": 2400
+    },
+    {
+      "L": 16,
+      "projected_runtime_seconds": 22879.674004083594,
+      "required_retained_rows": 2718400
+    },
+    {
+      "L": 20,
+      "projected_runtime_seconds": 3272426.7574491194,
+      "required_retained_rows": 3808000
+    }
+  ]
+}

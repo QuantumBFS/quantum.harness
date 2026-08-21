@@ -1,0 +1,61 @@
+{
+  "all_L_l2": {
+    "central_charge": 4.100593743509079,
+    "central_charge_linear_se": 0.11390971803346858,
+    "coefficients": [
+      -1.7142763370341365,
+      -2.1470658633273985
+    ],
+    "include_l4": false,
+    "sizes": [
+      8,
+      10,
+      12,
+      16,
+      20
+    ],
+    "weighted_residual_norm": 6.381557776651729
+  },
+  "drop_L8_l24": {
+    "central_charge": -9.692603361350615,
+    "central_charge_linear_se": 2.590145242877874,
+    "coefficients": [
+      -1.743632605470841,
+      5.075035252363138,
+      -430.4836392928898
+    ],
+    "include_l4": true,
+    "sizes": [
+      10,
+      12,
+      16,
+      20
+    ],
+    "weighted_residual_norm": 1.744203309963461
+  },
+  "primary_L8_l24": {
+    "central_charge": 3.2553131130639907,
+    "central_charge_linear_se": 1.4903991850949692,
+    "coefficients": [
+      -1.716098116860252,
+      -1.704477960189392,
+      -25.953422586984537
+    ],
+    "include_l4": true,
+    "sizes": [
+      8,
+      10,
+      12,
+      16,
+      20
+    ],
+    "weighted_residual_norm": 6.356156857433709
+  },
+  "reported": {
+    "bootstrap_samples": 2000,
+    "bootstrap_se": 1.4858679463125821,
+    "central_charge": 3.2553131130639907,
+    "fit_envelope_lower": -9.692603361350615,
+    "fit_envelope_upper": 4.100593743509079
+  }
+}
