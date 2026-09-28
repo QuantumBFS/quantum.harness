@@ -1,0 +1,91 @@
+{
+  "gates": {
+    "all_source_gates_pass": true,
+    "finite_bilinear_subspace_dynamically_closed": false,
+    "plp_fraction_decreases_with_volume": true
+  },
+  "interpretation": "At fixed physical momentum cutoff, the fraction of L Pj retained inside the two-spin bilinear subspace decreases approximately as L^-2, while its frequency scale decreases as L^-1.  The Q-space operator continuum therefore survives and cannot be replaced by a closed finite-field model as a microscopic identity.",
+  "method": "fixed_momentum_cutoff_finite_volume_plp_qlp_scaling",
+  "schema": 1,
+  "sequences": [
+    {
+      "cutoff_wave_number": 0.7853981633974483,
+      "fitted_amplitude": 6.123823990500843,
+      "fitted_power_of_length": -1.9436225060435575,
+      "last_length_scaled_maximum_frequency": 1.3293770380684882,
+      "last_length_squared_scaled_fraction": 7.429029729612353,
+      "rows": [
+        {
+          "cutoff_mode": 2,
+          "length": 16,
+          "length_squared_times_plp_fraction": 7.148845755597364,
+          "length_times_maximum_plp_frequency": 1.2996584325133733,
+          "maximum_plp_frequency": 0.08122865203208583,
+          "plp_fraction_of_projected_liouvillian_norm": 0.027925178732802203,
+          "source": "docs/xxx_slow_current_dynamics_L16_k1.json"
+        },
+        {
+          "cutoff_mode": 3,
+          "length": 24,
+          "length_squared_times_plp_fraction": 7.352834285079943,
+          "length_times_maximum_plp_frequency": 1.3217492471254386,
+          "maximum_plp_frequency": 0.055072885296893276,
+          "plp_fraction_of_projected_liouvillian_norm": 0.012765337300486013,
+          "source": "docs/xxx_slow_current_dynamics_L24_k1.json"
+        },
+        {
+          "cutoff_mode": 4,
+          "length": 32,
+          "length_squared_times_plp_fraction": 7.429029729612353,
+          "length_times_maximum_plp_frequency": 1.3293770380684882,
+          "maximum_plp_frequency": 0.041543032439640255,
+          "plp_fraction_of_projected_liouvillian_norm": 0.007254911845324563,
+          "source": "docs/xxx_slow_current_dynamics_L32_k1.json"
+        }
+      ]
+    },
+    {
+      "cutoff_wave_number": 1.5707963267948966,
+      "fitted_amplitude": 10.812592006252936,
+      "fitted_power_of_length": -1.9054712416388087,
+      "last_length_scaled_maximum_frequency": 3.13654849054594,
+      "last_length_squared_scaled_fraction": 14.948790255834524,
+      "rows": [
+        {
+          "cutoff_mode": 4,
+          "length": 16,
+          "length_squared_times_plp_fraction": 14.015736403203505,
+          "length_times_maximum_plp_frequency": 3.1214451522580546,
+          "maximum_plp_frequency": 0.19509032201612841,
+          "plp_fraction_of_projected_liouvillian_norm": 0.05474897032501369,
+          "source": "docs/xxx_slow_current_dynamics_L16_k1.json"
+        },
+        {
+          "cutoff_mode": 6,
+          "length": 24,
+          "length_squared_times_plp_fraction": 14.69403462604231,
+          "length_times_maximum_plp_frequency": 3.1326286132812386,
+          "maximum_plp_frequency": 0.1305261922200516,
+          "plp_fraction_of_projected_liouvillian_norm": 0.025510476781323455,
+          "source": "docs/xxx_slow_current_dynamics_L24_k1.json"
+        },
+        {
+          "cutoff_mode": 8,
+          "length": 32,
+          "length_squared_times_plp_fraction": 14.948790255834524,
+          "length_times_maximum_plp_frequency": 3.13654849054594,
+          "maximum_plp_frequency": 0.09801714032956063,
+          "plp_fraction_of_projected_liouvillian_norm": 0.014598427984213402,
+          "source": "docs/xxx_slow_current_dynamics_L32_k1.json"
+        }
+      ]
+    }
+  ],
+  "sources": [
+    "docs/xxx_slow_current_dynamics_L16_k1.json",
+    "docs/xxx_slow_current_dynamics_L24_k1.json",
+    "docs/xxx_slow_current_dynamics_L32_k1.json"
+  ],
+  "uses_target_a_or_D": false,
+  "uses_target_trajectory": false
+}

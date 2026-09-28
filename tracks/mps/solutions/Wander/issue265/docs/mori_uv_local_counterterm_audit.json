@@ -1,0 +1,208 @@
+{
+  "conclusion": "A pass is only a necessary locality check, not a physical matching coefficient.  A failure proves that the tested finite local basis does not remove cutoff drift over the full frequency band.",
+  "counterterm_interpretation": "Taylor coefficients at z0 represent local/contact Mori-EFT terms; the delta-noise contact is contained in order zero and cancels from every order>=0 subtracted difference",
+  "cutoffs": [
+    {
+      "fourier_points": 8,
+      "maximum_resolved_wave_number": 0.16,
+      "multiplicative_noise_delta_memory": 16.83113617448069,
+      "source": "docs/full_mode_physical_one_loop_h025.json"
+    },
+    {
+      "fourier_points": 12,
+      "maximum_resolved_wave_number": 0.24,
+      "multiplicative_noise_delta_memory": 25.246704261721028,
+      "source": "docs/full_mode_physical_one_loop_h025.json"
+    },
+    {
+      "fourier_points": 16,
+      "maximum_resolved_wave_number": 0.32,
+      "multiplicative_noise_delta_memory": 33.66227234896138,
+      "source": "docs/full_mode_physical_one_loop_h025.json"
+    },
+    {
+      "fourier_points": 20,
+      "maximum_resolved_wave_number": 0.4,
+      "multiplicative_noise_delta_memory": 42.07784043620173,
+      "source": "docs/full_mode_physical_one_loop_h025_uv20_24.json"
+    },
+    {
+      "fourier_points": 24,
+      "maximum_resolved_wave_number": 0.48,
+      "multiplicative_noise_delta_memory": 50.493408523442056,
+      "source": "docs/full_mode_physical_one_loop_h025_uv20_24.json"
+    }
+  ],
+  "finite_time_laplace_maximum_time": 50.0,
+  "gates": {
+    "finite_local_counterterm_uv_matching_complete": false,
+    "last_pair_relative_tolerance": 0.1,
+    "physical_F1_perp_certified": false,
+    "some_single_local_order_stabilizes_all_probes": false
+  },
+  "matching_frequency": 0.5,
+  "method": "laplace_bphz_local_counterterm_order_audit",
+  "orders": [
+    {
+      "all_probe_frequencies_stable": false,
+      "local_counterterm_order": 0,
+      "probes": [
+        {
+          "cutoff_stability_pass": false,
+          "frequency": 0.1,
+          "last_pair_relative_change": 0.3181371144862821,
+          "subtracted_values_by_cutoff": [
+            0.9960655813669838,
+            2.6979539203955847,
+            5.0074801778498355,
+            7.698188238398778,
+            10.610529564235648
+          ]
+        },
+        {
+          "cutoff_stability_pass": false,
+          "frequency": 0.2,
+          "last_pair_relative_change": 0.3482562465462385,
+          "subtracted_values_by_cutoff": [
+            0.5357709847200646,
+            1.6133119986104134,
+            3.2129247493839372,
+            5.174934338138957,
+            7.357116901209224
+          ]
+        }
+      ]
+    },
+    {
+      "all_probe_frequencies_stable": false,
+      "local_counterterm_order": 1,
+      "probes": [
+        {
+          "cutoff_stability_pass": false,
+          "frequency": 0.1,
+          "last_pair_relative_change": 0.15035712694812597,
+          "subtracted_values_by_cutoff": [
+            0.609558609197306,
+            1.382636875786603,
+            2.1413420637790352,
+            2.7548634257963016,
+            3.202748102208197
+          ]
+        },
+        {
+          "cutoff_stability_pass": false,
+          "frequency": 0.2,
+          "last_pair_relative_change": 0.20426339325196052,
+          "subtracted_values_by_cutoff": [
+            0.24589075559280626,
+            0.6268242151536771,
+            1.0633211638308389,
+            1.467440728687098,
+            1.8012808046886377
+          ]
+        }
+      ]
+    },
+    {
+      "all_probe_frequencies_stable": false,
+      "local_counterterm_order": 2,
+      "probes": [
+        {
+          "cutoff_stability_pass": false,
+          "frequency": 0.1,
+          "last_pair_relative_change": 0.23979088292762268,
+          "subtracted_values_by_cutoff": [
+            0.37429254066808215,
+            0.7059851224111497,
+            0.868693750945523,
+            0.8332513952135585,
+            0.6548364464949827
+          ]
+        },
+        {
+          "cutoff_stability_pass": true,
+          "frequency": 0.2,
+          "last_pair_relative_change": 0.048908321047561536,
+          "subtracted_values_by_cutoff": [
+            0.11355359204511806,
+            0.2462076038799843,
+            0.3474564878619866,
+            0.3865339614843073,
+            0.36808049834995415
+          ]
+        }
+      ]
+    },
+    {
+      "all_probe_frequencies_stable": false,
+      "local_counterterm_order": 3,
+      "probes": [
+        {
+          "cutoff_stability_pass": false,
+          "frequency": 0.1,
+          "last_pair_relative_change": 7.219486149097377,
+          "subtracted_values_by_cutoff": [
+            0.22973153896203913,
+            0.3491096350341092,
+            0.29258621299317156,
+            0.09448034903557101,
+            -0.16688621148002625
+          ]
+        },
+        {
+          "cutoff_stability_pass": false,
+          "frequency": 0.2,
+          "last_pair_relative_change": 1.1102621561630641,
+          "subtracted_values_by_cutoff": [
+            0.052566919450381056,
+            0.09565075764279563,
+            0.10441112028833821,
+            0.07486492637796971,
+            0.021416252016749127
+          ]
+        }
+      ]
+    },
+    {
+      "all_probe_frequencies_stable": false,
+      "local_counterterm_order": 4,
+      "probes": [
+        {
+          "cutoff_stability_pass": false,
+          "frequency": 0.1,
+          "last_pair_relative_change": 0.7821939930548701,
+          "subtracted_values_by_cutoff": [
+            0.1403087472771154,
+            0.1597026080930286,
+            0.03877243889836102,
+            -0.15930638163622035,
+            -0.3639506255642644
+          ]
+        },
+        {
+          "cutoff_stability_pass": false,
+          "frequency": 0.2,
+          "last_pair_relative_change": 1.5311907687780224,
+          "subtracted_values_by_cutoff": [
+            0.024272989268823153,
+            0.035721190524719226,
+            0.024102855828653347,
+            -0.005434781373651276,
+            -0.04093616025209457
+          ]
+        }
+      ]
+    }
+  ],
+  "probe_frequencies": [
+    0.1,
+    0.2
+  ],
+  "schema": 1,
+  "source_sha256": {
+    "docs/full_mode_physical_one_loop_h025.json": "036970d7d8eff077255deb6e407a0024fb7c779f2fccd1162b65c2b9728d8afb",
+    "docs/full_mode_physical_one_loop_h025_uv20_24.json": "9f5e633affe928a46a3b7f08003bc684bc5d5d75b1e18390b2fbbe4228c1037f"
+  },
+  "uses_target_a_or_D": false,
+  "uses_target_trajectory": false
+}

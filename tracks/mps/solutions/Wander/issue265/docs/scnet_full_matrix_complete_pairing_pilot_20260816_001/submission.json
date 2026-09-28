@@ -1,0 +1,33 @@
+{
+  "account": "giggleliu",
+  "array_tasks": 16,
+  "cpus_per_task": 8,
+  "field": 0.16666666666666666,
+  "job_id": "23323335",
+  "memory": "24G",
+  "pairing_counts": [
+    1,
+    8
+  ],
+  "partition": "xhacnormalb",
+  "preregistration_sha256": "83915fa9cd52c60ae285e0ab779d684eb33a86a5e4e44acb65808e9afa0f9089",
+  "run_id": "full_matrix_complete_pairing_pilot_20260816_001",
+  "samples": 8,
+  "schema": 1,
+  "seeds": [
+    4265,
+    5265,
+    6265,
+    7265,
+    8265,
+    9265,
+    10265,
+    11265
+  ],
+  "source_manifest_sha256": "8f5db8879626991ad3f5cc5f210e207676ad2e304ec631d2319642f055cb3b1a",
+  "status": "submitted",
+  "submission_stderr": "",
+  "submission_stdout": "23323335",
+  "submitted_at_utc": "2026-08-16T15:43:47.222796+00:00",
+  "test_only_exit_code": 0
+}

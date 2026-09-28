@@ -1,0 +1,136 @@
+{
+  "gates": {
+    "all_source_gates_pass": true,
+    "thermodynamic_prefix_uniquely_certified": false,
+    "three_common_positive_recurrents": true
+  },
+  "interpretation": "The first QLQ recurrents have a stable positive finite-volume sequence.  The second and third are compatible with the simple limits 2 and 4 within the declared two-scheme envelope; the first remains 1.21 percent above 5/4 in the quadratic scheme and does not pass that gate.  Five volumes constrain the first two recurrents and three constrain the third, but they do not prove simple exact identities; an analytic Fourier trace is required.",
+  "lengths": [
+    16,
+    24,
+    32,
+    40,
+    48
+  ],
+  "method": "fixed_pi_over_4_cutoff_qlq_lanczos_regulator_audit",
+  "qlp_force_norm_extrapolation": {
+    "lengths": [
+      16,
+      24,
+      32,
+      40,
+      48
+    ],
+    "linear_in_1_over_L_limit": 0.0027892384408724708,
+    "linear_in_1_over_L_squared_diagnostic_limit": 0.0027052530878347346,
+    "quadratic_in_1_over_L_limit": 0.0027010779992392145,
+    "scheme_envelope": [
+      0.0027010779992392145,
+      0.0027892384408724708
+    ],
+    "values": [
+      0.0024885666920499675,
+      0.0026099014012459613,
+      0.0026513944822534846,
+      0.0026704237831828978,
+      0.002680713476482697
+    ]
+  },
+  "schema": 1,
+  "simple_limit_candidates": [
+    {
+      "candidate": 1.25,
+      "inside_extrapolation_envelope": false,
+      "relative_distance_from_1_over_L_squared_diagnostic": 0.00011399967767413698,
+      "relative_distance_from_quadratic_limit": 0.012123236073692745
+    },
+    {
+      "candidate": 2.0,
+      "inside_extrapolation_envelope": true,
+      "relative_distance_from_1_over_L_squared_diagnostic": 0.0013018737507269895,
+      "relative_distance_from_quadratic_limit": 0.00789531125278009
+    },
+    {
+      "candidate": 4.0,
+      "inside_extrapolation_envelope": true,
+      "relative_distance_from_1_over_L_squared_diagnostic": 0.021685713969446074,
+      "relative_distance_from_quadratic_limit": 0.016541246415074262
+    }
+  ],
+  "sources": [
+    "docs/xxx_qlq_lanczos_L16_k1_cutoff_pi4.json",
+    "docs/xxx_qlq_lanczos_L24_k1_cutoff_pi4.json",
+    "docs/xxx_qlq_lanczos_L32_k1_cutoff_pi4.json",
+    "docs/xxx_qlq_lanczos_L40_k1_cutoff_pi4.json",
+    "docs/xxx_qlq_lanczos_L48_k1_cutoff_pi4.json"
+  ],
+  "squared_recurrent_extrapolations": [
+    {
+      "lengths": [
+        16,
+        24,
+        32,
+        40,
+        48
+      ],
+      "linear_in_1_over_L_limit": 1.3434563780523736,
+      "linear_in_1_over_L_squared_diagnostic_limit": 1.2498575004029073,
+      "quadratic_in_1_over_L_limit": 1.265154045092116,
+      "scheme_envelope": [
+        1.265154045092116,
+        1.3434563780523736
+      ],
+      "values": [
+        1.0118319679767693,
+        1.1405475360816995,
+        1.1892329881211163,
+        1.2123669388461438,
+        1.2250889964018574
+      ]
+    },
+    {
+      "lengths": [
+        16,
+        24,
+        32,
+        40,
+        48
+      ],
+      "linear_in_1_over_L_limit": 2.0140255498766146,
+      "linear_in_1_over_L_squared_diagnostic_limit": 1.997396252498546,
+      "quadratic_in_1_over_L_limit": 1.9842093774944398,
+      "scheme_envelope": [
+        1.9842093774944398,
+        2.0140255498766146
+      ],
+      "values": [
+        1.9523541298893443,
+        1.980352600172433,
+        1.9871614783698843,
+        1.9896975473446221,
+        1.9909038394727712
+      ]
+    },
+    {
+      "lengths": [
+        16,
+        24,
+        32
+      ],
+      "linear_in_1_over_L_limit": 4.153597798795534,
+      "linear_in_1_over_L_squared_diagnostic_limit": 3.9132571441222157,
+      "quadratic_in_1_over_L_limit": 3.933835014339703,
+      "scheme_envelope": [
+        3.933835014339703,
+        4.153597798795534
+      ],
+      "values": [
+        3.4654799003430137,
+        3.712759130412477,
+        3.8022134234207456
+      ]
+    }
+  ],
+  "target_coefficients_used": false,
+  "trajectory_data_used": false
+}

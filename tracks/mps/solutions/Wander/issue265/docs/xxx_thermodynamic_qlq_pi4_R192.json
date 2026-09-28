@@ -1,0 +1,52 @@
+{
+  "alphas": [
+    0.0,
+    0.0,
+    0.0
+  ],
+  "analytic_infinite_tail_first_recurrent": {
+    "l2_projected_current_norm": 0.004320823562899504,
+    "pl2_projected_current_norm": 0.0009289490338483164,
+    "projected_current_norm": 0.011355632113513082,
+    "ql2_projected_current_norm": 0.003391874529051187,
+    "qlp_force_norm": 0.0027039745556968315,
+    "squared_first_qlq_recurrent": 1.2544032716229014
+  },
+  "betas": [
+    1.120361279530189,
+    1.4133279596142483,
+    1.9849570807659134
+  ],
+  "exact_infinite_tail_projected_current_norm": 0.011355632113513082,
+  "gates": {
+    "analytic_first_recurrent_positive": true,
+    "band_tail_resolved": false,
+    "positive_force_norm": true,
+    "positive_recurrents": true,
+    "zero_diagonal_within_tolerance": true
+  },
+  "inputs": {
+    "cutoff_wave_number": 0.7853981633974483,
+    "maximum_separation": 192,
+    "steps": 3,
+    "target_coefficients_used": false,
+    "trajectory_data_used": false
+  },
+  "maximum_q_reprojection_residual": 0.04308501187702082,
+  "method": "thermodynamic_translation_orbit_bandlimited_qlq_lanczos",
+  "operator_counts": [
+    1532,
+    6510,
+    24446,
+    88878
+  ],
+  "projected_current_norm": 0.011290009296190865,
+  "projected_current_tail_relative_error": 0.005778878416123216,
+  "qlp_force_norm": 0.002666017389782946,
+  "schema": 1,
+  "squared_betas": [
+    1.2552093966705222,
+    1.9974959214273742,
+    3.940054612482737
+  ]
+}

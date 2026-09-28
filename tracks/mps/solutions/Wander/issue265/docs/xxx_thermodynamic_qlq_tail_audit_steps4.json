@@ -1,0 +1,91 @@
+{
+  "exact_analytic_first_squared_recurrent": 1.2544032716229014,
+  "first_recurrent_relative_extrapolation_errors": [
+    6.725811563082786e-05,
+    2.7472990661001712e-05
+  ],
+  "gates": {
+    "all_finite_tail_recurrents_positive": true,
+    "analytic_anchor_reproduced_below_1e_minus_4": true,
+    "higher_recurrent_intervals_are_analytic_identities": false
+  },
+  "interpretation": "The exact first recurrent validates 1/R^2 as the leading tail extrapolation at the 1e-4 level on this sequence.  Applying the same two-scheme audit gives narrow numerical intervals for the next 3 recurrents, but only the first is presently an analytic identity.",
+  "maximum_separations": [
+    64,
+    128,
+    192,
+    256
+  ],
+  "method": "analytic_anchor_validated_1_over_R_squared_qlq_tail_audit",
+  "schema": 1,
+  "sources": [
+    "docs/xxx_thermodynamic_qlq_pi4_R64_steps5.json",
+    "docs/xxx_thermodynamic_qlq_pi4_R128_steps5.json",
+    "docs/xxx_thermodynamic_qlq_pi4_R192_steps4.json",
+    "docs/xxx_thermodynamic_qlq_pi4_R256_steps4.json"
+  ],
+  "squared_recurrent_extrapolations": [
+    {
+      "level": 1,
+      "linear_in_1_over_R_squared_limit": 1.254318902822611,
+      "quadratic_in_1_over_R_squared_limit": 1.254368809413535,
+      "scheme_envelope": [
+        1.254318902822611,
+        1.254368809413535
+      ],
+      "values": [
+        1.2623167832467037,
+        1.2562814128487925,
+        1.2552093966705222,
+        1.254844051091345
+      ]
+    },
+    {
+      "level": 2,
+      "linear_in_1_over_R_squared_limit": 1.9923436631151574,
+      "quadratic_in_1_over_R_squared_limit": 1.9926213588768895,
+      "scheme_envelope": [
+        1.9923436631151574,
+        1.9926213588768895
+      ],
+      "values": [
+        2.0387484993135594,
+        2.0037435782450257,
+        1.9974959214273742,
+        1.9953945399837638
+      ]
+    },
+    {
+      "level": 3,
+      "linear_in_1_over_R_squared_limit": 3.9216977264761583,
+      "quadratic_in_1_over_R_squared_limit": 3.920976049220796,
+      "scheme_envelope": [
+        3.920976049220796,
+        3.9216977264761583
+      ],
+      "values": [
+        4.087500411115969,
+        3.963694957448789,
+        3.940054612482737,
+        3.931722278504563
+      ]
+    },
+    {
+      "level": 4,
+      "linear_in_1_over_R_squared_limit": 4.950339677582734,
+      "quadratic_in_1_over_R_squared_limit": 4.948824434318649,
+      "scheme_envelope": [
+        4.948824434318649,
+        4.950339677582734
+      ],
+      "values": [
+        5.147373778826637,
+        5.00078965463231,
+        4.971952976806177,
+        4.962044018019434
+      ]
+    }
+  ],
+  "target_coefficients_used": false,
+  "trajectory_data_used": false
+}

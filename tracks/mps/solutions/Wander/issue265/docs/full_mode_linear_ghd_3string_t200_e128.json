@@ -1,0 +1,168 @@
+{
+  "inputs": {
+    "cell_length": 64.0,
+    "ensembles": 128,
+    "field": 0.25,
+    "nonlinear_strength": 0.0,
+    "output_times": [
+      0.0,
+      50.0,
+      100.0,
+      150.0,
+      200.0
+    ],
+    "rapidity_points": 16,
+    "rapidity_u_extent": 1.5,
+    "seed": 265,
+    "spatial_points": 16,
+    "string_xi_buffer": 0.75,
+    "string_xi_cutoff": 0.75,
+    "target_coefficients_used": false,
+    "time_step": 0.25,
+    "trajectory_data_used": false
+  },
+  "operator": {
+    "active_strings": 3,
+    "dimension": 48,
+    "full_fdt_noise_covariance_retained": true,
+    "full_off_diagonal_diffusion_retained": true,
+    "full_velocity_vertex_retained": true,
+    "linear_noise_step": "exact stationary OU innovation; algebraically identical to integrating k^2 Q because Q=(D C+C D^T)/2",
+    "ou_negative_spectral_weight_clipped": 0.0,
+    "relative_fdt_identity_residual": 0.0
+  },
+  "schema_version": 1,
+  "scope": {
+    "finite_cutoff_nonlinear_fluctuating_ghd": true,
+    "infinite_mode_limit_converged": false,
+    "physical_F1_perp_claimed": false,
+    "required_next_check": "joint h->0, string-cutoff, rapidity-grid, spatial-grid, time-step, cell-volume and ensemble convergence"
+  },
+  "stability": {
+    "maximum_equal_time_variance_over_chi": 1.137325651449691,
+    "maximum_rms_occupation_fluctuation": 0.8562890818010407,
+    "minimum_equal_time_variance_over_chi": 0.8288355703495757
+  },
+  "structure_factor": [
+    {
+      "equal_time_variance_over_chi": [
+        0.9524954574130191,
+        1.1303137828477172,
+        0.9686344961402286,
+        1.1082111421809422,
+        1.0864224359796872
+      ],
+      "positive_wave_numbers": [
+        0.006135923151542565,
+        0.01227184630308513,
+        0.018407769454627694,
+        0.02454369260617026,
+        0.030679615757712823
+      ],
+      "structure_factor_over_chi": [
+        0.9524954574130191,
+        1.1303137828477174,
+        0.9686344961402283,
+        1.1082111421809422,
+        1.0864224359796872
+      ],
+      "time": 0.0
+    },
+    {
+      "equal_time_variance_over_chi": [
+        0.9321007642219271,
+        1.1144661256538144,
+        0.9407826841923762,
+        1.0093203748688568,
+        0.9667031450032171
+      ],
+      "positive_wave_numbers": [
+        0.006135923151542565,
+        0.01227184630308513,
+        0.018407769454627694,
+        0.02454369260617026,
+        0.030679615757712823
+      ],
+      "structure_factor_over_chi": [
+        0.929895176341188,
+        1.075143282303643,
+        0.8493896403395641,
+        0.8408849795232328,
+        0.7614791229590794
+      ],
+      "time": 50.0
+    },
+    {
+      "equal_time_variance_over_chi": [
+        0.9111387591873416,
+        1.069780220095203,
+        0.9168934974868559,
+        1.0333293007295234,
+        0.9060034757115724
+      ],
+      "positive_wave_numbers": [
+        0.006135923151542565,
+        0.01227184630308513,
+        0.018407769454627694,
+        0.02454369260617026,
+        0.030679615757712823
+      ],
+      "structure_factor_over_chi": [
+        0.8831213612515284,
+        0.9291515998032991,
+        0.5894994256552494,
+        0.4337424392929629,
+        0.36843202738965225
+      ],
+      "time": 100.0
+    },
+    {
+      "equal_time_variance_over_chi": [
+        0.8799763893864319,
+        1.0166391597954396,
+        0.8956455812377643,
+        1.0848115096281508,
+        0.8527222943527685
+      ],
+      "positive_wave_numbers": [
+        0.006135923151542565,
+        0.01227184630308513,
+        0.018407769454627694,
+        0.02454369260617026,
+        0.030679615757712823
+      ],
+      "structure_factor_over_chi": [
+        0.8098066292371268,
+        0.7234767080850711,
+        0.3046890078860827,
+        0.15068120257522158,
+        0.1405978928911708
+      ],
+      "time": 150.0
+    },
+    {
+      "equal_time_variance_over_chi": [
+        0.8655439996165285,
+        0.9924487139672864,
+        0.9274195606554495,
+        1.137325651449691,
+        0.8288355703495757
+      ],
+      "positive_wave_numbers": [
+        0.006135923151542565,
+        0.01227184630308513,
+        0.018407769454627694,
+        0.02454369260617026,
+        0.030679615757712823
+      ],
+      "structure_factor_over_chi": [
+        0.7209022003055692,
+        0.5137416891859601,
+        0.11199305251669668,
+        0.04394458626533235,
+        -0.020491297065584647
+      ],
+      "time": 200.0
+    }
+  ]
+}

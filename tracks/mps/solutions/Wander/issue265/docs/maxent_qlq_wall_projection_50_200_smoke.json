@@ -1,0 +1,163 @@
+{
+  "frozen_weak_projection": {
+    "D": -0.05334971037815057,
+    "a": 0.3718292850460662,
+    "mse": 9.584759916433748e-09,
+    "n_obs": 1617
+  },
+  "gaussian_quadrature": {
+    "compressed_even_moments": [
+      0.9999999999999996,
+      1.2543311977919953,
+      4.072466150061096,
+      23.022376892378453,
+      193.50455718930976,
+      2169.3492044008017
+    ],
+    "maximum_relative_compressed_moment_error": 4.192163394201032e-09,
+    "nodes": [
+      0.011256428115237204,
+      0.056940558067830604,
+      0.10034686277744871,
+      0.16903581881221105,
+      0.25876900960811133,
+      0.3680272158249682,
+      0.4954204086440816,
+      0.6394137728970923,
+      0.7983147594951523,
+      0.9703465374197079,
+      1.1537725728998585,
+      1.3470407989550657,
+      1.5489069810256668,
+      1.7584963068876107,
+      1.9752674191489987,
+      2.1988426392792584,
+      2.4286589510299184,
+      2.66340635253161,
+      2.9003425833671868,
+      3.1348951961288294,
+      3.3612393268185023,
+      3.5740090222658907,
+      3.7700272840636138,
+      3.9487755886319023,
+      4.111686614196063,
+      4.261180412619935,
+      4.4000307732597355,
+      4.5311580024805025,
+      4.657826844602105,
+      4.784525540347349,
+      4.920680925271474,
+      19.999820177722
+    ],
+    "order": 32,
+    "orthogonality_error": 1.6653345369377348e-15,
+    "weights": [
+      0.0007969014554361984,
+      0.016047445136840973,
+      0.03607674390889895,
+      0.049998905624587676,
+      0.06273903417989032,
+      0.07458172938212167,
+      0.08524995590702009,
+      0.094085972587807,
+      0.09997163275571469,
+      0.10138393834426669,
+      0.09682655985318277,
+      0.0856963966524759,
+      0.06917660677999496,
+      0.05032238865117454,
+      0.03286339393573198,
+      0.019442461147201835,
+      0.010697398699931153,
+      0.005726478113701492,
+      0.003161015522906178,
+      0.0018952672475352347,
+      0.0012539017027942796,
+      0.0008773222973102962,
+      0.0005904631911171808,
+      0.00033911271732331417,
+      0.00014732880098513394,
+      4.323732774439232e-05,
+      7.658739530430822e-06,
+      7.190852464405363e-07,
+      2.9843526277985e-08,
+      3.9903018371766983e-10,
+      8.051680644748848e-13,
+      8.166118402274089e-12
+    ]
+  },
+  "inputs": {
+    "boundary": "/Users/thomasjwang/Documents/GitHub/Projects/qh265-burgers-pr/tracks/mps/solutions/Wander/issue265/docs/qlq_kpz_low_frequency_boundary.json",
+    "constraints": "/Users/thomasjwang/Documents/GitHub/Projects/qh265-burgers-pr/tracks/mps/solutions/Wander/issue265/docs/qlq_positive_spectral_interval_steps5.json",
+    "fit_window": [
+      52.0,
+      198.0
+    ],
+    "k_maximum": 0.7853981633974483,
+    "k_step": 0.04,
+    "length": 400,
+    "profile_window": [
+      50.0,
+      200.0
+    ],
+    "propagation_bath_size": 464,
+    "propagation_measure": "full",
+    "regular_diffusion": 0.0
+  },
+  "maximum_entropy_continuum": {
+    "dual_multiplier": [
+      -0.44816065047015224,
+      39.63521598434565,
+      -63.422066430165856,
+      31.335896559774426,
+      -1.154513309264066
+    ],
+    "feature_scale": 4.0,
+    "fixed_low_tail_even_moments": [
+      0.0019942536676402335,
+      1.9942536676402352e-06,
+      3.1160213556878678e-09,
+      5.665493373977942e-12,
+      1.1128647698885214e-14,
+      2.2911921732998968e-17
+    ],
+    "integration_order": 400,
+    "maximum_relative_constraint_error": 2.8412881109771363e-11,
+    "maximum_relative_reconstructed_moment_error": 4.192163727267939e-09,
+    "newton_iterations": 55,
+    "omega_match": 0.05,
+    "omega_maximum": 20.0,
+    "reconstructed_even_moments": [
+      1.0000000000000002,
+      1.2543311977919958,
+      4.072466150061096,
+      23.022376892378443,
+      193.5045571893096,
+      2169.3492044008008
+    ],
+    "target_even_moments": [
+      1.0,
+      1.2543312030413998,
+      4.07246616708905,
+      23.02237698841829,
+      193.50455799379102,
+      2169.349213495068
+    ]
+  },
+  "method": "maximum_entropy_positive_QLQ_continuum_Mori_star_wall",
+  "schema_version": 1,
+  "scope": {
+    "closure_assumption": "maximum relative entropy with Lebesgue reference measure on the unresolved positive-frequency continuum",
+    "constant_burgers_pair_is_projection_not_microscopic_constant": true,
+    "exact_inputs": "microscopic slow-current norm, beta0, five QLQ recurrents, and the absolute KPZ low-frequency spectral boundary",
+    "physical_F1_uniquely_proved": false
+  },
+  "structure_factor_diagnostics": {
+    "k_zero_maximum_conservation_error": 0.0,
+    "last_time_at_kmax": -0.015316959914910507,
+    "maximum": 1.0,
+    "minimum": -0.7716477243083429
+  },
+  "uses_target_a_or_D": false,
+  "uses_target_trajectory": false
+}

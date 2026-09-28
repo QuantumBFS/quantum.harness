@@ -1,0 +1,51 @@
+{
+  "schema": 1,
+  "method": "exact_finite_regulator_algebra_and_scoped_no_go",
+  "uses_target_trajectory": false,
+  "uses_target_a_or_D": false,
+  "source_sha256": {
+    "docs/full_mode_mori_certificate.json": "86a2c85c97da260f6af2218f751a6532ad1fb3fb2537b8489516a4604762f7d8",
+    "docs/xxx_mori_mu26_certificate.json": "539a1f93535163304e4a4ba08752a99e4ea219b8af8e15f53712b62033db2b59",
+    "docs/nonlinear_mori_closure_no_go_certificate.json": "b83b7addd5e9a7f65f2793febfdf29ad91d08a459c1a52c764d532b7da99d207"
+  },
+  "statements": {
+    "gap3": {
+      "closed_statement": "For every declared finite GHD regulator, the linear fluctuating theory is an Ornstein-Uhlenbeck process with exact covariance Sigma(t)=C+exp(Lt)[Sigma(0)-C]exp(L^dagger t).",
+      "stationary_covariance_relative_residual": 0.0,
+      "maximum_hermiticity_residual": 0.0,
+      "closed": true,
+      "not_claimed": "uniform convergence of the h->0 infinite-mode limit"
+    },
+    "gap4": {
+      "closed_statement": "Schur elimination of every retained non-spin mode gives the exact frequency-dependent scalar Mori resolvent.  The exact mu26 prefix gives thirteen positive recurrents but does not choose a unique positive terminator.",
+      "maximum_resolvent_inversion_residual": 2.2204460497544736e-16,
+      "maximum_even_moment_order": 26,
+      "exact_recurrent_count": 13,
+      "constructive_terminator_nonidentifiability": true,
+      "closed": true,
+      "not_claimed": "a unique physical low-frequency terminator"
+    },
+    "gap5": {
+      "closed_statement": "Global pi spin rotation makes the physical current odd in the magnetic source, so the zero-field quadratic Kubo vertex vanishes.  A one-sided, orientation-conditioned wall coordinate is a different observable and may be nonzero.",
+      "physical_zero_field_quadratic_kubo_vertex": 0.0,
+      "conditional_coordinate_may_be_nonzero": true,
+      "closed": true,
+      "not_claimed": "universality of the conditional finite-window coordinate"
+    },
+    "gap7": {
+      "closed_statement": "The orientation-odd tangent of a sharp product wall is a linear combination of spin-density Fourier modes.  With those modes in the Mori projector, its linear initial slip is exactly zero.",
+      "linear_mori_initial_slip": 0.0,
+      "maximum_bare_mu6": 6.400000000000002e-05,
+      "closed": true,
+      "not_claimed": "a bound on the unknown O(mu^6) coefficient or a sharp-wall pointwise local-GGE expansion"
+    }
+  },
+  "gates": {
+    "gap3_scoped_statement_closed": true,
+    "gap4_scoped_statement_closed": true,
+    "gap5_scoped_statement_closed": true,
+    "gap7_scoped_statement_closed": true,
+    "all_four_scoped_statements_closed": true
+  },
+  "interpretation": "Closure means the stated algebraic theorem is complete.  It does not silently promote a finite regulator, a conditional wall coordinate, or a finite moment prefix to a unique asymptotic constant-coefficient Burgers equation."
+}

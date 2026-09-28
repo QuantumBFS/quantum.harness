@@ -1,0 +1,118 @@
+{
+  "schema": 1,
+  "method": "natural_string_coordinate_even_field_expansion_and_exact_common_shift_derivative",
+  "equations": {
+    "natural_coordinate": "x=h*(s+1)",
+    "leading_operator": "[-d_xi^2+(abs(k)/2)^2+2*csch(xi)^2] X0 = 2 delta",
+    "natural_expansion": "h*Tdr_h(x,y;h*K)=X0(x,y;K)+O(h^2)",
+    "old_coordinate_first": "X1_old=(d_xi+d_zeta)X0"
+  },
+  "sample": {
+    "xi": 1.1,
+    "zeta": 0.8
+  },
+  "leading_fredholm_residuals": [
+    {
+      "scaled_wave_number": 0.0,
+      "dressed_kernel": 0.5115623031859036,
+      "fredholm_residual": -4.814953991072457e-09
+    },
+    {
+      "scaled_wave_number": 0.8,
+      "dressed_kernel": 0.43948264231201983,
+      "fredholm_residual": -3.1353875051820523e-10
+    },
+    {
+      "scaled_wave_number": 2.0,
+      "dressed_kernel": 0.32691377346259204,
+      "fredholm_residual": -1.7564366627809136e-10
+    },
+    {
+      "scaled_wave_number": 3.4,
+      "dressed_kernel": 0.22337226045532083,
+      "fredholm_residual": -9.785422472319283e-11
+    }
+  ],
+  "first_order_convergence": [
+    {
+      "xi_cutoff": 12.0,
+      "quadrature_order": 320,
+      "first_dressed_kernel": 0.4291506490956442
+    },
+    {
+      "xi_cutoff": 14.0,
+      "quadrature_order": 640,
+      "first_dressed_kernel": 0.4291506490956442
+    },
+    {
+      "xi_cutoff": 16.0,
+      "quadrature_order": 720,
+      "first_dressed_kernel": 0.4291506490956442
+    }
+  ],
+  "common_shift_derivative_value": 0.4291506490956442,
+  "maximum_common_shift_identity_residual": 0.0,
+  "real_rapidity_inverse_fourier_convergence": [
+    {
+      "scaled_rapidity_difference": 0.0,
+      "leading_sequences": [
+        0.33773803997035284,
+        0.33774198714517867,
+        0.3377420096495139
+      ],
+      "first_sequences": [
+        0.5702880088127605,
+        0.570294935011903,
+        0.5702950207892303
+      ],
+      "leading_last_relative_change": 6.663173679477552e-08,
+      "first_last_relative_change": 1.5040871326199579e-07
+    },
+    {
+      "scaled_rapidity_difference": 0.4,
+      "leading_sequences": [
+        0.1600552980469996,
+        0.16005639129983046,
+        0.16005639576259262
+      ],
+      "first_sequences": [
+        0.37583139904365537,
+        0.37582880636086835,
+        0.37582875463813525
+      ],
+      "leading_last_relative_change": 2.788243635976073e-08,
+      "first_last_relative_change": 1.3762312045528802e-07
+    },
+    {
+      "scaled_rapidity_difference": 1.0,
+      "leading_sequences": [
+        0.03624799305161407,
+        0.036247665053341635,
+        0.03624766877802807
+      ],
+      "first_sequences": [
+        0.12353447736348608,
+        0.12353692828204116,
+        0.12353695390811241
+      ],
+      "leading_last_relative_change": 1.0275658945957389e-07,
+      "first_last_relative_change": 2.0743652617838393e-07
+    }
+  ],
+  "gates": {
+    "leading_max_absolute_residual": 4.814953991072457e-09,
+    "leading_residual_below_2e-8": true,
+    "first_order_relative_spread": 0.0,
+    "first_order_spread_below_2e-3": true,
+    "common_shift_identity_below_1e-12": true,
+    "leading_real_kernel_max_relative_change": 1.0275658945957389e-07,
+    "leading_real_kernel_change_below_1e-5": true,
+    "first_real_kernel_max_relative_change": 2.0743652617838393e-07,
+    "first_real_kernel_change_below_1e-4": true,
+    "pointwise_inverse_fourier_complete": true,
+    "outer_dressed_kernel_complete": true,
+    "full_diagonal_integrand_complete": false,
+    "fixed_string_inner_match_complete": false,
+    "physical_D1_certified": false
+  }
+}

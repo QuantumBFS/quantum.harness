@@ -1,0 +1,208 @@
+{
+  "schema_version": 1,
+  "created_at": "2026-07-29T22:48:47.121697+00:00",
+  "status": "pass",
+  "config_path": "/Users/thomasjwang/Documents/GitHub/Projects/Jin-Peng/Hydrodynamics/kharkov_B2_validation/configs/two_mode_solver_budget_20260730.json",
+  "config_sha256": "b38efe88235bb97056f3afddb3e375a05bd022a45aefb64c7d44c396021db6b9",
+  "source_sha256": {
+    "src/two_mode_nlfh.py": "416fbfb1acfac7a63f582f7a75d599eb2b15c499c65e98f49451ad210be75cfb",
+    "src/two_mode_solver_budget.py": "4c3580b592aacb4282901384c79bd1cb9d33cbba83cb2093cec87d396f74421c",
+    "src/two_mode_forward_refinement.py": "3c7110fa6736b85de8318532ebd18bc2b784c24d0742839c2a5bb5034c9aba08",
+    "scripts/run_two_mode_solver_budget.py": "ef94c1134504a802c8ecccb9576559f4db0adc1911df6c77c428628d47c6ccaf"
+  },
+  "environment": {
+    "python": "3.12.11",
+    "numpy": "2.3.5"
+  },
+  "quantum_fit_error_used": false,
+  "candidate_summaries": [
+    {
+      "seed": 20260730,
+      "params": {
+        "Dm": 0.8,
+        "Dphi": 1.1,
+        "lambda_m": 1.0,
+        "lambda_phi": 1.0,
+        "chi": 0.25
+      },
+      "target_variance": 0.25,
+      "m_variance": 0.2614666285526267,
+      "phi_variance": 0.24734562813283048,
+      "m_variance_relative_error": 0.045866514210506804,
+      "phi_variance_relative_error": 0.010617487468678077,
+      "magnetization_current_skewness": -0.19797091181195092,
+      "max_conservation_error": 3.552713678800501e-15,
+      "n_ensemble": 128
+    },
+    {
+      "seed": 20260730,
+      "params": {
+        "Dm": 0.8,
+        "Dphi": 1.1,
+        "lambda_m": 1.0,
+        "lambda_phi": 1.0,
+        "chi": 0.25
+      },
+      "target_variance": 0.25,
+      "m_variance": 0.2541440542500709,
+      "phi_variance": 0.2539990096046482,
+      "m_variance_relative_error": 0.016576217000283666,
+      "phi_variance_relative_error": 0.015996038418592873,
+      "magnetization_current_skewness": 0.11012537433369975,
+      "max_conservation_error": 4.884981308350689e-15,
+      "n_ensemble": 256
+    },
+    {
+      "seed": 20260730,
+      "params": {
+        "Dm": 0.8,
+        "Dphi": 1.1,
+        "lambda_m": 1.0,
+        "lambda_phi": 1.0,
+        "chi": 0.25
+      },
+      "target_variance": 0.25,
+      "m_variance": 0.25454603233373857,
+      "phi_variance": 0.2486233064171372,
+      "m_variance_relative_error": 0.01818412933495428,
+      "phi_variance_relative_error": 0.005506774331451192,
+      "magnetization_current_skewness": -0.025284562937509882,
+      "max_conservation_error": 5.329070518200751e-15,
+      "n_ensemble": 512
+    },
+    {
+      "seed": 20260730,
+      "params": {
+        "Dm": 0.8,
+        "Dphi": 1.1,
+        "lambda_m": 1.0,
+        "lambda_phi": 1.0,
+        "chi": 0.25
+      },
+      "target_variance": 0.25,
+      "m_variance": 0.25128766144294357,
+      "phi_variance": 0.25000627846701207,
+      "m_variance_relative_error": 0.005150645771774265,
+      "phi_variance_relative_error": 2.511386804826543e-05,
+      "magnetization_current_skewness": 0.056475197273254,
+      "max_conservation_error": 5.329070518200751e-15,
+      "n_ensemble": 1024
+    },
+    {
+      "seed": 20260730,
+      "params": {
+        "Dm": 0.8,
+        "Dphi": 1.1,
+        "lambda_m": 1.0,
+        "lambda_phi": 1.0,
+        "chi": 0.25
+      },
+      "target_variance": 0.25,
+      "m_variance": 0.25113099196865984,
+      "phi_variance": 0.2499671505050235,
+      "m_variance_relative_error": 0.0045239678746393786,
+      "phi_variance_relative_error": 0.00013139797990602275,
+      "magnetization_current_skewness": 0.025291262996316077,
+      "max_conservation_error": 7.105427357601002e-15,
+      "n_ensemble": 2048
+    }
+  ],
+  "forward_refinement": {
+    "status": "pass",
+    "quantum_fit_error_used": false,
+    "levels": {
+      "screening": {
+        "spatial_stride": 4,
+        "dt_internal": 0.2
+      },
+      "final": {
+        "spatial_stride": 2,
+        "dt_internal": 0.1
+      },
+      "reference": {
+        "spatial_stride": 1,
+        "dt_internal": 0.05
+      }
+    },
+    "comparison_window": {
+      "t_min": 50.0,
+      "t_max": 200.0,
+      "x_abs_max": 128.0
+    },
+    "comparisons": {
+      "screening": {
+        "profile_relative_l2": 0.0014482789990086658,
+        "current_relative_l2": 0.008903420362015427
+      },
+      "final": {
+        "profile_relative_l2": 0.0003783307907703611,
+        "current_relative_l2": 0.0021584594117886515
+      }
+    },
+    "conservation_error": {
+      "screening": 3.0747973611688906e-16,
+      "final": 1.3322676295501878e-15,
+      "reference": 2.6645352591003757e-15
+    },
+    "checks": {
+      "profile": true,
+      "current": true,
+      "profile_refines": true,
+      "current_refines": true,
+      "conservation": true
+    }
+  },
+  "screening_ensemble": 1024,
+  "final_ensemble": 2048,
+  "requires_extended_budget": false,
+  "comparisons": [
+    {
+      "from": 128,
+      "to": 256,
+      "relative_changes": {
+        "m_variance": 0.02881269177893325,
+        "phi_variance": 0.02619451738088974
+      },
+      "maximum_relative_change": 0.02881269177893325,
+      "converged": false
+    },
+    {
+      "from": 256,
+      "to": 512,
+      "relative_changes": {
+        "m_variance": 0.0015791960298191363,
+        "phi_variance": 0.02162187956141057
+      },
+      "maximum_relative_change": 0.02162187956141057,
+      "converged": false
+    },
+    {
+      "from": 512,
+      "to": 1024,
+      "relative_changes": {
+        "m_variance": 0.012966696701639835,
+        "phi_variance": 0.005531749275878067
+      },
+      "maximum_relative_change": 0.012966696701639835,
+      "converged": true
+    },
+    {
+      "from": 1024,
+      "to": 2048,
+      "relative_changes": {
+        "m_variance": 0.0006238555944671031,
+        "phi_variance": 0.00015653241599754007
+      },
+      "maximum_relative_change": 0.0006238555944671031,
+      "converged": true
+    }
+  ],
+  "final_checks": {
+    "minimum_final_ensemble": true,
+    "observable_convergence": true,
+    "m_variance": true,
+    "phi_variance": true,
+    "conservation": true,
+    "current_skewness": true
+  }
+}

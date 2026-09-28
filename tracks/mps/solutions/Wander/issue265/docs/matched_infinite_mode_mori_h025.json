@@ -1,0 +1,260 @@
+{
+  "bare_total_candidate_kernels": [
+    [
+      16.998906354055222,
+      14.67858218982515,
+      12.680236245908638,
+      9.885322725562233,
+      9.36520864772622
+    ],
+    [
+      25.6014943975126,
+      23.224391436637717,
+      20.925463143259503,
+      16.428661283884495,
+      15.178044216513431
+    ],
+    [
+      37.92963836913292,
+      35.52734644721947,
+      32.973236238271106,
+      26.16690812144185,
+      23.608168167209072
+    ]
+  ],
+  "conclusion": "The exact microscopic prefix is imposed algebraically, while the remaining spectrum is not assigned a pole count.  A failed gate means that this regulator sequence cannot yet determine the finite-window correction; it is not evidence for a second mode.",
+  "cutoffs": [
+    {
+      "causal_half_delta_contact": 8.415568087240345,
+      "colored_laplace_correction": [
+        2.3735953062834363,
+        2.065613560434129,
+        1.678873268261852,
+        0.6828076868948681,
+        0.4080044109401934
+      ],
+      "fourier_points": 8,
+      "maximum_resolved_wave_number": 0.16
+    },
+    {
+      "causal_half_delta_contact": 12.623352130860514,
+      "colored_laplace_correction": [
+        6.768399306120645,
+        6.403638763626525,
+        5.716316121992546,
+        3.018362201596961,
+        2.0130559361072358
+      ],
+      "fourier_points": 12,
+      "maximum_resolved_wave_number": 0.24
+    },
+    {
+      "causal_half_delta_contact": 16.83113617448069,
+      "colored_laplace_correction": [
+        14.888759234120789,
+        14.498809730588105,
+        13.556305173383976,
+        8.54882499553414,
+        6.2353958431827
+      ],
+      "fourier_points": 16,
+      "maximum_resolved_wave_number": 0.32
+    }
+  ],
+  "gates": {
+    "continuum_terminator_matching_complete": false,
+    "exact_mu20_prefix_preserved_if_reconstructed": true,
+    "full_fdt_noise_in_source": true,
+    "full_non_diagonal_diffusion_in_source": true,
+    "linear_zero_field_infinite_mode_limit_complete": false,
+    "nonlinear_zero_field_infinite_mode_limit_complete": false,
+    "physical_F1_perp_certified": false
+  },
+  "inputs": {
+    "causal_delta_endpoint_weight": 0.5,
+    "cutoff_relative_tolerance": 0.1,
+    "spectral_maximum": 20.0,
+    "spectral_nodes": 256,
+    "spectral_relative_tolerance": 0.02,
+    "target_coefficients_used": false,
+    "trajectory_data_used": false
+  },
+  "laplace_frequency": [
+    0.02,
+    0.05,
+    0.1,
+    0.5,
+    1.0
+  ],
+  "linear_full_mode_mori_kernel": [
+    6.20974296053144,
+    4.197400542150676,
+    2.5857948904064427,
+    0.7869469514270184,
+    0.5416361495456807
+  ],
+  "matching": {
+    "all_candidates_inside_stieltjes_bounds": false,
+    "all_spectral_weights_nonnegative": false,
+    "candidate_kernels_positive": [
+      [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      [
+        true,
+        true,
+        true,
+        true,
+        true
+      ]
+    ],
+    "cutoff_stability_pass": false,
+    "exact_moment_order_preserved": 20,
+    "exact_recurrent_count_preserved": 10,
+    "finite_pole_count_assumed": false,
+    "inside_moment_interval": [
+      [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      [
+        false,
+        false,
+        false,
+        false,
+        false
+      ]
+    ],
+    "laplace_frequency": [
+      0.02,
+      0.05,
+      0.1,
+      0.5,
+      1.0
+    ],
+    "last_pair_maximum_relative_change": 0.45724224249199213,
+    "matching_complete": false,
+    "maximum_spectral_relative_residual": null,
+    "moment_bounds_lower": [
+      0.0619725597110013,
+      0.15253087463843817,
+      0.28908423381443416,
+      0.5491370869892125,
+      0.38959282869230505
+    ],
+    "moment_bounds_upper": [
+      12.857328318774373,
+      5.157067292734118,
+      2.6034119650400807,
+      0.6365859654225501,
+      0.39265728545501055
+    ],
+    "reconstructed_moment_preserving_kernels": [
+      [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      [
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    ],
+    "spectral_fits": [
+      {
+        "minimum_weight": null,
+        "nonzero_quadrature_weights": 0,
+        "normalization_residual": null,
+        "pre_normalization_mass": 0.0,
+        "relative_residual": null,
+        "spectral_weights_nonnegative": false,
+        "terminator_positive": false
+      },
+      {
+        "minimum_weight": null,
+        "nonzero_quadrature_weights": 0,
+        "normalization_residual": null,
+        "pre_normalization_mass": 0.0,
+        "relative_residual": null,
+        "spectral_weights_nonnegative": false,
+        "terminator_positive": false
+      },
+      {
+        "minimum_weight": null,
+        "nonzero_quadrature_weights": 0,
+        "normalization_residual": null,
+        "pre_normalization_mass": 0.0,
+        "relative_residual": null,
+        "spectral_weights_nonnegative": false,
+        "terminator_positive": false
+      }
+    ],
+    "spectral_grid_is_continuum_quadrature": true,
+    "spectral_node_convergence_still_required": true,
+    "spectral_reconstruction_pass": false,
+    "target_coefficients_used": false,
+    "trajectory_data_used": false
+  },
+  "method": "positive_continuum_terminator_behind_exact_mu20_lanczos_prefix",
+  "one_loop_corrections": [
+    [
+      10.789163393523781,
+      10.481181647674473,
+      10.094441355502196,
+      9.098375774135214,
+      8.823572498180539
+    ],
+    [
+      19.39175143698116,
+      19.02699089448704,
+      18.33966825285306,
+      15.641714332457475,
+      14.63640806696775
+    ],
+    [
+      31.71989540860148,
+      31.329945905068797,
+      30.387441347864666,
+      25.37996117001483,
+      23.06653201766339
+    ]
+  ],
+  "schema": 1,
+  "sources": {
+    "docs/full_mode_mori_certificate.json": "86a2c85c97da260f6af2218f751a6532ad1fb3fb2537b8489516a4604762f7d8",
+    "docs/full_mode_physical_one_loop_h025.json": "036970d7d8eff077255deb6e407a0024fb7c779f2fccd1162b65c2b9728d8afb"
+  }
+}

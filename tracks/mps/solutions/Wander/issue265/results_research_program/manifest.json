@@ -1,0 +1,2723 @@
+{
+  "schema_version": 1,
+  "created_at": "2026-07-29T11:24:01.647097+00:00",
+  "matrix_path": "/Users/thomasjwang/Documents/GitHub/Projects/Jin-Peng/Hydrodynamics/kharkov_B2_validation/configs/burgers_research_matrix.json",
+  "matrix_sha256": "9b6c60f982ac41da5b9ecd926ef30c3ab232ea9f82767e447bd52598037dffed",
+  "output_root": "/Users/thomasjwang/Documents/GitHub/Projects/Jin-Peng/Hydrodynamics/kharkov_B2_validation/data/research",
+  "job_count": 74,
+  "jobs": [
+    {
+      "job_id": "amp_mu005_up__convergence__coarse",
+      "condition_id": "amp_mu005_up",
+      "stage": "convergence",
+      "resolution_level": "coarse",
+      "blinded": false,
+      "t_max": 200.0,
+      "output_path": "/Users/thomasjwang/Documents/GitHub/Projects/Jin-Peng/Hydrodynamics/kharkov_B2_validation/data/research/raw/convergence/amp_mu005_up__convergence__coarse.npz",
+      "condition": {
+        "condition_id": "amp_mu005_up",
+        "role": "primary_amplitude",
+        "delta": 1.0,
+        "temperature": "infinite",
+        "mu": 0.05,
+        "orientation": 1,
+        "profile": "tanh",
+        "width": 2.0,
+        "background_m": 0.0,
+        "j2": 0.0,
+        "parameters": {}
+      },
+      "numerics": {
+        "level": "coarse",
+        "L": 256,
+        "dt": 0.05,
+        "chi_max": 256,
+        "truncation_cutoff": 1e-08
+      },
+      "observables": [
+        "magnetization",
+        "local_spin_current",
+        "czz",
+        "fcs_logZ"
+      ],
+      "depends_on": []
+    },
+    {
+      "job_id": "amp_mu005_up__convergence__medium",
+      "condition_id": "amp_mu005_up",
+      "stage": "convergence",
+      "resolution_level": "medium",
+      "blinded": false,
+      "t_max": 200.0,
+      "output_path": "/Users/thomasjwang/Documents/GitHub/Projects/Jin-Peng/Hydrodynamics/kharkov_B2_validation/data/research/raw/convergence/amp_mu005_up__convergence__medium.npz",
+      "condition": {
+        "condition_id": "amp_mu005_up",
+        "role": "primary_amplitude",
+        "delta": 1.0,
+        "temperature": "infinite",
+        "mu": 0.05,
+        "orientation": 1,
+        "profile": "tanh",
+        "width": 2.0,
+        "background_m": 0.0,
+        "j2": 0.0,
+        "parameters": {}
+      },
+      "numerics": {
+        "level": "medium",
+        "L": 384,
+        "dt": 0.025,
+        "chi_max": 512,
+        "truncation_cutoff": 1e-10
+      },
+      "observables": [
+        "magnetization",
+        "local_spin_current",
+        "czz",
+        "fcs_logZ"
+      ],
+      "depends_on": []
+    },
+    {
+      "job_id": "amp_mu005_up__convergence__fine",
+      "condition_id": "amp_mu005_up",
+      "stage": "convergence",
+      "resolution_level": "fine",
+      "blinded": false,
+      "t_max": 200.0,
+      "output_path": "/Users/thomasjwang/Documents/GitHub/Projects/Jin-Peng/Hydrodynamics/kharkov_B2_validation/data/research/raw/convergence/amp_mu005_up__convergence__fine.npz",
+      "condition": {
+        "condition_id": "amp_mu005_up",
+        "role": "primary_amplitude",
+        "delta": 1.0,
+        "temperature": "infinite",
+        "mu": 0.05,
+        "orientation": 1,
+        "profile": "tanh",
+        "width": 2.0,
+        "background_m": 0.0,
+        "j2": 0.0,
+        "parameters": {}
+      },
+      "numerics": {
+        "level": "fine",
+        "L": 512,
+        "dt": 0.0125,
+        "chi_max": 1024,
+        "truncation_cutoff": 1e-11
+      },
+      "observables": [
+        "magnetization",
+        "local_spin_current",
+        "czz",
+        "fcs_logZ"
+      ],
+      "depends_on": []
+    },
+    {
+      "job_id": "amp_mu005_down__convergence__coarse",
+      "condition_id": "amp_mu005_down",
+      "stage": "convergence",
+      "resolution_level": "coarse",
+      "blinded": false,
+      "t_max": 200.0,
+      "output_path": "/Users/thomasjwang/Documents/GitHub/Projects/Jin-Peng/Hydrodynamics/kharkov_B2_validation/data/research/raw/convergence/amp_mu005_down__convergence__coarse.npz",
+      "condition": {
+        "condition_id": "amp_mu005_down",
+        "role": "primary_amplitude",
+        "delta": 1.0,
+        "temperature": "infinite",
+        "mu": 0.05,
+        "orientation": -1,
+        "profile": "tanh",
+        "width": 2.0,
+        "background_m": 0.0,
+        "j2": 0.0,
+        "parameters": {}
+      },
+      "numerics": {
+        "level": "coarse",
+        "L": 256,
+        "dt": 0.05,
+        "chi_max": 256,
+        "truncation_cutoff": 1e-08
+      },
+      "observables": [
+        "magnetization",
+        "local_spin_current",
+        "czz",
+        "fcs_logZ"
+      ],
+      "depends_on": []
+    },
+    {
+      "job_id": "amp_mu005_down__convergence__medium",
+      "condition_id": "amp_mu005_down",
+      "stage": "convergence",
+      "resolution_level": "medium",
+      "blinded": false,
+      "t_max": 200.0,
+      "output_path": "/Users/thomasjwang/Documents/GitHub/Projects/Jin-Peng/Hydrodynamics/kharkov_B2_validation/data/research/raw/convergence/amp_mu005_down__convergence__medium.npz",
+      "condition": {
+        "condition_id": "amp_mu005_down",
+        "role": "primary_amplitude",
+        "delta": 1.0,
+        "temperature": "infinite",
+        "mu": 0.05,
+        "orientation": -1,
+        "profile": "tanh",
+        "width": 2.0,
+        "background_m": 0.0,
+        "j2": 0.0,
+        "parameters": {}
+      },
+      "numerics": {
+        "level": "medium",
+        "L": 384,
+        "dt": 0.025,
+        "chi_max": 512,
+        "truncation_cutoff": 1e-10
+      },
+      "observables": [
+        "magnetization",
+        "local_spin_current",
+        "czz",
+        "fcs_logZ"
+      ],
+      "depends_on": []
+    },
+    {
+      "job_id": "amp_mu005_down__convergence__fine",
+      "condition_id": "amp_mu005_down",
+      "stage": "convergence",
+      "resolution_level": "fine",
+      "blinded": false,
+      "t_max": 200.0,
+      "output_path": "/Users/thomasjwang/Documents/GitHub/Projects/Jin-Peng/Hydrodynamics/kharkov_B2_validation/data/research/raw/convergence/amp_mu005_down__convergence__fine.npz",
+      "condition": {
+        "condition_id": "amp_mu005_down",
+        "role": "primary_amplitude",
+        "delta": 1.0,
+        "temperature": "infinite",
+        "mu": 0.05,
+        "orientation": -1,
+        "profile": "tanh",
+        "width": 2.0,
+        "background_m": 0.0,
+        "j2": 0.0,
+        "parameters": {}
+      },
+      "numerics": {
+        "level": "fine",
+        "L": 512,
+        "dt": 0.0125,
+        "chi_max": 1024,
+        "truncation_cutoff": 1e-11
+      },
+      "observables": [
+        "magnetization",
+        "local_spin_current",
+        "czz",
+        "fcs_logZ"
+      ],
+      "depends_on": []
+    },
+    {
+      "job_id": "shape_double_wall__convergence__coarse",
+      "condition_id": "shape_double_wall",
+      "stage": "convergence",
+      "resolution_level": "coarse",
+      "blinded": false,
+      "t_max": 200.0,
+      "output_path": "/Users/thomasjwang/Documents/GitHub/Projects/Jin-Peng/Hydrodynamics/kharkov_B2_validation/data/research/raw/convergence/shape_double_wall__convergence__coarse.npz",
+      "condition": {
+        "condition_id": "shape_double_wall",
+        "role": "primary_shape",
+        "delta": 1.0,
+        "temperature": "infinite",
+        "mu": 0.05,
+        "orientation": 1,
+        "profile": "double_wall",
+        "width": 2.0,
+        "background_m": 0.0,
+        "j2": 0.0,
+        "parameters": {
+          "separation": 32.0
+        }
+      },
+      "numerics": {
+        "level": "coarse",
+        "L": 256,
+        "dt": 0.05,
+        "chi_max": 256,
+        "truncation_cutoff": 1e-08
+      },
+      "observables": [
+        "magnetization",
+        "local_spin_current"
+      ],
+      "depends_on": []
+    },
+    {
+      "job_id": "shape_double_wall__convergence__medium",
+      "condition_id": "shape_double_wall",
+      "stage": "convergence",
+      "resolution_level": "medium",
+      "blinded": false,
+      "t_max": 200.0,
+      "output_path": "/Users/thomasjwang/Documents/GitHub/Projects/Jin-Peng/Hydrodynamics/kharkov_B2_validation/data/research/raw/convergence/shape_double_wall__convergence__medium.npz",
+      "condition": {
+        "condition_id": "shape_double_wall",
+        "role": "primary_shape",
+        "delta": 1.0,
+        "temperature": "infinite",
+        "mu": 0.05,
+        "orientation": 1,
+        "profile": "double_wall",
+        "width": 2.0,
+        "background_m": 0.0,
+        "j2": 0.0,
+        "parameters": {
+          "separation": 32.0
+        }
+      },
+      "numerics": {
+        "level": "medium",
+        "L": 384,
+        "dt": 0.025,
+        "chi_max": 512,
+        "truncation_cutoff": 1e-10
+      },
+      "observables": [
+        "magnetization",
+        "local_spin_current"
+      ],
+      "depends_on": []
+    },
+    {
+      "job_id": "shape_double_wall__convergence__fine",
+      "condition_id": "shape_double_wall",
+      "stage": "convergence",
+      "resolution_level": "fine",
+      "blinded": false,
+      "t_max": 200.0,
+      "output_path": "/Users/thomasjwang/Documents/GitHub/Projects/Jin-Peng/Hydrodynamics/kharkov_B2_validation/data/research/raw/convergence/shape_double_wall__convergence__fine.npz",
+      "condition": {
+        "condition_id": "shape_double_wall",
+        "role": "primary_shape",
+        "delta": 1.0,
+        "temperature": "infinite",
+        "mu": 0.05,
+        "orientation": 1,
+        "profile": "double_wall",
+        "width": 2.0,
+        "background_m": 0.0,
+        "j2": 0.0,
+        "parameters": {
+          "separation": 32.0
+        }
+      },
+      "numerics": {
+        "level": "fine",
+        "L": 512,
+        "dt": 0.0125,
+        "chi_max": 1024,
+        "truncation_cutoff": 1e-11
+      },
+      "observables": [
+        "magnetization",
+        "local_spin_current"
+      ],
+      "depends_on": []
+    },
+    {
+      "job_id": "background_p005_up__convergence__coarse",
+      "condition_id": "background_p005_up",
+      "stage": "convergence",
+      "resolution_level": "coarse",
+      "blinded": false,
+      "t_max": 200.0,
+      "output_path": "/Users/thomasjwang/Documents/GitHub/Projects/Jin-Peng/Hydrodynamics/kharkov_B2_validation/data/research/raw/convergence/background_p005_up__convergence__coarse.npz",
+      "condition": {
+        "condition_id": "background_p005_up",
+        "role": "primary_background",
+        "delta": 1.0,
+        "temperature": "infinite",
+        "mu": 0.02,
+        "orientation": 1,
+        "profile": "tanh",
+        "width": 2.0,
+        "background_m": 0.05,
+        "j2": 0.0,
+        "parameters": {}
+      },
+      "numerics": {
+        "level": "coarse",
+        "L": 256,
+        "dt": 0.05,
+        "chi_max": 256,
+        "truncation_cutoff": 1e-08
+      },
+      "observables": [
+        "magnetization",
+        "local_spin_current"
+      ],
+      "depends_on": []
+    },
+    {
+      "job_id": "background_p005_up__convergence__medium",
+      "condition_id": "background_p005_up",
+      "stage": "convergence",
+      "resolution_level": "medium",
+      "blinded": false,
+      "t_max": 200.0,
+      "output_path": "/Users/thomasjwang/Documents/GitHub/Projects/Jin-Peng/Hydrodynamics/kharkov_B2_validation/data/research/raw/convergence/background_p005_up__convergence__medium.npz",
+      "condition": {
+        "condition_id": "background_p005_up",
+        "role": "primary_background",
+        "delta": 1.0,
+        "temperature": "infinite",
+        "mu": 0.02,
+        "orientation": 1,
+        "profile": "tanh",
+        "width": 2.0,
+        "background_m": 0.05,
+        "j2": 0.0,
+        "parameters": {}
+      },
+      "numerics": {
+        "level": "medium",
+        "L": 384,
+        "dt": 0.025,
+        "chi_max": 512,
+        "truncation_cutoff": 1e-10
+      },
+      "observables": [
+        "magnetization",
+        "local_spin_current"
+      ],
+      "depends_on": []
+    },
+    {
+      "job_id": "background_p005_up__convergence__fine",
+      "condition_id": "background_p005_up",
+      "stage": "convergence",
+      "resolution_level": "fine",
+      "blinded": false,
+      "t_max": 200.0,
+      "output_path": "/Users/thomasjwang/Documents/GitHub/Projects/Jin-Peng/Hydrodynamics/kharkov_B2_validation/data/research/raw/convergence/background_p005_up__convergence__fine.npz",
+      "condition": {
+        "condition_id": "background_p005_up",
+        "role": "primary_background",
+        "delta": 1.0,
+        "temperature": "infinite",
+        "mu": 0.02,
+        "orientation": 1,
+        "profile": "tanh",
+        "width": 2.0,
+        "background_m": 0.05,
+        "j2": 0.0,
+        "parameters": {}
+      },
+      "numerics": {
+        "level": "fine",
+        "L": 512,
+        "dt": 0.0125,
+        "chi_max": 1024,
+        "truncation_cutoff": 1e-11
+      },
+      "observables": [
+        "magnetization",
+        "local_spin_current"
+      ],
+      "depends_on": []
+    },
+    {
+      "job_id": "amp_mu002_up__production_a",
+      "condition_id": "amp_mu002_up",
+      "stage": "production_a",
+      "resolution_level": "selected_after_convergence",
+      "blinded": false,
+      "t_max": 200.0,
+      "output_path": "/Users/thomasjwang/Documents/GitHub/Projects/Jin-Peng/Hydrodynamics/kharkov_B2_validation/data/research/raw/production_a/amp_mu002_up__production_a.npz",
+      "condition": {
+        "condition_id": "amp_mu002_up",
+        "role": "primary_amplitude",
+        "delta": 1.0,
+        "temperature": "infinite",
+        "mu": 0.02,
+        "orientation": 1,
+        "profile": "tanh",
+        "width": 2.0,
+        "background_m": 0.0,
+        "j2": 0.0,
+        "parameters": {}
+      },
+      "numerics": {
+        "level": "fine",
+        "L": 512,
+        "dt": 0.0125,
+        "chi_max": 1024,
+        "truncation_cutoff": 1e-11
+      },
+      "observables": [
+        "magnetization"
+      ],
+      "depends_on": [
+        "amp_mu005_up__convergence__fine",
+        "amp_mu005_down__convergence__fine",
+        "shape_double_wall__convergence__fine",
+        "background_p005_up__convergence__fine"
+      ]
+    },
+    {
+      "job_id": "amp_mu002_up__production_b",
+      "condition_id": "amp_mu002_up",
+      "stage": "production_b",
+      "resolution_level": "selected_after_convergence",
+      "blinded": true,
+      "t_max": 400.0,
+      "output_path": "/Users/thomasjwang/Documents/GitHub/Projects/Jin-Peng/Hydrodynamics/kharkov_B2_validation/data/research/raw/production_b/amp_mu002_up__production_b.npz",
+      "condition": {
+        "condition_id": "amp_mu002_up",
+        "role": "primary_amplitude",
+        "delta": 1.0,
+        "temperature": "infinite",
+        "mu": 0.02,
+        "orientation": 1,
+        "profile": "tanh",
+        "width": 2.0,
+        "background_m": 0.0,
+        "j2": 0.0,
+        "parameters": {}
+      },
+      "numerics": {
+        "level": "fine",
+        "L": 512,
+        "dt": 0.0125,
+        "chi_max": 1024,
+        "truncation_cutoff": 1e-11
+      },
+      "observables": [
+        "magnetization"
+      ],
+      "depends_on": [
+        "amp_mu002_up__production_a"
+      ]
+    },
+    {
+      "job_id": "amp_mu002_down__production_a",
+      "condition_id": "amp_mu002_down",
+      "stage": "production_a",
+      "resolution_level": "selected_after_convergence",
+      "blinded": false,
+      "t_max": 200.0,
+      "output_path": "/Users/thomasjwang/Documents/GitHub/Projects/Jin-Peng/Hydrodynamics/kharkov_B2_validation/data/research/raw/production_a/amp_mu002_down__production_a.npz",
+      "condition": {
+        "condition_id": "amp_mu002_down",
+        "role": "primary_amplitude",
+        "delta": 1.0,
+        "temperature": "infinite",
+        "mu": 0.02,
+        "orientation": -1,
+        "profile": "tanh",
+        "width": 2.0,
+        "background_m": 0.0,
+        "j2": 0.0,
+        "parameters": {}
+      },
+      "numerics": {
+        "level": "fine",
+        "L": 512,
+        "dt": 0.0125,
+        "chi_max": 1024,
+        "truncation_cutoff": 1e-11
+      },
+      "observables": [
+        "magnetization"
+      ],
+      "depends_on": [
+        "amp_mu005_up__convergence__fine",
+        "amp_mu005_down__convergence__fine",
+        "shape_double_wall__convergence__fine",
+        "background_p005_up__convergence__fine"
+      ]
+    },
+    {
+      "job_id": "amp_mu002_down__production_b",
+      "condition_id": "amp_mu002_down",
+      "stage": "production_b",
+      "resolution_level": "selected_after_convergence",
+      "blinded": true,
+      "t_max": 400.0,
+      "output_path": "/Users/thomasjwang/Documents/GitHub/Projects/Jin-Peng/Hydrodynamics/kharkov_B2_validation/data/research/raw/production_b/amp_mu002_down__production_b.npz",
+      "condition": {
+        "condition_id": "amp_mu002_down",
+        "role": "primary_amplitude",
+        "delta": 1.0,
+        "temperature": "infinite",
+        "mu": 0.02,
+        "orientation": -1,
+        "profile": "tanh",
+        "width": 2.0,
+        "background_m": 0.0,
+        "j2": 0.0,
+        "parameters": {}
+      },
+      "numerics": {
+        "level": "fine",
+        "L": 512,
+        "dt": 0.0125,
+        "chi_max": 1024,
+        "truncation_cutoff": 1e-11
+      },
+      "observables": [
+        "magnetization"
+      ],
+      "depends_on": [
+        "amp_mu002_down__production_a"
+      ]
+    },
+    {
+      "job_id": "amp_mu005_up__production_a",
+      "condition_id": "amp_mu005_up",
+      "stage": "production_a",
+      "resolution_level": "selected_after_convergence",
+      "blinded": false,
+      "t_max": 200.0,
+      "output_path": "/Users/thomasjwang/Documents/GitHub/Projects/Jin-Peng/Hydrodynamics/kharkov_B2_validation/data/research/raw/production_a/amp_mu005_up__production_a.npz",
+      "condition": {
+        "condition_id": "amp_mu005_up",
+        "role": "primary_amplitude",
+        "delta": 1.0,
+        "temperature": "infinite",
+        "mu": 0.05,
+        "orientation": 1,
+        "profile": "tanh",
+        "width": 2.0,
+        "background_m": 0.0,
+        "j2": 0.0,
+        "parameters": {}
+      },
+      "numerics": {
+        "level": "fine",
+        "L": 512,
+        "dt": 0.0125,
+        "chi_max": 1024,
+        "truncation_cutoff": 1e-11
+      },
+      "observables": [
+        "magnetization",
+        "local_spin_current",
+        "czz",
+        "fcs_logZ"
+      ],
+      "depends_on": [
+        "amp_mu005_up__convergence__fine"
+      ]
+    },
+    {
+      "job_id": "amp_mu005_up__production_b",
+      "condition_id": "amp_mu005_up",
+      "stage": "production_b",
+      "resolution_level": "selected_after_convergence",
+      "blinded": true,
+      "t_max": 400.0,
+      "output_path": "/Users/thomasjwang/Documents/GitHub/Projects/Jin-Peng/Hydrodynamics/kharkov_B2_validation/data/research/raw/production_b/amp_mu005_up__production_b.npz",
+      "condition": {
+        "condition_id": "amp_mu005_up",
+        "role": "primary_amplitude",
+        "delta": 1.0,
+        "temperature": "infinite",
+        "mu": 0.05,
+        "orientation": 1,
+        "profile": "tanh",
+        "width": 2.0,
+        "background_m": 0.0,
+        "j2": 0.0,
+        "parameters": {}
+      },
+      "numerics": {
+        "level": "fine",
+        "L": 512,
+        "dt": 0.0125,
+        "chi_max": 1024,
+        "truncation_cutoff": 1e-11
+      },
+      "observables": [
+        "magnetization",
+        "local_spin_current",
+        "czz",
+        "fcs_logZ"
+      ],
+      "depends_on": [
+        "amp_mu005_up__production_a"
+      ]
+    },
+    {
+      "job_id": "amp_mu005_down__production_a",
+      "condition_id": "amp_mu005_down",
+      "stage": "production_a",
+      "resolution_level": "selected_after_convergence",
+      "blinded": false,
+      "t_max": 200.0,
+      "output_path": "/Users/thomasjwang/Documents/GitHub/Projects/Jin-Peng/Hydrodynamics/kharkov_B2_validation/data/research/raw/production_a/amp_mu005_down__production_a.npz",
+      "condition": {
+        "condition_id": "amp_mu005_down",
+        "role": "primary_amplitude",
+        "delta": 1.0,
+        "temperature": "infinite",
+        "mu": 0.05,
+        "orientation": -1,
+        "profile": "tanh",
+        "width": 2.0,
+        "background_m": 0.0,
+        "j2": 0.0,
+        "parameters": {}
+      },
+      "numerics": {
+        "level": "fine",
+        "L": 512,
+        "dt": 0.0125,
+        "chi_max": 1024,
+        "truncation_cutoff": 1e-11
+      },
+      "observables": [
+        "magnetization",
+        "local_spin_current",
+        "czz",
+        "fcs_logZ"
+      ],
+      "depends_on": [
+        "amp_mu005_down__convergence__fine"
+      ]
+    },
+    {
+      "job_id": "amp_mu005_down__production_b",
+      "condition_id": "amp_mu005_down",
+      "stage": "production_b",
+      "resolution_level": "selected_after_convergence",
+      "blinded": true,
+      "t_max": 400.0,
+      "output_path": "/Users/thomasjwang/Documents/GitHub/Projects/Jin-Peng/Hydrodynamics/kharkov_B2_validation/data/research/raw/production_b/amp_mu005_down__production_b.npz",
+      "condition": {
+        "condition_id": "amp_mu005_down",
+        "role": "primary_amplitude",
+        "delta": 1.0,
+        "temperature": "infinite",
+        "mu": 0.05,
+        "orientation": -1,
+        "profile": "tanh",
+        "width": 2.0,
+        "background_m": 0.0,
+        "j2": 0.0,
+        "parameters": {}
+      },
+      "numerics": {
+        "level": "fine",
+        "L": 512,
+        "dt": 0.0125,
+        "chi_max": 1024,
+        "truncation_cutoff": 1e-11
+      },
+      "observables": [
+        "magnetization",
+        "local_spin_current",
+        "czz",
+        "fcs_logZ"
+      ],
+      "depends_on": [
+        "amp_mu005_down__production_a"
+      ]
+    },
+    {
+      "job_id": "amp_mu010_up__production_a",
+      "condition_id": "amp_mu010_up",
+      "stage": "production_a",
+      "resolution_level": "selected_after_convergence",
+      "blinded": false,
+      "t_max": 200.0,
+      "output_path": "/Users/thomasjwang/Documents/GitHub/Projects/Jin-Peng/Hydrodynamics/kharkov_B2_validation/data/research/raw/production_a/amp_mu010_up__production_a.npz",
+      "condition": {
+        "condition_id": "amp_mu010_up",
+        "role": "primary_amplitude",
+        "delta": 1.0,
+        "temperature": "infinite",
+        "mu": 0.1,
+        "orientation": 1,
+        "profile": "tanh",
+        "width": 2.0,
+        "background_m": 0.0,
+        "j2": 0.0,
+        "parameters": {}
+      },
+      "numerics": {
+        "level": "fine",
+        "L": 512,
+        "dt": 0.0125,
+        "chi_max": 1024,
+        "truncation_cutoff": 1e-11
+      },
+      "observables": [
+        "magnetization"
+      ],
+      "depends_on": [
+        "amp_mu005_up__convergence__fine",
+        "amp_mu005_down__convergence__fine",
+        "shape_double_wall__convergence__fine",
+        "background_p005_up__convergence__fine"
+      ]
+    },
+    {
+      "job_id": "amp_mu010_up__production_b",
+      "condition_id": "amp_mu010_up",
+      "stage": "production_b",
+      "resolution_level": "selected_after_convergence",
+      "blinded": true,
+      "t_max": 400.0,
+      "output_path": "/Users/thomasjwang/Documents/GitHub/Projects/Jin-Peng/Hydrodynamics/kharkov_B2_validation/data/research/raw/production_b/amp_mu010_up__production_b.npz",
+      "condition": {
+        "condition_id": "amp_mu010_up",
+        "role": "primary_amplitude",
+        "delta": 1.0,
+        "temperature": "infinite",
+        "mu": 0.1,
+        "orientation": 1,
+        "profile": "tanh",
+        "width": 2.0,
+        "background_m": 0.0,
+        "j2": 0.0,
+        "parameters": {}
+      },
+      "numerics": {
+        "level": "fine",
+        "L": 512,
+        "dt": 0.0125,
+        "chi_max": 1024,
+        "truncation_cutoff": 1e-11
+      },
+      "observables": [
+        "magnetization"
+      ],
+      "depends_on": [
+        "amp_mu010_up__production_a"
+      ]
+    },
+    {
+      "job_id": "amp_mu010_down__production_a",
+      "condition_id": "amp_mu010_down",
+      "stage": "production_a",
+      "resolution_level": "selected_after_convergence",
+      "blinded": false,
+      "t_max": 200.0,
+      "output_path": "/Users/thomasjwang/Documents/GitHub/Projects/Jin-Peng/Hydrodynamics/kharkov_B2_validation/data/research/raw/production_a/amp_mu010_down__production_a.npz",
+      "condition": {
+        "condition_id": "amp_mu010_down",
+        "role": "primary_amplitude",
+        "delta": 1.0,
+        "temperature": "infinite",
+        "mu": 0.1,
+        "orientation": -1,
+        "profile": "tanh",
+        "width": 2.0,
+        "background_m": 0.0,
+        "j2": 0.0,
+        "parameters": {}
+      },
+      "numerics": {
+        "level": "fine",
+        "L": 512,
+        "dt": 0.0125,
+        "chi_max": 1024,
+        "truncation_cutoff": 1e-11
+      },
+      "observables": [
+        "magnetization"
+      ],
+      "depends_on": [
+        "amp_mu005_up__convergence__fine",
+        "amp_mu005_down__convergence__fine",
+        "shape_double_wall__convergence__fine",
+        "background_p005_up__convergence__fine"
+      ]
+    },
+    {
+      "job_id": "amp_mu010_down__production_b",
+      "condition_id": "amp_mu010_down",
+      "stage": "production_b",
+      "resolution_level": "selected_after_convergence",
+      "blinded": true,
+      "t_max": 400.0,
+      "output_path": "/Users/thomasjwang/Documents/GitHub/Projects/Jin-Peng/Hydrodynamics/kharkov_B2_validation/data/research/raw/production_b/amp_mu010_down__production_b.npz",
+      "condition": {
+        "condition_id": "amp_mu010_down",
+        "role": "primary_amplitude",
+        "delta": 1.0,
+        "temperature": "infinite",
+        "mu": 0.1,
+        "orientation": -1,
+        "profile": "tanh",
+        "width": 2.0,
+        "background_m": 0.0,
+        "j2": 0.0,
+        "parameters": {}
+      },
+      "numerics": {
+        "level": "fine",
+        "L": 512,
+        "dt": 0.0125,
+        "chi_max": 1024,
+        "truncation_cutoff": 1e-11
+      },
+      "observables": [
+        "magnetization"
+      ],
+      "depends_on": [
+        "amp_mu010_down__production_a"
+      ]
+    },
+    {
+      "job_id": "amp_mu020_up__production_a",
+      "condition_id": "amp_mu020_up",
+      "stage": "production_a",
+      "resolution_level": "selected_after_convergence",
+      "blinded": false,
+      "t_max": 200.0,
+      "output_path": "/Users/thomasjwang/Documents/GitHub/Projects/Jin-Peng/Hydrodynamics/kharkov_B2_validation/data/research/raw/production_a/amp_mu020_up__production_a.npz",
+      "condition": {
+        "condition_id": "amp_mu020_up",
+        "role": "primary_amplitude",
+        "delta": 1.0,
+        "temperature": "infinite",
+        "mu": 0.2,
+        "orientation": 1,
+        "profile": "tanh",
+        "width": 2.0,
+        "background_m": 0.0,
+        "j2": 0.0,
+        "parameters": {}
+      },
+      "numerics": {
+        "level": "fine",
+        "L": 512,
+        "dt": 0.0125,
+        "chi_max": 1024,
+        "truncation_cutoff": 1e-11
+      },
+      "observables": [
+        "magnetization"
+      ],
+      "depends_on": [
+        "amp_mu005_up__convergence__fine",
+        "amp_mu005_down__convergence__fine",
+        "shape_double_wall__convergence__fine",
+        "background_p005_up__convergence__fine"
+      ]
+    },
+    {
+      "job_id": "amp_mu020_up__production_b",
+      "condition_id": "amp_mu020_up",
+      "stage": "production_b",
+      "resolution_level": "selected_after_convergence",
+      "blinded": true,
+      "t_max": 400.0,
+      "output_path": "/Users/thomasjwang/Documents/GitHub/Projects/Jin-Peng/Hydrodynamics/kharkov_B2_validation/data/research/raw/production_b/amp_mu020_up__production_b.npz",
+      "condition": {
+        "condition_id": "amp_mu020_up",
+        "role": "primary_amplitude",
+        "delta": 1.0,
+        "temperature": "infinite",
+        "mu": 0.2,
+        "orientation": 1,
+        "profile": "tanh",
+        "width": 2.0,
+        "background_m": 0.0,
+        "j2": 0.0,
+        "parameters": {}
+      },
+      "numerics": {
+        "level": "fine",
+        "L": 512,
+        "dt": 0.0125,
+        "chi_max": 1024,
+        "truncation_cutoff": 1e-11
+      },
+      "observables": [
+        "magnetization"
+      ],
+      "depends_on": [
+        "amp_mu020_up__production_a"
+      ]
+    },
+    {
+      "job_id": "amp_mu020_down__production_a",
+      "condition_id": "amp_mu020_down",
+      "stage": "production_a",
+      "resolution_level": "selected_after_convergence",
+      "blinded": false,
+      "t_max": 200.0,
+      "output_path": "/Users/thomasjwang/Documents/GitHub/Projects/Jin-Peng/Hydrodynamics/kharkov_B2_validation/data/research/raw/production_a/amp_mu020_down__production_a.npz",
+      "condition": {
+        "condition_id": "amp_mu020_down",
+        "role": "primary_amplitude",
+        "delta": 1.0,
+        "temperature": "infinite",
+        "mu": 0.2,
+        "orientation": -1,
+        "profile": "tanh",
+        "width": 2.0,
+        "background_m": 0.0,
+        "j2": 0.0,
+        "parameters": {}
+      },
+      "numerics": {
+        "level": "fine",
+        "L": 512,
+        "dt": 0.0125,
+        "chi_max": 1024,
+        "truncation_cutoff": 1e-11
+      },
+      "observables": [
+        "magnetization"
+      ],
+      "depends_on": [
+        "amp_mu005_up__convergence__fine",
+        "amp_mu005_down__convergence__fine",
+        "shape_double_wall__convergence__fine",
+        "background_p005_up__convergence__fine"
+      ]
+    },
+    {
+      "job_id": "amp_mu020_down__production_b",
+      "condition_id": "amp_mu020_down",
+      "stage": "production_b",
+      "resolution_level": "selected_after_convergence",
+      "blinded": true,
+      "t_max": 400.0,
+      "output_path": "/Users/thomasjwang/Documents/GitHub/Projects/Jin-Peng/Hydrodynamics/kharkov_B2_validation/data/research/raw/production_b/amp_mu020_down__production_b.npz",
+      "condition": {
+        "condition_id": "amp_mu020_down",
+        "role": "primary_amplitude",
+        "delta": 1.0,
+        "temperature": "infinite",
+        "mu": 0.2,
+        "orientation": -1,
+        "profile": "tanh",
+        "width": 2.0,
+        "background_m": 0.0,
+        "j2": 0.0,
+        "parameters": {}
+      },
+      "numerics": {
+        "level": "fine",
+        "L": 512,
+        "dt": 0.0125,
+        "chi_max": 1024,
+        "truncation_cutoff": 1e-11
+      },
+      "observables": [
+        "magnetization"
+      ],
+      "depends_on": [
+        "amp_mu020_down__production_a"
+      ]
+    },
+    {
+      "job_id": "width_w1_up__production_a",
+      "condition_id": "width_w1_up",
+      "stage": "production_a",
+      "resolution_level": "selected_after_convergence",
+      "blinded": false,
+      "t_max": 200.0,
+      "output_path": "/Users/thomasjwang/Documents/GitHub/Projects/Jin-Peng/Hydrodynamics/kharkov_B2_validation/data/research/raw/production_a/width_w1_up__production_a.npz",
+      "condition": {
+        "condition_id": "width_w1_up",
+        "role": "primary_width",
+        "delta": 1.0,
+        "temperature": "infinite",
+        "mu": 0.05,
+        "orientation": 1,
+        "profile": "tanh",
+        "width": 1.0,
+        "background_m": 0.0,
+        "j2": 0.0,
+        "parameters": {}
+      },
+      "numerics": {
+        "level": "fine",
+        "L": 512,
+        "dt": 0.0125,
+        "chi_max": 1024,
+        "truncation_cutoff": 1e-11
+      },
+      "observables": [
+        "magnetization"
+      ],
+      "depends_on": [
+        "amp_mu005_up__convergence__fine",
+        "amp_mu005_down__convergence__fine",
+        "shape_double_wall__convergence__fine",
+        "background_p005_up__convergence__fine"
+      ]
+    },
+    {
+      "job_id": "width_w1_up__production_b",
+      "condition_id": "width_w1_up",
+      "stage": "production_b",
+      "resolution_level": "selected_after_convergence",
+      "blinded": true,
+      "t_max": 400.0,
+      "output_path": "/Users/thomasjwang/Documents/GitHub/Projects/Jin-Peng/Hydrodynamics/kharkov_B2_validation/data/research/raw/production_b/width_w1_up__production_b.npz",
+      "condition": {
+        "condition_id": "width_w1_up",
+        "role": "primary_width",
+        "delta": 1.0,
+        "temperature": "infinite",
+        "mu": 0.05,
+        "orientation": 1,
+        "profile": "tanh",
+        "width": 1.0,
+        "background_m": 0.0,
+        "j2": 0.0,
+        "parameters": {}
+      },
+      "numerics": {
+        "level": "fine",
+        "L": 512,
+        "dt": 0.0125,
+        "chi_max": 1024,
+        "truncation_cutoff": 1e-11
+      },
+      "observables": [
+        "magnetization"
+      ],
+      "depends_on": [
+        "width_w1_up__production_a"
+      ]
+    },
+    {
+      "job_id": "width_w1_down__production_a",
+      "condition_id": "width_w1_down",
+      "stage": "production_a",
+      "resolution_level": "selected_after_convergence",
+      "blinded": false,
+      "t_max": 200.0,
+      "output_path": "/Users/thomasjwang/Documents/GitHub/Projects/Jin-Peng/Hydrodynamics/kharkov_B2_validation/data/research/raw/production_a/width_w1_down__production_a.npz",
+      "condition": {
+        "condition_id": "width_w1_down",
+        "role": "primary_width",
+        "delta": 1.0,
+        "temperature": "infinite",
+        "mu": 0.05,
+        "orientation": -1,
+        "profile": "tanh",
+        "width": 1.0,
+        "background_m": 0.0,
+        "j2": 0.0,
+        "parameters": {}
+      },
+      "numerics": {
+        "level": "fine",
+        "L": 512,
+        "dt": 0.0125,
+        "chi_max": 1024,
+        "truncation_cutoff": 1e-11
+      },
+      "observables": [
+        "magnetization"
+      ],
+      "depends_on": [
+        "amp_mu005_up__convergence__fine",
+        "amp_mu005_down__convergence__fine",
+        "shape_double_wall__convergence__fine",
+        "background_p005_up__convergence__fine"
+      ]
+    },
+    {
+      "job_id": "width_w1_down__production_b",
+      "condition_id": "width_w1_down",
+      "stage": "production_b",
+      "resolution_level": "selected_after_convergence",
+      "blinded": true,
+      "t_max": 400.0,
+      "output_path": "/Users/thomasjwang/Documents/GitHub/Projects/Jin-Peng/Hydrodynamics/kharkov_B2_validation/data/research/raw/production_b/width_w1_down__production_b.npz",
+      "condition": {
+        "condition_id": "width_w1_down",
+        "role": "primary_width",
+        "delta": 1.0,
+        "temperature": "infinite",
+        "mu": 0.05,
+        "orientation": -1,
+        "profile": "tanh",
+        "width": 1.0,
+        "background_m": 0.0,
+        "j2": 0.0,
+        "parameters": {}
+      },
+      "numerics": {
+        "level": "fine",
+        "L": 512,
+        "dt": 0.0125,
+        "chi_max": 1024,
+        "truncation_cutoff": 1e-11
+      },
+      "observables": [
+        "magnetization"
+      ],
+      "depends_on": [
+        "width_w1_down__production_a"
+      ]
+    },
+    {
+      "job_id": "width_w4_up__production_a",
+      "condition_id": "width_w4_up",
+      "stage": "production_a",
+      "resolution_level": "selected_after_convergence",
+      "blinded": false,
+      "t_max": 200.0,
+      "output_path": "/Users/thomasjwang/Documents/GitHub/Projects/Jin-Peng/Hydrodynamics/kharkov_B2_validation/data/research/raw/production_a/width_w4_up__production_a.npz",
+      "condition": {
+        "condition_id": "width_w4_up",
+        "role": "primary_width",
+        "delta": 1.0,
+        "temperature": "infinite",
+        "mu": 0.05,
+        "orientation": 1,
+        "profile": "tanh",
+        "width": 4.0,
+        "background_m": 0.0,
+        "j2": 0.0,
+        "parameters": {}
+      },
+      "numerics": {
+        "level": "fine",
+        "L": 512,
+        "dt": 0.0125,
+        "chi_max": 1024,
+        "truncation_cutoff": 1e-11
+      },
+      "observables": [
+        "magnetization"
+      ],
+      "depends_on": [
+        "amp_mu005_up__convergence__fine",
+        "amp_mu005_down__convergence__fine",
+        "shape_double_wall__convergence__fine",
+        "background_p005_up__convergence__fine"
+      ]
+    },
+    {
+      "job_id": "width_w4_up__production_b",
+      "condition_id": "width_w4_up",
+      "stage": "production_b",
+      "resolution_level": "selected_after_convergence",
+      "blinded": true,
+      "t_max": 400.0,
+      "output_path": "/Users/thomasjwang/Documents/GitHub/Projects/Jin-Peng/Hydrodynamics/kharkov_B2_validation/data/research/raw/production_b/width_w4_up__production_b.npz",
+      "condition": {
+        "condition_id": "width_w4_up",
+        "role": "primary_width",
+        "delta": 1.0,
+        "temperature": "infinite",
+        "mu": 0.05,
+        "orientation": 1,
+        "profile": "tanh",
+        "width": 4.0,
+        "background_m": 0.0,
+        "j2": 0.0,
+        "parameters": {}
+      },
+      "numerics": {
+        "level": "fine",
+        "L": 512,
+        "dt": 0.0125,
+        "chi_max": 1024,
+        "truncation_cutoff": 1e-11
+      },
+      "observables": [
+        "magnetization"
+      ],
+      "depends_on": [
+        "width_w4_up__production_a"
+      ]
+    },
+    {
+      "job_id": "width_w4_down__production_a",
+      "condition_id": "width_w4_down",
+      "stage": "production_a",
+      "resolution_level": "selected_after_convergence",
+      "blinded": false,
+      "t_max": 200.0,
+      "output_path": "/Users/thomasjwang/Documents/GitHub/Projects/Jin-Peng/Hydrodynamics/kharkov_B2_validation/data/research/raw/production_a/width_w4_down__production_a.npz",
+      "condition": {
+        "condition_id": "width_w4_down",
+        "role": "primary_width",
+        "delta": 1.0,
+        "temperature": "infinite",
+        "mu": 0.05,
+        "orientation": -1,
+        "profile": "tanh",
+        "width": 4.0,
+        "background_m": 0.0,
+        "j2": 0.0,
+        "parameters": {}
+      },
+      "numerics": {
+        "level": "fine",
+        "L": 512,
+        "dt": 0.0125,
+        "chi_max": 1024,
+        "truncation_cutoff": 1e-11
+      },
+      "observables": [
+        "magnetization"
+      ],
+      "depends_on": [
+        "amp_mu005_up__convergence__fine",
+        "amp_mu005_down__convergence__fine",
+        "shape_double_wall__convergence__fine",
+        "background_p005_up__convergence__fine"
+      ]
+    },
+    {
+      "job_id": "width_w4_down__production_b",
+      "condition_id": "width_w4_down",
+      "stage": "production_b",
+      "resolution_level": "selected_after_convergence",
+      "blinded": true,
+      "t_max": 400.0,
+      "output_path": "/Users/thomasjwang/Documents/GitHub/Projects/Jin-Peng/Hydrodynamics/kharkov_B2_validation/data/research/raw/production_b/width_w4_down__production_b.npz",
+      "condition": {
+        "condition_id": "width_w4_down",
+        "role": "primary_width",
+        "delta": 1.0,
+        "temperature": "infinite",
+        "mu": 0.05,
+        "orientation": -1,
+        "profile": "tanh",
+        "width": 4.0,
+        "background_m": 0.0,
+        "j2": 0.0,
+        "parameters": {}
+      },
+      "numerics": {
+        "level": "fine",
+        "L": 512,
+        "dt": 0.0125,
+        "chi_max": 1024,
+        "truncation_cutoff": 1e-11
+      },
+      "observables": [
+        "magnetization"
+      ],
+      "depends_on": [
+        "width_w4_down__production_a"
+      ]
+    },
+    {
+      "job_id": "width_w8_up__production_a",
+      "condition_id": "width_w8_up",
+      "stage": "production_a",
+      "resolution_level": "selected_after_convergence",
+      "blinded": false,
+      "t_max": 200.0,
+      "output_path": "/Users/thomasjwang/Documents/GitHub/Projects/Jin-Peng/Hydrodynamics/kharkov_B2_validation/data/research/raw/production_a/width_w8_up__production_a.npz",
+      "condition": {
+        "condition_id": "width_w8_up",
+        "role": "primary_width",
+        "delta": 1.0,
+        "temperature": "infinite",
+        "mu": 0.05,
+        "orientation": 1,
+        "profile": "tanh",
+        "width": 8.0,
+        "background_m": 0.0,
+        "j2": 0.0,
+        "parameters": {}
+      },
+      "numerics": {
+        "level": "fine",
+        "L": 512,
+        "dt": 0.0125,
+        "chi_max": 1024,
+        "truncation_cutoff": 1e-11
+      },
+      "observables": [
+        "magnetization"
+      ],
+      "depends_on": [
+        "amp_mu005_up__convergence__fine",
+        "amp_mu005_down__convergence__fine",
+        "shape_double_wall__convergence__fine",
+        "background_p005_up__convergence__fine"
+      ]
+    },
+    {
+      "job_id": "width_w8_up__production_b",
+      "condition_id": "width_w8_up",
+      "stage": "production_b",
+      "resolution_level": "selected_after_convergence",
+      "blinded": true,
+      "t_max": 400.0,
+      "output_path": "/Users/thomasjwang/Documents/GitHub/Projects/Jin-Peng/Hydrodynamics/kharkov_B2_validation/data/research/raw/production_b/width_w8_up__production_b.npz",
+      "condition": {
+        "condition_id": "width_w8_up",
+        "role": "primary_width",
+        "delta": 1.0,
+        "temperature": "infinite",
+        "mu": 0.05,
+        "orientation": 1,
+        "profile": "tanh",
+        "width": 8.0,
+        "background_m": 0.0,
+        "j2": 0.0,
+        "parameters": {}
+      },
+      "numerics": {
+        "level": "fine",
+        "L": 512,
+        "dt": 0.0125,
+        "chi_max": 1024,
+        "truncation_cutoff": 1e-11
+      },
+      "observables": [
+        "magnetization"
+      ],
+      "depends_on": [
+        "width_w8_up__production_a"
+      ]
+    },
+    {
+      "job_id": "width_w8_down__production_a",
+      "condition_id": "width_w8_down",
+      "stage": "production_a",
+      "resolution_level": "selected_after_convergence",
+      "blinded": false,
+      "t_max": 200.0,
+      "output_path": "/Users/thomasjwang/Documents/GitHub/Projects/Jin-Peng/Hydrodynamics/kharkov_B2_validation/data/research/raw/production_a/width_w8_down__production_a.npz",
+      "condition": {
+        "condition_id": "width_w8_down",
+        "role": "primary_width",
+        "delta": 1.0,
+        "temperature": "infinite",
+        "mu": 0.05,
+        "orientation": -1,
+        "profile": "tanh",
+        "width": 8.0,
+        "background_m": 0.0,
+        "j2": 0.0,
+        "parameters": {}
+      },
+      "numerics": {
+        "level": "fine",
+        "L": 512,
+        "dt": 0.0125,
+        "chi_max": 1024,
+        "truncation_cutoff": 1e-11
+      },
+      "observables": [
+        "magnetization"
+      ],
+      "depends_on": [
+        "amp_mu005_up__convergence__fine",
+        "amp_mu005_down__convergence__fine",
+        "shape_double_wall__convergence__fine",
+        "background_p005_up__convergence__fine"
+      ]
+    },
+    {
+      "job_id": "width_w8_down__production_b",
+      "condition_id": "width_w8_down",
+      "stage": "production_b",
+      "resolution_level": "selected_after_convergence",
+      "blinded": true,
+      "t_max": 400.0,
+      "output_path": "/Users/thomasjwang/Documents/GitHub/Projects/Jin-Peng/Hydrodynamics/kharkov_B2_validation/data/research/raw/production_b/width_w8_down__production_b.npz",
+      "condition": {
+        "condition_id": "width_w8_down",
+        "role": "primary_width",
+        "delta": 1.0,
+        "temperature": "infinite",
+        "mu": 0.05,
+        "orientation": -1,
+        "profile": "tanh",
+        "width": 8.0,
+        "background_m": 0.0,
+        "j2": 0.0,
+        "parameters": {}
+      },
+      "numerics": {
+        "level": "fine",
+        "L": 512,
+        "dt": 0.0125,
+        "chi_max": 1024,
+        "truncation_cutoff": 1e-11
+      },
+      "observables": [
+        "magnetization"
+      ],
+      "depends_on": [
+        "width_w8_down__production_a"
+      ]
+    },
+    {
+      "job_id": "shape_erf_up__production_a",
+      "condition_id": "shape_erf_up",
+      "stage": "production_a",
+      "resolution_level": "selected_after_convergence",
+      "blinded": false,
+      "t_max": 200.0,
+      "output_path": "/Users/thomasjwang/Documents/GitHub/Projects/Jin-Peng/Hydrodynamics/kharkov_B2_validation/data/research/raw/production_a/shape_erf_up__production_a.npz",
+      "condition": {
+        "condition_id": "shape_erf_up",
+        "role": "primary_shape",
+        "delta": 1.0,
+        "temperature": "infinite",
+        "mu": 0.05,
+        "orientation": 1,
+        "profile": "erf",
+        "width": 2.0,
+        "background_m": 0.0,
+        "j2": 0.0,
+        "parameters": {}
+      },
+      "numerics": {
+        "level": "fine",
+        "L": 512,
+        "dt": 0.0125,
+        "chi_max": 1024,
+        "truncation_cutoff": 1e-11
+      },
+      "observables": [
+        "magnetization"
+      ],
+      "depends_on": [
+        "amp_mu005_up__convergence__fine",
+        "amp_mu005_down__convergence__fine",
+        "shape_double_wall__convergence__fine",
+        "background_p005_up__convergence__fine"
+      ]
+    },
+    {
+      "job_id": "shape_erf_up__production_b",
+      "condition_id": "shape_erf_up",
+      "stage": "production_b",
+      "resolution_level": "selected_after_convergence",
+      "blinded": true,
+      "t_max": 400.0,
+      "output_path": "/Users/thomasjwang/Documents/GitHub/Projects/Jin-Peng/Hydrodynamics/kharkov_B2_validation/data/research/raw/production_b/shape_erf_up__production_b.npz",
+      "condition": {
+        "condition_id": "shape_erf_up",
+        "role": "primary_shape",
+        "delta": 1.0,
+        "temperature": "infinite",
+        "mu": 0.05,
+        "orientation": 1,
+        "profile": "erf",
+        "width": 2.0,
+        "background_m": 0.0,
+        "j2": 0.0,
+        "parameters": {}
+      },
+      "numerics": {
+        "level": "fine",
+        "L": 512,
+        "dt": 0.0125,
+        "chi_max": 1024,
+        "truncation_cutoff": 1e-11
+      },
+      "observables": [
+        "magnetization"
+      ],
+      "depends_on": [
+        "shape_erf_up__production_a"
+      ]
+    },
+    {
+      "job_id": "shape_erf_down__production_a",
+      "condition_id": "shape_erf_down",
+      "stage": "production_a",
+      "resolution_level": "selected_after_convergence",
+      "blinded": false,
+      "t_max": 200.0,
+      "output_path": "/Users/thomasjwang/Documents/GitHub/Projects/Jin-Peng/Hydrodynamics/kharkov_B2_validation/data/research/raw/production_a/shape_erf_down__production_a.npz",
+      "condition": {
+        "condition_id": "shape_erf_down",
+        "role": "primary_shape",
+        "delta": 1.0,
+        "temperature": "infinite",
+        "mu": 0.05,
+        "orientation": -1,
+        "profile": "erf",
+        "width": 2.0,
+        "background_m": 0.0,
+        "j2": 0.0,
+        "parameters": {}
+      },
+      "numerics": {
+        "level": "fine",
+        "L": 512,
+        "dt": 0.0125,
+        "chi_max": 1024,
+        "truncation_cutoff": 1e-11
+      },
+      "observables": [
+        "magnetization"
+      ],
+      "depends_on": [
+        "amp_mu005_up__convergence__fine",
+        "amp_mu005_down__convergence__fine",
+        "shape_double_wall__convergence__fine",
+        "background_p005_up__convergence__fine"
+      ]
+    },
+    {
+      "job_id": "shape_erf_down__production_b",
+      "condition_id": "shape_erf_down",
+      "stage": "production_b",
+      "resolution_level": "selected_after_convergence",
+      "blinded": true,
+      "t_max": 400.0,
+      "output_path": "/Users/thomasjwang/Documents/GitHub/Projects/Jin-Peng/Hydrodynamics/kharkov_B2_validation/data/research/raw/production_b/shape_erf_down__production_b.npz",
+      "condition": {
+        "condition_id": "shape_erf_down",
+        "role": "primary_shape",
+        "delta": 1.0,
+        "temperature": "infinite",
+        "mu": 0.05,
+        "orientation": -1,
+        "profile": "erf",
+        "width": 2.0,
+        "background_m": 0.0,
+        "j2": 0.0,
+        "parameters": {}
+      },
+      "numerics": {
+        "level": "fine",
+        "L": 512,
+        "dt": 0.0125,
+        "chi_max": 1024,
+        "truncation_cutoff": 1e-11
+      },
+      "observables": [
+        "magnetization"
+      ],
+      "depends_on": [
+        "shape_erf_down__production_a"
+      ]
+    },
+    {
+      "job_id": "shape_double_wall__production_a",
+      "condition_id": "shape_double_wall",
+      "stage": "production_a",
+      "resolution_level": "selected_after_convergence",
+      "blinded": false,
+      "t_max": 200.0,
+      "output_path": "/Users/thomasjwang/Documents/GitHub/Projects/Jin-Peng/Hydrodynamics/kharkov_B2_validation/data/research/raw/production_a/shape_double_wall__production_a.npz",
+      "condition": {
+        "condition_id": "shape_double_wall",
+        "role": "primary_shape",
+        "delta": 1.0,
+        "temperature": "infinite",
+        "mu": 0.05,
+        "orientation": 1,
+        "profile": "double_wall",
+        "width": 2.0,
+        "background_m": 0.0,
+        "j2": 0.0,
+        "parameters": {
+          "separation": 32.0
+        }
+      },
+      "numerics": {
+        "level": "fine",
+        "L": 512,
+        "dt": 0.0125,
+        "chi_max": 1024,
+        "truncation_cutoff": 1e-11
+      },
+      "observables": [
+        "magnetization",
+        "local_spin_current"
+      ],
+      "depends_on": [
+        "shape_double_wall__convergence__fine"
+      ]
+    },
+    {
+      "job_id": "shape_double_wall__production_b",
+      "condition_id": "shape_double_wall",
+      "stage": "production_b",
+      "resolution_level": "selected_after_convergence",
+      "blinded": true,
+      "t_max": 400.0,
+      "output_path": "/Users/thomasjwang/Documents/GitHub/Projects/Jin-Peng/Hydrodynamics/kharkov_B2_validation/data/research/raw/production_b/shape_double_wall__production_b.npz",
+      "condition": {
+        "condition_id": "shape_double_wall",
+        "role": "primary_shape",
+        "delta": 1.0,
+        "temperature": "infinite",
+        "mu": 0.05,
+        "orientation": 1,
+        "profile": "double_wall",
+        "width": 2.0,
+        "background_m": 0.0,
+        "j2": 0.0,
+        "parameters": {
+          "separation": 32.0
+        }
+      },
+      "numerics": {
+        "level": "fine",
+        "L": 512,
+        "dt": 0.0125,
+        "chi_max": 1024,
+        "truncation_cutoff": 1e-11
+      },
+      "observables": [
+        "magnetization",
+        "local_spin_current"
+      ],
+      "depends_on": [
+        "shape_double_wall__production_a"
+      ]
+    },
+    {
+      "job_id": "shape_gaussian_pos__production_a",
+      "condition_id": "shape_gaussian_pos",
+      "stage": "production_a",
+      "resolution_level": "selected_after_convergence",
+      "blinded": false,
+      "t_max": 200.0,
+      "output_path": "/Users/thomasjwang/Documents/GitHub/Projects/Jin-Peng/Hydrodynamics/kharkov_B2_validation/data/research/raw/production_a/shape_gaussian_pos__production_a.npz",
+      "condition": {
+        "condition_id": "shape_gaussian_pos",
+        "role": "primary_shape",
+        "delta": 1.0,
+        "temperature": "infinite",
+        "mu": 0.05,
+        "orientation": 1,
+        "profile": "gaussian",
+        "width": 3.0,
+        "background_m": 0.0,
+        "j2": 0.0,
+        "parameters": {
+          "center": -8.0
+        }
+      },
+      "numerics": {
+        "level": "fine",
+        "L": 512,
+        "dt": 0.0125,
+        "chi_max": 1024,
+        "truncation_cutoff": 1e-11
+      },
+      "observables": [
+        "magnetization"
+      ],
+      "depends_on": [
+        "amp_mu005_up__convergence__fine",
+        "amp_mu005_down__convergence__fine",
+        "shape_double_wall__convergence__fine",
+        "background_p005_up__convergence__fine"
+      ]
+    },
+    {
+      "job_id": "shape_gaussian_pos__production_b",
+      "condition_id": "shape_gaussian_pos",
+      "stage": "production_b",
+      "resolution_level": "selected_after_convergence",
+      "blinded": true,
+      "t_max": 400.0,
+      "output_path": "/Users/thomasjwang/Documents/GitHub/Projects/Jin-Peng/Hydrodynamics/kharkov_B2_validation/data/research/raw/production_b/shape_gaussian_pos__production_b.npz",
+      "condition": {
+        "condition_id": "shape_gaussian_pos",
+        "role": "primary_shape",
+        "delta": 1.0,
+        "temperature": "infinite",
+        "mu": 0.05,
+        "orientation": 1,
+        "profile": "gaussian",
+        "width": 3.0,
+        "background_m": 0.0,
+        "j2": 0.0,
+        "parameters": {
+          "center": -8.0
+        }
+      },
+      "numerics": {
+        "level": "fine",
+        "L": 512,
+        "dt": 0.0125,
+        "chi_max": 1024,
+        "truncation_cutoff": 1e-11
+      },
+      "observables": [
+        "magnetization"
+      ],
+      "depends_on": [
+        "shape_gaussian_pos__production_a"
+      ]
+    },
+    {
+      "job_id": "shape_gaussian_neg__production_a",
+      "condition_id": "shape_gaussian_neg",
+      "stage": "production_a",
+      "resolution_level": "selected_after_convergence",
+      "blinded": false,
+      "t_max": 200.0,
+      "output_path": "/Users/thomasjwang/Documents/GitHub/Projects/Jin-Peng/Hydrodynamics/kharkov_B2_validation/data/research/raw/production_a/shape_gaussian_neg__production_a.npz",
+      "condition": {
+        "condition_id": "shape_gaussian_neg",
+        "role": "primary_shape",
+        "delta": 1.0,
+        "temperature": "infinite",
+        "mu": 0.05,
+        "orientation": -1,
+        "profile": "gaussian",
+        "width": 3.0,
+        "background_m": 0.0,
+        "j2": 0.0,
+        "parameters": {
+          "center": 8.0
+        }
+      },
+      "numerics": {
+        "level": "fine",
+        "L": 512,
+        "dt": 0.0125,
+        "chi_max": 1024,
+        "truncation_cutoff": 1e-11
+      },
+      "observables": [
+        "magnetization"
+      ],
+      "depends_on": [
+        "amp_mu005_up__convergence__fine",
+        "amp_mu005_down__convergence__fine",
+        "shape_double_wall__convergence__fine",
+        "background_p005_up__convergence__fine"
+      ]
+    },
+    {
+      "job_id": "shape_gaussian_neg__production_b",
+      "condition_id": "shape_gaussian_neg",
+      "stage": "production_b",
+      "resolution_level": "selected_after_convergence",
+      "blinded": true,
+      "t_max": 400.0,
+      "output_path": "/Users/thomasjwang/Documents/GitHub/Projects/Jin-Peng/Hydrodynamics/kharkov_B2_validation/data/research/raw/production_b/shape_gaussian_neg__production_b.npz",
+      "condition": {
+        "condition_id": "shape_gaussian_neg",
+        "role": "primary_shape",
+        "delta": 1.0,
+        "temperature": "infinite",
+        "mu": 0.05,
+        "orientation": -1,
+        "profile": "gaussian",
+        "width": 3.0,
+        "background_m": 0.0,
+        "j2": 0.0,
+        "parameters": {
+          "center": 8.0
+        }
+      },
+      "numerics": {
+        "level": "fine",
+        "L": 512,
+        "dt": 0.0125,
+        "chi_max": 1024,
+        "truncation_cutoff": 1e-11
+      },
+      "observables": [
+        "magnetization"
+      ],
+      "depends_on": [
+        "shape_gaussian_neg__production_a"
+      ]
+    },
+    {
+      "job_id": "shape_sinusoid_32__production_a",
+      "condition_id": "shape_sinusoid_32",
+      "stage": "production_a",
+      "resolution_level": "selected_after_convergence",
+      "blinded": false,
+      "t_max": 200.0,
+      "output_path": "/Users/thomasjwang/Documents/GitHub/Projects/Jin-Peng/Hydrodynamics/kharkov_B2_validation/data/research/raw/production_a/shape_sinusoid_32__production_a.npz",
+      "condition": {
+        "condition_id": "shape_sinusoid_32",
+        "role": "primary_shape",
+        "delta": 1.0,
+        "temperature": "infinite",
+        "mu": 0.05,
+        "orientation": 1,
+        "profile": "sinusoid",
+        "width": 1.0,
+        "background_m": 0.0,
+        "j2": 0.0,
+        "parameters": {
+          "wavelength": 32.0
+        }
+      },
+      "numerics": {
+        "level": "fine",
+        "L": 512,
+        "dt": 0.0125,
+        "chi_max": 1024,
+        "truncation_cutoff": 1e-11
+      },
+      "observables": [
+        "magnetization"
+      ],
+      "depends_on": [
+        "amp_mu005_up__convergence__fine",
+        "amp_mu005_down__convergence__fine",
+        "shape_double_wall__convergence__fine",
+        "background_p005_up__convergence__fine"
+      ]
+    },
+    {
+      "job_id": "shape_sinusoid_32__production_b",
+      "condition_id": "shape_sinusoid_32",
+      "stage": "production_b",
+      "resolution_level": "selected_after_convergence",
+      "blinded": true,
+      "t_max": 400.0,
+      "output_path": "/Users/thomasjwang/Documents/GitHub/Projects/Jin-Peng/Hydrodynamics/kharkov_B2_validation/data/research/raw/production_b/shape_sinusoid_32__production_b.npz",
+      "condition": {
+        "condition_id": "shape_sinusoid_32",
+        "role": "primary_shape",
+        "delta": 1.0,
+        "temperature": "infinite",
+        "mu": 0.05,
+        "orientation": 1,
+        "profile": "sinusoid",
+        "width": 1.0,
+        "background_m": 0.0,
+        "j2": 0.0,
+        "parameters": {
+          "wavelength": 32.0
+        }
+      },
+      "numerics": {
+        "level": "fine",
+        "L": 512,
+        "dt": 0.0125,
+        "chi_max": 1024,
+        "truncation_cutoff": 1e-11
+      },
+      "observables": [
+        "magnetization"
+      ],
+      "depends_on": [
+        "shape_sinusoid_32__production_a"
+      ]
+    },
+    {
+      "job_id": "shape_sinusoid_64__production_a",
+      "condition_id": "shape_sinusoid_64",
+      "stage": "production_a",
+      "resolution_level": "selected_after_convergence",
+      "blinded": false,
+      "t_max": 200.0,
+      "output_path": "/Users/thomasjwang/Documents/GitHub/Projects/Jin-Peng/Hydrodynamics/kharkov_B2_validation/data/research/raw/production_a/shape_sinusoid_64__production_a.npz",
+      "condition": {
+        "condition_id": "shape_sinusoid_64",
+        "role": "primary_shape",
+        "delta": 1.0,
+        "temperature": "infinite",
+        "mu": 0.05,
+        "orientation": 1,
+        "profile": "sinusoid",
+        "width": 1.0,
+        "background_m": 0.0,
+        "j2": 0.0,
+        "parameters": {
+          "wavelength": 64.0
+        }
+      },
+      "numerics": {
+        "level": "fine",
+        "L": 512,
+        "dt": 0.0125,
+        "chi_max": 1024,
+        "truncation_cutoff": 1e-11
+      },
+      "observables": [
+        "magnetization"
+      ],
+      "depends_on": [
+        "amp_mu005_up__convergence__fine",
+        "amp_mu005_down__convergence__fine",
+        "shape_double_wall__convergence__fine",
+        "background_p005_up__convergence__fine"
+      ]
+    },
+    {
+      "job_id": "shape_sinusoid_64__production_b",
+      "condition_id": "shape_sinusoid_64",
+      "stage": "production_b",
+      "resolution_level": "selected_after_convergence",
+      "blinded": true,
+      "t_max": 400.0,
+      "output_path": "/Users/thomasjwang/Documents/GitHub/Projects/Jin-Peng/Hydrodynamics/kharkov_B2_validation/data/research/raw/production_b/shape_sinusoid_64__production_b.npz",
+      "condition": {
+        "condition_id": "shape_sinusoid_64",
+        "role": "primary_shape",
+        "delta": 1.0,
+        "temperature": "infinite",
+        "mu": 0.05,
+        "orientation": 1,
+        "profile": "sinusoid",
+        "width": 1.0,
+        "background_m": 0.0,
+        "j2": 0.0,
+        "parameters": {
+          "wavelength": 64.0
+        }
+      },
+      "numerics": {
+        "level": "fine",
+        "L": 512,
+        "dt": 0.0125,
+        "chi_max": 1024,
+        "truncation_cutoff": 1e-11
+      },
+      "observables": [
+        "magnetization"
+      ],
+      "depends_on": [
+        "shape_sinusoid_64__production_a"
+      ]
+    },
+    {
+      "job_id": "background_p005_up__production_a",
+      "condition_id": "background_p005_up",
+      "stage": "production_a",
+      "resolution_level": "selected_after_convergence",
+      "blinded": false,
+      "t_max": 200.0,
+      "output_path": "/Users/thomasjwang/Documents/GitHub/Projects/Jin-Peng/Hydrodynamics/kharkov_B2_validation/data/research/raw/production_a/background_p005_up__production_a.npz",
+      "condition": {
+        "condition_id": "background_p005_up",
+        "role": "primary_background",
+        "delta": 1.0,
+        "temperature": "infinite",
+        "mu": 0.02,
+        "orientation": 1,
+        "profile": "tanh",
+        "width": 2.0,
+        "background_m": 0.05,
+        "j2": 0.0,
+        "parameters": {}
+      },
+      "numerics": {
+        "level": "fine",
+        "L": 512,
+        "dt": 0.0125,
+        "chi_max": 1024,
+        "truncation_cutoff": 1e-11
+      },
+      "observables": [
+        "magnetization",
+        "local_spin_current"
+      ],
+      "depends_on": [
+        "background_p005_up__convergence__fine"
+      ]
+    },
+    {
+      "job_id": "background_p005_up__production_b",
+      "condition_id": "background_p005_up",
+      "stage": "production_b",
+      "resolution_level": "selected_after_convergence",
+      "blinded": true,
+      "t_max": 400.0,
+      "output_path": "/Users/thomasjwang/Documents/GitHub/Projects/Jin-Peng/Hydrodynamics/kharkov_B2_validation/data/research/raw/production_b/background_p005_up__production_b.npz",
+      "condition": {
+        "condition_id": "background_p005_up",
+        "role": "primary_background",
+        "delta": 1.0,
+        "temperature": "infinite",
+        "mu": 0.02,
+        "orientation": 1,
+        "profile": "tanh",
+        "width": 2.0,
+        "background_m": 0.05,
+        "j2": 0.0,
+        "parameters": {}
+      },
+      "numerics": {
+        "level": "fine",
+        "L": 512,
+        "dt": 0.0125,
+        "chi_max": 1024,
+        "truncation_cutoff": 1e-11
+      },
+      "observables": [
+        "magnetization",
+        "local_spin_current"
+      ],
+      "depends_on": [
+        "background_p005_up__production_a"
+      ]
+    },
+    {
+      "job_id": "background_p005_down__production_a",
+      "condition_id": "background_p005_down",
+      "stage": "production_a",
+      "resolution_level": "selected_after_convergence",
+      "blinded": false,
+      "t_max": 200.0,
+      "output_path": "/Users/thomasjwang/Documents/GitHub/Projects/Jin-Peng/Hydrodynamics/kharkov_B2_validation/data/research/raw/production_a/background_p005_down__production_a.npz",
+      "condition": {
+        "condition_id": "background_p005_down",
+        "role": "primary_background",
+        "delta": 1.0,
+        "temperature": "infinite",
+        "mu": 0.02,
+        "orientation": -1,
+        "profile": "tanh",
+        "width": 2.0,
+        "background_m": 0.05,
+        "j2": 0.0,
+        "parameters": {}
+      },
+      "numerics": {
+        "level": "fine",
+        "L": 512,
+        "dt": 0.0125,
+        "chi_max": 1024,
+        "truncation_cutoff": 1e-11
+      },
+      "observables": [
+        "magnetization"
+      ],
+      "depends_on": [
+        "amp_mu005_up__convergence__fine",
+        "amp_mu005_down__convergence__fine",
+        "shape_double_wall__convergence__fine",
+        "background_p005_up__convergence__fine"
+      ]
+    },
+    {
+      "job_id": "background_p005_down__production_b",
+      "condition_id": "background_p005_down",
+      "stage": "production_b",
+      "resolution_level": "selected_after_convergence",
+      "blinded": true,
+      "t_max": 400.0,
+      "output_path": "/Users/thomasjwang/Documents/GitHub/Projects/Jin-Peng/Hydrodynamics/kharkov_B2_validation/data/research/raw/production_b/background_p005_down__production_b.npz",
+      "condition": {
+        "condition_id": "background_p005_down",
+        "role": "primary_background",
+        "delta": 1.0,
+        "temperature": "infinite",
+        "mu": 0.02,
+        "orientation": -1,
+        "profile": "tanh",
+        "width": 2.0,
+        "background_m": 0.05,
+        "j2": 0.0,
+        "parameters": {}
+      },
+      "numerics": {
+        "level": "fine",
+        "L": 512,
+        "dt": 0.0125,
+        "chi_max": 1024,
+        "truncation_cutoff": 1e-11
+      },
+      "observables": [
+        "magnetization"
+      ],
+      "depends_on": [
+        "background_p005_down__production_a"
+      ]
+    },
+    {
+      "job_id": "background_m005_up__production_a",
+      "condition_id": "background_m005_up",
+      "stage": "production_a",
+      "resolution_level": "selected_after_convergence",
+      "blinded": false,
+      "t_max": 200.0,
+      "output_path": "/Users/thomasjwang/Documents/GitHub/Projects/Jin-Peng/Hydrodynamics/kharkov_B2_validation/data/research/raw/production_a/background_m005_up__production_a.npz",
+      "condition": {
+        "condition_id": "background_m005_up",
+        "role": "primary_background",
+        "delta": 1.0,
+        "temperature": "infinite",
+        "mu": 0.02,
+        "orientation": 1,
+        "profile": "tanh",
+        "width": 2.0,
+        "background_m": -0.05,
+        "j2": 0.0,
+        "parameters": {}
+      },
+      "numerics": {
+        "level": "fine",
+        "L": 512,
+        "dt": 0.0125,
+        "chi_max": 1024,
+        "truncation_cutoff": 1e-11
+      },
+      "observables": [
+        "magnetization"
+      ],
+      "depends_on": [
+        "amp_mu005_up__convergence__fine",
+        "amp_mu005_down__convergence__fine",
+        "shape_double_wall__convergence__fine",
+        "background_p005_up__convergence__fine"
+      ]
+    },
+    {
+      "job_id": "background_m005_up__production_b",
+      "condition_id": "background_m005_up",
+      "stage": "production_b",
+      "resolution_level": "selected_after_convergence",
+      "blinded": true,
+      "t_max": 400.0,
+      "output_path": "/Users/thomasjwang/Documents/GitHub/Projects/Jin-Peng/Hydrodynamics/kharkov_B2_validation/data/research/raw/production_b/background_m005_up__production_b.npz",
+      "condition": {
+        "condition_id": "background_m005_up",
+        "role": "primary_background",
+        "delta": 1.0,
+        "temperature": "infinite",
+        "mu": 0.02,
+        "orientation": 1,
+        "profile": "tanh",
+        "width": 2.0,
+        "background_m": -0.05,
+        "j2": 0.0,
+        "parameters": {}
+      },
+      "numerics": {
+        "level": "fine",
+        "L": 512,
+        "dt": 0.0125,
+        "chi_max": 1024,
+        "truncation_cutoff": 1e-11
+      },
+      "observables": [
+        "magnetization"
+      ],
+      "depends_on": [
+        "background_m005_up__production_a"
+      ]
+    },
+    {
+      "job_id": "background_m005_down__production_a",
+      "condition_id": "background_m005_down",
+      "stage": "production_a",
+      "resolution_level": "selected_after_convergence",
+      "blinded": false,
+      "t_max": 200.0,
+      "output_path": "/Users/thomasjwang/Documents/GitHub/Projects/Jin-Peng/Hydrodynamics/kharkov_B2_validation/data/research/raw/production_a/background_m005_down__production_a.npz",
+      "condition": {
+        "condition_id": "background_m005_down",
+        "role": "primary_background",
+        "delta": 1.0,
+        "temperature": "infinite",
+        "mu": 0.02,
+        "orientation": -1,
+        "profile": "tanh",
+        "width": 2.0,
+        "background_m": -0.05,
+        "j2": 0.0,
+        "parameters": {}
+      },
+      "numerics": {
+        "level": "fine",
+        "L": 512,
+        "dt": 0.0125,
+        "chi_max": 1024,
+        "truncation_cutoff": 1e-11
+      },
+      "observables": [
+        "magnetization"
+      ],
+      "depends_on": [
+        "amp_mu005_up__convergence__fine",
+        "amp_mu005_down__convergence__fine",
+        "shape_double_wall__convergence__fine",
+        "background_p005_up__convergence__fine"
+      ]
+    },
+    {
+      "job_id": "background_m005_down__production_b",
+      "condition_id": "background_m005_down",
+      "stage": "production_b",
+      "resolution_level": "selected_after_convergence",
+      "blinded": true,
+      "t_max": 400.0,
+      "output_path": "/Users/thomasjwang/Documents/GitHub/Projects/Jin-Peng/Hydrodynamics/kharkov_B2_validation/data/research/raw/production_b/background_m005_down__production_b.npz",
+      "condition": {
+        "condition_id": "background_m005_down",
+        "role": "primary_background",
+        "delta": 1.0,
+        "temperature": "infinite",
+        "mu": 0.02,
+        "orientation": -1,
+        "profile": "tanh",
+        "width": 2.0,
+        "background_m": -0.05,
+        "j2": 0.0,
+        "parameters": {}
+      },
+      "numerics": {
+        "level": "fine",
+        "L": 512,
+        "dt": 0.0125,
+        "chi_max": 1024,
+        "truncation_cutoff": 1e-11
+      },
+      "observables": [
+        "magnetization"
+      ],
+      "depends_on": [
+        "background_m005_down__production_a"
+      ]
+    },
+    {
+      "job_id": "control_delta08_up__production_a",
+      "condition_id": "control_delta08_up",
+      "stage": "production_a",
+      "resolution_level": "selected_after_convergence",
+      "blinded": false,
+      "t_max": 200.0,
+      "output_path": "/Users/thomasjwang/Documents/GitHub/Projects/Jin-Peng/Hydrodynamics/kharkov_B2_validation/data/research/raw/production_a/control_delta08_up__production_a.npz",
+      "condition": {
+        "condition_id": "control_delta08_up",
+        "role": "environment_control",
+        "delta": 0.8,
+        "temperature": "infinite",
+        "mu": 0.05,
+        "orientation": 1,
+        "profile": "tanh",
+        "width": 2.0,
+        "background_m": 0.0,
+        "j2": 0.0,
+        "parameters": {}
+      },
+      "numerics": {
+        "level": "fine",
+        "L": 512,
+        "dt": 0.0125,
+        "chi_max": 1024,
+        "truncation_cutoff": 1e-11
+      },
+      "observables": [
+        "magnetization"
+      ],
+      "depends_on": [
+        "amp_mu005_up__convergence__fine",
+        "amp_mu005_down__convergence__fine",
+        "shape_double_wall__convergence__fine",
+        "background_p005_up__convergence__fine"
+      ]
+    },
+    {
+      "job_id": "control_delta08_up__production_b",
+      "condition_id": "control_delta08_up",
+      "stage": "production_b",
+      "resolution_level": "selected_after_convergence",
+      "blinded": true,
+      "t_max": 400.0,
+      "output_path": "/Users/thomasjwang/Documents/GitHub/Projects/Jin-Peng/Hydrodynamics/kharkov_B2_validation/data/research/raw/production_b/control_delta08_up__production_b.npz",
+      "condition": {
+        "condition_id": "control_delta08_up",
+        "role": "environment_control",
+        "delta": 0.8,
+        "temperature": "infinite",
+        "mu": 0.05,
+        "orientation": 1,
+        "profile": "tanh",
+        "width": 2.0,
+        "background_m": 0.0,
+        "j2": 0.0,
+        "parameters": {}
+      },
+      "numerics": {
+        "level": "fine",
+        "L": 512,
+        "dt": 0.0125,
+        "chi_max": 1024,
+        "truncation_cutoff": 1e-11
+      },
+      "observables": [
+        "magnetization"
+      ],
+      "depends_on": [
+        "control_delta08_up__production_a"
+      ]
+    },
+    {
+      "job_id": "control_delta08_down__production_a",
+      "condition_id": "control_delta08_down",
+      "stage": "production_a",
+      "resolution_level": "selected_after_convergence",
+      "blinded": false,
+      "t_max": 200.0,
+      "output_path": "/Users/thomasjwang/Documents/GitHub/Projects/Jin-Peng/Hydrodynamics/kharkov_B2_validation/data/research/raw/production_a/control_delta08_down__production_a.npz",
+      "condition": {
+        "condition_id": "control_delta08_down",
+        "role": "environment_control",
+        "delta": 0.8,
+        "temperature": "infinite",
+        "mu": 0.05,
+        "orientation": -1,
+        "profile": "tanh",
+        "width": 2.0,
+        "background_m": 0.0,
+        "j2": 0.0,
+        "parameters": {}
+      },
+      "numerics": {
+        "level": "fine",
+        "L": 512,
+        "dt": 0.0125,
+        "chi_max": 1024,
+        "truncation_cutoff": 1e-11
+      },
+      "observables": [
+        "magnetization"
+      ],
+      "depends_on": [
+        "amp_mu005_up__convergence__fine",
+        "amp_mu005_down__convergence__fine",
+        "shape_double_wall__convergence__fine",
+        "background_p005_up__convergence__fine"
+      ]
+    },
+    {
+      "job_id": "control_delta08_down__production_b",
+      "condition_id": "control_delta08_down",
+      "stage": "production_b",
+      "resolution_level": "selected_after_convergence",
+      "blinded": true,
+      "t_max": 400.0,
+      "output_path": "/Users/thomasjwang/Documents/GitHub/Projects/Jin-Peng/Hydrodynamics/kharkov_B2_validation/data/research/raw/production_b/control_delta08_down__production_b.npz",
+      "condition": {
+        "condition_id": "control_delta08_down",
+        "role": "environment_control",
+        "delta": 0.8,
+        "temperature": "infinite",
+        "mu": 0.05,
+        "orientation": -1,
+        "profile": "tanh",
+        "width": 2.0,
+        "background_m": 0.0,
+        "j2": 0.0,
+        "parameters": {}
+      },
+      "numerics": {
+        "level": "fine",
+        "L": 512,
+        "dt": 0.0125,
+        "chi_max": 1024,
+        "truncation_cutoff": 1e-11
+      },
+      "observables": [
+        "magnetization"
+      ],
+      "depends_on": [
+        "control_delta08_down__production_a"
+      ]
+    },
+    {
+      "job_id": "control_delta12_up__production_a",
+      "condition_id": "control_delta12_up",
+      "stage": "production_a",
+      "resolution_level": "selected_after_convergence",
+      "blinded": false,
+      "t_max": 200.0,
+      "output_path": "/Users/thomasjwang/Documents/GitHub/Projects/Jin-Peng/Hydrodynamics/kharkov_B2_validation/data/research/raw/production_a/control_delta12_up__production_a.npz",
+      "condition": {
+        "condition_id": "control_delta12_up",
+        "role": "environment_control",
+        "delta": 1.2,
+        "temperature": "infinite",
+        "mu": 0.05,
+        "orientation": 1,
+        "profile": "tanh",
+        "width": 2.0,
+        "background_m": 0.0,
+        "j2": 0.0,
+        "parameters": {}
+      },
+      "numerics": {
+        "level": "fine",
+        "L": 512,
+        "dt": 0.0125,
+        "chi_max": 1024,
+        "truncation_cutoff": 1e-11
+      },
+      "observables": [
+        "magnetization"
+      ],
+      "depends_on": [
+        "amp_mu005_up__convergence__fine",
+        "amp_mu005_down__convergence__fine",
+        "shape_double_wall__convergence__fine",
+        "background_p005_up__convergence__fine"
+      ]
+    },
+    {
+      "job_id": "control_delta12_up__production_b",
+      "condition_id": "control_delta12_up",
+      "stage": "production_b",
+      "resolution_level": "selected_after_convergence",
+      "blinded": true,
+      "t_max": 400.0,
+      "output_path": "/Users/thomasjwang/Documents/GitHub/Projects/Jin-Peng/Hydrodynamics/kharkov_B2_validation/data/research/raw/production_b/control_delta12_up__production_b.npz",
+      "condition": {
+        "condition_id": "control_delta12_up",
+        "role": "environment_control",
+        "delta": 1.2,
+        "temperature": "infinite",
+        "mu": 0.05,
+        "orientation": 1,
+        "profile": "tanh",
+        "width": 2.0,
+        "background_m": 0.0,
+        "j2": 0.0,
+        "parameters": {}
+      },
+      "numerics": {
+        "level": "fine",
+        "L": 512,
+        "dt": 0.0125,
+        "chi_max": 1024,
+        "truncation_cutoff": 1e-11
+      },
+      "observables": [
+        "magnetization"
+      ],
+      "depends_on": [
+        "control_delta12_up__production_a"
+      ]
+    },
+    {
+      "job_id": "control_delta12_down__production_a",
+      "condition_id": "control_delta12_down",
+      "stage": "production_a",
+      "resolution_level": "selected_after_convergence",
+      "blinded": false,
+      "t_max": 200.0,
+      "output_path": "/Users/thomasjwang/Documents/GitHub/Projects/Jin-Peng/Hydrodynamics/kharkov_B2_validation/data/research/raw/production_a/control_delta12_down__production_a.npz",
+      "condition": {
+        "condition_id": "control_delta12_down",
+        "role": "environment_control",
+        "delta": 1.2,
+        "temperature": "infinite",
+        "mu": 0.05,
+        "orientation": -1,
+        "profile": "tanh",
+        "width": 2.0,
+        "background_m": 0.0,
+        "j2": 0.0,
+        "parameters": {}
+      },
+      "numerics": {
+        "level": "fine",
+        "L": 512,
+        "dt": 0.0125,
+        "chi_max": 1024,
+        "truncation_cutoff": 1e-11
+      },
+      "observables": [
+        "magnetization"
+      ],
+      "depends_on": [
+        "amp_mu005_up__convergence__fine",
+        "amp_mu005_down__convergence__fine",
+        "shape_double_wall__convergence__fine",
+        "background_p005_up__convergence__fine"
+      ]
+    },
+    {
+      "job_id": "control_delta12_down__production_b",
+      "condition_id": "control_delta12_down",
+      "stage": "production_b",
+      "resolution_level": "selected_after_convergence",
+      "blinded": true,
+      "t_max": 400.0,
+      "output_path": "/Users/thomasjwang/Documents/GitHub/Projects/Jin-Peng/Hydrodynamics/kharkov_B2_validation/data/research/raw/production_b/control_delta12_down__production_b.npz",
+      "condition": {
+        "condition_id": "control_delta12_down",
+        "role": "environment_control",
+        "delta": 1.2,
+        "temperature": "infinite",
+        "mu": 0.05,
+        "orientation": -1,
+        "profile": "tanh",
+        "width": 2.0,
+        "background_m": 0.0,
+        "j2": 0.0,
+        "parameters": {}
+      },
+      "numerics": {
+        "level": "fine",
+        "L": 512,
+        "dt": 0.0125,
+        "chi_max": 1024,
+        "truncation_cutoff": 1e-11
+      },
+      "observables": [
+        "magnetization"
+      ],
+      "depends_on": [
+        "control_delta12_down__production_a"
+      ]
+    },
+    {
+      "job_id": "control_j2_up__production_a",
+      "condition_id": "control_j2_up",
+      "stage": "production_a",
+      "resolution_level": "selected_after_convergence",
+      "blinded": false,
+      "t_max": 200.0,
+      "output_path": "/Users/thomasjwang/Documents/GitHub/Projects/Jin-Peng/Hydrodynamics/kharkov_B2_validation/data/research/raw/production_a/control_j2_up__production_a.npz",
+      "condition": {
+        "condition_id": "control_j2_up",
+        "role": "environment_control",
+        "delta": 1.0,
+        "temperature": "infinite",
+        "mu": 0.05,
+        "orientation": 1,
+        "profile": "tanh",
+        "width": 2.0,
+        "background_m": 0.0,
+        "j2": 0.1,
+        "parameters": {}
+      },
+      "numerics": {
+        "level": "fine",
+        "L": 512,
+        "dt": 0.0125,
+        "chi_max": 1024,
+        "truncation_cutoff": 1e-11
+      },
+      "observables": [
+        "magnetization"
+      ],
+      "depends_on": [
+        "amp_mu005_up__convergence__fine",
+        "amp_mu005_down__convergence__fine",
+        "shape_double_wall__convergence__fine",
+        "background_p005_up__convergence__fine"
+      ]
+    },
+    {
+      "job_id": "control_j2_up__production_b",
+      "condition_id": "control_j2_up",
+      "stage": "production_b",
+      "resolution_level": "selected_after_convergence",
+      "blinded": true,
+      "t_max": 400.0,
+      "output_path": "/Users/thomasjwang/Documents/GitHub/Projects/Jin-Peng/Hydrodynamics/kharkov_B2_validation/data/research/raw/production_b/control_j2_up__production_b.npz",
+      "condition": {
+        "condition_id": "control_j2_up",
+        "role": "environment_control",
+        "delta": 1.0,
+        "temperature": "infinite",
+        "mu": 0.05,
+        "orientation": 1,
+        "profile": "tanh",
+        "width": 2.0,
+        "background_m": 0.0,
+        "j2": 0.1,
+        "parameters": {}
+      },
+      "numerics": {
+        "level": "fine",
+        "L": 512,
+        "dt": 0.0125,
+        "chi_max": 1024,
+        "truncation_cutoff": 1e-11
+      },
+      "observables": [
+        "magnetization"
+      ],
+      "depends_on": [
+        "control_j2_up__production_a"
+      ]
+    },
+    {
+      "job_id": "control_j2_down__production_a",
+      "condition_id": "control_j2_down",
+      "stage": "production_a",
+      "resolution_level": "selected_after_convergence",
+      "blinded": false,
+      "t_max": 200.0,
+      "output_path": "/Users/thomasjwang/Documents/GitHub/Projects/Jin-Peng/Hydrodynamics/kharkov_B2_validation/data/research/raw/production_a/control_j2_down__production_a.npz",
+      "condition": {
+        "condition_id": "control_j2_down",
+        "role": "environment_control",
+        "delta": 1.0,
+        "temperature": "infinite",
+        "mu": 0.05,
+        "orientation": -1,
+        "profile": "tanh",
+        "width": 2.0,
+        "background_m": 0.0,
+        "j2": 0.1,
+        "parameters": {}
+      },
+      "numerics": {
+        "level": "fine",
+        "L": 512,
+        "dt": 0.0125,
+        "chi_max": 1024,
+        "truncation_cutoff": 1e-11
+      },
+      "observables": [
+        "magnetization"
+      ],
+      "depends_on": [
+        "amp_mu005_up__convergence__fine",
+        "amp_mu005_down__convergence__fine",
+        "shape_double_wall__convergence__fine",
+        "background_p005_up__convergence__fine"
+      ]
+    },
+    {
+      "job_id": "control_j2_down__production_b",
+      "condition_id": "control_j2_down",
+      "stage": "production_b",
+      "resolution_level": "selected_after_convergence",
+      "blinded": true,
+      "t_max": 400.0,
+      "output_path": "/Users/thomasjwang/Documents/GitHub/Projects/Jin-Peng/Hydrodynamics/kharkov_B2_validation/data/research/raw/production_b/control_j2_down__production_b.npz",
+      "condition": {
+        "condition_id": "control_j2_down",
+        "role": "environment_control",
+        "delta": 1.0,
+        "temperature": "infinite",
+        "mu": 0.05,
+        "orientation": -1,
+        "profile": "tanh",
+        "width": 2.0,
+        "background_m": 0.0,
+        "j2": 0.1,
+        "parameters": {}
+      },
+      "numerics": {
+        "level": "fine",
+        "L": 512,
+        "dt": 0.0125,
+        "chi_max": 1024,
+        "truncation_cutoff": 1e-11
+      },
+      "observables": [
+        "magnetization"
+      ],
+      "depends_on": [
+        "control_j2_down__production_a"
+      ]
+    }
+  ]
+}

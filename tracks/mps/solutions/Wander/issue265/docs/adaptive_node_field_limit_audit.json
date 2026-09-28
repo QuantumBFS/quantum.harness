@@ -1,0 +1,377 @@
+{
+  "diagnostic_D1_envelope": {
+    "eligible_as_physical_interval": false,
+    "maximum": -0.7418996440838672,
+    "minimum": -1.1762417157149723
+  },
+  "exact_D0": 0.5817764173314431,
+  "field_fits": [
+    {
+      "coefficients_descending": [
+        -0.479867017258542,
+        0.5529113718666046
+      ],
+      "field_model": "polynomial_degree_1",
+      "node_power": 2.0,
+      "rms_residual": 0.00022728285936348848,
+      "zero_field_intercept": 0.5529113718666046
+    },
+    {
+      "coefficients_descending": [
+        -0.3826549892192971,
+        -0.41308612334734623,
+        0.5502734954165693
+      ],
+      "field_model": "polynomial_degree_2",
+      "node_power": 2.0,
+      "rms_residual": 8.35783232622295e-06,
+      "zero_field_intercept": 0.5502734954165693
+    },
+    {
+      "coefficients_descending": [
+        -0.4944767835051382,
+        0.5573556607333747
+      ],
+      "field_model": "polynomial_degree_1",
+      "node_power": 3.0,
+      "rms_residual": 0.00018074707407918442,
+      "zero_field_intercept": 0.5573556607333747
+    },
+    {
+      "coefficients_descending": [
+        -0.30446220841568444,
+        -0.44134208250030066,
+        0.5552568152664855
+      ],
+      "field_model": "polynomial_degree_2",
+      "node_power": 3.0,
+      "rms_residual": 3.3003801556826568e-06,
+      "zero_field_intercept": 0.5552568152664855
+    },
+    {
+      "coefficients_descending": [
+        -0.5015918175425548,
+        0.5595201850465735
+      ],
+      "field_model": "polynomial_degree_1",
+      "node_power": 4.0,
+      "rms_residual": 0.00015811593030711602,
+      "zero_field_intercept": 0.5595201850465735
+    },
+    {
+      "coefficients_descending": [
+        -0.26638145218007936,
+        -0.4551029646616838,
+        0.557683853679601
+      ],
+      "field_model": "polynomial_degree_2",
+      "node_power": 4.0,
+      "rms_residual": 8.43186644973451e-07,
+      "zero_field_intercept": 0.557683853679601
+    }
+  ],
+  "fixed_exact_D0_diagnostic_fits": [
+    {
+      "fixed_exact_D0_linear_D1": -0.7915323633911461,
+      "fixed_exact_D0_quadratic_D1": -1.1762417157149723,
+      "fixed_exact_D0_quadratic_D2": 3.8437405943604785,
+      "node_power": 2.0
+    },
+    {
+      "fixed_exact_D0_linear_D1": -0.7581556877087837,
+      "fixed_exact_D0_quadratic_D1": -1.0837771771853122,
+      "fixed_exact_D0_quadratic_D2": 3.2533769453141,
+      "node_power": 3.0
+    },
+    {
+      "fixed_exact_D0_linear_D1": -0.7418996440838672,
+      "fixed_exact_D0_quadratic_D1": -1.0387432611097251,
+      "fixed_exact_D0_quadratic_D2": 2.965849033944633,
+      "node_power": 4.0
+    }
+  ],
+  "gates": {
+    "leading_D0_gate_pass": false,
+    "maximum_leading_relative_error": 0.01,
+    "maximum_observed_leading_relative_error": 0.054149534041573744,
+    "minimum_susceptibility_capture": 0.985,
+    "physical_D1_certified": false,
+    "physical_D1_reason": "leading D0 gate failed; subtracting D0/h would amplify the unresolved joint regulator error",
+    "susceptibility_capture_pass": true
+  },
+  "method": "nested_adaptive_node_then_zero_field_limit",
+  "node_limits": [
+    {
+      "field": 0.05,
+      "input_rows": [
+        {
+          "fdt_residual": 1.4352432222911133e-16,
+          "field": 0.05,
+          "h_times_spin_diffusion": 0.5457438327112811,
+          "nodes_per_string": 32,
+          "source": "docs/regulated_infinite_mode_fghd_adaptive_h005_xi6_n32.json",
+          "susceptibility_captured_fraction": 0.9915466146456332
+        },
+        {
+          "fdt_residual": 1.4797737579954728e-16,
+          "field": 0.05,
+          "h_times_spin_diffusion": 0.5390986282016528,
+          "nodes_per_string": 40,
+          "source": "docs/regulated_infinite_mode_fghd_adaptive_h005_xi6_n40.json",
+          "susceptibility_captured_fraction": 0.9916049790228095
+        },
+        {
+          "fdt_residual": 1.5570900805146337e-16,
+          "field": 0.05,
+          "h_times_spin_diffusion": 0.536447566315885,
+          "nodes_per_string": 48,
+          "source": "docs/regulated_infinite_mode_fghd_adaptive_h005_xi6_n48.json",
+          "susceptibility_captured_fraction": 0.991608224965165
+        }
+      ],
+      "limit_envelope": {
+        "center": 0.5314582530059324,
+        "half_width": 0.0028037407737722675,
+        "maximum": 0.5342619937797046,
+        "minimum": 0.5286545122321601
+      },
+      "schemes": [
+        {
+          "power": 2.0,
+          "rms_residual": 0.0002886628363668347,
+          "zero_node_spacing_limit": 0.5286545122321601
+        },
+        {
+          "power": 3.0,
+          "rms_residual": 9.13172793819449e-05,
+          "zero_node_spacing_limit": 0.5324254124332842
+        },
+        {
+          "power": 4.0,
+          "rms_residual": 8.839220663886116e-05,
+          "zero_node_spacing_limit": 0.5342619937797046
+        }
+      ]
+    },
+    {
+      "field": 0.0625,
+      "input_rows": [
+        {
+          "fdt_residual": 1.5090324866380817e-16,
+          "field": 0.0625,
+          "h_times_spin_diffusion": 0.5389080917512779,
+          "nodes_per_string": 32,
+          "source": "docs/regulated_infinite_mode_fghd_adaptive_uniform_h00625_xi6_n32.json",
+          "susceptibility_captured_fraction": 0.9915395606387151
+        },
+        {
+          "fdt_residual": 1.422409587745574e-16,
+          "field": 0.0625,
+          "h_times_spin_diffusion": 0.5327051486651105,
+          "nodes_per_string": 40,
+          "source": "docs/regulated_infinite_mode_fghd_adaptive_uniform_h00625_xi6_n40.json",
+          "susceptibility_captured_fraction": 0.991592699186435
+        },
+        {
+          "fdt_residual": 1.4599762575382068e-16,
+          "field": 0.0625,
+          "h_times_spin_diffusion": 0.5302422235414945,
+          "nodes_per_string": 48,
+          "source": "docs/regulated_infinite_mode_fghd_adaptive_uniform_h00625_xi6_n48.json",
+          "susceptibility_captured_fraction": 0.9915956106536847
+        }
+      ],
+      "limit_envelope": {
+        "center": 0.5255866381869825,
+        "half_width": 0.0026137994223393024,
+        "maximum": 0.5282004376093218,
+        "minimum": 0.5229728387646432
+      },
+      "schemes": [
+        {
+          "power": 2.0,
+          "rms_residual": 0.00027297406650034873,
+          "zero_node_spacing_limit": 0.5229728387646432
+        },
+        {
+          "power": 3.0,
+          "rms_residual": 8.897239473857307e-05,
+          "zero_node_spacing_limit": 0.526488272112868
+        },
+        {
+          "power": 4.0,
+          "rms_residual": 7.859419331517383e-05,
+          "zero_node_spacing_limit": 0.5282004376093218
+        }
+      ]
+    },
+    {
+      "field": 0.08333333333333333,
+      "input_rows": [
+        {
+          "fdt_residual": 1.4924622316109628e-16,
+          "field": 0.08333333333333333,
+          "h_times_spin_diffusion": 0.5275723414738609,
+          "nodes_per_string": 32,
+          "source": "docs/regulated_infinite_mode_fghd_adaptive_uniform_h008333_xi6_n32.json",
+          "susceptibility_captured_fraction": 0.9915202943004526
+        },
+        {
+          "fdt_residual": 1.4932172087610107e-16,
+          "field": 0.08333333333333333,
+          "h_times_spin_diffusion": 0.5219622449460015,
+          "nodes_per_string": 40,
+          "source": "docs/regulated_infinite_mode_fghd_adaptive_uniform_h008333_xi6_n40.json",
+          "susceptibility_captured_fraction": 0.9915664781013722
+        },
+        {
+          "fdt_residual": 1.5790101204498747e-16,
+          "field": 0.08333333333333333,
+          "h_times_spin_diffusion": 0.5197593758012489,
+          "nodes_per_string": 48,
+          "source": "docs/regulated_infinite_mode_fghd_adaptive_uniform_h008333_xi6_n48.json",
+          "susceptibility_captured_fraction": 0.9915689589132664
+        }
+      ],
+      "limit_envelope": {
+        "center": 0.5155522723830671,
+        "half_width": 0.0023569392228428576,
+        "maximum": 0.51790921160591,
+        "minimum": 0.5131953331602243
+      },
+      "schemes": [
+        {
+          "power": 2.0,
+          "rms_residual": 0.0002543103459577098,
+          "zero_node_spacing_limit": 0.5131953331602243
+        },
+        {
+          "power": 3.0,
+          "rms_residual": 8.833700392138414e-05,
+          "zero_node_spacing_limit": 0.5163652922583495
+        },
+        {
+          "power": 4.0,
+          "rms_residual": 6.282947061461275e-05,
+          "zero_node_spacing_limit": 0.51790921160591
+        }
+      ]
+    },
+    {
+      "field": 0.1,
+      "input_rows": [
+        {
+          "fdt_residual": 1.541840484438114e-16,
+          "field": 0.1,
+          "h_times_spin_diffusion": 0.5184939375117966,
+          "nodes_per_string": 32,
+          "source": "docs/regulated_infinite_mode_fghd_adaptive_uniform_h0100_xi6_n32.json",
+          "susceptibility_captured_fraction": 0.9914987127124775
+        },
+        {
+          "fdt_residual": 1.5097362193343527e-16,
+          "field": 0.1,
+          "h_times_spin_diffusion": 0.5132700735039416,
+          "nodes_per_string": 40,
+          "source": "docs/regulated_infinite_mode_fghd_adaptive_uniform_h0100_xi6_n40.json",
+          "susceptibility_captured_fraction": 0.9915405002596481
+        },
+        {
+          "fdt_residual": 1.394770997735089e-16,
+          "field": 0.1,
+          "h_times_spin_diffusion": 0.5112334089636957,
+          "nodes_per_string": 48,
+          "source": "docs/regulated_infinite_mode_fghd_adaptive_uniform_h0100_xi6_n48.json",
+          "susceptibility_captured_fraction": 0.9915427175371064
+        }
+      ],
+      "limit_envelope": {
+        "center": 0.5073180262582825,
+        "half_width": 0.0021905174922239867,
+        "maximum": 0.5095085437505065,
+        "minimum": 0.5051275087660585
+      },
+      "schemes": [
+        {
+          "power": 2.0,
+          "rms_residual": 0.00024118195968923266,
+          "zero_node_spacing_limit": 0.5051275087660585
+        },
+        {
+          "power": 3.0,
+          "rms_residual": 8.689612537898965e-05,
+          "zero_node_spacing_limit": 0.5080736336352768
+        },
+        {
+          "power": 4.0,
+          "rms_residual": 5.363610911895405e-05,
+          "zero_node_spacing_limit": 0.5095085437505065
+        }
+      ]
+    },
+    {
+      "field": 0.125,
+      "input_rows": [
+        {
+          "fdt_residual": 1.5314073021359782e-16,
+          "field": 0.125,
+          "h_times_spin_diffusion": 0.5047866060031206,
+          "nodes_per_string": 32,
+          "source": "docs/regulated_infinite_mode_fghd_adaptive_uniform_h0125_xi6_n32.json",
+          "susceptibility_captured_fraction": 0.9914569625512528
+        },
+        {
+          "fdt_residual": 1.504084160949123e-16,
+          "field": 0.125,
+          "h_times_spin_diffusion": 0.5000361325488314,
+          "nodes_per_string": 40,
+          "source": "docs/regulated_infinite_mode_fghd_adaptive_uniform_h0125_xi6_n40.json",
+          "susceptibility_captured_fraction": 0.9914935413634356
+        },
+        {
+          "fdt_residual": 1.4833448759035632e-16,
+          "field": 0.125,
+          "h_times_spin_diffusion": 0.4982058551799591,
+          "nodes_per_string": 48,
+          "source": "docs/regulated_infinite_mode_fghd_adaptive_uniform_h0125_xi6_n48.json",
+          "susceptibility_captured_fraction": 0.99149545530488
+        }
+      ],
+      "limit_envelope": {
+        "center": 0.49464840595928167,
+        "half_width": 0.0019857759789831952,
+        "maximum": 0.49663418193826486,
+        "minimum": 0.49266262998029847
+      },
+      "schemes": [
+        {
+          "power": 2.0,
+          "rms_residual": 0.00022589689863486114,
+          "zero_node_spacing_limit": 0.49266262998029847
+        },
+        {
+          "power": 3.0,
+          "rms_residual": 8.598400788917107e-05,
+          "zero_node_spacing_limit": 0.49533338016868156
+        },
+        {
+          "power": 4.0,
+          "rms_residual": 4.14724663143667e-05,
+          "zero_node_spacing_limit": 0.49663418193826486
+        }
+      ]
+    }
+  ],
+  "regulator_signature": {
+    "kernel_theta_step": 1.0,
+    "operator_only": true,
+    "rapidity_quadrature": "adaptive-string",
+    "scaled_rapidity_extent": 20.0,
+    "scaled_rapidity_map_alpha": 4.0,
+    "string_xi_buffer": 3.0,
+    "string_xi_cutoff": 6.0
+  },
+  "schema": 1,
+  "uses_target_a_or_D": false,
+  "uses_target_trajectory": false
+}

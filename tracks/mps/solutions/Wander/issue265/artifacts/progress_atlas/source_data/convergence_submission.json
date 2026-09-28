@@ -1,0 +1,878 @@
+{
+  "schema_version": 1,
+  "submitted_at": "2026-07-29T13:54:13.331997+00:00",
+  "cluster": "SCNet xh5",
+  "partition": "xhacnormalb",
+  "account": "giggleliu",
+  "team_root": "/work/share/giggleliu/cfys01/kharkov_burgers_20260729",
+  "source_root": "/work/share/giggleliu/cfys01/kharkov_burgers_20260729/source",
+  "pilot_job_id": "23009308",
+  "pilot_state": "COMPLETED",
+  "manifest_sha256": "cfd39d2b8b67f8a812114c3d7a84daba2b12d2c6bf3bbe1433aa03eba837bd52",
+  "runner_sha256": "81ea5ff41dc7d43e86945048d10ee9d25791ff999bab38dfff7e037ab6b25a8c",
+  "jobs": [
+    {
+      "job_id": "amp_mu005_up__convergence__coarse",
+      "condition_id": "amp_mu005_up",
+      "resolution_level": "coarse",
+      "fcs": true,
+      "resource": {
+        "cpus": 8,
+        "memory": "24G",
+        "time": "7-00:00:00"
+      },
+      "slurm_job_id": "23009466",
+      "output": "/work/share/giggleliu/cfys01/kharkov_burgers_20260729/data/convergence/amp_mu005_up__convergence__coarse.npz"
+    },
+    {
+      "job_id": "amp_mu005_up__convergence__medium",
+      "condition_id": "amp_mu005_up",
+      "resolution_level": "medium",
+      "fcs": true,
+      "resource": {
+        "cpus": 16,
+        "memory": "60G",
+        "time": "10-00:00:00"
+      },
+      "slurm_job_id": "23190350",
+      "output": "/work/share/giggleliu/cfys01/kharkov_burgers_20260729/data/convergence/amp_mu005_up__convergence__medium.npz",
+      "attempts": [
+        {
+          "slice": 1,
+          "slurm_job_id": "23009467",
+          "submitted_at": "2026-07-29T13:54:13.331997+00:00",
+          "resource": {
+            "cpus": 16,
+            "memory": "60G",
+            "time": "7-00:00:00"
+          }
+        },
+        {
+          "slice": 2,
+          "slurm_job_id": "23188626",
+          "submitted_at": "2026-08-05T13:01:10.107425+00:00",
+          "resource": {
+            "cpus": 16,
+            "memory": "60G",
+            "time": "5-00:00:00"
+          },
+          "resumed_from_checkpoint": "/work/share/giggleliu/cfys01/kharkov_burgers_20260729/data/convergence/amp_mu005_up__convergence__medium.npz.checkpoint.h5",
+          "dependency_type": "afterany",
+          "dependency_job_id": "23009467",
+          "predecessor_state_at_submission": "RUNNING",
+          "terminal_state": "CANCELLED",
+          "cancelled_at": "2026-08-05T16:35:12.108944+00:00",
+          "reason": "user_authorized_account_migration_after_cfys01_quota_ceiling"
+        },
+        {
+          "slice": 3,
+          "slurm_job_id": "23190350",
+          "submitted_at": "2026-08-05T16:35:12.108944+00:00",
+          "resource": {
+            "cpus": 16,
+            "memory": "60G",
+            "time": "10-00:00:00"
+          },
+          "resumed_from_checkpoint": "/work/share/giggleliu/cfys01/kharkov_burgers_20260729/data/convergence/amp_mu005_up__convergence__medium.npz.checkpoint.h5",
+          "previous_terminal_state": "CANCELLED",
+          "migration_from_user": "cfys01",
+          "submitter_user": "acamtw70yu",
+          "migration_authorization": "user-2026-08-06-switch-to-shen-acamtw70yu",
+          "continuation_authorization_id": "user-2026-08-05-extra-10d",
+          "held_until_source_gate_pass": false,
+          "released_at": "2026-08-05T16:41:14.458785+00:00",
+          "scheduler_backfill_superseded_job_ids": [
+            "23190297"
+          ],
+          "scheduler_backfill_correction_at": "2026-08-05T16:41:11.814374+00:00",
+          "scheduler_backfill_reason": "implicit TimeMin=00:15:00 would terminate before next checkpoint",
+          "resubmitted_at": "2026-08-05T16:41:11.814374+00:00",
+          "time_min": "10-00:00:00",
+          "observed_state": "RUNNING",
+          "observed_at": "2026-08-05T16:49:50.487032+00:00",
+          "observed_start_time": "2026-08-06T00:41:30",
+          "observed_end_time": "2026-08-16T00:41:30",
+          "observed_time_limit": "10-00:00:00",
+          "observed_time_min": "10-00:00:00",
+          "source_gate_status": "pass"
+        }
+      ],
+      "status": "running"
+    },
+    {
+      "job_id": "amp_mu005_up__convergence__fine",
+      "condition_id": "amp_mu005_up",
+      "resolution_level": "fine",
+      "fcs": true,
+      "resource": {
+        "cpus": 32,
+        "memory": "120G",
+        "time": "10-00:00:00"
+      },
+      "slurm_job_id": "23190348",
+      "output": "/work/share/giggleliu/cfys01/kharkov_burgers_20260729/data/convergence/amp_mu005_up__convergence__fine.npz",
+      "attempts": [
+        {
+          "slice": 1,
+          "slurm_job_id": "23009468",
+          "submitted_at": "2026-07-29T13:54:13.331997+00:00",
+          "resource": {
+            "cpus": 32,
+            "memory": "120G",
+            "time": "7-00:00:00"
+          }
+        },
+        {
+          "slice": 2,
+          "slurm_job_id": "23188624",
+          "submitted_at": "2026-08-05T13:01:10.107425+00:00",
+          "resource": {
+            "cpus": 32,
+            "memory": "120G",
+            "time": "5-00:00:00"
+          },
+          "resumed_from_checkpoint": "/work/share/giggleliu/cfys01/kharkov_burgers_20260729/data/convergence/amp_mu005_up__convergence__fine.npz.checkpoint.h5",
+          "dependency_type": "afterany",
+          "dependency_job_id": "23009468",
+          "predecessor_state_at_submission": "RUNNING",
+          "terminal_state": "CANCELLED",
+          "cancelled_at": "2026-08-05T16:35:12.108944+00:00",
+          "reason": "user_authorized_account_migration_after_cfys01_quota_ceiling"
+        },
+        {
+          "slice": 3,
+          "slurm_job_id": "23190348",
+          "submitted_at": "2026-08-05T16:35:12.108944+00:00",
+          "resource": {
+            "cpus": 32,
+            "memory": "120G",
+            "time": "10-00:00:00"
+          },
+          "resumed_from_checkpoint": "/work/share/giggleliu/cfys01/kharkov_burgers_20260729/data/convergence/amp_mu005_up__convergence__fine.npz.checkpoint.h5",
+          "previous_terminal_state": "CANCELLED",
+          "migration_from_user": "cfys01",
+          "submitter_user": "acamtw70yu",
+          "migration_authorization": "user-2026-08-06-switch-to-shen-acamtw70yu",
+          "continuation_authorization_id": "user-2026-08-05-extra-10d",
+          "held_until_source_gate_pass": false,
+          "released_at": "2026-08-05T16:41:14.458785+00:00",
+          "scheduler_backfill_superseded_job_ids": [
+            "23190295"
+          ],
+          "scheduler_backfill_correction_at": "2026-08-05T16:41:11.814374+00:00",
+          "scheduler_backfill_reason": "implicit TimeMin=00:15:00 would terminate before next checkpoint",
+          "resubmitted_at": "2026-08-05T16:41:11.814374+00:00",
+          "time_min": "10-00:00:00",
+          "observed_state": "RUNNING",
+          "observed_at": "2026-08-05T16:49:50.487032+00:00",
+          "observed_start_time": "2026-08-06T00:41:30",
+          "observed_end_time": "2026-08-16T00:41:30",
+          "observed_time_limit": "10-00:00:00",
+          "observed_time_min": "10-00:00:00",
+          "source_gate_status": "pass"
+        }
+      ],
+      "status": "running"
+    },
+    {
+      "job_id": "amp_mu005_down__convergence__coarse",
+      "condition_id": "amp_mu005_down",
+      "resolution_level": "coarse",
+      "fcs": true,
+      "resource": {
+        "cpus": 8,
+        "memory": "24G",
+        "time": "7-00:00:00"
+      },
+      "slurm_job_id": "23009469",
+      "output": "/work/share/giggleliu/cfys01/kharkov_burgers_20260729/data/convergence/amp_mu005_down__convergence__coarse.npz"
+    },
+    {
+      "job_id": "amp_mu005_down__convergence__medium",
+      "condition_id": "amp_mu005_down",
+      "resolution_level": "medium",
+      "fcs": true,
+      "resource": {
+        "cpus": 16,
+        "memory": "60G",
+        "time": "10-00:00:00"
+      },
+      "slurm_job_id": "23190345",
+      "output": "/work/share/giggleliu/cfys01/kharkov_burgers_20260729/data/convergence/amp_mu005_down__convergence__medium.npz",
+      "attempts": [
+        {
+          "slice": 1,
+          "slurm_job_id": "23009470",
+          "submitted_at": "2026-07-29T13:54:13.331997+00:00",
+          "resource": {
+            "cpus": 16,
+            "memory": "60G",
+            "time": "7-00:00:00"
+          }
+        },
+        {
+          "slice": 2,
+          "slurm_job_id": "23188621",
+          "submitted_at": "2026-08-05T13:01:10.107425+00:00",
+          "resource": {
+            "cpus": 16,
+            "memory": "60G",
+            "time": "5-00:00:00"
+          },
+          "resumed_from_checkpoint": "/work/share/giggleliu/cfys01/kharkov_burgers_20260729/data/convergence/amp_mu005_down__convergence__medium.npz.checkpoint.h5",
+          "dependency_type": "afterany",
+          "dependency_job_id": "23009470",
+          "predecessor_state_at_submission": "RUNNING",
+          "terminal_state": "CANCELLED",
+          "cancelled_at": "2026-08-05T16:35:12.108944+00:00",
+          "reason": "user_authorized_account_migration_after_cfys01_quota_ceiling"
+        },
+        {
+          "slice": 3,
+          "slurm_job_id": "23190345",
+          "submitted_at": "2026-08-05T16:35:12.108944+00:00",
+          "resource": {
+            "cpus": 16,
+            "memory": "60G",
+            "time": "10-00:00:00"
+          },
+          "resumed_from_checkpoint": "/work/share/giggleliu/cfys01/kharkov_burgers_20260729/data/convergence/amp_mu005_down__convergence__medium.npz.checkpoint.h5",
+          "previous_terminal_state": "CANCELLED",
+          "migration_from_user": "cfys01",
+          "submitter_user": "acamtw70yu",
+          "migration_authorization": "user-2026-08-06-switch-to-shen-acamtw70yu",
+          "continuation_authorization_id": "user-2026-08-05-extra-10d",
+          "held_until_source_gate_pass": false,
+          "released_at": "2026-08-05T16:41:14.458785+00:00",
+          "scheduler_backfill_superseded_job_ids": [
+            "23190292"
+          ],
+          "scheduler_backfill_correction_at": "2026-08-05T16:41:11.814374+00:00",
+          "scheduler_backfill_reason": "implicit TimeMin=00:15:00 would terminate before next checkpoint",
+          "resubmitted_at": "2026-08-05T16:41:11.814374+00:00",
+          "time_min": "10-00:00:00",
+          "observed_state": "RUNNING",
+          "observed_at": "2026-08-05T16:49:50.487032+00:00",
+          "observed_start_time": "2026-08-06T00:41:30",
+          "observed_end_time": "2026-08-16T00:41:30",
+          "observed_time_limit": "10-00:00:00",
+          "observed_time_min": "10-00:00:00",
+          "source_gate_status": "pass"
+        }
+      ],
+      "status": "running"
+    },
+    {
+      "job_id": "amp_mu005_down__convergence__fine",
+      "condition_id": "amp_mu005_down",
+      "resolution_level": "fine",
+      "fcs": true,
+      "resource": {
+        "cpus": 32,
+        "memory": "120G",
+        "time": "10-00:00:00"
+      },
+      "slurm_job_id": "23190352",
+      "output": "/work/share/giggleliu/cfys01/kharkov_burgers_20260729/data/convergence/amp_mu005_down__convergence__fine.npz",
+      "attempts": [
+        {
+          "slice": 1,
+          "slurm_job_id": "23009471",
+          "submitted_at": "2026-07-29T13:54:13.331997+00:00",
+          "resource": {
+            "cpus": 32,
+            "memory": "120G",
+            "time": "7-00:00:00"
+          }
+        },
+        {
+          "slice": 2,
+          "slurm_job_id": "23188628",
+          "submitted_at": "2026-08-05T13:01:10.107425+00:00",
+          "resource": {
+            "cpus": 32,
+            "memory": "120G",
+            "time": "5-00:00:00"
+          },
+          "resumed_from_checkpoint": "/work/share/giggleliu/cfys01/kharkov_burgers_20260729/data/convergence/amp_mu005_down__convergence__fine.npz.checkpoint.h5",
+          "dependency_type": "afterany",
+          "dependency_job_id": "23009471",
+          "predecessor_state_at_submission": "RUNNING",
+          "terminal_state": "CANCELLED",
+          "cancelled_at": "2026-08-05T16:35:12.108944+00:00",
+          "reason": "user_authorized_account_migration_after_cfys01_quota_ceiling"
+        },
+        {
+          "slice": 3,
+          "slurm_job_id": "23190352",
+          "submitted_at": "2026-08-05T16:35:12.108944+00:00",
+          "resource": {
+            "cpus": 32,
+            "memory": "120G",
+            "time": "10-00:00:00"
+          },
+          "resumed_from_checkpoint": "/work/share/giggleliu/cfys01/kharkov_burgers_20260729/data/convergence/amp_mu005_down__convergence__fine.npz.checkpoint.h5",
+          "previous_terminal_state": "CANCELLED",
+          "migration_from_user": "cfys01",
+          "submitter_user": "acamtw70yu",
+          "migration_authorization": "user-2026-08-06-switch-to-shen-acamtw70yu",
+          "continuation_authorization_id": "user-2026-08-05-extra-10d",
+          "held_until_source_gate_pass": false,
+          "released_at": "2026-08-05T16:41:14.458785+00:00",
+          "scheduler_backfill_superseded_job_ids": [
+            "23190299"
+          ],
+          "scheduler_backfill_correction_at": "2026-08-05T16:41:11.814374+00:00",
+          "scheduler_backfill_reason": "implicit TimeMin=00:15:00 would terminate before next checkpoint",
+          "resubmitted_at": "2026-08-05T16:41:11.814374+00:00",
+          "time_min": "10-00:00:00",
+          "observed_state": "RUNNING",
+          "observed_at": "2026-08-05T16:49:50.487032+00:00",
+          "observed_start_time": "2026-08-06T00:41:30",
+          "observed_end_time": "2026-08-16T00:41:30",
+          "observed_time_limit": "10-00:00:00",
+          "observed_time_min": "10-00:00:00",
+          "source_gate_status": "pass"
+        }
+      ],
+      "status": "running"
+    },
+    {
+      "job_id": "shape_double_wall__convergence__coarse",
+      "condition_id": "shape_double_wall",
+      "resolution_level": "coarse",
+      "fcs": false,
+      "resource": {
+        "cpus": 4,
+        "memory": "12G",
+        "time": "7-00:00:00"
+      },
+      "slurm_job_id": "23009472",
+      "output": "/work/share/giggleliu/cfys01/kharkov_burgers_20260729/data/convergence/shape_double_wall__convergence__coarse.npz"
+    },
+    {
+      "job_id": "shape_double_wall__convergence__medium",
+      "condition_id": "shape_double_wall",
+      "resolution_level": "medium",
+      "fcs": false,
+      "resource": {
+        "cpus": 8,
+        "memory": "30G",
+        "time": "10-00:00:00"
+      },
+      "slurm_job_id": "23190351",
+      "output": "/work/share/giggleliu/cfys01/kharkov_burgers_20260729/data/convergence/shape_double_wall__convergence__medium.npz",
+      "attempts": [
+        {
+          "slice": 1,
+          "slurm_job_id": "23009473",
+          "submitted_at": "2026-07-29T13:54:13.331997+00:00",
+          "resource": {
+            "cpus": 8,
+            "memory": "30G",
+            "time": "7-00:00:00"
+          }
+        },
+        {
+          "slice": 2,
+          "slurm_job_id": "23188627",
+          "submitted_at": "2026-08-05T13:01:10.107425+00:00",
+          "resource": {
+            "cpus": 8,
+            "memory": "30G",
+            "time": "5-00:00:00"
+          },
+          "resumed_from_checkpoint": "/work/share/giggleliu/cfys01/kharkov_burgers_20260729/data/convergence/shape_double_wall__convergence__medium.npz.checkpoint.h5",
+          "dependency_type": "afterany",
+          "dependency_job_id": "23009473",
+          "predecessor_state_at_submission": "RUNNING",
+          "terminal_state": "CANCELLED",
+          "cancelled_at": "2026-08-05T16:35:12.108944+00:00",
+          "reason": "user_authorized_account_migration_after_cfys01_quota_ceiling"
+        },
+        {
+          "slice": 3,
+          "slurm_job_id": "23190351",
+          "submitted_at": "2026-08-05T16:35:12.108944+00:00",
+          "resource": {
+            "cpus": 8,
+            "memory": "30G",
+            "time": "10-00:00:00"
+          },
+          "resumed_from_checkpoint": "/work/share/giggleliu/cfys01/kharkov_burgers_20260729/data/convergence/shape_double_wall__convergence__medium.npz.checkpoint.h5",
+          "previous_terminal_state": "CANCELLED",
+          "migration_from_user": "cfys01",
+          "submitter_user": "acamtw70yu",
+          "migration_authorization": "user-2026-08-06-switch-to-shen-acamtw70yu",
+          "continuation_authorization_id": "user-2026-08-05-extra-10d",
+          "held_until_source_gate_pass": false,
+          "released_at": "2026-08-05T16:41:14.458785+00:00",
+          "scheduler_backfill_superseded_job_ids": [
+            "23190298"
+          ],
+          "scheduler_backfill_correction_at": "2026-08-05T16:41:11.814374+00:00",
+          "scheduler_backfill_reason": "implicit TimeMin=00:15:00 would terminate before next checkpoint",
+          "resubmitted_at": "2026-08-05T16:41:11.814374+00:00",
+          "time_min": "10-00:00:00",
+          "observed_state": "RUNNING",
+          "observed_at": "2026-08-05T16:49:50.487032+00:00",
+          "observed_start_time": "2026-08-06T00:41:30",
+          "observed_end_time": "2026-08-16T00:41:30",
+          "observed_time_limit": "10-00:00:00",
+          "observed_time_min": "10-00:00:00",
+          "source_gate_status": "pass"
+        }
+      ],
+      "status": "running"
+    },
+    {
+      "job_id": "shape_double_wall__convergence__fine",
+      "condition_id": "shape_double_wall",
+      "resolution_level": "fine",
+      "fcs": false,
+      "resource": {
+        "cpus": 16,
+        "memory": "60G",
+        "time": "10-00:00:00"
+      },
+      "slurm_job_id": "23190347",
+      "output": "/work/share/giggleliu/cfys01/kharkov_burgers_20260729/data/convergence/shape_double_wall__convergence__fine.npz",
+      "attempts": [
+        {
+          "slice": 1,
+          "slurm_job_id": "23009474",
+          "submitted_at": "2026-07-29T13:54:13.331997+00:00",
+          "resource": {
+            "cpus": 16,
+            "memory": "60G",
+            "time": "7-00:00:00"
+          }
+        },
+        {
+          "slice": 2,
+          "slurm_job_id": "23188623",
+          "submitted_at": "2026-08-05T13:01:10.107425+00:00",
+          "resource": {
+            "cpus": 16,
+            "memory": "60G",
+            "time": "5-00:00:00"
+          },
+          "resumed_from_checkpoint": "/work/share/giggleliu/cfys01/kharkov_burgers_20260729/data/convergence/shape_double_wall__convergence__fine.npz.checkpoint.h5",
+          "dependency_type": "afterany",
+          "dependency_job_id": "23009474",
+          "predecessor_state_at_submission": "RUNNING",
+          "terminal_state": "CANCELLED",
+          "cancelled_at": "2026-08-05T16:35:12.108944+00:00",
+          "reason": "user_authorized_account_migration_after_cfys01_quota_ceiling"
+        },
+        {
+          "slice": 3,
+          "slurm_job_id": "23190347",
+          "submitted_at": "2026-08-05T16:35:12.108944+00:00",
+          "resource": {
+            "cpus": 16,
+            "memory": "60G",
+            "time": "10-00:00:00"
+          },
+          "resumed_from_checkpoint": "/work/share/giggleliu/cfys01/kharkov_burgers_20260729/data/convergence/shape_double_wall__convergence__fine.npz.checkpoint.h5",
+          "previous_terminal_state": "CANCELLED",
+          "migration_from_user": "cfys01",
+          "submitter_user": "acamtw70yu",
+          "migration_authorization": "user-2026-08-06-switch-to-shen-acamtw70yu",
+          "continuation_authorization_id": "user-2026-08-05-extra-10d",
+          "held_until_source_gate_pass": false,
+          "released_at": "2026-08-05T16:41:14.458785+00:00",
+          "scheduler_backfill_superseded_job_ids": [
+            "23190294"
+          ],
+          "scheduler_backfill_correction_at": "2026-08-05T16:41:11.814374+00:00",
+          "scheduler_backfill_reason": "implicit TimeMin=00:15:00 would terminate before next checkpoint",
+          "resubmitted_at": "2026-08-05T16:41:11.814374+00:00",
+          "time_min": "10-00:00:00",
+          "observed_state": "RUNNING",
+          "observed_at": "2026-08-05T16:49:50.487032+00:00",
+          "observed_start_time": "2026-08-06T00:41:30",
+          "observed_end_time": "2026-08-16T00:41:30",
+          "observed_time_limit": "10-00:00:00",
+          "observed_time_min": "10-00:00:00",
+          "source_gate_status": "pass"
+        }
+      ],
+      "status": "running"
+    },
+    {
+      "job_id": "background_p005_up__convergence__coarse",
+      "condition_id": "background_p005_up",
+      "resolution_level": "coarse",
+      "fcs": false,
+      "resource": {
+        "cpus": 4,
+        "memory": "12G",
+        "time": "7-00:00:00"
+      },
+      "slurm_job_id": "23009475",
+      "output": "/work/share/giggleliu/cfys01/kharkov_burgers_20260729/data/convergence/background_p005_up__convergence__coarse.npz"
+    },
+    {
+      "job_id": "background_p005_up__convergence__medium",
+      "condition_id": "background_p005_up",
+      "resolution_level": "medium",
+      "fcs": false,
+      "resource": {
+        "cpus": 8,
+        "memory": "30G",
+        "time": "10-00:00:00"
+      },
+      "slurm_job_id": "23190349",
+      "output": "/work/share/giggleliu/cfys01/kharkov_burgers_20260729/data/convergence/background_p005_up__convergence__medium.npz",
+      "attempts": [
+        {
+          "slice": 1,
+          "slurm_job_id": "23009476",
+          "submitted_at": "2026-07-29T13:54:13.331997+00:00",
+          "resource": {
+            "cpus": 8,
+            "memory": "30G",
+            "time": "7-00:00:00"
+          }
+        },
+        {
+          "slice": 2,
+          "slurm_job_id": "23188625",
+          "submitted_at": "2026-08-05T13:01:10.107425+00:00",
+          "resource": {
+            "cpus": 8,
+            "memory": "30G",
+            "time": "5-00:00:00"
+          },
+          "resumed_from_checkpoint": "/work/share/giggleliu/cfys01/kharkov_burgers_20260729/data/convergence/background_p005_up__convergence__medium.npz.checkpoint.h5",
+          "dependency_type": "afterany",
+          "dependency_job_id": "23009476",
+          "predecessor_state_at_submission": "RUNNING",
+          "terminal_state": "CANCELLED",
+          "cancelled_at": "2026-08-05T16:35:12.108944+00:00",
+          "reason": "user_authorized_account_migration_after_cfys01_quota_ceiling"
+        },
+        {
+          "slice": 3,
+          "slurm_job_id": "23190349",
+          "submitted_at": "2026-08-05T16:35:12.108944+00:00",
+          "resource": {
+            "cpus": 8,
+            "memory": "30G",
+            "time": "10-00:00:00"
+          },
+          "resumed_from_checkpoint": "/work/share/giggleliu/cfys01/kharkov_burgers_20260729/data/convergence/background_p005_up__convergence__medium.npz.checkpoint.h5",
+          "previous_terminal_state": "CANCELLED",
+          "migration_from_user": "cfys01",
+          "submitter_user": "acamtw70yu",
+          "migration_authorization": "user-2026-08-06-switch-to-shen-acamtw70yu",
+          "continuation_authorization_id": "user-2026-08-05-extra-10d",
+          "held_until_source_gate_pass": false,
+          "released_at": "2026-08-05T16:41:14.458785+00:00",
+          "scheduler_backfill_superseded_job_ids": [
+            "23190296"
+          ],
+          "scheduler_backfill_correction_at": "2026-08-05T16:41:11.814374+00:00",
+          "scheduler_backfill_reason": "implicit TimeMin=00:15:00 would terminate before next checkpoint",
+          "resubmitted_at": "2026-08-05T16:41:11.814374+00:00",
+          "time_min": "10-00:00:00",
+          "observed_state": "RUNNING",
+          "observed_at": "2026-08-05T16:49:50.487032+00:00",
+          "observed_start_time": "2026-08-06T00:41:30",
+          "observed_end_time": "2026-08-16T00:41:30",
+          "observed_time_limit": "10-00:00:00",
+          "observed_time_min": "10-00:00:00",
+          "source_gate_status": "pass"
+        }
+      ],
+      "status": "running"
+    },
+    {
+      "job_id": "background_p005_up__convergence__fine",
+      "condition_id": "background_p005_up",
+      "resolution_level": "fine",
+      "fcs": false,
+      "resource": {
+        "cpus": 16,
+        "memory": "60G",
+        "time": "10-00:00:00"
+      },
+      "slurm_job_id": "23190346",
+      "output": "/work/share/giggleliu/cfys01/kharkov_burgers_20260729/data/convergence/background_p005_up__convergence__fine.npz",
+      "attempts": [
+        {
+          "slice": 1,
+          "slurm_job_id": "23009477",
+          "submitted_at": "2026-07-29T13:54:13.331997+00:00",
+          "resource": {
+            "cpus": 16,
+            "memory": "60G",
+            "time": "7-00:00:00"
+          }
+        },
+        {
+          "slice": 2,
+          "slurm_job_id": "23188622",
+          "submitted_at": "2026-08-05T13:01:10.107425+00:00",
+          "resource": {
+            "cpus": 16,
+            "memory": "60G",
+            "time": "5-00:00:00"
+          },
+          "resumed_from_checkpoint": "/work/share/giggleliu/cfys01/kharkov_burgers_20260729/data/convergence/background_p005_up__convergence__fine.npz.checkpoint.h5",
+          "dependency_type": "afterany",
+          "dependency_job_id": "23009477",
+          "predecessor_state_at_submission": "RUNNING",
+          "terminal_state": "CANCELLED",
+          "cancelled_at": "2026-08-05T16:35:12.108944+00:00",
+          "reason": "user_authorized_account_migration_after_cfys01_quota_ceiling"
+        },
+        {
+          "slice": 3,
+          "slurm_job_id": "23190346",
+          "submitted_at": "2026-08-05T16:35:12.108944+00:00",
+          "resource": {
+            "cpus": 16,
+            "memory": "60G",
+            "time": "10-00:00:00"
+          },
+          "resumed_from_checkpoint": "/work/share/giggleliu/cfys01/kharkov_burgers_20260729/data/convergence/background_p005_up__convergence__fine.npz.checkpoint.h5",
+          "previous_terminal_state": "CANCELLED",
+          "migration_from_user": "cfys01",
+          "submitter_user": "acamtw70yu",
+          "migration_authorization": "user-2026-08-06-switch-to-shen-acamtw70yu",
+          "continuation_authorization_id": "user-2026-08-05-extra-10d",
+          "held_until_source_gate_pass": false,
+          "released_at": "2026-08-05T16:41:14.458785+00:00",
+          "scheduler_backfill_superseded_job_ids": [
+            "23190293"
+          ],
+          "scheduler_backfill_correction_at": "2026-08-05T16:41:11.814374+00:00",
+          "scheduler_backfill_reason": "implicit TimeMin=00:15:00 would terminate before next checkpoint",
+          "resubmitted_at": "2026-08-05T16:41:11.814374+00:00",
+          "time_min": "10-00:00:00",
+          "observed_state": "RUNNING",
+          "observed_at": "2026-08-05T16:49:50.487032+00:00",
+          "observed_start_time": "2026-08-06T00:41:30",
+          "observed_end_time": "2026-08-16T00:41:30",
+          "observed_time_limit": "10-00:00:00",
+          "observed_time_min": "10-00:00:00",
+          "source_gate_status": "pass"
+        }
+      ],
+      "status": "running"
+    }
+  ],
+  "submission_complete": true,
+  "controllers": [
+    {
+      "generation": 1,
+      "slurm_job_id": "23009668",
+      "submitted_at": "2026-07-29T14:05:57.350447+00:00",
+      "dependency_job_ids": [
+        "23009466",
+        "23009467",
+        "23009468",
+        "23009469",
+        "23009470",
+        "23009471",
+        "23009472",
+        "23009473",
+        "23009474",
+        "23009475",
+        "23009476",
+        "23009477"
+      ],
+      "terminal_state": "CANCELLED",
+      "cancelled_at": "2026-08-05T13:01:10.107425+00:00",
+      "reason": "replaced_by_pre_submitted_five_day_slice"
+    },
+    {
+      "generation": 2,
+      "slurm_job_id": "23188639",
+      "submitted_at": "2026-08-05T13:02:29.452009+00:00",
+      "dependency_job_ids": [
+        "23188621",
+        "23188622",
+        "23188623",
+        "23188624",
+        "23188625",
+        "23188626",
+        "23188627",
+        "23188628"
+      ],
+      "role": "final_audit_after_single_five_day_extension",
+      "automatic_resubmission_allowed": false,
+      "terminal_state": "CANCELLED",
+      "cancelled_at": "2026-08-05T16:35:12.108944+00:00",
+      "reason": "replaced_by_shen_account_migration"
+    },
+    {
+      "generation": 3,
+      "slurm_job_id": "23190303",
+      "submitted_at": "2026-08-05T16:35:14.037031+00:00",
+      "dependency_job_ids": [
+        "23190292",
+        "23190293",
+        "23190294",
+        "23190295",
+        "23190296",
+        "23190297",
+        "23190298",
+        "23190299"
+      ],
+      "submitter_user": "acamtw70yu",
+      "role": "final_audit_after_shen_ten_day_slice",
+      "terminal_state": "CANCELLED",
+      "cancelled_at": "2026-08-05T16:41:11.814374+00:00",
+      "reason": "replaced_to_enforce_full_time_min"
+    },
+    {
+      "generation": 3,
+      "slurm_job_id": "23190354",
+      "submitted_at": "2026-08-05T16:41:13.246746+00:00",
+      "dependency_job_ids": [
+        "23190345",
+        "23190346",
+        "23190347",
+        "23190348",
+        "23190349",
+        "23190350",
+        "23190351",
+        "23190352"
+      ],
+      "submitter_user": "acamtw70yu",
+      "role": "final_audit_after_shen_ten_day_slice",
+      "explicit_time_min": "00:30:00",
+      "status": "pending_dependency",
+      "observed_at": "2026-08-05T16:49:50.487032+00:00"
+    }
+  ],
+  "active_controller_job_id": "23190354",
+  "continuation_generation": 2,
+  "continuation_policy": {
+    "policy_version": 1,
+    "policy": "one_additional_five_day_checkpoint_resume_slice",
+    "eligible_resolution_levels": [
+      "fine",
+      "medium"
+    ],
+    "initial_slice_time": "7-00:00:00",
+    "continuation_time": "5-00:00:00",
+    "maximum_attempts": 2,
+    "automatic_third_slice": false,
+    "requested_on": "2026-08-05",
+    "registered_at": "2026-08-05T13:01:10.107425+00:00",
+    "replaced_controller_job_id": "23009668",
+    "extension_job_ids": [
+      "23188626",
+      "23188624",
+      "23188621",
+      "23188628",
+      "23188627",
+      "23188623",
+      "23188625",
+      "23188622"
+    ]
+  },
+  "continuation_authorization": {
+    "authorization_id": "user-2026-08-05-extra-10d",
+    "authorized_at": "2026-08-05T14:28:12.943292+00:00",
+    "authorized_by": "user",
+    "minimum_slice": 3,
+    "maximum_slice": 3,
+    "walltime": "10-00:00:00",
+    "controller_job_id": "23188639",
+    "reason": "User authorized one additional ten-day continuation",
+    "supersedes_controller_policy": "final_audit_after_single_five_day_extension"
+  },
+  "active_submitter_user": "acamtw70yu",
+  "submitter_route": "shen (acamtw70yu) on SCNet xh5",
+  "account_migrations": [
+    {
+      "migration_id": "user-2026-08-06-switch-to-shen-acamtw70yu",
+      "authorized_at": "2026-08-05T16:35:12.108944+00:00",
+      "authorized_by": "user",
+      "from_user": "cfys01",
+      "to_user": "acamtw70yu",
+      "reason": "cfys01 quota ceiling",
+      "old_job_ids": [
+        "23188621",
+        "23188622",
+        "23188623",
+        "23188624",
+        "23188625",
+        "23188626",
+        "23188627",
+        "23188628"
+      ],
+      "new_job_ids": [
+        "23190292",
+        "23190293",
+        "23190294",
+        "23190295",
+        "23190296",
+        "23190297",
+        "23190298",
+        "23190299"
+      ],
+      "checkpoint_reuse": "same shared filesystem; HDF5 open validation passed before submission",
+      "release_state": "released_after_8_of_8_source_gates_passed",
+      "controller_job_id": "23190303",
+      "released_at": "2026-08-05T16:35:14.259173+00:00",
+      "scheduler_corrections": [
+        {
+          "at": "2026-08-05T16:41:11.814374+00:00",
+          "reason": "implicit 15-minute backfill minimum",
+          "superseded_job_ids": [
+            "23190292",
+            "23190293",
+            "23190294",
+            "23190295",
+            "23190296",
+            "23190297",
+            "23190298",
+            "23190299"
+          ],
+          "replacement_job_ids": [
+            "23190345",
+            "23190346",
+            "23190347",
+            "23190348",
+            "23190349",
+            "23190350",
+            "23190351",
+            "23190352"
+          ],
+          "explicit_time_min": "10-00:00:00"
+        }
+      ],
+      "status": "complete",
+      "verified_at": "2026-08-05T16:49:50.487032+00:00",
+      "verification": "8 main jobs RUNNING under QOS user_acamtw70yu with full ten-day TimeMin/TimeLimit; FCS RUNNING with full two-day TimeMin/TimeLimit"
+    }
+  ],
+  "auxiliary_tasks": {
+    "fcs_gamma_pilot": {
+      "old_slurm_job_id": "23187330",
+      "old_submitter_user": "cfys01",
+      "old_terminal_state": "CANCELLED",
+      "new_slurm_job_id": "23190353",
+      "submitter_user": "acamtw70yu",
+      "status": "running",
+      "resumed_from_checkpoint": "/work/share/giggleliu/cfys01/kharkov_burgers_20260729/data/preflight/fcs_multiscale_L128_chi256_t40.npz.checkpoint.h5",
+      "submitted_at": "2026-08-05T16:35:12.108944+00:00",
+      "released_at": "2026-08-05T16:41:14.458785+00:00",
+      "scheduler_backfill_superseded_job_ids": [
+        "23190300"
+      ],
+      "time_min": "2-00:00:00",
+      "observed_at": "2026-08-05T16:49:50.487032+00:00",
+      "observed_start_time": "2026-08-06T00:41:30",
+      "observed_end_time": "2026-08-08T00:41:30",
+      "observed_time_limit": "2-00:00:00",
+      "observed_time_min": "2-00:00:00"
+    }
+  }
+}

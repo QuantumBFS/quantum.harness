@@ -1,0 +1,332 @@
+{
+  "conclusion": "The finite-field linear F-GHD Navier-Stokes operator has a nonuniform zero-field limit.  On p=r*q^(3/2), its bare dimensionless diffusion term grows as sqrt(q), while the orthogonal linear memory decreases.  A dynamically regulated giant-string nonlinear fluctuation resummation is required before matching to the microscopic QLQ continuum.",
+  "gates": {
+    "bare_diffusion_grows_as_sqrt_q_on_kpz_ray": true,
+    "finite_field_step_stable": true,
+    "full_linear_A_D_Q_retained": true,
+    "linear_fghd_has_uniform_zero_field_kpz_limit": false,
+    "orthogonal_linear_memory_supplies_zero_field_kpz_tail": false
+  },
+  "inputs": {
+    "rays": [
+      0.5,
+      1.0,
+      2.0
+    ],
+    "target_coefficients_used": false,
+    "trajectory_data_used": false
+  },
+  "large_q_checks": [
+    {
+      "expected_sqrt_q_growth_ratio": 1.4142135623730951,
+      "observed_bare_growth_ratio": 1.414213542148502,
+      "orthogonal_memory_ratio_large_over_small_q": 0.36112737050853233,
+      "q_pair": [
+        5.12,
+        10.24
+      ],
+      "ray": 0.5,
+      "relative_residual": 1.4300946935774986e-08
+    },
+    {
+      "expected_sqrt_q_growth_ratio": 1.4142135623730951,
+      "observed_bare_growth_ratio": 1.414213542148502,
+      "orthogonal_memory_ratio_large_over_small_q": 0.3239534014444138,
+      "q_pair": [
+        5.12,
+        10.24
+      ],
+      "ray": 1.0,
+      "relative_residual": 1.4300946935774986e-08
+    },
+    {
+      "expected_sqrt_q_growth_ratio": 1.4142135623730951,
+      "observed_bare_growth_ratio": 1.414213562493554,
+      "orthogonal_memory_ratio_large_over_small_q": 0.28663217581865885,
+      "q_pair": [
+        5.12,
+        10.24
+      ],
+      "ray": 2.0,
+      "relative_residual": 8.517720186510306e-11
+    }
+  ],
+  "method": "fixed_z_over_k_3_2_joint_scaled_full_mode_Schur_audit",
+  "rows": [
+    {
+      "dimensionless_bare_diffusion": 0.16750836452101478,
+      "dimensionless_orthogonal_memory": 0.6753033611963422,
+      "dimensionless_total": 0.8428117257173571,
+      "field": 0.0833333333333333,
+      "p": 0.256,
+      "q": 0.64,
+      "ray_z_over_k_3_2": 0.5
+    },
+    {
+      "dimensionless_bare_diffusion": 0.2110473144934901,
+      "dimensionless_orthogonal_memory": 0.7050950470810182,
+      "dimensionless_total": 0.9161423615745083,
+      "field": 0.0833333333333333,
+      "p": 0.512,
+      "q": 0.64,
+      "ray_z_over_k_3_2": 1.0
+    },
+    {
+      "dimensionless_bare_diffusion": 0.2659029540541315,
+      "dimensionless_orthogonal_memory": 0.7074030527630529,
+      "dimensionless_total": 0.9733060068171845,
+      "field": 0.0833333333333333,
+      "p": 1.024,
+      "q": 0.64,
+      "ray_z_over_k_3_2": 2.0
+    },
+    {
+      "dimensionless_bare_diffusion": 0.2368925634087411,
+      "dimensionless_orthogonal_memory": 0.43722906694164126,
+      "dimensionless_total": 0.6741216303503823,
+      "field": 0.0833333333333333,
+      "p": 0.724077,
+      "q": 1.28,
+      "ray_z_over_k_3_2": 0.5
+    },
+    {
+      "dimensionless_bare_diffusion": 0.29846599590253253,
+      "dimensionless_orthogonal_memory": 0.45489066080838025,
+      "dimensionless_total": 0.7533566567109128,
+      "field": 0.0833333333333333,
+      "p": 1.448155,
+      "q": 1.28,
+      "ray_z_over_k_3_2": 1.0
+    },
+    {
+      "dimensionless_bare_diffusion": 0.37604354763696335,
+      "dimensionless_orthogonal_memory": 0.44626640252527433,
+      "dimensionless_total": 0.8223099501622376,
+      "field": 0.0833333333333333,
+      "p": 2.896309,
+      "q": 1.28,
+      "ray_z_over_k_3_2": 2.0
+    },
+    {
+      "dimensionless_bare_diffusion": 0.33501672904202956,
+      "dimensionless_orthogonal_memory": 0.28083031194928687,
+      "dimensionless_total": 0.6158470409913167,
+      "field": 0.0833333333333333,
+      "p": 2.048,
+      "q": 2.56,
+      "ray_z_over_k_3_2": 0.5
+    },
+    {
+      "dimensionless_bare_diffusion": 0.42209462898698014,
+      "dimensionless_orthogonal_memory": 0.28685317173052405,
+      "dimensionless_total": 0.7089478007175045,
+      "field": 0.0833333333333333,
+      "p": 4.096,
+      "q": 2.56,
+      "ray_z_over_k_3_2": 1.0
+    },
+    {
+      "dimensionless_bare_diffusion": 0.531805908108263,
+      "dimensionless_orthogonal_memory": 0.27219986865167967,
+      "dimensionless_total": 0.8040057767599431,
+      "field": 0.0833333333333333,
+      "p": 8.192,
+      "q": 2.56,
+      "ray_z_over_k_3_2": 2.0
+    },
+    {
+      "dimensionless_bare_diffusion": 0.4737852086086876,
+      "dimensionless_orthogonal_memory": 0.16410251261290879,
+      "dimensionless_total": 0.6378877212215964,
+      "field": 0.0833333333333333,
+      "p": 5.792619,
+      "q": 5.12,
+      "ray_z_over_k_3_2": 0.5
+    },
+    {
+      "dimensionless_bare_diffusion": 0.5969319574549192,
+      "dimensionless_orthogonal_memory": 0.16211657489192996,
+      "dimensionless_total": 0.7590485323468492,
+      "field": 0.0833333333333333,
+      "p": 11.585238,
+      "q": 5.12,
+      "ray_z_over_k_3_2": 1.0
+    },
+    {
+      "dimensionless_bare_diffusion": 0.7520871277327847,
+      "dimensionless_orthogonal_memory": 0.14717160409799573,
+      "dimensionless_total": 0.8992587318307804,
+      "field": 0.0833333333333333,
+      "p": 23.170475,
+      "q": 5.12,
+      "ray_z_over_k_3_2": 2.0
+    },
+    {
+      "dimensionless_bare_diffusion": 0.6700334580840591,
+      "dimensionless_orthogonal_memory": 0.05926190887374301,
+      "dimensionless_total": 0.7292953669578021,
+      "field": 0.0833333333333333,
+      "p": 16.384,
+      "q": 10.24,
+      "ray_z_over_k_3_2": 0.5
+    },
+    {
+      "dimensionless_bare_diffusion": 0.8441892579739603,
+      "dimensionless_orthogonal_memory": 0.05251821586675876,
+      "dimensionless_total": 0.8967074738407189,
+      "field": 0.0833333333333333,
+      "p": 32.768,
+      "q": 10.24,
+      "ray_z_over_k_3_2": 1.0
+    },
+    {
+      "dimensionless_bare_diffusion": 1.063611816216526,
+      "dimensionless_orthogonal_memory": 0.04218411710133077,
+      "dimensionless_total": 1.1057959333178566,
+      "field": 0.0833333333333333,
+      "p": 65.536,
+      "q": 10.24,
+      "ray_z_over_k_3_2": 2.0
+    },
+    {
+      "dimensionless_bare_diffusion": 0.164611569225808,
+      "dimensionless_orthogonal_memory": 0.6741726028666686,
+      "dimensionless_total": 0.8387841720924766,
+      "field": 0.1,
+      "p": 0.256,
+      "q": 0.64,
+      "ray_z_over_k_3_2": 0.5
+    },
+    {
+      "dimensionless_bare_diffusion": 0.20739758112382264,
+      "dimensionless_orthogonal_memory": 0.7034033606271908,
+      "dimensionless_total": 0.9108009417510134,
+      "field": 0.1,
+      "p": 0.512,
+      "q": 0.64,
+      "ray_z_over_k_3_2": 1.0
+    },
+    {
+      "dimensionless_bare_diffusion": 0.26130457815518376,
+      "dimensionless_orthogonal_memory": 0.7053900395955772,
+      "dimensionless_total": 0.9666946177507609,
+      "field": 0.1,
+      "p": 1.024,
+      "q": 0.64,
+      "ray_z_over_k_3_2": 2.0
+    },
+    {
+      "dimensionless_bare_diffusion": 0.2327958768634801,
+      "dimensionless_orthogonal_memory": 0.436644913343145,
+      "dimensionless_total": 0.6694407902066252,
+      "field": 0.1,
+      "p": 0.724077,
+      "q": 1.28,
+      "ray_z_over_k_3_2": 0.5
+    },
+    {
+      "dimensionless_bare_diffusion": 0.2933044931012727,
+      "dimensionless_orthogonal_memory": 0.45395012775206184,
+      "dimensionless_total": 0.7472546208533347,
+      "field": 0.1,
+      "p": 1.448155,
+      "q": 1.28,
+      "ray_z_over_k_3_2": 1.0
+    },
+    {
+      "dimensionless_bare_diffusion": 0.36954046235699833,
+      "dimensionless_orthogonal_memory": 0.44498895382627823,
+      "dimensionless_total": 0.8145294161832768,
+      "field": 0.1,
+      "p": 2.896309,
+      "q": 1.28,
+      "ray_z_over_k_3_2": 2.0
+    },
+    {
+      "dimensionless_bare_diffusion": 0.329223138451616,
+      "dimensionless_orthogonal_memory": 0.28067427256082167,
+      "dimensionless_total": 0.6098974110124376,
+      "field": 0.1,
+      "p": 2.048,
+      "q": 2.56,
+      "ray_z_over_k_3_2": 0.5
+    },
+    {
+      "dimensionless_bare_diffusion": 0.41479516224764523,
+      "dimensionless_orthogonal_memory": 0.2864227200397228,
+      "dimensionless_total": 0.7012178822873679,
+      "field": 0.1,
+      "p": 4.096,
+      "q": 2.56,
+      "ray_z_over_k_3_2": 1.0
+    },
+    {
+      "dimensionless_bare_diffusion": 0.5226091563103675,
+      "dimensionless_orthogonal_memory": 0.2712680526309525,
+      "dimensionless_total": 0.7938772089413199,
+      "field": 0.1,
+      "p": 8.192,
+      "q": 2.56,
+      "ray_z_over_k_3_2": 2.0
+    },
+    {
+      "dimensionless_bare_diffusion": 0.4655918341037146,
+      "dimensionless_orthogonal_memory": 0.16425338356451114,
+      "dimensionless_total": 0.6298452176682258,
+      "field": 0.1,
+      "p": 5.792619,
+      "q": 5.12,
+      "ray_z_over_k_3_2": 0.5
+    },
+    {
+      "dimensionless_bare_diffusion": 0.5866089524464317,
+      "dimensionless_orthogonal_memory": 0.16195487290357716,
+      "dimensionless_total": 0.7485638253500089,
+      "field": 0.1,
+      "p": 11.585238,
+      "q": 5.12,
+      "ray_z_over_k_3_2": 1.0
+    },
+    {
+      "dimensionless_bare_diffusion": 0.7390809566115295,
+      "dimensionless_orthogonal_memory": 0.1462298123946276,
+      "dimensionless_total": 0.8853107690061571,
+      "field": 0.1,
+      "p": 23.170475,
+      "q": 5.12,
+      "ray_z_over_k_3_2": 2.0
+    },
+    {
+      "dimensionless_bare_diffusion": 0.658446276903232,
+      "dimensionless_orthogonal_memory": 0.059475001509425356,
+      "dimensionless_total": 0.7179212784126571,
+      "field": 0.1,
+      "p": 16.384,
+      "q": 10.24,
+      "ray_z_over_k_3_2": 0.5
+    },
+    {
+      "dimensionless_bare_diffusion": 0.8295903244952905,
+      "dimensionless_orthogonal_memory": 0.05225826818144569,
+      "dimensionless_total": 0.8818485926767358,
+      "field": 0.1,
+      "p": 32.768,
+      "q": 10.24,
+      "ray_z_over_k_3_2": 1.0
+    },
+    {
+      "dimensionless_bare_diffusion": 1.045218312620735,
+      "dimensionless_orthogonal_memory": 0.04087362732180042,
+      "dimensionless_total": 1.0860919399425348,
+      "field": 0.1,
+      "p": 65.536,
+      "q": 10.24,
+      "ray_z_over_k_3_2": 2.0
+    }
+  ],
+  "schema_version": 1,
+  "sources": [
+    "docs/regulated_infinite_mode_fghd_adaptive_kpz_ray_grid.json",
+    "docs/regulated_infinite_mode_fghd_adaptive_kpz_ray_largeq.json"
+  ]
+}

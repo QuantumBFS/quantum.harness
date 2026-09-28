@@ -1,0 +1,143 @@
+{
+  "frozen_weak_projection": {
+    "D": 2.311430852059063,
+    "a": 0.21411127321024834,
+    "mse": 3.0313846981135574e-08,
+    "n_obs": 8030
+  },
+  "method": "finite_window_self_consistent_full_non_diagonal_linear_fghd",
+  "regulators": {
+    "curvature_q_step": 0.25,
+    "fields": [
+      0.26,
+      0.24,
+      0.22,
+      0.2,
+      0.18,
+      0.16,
+      0.145,
+      0.135
+    ],
+    "nodes_per_string": 56,
+    "q_maximum": 8.0,
+    "q_step": 0.25,
+    "string_xi_buffer": 3.0,
+    "string_xi_cutoff": 6.0
+  },
+  "schema": 1,
+  "scope": {
+    "complete_linear_A_D_Q_propagated": true,
+    "finite_window_field_dependence_retained": true,
+    "nonlinear_state_derivative_vertices_included": false,
+    "physical_F1_claimed": false
+  },
+  "self_consistency": {
+    "equations": [
+      "ell=1/h^2 at chi=1/4",
+      "Var_q[F_h(q,tau_h)]=1",
+      "t_h=tau_h/h^3"
+    ],
+    "exact_D0_inserted_into_wall_scale": false,
+    "kpz_scaling_function_used": false
+  },
+  "self_consistent_knots": [
+    {
+      "fdt_residual": 1.4708115619875397e-16,
+      "field": 0.26,
+      "mode_count": 1344,
+      "physical_time": 40.532188692775335,
+      "rms_length": 14.792899408284022,
+      "root_variance_residual": 1.0666192373776084e-09,
+      "structure_at_qmax": 0.023057774171551103,
+      "susceptibility_captured_fraction": 0.9913640378824021,
+      "tau_root": 0.7123937484642193,
+      "wall_at_ymax": 0.5000151221054785
+    },
+    {
+      "fdt_residual": 1.4475118006581074e-16,
+      "field": 0.24,
+      "mode_count": 1400,
+      "physical_time": 50.44029541381836,
+      "rms_length": 17.36111111111111,
+      "root_variance_residual": 4.793025976113086e-10,
+      "structure_at_qmax": -0.002053343484493193,
+      "susceptibility_captured_fraction": 0.9911676718743129,
+      "tau_root": 0.6972866438006249,
+      "wall_at_ymax": 0.5000451457375544
+    },
+    {
+      "fdt_residual": 1.4789960448812997e-16,
+      "field": 0.22,
+      "mode_count": 1568,
+      "physical_time": 64.13247535276342,
+      "rms_length": 20.66115702479339,
+      "root_variance_residual": 1.408415606363178e-10,
+      "structure_at_qmax": -0.023390089448029873,
+      "susceptibility_captured_fraction": 0.9914447211859996,
+      "tau_root": 0.6828825975562249,
+      "wall_at_ymax": 0.49999169524826176
+    },
+    {
+      "fdt_residual": 1.5588065382399576e-16,
+      "field": 0.2,
+      "mode_count": 1680,
+      "physical_time": 83.64959767622241,
+      "rms_length": 24.999999999999996,
+      "root_variance_residual": 2.209188387780614e-11,
+      "structure_at_qmax": -0.0005394473954270294,
+      "susceptibility_captured_fraction": 0.9913008918809172,
+      "tau_root": 0.6691967814097795,
+      "wall_at_ymax": 0.4999766412517527
+    },
+    {
+      "fdt_residual": 1.4363873753007558e-16,
+      "field": 0.18,
+      "mode_count": 1904,
+      "physical_time": 112.62217418648596,
+      "rms_length": 30.8641975308642,
+      "root_variance_residual": 1.16950893414014e-12,
+      "structure_at_qmax": -0.0048781993614780885,
+      "susceptibility_captured_fraction": 0.9915355355961699,
+      "tau_root": 0.6568125198555861,
+      "wall_at_ymax": 0.5000172525702793
+    },
+    {
+      "fdt_residual": 1.4833384559414354e-16,
+      "field": 0.16,
+      "mode_count": 2128,
+      "physical_time": 157.78635773267462,
+      "rms_length": 39.0625,
+      "root_variance_residual": -3.463830444694338e-09,
+      "structure_at_qmax": 0.0031666407456519153,
+      "susceptibility_captured_fraction": 0.9915402390040976,
+      "tau_root": 0.6462929212730354,
+      "wall_at_ymax": 0.49998503425961827
+    },
+    {
+      "fdt_residual": 1.564646237735631e-16,
+      "field": 0.145,
+      "mode_count": 2352,
+      "physical_time": 210.0607234167785,
+      "rms_length": 47.562425683709876,
+      "root_variance_residual": 2.541372001729769e-09,
+      "structure_at_qmax": 0.007290412359647982,
+      "susceptibility_captured_fraction": 0.9915965767668057,
+      "tau_root": 0.6403963729264762,
+      "wall_at_ymax": 0.499998714140913
+    },
+    {
+      "fdt_residual": 1.4539321957984432e-16,
+      "field": 0.135,
+      "mode_count": 2520,
+      "physical_time": 259.23800059650563,
+      "rms_length": 54.869684499314126,
+      "root_variance_residual": 1.0236256287043943e-13,
+      "structure_at_qmax": 0.00521535539187028,
+      "susceptibility_captured_fraction": 0.9915994476999117,
+      "tau_root": 0.6378226957176276,
+      "wall_at_ymax": 0.5000152309752898
+    }
+  ],
+  "uses_target_a_or_D": false,
+  "uses_target_trajectory": false
+}

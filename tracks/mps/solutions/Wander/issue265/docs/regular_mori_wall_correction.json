@@ -1,0 +1,60 @@
+{
+  "correction_audit": {
+    "maximum_absolute_delta_structure_factor": 0.03927306340274799,
+    "maximum_absolute_delta_wall": 0.01282534085495296,
+    "maximum_mass_error_corrected": 6.661338147750939e-16,
+    "maximum_mass_error_leading": 4.440892098500626e-16,
+    "minimum_corrected_density": -8.242241532427975e-10,
+    "minimum_leading_density": -5.510156444345947e-10
+  },
+  "decision": {
+    "constant_regular_kernel_sufficient": false,
+    "criterion": "requires a certified d and stable simultaneous a,D prediction"
+  },
+  "frozen_weak_estimator": {
+    "leading_kpz": {
+      "D": 2.2212066064947176,
+      "a": 0.21222807101109065,
+      "mse": 3.5807087053080057e-09,
+      "n_obs": 8041
+    },
+    "regular_mori_first_order": {
+      "D": 2.034905722836227,
+      "a": 0.21283438676126704,
+      "mse": 5.2045520927859085e-09,
+      "n_obs": 8041
+    },
+    "shift": {
+      "D": -0.1863008836584905,
+      "a": 0.0006063157501763894
+    }
+  },
+  "inputs": {
+    "dt": 0.2,
+    "dx": 1.0,
+    "fit_window": [
+      52.0,
+      198.0
+    ],
+    "length": 400,
+    "profile_window": [
+      50.0,
+      200.0
+    ],
+    "regular_kernel_d": -0.2122065907891938,
+    "target_coefficients_used": false,
+    "trajectory_data_used": false,
+    "x_crop": [
+      -120.0,
+      120.0
+    ]
+  },
+  "schema_version": 1,
+  "theory": {
+    "kpz_scale": 1.926524141187757,
+    "leading_profile": "stationary_Praehofer_Spohn_KPZ",
+    "physical_regular_kernel_certified": false,
+    "reason_not_certified": "UV/contact matching to the exact QLQ continuum is incomplete",
+    "resolvent_correction": "delta_S=-d*khat^2*(S0 convolution S0)"
+  }
+}

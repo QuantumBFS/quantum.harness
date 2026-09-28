@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "seed": 20260730,
+  "candidate_ensembles": [
+    128,
+    256,
+    512,
+    1024,
+    2048
+  ],
+  "screening_ensemble": 512,
+  "minimum_final_ensemble": 2048,
+  "observable_relative_change_max": 0.02,
+  "conservation_error_max": 1e-12,
+  "variance_relative_error_max": 0.02,
+  "current_skewness_abs_max": 0.05,
+  "pilot": {
+    "n_cells": 64,
+    "n_steps": 50,
+    "dt": 0.0002,
+    "dx": 1.0,
+    "params": {
+      "Dm": 0.8,
+      "Dphi": 1.1,
+      "lambda_m": 1.0,
+      "lambda_phi": 1.0,
+      "chi": 0.25
+    }
+  },
+  "forward_refinement": {
+    "L": 512,
+    "mu": 0.05,
+    "width": 2.0,
+    "alpha": 1.0,
+    "t_max": 200.0,
+    "output_dt": 2.0,
+    "comparison_t_min": 50.0,
+    "spatial_window": 128.0,
+    "params": {
+      "Dm": 0.8,
+      "Dphi": 1.1,
+      "lambda_m": 1.0,
+      "lambda_phi": 0.8,
+      "chi": 0.25
+    },
+    "levels": {
+      "screening": {
+        "spatial_stride": 4,
+        "dt_internal": 0.2
+      },
+      "final": {
+        "spatial_stride": 2,
+        "dt_internal": 0.1
+      },
+      "reference": {
+        "spatial_stride": 1,
+        "dt_internal": 0.05
+      }
+    },
+    "thresholds": {
+      "profile_relative_l2_max": 0.001,
+      "current_relative_l2_max": 0.005,
+      "conservation_error_max": 1e-12
+    }
+  }
+}

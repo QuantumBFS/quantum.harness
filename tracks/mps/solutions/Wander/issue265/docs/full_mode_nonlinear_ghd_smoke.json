@@ -1,0 +1,135 @@
+{
+  "inputs": {
+    "cell_length": 512.0,
+    "ensembles": 8,
+    "field": 0.25,
+    "nonlinear_strength": 1.0,
+    "output_times": [
+      0.0,
+      0.04,
+      0.1
+    ],
+    "rapidity_points": 16,
+    "rapidity_u_extent": 1.5,
+    "seed": 265,
+    "spatial_points": 16,
+    "string_xi_buffer": 0.5,
+    "string_xi_cutoff": 0.25,
+    "target_coefficients_used": false,
+    "time_step": 0.02,
+    "trajectory_data_used": false
+  },
+  "operator": {
+    "active_strings": 1,
+    "dimension": 16,
+    "full_fdt_noise_covariance_retained": true,
+    "full_off_diagonal_diffusion_retained": true,
+    "full_velocity_vertex_retained": true,
+    "ou_negative_spectral_weight_clipped": 1.1680631171838663e-12,
+    "relative_fdt_identity_residual": 0.0
+  },
+  "schema_version": 1,
+  "scope": {
+    "finite_cutoff_nonlinear_fluctuating_ghd": true,
+    "infinite_mode_limit_converged": false,
+    "physical_F1_perp_claimed": false,
+    "required_next_check": "joint h->0, string-cutoff, rapidity-grid, spatial-grid, time-step, cell-volume and ensemble convergence"
+  },
+  "stability": {
+    "maximum_equal_time_variance_over_chi": 2.110834394426469,
+    "maximum_rms_occupation_fluctuation": 0.48375362649663334,
+    "minimum_equal_time_variance_over_chi": 0.49112061035645543
+  },
+  "structure_factor": [
+    {
+      "equal_time_variance_over_chi": [
+        1.143100090332219,
+        0.6639426877884789,
+        0.965858197865109,
+        2.1106008216127963,
+        1.1814866590228368,
+        0.4911899727621008,
+        0.7879194007828004
+      ],
+      "positive_wave_numbers": [
+        0.0007669903939428206,
+        0.0015339807878856412,
+        0.0023009711818284618,
+        0.0030679615757712823,
+        0.003834951969714103,
+        0.0046019423636569235,
+        0.005368932757599744
+      ],
+      "structure_factor_over_chi": [
+        1.143100090332219,
+        0.6639426877884791,
+        0.965858197865109,
+        2.1106008216127963,
+        1.1814866590228368,
+        0.4911899727621009,
+        0.7879194007828004
+      ],
+      "time": 0.0
+    },
+    {
+      "equal_time_variance_over_chi": [
+        1.1430786348808961,
+        0.6639926771617513,
+        0.9658807512540633,
+        2.110606476257149,
+        1.1814441028793696,
+        0.49126552742313,
+        0.7879720813637523
+      ],
+      "positive_wave_numbers": [
+        0.0007669903939428206,
+        0.0015339807878856412,
+        0.0023009711818284618,
+        0.0030679615757712823,
+        0.003834951969714103,
+        0.0046019423636569235,
+        0.005368932757599744
+      ],
+      "structure_factor_over_chi": [
+        1.1430893608625405,
+        0.6639676765447495,
+        0.9658694631168597,
+        2.11060362970694,
+        1.1814653627265161,
+        0.4912277004332269,
+        0.7879456892858726
+      ],
+      "time": 0.04
+    },
+    {
+      "equal_time_variance_over_chi": [
+        1.1431068910500461,
+        0.664019601779826,
+        0.965784418309165,
+        2.110834394426469,
+        1.1812749844245856,
+        0.49112061035645543,
+        0.7879258224860054
+      ],
+      "positive_wave_numbers": [
+        0.0007669903939428206,
+        0.0015339807878856412,
+        0.0023009711818284618,
+        0.0030679615757712823,
+        0.003834951969714103,
+        0.0046019423636569235,
+        0.005368932757599744
+      ],
+      "structure_factor_over_chi": [
+        1.1431034855995021,
+        0.6639811133810866,
+        0.9658212629822182,
+        2.110717567048343,
+        1.18138074850185,
+        0.49115505760835493,
+        0.7879223979009795
+      ],
+      "time": 0.1
+    }
+  ]
+}

@@ -1,0 +1,127 @@
+{
+  "schema_version": 2,
+  "description": "First-principles finite-field quadratures of both the diagonal dressed-kernel formula and the exact two-species charge-difference square; no Heisenberg trajectory or target Burgers coefficient is used.",
+  "common_parameters": {
+    "string_xi_cutoff": 8.0,
+    "string_xi_buffer": 6.0,
+    "string_boundary": "robin",
+    "rapidity_u_extent": 60.0,
+    "rapidity_step": 0.25,
+    "velocity_group_ratio": 1.3
+  },
+  "runs": [
+    {"field": 0.30, "velocity_series_terms": 100, "diagonal_diffusion": 2.054310634852249},
+    {"field": 0.30, "velocity_series_terms": 150, "diagonal_diffusion": 2.025730186551842},
+    {"field": 0.30, "velocity_series_terms": 300, "diagonal_diffusion": 1.998896726181555},
+    {"field": 0.30, "velocity_series_terms": 600, "diagonal_diffusion": 1.9869777526388481},
+    {"field": 0.25, "velocity_series_terms": 150, "diagonal_diffusion": 2.5676719794022937},
+    {"field": 0.25, "velocity_series_terms": 600, "diagonal_diffusion": 2.5156989036831363},
+    {"field": 0.20, "velocity_series_terms": 100, "diagonal_diffusion": 3.427050935515735},
+    {"field": 0.20, "velocity_series_terms": 150, "diagonal_diffusion": 3.374326898321098},
+    {"field": 0.20, "velocity_series_terms": 300, "diagonal_diffusion": 3.324436798116541},
+    {"field": 0.20, "velocity_series_terms": 600, "diagonal_diffusion": 3.301949538755397},
+    {"field": 0.15, "velocity_series_terms": 150, "diagonal_diffusion": 4.718537659314285},
+    {"field": 0.15, "velocity_series_terms": 600, "diagonal_diffusion": 4.609896264014643}
+  ],
+  "full_cross_runs": [
+    {
+      "field": 0.2,
+      "string_xi_cutoff": 8.0,
+      "velocity_series_terms": 150,
+      "h_times_diagonal_diffusion": 0.6748294955951009,
+      "h_times_full_diffusion": 0.4597357471490877,
+      "full_leading_subtracted": -0.6102033509117768
+    },
+    {
+      "field": 0.2,
+      "string_xi_cutoff": 8.0,
+      "velocity_series_terms": 300,
+      "h_times_diagonal_diffusion": 0.6648514818107243,
+      "h_times_full_diffusion": 0.45998908650008685,
+      "full_leading_subtracted": -0.6089366541567811
+    },
+    {
+      "field": 0.2,
+      "string_xi_cutoff": 8.0,
+      "velocity_series_terms": 600,
+      "h_times_diagonal_diffusion": 0.6603540274736175,
+      "h_times_full_diffusion": 0.46011598193592235,
+      "full_leading_subtracted": -0.6083021769776038
+    },
+    {
+      "field": 0.2,
+      "string_xi_cutoff": 12.0,
+      "velocity_series_terms": 300,
+      "h_times_diagonal_diffusion": 0.6648789607341178,
+      "h_times_full_diffusion": 0.46001525722984893,
+      "full_leading_subtracted": -0.6088058005079708
+    },
+    {
+      "field": 0.15,
+      "string_xi_cutoff": 8.0,
+      "velocity_series_terms": 300,
+      "h_times_diagonal_diffusion": 0.6962445603994966,
+      "h_times_full_diffusion": 0.487617362788354,
+      "full_leading_subtracted": -0.6277270302872613
+    },
+    {
+      "field": 0.1,
+      "string_xi_cutoff": 8.0,
+      "velocity_series_terms": 100,
+      "h_times_diagonal_diffusion": 0.7519284751655304,
+      "h_times_full_diffusion": 0.5144357227774339,
+      "full_leading_subtracted": -0.6734069455400924
+    },
+    {
+      "field": 0.1,
+      "string_xi_cutoff": 8.0,
+      "velocity_series_terms": 200,
+      "h_times_diagonal_diffusion": 0.7325321663905042,
+      "h_times_full_diffusion": 0.5147194262488459,
+      "full_leading_subtracted": -0.6705699108259715
+    },
+    {
+      "field": 0.075,
+      "string_xi_cutoff": 8.0,
+      "velocity_series_terms": 100,
+      "h_times_diagonal_diffusion": 0.7671657833893041,
+      "h_times_full_diffusion": 0.5269451752989273,
+      "full_leading_subtracted": -0.7310832271002115
+    },
+    {
+      "field": 0.075,
+      "string_xi_cutoff": 8.0,
+      "velocity_series_terms": 200,
+      "h_times_diagonal_diffusion": 0.7466369808694107,
+      "h_times_full_diffusion": 0.5271795073259201,
+      "full_leading_subtracted": -0.7279588000736403,
+      "rapidity_points": 6400,
+      "rho_total_relative_l2_error": 0.002032926488996737
+    }
+  ],
+  "full_cross_limit_diagnostic": {
+    "exact_leading_D0": 0.5817764173314431,
+    "linear_in_h_D1_from_h_0p1_0p15_0p2": -0.7289346401361639,
+    "quadratic_in_h_D1_from_h_0p1_0p15_0p2": -0.8265097535905499,
+    "fixed_D0_quadratic_D1": -0.71930245,
+    "linear_in_h_D1_from_h_0p075_0p1_0p15_0p2": -0.7769846,
+    "fixed_D0_quadratic_D1_from_h_0p075_0p1_0p15_0p2": -0.75241331,
+    "status": "withdrawn_for_D1_order_of_limits_diagnostic_only",
+    "interpretation": "The exact cross contraction is stable in velocity-series and string-tail cutoffs at h=0.2, but Eq. (16) of the cited supplement states D_spin=D_diagonal+O(h) only after the infinite-string limit. The finite-cutoff cross term has a spurious 1/h component. Its apparent approach to 5*pi/27 and all D1 fits listed above are retained only as an order-of-limits failure diagnostic and are not physical D1 estimates."
+  },
+  "continuum_checks": [
+    {"field": 0.30, "velocity_series_terms": 300, "rapidity_u_extent": 60.0, "rapidity_step": 0.25, "diagonal_diffusion": 1.998896726181555, "rho_total_relative_l2_error": 0.003252789579257757},
+    {"field": 0.30, "velocity_series_terms": 300, "rapidity_u_extent": 60.0, "rapidity_step": 0.125, "diagonal_diffusion": 2.0093013696149553, "rho_total_relative_l2_error": 0.0027680119133173457},
+    {"field": 0.30, "velocity_series_terms": 300, "rapidity_u_extent": 100.0, "rapidity_step": 0.24801587301587305, "diagonal_diffusion": 2.013406543925121, "rho_total_relative_l2_error": 0.0020728156379862645},
+    {"field": 0.20, "velocity_series_terms": 150, "rapidity_u_extent": 60.0, "rapidity_step": 0.50, "diagonal_diffusion": 3.266142250082757, "rho_total_relative_l2_error": 0.04180296683441958},
+    {"field": 0.20, "velocity_series_terms": 150, "rapidity_u_extent": 60.0, "rapidity_step": 0.25, "diagonal_diffusion": 3.374326898321098, "rho_total_relative_l2_error": 0.0026086359677308427},
+    {"field": 0.20, "velocity_series_terms": 150, "rapidity_u_extent": 60.0, "rapidity_step": 0.125, "diagonal_diffusion": 3.3911243087969245, "rho_total_relative_l2_error": 0.001886638755072146}
+  ],
+  "provenance": {
+    "program": "scripts/evaluate_full_tba_diffusion.py",
+    "trajectory_data_used": false,
+    "target_coefficients_used": false,
+    "source_equation": "Eq. (16), Supplemental Material, arXiv:2003.13708",
+    "status": "diagnostic_nonuniform_sequence_not_a_converged_D1"
+  }
+}

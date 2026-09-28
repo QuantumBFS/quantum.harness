@@ -1,0 +1,5132 @@
+{
+  "all_captured_susceptibility_fractions_valid": true,
+  "all_fdt_covariances_positive_semidefinite": true,
+  "all_finite_regulator_matrix_iterations_converged": true,
+  "all_required_replicates_present": true,
+  "common_regulator_signature": {
+    "fourier_points": 4,
+    "kernel_theta_step": 0.25,
+    "lattice_wave_number": false,
+    "nodes_per_string": 12,
+    "samples_per_internal_wave": 8,
+    "scaled_rapidity_extent": 6.0,
+    "scaled_rapidity_map_alpha": 3.0,
+    "string_xi_buffer": 0.5,
+    "string_xi_cutoff": 6.0,
+    "trace_distribution": "rademacher",
+    "trace_pairings_per_frame": 1,
+    "trace_source_layout": "pairwise"
+  },
+  "field_rows": [
+    {
+      "captured_susceptibility_fraction_range": [
+        0.9714265557950033,
+        0.9714265557950033
+      ],
+      "field": 0.2,
+      "input_files": [
+        "docs/scnet_full_matrix_infinite_mode_20260816_003/h0200_seed1265_samples8.json",
+        "docs/scnet_full_matrix_infinite_mode_20260816_003/h0200_seed2265_samples8.json",
+        "docs/scnet_full_matrix_infinite_mode_20260816_003/h0200_seed265_samples8.json",
+        "docs/scnet_full_matrix_infinite_mode_20260816_003/h0200_seed3265_samples8.json"
+      ],
+      "maximum_structure_factor_sem": 0.0008930185755692821,
+      "replicate_count": 4,
+      "seeds": [
+        1265,
+        2265,
+        265,
+        3265
+      ]
+    },
+    {
+      "captured_susceptibility_fraction_range": [
+        0.971726674195726,
+        0.971726674195726
+      ],
+      "field": 0.16666666666666666,
+      "input_files": [
+        "docs/scnet_full_matrix_infinite_mode_20260816_003/h016667_seed1265_samples8.json",
+        "docs/scnet_full_matrix_infinite_mode_20260816_003/h016667_seed2265_samples8.json",
+        "docs/scnet_full_matrix_infinite_mode_20260816_003/h016667_seed265_samples8.json",
+        "docs/scnet_full_matrix_infinite_mode_20260816_003/h016667_seed3265_samples8.json"
+      ],
+      "maximum_structure_factor_sem": 0.0009230950735813448,
+      "replicate_count": 4,
+      "seeds": [
+        1265,
+        2265,
+        265,
+        3265
+      ]
+    },
+    {
+      "captured_susceptibility_fraction_range": [
+        0.9719641883845794,
+        0.9719641883845794
+      ],
+      "field": 0.125,
+      "input_files": [
+        "docs/scnet_full_matrix_infinite_mode_20260816_003/h0125_seed1265_samples8.json",
+        "docs/scnet_full_matrix_infinite_mode_20260816_003/h0125_seed2265_samples8.json",
+        "docs/scnet_full_matrix_infinite_mode_20260816_003/h0125_seed265_samples8.json",
+        "docs/scnet_full_matrix_infinite_mode_20260816_003/h0125_seed3265_samples8.json"
+      ],
+      "maximum_structure_factor_sem": 0.0015264367474585492,
+      "replicate_count": 4,
+      "seeds": [
+        1265,
+        2265,
+        265,
+        3265
+      ]
+    },
+    {
+      "captured_susceptibility_fraction_range": [
+        0.9720105301718236,
+        0.9720105301718236
+      ],
+      "field": 0.1,
+      "input_files": [
+        "docs/scnet_full_matrix_infinite_mode_20260816_003/h0100_seed1265_samples8.json",
+        "docs/scnet_full_matrix_infinite_mode_20260816_003/h0100_seed2265_samples8.json",
+        "docs/scnet_full_matrix_infinite_mode_20260816_003/h0100_seed265_samples8.json",
+        "docs/scnet_full_matrix_infinite_mode_20260816_003/h0100_seed3265_samples8.json"
+      ],
+      "maximum_structure_factor_sem": 0.001417197529699965,
+      "replicate_count": 4,
+      "seeds": [
+        1265,
+        2265,
+        265,
+        3265
+      ]
+    }
+  ],
+  "fields_descending": [
+    0.2,
+    0.16666666666666666,
+    0.125,
+    0.1
+  ],
+  "input_sha256_by_file": {
+    "docs/scnet_full_matrix_infinite_mode_20260816_003/h0100_seed1265_samples8.json": "e83ad9ed76a1021bb85b1b5d3bd3392fc45c40ab45b766b45a8783eaa421f4d2",
+    "docs/scnet_full_matrix_infinite_mode_20260816_003/h0100_seed2265_samples8.json": "a9314081e8b70dbc508d083b04d3f88d897af1cffc00398f592a5e4e4b692ca6",
+    "docs/scnet_full_matrix_infinite_mode_20260816_003/h0100_seed265_samples8.json": "fcfc0386b5bdfd87fd544259022a18281fbab500bc334bef8d92fa8e1353b620",
+    "docs/scnet_full_matrix_infinite_mode_20260816_003/h0100_seed3265_samples8.json": "3ff80e29351c362118e11e818b62a9de2d11dc6239112816da3ebccadda46c28",
+    "docs/scnet_full_matrix_infinite_mode_20260816_003/h0125_seed1265_samples8.json": "ea72d7e067a10dfc8be8f674d451742f517d1dcadcf00996f51c4a14187b05c9",
+    "docs/scnet_full_matrix_infinite_mode_20260816_003/h0125_seed2265_samples8.json": "0697bbc1de7b59804be896acb81add869a1fdc787443c34107881b96d55528aa",
+    "docs/scnet_full_matrix_infinite_mode_20260816_003/h0125_seed265_samples8.json": "0ae200f01da9fd2ff89647aa9a0b2de530b1fcbffe66346db67b175216f20933",
+    "docs/scnet_full_matrix_infinite_mode_20260816_003/h0125_seed3265_samples8.json": "9c1b022fa3cd38f56cea2af0bfc809b8a9ec6882a7c3730ee0ca40e4162e9f59",
+    "docs/scnet_full_matrix_infinite_mode_20260816_003/h016667_seed1265_samples8.json": "eaebe0e5a54897cacd26516193070307a0951e0368ebd8bed4234f362c60ae02",
+    "docs/scnet_full_matrix_infinite_mode_20260816_003/h016667_seed2265_samples8.json": "45a1573a2818f35884bcc04876aaea059aca585e035b43b9cdc75dc863aba442",
+    "docs/scnet_full_matrix_infinite_mode_20260816_003/h016667_seed265_samples8.json": "7e4ae7f5e96643e69c6fd28efd37586fa658d98515242dbbff045956c37306e0",
+    "docs/scnet_full_matrix_infinite_mode_20260816_003/h016667_seed3265_samples8.json": "f7875cb971001e5daa48606a17b8da54350a59a92f7eef3a0dd8be7af47adf2e",
+    "docs/scnet_full_matrix_infinite_mode_20260816_003/h0200_seed1265_samples8.json": "39588ed84d94e822eecb837d52074f8e8c4bf20c7434b82dd8c54320aa5598f6",
+    "docs/scnet_full_matrix_infinite_mode_20260816_003/h0200_seed2265_samples8.json": "c8ffb45a26d33443a07c079969c14dc84817f6b409a4363577573d09b794e709",
+    "docs/scnet_full_matrix_infinite_mode_20260816_003/h0200_seed265_samples8.json": "e949b59a6f58fe87ec0dd0b4064dde907c3bda4d27b2f1596b4c7720190b6332",
+    "docs/scnet_full_matrix_infinite_mode_20260816_003/h0200_seed3265_samples8.json": "4446a883ec49be21f8c1d432da2546d0e13ef72eb2adb871d23afb826367a33b"
+  },
+  "joint_field_limit_accepted": false,
+  "method": "replicated_joint_field_full_matrix_structure_audit",
+  "minimum_captured_susceptibility_fraction": 0.96,
+  "physical_a_or_D_identified": false,
+  "required_replicates_per_field": 4,
+  "scaled_times": [
+    0.0,
+    0.025,
+    0.05,
+    0.07500000000000001,
+    0.1,
+    0.125,
+    0.15000000000000002,
+    0.17500000000000002,
+    0.2,
+    0.225,
+    0.25,
+    0.275,
+    0.30000000000000004,
+    0.325,
+    0.35000000000000003,
+    0.375,
+    0.4
+  ],
+  "scaled_waves": [
+    0.0,
+    0.4,
+    -0.8,
+    -0.4
+  ],
+  "schema": 1,
+  "sigma_multiplier": 2.0,
+  "tolerance": 0.001,
+  "uses_target_a_or_D": false,
+  "uses_target_trajectory": false,
+  "wave_rows": [
+    {
+      "rows": [
+        {
+          "accepted": true,
+          "candidate_power_fits": [
+            {
+              "power": 0.3333333333333333,
+              "rms_residual": 1.0053497077208614e-15,
+              "sigma_interval": [
+                1.000000000000001,
+                1.0000000000000033
+              ],
+              "zero_field_intercept": 1.0000000000000022,
+              "zero_field_intercept_sem": 5.146948981348671e-16
+            },
+            {
+              "power": 0.5,
+              "rms_residual": 9.820925191391734e-16,
+              "sigma_interval": [
+                1.0000000000000007,
+                1.000000000000002
+              ],
+              "zero_field_intercept": 1.0000000000000013,
+              "zero_field_intercept_sem": 3.475853856471799e-16
+            },
+            {
+              "power": 0.6666666666666666,
+              "rms_residual": 1.0821115497893178e-15,
+              "sigma_interval": [
+                1.0000000000000009,
+                1.0000000000000018
+              ],
+              "zero_field_intercept": 1.0000000000000013,
+              "zero_field_intercept_sem": 2.6433203292710214e-16
+            },
+            {
+              "power": 1.0,
+              "rms_residual": 1.0205600981444537e-15,
+              "sigma_interval": [
+                1.0,
+                1.0000000000000009
+              ],
+              "zero_field_intercept": 1.0000000000000004,
+              "zero_field_intercept_sem": 1.8165730719242325e-16
+            },
+            {
+              "power": 1.3333333333333333,
+              "rms_residual": 9.883479487474066e-16,
+              "sigma_interval": [
+                0.9999999999999993,
+                1.0
+              ],
+              "zero_field_intercept": 0.9999999999999997,
+              "zero_field_intercept_sem": 1.4086508424953488e-16
+            },
+            {
+              "power": 2.0,
+              "rms_residual": 9.40418540046196e-16,
+              "sigma_interval": [
+                0.9999999999999998,
+                1.0000000000000002
+              ],
+              "zero_field_intercept": 1.0,
+              "zero_field_intercept_sem": 1.0104766682936467e-16
+            }
+          ],
+          "last_field_step_sigma_bound": 4.531559571436952e-16,
+          "maximum_within_field_sem": 1.1555567610933196e-16,
+          "mean_values_by_descending_field": [
+            [
+              1.0000000000000007,
+              0.0
+            ],
+            [
+              0.9999999999999982,
+              0.0
+            ],
+            [
+              1.0,
+              0.0
+            ],
+            [
+              1.0000000000000002,
+              0.0
+            ]
+          ],
+          "scaled_time": 0.0,
+          "sem_by_descending_field": [
+            6.409875621278546e-17,
+            5.551115123125783e-17,
+            0.0,
+            1.1555567610933196e-16
+          ],
+          "zero_field_intercept_sigma_envelope": [
+            0.9999999999999993,
+            1.0000000000000033
+          ],
+          "zero_field_intercept_sigma_envelope_width": 3.9968028886505635e-15
+        },
+        {
+          "accepted": true,
+          "candidate_power_fits": [
+            {
+              "power": 0.3333333333333333,
+              "rms_residual": 2.251800755164361e-06,
+              "sigma_interval": [
+                0.9981193685581967,
+                0.9981193685581978
+              ],
+              "zero_field_intercept": 0.9981193685581973,
+              "zero_field_intercept_sem": 2.6694008178899034e-16
+            },
+            {
+              "power": 0.5,
+              "rms_residual": 1.2404087257527379e-06,
+              "sigma_interval": [
+                0.9983643416919777,
+                0.9983643416919784
+              ],
+              "zero_field_intercept": 0.9983643416919781,
+              "zero_field_intercept_sem": 1.7180211779024667e-16
+            },
+            {
+              "power": 0.6666666666666666,
+              "rms_residual": 2.3890437150629296e-07,
+              "sigma_interval": [
+                0.9984866498763174,
+                0.9984866498763179
+              ],
+              "zero_field_intercept": 0.9984866498763176,
+              "zero_field_intercept_sem": 1.2451166404909451e-16
+            },
+            {
+              "power": 1.0,
+              "rms_residual": 1.775273251616542e-06,
+              "sigma_interval": [
+                0.9986086112969164,
+                0.9986086112969166
+              ],
+              "zero_field_intercept": 0.9986086112969165,
+              "zero_field_intercept_sem": 7.785469347350034e-17
+            },
+            {
+              "power": 1.3333333333333333,
+              "rms_residual": 3.7503414108704902e-06,
+              "sigma_interval": [
+                0.998669260985043,
+                0.9986692609850433
+              ],
+              "zero_field_intercept": 0.9986692609850432,
+              "zero_field_intercept_sem": 5.526327010104177e-17
+            },
+            {
+              "power": 2.0,
+              "rms_residual": 7.581523085528945e-06,
+              "sigma_interval": [
+                0.9987293117823405,
+                0.9987293117823407
+              ],
+              "zero_field_intercept": 0.9987293117823406,
+              "zero_field_intercept_sem": 3.447600947001975e-17
+            }
+          ],
+          "last_field_step_sigma_bound": 4.617784216509616e-05,
+          "maximum_within_field_sem": 7.850464517660045e-17,
+          "mean_values_by_descending_field": [
+            [
+              0.9989472405787546,
+              -1.6010530322108793e-19
+            ],
+            [
+              0.9988939752788215,
+              -1.0844060939625897e-19
+            ],
+            [
+              0.9988230173603189,
+              4.208229941612173e-19
+            ],
+            [
+              0.9987768395181538,
+              -2.0231409185464056e-19
+            ]
+          ],
+          "scaled_time": 0.025,
+          "sem_by_descending_field": [
+            7.166459595674082e-17,
+            7.850464517660045e-17,
+            1.688215402010087e-20,
+            6.777909687609813e-20
+          ],
+          "zero_field_intercept_sigma_envelope": [
+            0.9981193685581967,
+            0.9987293117823407
+          ],
+          "zero_field_intercept_sigma_envelope_width": 0.0006099432241439828
+        },
+        {
+          "accepted": true,
+          "candidate_power_fits": [
+            {
+              "power": 0.3333333333333333,
+              "rms_residual": 8.292573004399872e-06,
+              "sigma_interval": [
+                0.9953234825559016,
+                0.995647427863579
+              ],
+              "zero_field_intercept": 0.9954854552097403,
+              "zero_field_intercept_sem": 8.098632691934255e-05
+            },
+            {
+              "power": 0.5,
+              "rms_residual": 6.998924006988998e-06,
+              "sigma_interval": [
+                0.9960214731446637,
+                0.9962428808949522
+              ],
+              "zero_field_intercept": 0.9961321770198079,
+              "zero_field_intercept_sem": 5.535193757211713e-05
+            },
+            {
+              "power": 0.6666666666666666,
+              "rms_residual": 6.650831726754834e-06,
+              "sigma_interval": [
+                0.996369895073773,
+                0.996540265153801
+              ],
+              "zero_field_intercept": 0.996455080113787,
+              "zero_field_intercept_sem": 4.2592520006983045e-05
+            },
+            {
+              "power": 1.0,
+              "rms_residual": 8.893504158287213e-06,
+              "sigma_interval": [
+                0.9967172163138367,
+                0.9968369723088988
+              ],
+              "zero_field_intercept": 0.9967770943113677,
+              "zero_field_intercept_sem": 2.993899876551331e-05
+            },
+            {
+              "power": 1.3333333333333333,
+              "rms_residual": 1.3082210405304492e-05,
+              "sigma_interval": [
+                0.9968898410797717,
+                0.9969846677069292
+              ],
+              "zero_field_intercept": 0.9969372543933505,
+              "zero_field_intercept_sem": 2.3706656789353067e-05
+            },
+            {
+              "power": 2.0,
+              "rms_residual": 2.264373289753293e-05,
+              "sigma_interval": [
+                0.9970606276321873,
+                0.9971311477434709
+              ],
+              "zero_field_intercept": 0.9970958876878291,
+              "zero_field_intercept_sem": 1.7630027820924433e-05
+            }
+          ],
+          "last_field_step_sigma_bound": 0.00015743552079834557,
+          "maximum_within_field_sem": 1.8614567110511643e-05,
+          "mean_values_by_descending_field": [
+            [
+              0.997665858248098,
+              8.718178854772355e-08
+            ],
+            [
+              0.9975400220338896,
+              -2.9205179700443887e-08
+            ],
+            [
+              0.9973349468711122,
+              1.5327398391571611e-07
+            ],
+            [
+              0.9972235184812392,
+              4.753412225572775e-07
+            ]
+          ],
+          "scaled_time": 0.05,
+          "sem_by_descending_field": [
+            5.590195342567936e-06,
+            8.887390838012289e-06,
+            1.3514851404789501e-05,
+            1.8614567110511643e-05
+          ],
+          "zero_field_intercept_sigma_envelope": [
+            0.9953234825559016,
+            0.9971311477434709
+          ],
+          "zero_field_intercept_sigma_envelope_width": 0.0018076651875692518
+        },
+        {
+          "accepted": false,
+          "candidate_power_fits": [
+            {
+              "power": 0.3333333333333333,
+              "rms_residual": 2.1722188423657343e-05,
+              "sigma_interval": [
+                0.9916292876062954,
+                0.992593033831139
+              ],
+              "zero_field_intercept": 0.9921111607187172,
+              "zero_field_intercept_sem": 0.00024093655621087624
+            },
+            {
+              "power": 0.5,
+              "rms_residual": 2.0301107354131357e-05,
+              "sigma_interval": [
+                0.9929834658639441,
+                0.9936421404594576
+              ],
+              "zero_field_intercept": 0.9933128031617009,
+              "zero_field_intercept_sem": 0.0001646686488783775
+            },
+            {
+              "power": 0.6666666666666666,
+              "rms_residual": 2.014623425098582e-05,
+              "sigma_interval": [
+                0.9936593737973248,
+                0.99416620325941
+              ],
+              "zero_field_intercept": 0.9939127885283674,
+              "zero_field_intercept_sem": 0.00012670736552129869
+            },
+            {
+              "power": 1.0,
+              "rms_residual": 2.3474428113108172e-05,
+              "sigma_interval": [
+                0.9943330270815443,
+                0.9946892773067237
+              ],
+              "zero_field_intercept": 0.994511152194134,
+              "zero_field_intercept_sem": 8.906255629487641e-05
+            },
+            {
+              "power": 1.3333333333333333,
+              "rms_residual": 2.9989948521055767e-05,
+              "sigma_interval": [
+                0.9946677458686821,
+                0.9949498351153656
+              ],
+              "zero_field_intercept": 0.9948087904920239,
+              "zero_field_intercept_sem": 7.052231167090012e-05
+            },
+            {
+              "power": 2.0,
+              "rms_residual": 4.6420870823388164e-05,
+              "sigma_interval": [
+                0.9949987583535388,
+                0.9952085477340703
+              ],
+              "zero_field_intercept": 0.9951036530438045,
+              "zero_field_intercept_sem": 5.2447345132900166e-05
+            }
+          ],
+          "last_field_step_sigma_bound": 0.0003317347879813685,
+          "maximum_within_field_sem": 5.534412999635063e-05,
+          "mean_values_by_descending_field": [
+            [
+              0.9961568443153298,
+              4.5931563637934536e-07
+            ],
+            [
+              0.9959394687960412,
+              -1.670271128443661e-07
+            ],
+            [
+              0.995538296025799,
+              6.09422548667434e-07
+            ],
+            [
+              0.995343458368142,
+              2.364877411014348e-06
+            ]
+          ],
+          "scaled_time": 0.07500000000000001,
+          "sem_by_descending_field": [
+            1.6714206357165777e-05,
+            2.6571232742584682e-05,
+            4.0270238028656565e-05,
+            5.534412999635063e-05
+          ],
+          "zero_field_intercept_sigma_envelope": [
+            0.9916292876062954,
+            0.9952085477340703
+          ],
+          "zero_field_intercept_sigma_envelope_width": 0.003579260127774875
+        },
+        {
+          "accepted": false,
+          "candidate_power_fits": [
+            {
+              "power": 0.3333333333333333,
+              "rms_residual": 4.203924305598123e-05,
+              "sigma_interval": [
+                0.98706669858536,
+                0.9889717209672428
+              ],
+              "zero_field_intercept": 0.9880192097763014,
+              "zero_field_intercept_sem": 0.0004762555954706988
+            },
+            {
+              "power": 0.5,
+              "rms_residual": 4.0327548317187893e-05,
+              "sigma_interval": [
+                0.9892715375510004,
+                0.9905734748245203
+              ],
+              "zero_field_intercept": 0.9899225061877603,
+              "zero_field_intercept_sem": 0.0003254843183799938
+            },
+            {
+              "power": 0.6666666666666666,
+              "rms_residual": 4.0275596204232986e-05,
+              "sigma_interval": [
+                0.9903719615055325,
+                0.9913737309078027
+              ],
+              "zero_field_intercept": 0.9908728462066676,
+              "zero_field_intercept_sem": 0.00025044235056752995
+            },
+            {
+              "power": 1.0,
+              "rms_residual": 4.491424167939945e-05,
+              "sigma_interval": [
+                0.9914685889117375,
+                0.9921727099012602
+              ],
+              "zero_field_intercept": 0.9918206494064988,
+              "zero_field_intercept_sem": 0.00017603024738067287
+            },
+            {
+              "power": 1.3333333333333333,
+              "rms_residual": 5.414981985257009e-05,
+              "sigma_interval": [
+                0.9920133669158472,
+                0.9925709097685541
+              ],
+              "zero_field_intercept": 0.9922921383422006,
+              "zero_field_intercept_sem": 0.000139385713176707
+            },
+            {
+              "power": 2.0,
+              "rms_residual": 7.868149177652068e-05,
+              "sigma_interval": [
+                0.99255196180404,
+                0.9929666294531044
+              ],
+              "zero_field_intercept": 0.9927592956285722,
+              "zero_field_intercept_sem": 0.00010366691226607698
+            }
+          ],
+          "last_field_step_sigma_bound": 0.0005654232994996781,
+          "maximum_within_field_sem": 0.00010928637769194999,
+          "mean_values_by_descending_field": [
+            [
+              0.99442168113304,
+              1.3055852011096775e-06
+            ],
+            [
+              0.994094346522927,
+              -5.019376713474709e-07
+            ],
+            [
+              0.9934372039061515,
+              1.5187957923112632e-06
+            ],
+            [
+              0.9931424798601651,
+              6.503540505537487e-06
+            ]
+          ],
+          "scaled_time": 0.1,
+          "sem_by_descending_field": [
+            3.330866758875378e-05,
+            5.289270456648902e-05,
+            7.981418682542085e-05,
+            0.00010928637769194999
+          ],
+          "zero_field_intercept_sigma_envelope": [
+            0.98706669858536,
+            0.9929666294531044
+          ],
+          "zero_field_intercept_sigma_envelope_width": 0.0058999308677444295
+        },
+        {
+          "accepted": false,
+          "candidate_power_fits": [
+            {
+              "power": 0.3333333333333333,
+              "rms_residual": 6.905805309523805e-05,
+              "sigma_interval": [
+                0.981677907891869,
+                0.9848054889704031
+              ],
+              "zero_field_intercept": 0.9832416984311361,
+              "zero_field_intercept_sem": 0.000781895269633542
+            },
+            {
+              "power": 0.5,
+              "rms_residual": 6.689750587946185e-05,
+              "sigma_interval": [
+                0.9849155725633663,
+                0.9870529167464988
+              ],
+              "zero_field_intercept": 0.9859842446549325,
+              "zero_field_intercept_sem": 0.0005343360457831482
+            },
+            {
+              "power": 0.6666666666666666,
+              "rms_residual": 6.685627507748009e-05,
+              "sigma_interval": [
+                0.9865313973233486,
+                0.9881759008566876
+              ],
+              "zero_field_intercept": 0.9873536490900181,
+              "zero_field_intercept_sem": 0.0004111258833347576
+            },
+            {
+              "power": 1.0,
+              "rms_residual": 7.286293507221578e-05,
+              "sigma_interval": [
+                0.9881415124683144,
+                0.9892973497591366
+              ],
+              "zero_field_intercept": 0.9887194311137255,
+              "zero_field_intercept_sem": 0.0002889593227055833
+            },
+            {
+              "power": 1.3333333333333333,
+              "rms_residual": 8.510832058560774e-05,
+              "sigma_interval": [
+                0.9889412663824871,
+                0.9898564914720337
+              ],
+              "zero_field_intercept": 0.9893988789272604,
+              "zero_field_intercept_sem": 0.0002288062723866369
+            },
+            {
+              "power": 2.0,
+              "rms_residual": 0.00011883898011396766,
+              "sigma_interval": [
+                0.9897317795423206,
+                0.9904125249196472
+              ],
+              "zero_field_intercept": 0.9900721522309839,
+              "zero_field_intercept_sem": 0.00017018634433164681
+            }
+          ],
+          "last_field_step_sigma_bound": 0.0008533431423636284,
+          "maximum_within_field_sem": 0.00017916622507707335,
+          "mean_values_by_descending_field": [
+            [
+              0.9924623334724901,
+              2.8054556046709314e-06
+            ],
+            [
+              0.9920073735515434,
+              -1.1287231141864598e-06
+            ],
+            [
+              0.9910373876883871,
+              3.0368477175164555e-06
+            ],
+            [
+              0.9906287004620571,
+              1.3584273072041322e-05
+            ]
+          ],
+          "scaled_time": 0.125,
+          "sem_by_descending_field": [
+            5.5303780569459176e-05,
+            8.762727570886662e-05,
+            0.00013152541420559166,
+            0.00017916622507707335
+          ],
+          "zero_field_intercept_sigma_envelope": [
+            0.981677907891869,
+            0.9904125249196472
+          ],
+          "zero_field_intercept_sigma_envelope_width": 0.008734617027778113
+        },
+        {
+          "accepted": false,
+          "candidate_power_fits": [
+            {
+              "power": 0.3333333333333333,
+              "rms_residual": 0.00010264805751871735,
+              "sigma_interval": [
+                0.9755164324634216,
+                0.9801224883257389
+              ],
+              "zero_field_intercept": 0.9778194603945802,
+              "zero_field_intercept_sem": 0.00115151396557931
+            },
+            {
+              "power": 0.5,
+              "rms_residual": 9.984477751409793e-05,
+              "sigma_interval": [
+                0.9799534616410592,
+                0.9831009524364536
+              ],
+              "zero_field_intercept": 0.9815272070387564,
+              "zero_field_intercept_sem": 0.0007868726988485942
+            },
+            {
+              "power": 0.6666666666666666,
+              "rms_residual": 9.967074268330003e-05,
+              "sigma_interval": [
+                0.982167769913918,
+                0.984589371761937
+              ],
+              "zero_field_intercept": 0.9833785708379275,
+              "zero_field_intercept_sem": 0.0006054004620047571
+            },
+            {
+              "power": 1.0,
+              "rms_residual": 0.00010694541790211554,
+              "sigma_interval": [
+                0.9843741053718634,
+                0.9860760370809655
+              ],
+              "zero_field_intercept": 0.9852250712264145,
+              "zero_field_intercept_sem": 0.00042548292727553417
+            },
+            {
+              "power": 1.3333333333333333,
+              "rms_residual": 0.0001223370418235836,
+              "sigma_interval": [
+                0.9854698810992192,
+                0.9868175199868713
+              ],
+              "zero_field_intercept": 0.9861437005430452,
+              "zero_field_intercept_sem": 0.0003369097219130477
+            },
+            {
+              "power": 2.0,
+              "rms_residual": 0.00016611890078755247,
+              "sigma_interval": [
+                0.9865528126408296,
+                0.987555289280605
+              ],
+              "zero_field_intercept": 0.9870540509607173,
+              "zero_field_intercept_sem": 0.0002506191599438511
+            }
+          ],
+          "last_field_step_sigma_bound": 0.0011889766059774562,
+          "maximum_within_field_sem": 0.00026337567657278287,
+          "mean_values_by_descending_field": [
+            [
+              0.9902812375349143,
+              5.127600816249359e-06
+            ],
+            [
+              0.9896819355901167,
+              -2.145681866893624e-06
+            ],
+            [
+              0.9883460702169297,
+              5.327292010933622e-06
+            ],
+            [
+              0.9878123913373367,
+              2.41262917901582e-05
+            ]
+          ],
+          "scaled_time": 0.15000000000000002,
+          "sem_by_descending_field": [
+            8.262363333735191e-05,
+            0.0001304879567549807,
+            0.00019462427122700379,
+            0.00026337567657278287
+          ],
+          "zero_field_intercept_sigma_envelope": [
+            0.9755164324634216,
+            0.987555289280605
+          ],
+          "zero_field_intercept_sigma_envelope_width": 0.012038856817183419
+        },
+        {
+          "accepted": false,
+          "candidate_power_fits": [
+            {
+              "power": 0.3333333333333333,
+              "rms_residual": 0.00014268307805958742,
+              "sigma_interval": [
+                0.9686459240559239,
+                0.9749566118503709
+              ],
+              "zero_field_intercept": 0.9718012679531474,
+              "zero_field_intercept_sem": 0.0015776719486117537
+            },
+            {
+              "power": 0.5,
+              "rms_residual": 0.00013899458413932613,
+              "sigma_interval": [
+                0.9744302777626983,
+                0.9787422300356015
+              ],
+              "zero_field_intercept": 0.9765862538991499,
+              "zero_field_intercept_sem": 0.0010779880682258059
+            },
+            {
+              "power": 0.6666666666666666,
+              "rms_residual": 0.00013848016640506013,
+              "sigma_interval": [
+                0.9773168758608007,
+                0.9806341750472255
+              ],
+              "zero_field_intercept": 0.9789755254540131,
+              "zero_field_intercept_sem": 0.0008293247966061793
+            },
+            {
+              "power": 1.0,
+              "rms_residual": 0.00014675428043804144,
+              "sigma_interval": [
+                0.9801929125896405,
+                0.982524197740896
+              ],
+              "zero_field_intercept": 0.9813585551652683,
+              "zero_field_intercept_sem": 0.0005828212878138995
+            },
+            {
+              "power": 1.3333333333333333,
+              "rms_residual": 0.00016524787290365744,
+              "sigma_interval": [
+                0.9816211534586703,
+                0.9834671291974191
+              ],
+              "zero_field_intercept": 0.9825441413280447,
+              "zero_field_intercept_sem": 0.0004614939346871943
+            },
+            {
+              "power": 2.0,
+              "rms_residual": 0.0002196144987132779,
+              "sigma_interval": [
+                0.9830324421652914,
+                0.9844057838362346
+              ],
+              "zero_field_intercept": 0.983719113000763,
+              "zero_field_intercept_sem": 0.0003433354177357918
+            }
+          ],
+          "last_field_step_sigma_bound": 0.0015646275153903613,
+          "maximum_within_field_sem": 0.00036002251113052526,
+          "mean_values_by_descending_field": [
+            [
+              0.9878812876978235,
+              8.428875527141605e-06
+            ],
+            [
+              0.9871220609865187,
+              -3.6518294425921355e-06
+            ],
+            [
+              0.9853718900057555,
+              8.56380581307726e-06
+            ],
+            [
+              0.9847057968700239,
+              3.845090661678823e-05
+            ]
+          ],
+          "scaled_time": 0.17500000000000002,
+          "sem_by_descending_field": [
+            0.00011518629553776465,
+            0.00018112954887409934,
+            0.0002681861792985766,
+            0.00036002251113052526
+          ],
+          "zero_field_intercept_sigma_envelope": [
+            0.9686459240559239,
+            0.9844057838362346
+          ],
+          "zero_field_intercept_sigma_envelope_width": 0.015759859780310692
+        },
+        {
+          "accepted": false,
+          "candidate_power_fits": [
+            {
+              "power": 0.3333333333333333,
+              "rms_residual": 0.0001890364511885514,
+              "sigma_interval": [
+                0.9611387726379138,
+                0.9693470018514482
+              ],
+              "zero_field_intercept": 0.965242887244681,
+              "zero_field_intercept_sem": 0.0020520573033835842
+            },
+            {
+              "power": 0.5,
+              "rms_residual": 0.0001841692993962146,
+              "sigma_interval": [
+                0.968397308677839,
+                0.9740052082465509
+              ],
+              "zero_field_intercept": 0.971201258462195,
+              "zero_field_intercept_sem": 0.0014019748921779678
+            },
+            {
+              "power": 0.6666666666666666,
+              "rms_residual": 0.00018303958764575936,
+              "sigma_interval": [
+                0.9720194664643211,
+                0.9763334341823755
+              ],
+              "zero_field_intercept": 0.9741764503233483,
+              "zero_field_intercept_sem": 0.00107849192951359
+            },
+            {
+              "power": 1.0,
+              "rms_residual": 0.0001918679079607284,
+              "sigma_interval": [
+                0.9756281768907027,
+                0.9786596330561177
+              ],
+              "zero_field_intercept": 0.9771439049734102,
+              "zero_field_intercept_sem": 0.0007578640413537698
+            },
+            {
+              "power": 1.3333333333333333,
+              "rms_residual": 0.0002132184286257788,
+              "sigma_interval": [
+                0.9774200981127,
+                0.9798204719934792
+              ],
+              "zero_field_intercept": 0.9786202850530896,
+              "zero_field_intercept_sem": 0.0006000934701948208
+            },
+            {
+              "power": 2.0,
+              "rms_residual": 0.00027832817346563936,
+              "sigma_interval": [
+                0.979190501037381,
+                0.9809765358245904
+              ],
+              "zero_field_intercept": 0.9800835184309857,
+              "zero_field_intercept_sem": 0.0004465086968023242
+            }
+          ],
+          "last_field_step_sigma_bound": 0.001971634154762898,
+          "maximum_within_field_sem": 0.0004669865657546478,
+          "mean_values_by_descending_field": [
+            [
+              0.9852658211101019,
+              1.2853318110007286e-05
+            ],
+            [
+              0.9843323915565971,
+              -5.744168643707922e-06
+            ],
+            [
+              0.9821247953745572,
+              1.2930116040429954e-05
+            ],
+            [
+              0.9813229213516861,
+              5.666582130127335e-05
+            ]
+          ],
+          "scaled_time": 0.2,
+          "sem_by_descending_field": [
+            0.00015290370392612496,
+            0.0002391537907043094,
+            0.0003511573974055614,
+            0.0004669865657546478
+          ],
+          "zero_field_intercept_sigma_envelope": [
+            0.9611387726379138,
+            0.9809765358245904
+          ],
+          "zero_field_intercept_sigma_envelope_width": 0.019837763186676627
+        },
+        {
+          "accepted": false,
+          "candidate_power_fits": [
+            {
+              "power": 0.3333333333333333,
+              "rms_residual": 0.0002415827089686901,
+              "sigma_interval": [
+                0.9530745371343023,
+                0.9633374846342884
+              ],
+              "zero_field_intercept": 0.9582060108842954,
+              "zero_field_intercept_sem": 0.0025657368749965287
+            },
+            {
+              "power": 0.5,
+              "rms_residual": 0.00023519650476827944,
+              "sigma_interval": [
+                0.9619109696712154,
+                0.9689217533952119
+              ],
+              "zero_field_intercept": 0.9654163615332136,
+              "zero_field_intercept_sem": 0.0017526959309991388
+            },
+            {
+              "power": 0.6666666666666666,
+              "rms_residual": 0.00023311210186795683,
+              "sigma_interval": [
+                0.9663204011807386,
+                0.9717130429116513
+              ],
+              "zero_field_intercept": 0.9690167220461949,
+              "zero_field_intercept_sem": 0.0013481604327281582
+            },
+            {
+              "power": 1.0,
+              "rms_residual": 0.00024187281308083,
+              "sigma_interval": [
+                0.9707132322907468,
+                0.9745022789904867
+              ],
+              "zero_field_intercept": 0.9726077556406167,
+              "zero_field_intercept_sem": 0.0009472616749349865
+            },
+            {
+              "power": 1.3333333333333333,
+              "rms_residual": 0.0002656219291633937,
+              "sigma_interval": [
+                0.9728943147671071,
+                0.9758945198005148
+              ],
+              "zero_field_intercept": 0.9743944172838109,
+              "zero_field_intercept_sem": 0.0007500512583518979
+            },
+            {
+              "power": 2.0,
+              "rms_residual": 0.00034121256794830115,
+              "sigma_interval": [
+                0.9750489049757236,
+                0.9772815780270705
+              ],
+              "zero_field_intercept": 0.976165241501397,
+              "zero_field_intercept_sem": 0.0005581682628367235
+            }
+          ],
+          "last_field_step_sigma_bound": 0.0024006085361396104,
+          "maximum_within_field_sem": 0.0005819822734889907,
+          "mean_values_by_descending_field": [
+            [
+              0.9824386002651433,
+              1.8531173419970122e-05
+            ],
+            [
+              0.9813181493332718,
+              -8.515082908283926e-06
+            ],
+            [
+              0.9786159246296087,
+              1.861842107295593e-05
+            ],
+            [
+              0.9776792879534691,
+              7.865852213867861e-05
+            ]
+          ],
+          "scaled_time": 0.225,
+          "sem_by_descending_field": [
+            0.00019568135829873908,
+            0.0003041152713619376,
+            0.0004423729349617478,
+            0.0005819822734889907
+          ],
+          "zero_field_intercept_sigma_envelope": [
+            0.9530745371343023,
+            0.9772815780270705
+          ],
+          "zero_field_intercept_sigma_envelope_width": 0.02420704089276815
+        },
+        {
+          "accepted": false,
+          "candidate_power_fits": [
+            {
+              "power": 0.3333333333333333,
+              "rms_residual": 0.0003001984595897188,
+              "sigma_interval": [
+                0.944538241533906,
+                0.9569759457550256
+              ],
+              "zero_field_intercept": 0.9507570936444658,
+              "zero_field_intercept_sem": 0.0031094260552799106
+            },
+            {
+              "power": 0.5,
+              "rms_residual": 0.0002919149222912818,
+              "sigma_interval": [
+                0.9550316227024694,
+                0.9635266943627793
+              ],
+              "zero_field_intercept": 0.9592791585326244,
+              "zero_field_intercept_sem": 0.002123767915077474
+            },
+            {
+              "power": 0.6666666666666666,
+              "rms_residual": 0.00028848022431162264,
+              "sigma_interval": [
+                0.9602677279272018,
+                0.9668013098903481
+              ],
+              "zero_field_intercept": 0.963534518908775,
+              "zero_field_intercept_sem": 0.0016333954907865496
+            },
+            {
+              "power": 1.0,
+              "rms_residual": 0.00029638527731828235,
+              "sigma_interval": [
+                0.9654838448161543,
+                0.9700739402641304
+              ],
+              "zero_field_intercept": 0.9677788925401424,
+              "zero_field_intercept_sem": 0.00114752386199399
+            },
+            {
+              "power": 1.3333333333333333,
+              "rms_residual": 0.0003218580371347715,
+              "sigma_interval": [
+                0.9680734584807292,
+                0.9717078412328902
+              ],
+              "zero_field_intercept": 0.9698906498568097,
+              "zero_field_intercept_sem": 0.0009085956880402549
+            },
+            {
+              "power": 2.0,
+              "rms_residual": 0.0004072128989721545,
+              "sigma_interval": [
+                0.9706312510392419,
+                0.9733362716702412
+              ],
+              "zero_field_intercept": 0.9719837613547415,
+              "zero_field_intercept_sem": 0.0006762551577498217
+            }
+          ],
+          "last_field_step_sigma_bound": 0.0028416959262664732,
+          "maximum_within_field_sem": 0.0007026260118606577,
+          "mean_values_by_descending_field": [
+            [
+              0.9794037936952944,
+              2.5577927025920677e-05
+            ],
+            [
+              0.9780850996097263,
+              -1.2049899044413856e-05
+            ],
+            [
+              0.9748574744029106,
+              2.5826208281157695e-05
+            ],
+            [
+              0.9737916757517917,
+              0.00010409902975426967
+            ]
+          ],
+          "scaled_time": 0.25,
+          "sem_by_descending_field": [
+            0.00024341785235840248,
+            0.00037552797137305633,
+            0.0005405763786468219,
+            0.0007026260118606577
+          ],
+          "zero_field_intercept_sigma_envelope": [
+            0.944538241533906,
+            0.9733362716702412
+          ],
+          "zero_field_intercept_sigma_envelope_width": 0.028798030136335195
+        },
+        {
+          "accepted": false,
+          "candidate_power_fits": [
+            {
+              "power": 0.3333333333333333,
+              "rms_residual": 0.00036476013858883664,
+              "sigma_interval": [
+                0.9356185774646913,
+                0.9503136603935524
+              ],
+              "zero_field_intercept": 0.9429661189291219,
+              "zero_field_intercept_sem": 0.003673770732215241
+            },
+            {
+              "power": 0.5,
+              "rms_residual": 0.0003541763595478714,
+              "sigma_interval": [
+                0.9478223301811047,
+                0.9578573455393874
+              ],
+              "zero_field_intercept": 0.9528398378602461,
+              "zero_field_intercept_sem": 0.0025087538395706893
+            },
+            {
+              "power": 0.6666666666666666,
+              "rms_residual": 0.0003489528014720132,
+              "sigma_interval": [
+                0.9539117121074806,
+                0.9616285777639276
+              ],
+              "zero_field_intercept": 0.9577701449357041,
+              "zero_field_intercept_sem": 0.0019292164141117704
+            },
+            {
+              "power": 1.0,
+              "rms_residual": 0.000355069472141641,
+              "sigma_interval": [
+                0.9599775160694154,
+                0.9653980052773031
+              ],
+              "zero_field_intercept": 0.9626877606733593,
+              "zero_field_intercept_sem": 0.0013551223019719267
+            },
+            {
+              "power": 1.3333333333333333,
+              "rms_residual": 0.000381381905479617,
+              "sigma_interval": [
+                0.9629886797930537,
+                0.9672803647091578
+              ],
+              "zero_field_intercept": 0.9651345222511057,
+              "zero_field_intercept_sem": 0.0010729212290260096
+            },
+            {
+              "power": 2.0,
+              "rms_residual": 0.00047530962632999366,
+              "sigma_interval": [
+                0.9659623929851243,
+                0.9691571163869904
+              ],
+              "zero_field_intercept": 0.9675597546860574,
+              "zero_field_intercept_sem": 0.0007986808504665105
+            }
+          ],
+          "last_field_step_sigma_bound": 0.0032848479636928283,
+          "maximum_within_field_sem": 0.0008265067322066679,
+          "mean_values_by_descending_field": [
+            [
+              0.976165954943372,
+              3.4093345845268954e-05
+            ],
+            [
+              0.9746395106858889,
+              -1.6424658591510914e-05
+            ],
+            [
+              0.9708625584797288,
+              3.4751617415109435e-05
+            ],
+            [
+              0.9696778410143139,
+              0.00013245194934702857
+            ]
+          ],
+          "scaled_time": 0.275,
+          "sem_by_descending_field": [
+            0.000296004267555041,
+            0.00045287228010871996,
+            0.0006444413351480544,
+            0.0008265067322066679
+          ],
+          "zero_field_intercept_sigma_envelope": [
+            0.9356185774646913,
+            0.9691571163869904
+          ],
+          "zero_field_intercept_sigma_envelope_width": 0.03353853892229908
+        },
+        {
+          "accepted": false,
+          "candidate_power_fits": [
+            {
+              "power": 0.3333333333333333,
+              "rms_residual": 0.00043513772763051464,
+              "sigma_interval": [
+                0.9264060563240042,
+                0.9434045930696184
+              ],
+              "zero_field_intercept": 0.9349053246968113,
+              "zero_field_intercept_sem": 0.004249634186403567
+            },
+            {
+              "power": 0.5,
+              "rms_residual": 0.0004218426556235585,
+              "sigma_interval": [
+                0.94034757296928,
+                0.9519530078894564
+              ],
+              "zero_field_intercept": 0.9461502904293682,
+              "zero_field_intercept_sem": 0.00290135873004409
+            },
+            {
+              "power": 0.6666666666666666,
+              "rms_residual": 0.0004143661931699516,
+              "sigma_interval": [
+                0.9473038372235001,
+                0.9562268247061896
+              ],
+              "zero_field_intercept": 0.9517653309648448,
+              "zero_field_intercept_sem": 0.00223074687067237
+            },
+            {
+              "power": 1.0,
+              "rms_residual": 0.00041764977999948907,
+              "sigma_interval": [
+                0.9542327657700614,
+                0.9604991477791428
+              ],
+              "zero_field_intercept": 0.9573659567746021,
+              "zero_field_intercept_sem": 0.0015665955022703222
+            },
+            {
+              "power": 1.3333333333333333,
+              "rms_residual": 0.0004437288445005603,
+              "sigma_interval": [
+                0.9576720475417874,
+                0.9626331299074263
+              ],
+              "zero_field_intercept": 0.9601525887246068,
+              "zero_field_intercept_sem": 0.0012402705914097553
+            },
+            {
+              "power": 2.0,
+              "rms_residual": 0.0005445597738666791,
+              "sigma_interval": [
+                0.961068003043527,
+                0.9647615510504604
+              ],
+              "zero_field_intercept": 0.9629147770469937,
+              "zero_field_intercept_sem": 0.0009233870017333111
+            }
+          ],
+          "last_field_step_sigma_bound": 0.003720102191914487,
+          "maximum_within_field_sem": 0.0009512582576708643,
+          "mean_values_by_descending_field": [
+            [
+              0.9727299999777923,
+              4.416052396784606e-05
+            ],
+            [
+              0.9709881107949653,
+              -2.1704135912610973e-05
+            ],
+            [
+              0.9666450594599293,
+              4.558759591458392e-05
+            ],
+            [
+              0.9653562292078288,
+              0.00016299741465088363
+            ]
+          ],
+          "scaled_time": 0.30000000000000004,
+          "sem_by_descending_field": [
+            0.0003533234606146347,
+            0.0005356023171823976,
+            0.0007525941761903311,
+            0.0009512582576708643
+          ],
+          "zero_field_intercept_sigma_envelope": [
+            0.9264060563240042,
+            0.9647615510504604
+          ],
+          "zero_field_intercept_sigma_envelope_width": 0.03835549472645616
+        },
+        {
+          "accepted": false,
+          "candidate_power_fits": [
+            {
+              "power": 0.3333333333333333,
+              "rms_residual": 0.000511184179389328,
+              "sigma_interval": [
+                0.9169911561361694,
+                0.9363046802781867
+              ],
+              "zero_field_intercept": 0.9266479182071781,
+              "zero_field_intercept_sem": 0.004828381035504342
+            },
+            {
+              "power": 0.5,
+              "rms_residual": 0.0004947771477502855,
+              "sigma_interval": [
+                0.9326719636283924,
+                0.9458544578275545
+              ],
+              "zero_field_intercept": 0.9392632107279735,
+              "zero_field_intercept_sem": 0.003295623549790503
+            },
+            {
+              "power": 0.6666666666666666,
+              "rms_residual": 0.00048457887557550446,
+              "sigma_interval": [
+                0.9404958010325105,
+                0.9506292561672595
+              ],
+              "zero_field_intercept": 0.945562528599885,
+              "zero_field_intercept_sem": 0.0025333637836872608
+            },
+            {
+              "power": 1.0,
+              "rms_residual": 0.00048391538211437233,
+              "sigma_interval": [
+                0.9482884102164401,
+                0.9554030210669094
+              ],
+              "zero_field_intercept": 0.9518457156416747,
+              "zero_field_intercept_sem": 0.0017786527126173357
+            },
+            {
+              "power": 1.3333333333333333,
+              "rms_residual": 0.0005085320200935098,
+              "sigma_interval": [
+                0.9521559678458775,
+                0.9577880328495239
+              ],
+              "zero_field_intercept": 0.9549720003477007,
+              "zero_field_intercept_sem": 0.0014080162509116085
+            },
+            {
+              "power": 2.0,
+              "rms_residual": 0.0006141347818616976,
+              "sigma_interval": [
+                0.9559741301754457,
+                0.9601677492532567
+              ],
+              "zero_field_intercept": 0.9580709397143512,
+              "zero_field_intercept_sem": 0.0010484047694527248
+            }
+          ],
+          "last_field_step_sigma_bound": 0.004137860615945561,
+          "maximum_within_field_sem": 0.0010746315434665345,
+          "mean_values_by_descending_field": [
+            [
+              0.9691011832268439,
+              5.584493655636399e-05
+            ],
+            [
+              0.9671380426889205,
+              -2.7940129866386186e-05
+            ],
+            [
+              0.9622194758682031,
+              5.8515182207733586e-05
+            ],
+            [
+              0.9608456842586952,
+              0.00019486018753316333
+            ]
+          ],
+          "scaled_time": 0.325,
+          "sem_by_descending_field": [
+            0.0004152492771930447,
+            0.0006231533875220342,
+            0.0008636376350987201,
+            0.0010746315434665345
+          ],
+          "zero_field_intercept_sigma_envelope": [
+            0.9169911561361694,
+            0.9601677492532567
+          ],
+          "zero_field_intercept_sigma_envelope_width": 0.043176593117087214
+        },
+        {
+          "accepted": false,
+          "candidate_power_fits": [
+            {
+              "power": 0.3333333333333333,
+              "rms_residual": 0.000592721000420579,
+              "sigma_interval": [
+                0.9074625085900729,
+                0.9290711071342423
+              ],
+              "zero_field_intercept": 0.9182668078621576,
+              "zero_field_intercept_sem": 0.005402149636042359
+            },
+            {
+              "power": 0.5,
+              "rms_residual": 0.0005728309314185837,
+              "sigma_interval": [
+                0.9248589860310382,
+                0.9396034319408363
+              ],
+              "zero_field_intercept": 0.9322312089859373,
+              "zero_field_intercept_sem": 0.003686111477449519
+            },
+            {
+              "power": 0.6666666666666666,
+              "rms_residual": 0.0005594593951338077,
+              "sigma_interval": [
+                0.9335385312286663,
+                0.9448698933301901
+              ],
+              "zero_field_intercept": 0.9392042122794282,
+              "zero_field_intercept_sem": 0.00283284052538094
+            },
+            {
+              "power": 1.0,
+              "rms_residual": 0.0005537158824186115,
+              "sigma_interval": [
+                0.9421828535485449,
+                0.9501359496571896
+              ],
+              "zero_field_intercept": 0.9461594016028673,
+              "zero_field_intercept_sem": 0.0019882740271611596
+            },
+            {
+              "power": 1.3333333333333333,
+              "rms_residual": 0.0005755308936903985,
+              "sigma_interval": [
+                0.9464726126257935,
+                0.9527675687588352
+              ],
+              "zero_field_intercept": 0.9496200906923143,
+              "zero_field_intercept_sem": 0.001573739033260387
+            },
+            {
+              "power": 2.0,
+              "rms_residual": 0.000683352549766965,
+              "sigma_interval": [
+                0.9507067647449453,
+                0.9553944127535449
+              ],
+              "zero_field_intercept": 0.9530505887492451,
+              "zero_field_intercept_sem": 0.0011719120021498768
+            }
+          ],
+          "last_field_step_sigma_bound": 0.004529159517134954,
+          "maximum_within_field_sem": 0.0011945650709142626,
+          "mean_values_by_descending_field": [
+            [
+              0.9652850724147677,
+              6.919350895666342e-05
+            ],
+            [
+              0.9630968163881353,
+              -3.5170049869713065e-05
+            ],
+            [
+              0.9576007669918774,
+              7.36962757945108e-05
+            ],
+            [
+              0.9561651614840931,
+              0.00022704585780688818
+            ]
+          ],
+          "scaled_time": 0.35000000000000003,
+          "sem_by_descending_field": [
+            0.0004816457249718975,
+            0.0007149493963237766,
+            0.0009761748953754054,
+            0.0011945650709142626
+          ],
+          "zero_field_intercept_sigma_envelope": [
+            0.9074625085900729,
+            0.9553944127535449
+          ],
+          "zero_field_intercept_sigma_envelope_width": 0.04793190416347193
+        },
+        {
+          "accepted": false,
+          "candidate_power_fits": [
+            {
+              "power": 0.3333333333333333,
+              "rms_residual": 0.0006795208968795512,
+              "sigma_interval": [
+                0.8979051725569573,
+                0.9217615862708937
+              ],
+              "zero_field_intercept": 0.9098333794139255,
+              "zero_field_intercept_sem": 0.005964103428484076
+            },
+            {
+              "power": 0.5,
+              "rms_residual": 0.0006558247635706065,
+              "sigma_interval": [
+                0.9169697929980786,
+                0.9332421137050889
+              ],
+              "zero_field_intercept": 0.9251059533515837,
+              "zero_field_intercept_sem": 0.00406808017675257
+            },
+            {
+              "power": 0.6666666666666666,
+              "rms_residual": 0.0006388683112177718,
+              "sigma_interval": [
+                0.9264812450105798,
+                0.9389831633646825
+              ],
+              "zero_field_intercept": 0.9327322041876311,
+              "zero_field_intercept_sem": 0.0031254795885256436
+            },
+            {
+              "power": 1.0,
+              "rms_residual": 0.0006269475581885467,
+              "sigma_interval": [
+                0.9359534089205361,
+                0.9447246224367951
+              ],
+              "zero_field_intercept": 0.9403390156786656,
+              "zero_field_intercept_sem": 0.0021928033790647675
+            },
+            {
+              "power": 1.3333333333333333,
+              "rms_residual": 0.0006445686115067014,
+              "sigma_interval": [
+                0.9406533711866792,
+                0.9475945761375021
+              ],
+              "zero_field_intercept": 0.9441239736620907,
+              "zero_field_intercept_sem": 0.0017353012377057137
+            },
+            {
+              "power": 2.0,
+              "rms_residual": 0.0007517011650886932,
+              "sigma_interval": [
+                0.9452914196225188,
+                0.9504605657365135
+              ],
+              "zero_field_intercept": 0.9478759926795162,
+              "zero_field_intercept_sem": 0.0012922865284986478
+            }
+          ],
+          "last_field_step_sigma_bound": 0.004885922773101277,
+          "maximum_within_field_sem": 0.0013092513808591417,
+          "mean_values_by_descending_field": [
+            [
+              0.961287522387526,
+              8.423371239215784e-05
+            ],
+            [
+              0.958872260595845,
+              -4.341581110360173e-05
+            ],
+            [
+              0.9528041977987004,
+              9.126628858814842e-05
+            ],
+            [
+              0.9513334503311188,
+              0.0002584827971453947
+            ]
+          ],
+          "scaled_time": 0.375,
+          "sem_by_descending_field": [
+            0.0005523661395391902,
+            0.0008104100576653465,
+            0.0010888337499103595,
+            0.0013092513808591417
+          ],
+          "zero_field_intercept_sigma_envelope": [
+            0.8979051725569573,
+            0.9504605657365135
+          ],
+          "zero_field_intercept_sigma_envelope_width": 0.052555393179556154
+        },
+        {
+          "accepted": false,
+          "candidate_power_fits": [
+            {
+              "power": 0.3333333333333333,
+              "rms_residual": 0.0007712887074412823,
+              "sigma_interval": [
+                0.8883990409465586,
+                0.9144336434586205
+              ],
+              "zero_field_intercept": 0.9014163422025896,
+              "zero_field_intercept_sem": 0.006508650628015461
+            },
+            {
+              "power": 0.5,
+              "rms_residual": 0.0007435279321009737,
+              "sigma_interval": [
+                0.9090620939847699,
+                0.9268126258241786
+              ],
+              "zero_field_intercept": 0.9179373599044742,
+              "zero_field_intercept_sem": 0.004437632959852163
+            },
+            {
+              "power": 0.6666666666666666,
+              "rms_residual": 0.0007226354298082717,
+              "sigma_interval": [
+                0.9193705771604674,
+                0.9330034946809389
+              ],
+              "zero_field_intercept": 0.9261870359207032,
+              "zero_field_intercept_sem": 0.0034082293801178725
+            },
+            {
+              "power": 1.0,
+              "rms_residual": 0.0007035308169858269,
+              "sigma_interval": [
+                0.9296356668526943,
+                0.9391957900484885
+              ],
+              "zero_field_intercept": 0.9344157284505914,
+              "zero_field_intercept_sem": 0.00239003079894857
+            },
+            {
+              "power": 1.3333333333333333,
+              "rms_residual": 0.0007155773899879768,
+              "sigma_interval": [
+                0.9347283384998404,
+                0.9422919845706903
+              ],
+              "zero_field_intercept": 0.9385101615352653,
+              "zero_field_intercept_sem": 0.0018909115177124876
+            },
+            {
+              "power": 2.0,
+              "rms_residual": 0.0008188518018765024,
+              "sigma_interval": [
+                0.9397527377994928,
+                0.9453853521089595
+              ],
+              "zero_field_intercept": 0.9425690449542261,
+              "zero_field_intercept_sem": 0.0014081535773666704
+            }
+          ],
+          "last_field_step_sigma_bound": 0.005201191082875307,
+          "maximum_within_field_sem": 0.001417197529699965,
+          "mean_values_by_descending_field": [
+            [
+              0.9571146481194728,
+              0.00010097270170591464
+            ],
+            [
+              0.9544724733546441,
+              -5.268304392782142e-05
+            ],
+            [
+              0.9478451864121487,
+              0.00011132709750018246
+            ],
+            [
+              0.9463689126284741,
+              0.00028806826868604124
+            ]
+          ],
+          "scaled_time": 0.4,
+          "sem_by_descending_field": [
+            0.0006272523757159654,
+            0.0009089577202765081,
+            0.0012002902912542923,
+            0.001417197529699965
+          ],
+          "zero_field_intercept_sigma_envelope": [
+            0.8883990409465586,
+            0.9453853521089595
+          ],
+          "zero_field_intercept_sigma_envelope_width": 0.05698631116240083
+        }
+      ],
+      "scaled_wave": 0.4,
+      "wave_index": 1
+    },
+    {
+      "rows": [
+        {
+          "accepted": true,
+          "candidate_power_fits": [
+            {
+              "power": 0.3333333333333333,
+              "rms_residual": 1.0053497077208614e-15,
+              "sigma_interval": [
+                1.000000000000001,
+                1.0000000000000033
+              ],
+              "zero_field_intercept": 1.0000000000000022,
+              "zero_field_intercept_sem": 5.146948981348671e-16
+            },
+            {
+              "power": 0.5,
+              "rms_residual": 9.820925191391734e-16,
+              "sigma_interval": [
+                1.0000000000000007,
+                1.000000000000002
+              ],
+              "zero_field_intercept": 1.0000000000000013,
+              "zero_field_intercept_sem": 3.475853856471799e-16
+            },
+            {
+              "power": 0.6666666666666666,
+              "rms_residual": 1.0821115497893178e-15,
+              "sigma_interval": [
+                1.0000000000000009,
+                1.0000000000000018
+              ],
+              "zero_field_intercept": 1.0000000000000013,
+              "zero_field_intercept_sem": 2.6433203292710214e-16
+            },
+            {
+              "power": 1.0,
+              "rms_residual": 1.0205600981444537e-15,
+              "sigma_interval": [
+                1.0,
+                1.0000000000000009
+              ],
+              "zero_field_intercept": 1.0000000000000004,
+              "zero_field_intercept_sem": 1.8165730719242325e-16
+            },
+            {
+              "power": 1.3333333333333333,
+              "rms_residual": 9.883479487474066e-16,
+              "sigma_interval": [
+                0.9999999999999993,
+                1.0
+              ],
+              "zero_field_intercept": 0.9999999999999997,
+              "zero_field_intercept_sem": 1.4086508424953488e-16
+            },
+            {
+              "power": 2.0,
+              "rms_residual": 9.40418540046196e-16,
+              "sigma_interval": [
+                0.9999999999999998,
+                1.0000000000000002
+              ],
+              "zero_field_intercept": 1.0,
+              "zero_field_intercept_sem": 1.0104766682936467e-16
+            }
+          ],
+          "last_field_step_sigma_bound": 4.531559571436952e-16,
+          "maximum_within_field_sem": 1.1555567610933196e-16,
+          "mean_values_by_descending_field": [
+            [
+              1.0000000000000007,
+              0.0
+            ],
+            [
+              0.9999999999999982,
+              0.0
+            ],
+            [
+              1.0,
+              0.0
+            ],
+            [
+              1.0000000000000002,
+              0.0
+            ]
+          ],
+          "scaled_time": 0.0,
+          "sem_by_descending_field": [
+            6.409875621278546e-17,
+            5.551115123125783e-17,
+            0.0,
+            1.1555567610933196e-16
+          ],
+          "zero_field_intercept_sigma_envelope": [
+            0.9999999999999993,
+            1.0000000000000033
+          ],
+          "zero_field_intercept_sigma_envelope_width": 3.9968028886505635e-15
+        },
+        {
+          "accepted": false,
+          "candidate_power_fits": [
+            {
+              "power": 0.3333333333333333,
+              "rms_residual": 9.015239050562225e-06,
+              "sigma_interval": [
+                0.99249632633367,
+                0.992496326333672
+              ],
+              "zero_field_intercept": 0.992496326333671,
+              "zero_field_intercept_sem": 5.039955464468841e-16
+            },
+            {
+              "power": 0.5,
+              "rms_residual": 4.982907787059587e-06,
+              "sigma_interval": [
+                0.9934729599417857,
+                0.9934729599417871
+              ],
+              "zero_field_intercept": 0.9934729599417864,
+              "zero_field_intercept_sem": 3.3923301173275235e-16
+            },
+            {
+              "power": 0.6666666666666666,
+              "rms_residual": 9.877276695691034e-07,
+              "sigma_interval": [
+                0.993960565576019,
+                0.9939605655760201
+              ],
+              "zero_field_intercept": 0.9939605655760195,
+              "zero_field_intercept_sem": 2.572414478633186e-16
+            },
+            {
+              "power": 1.0,
+              "rms_residual": 7.039518900406752e-06,
+              "sigma_interval": [
+                0.9944467887397013,
+                0.9944467887397019
+              ],
+              "zero_field_intercept": 0.9944467887397016,
+              "zero_field_intercept_sem": 1.7600531639930085e-16
+            },
+            {
+              "power": 1.3333333333333333,
+              "rms_residual": 1.4913839508894599e-05,
+              "sigma_interval": [
+                0.9946885806046986,
+                0.994688580604699
+              ],
+              "zero_field_intercept": 0.9946885806046988,
+              "zero_field_intercept_sem": 1.3610616228965138e-16
+            },
+            {
+              "power": 2.0,
+              "rms_residual": 3.0188268116470828e-05,
+              "sigma_interval": [
+                0.9949279848052948,
+                0.9949279848052952
+              ],
+              "zero_field_intercept": 0.994927984805295,
+              "zero_field_intercept_sem": 9.750791266355528e-17
+            }
+          ],
+          "last_field_step_sigma_bound": 0.00018401386402699949,
+          "maximum_within_field_sem": 1.1102234039321073e-16,
+          "mean_values_by_descending_field": [
+            [
+              0.9957968522459332,
+              9.56791072960842e-19
+            ],
+            [
+              0.9955844305912573,
+              -1.240413821495866e-19
+            ],
+            [
+              0.9953015297132706,
+              9.573715264027945e-20
+            ],
+            [
+              0.9951175158492438,
+              -4.1874770592645267e-19
+            ]
+          ],
+          "scaled_time": 0.025,
+          "sem_by_descending_field": [
+            6.409885694249997e-17,
+            7.85047156903036e-17,
+            5.2318558581445186e-20,
+            1.1102234039321073e-16
+          ],
+          "zero_field_intercept_sigma_envelope": [
+            0.99249632633367,
+            0.9949279848052952
+          ],
+          "zero_field_intercept_sigma_envelope_width": 0.0024316584716251866
+        },
+        {
+          "accepted": false,
+          "candidate_power_fits": [
+            {
+              "power": 0.3333333333333333,
+              "rms_residual": 1.7160833731896254e-05,
+              "sigma_interval": [
+                0.982695037722839,
+                0.9829079580294755
+              ],
+              "zero_field_intercept": 0.9828014978761572,
+              "zero_field_intercept_sem": 5.323007665916042e-05
+            },
+            {
+              "power": 0.5,
+              "rms_residual": 7.330594843811517e-06,
+              "sigma_interval": [
+                0.9851123256103753,
+                0.9852574787176998
+              ],
+              "zero_field_intercept": 0.9851849021640375,
+              "zero_field_intercept_sem": 3.628827683108425e-05
+            },
+            {
+              "power": 0.6666666666666666,
+              "rms_residual": 2.588803109078817e-06,
+              "sigma_interval": [
+                0.986319078978084,
+                0.9864306639240366
+              ],
+              "zero_field_intercept": 0.9863748714510603,
+              "zero_field_intercept_sem": 2.7896236488113277e-05
+            },
+            {
+              "power": 1.0,
+              "rms_residual": 2.2001074486730313e-05,
+              "sigma_interval": [
+                0.9875221799990681,
+                0.9876007655209631
+              ],
+              "zero_field_intercept": 0.9875614727600156,
+              "zero_field_intercept_sem": 1.9646380473722804e-05
+            },
+            {
+              "power": 1.3333333333333333,
+              "rms_residual": 4.1200742644755464e-05,
+              "sigma_interval": [
+                0.9881202698937298,
+                0.9881828481125171
+              ],
+              "zero_field_intercept": 0.9881515590031235,
+              "zero_field_intercept_sem": 1.5644554696832566e-05
+            },
+            {
+              "power": 2.0,
+              "rms_residual": 7.842174310096835e-05,
+              "sigma_interval": [
+                0.9887121639045902,
+                0.988759499036717
+              ],
+              "zero_field_intercept": 0.9887358314706536,
+              "zero_field_intercept_sem": 1.1833783031735806e-05
+            }
+          ],
+          "last_field_step_sigma_bound": 0.0004920345594713719,
+          "maximum_within_field_sem": 1.438920313718594e-05,
+          "mean_values_by_descending_field": [
+            [
+              0.9908493709804618,
+              2.568007043820984e-08
+            ],
+            [
+              0.9903408469327512,
+              7.234196728147441e-08
+            ],
+            [
+              0.9896505742896915,
+              -4.233928275288898e-08
+            ],
+            [
+              0.9891920206216502,
+              6.887456322387298e-08
+            ]
+          ],
+          "scaled_time": 0.05,
+          "sem_by_descending_field": [
+            8.796748048932834e-06,
+            8.021047657311015e-06,
+            1.438920313718594e-05,
+            8.555298361040369e-06
+          ],
+          "zero_field_intercept_sigma_envelope": [
+            0.982695037722839,
+            0.988759499036717
+          ],
+          "zero_field_intercept_sigma_envelope_width": 0.006064461313878056
+        },
+        {
+          "accepted": false,
+          "candidate_power_fits": [
+            {
+              "power": 0.3333333333333333,
+              "rms_residual": 2.5880098555152435e-05,
+              "sigma_interval": [
+                0.9707009521143618,
+                0.9713374606703057
+              ],
+              "zero_field_intercept": 0.9710192063923337,
+              "zero_field_intercept_sem": 0.0001591271389859657
+            },
+            {
+              "power": 0.5,
+              "rms_residual": 8.587946766629338e-06,
+              "sigma_interval": [
+                0.9749935894037457,
+                0.97542756425388
+              ],
+              "zero_field_intercept": 0.9752105768288128,
+              "zero_field_intercept_sem": 0.00010849371253357436
+            },
+            {
+              "power": 0.6666666666666666,
+              "rms_residual": 8.741132337626597e-06,
+              "sigma_interval": [
+                0.9771363921414369,
+                0.9774700431485628
+              ],
+              "zero_field_intercept": 0.9773032176449998,
+              "zero_field_intercept_sem": 8.3412751781455e-05
+            },
+            {
+              "power": 1.0,
+              "rms_residual": 4.296781691607021e-05,
+              "sigma_interval": [
+                0.9792724285653749,
+                0.9795074552948737
+              ],
+              "zero_field_intercept": 0.9793899419301243,
+              "zero_field_intercept_sem": 5.8756682374716775e-05
+            },
+            {
+              "power": 1.3333333333333333,
+              "rms_residual": 7.67256140613555e-05,
+              "sigma_interval": [
+                0.9803340652840936,
+                0.9805212506794446
+              ],
+              "zero_field_intercept": 0.9804276579817691,
+              "zero_field_intercept_sem": 4.679634883776592e-05
+            },
+            {
+              "power": 2.0,
+              "rms_residual": 0.0001421466197351319,
+              "sigma_interval": [
+                0.9813843513257523,
+                0.9815259767150881
+              ],
+              "zero_field_intercept": 0.9814551640204202,
+              "zero_field_intercept_sem": 3.5406347333959045e-05
+            }
+          ],
+          "last_field_step_sigma_bound": 0.0009144908380736463,
+          "maximum_within_field_sem": 4.308031416591974e-05,
+          "mean_values_by_descending_field": [
+            [
+              0.9851657002942603,
+              1.1851271210377526e-07
+            ],
+            [
+              0.9842807338644344,
+              3.2221076460076234e-07
+            ],
+            [
+              0.9830661875269442,
+              -2.0439385052192702e-07
+            ],
+            [
+              0.9822519254609323,
+              2.41697253020275e-07
+            ]
+          ],
+          "scaled_time": 0.07500000000000001,
+          "sem_by_descending_field": [
+            2.623142067447441e-05,
+            2.3984515505672217e-05,
+            4.308031416591974e-05,
+            2.560336100792975e-05
+          ],
+          "zero_field_intercept_sigma_envelope": [
+            0.9707009521143618,
+            0.9815259767150881
+          ],
+          "zero_field_intercept_sigma_envelope_width": 0.010825024600726318
+        },
+        {
+          "accepted": false,
+          "candidate_power_fits": [
+            {
+              "power": 0.3333333333333333,
+              "rms_residual": 3.752990901496086e-05,
+              "sigma_interval": [
+                0.9566803599596623,
+                0.9579480214332274
+              ],
+              "zero_field_intercept": 0.9573141906964449,
+              "zero_field_intercept_sem": 0.0003169153683912903
+            },
+            {
+              "power": 0.5,
+              "rms_residual": 1.1272187121355093e-05,
+              "sigma_interval": [
+                0.9632362291593105,
+                0.9641006169070651
+              ],
+              "zero_field_intercept": 0.9636684230331878,
+              "zero_field_intercept_sem": 0.00021609693693865623
+            },
+            {
+              "power": 0.6666666666666666,
+              "rms_residual": 1.4906313395119522e-05,
+              "sigma_interval": [
+                0.9665086117867372,
+                0.9671732409938196
+              ],
+              "zero_field_intercept": 0.9668409263902784,
+              "zero_field_intercept_sem": 0.0001661573017706088
+            },
+            {
+              "power": 1.0,
+              "rms_residual": 6.684949153143179e-05,
+              "sigma_interval": [
+                0.9697703380927231,
+                0.9702385928658125
+              ],
+              "zero_field_intercept": 0.9700044654792678,
+              "zero_field_intercept_sem": 0.00011706369327234598
+            },
+            {
+              "power": 1.3333333333333333,
+              "rms_residual": 0.00011804367059778528,
+              "sigma_interval": [
+                0.9713911834000172,
+                0.97176417845703
+              ],
+              "zero_field_intercept": 0.9715776809285236,
+              "zero_field_intercept_sem": 9.324876425321349e-05
+            },
+            {
+              "power": 2.0,
+              "rms_residual": 0.0002172430126634125,
+              "sigma_interval": [
+                0.9729942920922563,
+                0.9732765660166058
+              ],
+              "zero_field_intercept": 0.9731354290544311,
+              "zero_field_intercept_sem": 7.05684810873799e-05
+            }
+          ],
+          "last_field_step_sigma_bound": 0.0014360034286173805,
+          "maximum_within_field_sem": 8.589923449392222e-05,
+          "mean_values_by_descending_field": [
+            [
+              0.9787577824023546,
+              3.3383752440682637e-07
+            ],
+            [
+              0.9774212733711843,
+              8.305475604228644e-07
+            ],
+            [
+              0.9755777125939846,
+              -5.577097863141307e-07
+            ],
+            [
+              0.9743415692828398,
+              5.529499122956067e-07
+            ]
+          ],
+          "scaled_time": 0.1,
+          "sem_by_descending_field": [
+            5.209862952956776e-05,
+            4.781848556351209e-05,
+            8.589923449392222e-05,
+            5.106161270123558e-05
+          ],
+          "zero_field_intercept_sigma_envelope": [
+            0.9566803599596623,
+            0.9732765660166058
+          ],
+          "zero_field_intercept_sigma_envelope_width": 0.016596206056943563
+        },
+        {
+          "accepted": false,
+          "candidate_power_fits": [
+            {
+              "power": 0.3333333333333333,
+              "rms_residual": 5.522276594867853e-05,
+              "sigma_interval": [
+                0.9408546669603461,
+                0.9429571143787177
+              ],
+              "zero_field_intercept": 0.9419058906695319,
+              "zero_field_intercept_sem": 0.0005256118545928907
+            },
+            {
+              "power": 0.5,
+              "rms_residual": 1.8827043531734947e-05,
+              "sigma_interval": [
+                0.9499992812119806,
+                0.9514330174000054
+              ],
+              "zero_field_intercept": 0.950716149305993,
+              "zero_field_intercept_sem": 0.00035843404700617107
+            },
+            {
+              "power": 0.6666666666666666,
+              "rms_residual": 1.7591963824669752e-05,
+              "sigma_interval": [
+                0.9545636362379187,
+                0.9556661327197652
+              ],
+              "zero_field_intercept": 0.955114884478842,
+              "zero_field_intercept_sem": 0.000275624120461603
+            },
+            {
+              "power": 1.0,
+              "rms_residual": 8.961559189282651e-05,
+              "sigma_interval": [
+                0.9591127589811791,
+                0.9598896280391994
+              ],
+              "zero_field_intercept": 0.9595011935101893,
+              "zero_field_intercept_sem": 0.0001942172645051066
+            },
+            {
+              "power": 1.3333333333333333,
+              "rms_residual": 0.00016064248674723842,
+              "sigma_interval": [
+                0.9613730359240847,
+                0.9619919448464346
+              ],
+              "zero_field_intercept": 0.9616824903852597,
+              "zero_field_intercept_sem": 0.0001547272305874674
+            },
+            {
+              "power": 2.0,
+              "rms_residual": 0.00029829051995295856,
+              "sigma_interval": [
+                0.963608111453139,
+                0.964076582089203
+              ],
+              "zero_field_intercept": 0.963842346771171,
+              "zero_field_intercept_sem": 0.00011711765901600351
+            }
+          ],
+          "last_field_step_sigma_bound": 0.002036247616033076,
+          "maximum_within_field_sem": 0.0001425859289304694,
+          "mean_values_by_descending_field": [
+            [
+              0.9716412652828441,
+              7.42681652175778e-07
+            ],
+            [
+              0.9697851465838359,
+              1.6497317389607969e-06
+            ],
+            [
+              0.967224173136159,
+              -1.1673413984893562e-06
+            ],
+            [
+              0.9655197491930188,
+              1.0471868324233301e-06
+            ]
+          ],
+          "scaled_time": 0.125,
+          "sem_by_descending_field": [
+            8.614840092617797e-05,
+            7.945665220924155e-05,
+            0.0001425859289304694,
+            8.482777644017548e-05
+          ],
+          "zero_field_intercept_sigma_envelope": [
+            0.9408546669603461,
+            0.964076582089203
+          ],
+          "zero_field_intercept_sigma_envelope_width": 0.02322191512885685
+        },
+        {
+          "accepted": false,
+          "candidate_power_fits": [
+            {
+              "power": 0.3333333333333333,
+              "rms_residual": 8.25759208629621e-05,
+              "sigma_interval": [
+                0.9234918896929928,
+                0.9266280310263287
+              ],
+              "zero_field_intercept": 0.9250599603596608,
+              "zero_field_intercept_sem": 0.0007840353333340049
+            },
+            {
+              "power": 0.5,
+              "rms_residual": 3.524273580961431e-05,
+              "sigma_interval": [
+                0.9354754163066598,
+                0.9376142260837342
+              ],
+              "zero_field_intercept": 0.936544821195197,
+              "zero_field_intercept_sem": 0.0005347024442686464
+            },
+            {
+              "power": 0.6666666666666666,
+              "rms_residual": 1.3380417565995818e-05,
+              "sigma_interval": [
+                0.9414565196176603,
+                0.9431013128599475
+              ],
+              "zero_field_intercept": 0.9422789162388039,
+              "zero_field_intercept_sem": 0.00041119831057178394
+            },
+            {
+              "power": 1.0,
+              "rms_residual": 0.00010661674425885199,
+              "sigma_interval": [
+                0.9474172372590958,
+                0.9485763863078575
+              ],
+              "zero_field_intercept": 0.9479968117834766,
+              "zero_field_intercept_sem": 0.0002897872621904251
+            },
+            {
+              "power": 1.3333333333333333,
+              "rms_residual": 0.00019926522174627608,
+              "sigma_interval": [
+                0.9503785174126649,
+                0.9513020832688004
+              ],
+              "zero_field_intercept": 0.9508403003407326,
+              "zero_field_intercept_sem": 0.0002308914640338812
+            },
+            {
+              "power": 2.0,
+              "rms_residual": 0.00037891948852606625,
+              "sigma_interval": [
+                0.9533062355073874,
+                0.9540054338381867
+              ],
+              "zero_field_intercept": 0.953655834672787,
+              "zero_field_intercept_sem": 0.00017479958269984208
+            }
+          ],
+          "last_field_step_sigma_bound": 0.0026910954595651517,
+          "maximum_within_field_sem": 0.00021279567654571734,
+          "mean_values_by_descending_field": [
+            [
+              0.9638353766004589,
+              1.4332406230480638e-06
+            ],
+            [
+              0.9614002638424817,
+              2.799895202057503e-06
+            ],
+            [
+              0.9580534477437835,
+              -2.091374080264175e-06
+            ],
+            [
+              0.9558577562151924,
+              1.7874878686177664e-06
+            ]
+          ],
+          "scaled_time": 0.15000000000000002,
+          "sem_by_descending_field": [
+            0.0001280885106895653,
+            0.00011883701806056731,
+            0.00021279567654571734,
+            0.00012678097289116826
+          ],
+          "zero_field_intercept_sigma_envelope": [
+            0.9234918896929928,
+            0.9540054338381867
+          ],
+          "zero_field_intercept_sigma_envelope_width": 0.030513544145193916
+        },
+        {
+          "accepted": false,
+          "candidate_power_fits": [
+            {
+              "power": 0.3333333333333333,
+              "rms_residual": 0.000123383223057049,
+              "sigma_interval": [
+                0.9048963810561031,
+                0.90925964437278
+              ],
+              "zero_field_intercept": 0.9070780127144416,
+              "zero_field_intercept_sem": 0.0010908158291691949
+            },
+            {
+              "power": 0.5,
+              "rms_residual": 6.460377195315517e-05,
+              "sigma_interval": [
+                0.9198837783233316,
+                0.9228596475178263
+              ],
+              "zero_field_intercept": 0.921371712920579,
+              "zero_field_intercept_sem": 0.0007439672986237123
+            },
+            {
+              "power": 0.6666666666666666,
+              "rms_residual": 1.16964522277093e-05,
+              "sigma_interval": [
+                0.9273638649692583,
+                0.9296525078576713
+              ],
+              "zero_field_intercept": 0.9285081864134648,
+              "zero_field_intercept_sem": 0.0005721607221032502
+            },
+            {
+              "power": 1.0,
+              "rms_residual": 0.00011301444434485053,
+              "sigma_interval": [
+                0.9348179577692346,
+                0.9364310252472787
+              ],
+              "zero_field_intercept": 0.9356244915082567,
+              "zero_field_intercept_sem": 0.00040326686951104216
+            },
+            {
+              "power": 1.3333333333333333,
+              "rms_residual": 0.00022830531857238762,
+              "sigma_interval": [
+                0.938520719406145,
+                0.9398060713676176
+              ],
+              "zero_field_intercept": 0.9391633953868813,
+              "zero_field_intercept_sem": 0.00032133799036812956
+            },
+            {
+              "power": 2.0,
+              "rms_residual": 0.0004522305492698153,
+              "sigma_interval": [
+                0.9421808688631644,
+                0.9431541086240124
+              ],
+              "zero_field_intercept": 0.9426674887435884,
+              "zero_field_intercept_sem": 0.00024330994021201302
+            }
+          ],
+          "last_field_step_sigma_bound": 0.003373973804012323,
+          "maximum_within_field_sem": 0.00029610068084612973,
+          "mean_values_by_descending_field": [
+            [
+              0.9553627652986398,
+              2.5119763976694784e-06
+            ],
+            [
+              0.952299427147957,
+              4.265961937110092e-06
+            ],
+            [
+              0.9481212508309786,
+              -3.380665498456598e-06
+            ],
+            [
+              0.9454370023670047,
+              2.861138521511617e-06
+            ]
+          ],
+          "scaled_time": 0.17500000000000002,
+          "sem_by_descending_field": [
+            0.00017758714146908462,
+            0.00016590028594502712,
+            0.00029610068084612973,
+            0.00017678276291338592
+          ],
+          "zero_field_intercept_sigma_envelope": [
+            0.9048963810561031,
+            0.9431541086240124
+          ],
+          "zero_field_intercept_sigma_envelope_width": 0.03825772756790924
+        },
+        {
+          "accepted": false,
+          "candidate_power_fits": [
+            {
+              "power": 0.3333333333333333,
+              "rms_residual": 0.00018127281879933618,
+              "sigma_interval": [
+                0.8853972384354346,
+                0.8911748495440471
+              ],
+              "zero_field_intercept": 0.8882860439897409,
+              "zero_field_intercept_sem": 0.001444402777153107
+            },
+            {
+              "power": 0.5,
+              "rms_residual": 0.00011085030801357277,
+              "sigma_interval": [
+                0.9034618982482839,
+                0.9074025662174926
+              ],
+              "zero_field_intercept": 0.9054322322328883,
+              "zero_field_intercept_sem": 0.0009851669923021844
+            },
+            {
+              "power": 0.6666666666666666,
+              "rms_residual": 4.294753947048825e-05,
+              "sigma_interval": [
+                0.9124774886070997,
+                0.9155082568628032
+              ],
+              "zero_field_intercept": 0.9139928727349514,
+              "zero_field_intercept_sem": 0.0007576920639258917
+            },
+            {
+              "power": 1.0,
+              "rms_residual": 0.0001044633771256076,
+              "sigma_interval": [
+                0.9214611540237089,
+                0.9235974555368888
+              ],
+              "zero_field_intercept": 0.9225293047802988,
+              "zero_field_intercept_sem": 0.0005340753782949598
+            },
+            {
+              "power": 1.3333333333333333,
+              "rms_residual": 0.0002422737243278363,
+              "sigma_interval": [
+                0.9259232084157226,
+                0.9276256175669394
+              ],
+              "zero_field_intercept": 0.926774412991331,
+              "zero_field_intercept_sem": 0.00042560228780421695
+            },
+            {
+              "power": 2.0,
+              "rms_residual": 0.0005112627159771543,
+              "sigma_interval": [
+                0.9303331324670342,
+                0.9316223161398495
+              ],
+              "zero_field_intercept": 0.9309777243034418,
+              "zero_field_intercept_sem": 0.0003222959182038132
+            }
+          ],
+          "last_field_step_sigma_bound": 0.004057362227411594,
+          "maximum_within_field_sem": 0.00039199200759593264,
+          "mean_values_by_descending_field": [
+            [
+              0.9462493125980005,
+              4.104296758868376e-06
+            ],
+            [
+              0.9425199304025598,
+              5.995493033664711e-06
+            ],
+            [
+              0.9374899483073754,
+              -5.078837230183305e-06
+            ],
+            [
+              0.9343463423880937,
+              4.382182549272378e-06
+            ]
+          ],
+          "scaled_time": 0.2,
+          "sem_by_descending_field": [
+            0.00023427582765978274,
+            0.00022058782790971903,
+            0.00039199200759593264,
+            0.0002346772446232289
+          ],
+          "zero_field_intercept_sigma_envelope": [
+            0.8853972384354346,
+            0.9316223161398495
+          ],
+          "zero_field_intercept_sigma_envelope_width": 0.04622507770441486
+        },
+        {
+          "accepted": false,
+          "candidate_power_fits": [
+            {
+              "power": 0.3333333333333333,
+              "rms_residual": 0.0002593807234783557,
+              "sigma_interval": [
+                0.8653359013592573,
+                0.8727081788752425
+              ],
+              "zero_field_intercept": 0.8690220401172499,
+              "zero_field_intercept_sem": 0.0018430693789962826
+            },
+            {
+              "power": 0.5,
+              "rms_residual": 0.00017747238680071748,
+              "sigma_interval": [
+                0.8864570331421137,
+                0.8914854972359233
+              ],
+              "zero_field_intercept": 0.8889712651890185,
+              "zero_field_intercept_sem": 0.0012571160234524047
+            },
+            {
+              "power": 0.6666666666666666,
+              "rms_residual": 9.738482433123481e-05,
+              "sigma_interval": [
+                0.8969976270484176,
+                0.9008651274113918
+              ],
+              "zero_field_intercept": 0.8989313772299047,
+              "zero_field_intercept_sem": 0.0009668750907435589
+            },
+            {
+              "power": 1.0,
+              "rms_residual": 7.90901143892033e-05,
+              "sigma_interval": [
+                0.9075001779005702,
+                0.9102264166069005
+              ],
+              "zero_field_intercept": 0.9088632972537354,
+              "zero_field_intercept_sem": 0.0006815596765825798
+            },
+            {
+              "power": 1.3333333333333333,
+              "rms_residual": 0.00023638823051061247,
+              "sigma_interval": [
+                0.9127160220776215,
+                0.9148886618344633
+              ],
+              "zero_field_intercept": 0.9138023419560424,
+              "zero_field_intercept_sem": 0.0005431599392104652
+            },
+            {
+              "power": 2.0,
+              "rms_residual": 0.0005494922543339661,
+              "sigma_interval": [
+                0.9178699773891154,
+                0.9195154055429439
+              ],
+              "zero_field_intercept": 0.9186926914660296,
+              "zero_field_intercept_sem": 0.0004113570384571303
+            }
+          ],
+          "last_field_step_sigma_bound": 0.00471434731170982,
+          "maximum_within_field_sem": 0.0004998818235632647,
+          "mean_values_by_descending_field": [
+            [
+              0.9365239144718347,
+              6.354788258617634e-06
+            ],
+            [
+              0.9321031038368763,
+              7.897402500210778e-06
+            ],
+            [
+              0.9262272408492875,
+              -7.222519916276186e-06
+            ],
+            [
+              0.9226792057086612,
+              6.490715556671621e-06
+            ]
+          ],
+          "scaled_time": 0.225,
+          "sem_by_descending_field": [
+            0.00029775265181284695,
+            0.00028283911182401425,
+            0.0004998818235632647,
+            0.0003002894080718154
+          ],
+          "zero_field_intercept_sigma_envelope": [
+            0.8653359013592573,
+            0.9195154055429439
+          ],
+          "zero_field_intercept_sigma_envelope_width": 0.054179504183686555
+        },
+        {
+          "accepted": false,
+          "candidate_power_fits": [
+            {
+              "power": 0.3333333333333333,
+              "rms_residual": 0.0003600455455453039,
+              "sigma_interval": [
+                0.8450534749826842,
+                0.8541931210269685
+              ],
+              "zero_field_intercept": 0.8496232980048264,
+              "zero_field_intercept_sem": 0.0022849115110710697
+            },
+            {
+              "power": 0.5,
+              "rms_residual": 0.0002671760822044391,
+              "sigma_interval": [
+                0.8691173004778836,
+                0.875351317407921
+              ],
+              "zero_field_intercept": 0.8722343089429023,
+              "zero_field_intercept_sem": 0.0015585042325093595
+            },
+            {
+              "power": 0.6666666666666666,
+              "rms_residual": 0.00017579518476299429,
+              "sigma_interval": [
+                0.8811259740365883,
+                0.8859207500447625
+              ],
+              "zero_field_intercept": 0.8835233620406754,
+              "zero_field_intercept_sem": 0.0011986940020435083
+            },
+            {
+              "power": 1.0,
+              "rms_residual": 5.2102919888230425e-05,
+              "sigma_interval": [
+                0.8930904340612218,
+                0.8964704094326235
+              ],
+              "zero_field_intercept": 0.8947804217469226,
+              "zero_field_intercept_sem": 0.0008449938428503918
+            },
+            {
+              "power": 1.3333333333333333,
+              "rms_residual": 0.0002075555371546453,
+              "sigma_interval": [
+                0.8990315472591642,
+                0.9017252526252858
+              ],
+              "zero_field_intercept": 0.900378399942225,
+              "zero_field_intercept_sem": 0.0006734263415303909
+            },
+            {
+              "power": 2.0,
+              "rms_residual": 0.0005613548058917271,
+              "sigma_interval": [
+                0.9049009976528536,
+                0.9069411776650204
+              ],
+              "zero_field_intercept": 0.905921087658937,
+              "zero_field_intercept_sem": 0.0005100450030416705
+            }
+          ],
+          "last_field_step_sigma_bound": 0.005320146579802317,
+          "maximum_within_field_sem": 0.0006191059196961006,
+          "mean_values_by_descending_field": [
+            [
+              0.9262182379769136,
+              9.42698366366179e-06
+            ],
+            [
+              0.9210938098725103,
+              9.841592743901513e-06
+            ],
+            [
+              0.9144047510048952,
+              -9.84183618153771e-06
+            ],
+            [
+              0.9105306609837449,
+              9.349014100576275e-06
+            ]
+          ],
+          "scaled_time": 0.25,
+          "sem_by_descending_field": [
+            0.00036758565572786705,
+            0.00035258848492559244,
+            0.0006191059196961006,
+            0.00037342119180463053
+          ],
+          "zero_field_intercept_sigma_envelope": [
+            0.8450534749826842,
+            0.9069411776650204
+          ],
+          "zero_field_intercept_sigma_envelope_width": 0.06188770268233612
+        },
+        {
+          "accepted": false,
+          "candidate_power_fits": [
+            {
+              "power": 0.3333333333333333,
+              "rms_residual": 0.0004845365378845143,
+              "sigma_interval": [
+                0.8248783198724433,
+                0.8359496813492256
+              ],
+              "zero_field_intercept": 0.8304140006108345,
+              "zero_field_intercept_sem": 0.0027678403691955597
+            },
+            {
+              "power": 0.5,
+              "rms_residual": 0.0003815860641240004,
+              "sigma_interval": [
+                0.8516829813768345,
+                0.8592345486006658
+              ],
+              "zero_field_intercept": 0.8554587649887502,
+              "zero_field_intercept_sem": 0.001887891805957832
+            },
+            {
+              "power": 0.6666666666666666,
+              "rms_residual": 0.00027990655279448663,
+              "sigma_interval": [
+                0.8650588378329488,
+                0.8708669604026195
+              ],
+              "zero_field_intercept": 0.8679628991177841,
+              "zero_field_intercept_sem": 0.0014520306424176477
+            },
+            {
+              "power": 1.0,
+              "rms_residual": 9.512247816618947e-05,
+              "sigma_interval": [
+                0.8783843861501984,
+                0.8824786924331941
+              ],
+              "zero_field_intercept": 0.8804315392916963,
+              "zero_field_intercept_sem": 0.0010235765707489455
+            },
+            {
+              "power": 1.3333333333333333,
+              "rms_residual": 0.00015733332726346013,
+              "sigma_interval": [
+                0.8850004458435776,
+                0.8882634648955903
+              ],
+              "zero_field_intercept": 0.886631955369584,
+              "zero_field_intercept_sem": 0.0008157547630031731
+            },
+            {
+              "power": 2.0,
+              "rms_residual": 0.0005428160518195773,
+              "sigma_interval": [
+                0.8915352669032508,
+                0.8940067165194536
+              ],
+              "zero_field_intercept": 0.8927709917113522,
+              "zero_field_intercept_sem": 0.0006178624040507197
+            }
+          ],
+          "last_field_step_sigma_bound": 0.00585351730585954,
+          "maximum_within_field_sem": 0.0007489265228756497,
+          "mean_values_by_descending_field": [
+            [
+              0.9153664540963741,
+              1.3502654020290989e-05
+            ],
+            [
+              0.9095398984057687,
+              1.1659540936895772e-05
+            ],
+            [
+              0.902096552722671,
+              -1.2961098899068768e-05
+            ],
+            [
+              0.8979945364271156,
+              1.3134811648136033e-05
+            ]
+          ],
+          "scaled_time": 0.275,
+          "sem_by_descending_field": [
+            0.00044331642937811083,
+            0.00042976125177886736,
+            0.0007489265228756497,
+            0.0004538450387215416
+          ],
+          "zero_field_intercept_sigma_envelope": [
+            0.8248783198724433,
+            0.8940067165194536
+          ],
+          "zero_field_intercept_sigma_envelope_width": 0.06912839664701032
+        },
+        {
+          "accepted": false,
+          "candidate_power_fits": [
+            {
+              "power": 0.3333333333333333,
+              "rms_residual": 0.0006328333808248408,
+              "sigma_interval": [
+                0.8051144272980933,
+                0.8182727036376468
+              ],
+              "zero_field_intercept": 0.8116935654678701,
+              "zero_field_intercept_sem": 0.0032895690848883763
+            },
+            {
+              "power": 0.5,
+              "rms_residual": 0.0005210069745919131,
+              "sigma_interval": [
+                0.8343783519663559,
+                0.8433531528733049
+              ],
+              "zero_field_intercept": 0.8388657524198304,
+              "zero_field_intercept_sem": 0.0022437002267372574
+            },
+            {
+              "power": 0.6666666666666666,
+              "rms_residual": 0.0004102814259382312,
+              "sigma_interval": [
+                0.8489806981287247,
+                0.8558833286850596
+              ],
+              "zero_field_intercept": 0.8524320134068921,
+              "zero_field_intercept_sem": 0.00172565763908374
+            },
+            {
+              "power": 1.0,
+              "rms_residual": 0.00019866597230615453,
+              "sigma_interval": [
+                0.8635268344825391,
+                0.8683925405844888
+              ],
+              "zero_field_intercept": 0.8659596875335139,
+              "zero_field_intercept_sem": 0.0012164265254874477
+            },
+            {
+              "power": 1.3333333333333333,
+              "rms_residual": 0.00010871396761609187,
+              "sigma_interval": [
+                0.8707477882901927,
+                0.8746255196136598
+              ],
+              "zero_field_intercept": 0.8726866539519262,
+              "zero_field_intercept_sem": 0.0009694328308667432
+            },
+            {
+              "power": 2.0,
+              "rms_residual": 0.0004921245307613613,
+              "sigma_interval": [
+                0.8778783197863311,
+                0.8808153612283076
+              ],
+              "zero_field_intercept": 0.8793468405073194,
+              "zero_field_intercept_sem": 0.0007342603604941275
+            }
+          ],
+          "last_field_step_sigma_bound": 0.006297971979855651,
+          "maximum_within_field_sem": 0.0008885354273281881,
+          "mean_values_by_descending_field": [
+            [
+              0.9040049499978382,
+              1.8780624915805924e-05
+            ],
+            [
+              0.8974916301132142,
+              1.3145848342755906e-05
+            ],
+            [
+              0.8893776830191683,
+              -1.6599673871337015e-05
+            ],
+            [
+              0.885160714272229,
+              1.8032227899684055e-05
+            ]
+          ],
+          "scaled_time": 0.30000000000000004,
+          "sem_by_descending_field": [
+            0.000524463841275153,
+            0.0005142690406953687,
+            0.0008885354273281881,
+            0.0005412951585954635
+          ],
+          "zero_field_intercept_sigma_envelope": [
+            0.8051144272980933,
+            0.8808153612283076
+          ],
+          "zero_field_intercept_sigma_envelope_width": 0.07570093393021426
+        },
+        {
+          "accepted": false,
+          "candidate_power_fits": [
+            {
+              "power": 0.3333333333333333,
+              "rms_residual": 0.0008034748133371618,
+              "sigma_interval": [
+                0.7860310543675216,
+                0.80142143291242
+              ],
+              "zero_field_intercept": 0.7937262436399708,
+              "zero_field_intercept_sem": 0.003847594636224564
+            },
+            {
+              "power": 0.5,
+              "rms_residual": 0.0006842581320557814,
+              "sigma_interval": [
+                0.8174043715495538,
+                0.8279011718758686
+              ],
+              "zero_field_intercept": 0.8226527717127112,
+              "zero_field_intercept_sem": 0.0026242000815787144
+            },
+            {
+              "power": 0.6666666666666666,
+              "rms_residual": 0.000565993258810817,
+              "sigma_interval": [
+                0.8330584185500136,
+                0.8411313352668814
+              ],
+              "zero_field_intercept": 0.8370948769084475,
+              "zero_field_intercept_sem": 0.0020182291792169792
+            },
+            {
+              "power": 1.0,
+              "rms_residual": 0.00033617129478364906,
+              "sigma_interval": [
+                0.8486506486828376,
+                0.8543409531815698
+              ],
+              "zero_field_intercept": 0.8514958009322037,
+              "zero_field_intercept_sem": 0.0014225761246830645
+            },
+            {
+              "power": 1.3333333333333333,
+              "rms_residual": 0.0001475527590415905,
+              "sigma_interval": [
+                0.856389542375486,
+                0.860924253718968
+              ],
+              "zero_field_intercept": 0.858656898047227,
+              "zero_field_intercept_sem": 0.0011336778358704686
+            },
+            {
+              "power": 2.0,
+              "rms_residual": 0.00041130164098530925,
+              "sigma_interval": [
+                0.8640293897357767,
+                0.8674639311773493
+              ],
+              "zero_field_intercept": 0.865746660456563,
+              "zero_field_intercept_sem": 0.000858635360393152
+            }
+          ],
+          "last_field_step_sigma_bound": 0.006642733305911894,
+          "maximum_within_field_sem": 0.0010370575141589171,
+          "mean_values_by_descending_field": [
+            [
+              0.892172023821149,
+              2.547512606184126e-05
+            ],
+            [
+              0.885001076813184,
+              1.4060744859040311e-05
+            ],
+            [
+              0.8763226755148307,
+              -2.077293769432085e-05
+            ],
+            [
+              0.8721127072710864,
+              2.4221020029758204e-05
+            ]
+          ],
+          "scaled_time": 0.325,
+          "sem_by_descending_field": [
+            0.000610527874792213,
+            0.0006060045166144509,
+            0.0010370575141589171,
+            0.0006354571070098675
+          ],
+          "zero_field_intercept_sigma_envelope": [
+            0.7860310543675216,
+            0.8674639311773493
+          ],
+          "zero_field_intercept_sigma_envelope_width": 0.08143287680982769
+        },
+        {
+          "accepted": false,
+          "candidate_power_fits": [
+            {
+              "power": 0.3333333333333333,
+              "rms_residual": 0.0009934889593100227,
+              "sigma_interval": [
+                0.7678540270369896,
+                0.7856107364289813
+              ],
+              "zero_field_intercept": 0.7767323817329854,
+              "zero_field_intercept_sem": 0.0044391773479978995
+            },
+            {
+              "power": 0.5,
+              "rms_residual": 0.0008685930681404453,
+              "sigma_interval": [
+                0.8009325109691721,
+                0.8130425001546031
+              ],
+              "zero_field_intercept": 0.8069875055618876,
+              "zero_field_intercept_sem": 0.00302749729635778
+            },
+            {
+              "power": 0.6666666666666666,
+              "rms_residual": 0.0007445084404492093,
+              "sigma_interval": [
+                0.8174363359077105,
+                0.8267494184465808
+              ],
+              "zero_field_intercept": 0.8220928771771456,
+              "zero_field_intercept_sem": 0.0023282706347175714
+            },
+            {
+              "power": 1.0,
+              "rms_residual": 0.0005014169073947771,
+              "sigma_interval": [
+                0.833873114375263,
+                0.8404369727160231
+              ],
+              "zero_field_intercept": 0.8371550435456431,
+              "zero_field_intercept_sem": 0.0016409645851900535
+            },
+            {
+              "power": 1.3333333333333333,
+              "rms_residual": 0.00027774256333445925,
+              "sigma_interval": [
+                0.8420295453555101,
+                0.847260071396288
+              ],
+              "zero_field_intercept": 0.8446448083758991,
+              "zero_field_intercept_sem": 0.0013076315101944573
+            },
+            {
+              "power": 2.0,
+              "rms_residual": 0.00031093435042131085,
+              "sigma_interval": [
+                0.8500790008455149,
+                0.8540403039578742
+              ],
+              "zero_field_intercept": 0.8520596524016946,
+              "zero_field_intercept_sem": 0.000990325778089806
+            }
+          ],
+          "last_field_step_sigma_bound": 0.006883376474883499,
+          "maximum_within_field_sem": 0.0011935547638158852,
+          "mean_values_by_descending_field": [
+            [
+              0.8799075652837635,
+              3.381369277707289e-05
+            ],
+            [
+              0.8721215082073921,
+              1.4133521015093706e-05
+            ],
+            [
+              0.8630041542337117,
+              -2.5493240182145692e-05
+            ],
+            [
+              0.8589256097950488,
+              3.186494326148674e-05
+            ]
+          ],
+          "scaled_time": 0.35000000000000003,
+          "sem_by_descending_field": [
+            0.0007009935362730654,
+            0.0007048355670953727,
+            0.0011935547638158852,
+            0.000735956623884317
+          ],
+          "zero_field_intercept_sigma_envelope": [
+            0.7678540270369896,
+            0.8540403039578742
+          ],
+          "zero_field_intercept_sigma_envelope_width": 0.08618627692088465
+        },
+        {
+          "accepted": false,
+          "candidate_power_fits": [
+            {
+              "power": 0.3333333333333333,
+              "rms_residual": 0.0011984131409931652,
+              "sigma_interval": [
+                0.7507590355069221,
+                0.771004319479598
+              ],
+              "zero_field_intercept": 0.7608816774932601,
+              "zero_field_intercept_sem": 0.0050613209931689674
+            },
+            {
+              "power": 0.5,
+              "rms_residual": 0.0010697113332708784,
+              "sigma_interval": [
+                0.785099947384011,
+                0.7989060268118435
+              ],
+              "zero_field_intercept": 0.7920029870979273,
+              "zero_field_intercept_sem": 0.003451519856958141
+            },
+            {
+              "power": 0.6666666666666666,
+              "rms_residual": 0.0009416825226213857,
+              "sigma_interval": [
+                0.8022324033373803,
+                0.8128490777887923
+              ],
+              "zero_field_intercept": 0.8075407405630863,
+              "zero_field_intercept_sem": 0.0026541686128529855
+            },
+            {
+              "power": 1.0,
+              "rms_residual": 0.0006896387826649959,
+              "sigma_interval": [
+                0.8192930221367608,
+                0.826774747466588
+              ],
+              "zero_field_intercept": 0.8230338848016744,
+              "zero_field_intercept_sem": 0.001870431332456767
+            },
+            {
+              "power": 1.3333333333333333,
+              "rms_residual": 0.00044967728363454396,
+              "sigma_interval": [
+                0.827757063426805,
+                0.8337184839568175
+              ],
+              "zero_field_intercept": 0.8307377736918112,
+              "zero_field_intercept_sem": 0.001490355132503095
+            },
+            {
+              "power": 2.0,
+              "rms_residual": 0.0002302114524313631,
+              "sigma_interval": [
+                0.8361069936009994,
+                0.8406214283065266
+              ],
+              "zero_field_intercept": 0.838364210953763,
+              "zero_field_intercept_sem": 0.001128608676381812
+            }
+          ],
+          "last_field_step_sigma_bound": 0.007022124840806011,
+          "maximum_within_field_sem": 0.0013570308885226669,
+          "mean_values_by_descending_field": [
+            [
+              0.8672527255260787,
+              4.403464711516395e-05
+            ],
+            [
+              0.8589067744403124,
+              1.3066838843279777e-05
+            ],
+            [
+              0.8494915237419148,
+              -3.077078504576959e-05
+            ],
+            [
+              0.8456644966468905,
+              4.1100075946109315e-05
+            ]
+          ],
+          "scaled_time": 0.375,
+          "sem_by_descending_field": [
+            0.0007953348023328247,
+            0.0008105991534910618,
+            0.0013570308885226669,
+            0.0008423488913387544
+          ],
+          "zero_field_intercept_sigma_envelope": [
+            0.7507590355069221,
+            0.8406214283065266
+          ],
+          "zero_field_intercept_sigma_envelope_width": 0.0898623927996045
+        },
+        {
+          "accepted": false,
+          "candidate_power_fits": [
+            {
+              "power": 0.3333333333333333,
+              "rms_residual": 0.0014124056972157574,
+              "sigma_interval": [
+                0.7348671497872306,
+                0.7577101774169388
+              ],
+              "zero_field_intercept": 0.7462886636020847,
+              "zero_field_intercept_sem": 0.005710756907427058
+            },
+            {
+              "power": 0.5,
+              "rms_residual": 0.0012818651009153799,
+              "sigma_interval": [
+                0.7700062853817777,
+                0.7855823147631016
+              ],
+              "zero_field_intercept": 0.7777943000724397,
+              "zero_field_intercept_sem": 0.0038940073453309445
+            },
+            {
+              "power": 0.6666666666666666,
+              "rms_residual": 0.001151858810421885,
+              "sigma_interval": [
+                0.7875355133732584,
+                0.7995121662522051
+              ],
+              "zero_field_intercept": 0.7935238398127318,
+              "zero_field_intercept_sem": 0.002994163219736682
+            },
+            {
+              "power": 1.0,
+              "rms_residual": 0.0008950527891772822,
+              "sigma_interval": [
+                0.8049885909734554,
+                0.8134274350299383
+              ],
+              "zero_field_intercept": 0.8092080130016969,
+              "zero_field_intercept_sem": 0.0021097110141206966
+            },
+            {
+              "power": 1.3333333333333333,
+              "rms_residual": 0.0006468235288010654,
+              "sigma_interval": [
+                0.8136450139426047,
+                0.8203683176531217
+              ],
+              "zero_field_intercept": 0.8170066657978632,
+              "zero_field_intercept_sem": 0.001680825927629246
+            },
+            {
+              "power": 2.0,
+              "rms_residual": 0.00026268635155714834,
+              "sigma_interval": [
+                0.8221810432771517,
+                0.8272718336211411
+              ],
+              "zero_field_intercept": 0.8247264384491464,
+              "zero_field_intercept_sem": 0.0012726975859973261
+            }
+          ],
+          "last_field_step_sigma_bound": 0.007067786783464973,
+          "maximum_within_field_sem": 0.0015264367474585492,
+          "mean_values_by_descending_field": [
+            [
+              0.8542495797122847,
+              5.63841950907349e-05
+            ],
+            [
+              0.8454106939173187,
+              1.0541856627286532e-05
+            ],
+            [
+              0.8358497883332021,
+              -3.661432798565796e-05
+            ],
+            [
+              0.832383320151699,
+              5.2023975757627244e-05
+            ]
+          ],
+          "scaled_time": 0.4,
+          "sem_by_descending_field": [
+            0.0008930185755692821,
+            0.0009230950735813448,
+            0.0015264367474585492,
+            0.0009541094443462955
+          ],
+          "zero_field_intercept_sigma_envelope": [
+            0.7348671497872306,
+            0.8272718336211411
+          ],
+          "zero_field_intercept_sigma_envelope_width": 0.09240468383391054
+        }
+      ],
+      "scaled_wave": -0.8,
+      "wave_index": 2
+    },
+    {
+      "rows": [
+        {
+          "accepted": true,
+          "candidate_power_fits": [
+            {
+              "power": 0.3333333333333333,
+              "rms_residual": 1.0053497077208614e-15,
+              "sigma_interval": [
+                1.000000000000001,
+                1.0000000000000033
+              ],
+              "zero_field_intercept": 1.0000000000000022,
+              "zero_field_intercept_sem": 5.146948981348671e-16
+            },
+            {
+              "power": 0.5,
+              "rms_residual": 9.820925191391734e-16,
+              "sigma_interval": [
+                1.0000000000000007,
+                1.000000000000002
+              ],
+              "zero_field_intercept": 1.0000000000000013,
+              "zero_field_intercept_sem": 3.475853856471799e-16
+            },
+            {
+              "power": 0.6666666666666666,
+              "rms_residual": 1.0821115497893178e-15,
+              "sigma_interval": [
+                1.0000000000000009,
+                1.0000000000000018
+              ],
+              "zero_field_intercept": 1.0000000000000013,
+              "zero_field_intercept_sem": 2.6433203292710214e-16
+            },
+            {
+              "power": 1.0,
+              "rms_residual": 1.0205600981444537e-15,
+              "sigma_interval": [
+                1.0,
+                1.0000000000000009
+              ],
+              "zero_field_intercept": 1.0000000000000004,
+              "zero_field_intercept_sem": 1.8165730719242325e-16
+            },
+            {
+              "power": 1.3333333333333333,
+              "rms_residual": 9.883479487474066e-16,
+              "sigma_interval": [
+                0.9999999999999993,
+                1.0
+              ],
+              "zero_field_intercept": 0.9999999999999997,
+              "zero_field_intercept_sem": 1.4086508424953488e-16
+            },
+            {
+              "power": 2.0,
+              "rms_residual": 9.40418540046196e-16,
+              "sigma_interval": [
+                0.9999999999999998,
+                1.0000000000000002
+              ],
+              "zero_field_intercept": 1.0,
+              "zero_field_intercept_sem": 1.0104766682936467e-16
+            }
+          ],
+          "last_field_step_sigma_bound": 4.531559571436952e-16,
+          "maximum_within_field_sem": 1.1555567610933196e-16,
+          "mean_values_by_descending_field": [
+            [
+              1.0000000000000007,
+              0.0
+            ],
+            [
+              0.9999999999999982,
+              0.0
+            ],
+            [
+              1.0,
+              0.0
+            ],
+            [
+              1.0000000000000002,
+              0.0
+            ]
+          ],
+          "scaled_time": 0.0,
+          "sem_by_descending_field": [
+            6.409875621278546e-17,
+            5.551115123125783e-17,
+            0.0,
+            1.1555567610933196e-16
+          ],
+          "zero_field_intercept_sigma_envelope": [
+            0.9999999999999993,
+            1.0000000000000033
+          ],
+          "zero_field_intercept_sigma_envelope_width": 3.9968028886505635e-15
+        },
+        {
+          "accepted": true,
+          "candidate_power_fits": [
+            {
+              "power": 0.3333333333333333,
+              "rms_residual": 2.251800755164361e-06,
+              "sigma_interval": [
+                0.9981193685581967,
+                0.9981193685581978
+              ],
+              "zero_field_intercept": 0.9981193685581973,
+              "zero_field_intercept_sem": 2.6694008178899034e-16
+            },
+            {
+              "power": 0.5,
+              "rms_residual": 1.2404087257527379e-06,
+              "sigma_interval": [
+                0.9983643416919777,
+                0.9983643416919784
+              ],
+              "zero_field_intercept": 0.9983643416919781,
+              "zero_field_intercept_sem": 1.7180211779024667e-16
+            },
+            {
+              "power": 0.6666666666666666,
+              "rms_residual": 2.3890437150629296e-07,
+              "sigma_interval": [
+                0.9984866498763174,
+                0.9984866498763179
+              ],
+              "zero_field_intercept": 0.9984866498763176,
+              "zero_field_intercept_sem": 1.2451166404909451e-16
+            },
+            {
+              "power": 1.0,
+              "rms_residual": 1.775273251616542e-06,
+              "sigma_interval": [
+                0.9986086112969164,
+                0.9986086112969166
+              ],
+              "zero_field_intercept": 0.9986086112969165,
+              "zero_field_intercept_sem": 7.785469347350034e-17
+            },
+            {
+              "power": 1.3333333333333333,
+              "rms_residual": 3.7503414108704902e-06,
+              "sigma_interval": [
+                0.998669260985043,
+                0.9986692609850433
+              ],
+              "zero_field_intercept": 0.9986692609850432,
+              "zero_field_intercept_sem": 5.526327010104177e-17
+            },
+            {
+              "power": 2.0,
+              "rms_residual": 7.581523085528945e-06,
+              "sigma_interval": [
+                0.9987293117823405,
+                0.9987293117823407
+              ],
+              "zero_field_intercept": 0.9987293117823406,
+              "zero_field_intercept_sem": 3.447600947001975e-17
+            }
+          ],
+          "last_field_step_sigma_bound": 4.617784216509616e-05,
+          "maximum_within_field_sem": 7.850464517660045e-17,
+          "mean_values_by_descending_field": [
+            [
+              0.9989472405787546,
+              1.6010530322108793e-19
+            ],
+            [
+              0.9988939752788215,
+              1.0844060939625897e-19
+            ],
+            [
+              0.9988230173603189,
+              -4.208229941612173e-19
+            ],
+            [
+              0.9987768395181538,
+              2.0231409185464056e-19
+            ]
+          ],
+          "scaled_time": 0.025,
+          "sem_by_descending_field": [
+            7.166459595674082e-17,
+            7.850464517660045e-17,
+            1.688215402010087e-20,
+            6.777909687609813e-20
+          ],
+          "zero_field_intercept_sigma_envelope": [
+            0.9981193685581967,
+            0.9987293117823407
+          ],
+          "zero_field_intercept_sigma_envelope_width": 0.0006099432241439828
+        },
+        {
+          "accepted": true,
+          "candidate_power_fits": [
+            {
+              "power": 0.3333333333333333,
+              "rms_residual": 8.292573004399872e-06,
+              "sigma_interval": [
+                0.9953234825559016,
+                0.995647427863579
+              ],
+              "zero_field_intercept": 0.9954854552097403,
+              "zero_field_intercept_sem": 8.098632691934255e-05
+            },
+            {
+              "power": 0.5,
+              "rms_residual": 6.998924006988998e-06,
+              "sigma_interval": [
+                0.9960214731446637,
+                0.9962428808949522
+              ],
+              "zero_field_intercept": 0.9961321770198079,
+              "zero_field_intercept_sem": 5.535193757211713e-05
+            },
+            {
+              "power": 0.6666666666666666,
+              "rms_residual": 6.650831726754834e-06,
+              "sigma_interval": [
+                0.996369895073773,
+                0.996540265153801
+              ],
+              "zero_field_intercept": 0.996455080113787,
+              "zero_field_intercept_sem": 4.2592520006983045e-05
+            },
+            {
+              "power": 1.0,
+              "rms_residual": 8.893504158287213e-06,
+              "sigma_interval": [
+                0.9967172163138367,
+                0.9968369723088988
+              ],
+              "zero_field_intercept": 0.9967770943113677,
+              "zero_field_intercept_sem": 2.993899876551331e-05
+            },
+            {
+              "power": 1.3333333333333333,
+              "rms_residual": 1.3082210405304492e-05,
+              "sigma_interval": [
+                0.9968898410797717,
+                0.9969846677069292
+              ],
+              "zero_field_intercept": 0.9969372543933505,
+              "zero_field_intercept_sem": 2.3706656789353067e-05
+            },
+            {
+              "power": 2.0,
+              "rms_residual": 2.264373289753293e-05,
+              "sigma_interval": [
+                0.9970606276321873,
+                0.9971311477434709
+              ],
+              "zero_field_intercept": 0.9970958876878291,
+              "zero_field_intercept_sem": 1.7630027820924433e-05
+            }
+          ],
+          "last_field_step_sigma_bound": 0.00015743552079834557,
+          "maximum_within_field_sem": 1.8614567110511643e-05,
+          "mean_values_by_descending_field": [
+            [
+              0.997665858248098,
+              -8.718178854772355e-08
+            ],
+            [
+              0.9975400220338896,
+              2.9205179700443887e-08
+            ],
+            [
+              0.9973349468711122,
+              -1.5327398391571611e-07
+            ],
+            [
+              0.9972235184812392,
+              -4.753412225572775e-07
+            ]
+          ],
+          "scaled_time": 0.05,
+          "sem_by_descending_field": [
+            5.590195342567936e-06,
+            8.887390838012289e-06,
+            1.3514851404789501e-05,
+            1.8614567110511643e-05
+          ],
+          "zero_field_intercept_sigma_envelope": [
+            0.9953234825559016,
+            0.9971311477434709
+          ],
+          "zero_field_intercept_sigma_envelope_width": 0.0018076651875692518
+        },
+        {
+          "accepted": false,
+          "candidate_power_fits": [
+            {
+              "power": 0.3333333333333333,
+              "rms_residual": 2.1722188423657343e-05,
+              "sigma_interval": [
+                0.9916292876062954,
+                0.992593033831139
+              ],
+              "zero_field_intercept": 0.9921111607187172,
+              "zero_field_intercept_sem": 0.00024093655621087624
+            },
+            {
+              "power": 0.5,
+              "rms_residual": 2.0301107354131357e-05,
+              "sigma_interval": [
+                0.9929834658639441,
+                0.9936421404594576
+              ],
+              "zero_field_intercept": 0.9933128031617009,
+              "zero_field_intercept_sem": 0.0001646686488783775
+            },
+            {
+              "power": 0.6666666666666666,
+              "rms_residual": 2.014623425098582e-05,
+              "sigma_interval": [
+                0.9936593737973248,
+                0.99416620325941
+              ],
+              "zero_field_intercept": 0.9939127885283674,
+              "zero_field_intercept_sem": 0.00012670736552129869
+            },
+            {
+              "power": 1.0,
+              "rms_residual": 2.3474428113108172e-05,
+              "sigma_interval": [
+                0.9943330270815443,
+                0.9946892773067237
+              ],
+              "zero_field_intercept": 0.994511152194134,
+              "zero_field_intercept_sem": 8.906255629487641e-05
+            },
+            {
+              "power": 1.3333333333333333,
+              "rms_residual": 2.9989948521055767e-05,
+              "sigma_interval": [
+                0.9946677458686821,
+                0.9949498351153656
+              ],
+              "zero_field_intercept": 0.9948087904920239,
+              "zero_field_intercept_sem": 7.052231167090012e-05
+            },
+            {
+              "power": 2.0,
+              "rms_residual": 4.6420870823388164e-05,
+              "sigma_interval": [
+                0.9949987583535388,
+                0.9952085477340703
+              ],
+              "zero_field_intercept": 0.9951036530438045,
+              "zero_field_intercept_sem": 5.2447345132900166e-05
+            }
+          ],
+          "last_field_step_sigma_bound": 0.0003317347879813685,
+          "maximum_within_field_sem": 5.534412999635063e-05,
+          "mean_values_by_descending_field": [
+            [
+              0.9961568443153298,
+              -4.5931563637934536e-07
+            ],
+            [
+              0.9959394687960412,
+              1.670271128443661e-07
+            ],
+            [
+              0.995538296025799,
+              -6.09422548667434e-07
+            ],
+            [
+              0.995343458368142,
+              -2.364877411014348e-06
+            ]
+          ],
+          "scaled_time": 0.07500000000000001,
+          "sem_by_descending_field": [
+            1.6714206357165777e-05,
+            2.6571232742584682e-05,
+            4.0270238028656565e-05,
+            5.534412999635063e-05
+          ],
+          "zero_field_intercept_sigma_envelope": [
+            0.9916292876062954,
+            0.9952085477340703
+          ],
+          "zero_field_intercept_sigma_envelope_width": 0.003579260127774875
+        },
+        {
+          "accepted": false,
+          "candidate_power_fits": [
+            {
+              "power": 0.3333333333333333,
+              "rms_residual": 4.203924305598123e-05,
+              "sigma_interval": [
+                0.98706669858536,
+                0.9889717209672428
+              ],
+              "zero_field_intercept": 0.9880192097763014,
+              "zero_field_intercept_sem": 0.0004762555954706988
+            },
+            {
+              "power": 0.5,
+              "rms_residual": 4.0327548317187893e-05,
+              "sigma_interval": [
+                0.9892715375510004,
+                0.9905734748245203
+              ],
+              "zero_field_intercept": 0.9899225061877603,
+              "zero_field_intercept_sem": 0.0003254843183799938
+            },
+            {
+              "power": 0.6666666666666666,
+              "rms_residual": 4.0275596204232986e-05,
+              "sigma_interval": [
+                0.9903719615055325,
+                0.9913737309078027
+              ],
+              "zero_field_intercept": 0.9908728462066676,
+              "zero_field_intercept_sem": 0.00025044235056752995
+            },
+            {
+              "power": 1.0,
+              "rms_residual": 4.491424167939945e-05,
+              "sigma_interval": [
+                0.9914685889117375,
+                0.9921727099012602
+              ],
+              "zero_field_intercept": 0.9918206494064988,
+              "zero_field_intercept_sem": 0.00017603024738067287
+            },
+            {
+              "power": 1.3333333333333333,
+              "rms_residual": 5.414981985257009e-05,
+              "sigma_interval": [
+                0.9920133669158472,
+                0.9925709097685541
+              ],
+              "zero_field_intercept": 0.9922921383422006,
+              "zero_field_intercept_sem": 0.000139385713176707
+            },
+            {
+              "power": 2.0,
+              "rms_residual": 7.868149177652068e-05,
+              "sigma_interval": [
+                0.99255196180404,
+                0.9929666294531044
+              ],
+              "zero_field_intercept": 0.9927592956285722,
+              "zero_field_intercept_sem": 0.00010366691226607698
+            }
+          ],
+          "last_field_step_sigma_bound": 0.0005654232994996781,
+          "maximum_within_field_sem": 0.00010928637769194999,
+          "mean_values_by_descending_field": [
+            [
+              0.99442168113304,
+              -1.3055852011096775e-06
+            ],
+            [
+              0.994094346522927,
+              5.019376713474709e-07
+            ],
+            [
+              0.9934372039061515,
+              -1.5187957923112632e-06
+            ],
+            [
+              0.9931424798601651,
+              -6.503540505537487e-06
+            ]
+          ],
+          "scaled_time": 0.1,
+          "sem_by_descending_field": [
+            3.330866758875378e-05,
+            5.289270456648902e-05,
+            7.981418682542085e-05,
+            0.00010928637769194999
+          ],
+          "zero_field_intercept_sigma_envelope": [
+            0.98706669858536,
+            0.9929666294531044
+          ],
+          "zero_field_intercept_sigma_envelope_width": 0.0058999308677444295
+        },
+        {
+          "accepted": false,
+          "candidate_power_fits": [
+            {
+              "power": 0.3333333333333333,
+              "rms_residual": 6.905805309523805e-05,
+              "sigma_interval": [
+                0.981677907891869,
+                0.9848054889704031
+              ],
+              "zero_field_intercept": 0.9832416984311361,
+              "zero_field_intercept_sem": 0.000781895269633542
+            },
+            {
+              "power": 0.5,
+              "rms_residual": 6.689750587946185e-05,
+              "sigma_interval": [
+                0.9849155725633663,
+                0.9870529167464988
+              ],
+              "zero_field_intercept": 0.9859842446549325,
+              "zero_field_intercept_sem": 0.0005343360457831482
+            },
+            {
+              "power": 0.6666666666666666,
+              "rms_residual": 6.685627507748009e-05,
+              "sigma_interval": [
+                0.9865313973233486,
+                0.9881759008566876
+              ],
+              "zero_field_intercept": 0.9873536490900181,
+              "zero_field_intercept_sem": 0.0004111258833347576
+            },
+            {
+              "power": 1.0,
+              "rms_residual": 7.286293507221578e-05,
+              "sigma_interval": [
+                0.9881415124683144,
+                0.9892973497591366
+              ],
+              "zero_field_intercept": 0.9887194311137255,
+              "zero_field_intercept_sem": 0.0002889593227055833
+            },
+            {
+              "power": 1.3333333333333333,
+              "rms_residual": 8.510832058560774e-05,
+              "sigma_interval": [
+                0.9889412663824871,
+                0.9898564914720337
+              ],
+              "zero_field_intercept": 0.9893988789272604,
+              "zero_field_intercept_sem": 0.0002288062723866369
+            },
+            {
+              "power": 2.0,
+              "rms_residual": 0.00011883898011396766,
+              "sigma_interval": [
+                0.9897317795423206,
+                0.9904125249196472
+              ],
+              "zero_field_intercept": 0.9900721522309839,
+              "zero_field_intercept_sem": 0.00017018634433164681
+            }
+          ],
+          "last_field_step_sigma_bound": 0.0008533431423636284,
+          "maximum_within_field_sem": 0.00017916622507707335,
+          "mean_values_by_descending_field": [
+            [
+              0.9924623334724901,
+              -2.8054556046709314e-06
+            ],
+            [
+              0.9920073735515434,
+              1.1287231141864598e-06
+            ],
+            [
+              0.9910373876883871,
+              -3.0368477175164555e-06
+            ],
+            [
+              0.9906287004620571,
+              -1.3584273072041322e-05
+            ]
+          ],
+          "scaled_time": 0.125,
+          "sem_by_descending_field": [
+            5.5303780569459176e-05,
+            8.762727570886662e-05,
+            0.00013152541420559166,
+            0.00017916622507707335
+          ],
+          "zero_field_intercept_sigma_envelope": [
+            0.981677907891869,
+            0.9904125249196472
+          ],
+          "zero_field_intercept_sigma_envelope_width": 0.008734617027778113
+        },
+        {
+          "accepted": false,
+          "candidate_power_fits": [
+            {
+              "power": 0.3333333333333333,
+              "rms_residual": 0.00010264805751871735,
+              "sigma_interval": [
+                0.9755164324634216,
+                0.9801224883257389
+              ],
+              "zero_field_intercept": 0.9778194603945802,
+              "zero_field_intercept_sem": 0.00115151396557931
+            },
+            {
+              "power": 0.5,
+              "rms_residual": 9.984477751409793e-05,
+              "sigma_interval": [
+                0.9799534616410592,
+                0.9831009524364536
+              ],
+              "zero_field_intercept": 0.9815272070387564,
+              "zero_field_intercept_sem": 0.0007868726988485942
+            },
+            {
+              "power": 0.6666666666666666,
+              "rms_residual": 9.967074268330003e-05,
+              "sigma_interval": [
+                0.982167769913918,
+                0.984589371761937
+              ],
+              "zero_field_intercept": 0.9833785708379275,
+              "zero_field_intercept_sem": 0.0006054004620047571
+            },
+            {
+              "power": 1.0,
+              "rms_residual": 0.00010694541790211554,
+              "sigma_interval": [
+                0.9843741053718634,
+                0.9860760370809655
+              ],
+              "zero_field_intercept": 0.9852250712264145,
+              "zero_field_intercept_sem": 0.00042548292727553417
+            },
+            {
+              "power": 1.3333333333333333,
+              "rms_residual": 0.0001223370418235836,
+              "sigma_interval": [
+                0.9854698810992192,
+                0.9868175199868713
+              ],
+              "zero_field_intercept": 0.9861437005430452,
+              "zero_field_intercept_sem": 0.0003369097219130477
+            },
+            {
+              "power": 2.0,
+              "rms_residual": 0.00016611890078755247,
+              "sigma_interval": [
+                0.9865528126408296,
+                0.987555289280605
+              ],
+              "zero_field_intercept": 0.9870540509607173,
+              "zero_field_intercept_sem": 0.0002506191599438511
+            }
+          ],
+          "last_field_step_sigma_bound": 0.0011889766059774562,
+          "maximum_within_field_sem": 0.00026337567657278287,
+          "mean_values_by_descending_field": [
+            [
+              0.9902812375349143,
+              -5.127600816249359e-06
+            ],
+            [
+              0.9896819355901167,
+              2.145681866893624e-06
+            ],
+            [
+              0.9883460702169297,
+              -5.327292010933622e-06
+            ],
+            [
+              0.9878123913373367,
+              -2.41262917901582e-05
+            ]
+          ],
+          "scaled_time": 0.15000000000000002,
+          "sem_by_descending_field": [
+            8.262363333735191e-05,
+            0.0001304879567549807,
+            0.00019462427122700379,
+            0.00026337567657278287
+          ],
+          "zero_field_intercept_sigma_envelope": [
+            0.9755164324634216,
+            0.987555289280605
+          ],
+          "zero_field_intercept_sigma_envelope_width": 0.012038856817183419
+        },
+        {
+          "accepted": false,
+          "candidate_power_fits": [
+            {
+              "power": 0.3333333333333333,
+              "rms_residual": 0.00014268307805958742,
+              "sigma_interval": [
+                0.9686459240559239,
+                0.9749566118503709
+              ],
+              "zero_field_intercept": 0.9718012679531474,
+              "zero_field_intercept_sem": 0.0015776719486117537
+            },
+            {
+              "power": 0.5,
+              "rms_residual": 0.00013899458413932613,
+              "sigma_interval": [
+                0.9744302777626983,
+                0.9787422300356015
+              ],
+              "zero_field_intercept": 0.9765862538991499,
+              "zero_field_intercept_sem": 0.0010779880682258059
+            },
+            {
+              "power": 0.6666666666666666,
+              "rms_residual": 0.00013848016640506013,
+              "sigma_interval": [
+                0.9773168758608007,
+                0.9806341750472255
+              ],
+              "zero_field_intercept": 0.9789755254540131,
+              "zero_field_intercept_sem": 0.0008293247966061793
+            },
+            {
+              "power": 1.0,
+              "rms_residual": 0.00014675428043804144,
+              "sigma_interval": [
+                0.9801929125896405,
+                0.982524197740896
+              ],
+              "zero_field_intercept": 0.9813585551652683,
+              "zero_field_intercept_sem": 0.0005828212878138995
+            },
+            {
+              "power": 1.3333333333333333,
+              "rms_residual": 0.00016524787290365744,
+              "sigma_interval": [
+                0.9816211534586703,
+                0.9834671291974191
+              ],
+              "zero_field_intercept": 0.9825441413280447,
+              "zero_field_intercept_sem": 0.0004614939346871943
+            },
+            {
+              "power": 2.0,
+              "rms_residual": 0.0002196144987132779,
+              "sigma_interval": [
+                0.9830324421652914,
+                0.9844057838362346
+              ],
+              "zero_field_intercept": 0.983719113000763,
+              "zero_field_intercept_sem": 0.0003433354177357918
+            }
+          ],
+          "last_field_step_sigma_bound": 0.0015646275153903613,
+          "maximum_within_field_sem": 0.00036002251113052526,
+          "mean_values_by_descending_field": [
+            [
+              0.9878812876978235,
+              -8.428875527141605e-06
+            ],
+            [
+              0.9871220609865187,
+              3.6518294425921355e-06
+            ],
+            [
+              0.9853718900057555,
+              -8.56380581307726e-06
+            ],
+            [
+              0.9847057968700239,
+              -3.845090661678823e-05
+            ]
+          ],
+          "scaled_time": 0.17500000000000002,
+          "sem_by_descending_field": [
+            0.00011518629553776465,
+            0.00018112954887409934,
+            0.0002681861792985766,
+            0.00036002251113052526
+          ],
+          "zero_field_intercept_sigma_envelope": [
+            0.9686459240559239,
+            0.9844057838362346
+          ],
+          "zero_field_intercept_sigma_envelope_width": 0.015759859780310692
+        },
+        {
+          "accepted": false,
+          "candidate_power_fits": [
+            {
+              "power": 0.3333333333333333,
+              "rms_residual": 0.0001890364511885514,
+              "sigma_interval": [
+                0.9611387726379138,
+                0.9693470018514482
+              ],
+              "zero_field_intercept": 0.965242887244681,
+              "zero_field_intercept_sem": 0.0020520573033835842
+            },
+            {
+              "power": 0.5,
+              "rms_residual": 0.0001841692993962146,
+              "sigma_interval": [
+                0.968397308677839,
+                0.9740052082465509
+              ],
+              "zero_field_intercept": 0.971201258462195,
+              "zero_field_intercept_sem": 0.0014019748921779678
+            },
+            {
+              "power": 0.6666666666666666,
+              "rms_residual": 0.00018303958764575936,
+              "sigma_interval": [
+                0.9720194664643211,
+                0.9763334341823755
+              ],
+              "zero_field_intercept": 0.9741764503233483,
+              "zero_field_intercept_sem": 0.00107849192951359
+            },
+            {
+              "power": 1.0,
+              "rms_residual": 0.0001918679079607284,
+              "sigma_interval": [
+                0.9756281768907027,
+                0.9786596330561177
+              ],
+              "zero_field_intercept": 0.9771439049734102,
+              "zero_field_intercept_sem": 0.0007578640413537698
+            },
+            {
+              "power": 1.3333333333333333,
+              "rms_residual": 0.0002132184286257788,
+              "sigma_interval": [
+                0.9774200981127,
+                0.9798204719934792
+              ],
+              "zero_field_intercept": 0.9786202850530896,
+              "zero_field_intercept_sem": 0.0006000934701948208
+            },
+            {
+              "power": 2.0,
+              "rms_residual": 0.00027832817346563936,
+              "sigma_interval": [
+                0.979190501037381,
+                0.9809765358245904
+              ],
+              "zero_field_intercept": 0.9800835184309857,
+              "zero_field_intercept_sem": 0.0004465086968023242
+            }
+          ],
+          "last_field_step_sigma_bound": 0.001971634154762898,
+          "maximum_within_field_sem": 0.0004669865657546478,
+          "mean_values_by_descending_field": [
+            [
+              0.9852658211101019,
+              -1.2853318110007286e-05
+            ],
+            [
+              0.9843323915565971,
+              5.744168643707922e-06
+            ],
+            [
+              0.9821247953745572,
+              -1.2930116040429954e-05
+            ],
+            [
+              0.9813229213516861,
+              -5.666582130127335e-05
+            ]
+          ],
+          "scaled_time": 0.2,
+          "sem_by_descending_field": [
+            0.00015290370392612496,
+            0.0002391537907043094,
+            0.0003511573974055614,
+            0.0004669865657546478
+          ],
+          "zero_field_intercept_sigma_envelope": [
+            0.9611387726379138,
+            0.9809765358245904
+          ],
+          "zero_field_intercept_sigma_envelope_width": 0.019837763186676627
+        },
+        {
+          "accepted": false,
+          "candidate_power_fits": [
+            {
+              "power": 0.3333333333333333,
+              "rms_residual": 0.0002415827089686901,
+              "sigma_interval": [
+                0.9530745371343023,
+                0.9633374846342884
+              ],
+              "zero_field_intercept": 0.9582060108842954,
+              "zero_field_intercept_sem": 0.0025657368749965287
+            },
+            {
+              "power": 0.5,
+              "rms_residual": 0.00023519650476827944,
+              "sigma_interval": [
+                0.9619109696712154,
+                0.9689217533952119
+              ],
+              "zero_field_intercept": 0.9654163615332136,
+              "zero_field_intercept_sem": 0.0017526959309991388
+            },
+            {
+              "power": 0.6666666666666666,
+              "rms_residual": 0.00023311210186795683,
+              "sigma_interval": [
+                0.9663204011807386,
+                0.9717130429116513
+              ],
+              "zero_field_intercept": 0.9690167220461949,
+              "zero_field_intercept_sem": 0.0013481604327281582
+            },
+            {
+              "power": 1.0,
+              "rms_residual": 0.00024187281308083,
+              "sigma_interval": [
+                0.9707132322907468,
+                0.9745022789904867
+              ],
+              "zero_field_intercept": 0.9726077556406167,
+              "zero_field_intercept_sem": 0.0009472616749349865
+            },
+            {
+              "power": 1.3333333333333333,
+              "rms_residual": 0.0002656219291633937,
+              "sigma_interval": [
+                0.9728943147671071,
+                0.9758945198005148
+              ],
+              "zero_field_intercept": 0.9743944172838109,
+              "zero_field_intercept_sem": 0.0007500512583518979
+            },
+            {
+              "power": 2.0,
+              "rms_residual": 0.00034121256794830115,
+              "sigma_interval": [
+                0.9750489049757236,
+                0.9772815780270705
+              ],
+              "zero_field_intercept": 0.976165241501397,
+              "zero_field_intercept_sem": 0.0005581682628367235
+            }
+          ],
+          "last_field_step_sigma_bound": 0.0024006085361396104,
+          "maximum_within_field_sem": 0.0005819822734889907,
+          "mean_values_by_descending_field": [
+            [
+              0.9824386002651433,
+              -1.8531173419970122e-05
+            ],
+            [
+              0.9813181493332718,
+              8.515082908283926e-06
+            ],
+            [
+              0.9786159246296087,
+              -1.861842107295593e-05
+            ],
+            [
+              0.9776792879534691,
+              -7.865852213867861e-05
+            ]
+          ],
+          "scaled_time": 0.225,
+          "sem_by_descending_field": [
+            0.00019568135829873908,
+            0.0003041152713619376,
+            0.0004423729349617478,
+            0.0005819822734889907
+          ],
+          "zero_field_intercept_sigma_envelope": [
+            0.9530745371343023,
+            0.9772815780270705
+          ],
+          "zero_field_intercept_sigma_envelope_width": 0.02420704089276815
+        },
+        {
+          "accepted": false,
+          "candidate_power_fits": [
+            {
+              "power": 0.3333333333333333,
+              "rms_residual": 0.0003001984595897188,
+              "sigma_interval": [
+                0.944538241533906,
+                0.9569759457550256
+              ],
+              "zero_field_intercept": 0.9507570936444658,
+              "zero_field_intercept_sem": 0.0031094260552799106
+            },
+            {
+              "power": 0.5,
+              "rms_residual": 0.0002919149222912818,
+              "sigma_interval": [
+                0.9550316227024694,
+                0.9635266943627793
+              ],
+              "zero_field_intercept": 0.9592791585326244,
+              "zero_field_intercept_sem": 0.002123767915077474
+            },
+            {
+              "power": 0.6666666666666666,
+              "rms_residual": 0.00028848022431162264,
+              "sigma_interval": [
+                0.9602677279272018,
+                0.9668013098903481
+              ],
+              "zero_field_intercept": 0.963534518908775,
+              "zero_field_intercept_sem": 0.0016333954907865496
+            },
+            {
+              "power": 1.0,
+              "rms_residual": 0.00029638527731828235,
+              "sigma_interval": [
+                0.9654838448161543,
+                0.9700739402641304
+              ],
+              "zero_field_intercept": 0.9677788925401424,
+              "zero_field_intercept_sem": 0.00114752386199399
+            },
+            {
+              "power": 1.3333333333333333,
+              "rms_residual": 0.0003218580371347715,
+              "sigma_interval": [
+                0.9680734584807292,
+                0.9717078412328902
+              ],
+              "zero_field_intercept": 0.9698906498568097,
+              "zero_field_intercept_sem": 0.0009085956880402549
+            },
+            {
+              "power": 2.0,
+              "rms_residual": 0.0004072128989721545,
+              "sigma_interval": [
+                0.9706312510392419,
+                0.9733362716702412
+              ],
+              "zero_field_intercept": 0.9719837613547415,
+              "zero_field_intercept_sem": 0.0006762551577498217
+            }
+          ],
+          "last_field_step_sigma_bound": 0.0028416959262664732,
+          "maximum_within_field_sem": 0.0007026260118606577,
+          "mean_values_by_descending_field": [
+            [
+              0.9794037936952944,
+              -2.5577927025920677e-05
+            ],
+            [
+              0.9780850996097263,
+              1.2049899044413856e-05
+            ],
+            [
+              0.9748574744029106,
+              -2.5826208281157695e-05
+            ],
+            [
+              0.9737916757517917,
+              -0.00010409902975426967
+            ]
+          ],
+          "scaled_time": 0.25,
+          "sem_by_descending_field": [
+            0.00024341785235840248,
+            0.00037552797137305633,
+            0.0005405763786468219,
+            0.0007026260118606577
+          ],
+          "zero_field_intercept_sigma_envelope": [
+            0.944538241533906,
+            0.9733362716702412
+          ],
+          "zero_field_intercept_sigma_envelope_width": 0.028798030136335195
+        },
+        {
+          "accepted": false,
+          "candidate_power_fits": [
+            {
+              "power": 0.3333333333333333,
+              "rms_residual": 0.00036476013858883664,
+              "sigma_interval": [
+                0.9356185774646913,
+                0.9503136603935524
+              ],
+              "zero_field_intercept": 0.9429661189291219,
+              "zero_field_intercept_sem": 0.003673770732215241
+            },
+            {
+              "power": 0.5,
+              "rms_residual": 0.0003541763595478714,
+              "sigma_interval": [
+                0.9478223301811047,
+                0.9578573455393874
+              ],
+              "zero_field_intercept": 0.9528398378602461,
+              "zero_field_intercept_sem": 0.0025087538395706893
+            },
+            {
+              "power": 0.6666666666666666,
+              "rms_residual": 0.0003489528014720132,
+              "sigma_interval": [
+                0.9539117121074806,
+                0.9616285777639276
+              ],
+              "zero_field_intercept": 0.9577701449357041,
+              "zero_field_intercept_sem": 0.0019292164141117704
+            },
+            {
+              "power": 1.0,
+              "rms_residual": 0.000355069472141641,
+              "sigma_interval": [
+                0.9599775160694154,
+                0.9653980052773031
+              ],
+              "zero_field_intercept": 0.9626877606733593,
+              "zero_field_intercept_sem": 0.0013551223019719267
+            },
+            {
+              "power": 1.3333333333333333,
+              "rms_residual": 0.000381381905479617,
+              "sigma_interval": [
+                0.9629886797930537,
+                0.9672803647091578
+              ],
+              "zero_field_intercept": 0.9651345222511057,
+              "zero_field_intercept_sem": 0.0010729212290260096
+            },
+            {
+              "power": 2.0,
+              "rms_residual": 0.00047530962632999366,
+              "sigma_interval": [
+                0.9659623929851243,
+                0.9691571163869904
+              ],
+              "zero_field_intercept": 0.9675597546860574,
+              "zero_field_intercept_sem": 0.0007986808504665105
+            }
+          ],
+          "last_field_step_sigma_bound": 0.0032848479636928283,
+          "maximum_within_field_sem": 0.0008265067322066679,
+          "mean_values_by_descending_field": [
+            [
+              0.976165954943372,
+              -3.4093345845268954e-05
+            ],
+            [
+              0.9746395106858889,
+              1.6424658591510914e-05
+            ],
+            [
+              0.9708625584797288,
+              -3.4751617415109435e-05
+            ],
+            [
+              0.9696778410143139,
+              -0.00013245194934702857
+            ]
+          ],
+          "scaled_time": 0.275,
+          "sem_by_descending_field": [
+            0.000296004267555041,
+            0.00045287228010871996,
+            0.0006444413351480544,
+            0.0008265067322066679
+          ],
+          "zero_field_intercept_sigma_envelope": [
+            0.9356185774646913,
+            0.9691571163869904
+          ],
+          "zero_field_intercept_sigma_envelope_width": 0.03353853892229908
+        },
+        {
+          "accepted": false,
+          "candidate_power_fits": [
+            {
+              "power": 0.3333333333333333,
+              "rms_residual": 0.00043513772763051464,
+              "sigma_interval": [
+                0.9264060563240042,
+                0.9434045930696184
+              ],
+              "zero_field_intercept": 0.9349053246968113,
+              "zero_field_intercept_sem": 0.004249634186403567
+            },
+            {
+              "power": 0.5,
+              "rms_residual": 0.0004218426556235585,
+              "sigma_interval": [
+                0.94034757296928,
+                0.9519530078894564
+              ],
+              "zero_field_intercept": 0.9461502904293682,
+              "zero_field_intercept_sem": 0.00290135873004409
+            },
+            {
+              "power": 0.6666666666666666,
+              "rms_residual": 0.0004143661931699516,
+              "sigma_interval": [
+                0.9473038372235001,
+                0.9562268247061896
+              ],
+              "zero_field_intercept": 0.9517653309648448,
+              "zero_field_intercept_sem": 0.00223074687067237
+            },
+            {
+              "power": 1.0,
+              "rms_residual": 0.00041764977999948907,
+              "sigma_interval": [
+                0.9542327657700614,
+                0.9604991477791428
+              ],
+              "zero_field_intercept": 0.9573659567746021,
+              "zero_field_intercept_sem": 0.0015665955022703222
+            },
+            {
+              "power": 1.3333333333333333,
+              "rms_residual": 0.0004437288445005603,
+              "sigma_interval": [
+                0.9576720475417874,
+                0.9626331299074263
+              ],
+              "zero_field_intercept": 0.9601525887246068,
+              "zero_field_intercept_sem": 0.0012402705914097553
+            },
+            {
+              "power": 2.0,
+              "rms_residual": 0.0005445597738666791,
+              "sigma_interval": [
+                0.961068003043527,
+                0.9647615510504604
+              ],
+              "zero_field_intercept": 0.9629147770469937,
+              "zero_field_intercept_sem": 0.0009233870017333111
+            }
+          ],
+          "last_field_step_sigma_bound": 0.003720102191914487,
+          "maximum_within_field_sem": 0.0009512582576708643,
+          "mean_values_by_descending_field": [
+            [
+              0.9727299999777923,
+              -4.416052396784606e-05
+            ],
+            [
+              0.9709881107949653,
+              2.1704135912610973e-05
+            ],
+            [
+              0.9666450594599293,
+              -4.558759591458392e-05
+            ],
+            [
+              0.9653562292078288,
+              -0.00016299741465088363
+            ]
+          ],
+          "scaled_time": 0.30000000000000004,
+          "sem_by_descending_field": [
+            0.0003533234606146347,
+            0.0005356023171823976,
+            0.0007525941761903311,
+            0.0009512582576708643
+          ],
+          "zero_field_intercept_sigma_envelope": [
+            0.9264060563240042,
+            0.9647615510504604
+          ],
+          "zero_field_intercept_sigma_envelope_width": 0.03835549472645616
+        },
+        {
+          "accepted": false,
+          "candidate_power_fits": [
+            {
+              "power": 0.3333333333333333,
+              "rms_residual": 0.000511184179389328,
+              "sigma_interval": [
+                0.9169911561361694,
+                0.9363046802781867
+              ],
+              "zero_field_intercept": 0.9266479182071781,
+              "zero_field_intercept_sem": 0.004828381035504342
+            },
+            {
+              "power": 0.5,
+              "rms_residual": 0.0004947771477502855,
+              "sigma_interval": [
+                0.9326719636283924,
+                0.9458544578275545
+              ],
+              "zero_field_intercept": 0.9392632107279735,
+              "zero_field_intercept_sem": 0.003295623549790503
+            },
+            {
+              "power": 0.6666666666666666,
+              "rms_residual": 0.00048457887557550446,
+              "sigma_interval": [
+                0.9404958010325105,
+                0.9506292561672595
+              ],
+              "zero_field_intercept": 0.945562528599885,
+              "zero_field_intercept_sem": 0.0025333637836872608
+            },
+            {
+              "power": 1.0,
+              "rms_residual": 0.00048391538211437233,
+              "sigma_interval": [
+                0.9482884102164401,
+                0.9554030210669094
+              ],
+              "zero_field_intercept": 0.9518457156416747,
+              "zero_field_intercept_sem": 0.0017786527126173357
+            },
+            {
+              "power": 1.3333333333333333,
+              "rms_residual": 0.0005085320200935098,
+              "sigma_interval": [
+                0.9521559678458775,
+                0.9577880328495239
+              ],
+              "zero_field_intercept": 0.9549720003477007,
+              "zero_field_intercept_sem": 0.0014080162509116085
+            },
+            {
+              "power": 2.0,
+              "rms_residual": 0.0006141347818616976,
+              "sigma_interval": [
+                0.9559741301754457,
+                0.9601677492532567
+              ],
+              "zero_field_intercept": 0.9580709397143512,
+              "zero_field_intercept_sem": 0.0010484047694527248
+            }
+          ],
+          "last_field_step_sigma_bound": 0.004137860615945561,
+          "maximum_within_field_sem": 0.0010746315434665345,
+          "mean_values_by_descending_field": [
+            [
+              0.9691011832268439,
+              -5.584493655636399e-05
+            ],
+            [
+              0.9671380426889205,
+              2.7940129866386186e-05
+            ],
+            [
+              0.9622194758682031,
+              -5.8515182207733586e-05
+            ],
+            [
+              0.9608456842586952,
+              -0.00019486018753316333
+            ]
+          ],
+          "scaled_time": 0.325,
+          "sem_by_descending_field": [
+            0.0004152492771930447,
+            0.0006231533875220342,
+            0.0008636376350987201,
+            0.0010746315434665345
+          ],
+          "zero_field_intercept_sigma_envelope": [
+            0.9169911561361694,
+            0.9601677492532567
+          ],
+          "zero_field_intercept_sigma_envelope_width": 0.043176593117087214
+        },
+        {
+          "accepted": false,
+          "candidate_power_fits": [
+            {
+              "power": 0.3333333333333333,
+              "rms_residual": 0.000592721000420579,
+              "sigma_interval": [
+                0.9074625085900729,
+                0.9290711071342423
+              ],
+              "zero_field_intercept": 0.9182668078621576,
+              "zero_field_intercept_sem": 0.005402149636042359
+            },
+            {
+              "power": 0.5,
+              "rms_residual": 0.0005728309314185837,
+              "sigma_interval": [
+                0.9248589860310382,
+                0.9396034319408363
+              ],
+              "zero_field_intercept": 0.9322312089859373,
+              "zero_field_intercept_sem": 0.003686111477449519
+            },
+            {
+              "power": 0.6666666666666666,
+              "rms_residual": 0.0005594593951338077,
+              "sigma_interval": [
+                0.9335385312286663,
+                0.9448698933301901
+              ],
+              "zero_field_intercept": 0.9392042122794282,
+              "zero_field_intercept_sem": 0.00283284052538094
+            },
+            {
+              "power": 1.0,
+              "rms_residual": 0.0005537158824186115,
+              "sigma_interval": [
+                0.9421828535485449,
+                0.9501359496571896
+              ],
+              "zero_field_intercept": 0.9461594016028673,
+              "zero_field_intercept_sem": 0.0019882740271611596
+            },
+            {
+              "power": 1.3333333333333333,
+              "rms_residual": 0.0005755308936903985,
+              "sigma_interval": [
+                0.9464726126257935,
+                0.9527675687588352
+              ],
+              "zero_field_intercept": 0.9496200906923143,
+              "zero_field_intercept_sem": 0.001573739033260387
+            },
+            {
+              "power": 2.0,
+              "rms_residual": 0.000683352549766965,
+              "sigma_interval": [
+                0.9507067647449453,
+                0.9553944127535449
+              ],
+              "zero_field_intercept": 0.9530505887492451,
+              "zero_field_intercept_sem": 0.0011719120021498768
+            }
+          ],
+          "last_field_step_sigma_bound": 0.004529159517134954,
+          "maximum_within_field_sem": 0.0011945650709142626,
+          "mean_values_by_descending_field": [
+            [
+              0.9652850724147677,
+              -6.919350895666342e-05
+            ],
+            [
+              0.9630968163881353,
+              3.5170049869713065e-05
+            ],
+            [
+              0.9576007669918774,
+              -7.36962757945108e-05
+            ],
+            [
+              0.9561651614840931,
+              -0.00022704585780688818
+            ]
+          ],
+          "scaled_time": 0.35000000000000003,
+          "sem_by_descending_field": [
+            0.0004816457249718975,
+            0.0007149493963237766,
+            0.0009761748953754054,
+            0.0011945650709142626
+          ],
+          "zero_field_intercept_sigma_envelope": [
+            0.9074625085900729,
+            0.9553944127535449
+          ],
+          "zero_field_intercept_sigma_envelope_width": 0.04793190416347193
+        },
+        {
+          "accepted": false,
+          "candidate_power_fits": [
+            {
+              "power": 0.3333333333333333,
+              "rms_residual": 0.0006795208968795512,
+              "sigma_interval": [
+                0.8979051725569573,
+                0.9217615862708937
+              ],
+              "zero_field_intercept": 0.9098333794139255,
+              "zero_field_intercept_sem": 0.005964103428484076
+            },
+            {
+              "power": 0.5,
+              "rms_residual": 0.0006558247635706065,
+              "sigma_interval": [
+                0.9169697929980786,
+                0.9332421137050889
+              ],
+              "zero_field_intercept": 0.9251059533515837,
+              "zero_field_intercept_sem": 0.00406808017675257
+            },
+            {
+              "power": 0.6666666666666666,
+              "rms_residual": 0.0006388683112177718,
+              "sigma_interval": [
+                0.9264812450105798,
+                0.9389831633646825
+              ],
+              "zero_field_intercept": 0.9327322041876311,
+              "zero_field_intercept_sem": 0.0031254795885256436
+            },
+            {
+              "power": 1.0,
+              "rms_residual": 0.0006269475581885467,
+              "sigma_interval": [
+                0.9359534089205361,
+                0.9447246224367951
+              ],
+              "zero_field_intercept": 0.9403390156786656,
+              "zero_field_intercept_sem": 0.0021928033790647675
+            },
+            {
+              "power": 1.3333333333333333,
+              "rms_residual": 0.0006445686115067014,
+              "sigma_interval": [
+                0.9406533711866792,
+                0.9475945761375021
+              ],
+              "zero_field_intercept": 0.9441239736620907,
+              "zero_field_intercept_sem": 0.0017353012377057137
+            },
+            {
+              "power": 2.0,
+              "rms_residual": 0.0007517011650886932,
+              "sigma_interval": [
+                0.9452914196225188,
+                0.9504605657365135
+              ],
+              "zero_field_intercept": 0.9478759926795162,
+              "zero_field_intercept_sem": 0.0012922865284986478
+            }
+          ],
+          "last_field_step_sigma_bound": 0.004885922773101277,
+          "maximum_within_field_sem": 0.0013092513808591417,
+          "mean_values_by_descending_field": [
+            [
+              0.961287522387526,
+              -8.423371239215784e-05
+            ],
+            [
+              0.958872260595845,
+              4.341581110360173e-05
+            ],
+            [
+              0.9528041977987004,
+              -9.126628858814842e-05
+            ],
+            [
+              0.9513334503311188,
+              -0.0002584827971453947
+            ]
+          ],
+          "scaled_time": 0.375,
+          "sem_by_descending_field": [
+            0.0005523661395391902,
+            0.0008104100576653465,
+            0.0010888337499103595,
+            0.0013092513808591417
+          ],
+          "zero_field_intercept_sigma_envelope": [
+            0.8979051725569573,
+            0.9504605657365135
+          ],
+          "zero_field_intercept_sigma_envelope_width": 0.052555393179556154
+        },
+        {
+          "accepted": false,
+          "candidate_power_fits": [
+            {
+              "power": 0.3333333333333333,
+              "rms_residual": 0.0007712887074412823,
+              "sigma_interval": [
+                0.8883990409465586,
+                0.9144336434586205
+              ],
+              "zero_field_intercept": 0.9014163422025896,
+              "zero_field_intercept_sem": 0.006508650628015461
+            },
+            {
+              "power": 0.5,
+              "rms_residual": 0.0007435279321009737,
+              "sigma_interval": [
+                0.9090620939847699,
+                0.9268126258241786
+              ],
+              "zero_field_intercept": 0.9179373599044742,
+              "zero_field_intercept_sem": 0.004437632959852163
+            },
+            {
+              "power": 0.6666666666666666,
+              "rms_residual": 0.0007226354298082717,
+              "sigma_interval": [
+                0.9193705771604674,
+                0.9330034946809389
+              ],
+              "zero_field_intercept": 0.9261870359207032,
+              "zero_field_intercept_sem": 0.0034082293801178725
+            },
+            {
+              "power": 1.0,
+              "rms_residual": 0.0007035308169858269,
+              "sigma_interval": [
+                0.9296356668526943,
+                0.9391957900484885
+              ],
+              "zero_field_intercept": 0.9344157284505914,
+              "zero_field_intercept_sem": 0.00239003079894857
+            },
+            {
+              "power": 1.3333333333333333,
+              "rms_residual": 0.0007155773899879768,
+              "sigma_interval": [
+                0.9347283384998404,
+                0.9422919845706903
+              ],
+              "zero_field_intercept": 0.9385101615352653,
+              "zero_field_intercept_sem": 0.0018909115177124876
+            },
+            {
+              "power": 2.0,
+              "rms_residual": 0.0008188518018765024,
+              "sigma_interval": [
+                0.9397527377994928,
+                0.9453853521089595
+              ],
+              "zero_field_intercept": 0.9425690449542261,
+              "zero_field_intercept_sem": 0.0014081535773666704
+            }
+          ],
+          "last_field_step_sigma_bound": 0.005201191082875307,
+          "maximum_within_field_sem": 0.001417197529699965,
+          "mean_values_by_descending_field": [
+            [
+              0.9571146481194728,
+              -0.00010097270170591464
+            ],
+            [
+              0.9544724733546441,
+              5.268304392782142e-05
+            ],
+            [
+              0.9478451864121487,
+              -0.00011132709750018246
+            ],
+            [
+              0.9463689126284741,
+              -0.00028806826868604124
+            ]
+          ],
+          "scaled_time": 0.4,
+          "sem_by_descending_field": [
+            0.0006272523757159654,
+            0.0009089577202765081,
+            0.0012002902912542923,
+            0.001417197529699965
+          ],
+          "zero_field_intercept_sigma_envelope": [
+            0.8883990409465586,
+            0.9453853521089595
+          ],
+          "zero_field_intercept_sigma_envelope_width": 0.05698631116240083
+        }
+      ],
+      "scaled_wave": -0.4,
+      "wave_index": 3
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "method": "thermodynamic_translation_orbit_sparse_pauli_commutator_chain",
+  "uses_target_a_or_D": false,
+  "uses_target_trajectory": false,
+  "maximum_even_moment_order": 24,
+  "mu24_exact": {
+    "denominator": 16777216,
+    "float": 30002474663.343575,
+    "numerator": 503357997961442429
+  },
+  "twelfth_squared_lanczos_recurrent_exact": {
+    "denominator": 5723858454419032516985810177548916159600312473930368972463971550968,
+    "float": 8.758455000309242,
+    "numerator": 50132156701168705499901888783939441335625086510164717309097902703635
+  },
+  "translation_orbit_counts_by_even_order": [
+    2,
+    4,
+    18,
+    54,
+    176,
+    480,
+    1410,
+    3808,
+    10522,
+    28068,
+    75988,
+    198358,
+    526812
+  ],
+  "validation": {
+    "matches_full_periodic_ring_through_mu6": true,
+    "consistent_with_two_independent_periodic_ring_float_sums_at_mu22": true,
+    "matches_known_exact_moments_through_mu20": true,
+    "integer_gaussian_coefficient_chain": true
+  },
+  "finite_ring_used_for_mu24": false,
+  "finite_momentum_extrapolation_used": false,
+  "accepted": true
+}

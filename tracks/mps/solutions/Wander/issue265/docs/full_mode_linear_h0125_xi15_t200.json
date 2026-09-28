@@ -1,0 +1,73 @@
+{
+  "inputs": {
+    "field": 0.125,
+    "rapidity_points": 16,
+    "rapidity_u_extent": 3.0,
+    "string_xi_buffer": 1.5,
+    "string_xi_cutoff": 1.5,
+    "target_coefficients_used": false,
+    "times": [
+      0,
+      50,
+      100,
+      150,
+      200
+    ],
+    "trajectory_data_used": false,
+    "wave_numbers": [
+      0.01227184630308513,
+      0.02454369260617026
+    ]
+  },
+  "operator": {
+    "dimension": 192,
+    "fdt_noise_covariance_retained": true,
+    "full_off_diagonal_diffusion_retained": true,
+    "maximum_noise_covariance_eigenvalue": 1977078.7088111332,
+    "minimum_noise_covariance_eigenvalue": 6.229850380650493e-11,
+    "relative_fdt_identity_residual": 0.0
+  },
+  "schema_version": 1,
+  "scope": {
+    "interpretation": "all finite-cutoff modes, off-diagonal diffusion and FDT noise are propagated; nonlinear giant-mode feedback remains required",
+    "linearized_full_mode_fluctuating_ghd": true,
+    "nonlinear_state_dependent_velocity_propagated": false,
+    "physical_F1_perp_claimed": false
+  },
+  "structure_factor": [
+    {
+      "k": 0.01227184630308513,
+      "structure_factor_over_chi": [
+        1.0000000000000007,
+        0.9898536248241714,
+        0.9731941017636351,
+        0.9505673427491796,
+        0.9226885813443813
+      ],
+      "times": [
+        0.0,
+        50.0,
+        100.0,
+        150.0,
+        200.0
+      ]
+    },
+    {
+      "k": 0.02454369260617026,
+      "structure_factor_over_chi": [
+        1.0000000000000007,
+        0.9608778443089032,
+        0.9012675637372322,
+        0.8281453380600713,
+        0.7491754900974874
+      ],
+      "times": [
+        0.0,
+        50.0,
+        100.0,
+        150.0,
+        200.0
+      ]
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "status": "complete",
+  "output": "/work/share/giggleliu/cfys01/kharkov_burgers_20260729/data/convergence/amp_mu005_up__convergence__coarse.npz",
+  "job_id": "amp_mu005_up__convergence__coarse",
+  "smoke": false,
+  "effective_numerics": {
+    "L": 256,
+    "dt": 0.05,
+    "chi_max": 256,
+    "truncation_cutoff": 1e-08,
+    "t_max": 200.0,
+    "output_dt": 0.2,
+    "steps_per_output": 4,
+    "output_count": 1000,
+    "fcs_gamma": [
+      -0.6,
+      -0.4,
+      -0.2,
+      0.0,
+      0.2,
+      0.4,
+      0.6
+    ]
+  },
+  "produced_observables": [
+    "magnetization",
+    "local_spin_current",
+    "czz",
+    "fcs_logZ"
+  ],
+  "omitted_observables": [],
+  "maximum_total_magnetization_drift": 2.7931136332703943e-06,
+  "maximum_chi_observed": 256,
+  "discarded_weight_cumulative": 2.026633368793031,
+  "fcs_branch_count": 3,
+  "wall_time_seconds": 317469.4636403732,
+  "checkpoint": "/work/share/giggleliu/cfys01/kharkov_burgers_20260729/data/convergence/amp_mu005_up__convergence__coarse.npz.checkpoint.h5"
+}

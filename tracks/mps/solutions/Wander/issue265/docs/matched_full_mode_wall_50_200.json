@@ -1,0 +1,17 @@
+{
+  "failed_gates": [
+    "continuum_terminator_matching_complete",
+    "physical_F1_perp_certified"
+  ],
+  "physical_F1_perp_certified": false,
+  "projection_performed": false,
+  "reason": "The bare complete fluctuating-GHD loop has not been matched to a positive continuum behind the exact microscopic Mori prefix.  A wall or Burgers pair would therefore depend on the hydrodynamic UV regulator.",
+  "schema": 1,
+  "status": "blocked",
+  "target_coefficients_used": false,
+  "trajectory_data_used": false,
+  "window": [
+    50.0,
+    200.0
+  ]
+}

@@ -1,0 +1,113 @@
+{
+  "conclusion": "The exact low-frequency amplitude and four microscopic QLQ recurrents still permit distinct positive continua in the finite-window band.  Additional frequency-resolved microscopic/F-GHD information is required.",
+  "gates": {
+    "all_linear_programs_feasible": true,
+    "finite_window_resolvent_unique": false,
+    "pole_count_assumed": false,
+    "positive_spectral_measure_enforced": true
+  },
+  "inputs": {
+    "laplace_frequencies": [
+      0.005,
+      0.01,
+      0.02,
+      0.05
+    ],
+    "omega_match": 0.05,
+    "omega_maximum": 20.0,
+    "spectral_nodes": 999,
+    "target_coefficients_used": false,
+    "trajectory_data_used": false
+  },
+  "maximum_relative_qlq_interval_width": 1.9155169069350997,
+  "method": "positive_measure_linear_program_with_fixed_KPZ_low_tail",
+  "microscopic_constraints": {
+    "even_moments": [
+      1.0,
+      1.2543312030413998,
+      4.07246616708905,
+      23.02237698841829,
+      193.50455799379102,
+      2169.349213495068
+    ],
+    "fixed_low_tail_even_moments": [
+      0.0019942536676402335,
+      1.9942536676402352e-06,
+      3.1160213556878678e-09,
+      5.665493373977942e-12,
+      1.1128647698885214e-14,
+      2.2911921732998968e-17
+    ],
+    "low_density_amplitude": 0.14435299433071072,
+    "squared_qlq_recurrents": [
+      1.2543312030413996,
+      1.992391956850076,
+      3.921464002562568,
+      4.949646294233263,
+      6.343519453249705
+    ]
+  },
+  "rows": [
+    {
+      "feasible": true,
+      "fixed_low_resolvent": 0.03681466507608299,
+      "maximum_extremizer_nonzero_nodes": 6,
+      "minimum_extremizer_nonzero_nodes": 6,
+      "qlq_resolvent_interval": [
+        0.044364470629289256,
+        0.9634058668854154
+      ],
+      "slow_current_resolvent_interval": [
+        0.04844474790171169,
+        0.7296109035827083
+      ],
+      "z": 0.005
+    },
+    {
+      "feasible": true,
+      "fixed_low_resolvent": 0.0406109601109585,
+      "maximum_extremizer_nonzero_nodes": 6,
+      "minimum_extremizer_nonzero_nodes": 6,
+      "qlq_resolvent_interval": [
+        0.055708577664182024,
+        1.8404074911597323
+      ],
+      "slow_current_resolvent_interval": [
+        0.025334205606883486,
+        0.48809547124136177
+      ],
+      "z": 0.01
+    },
+    {
+      "feasible": true,
+      "fixed_low_resolvent": 0.040334099054101465,
+      "maximum_extremizer_nonzero_nodes": 6,
+      "minimum_extremizer_nonzero_nodes": 6,
+      "qlq_resolvent_interval": [
+        0.07051339649855348,
+        3.268066853842651
+      ],
+      "slow_current_resolvent_interval": [
+        0.014226837571239525,
+        0.30865686978201384
+      ],
+      "z": 0.02
+    },
+    {
+      "feasible": true,
+      "fixed_low_resolvent": 0.02979819636588605,
+      "maximum_extremizer_nonzero_nodes": 6,
+      "minimum_extremizer_nonzero_nodes": 6,
+      "qlq_resolvent_interval": [
+        0.10496873103983292,
+        4.715195351478669
+      ],
+      "slow_current_resolvent_interval": [
+        0.009682740597277941,
+        0.15141874443188644
+      ],
+      "z": 0.05
+    }
+  ],
+  "schema_version": 1
+}

@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "frozen_at": "2026-07-29",
+  "thresholds": {
+    "profile_convergence_max": 0.002,
+    "width_convergence_max": 0.003,
+    "universal_loco_integrated_max": 0.01,
+    "universal_loco_endpoint_max": 0.02,
+    "coefficient_relative_spread_max": 0.1,
+    "window_drift_abs_max": 0.1,
+    "finite_window_within_error_max": 0.005,
+    "finite_window_cross_error_ratio_min": 2.0,
+    "tangent_ratio_abs_error_max": 0.05,
+    "tangent_drift_exponent_tolerance": 0.12,
+    "two_mode_relative_improvement_min": 0.3,
+    "late_width_exponent_abs_error_max": 0.05,
+    "bootstrap_confidence": 0.95,
+    "bootstrap_block_duration": 10.0,
+    "bootstrap_replicates": 2000.0
+  }
+}

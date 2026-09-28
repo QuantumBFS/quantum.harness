@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "method": "exact_sparse_Pauli_string_uniform_current_commutator_chain",
+  "uses_target_trajectory": false,
+  "uses_target_a_or_D": false,
+  "maximum_even_moment_order": 20,
+  "mu20_exact": {
+    "numerator": 23930343808959,
+    "denominator": 262144,
+    "decimal": 91287017.09350204
+  },
+  "b10_squared_exact": {
+    "numerator": 8947223295590546232590956669440969508183131,
+    "denominator": 1157939709161061360332266823095747081714670,
+    "decimal": 7.7268472829841
+  },
+  "independent_ring_checks": [
+    {
+      "length": 26,
+      "mu20": 91287017.09350207,
+      "highest_order_Pauli_string_count": 1975688
+    },
+    {
+      "length": 24,
+      "mu20": 91287017.09350204,
+      "highest_order_Pauli_string_count": 1823712
+    }
+  ],
+  "known_mu18_reproduction": {
+    "exact": 5545330.451820374,
+    "length_26": 5545330.4518203745,
+    "length_24": 5545330.451820374
+  },
+  "compensated_Hilbert_Schmidt_sum_used": true,
+  "ring_independence_pass": true,
+  "positive_recurrent_pass": true,
+  "scope": {
+    "strict_long_wave_limit": true,
+    "finite_momentum_mu20_closed_form_available": false,
+    "finite_window_spectrum_uniquely_determined": false
+  }
+}

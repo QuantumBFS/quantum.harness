@@ -1,0 +1,46 @@
+{
+  "alphas": [
+    0.0,
+    0.0,
+    0.0
+  ],
+  "betas": [
+    1.0679642016854776,
+    1.4072500133851245,
+    1.9268521298772454
+  ],
+  "cutoff_mode": 3,
+  "cutoff_wave_number": 0.7853981633974483,
+  "external_mode": 1,
+  "gates": {
+    "positive_lanczos_betas": true,
+    "positive_qlp_force_norm": true,
+    "q_orthogonality_preserved": true
+  },
+  "length": 24,
+  "maximum_q_orthogonality_residual": 2.52758597975507e-17,
+  "method": "exact_sparse_pauli_projected_qlq_lanczos",
+  "operator_counts": [
+    2064,
+    8328,
+    29592,
+    101688
+  ],
+  "qlp_force_norm": 0.0026099014012459613,
+  "schema": 1,
+  "selected_modes": [
+    0,
+    1,
+    2,
+    3,
+    22,
+    23
+  ],
+  "squared_betas": [
+    1.1405475360816995,
+    1.980352600172433,
+    3.712759130412477
+  ],
+  "target_coefficients_used": false,
+  "trajectory_data_used": false
+}

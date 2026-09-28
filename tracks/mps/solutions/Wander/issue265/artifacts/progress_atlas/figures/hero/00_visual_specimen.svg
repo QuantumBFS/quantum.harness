@@ -1,0 +1,304 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="1152pt" height="648pt" viewBox="0 0 1152 648" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:date>2026-08-24T04:43:10.940052</dc:date>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.10.8, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 648
+L 1152 648
+L 1152 0
+L 0 0
+z
+" style="fill: #f8fafc"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 83.8656 242.7408
+L 370.944 242.7408
+Q 389.39904 242.7408 389.39904 234.576
+L 389.39904 162
+Q 389.39904 153.8352 370.944 153.8352
+L 83.8656 153.8352
+Q 65.41056 153.8352 65.41056 162
+L 65.41056 234.576
+Q 65.41056 242.7408 83.8656 242.7408
+z
+" clip-path="url(#p1e101e87bd)" style="fill: #ffffff; stroke: #d9e0e8; stroke-width: 1.2; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_3">
+    <path d="M 104.3712 220.968
+L 160.7616 220.968
+Q 171.0144 220.968 171.0144 216.432
+L 171.0144 180.144
+Q 171.0144 175.608 160.7616 175.608
+L 104.3712 175.608
+Q 94.1184 175.608 94.1184 180.144
+L 94.1184 216.432
+Q 94.1184 220.968 104.3712 220.968
+z
+" clip-path="url(#p1e101e87bd)" style="fill: #2864a5"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 411.9552 242.7408
+L 699.0336 242.7408
+Q 717.48864 242.7408 717.48864 234.576
+L 717.48864 162
+Q 717.48864 153.8352 699.0336 153.8352
+L 411.9552 153.8352
+Q 393.50016 153.8352 393.50016 162
+L 393.50016 234.576
+Q 393.50016 242.7408 411.9552 242.7408
+z
+" clip-path="url(#p1e101e87bd)" style="fill: #ffffff; stroke: #d9e0e8; stroke-width: 1.2; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_5">
+    <path d="M 432.4608 220.968
+L 488.8512 220.968
+Q 499.104 220.968 499.104 216.432
+L 499.104 180.144
+Q 499.104 175.608 488.8512 175.608
+L 432.4608 175.608
+Q 422.208 175.608 422.208 180.144
+L 422.208 216.432
+Q 422.208 220.968 432.4608 220.968
+z
+" clip-path="url(#p1e101e87bd)" style="fill: #d97732"/>
+   </g>
+   <g id="patch_6">
+    <path d="M 740.0448 242.7408
+L 1027.1232 242.7408
+Q 1045.57824 242.7408 1045.57824 234.576
+L 1045.57824 162
+Q 1045.57824 153.8352 1027.1232 153.8352
+L 740.0448 153.8352
+Q 721.58976 153.8352 721.58976 162
+L 721.58976 234.576
+Q 721.58976 242.7408 740.0448 242.7408
+z
+" clip-path="url(#p1e101e87bd)" style="fill: #ffffff; stroke: #d9e0e8; stroke-width: 1.2; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_7">
+    <path d="M 760.5504 220.968
+L 816.9408 220.968
+Q 827.1936 220.968 827.1936 216.432
+L 827.1936 180.144
+Q 827.1936 175.608 816.9408 175.608
+L 760.5504 175.608
+Q 750.2976 175.608 750.2976 180.144
+L 750.2976 216.432
+Q 750.2976 220.968 760.5504 220.968
+z
+" clip-path="url(#p1e101e87bd)" style="fill: #168c84"/>
+   </g>
+   <g id="patch_8">
+    <path d="M 83.8656 347.0688
+L 370.944 347.0688
+Q 389.39904 347.0688 389.39904 338.904
+L 389.39904 266.328
+Q 389.39904 258.1632 370.944 258.1632
+L 83.8656 258.1632
+Q 65.41056 258.1632 65.41056 266.328
+L 65.41056 338.904
+Q 65.41056 347.0688 83.8656 347.0688
+z
+" clip-path="url(#p1e101e87bd)" style="fill: #ffffff; stroke: #d9e0e8; stroke-width: 1.2; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_9">
+    <path d="M 104.3712 325.296
+L 160.7616 325.296
+Q 171.0144 325.296 171.0144 320.76
+L 171.0144 284.472
+Q 171.0144 279.936 160.7616 279.936
+L 104.3712 279.936
+Q 94.1184 279.936 94.1184 284.472
+L 94.1184 320.76
+Q 94.1184 325.296 104.3712 325.296
+z
+" clip-path="url(#p1e101e87bd)" style="fill: #7656a5"/>
+   </g>
+   <g id="patch_10">
+    <path d="M 411.9552 347.0688
+L 699.0336 347.0688
+Q 717.48864 347.0688 717.48864 338.904
+L 717.48864 266.328
+Q 717.48864 258.1632 699.0336 258.1632
+L 411.9552 258.1632
+Q 393.50016 258.1632 393.50016 266.328
+L 393.50016 338.904
+Q 393.50016 347.0688 411.9552 347.0688
+z
+" clip-path="url(#p1e101e87bd)" style="fill: #ffffff; stroke: #d9e0e8; stroke-width: 1.2; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_11">
+    <path d="M 432.4608 325.296
+L 488.8512 325.296
+Q 499.104 325.296 499.104 320.76
+L 499.104 284.472
+Q 499.104 279.936 488.8512 279.936
+L 432.4608 279.936
+Q 422.208 279.936 422.208 284.472
+L 422.208 320.76
+Q 422.208 325.296 432.4608 325.296
+z
+" clip-path="url(#p1e101e87bd)" style="fill: #b44545"/>
+   </g>
+   <g id="patch_12">
+    <path d="M 740.0448 347.0688
+L 1027.1232 347.0688
+Q 1045.57824 347.0688 1045.57824 338.904
+L 1045.57824 266.328
+Q 1045.57824 258.1632 1027.1232 258.1632
+L 740.0448 258.1632
+Q 721.58976 258.1632 721.58976 266.328
+L 721.58976 338.904
+Q 721.58976 347.0688 740.0448 347.0688
+z
+" clip-path="url(#p1e101e87bd)" style="fill: #ffffff; stroke: #d9e0e8; stroke-width: 1.2; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_13">
+    <path d="M 760.5504 325.296
+L 816.9408 325.296
+Q 827.1936 325.296 827.1936 320.76
+L 827.1936 284.472
+Q 827.1936 279.936 816.9408 279.936
+L 760.5504 279.936
+Q 750.2976 279.936 750.2976 284.472
+L 750.2976 320.76
+Q 750.2976 325.296 760.5504 325.296
+z
+" clip-path="url(#p1e101e87bd)" style="fill: #8a9099"/>
+   </g>
+   <g id="text_1">
+    <text style="font-weight: 700; font-size: 16px; font-family: 'DejaVu Sans', 'Noto Sans CJK SC', 'Source Han Sans SC', 'Hiragino Sans GB', 'Heiti SC', 'Source Sans 3', sans-serif; text-anchor: start; fill: #17202a" x="181.2672" y="195.3829" transform="rotate(-0 181.2672 195.3829)">Magnetization</text>
+   </g>
+   <g id="text_2">
+    <text style="font-size: 10px; font-family: 'DejaVu Sans', 'Noto Sans CJK SC', 'Source Han Sans SC', 'Hiragino Sans GB', 'Heiti SC', 'Source Sans 3', sans-serif; text-anchor: start; fill: #66717e" x="181.2672" y="213.748175" transform="rotate(-0 181.2672 213.748175)">#2864A5</text>
+   </g>
+   <g id="text_3">
+    <text style="font-weight: 700; font-size: 16px; font-family: 'DejaVu Sans', 'Noto Sans CJK SC', 'Source Han Sans SC', 'Hiragino Sans GB', 'Heiti SC', 'Source Sans 3', sans-serif; text-anchor: start; fill: #17202a" x="509.3568" y="195.4454" transform="rotate(-0 509.3568 195.4454)">Current</text>
+   </g>
+   <g id="text_4">
+    <text style="font-size: 10px; font-family: 'DejaVu Sans', 'Noto Sans CJK SC', 'Source Han Sans SC', 'Hiragino Sans GB', 'Heiti SC', 'Source Sans 3', sans-serif; text-anchor: start; fill: #66717e" x="509.3568" y="213.748175" transform="rotate(-0 509.3568 213.748175)">#D97732</text>
+   </g>
+   <g id="text_5">
+    <text style="font-weight: 700; font-size: 16px; font-family: 'DejaVu Sans', 'Noto Sans CJK SC', 'Source Han Sans SC', 'Hiragino Sans GB', 'Heiti SC', 'Source Sans 3', sans-serif; text-anchor: start; fill: #17202a" x="837.4464" y="195.4454" transform="rotate(-0 837.4464 195.4454)">Kpz</text>
+   </g>
+   <g id="text_6">
+    <text style="font-size: 10px; font-family: 'DejaVu Sans', 'Noto Sans CJK SC', 'Source Han Sans SC', 'Hiragino Sans GB', 'Heiti SC', 'Source Sans 3', sans-serif; text-anchor: start; fill: #66717e" x="837.4464" y="213.748175" transform="rotate(-0 837.4464 213.748175)">#168C84</text>
+   </g>
+   <g id="text_7">
+    <text style="font-weight: 700; font-size: 16px; font-family: 'DejaVu Sans', 'Noto Sans CJK SC', 'Source Han Sans SC', 'Hiragino Sans GB', 'Heiti SC', 'Source Sans 3', sans-serif; text-anchor: start; fill: #17202a" x="181.2672" y="299.6484" transform="rotate(-0 181.2672 299.6484)">Memory</text>
+   </g>
+   <g id="text_8">
+    <text style="font-size: 10px; font-family: 'DejaVu Sans', 'Noto Sans CJK SC', 'Source Han Sans SC', 'Hiragino Sans GB', 'Heiti SC', 'Source Sans 3', sans-serif; text-anchor: start; fill: #66717e" x="181.2672" y="318.076175" transform="rotate(-0 181.2672 318.076175)">#7656A5</text>
+   </g>
+   <g id="text_9">
+    <text style="font-weight: 700; font-size: 16px; font-family: 'DejaVu Sans', 'Noto Sans CJK SC', 'Source Han Sans SC', 'Hiragino Sans GB', 'Heiti SC', 'Source Sans 3', sans-serif; text-anchor: start; fill: #17202a" x="509.3568" y="299.7734" transform="rotate(-0 509.3568 299.7734)">Risk</text>
+   </g>
+   <g id="text_10">
+    <text style="font-size: 10px; font-family: 'DejaVu Sans', 'Noto Sans CJK SC', 'Source Han Sans SC', 'Hiragino Sans GB', 'Heiti SC', 'Source Sans 3', sans-serif; text-anchor: start; fill: #66717e" x="509.3568" y="318.076175" transform="rotate(-0 509.3568 318.076175)">#B44545</text>
+   </g>
+   <g id="text_11">
+    <text style="font-weight: 700; font-size: 16px; font-family: 'DejaVu Sans', 'Noto Sans CJK SC', 'Source Han Sans SC', 'Hiragino Sans GB', 'Heiti SC', 'Source Sans 3', sans-serif; text-anchor: start; fill: #17202a" x="837.4464" y="299.7734" transform="rotate(-0 837.4464 299.7734)">Unresolved</text>
+   </g>
+   <g id="text_12">
+    <text style="font-size: 10px; font-family: 'DejaVu Sans', 'Noto Sans CJK SC', 'Source Han Sans SC', 'Hiragino Sans GB', 'Heiti SC', 'Source Sans 3', sans-serif; text-anchor: start; fill: #66717e" x="837.4464" y="318.076175" transform="rotate(-0 837.4464 318.076175)">#8A9099</text>
+   </g>
+   <g id="text_13">
+    <text style="font-weight: 700; font-size: 17px; font-family: 'DejaVu Sans', 'Noto Sans CJK SC', 'Source Han Sans SC', 'Hiragino Sans GB', 'Heiti SC', 'Source Sans 3', sans-serif; text-anchor: start; fill: #17202a" x="83.8656" y="447.768" transform="rotate(-0 83.8656 447.768)">Evidence states</text>
+   </g>
+   <g id="text_14">
+    <g id="patch_14">
+     <path d="M 83.8656 500.663625
+L 200.6556 500.663625
+Q 205.6956 500.663625 205.6956 495.623625
+L 205.6956 484.009875
+Q 205.6956 478.969875 200.6556 478.969875
+L 83.8656 478.969875
+Q 78.8256 478.969875 78.8256 484.009875
+L 78.8256 495.623625
+Q 78.8256 500.663625 83.8656 500.663625
+z
+" style="fill: #ffffff; stroke: #168c84; stroke-linejoin: miter"/>
+    </g>
+    <text style="font-weight: 700; font-size: 12px; font-family: 'DejaVu Sans', 'Noto Sans CJK SC', 'Source Han Sans SC', 'Hiragino Sans GB', 'Heiti SC', 'Source Sans 3', sans-serif; text-anchor: start; fill: #168c84" x="83.8656" y="493.128" transform="rotate(-0 83.8656 493.128)">complete artifact</text>
+   </g>
+   <g id="text_15">
+    <g id="patch_15">
+     <path d="M 401.7024 500.663625
+L 557.64615 500.663625
+Q 562.68615 500.663625 562.68615 495.623625
+L 562.68615 484.009875
+Q 562.68615 478.969875 557.64615 478.969875
+L 401.7024 478.969875
+Q 396.6624 478.969875 396.6624 484.009875
+L 396.6624 495.623625
+Q 396.6624 500.663625 401.7024 500.663625
+z
+" style="fill: #ffffff; stroke: #b44545; stroke-linejoin: miter"/>
+    </g>
+    <text style="font-weight: 700; font-size: 12px; font-family: 'DejaVu Sans', 'Noto Sans CJK SC', 'Source Han Sans SC', 'Hiragino Sans GB', 'Heiti SC', 'Source Sans 3', sans-serif; text-anchor: start; fill: #b44545" x="401.7024" y="493.128" transform="rotate(-0 401.7024 493.128)">checkpointed TIMEOUT</text>
+   </g>
+   <g id="text_16">
+    <g id="patch_16">
+     <path d="M 719.5392 500.663625
+L 794.732325 500.663625
+Q 799.772325 500.663625 799.772325 495.623625
+L 799.772325 484.009875
+Q 799.772325 478.969875 794.732325 478.969875
+L 719.5392 478.969875
+Q 714.4992 478.969875 714.4992 484.009875
+L 714.4992 495.623625
+Q 714.4992 500.663625 719.5392 500.663625
+z
+" style="fill: #ffffff; stroke: #8a9099; stroke-linejoin: miter"/>
+    </g>
+    <text style="font-weight: 700; font-size: 12px; font-family: 'DejaVu Sans', 'Noto Sans CJK SC', 'Source Han Sans SC', 'Hiragino Sans GB', 'Heiti SC', 'Source Sans 3', sans-serif; text-anchor: start; fill: #8a9099" x="719.5392" y="493.128" transform="rotate(-0 719.5392 493.128)">unresolved</text>
+   </g>
+  </g>
+  <g id="text_17">
+   <text style="font-weight: 700; font-size: 21.5px; font-family: 'DejaVu Sans', 'Noto Sans CJK SC', 'Source Han Sans SC', 'Hiragino Sans GB', 'Heiti SC', 'Source Sans 3', sans-serif; text-anchor: start; fill: #17202a" x="63.36" y="45.496641" transform="rotate(-0 63.36 45.496641)">Hydrodynamic Evidence Atlas</text>
+  </g>
+  <g id="text_18">
+   <text style="font-size: 11.2px; font-family: 'DejaVu Sans', 'Noto Sans CJK SC', 'Source Han Sans SC', 'Hiragino Sans GB', 'Heiti SC', 'Source Sans 3', sans-serif; text-anchor: start; fill: #586574" x="63.36" y="76.55025" transform="rotate(-0 63.36 76.55025)">Visual specimen · fixed hierarchy, evidence language, and collision-safe layout</text>
+  </g>
+  <g id="text_19">
+   <g id="patch_17">
+    <path d="M 970.6275 48.522125
+L 1088.64 48.522125
+Q 1093.14 48.522125 1093.14 44.022125
+L 1093.14 34.344
+Q 1093.14 29.844 1088.64 29.844
+L 970.6275 29.844
+Q 966.1275 29.844 966.1275 34.344
+L 966.1275 44.022125
+Q 966.1275 48.522125 970.6275 48.522125
+z
+" style="fill: #ffffff; stroke: #b44545; stroke-width: 1.3; stroke-linejoin: miter"/>
+   </g>
+   <text style="font-weight: 700; font-size: 10px; font-family: 'DejaVu Sans', 'Noto Sans CJK SC', 'Source Han Sans SC', 'Hiragino Sans GB', 'Heiti SC', 'Source Sans 3', sans-serif; text-anchor: end; fill: #b44545" x="1088.64" y="41.942438" transform="rotate(-0 1088.64 41.942438)">GATE NOT ACCEPTED</text>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="p1e101e87bd">
+   <rect x="63.36" y="116.64" width="1025.28" height="453.6"/>
+  </clipPath>
+ </defs>
+</svg>

@@ -1,0 +1,399 @@
+{
+  "audit": {
+    "all_kernels_inside_exact_moment_intervals": true,
+    "all_terminators_positive": true,
+    "declared_hydrodynamic_p_maximum": 7.59375,
+    "declared_relative_tolerance": 0.02,
+    "finite_k_recurrent_error_order": "O(k^2)=O(h^4) at fixed q=k/h^2",
+    "finite_pole_terminator_assumed": false,
+    "last_field_step_relative_scaled_terminator_change_by_p": [
+      0.44362688878194856,
+      0.4405401917143131,
+      0.43589720904038476,
+      0.4289951129467928,
+      0.41884205846129885,
+      0.4039162827375129,
+      0.3815752755010338,
+      0.3465039728421128,
+      0.2866450937065959
+    ],
+    "linear_full_mode_joint_scaling_supported_on_declared_low_p_window": false,
+    "linear_full_mode_joint_scaling_supported_on_entire_sampled_p_grid": false,
+    "maximum_last_field_step_relative_scaled_terminator_change": 0.44362688878194856,
+    "maximum_low_p_last_field_step_relative_change": 0.44362688878194856,
+    "maximum_reconstruction_relative_residual": 6.79738613745675e-16,
+    "physical_full_nonlinear_terminator_claimed": false,
+    "remaining_requirement": "add the UV-matched nonlinear fluctuating-GHD vertices before promoting the linear full-mode terminator to the physical F1"
+  },
+  "exact_even_moment_order": 26,
+  "exact_recurrent_count": 13,
+  "method": "exact_finite_recurrent_long_wave_peeling_of_joint_scaled_full_mode_kernel",
+  "per_field": [
+    {
+      "entries": [
+        {
+          "inside_exact_moment_interval": true,
+          "laplace_frequency": 0.001953125,
+          "moment_lower_bound": 0.008160182752810753,
+          "moment_upper_bound": 124.78328334691955,
+          "reconstruction_relative_residual": 0.0,
+          "scaled_frequency_p_equals_z_over_h3": 1.0,
+          "scaled_h_times_terminator": 0.015844726037256663,
+          "thirteenth_level_terminator": 0.1267578082980533,
+          "total_continuity_kernel": 4.0697427110496065
+        },
+        {
+          "inside_exact_moment_interval": true,
+          "laplace_frequency": 0.0029296875,
+          "moment_lower_bound": 0.012239627092733999,
+          "moment_upper_bound": 83.18950901524397,
+          "reconstruction_relative_residual": 6.79738613745675e-16,
+          "scaled_frequency_p_equals_z_over_h3": 1.5,
+          "scaled_h_times_terminator": 0.01621890499167745,
+          "thirteenth_level_terminator": 0.1297512399334196,
+          "total_continuity_kernel": 3.9199409967569014
+        },
+        {
+          "inside_exact_moment_interval": true,
+          "laplace_frequency": 0.00439453125,
+          "moment_lower_bound": 0.018357257275414717,
+          "moment_upper_bound": 55.46065282596185,
+          "reconstruction_relative_residual": 2.3725985664476627e-16,
+          "scaled_frequency_p_equals_z_over_h3": 2.25,
+          "scaled_h_times_terminator": 0.016645022254866526,
+          "thirteenth_level_terminator": 0.1331601780389322,
+          "total_continuity_kernel": 3.7434837576840354
+        },
+        {
+          "inside_exact_moment_interval": true,
+          "laplace_frequency": 0.006591796875,
+          "moment_lower_bound": 0.027528519978712297,
+          "moment_upper_bound": 36.9752386838497,
+          "reconstruction_relative_residual": 1.252094411605284e-16,
+          "scaled_frequency_p_equals_z_over_h3": 3.375,
+          "scaled_h_times_terminator": 0.017072788593896132,
+          "thirteenth_level_terminator": 0.13658230875116906,
+          "total_continuity_kernel": 3.5467709601922524
+        },
+        {
+          "inside_exact_moment_interval": true,
+          "laplace_frequency": 0.0098876953125,
+          "moment_lower_bound": 0.04126794207576316,
+          "moment_upper_bound": 24.652364017023718,
+          "reconstruction_relative_residual": 3.990570757251845e-16,
+          "scaled_frequency_p_equals_z_over_h3": 5.0625,
+          "scaled_h_times_terminator": 0.017409467929757186,
+          "thirteenth_level_terminator": 0.1392757434380575,
+          "total_continuity_kernel": 3.338539047651595
+        },
+        {
+          "inside_exact_moment_interval": true,
+          "laplace_frequency": 0.01483154296875,
+          "moment_lower_bound": 0.06181825294179754,
+          "moment_upper_bound": 16.438215656168854,
+          "reconstruction_relative_residual": 5.679340106098455e-16,
+          "scaled_frequency_p_equals_z_over_h3": 7.59375,
+          "scaled_h_times_terminator": 0.01750455994881038,
+          "thirteenth_level_terminator": 0.14003647959048304,
+          "total_continuity_kernel": 3.1277521793294345
+        },
+        {
+          "inside_exact_moment_interval": true,
+          "laplace_frequency": 0.022247314453125,
+          "moment_lower_bound": 0.09244629340646972,
+          "moment_upper_bound": 10.963766430598865,
+          "reconstruction_relative_residual": 0.0,
+          "scaled_frequency_p_equals_z_over_h3": 11.390625,
+          "scaled_h_times_terminator": 0.017122882759776994,
+          "thirteenth_level_terminator": 0.13698306207821595,
+          "total_continuity_kernel": 2.922112920580859
+        },
+        {
+          "inside_exact_moment_interval": true,
+          "laplace_frequency": 0.0333709716796875,
+          "moment_lower_bound": 0.1377302867954491,
+          "moment_upper_bound": 7.316599906694763,
+          "reconstruction_relative_residual": 1.627722041896919e-16,
+          "scaled_frequency_p_equals_z_over_h3": 17.0859375,
+          "scaled_h_times_terminator": 0.015887723149616586,
+          "thirteenth_level_terminator": 0.1271017851969327,
+          "total_continuity_kernel": 2.728286515875455
+        },
+        {
+          "inside_exact_moment_interval": true,
+          "laplace_frequency": 0.05005645751953125,
+          "moment_lower_bound": 0.20349619174543368,
+          "moment_upper_bound": 4.888827364598768,
+          "reconstruction_relative_residual": 0.0,
+          "scaled_frequency_p_equals_z_over_h3": 25.62890625,
+          "scaled_h_times_terminator": 0.0131752289160885,
+          "thirteenth_level_terminator": 0.105401831328708,
+          "total_continuity_kernel": 2.5531798529998015
+        }
+      ],
+      "exact_squared_recurrents": [
+        0.5,
+        1.75,
+        3.1785714285714284,
+        4.17255216693419,
+        4.420346879585746,
+        5.484054789770981,
+        5.558202140126421,
+        6.801640474648271,
+        6.6441303605386395,
+        7.7268472829841,
+        7.540432748832734,
+        8.758455000309242,
+        8.8498471089788
+      ],
+      "field": 0.125,
+      "scaled_wave_q_equals_k_over_h2": 2.56,
+      "wave_number": 0.04
+    },
+    {
+      "entries": [
+        {
+          "inside_exact_moment_interval": true,
+          "laplace_frequency": 0.0010000000000000002,
+          "moment_lower_bound": 0.004178143948091538,
+          "moment_upper_bound": 243.71622022697636,
+          "reconstruction_relative_residual": 3.447161248072361e-16,
+          "scaled_frequency_p_equals_z_over_h3": 1.0,
+          "scaled_h_times_terminator": 0.01011922127035799,
+          "thirteenth_level_terminator": 0.1011922127035799,
+          "total_continuity_kernel": 5.153100512468288
+        },
+        {
+          "inside_exact_moment_interval": true,
+          "laplace_frequency": 0.0015000000000000005,
+          "moment_lower_bound": 0.006267129069344164,
+          "moment_upper_bound": 162.47781472344337,
+          "reconstruction_relative_residual": 1.7878099398198162e-16,
+          "scaled_frequency_p_equals_z_over_h3": 1.5,
+          "scaled_h_times_terminator": 0.010399179040263834,
+          "thirteenth_level_terminator": 0.10399179040263833,
+          "total_continuity_kernel": 4.967968909433628
+        },
+        {
+          "inside_exact_moment_interval": true,
+          "laplace_frequency": 0.0022500000000000007,
+          "moment_lower_bound": 0.009400400489369302,
+          "moment_upper_bound": 108.3190450035519,
+          "reconstruction_relative_residual": 3.740281615435321e-16,
+          "scaled_frequency_p_equals_z_over_h3": 2.25,
+          "scaled_h_times_terminator": 0.010735719890968205,
+          "thirteenth_level_terminator": 0.10735719890968204,
+          "total_continuity_kernel": 4.749259606735535
+        },
+        {
+          "inside_exact_moment_interval": true,
+          "laplace_frequency": 0.003375000000000001,
+          "moment_lower_bound": 0.014099611574851154,
+          "moment_upper_bound": 72.21344943877251,
+          "reconstruction_relative_residual": 1.9715388024320868e-16,
+          "scaled_frequency_p_equals_z_over_h3": 3.375,
+          "scaled_h_times_terminator": 0.011109076046851839,
+          "thirteenth_level_terminator": 0.11109076046851839,
+          "total_continuity_kernel": 4.50500095967916
+        },
+        {
+          "inside_exact_moment_interval": true,
+          "laplace_frequency": 0.005062500000000001,
+          "moment_lower_bound": 0.021146079729870513,
+          "moment_upper_bound": 48.14342873946227,
+          "reconstruction_relative_residual": 2.0915107568536892e-16,
+          "scaled_frequency_p_equals_z_over_h3": 5.0625,
+          "scaled_h_times_terminator": 0.01147804300774885,
+          "thirteenth_level_terminator": 0.1147804300774885,
+          "total_continuity_kernel": 4.246587863770941
+        },
+        {
+          "inside_exact_moment_interval": true,
+          "laplace_frequency": 0.0075937500000000015,
+          "moment_lower_bound": 0.03170786100428049,
+          "moment_upper_bound": 32.09731269172448,
+          "reconstruction_relative_residual": 2.2281552169806497e-16,
+          "scaled_frequency_p_equals_z_over_h3": 7.59375,
+          "scaled_h_times_terminator": 0.011773652146652092,
+          "thirteenth_level_terminator": 0.11773652146652092,
+          "total_continuity_kernel": 3.9861604475817747
+        },
+        {
+          "inside_exact_moment_interval": true,
+          "laplace_frequency": 0.011390625000000003,
+          "moment_lower_bound": 0.047523838649159635,
+          "moment_upper_bound": 21.400748292483893,
+          "reconstruction_relative_residual": 4.756859830308473e-16,
+          "scaled_frequency_p_equals_z_over_h3": 11.390625,
+          "scaled_h_times_terminator": 0.011890227479381264,
+          "thirteenth_level_terminator": 0.11890227479381263,
+          "total_continuity_kernel": 3.7343056191862973
+        },
+        {
+          "inside_exact_moment_interval": true,
+          "laplace_frequency": 0.017085937500000006,
+          "moment_lower_bound": 0.07115800690178894,
+          "moment_upper_bound": 14.270973700668042,
+          "reconstruction_relative_residual": 2.53839250298718e-16,
+          "scaled_frequency_p_equals_z_over_h3": 17.0859375,
+          "scaled_h_times_terminator": 0.01166962599177331,
+          "thirteenth_level_terminator": 0.1166962599177331,
+          "total_continuity_kernel": 3.498979841198384
+        },
+        {
+          "inside_exact_moment_interval": true,
+          "laplace_frequency": 0.025628906250000007,
+          "moment_lower_bound": 0.10630841353081605,
+          "moment_upper_bound": 9.519689416939144,
+          "reconstruction_relative_residual": 1.3512851658476871e-16,
+          "scaled_frequency_p_equals_z_over_h3": 25.62890625,
+          "scaled_h_times_terminator": 0.010868727738576535,
+          "thirteenth_level_terminator": 0.10868727738576535,
+          "total_continuity_kernel": 3.286421112833551
+        }
+      ],
+      "exact_squared_recurrents": [
+        0.5,
+        1.75,
+        3.1785714285714284,
+        4.17255216693419,
+        4.420346879585746,
+        5.484054789770981,
+        5.558202140126421,
+        6.801640474648271,
+        6.6441303605386395,
+        7.7268472829841,
+        7.540432748832734,
+        8.758455000309242,
+        8.8498471089788
+      ],
+      "field": 0.1,
+      "scaled_wave_q_equals_k_over_h2": 2.56,
+      "wave_number": 0.025600000000000005
+    },
+    {
+      "entries": [
+        {
+          "inside_exact_moment_interval": true,
+          "laplace_frequency": 0.000578703703703703,
+          "moment_lower_bound": 0.002417925206758352,
+          "moment_upper_bound": 421.1411671236499,
+          "reconstruction_relative_residual": 0.0,
+          "scaled_frequency_p_equals_z_over_h3": 1.0,
+          "scaled_h_times_terminator": 0.0070095821496481145,
+          "thirteenth_level_terminator": 0.0841149857957774,
+          "total_continuity_kernel": 6.237130768744652
+        },
+        {
+          "inside_exact_moment_interval": true,
+          "laplace_frequency": 0.0008680555555555545,
+          "moment_lower_bound": 0.0036268709770709293,
+          "moment_upper_bound": 280.7609717013004,
+          "reconstruction_relative_residual": 1.4761976760403314e-16,
+          "scaled_frequency_p_equals_z_over_h3": 1.5,
+          "scaled_h_times_terminator": 0.00721894404618333,
+          "thirteenth_level_terminator": 0.0866273285542,
+          "total_continuity_kernel": 6.016663175371773
+        },
+        {
+          "inside_exact_moment_interval": true,
+          "laplace_frequency": 0.0013020833333333317,
+          "moment_lower_bound": 0.005440249654884841,
+          "moment_upper_bound": 187.17427156180347,
+          "reconstruction_relative_residual": 3.0862965317319567e-16,
+          "scaled_frequency_p_equals_z_over_h3": 2.25,
+          "scaled_h_times_terminator": 0.007476663248160309,
+          "thirteenth_level_terminator": 0.08971995897792374,
+          "total_continuity_kernel": 5.755625945648848
+        },
+        {
+          "inside_exact_moment_interval": true,
+          "laplace_frequency": 0.0019531249999999976,
+          "moment_lower_bound": 0.008160182752810743,
+          "moment_upper_bound": 124.7832833469197,
+          "reconstruction_relative_residual": 4.876925439072214e-16,
+          "scaled_frequency_p_equals_z_over_h3": 3.375,
+          "scaled_h_times_terminator": 0.007774047613041399,
+          "thirteenth_level_terminator": 0.09328857135649682,
+          "total_continuity_kernel": 5.463555455970384
+        },
+        {
+          "inside_exact_moment_interval": true,
+          "laplace_frequency": 0.0029296874999999965,
+          "moment_lower_bound": 0.012239627092733985,
+          "moment_upper_bound": 83.18950901524407,
+          "reconstruction_relative_residual": 0.0,
+          "scaled_frequency_p_equals_z_over_h3": 5.0625,
+          "scaled_h_times_terminator": 0.008089725659948734,
+          "thirteenth_level_terminator": 0.09707670791938483,
+          "total_continuity_kernel": 5.154370715104461
+        },
+        {
+          "inside_exact_moment_interval": true,
+          "laplace_frequency": 0.004394531249999995,
+          "moment_lower_bound": 0.018357257275414696,
+          "moment_upper_bound": 55.460652825961915,
+          "reconstruction_relative_residual": 1.8338337125262742e-16,
+          "scaled_frequency_p_equals_z_over_h3": 7.59375,
+          "scaled_h_times_terminator": 0.008386292182390327,
+          "thirteenth_level_terminator": 0.10063550618868396,
+          "total_continuity_kernel": 4.843287663615792
+        },
+        {
+          "inside_exact_moment_interval": true,
+          "laplace_frequency": 0.006591796874999992,
+          "moment_lower_bound": 0.027528519978712262,
+          "moment_upper_bound": 36.97523868384975,
+          "reconstruction_relative_residual": 0.0,
+          "scaled_frequency_p_equals_z_over_h3": 11.390625,
+          "scaled_h_times_terminator": 0.008606282763036002,
+          "thirteenth_level_terminator": 0.10327539315643207,
+          "total_continuity_kernel": 4.543908709831693
+        },
+        {
+          "inside_exact_moment_interval": true,
+          "laplace_frequency": 0.009887695312499988,
+          "moment_lower_bound": 0.041267942075763106,
+          "moment_upper_bound": 24.652364017023746,
+          "reconstruction_relative_residual": 4.163747297331748e-16,
+          "scaled_frequency_p_equals_z_over_h3": 17.0859375,
+          "scaled_h_times_terminator": 0.008666610888003416,
+          "thirteenth_level_terminator": 0.10399933065604103,
+          "total_continuity_kernel": 4.266245553707336
+        },
+        {
+          "inside_exact_moment_interval": true,
+          "laplace_frequency": 0.014831542968749983,
+          "moment_lower_bound": 0.06181825294179746,
+          "moment_upper_bound": 16.43821565616888,
+          "reconstruction_relative_residual": 2.211213399221617e-16,
+          "scaled_frequency_p_equals_z_over_h3": 25.62890625,
+          "scaled_h_times_terminator": 0.008447339357013877,
+          "thirteenth_level_terminator": 0.10136807228416655,
+          "total_continuity_kernel": 4.016701508831208
+        }
+      ],
+      "exact_squared_recurrents": [
+        0.5,
+        1.75,
+        3.1785714285714284,
+        4.17255216693419,
+        4.420346879585746,
+        5.484054789770981,
+        5.558202140126421,
+        6.801640474648271,
+        6.6441303605386395,
+        7.7268472829841,
+        7.540432748832734,
+        8.758455000309242,
+        8.8498471089788
+      ],
+      "field": 0.0833333333333333,
+      "scaled_wave_q_equals_k_over_h2": 2.56,
+      "wave_number": 0.017777777777777764
+    }
+  ],
+  "schema": 1,
+  "uses_target_a_or_D": false,
+  "uses_target_trajectory": false
+}

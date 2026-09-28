@@ -1,0 +1,142 @@
+{
+  "exact_leading_D0": 0.5817764173314431,
+  "field_sequences": [
+    {
+      "field": 0.3,
+      "h_times_extrapolated_D": 0.5925176337288423,
+      "inverse_terms_extrapolated_D": 1.975058779096141,
+      "largest_terms": 600,
+      "largest_terms_D": 1.9869777526388481,
+      "putative_D1": 0.035804054657996964,
+      "relative_leading_benchmark_error": 0.018462790992230582,
+      "sequence": [
+        {
+          "D": 2.054310634852249,
+          "terms": 100
+        },
+        {
+          "D": 2.025730186551842,
+          "terms": 150
+        },
+        {
+          "D": 1.998896726181555,
+          "terms": 300
+        },
+        {
+          "D": 1.9869777526388481,
+          "terms": 600
+        }
+      ]
+    },
+    {
+      "field": 0.25,
+      "h_times_extrapolated_D": 0.624593636277521,
+      "inverse_terms_extrapolated_D": 2.498374545110084,
+      "largest_terms": 600,
+      "largest_terms_D": 2.5156989036831363,
+      "putative_D1": 0.17126887578431127,
+      "relative_leading_benchmark_error": 0.07359737808293532,
+      "sequence": [
+        {
+          "D": 2.5676719794022937,
+          "terms": 150
+        },
+        {
+          "D": 2.5156989036831363,
+          "terms": 600
+        }
+      ]
+    },
+    {
+      "field": 0.2,
+      "h_times_extrapolated_D": 0.6558924558788508,
+      "inverse_terms_extrapolated_D": 3.2794622793942536,
+      "largest_terms": 600,
+      "largest_terms_D": 3.301949538755397,
+      "putative_D1": 0.37058019273703824,
+      "relative_leading_benchmark_error": 0.1273960860898613,
+      "sequence": [
+        {
+          "D": 3.427050935515735,
+          "terms": 100
+        },
+        {
+          "D": 3.374326898321098,
+          "terms": 150
+        },
+        {
+          "D": 3.324436798116541,
+          "terms": 300
+        },
+        {
+          "D": 3.301949538755397,
+          "terms": 600
+        }
+      ]
+    },
+    {
+      "field": 0.15,
+      "h_times_extrapolated_D": 0.6860523698372142,
+      "inverse_terms_extrapolated_D": 4.573682465581428,
+      "largest_terms": 600,
+      "largest_terms_D": 4.609896264014643,
+      "putative_D1": 0.6951730167051404,
+      "relative_leading_benchmark_error": 0.17923715949861907,
+      "sequence": [
+        {
+          "D": 4.718537659314285,
+          "terms": 150
+        },
+        {
+          "D": 4.609896264014643,
+          "terms": 600
+        }
+      ]
+    }
+  ],
+  "forbidden_uniform_field_substitution": {
+    "field_at_window_endpoints": [
+      0.2521181857332371,
+      0.15119212261914644
+    ],
+    "finite_field_substitution_current": [
+      0.401923504838372,
+      1.9587348782461318
+    ],
+    "finite_field_substitution_strong": [
+      0.36090037021377164,
+      2.026300645700964
+    ],
+    "implied_time_grid": [
+      31.25395340890946,
+      51.233310974339936,
+      95.290012013104,
+      215.94291436279212
+    ],
+    "interpretation": "Uniform external-field diffusion and the fluctuating local field have the same controlled D0/h singularity, but no derivation identifies their finite-h remainders. The large shift in a is therefore a rejection diagnostic, not a finite-window prediction.",
+    "leading_kpz_current": [
+      0.24797804066938867,
+      2.0582056639480273
+    ],
+    "leading_kpz_strong": [
+      0.21357011708388587,
+      2.2288550489954773
+    ],
+    "mapping_authorized_beyond_leading_singularity": false
+  },
+  "inputs": {
+    "source_status": "diagnostic_nonuniform_sequence_not_a_converged_D1",
+    "t_start": 50.0,
+    "t_stop": 200.0,
+    "target_coefficients_used": false,
+    "trajectory_data_used": false
+  },
+  "schema_version": 1,
+  "subleading_constant_audit": {
+    "leading_benchmark_improves_toward_zero": false,
+    "physical_D1_determined": false,
+    "putative_D1_max": 0.6951730167051404,
+    "putative_D1_min": 0.035804054657996964,
+    "reason": "The finite-cutoff sequence fails the exact hD->5*pi/27 benchmark uniformly as h is lowered; subtracting the singularity amplifies this nonuniform error."
+  }
+}

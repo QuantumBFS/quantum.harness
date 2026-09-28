@@ -1,0 +1,234 @@
+{
+  "interpretation": {
+    "constant_markov_kernel_rejected_on_this_p_grid": true,
+    "finite_pole_closure_used_in_propagation": false,
+    "nonlinear_vertices_included": false,
+    "one_pole_is_an_approximation_not_an_identity": true,
+    "reason": "the linear full-mode scaling function is converging, but a physical F1 requires nonlinear vertices plus microscopic Mori/UV matching",
+    "zero_field_infinite_mode_limit_claimed": false
+  },
+  "last_field_step_convergence": {
+    "maximum_absolute_structure_factor_change": 0.011926984507175664,
+    "maximum_relative_orthogonal_memory_change": 0.02144576841955928,
+    "maximum_relative_total_memory_change": 0.018173163544877153
+  },
+  "method": "target_free_joint_scaled_full_mode_mori_audit",
+  "per_field": [
+    {
+      "field": 0.125,
+      "maximum_gmres_residual": 9.920809009927454e-11,
+      "mode_count": 1536,
+      "scaled_orthogonal_memory_hK_perp": [
+        0.25632453176252407,
+        0.23759931747593593,
+        0.21554216259182768,
+        0.1909530629053548,
+        0.16492407383777263,
+        0.13857571529750257,
+        0.11287080795393062,
+        0.08864250736575513,
+        0.06675417450629845
+      ],
+      "scaled_structure_factor": [
+        0.9999999999999999,
+        0.795555126071874,
+        0.5865052569044398,
+        0.411162831520529,
+        0.2702522255587338
+      ],
+      "scaled_total_memory_hK": [
+        0.5087178388812008,
+        0.4899926245946127,
+        0.4679354697105044,
+        0.44334637002403154,
+        0.4173173809564494,
+        0.3909690224161793,
+        0.36526411507260736,
+        0.3410358144844319,
+        0.3191474816249752
+      ],
+      "susceptibility_captured_fraction": 0.9914569625512528
+    },
+    {
+      "field": 0.1,
+      "maximum_gmres_residual": 9.877650436710783e-11,
+      "mode_count": 1920,
+      "scaled_orthogonal_memory_hK_perp": [
+        0.2560630748420506,
+        0.23754991453858462,
+        0.21567898426877533,
+        0.19125311956313784,
+        0.16541180997231592,
+        0.1393690683533993,
+        0.11418358551385155,
+        0.09065100771506024,
+        0.06939513487857694
+      ],
+      "scaled_structure_factor": [
+        0.9999999999999997,
+        0.7903270251547172,
+        0.5826451850956189,
+        0.402460670345141,
+        0.2751441625724584
+      ],
+      "scaled_total_memory_hK": [
+        0.5153100512468288,
+        0.4967968909433628,
+        0.4749259606735535,
+        0.450500095967916,
+        0.4246587863770941,
+        0.39861604475817747,
+        0.3734305619186298,
+        0.3498979841198384,
+        0.32864211128335513
+      ],
+      "susceptibility_captured_fraction": 0.9914987127124775
+    },
+    {
+      "field": 0.0833333333333333,
+      "maximum_gmres_residual": 9.650518105890011e-11,
+      "mode_count": 2336,
+      "scaled_orthogonal_memory_hK_perp": [
+        0.2559517542785247,
+        0.23757945483078477,
+        0.21582635235387437,
+        0.19148714488066898,
+        0.1657217498085088,
+        0.139798162184453,
+        0.11484991603577813,
+        0.09171131969208168,
+        0.07091598261907103
+      ],
+      "scaled_structure_factor": [
+        1.0,
+        0.787627912889889,
+        0.5778017298368796,
+        0.4034366904522955,
+        0.2632171780652827
+      ],
+      "scaled_total_memory_hK": [
+        0.5197608973953876,
+        0.5013885979476476,
+        0.4796354954707372,
+        0.4552962879975318,
+        0.4295308929253716,
+        0.40360730530131583,
+        0.3786590591526409,
+        0.3555204628089445,
+        0.3347251257359338
+      ],
+      "susceptibility_captured_fraction": 0.9916758127849887
+    }
+  ],
+  "scaled_variables": {
+    "p_equals_z_over_h3": [
+      1.0,
+      1.5,
+      2.25,
+      3.375,
+      5.0625,
+      7.59375,
+      11.390625,
+      17.0859375,
+      25.62890625
+    ],
+    "q_equals_k_over_h2": 2.56,
+    "tau_equals_t_h3": [
+      0.0,
+      0.1,
+      0.2,
+      0.3,
+      0.4
+    ]
+  },
+  "schema": 1,
+  "smallest_field_orthogonal_spectrum_fits": {
+    "constant": {
+      "maximum_pointwise_relative_residual": 1.3248823339683222,
+      "parameters": {
+        "value": 0.16487131518708284
+      },
+      "predicted": [
+        0.16487131518708284,
+        0.16487131518708284,
+        0.16487131518708284,
+        0.16487131518708284,
+        0.16487131518708284,
+        0.16487131518708284,
+        0.16487131518708284,
+        0.16487131518708284,
+        0.16487131518708284
+      ],
+      "relative_l2_residual": 0.35020682342534676
+    },
+    "one_positive_pole": {
+      "maximum_pointwise_relative_residual": 0.08533236814713636,
+      "parameters": {
+        "optimizer_success": true,
+        "rate": 7.613162412457591,
+        "weight": 2.1562319539285446
+      },
+      "predicted": [
+        0.25034149487415824,
+        0.23660633447956547,
+        0.21861466573896549,
+        0.19623226095420318,
+        0.17010802936889582,
+        0.14179288309454238,
+        0.11346327482673614,
+        0.08730002152187727,
+        0.06486455388270454
+      ],
+      "relative_l2_residual": 0.022719666748151925
+    },
+    "positive_contact_plus_one_positive_pole": {
+      "maximum_pointwise_relative_residual": 0.02662365501749429,
+      "parameters": {
+        "contact": 0.025041142668965847,
+        "optimizer_success": true,
+        "rate": 5.4798758946748185,
+        "weight": 1.4858451096098364
+      },
+      "predicted": [
+        0.2543426190800972,
+        0.2379167198326569,
+        0.21726222485133936,
+        0.19284079647364535,
+        0.16598139413167157,
+        0.13869324818125944,
+        0.1131147048522229,
+        0.09088610396606106,
+        0.0728040252755478
+      ],
+      "relative_l2_residual": 0.0073690898325226495
+    },
+    "two_positive_poles": {
+      "maximum_pointwise_relative_residual": 0.0007057937292359064,
+      "parameters": {
+        "optimizer_success": true,
+        "rates": [
+          2.995533324096468,
+          18.30071902556836
+        ],
+        "weights": [
+          0.5530456083588111,
+          2.268514544760957
+        ]
+      },
+      "predicted": [
+        0.2559512018239447,
+        0.23758841540871428,
+        0.2158178613332924,
+        0.19147002381408215,
+        0.16573051486349752,
+        0.13983305833390014,
+        0.11484612598586383,
+        0.09164659041774306,
+        0.07096049153178363
+      ],
+      "relative_l2_residual": 0.00016859303307405584
+    }
+  },
+  "uses_target_a_or_D": false,
+  "uses_target_trajectory": false
+}

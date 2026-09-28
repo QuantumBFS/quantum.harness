@@ -1,0 +1,176 @@
+{
+  "inputs": {
+    "field": 0.25,
+    "fourier_cutoffs": [
+      4,
+      6,
+      8,
+      10,
+      12,
+      16,
+      20,
+      24
+    ],
+    "rapidity_points": 16,
+    "times": [
+      0.0,
+      1.0,
+      5.0,
+      10.0,
+      25.0,
+      50.0
+    ],
+    "u_extent": 1.5,
+    "wave_number": 0.04,
+    "xi_buffer": 0.5,
+    "xi_cutoff": 0.25
+  },
+  "method": "deterministic_six_point_Wick_contraction_of_normal_ordered_cubic_velocity",
+  "operator": {
+    "active_strings": 1,
+    "dimension": 16,
+    "velocity_hessian_schwarz_relative_residual": 1.9868395277391273e-08
+  },
+  "rows": [
+    {
+      "continuity_normalized_W2_memory": [
+        3.613169130247829e-06,
+        3.5765658918875493e-06,
+        3.383603751702716e-06,
+        3.0529380911895133e-06,
+        1.7786450554385814e-06,
+        3.0258223603079686e-07
+      ],
+      "dealiased_ordered_momentum_triplets": 6,
+      "fourier_points": 4,
+      "integral_to_maximum_time": 9.585877614855672e-05,
+      "maximum_resolved_wave_number": 0.08,
+      "spatial_cell_length": 157.07963267948966,
+      "zero_time_nonnegative": true
+    },
+    {
+      "continuity_normalized_W2_memory": [
+        2.0202450680667635e-05,
+        1.9325040104851947e-05,
+        1.536850699607037e-05,
+        1.0279395258688582e-05,
+        1.2704855437522217e-06,
+        1.9230909223200446e-07
+      ],
+      "dealiased_ordered_momentum_triplets": 21,
+      "fourier_points": 6,
+      "integral_to_maximum_time": 0.00025817963419961067,
+      "maximum_resolved_wave_number": 0.12,
+      "spatial_cell_length": 157.07963267948966,
+      "zero_time_nonnegative": true
+    },
+    {
+      "continuity_normalized_W2_memory": [
+        4.241341026113194e-05,
+        3.911038653316639e-05,
+        2.624843655717011e-05,
+        1.3207163748884217e-05,
+        1.758890800438321e-07,
+        1.341087827699632e-07
+      ],
+      "dealiased_ordered_momentum_triplets": 42,
+      "fourier_points": 8,
+      "integral_to_maximum_time": 0.0003743664148450908,
+      "maximum_resolved_wave_number": 0.16,
+      "spatial_cell_length": 157.07963267948966,
+      "zero_time_nonnegative": true
+    },
+    {
+      "continuity_normalized_W2_memory": [
+        7.069222309129506e-05,
+        6.229819388428789e-05,
+        3.443889807162054e-05,
+        1.2471435931088617e-05,
+        -5.614105673084989e-08,
+        1.3645885026494006e-08
+      ],
+      "dealiased_ordered_momentum_triplets": 69,
+      "fourier_points": 10,
+      "integral_to_maximum_time": 0.00046982874931776006,
+      "maximum_resolved_wave_number": 0.2,
+      "spatial_cell_length": 157.07963267948966,
+      "zero_time_nonnegative": true
+    },
+    {
+      "continuity_normalized_W2_memory": [
+        0.0001051489843552276,
+        8.783141812766104e-05,
+        3.93023623722532e-05,
+        9.761388089339014e-06,
+        -3.201092238621188e-07,
+        -3.181787131534064e-09
+      ],
+      "dealiased_ordered_momentum_triplets": 102,
+      "fourier_points": 12,
+      "integral_to_maximum_time": 0.0005401855922489094,
+      "maximum_resolved_wave_number": 0.24,
+      "spatial_cell_length": 157.07963267948966,
+      "zero_time_nonnegative": true
+    },
+    {
+      "continuity_normalized_W2_memory": [
+        0.00019272527943943048,
+        0.0001415892982161582,
+        4.028172825107509e-05,
+        3.911740207192113e-06,
+        -7.022872200664042e-07,
+        3.309444104289638e-08
+      ],
+      "dealiased_ordered_momentum_triplets": 186,
+      "fourier_points": 16,
+      "integral_to_maximum_time": 0.0006570890005735779,
+      "maximum_resolved_wave_number": 0.32,
+      "spatial_cell_length": 157.07963267948966,
+      "zero_time_nonnegative": true
+    },
+    {
+      "continuity_normalized_W2_memory": [
+        0.00030525383931865447,
+        0.00019298481001762832,
+        3.404989776558333e-05,
+        5.133333222249582e-07,
+        -5.82678860319918e-07,
+        -1.1788063745663929e-07
+      ],
+      "dealiased_ordered_momentum_triplets": 294,
+      "fourier_points": 20,
+      "integral_to_maximum_time": 0.0007803197326961661,
+      "maximum_resolved_wave_number": 0.4,
+      "spatial_cell_length": 157.07963267948966,
+      "zero_time_nonnegative": true
+    },
+    {
+      "continuity_normalized_W2_memory": [
+        0.0004427621877889167,
+        0.0002375112914609748,
+        2.543339347398098e-05,
+        -1.2947224319063818e-06,
+        -4.939538803275768e-07,
+        3.796130922626265e-08
+      ],
+      "dealiased_ordered_momentum_triplets": 426,
+      "fourier_points": 24,
+      "integral_to_maximum_time": 0.0009072578076195228,
+      "maximum_resolved_wave_number": 0.48,
+      "spatial_cell_length": 157.07963267948966,
+      "zero_time_nonnegative": true
+    }
+  ],
+  "schema": 1,
+  "scope": {
+    "first_nonzero_cubic_velocity_memory_W2_evaluated": true,
+    "first_order_cubic_tadpole_removed_by_explicit_counterterm": true,
+    "fixed_fourier_spacing_has_fixed_spatial_cell_length": true,
+    "full_string_zero_field_limit_complete": false,
+    "microscopic_mori_uv_matching_complete": false,
+    "physical_F1_perp_claimed": false,
+    "wrapped_cubic_aliases_removed": true
+  },
+  "uses_target_a_or_D": false,
+  "uses_target_trajectory": false
+}

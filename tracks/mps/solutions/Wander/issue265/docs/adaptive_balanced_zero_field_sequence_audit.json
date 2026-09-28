@@ -1,0 +1,105 @@
+{
+  "exact_D0": 0.5817764173314431,
+  "fits": [
+    {
+      "coefficients_descending": [
+        -0.5363922784633985,
+        0.571002495246471
+      ],
+      "model": "polynomial_degree_1",
+      "rms_residual": 5.399105647829024e-05,
+      "zero_field_intercept": 0.571002495246471
+    },
+    {
+      "coefficients_descending": [
+        -0.06553684887890134,
+        -0.5256591035889286,
+        0.5706213283131892
+      ],
+      "model": "polynomial_degree_2",
+      "rms_residual": 2.6778916158744206e-05,
+      "zero_field_intercept": 0.5706213283131892
+    },
+    {
+      "coefficients_descending": [
+        -1.3383288331372627,
+        0.267761751505876,
+        -0.5513389966620399,
+        0.5712241218684663
+      ],
+      "model": "polynomial_degree_3",
+      "rms_residual": 1.707090512541203e-05,
+      "zero_field_intercept": 0.5712241218684663
+    },
+    {
+      "coefficients": [
+        0.5702889161453496,
+        -0.009758969610339006,
+        -0.551435647965527
+      ],
+      "model": "constant_plus_h_log_h_plus_h",
+      "rms_residual": 3.0569178268985e-05,
+      "zero_field_intercept": 0.5702889161453496
+    }
+  ],
+  "gates": {
+    "eligible_for_subleading_finite_window_kernel": false,
+    "leading_D0_gate_pass": false,
+    "maximum_leading_relative_error": 0.01,
+    "minimum_susceptibility_capture": 0.985,
+    "susceptibility_capture_pass": true
+  },
+  "intercept_envelope": {
+    "center": 0.5707565190069079,
+    "half_scheme_spread": 0.0004676028615583361,
+    "relative_center_error": 0.01894180993977468
+  },
+  "method": "adaptive_full_operator_zero_field_extrapolation",
+  "rows": [
+    {
+      "field": 0.125,
+      "h_times_spin_complement_coupling": 0.2737019429660056,
+      "h_times_spin_diffusion": 0.5038805273714497,
+      "source": "docs/regulated_infinite_mode_fghd_adaptive_balanced_h00625_h0125_xi6_R28_n48.json",
+      "susceptibility_captured_fraction": 0.9935769737029951
+    },
+    {
+      "field": 0.1,
+      "h_times_spin_complement_coupling": 0.27373981155467847,
+      "h_times_spin_diffusion": 0.5174072590593685,
+      "source": "docs/regulated_infinite_mode_fghd_adaptive_balanced_h00625_h0125_xi6_R28_n48.json",
+      "susceptibility_captured_fraction": 0.9935875369508562
+    },
+    {
+      "field": 0.0833333333333333,
+      "h_times_spin_complement_coupling": 0.27378658678949636,
+      "h_times_spin_diffusion": 0.5263953691544604,
+      "source": "docs/regulated_infinite_mode_fghd_adaptive_balanced_h00625_h0125_xi6_R28_n48.json",
+      "susceptibility_captured_fraction": 0.9937454460347585
+    },
+    {
+      "field": 0.0625,
+      "h_times_spin_complement_coupling": 0.27390124707032787,
+      "h_times_spin_diffusion": 0.5374727449135894,
+      "source": "docs/regulated_infinite_mode_fghd_adaptive_balanced_h00625_h0125_xi6_R28_n48.json",
+      "susceptibility_captured_fraction": 0.9935850896163504
+    },
+    {
+      "field": 0.05,
+      "h_times_spin_complement_coupling": 0.27403124050288447,
+      "h_times_spin_diffusion": 0.5441509712596347,
+      "source": "docs/regulated_infinite_mode_fghd_adaptive_h005_xi6_R28_n48.json",
+      "susceptibility_captured_fraction": 0.9935788084067237
+    },
+    {
+      "field": 0.04,
+      "h_times_spin_complement_coupling": 0.27417537221563004,
+      "h_times_spin_diffusion": 0.5495206580617732,
+      "source": "docs/regulated_infinite_mode_fghd_adaptive_balanced_h004_xi6_R28_n48.json",
+      "susceptibility_captured_fraction": 0.9935715736485565
+    }
+  ],
+  "schema": 1,
+  "uses_target_a_or_D": false,
+  "uses_target_trajectory": false
+}

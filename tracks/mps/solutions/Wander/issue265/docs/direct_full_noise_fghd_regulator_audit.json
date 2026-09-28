@@ -1,0 +1,83 @@
+{
+  "field_times_spin_diffusion_relative_steps": [
+    0.14347087097121256,
+    0.04419242808950043
+  ],
+  "gates": {
+    "finite_regulator_calculation_valid": true,
+    "finite_window_a_and_D_uniquely_determined": false,
+    "full_fdt_propagation_pass": true,
+    "infinite_mode_zero_field_limit_accepted": false,
+    "offdiagonal_noise_material_and_retained": true,
+    "static_susceptibility_capture_pass": true
+  },
+  "method": "direct_full_nondiagonal_noise_fghd_regulator_audit",
+  "nonacceptance_reason": "This sequence varies h and the number of strings together but does not supply independent tails in string cutoff, rapidity extent, node count, spatial wave number, and nonlinear magnetic vertices.  It therefore certifies the finite-regulator full A,D,Q propagation only.",
+  "rows": [
+    {
+      "active_strings": 16,
+      "diagonal_plus_offdiagonal_residual": 5.551115123125783e-17,
+      "direct_noise_fdt_maximum_absolute_residual": 3.1086244689504383e-15,
+      "direct_total_covariance_maximum_absolute_residual": 3.1086244689504383e-15,
+      "fdt_operator_residual": 1.9361988916731407e-16,
+      "field": 0.25,
+      "field_times_spin_diffusion": 0.423856386932243,
+      "final_diagonal_noise_only_covariance": 0.5504872843979469,
+      "final_full_noise_covariance": 0.4444701621498395,
+      "final_offdiagonal_fraction_of_full_noise": -0.23852472286399978,
+      "final_offdiagonal_noise_covariance": -0.10601712224810751,
+      "mode_count": 512,
+      "spin_diffusion": 1.695425547728972,
+      "spin_to_complement_diffusion_norm": 1.0815819716329023,
+      "spin_to_complement_noise_norm": 1.0815819716329023,
+      "susceptibility_captured_fraction": 0.9641065500295163,
+      "wave_number": 0.04
+    },
+    {
+      "active_strings": 32,
+      "diagonal_plus_offdiagonal_residual": 1.1102230246251565e-16,
+      "direct_noise_fdt_maximum_absolute_residual": 1.6653345369377348e-15,
+      "direct_total_covariance_maximum_absolute_residual": 1.6653345369377348e-15,
+      "fdt_operator_residual": 2.1042004341001295e-16,
+      "field": 0.125,
+      "field_times_spin_diffusion": 0.49485344113498025,
+      "final_diagonal_noise_only_covariance": 0.9089195106453672,
+      "final_full_noise_covariance": 0.6868070914270983,
+      "final_offdiagonal_fraction_of_full_noise": -0.32339855250583893,
+      "final_offdiagonal_noise_covariance": -0.22211241921826896,
+      "mode_count": 1024,
+      "spin_diffusion": 3.958827529079842,
+      "spin_to_complement_diffusion_norm": 2.186970103333552,
+      "spin_to_complement_noise_norm": 2.1869701033335516,
+      "susceptibility_captured_fraction": 0.95988937348282,
+      "wave_number": 0.04
+    },
+    {
+      "active_strings": 48,
+      "diagonal_plus_offdiagonal_residual": 0.0,
+      "direct_noise_fdt_maximum_absolute_residual": 8.881784197001252e-16,
+      "direct_total_covariance_maximum_absolute_residual": 8.881784197001252e-16,
+      "fdt_operator_residual": 1.53879801063667e-16,
+      "field": 0.08333333333333333,
+      "field_times_spin_diffusion": 0.5177333342796719,
+      "final_diagonal_noise_only_covariance": 1.095080777353945,
+      "final_full_noise_covariance": 0.8033616189060444,
+      "final_offdiagonal_fraction_of_full_noise": -0.36312309622799904,
+      "final_offdiagonal_noise_covariance": -0.29171915844790064,
+      "mode_count": 1536,
+      "spin_diffusion": 6.212800011356064,
+      "spin_to_complement_diffusion_norm": 3.2850415238084483,
+      "spin_to_complement_noise_norm": 3.2850415238084474,
+      "susceptibility_captured_fraction": 0.9579959170230135,
+      "wave_number": 0.04
+    }
+  ],
+  "schema": 1,
+  "source_sha256": {
+    "docs/regulated_infinite_mode_fghd_direct_noise_adaptive_xi4_h008333.json": "4ef0522c87bef9f3b90699e4a7088e62b6a1a578d934c967c203669d93d8bf45",
+    "docs/regulated_infinite_mode_fghd_direct_noise_adaptive_xi4_h025_h0125.json": "b308e777c15854c82fefb12f3363d6e03921f31b7845bb9ac872ddd3e6c2293f"
+  },
+  "uses_auxiliary_field_or_finite_pole_closure": false,
+  "uses_target_a_or_D": false,
+  "uses_target_trajectory": false
+}

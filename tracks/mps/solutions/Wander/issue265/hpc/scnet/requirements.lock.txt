@@ -1,0 +1,5 @@
+# SCNet xh5 uses `module load anaconda3/2023.09` and a venv created with
+# `--system-site-packages`.  NumPy 1.24.3, SciPy 1.11.1, and h5py 3.9.0 are
+# supplied by that immutable module.  TeNPy 1.0.6 is the newest release with a
+# CPython 3.11 manylinux2014 wheel and is installed offline from wheelhouse/.
+physics-tenpy==1.0.6

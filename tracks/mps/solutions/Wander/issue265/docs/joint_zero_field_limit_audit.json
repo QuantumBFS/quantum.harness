@@ -1,0 +1,313 @@
+{
+  "finite_cutoff_full_cross_diagnostic": {
+    "inputs": {
+      "audited_value_key": "h_times_full_diffusion",
+      "exact_leading_D0": 0.5817764173314431,
+      "physical_D1_candidate_by_order_of_limits": false,
+      "quantity_label": "finite_cutoff_diagonal_minus_cross_order_of_limits_diagnostic",
+      "target_coefficients_used": false,
+      "trajectory_data_used": false
+    },
+    "joint_limit_audit": {
+      "D1_scheme_spread": 0.4153048420821143,
+      "all_regulator_directions_bounded": false,
+      "approaches_exact_leading_monotonically": true,
+      "exact_leading_giant_string_tail_controlled": true,
+      "maximum_known_regulator_relative_error": 0.0004876503463538076,
+      "missing_regulator_evidence": [
+        "h=0.075: second string cutoff or analytic tail bound",
+        "h=0.1: second string cutoff or analytic tail bound",
+        "h=0.1: rapidity-grid error estimate",
+        "h=0.15: second velocity-series cutoff",
+        "h=0.15: second string cutoff or analytic tail bound",
+        "h=0.15: rapidity-grid error estimate",
+        "h=0.2: second velocity-series cutoff",
+        "h=0.2: rapidity-grid error estimate"
+      ],
+      "physical_D1_certified": false,
+      "smallest_field": 0.075,
+      "zero_field_joint_limit_controlled": false
+    },
+    "nested_small_field_fits": [
+      {
+        "fields": [
+          0.075,
+          0.1,
+          0.15
+        ],
+        "fixed_D0_quadratic_D1": -0.792063669613918,
+        "fixed_D0_quadratic_D2": 1.108856727152362,
+        "free_linear_D0": 0.567759818988885,
+        "free_linear_D1": -0.5330619234003989,
+        "free_quadratic_D0": 0.5595172729176898,
+        "free_quadratic_D1": -0.37675882753180373
+      },
+      {
+        "fields": [
+          0.075,
+          0.1,
+          0.15,
+          0.2
+        ],
+        "fixed_D0_quadratic_D1": -0.7473457914513785,
+        "fixed_D0_quadratic_D2": 0.7154698038269875,
+        "free_linear_D0": 0.5685849649955819,
+        "free_linear_D1": -0.5415052778875307,
+        "free_quadratic_D0": 0.5648042932148248,
+        "free_quadratic_D1": -0.47895845884628235
+      }
+    ],
+    "provisional_D1_interval": {
+      "maximum": -0.37675882753180373,
+      "minimum": -0.792063669613918,
+      "status": "regulator_and_scheme_envelope_not_a_proof"
+    },
+    "schema_version": 1,
+    "selected_field_sequence": [
+      {
+        "available_string_cutoffs": [
+          8.0
+        ],
+        "field": 0.075,
+        "hD_values": [
+          0.5269451752989273,
+          0.5271795073259201
+        ],
+        "inverse_terms_extrapolated_hD": 0.527413839352913,
+        "leading_D0_giant_string_tail_bound": 2.207374178441811e-05,
+        "rapidity_density_relative_l2_error": 0.002032926488996737,
+        "relative_leading_error": -0.0934423884486183,
+        "string_tail_absolute_error": null,
+        "string_xi_cutoff": 8.0,
+        "tail_bound_applies_to_physical_D1": false,
+        "velocity_series_absolute_error": 0.00023433202699285616,
+        "velocity_terms": [
+          100,
+          200
+        ]
+      },
+      {
+        "available_string_cutoffs": [
+          8.0
+        ],
+        "field": 0.1,
+        "hD_values": [
+          0.5144357227774339,
+          0.5147194262488459
+        ],
+        "inverse_terms_extrapolated_hD": 0.5150031297202581,
+        "leading_D0_giant_string_tail_bound": 2.207374178441811e-05,
+        "rapidity_density_relative_l2_error": null,
+        "relative_leading_error": -0.11477482693002272,
+        "string_tail_absolute_error": null,
+        "string_xi_cutoff": 8.0,
+        "tail_bound_applies_to_physical_D1": false,
+        "velocity_series_absolute_error": 0.00028370347141215557,
+        "velocity_terms": [
+          100,
+          200
+        ]
+      },
+      {
+        "available_string_cutoffs": [
+          8.0
+        ],
+        "field": 0.15,
+        "hD_values": [
+          0.487617362788354
+        ],
+        "inverse_terms_extrapolated_hD": 0.487617362788354,
+        "leading_D0_giant_string_tail_bound": 2.207374178441811e-05,
+        "rapidity_density_relative_l2_error": null,
+        "relative_leading_error": -0.16184749284783384,
+        "string_tail_absolute_error": null,
+        "string_xi_cutoff": 8.0,
+        "tail_bound_applies_to_physical_D1": false,
+        "velocity_series_absolute_error": null,
+        "velocity_terms": [
+          300
+        ]
+      },
+      {
+        "available_string_cutoffs": [
+          8.0,
+          12.0
+        ],
+        "field": 0.2,
+        "hD_values": [
+          0.46001525722984893
+        ],
+        "inverse_terms_extrapolated_hD": 0.46001525722984893,
+        "leading_D0_giant_string_tail_bound": 2.2636653913556676e-08,
+        "rapidity_density_relative_l2_error": null,
+        "relative_leading_error": -0.20929201747314174,
+        "string_tail_absolute_error": 0.0002276201419088575,
+        "string_xi_cutoff": 12.0,
+        "tail_bound_applies_to_physical_D1": false,
+        "velocity_series_absolute_error": null,
+        "velocity_terms": [
+          300
+        ]
+      }
+    ]
+  },
+  "physical_D1_certified": false,
+  "physical_diagonal_audit": {
+    "inputs": {
+      "audited_value_key": "h_times_diagonal_diffusion",
+      "exact_leading_D0": 0.5817764173314431,
+      "physical_D1_candidate_by_order_of_limits": true,
+      "quantity_label": "Eq16_diagonal_physical_through_D1",
+      "target_coefficients_used": false,
+      "trajectory_data_used": false
+    },
+    "joint_limit_audit": {
+      "D1_scheme_spread": 3.5671499521774237,
+      "all_regulator_directions_bounded": false,
+      "approaches_exact_leading_monotonically": false,
+      "exact_leading_giant_string_tail_controlled": true,
+      "maximum_known_regulator_relative_error": 0.03528641228542267,
+      "missing_regulator_evidence": [
+        "h=0.075: second string cutoff or analytic tail bound",
+        "h=0.1: second string cutoff or analytic tail bound",
+        "h=0.1: rapidity-grid error estimate",
+        "h=0.15: second string cutoff or analytic tail bound",
+        "h=0.15: rapidity-grid error estimate",
+        "h=0.2: second velocity-series cutoff",
+        "h=0.2: rapidity-grid error estimate"
+      ],
+      "physical_D1_certified": false,
+      "smallest_field": 0.075,
+      "zero_field_joint_limit_controlled": false
+    },
+    "nested_small_field_fits": [
+      {
+        "fields": [
+          0.075,
+          0.1,
+          0.15
+        ],
+        "fixed_D0_quadratic_D1": 2.9044762591128426,
+        "fixed_D0_quadratic_D2": -14.807587450767459,
+        "free_linear_D0": 0.7655920873246743,
+        "free_linear_D1": -0.5255627913973289,
+        "free_quadratic_D0": 0.764091345866628,
+        "free_quadratic_D1": -0.4971042867114047
+      },
+      {
+        "fields": [
+          0.075,
+          0.1,
+          0.15,
+          0.2
+        ],
+        "fixed_D0_quadratic_D1": 2.355795332565325,
+        "fixed_D0_quadratic_D2": -9.980795338733419,
+        "free_linear_D0": 0.7623857218564867,
+        "free_linear_D1": -0.4927534703274996,
+        "free_quadratic_D0": 0.7726566293291508,
+        "free_quadratic_D1": -0.6626736930645813
+      }
+    ],
+    "provisional_D1_interval": {
+      "maximum": 2.9044762591128426,
+      "minimum": -0.6626736930645813,
+      "status": "regulator_and_scheme_envelope_not_a_proof"
+    },
+    "schema_version": 1,
+    "selected_field_sequence": [
+      {
+        "available_string_cutoffs": [
+          8.0
+        ],
+        "field": 0.075,
+        "hD_values": [
+          0.7671657833893041,
+          0.7466369808694107
+        ],
+        "inverse_terms_extrapolated_hD": 0.7261081783495172,
+        "leading_D0_giant_string_tail_bound": 2.207374178441811e-05,
+        "rapidity_density_relative_l2_error": 0.002032926488996737,
+        "relative_leading_error": 0.248088022680794,
+        "string_tail_absolute_error": null,
+        "string_xi_cutoff": 8.0,
+        "tail_bound_applies_to_physical_D1": false,
+        "velocity_series_absolute_error": 0.02052880251989342,
+        "velocity_terms": [
+          100,
+          200
+        ]
+      },
+      {
+        "available_string_cutoffs": [
+          8.0
+        ],
+        "field": 0.1,
+        "hD_values": [
+          0.7519284751655304,
+          0.7325321663905042
+        ],
+        "inverse_terms_extrapolated_hD": 0.7131358576154779,
+        "leading_D0_giant_string_tail_bound": 2.207374178441811e-05,
+        "rapidity_density_relative_l2_error": null,
+        "relative_leading_error": 0.22579024582427887,
+        "string_tail_absolute_error": null,
+        "string_xi_cutoff": 8.0,
+        "tail_bound_applies_to_physical_D1": false,
+        "velocity_series_absolute_error": 0.019396308775026294,
+        "velocity_terms": [
+          100,
+          200
+        ]
+      },
+      {
+        "available_string_cutoffs": [
+          8.0
+        ],
+        "field": 0.15,
+        "hD_values": [
+          0.7077806488971428,
+          0.6962445603994966,
+          0.6914844396021964
+        ],
+        "inverse_terms_extrapolated_hD": 0.6867243188048961,
+        "leading_D0_giant_string_tail_bound": 2.207374178441811e-05,
+        "rapidity_density_relative_l2_error": null,
+        "relative_leading_error": 0.18039215469550962,
+        "string_tail_absolute_error": null,
+        "string_xi_cutoff": 8.0,
+        "tail_bound_applies_to_physical_D1": false,
+        "velocity_series_absolute_error": 0.00476012079730026,
+        "velocity_terms": [
+          150,
+          300,
+          600
+        ]
+      },
+      {
+        "available_string_cutoffs": [
+          8.0,
+          12.0
+        ],
+        "field": 0.2,
+        "hD_values": [
+          0.6648789607341178
+        ],
+        "inverse_terms_extrapolated_hD": 0.6648789607341178,
+        "leading_D0_giant_string_tail_bound": 2.2636653913556676e-08,
+        "rapidity_density_relative_l2_error": null,
+        "relative_leading_error": 0.14284275011328007,
+        "string_tail_absolute_error": 0.008986504855267086,
+        "string_xi_cutoff": 12.0,
+        "tail_bound_applies_to_physical_D1": false,
+        "velocity_series_absolute_error": null,
+        "velocity_terms": [
+          300
+        ]
+      }
+    ]
+  },
+  "schema_version": 2,
+  "source_order_statement": "Eq. (16) of the supplement to arXiv:2003.13708: D_spin=D_diagonal+O(h); finite-cutoff off-diagonal terms must not be used to extract the constant D1",
+  "withdrawn_previous_full_cross_D1_envelope": true
+}

@@ -1,0 +1,80 @@
+{
+  "schema_version": 1,
+  "chi": 0.25,
+  "fcs_gamma": [
+    -0.6,
+    -0.4,
+    -0.2,
+    0.0,
+    0.2,
+    0.4,
+    0.6
+  ],
+  "windows": {
+    "train": [
+      50.0,
+      150.0
+    ],
+    "validation": [
+      150.0,
+      200.0
+    ],
+    "blind": [
+      200.0,
+      400.0
+    ]
+  },
+  "bootstrap": {
+    "replicates": 2000,
+    "block_time": 10.0,
+    "confidence": 0.95,
+    "seed": 20260730
+  },
+  "optimization": {
+    "multistarts": 12,
+    "maxiter": 500,
+    "seed": 20260730,
+    "parallel_starts": 4,
+    "successful_starts_min": 2,
+    "best_objective_relative_spread_max": 0.05
+  },
+  "cross_validation": {
+    "required": true,
+    "models": [
+      "scalar_surrogate",
+      "independent_two_burgers",
+      "coupled_two_mode"
+    ],
+    "evaluation_phase": "validation",
+    "orientation_values": [
+      -1,
+      1
+    ],
+    "condition_folds": "all_core_conditions",
+    "expected_shards": 27,
+    "improvement_min": 0.0,
+    "orientation_pass_fraction_min": 1.0,
+    "condition_pass_fraction_min": 0.75,
+    "normalized_rmse_max": 1.5
+  },
+  "forward_model": {
+    "screening_spatial_stride": 4,
+    "screening_dt_internal": 0.2,
+    "final_spatial_stride": 2,
+    "final_dt_internal": 0.1,
+    "screening_ensemble": 1024,
+    "final_ensemble": 2048,
+    "seed": 20260730,
+    "boundary_condition": "periodic_coarse_hydrodynamic_window"
+  },
+  "thresholds": {
+    "two_mode_vs_scalar_improvement_min": 0.3,
+    "paired_ci_low_min": 0.0,
+    "coupled_vs_independent_improvement_min": 0.1,
+    "coupled_vs_independent_delta_bic_min": 10.0,
+    "fcs_cumulant_stability_max": 0.1,
+    "joint_normalized_rmse_max": 1.5,
+    "symmetry_numerical_floor_multiplier": 5.0,
+    "scale_numerical_floor": 1e-08
+  }
+}

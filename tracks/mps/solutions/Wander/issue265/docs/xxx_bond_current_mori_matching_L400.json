@@ -1,0 +1,183 @@
+{
+  "conclusion": "The XXX lattice fixes the external bond-divergence symbol and the microscopic Mori prefix exactly.  It does not license replacing every internal continuum-GHD momentum by 2*sin(p/2).  The next required operation is the Kubo-orthogonal P/Q spectral split.",
+  "gates": {
+    "all_microscopic_continuity_residuals_zero": true,
+    "finite_window_kernel_unique": false,
+    "microscopic_short_time_side_fixed": true,
+    "slow_orthogonal_spectral_split_evaluated": false,
+    "unique_a_D_claimed": false
+  },
+  "inputs": {
+    "exchange": 1.0,
+    "length": 400,
+    "modes": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "target_coefficients_used": false,
+    "temperature": "infinite",
+    "trajectory_data_used": false
+  },
+  "long_wave_exact_prefix": {
+    "mu0": 0.5,
+    "mu18": 5545330.451820374,
+    "mu20": 91287017.09350204,
+    "mu22": 1605913518.5445154,
+    "mu24": 30002474663.343575,
+    "mu26": 592167025455.5975,
+    "squared_recurrents": [
+      0.5,
+      1.75,
+      3.1785714285714284,
+      4.17255216693419,
+      4.420346879585746,
+      5.484054789770981,
+      5.558202140126421,
+      6.801640474648271,
+      6.6441303605386395,
+      7.7268472829841,
+      7.540432748832734,
+      8.758455000309242,
+      8.8498471089788
+    ]
+  },
+  "matching_equation": {
+    "exact_current_split": "j=P_slow j+Q_slow j",
+    "no_double_counting_condition": "<P_slow j,Q_slow j>_Kubo=0",
+    "orthogonal_part": "positive Mori continuum constrained by the exact finite-k moments and the long-wave mu26 prefix",
+    "slow_part": "full infinite-mode GHD projection, including all non-diagonal diffusion and FDT noise"
+  },
+  "method": "exact_xxx_bond_current_pauli_continuity_and_mori_prefix",
+  "microscopic_identity": {
+    "bond_current": "j_{x+1/2}=S_x^x S_{x+1}^y-S_x^y S_{x+1}^x",
+    "external_lattice_symbol_fixed_exactly": true,
+    "fourier_continuity": "d_t S^z_k=-i*2*sin(k/2)*j_{k,bond-centred}",
+    "hamiltonian": "H=sum_x S_x dot S_{x+1}",
+    "replacement_of_internal_ghd_momenta_fixed_by_identity": false
+  },
+  "rows": [
+    {
+      "bond_current_norm": 0.12500000000000003,
+      "closed_mori_even_moments": {
+        "0": 0.5,
+        "10": 182.0647284245886,
+        "12": 2036.1162240791368,
+        "14": 25842.84481070525,
+        "16": 362809.6646768645,
+        "2": 0.25003084187958485,
+        "4": 0.5625539770941597,
+        "6": 2.6564196417529615,
+        "8": 19.328857538874406
+      },
+      "continuity_relative_operator_residual": 0.0,
+      "density_commutator_norm": 3.084187958485034e-05,
+      "density_susceptibility": 0.25000000000000006,
+      "finite_k_squared_lanczos_recurrents": [
+        0.5000616837591697,
+        1.7498766553081617,
+        3.178592798890628,
+        4.172390324901393,
+        4.4203995716325855,
+        5.4838595554086345,
+        5.55833169712784,
+        6.801368056865588
+      ],
+      "k": 0.015707963267948967,
+      "khat": 0.01570780177742267,
+      "mode": 1
+    },
+    {
+      "bond_current_norm": 0.12500000000000003,
+      "closed_mori_even_moments": {
+        "0": 0.5,
+        "10": 182.07434502600012,
+        "12": 2036.1206690535814,
+        "14": 25841.77768840891,
+        "16": 362780.9961842846,
+        "2": 0.2501233599085671,
+        "4": 0.5627159407106606,
+        "6": 2.6569286621466683,
+        "8": 19.331055505607697
+      },
+      "continuity_relative_operator_residual": 0.0,
+      "density_commutator_norm": 0.00012335990856711076,
+      "density_susceptibility": 0.25,
+      "finite_k_squared_lanczos_recurrents": [
+        0.5002467198171342,
+        1.7495069254096134,
+        3.178656542804166,
+        4.171905349604991,
+        4.42055703679767,
+        5.483274676374963,
+        5.558719446112992,
+        6.80055208855523
+      ],
+      "k": 0.031415926535897934,
+      "khat": 0.03141463462364135,
+      "mode": 2
+    },
+    {
+      "bond_current_norm": 0.12500000000000003,
+      "closed_mori_even_moments": {
+        "0": 0.5,
+        "10": 182.09037816338443,
+        "12": 2036.1281140777198,
+        "14": 25839.999585136095,
+        "16": 362733.2234443911,
+        "2": 0.25027753125950747,
+        "4": 0.5629859877985381,
+        "6": 2.6577773466380203,
+        "8": 19.334719950806985
+      },
+      "continuity_relative_operator_residual": 0.0,
+      "density_commutator_norm": 0.00027753125950750687,
+      "density_susceptibility": 0.25000000000000006,
+      "finite_k_squared_lanczos_recurrents": [
+        0.5005550625190149,
+        1.7488917214785062,
+        3.178761561130998,
+        4.171098889717271,
+        4.4208174466892,
+        5.482302617440001,
+        5.559362629475354,
+        6.79919641147309
+      ],
+      "k": 0.047123889803846894,
+      "khat": 0.0471195296672203,
+      "mode": 3
+    },
+    {
+      "bond_current_norm": 0.12500000000000003,
+      "closed_mori_even_moments": {
+        "0": 0.5,
+        "10": 182.11283604353363,
+        "12": 2036.1386142718732,
+        "14": 25837.511151813065,
+        "16": 362666.35857863066,
+        "2": 0.2504933178929321,
+        "4": 0.5633642797628051,
+        "6": 2.6589661711627506,
+        "8": 19.339852626406675
+      },
+      "continuity_relative_operator_residual": 0.0,
+      "density_commutator_norm": 0.0004933178929321096,
+      "density_susceptibility": 0.25000000000000006,
+      "finite_k_squared_lanczos_recurrents": [
+        0.5009866357858642,
+        1.7480325576267237,
+        3.1789060283931723,
+        4.169973680616881,
+        4.421177769059792,
+        5.480947462012316,
+        5.560256679277856,
+        6.797307384200339
+      ],
+      "k": 0.06283185307179587,
+      "khat": 0.06282151815625658,
+      "mode": 4
+    }
+  ],
+  "schema": 1
+}

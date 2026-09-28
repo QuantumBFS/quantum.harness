@@ -1,0 +1,488 @@
+{
+  "bare_total_candidate_kernels": [
+    [
+      10.80856341478723,
+      8.696467442156845,
+      6.994075772444871,
+      5.049886852351107,
+      4.778397109739119
+    ],
+    [
+      13.661645050374457,
+      11.424977396326266,
+      9.587648413929855,
+      7.3331218197177845,
+      6.983477401053808
+    ],
+    [
+      16.99640536719739,
+      14.675853027005163,
+      12.677121580263073,
+      9.879125816882958,
+      9.35520341529872
+    ],
+    [
+      20.929347734328367,
+      18.55842572016938,
+      16.399375662470174,
+      12.837611945982562,
+      12.012286764017885
+    ],
+    [
+      25.563220529679242,
+      23.18471268503974,
+      20.883436950477368,
+      16.367969987935897,
+      15.0944391769592
+    ],
+    [
+      31.089944667904213,
+      28.699213068269124,
+      26.264531264654988,
+      20.6356933025734,
+      18.757276052117547
+    ],
+    [
+      37.65856022456604,
+      35.251041264119536,
+      32.68823891038855,
+      25.81315485478318,
+      23.170723822756962
+    ]
+  ],
+  "conclusion": "The exact microscopic prefix is imposed algebraically, while the remaining spectrum is not assigned a pole count.  A failed gate means that this regulator sequence cannot yet determine the finite-window correction; it is not evidence for a second mode.",
+  "cutoffs": [
+    {
+      "causal_half_delta_contact": 4.2077840436201726,
+      "colored_laplace_correction": [
+        0.39103641063561717,
+        0.2912828563859961,
+        0.20049683841825566,
+        0.055155857303916304,
+        0.028976916573265708
+      ],
+      "fourier_points": 4,
+      "maximum_resolved_wave_number": 0.08
+    },
+    {
+      "causal_half_delta_contact": 6.311676065430257,
+      "colored_laplace_correction": [
+        1.1402260244127589,
+        0.9159007887453334,
+        0.6901774580931556,
+        0.23449880286050914,
+        0.13016518607786984
+      ],
+      "fourier_points": 6,
+      "maximum_resolved_wave_number": 0.12
+    },
+    {
+      "causal_half_delta_contact": 8.415568087240345,
+      "colored_laplace_correction": [
+        2.3710943194256053,
+        2.062884397614141,
+        1.6757586026162854,
+        0.6766107782155937,
+        0.3979991785126938
+      ],
+      "fourier_points": 8,
+      "maximum_resolved_wave_number": 0.16
+    },
+    {
+      "causal_half_delta_contact": 10.519460109050433,
+      "colored_laplace_correction": [
+        4.200144664746496,
+        3.8415650689682717,
+        3.2941206630132975,
+        1.531204885505111,
+        0.9511905054217712
+      ],
+      "fourier_points": 10,
+      "maximum_resolved_wave_number": 0.2
+    },
+    {
+      "causal_half_delta_contact": 12.623352130860514,
+      "colored_laplace_correction": [
+        6.730125438287288,
+        6.36396001202855,
+        5.674289929210411,
+        2.9576709056483637,
+        1.9294508965530048
+      ],
+      "fourier_points": 12,
+      "maximum_resolved_wave_number": 0.24
+    },
+    {
+      "causal_half_delta_contact": 14.727244152670611,
+      "colored_laplace_correction": [
+        10.152957554702162,
+        9.774568373447838,
+        8.951492221577933,
+        5.121502198475769,
+        3.4883957499012554
+      ],
+      "fourier_points": 14,
+      "maximum_resolved_wave_number": 0.28
+    },
+    {
+      "causal_half_delta_contact": 16.83113617448069,
+      "colored_laplace_correction": [
+        14.617681089553908,
+        14.222504547488168,
+        13.271307845501417,
+        8.195071728875469,
+        5.797951498730592
+      ],
+      "fourier_points": 16,
+      "maximum_resolved_wave_number": 0.32
+    }
+  ],
+  "gates": {
+    "continuum_terminator_matching_complete": false,
+    "exact_mu26_prefix_preserved_if_reconstructed": true,
+    "full_fdt_noise_in_source": true,
+    "full_non_diagonal_diffusion_in_source": true,
+    "linear_zero_field_infinite_mode_limit_complete": false,
+    "nonlinear_zero_field_infinite_mode_limit_complete": false,
+    "physical_F1_perp_certified": false
+  },
+  "inputs": {
+    "causal_delta_endpoint_weight": 0.5,
+    "cutoff_relative_tolerance": 0.1,
+    "spectral_maximum": 20.0,
+    "spectral_nodes": 256,
+    "spectral_relative_tolerance": 0.02,
+    "target_coefficients_used": false,
+    "trajectory_data_used": false
+  },
+  "laplace_frequency": [
+    0.02,
+    0.05,
+    0.1,
+    0.5,
+    1.0
+  ],
+  "linear_full_mode_mori_kernel": [
+    6.20974296053144,
+    4.197400542150676,
+    2.5857948904064427,
+    0.7869469514270184,
+    0.5416361495456807
+  ],
+  "matching": {
+    "all_candidates_inside_stieltjes_bounds": false,
+    "all_regulators_spectral_reconstruction_pass": false,
+    "all_spectral_weights_nonnegative": false,
+    "candidate_kernels_positive": [
+      [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      [
+        true,
+        true,
+        true,
+        true,
+        true
+      ]
+    ],
+    "cutoff_stability_pass": false,
+    "exact_moment_order_preserved": 26,
+    "exact_recurrent_count_preserved": 13,
+    "finite_pole_count_assumed": false,
+    "inside_moment_interval": [
+      [
+        true,
+        false,
+        false,
+        false,
+        false
+      ],
+      [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      [
+        false,
+        false,
+        false,
+        false,
+        false
+      ]
+    ],
+    "laplace_frequency": [
+      0.02,
+      0.05,
+      0.1,
+      0.5,
+      1.0
+    ],
+    "last_pair_maximum_relative_change": 0.22293175213602234,
+    "matching_complete": false,
+    "maximum_spectral_relative_residual": null,
+    "moment_bounds_lower": [
+      0.08319489647145079,
+      0.20327904343073472,
+      0.3762212769831562,
+      0.5763673878492682,
+      0.39105181514495985
+    ],
+    "moment_bounds_upper": [
+      12.193815048167444,
+      4.894302624307494,
+      2.476610959198617,
+      0.627185721411386,
+      0.39211910485489876
+    ],
+    "reconstructed_moment_preserving_kernels": [
+      [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      [
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    ],
+    "required_tail_count": 7,
+    "required_tail_inside_stieltjes_bounds": false,
+    "required_tail_spectral_weights_nonnegative": false,
+    "spectral_fits": [
+      {
+        "minimum_weight": null,
+        "nonzero_quadrature_weights": 0,
+        "normalization_residual": null,
+        "pre_normalization_mass": 0.0,
+        "relative_residual": null,
+        "spectral_weights_nonnegative": false,
+        "terminator_positive": false
+      },
+      {
+        "minimum_weight": null,
+        "nonzero_quadrature_weights": 0,
+        "normalization_residual": null,
+        "pre_normalization_mass": 0.0,
+        "relative_residual": null,
+        "spectral_weights_nonnegative": false,
+        "terminator_positive": false
+      },
+      {
+        "minimum_weight": null,
+        "nonzero_quadrature_weights": 0,
+        "normalization_residual": null,
+        "pre_normalization_mass": 0.0,
+        "relative_residual": null,
+        "spectral_weights_nonnegative": false,
+        "terminator_positive": false
+      },
+      {
+        "minimum_weight": null,
+        "nonzero_quadrature_weights": 0,
+        "normalization_residual": null,
+        "pre_normalization_mass": 0.0,
+        "relative_residual": null,
+        "spectral_weights_nonnegative": false,
+        "terminator_positive": false
+      },
+      {
+        "minimum_weight": null,
+        "nonzero_quadrature_weights": 0,
+        "normalization_residual": null,
+        "pre_normalization_mass": 0.0,
+        "relative_residual": null,
+        "spectral_weights_nonnegative": false,
+        "terminator_positive": false
+      },
+      {
+        "minimum_weight": null,
+        "nonzero_quadrature_weights": 0,
+        "normalization_residual": null,
+        "pre_normalization_mass": 0.0,
+        "relative_residual": null,
+        "spectral_weights_nonnegative": false,
+        "terminator_positive": false
+      },
+      {
+        "minimum_weight": null,
+        "nonzero_quadrature_weights": 0,
+        "normalization_residual": null,
+        "pre_normalization_mass": 0.0,
+        "relative_residual": null,
+        "spectral_weights_nonnegative": false,
+        "terminator_positive": false
+      }
+    ],
+    "spectral_grid_is_continuum_quadrature": true,
+    "spectral_node_convergence_still_required": true,
+    "spectral_reconstruction_pass": false,
+    "target_coefficients_used": false,
+    "trajectory_data_used": false
+  },
+  "method": "positive_continuum_terminator_behind_exact_mu26_lanczos_prefix",
+  "one_loop_corrections": [
+    [
+      4.598820454255789,
+      4.499066900006168,
+      4.4082808820384285,
+      4.2629399009240885,
+      4.236760960193438
+    ],
+    [
+      7.451902089843016,
+      7.227576854175591,
+      7.001853523523413,
+      6.546174868290766,
+      6.4418412515081265
+    ],
+    [
+      10.78666240666595,
+      10.478452484854486,
+      10.091326689856631,
+      9.092178865455939,
+      8.813567265753038
+    ],
+    [
+      14.719604773796929,
+      14.361025178018705,
+      13.81358077206373,
+      12.050664994555545,
+      11.470650614472204
+    ],
+    [
+      19.353477569147802,
+      18.987312142889063,
+      18.297642060070924,
+      15.581023036508878,
+      14.55280302741352
+    ],
+    [
+      24.880201707372773,
+      24.50181252611845,
+      23.678736374248544,
+      19.84874635114638,
+      18.215639902571866
+    ],
+    [
+      31.4488172640346,
+      31.053640721968858,
+      30.10244401998211,
+      25.02620790335616,
+      22.62908767321128
+    ]
+  ],
+  "schema": 1,
+  "sources": {
+    "docs/full_mode_mori_certificate.json": "86a2c85c97da260f6af2218f751a6532ad1fb3fb2537b8489516a4604762f7d8",
+    "docs/full_mode_physical_one_loop_h025_mu20_uv4_16.json": "fe40d38a27ab1d1998fbc1631b83aca271087189c96bdb8743cc329f2ca7cbd6"
+  }
+}

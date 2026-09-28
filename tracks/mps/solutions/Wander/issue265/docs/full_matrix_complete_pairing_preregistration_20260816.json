@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "status": "frozen_before_candidate_outputs",
+  "uses_target_a_or_D": false,
+  "uses_target_trajectory": false,
+  "purpose": "select an unbiased trace estimator for the complete infinite-mode colored Mori memory",
+  "estimator_identity": "with S independent x probes and S independent y probes, S cyclic shifts enumerate all S^2 ordered pairs exactly once",
+  "field": 0.16666666666666666,
+  "scaled_time_endpoint": 0.8594366926962348,
+  "samples_per_frame": 8,
+  "control_pairings_per_frame": 1,
+  "candidate_pairings_per_frame": 8,
+  "independent_seeds": [4265, 5265, 6265, 7265, 8265, 9265, 10265, 11265],
+  "required_replicates": 8,
+  "target_complex_sem": 0.0005,
+  "acceptance": {
+    "paired_complex_mean_shift_at_most_two_sem": true,
+    "candidate_real_variance_ratio_to_control_at_most_one": true,
+    "all_outputs_converged_and_target_free": true,
+    "complete_non_diagonal_diffusion_and_full_fdt_noise_required": true,
+    "colored_memory_required": true,
+    "bare_white_noise_contact_must_be_absent_from_colored_memory": true
+  },
+  "fallback_if_candidate_rejected": "use P=1 and the audit's plugin independent-replicate count; do not select a partial pairing count",
+  "frozen_source_sha256": {
+    "scripts/derive_low_rank_self_consistent_full_matrix.py": "deeb0b248f84d24f8076ce4caf4216e61e45ed86403cbccd90c1017bd9f538bc",
+    "scripts/evaluate_full_tba_diffusion.py": "8a73bd1bceb32fa7d6e30f0fb4dbe5a5f5341e92de5f704b3619b725932a1654",
+    "src/heisenberg_burgers_bridge.py": "1689c0f2701c629e3cb324fd96b97dd86c20230d99e8e2adce3025c7b097d2e1",
+    "src/full_mode_analytic_certificates.py": "224dcba3ccf58a364cc261d964f6e1ac4ab6b760224f21e3d13bf174ea6f322d",
+    "scripts/audit_complete_trace_pairing.py": "543f37b6728ddfb687b64de854c3c131789b59461b54171261be8ed652b6337a",
+    "scripts/audit_trace_pairing_variance_reduction.py": "510833031494dc800bc20e7f44cba48772a220d2777dd1746fbeceea94c4725f",
+    "hpc/scnet/full_matrix_complete_pairing_pilot.sbatch": "4bfb9d787dad7b5230ce7796cf3ce5658c32b10cd48d153a43a35c16fed2824c"
+  },
+  "submission_performed": false
+}

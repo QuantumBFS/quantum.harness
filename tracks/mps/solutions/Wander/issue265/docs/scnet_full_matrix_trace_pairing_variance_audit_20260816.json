@@ -1,0 +1,154 @@
+{
+  "common_regulator_signature": {
+    "field": 0.16666666666666666,
+    "fourier_points": 4,
+    "kernel_theta_step": 0.25,
+    "lattice_wave_number": false,
+    "nodes_per_string": 12,
+    "samples_per_internal_wave": 8,
+    "scaled_rapidity_extent": 6.0,
+    "scaled_rapidity_map_alpha": 3.0,
+    "scaled_times": [
+      0.0,
+      0.0477464829275686,
+      0.0954929658551372,
+      0.1432394487827058,
+      0.1909859317102744,
+      0.238732414637843,
+      0.2864788975654116,
+      0.3342253804929802,
+      0.3819718634205488,
+      0.4297183463481174,
+      0.477464829275686,
+      0.5252113122032546,
+      0.5729577951308232,
+      0.6207042780583919,
+      0.6684507609859603,
+      0.716197243913529,
+      0.7639437268410976,
+      0.8116902097686661,
+      0.8594366926962348
+    ],
+    "scaled_waves": [
+      0.0,
+      0.4,
+      -0.8,
+      -0.4
+    ],
+    "string_xi_buffer": 0.5,
+    "string_xi_cutoff": 6.0,
+    "trace_distribution": "srht_rademacher",
+    "trace_source_layout": "shared_wave"
+  },
+  "common_seeds": [
+    265,
+    1265,
+    2265,
+    3265
+  ],
+  "input_sha256_by_file": {
+    "docs/scnet_full_matrix_trace_pairing_p1_control_20260816_001/h016667_pair1_seed1265_samples8_srht_tauwall.json": "2870698de9bb192eb0cfe64a634b714e6bfec0fe62c8fad6762c5f9ff151bdb2",
+    "docs/scnet_full_matrix_trace_pairing_p1_control_20260816_001/h016667_pair1_seed2265_samples8_srht_tauwall.json": "56fdbce96d2e96c7a2ae5e0fa9ff24341882dc80533ab4104ab6fe40302a95c0",
+    "docs/scnet_full_matrix_trace_pairing_p1_control_20260816_001/h016667_pair1_seed265_samples8_srht_tauwall.json": "6c71ea3e0382702c940d244b4fdf70e94d5b9feb4436c7658d8a9a3cade304aa",
+    "docs/scnet_full_matrix_trace_pairing_p1_control_20260816_001/h016667_pair1_seed3265_samples8_srht_tauwall.json": "f438b612acea658ed47536d24b2067441dc73009794df8647cfae6df75cb998b",
+    "docs/scnet_full_matrix_trace_pairing_pilot_20260816_001/h016667_pair2_seed1265_samples8_srht_tauwall.json": "9be5944c4ff5dfc91f4f1437b256e92671b3335d3da10f0e9a35f3d55e72b1dd",
+    "docs/scnet_full_matrix_trace_pairing_pilot_20260816_001/h016667_pair2_seed2265_samples8_srht_tauwall.json": "dad3fc9f5bc7cdb100110fbe496cf1ceace17c1e3d2eb900055048d57949038b",
+    "docs/scnet_full_matrix_trace_pairing_pilot_20260816_001/h016667_pair2_seed265_samples8_srht_tauwall.json": "409272fa80c629c81491f444c24259a68cb941cfd576db4558b387c57cfe882f",
+    "docs/scnet_full_matrix_trace_pairing_pilot_20260816_001/h016667_pair2_seed3265_samples8_srht_tauwall.json": "f9c4eb478a39c53eadaaa23117d8b84d65e2f81684073b64f09e3f466dc52e6d",
+    "docs/scnet_full_matrix_trace_pairing_pilot_20260816_001/h016667_pair4_seed1265_samples8_srht_tauwall.json": "690ccf9785708a8c32ed8b07ab6e3235f9d37067356ec2974ac946959008ddb7",
+    "docs/scnet_full_matrix_trace_pairing_pilot_20260816_001/h016667_pair4_seed2265_samples8_srht_tauwall.json": "3e825cf16287a47ec541df6250b201930ad00fb08e504c24879a05c79c84a5c6",
+    "docs/scnet_full_matrix_trace_pairing_pilot_20260816_001/h016667_pair4_seed265_samples8_srht_tauwall.json": "2717e855f08dc197432c7c66518c0617070f19fb7ae482cd5d481ce72c59d607",
+    "docs/scnet_full_matrix_trace_pairing_pilot_20260816_001/h016667_pair4_seed3265_samples8_srht_tauwall.json": "58120562a3ea913a43c4354408e6c2aa550a650e79c0ce4f1513cf9fcc39f426"
+  },
+  "method": "paired_cyclic_wick_trace_variance_audit",
+  "paired_runs_require_numeric_full_matrix_operator_evidence": true,
+  "replicate_count_estimate_is_plugin_not_acceptance_evidence": true,
+  "rows": [
+    {
+      "accepted": true,
+      "endpoint_complex_sem": 0.002134232302340946,
+      "endpoint_imaginary_variance": 2.4490286741118048e-06,
+      "endpoint_mean": [
+        0.8484293991071004,
+        0.0003691232466028159
+      ],
+      "endpoint_real_variance": 1.5770761407310333e-05,
+      "full_matrix_operator_evidence": {
+        "diffusion_off_diagonal_frobenius_fraction_range": [
+          0.1871487703119738,
+          0.1871487703119738
+        ],
+        "fdt_noise_off_diagonal_frobenius_fraction_range": [
+          0.04866369317641387,
+          0.04866369317641387
+        ],
+        "maximum_diffusion_static_metric_commutator_relative_norm": 9.85694841159687e-18
+      },
+      "paired_complex_mean_shift": 0.0,
+      "paired_complex_shift_sem": 0.0,
+      "plugin_minimum_independent_replicates_for_target_sem": 73,
+      "real_variance_ratio_to_single_pairing": 1.0,
+      "target_complex_sem": 0.0005,
+      "trace_pairings_per_frame": 1
+    },
+    {
+      "accepted": false,
+      "endpoint_complex_sem": 0.0018867812128743951,
+      "endpoint_imaginary_variance": 1.4909709413966394e-06,
+      "endpoint_mean": [
+        0.846029155159633,
+        0.0004437154938011279
+      ],
+      "endpoint_real_variance": 1.2748802439626457e-05,
+      "full_matrix_operator_evidence": {
+        "diffusion_off_diagonal_frobenius_fraction_range": [
+          0.1871487703119738,
+          0.1871487703119738
+        ],
+        "fdt_noise_off_diagonal_frobenius_fraction_range": [
+          0.04866369317641387,
+          0.04866369317641387
+        ],
+        "maximum_diffusion_static_metric_commutator_relative_norm": 9.85694841159687e-18
+      },
+      "paired_complex_mean_shift": 0.002401402717308423,
+      "paired_complex_shift_sem": 0.000900651971312702,
+      "plugin_minimum_independent_replicates_for_target_sem": 57,
+      "real_variance_ratio_to_single_pairing": 0.8083821770150498,
+      "target_complex_sem": 0.0005,
+      "trace_pairings_per_frame": 2
+    },
+    {
+      "accepted": false,
+      "endpoint_complex_sem": 0.002017891009149038,
+      "endpoint_imaginary_variance": 1.1859634605791609e-06,
+      "endpoint_mean": [
+        0.8458656369370356,
+        0.0010029702618795334
+      ],
+      "endpoint_real_variance": 1.5101573038638925e-05,
+      "full_matrix_operator_evidence": {
+        "diffusion_off_diagonal_frobenius_fraction_range": [
+          0.1871487703119738,
+          0.1871487703119738
+        ],
+        "fdt_noise_off_diagonal_frobenius_fraction_range": [
+          0.04866369317641387,
+          0.04866369317641387
+        ],
+        "maximum_diffusion_static_metric_commutator_relative_norm": 9.85694841159687e-18
+      },
+      "paired_complex_mean_shift": 0.0026409540896105486,
+      "paired_complex_shift_sem": 0.0011407801897237672,
+      "plugin_minimum_independent_replicates_for_target_sem": 66,
+      "real_variance_ratio_to_single_pairing": 0.9575677831026462,
+      "target_complex_sem": 0.0005,
+      "trace_pairings_per_frame": 4
+    }
+  ],
+  "schema": 1,
+  "target_complex_sem": 0.0005,
+  "trace_pairing_variance_reduction_accepted": false,
+  "uses_target_a_or_D": false,
+  "uses_target_trajectory": false
+}

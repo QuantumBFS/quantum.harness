@@ -1,0 +1,463 @@
+{
+  "schema": 1,
+  "evidence_status": "gate not accepted",
+  "snapshot_manifest": "artifacts/progress_atlas/source_manifest.json",
+  "figures": [
+    {
+      "name": "00_visual_specimen",
+      "group": "hero",
+      "caption": "Visual tokens and evidence-state language used throughout the atlas.",
+      "files": [
+        {
+          "path": "artifacts/progress_atlas/figures/hero/00_visual_specimen.png",
+          "sha256": "5767f374e6efdb2ed7140d1979d57cc68cfc8ae703e4fbea1a0189f41b28389b"
+        },
+        {
+          "path": "artifacts/progress_atlas/figures/hero/00_visual_specimen.pdf",
+          "sha256": "4ee1c28dbad27a6a8eb9ce0fcaee1e0f382a7d81e476b8f389dc6bf3042d924c"
+        },
+        {
+          "path": "artifacts/progress_atlas/figures/hero/00_visual_specimen.svg",
+          "sha256": "a386f9eec68d3592a1cecbdc8b352d729a6e80427507d5bf9e99b739028cc6fb"
+        }
+      ]
+    },
+    {
+      "name": "01_evidence_map",
+      "group": "hero",
+      "caption": "Current numerical coverage mapped onto the controlled hydrodynamic reduction hierarchy.",
+      "files": [
+        {
+          "path": "artifacts/progress_atlas/figures/hero/01_evidence_map.png",
+          "sha256": "f3ebaad95bd9da6a8add9965c97fdf01056a1034438680b70b36f837cb1d4016"
+        },
+        {
+          "path": "artifacts/progress_atlas/figures/hero/01_evidence_map.pdf",
+          "sha256": "1ab0a2af93dd4f67f25c059a4ac1e4227b7a19dbe6ef2d56b0eb6a66fbc3f540"
+        },
+        {
+          "path": "artifacts/progress_atlas/figures/hero/01_evidence_map.svg",
+          "sha256": "c135f4a4cedd05cbaf0c50dec9073275571b2441a89c8238a98a1b22b8de6c73"
+        }
+      ]
+    },
+    {
+      "name": "02_time_coverage",
+      "group": "hero",
+      "caption": "Physical-time coverage and cumulative wall-time cost for all twelve convergence jobs.",
+      "files": [
+        {
+          "path": "artifacts/progress_atlas/figures/hero/02_time_coverage.png",
+          "sha256": "2e437e1f5175f61324325e61ea037c4ff4db248541be4b74670b99003e2266b9"
+        },
+        {
+          "path": "artifacts/progress_atlas/figures/hero/02_time_coverage.pdf",
+          "sha256": "b8cc70ba7c332ccc66268b14d583c5738ebd34db5f0f3b25acb30aaf6cf9f78a"
+        },
+        {
+          "path": "artifacts/progress_atlas/figures/hero/02_time_coverage.svg",
+          "sha256": "f50f50694f5c51b1f6eff2cb19255ad81135985da3ce335ba03e051722442b8e"
+        }
+      ]
+    },
+    {
+      "name": "03_profile_current_convergence",
+      "group": "hero",
+      "caption": "Coarse--medium comparison of magnetization and current in the two fully completed resolution pairs.",
+      "files": [
+        {
+          "path": "artifacts/progress_atlas/figures/hero/03_profile_current_convergence.png",
+          "sha256": "40b8b5849f92a2b52634edab0c162a0d96569cb4fa3c014259efd11d38cd50e4"
+        },
+        {
+          "path": "artifacts/progress_atlas/figures/hero/03_profile_current_convergence.pdf",
+          "sha256": "1deceea841102fba84e57b39c8499d290c83beb5711443185dee79bb4227136b"
+        },
+        {
+          "path": "artifacts/progress_atlas/figures/hero/03_profile_current_convergence.svg",
+          "sha256": "a2ca4e914955fdf249345ca755635a29a24add7b7f772e80a425588c395e3a30"
+        }
+      ]
+    },
+    {
+      "name": "04_initial_state_dynamics",
+      "group": "hero",
+      "caption": "Time--space magnetization maps for the four complete coarse trajectories.",
+      "files": [
+        {
+          "path": "artifacts/progress_atlas/figures/hero/04_initial_state_dynamics.png",
+          "sha256": "95ce73dea69e6fda54c23c1551b0be66668f01a366b07d850caea89581edc065"
+        },
+        {
+          "path": "artifacts/progress_atlas/figures/hero/04_initial_state_dynamics.pdf",
+          "sha256": "bfe236e8588a508a201fa74c6f7435a92ad60cc2cb833957b36f233ee45fafe3"
+        },
+        {
+          "path": "artifacts/progress_atlas/figures/hero/04_initial_state_dynamics.svg",
+          "sha256": "a2642be4b3eb4dfa9860c3d18653febfb1763033c35ea651713293a2c64125e1"
+        }
+      ]
+    },
+    {
+      "name": "05_spin_inversion",
+      "group": "hero",
+      "caption": "Opposite-wall profile overlays and normalized spin-flip/FCS orientation residuals.",
+      "files": [
+        {
+          "path": "artifacts/progress_atlas/figures/hero/05_spin_inversion.png",
+          "sha256": "dbbdcd1d37b5864c21d364b145dd2b325a6d8fcf73497f4a8e2f81f6bbc96228"
+        },
+        {
+          "path": "artifacts/progress_atlas/figures/hero/05_spin_inversion.pdf",
+          "sha256": "650bc84defb4ac3185e5d841946d83771c673e69bf479b8ecdc99f5346e1a495"
+        },
+        {
+          "path": "artifacts/progress_atlas/figures/hero/05_spin_inversion.svg",
+          "sha256": "69ef357451723908cc81937efb25c77ece67d56d85f6f6eb34815264b941aba1"
+        }
+      ]
+    },
+    {
+      "name": "06_scaling_competition",
+      "group": "hero",
+      "caption": "Diffusive, KPZ, and ballistic compensation plots for the completed finite-background medium trajectory.",
+      "files": [
+        {
+          "path": "artifacts/progress_atlas/figures/hero/06_scaling_competition.png",
+          "sha256": "94c073b28b5d11d7e708f43f60b88d0962ec2ac950a6e28e486e9b9c8dcdaca3"
+        },
+        {
+          "path": "artifacts/progress_atlas/figures/hero/06_scaling_competition.pdf",
+          "sha256": "c49bff7dbc4acef45e83a3031e50aac721d8d4a52ee2b5d2f5da990eddbd54f3"
+        },
+        {
+          "path": "artifacts/progress_atlas/figures/hero/06_scaling_competition.svg",
+          "sha256": "6cdc013bc13b69f7db5b076e5d5de7336bbe9f2077d10acc4199cdacb26c0981"
+        }
+      ]
+    },
+    {
+      "name": "07_local_closure_vs_memory",
+      "group": "hero",
+      "caption": "Conceptual distinction between local closure and projected memory, located by observed coarse--medium differences.",
+      "files": [
+        {
+          "path": "artifacts/progress_atlas/figures/hero/07_local_closure_vs_memory.png",
+          "sha256": "c8c73581a83d3ab7c0ad7caa7ff03b53d8efb675a4a6760849caad218272c0ff"
+        },
+        {
+          "path": "artifacts/progress_atlas/figures/hero/07_local_closure_vs_memory.pdf",
+          "sha256": "a05dc97aacc2d001e3cf359d2b22b931cb7601487fb153bf65ca5b5eded70419"
+        },
+        {
+          "path": "artifacts/progress_atlas/figures/hero/07_local_closure_vs_memory.svg",
+          "sha256": "4a9a51111f01461bd7bfd1a05ee3d1225b01e7e10600a3f435f72297b2776424"
+        }
+      ]
+    },
+    {
+      "name": "08_controlled_hierarchy",
+      "group": "hero",
+      "caption": "Controlled hierarchy from infinite-mode fluctuating GHD to a finite-window deterministic Burgers surrogate.",
+      "files": [
+        {
+          "path": "artifacts/progress_atlas/figures/hero/08_controlled_hierarchy.png",
+          "sha256": "b3d26b3cd27c54e36ec4734ae970890c34d30782a438cd1818b952acd7f18086"
+        },
+        {
+          "path": "artifacts/progress_atlas/figures/hero/08_controlled_hierarchy.pdf",
+          "sha256": "118ae16851fb9e9574ffbe57a6dd56b2a699bb6eb0d128dbcc602926984238d7"
+        },
+        {
+          "path": "artifacts/progress_atlas/figures/hero/08_controlled_hierarchy.svg",
+          "sha256": "bd271bc4d552606fb3d0336b909cd36aaac96beef65b4b63c928401ceb2c0d45"
+        }
+      ]
+    },
+    {
+      "name": "00_atlas_contact_sheet",
+      "group": "overview",
+      "caption": "Nine-panel visual index of the argument-level evidence atlas.",
+      "files": [
+        {
+          "path": "artifacts/progress_atlas/figures/overview/00_atlas_contact_sheet.png",
+          "sha256": "447f915e7359578362455c62c841cbbe746f10cb18107249de32004e90cd28e6"
+        },
+        {
+          "path": "artifacts/progress_atlas/figures/overview/00_atlas_contact_sheet.pdf",
+          "sha256": "ff24199fb76a15291f55c3c7bf8025279e994f4fec422006a7386ee22bd9255a"
+        },
+        {
+          "path": "artifacts/progress_atlas/figures/overview/00_atlas_contact_sheet.svg",
+          "sha256": "6ec82bf153e999be294bd172f734ba7011ec5682d04b210935d5c2b0a87cc35b"
+        }
+      ]
+    },
+    {
+      "name": "background_p005_up_m_profiles",
+      "group": "support",
+      "caption": "Coarse--medium magnetization profiles at five representative times.",
+      "files": [
+        {
+          "path": "artifacts/progress_atlas/figures/support/background_p005_up_m_profiles.png",
+          "sha256": "ff191ea55098bfd0888f2912a83c00f4d87ca414babc67be0edbfc548a57738b"
+        },
+        {
+          "path": "artifacts/progress_atlas/figures/support/background_p005_up_m_profiles.pdf",
+          "sha256": "6726a33ab2b685e4d60d061e7f6d28968d9684f0ce675107ebd487852990ab8f"
+        },
+        {
+          "path": "artifacts/progress_atlas/figures/support/background_p005_up_m_profiles.svg",
+          "sha256": "482751b1d44da7dc7f8ff773cf18038475f432bc1185a4cc9ba62601322eacc8"
+        }
+      ]
+    },
+    {
+      "name": "background_p005_up_current_profiles",
+      "group": "support",
+      "caption": "Coarse--medium current profiles at five representative times.",
+      "files": [
+        {
+          "path": "artifacts/progress_atlas/figures/support/background_p005_up_current_profiles.png",
+          "sha256": "66427a18d2b9ad7b93ae2b3c2106ebfc2f0542aeb91c250ac3284c31a6b6e518"
+        },
+        {
+          "path": "artifacts/progress_atlas/figures/support/background_p005_up_current_profiles.pdf",
+          "sha256": "99416d1019b74b9551f422eb2b8fd9aa5c79438028c6ca08ab5da15de9a1cd51"
+        },
+        {
+          "path": "artifacts/progress_atlas/figures/support/background_p005_up_current_profiles.svg",
+          "sha256": "4f3b42b191cd176eced027c26463011d11ee3217b982b5fa6bc84bdf7a3c5b87"
+        }
+      ]
+    },
+    {
+      "name": "shape_double_wall_m_profiles",
+      "group": "support",
+      "caption": "Coarse--medium magnetization profiles at five representative times.",
+      "files": [
+        {
+          "path": "artifacts/progress_atlas/figures/support/shape_double_wall_m_profiles.png",
+          "sha256": "3f1473e5e92dd1d74e48921f6698a5351b8254d2d397089c2b8e1ca855770c11"
+        },
+        {
+          "path": "artifacts/progress_atlas/figures/support/shape_double_wall_m_profiles.pdf",
+          "sha256": "631bbf6300c6714ecd1e49c3f037b720e10356dce28ffbc43d33ebc1a4304008"
+        },
+        {
+          "path": "artifacts/progress_atlas/figures/support/shape_double_wall_m_profiles.svg",
+          "sha256": "09cead372c2a19ff95c9eda13bd08c6edd11199b65a08ab320f9e068dc715e58"
+        }
+      ]
+    },
+    {
+      "name": "shape_double_wall_current_profiles",
+      "group": "support",
+      "caption": "Coarse--medium current profiles at five representative times.",
+      "files": [
+        {
+          "path": "artifacts/progress_atlas/figures/support/shape_double_wall_current_profiles.png",
+          "sha256": "a0563d68674db60dc7f77ce9474722eaaf798ecc72b10003e4baf83b1c9f9334"
+        },
+        {
+          "path": "artifacts/progress_atlas/figures/support/shape_double_wall_current_profiles.pdf",
+          "sha256": "3c1443d159761da5bd522ef6b26ebd2de784eac6afa2e663c3aef08e8a1c5df3"
+        },
+        {
+          "path": "artifacts/progress_atlas/figures/support/shape_double_wall_current_profiles.svg",
+          "sha256": "ef966d37fcebb983d122c1dc4259df46f61f4b27679068dbc95c7e7d04532ce8"
+        }
+      ]
+    },
+    {
+      "name": "convergence_error_curves",
+      "group": "support",
+      "caption": "Time-dependent coarse--medium numerical sensitivity for profiles and currents.",
+      "files": [
+        {
+          "path": "artifacts/progress_atlas/figures/support/convergence_error_curves.png",
+          "sha256": "cecab8f46ad2b1baef5d1f476a03fb099c62601a542a5dcc0a871c7d9b7a4ceb"
+        },
+        {
+          "path": "artifacts/progress_atlas/figures/support/convergence_error_curves.pdf",
+          "sha256": "6fd8a78f98ea52c30bdeecd942a988e9f00b37f892d17519cac7c8c30ccaecfe"
+        },
+        {
+          "path": "artifacts/progress_atlas/figures/support/convergence_error_curves.svg",
+          "sha256": "fb46a5c2c8dcc7384c9a45c2fac87416515f7c1d175b2fab540381be9b7210f6"
+        }
+      ]
+    },
+    {
+      "name": "resource_error_budget",
+      "group": "support",
+      "caption": "Discarded weight, magnetization drift, and cumulative wall time for all convergence jobs.",
+      "files": [
+        {
+          "path": "artifacts/progress_atlas/figures/support/resource_error_budget.png",
+          "sha256": "83c0d8468eeea611a7020b7185c05e204fdc7e9dd5fde6757a709c062e58ced6"
+        },
+        {
+          "path": "artifacts/progress_atlas/figures/support/resource_error_budget.pdf",
+          "sha256": "a7f0c7cad45937f405e18babcf64b4b204581b44eafc7707de8ff565a3c36d70"
+        },
+        {
+          "path": "artifacts/progress_atlas/figures/support/resource_error_budget.svg",
+          "sha256": "3b45ac5a6e5cb79bcbcf433e1e343618f17f50e2f658bb523e2815fdec2060f7"
+        }
+      ]
+    },
+    {
+      "name": "amp_mu005_up_m_spacetime",
+      "group": "support",
+      "caption": "Raw time--space field from the complete coarse trajectory.",
+      "files": [
+        {
+          "path": "artifacts/progress_atlas/figures/support/amp_mu005_up_m_spacetime.png",
+          "sha256": "276b79fc3b2b45162fa43dfd4636de76e4184e1654cc73131f9e0e4a761a69f4"
+        },
+        {
+          "path": "artifacts/progress_atlas/figures/support/amp_mu005_up_m_spacetime.pdf",
+          "sha256": "88c33295595ebc319fcb82dd2d3ad9f57eae26d413275f375ace4cd76cf0225a"
+        },
+        {
+          "path": "artifacts/progress_atlas/figures/support/amp_mu005_up_m_spacetime.svg",
+          "sha256": "c8af4a0f3e0e0ae107140ede9e44ad1e0e2b0ee312cda7b2816ac6efc444ed48"
+        }
+      ]
+    },
+    {
+      "name": "amp_mu005_up_current_spacetime",
+      "group": "support",
+      "caption": "Raw time--space field from the complete coarse trajectory.",
+      "files": [
+        {
+          "path": "artifacts/progress_atlas/figures/support/amp_mu005_up_current_spacetime.png",
+          "sha256": "947a0d011bc69799a58fdd48b0ce6825a59116af4997baa27719d6223f90506e"
+        },
+        {
+          "path": "artifacts/progress_atlas/figures/support/amp_mu005_up_current_spacetime.pdf",
+          "sha256": "9ddf56d3cf897adecc57ce191a461fbb23dec11e799b4ea4ab0dda832c1bd099"
+        },
+        {
+          "path": "artifacts/progress_atlas/figures/support/amp_mu005_up_current_spacetime.svg",
+          "sha256": "ceaf290a8b60888d463b4b02d57577b971200e2afc30ce89ceed00b109b94423"
+        }
+      ]
+    },
+    {
+      "name": "amp_mu005_down_m_spacetime",
+      "group": "support",
+      "caption": "Raw time--space field from the complete coarse trajectory.",
+      "files": [
+        {
+          "path": "artifacts/progress_atlas/figures/support/amp_mu005_down_m_spacetime.png",
+          "sha256": "58fdbea9333b84a27a9c122a6e53fa8118138004f2c0d99016d53ef63315dca3"
+        },
+        {
+          "path": "artifacts/progress_atlas/figures/support/amp_mu005_down_m_spacetime.pdf",
+          "sha256": "893f0333bbcf915a894b077839861887ec412fe1c3fe79ab964b14ad2922d027"
+        },
+        {
+          "path": "artifacts/progress_atlas/figures/support/amp_mu005_down_m_spacetime.svg",
+          "sha256": "4e40065369d855d0451ff0d948d180953610bdb0da2e5208e3d75bee0446f16c"
+        }
+      ]
+    },
+    {
+      "name": "amp_mu005_down_current_spacetime",
+      "group": "support",
+      "caption": "Raw time--space field from the complete coarse trajectory.",
+      "files": [
+        {
+          "path": "artifacts/progress_atlas/figures/support/amp_mu005_down_current_spacetime.png",
+          "sha256": "39e5b8d71d66b4ea5d01f6dcb552e38e65d4b297695736ed6d6857fae0659e5b"
+        },
+        {
+          "path": "artifacts/progress_atlas/figures/support/amp_mu005_down_current_spacetime.pdf",
+          "sha256": "91e3101c7e5540ca4238d8806c2377086a7f86defeae095427980db5d5579742"
+        },
+        {
+          "path": "artifacts/progress_atlas/figures/support/amp_mu005_down_current_spacetime.svg",
+          "sha256": "814e08d38a94b22ca4b5b46e4f653878e92342e7fadc52a675d65d3ae6dac88d"
+        }
+      ]
+    },
+    {
+      "name": "background_p005_up_m_spacetime",
+      "group": "support",
+      "caption": "Raw time--space field from the complete coarse trajectory.",
+      "files": [
+        {
+          "path": "artifacts/progress_atlas/figures/support/background_p005_up_m_spacetime.png",
+          "sha256": "19e999743e698d7468a63e66f5d2010d8c993c014d2cb18e815df91555b3ae72"
+        },
+        {
+          "path": "artifacts/progress_atlas/figures/support/background_p005_up_m_spacetime.pdf",
+          "sha256": "beec5979e7f449407c39a2e7a6702cdf9756b6c375cc23ddc2ae823fe6d7d562"
+        },
+        {
+          "path": "artifacts/progress_atlas/figures/support/background_p005_up_m_spacetime.svg",
+          "sha256": "86872bbba080eb7b55036d31c58c7bcf658b4e4d2d12ac57165121b67118d0ed"
+        }
+      ]
+    },
+    {
+      "name": "background_p005_up_current_spacetime",
+      "group": "support",
+      "caption": "Raw time--space field from the complete coarse trajectory.",
+      "files": [
+        {
+          "path": "artifacts/progress_atlas/figures/support/background_p005_up_current_spacetime.png",
+          "sha256": "3228f212f0273db42ad19fe91d6da4a83e1b4303b9c6ff36d0b8982536a528a8"
+        },
+        {
+          "path": "artifacts/progress_atlas/figures/support/background_p005_up_current_spacetime.pdf",
+          "sha256": "98737a1ad0f4fe342f642ef66be5517b701c94a33a590631b383eb788850df8f"
+        },
+        {
+          "path": "artifacts/progress_atlas/figures/support/background_p005_up_current_spacetime.svg",
+          "sha256": "25d4eaae3354c177d1bb7df85c8a8975491299b43bb77f8afd59ea0f4d6c7e63"
+        }
+      ]
+    },
+    {
+      "name": "shape_double_wall_m_spacetime",
+      "group": "support",
+      "caption": "Raw time--space field from the complete coarse trajectory.",
+      "files": [
+        {
+          "path": "artifacts/progress_atlas/figures/support/shape_double_wall_m_spacetime.png",
+          "sha256": "7ac0796227416abd28786a082319b041828cc22db3ff9e089ad248b24ea8a5f0"
+        },
+        {
+          "path": "artifacts/progress_atlas/figures/support/shape_double_wall_m_spacetime.pdf",
+          "sha256": "c7332334236ea39f1596546f42c4ddcdb0287939b0087de82cd29c16556f74ae"
+        },
+        {
+          "path": "artifacts/progress_atlas/figures/support/shape_double_wall_m_spacetime.svg",
+          "sha256": "dad319d58fb2e1b75841ea12358ca6fb99d7e0e66a2639c75ed8c36aa8acbe21"
+        }
+      ]
+    },
+    {
+      "name": "shape_double_wall_current_spacetime",
+      "group": "support",
+      "caption": "Raw time--space field from the complete coarse trajectory.",
+      "files": [
+        {
+          "path": "artifacts/progress_atlas/figures/support/shape_double_wall_current_spacetime.png",
+          "sha256": "95fe824f87595f3943ed96772247c399da09d55796637396980a38dc83f18999"
+        },
+        {
+          "path": "artifacts/progress_atlas/figures/support/shape_double_wall_current_spacetime.pdf",
+          "sha256": "50d2b1d6e6bdd35f172ed6a9aa133ee1c2c8d998466a2751050cee31389650b1"
+        },
+        {
+          "path": "artifacts/progress_atlas/figures/support/shape_double_wall_current_spacetime.svg",
+          "sha256": "e5ba3d00275d7100ca88e6f17cbbb1d99e550900a2e07d7ddd064570a39844eb"
+        }
+      ]
+    }
+  ]
+}

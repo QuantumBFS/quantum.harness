@@ -1,0 +1,34 @@
+{
+  "schema": 1,
+  "method": "exact_thermodynamic_translation_orbit_sparse_pauli_commutator_chain",
+  "uses_target_a_or_D": false,
+  "uses_target_trajectory": false,
+  "maximum_even_moment_order": 22,
+  "mu22_exact": {
+    "denominator": 4194304,
+    "float": 1605913518.5445154,
+    "numerator": 6735689494485335
+  },
+  "eleventh_squared_lanczos_recurrent_exact": {
+    "denominator": 662940090391383920022207046600208806645584336263399720,
+    "float": 7.540432748832734,
+    "numerator": 4998855168101323939519657338176816790733704038061133749
+  },
+  "ring_checks": [
+    {
+      "length": 26,
+      "mu22_float": 1605913518.5445158,
+      "order_22_operator_count": 5157308
+    },
+    {
+      "length": 27,
+      "mu22_float": 1605913518.5445156,
+      "order_22_operator_count": 5355666
+    }
+  ],
+  "absolute_ring_float_difference": 2.384185791015625e-7,
+  "relative_ring_float_difference": 1.484640671526045e-16,
+  "finite_momentum_extrapolation_used": false,
+  "finite_ring_float_sums_used_for_exact_rational": false,
+  "accepted": true
+}

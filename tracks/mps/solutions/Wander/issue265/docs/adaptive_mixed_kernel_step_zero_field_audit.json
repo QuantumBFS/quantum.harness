@@ -1,0 +1,281 @@
+{
+  "audited_quantity": "finite_cutoff_full_non_diagonal_physical_spin_block",
+  "closed_spectral_regulator_positive_control": {
+    "fits": [
+      {
+        "coefficients_descending": [
+          -0.23222302215335483,
+          0.5824149680284337
+        ],
+        "model": "polynomial_degree_1",
+        "rms_residual": 9.851150942461669e-05,
+        "zero_field_intercept": 0.5824149680284337
+      },
+      {
+        "coefficients_descending": [
+          -0.12316482159576268,
+          -0.2130426023707733,
+          0.581794400008422
+        ],
+        "model": "polynomial_degree_2",
+        "rms_residual": 9.430763821105626e-07,
+        "zero_field_intercept": 0.581794400008422
+      },
+      {
+        "coefficients_descending": [
+          0.04924636700503432,
+          -0.13489694439468436,
+          -0.2121941673590394,
+          0.5817762174578504
+        ],
+        "model": "polynomial_degree_3",
+        "rms_residual": 3.243191715006916e-09,
+        "zero_field_intercept": 0.5817762174578504
+      },
+      {
+        "coefficients": [
+          0.5811998823615975,
+          -0.01807481197118957,
+          -0.2611874097900157
+        ],
+        "model": "constant_plus_h_log_h_plus_h",
+        "rms_residual": 1.0281942098700967e-05,
+        "zero_field_intercept": 0.5811998823615975
+      }
+    ],
+    "interpretation": "the same field grid and polynomial fits recover the known leading limit; the rejected full-operator intercept is an order-of-limits failure, not merely a generic fit failure",
+    "minimum_relative_intercept_error": 3.4355739908509264e-07,
+    "physical_finite_field_D1": false,
+    "rows": [
+      {
+        "field": 0.125,
+        "h_times_D": 0.5532403670501292
+      },
+      {
+        "field": 0.1,
+        "h_times_D": 0.5592570731419451
+      },
+      {
+        "field": 0.0833333333333333,
+        "h_times_D": 0.5631850893798501
+      },
+      {
+        "field": 0.0625,
+        "h_times_D": 0.5679991659373902
+      },
+      {
+        "field": 0.05,
+        "h_times_D": 0.5708354193151061
+      },
+      {
+        "field": 0.04,
+        "h_times_D": 0.5730757645403625
+      },
+      {
+        "field": 0.0333333333333333,
+        "h_times_D": 0.5745550200534681
+      }
+    ]
+  },
+  "corrected_small_field_point": {
+    "corrected_value": 0.5531500753445342,
+    "field": 0.0333333333333333,
+    "raw_value": 0.5534675172564087,
+    "scheme_uncertainty": 1.8745625826969785e-06
+  },
+  "eq16_order_of_limits_eligible": false,
+  "eq16_required_quantity_for_D1": "diagonal_contraction_after_the_infinite_string_limit",
+  "exact_D0": 0.5817764173314431,
+  "fits": [
+    {
+      "coefficients_descending": [
+        -0.5365419766749455,
+        0.5710169664721448
+      ],
+      "model": "polynomial_degree_1",
+      "rms_residual": 5.067780763907545e-05,
+      "zero_field_intercept": 0.5710169664721448,
+      "zero_field_intercept_with_kernel_scheme": {
+        "maximum": 0.5710179593170965,
+        "minimum": 0.5710159736271933
+      }
+    },
+    {
+      "coefficients_descending": [
+        -0.039089084306951974,
+        -0.5304546455993155,
+        0.5708200154650457
+      ],
+      "model": "polynomial_degree_2",
+      "rms_residual": 3.9885353849674735e-05,
+      "zero_field_intercept": 0.5708200154650457,
+      "zero_field_intercept_with_kernel_scheme": {
+        "maximum": 0.5708230303909508,
+        "minimum": 0.570817000539141
+      }
+    },
+    {
+      "coefficients_descending": [
+        -1.8311934320001244,
+        0.39716210577615735,
+        -0.5620031377116091,
+        0.5714961215254578
+      ],
+      "model": "polynomial_degree_3",
+      "rms_residual": 1.9003015959619345e-05,
+      "zero_field_intercept": 0.5714961215254578,
+      "zero_field_intercept_with_kernel_scheme": {
+        "maximum": 0.5715052306461732,
+        "minimum": 0.5714870124047423
+      }
+    },
+    {
+      "coefficients": [
+        0.5706838577704612,
+        -0.004955105070557659,
+        -0.544482395876695
+      ],
+      "model": "constant_plus_h_log_h_plus_h",
+      "rms_residual": 4.2974899309227265e-05,
+      "zero_field_intercept": 0.5706838577704612,
+      "zero_field_intercept_with_kernel_scheme": {
+        "maximum": 0.5706893038139982,
+        "minimum": 0.5706784117269242
+      }
+    }
+  ],
+  "forced_exact_leading_diagnostics": [
+    {
+      "D1": -0.6640874169034494,
+      "higher_coefficients": [],
+      "model": "exact_D0_plus_degree_1",
+      "physical_D1_certified": false,
+      "rms_residual": 0.004346167483567767
+    },
+    {
+      "D1": -0.8411646390336396,
+      "higher_coefficients": [
+        1.8445207360115856
+      ],
+      "model": "exact_D0_plus_degree_2",
+      "physical_D1_certified": false,
+      "rms_residual": 0.0016191619513071778
+    }
+  ],
+  "gates": {
+    "eligible_for_physical_D1": false,
+    "eq16_order_of_limits_pass": false,
+    "leading_D0_gate_pass": false,
+    "maximum_leading_relative_error": 0.01,
+    "minimum_susceptibility_capture": 0.985,
+    "susceptibility_capture_pass": true
+  },
+  "intercept_envelope": {
+    "maximum": 0.5715052306461732,
+    "maximum_relative_error": 0.01907606646454396,
+    "minimum": 0.5706784117269242
+  },
+  "matched_kernel_step_calibration": {
+    "c_center": 0.2856977206871447,
+    "c_half_pair_spread": 0.0016871063244272844,
+    "model": "y_coarse(h)-y_fine(h)=c*h^2",
+    "rows": [
+      {
+        "coarse_minus_fine": 0.00045981572321851516,
+        "coarse_minus_fine_over_h2": 0.287384827011572,
+        "coarse_source": "docs/regulated_infinite_mode_fghd_adaptive_balanced_h004_xi6_R28_n48_k2.json",
+        "field": 0.04,
+        "fine_source": "docs/regulated_infinite_mode_fghd_adaptive_balanced_h004_xi6_R28_n48.json"
+      },
+      {
+        "coarse_minus_fine": 0.0007100265359067937,
+        "coarse_minus_fine_over_h2": 0.2840106143627174,
+        "coarse_source": "docs/regulated_infinite_mode_fghd_adaptive_h005_xi6_R28_n48_k2.json",
+        "field": 0.05,
+        "fine_source": "docs/regulated_infinite_mode_fghd_adaptive_h005_xi6_R28_n48.json"
+      }
+    ]
+  },
+  "method": "matched_h2_kernel_step_correction_then_zero_field_extrapolation",
+  "rows": [
+    {
+      "field": 0.125,
+      "h_times_spin_diffusion": 0.5038805273714497,
+      "kernel_step_correction": false,
+      "source": "docs/regulated_infinite_mode_fghd_adaptive_balanced_h00625_h0125_xi6_R28_n48.json",
+      "susceptibility_captured_fraction": 0.9935769737029951,
+      "value_uncertainty": 0.0
+    },
+    {
+      "field": 0.1,
+      "h_times_spin_diffusion": 0.5174072590593685,
+      "kernel_step_correction": false,
+      "source": "docs/regulated_infinite_mode_fghd_adaptive_balanced_h00625_h0125_xi6_R28_n48.json",
+      "susceptibility_captured_fraction": 0.9935875369508562,
+      "value_uncertainty": 0.0
+    },
+    {
+      "field": 0.0833333333333333,
+      "h_times_spin_diffusion": 0.5263953691544604,
+      "kernel_step_correction": false,
+      "source": "docs/regulated_infinite_mode_fghd_adaptive_balanced_h00625_h0125_xi6_R28_n48.json",
+      "susceptibility_captured_fraction": 0.9937454460347585,
+      "value_uncertainty": 0.0
+    },
+    {
+      "field": 0.0625,
+      "h_times_spin_diffusion": 0.5374727449135894,
+      "kernel_step_correction": false,
+      "source": "docs/regulated_infinite_mode_fghd_adaptive_balanced_h00625_h0125_xi6_R28_n48.json",
+      "susceptibility_captured_fraction": 0.9935850896163504,
+      "value_uncertainty": 0.0
+    },
+    {
+      "field": 0.05,
+      "h_times_spin_diffusion": 0.5441509712596347,
+      "kernel_step_correction": false,
+      "source": "docs/regulated_infinite_mode_fghd_adaptive_h005_xi6_R28_n48.json",
+      "susceptibility_captured_fraction": 0.9935788084067237,
+      "value_uncertainty": 0.0
+    },
+    {
+      "field": 0.04,
+      "h_times_spin_diffusion": 0.5495206580617732,
+      "kernel_step_correction": false,
+      "source": "docs/regulated_infinite_mode_fghd_adaptive_balanced_h004_xi6_R28_n48.json",
+      "susceptibility_captured_fraction": 0.9935715736485565,
+      "value_uncertainty": 0.0
+    },
+    {
+      "field": 0.0333333333333333,
+      "h_times_spin_diffusion": 0.5531500753445342,
+      "kernel_step_correction": true,
+      "raw_h_times_spin_diffusion": 0.5534675172564087,
+      "source": "docs/regulated_infinite_mode_fghd_adaptive_balanced_h003333_xi6_R28_n48_k2.json",
+      "susceptibility_captured_fraction": 0.9936385655748253,
+      "value_uncertainty": 1.8745625826969785e-06
+    }
+  ],
+  "schema": 1,
+  "source_sha256": {
+    "docs/regulated_infinite_mode_fghd_adaptive_balanced_h003333_xi6_R28_n48_k2.json": "3e1b18e6ef1476a057df4d2667ca909e44414f8d6dfe8a9aa69e35168cfb1040",
+    "docs/regulated_infinite_mode_fghd_adaptive_balanced_h004_xi6_R28_n48.json": "7e41473ee9ee1054880e2a601f542edcfbac8714bb24889ea33ca29f6979d80b",
+    "docs/regulated_infinite_mode_fghd_adaptive_balanced_h004_xi6_R28_n48_k2.json": "6b86208c16690b20807056d60484f03df6cc24196c838cddaf22ad4424e5aa8a",
+    "docs/regulated_infinite_mode_fghd_adaptive_balanced_h00625_h0125_xi6_R28_n48.json": "23d9cd28fee9f17ced229e7a48d1c4cd3ad7aae4c5b1d42d75ff743b374c3a1f",
+    "docs/regulated_infinite_mode_fghd_adaptive_h005_xi6_R28_n48.json": "5d9125f8772900bdf1e70f5aac7d8e879775c4fa5143b748fe7d1e314cf9637d",
+    "docs/regulated_infinite_mode_fghd_adaptive_h005_xi6_R28_n48_k2.json": "f0cbb8cf9088a82a4d8e2986343181fc294141d8f2fea7e88918bba9926a1896",
+    "docs/regulated_infinite_mode_fghd_adaptive_h005_xi6_R32_n56_k2.json": "a04a12cc7303ff0762e485e5cb5e0dafbbe3c1a3ccef0d8c2f088a2a5f3a8e0b"
+  },
+  "tail_diagnostic": {
+    "field": 0.05,
+    "interpretation": "joint scaled-rapidity-tail/node path diagnostic only",
+    "raw_difference": -0.00041703836250173154,
+    "relative_difference": -0.0007654032206177996,
+    "sources": [
+      "docs/regulated_infinite_mode_fghd_adaptive_h005_xi6_R28_n48_k2.json",
+      "docs/regulated_infinite_mode_fghd_adaptive_h005_xi6_R32_n56_k2.json"
+    ]
+  },
+  "uses_target_a_or_D": false,
+  "uses_target_trajectory": false
+}

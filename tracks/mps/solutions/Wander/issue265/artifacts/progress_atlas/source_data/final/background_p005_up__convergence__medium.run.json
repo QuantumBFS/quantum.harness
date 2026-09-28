@@ -1,0 +1,27 @@
+{
+  "status": "complete",
+  "output": "/work/share/giggleliu/cfys01/kharkov_burgers_20260729/data/convergence/background_p005_up__convergence__medium.npz",
+  "job_id": "background_p005_up__convergence__medium",
+  "smoke": false,
+  "effective_numerics": {
+    "L": 384,
+    "dt": 0.025,
+    "chi_max": 512,
+    "truncation_cutoff": 1e-10,
+    "t_max": 200.0,
+    "output_dt": 0.2,
+    "steps_per_output": 8,
+    "output_count": 1000
+  },
+  "produced_observables": [
+    "magnetization",
+    "local_spin_current"
+  ],
+  "omitted_observables": [],
+  "maximum_total_magnetization_drift": 0.0005540035375588559,
+  "maximum_chi_observed": 512,
+  "discarded_weight_cumulative": 0.004095357517314739,
+  "fcs_branch_count": 0,
+  "wall_time_seconds": 1082083.207648607,
+  "checkpoint": "/work/share/giggleliu/cfys01/kharkov_burgers_20260729/data/convergence/background_p005_up__convergence__medium.npz.checkpoint.h5"
+}

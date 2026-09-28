@@ -1,0 +1,127 @@
+{
+  "inputs": {
+    "dt": 0.2,
+    "fit_window": [
+      52.0,
+      198.0
+    ],
+    "k_maximum": 1.2,
+    "k_step": 0.01,
+    "length": 400,
+    "profile_window": [
+      50.0,
+      200.0
+    ],
+    "x_crop": [
+      -120.0,
+      120.0
+    ]
+  },
+  "last_pair_absolute_change": {
+    "D": 0.09253984976674812,
+    "a": 0.06494572957379607
+  },
+  "method": "full_mode_fghd_continuum_behind_mu26_wall_projection",
+  "rows": [
+    {
+      "frozen_weak_projection": {
+        "D": -0.8794670606981659,
+        "a": 0.6012807516185533,
+        "mse": 4.3836527424077896e-06,
+        "n_obs": 8041
+      },
+      "full_jacobi_dimension": 27,
+      "full_spectral_mass_residual": 0.0,
+      "k_zero_conservation_error": 0.0,
+      "kernel_zero_time_residual": 0.0,
+      "laplace_reconstruction_maximum_relative_residual": 2.5874954873424435e-15,
+      "minimum_full_spectral_weight": 4.342311058499259e-08,
+      "regulator": {
+        "active_strings": 24,
+        "dense_check": true,
+        "field": 0.08333333333333333,
+        "fourier_points": 4,
+        "mode_count": 240,
+        "nodes_per_string": 10,
+        "samples_per_internal_wave": 2,
+        "scaled_rapidity_extent": 3.0,
+        "string_xi_cutoff": 2.0,
+        "trace_distribution": "rademacher"
+      },
+      "structure_maximum": 1.0,
+      "structure_minimum": -0.8608266415506302,
+      "terminator_nonzero_spectral_weights": 7
+    },
+    {
+      "frozen_weak_projection": {
+        "D": -0.8454225407579393,
+        "a": 0.5614332444123867,
+        "mse": 4.4035023841475316e-06,
+        "n_obs": 8041
+      },
+      "full_jacobi_dimension": 29,
+      "full_spectral_mass_residual": 4.440892098500626e-16,
+      "k_zero_conservation_error": 0.0,
+      "kernel_zero_time_residual": 2.220446049250313e-16,
+      "laplace_reconstruction_maximum_relative_residual": 3.376965783245072e-15,
+      "minimum_full_spectral_weight": 4.3361219737849005e-08,
+      "regulator": {
+        "active_strings": 24,
+        "dense_check": true,
+        "field": 0.08333333333333333,
+        "fourier_points": 4,
+        "mode_count": 288,
+        "nodes_per_string": 12,
+        "samples_per_internal_wave": 2,
+        "scaled_rapidity_extent": 4.0,
+        "string_xi_cutoff": 2.0,
+        "trace_distribution": "rademacher"
+      },
+      "structure_maximum": 1.0,
+      "structure_minimum": -0.8732605017344715,
+      "terminator_nonzero_spectral_weights": 8
+    },
+    {
+      "frozen_weak_projection": {
+        "D": -0.7528826909911912,
+        "a": 0.49648751483859066,
+        "mse": 4.31472672164382e-06,
+        "n_obs": 8041
+      },
+      "full_jacobi_dimension": 29,
+      "full_spectral_mass_residual": 5.551115123125783e-16,
+      "k_zero_conservation_error": 0.0,
+      "kernel_zero_time_residual": 2.220446049250313e-16,
+      "laplace_reconstruction_maximum_relative_residual": 1.1710827714862908e-15,
+      "minimum_full_spectral_weight": 4.2169097358709036e-08,
+      "regulator": {
+        "active_strings": 24,
+        "dense_check": true,
+        "field": 0.08333333333333333,
+        "fourier_points": 4,
+        "mode_count": 384,
+        "nodes_per_string": 16,
+        "samples_per_internal_wave": 2,
+        "scaled_rapidity_extent": 5.0,
+        "string_xi_cutoff": 2.0,
+        "trace_distribution": "rademacher"
+      },
+      "structure_maximum": 1.0,
+      "structure_minimum": -0.8729130663193108,
+      "terminator_nonzero_spectral_weights": 8
+    }
+  ],
+  "schema": 1,
+  "scope": {
+    "exact_mu26_prefix": true,
+    "finite_pole_count_assumed": false,
+    "frozen_estimator_uses_target_profiles": false,
+    "joint_regulator_convergence_complete": false,
+    "positive_fghd_terminator": true,
+    "unique_a_D_proved": false
+  },
+  "source": "docs/adaptive_dense_mu26_matching_h008333_xi200_R5_n16_t200_z40.json",
+  "source_sha256": "8ab264cce3fb94aecc0147221c0ecdbd3294d7f79afb6ab4c542f5584b3022d7",
+  "uses_target_a_or_D": false,
+  "uses_target_trajectory": false
+}

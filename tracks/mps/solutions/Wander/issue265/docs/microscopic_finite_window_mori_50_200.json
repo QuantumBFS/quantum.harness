@@ -1,0 +1,147 @@
+{
+  "candidate_first_correction": {
+    "D1_spectral": -0.2122065907891938,
+    "Phi0": [
+      1.212219540396886,
+      0.9527083455474649,
+      0.7810592758277589,
+      0.5706655385263496,
+      0.44788814869046295
+    ],
+    "Phi1": [
+      0.16171954755857373,
+      0.10176042362777431,
+      0.0691963760891717,
+      0.037435219263884004,
+      0.02322645867895684
+    ],
+    "delta_K1": [
+      -0.26381484565433694,
+      -0.26875604483118093,
+      -0.27190339835497584,
+      -0.27556011737502073,
+      -0.2775512134080526
+    ],
+    "formula": "delta_K1=-lambda^(4/3)*Phi1/Phi0^2",
+    "front_scale_correction": -0.2311973189184577,
+    "physical_full_diffusion_D1_claimed": false,
+    "scaled_frequency": [
+      0.5,
+      0.75,
+      1.0,
+      1.5,
+      2.0
+    ],
+    "source": "analytic finite-field spectral regulator"
+  },
+  "exact_microscopic_short_time_end": {
+    "continuum_terminator_still_required": true,
+    "maximum_even_moment": 18,
+    "mu0": 0.5,
+    "mu18": 5545330.451820374,
+    "squared_lanczos_recurrents": [
+      0.5,
+      1.75,
+      3.1785714285714284,
+      4.17255216693419,
+      4.420346879585746,
+      5.484054789770981,
+      5.558202140126421,
+      6.801640474648271,
+      6.6441303605386395
+    ]
+  },
+  "exact_tba": {
+    "D0_closed_form": 0.5817764173314431,
+    "D0_giant_string_quadrature": 0.5817764173315155,
+    "identity": "D0=lim_{h->0} h D(h)=5*pi/27",
+    "relative_quadrature_error": 1.2434497875801753e-13
+  },
+  "finite_window_projection": {
+    "constant_current_diagnostics": {
+      "normalized_condition_number": 54.7002685036131,
+      "relative_current_residual": 0.021804862616824808
+    },
+    "constant_window_projections": {
+      "leading_current": {
+        "D": 2.0582056639480273,
+        "a": 0.24797804066938867
+      },
+      "leading_strong": {
+        "D": 2.2288550489954773,
+        "a": 0.21357011708388587
+      },
+      "spectral_scale_current": {
+        "D": 1.8238555864108765,
+        "a": 0.2536817584126272
+      },
+      "spectral_scale_strong": {
+        "D": 1.9855755079325008,
+        "a": 0.21783468761967983
+      }
+    },
+    "inputs": {
+      "initial_state": "infinite-temperature infinitesimal sharp domain wall",
+      "microscopic_model": "spin-1/2 isotropic Heisenberg chain, J=1",
+      "t_start": 50.0,
+      "t_stop": 200.0,
+      "target_coefficients_used": false,
+      "trajectory_data_used": false
+    },
+    "microscopic_and_universal_inputs": {
+      "D0": 0.5817764173314431,
+      "lambda_kpz_self_consistent": 1.926524141187757,
+      "spectral_scale_correction": -0.2311973189184577
+    },
+    "running_local_current_projection": {
+      "D": [
+        2.1662252459450335,
+        3.438668234213218
+      ],
+      "a": [
+        0.19825834678633023,
+        0.12489493221672752
+      ],
+      "alpha": 0.707614033386703,
+      "delta": 0.3679359835505952,
+      "relative_current_residual": 0.002322829206952195,
+      "times": [
+        50.0,
+        200.0
+      ]
+    },
+    "schema_version": 1,
+    "scheme_variation_estimate": {
+      "D": 2.026355317703177,
+      "D_half_width": 0.20249973129230037,
+      "a": 0.23362593774825652,
+      "a_half_width": 0.020055820664370658,
+      "interpretation": "restricted strong/current operator-level truncation band; not a confidence interval and not an envelope over every possible observable projector"
+    },
+    "width_rate_projection": {
+      "D": 1.8899924782591078,
+      "a": 0.27602160732712877,
+      "relative_rate_residual": 0.007881690673074817
+    }
+  },
+  "identifiability": {
+    "physical_F1_uniquely_fixed": false,
+    "reason": "the exact moments through mu18 and the KPZ low-frequency tail do not determine the intermediate-frequency spectral measure; the spectral-regulator F1 is one microscopic candidate rather than a proof of the full finite-time kernel"
+  },
+  "inputs": {
+    "initial_condition_for_wall_projection": "infinitesimal sharp magnetization wall",
+    "microscopic_model": "spin-1/2 isotropic Heisenberg chain, J=1",
+    "state": "infinite temperature, zero magnetization",
+    "target_coefficients_used": false,
+    "time_window": [
+      50.0,
+      200.0
+    ],
+    "trajectory_data_used": false
+  },
+  "kpz_self_consistency": {
+    "lambda": 1.926524141187757,
+    "status": "uses giant-string thermal-fluctuation self-consistency and the universal stationary-KPZ variance; not a TBA identity"
+  },
+  "schema_version": 1
+}

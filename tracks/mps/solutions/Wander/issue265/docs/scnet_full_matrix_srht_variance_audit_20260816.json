@@ -1,0 +1,49 @@
+{
+  "accepted": true,
+  "candidate": {
+    "complex_standard_deviation": 0.002562711364522321,
+    "complex_standard_error": 0.0012813556822611604,
+    "field": 0.2,
+    "mean": [
+      0.8557280690002704,
+      0.0004144738764240816
+    ],
+    "real_standard_deviation": 0.0023000609343935517,
+    "seeds": [
+      1265,
+      2265,
+      265,
+      3265
+    ],
+    "trace_distribution": "srht_rademacher"
+  },
+  "maximum_mean_difference_sigma": 2.0,
+  "maximum_variance_ratio": 0.75,
+  "method": "replicated_trace_variance_reduction_audit",
+  "observed_complex_mean_difference": 0.0018133765473981175,
+  "observed_mean_difference_sigma": 0.6576625224080175,
+  "observed_real_variance_ratio": 0.22847176279599307,
+  "ordinary": {
+    "complex_standard_deviation": 0.004882975206021443,
+    "complex_standard_error": 0.0024414876030107216,
+    "field": 0.2,
+    "mean": [
+      0.8575343325000659,
+      0.0005749315716586271
+    ],
+    "real_standard_deviation": 0.0048119718211112215,
+    "seeds": [
+      1265,
+      2265,
+      265,
+      3265
+    ],
+    "trace_distribution": "rademacher"
+  },
+  "pooled_complex_standard_error": 0.002757305587003008,
+  "scaled_time": 0.8594366926962348,
+  "scaled_wave": 0.4,
+  "schema": 1,
+  "uses_target_a_or_D": false,
+  "uses_target_trajectory": false
+}

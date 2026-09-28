@@ -1,0 +1,27 @@
+{
+  "status": "complete",
+  "output": "/work/share/giggleliu/cfys01/kharkov_burgers_20260729/data/convergence/shape_double_wall__convergence__coarse.npz",
+  "job_id": "shape_double_wall__convergence__coarse",
+  "smoke": false,
+  "effective_numerics": {
+    "L": 256,
+    "dt": 0.05,
+    "chi_max": 256,
+    "truncation_cutoff": 1e-08,
+    "t_max": 200.0,
+    "output_dt": 0.2,
+    "steps_per_output": 4,
+    "output_count": 1000
+  },
+  "produced_observables": [
+    "magnetization",
+    "local_spin_current"
+  ],
+  "omitted_observables": [],
+  "maximum_total_magnetization_drift": 0.0013157238398626703,
+  "maximum_chi_observed": 256,
+  "discarded_weight_cumulative": 0.05647390059564677,
+  "fcs_branch_count": 0,
+  "wall_time_seconds": 116905.94067005068,
+  "checkpoint": "/work/share/giggleliu/cfys01/kharkov_burgers_20260729/data/convergence/shape_double_wall__convergence__coarse.npz.checkpoint.h5"
+}

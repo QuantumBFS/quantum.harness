@@ -1,0 +1,140 @@
+{
+  "all_pairs_identity": "S cyclic shifts enumerate each ordered (x_i,y_j) once",
+  "candidate_pairings_per_frame": 8,
+  "candidate_selected_before_candidate_outputs": true,
+  "common_regulator_signature": {
+    "field": 0.16666666666666666,
+    "fourier_points": 4,
+    "kernel_theta_step": 0.25,
+    "lattice_wave_number": false,
+    "nodes_per_string": 12,
+    "samples_per_internal_wave": 8,
+    "scaled_rapidity_extent": 6.0,
+    "scaled_rapidity_map_alpha": 3.0,
+    "scaled_times": [
+      0.0,
+      0.0477464829275686,
+      0.0954929658551372,
+      0.1432394487827058,
+      0.1909859317102744,
+      0.238732414637843,
+      0.2864788975654116,
+      0.3342253804929802,
+      0.3819718634205488,
+      0.4297183463481174,
+      0.477464829275686,
+      0.5252113122032546,
+      0.5729577951308232,
+      0.6207042780583919,
+      0.6684507609859603,
+      0.716197243913529,
+      0.7639437268410976,
+      0.8116902097686661,
+      0.8594366926962348
+    ],
+    "scaled_waves": [
+      0.0,
+      0.4,
+      -0.8,
+      -0.4
+    ],
+    "string_xi_buffer": 0.5,
+    "string_xi_cutoff": 6.0,
+    "trace_distribution": "srht_rademacher",
+    "trace_source_layout": "shared_wave"
+  },
+  "common_seeds": [
+    4265,
+    5265,
+    6265,
+    7265,
+    8265,
+    9265,
+    10265,
+    11265
+  ],
+  "complete_pairing_accepted": false,
+  "fallback_if_rejected": "use P=1 with the plugin independent-replicate count; do not select another partial pairing count",
+  "input_sha256_by_file": {
+    "docs/scnet_full_matrix_complete_pairing_pilot_20260816_001/results/h016667_pair1_seed10265_samples8_srht_tauwall_memory.json": "77d3a3e8b4b9ee33b521b0f638e410b89238d2eaac3cd4e658f9db8bf708e1ee",
+    "docs/scnet_full_matrix_complete_pairing_pilot_20260816_001/results/h016667_pair1_seed11265_samples8_srht_tauwall_memory.json": "ccfef09981655088ef5b8adce525c3f00fe2ed97c8b40bd361a6dfeec940cd8c",
+    "docs/scnet_full_matrix_complete_pairing_pilot_20260816_001/results/h016667_pair1_seed4265_samples8_srht_tauwall_memory.json": "65dca3a58da1aabc6184ffd819eccb52492b0618ba3ec9ef845408767b92defe",
+    "docs/scnet_full_matrix_complete_pairing_pilot_20260816_001/results/h016667_pair1_seed5265_samples8_srht_tauwall_memory.json": "bf4e846d1c272e542d64336aea672db2730f110fe63da10cc4124d04178518f4",
+    "docs/scnet_full_matrix_complete_pairing_pilot_20260816_001/results/h016667_pair1_seed6265_samples8_srht_tauwall_memory.json": "2bfebef9b90b8a61adce379ec73ea41a7d44a070e043dcdf33f13cff514d7263",
+    "docs/scnet_full_matrix_complete_pairing_pilot_20260816_001/results/h016667_pair1_seed7265_samples8_srht_tauwall_memory.json": "83e61925a4b7d1a0ac84a7c3703628e2d4c09fdd6888b836a41fe06c487d4f1e",
+    "docs/scnet_full_matrix_complete_pairing_pilot_20260816_001/results/h016667_pair1_seed8265_samples8_srht_tauwall_memory.json": "48554339c992cbf0734e06fcf6da7db53f64d2b6ed7e04c17b0357e734393377",
+    "docs/scnet_full_matrix_complete_pairing_pilot_20260816_001/results/h016667_pair1_seed9265_samples8_srht_tauwall_memory.json": "20e6dc6c5a93791e520f4ca49f8c19aeb3c13f77fd25668530c1f311254f8b33",
+    "docs/scnet_full_matrix_complete_pairing_pilot_20260816_001/results/h016667_pair8_seed10265_samples8_srht_tauwall_memory.json": "a843fc2ab392abde1c414de1dcc952ff871a96c8786f5e7c47a4c1ed596d4194",
+    "docs/scnet_full_matrix_complete_pairing_pilot_20260816_001/results/h016667_pair8_seed11265_samples8_srht_tauwall_memory.json": "22e318a8b5edf04850e81f76111b445dd09580c6eabbae6b33740e7adabdfa79",
+    "docs/scnet_full_matrix_complete_pairing_pilot_20260816_001/results/h016667_pair8_seed4265_samples8_srht_tauwall_memory.json": "e485f729b710f3e38ed1f11bd64a956078d98b6f088f9f684233adb1a4115098",
+    "docs/scnet_full_matrix_complete_pairing_pilot_20260816_001/results/h016667_pair8_seed5265_samples8_srht_tauwall_memory.json": "83d737313595b0f8d4318019fd3a7280ae0b93180e025791c2b96439aa93bca3",
+    "docs/scnet_full_matrix_complete_pairing_pilot_20260816_001/results/h016667_pair8_seed6265_samples8_srht_tauwall_memory.json": "63bd1b83506b9fe39efc9c4bf436af015021db91ad1279c37ac94e44cc511a1e",
+    "docs/scnet_full_matrix_complete_pairing_pilot_20260816_001/results/h016667_pair8_seed7265_samples8_srht_tauwall_memory.json": "bd6228f878b2f39387121902515c1e36df100a83ddb9ffe12ad1d9329504dd2a",
+    "docs/scnet_full_matrix_complete_pairing_pilot_20260816_001/results/h016667_pair8_seed8265_samples8_srht_tauwall_memory.json": "8d8bee53087248ae78afd7db9ee055c97b636a884d136963b5b87fa6d11af207",
+    "docs/scnet_full_matrix_complete_pairing_pilot_20260816_001/results/h016667_pair8_seed9265_samples8_srht_tauwall_memory.json": "03b4c19e8cf8b5b34b9d75e85629b787d505a2b1130bc547002f7fe9a7f72935"
+  },
+  "method": "complete_cartesian_trace_pairing_preregistered_audit",
+  "paired_runs_require_numeric_full_matrix_operator_evidence": true,
+  "replicate_count_estimate_is_plugin_not_acceptance_evidence": true,
+  "rows": [
+    {
+      "accepted": true,
+      "endpoint_complex_sem": 0.0015461150335832632,
+      "endpoint_imaginary_variance": 9.910572287479779e-06,
+      "endpoint_mean": [
+        0.8493887557233735,
+        0.0008886587707191984
+      ],
+      "endpoint_real_variance": 9.213201289097621e-06,
+      "full_matrix_operator_evidence": {
+        "diffusion_off_diagonal_frobenius_fraction_range": [
+          0.1871487703119738,
+          0.1871487703119738
+        ],
+        "fdt_noise_off_diagonal_frobenius_fraction_range": [
+          0.04866369317641387,
+          0.04866369317641387
+        ],
+        "maximum_diffusion_static_metric_commutator_relative_norm": 9.85694841159687e-18
+      },
+      "paired_complex_mean_shift": 0.0,
+      "paired_complex_shift_sem": 0.0,
+      "plugin_minimum_independent_replicates_for_target_sem": 77,
+      "real_variance_ratio_to_single_pairing": 1.0,
+      "target_complex_sem": 0.0005,
+      "trace_pairings_per_frame": 1
+    },
+    {
+      "accepted": false,
+      "endpoint_complex_sem": 0.0017483744410907083,
+      "endpoint_imaginary_variance": 1.0323261487497975e-05,
+      "endpoint_mean": [
+        0.8439062948461247,
+        0.0009282615590114071
+      ],
+      "endpoint_real_variance": 1.4131244002575998e-05,
+      "full_matrix_operator_evidence": {
+        "diffusion_off_diagonal_frobenius_fraction_range": [
+          0.1871487703119738,
+          0.1871487703119738
+        ],
+        "fdt_noise_off_diagonal_frobenius_fraction_range": [
+          0.04866369317641387,
+          0.04866369317641387
+        ],
+        "maximum_diffusion_static_metric_commutator_relative_norm": 9.85694841159687e-18
+      },
+      "paired_complex_mean_shift": 0.005482603911591995,
+      "paired_complex_shift_sem": 0.0015683874793986571,
+      "plugin_minimum_independent_replicates_for_target_sem": 98,
+      "real_variance_ratio_to_single_pairing": 1.533803892822586,
+      "target_complex_sem": 0.0005,
+      "trace_pairings_per_frame": 8
+    }
+  ],
+  "schema": 1,
+  "target_complex_sem": 0.0005,
+  "trace_pairing_variance_reduction_accepted": false,
+  "uses_target_a_or_D": false,
+  "uses_target_trajectory": false
+}

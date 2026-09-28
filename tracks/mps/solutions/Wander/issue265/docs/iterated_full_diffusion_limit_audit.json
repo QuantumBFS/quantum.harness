@@ -1,0 +1,272 @@
+{
+  "schema": 1,
+  "method": "selected_rows_fixed_h_then_small_h_with_adaptive_outer_boundary",
+  "source_equations": {
+    "full_contraction": "supplement Eq. (12)-(14)",
+    "diagonal_claim_under_test": "supplement Eq. (13),(16): off-diagonal terms are stated to be arguable/expected to vanish, not derived there",
+    "regulated_string_measure": "supplement Eq. (32)-(33)",
+    "exact_leading_value": "supplement Eq. (22)-(23)"
+  },
+  "exact_D0": 0.5817764173314431,
+  "outer_rows": [
+    {
+      "schema": 1,
+      "method": "outer_giant_diagonal_adaptive_rapidity_fft",
+      "inputs": {
+        "matching_scale": 0.1,
+        "xi_extent": 8.0,
+        "xi_points": 35,
+        "xi_order_per_panel": 5,
+        "xi_panel_count": 7,
+        "xi_geometric_panels": true,
+        "dressing_xi_extent": 16.0,
+        "dressing_xi_points": 120,
+        "rapidity_extent": 24.0,
+        "rapidity_step": 0.125,
+        "rapidity_nodes_per_string": 36,
+        "kernel_points": 768,
+        "sinh_map_alpha_range": [
+          2.852829824506924,
+          8.236521202784125
+        ]
+      },
+      "outer_leading_integral": 0.700038134975927,
+      "outer_first_integral": -0.5105087634426343,
+      "outer_cross_leading_integral": 0.2002297514799018,
+      "outer_cross_first_integral": -0.040431731415672884,
+      "outer_full_leading_integral": 0.49980838349602524,
+      "outer_full_first_integral": -0.4700770320269614,
+      "exact_full_leading_D0": 0.5817764173314431,
+      "leading_difference_from_exact_full_D0": -0.1182617176444839,
+      "diagnostics": {
+        "leading_resolvent_max_abs_error": 2.6645352591003757e-14,
+        "physical_D1_certified": false,
+        "reason": "the u=O(xi) rapidity layer is explicitly resolved; eta and fixed-string overlap convergence remain separate gates"
+      }
+    },
+    {
+      "schema": 1,
+      "method": "outer_giant_diagonal_adaptive_rapidity_fft",
+      "inputs": {
+        "matching_scale": 0.05,
+        "xi_extent": 8.0,
+        "xi_points": 40,
+        "xi_order_per_panel": 5,
+        "xi_panel_count": 8,
+        "xi_geometric_panels": true,
+        "dressing_xi_extent": 16.0,
+        "dressing_xi_points": 120,
+        "rapidity_extent": 24.0,
+        "rapidity_step": 0.125,
+        "rapidity_nodes_per_string": 36,
+        "kernel_points": 768,
+        "sinh_map_alpha_range": [
+          2.852829824506924,
+          9.020601246030719
+        ]
+      },
+      "outer_leading_integral": 0.7292245217599694,
+      "outer_first_integral": -0.5370326198226221,
+      "outer_cross_leading_integral": 0.20035223449517467,
+      "outer_cross_first_integral": -0.03737123398813685,
+      "outer_full_leading_integral": 0.5288722872647947,
+      "outer_full_first_integral": -0.4996613858344852,
+      "exact_full_leading_D0": 0.5817764173314431,
+      "leading_difference_from_exact_full_D0": -0.1474481044285263,
+      "diagnostics": {
+        "leading_resolvent_max_abs_error": 2.6645352591003757e-14,
+        "physical_D1_certified": false,
+        "reason": "the u=O(xi) rapidity layer is explicitly resolved; eta and fixed-string overlap convergence remain separate gates"
+      }
+    },
+    {
+      "schema": 1,
+      "method": "outer_giant_diagonal_adaptive_rapidity_fft",
+      "inputs": {
+        "matching_scale": 0.025,
+        "xi_extent": 8.0,
+        "xi_points": 45,
+        "xi_order_per_panel": 5,
+        "xi_panel_count": 9,
+        "xi_geometric_panels": true,
+        "dressing_xi_extent": 16.0,
+        "dressing_xi_points": 120,
+        "rapidity_extent": 24.0,
+        "rapidity_step": 0.125,
+        "rapidity_nodes_per_string": 36,
+        "kernel_points": 768,
+        "sinh_map_alpha_range": [
+          2.852829824506924,
+          9.796235617447262
+        ]
+      },
+      "outer_leading_integral": 0.7448121605175682,
+      "outer_first_integral": -0.6243634442576304,
+      "outer_cross_leading_integral": 0.20036644666725256,
+      "outer_cross_first_integral": -0.036637573699313995,
+      "outer_full_leading_integral": 0.5444457138503156,
+      "outer_full_first_integral": -0.5877258705583164,
+      "exact_full_leading_D0": 0.5817764173314431,
+      "leading_difference_from_exact_full_D0": -0.16303574318612502,
+      "diagnostics": {
+        "leading_resolvent_max_abs_error": 2.6645352591003757e-14,
+        "physical_D1_certified": false,
+        "reason": "the u=O(xi) rapidity layer is explicitly resolved; eta and fixed-string overlap convergence remain separate gates"
+      }
+    }
+  ],
+  "finite_field_rows": [
+    {
+      "inputs": {
+        "field": 0.1,
+        "nodes": 34,
+        "ratio_extent": 10.0,
+        "xi_cutoff": 6.0
+      },
+      "active_strings": 60,
+      "hD_diagonal": 0.6859787596591138,
+      "hD_cross": 0.18432102626959235,
+      "hD_full": 0.5016577333895214,
+      "naive_constant_remainder": -0.8011868394192179,
+      "first_fixed_rows": [
+        {
+          "string": 1,
+          "diagonal_weight": 0.0028619448870560514,
+          "cross_weight": 0.006384706987156595,
+          "full_weight": -0.0035227621001005433,
+          "max_collision_rate": 20.004019644377
+        },
+        {
+          "string": 2,
+          "diagonal_weight": 0.018031201332391854,
+          "cross_weight": 0.018002576302286112,
+          "full_weight": 2.862503010574169e-05,
+          "max_collision_rate": 22.54243396149988
+        },
+        {
+          "string": 3,
+          "diagonal_weight": 0.03915850135498289,
+          "cross_weight": 0.03165585657732214,
+          "full_weight": 0.007502644777660751,
+          "max_collision_rate": 18.964936601694884
+        },
+        {
+          "string": 4,
+          "diagonal_weight": 0.06260271309218814,
+          "cross_weight": 0.04504741095665066,
+          "full_weight": 0.01755530213553748,
+          "max_collision_rate": 15.522266912589489
+        }
+      ]
+    },
+    {
+      "inputs": {
+        "field": 0.05,
+        "nodes": 42,
+        "ratio_extent": 10.0,
+        "xi_cutoff": 8.0
+      },
+      "active_strings": 160,
+      "hD_diagonal": 0.718368497778015,
+      "hD_cross": 0.19069878914833815,
+      "hD_full": 0.5276697086296769,
+      "naive_constant_remainder": -1.0821341740353252,
+      "first_fixed_rows": [
+        {
+          "string": 1,
+          "diagonal_weight": 0.0007124534154004416,
+          "cross_weight": 0.0016730967968155552,
+          "full_weight": -0.0009606433814151135,
+          "max_collision_rate": 27.507201174200485
+        },
+        {
+          "string": 2,
+          "diagonal_weight": 0.004728189274171899,
+          "cross_weight": 0.004973663709980985,
+          "full_weight": -0.00024547443580908573,
+          "max_collision_rate": 56.79807711987993
+        },
+        {
+          "string": 3,
+          "diagonal_weight": 0.010392444347964342,
+          "cross_weight": 0.009341488972471779,
+          "full_weight": 0.0010509553754925634,
+          "max_collision_rate": 65.60871257309287
+        },
+        {
+          "string": 4,
+          "diagonal_weight": 0.01757529625186707,
+          "cross_weight": 0.01449896064339095,
+          "full_weight": 0.0030763356084761197,
+          "max_collision_rate": 56.5034974783798
+        }
+      ]
+    },
+    {
+      "inputs": {
+        "field": 0.025,
+        "nodes": 46,
+        "ratio_extent": 10.0,
+        "xi_cutoff": 6.0
+      },
+      "active_strings": 240,
+      "hD_diagonal": 0.7320121431388277,
+      "hD_cross": 0.19280737336904133,
+      "hD_full": 0.5392047697697864,
+      "naive_constant_remainder": -1.7028659024662707,
+      "first_fixed_rows": [
+        {
+          "string": 1,
+          "diagonal_weight": 0.00017953695352570414,
+          "cross_weight": 0.00042422894020292096,
+          "full_weight": -0.0002446919866772168,
+          "max_collision_rate": 33.25386542066731
+        },
+        {
+          "string": 2,
+          "diagonal_weight": 0.001192704974258913,
+          "cross_weight": 0.001278073204032434,
+          "full_weight": -8.53682297735209e-05,
+          "max_collision_rate": 87.39170710921434
+        },
+        {
+          "string": 3,
+          "diagonal_weight": 0.002608432231059393,
+          "cross_weight": 0.0024237119078643486,
+          "full_weight": 0.00018472032319504427,
+          "max_collision_rate": 119.65458893826984
+        },
+        {
+          "string": 4,
+          "diagonal_weight": 0.004492368957450569,
+          "cross_weight": 0.0038837167003763816,
+          "full_weight": 0.0006086522570741878,
+          "max_collision_rate": 148.58566856597437
+        }
+      ]
+    }
+  ],
+  "derived": {
+    "fixed_s1_field_power": 1.9973215825073505,
+    "scaled_cross_range": [
+      0.18432102626959235,
+      0.19280737336904133
+    ],
+    "naive_constant_remainder_range": [
+      -1.7028659024662707,
+      -0.8011868394192179
+    ]
+  },
+  "gates": {
+    "fixed_finite_string_weight_vanishes_quadratically": true,
+    "cross_is_subleading_Oh_in_tested_iterated_sequence": false,
+    "diagonal_reduction_is_a_proved_identity": false,
+    "supplement_eq16_eligible_for_D1_extraction": false,
+    "uniform_u_outer_certificate_superseded": true,
+    "u_over_xi_boundary_layer_resolved": true,
+    "regulated_xi_boundary_counterterm_derived": false,
+    "constant_D1_existence_certified": false,
+    "physical_D1_certified": false
+  },
+  "interpretation": "The previous fixed-du outer scan did not resolve u=O(xi).  The adaptive calculation retains a leading cross contraction, while each fixed finite string vanishes as h^2.  The missing operation is therefore the regulated xi,u edge layer encoded by the quantum Euler-Maclaurin measure.  The primary source only argues that off-diagonal terms should vanish; it does not prove that reduction.  The exact full diagonal-minus-cross contraction is therefore authoritative.  Until its edge matching is derived, neither Eq. (16) nor a constant D1 is an eligible extraction route."
+}

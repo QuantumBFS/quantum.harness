@@ -1,0 +1,236 @@
+{
+  "exact_prefix": {
+    "finite_k_error_order": "O(k^2)=O(q^2 h^4)",
+    "highest_even_moment": 26,
+    "recurrent_count": 13
+  },
+  "gates": {
+    "all_candidates_inside_mu26_intervals": false,
+    "all_mu26_terminators_positive": false,
+    "complete_colored_velocity_diffusion_cross_added": true,
+    "complete_non_diagonal_linear_operator": true,
+    "finite_time_tail_converged": false,
+    "joint_field_limit_converged": false,
+    "maximum_reconstruction_relative_residual": 3.468147343050711e-16,
+    "physical_F1_certified": false,
+    "white_contact_uniquely_cancelled_by_large_z_regularity": true
+  },
+  "interpretation": "The nonlinear continuum is matched at the physical top-level Mori kernel before peeling mu26.  A failed interval or regulator gate rejects this finite-regulator approximation; it does not imply a finite-pole or second-mode closure.",
+  "last_field_step": {
+    "maximum_scaled_total_hK_relative_change": 0.14080894677112676,
+    "scaled_total_hK_relative_change_by_p": [
+      0.10740821265415788,
+      0.12015475915593168,
+      0.14080894677112676
+    ]
+  },
+  "method": "joint_scaled_top_level_nonlinear_fghd_mu26_matching",
+  "operator_regulators": {
+    "kernel_theta_step": 1.0,
+    "nodes_per_string": 12,
+    "scaled_rapidity_extent": 12.0,
+    "scaled_rapidity_map_alpha": 4.0,
+    "string_xi_buffer": 3.0,
+    "string_xi_cutoff": 6.0
+  },
+  "rows": [
+    {
+      "field": 0.2,
+      "frequency_rows": [
+        {
+          "inside_mu26_interval": true,
+          "mu26_stieltjes_lower": 0.033401821922208086,
+          "mu26_stieltjes_upper": 30.46768889035259,
+          "mu26_terminator": 0.019372019132802933,
+          "physical_frequency_z": 0.008000000000000002,
+          "reconstruction_relative_residual": 1.2284101417426375e-16,
+          "scaled_colored_error_upper_bound": 0.14858827842438857,
+          "scaled_colored_hDeltaK": 1.6378713721258045,
+          "scaled_frequency_p": 1.0,
+          "scaled_linear_hK": 1.2542519978103785,
+          "scaled_total_hK": 2.892123369936183,
+          "terminator_positive": true
+        },
+        {
+          "inside_mu26_interval": true,
+          "mu26_stieltjes_lower": 0.0666618548094563,
+          "mu26_stieltjes_upper": 15.238659591167947,
+          "mu26_terminator": 0.010861244148148621,
+          "physical_frequency_z": 0.016000000000000004,
+          "reconstruction_relative_residual": 1.5268977497871467e-16,
+          "scaled_colored_error_upper_bound": 0.11202502973978715,
+          "scaled_colored_hDeltaK": 1.4002945930650617,
+          "scaled_frequency_p": 2.0,
+          "scaled_linear_hK": 0.9264582489610383,
+          "scaled_total_hK": 2.3267528420261003,
+          "terminator_positive": true
+        },
+        {
+          "inside_mu26_interval": false,
+          "mu26_stieltjes_lower": 0.1322016276164235,
+          "mu26_stieltjes_upper": 7.6289437977943795,
+          "mu26_terminator": -0.009902527461618446,
+          "physical_frequency_z": 0.03200000000000001,
+          "reconstruction_relative_residual": null,
+          "scaled_colored_error_upper_bound": 0.07649795208988765,
+          "scaled_colored_hDeltaK": 1.1302070973195035,
+          "scaled_frequency_p": 4.0,
+          "scaled_linear_hK": 0.6460058755489659,
+          "scaled_total_hK": 1.7762129728684692,
+          "terminator_positive": false
+        }
+      ],
+      "maximum_linear_gmres_residual": 9.738421854291831e-11,
+      "mode_count": 360,
+      "renormalized_white_contact": 0.0,
+      "source": "docs/joint_scaled_nonlinear_fghd_refined_s128_h020.json",
+      "source_sha256": "ee4971e40b8b00a3a93b41d1496001437b003c40eebf358cbaaec8e75a17b672",
+      "susceptibility_captured_fraction": 0.9868927475959931,
+      "terminators": [
+        0.019372019132802933,
+        0.010861244148148621,
+        -0.009902527461618446
+      ],
+      "white_contact_bare": 7777.191096409099,
+      "white_contact_counterterm": -7777.191096409099
+    },
+    {
+      "field": 0.16666666666666666,
+      "frequency_rows": [
+        {
+          "inside_mu26_interval": true,
+          "mu26_stieltjes_lower": 0.019338877988696167,
+          "mu26_stieltjes_upper": 52.64447552195812,
+          "mu26_terminator": 0.01821408140558531,
+          "physical_frequency_z": 0.0046296296296296285,
+          "reconstruction_relative_residual": 1.88948388803885e-16,
+          "scaled_colored_error_upper_bound": 0.20159386128795875,
+          "scaled_colored_hDeltaK": 1.850181895812969,
+          "scaled_frequency_p": 1.0,
+          "scaled_linear_hK": 1.2835783347721539,
+          "scaled_total_hK": 3.133760230585123,
+          "terminator_positive": true
+        },
+        {
+          "inside_mu26_interval": true,
+          "mu26_stieltjes_lower": 0.038650209888675215,
+          "mu26_stieltjes_upper": 26.32502535064751,
+          "mu26_terminator": 0.01444659322631513,
+          "physical_frequency_z": 0.009259259259259257,
+          "reconstruction_relative_residual": 3.468147343050711e-16,
+          "scaled_colored_error_upper_bound": 0.15724247781944536,
+          "scaled_colored_hDeltaK": 1.5980734629891988,
+          "scaled_frequency_p": 2.0,
+          "scaled_linear_hK": 0.9628858384655383,
+          "scaled_total_hK": 2.560959301454737,
+          "terminator_positive": true
+        },
+        {
+          "inside_mu26_interval": true,
+          "mu26_stieltjes_lower": 0.07708085294795396,
+          "mu26_stieltjes_upper": 13.168084692472425,
+          "mu26_terminator": 0.00430887493941697,
+          "physical_frequency_z": 0.018518518518518514,
+          "reconstruction_relative_residual": 2.984541457039413e-16,
+          "scaled_colored_error_upper_bound": 0.11258581919613,
+          "scaled_colored_hDeltaK": 1.2992295073083877,
+          "scaled_frequency_p": 4.0,
+          "scaled_linear_hK": 0.6847233209231107,
+          "scaled_total_hK": 1.9839528282314984,
+          "terminator_positive": true
+        }
+      ],
+      "maximum_linear_gmres_residual": 9.255603792898509e-11,
+      "mode_count": 432,
+      "renormalized_white_contact": 0.0,
+      "source": "docs/joint_scaled_nonlinear_fghd_refined_s128_h016667.json",
+      "source_sha256": "c400a27627278776c4233ecb07388cad9c35dc8fdfce1f653b48f3b008d8844e",
+      "susceptibility_captured_fraction": 0.9871503987017146,
+      "terminators": [
+        0.01821408140558531,
+        0.01444659322631513,
+        0.00430887493941697
+      ],
+      "white_contact_bare": 11080.083855446182,
+      "white_contact_counterterm": -11080.083855446182
+    },
+    {
+      "field": 0.125,
+      "frequency_rows": [
+        {
+          "inside_mu26_interval": true,
+          "mu26_stieltjes_lower": 0.008160182752810753,
+          "mu26_stieltjes_upper": 124.78328334691955,
+          "mu26_terminator": 0.014690714625914281,
+          "physical_frequency_z": 0.001953125,
+          "reconstruction_relative_residual": 2.5298067011786523e-16,
+          "scaled_colored_error_upper_bound": 0.4050249112637525,
+          "scaled_colored_hDeltaK": 2.1907929528958556,
+          "scaled_frequency_p": 1.0,
+          "scaled_linear_hK": 1.32006192501366,
+          "scaled_total_hK": 3.510854877909516,
+          "terminator_positive": true
+        },
+        {
+          "inside_mu26_interval": true,
+          "mu26_stieltjes_lower": 0.01631829514590431,
+          "mu26_stieltjes_upper": 62.39281787073466,
+          "mu26_terminator": 0.014336784197039067,
+          "physical_frequency_z": 0.00390625,
+          "reconstruction_relative_residual": 1.5257164671645844e-16,
+          "scaled_colored_error_upper_bound": 0.31363282332879355,
+          "scaled_colored_hDeltaK": 1.9051203733189153,
+          "scaled_frequency_p": 2.0,
+          "scaled_linear_hK": 1.00557253330852,
+          "scaled_total_hK": 2.9106929066274354,
+          "terminator_positive": true
+        },
+        {
+          "inside_mu26_interval": true,
+          "mu26_stieltjes_lower": 0.03262003817511647,
+          "mu26_stieltjes_upper": 31.198761092325736,
+          "mu26_terminator": 0.011768318001954268,
+          "physical_frequency_z": 0.0078125,
+          "reconstruction_relative_residual": 0.0,
+          "scaled_colored_error_upper_bound": 0.223966941252059,
+          "scaled_colored_hDeltaK": 1.5746393075254774,
+          "scaled_frequency_p": 4.0,
+          "scaled_linear_hK": 0.7344546021186314,
+          "scaled_total_hK": 2.3090939096441088,
+          "terminator_positive": true
+        }
+      ],
+      "maximum_linear_gmres_residual": 9.75913302649414e-11,
+      "mode_count": 576,
+      "renormalized_white_contact": 0.0,
+      "source": "docs/joint_scaled_nonlinear_fghd_refined_h0125.json",
+      "source_sha256": "a817c58a5ebfac890e507d2765e0fc749d676cb9e1a4179af3dd69b29ff8484a",
+      "susceptibility_captured_fraction": 0.9874215550350532,
+      "terminators": [
+        0.014690714625914281,
+        0.014336784197039067,
+        0.011768318001954268
+      ],
+      "white_contact_bare": 19444.720938172082,
+      "white_contact_counterterm": -19444.720938172082
+    }
+  ],
+  "scaled_variables": {
+    "p_equals_z_over_h3": [
+      1.0,
+      2.0,
+      4.0
+    ],
+    "q_equals_k_over_h2": 0.4,
+    "tau_equals_t_h3": [
+      0.0,
+      0.25,
+      0.5,
+      0.75,
+      1.0
+    ]
+  },
+  "schema": 1,
+  "uses_target_a_or_D": false,
+  "uses_target_trajectory": false
+}

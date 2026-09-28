@@ -1,0 +1,183 @@
+{
+  "effective_exponent_range": [
+    0.6476308939073722,
+    0.7540139766951609
+  ],
+  "frequency_rows": [
+    {
+      "adjacent_effective_exponents": [
+        0.7102740379401292,
+        0.6685249046223897,
+        0.587383146552685
+      ],
+      "candidate_power_plus_finite_part": [
+        {
+          "candidate_exponent": 0.3333333333333333,
+          "divergent_amplitude": 1.9231353298617042,
+          "putative_finite_part": -1.6513721814495796,
+          "relative_residual": 0.0024817097191374535
+        },
+        {
+          "candidate_exponent": 0.5,
+          "divergent_amplitude": 0.9560395360960058,
+          "putative_finite_part": -0.504773177769733,
+          "relative_residual": 0.0052869891942564735
+        },
+        {
+          "candidate_exponent": 0.6666666666666666,
+          "divergent_amplitude": 0.5337918089492858,
+          "putative_finite_part": 0.06826405024746184,
+          "relative_residual": 0.008147257083809152
+        },
+        {
+          "candidate_exponent": 1.0,
+          "divergent_amplitude": 0.1962587792922983,
+          "putative_finite_part": 0.6406752557160783,
+          "relative_residual": 0.013804905517393003
+        }
+      ],
+      "colored_hDeltaK_by_field": [
+        1.3978067257525453,
+        1.6378713721258045,
+        1.850181895812969,
+        2.1907929528958556
+      ],
+      "pure_power_effective_exponent": 0.6476308939073722,
+      "pure_power_relative_residual": 0.007994192930814064,
+      "scaled_frequency_p": 1.0
+    },
+    {
+      "adjacent_effective_exponents": [
+        0.7743983788698973,
+        0.724632798998028,
+        0.6109048612520189
+      ],
+      "candidate_power_plus_finite_part": [
+        {
+          "candidate_exponent": 0.3333333333333333,
+          "divergent_amplitude": 1.7638338878287194,
+          "putative_finite_part": -1.616807458233767,
+          "relative_residual": 0.004031448986090765
+        },
+        {
+          "candidate_exponent": 0.5,
+          "divergent_amplitude": 0.8767311894538657,
+          "putative_finite_part": -0.5649112839601339,
+          "relative_residual": 0.006990757494779543
+        },
+        {
+          "candidate_exponent": 0.6666666666666666,
+          "divergent_amplitude": 0.4894466675887443,
+          "putative_finite_part": -0.03920522542239297,
+          "relative_residual": 0.010016224033552021
+        },
+        {
+          "candidate_exponent": 1.0,
+          "divergent_amplitude": 0.17990735007888417,
+          "putative_finite_part": 0.4859232654933997,
+          "relative_residual": 0.016023345457043325
+        }
+      ],
+      "colored_hDeltaK_by_field": [
+        1.178073684414758,
+        1.4002945930650617,
+        1.5980734629891988,
+        1.9051203733189153
+      ],
+      "pure_power_effective_exponent": 0.6928460980301533,
+      "pure_power_relative_residual": 0.010754166496351648,
+      "scaled_frequency_p": 2.0
+    },
+    {
+      "adjacent_effective_exponents": [
+        0.8640604445161371,
+        0.7644214794348221,
+        0.6682892376423251
+      ],
+      "candidate_power_plus_finite_part": [
+        {
+          "candidate_exponent": 0.3333333333333333,
+          "divergent_amplitude": 1.5560149824324692,
+          "putative_finite_part": -1.5335440093434478,
+          "relative_residual": 0.0033744742408655143
+        },
+        {
+          "candidate_exponent": 0.5,
+          "divergent_amplitude": 0.7734802732105668,
+          "putative_finite_part": -0.6056976974525375,
+          "relative_residual": 0.006737261048986913
+        },
+        {
+          "candidate_exponent": 0.6666666666666666,
+          "divergent_amplitude": 0.43183267400532044,
+          "putative_finite_part": -0.14198962814828095,
+          "relative_residual": 0.010071542383370916
+        },
+        {
+          "candidate_exponent": 1.0,
+          "divergent_amplitude": 0.15875062045838245,
+          "putative_finite_part": 0.32120613422534966,
+          "relative_residual": 0.016619349767918706
+        }
+      ],
+      "colored_hDeltaK_by_field": [
+        0.9320128952908269,
+        1.1302070973195035,
+        1.2992295073083877,
+        1.5746393075254774
+      ],
+      "pure_power_effective_exponent": 0.7540139766951609,
+      "pure_power_relative_residual": 0.01217100016638798,
+      "scaled_frequency_p": 4.0
+    }
+  ],
+  "gates": {
+    "finite_one_loop_zero_field_limit": false,
+    "finite_part_unique_across_candidate_powers": false,
+    "pure_power_growth_below_one_percent_residual_at_every_p": false,
+    "self_consistent_nonlinear_resummation_required": true,
+    "two_thirds_growth_consistent_but_not_proved": true
+  },
+  "interpretation": "The bare colored loop grows rather than approaching a finite hK. Its apparent power is compatible with the KPZ infrared breakdown, but the finite part changes with the subtraction power and is not a microscopic prediction.",
+  "maximum_last_field_step_normalized_shape_change": 0.016535960325510524,
+  "method": "target_free_joint_scaled_nonlinear_one_loop_breakdown_audit",
+  "normalized_colored_shape_by_field": [
+    [
+      1.0,
+      0.8428015566891135,
+      0.6667680718083924
+    ],
+    [
+      1.0,
+      0.8549478407743397,
+      0.6900463104453679
+    ],
+    [
+      1.0,
+      0.863738568951355,
+      0.7022171767265656
+    ],
+    [
+      1.0,
+      0.8696031137039537,
+      0.7187531370520761
+    ]
+  ],
+  "scaled_variables": {
+    "fields": [
+      0.25,
+      0.2,
+      0.16666666666666666,
+      0.125
+    ],
+    "p_equals_z_over_h3": [
+      1.0,
+      2.0,
+      4.0
+    ],
+    "q_equals_k_over_h2": 0.4
+  },
+  "schema": 1,
+  "uses_target_a_or_D": false,
+  "uses_target_trajectory": false
+}

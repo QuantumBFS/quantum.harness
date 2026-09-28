@@ -1,0 +1,97 @@
+{
+  "schema": 1,
+  "method": "constructive_positive_terminator_nonidentifiability_and_uv_gate",
+  "uses_target_trajectory": false,
+  "uses_target_a_or_D": false,
+  "source_sha256": {
+    "docs/xxx_mori_mu26_certificate.json": "539a1f93535163304e4a4ba08752a99e4ea219b8af8e15f53712b62033db2b59",
+    "docs/mori_uv_local_counterterm_audit.json": "101ff807b61147e76c67b39f5ebf9f7ee80a873fabcbb6f26093f413841c4b54",
+    "docs/mu20_moment_preserving_one_loop_audit.json": "f81f90d36032800a9246f427bc66fd6c3329ad20d6bbb52cb75540550e8d7342",
+    "docs/mu22_prefix_moment_preserving_one_loop_audit.json": "0c00254367ac05bf46dbc7d80e9d7d824ad264197bc1a87abd1ec76562c3cf69",
+    "docs/iterated_full_diffusion_limit_audit.json": "67eeb8733358e6ea35d3ea6fcfc9c1424cb66868ffdbaacf284e8560371c6303"
+  },
+  "exact_prefix": {
+    "maximum_even_moment_order": 26,
+    "recurrent_count": 13,
+    "squared_recurrents": [
+      0.5,
+      1.75,
+      3.1785714285714284,
+      4.17255216693419,
+      4.420346879585746,
+      5.484054789770981,
+      5.558202140126421,
+      6.801640474648271,
+      6.6441303605386395,
+      7.7268472829841,
+      7.540432748832734,
+      8.758455000309242,
+      8.8498471089788
+    ]
+  },
+  "laplace_frequency": [
+    0.02,
+    0.05,
+    0.1
+  ],
+  "stieltjes_bounds": {
+    "lower": [
+      0.08319489647145079,
+      0.20327904343073472,
+      0.3762212769831562
+    ],
+    "upper": [
+      12.193815048167444,
+      4.894302624307494,
+      2.476610959198617
+    ]
+  },
+  "constructive_counterexample": {
+    "slow_atom_frequency": 0.5,
+    "fast_atom_frequency": 5.0,
+    "slow_kernel": [
+      4.349306336592867,
+      1.8331103410849419,
+      1.0722500754778368
+    ],
+    "fast_kernel": [
+      11.975146319410069,
+      4.807818937247192,
+      2.4350700532316085
+    ],
+    "absolute_separation": [
+      7.625839982817202,
+      2.97470859616225,
+      1.3628199777537717
+    ],
+    "relative_separation": [
+      0.9342843087621657,
+      0.8958711865425395,
+      0.7771289347660634
+    ],
+    "both_spectral_measures_positive": true,
+    "both_spectral_measures_unit_mass": true,
+    "both_preserve_all_known_recurrents": true
+  },
+  "premises": {
+    "thirteen_exact_positive_recurrents": true,
+    "two_positive_unit_mass_terminators_preserve_prefix": true,
+    "two_terminators_give_distinct_low_frequency_kernels": true,
+    "finite_local_orders_0_through_4_fail_common_uv_stability": true,
+    "mu20_matching_fails_positivity_cutoff_gates": true,
+    "mu22_extension_still_fails_matching_gates": true,
+    "zero_field_boundary_input_not_yet_matched": true
+  },
+  "gates": {
+    "finite_microscopic_prefix_uniquely_determines_nonlinear_kernel": false,
+    "tested_local_counterterms_renormalize_bare_one_loop": false,
+    "current_hydrodynamic_vertices_define_physical_F1_perp": false,
+    "unique_constant_burgers_pair_follows_analytically": false,
+    "nonidentifiability_no_go_certified": true
+  },
+  "scope": {
+    "closed_statement": "No regulator-independent nonlinear Mori correction or constant Burgers pair follows from the known finite moment prefix plus the bare hydrodynamic one-loop vertices.",
+    "not_claimed": "The physical full Mori kernel is not absent; it requires an additional microscopic spectral/renormalization condition and the GAP-1 zero-field boundary match.",
+    "controlled_equation_retained": "exact projected Mori equation with a positive continuum terminator constrained, but not fixed, by the exact prefix"
+  }
+}

@@ -1,0 +1,163 @@
+{
+  "joint_limit_audit": {
+    "declared_relative_tolerance": 0.1,
+    "h_times_spin_complement_coupling": [
+      0.3372034532965177
+    ],
+    "h_times_spin_complement_coupling_relative_steps": [],
+    "h_times_spin_diffusion_relative_steps": [],
+    "infinite_mode_limit_accepted": false,
+    "reason": "the declared finite-field regulator sequence is not stable",
+    "selected_scalar_stable": false
+  },
+  "method": "full_non_diagonal_fghd_joint_zero_field_regulator",
+  "regulators": {
+    "fields": [
+      0.125
+    ],
+    "rapidity_points": 32,
+    "rapidity_u_extent": 8.0,
+    "string_xi_buffer": 3.0,
+    "string_xi_cutoff": 3.0
+  },
+  "rows": [
+    {
+      "active_strings": 24,
+      "diffusion_complement": {
+        "complement_energy_retained_ranks": {
+          "0.9": 215,
+          "0.99": 575,
+          "0.999": 705
+        },
+        "complement_frobenius_norm": 788.3254779184043,
+        "complement_leading_singular_values": [
+          236.21932944536638,
+          206.017368898485,
+          178.25640276806652,
+          166.9510563515572,
+          156.9391272609403,
+          141.96984975282933,
+          138.18514435250785,
+          125.15205846481548,
+          115.77313682385667,
+          112.11953297858524,
+          101.26603951170523,
+          98.59651032149297,
+          91.52764060102398,
+          86.42280117202833,
+          84.06525877578727,
+          83.13538208237571
+        ],
+        "complement_to_spin_norm": 2.6976276263721415,
+        "round_trip_scalar": {
+          "imag": 0.0,
+          "real": 7.277194810566195
+        },
+        "spin_to_complement_norm": 2.6976276263721415
+      },
+      "fdt_residual": 4.1641895679271373e-16,
+      "field": 0.125,
+      "h_times_spin_diffusion": 0.27921032118557854,
+      "mode_count": 768,
+      "noise_complement": {
+        "complement_energy_retained_ranks": {
+          "0.9": 215,
+          "0.99": 575,
+          "0.999": 705
+        },
+        "complement_frobenius_norm": 788.3254779184043,
+        "complement_leading_singular_values": [
+          236.21932944536633,
+          206.0173688984851,
+          178.25640276806652,
+          166.95105635155724,
+          156.9391272609402,
+          141.96984975282925,
+          138.1851443525077,
+          125.15205846481551,
+          115.77313682385677,
+          112.11953297858526,
+          101.26603951170532,
+          98.59651032149301,
+          91.52764060102372,
+          86.42280117202837,
+          84.06525877578737,
+          83.1353820823758
+        ],
+        "complement_to_spin_norm": 2.6976276263721415,
+        "round_trip_scalar": {
+          "imag": 0.0,
+          "real": 7.277194810566195
+        },
+        "spin_to_complement_norm": 2.6976276263721415
+      },
+      "propagation": {
+        "0.04": {
+          "stationarity_residual": 8.301620046108539e-16,
+          "structure_factor_over_susceptibility": {
+            "imag": [
+              0.0,
+              9.148268675588325e-06,
+              7.307630045531532e-06,
+              4.871776316114965e-06,
+              3.033905585742288e-06
+            ],
+            "real": [
+              1.0,
+              0.9053942363738154,
+              0.8070059685550459,
+              0.7139703906100887,
+              0.6324801754916883
+            ]
+          },
+          "times": [
+            0.0,
+            50.0,
+            100.0,
+            150.0,
+            200.0
+          ]
+        }
+      },
+      "spin_diffusion": 2.2336825694846283,
+      "spin_noise": 2.233682569484628,
+      "susceptibility": 0.23327179141791643,
+      "velocity_complement": {
+        "complement_energy_retained_ranks": {
+          "0.9": 241,
+          "0.99": 619,
+          "0.999": 729
+        },
+        "complement_frobenius_norm": 1.939466551686996,
+        "complement_leading_singular_values": [
+          0.4301240470955359,
+          0.43012404431117834,
+          0.40045807139830547,
+          0.4004580575037633,
+          0.3645436171747836,
+          0.364543580495567,
+          0.32610966729029217,
+          0.32610959708437837,
+          0.28815263686433856,
+          0.2881525264573995,
+          0.25265327498974716,
+          0.2526531229877743,
+          0.22065610294662255,
+          0.2206559136591678,
+          0.19580876321750307,
+          0.19580876314451498
+        ],
+        "complement_to_spin_norm": 0.09124818867039827,
+        "round_trip_scalar": {
+          "imag": 0.0,
+          "real": 0.008326231935628599
+        },
+        "spin_to_complement_norm": 0.09124818867039827
+      }
+    }
+  ],
+  "schema": 1,
+  "two_mode_or_finite_pole_closure": false,
+  "uses_target_a_or_D": false,
+  "uses_target_trajectory": false
+}

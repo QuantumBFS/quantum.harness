@@ -1,0 +1,71 @@
+{
+  "schema": 1,
+  "status": "frozen_before_candidate_outputs",
+  "purpose": "Target-free propagation of the complete non-diagonal fluctuating-GHD diffusion and FDT-noise operators into the finite physical-time wall projection.",
+  "forbidden_inputs": [
+    "target magnetization trajectories",
+    "target a",
+    "target D",
+    "post-output selection of a field correction exponent",
+    "diagonal approximation to diffusion or noise",
+    "one-pole or two-field closure imposed before the calculation"
+  ],
+  "finite_regulator_equations": {
+    "generator": "L_k(h)=-i khat A(h)-khat^2 D(h)/2",
+    "fdt_noise": "Q_k(h)=-(L_k C+C L_k^dagger)",
+    "matrix_response": "dG_k/dt=L_k G_k-int_0^t M_k(t-s) C^{-1} G_k(s) ds",
+    "spin_structure": "S_m(k,t)/chi=p^T G_k(t) C p/chi"
+  },
+  "regulator_sequence": {
+    "fields_descending": [
+      0.3,
+      0.25,
+      0.2,
+      0.16666666666666666,
+      0.125,
+      0.1,
+      0.08333333333333333
+    ],
+    "required_fields": 7,
+    "field_expansion_degrees": [1, 2, 3],
+    "scaled_time_tau": 0.8594366926962348,
+    "scaled_fourier_points": 32,
+    "scaled_wave_step": 0.25
+  },
+  "physical_window_mapping": {
+    "h_eff_of_t": "(tau/t)^(1/3)",
+    "profile_time_window": [50.0, 200.0],
+    "fit_time_window": [52.0, 198.0],
+    "spatial_crop": [-120.0, 120.0],
+    "physical_length": 400,
+    "dx": 1.0,
+    "dt": 0.2,
+    "running_field_endpoint_range": [0.16257782104178672, 0.2580762041484299]
+  },
+  "hard_gates": {
+    "trace_pairing_gate_must_be_accepted": true,
+    "momentum_sampling_gate_must_be_accepted": true,
+    "matched_integer_field_gate_must_be_accepted": true,
+    "all_matrix_fixed_points_must_converge": true,
+    "complete_non_diagonal_diffusion_required": true,
+    "complete_non_diagonal_fdt_noise_required": true,
+    "fdt_and_thermodynamic_metric_residual_required": true,
+    "running_field_must_lie_inside_computed_field_support": true,
+    "maximum_absolute_fourier_tail": 0.01,
+    "maximum_relative_degree_envelope": 0.1,
+    "maximum_weak_strong_projection_disagreement": 0.15
+  },
+  "source_sha256": {
+    "scripts/derive_low_rank_self_consistent_full_matrix.py": "deeb0b248f84d24f8076ce4caf4216e61e45ed86403cbccd90c1017bd9f538bc",
+    "scripts/project_running_field_full_matrix_wall.py": "945e29063c85b140fc25116b3b611ca269b5787553e1ac85bb572bf3cfc33ae0",
+    "scripts/audit_matched_integer_field_limit.py": "9bb4f1074aa2bc550cefd345ecd99f807b1e75c046250c51b49f53ca70d25d3f",
+    "scripts/audit_momentum_sampling_convergence.py": "b0d3a4d9f9c7c84f4b48716c816d15a59c1128284923a61d5d7636e454263fad",
+    "hpc/scnet/full_matrix_matched_field_sequence.sbatch": "6a0167566c13562163dd929b1060bdbd8cb3053a491b376864f6744f396f9187",
+    "hpc/scnet/full_matrix_qgrid_matched_field_sequence.sbatch": "79c3ee08cbe216403d9d6c2ce0095d98baac083261288b905b42b4d0eec78c06"
+  },
+  "interpretation": {
+    "finite_cutoff_output_is_not_the_infinite_mode_limit": true,
+    "survival_means_not_rejected_in_the_preregistered_domain": true,
+    "a_and_D_are_finite_window_projection_coordinates_not_asymptotic_transport_constants": true
+  }
+}

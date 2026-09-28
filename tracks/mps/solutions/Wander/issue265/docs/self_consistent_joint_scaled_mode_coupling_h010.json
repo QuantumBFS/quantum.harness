@@ -1,0 +1,116 @@
+{
+  "closure": {
+    "exact_kpz_scaling_function_used": false,
+    "finite_mode_or_second_field_assumed": false,
+    "fixed_point_equation": "Gamma=sqrt(qhat)*h*(K_linear+DeltaK_Gamma)",
+    "internal_line_factor": "exp[-Gamma (|p_hat|^(3/2)+|q_hat|^(3/2)) t]",
+    "white_contact_removed": true
+  },
+  "gates": {
+    "exact_kpz_shape_resummation_complete": false,
+    "field_limit_converged": false,
+    "fixed_point_found_every_field": true,
+    "last_field_step_below_two_percent": false,
+    "physical_finite_window_kernel_certified": false
+  },
+  "interpretation": "Scalar KPZ line dressing removes the bare power divergence, but its remaining field and closure dependence must converge before the result can normalize a physical wall.",
+  "last_field_step_relative_gamma_change": 0.07934654526678846,
+  "method": "self_consistent_scalar_kpz_line_dressing_of_full_mode_fghd_loop",
+  "rows": [
+    {
+      "field": 0.2,
+      "fixed_point_residual": -4.7624126864320715e-12,
+      "function_evaluations": 12,
+      "mode_count": 360,
+      "scaled_colored_hDeltaK_at_fixed_point": 1.1415437996410456,
+      "scaled_frequency_p_at_fixed_point": 0.44915723996769197,
+      "scaled_linear_hK_at_fixed_point": 1.665748838548064,
+      "self_consistent_gamma": 1.7754782898018793,
+      "source": "docs/joint_scaled_nonlinear_fghd_refined_s128_h020.json",
+      "source_sha256": "ee4971e40b8b00a3a93b41d1496001437b003c40eebf358cbaaec8e75a17b672",
+      "susceptibility_captured_fraction": 0.9868927475959931
+    },
+    {
+      "field": 0.16666666666666666,
+      "fixed_point_residual": -2.6574298317427747e-12,
+      "function_evaluations": 12,
+      "mode_count": 432,
+      "scaled_colored_hDeltaK_at_fixed_point": 1.2844422308797725,
+      "scaled_frequency_p_at_fixed_point": 0.4720416418116965,
+      "scaled_linear_hK_at_fixed_point": 1.665848383098314,
+      "self_consistent_gamma": 1.8659228207248097,
+      "source": "docs/joint_scaled_nonlinear_fghd_refined_s128_h016667.json",
+      "source_sha256": "c400a27627278776c4233ecb07388cad9c35dc8fdfce1f653b48f3b008d8844e",
+      "susceptibility_captured_fraction": 0.9871503987017146
+    },
+    {
+      "field": 0.125,
+      "fixed_point_residual": -4.175992884825064e-12,
+      "function_evaluations": 12,
+      "mode_count": 576,
+      "scaled_colored_hDeltaK_at_fixed_point": 1.4978367578343499,
+      "scaled_frequency_p_at_fixed_point": 0.5058917899187195,
+      "scaled_linear_hK_at_fixed_point": 1.663997221565961,
+      "self_consistent_gamma": 1.9997177642722794,
+      "source": "docs/joint_scaled_nonlinear_fghd_refined_h0125.json",
+      "source_sha256": "a817c58a5ebfac890e507d2765e0fc749d676cb9e1a4179af3dd69b29ff8484a",
+      "susceptibility_captured_fraction": 0.9874215550350532
+    },
+    {
+      "field": 0.1,
+      "fixed_point_residual": -5.265121671982342e-12,
+      "function_evaluations": 12,
+      "mode_count": 720,
+      "scaled_colored_hDeltaK_at_fixed_point": 1.7915315004028707,
+      "scaled_frequency_p_at_fixed_point": 0.5494928808601123,
+      "scaled_linear_hK_at_fixed_point": 1.6428035840755102,
+      "self_consistent_gamma": 2.172063499019575,
+      "source": "docs/joint_scaled_nonlinear_fghd_refined_h010.json",
+      "source_sha256": "ad63eb7465fab737c4df91ca2f8e64e46189b4c1ceaabda390335de501a688b7",
+      "susceptibility_captured_fraction": 0.987542563393359
+    }
+  ],
+  "scaled_variables": {
+    "q_equals_k_over_h2": 0.4,
+    "tau_equals_t_h3": [
+      0.0,
+      0.25,
+      0.5,
+      0.75,
+      1.0
+    ]
+  },
+  "schema": 1,
+  "uses_target_a_or_D": false,
+  "uses_target_trajectory": false,
+  "zero_field_extrapolation_envelope": [
+    2.5174258448957323,
+    3.6312407118015666
+  ],
+  "zero_field_extrapolation_schemes": [
+    {
+      "correction_power": 0.3333333333333333,
+      "relative_residual": 0.011212016180330077,
+      "slope": -3.197176574050696,
+      "zero_field_limit": 3.6312407118015666
+    },
+    {
+      "correction_power": 0.5,
+      "relative_residual": 0.012269254472249249,
+      "slope": -2.9378320742833903,
+      "zero_field_limit": 3.0735225763424574
+    },
+    {
+      "correction_power": 0.6666666666666666,
+      "relative_residual": 0.013329647824722922,
+      "slope": -3.0326413551308264,
+      "zero_field_limit": 2.795075020918603
+    },
+    {
+      "correction_power": 1.0,
+      "relative_residual": 0.01544500986363105,
+      "slope": -3.8138383196017793,
+      "zero_field_limit": 2.5174258448957323
+    }
+  ]
+}

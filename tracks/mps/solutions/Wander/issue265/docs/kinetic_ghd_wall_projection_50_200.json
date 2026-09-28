@@ -1,0 +1,103 @@
+{
+  "frozen_weak_projection": {
+    "D": 3.1878124691663157,
+    "a": 0.35511402760220884,
+    "mse": 8.63492592241238e-08,
+    "n_obs": 8030
+  },
+  "inputs": {
+    "closure": "node-resolved diagonal finite-field GHD Gaussian kinetics",
+    "dt": 0.2,
+    "initial_condition": "infinitesimal sharp domain wall",
+    "knot_times": [
+      50.0,
+      75.0,
+      100.0,
+      125.0,
+      150.0,
+      175.0,
+      200.0
+    ],
+    "length": 400,
+    "microscopic_model": "spin-1/2 isotropic Heisenberg chain, J=1",
+    "rapidity_step": 0.4,
+    "rapidity_u_extent": 30.0,
+    "state": "infinite temperature, zero mean magnetization",
+    "string_xi_buffer": 4.0,
+    "string_xi_cutoff": 6.0,
+    "target_coefficients_used": false,
+    "trajectory_data_used": false,
+    "velocity_series_terms": 80
+  },
+  "limitations": [
+    "off-diagonal diffusion-kernel propagation is not included",
+    "the fluctuating field is closed at the leading KPZ length",
+    "time dependence between microscopic knots is shape-preserving interpolation"
+  ],
+  "schema_version": 1,
+  "time_nodes": [
+    {
+      "active_strings": 28,
+      "field": 0.21814830692199383,
+      "front_length": 21.013398982222864,
+      "maximum_width": 1807.9808416221051,
+      "minimum_width": 0.010899672741994269,
+      "susceptibility_captured_fraction": 0.9885536287687294,
+      "time": 50.0
+    },
+    {
+      "active_strings": 32,
+      "field": 0.19057009934235214,
+      "front_length": 27.535342272869283,
+      "maximum_width": 2794.1339333895135,
+      "minimum_width": 0.010765134811373759,
+      "susceptibility_captured_fraction": 0.9885300867917947,
+      "time": 75.0
+    },
+    {
+      "active_strings": 35,
+      "field": 0.17314442594652735,
+      "front_length": 33.35669164980806,
+      "maximum_width": 3816.3776243176944,
+      "minimum_width": 0.01079582370985894,
+      "susceptibility_captured_fraction": 0.9884616587771243,
+      "time": 100.0
+    },
+    {
+      "active_strings": 38,
+      "field": 0.16073304681513922,
+      "front_length": 38.707011872003434,
+      "maximum_width": 4863.7001552927895,
+      "minimum_width": 0.010856460234829874,
+      "susceptibility_captured_fraction": 0.9885134130178351,
+      "time": 125.0
+    },
+    {
+      "active_strings": 40,
+      "field": 0.15125558808486703,
+      "front_length": 43.70963129025713,
+      "maximum_width": 5879.286280873162,
+      "minimum_width": 0.010703632765059558,
+      "susceptibility_captured_fraction": 0.9884240905005206,
+      "time": 150.0
+    },
+    {
+      "active_strings": 42,
+      "field": 0.14367983875489504,
+      "front_length": 48.44046864357216,
+      "maximum_width": 6932.775738273975,
+      "minimum_width": 0.010671707876006185,
+      "susceptibility_captured_fraction": 0.988390161172012,
+      "time": 175.0
+    },
+    {
+      "active_strings": 44,
+      "field": 0.13742482194497377,
+      "front_length": 52.95044741508418,
+      "maximum_width": 8010.1917565474205,
+      "minimum_width": 0.010674314579692796,
+      "susceptibility_captured_fraction": 0.9884000126378012,
+      "time": 200.0
+    }
+  ]
+}

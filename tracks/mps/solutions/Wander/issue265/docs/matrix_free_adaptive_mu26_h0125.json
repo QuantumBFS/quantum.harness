@@ -1,0 +1,4112 @@
+{
+  "fdt_residual": 0.0,
+  "method": "matrix_free_adaptive_full_mode_velocity_diffusion_noise",
+  "multiplicative_noise_delta_memory": {
+    "absolute_dense_difference": null,
+    "dense_check": null,
+    "estimate": 15.46393232132016,
+    "interpretation": "coefficient multiplying delta(t) before microscopic Mori/UV contact matching",
+    "maximum_root_sylvester_nullspace_residual": 4.490963523995089e-15,
+    "samples": 512,
+    "standard_error": 0.03983582480271195,
+    "trace_distribution": "rademacher"
+  },
+  "multiplicative_noise_quadratic_observable_contact": {
+    "left_leg": [
+      [
+        0.0,
+        0.0
+      ],
+      [
+        -0.024315315993312235,
+        1.364276728189344e-18
+      ],
+      [
+        -0.04275078413413018,
+        4.237212054392989e-18
+      ],
+      [
+        -0.05624629022637472,
+        8.169073418033459e-18
+      ],
+      [
+        -0.06566841049712721,
+        1.3084088610664756e-17
+      ],
+      [
+        -0.07181050873581458,
+        1.8367786489167615e-17
+      ],
+      [
+        -0.07538900583470763,
+        2.1136299418657125e-17
+      ],
+      [
+        -0.07703682897043064,
+        2.3386847102351624e-17
+      ],
+      [
+        -0.07729670028397168,
+        2.0248520558506283e-17
+      ],
+      [
+        -0.07661712394413023,
+        1.9910372941709975e-17
+      ],
+      [
+        -0.07535290001333195,
+        2.0459250232741667e-17
+      ],
+      [
+        -0.07377039047026297,
+        1.9494191259499134e-17
+      ],
+      [
+        -0.07205637459508789,
+        2.4354544908724118e-17
+      ],
+      [
+        -0.07032872429752954,
+        2.2474564791708297e-17
+      ],
+      [
+        -0.06864742165172862,
+        2.485177646564088e-17
+      ],
+      [
+        -0.06702529529715981,
+        2.2532619120567413e-17
+      ],
+      [
+        -0.06543869433392117,
+        2.7115141338823744e-17
+      ],
+      [
+        -0.0638386464245316,
+        3.057766738149276e-17
+      ],
+      [
+        -0.06216268818399669,
+        2.98595277939822e-17
+      ],
+      [
+        -0.06034674005087055,
+        3.049133984052692e-17
+      ],
+      [
+        -0.05833562025386155,
+        3.1557428425030774e-17
+      ]
+    ],
+    "maximum_root_sylvester_nullspace_residual": 4.339932664930567e-15,
+    "microscopic_convention_matching_complete": false,
+    "rank_three_noise_root_derivative_stored": false,
+    "right_leg": [
+      [
+        0.0,
+        0.0
+      ],
+      [
+        -0.024315315993312235,
+        1.4566358877379458e-18
+      ],
+      [
+        -0.04275078413413019,
+        4.84942134054372e-18
+      ],
+      [
+        -0.05624629022637472,
+        8.533232389967945e-18
+      ],
+      [
+        -0.06566841049712721,
+        1.330273478429002e-17
+      ],
+      [
+        -0.07181050873581458,
+        1.906594634012276e-17
+      ],
+      [
+        -0.07538900583470763,
+        2.2007868303866788e-17
+      ],
+      [
+        -0.07703682897043065,
+        2.0658293645972933e-17
+      ],
+      [
+        -0.07729670028397168,
+        2.110161761180623e-17
+      ],
+      [
+        -0.07661712394413023,
+        2.0005370934388534e-17
+      ],
+      [
+        -0.07535290001333193,
+        1.833008887302533e-17
+      ],
+      [
+        -0.07377039047026297,
+        1.9083287243548213e-17
+      ],
+      [
+        -0.0720563745950879,
+        2.1152886369759735e-17
+      ],
+      [
+        -0.07032872429752951,
+        1.9598236680051843e-17
+      ],
+      [
+        -0.06864742165172862,
+        2.14062143502359e-17
+      ],
+      [
+        -0.06702529529715981,
+        2.125919364728098e-17
+      ],
+      [
+        -0.06543869433392117,
+        2.49528060769022e-17
+      ],
+      [
+        -0.0638386464245316,
+        2.9307634693659127e-17
+      ],
+      [
+        -0.06216268818399669,
+        2.6522534813067006e-17
+      ],
+      [
+        -0.06034674005087055,
+        2.8779868067667113e-17
+      ],
+      [
+        -0.05833562025386154,
+        2.952175715334731e-17
+      ]
+    ],
+    "root_directional_action_calls": 21,
+    "stochastic_convention": "Ito",
+    "times": [
+      0.0,
+      2.0,
+      4.0,
+      6.0,
+      8.0,
+      10.0,
+      12.0,
+      14.0,
+      16.0,
+      18.0,
+      20.0,
+      22.0,
+      24.0,
+      26.0,
+      28.0,
+      30.0,
+      32.0,
+      34.0,
+      36.0,
+      38.0,
+      40.0
+    ],
+    "total": [
+      [
+        0.0,
+        0.0
+      ],
+      [
+        -0.04863063198662447,
+        2.82091261592729e-18
+      ],
+      [
+        -0.08550156826826037,
+        9.086633394936709e-18
+      ],
+      [
+        -0.11249258045274944,
+        1.6702305808001404e-17
+      ],
+      [
+        -0.13133682099425442,
+        2.6386823394954775e-17
+      ],
+      [
+        -0.14362101747162917,
+        3.743373282929038e-17
+      ],
+      [
+        -0.15077801166941526,
+        4.3144167722523916e-17
+      ],
+      [
+        -0.1540736579408613,
+        4.4045140748324556e-17
+      ],
+      [
+        -0.15459340056794335,
+        4.135013817031251e-17
+      ],
+      [
+        -0.15323424788826046,
+        3.991574387609851e-17
+      ],
+      [
+        -0.1507058000266639,
+        3.878933910576699e-17
+      ],
+      [
+        -0.14754078094052595,
+        3.8577478503047347e-17
+      ],
+      [
+        -0.1441127491901758,
+        4.550743127848385e-17
+      ],
+      [
+        -0.14065744859505905,
+        4.207280147176014e-17
+      ],
+      [
+        -0.13729484330345723,
+        4.625799081587678e-17
+      ],
+      [
+        -0.13405059059431962,
+        4.379181276784839e-17
+      ],
+      [
+        -0.13087738866784235,
+        5.206794741572594e-17
+      ],
+      [
+        -0.1276772928490632,
+        5.988530207515189e-17
+      ],
+      [
+        -0.12432537636799337,
+        5.63820626070492e-17
+      ],
+      [
+        -0.1206934801017411,
+        5.927120790819403e-17
+      ],
+      [
+        -0.1166712405077231,
+        6.107918557837808e-17
+      ]
+    ]
+  },
+  "randomized_trace_not_physical_sampling": true,
+  "regulator": {
+    "active_strings": 4,
+    "dense_check": false,
+    "field": 0.125,
+    "fourier_points": 4,
+    "mode_count": 32,
+    "nodes_per_string": 8,
+    "samples_per_internal_wave": 512,
+    "scaled_rapidity_extent": 2.0,
+    "string_xi_cutoff": 0.5,
+    "trace_distribution": "rademacher"
+  },
+  "rows": [
+    {
+      "absolute_dense_differences": null,
+      "continuity_memory_estimates": {
+        "cross": [
+          0.0,
+          3.3420901828611737e-19
+        ],
+        "diffusion": [
+          0.03072042704246805,
+          0.0
+        ],
+        "total": [
+          0.09718997429147098,
+          3.3420901828611737e-19
+        ],
+        "velocity": [
+          0.0664695472490029,
+          0.0
+        ]
+      },
+      "dense_checks": null,
+      "internal_wave_rows": [
+        {
+          "dense_checks": null,
+          "estimates": {
+            "cross": [
+              0.0,
+              -4.506636133782805e-25
+            ],
+            "diffusion": [
+              1.5145402974579006e-08,
+              0.0
+            ],
+            "total": [
+              1.0452253442645424e-07,
+              -4.506636133782805e-25
+            ],
+            "velocity": [
+              8.937713145187523e-08,
+              0.0
+            ]
+          },
+          "p_wave": 0.0,
+          "q_wave": 0.1,
+          "quadratic_observable_dense_check": null,
+          "quadratic_observable_estimate": [
+            0.000284046559638078,
+            0.0
+          ],
+          "quadratic_observable_standard_error_complex_norm": 2.2630984115023724e-05,
+          "standard_error_complex_norms": {
+            "cross": 8.95624761554337e-25,
+            "diffusion": 1.024691300003597e-09,
+            "total": 8.806998484779697e-09,
+            "velocity": 8.752912827855267e-09
+          }
+        },
+        {
+          "dense_checks": null,
+          "estimates": {
+            "cross": [
+              0.0,
+              9.02121215257666e-25
+            ],
+            "diffusion": [
+              1.644124226563371e-08,
+              0.0
+            ],
+            "total": [
+              1.1102120832332683e-07,
+              9.02121215257666e-25
+            ],
+            "velocity": [
+              9.457996605769313e-08,
+              0.0
+            ]
+          },
+          "p_wave": 0.1,
+          "q_wave": 0.0,
+          "quadratic_observable_dense_check": null,
+          "quadratic_observable_estimate": [
+            0.0002570906387214068,
+            0.0
+          ],
+          "quadratic_observable_standard_error_complex_norm": 1.8434003578237434e-05,
+          "standard_error_complex_norms": {
+            "cross": 9.459040620407428e-25,
+            "diffusion": 1.0340587476644107e-09,
+            "total": 9.518124906277133e-09,
+            "velocity": 9.385508628661755e-09
+          }
+        },
+        {
+          "dense_checks": null,
+          "estimates": {
+            "cross": [
+              0.0,
+              -2.6570349900781702e-24
+            ],
+            "diffusion": [
+              2.046415647336571e-07,
+              0.0
+            ],
+            "total": [
+              6.123968589345195e-07,
+              -2.6570349900781702e-24
+            ],
+            "velocity": [
+              4.077552942008623e-07,
+              0.0
+            ]
+          },
+          "p_wave": -0.2,
+          "q_wave": -0.1,
+          "quadratic_observable_dense_check": null,
+          "quadratic_observable_estimate": [
+            0.0002444976860745471,
+            0.0
+          ],
+          "quadratic_observable_standard_error_complex_norm": 1.699100938027481e-05,
+          "standard_error_complex_norms": {
+            "cross": 8.992111440203912e-24,
+            "diffusion": 1.2760217439320905e-08,
+            "total": 3.8909792195442876e-08,
+            "velocity": 3.6104491013491506e-08
+          }
+        },
+        {
+          "dense_checks": null,
+          "estimates": {
+            "cross": [
+              0.0,
+              6.986202663735215e-24
+            ],
+            "diffusion": [
+              2.0320592243714095e-07,
+              0.0
+            ],
+            "total": [
+              5.622937193679572e-07,
+              6.986202663735215e-24
+            ],
+            "velocity": [
+              3.590877969308162e-07,
+              0.0
+            ]
+          },
+          "p_wave": -0.1,
+          "q_wave": -0.2,
+          "quadratic_observable_dense_check": null,
+          "quadratic_observable_estimate": [
+            0.00024229985924414872,
+            0.0
+          ],
+          "quadratic_observable_standard_error_complex_norm": 1.7504862817278437e-05,
+          "standard_error_complex_norms": {
+            "cross": 7.534433310736593e-24,
+            "diffusion": 1.2615613845939242e-08,
+            "total": 3.1689150665546895e-08,
+            "velocity": 2.8978378405843308e-08
+          }
+        }
+      ],
+      "quadratic_spin_observable_structure_correction": {
+        "absolute_dense_difference": null,
+        "dense_check": null,
+        "estimate": [
+          0.7186195147000464,
+          0.0
+        ],
+        "standard_error_complex_norm": 0.026593837781995373
+      },
+      "standard_error_complex_norms": {
+        "cross": 8.251716449167287e-19,
+        "diffusion": 0.0012585497422630896,
+        "total": 0.0036233752548285496,
+        "velocity": 0.003358533345765056
+      },
+      "time": 0.0
+    },
+    {
+      "absolute_dense_differences": null,
+      "continuity_memory_estimates": {
+        "cross": [
+          -0.0004294304551153102,
+          0.0001686945682273607
+        ],
+        "diffusion": [
+          0.02522881191591911,
+          0.0002611689898026362
+        ],
+        "total": [
+          0.08640974488309974,
+          0.0008663661754308078
+        ],
+        "velocity": [
+          0.06161036342229593,
+          0.0004365026174008111
+        ]
+      },
+      "dense_checks": null,
+      "internal_wave_rows": [
+        {
+          "dense_checks": null,
+          "estimates": {
+            "cross": [
+              -4.019086010907857e-10,
+              -3.8084812976525615e-11
+            ],
+            "diffusion": [
+              1.4558672221592393e-08,
+              9.488287856609755e-11
+            ],
+            "total": [
+              1.0202780147532875e-07,
+              -3.4817414615874594e-11
+            ],
+            "velocity": [
+              8.787103785482713e-08,
+              -9.161548020544648e-11
+            ]
+          },
+          "p_wave": 0.0,
+          "q_wave": 0.1,
+          "quadratic_observable_dense_check": null,
+          "quadratic_observable_estimate": [
+            0.00027717470840707474,
+            6.417128479853437e-07
+          ],
+          "quadratic_observable_standard_error_complex_norm": 2.220693760036454e-05,
+          "standard_error_complex_norms": {
+            "cross": 1.755912648526207e-10,
+            "diffusion": 9.861069883566713e-10,
+            "total": 8.626364356501205e-09,
+            "velocity": 8.61030703689554e-09
+          }
+        },
+        {
+          "dense_checks": null,
+          "estimates": {
+            "cross": [
+              -9.201624055678412e-11,
+              3.254817876006084e-11
+            ],
+            "diffusion": [
+              1.5738813899758025e-08,
+              -4.635246143997467e-11
+            ],
+            "total": [
+              1.0859686991967002e-07,
+              -5.21513064901268e-10
+            ],
+            "velocity": [
+              9.295007226046879e-08,
+              -5.077087822213542e-10
+            ]
+          },
+          "p_wave": 0.1,
+          "q_wave": 0.0,
+          "quadratic_observable_dense_check": null,
+          "quadratic_observable_estimate": [
+            0.00025083916800029286,
+            2.520611047302276e-06
+          ],
+          "quadratic_observable_standard_error_complex_norm": 1.8048513513608413e-05,
+          "standard_error_complex_norms": {
+            "cross": 1.8151940006907423e-10,
+            "diffusion": 9.927542786443913e-10,
+            "total": 9.353053168374567e-09,
+            "velocity": 9.23355982111787e-09
+          }
+        },
+        {
+          "dense_checks": null,
+          "estimates": {
+            "cross": [
+              3.736320128088764e-09,
+              2.35891331746967e-09
+            ],
+            "diffusion": [
+              1.6563382647749629e-07,
+              2.8273744581675538e-09
+            ],
+            "total": [
+              5.405455673351517e-07,
+              1.1193165553218451e-08
+            ],
+            "velocity": [
+              3.7117542072956666e-07,
+              6.006877777581229e-09
+            ]
+          },
+          "p_wave": -0.2,
+          "q_wave": -0.1,
+          "quadratic_observable_dense_check": null,
+          "quadratic_observable_estimate": [
+            0.00021559024939605035,
+            2.93963378055642e-06
+          ],
+          "quadratic_observable_standard_error_complex_norm": 1.558327113839334e-05,
+          "standard_error_complex_norms": {
+            "cross": 4.241992269756705e-09,
+            "diffusion": 1.0481381139982493e-08,
+            "total": 3.668181364862997e-08,
+            "velocity": 3.336689360500599e-08
+          }
+        },
+        {
+          "dense_checks": null,
+          "estimates": {
+            "cross": [
+              -9.385096337230407e-09,
+              5.968063294108002e-11
+            ],
+            "diffusion": [
+              1.649491224519616e-07,
+              8.599340923068646e-10
+            ],
+            "total": [
+              4.84860472108273e-07,
+              1.7559245752575506e-09
+            ],
+            "velocity": [
+              3.292964459935418e-07,
+              8.363098500096068e-10
+            ]
+          },
+          "p_wave": -0.1,
+          "q_wave": -0.2,
+          "quadratic_observable_dense_check": null,
+          "quadratic_observable_estimate": [
+            0.0002118194419271737,
+            5.566855850098709e-07
+          ],
+          "quadratic_observable_standard_error_complex_norm": 1.5796825617968803e-05,
+          "standard_error_complex_norms": {
+            "cross": 3.9108348777035275e-09,
+            "diffusion": 1.0432600854748393e-08,
+            "total": 2.8983648402707832e-08,
+            "velocity": 2.7102651781346253e-08
+          }
+        }
+      ],
+      "quadratic_spin_observable_structure_correction": {
+        "absolute_dense_difference": null,
+        "dense_check": null,
+        "estimate": [
+          0.6679276333425469,
+          0.0046549948993392905
+        ],
+        "standard_error_complex_norm": 0.025315140662301085
+      },
+      "standard_error_complex_norms": {
+        "cross": 0.000403738647246693,
+        "diffusion": 0.001038464855960153,
+        "total": 0.0033871650771257382,
+        "velocity": 0.003132128216222228
+      },
+      "time": 2.0
+    },
+    {
+      "absolute_dense_differences": null,
+      "continuity_memory_estimates": {
+        "cross": [
+          -0.0007673520834290732,
+          0.00033644536085697933
+        ],
+        "diffusion": [
+          0.019830832099261547,
+          0.0004368066810365327
+        ],
+        "total": [
+          0.07322715444436222,
+          0.0015355017286606185
+        ],
+        "velocity": [
+          0.05416367442852975,
+          0.0007622496867671064
+        ]
+      },
+      "dense_checks": null,
+      "internal_wave_rows": [
+        {
+          "dense_checks": null,
+          "estimates": {
+            "cross": [
+              -7.797349877194655e-10,
+              -7.806680580339274e-11
+            ],
+            "diffusion": [
+              1.391172842475838e-08,
+              1.8486397319397102e-10
+            ],
+            "total": [
+              9.893762442574626e-08,
+              -7.691397472300867e-11
+            ],
+            "velocity": [
+              8.580563098870734e-08,
+              -1.8371114211358723e-10
+            ]
+          },
+          "p_wave": 0.0,
+          "q_wave": 0.1,
+          "quadratic_observable_dense_check": null,
+          "quadratic_observable_estimate": [
+            0.00026850390867188856,
+            1.2614822479823634e-06
+          ],
+          "quadratic_observable_standard_error_complex_norm": 2.1736811164588193e-05,
+          "standard_error_complex_norms": {
+            "cross": 3.4169813368392187e-10,
+            "diffusion": 9.46291429978191e-10,
+            "total": 8.420148393404606e-09,
+            "velocity": 8.434866046274645e-09
+          }
+        },
+        {
+          "dense_checks": null,
+          "estimates": {
+            "cross": [
+              -1.764904141375232e-10,
+              6.570381721139166e-11
+            ],
+            "diffusion": [
+              1.4990110117762957e-08,
+              -9.120345645528141e-11
+            ],
+            "total": [
+              1.0558776005103226e-07,
+              -1.0200950134983632e-09
+            ],
+            "velocity": [
+              9.077414034740683e-08,
+              -9.945953742544735e-10
+            ]
+          },
+          "p_wave": 0.1,
+          "q_wave": 0.0,
+          "quadratic_observable_dense_check": null,
+          "quadratic_observable_estimate": [
+            0.00024290031286752827,
+            4.962685832378186e-06
+          ],
+          "quadratic_observable_standard_error_complex_norm": 1.764736663650195e-05,
+          "standard_error_complex_norms": {
+            "cross": 3.5323829282053906e-10,
+            "diffusion": 9.507282508044273e-10,
+            "total": 9.176904299126852e-09,
+            "velocity": 9.06499894469161e-09
+          }
+        },
+        {
+          "dense_checks": null,
+          "estimates": {
+            "cross": [
+              6.174930194029093e-09,
+              5.551497175543915e-09
+            ],
+            "diffusion": [
+              1.275972801498371e-07,
+              4.731219687571929e-09
+            ],
+            "total": [
+              4.4896531045021777e-07,
+              2.09041420299824e-08
+            ],
+            "velocity": [
+              3.1519310010635163e-07,
+              1.0621425166866557e-08
+            ]
+          },
+          "p_wave": -0.2,
+          "q_wave": -0.1,
+          "quadratic_observable_dense_check": null,
+          "quadratic_observable_estimate": [
+            0.00017757694911204756,
+            5.3689697232519205e-06
+          ],
+          "quadratic_observable_standard_error_complex_norm": 1.4112507851490506e-05,
+          "standard_error_complex_norms": {
+            "cross": 7.298353137718213e-09,
+            "diffusion": 8.439626740356795e-09,
+            "total": 3.3710323380537416e-08,
+            "velocity": 2.9735468866499642e-08
+          }
+        },
+        {
+          "dense_checks": null,
+          "estimates": {
+            "cross": [
+              -1.619513739739887e-08,
+              -7.265196016301085e-10
+            ],
+            "diffusion": [
+              1.2716700634166774e-07,
+              1.423332577603919e-09
+            ],
+            "total": [
+              3.939723184517465e-07,
+              2.1571407301109005e-09
+            ],
+            "velocity": [
+              2.8300044950747763e-07,
+              1.46032775413709e-09
+            ]
+          },
+          "p_wave": -0.1,
+          "q_wave": -0.2,
+          "quadratic_observable_dense_check": null,
+          "quadratic_observable_estimate": [
+            0.00017420960928148137,
+            1.1899335581032192e-06
+          ],
+          "quadratic_observable_standard_error_complex_norm": 1.4056414160938753e-05,
+          "standard_error_complex_norms": {
+            "cross": 6.8070109448140585e-09,
+            "diffusion": 8.497530618916415e-09,
+            "total": 2.657536571669505e-08,
+            "velocity": 2.4784352899373395e-08
+          }
+        }
+      ],
+      "quadratic_spin_observable_structure_correction": {
+        "absolute_dense_difference": null,
+        "dense_check": null,
+        "estimate": [
+          0.6034485585625555,
+          0.00893652500299974
+        ],
+        "standard_error_complex_norm": 0.02402130804089871
+      },
+      "standard_error_complex_norms": {
+        "cross": 0.000698541216555202,
+        "diffusion": 0.0008424975065696091,
+        "total": 0.0031246694301878594,
+        "velocity": 0.0028412536966055733
+      },
+      "time": 4.0
+    },
+    {
+      "absolute_dense_differences": null,
+      "continuity_memory_estimates": {
+        "cross": [
+          -0.0010011225603906153,
+          0.0004807214317365258
+        ],
+        "diffusion": [
+          0.01479805622876413,
+          0.0005278962118810665
+        ],
+        "total": [
+          0.058943992574817555,
+          0.0019850434056670283
+        ],
+        "velocity": [
+          0.04514705890644403,
+          0.0009764257620494365
+        ]
+      },
+      "dense_checks": null,
+      "internal_wave_rows": [
+        {
+          "dense_checks": null,
+          "estimates": {
+            "cross": [
+              -1.1303575701144511e-09,
+              -1.1964913302608765e-10
+            ],
+            "diffusion": [
+              1.3211511991688892e-08,
+              2.6936689953076537e-10
+            ],
+            "total": [
+              9.529300215715616e-08,
+              -1.1716220978827956e-10
+            ],
+            "velocity": [
+              8.321184773558172e-08,
+              -2.668799762929572e-10
+            ]
+          },
+          "p_wave": 0.0,
+          "q_wave": 0.1,
+          "quadratic_observable_dense_check": null,
+          "quadratic_observable_estimate": [
+            0.00025815329970210136,
+            1.848216798288361e-06
+          ],
+          "quadratic_observable_standard_error_complex_norm": 2.12226504605585e-05,
+          "standard_error_complex_norms": {
+            "cross": 4.976715847508513e-10,
+            "diffusion": 9.054788809433481e-10,
+            "total": 8.190174836342204e-09,
+            "velocity": 8.228424792561114e-09
+          }
+        },
+        {
+          "dense_checks": null,
+          "estimates": {
+            "cross": [
+              -2.5573597831499077e-10,
+              9.854970518075693e-11
+            ],
+            "diffusion": [
+              1.420165310462408e-08,
+              -1.347696647009484e-10
+            ],
+            "total": [
+              1.0202774335862654e-07,
+              -1.490918084472605e-09
+            ],
+            "velocity": [
+              8.808182623231745e-08,
+              -1.4546981249524133e-09
+            ]
+          },
+          "p_wave": 0.1,
+          "q_wave": 0.0,
+          "quadratic_observable_dense_check": null,
+          "quadratic_observable_estimate": [
+            0.00023338661855197953,
+            7.2623207639503514e-06
+          ],
+          "quadratic_observable_standard_error_complex_norm": 1.7233387663321307e-05,
+          "standard_error_complex_norms": {
+            "cross": 5.145465911330476e-10,
+            "diffusion": 9.082057032445148e-10,
+            "total": 8.990463497433143e-09,
+            "velocity": 8.880763301805981e-09
+          }
+        },
+        {
+          "dense_checks": null,
+          "estimates": {
+            "cross": [
+              7.048865385505545e-09,
+              8.89693435870813e-09
+            ],
+            "diffusion": [
+              9.23995552023098e-08,
+              5.696095542561556e-09
+            ],
+            "total": [
+              3.4744801375150414e-07,
+              2.8192255135107304e-08
+            ],
+            "velocity": [
+              2.479995931636888e-07,
+              1.3599225233837623e-08
+            ]
+          },
+          "p_wave": -0.2,
+          "q_wave": -0.1,
+          "quadratic_observable_dense_check": null,
+          "quadratic_observable_estimate": [
+            0.0001343307831643524,
+            6.937458837244436e-06
+          ],
+          "quadratic_observable_standard_error_complex_norm": 1.268904751379364e-05,
+          "standard_error_complex_norms": {
+            "cross": 9.23647876590819e-09,
+            "diffusion": 6.69019447957449e-09,
+            "total": 3.012785257695955e-08,
+            "velocity": 2.5695025934171092e-08
+          }
+        },
+        {
+          "dense_checks": null,
+          "estimates": {
+            "cross": [
+              -1.998312692700315e-08,
+              -1.99945248362362e-09
+            ],
+            "diffusion": [
+              9.186308066816916e-08,
+              1.720491766701439e-09
+            ],
+            "total": [
+              2.983836553182582e-07,
+              1.8104768858897713e-09
+            ],
+            "velocity": [
+              2.2650370157709218e-07,
+              2.0894376028119557e-09
+            ]
+          },
+          "p_wave": -0.1,
+          "q_wave": -0.2,
+          "quadratic_observable_dense_check": null,
+          "quadratic_observable_estimate": [
+            0.00013271068612175438,
+            1.77643077756196e-06
+          ],
+          "quadratic_observable_standard_error_complex_norm": 1.2398267765899735e-05,
+          "standard_error_complex_norms": {
+            "cross": 8.735324006572207e-09,
+            "diffusion": 6.84238331651667e-09,
+            "total": 2.431394498401257e-08,
+            "velocity": 2.213939421489046e-08
+          }
+        }
+      ],
+      "quadratic_spin_observable_structure_correction": {
+        "absolute_dense_difference": null,
+        "dense_check": null,
+        "estimate": [
+          0.530317115874511,
+          0.012460889454851066
+        ],
+        "standard_error_complex_norm": 0.022783485003751623
+      },
+      "standard_error_complex_norms": {
+        "cross": 0.0008901563730695627,
+        "diffusion": 0.0006749814440118389,
+        "total": 0.002836932403648213,
+        "velocity": 0.0025176601058032114
+      },
+      "time": 6.0
+    },
+    {
+      "absolute_dense_differences": null,
+      "continuity_memory_estimates": {
+        "cross": [
+          -0.001127543689479282,
+          0.0005868640777911712
+        ],
+        "diffusion": [
+          0.010345057390473273,
+          0.0005435204442676182
+        ],
+        "total": [
+          0.04493457494668752,
+          0.0022136500144688703
+        ],
+        "velocity": [
+          0.03571706124569353,
+          0.0010832654924100814
+        ]
+      },
+      "dense_checks": null,
+      "internal_wave_rows": [
+        {
+          "dense_checks": null,
+          "estimates": {
+            "cross": [
+              -1.4510394372500374e-09,
+              -1.6265442047595344e-10
+            ],
+            "diffusion": [
+              1.2465636120144831e-08,
+              3.479003953052881e-10
+            ],
+            "total": [
+              9.114294330870787e-08,
+              -1.4730997314068118e-10
+            ],
+            "velocity": [
+              8.012834662581307e-08,
+              -3.32555947970016e-10
+            ]
+          },
+          "p_wave": 0.0,
+          "q_wave": 0.1,
+          "quadratic_observable_dense_check": null,
+          "quadratic_observable_estimate": [
+            0.0002462708673459192,
+            2.3920356982576444e-06
+          ],
+          "quadratic_observable_standard_error_complex_norm": 2.0667339209473363e-05,
+          "standard_error_complex_norms": {
+            "cross": 6.429428325606451e-10,
+            "diffusion": 8.63943298148741e-10,
+            "total": 7.938780313673972e-09,
+            "velocity": 7.9933780516032e-09
+          }
+        },
+        {
+          "dense_checks": null,
+          "estimates": {
+            "cross": [
+              -3.318318281783118e-10,
+              1.3000111428197152e-10
+            ],
+            "diffusion": [
+              1.3380524856490187e-08,
+              -1.7721714227519544e-10
+            ],
+            "total": [
+              9.795794669940871e-08,
+              -1.9299436139499245e-09
+            ],
+            "velocity": [
+              8.490925367109683e-08,
+              -1.882727585956701e-09
+            ]
+          },
+          "p_wave": 0.1,
+          "q_wave": 0.0,
+          "quadratic_observable_dense_check": null,
+          "quadratic_observable_estimate": [
+            0.00022243703314817742,
+            9.361022289329335e-06
+          ],
+          "quadratic_observable_standard_error_complex_norm": 1.6809745406697238e-05,
+          "standard_error_complex_norms": {
+            "cross": 6.64908970364878e-10,
+            "diffusion": 8.654808467902662e-10,
+            "total": 8.794989871932594e-09,
+            "velocity": 8.682385488508498e-09
+          }
+        },
+        {
+          "dense_checks": null,
+          "estimates": {
+            "cross": [
+              6.409794029664172e-09,
+              1.1688740892502655e-08
+            ],
+            "diffusion": [
+              6.144665875075244e-08,
+              5.813681860405994e-09
+            ],
+            "total": [
+              2.4663506398074173e-07,
+              3.243225628600902e-08
+            ],
+            "velocity": [
+              1.7877861120032513e-07,
+              1.4929833533100377e-08
+            ]
+          },
+          "p_wave": -0.2,
+          "q_wave": -0.1,
+          "quadratic_observable_dense_check": null,
+          "quadratic_observable_estimate": [
+            8.99867980213227e-05,
+            7.507411959728215e-06
+          ],
+          "quadratic_observable_standard_error_complex_norm": 1.1437456311974354e-05,
+          "standard_error_complex_norms": {
+            "cross": 1.0199861786444822e-08,
+            "diffusion": 5.28082777170385e-09,
+            "total": 2.6335839330292117e-08,
+            "velocity": 2.1789311152115653e-08
+          }
+        },
+        {
+          "dense_checks": null,
+          "estimates": {
+            "cross": [
+              -2.075564331414495e-08,
+              -3.261409136336423e-09
+            ],
+            "diffusion": [
+              6.06859604126271e-08,
+              1.7903131012974675e-09
+            ],
+            "total": [
+              2.0702158091319599e-07,
+              1.3097060053261882e-09
+            ],
+            "velocity": [
+              1.670912638147138e-07,
+              2.78080204036515e-09
+            ]
+          },
+          "p_wave": -0.1,
+          "q_wave": -0.2,
+          "quadratic_observable_dense_check": null,
+          "quadratic_observable_estimate": [
+            9.070028666789939e-05,
+            2.250260937527304e-06
+          ],
+          "quadratic_observable_standard_error_complex_norm": 1.095762791519073e-05,
+          "standard_error_complex_norms": {
+            "cross": 9.812659464349845e-09,
+            "diffusion": 5.4982973647466165e-09,
+            "total": 2.2102258365409922e-08,
+            "velocity": 1.9334406761092048e-08
+          }
+        }
+      ],
+      "quadratic_spin_observable_structure_correction": {
+        "absolute_dense_difference": null,
+        "dense_check": null,
+        "estimate": [
+          0.45398592855343917,
+          0.015037949718477772
+        ],
+        "standard_error_complex_norm": 0.021667201572964985
+      },
+      "standard_error_complex_norms": {
+        "cross": 0.0009915780032956028,
+        "diffusion": 0.0005397679864879819,
+        "total": 0.0025422901672061374,
+        "velocity": 0.002197271082914978
+      },
+      "time": 8.0
+    },
+    {
+      "absolute_dense_differences": null,
+      "continuity_memory_estimates": {
+        "cross": [
+          -0.0011521832749504515,
+          0.000649643874312841
+        ],
+        "diffusion": [
+          0.0066178190320733046,
+          0.0005001177832085024
+        ],
+        "total": [
+          0.032424164725751506,
+          0.002235431089588874
+        ],
+        "velocity": [
+          0.02695852896862866,
+          0.001085669432067531
+        ]
+      },
+      "dense_checks": null,
+      "internal_wave_rows": [
+        {
+          "dense_checks": null,
+          "estimates": {
+            "cross": [
+              -1.7395446174765427e-09,
+              -2.0700286118347404e-10
+            ],
+            "diffusion": [
+              1.1682257837684454e-08,
+              4.200542129284253e-10
+            ],
+            "total": [
+              8.654328907781783e-08,
+              -1.6046806490213226e-10
+            ],
+            "velocity": [
+              7.660057585760992e-08,
+              -3.735194166470831e-10
+            ]
+          },
+          "p_wave": 0.0,
+          "q_wave": 0.1,
+          "quadratic_observable_dense_check": null,
+          "quadratic_observable_estimate": [
+            0.00023302990276950888,
+            2.8848061827626156e-06
+          ],
+          "quadratic_observable_standard_error_complex_norm": 2.0074540529576923e-05,
+          "standard_error_complex_norms": {
+            "cross": 7.770456822275951e-10,
+            "diffusion": 8.219926033592693e-10,
+            "total": 7.668788297567638e-09,
+            "velocity": 7.73265332927973e-09
+          }
+        },
+        {
+          "dense_checks": null,
+          "estimates": {
+            "cross": [
+              -4.0648843175669913e-10,
+              1.5885787182684196e-10
+            ],
+            "diffusion": [
+              1.253424850421595e-08,
+              -2.1863399064394288e-10
+            ],
+            "total": [
+              9.342602173818527e-08,
+              -2.334076939901461e-09
+            ],
+            "velocity": [
+              8.129826166572603e-08,
+              -2.274300821084361e-09
+            ]
+          },
+          "p_wave": 0.1,
+          "q_wave": 0.0,
+          "quadratic_observable_dense_check": null,
+          "quadratic_observable_estimate": [
+            0.00021021369316642075,
+            1.1207608323256509e-05
+          ],
+          "quadratic_observable_standard_error_complex_norm": 1.637982965408349e-05,
+          "standard_error_complex_norms": {
+            "cross": 8.038617360419753e-10,
+            "diffusion": 8.229033213665108e-10,
+            "total": 8.592123870429408e-09,
+            "velocity": 8.47190745573618e-09
+          }
+        },
+        {
+          "dense_checks": null,
+          "estimates": {
+            "cross": [
+              4.598319071473561e-09,
+              1.3402854427540609e-08
+            ],
+            "diffusion": [
+              3.565451635836081e-08,
+              5.266699099595243e-09
+            ],
+            "total": [
+              1.5622667200333875e-07,
+              3.343565786955961e-08
+            ],
+            "velocity": [
+              1.159738365735044e-07,
+              1.4766104342423767e-08
+            ]
+          },
+          "p_wave": -0.2,
+          "q_wave": -0.1,
+          "quadratic_observable_dense_check": null,
+          "quadratic_observable_estimate": [
+            4.839721373292302e-05,
+            7.153881506989982e-06
+          ],
+          "quadratic_observable_standard_error_complex_norm": 1.041490111816984e-05,
+          "standard_error_complex_norms": {
+            "cross": 1.0400150706219557e-08,
+            "diffusion": 4.233326922276686e-09,
+            "total": 2.282533035874896e-08,
+            "velocity": 1.846057560703309e-08
+          }
+        },
+        {
+          "dense_checks": null,
+          "estimates": {
+            "cross": [
+              -1.8933458536750143e-08,
+              -4.0620100922358166e-09
+            ],
+            "diffusion": [
+              3.4792230541369957e-08,
+              1.6857143101767833e-09
+            ],
+            "total": [
+              1.2760892053422883e-07,
+              1.0351588211849797e-09
+            ],
+            "velocity": [
+              1.1175014852960903e-07,
+              3.411454603244017e-09
+            ]
+          },
+          "p_wave": -0.1,
+          "q_wave": -0.2,
+          "quadratic_observable_dense_check": null,
+          "quadratic_observable_estimate": [
+            5.131308373817026e-05,
+            2.5930651179552213e-06
+          ],
+          "quadratic_observable_standard_error_complex_norm": 9.836466834528723e-06,
+          "standard_error_complex_norms": {
+            "cross": 1.0213422677090845e-08,
+            "diffusion": 4.471763202869047e-09,
+            "total": 1.993929523378911e-08,
+            "velocity": 1.65746968521276e-08
+          }
+        }
+      ],
+      "quadratic_spin_observable_structure_correction": {
+        "absolute_dense_difference": null,
+        "dense_check": null,
+        "estimate": [
+          0.37957396204793503,
+          0.016665873229843992
+        ],
+        "standard_error_complex_norm": 0.02069724089724694
+      },
+      "standard_error_complex_norms": {
+        "cross": 0.0010220291659689938,
+        "diffusion": 0.000438093726901724,
+        "total": 0.0022666131238367727,
+        "velocity": 0.0019108085787111042
+      },
+      "time": 10.0
+    },
+    {
+      "absolute_dense_differences": null,
+      "continuity_memory_estimates": {
+        "cross": [
+          -0.0010892886032713987,
+          0.0006721109545592986
+        ],
+        "diffusion": [
+          0.0036860131667537863,
+          0.0004187302049224609
+        ],
+        "total": [
+          0.022301102359751367,
+          0.002074979754853192
+        ],
+        "velocity": [
+          0.019704377796268976,
+          0.0009841385953714326
+        ]
+      },
+      "dense_checks": null,
+      "internal_wave_rows": [
+        {
+          "dense_checks": null,
+          "estimates": {
+            "cross": [
+              -1.9942320123094234e-09,
+              -2.5267767976123613e-10
+            ],
+            "diffusion": [
+              1.0869926662441393e-08,
+              4.854947282082196e-10
+            ],
+            "total": [
+              8.155531676149325e-08,
+              -1.5150491436784967e-10
+            ],
+            "velocity": [
+              7.267962211136127e-08,
+              -3.843219628148331e-10
+            ]
+          },
+          "p_wave": 0.0,
+          "q_wave": 0.1,
+          "quadratic_observable_dense_check": null,
+          "quadratic_observable_estimate": [
+            0.00021862449334688738,
+            3.3205787789459163e-06
+          ],
+          "quadratic_observable_standard_error_complex_norm": 1.9448667147922055e-05,
+          "standard_error_complex_norms": {
+            "cross": 8.996354824049119e-10,
+            "diffusion": 7.799641807533674e-10,
+            "total": 7.383481812409664e-09,
+            "velocity": 7.4496819855524536e-09
+          }
+        },
+        {
+          "dense_checks": null,
+          "estimates": {
+            "cross": [
+              -4.809423533666172e-10,
+              1.8386555063957497e-10
+            ],
+            "diffusion": [
+              1.1670644267260876e-08,
+              -2.5900921683911133e-10
+            ],
+            "total": [
+              8.848518445323374e-08,
+              -2.7012746678284714e-09
+            ],
+            "velocity": [
+              7.72954825393395e-08,
+              -2.6261310016289347e-09
+            ]
+          },
+          "p_wave": 0.1,
+          "q_wave": 0.0,
+          "quadratic_observable_dense_check": null,
+          "quadratic_observable_estimate": [
+            0.00019689788594464308,
+            1.275981276296665e-05
+          ],
+          "quadratic_observable_standard_error_complex_norm": 1.594713883442084e-05,
+          "standard_error_complex_norms": {
+            "cross": 9.310121810668721e-10,
+            "diffusion": 7.808614952196085e-10,
+            "total": 8.383768789711554e-09,
+            "velocity": 8.251767401674116e-09
+          }
+        },
+        {
+          "dense_checks": null,
+          "estimates": {
+            "cross": [
+              2.1265744343963716e-09,
+              1.3834691304493732e-08
+            ],
+            "diffusion": [
+              1.5438277973201593e-08,
+              4.2950559295949194e-09
+            ],
+            "total": [
+              8.34113065234241e-08,
+              3.1479837748535594e-08
+            ],
+            "velocity": [
+              6.584645411582614e-08,
+              1.3350090514446942e-08
+            ]
+          },
+          "p_wave": -0.2,
+          "q_wave": -0.1,
+          "quadratic_observable_dense_check": null,
+          "quadratic_observable_estimate": [
+            1.2640807277447033e-05,
+            6.109654390827671e-06
+          ],
+          "quadratic_observable_standard_error_complex_norm": 9.582501510047247e-06,
+          "standard_error_complex_norms": {
+            "cross": 1.0095678625976328e-08,
+            "diffusion": 3.5252495850736597e-09,
+            "total": 1.9970453451472473e-08,
+            "velocity": 1.5902772611191675e-08
+          }
+        },
+        {
+          "dense_checks": null,
+          "estimates": {
+            "cross": [
+              -1.523290847881022e-08,
+              -4.151804026207944e-09
+            ],
+            "diffusion": [
+              1.474698058341315e-08,
+              1.4681000461161469e-09
+            ],
+            "total": [
+              6.554979838272441e-08,
+              1.0540698688870776e-09
+            ],
+            "velocity": [
+              6.603572627812148e-08,
+              3.737773848978879e-09
+            ]
+          },
+          "p_wave": -0.1,
+          "q_wave": -0.2,
+          "quadratic_observable_dense_check": null,
+          "quadratic_observable_estimate": [
+            1.7093777323561933e-05,
+            2.7990298020745966e-06
+          ],
+          "quadratic_observable_standard_error_complex_norm": 9.05591830797257e-06,
+          "standard_error_complex_norms": {
+            "cross": 1.0142208223875067e-08,
+            "diffusion": 3.7322221688236045e-09,
+            "total": 1.791732104135135e-08,
+            "velocity": 1.40813512732133e-08
+          }
+        }
+      ],
+      "quadratic_spin_observable_structure_correction": {
+        "absolute_dense_difference": null,
+        "dense_check": null,
+        "estimate": [
+          0.3112749571673658,
+          0.01746962789982066
+        ],
+        "standard_error_complex_norm": 0.01985215293334103
+      },
+      "standard_error_complex_norms": {
+        "cross": 0.001004511314743495,
+        "diffusion": 0.00036710548507285125,
+        "total": 0.002031760772769498,
+        "velocity": 0.001676028057841347
+      },
+      "time": 12.0
+    },
+    {
+      "absolute_dense_differences": null,
+      "continuity_memory_estimates": {
+        "cross": [
+          -0.0009611022572613491,
+          0.0006622860681758025
+        ],
+        "diffusion": [
+          0.0015433833909831978,
+          0.0003211233255893966
+        ],
+        "total": [
+          0.015003957090293627,
+          0.0017642632227433553
+        ],
+        "velocity": [
+          0.014421675956571779,
+          0.0007808538289781565
+        ]
+      },
+      "dense_checks": null,
+      "internal_wave_rows": [
+        {
+          "dense_checks": null,
+          "estimates": {
+            "cross": [
+              -2.2141229626132763e-09,
+              -2.996813186841976e-10
+            ],
+            "diffusion": [
+              1.0037416521427657e-08,
+              5.43960598974972e-10
+            ],
+            "total": [
+              7.624418116800624e-08,
+              -1.1732873173620328e-10
+            ],
+            "velocity": [
+              6.842088760919187e-08,
+              -3.6160801202697753e-10
+            ]
+          },
+          "p_wave": 0.0,
+          "q_wave": 0.1,
+          "quadratic_observable_dense_check": null,
+          "quadratic_observable_estimate": [
+            0.0002032642451222117,
+            3.695897265139858e-06
+          ],
+          "quadratic_observable_standard_error_complex_norm": 1.8794919046416125e-05,
+          "standard_error_complex_norms": {
+            "cross": 1.0105036736338315e-09,
+            "diffusion": 7.382211995590275e-10,
+            "total": 7.086572151703442e-09,
+            "velocity": 7.148367852330923e-09
+          }
+        },
+        {
+          "dense_checks": null,
+          "estimates": {
+            "cross": [
+              -5.558854144191341e-10,
+              2.037824471664617e-10
+            ],
+            "diffusion": [
+              1.0797666478976189e-08,
+              -2.9821927262585444e-10
+            ],
+            "total": [
+              8.319306742939147e-08,
+              -3.0305998783709213e-09
+            ],
+            "velocity": [
+              7.295128636483441e-08,
+              -2.9361630529115273e-09
+            ]
+          },
+          "p_wave": 0.1,
+          "q_wave": 0.0,
+          "quadratic_observable_dense_check": null,
+          "quadratic_observable_estimate": [
+            0.0001826853548457559,
+            1.3985528821449639e-05
+          ],
+          "quadratic_observable_standard_error_complex_norm": 1.5515188575127288e-05,
+          "standard_error_complex_norms": {
+            "cross": 1.0460420831037872e-09,
+            "diffusion": 7.397633071319573e-10,
+            "total": 8.171956751506598e-09,
+            "velocity": 8.024667661434427e-09
+          }
+        },
+        {
+          "dense_checks": null,
+          "estimates": {
+            "cross": [
+              -4.781294579673814e-10,
+              1.312265233948066e-08
+            ],
+            "diffusion": [
+              7.373413699645606e-10,
+              3.1519810588277836e-09
+            ],
+            "total": [
+              3.187796276276103e-08,
+              2.7235324145868245e-08
+            ],
+            "velocity": [
+              3.161875085076385e-08,
+              1.0960690747559802e-08
+            ]
+          },
+          "p_wave": -0.2,
+          "q_wave": -0.1,
+          "quadratic_observable_dense_check": null,
+          "quadratic_observable_estimate": [
+            -1.5316493864546145e-05,
+            4.6769231524472505e-06
+          ],
+          "quadratic_observable_standard_error_complex_norm": 8.852876715119911e-06,
+          "standard_error_complex_norms": {
+            "cross": 9.553210732938812e-09,
+            "diffusion": 3.085322624070307e-09,
+            "total": 1.786786496380819e-08,
+            "velocity": 1.4030112659124624e-08
+          }
+        },
+        {
+          "dense_checks": null,
+          "estimates": {
+            "cross": [
+              -1.0499754926844268e-08,
+              -3.5532164180250894e-09
+            ],
+            "diffusion": [
+              5.045910453579939e-10,
+              1.1957212470434595e-09
+            ],
+            "total": [
+              2.3305856816747652e-08,
+              1.1491507387790515e-09
+            ],
+            "velocity": [
+              3.330102069823393e-08,
+              3.5066459097606808e-09
+            ]
+          },
+          "p_wave": -0.1,
+          "q_wave": -0.2,
+          "quadratic_observable_dense_check": null,
+          "quadratic_observable_estimate": [
+            -1.025512543116533e-05,
+            2.833113216584083e-06
+          ],
+          "quadratic_observable_standard_error_complex_norm": 8.547316873670194e-06,
+          "standard_error_complex_norms": {
+            "cross": 9.797920948269925e-09,
+            "diffusion": 3.219219365400181e-09,
+            "total": 1.617217194712497e-08,
+            "velocity": 1.2054905386960481e-08
+          }
+        }
+      ],
+      "quadratic_spin_observable_structure_correction": {
+        "absolute_dense_difference": null,
+        "dense_check": null,
+        "estimate": [
+          0.2519368580272033,
+          0.017611114553503483
+        ],
+        "standard_error_complex_norm": 0.01908658311156913
+      },
+      "standard_error_complex_norms": {
+        "cross": 0.0009620523318642401,
+        "diffusion": 0.0003201713535135556,
+        "total": 0.0018467112000380647,
+        "velocity": 0.001495562572245045
+      },
+      "time": 14.0
+    },
+    {
+      "absolute_dense_differences": null,
+      "continuity_memory_estimates": {
+        "cross": [
+          -0.0007956199450861173,
+          0.00062922001020775
+        ],
+        "diffusion": [
+          0.00011778613748564295,
+          0.0002258662271806105
+        ],
+        "total": [
+          0.01050447496419919,
+          0.0013414835745939012
+        ],
+        "velocity": [
+          0.011182308771799664,
+          0.00048639733720554036
+        ]
+      },
+      "dense_checks": null,
+      "internal_wave_rows": [
+        {
+          "dense_checks": null,
+          "estimates": {
+            "cross": [
+              -2.3989397062162593e-09,
+              -3.479863209110305e-10
+            ],
+            "diffusion": [
+              9.193547251525921e-09,
+              5.952587534085326e-10
+            ],
+            "total": [
+              7.067725807842129e-08,
+              -5.7044022021388253e-11
+            ],
+            "velocity": [
+              6.388265053311162e-08,
+              -3.0431645451888846e-10
+            ]
+          },
+          "p_wave": 0.0,
+          "q_wave": 0.1,
+          "quadratic_observable_dense_check": null,
+          "quadratic_observable_estimate": [
+            0.00018716847257791778,
+            4.0099672431910775e-06
+          ],
+          "quadratic_observable_standard_error_complex_norm": 1.8119416998110528e-05,
+          "standard_error_complex_norms": {
+            "cross": 1.10958703052015e-09,
+            "diffusion": 6.971490411136502e-10,
+            "total": 6.782160227237911e-09,
+            "velocity": 6.833052033170448e-09
+          }
+        },
+        {
+          "dense_checks": null,
+          "estimates": {
+            "cross": [
+              -6.314325866923015e-10,
+              2.1744865525879898e-10
+            ],
+            "diffusion": [
+              9.923229056415793e-09,
+              -3.3602326830593497e-10
+            ],
+            "total": [
+              7.761042974694024e-08,
+              -3.3222235810387655e-09
+            ],
+            "velocity": [
+              6.831863327721675e-08,
+              -3.2036489679916307e-09
+            ]
+          },
+          "p_wave": 0.1,
+          "q_wave": 0.0,
+          "quadratic_observable_dense_check": null,
+          "quadratic_observable_estimate": [
+            0.0001677811421867036,
+            1.4863643744748605e-05
+          ],
+          "quadratic_observable_standard_error_complex_norm": 1.5087448303146983e-05,
+          "standard_error_complex_norms": {
+            "cross": 1.1487161148103582e-09,
+            "diffusion": 7.000153050716915e-10,
+            "total": 7.958711883052538e-09,
+            "velocity": 7.79343327274388e-09
+          }
+        },
+        {
+          "dense_checks": null,
+          "estimates": {
+            "cross": [
+              -2.8104398367617945e-09,
+              1.1660276276211407e-08
+            ],
+            "diffusion": [
+              -8.91706493291008e-09,
+              2.060267498554864e-09
+            ],
+            "total": [
+              1.6107800043953781e-09,
+              2.1612379016249815e-08
+            ],
+            "velocity": [
+              1.3338284774067254e-08,
+              7.89183524148354e-09
+            ]
+          },
+          "p_wave": -0.2,
+          "q_wave": -0.1,
+          "quadratic_observable_dense_check": null,
+          "quadratic_observable_estimate": [
+            -3.474891666375176e-05,
+            3.1367269611160705e-06
+          ],
+          "quadratic_observable_standard_error_complex_norm": 8.164559829221815e-06,
+          "standard_error_complex_norms": {
+            "cross": 8.990924793868309e-09,
+            "diffusion": 2.8173776313410306e-09,
+            "total": 1.6344097276650468e-08,
+            "velocity": 1.2625559432443114e-08
+          }
+        },
+        {
+          "dense_checks": null,
+          "estimates": {
+            "cross": [
+              -5.539972382683406e-09,
+              -2.5291882959735696e-09
+            ],
+            "diffusion": [
+              -8.514863405161445e-09,
+              9.113547594608748e-10
+            ],
+            "total": [
+              3.606687357876261e-10,
+              9.558689330266782e-10
+            ],
+            "velocity": [
+              1.4415504523632475e-08,
+              2.5737024695393733e-09
+            ]
+          },
+          "p_wave": -0.1,
+          "q_wave": -0.2,
+          "quadratic_observable_dense_check": null,
+          "quadratic_observable_estimate": [
+            -2.9987903702230018e-05,
+            2.607680232770878e-06
+          ],
+          "quadratic_observable_standard_error_complex_norm": 8.192111728393482e-06,
+          "standard_error_complex_norms": {
+            "cross": 9.339140708410961e-09,
+            "diffusion": 2.861602845980102e-09,
+            "total": 1.4809169764446368e-08,
+            "velocity": 1.0621567212995912e-08
+          }
+        }
+      ],
+      "quadratic_spin_observable_structure_correction": {
+        "absolute_dense_difference": null,
+        "dense_check": null,
+        "estimate": [
+          0.20288503599386762,
+          0.017210225053196332
+        ],
+        "standard_error_complex_norm": 0.01835981617659105
+      },
+      "standard_error_complex_norms": {
+        "cross": 0.0009131284984092319,
+        "diffusion": 0.00028910947068504553,
+        "total": 0.001706382367522691,
+        "velocity": 0.0013621518716325262
+      },
+      "time": 16.0
+    },
+    {
+      "absolute_dense_differences": null,
+      "continuity_memory_estimates": {
+        "cross": [
+          -0.0006226603490064911,
+          0.0005802095422934951
+        ],
+        "diffusion": [
+          -0.0007103892878321555,
+          0.00014539908377229644
+        ],
+        "total": [
+          0.008382723200144281,
+          0.0008509822993461172
+        ],
+        "velocity": [
+          0.009715772836982928,
+          0.00012537367328032615
+        ]
+      },
+      "dense_checks": null,
+      "internal_wave_rows": [
+        {
+          "dense_checks": null,
+          "estimates": {
+            "cross": [
+              -2.549113408521364e-09,
+              -3.9748523308911596e-10
+            ],
+            "diffusion": [
+              8.347002417958087e-09,
+              6.392609185140483e-10
+            ],
+            "total": [
+              6.492245781869596e-08,
+              2.8023563284519363e-11
+            ],
+            "velocity": [
+              5.912456880925923e-08,
+              -2.137521221404129e-10
+            ]
+          },
+          "p_wave": 0.0,
+          "q_wave": 0.1,
+          "quadratic_observable_dense_check": null,
+          "quadratic_observable_estimate": [
+            0.00017056011542500337,
+            4.2646751475932786e-06
+          ],
+          "quadratic_observable_standard_error_complex_norm": 1.7429436190693183e-05,
+          "standard_error_complex_norms": {
+            "cross": 1.1969708442096738e-09,
+            "diffusion": 6.571508170235801e-10,
+            "total": 6.4746859331626295e-09,
+            "velocity": 6.508471780414907e-09
+          }
+        },
+        {
+          "dense_checks": null,
+          "estimates": {
+            "cross": [
+              -7.071303130158623e-10,
+              2.238533808872355e-10
+            ],
+            "diffusion": [
+              9.055027343459306e-09,
+              -3.7206730395819386e-10
+            ],
+            "total": [
+              7.179977601785329e-08,
+              -3.5773734842908024e-09
+            ],
+            "velocity": [
+              6.345187898740985e-08,
+              -3.4291595612198448e-09
+            ]
+          },
+          "p_wave": 0.1,
+          "q_wave": 0.0,
+          "quadratic_observable_dense_check": null,
+          "quadratic_observable_estimate": [
+            0.00015239418426019584,
+            1.5384436399238463e-05
+          ],
+          "quadratic_observable_standard_error_complex_norm": 1.46673071152149e-05,
+          "standard_error_complex_norms": {
+            "cross": 1.2388949262305517e-09,
+            "diffusion": 6.620007426516647e-10,
+            "total": 7.745924531459576e-09,
+            "velocity": 7.56087169038924e-09
+          }
+        },
+        {
+          "dense_checks": null,
+          "estimates": {
+            "cross": [
+              -4.660155164190362e-09,
+              9.939307881779072e-09
+            ],
+            "diffusion": [
+              -1.4296216286367905e-08,
+              1.1783241863665926e-09
+            ],
+            "total": [
+              -1.054153459058547e-08,
+              1.5570469160782428e-08
+            ],
+            "velocity": [
+              8.414836859972795e-09,
+              4.452837092636767e-09
+            ]
+          },
+          "p_wave": -0.2,
+          "q_wave": -0.1,
+          "quadratic_observable_dense_check": null,
+          "quadratic_observable_estimate": [
+            -4.6074026123836485e-05,
+            1.6850344794750417e-06
+          ],
+          "quadratic_observable_standard_error_complex_norm": 7.514464890978854e-06,
+          "standard_error_complex_norms": {
+            "cross": 8.521419129395038e-09,
+            "diffusion": 2.635408277936817e-09,
+            "total": 1.514552346465599e-08,
+            "velocity": 1.154267837149154e-08
+          }
+        },
+        {
+          "dense_checks": null,
+          "estimates": {
+            "cross": [
+              -9.90320082539147e-10,
+              -1.466186036099285e-09
+            ],
+            "diffusion": [
+              -1.3267433296969766e-08,
+              6.343139716798209e-10
+            ],
+            "total": [
+              -6.271731457047512e-09,
+              1.5158486662631822e-10
+            ],
+            "velocity": [
+              7.986021922461405e-09,
+              9.83456931045785e-10
+            ]
+          },
+          "p_wave": -0.1,
+          "q_wave": -0.2,
+          "quadratic_observable_dense_check": null,
+          "quadratic_observable_estimate": [
+            -4.22768078461417e-05,
+            1.996237637093412e-06
+          ],
+          "quadratic_observable_standard_error_complex_norm": 7.874738371568275e-06,
+          "standard_error_complex_norms": {
+            "cross": 8.864379242774189e-09,
+            "diffusion": 2.59368626425599e-09,
+            "total": 1.3845488135656237e-08,
+            "velocity": 9.77676556855444e-09
+          }
+        }
+      ],
+      "quadratic_spin_observable_structure_correction": {
+        "absolute_dense_difference": null,
+        "dense_check": null,
+        "estimate": [
+          0.16400907714819143,
+          0.016310051867657695
+        ],
+        "standard_error_complex_norm": 0.017649702496596417
+      },
+      "standard_error_complex_norms": {
+        "cross": 0.00086799749446416,
+        "diffusion": 0.00026659723858147444,
+        "total": 0.0015987719415612234,
+        "velocity": 0.001266773681338289
+      },
+      "time": 18.0
+    },
+    {
+      "absolute_dense_differences": null,
+      "continuity_memory_estimates": {
+        "cross": [
+          -0.0004690881548512458,
+          0.000520335794075667
+        ],
+        "diffusion": [
+          -0.0010849474139173474,
+          8.48053946420809e-05
+        ],
+        "total": [
+          0.007969147741642155,
+          0.00034267668282024125
+        ],
+        "velocity": [
+          0.009523183310410748,
+          -0.0002624645058975066
+        ]
+      },
+      "dense_checks": null,
+      "internal_wave_rows": [
+        {
+          "dense_checks": null,
+          "estimates": {
+            "cross": [
+              -2.6657619197375364e-09,
+              -4.4794391253826813e-10
+            ],
+            "diffusion": [
+              7.506150298820286e-09,
+              6.759008193305557e-10
+            ],
+            "total": [
+              5.9046577527980385e-08,
+              1.3443277085205564e-10
+            ],
+            "velocity": [
+              5.420618914889764e-08,
+              -9.352413594023182e-11
+            ]
+          },
+          "p_wave": 0.0,
+          "q_wave": 0.1,
+          "quadratic_observable_dense_check": null,
+          "quadratic_observable_estimate": [
+            0.00015365965258806773,
+            4.4644578598835925e-06
+          ],
+          "quadratic_observable_standard_error_complex_norm": 1.6733707436349976e-05,
+          "standard_error_complex_norms": {
+            "cross": 1.2728855090993475e-09,
+            "diffusion": 6.186407200752681e-10,
+            "total": 6.168859603846766e-09,
+            "velocity": 6.179710206676065e-09
+          }
+        },
+        {
+          "dense_checks": null,
+          "estimates": {
+            "cross": [
+              -7.820044495040961e-10,
+              2.2219669429410366e-10
+            ],
+            "diffusion": [
+              8.200364407488374e-09,
+              -4.058977807030914e-10
+            ],
+            "total": [
+              6.582394031442142e-08,
+              -3.798233814905519e-09
+            ],
+            "velocity": [
+              5.8405580356437154e-08,
+              -3.6145327284965305e-09
+            ]
+          },
+          "p_wave": 0.1,
+          "q_wave": 0.0,
+          "quadratic_observable_dense_check": null,
+          "quadratic_observable_estimate": [
+            0.00013673188170062447,
+            1.5549529270566227e-05
+          ],
+          "quadratic_observable_standard_error_complex_norm": 1.4258062071443652e-05,
+          "standard_error_complex_norms": {
+            "cross": 1.3165516601724433e-09,
+            "diffusion": 6.260578687714016e-10,
+            "total": 7.535249736923152e-09,
+            "velocity": 7.329644031316032e-09
+          }
+        },
+        {
+          "dense_checks": null,
+          "estimates": {
+            "cross": [
+              -6.005914061634824e-09,
+              8.386344080155716e-09
+            ],
+            "diffusion": [
+              -1.6343958508778e-08,
+              5.828501476721023e-10
+            ],
+            "total": [
+              -9.722000281290817e-09,
+              9.941456117367846e-09
+            ],
+            "velocity": [
+              1.2627872289122005e-08,
+              9.722618895400268e-10
+            ]
+          },
+          "p_wave": -0.2,
+          "q_wave": -0.1,
+          "quadratic_observable_dense_check": null,
+          "quadratic_observable_estimate": [
+            -5.056993353575315e-05,
+            4.1188326988390726e-07
+          ],
+          "quadratic_observable_standard_error_complex_norm": 6.931307433248523e-06,
+          "standard_error_complex_norms": {
+            "cross": 8.140865287641073e-09,
+            "diffusion": 2.479813682608549e-09,
+            "total": 1.4128844083385366e-08,
+            "velocity": 1.0767830954115898e-08
+          }
+        },
+        {
+          "dense_checks": null,
+          "estimates": {
+            "cross": [
+              2.743703838872072e-09,
+              -7.175587844804082e-10
+            ],
+            "diffusion": [
+              -1.4881966942936648e-08,
+              3.602284211533178e-10
+            ],
+            "total": [
+              -1.1554562321579926e-09,
+              -1.3759058038648368e-09
+            ],
+            "velocity": [
+              1.098280687190658e-08,
+              -1.0185754405377457e-09
+            ]
+          },
+          "p_wave": -0.1,
+          "q_wave": -0.2,
+          "quadratic_observable_dense_check": null,
+          "quadratic_observable_estimate": [
+            -4.803490609106517e-05,
+            8.858859681402252e-07
+          ],
+          "quadratic_observable_standard_error_complex_norm": 7.512170133035772e-06,
+          "standard_error_complex_norms": {
+            "cross": 8.417695719087385e-09,
+            "diffusion": 2.3654216434003027e-09,
+            "total": 1.3207547599540476e-08,
+            "velocity": 9.380712003652248e-09
+          }
+        }
+      ],
+      "quadratic_spin_observable_structure_correction": {
+        "absolute_dense_difference": null,
+        "dense_check": null,
+        "estimate": [
+          0.13407627506653294,
+          0.014898848504835744
+        ],
+        "standard_error_complex_norm": 0.016948946888140495
+      },
+      "standard_error_complex_norms": {
+        "cross": 0.0008286062098474749,
+        "diffusion": 0.0002473571848891348,
+        "total": 0.0015138150589103553,
+        "velocity": 0.0012024692402504132
+      },
+      "time": 20.0
+    },
+    {
+      "absolute_dense_differences": null,
+      "continuity_memory_estimates": {
+        "cross": [
+          -0.0003546211376544388,
+          0.00045425085242779985
+        ],
+        "diffusion": [
+          -0.001150409281904677,
+          4.251499253897376e-05
+        ],
+        "total": [
+          0.008514694719900408,
+          -0.00013042004842053694
+        ],
+        "velocity": [
+          0.010019725139459524,
+          -0.0006271858933873107
+        ]
+      },
+      "dense_checks": null,
+      "internal_wave_rows": [
+        {
+          "dense_checks": null,
+          "estimates": {
+            "cross": [
+              -2.7506388587530862e-09,
+              -4.989623876411293e-10
+            ],
+            "diffusion": [
+              6.678874699492745e-09,
+              7.05172094449762e-10
+            ],
+            "total": [
+              5.3113757869673185e-08,
+              2.568543208784406e-10
+            ],
+            "velocity": [
+              4.918552202893352e-08,
+              5.0644614069808234e-11
+            ]
+          },
+          "p_wave": 0.0,
+          "q_wave": 0.1,
+          "quadratic_observable_dense_check": null,
+          "quadratic_observable_estimate": [
+            0.0001366792800325533,
+            4.61603140315888e-06
+          ],
+          "quadratic_observable_standard_error_complex_norm": 1.6042708365506186e-05,
+          "standard_error_complex_norms": {
+            "cross": 1.337696286100215e-09,
+            "diffusion": 5.820338092828043e-10,
+            "total": 5.869568474456232e-09,
+            "velocity": 5.852131972991037e-09
+          }
+        },
+        {
+          "dense_checks": null,
+          "estimates": {
+            "cross": [
+              -8.54644572372947e-10,
+              2.11942179268464e-10
+            ],
+            "diffusion": [
+              7.365989611005506e-09,
+              -4.369829819972156e-10
+            ],
+            "total": [
+              5.974469215691069e-08,
+              -3.987802340671456e-09
+            ],
+            "velocity": [
+              5.323334711827812e-08,
+              -3.762761537942706e-09
+            ]
+          },
+          "p_wave": 0.1,
+          "q_wave": 0.0,
+          "quadratic_observable_dense_check": null,
+          "quadratic_observable_estimate": [
+            0.00012099486644897911,
+            1.5371406607076007e-05
+          ],
+          "quadratic_observable_standard_error_complex_norm": 1.3862913573426068e-05,
+          "standard_error_complex_norms": {
+            "cross": 1.381789818945212e-09,
+            "diffusion": 5.924598657433241e-10,
+            "total": 7.328040654254059e-09,
+            "velocity": 7.102157140576156e-09
+          }
+        },
+        {
+          "dense_checks": null,
+          "estimates": {
+            "cross": [
+              -6.9457873001469005e-09,
+              7.250322167752502e-09
+            ],
+            "diffusion": [
+              -1.6042003117618588e-08,
+              2.705352220961042e-10
+            ],
+            "total": [
+              -1.6750799267821062e-09,
+              5.308067628257216e-09
+            ],
+            "velocity": [
+              2.1312710490983383e-08,
+              -2.2127897615913916e-09
+            ]
+          },
+          "p_wave": -0.2,
+          "q_wave": -0.1,
+          "quadratic_observable_dense_check": null,
+          "quadratic_observable_estimate": [
+            -4.99840161165527e-05,
+            -6.773437802436527e-07
+          ],
+          "quadratic_observable_standard_error_complex_norm": 6.425240404475212e-06,
+          "standard_error_complex_norms": {
+            "cross": 7.787031607820638e-09,
+            "diffusion": 2.3171613099783892e-09,
+            "total": 1.3296031798498026e-08,
+            "velocity": 1.0318931777679624e-08
+          }
+        },
+        {
+          "dense_checks": null,
+          "estimates": {
+            "cross": [
+              5.478464424584545e-09,
+              -4.655625575926803e-10
+            ],
+            "diffusion": [
+              -1.4458657982830208e-08,
+              6.942277340000228e-11
+            ],
+            "total": [
+              1.0613357589288653e-08,
+              -3.4426868008555587e-09
+            ],
+            "velocity": [
+              1.959355114753432e-08,
+              -3.046547016662879e-09
+            ]
+          },
+          "p_wave": -0.1,
+          "q_wave": -0.2,
+          "quadratic_observable_dense_check": null,
+          "quadratic_observable_estimate": [
+            -4.864402681674352e-05,
+            -7.498374018401809e-07
+          ],
+          "quadratic_observable_standard_error_complex_norm": 7.060471444230008e-06,
+          "standard_error_complex_norms": {
+            "cross": 8.013971354540828e-09,
+            "diffusion": 2.1506453757213685e-09,
+            "total": 1.2779603342780175e-08,
+            "velocity": 9.236202450613619e-09
+          }
+        }
+      ],
+      "quadratic_spin_observable_structure_correction": {
+        "absolute_dense_difference": null,
+        "dense_check": null,
+        "estimate": [
+          0.11118763564484516,
+          0.012975301045695404
+        ],
+        "standard_error_complex_norm": 0.016255665455643872
+      },
+      "standard_error_complex_norms": {
+        "cross": 0.0007926601454136023,
+        "diffusion": 0.00022851050786440937,
+        "total": 0.0014467202126479022,
+        "velocity": 0.0011624173426158621
+      },
+      "time": 22.0
+    },
+    {
+      "absolute_dense_differences": null,
+      "continuity_memory_estimates": {
+        "cross": [
+          -0.00028954321764852373,
+          0.0003888723945224534
+        ],
+        "diffusion": [
+          -0.0010327858196229024,
+          1.2616618643596756e-05
+        ],
+        "total": [
+          0.009347578170959056,
+          -0.0005173405134302611
+        ],
+        "velocity": [
+          0.010669907208230483,
+          -0.0009188295265963116
+        ]
+      },
+      "dense_checks": null,
+      "internal_wave_rows": [
+        {
+          "dense_checks": null,
+          "estimates": {
+            "cross": [
+              -2.8060569712269025e-09,
+              -5.499469114554919e-10
+            ],
+            "diffusion": [
+              5.872421788541952e-09,
+              7.271268888585883e-10
+            ],
+            "total": [
+              4.718410389883316e-08,
+              3.8840562149934886e-10
+            ],
+            "velocity": [
+              4.411773908151811e-08,
+              2.112256440962525e-10
+            ]
+          },
+          "p_wave": 0.0,
+          "q_wave": 0.1,
+          "quadratic_observable_dense_check": null,
+          "quadratic_observable_estimate": [
+            0.00011981760188369106,
+            4.727994991023379e-06
+          ],
+          "quadratic_observable_standard_error_complex_norm": 1.536881992426828e-05,
+          "standard_error_complex_norms": {
+            "cross": 1.3918864271818451e-09,
+            "diffusion": 5.477309045718603e-10,
+            "total": 5.5817505068843395e-09,
+            "velocity": 5.531297964579279e-09
+          }
+        },
+        {
+          "dense_checks": null,
+          "estimates": {
+            "cross": [
+              -9.23319138263441e-10,
+              1.9285740102554798e-10
+            ],
+            "diffusion": [
+              6.557956626193092e-09,
+              -4.647416844335022e-10
+            ],
+            "total": [
+              5.3621420303436744e-08,
+              -4.149712806336495e-09
+            ],
+            "velocity": [
+              4.798678281550709e-08,
+              -3.877828522928542e-09
+            ]
+          },
+          "p_wave": 0.1,
+          "q_wave": 0.0,
+          "quadratic_observable_dense_check": null,
+          "quadratic_observable_estimate": [
+            0.00010537217389367169,
+            1.4872529769552072e-05
+          ],
+          "quadratic_observable_standard_error_complex_norm": 1.3484945945768766e-05,
+          "standard_error_complex_norms": {
+            "cross": 1.43485982595849e-09,
+            "diffusion": 5.613981847205154e-10,
+            "total": 7.125323254666577e-09,
+            "velocity": 6.88048366793635e-09
+          }
+        },
+        {
+          "dense_checks": null,
+          "estimates": {
+            "cross": [
+              -7.603023801821772e-09,
+              6.571590733182543e-09
+            ],
+            "diffusion": [
+              -1.4291059330102363e-08,
+              1.7647582433956843e-10
+            ],
+            "total": [
+              8.531818452520154e-09,
+              1.9580604509632935e-09
+            ],
+            "velocity": [
+              3.042590158444429e-08,
+              -4.790006106558818e-09
+            ]
+          },
+          "p_wave": -0.2,
+          "q_wave": -0.1,
+          "quadratic_observable_dense_check": null,
+          "quadratic_observable_estimate": [
+            -4.612942409102606e-05,
+            -1.6147168962121066e-06
+          ],
+          "quadratic_observable_standard_error_complex_norm": 5.965004235780134e-06,
+          "standard_error_complex_norms": {
+            "cross": 7.418344989501055e-09,
+            "diffusion": 2.138998328961095e-09,
+            "total": 1.2694389808029804e-08,
+            "velocity": 1.0122649905287223e-08
+          }
+        },
+        {
+          "dense_checks": null,
+          "estimates": {
+            "cross": [
+              7.190687542959259e-09,
+              -6.519547428701385e-10
+            ],
+            "diffusion": [
+              -1.2912594859249765e-08,
+              -2.583891603252857e-10
+            ],
+            "total": [
+              2.4373197827641047e-08,
+              -5.596945957654229e-09
+            ],
+            "velocity": [
+              3.0095105143931554e-08,
+              -4.686602054458808e-09
+            ]
+          },
+          "p_wave": -0.1,
+          "q_wave": -0.2,
+          "quadratic_observable_dense_check": null,
+          "quadratic_observable_estimate": [
+            -4.565006568168183e-05,
+            -2.789533218244667e-06
+          ],
+          "quadratic_observable_standard_error_complex_norm": 6.5129551467209825e-06,
+          "standard_error_complex_norms": {
+            "cross": 7.661168558362204e-09,
+            "diffusion": 1.9490679929285375e-09,
+            "total": 1.24570538955959e-08,
+            "velocity": 9.182300959918759e-09
+          }
+        }
+      ],
+      "quadratic_spin_observable_structure_correction": {
+        "absolute_dense_difference": null,
+        "dense_check": null,
+        "estimate": [
+          0.09326587662715898,
+          0.010623572730275662
+        ],
+        "standard_error_complex_norm": 0.015570181414697475
+      },
+      "standard_error_complex_norms": {
+        "cross": 0.0007585101307553834,
+        "diffusion": 0.00020960313521745268,
+        "total": 0.0013951226405470255,
+        "velocity": 0.001137433518292449
+      },
+      "time": 24.0
+    },
+    {
+      "absolute_dense_differences": null,
+      "continuity_memory_estimates": {
+        "cross": [
+          -0.0002748852257578119,
+          0.0003350026945734859
+        ],
+        "diffusion": [
+          -0.000827717366446119,
+          -1.1994661042919932e-05
+        ],
+        "total": [
+          0.009983409033441469,
+          -0.0007765879535220364
+        ],
+        "velocity": [
+          0.0110860116256454,
+          -0.0010995959870526027
+        ]
+      },
+      "dense_checks": null,
+      "internal_wave_rows": [
+        {
+          "dense_checks": null,
+          "estimates": {
+            "cross": [
+              -2.834789890821161e-09,
+              -6.000960954517714e-10
+            ],
+            "diffusion": [
+              5.0932684116023215e-09,
+              7.418750064693826e-10
+            ],
+            "total": [
+              4.131252091058367e-08,
+              5.21072124413457e-10
+            ],
+            "velocity": [
+              3.9054042389802505e-08,
+              3.7929321339584553e-10
+            ]
+          },
+          "p_wave": 0.0,
+          "q_wave": 0.1,
+          "quadratic_observable_dense_check": null,
+          "quadratic_observable_estimate": [
+            0.00010325505446650035,
+            4.8103335594076e-06
+          ],
+          "quadratic_observable_standard_error_complex_norm": 1.4726184676657107e-05,
+          "standard_error_complex_norms": {
+            "cross": 1.4360343589298217e-09,
+            "diffusion": 5.160977321625581e-10,
+            "total": 5.310228957348885e-09,
+            "velocity": 5.222849561835202e-09
+          }
+        },
+        {
+          "dense_checks": null,
+          "estimates": {
+            "cross": [
+              -9.861140652700497e-10,
+              1.6503975011257978e-10
+            ],
+            "diffusion": [
+              5.781507049162148e-09,
+              -4.885771008870426e-10
+            ],
+            "total": [
+              4.750994589602396e-08,
+              -4.288032581214262e-09
+            ],
+            "velocity": [
+              4.271455291213187e-08,
+              -3.964495230439799e-09
+            ]
+          },
+          "p_wave": 0.1,
+          "q_wave": 0.0,
+          "quadratic_observable_dense_check": null,
+          "quadratic_observable_estimate": [
+            9.003700616518309e-05,
+            1.4084098372974134e-05
+          ],
+          "quadratic_observable_standard_error_complex_norm": 1.3127069311167476e-05,
+          "standard_error_complex_norms": {
+            "cross": 1.4761713890085817e-09,
+            "diffusion": 5.329711611651384e-10,
+            "total": 6.927813003682563e-09,
+            "velocity": 6.666314391708922e-09
+          }
+        },
+        {
+          "dense_checks": null,
+          "estimates": {
+            "cross": [
+              -8.049229414413918e-09,
+              6.228392968668285e-09
+            ],
+            "diffusion": [
+              -1.1824940524933307e-08,
+              2.031957825180693e-10
+            ],
+            "total": [
+              1.738419469045378e-08,
+              -9.011666515277036e-11
+            ],
+            "velocity": [
+              3.7258364629801e-08,
+              -6.521705416339124e-09
+            ]
+          },
+          "p_wave": -0.2,
+          "q_wave": -0.1,
+          "quadratic_observable_dense_check": null,
+          "quadratic_observable_estimate": [
+            -4.055933585112589e-05,
+            -2.4204250501156354e-06
+          ],
+          "quadratic_observable_standard_error_complex_norm": 5.503931885410084e-06,
+          "standard_error_complex_norms": {
+            "cross": 7.0478634849140495e-09,
+            "diffusion": 1.959749983850092e-09,
+            "total": 1.2300485304675377e-08,
+            "velocity": 1.0014009454638146e-08
+          }
+        },
+        {
+          "dense_checks": null,
+          "estimates": {
+            "cross": [
+              7.938093281137138e-09,
+              -1.001358365938836e-09
+            ],
+            "diffusion": [
+              -1.0889750517179001e-08,
+              -6.280688898927934e-10
+            ],
+            "total": [
+              3.659899289862528e-08,
+              -7.25146811815784e-09
+            ],
+            "velocity": [
+              3.9550650134667143e-08,
+              -5.622040862326213e-09
+            ]
+          },
+          "p_wave": -0.1,
+          "q_wave": -0.2,
+          "quadratic_observable_dense_check": null,
+          "quadratic_observable_estimate": [
+            -4.049161178802547e-05,
+            -4.946025797327146e-06
+          ],
+          "quadratic_observable_standard_error_complex_norm": 5.894708114890803e-06,
+          "standard_error_complex_norms": {
+            "cross": 7.36077276441996e-09,
+            "diffusion": 1.7747403239793901e-09,
+            "total": 1.2169679677133374e-08,
+            "velocity": 9.131628445099061e-09
+          }
+        }
+      ],
+      "quadratic_spin_observable_structure_correction": {
+        "absolute_dense_difference": null,
+        "dense_check": null,
+        "estimate": [
+          0.07846670680618477,
+          0.008059103190818618
+        ],
+        "standard_error_complex_norm": 0.01489934635300838
+      },
+      "standard_error_complex_norms": {
+        "cross": 0.0007268344862263192,
+        "diffusion": 0.00019197310847979027,
+        "total": 0.0013548588018331166,
+        "velocity": 0.0011172004278958948
+      },
+      "time": 26.0
+    },
+    {
+      "absolute_dense_differences": null,
+      "continuity_memory_estimates": {
+        "cross": [
+          -0.0003046089275402309,
+          0.00030625080810474706
+        ],
+        "diffusion": [
+          -0.0005970766661036961,
+          -3.663140176829582e-05
+        ],
+        "total": [
+          0.010171074124289765,
+          -0.0008842878003560028
+        ],
+        "velocity": [
+          0.011072759717933691,
+          -0.0011539072066924538
+        ]
+      },
+      "dense_checks": null,
+      "internal_wave_rows": [
+        {
+          "dense_checks": null,
+          "estimates": {
+            "cross": [
+              -2.839957389613256e-09,
+              -6.48403062216595e-10
+            ],
+            "diffusion": [
+              4.347016378127268e-09,
+              7.495834369943515e-10
+            ],
+            "total": [
+              3.5547804835825946e-08,
+              6.461904291303299e-10
+            ],
+            "velocity": [
+              3.4040745847311934e-08,
+              5.450100543525739e-10
+            ]
+          },
+          "p_wave": 0.0,
+          "q_wave": 0.1,
+          "quadratic_observable_dense_check": null,
+          "quadratic_observable_estimate": [
+            8.715024218332724e-05,
+            4.873847434870392e-06
+          ],
+          "quadratic_observable_standard_error_complex_norm": 1.4130090246122402e-05,
+          "standard_error_complex_norms": {
+            "cross": 1.4707862082832842e-09,
+            "diffusion": 4.874385334713271e-10,
+            "total": 5.0595050448861665e-09,
+            "velocity": 4.932351306098359e-09
+          }
+        },
+        {
+          "dense_checks": null,
+          "estimates": {
+            "cross": [
+              -1.0410858281179714e-09,
+              1.2892599554385836e-10
+            ],
+            "diffusion": [
+              5.040984457049474e-09,
+              -5.079141035190018e-10
+            ],
+            "total": [
+              4.146150978929057e-08,
+              -4.407046362065839e-09
+            ],
+            "velocity": [
+              3.7461611160359067e-08,
+              -4.028058254090695e-09
+            ]
+          },
+          "p_wave": 0.1,
+          "q_wave": 0.0,
+          "quadratic_observable_dense_check": null,
+          "quadratic_observable_estimate": [
+            7.514324131182272e-05,
+            1.3044520684697631e-05
+          ],
+          "quadratic_observable_standard_error_complex_norm": 1.2791903436376504e-05,
+          "standard_error_complex_norms": {
+            "cross": 1.5062989020731238e-09,
+            "diffusion": 5.071796002760411e-10,
+            "total": 6.735968228861656e-09,
+            "velocity": 6.460943564951658e-09
+          }
+        },
+        {
+          "dense_checks": null,
+          "estimates": {
+            "cross": [
+              -8.273771190471521e-09,
+              6.028165779266683e-09
+            ],
+            "diffusion": [
+              -9.167647693408219e-09,
+              2.521876111473927e-10
+            ],
+            "total": [
+              2.3241987835014145e-08,
+              -1.0135989151568683e-09
+            ],
+            "velocity": [
+              4.068340671889389e-08,
+              -7.293952305570944e-09
+            ]
+          },
+          "p_wave": -0.2,
+          "q_wave": -0.1,
+          "quadratic_observable_dense_check": null,
+          "quadratic_observable_estimate": [
+            -3.437976465394496e-05,
+            -3.0727060824320004e-06
+          ],
+          "quadratic_observable_standard_error_complex_norm": 5.024787064276917e-06,
+          "standard_error_complex_norms": {
+            "cross": 6.715816533469081e-09,
+            "diffusion": 1.8044409007001481e-09,
+            "total": 1.1996757346646172e-08,
+            "velocity": 9.837660778765231e-09
+          }
+        },
+        {
+          "dense_checks": null,
+          "estimates": {
+            "cross": [
+              7.797597641220723e-09,
+              -1.1279859973081027e-09
+            ],
+            "diffusion": [
+              -8.76111549476013e-09,
+              -1.0178434189252498e-09
+            ],
+            "total": [
+              4.5238769253933564e-08,
+              -7.87466105820339e-09
+            ],
+            "velocity": [
+              4.6202287107472964e-08,
+              -5.728831641970035e-09
+            ]
+          },
+          "p_wave": -0.1,
+          "q_wave": -0.2,
+          "quadratic_observable_dense_check": null,
+          "quadratic_observable_estimate": [
+            -3.431452105023911e-05,
+            -6.809996453309626e-06
+          ],
+          "quadratic_observable_standard_error_complex_norm": 5.251428499053662e-06,
+          "standard_error_complex_norms": {
+            "cross": 7.093038069341893e-09,
+            "diffusion": 1.635495260933683e-09,
+            "total": 1.1877682146409223e-08,
+            "velocity": 9.052858520907782e-09
+          }
+        }
+      ],
+      "quadratic_spin_observable_structure_correction": {
+        "absolute_dense_difference": null,
+        "dense_check": null,
+        "estimate": [
+          0.06543431915938391,
+          0.0056176582586151625
+        ],
+        "standard_error_complex_norm": 0.014260732474459888
+      },
+      "standard_error_complex_norms": {
+        "cross": 0.0006985504440008356,
+        "diffusion": 0.0001772119403046589,
+        "total": 0.0013189921841979166,
+        "velocity": 0.0010938158759905058
+      },
+      "time": 28.0
+    },
+    {
+      "absolute_dense_differences": null,
+      "continuity_memory_estimates": {
+        "cross": [
+          -0.00036856121729463346,
+          0.0003149151273920134
+        ],
+        "diffusion": [
+          -0.0003730411834173611,
+          -6.289685287626298e-05
+        ],
+        "total": [
+          0.00987505437216888,
+          -0.0008407026794513861
+        ],
+        "velocity": [
+          0.010616656772880876,
+          -0.0010927209539671366
+        ]
+      },
+      "dense_checks": null,
+      "internal_wave_rows": [
+        {
+          "dense_checks": null,
+          "estimates": {
+            "cross": [
+              -2.824899890878999e-09,
+              -6.936744725620067e-10
+            ],
+            "diffusion": [
+              3.6383160744387624e-09,
+              7.504760193447912e-10
+            ],
+            "total": [
+              2.9932013731201894e-08,
+              7.549652811043033e-10
+            ],
+            "velocity": [
+              2.9118597547642132e-08,
+              6.981637343215196e-10
+            ]
+          },
+          "p_wave": 0.0,
+          "q_wave": 0.1,
+          "quadratic_observable_dense_check": null,
+          "quadratic_observable_estimate": [
+            7.163731484780908e-05,
+            4.929541682017317e-06
+          ],
+          "quadratic_observable_standard_error_complex_norm": 1.3595741392924168e-05,
+          "standard_error_complex_norms": {
+            "cross": 1.4968255528605228e-09,
+            "diffusion": 4.6196615345257047e-10,
+            "total": 4.833514539458823e-09,
+            "velocity": 4.665081439470368e-09
+          }
+        },
+        {
+          "dense_checks": null,
+          "estimates": {
+            "cross": [
+              -1.0864192241154964e-09,
+              8.528475375114168e-11
+            ],
+            "diffusion": [
+              4.339782206421095e-09,
+              -5.222374415276649e-10
+            ],
+            "total": [
+              3.552196998520273e-08,
+              -4.5110372313053725e-09
+            ],
+            "velocity": [
+              3.2268607002897124e-08,
+              -4.074084543528849e-09
+            ]
+          },
+          "p_wave": 0.1,
+          "q_wave": 0.0,
+          "quadratic_observable_dense_check": null,
+          "quadratic_observable_estimate": [
+            6.0822804888497996e-05,
+            1.1797668282741227e-05
+          ],
+          "quadratic_observable_standard_error_complex_norm": 1.2481596300553402e-05,
+          "standard_error_complex_norms": {
+            "cross": 1.525977611741492e-09,
+            "diffusion": 4.83930377274562e-10,
+            "total": 6.550069684085087e-09,
+            "velocity": 6.265284590069897e-09
+          }
+        },
+        {
+          "dense_checks": null,
+          "estimates": {
+            "cross": [
+              -8.204664225960344e-09,
+              5.799742063619741e-09
+            ],
+            "diffusion": [
+              -6.634336283103641e-09,
+              2.5011124242933973e-10
+            ],
+            "total": [
+              2.6120820301540727e-08,
+              -1.0948396969440021e-09
+            ],
+            "velocity": [
+              4.095982081060471e-08,
+              -7.1446930029930805e-09
+            ]
+          },
+          "p_wave": -0.2,
+          "q_wave": -0.1,
+          "quadratic_observable_dense_check": null,
+          "quadratic_observable_estimate": [
+            -2.8218537714644634e-05,
+            -3.5078810648960192e-06
+          ],
+          "quadratic_observable_standard_error_complex_norm": 4.559260816587552e-06,
+          "standard_error_complex_norms": {
+            "cross": 6.437472037023065e-09,
+            "diffusion": 1.6861917850878124e-09,
+            "total": 1.16463203251713e-08,
+            "velocity": 9.526840190395148e-09
+          }
+        },
+        {
+          "dense_checks": null,
+          "estimates": {
+            "cross": [
+              6.8439739858009765e-09,
+              -6.867126274862909e-10
+            ],
+            "diffusion": [
+              -6.679854121800306e-09,
+              -1.378045125160532e-09
+            ],
+            "total": [
+              4.968091305092015e-08,
+              -7.174749716534073e-09
+            ],
+            "velocity": [
+              4.951679318691948e-08,
+              -5.1099919638872514e-09
+            ]
+          },
+          "p_wave": -0.1,
+          "q_wave": -0.2,
+          "quadratic_observable_dense_check": null,
+          "quadratic_observable_estimate": [
+            -2.7898040716919903e-05,
+            -7.949872023045608e-06
+          ],
+          "quadratic_observable_standard_error_complex_norm": 4.6352585315106905e-06,
+          "standard_error_complex_norms": {
+            "cross": 6.814094083402832e-09,
+            "diffusion": 1.5224924596498972e-09,
+            "total": 1.1558329870448224e-08,
+            "velocity": 8.934138785704776e-09
+          }
+        }
+      ],
+      "quadratic_spin_observable_structure_correction": {
+        "absolute_dense_difference": null,
+        "dense_check": null,
+        "estimate": [
+          0.05337105194692481,
+          0.0036838277593392844
+        ],
+        "standard_error_complex_norm": 0.013679809950525769
+      },
+      "standard_error_complex_norms": {
+        "cross": 0.0006721530475551546,
+        "diffusion": 0.00016556536764249601,
+        "total": 0.0012804966791027457,
+        "velocity": 0.0010638962197646574
+      },
+      "time": 30.0
+    },
+    {
+      "absolute_dense_differences": null,
+      "continuity_memory_estimates": {
+        "cross": [
+          -0.0004548454510229891,
+          0.0003661245199966225
+        ],
+        "diffusion": [
+          -0.00016704160022503674,
+          -8.836526255268861e-05
+        ],
+        "total": [
+          0.009210654557509634,
+          -0.000672656942097971
+        ],
+        "velocity": [
+          0.009832541608757659,
+          -0.0009504161995419045
+        ]
+      },
+      "dense_checks": null,
+      "internal_wave_rows": [
+        {
+          "dense_checks": null,
+          "estimates": {
+            "cross": [
+              -2.793048403502777e-09,
+              -7.345661317797851e-10
+            ],
+            "diffusion": [
+              2.970821489570246e-09,
+              7.448329697921372e-10
+            ],
+            "total": [
+              2.450013282616835e-08,
+              8.389912191318509e-10
+            ],
+            "velocity": [
+              2.4322359740100877e-08,
+              8.287243811194989e-10
+            ]
+          },
+          "p_wave": 0.0,
+          "q_wave": 0.1,
+          "quadratic_observable_dense_check": null,
+          "quadratic_observable_estimate": [
+            5.6824460966358e-05,
+            4.988009712029294e-06
+          ],
+          "quadratic_observable_standard_error_complex_norm": 1.3136410619170043e-05,
+          "standard_error_complex_norms": {
+            "cross": 1.5148428022793216e-09,
+            "diffusion": 4.397729499893584e-10,
+            "total": 4.6353675398665366e-09,
+            "velocity": 4.425766002844118e-09
+          }
+        },
+        {
+          "dense_checks": null,
+          "estimates": {
+            "cross": [
+              -1.1205796237714827e-09,
+              3.5192003087038176e-11
+            ],
+            "diffusion": [
+              3.680326578636145e-09,
+              -5.311285727554878e-10
+            ],
+            "total": [
+              2.9731234496944448e-08,
+              -4.6040762249482476e-09
+            ],
+            "velocity": [
+              2.7171487542079783e-08,
+              -4.108139655279796e-09
+            ]
+          },
+          "p_wave": 0.1,
+          "q_wave": 0.0,
+          "quadratic_observable_dense_check": null,
+          "quadratic_observable_estimate": [
+            4.718397739954842e-05,
+            1.0390997663618257e-05
+          ],
+          "quadratic_observable_standard_error_complex_norm": 1.2197588569710497e-05,
+          "standard_error_complex_norms": {
+            "cross": 1.5360890887826258e-09,
+            "diffusion": 4.630480189770748e-10,
+            "total": 6.370312393255372e-09,
+            "velocity": 6.079910405707546e-09
+          }
+        },
+        {
+          "dense_checks": null,
+          "estimates": {
+            "cross": [
+              -7.763471725457219e-09,
+              5.4506638992289865e-09
+            ],
+            "diffusion": [
+              -4.368172605745097e-09,
+              1.63975073815778e-10
+            ],
+            "total": [
+              2.7089957034300612e-08,
+              -6.42318551034711e-10
+            ],
+            "velocity": [
+              3.922160136550292e-08,
+              -6.256957524079474e-09
+            ]
+          },
+          "p_wave": -0.2,
+          "q_wave": -0.1,
+          "quadratic_observable_dense_check": null,
+          "quadratic_observable_estimate": [
+            -2.232383266971578e-05,
+            -3.6474979447649177e-06
+          ],
+          "quadratic_observable_standard_error_complex_norm": 4.165088839372764e-06,
+          "standard_error_complex_norms": {
+            "cross": 6.183806945795906e-09,
+            "diffusion": 1.592581630073137e-09,
+            "total": 1.1178886627682404e-08,
+            "velocity": 9.10644398003129e-09
+          }
+        },
+        {
+          "dense_checks": null,
+          "estimates": {
+            "cross": [
+              5.170855035655294e-09,
+              4.858643411791297e-10
+            ],
+            "diffusion": [
+              -4.672388232341159e-09,
+              -1.6416824885003317e-09
+            ],
+            "total": [
+              5.043062000265424e-08,
+              -5.214481560580454e-09
+            ],
+            "velocity": [
+              4.99321531993401e-08,
+              -4.05866341325925e-09
+            ]
+          },
+          "p_wave": -0.1,
+          "q_wave": -0.2,
+          "quadratic_observable_dense_check": null,
+          "quadratic_observable_estimate": [
+            -2.168541486548861e-05,
+            -8.0392790582287e-06
+          ],
+          "quadratic_observable_standard_error_complex_norm": 4.096178234287103e-06,
+          "standard_error_complex_norms": {
+            "cross": 6.480865255693947e-09,
+            "diffusion": 1.4219601631812517e-09,
+            "total": 1.1195643804670992e-08,
+            "velocity": 8.759117611813718e-09
+          }
+        }
+      ],
+      "quadratic_spin_observable_structure_correction": {
+        "absolute_dense_difference": null,
+        "dense_check": null,
+        "estimate": [
+          0.041944870199516524,
+          0.002581203539305627
+        ],
+        "standard_error_complex_norm": 0.01318064998321493
+      },
+      "standard_error_complex_norms": {
+        "cross": 0.0006441329920117847,
+        "diffusion": 0.0001557905895976178,
+        "total": 0.0012355869282883265,
+        "velocity": 0.0010279298893035682
+      },
+      "time": 32.0
+    },
+    {
+      "absolute_dense_differences": null,
+      "continuity_memory_estimates": {
+        "cross": [
+          -0.0005508396199182037,
+          0.0004527608955148878
+        ],
+        "diffusion": [
+          1.9739701989964722e-05,
+          -0.00010783724192139115
+        ],
+        "total": [
+          0.008357966036777922,
+          -0.00043018785632236404
+        ],
+        "velocity": [
+          0.008889065954706163,
+          -0.0007751115099158606
+        ]
+      },
+      "dense_checks": null,
+      "internal_wave_rows": [
+        {
+          "dense_checks": null,
+          "estimates": {
+            "cross": [
+              -2.7477961071992787e-09,
+              -7.696337339413553e-10
+            ],
+            "diffusion": [
+              2.347177407461001e-09,
+              7.329899898396502e-10
+            ],
+            "total": [
+              1.9280031187432653e-08,
+              8.907498612114638e-10
+            ],
+            "velocity": [
+              1.9680649887170934e-08,
+              9.273936053131692e-10
+            ]
+          },
+          "p_wave": 0.0,
+          "q_wave": 0.1,
+          "quadratic_observable_dense_check": null,
+          "quadratic_observable_estimate": [
+            4.279353354528431e-05,
+            5.0588458160400044e-06
+          ],
+          "quadratic_observable_standard_error_complex_norm": 1.2761182557023684e-05,
+          "standard_error_complex_norms": {
+            "cross": 1.5255069556864274e-09,
+            "diffusion": 4.208089297185652e-10,
+            "total": 4.467106934712223e-09,
+            "velocity": 4.218267140374954e-09
+          }
+        },
+        {
+          "dense_checks": null,
+          "estimates": {
+            "cross": [
+              -1.1424497932901357e-09,
+              -2.00093042331688e-11
+            ],
+            "diffusion": [
+              3.0640951271278364e-09,
+              -5.342987753975102e-10
+            ],
+            "total": [
+              2.4122943234044007e-08,
+              -4.689830836309493e-09
+            ],
+            "velocity": [
+              2.2201297900206308e-08,
+              -4.1355227566788125e-09
+            ]
+          },
+          "p_wave": 0.1,
+          "q_wave": 0.0,
+          "quadratic_observable_dense_check": null,
+          "quadratic_observable_estimate": [
+            3.4310665329474675e-05,
+            8.873625012201858e-06
+          ],
+          "quadratic_observable_standard_error_complex_norm": 1.1940356326062685e-05,
+          "standard_error_complex_norms": {
+            "cross": 1.5376356299463135e-09,
+            "diffusion": 4.442929470612021e-10,
+            "total": 6.196894823317226e-09,
+            "velocity": 5.905111055783835e-09
+          }
+        },
+        {
+          "dense_checks": null,
+          "estimates": {
+            "cross": [
+              -6.92421224121492e-09,
+              4.975258767335166e-09
+            ],
+            "diffusion": [
+              -2.3985000464498756e-09,
+              3.043838872227501e-12
+            ],
+            "total": [
+              2.752576820681675e-08,
+              6.257244957228608e-11
+            ],
+            "velocity": [
+              3.684848049448155e-08,
+              -4.915730156635106e-09
+            ]
+          },
+          "p_wave": -0.2,
+          "q_wave": -0.1,
+          "quadratic_observable_dense_check": null,
+          "quadratic_observable_estimate": [
+            -1.6733522828853874e-05,
+            -3.438266360484876e-06
+          ],
+          "quadratic_observable_standard_error_complex_norm": 3.877313843197848e-06,
+          "standard_error_complex_norms": {
+            "cross": 5.9172705040641e-09,
+            "diffusion": 1.4985519919005378e-09,
+            "total": 1.0620489854605204e-08,
+            "velocity": 8.646204345633112e-09
+          }
+        },
+        {
+          "dense_checks": null,
+          "estimates": {
+            "cross": [
+              2.9350842598977734e-09,
+              2.2908108854556144e-09
+            ],
+            "diffusion": [
+              -2.7304099153133737e-09,
+              -1.7442710597251607e-09
+            ],
+            "total": [
+              4.8626091326812086e-08,
+              -2.417026617571126e-09
+            ],
+            "velocity": [
+              4.8421416982227685e-08,
+              -2.9635664433015808e-09
+            ]
+          },
+          "p_wave": -0.1,
+          "q_wave": -0.2,
+          "quadratic_observable_dense_check": null,
+          "quadratic_observable_estimate": [
+            -1.5883913962363027e-05,
+            -6.9694720112276115e-06
+          ],
+          "quadratic_observable_standard_error_complex_norm": 3.680388457203716e-06,
+          "standard_error_complex_norms": {
+            "cross": 6.088169701230965e-09,
+            "diffusion": 1.3328505269743947e-09,
+            "total": 1.0778797256337806e-08,
+            "velocity": 8.510666276107335e-09
+          }
+        }
+      ],
+      "quadratic_spin_observable_structure_correction": {
+        "absolute_dense_difference": null,
+        "dense_check": null,
+        "estimate": [
+          0.031100277109672354,
+          0.0024641073209523113
+        ],
+        "standard_error_complex_norm": 0.012776322241996138
+      },
+      "standard_error_complex_norms": {
+        "cross": 0.0006125382006256665,
+        "diffusion": 0.00014658622909570859,
+        "total": 0.001185023160485078,
+        "velocity": 0.0009882985315682838
+      },
+      "time": 34.0
+    },
+    {
+      "absolute_dense_differences": null,
+      "continuity_memory_estimates": {
+        "cross": [
+          -0.0006430598390553899,
+          0.0005538502019504353
+        ],
+        "diffusion": [
+          0.00018741690438226288,
+          -0.0001156150492042233
+        ],
+        "total": [
+          0.007481583503626855,
+          -0.00017723834016804998
+        ],
+        "velocity": [
+          0.007937226438299983,
+          -0.0006154734929142621
+        ]
+      },
+      "dense_checks": null,
+      "internal_wave_rows": [
+        {
+          "dense_checks": null,
+          "estimates": {
+            "cross": [
+              -2.6923775731845423e-09,
+              -7.973962341006175e-10
+            ],
+            "diffusion": [
+              1.7690381817508478e-09,
+              7.15336676947435e-10
+            ],
+            "total": [
+              1.4292694095096231e-08,
+              9.040556371252424e-10
+            ],
+            "velocity": [
+              1.5216033486529927e-08,
+              9.861151942784254e-10
+            ]
+          },
+          "p_wave": 0.0,
+          "q_wave": 0.1,
+          "quadratic_observable_dense_check": null,
+          "quadratic_observable_estimate": [
+            2.960076746791827e-05,
+            5.150119414643564e-06
+          ],
+          "quadratic_observable_standard_error_complex_norm": 1.2472778759985116e-05,
+          "standard_error_complex_norms": {
+            "cross": 1.5294425244013812e-09,
+            "diffusion": 4.0487403499461366e-10,
+            "total": 4.3295337703164285e-09,
+            "velocity": 4.045260523627274e-09
+          }
+        },
+        {
+          "dense_checks": null,
+          "estimates": {
+            "cross": [
+              -1.1514422510581286e-09,
+              -7.876361060786856e-11
+            ],
+            "diffusion": [
+              2.4916683654457867e-09,
+              -5.316163937752874e-10
+            ],
+            "total": [
+              1.872440026390661e-08,
+              -4.771401620575416e-09
+            ],
+            "velocity": [
+              1.7384174149518952e-08,
+              -4.161021616192262e-09
+            ]
+          },
+          "p_wave": 0.1,
+          "q_wave": 0.0,
+          "quadratic_observable_dense_check": null,
+          "quadratic_observable_estimate": [
+            2.226261755652403e-05,
+            7.294439615683473e-06
+          ],
+          "quadratic_observable_standard_error_complex_norm": 1.170918240987063e-05,
+          "standard_error_complex_norms": {
+            "cross": 1.5317044936888123e-09,
+            "diffusion": 4.273839534986698e-10,
+            "total": 6.0300918495109505e-09,
+            "velocity": 5.740960231474178e-09
+          }
+        },
+        {
+          "dense_checks": null,
+          "estimates": {
+            "cross": [
+              -5.748018821303483e-09,
+              4.422875059146495e-09
+            ],
+            "diffusion": [
+              -7.030023412587487e-10,
+              -1.9113582306881284e-10
+            ],
+            "total": [
+              2.846310952040619e-08,
+              7.914775921465267e-10
+            ],
+            "velocity": [
+              3.491413068296842e-08,
+              -3.4402616439311582e-09
+            ]
+          },
+          "p_wave": -0.2,
+          "q_wave": -0.1,
+          "quadratic_observable_dense_check": null,
+          "quadratic_observable_estimate": [
+            -1.1445607887577721e-05,
+            -2.885968475601222e-06
+          ],
+          "quadratic_observable_standard_error_complex_norm": 3.677354301899869e-06,
+          "standard_error_complex_norms": {
+            "cross": 5.64213129964275e-09,
+            "diffusion": 1.3915305555353525e-09,
+            "total": 1.0061632299769526e-08,
+            "velocity": 8.206592748009572e-09
+          }
+        },
+        {
+          "dense_checks": null,
+          "estimates": {
+            "cross": [
+              3.933192996716215e-10,
+              4.375722928863259e-09
+            ],
+            "diffusion": [
+              -8.768370206436887e-10,
+              -1.6463765369673985e-09
+            ],
+            "total": [
+              4.553859346451844e-08,
+              5.405984181992154e-10
+            ],
+            "velocity": [
+              4.602211118549051e-08,
+              -2.188747973696643e-09
+            ]
+          },
+          "p_wave": -0.1,
+          "q_wave": -0.2,
+          "quadratic_observable_dense_check": null,
+          "quadratic_observable_estimate": [
+            -1.0584887519393307e-05,
+            -4.905724784837172e-06
+          ],
+          "quadratic_observable_standard_error_complex_norm": 3.4196921926734345e-06,
+          "standard_error_complex_norms": {
+            "cross": 5.686389749470943e-09,
+            "diffusion": 1.266225265319724e-09,
+            "total": 1.0309944567042093e-08,
+            "velocity": 8.192690384378782e-09
+          }
+        }
+      ],
+      "quadratic_spin_observable_structure_correction": {
+        "absolute_dense_difference": null,
+        "dense_check": null,
+        "estimate": [
+          0.02085589264382243,
+          0.0032527747136530676
+        ],
+        "standard_error_complex_norm": 0.012464461731541424
+      },
+      "standard_error_complex_norms": {
+        "cross": 0.0005800935121096181,
+        "diffusion": 0.00013781598597799213,
+        "total": 0.0011329544967395551,
+        "velocity": 0.0009477541544081213
+      },
+      "time": 36.0
+    },
+    {
+      "absolute_dense_differences": null,
+      "continuity_memory_estimates": {
+        "cross": [
+          -0.0007168927457243562,
+          0.000638019536053071
+        ],
+        "diffusion": [
+          0.0003320796372452287,
+          -0.00010791616663519506
+        ],
+        "total": [
+          0.006676875820607544,
+          2.197784936444215e-05
+        ],
+        "velocity": [
+          0.0070616889290866704,
+          -0.000508125520053434
+        ]
+      },
+      "dense_checks": null,
+      "internal_wave_rows": [
+        {
+          "dense_checks": null,
+          "estimates": {
+            "cross": [
+              -2.629761063989539e-09,
+              -8.164084133985241e-10
+            ],
+            "diffusion": [
+              1.2371162285392924e-09,
+              6.923139904195951e-10
+            ],
+            "total": [
+              9.552702418999623e-09,
+              8.744260551969285e-10
+            ],
+            "velocity": [
+              1.0945347254449868e-08,
+              9.985204781758581e-10
+            ]
+          },
+          "p_wave": 0.0,
+          "q_wave": 0.1,
+          "quadratic_observable_dense_check": null,
+          "quadratic_observable_estimate": [
+            1.7278493438661604e-05,
+            5.267940102405823e-06
+          ],
+          "quadratic_observable_standard_error_complex_norm": 1.2266123375230572e-05,
+          "standard_error_complex_norms": {
+            "cross": 1.527214077371582e-09,
+            "diffusion": 3.916293906592564e-10,
+            "total": 4.222147972919532e-09,
+            "velocity": 3.907963911790167e-09
+          }
+        },
+        {
+          "dense_checks": null,
+          "estimates": {
+            "cross": [
+              -1.1475795466351802e-09,
+              -1.3936840959587073e-10
+            ],
+            "diffusion": [
+              1.9628113430982086e-09,
+              -5.23126389846358e-10
+            ],
+            "total": [
+              1.3556745709473553e-08,
+              -4.851194350163291e-09
+            ],
+            "velocity": [
+              1.2741513913010525e-08,
+              -4.188699550721063e-09
+            ]
+          },
+          "p_wave": 0.1,
+          "q_wave": 0.0,
+          "quadratic_observable_dense_check": null,
+          "quadratic_observable_estimate": [
+            1.1076525135272728e-05,
+            5.700336549130118e-06
+          ],
+          "quadratic_observable_standard_error_complex_norm": 1.1502014858121341e-05,
+          "standard_error_complex_norms": {
+            "cross": 1.5194242394031102e-09,
+            "diffusion": 4.120219182260672e-10,
+            "total": 5.870301373080517e-09,
+            "velocity": 5.5873830534176914e-09
+          }
+        },
+        {
+          "dense_checks": null,
+          "estimates": {
+            "cross": [
+              -4.378952660193298e-09,
+              3.851116270614357e-09
+            ],
+            "diffusion": [
+              7.418012331415209e-10,
+              -3.6230851711006476e-10
+            ],
+            "total": [
+              3.022025165532451e-08,
+              1.3769171843029093e-09
+            ],
+            "velocity": [
+              3.3857403082376286e-08,
+              -2.1118905692013853e-09
+            ]
+          },
+          "p_wave": -0.2,
+          "q_wave": -0.1,
+          "quadratic_observable_dense_check": null,
+          "quadratic_observable_estimate": [
+            -6.532101269010894e-06,
+            -2.068092942001873e-06
+          ],
+          "quadratic_observable_standard_error_complex_norm": 3.512869999173914e-06,
+          "standard_error_complex_norms": {
+            "cross": 5.412824901098813e-09,
+            "diffusion": 1.2816216230643364e-09,
+            "total": 9.589949278764349e-09,
+            "velocity": 7.80870814301809e-09
+          }
+        },
+        {
+          "dense_checks": null,
+          "estimates": {
+            "cross": [
+              -2.0983539485593346e-09,
+              6.231081903853296e-09
+            ],
+            "diffusion": [
+              8.084371705340807e-10,
+              -1.350544052472313e-09
+            ],
+            "total": [
+              4.217831933939655e-08,
+              2.9142288097225355e-09
+            ],
+            "velocity": [
+              4.3468236117421794e-08,
+              -1.966309041658447e-09
+            ]
+          },
+          "p_wave": -0.1,
+          "q_wave": -0.2,
+          "quadratic_observable_dense_check": null,
+          "quadratic_observable_estimate": [
+            -5.857872876976833e-06,
+            -2.2637251585196014e-06
+          ],
+          "quadratic_observable_standard_error_complex_norm": 3.302057074321141e-06,
+          "standard_error_complex_norms": {
+            "cross": 5.357338695443106e-09,
+            "diffusion": 1.2260203221858265e-09,
+            "total": 9.81481322085132e-09,
+            "velocity": 7.843135807786832e-09
+          }
+        }
+      ],
+      "quadratic_spin_observable_structure_correction": {
+        "absolute_dense_difference": null,
+        "dense_check": null,
+        "estimate": [
+          0.011161012456805817,
+          0.004639485777270376
+        ],
+        "standard_error_complex_norm": 0.012229050278187624
+      },
+      "standard_error_complex_norms": {
+        "cross": 0.0005533017633493992,
+        "diffusion": 0.00013020391989079522,
+        "total": 0.0010843448606910784,
+        "velocity": 0.0009087686609281118
+      },
+      "time": 38.0
+    },
+    {
+      "absolute_dense_differences": null,
+      "continuity_memory_estimates": {
+        "cross": [
+          -0.0007574310134213229,
+          0.0006716525069094365
+        ],
+        "diffusion": [
+          0.0004447660206385388,
+          -8.454083781910836e-05
+        ],
+        "total": [
+          0.005952661588129935,
+          0.00011774996592418436
+        ],
+        "velocity": [
+          0.00626532658091272,
+          -0.0004693617031661442
+        ]
+      },
+      "dense_checks": null,
+      "internal_wave_rows": [
+        {
+          "dense_checks": null,
+          "estimates": {
+            "cross": [
+              -2.562558552102728e-09,
+              -8.253384801920453e-10
+            ],
+            "diffusion": [
+              7.512572050670788e-10,
+              6.644105730914182e-10
+            ],
+            "total": [
+              5.068919290465377e-09,
+              7.993571263290136e-10
+            ],
+            "velocity": [
+              6.880220637501024e-09,
+              9.6028503342964e-10
+            ]
+          },
+          "p_wave": 0.0,
+          "q_wave": 0.1,
+          "quadratic_observable_dense_check": null,
+          "quadratic_observable_estimate": [
+            5.837705807634664e-06,
+            5.41613723211944e-06
+          ],
+          "quadratic_observable_standard_error_complex_norm": 1.212821932205713e-05,
+          "standard_error_complex_norms": {
+            "cross": 1.5193201428705912e-09,
+            "diffusion": 3.8062771238754516e-10,
+            "total": 4.143234089764998e-09,
+            "velocity": 3.8059935226031295e-09
+          }
+        },
+        {
+          "dense_checks": null,
+          "estimates": {
+            "cross": [
+              -1.1315367458725542e-09,
+              -2.0004787079325628e-10
+            ],
+            "diffusion": [
+              1.4765802708604726e-09,
+              -5.090608015823986e-10
+            ],
+            "total": [
+              8.63534522427369e-09,
+              -4.93083310256171e-09
+            ],
+            "velocity": [
+              8.290301699285771e-09,
+              -4.221724430186057e-09
+            ]
+          },
+          "p_wave": 0.1,
+          "q_wave": 0.0,
+          "quadratic_observable_dense_check": null,
+          "quadratic_observable_estimate": [
+            7.679029681264218e-07,
+            4.134640620984068e-06
+          ],
+          "quadratic_observable_standard_error_complex_norm": 1.1315464194892114e-05,
+          "standard_error_complex_norms": {
+            "cross": 1.501916742031941e-09,
+            "diffusion": 3.979119396745269e-10,
+            "total": 5.718059042676358e-09,
+            "velocity": 5.444218642752076e-09
+          }
+        },
+        {
+          "dense_checks": null,
+          "estimates": {
+            "cross": [
+              -3.0047708690216005e-09,
+              3.2904986269867846e-09
+            ],
+            "diffusion": [
+              1.9320168907970958e-09,
+              -4.589469220271232e-10
+            ],
+            "total": [
+              3.236369661514359e-08,
+              1.7136613108697892e-09
+            ],
+            "velocity": [
+              3.34364505933681e-08,
+              -1.1178903940898717e-09
+            ]
+          },
+          "p_wave": -0.2,
+          "q_wave": -0.1,
+          "quadratic_observable_dense_check": null,
+          "quadratic_observable_estimate": [
+            -2.1680735968530697e-06,
+            -1.1194711566407504e-06
+          ],
+          "quadratic_observable_standard_error_complex_norm": 3.342460980862391e-06,
+          "standard_error_complex_norms": {
+            "cross": 5.282409007059738e-09,
+            "diffusion": 1.1894201908389667e-09,
+            "total": 9.228576440432368e-09,
+            "velocity": 7.437222482313302e-09
+          }
+        },
+        {
+          "dense_checks": null,
+          "estimates": {
+            "cross": [
+              -4.135652499813015e-09,
+              7.342405101521172e-09
+            ],
+            "diffusion": [
+              2.2022111779700767e-09,
+              -9.057001573931229e-10
+            ],
+            "total": [
+              3.908068204816076e-08,
+              4.102145226451455e-09
+            ],
+            "velocity": [
+              4.101412337000371e-08,
+              -2.3345597176765963e-09
+            ]
+          },
+          "p_wave": -0.1,
+          "q_wave": -0.2,
+          "quadratic_observable_dense_check": null,
+          "quadratic_observable_estimate": [
+            -1.7916161308820417e-06,
+            3.9147344916473405e-07
+          ],
+          "quadratic_observable_standard_error_complex_norm": 3.2582074815997395e-06,
+          "standard_error_complex_norms": {
+            "cross": 5.154122939118594e-09,
+            "diffusion": 1.196884509714852e-09,
+            "total": 9.342326573864388e-09,
+            "velocity": 7.51678706885007e-09
+          }
+        }
+      ],
+      "quadratic_spin_observable_structure_correction": {
+        "absolute_dense_difference": null,
+        "dense_check": null,
+        "estimate": [
+          0.0018497371296395404,
+          0.006167922648347598
+        ],
+        "standard_error_complex_norm": 0.012046314788374462
+      },
+      "standard_error_complex_norms": {
+        "cross": 0.0005371314461718418,
+        "diffusion": 0.00012408541624211886,
+        "total": 0.0010423444963148683,
+        "velocity": 0.0008729944596218878
+      },
+      "time": 40.0
+    }
+  ],
+  "schema": 1,
+  "scope": {
+    "full_non_diagonal_diffusion_vertex": true,
+    "microscopic_mori_contact_matched": false,
+    "multiplicative_noise_contact_included": true,
+    "multiplicative_noise_observable_contact_included": true,
+    "physical_F1_certified": false,
+    "quadratic_observable_included": true,
+    "rank_three_derivative_tensor_in_production_path": false,
+    "velocity_diffusion_cross_included": true,
+    "velocity_vertex_included": true
+  },
+  "static_susceptibility_captured_fraction": 0.09128820340190508,
+  "uses_target_a_or_D": false,
+  "uses_target_trajectory": false
+}

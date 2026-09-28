@@ -1,0 +1,139 @@
+{
+  "external_wave_number": 0.39269908169872414,
+  "full_current_norm": 0.125,
+  "full_liouvillian_current_norm": 0.07677258765413374,
+  "gates": {
+    "all_analytic_gram_residuals_small": true,
+    "all_qlp_leakage_norms_nonnegative": true,
+    "all_static_projector_norms_bounded": true,
+    "exact_full_current_norm": true
+  },
+  "inputs": {
+    "cutoff_modes": [
+      2,
+      4,
+      6,
+      7
+    ],
+    "external_mode": 1,
+    "length": 16,
+    "target_coefficients_used": false,
+    "temperature": "infinite",
+    "trajectory_data_used": false
+  },
+  "interpretation": "A nonzero QLP leakage proves that the selected long-wave bilinear sector is not dynamically closed.  Its eliminated spectrum is a Mori continuum unless an independently controlled rational approximation is introduced.",
+  "method": "exact_sparse_pauli_slow_bilinear_plp_qlp_split",
+  "rows": [
+    {
+      "cutoff_mode": 2,
+      "cutoff_wave_number": 0.7853981633974483,
+      "g0_analytic_residual": 1.7156450257728166e-17,
+      "plp_generalized_frequency_maximum": 0.08122865203208583,
+      "plp_generalized_frequency_minimum": -0.08122865203208583,
+      "plp_liouvillian_norm": 7.149004186056545e-05,
+      "projected_current_norm": 0.010834953673806626,
+      "projected_fraction_of_full_current": 0.08667962939045301,
+      "projected_liouvillian_norm": 0.002560056733910532,
+      "projected_mean_liouvillian_frequency": -3.5648239538089455e-17,
+      "projected_second_frequency_moment": 0.2362775892710496,
+      "qlp_fraction_of_projected_liouvillian_norm": 0.9720748212671978,
+      "qlp_leakage_norm": 0.0024885666920499666,
+      "selected_modes": [
+        0,
+        1,
+        2,
+        15
+      ],
+      "selected_rank": 3
+    },
+    {
+      "cutoff_mode": 4,
+      "cutoff_wave_number": 1.5707963267948966,
+      "g0_analytic_residual": 2.756518725442522e-17,
+      "plp_generalized_frequency_maximum": 0.19509032201612841,
+      "plp_generalized_frequency_minimum": -0.19509032201612841,
+      "plp_liouvillian_norm": 0.0023787646090222907,
+      "projected_current_norm": 0.06250000000000006,
+      "projected_fraction_of_full_current": 0.5000000000000004,
+      "projected_liouvillian_norm": 0.043448572546678194,
+      "projected_mean_liouvillian_frequency": 7.554720737878988e-16,
+      "projected_second_frequency_moment": 0.6951771607468504,
+      "qlp_fraction_of_projected_liouvillian_norm": 0.9452510296749863,
+      "qlp_leakage_norm": 0.041069807937655904,
+      "selected_modes": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        13,
+        14,
+        15
+      ],
+      "selected_rank": 5
+    },
+    {
+      "cutoff_mode": 6,
+      "cutoff_wave_number": 2.356194490192345,
+      "g0_analytic_residual": 2.756518725442522e-17,
+      "plp_generalized_frequency_maximum": 0.26367095702364274,
+      "plp_generalized_frequency_minimum": -0.26367095702364274,
+      "plp_liouvillian_norm": 0.00793702500021229,
+      "projected_current_norm": 0.11416504632619329,
+      "projected_fraction_of_full_current": 0.9133203706095463,
+      "projected_liouvillian_norm": 0.08091949080195893,
+      "projected_mean_liouvillian_frequency": 7.170081093715177e-17,
+      "projected_second_frequency_moment": 0.7087939207833815,
+      "qlp_fraction_of_projected_liouvillian_norm": 0.9019145459078921,
+      "qlp_leakage_norm": 0.07298246580174664,
+      "selected_modes": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        11,
+        12,
+        13,
+        14,
+        15
+      ],
+      "selected_rank": 7
+    },
+    {
+      "cutoff_mode": 7,
+      "cutoff_wave_number": 2.748893571891069,
+      "g0_analytic_residual": 2.756518725442522e-17,
+      "plp_generalized_frequency_maximum": 0.2745836426161904,
+      "plp_generalized_frequency_minimum": -0.2745836426161904,
+      "plp_liouvillian_norm": 0.009334847220542314,
+      "projected_current_norm": 0.12381061769548883,
+      "projected_fraction_of_full_current": 0.9904849415639106,
+      "projected_liouvillian_norm": 0.07763113232068317,
+      "projected_mean_liouvillian_frequency": -5.896653268384463e-18,
+      "projected_second_frequency_moment": 0.6270151443038292,
+      "qlp_fraction_of_projected_liouvillian_norm": 0.8797538185842584,
+      "qlp_leakage_norm": 0.06829628510014085,
+      "selected_modes": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15
+      ],
+      "selected_rank": 8
+    }
+  ],
+  "schema": 1
+}

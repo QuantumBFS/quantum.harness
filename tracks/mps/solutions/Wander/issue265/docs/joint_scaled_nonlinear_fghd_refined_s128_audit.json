@@ -1,0 +1,308 @@
+{
+  "last_field_step_convergence": {
+    "bare_vertex_sequence_converged": false,
+    "colored_components": {
+      "cross": {
+        "last_field_step_change_in_pooled_standard_errors_by_tau": [
+          0.9238693610928863,
+          1.791074474977151,
+          0.5195792312234631,
+          1.3950061441507013,
+          1.2825710185063475
+        ],
+        "last_field_step_relative_change_by_tau": [
+          0.03385777482128467,
+          1.7329600176081688,
+          1.05874868452342,
+          1.077514110827171,
+          1.5231309530093529
+        ],
+        "maximum_change_in_pooled_standard_errors": 1.791074474977151,
+        "maximum_last_field_step_relative_change": 1.7329600176081688
+      },
+      "diffusion": {
+        "last_field_step_change_in_pooled_standard_errors_by_tau": [
+          1.0351374670989402,
+          1.1778508719079888,
+          1.5905733278729757,
+          1.3389093835847778,
+          1.1125936621219104
+        ],
+        "last_field_step_relative_change_by_tau": [
+          0.0982537194031489,
+          0.10785165175129355,
+          0.14372203395256405,
+          0.1262650054285651,
+          0.11386905725987162
+        ],
+        "maximum_change_in_pooled_standard_errors": 1.5905733278729757,
+        "maximum_last_field_step_relative_change": 0.14372203395256405
+      },
+      "total": {
+        "last_field_step_change_in_pooled_standard_errors_by_tau": [
+          1.452075257842368,
+          1.1961484894278456,
+          0.4041606408191308,
+          0.6368652683502783,
+          1.241845949449384
+        ],
+        "last_field_step_relative_change_by_tau": [
+          0.12894836237204146,
+          0.1443727739872115,
+          0.11975303017698062,
+          0.23966120129153223,
+          0.5107269602379941
+        ],
+        "maximum_change_in_pooled_standard_errors": 1.452075257842368,
+        "maximum_last_field_step_relative_change": 0.5107269602379941
+      },
+      "velocity": {
+        "last_field_step_change_in_pooled_standard_errors_by_tau": [
+          1.1964681921216143,
+          0.28862444048514446,
+          0.3479121407557047,
+          0.6547819223425067,
+          0.9298082640300183
+        ],
+        "last_field_step_relative_change_by_tau": [
+          0.15621100723181874,
+          0.058312443614888305,
+          0.5838196351912844,
+          0.7387853098970129,
+          1.0528774438872335
+        ],
+        "maximum_change_in_pooled_standard_errors": 1.1964681921216143,
+        "maximum_last_field_step_relative_change": 1.0528774438872335
+      }
+    },
+    "declared_relative_tolerance": 0.05,
+    "maximum_relative_change": 1.7329600176081688,
+    "multiplicative_noise_contact_change_in_pooled_standard_errors": 2865.022077930671,
+    "multiplicative_noise_contact_relative_change": 0.15771131000027022
+  },
+  "method": "target_free_joint_scaled_full_nonlinear_fghd_vertex_audit",
+  "per_field": [
+    {
+      "dense_contractions_used": false,
+      "fdt_residual": 0.0,
+      "field": 0.2,
+      "mode_count": 360,
+      "scaled_colored_memory_K_over_h2": {
+        "cross": [
+          [
+            0.0,
+            -2.5082614557948877e-16
+          ],
+          [
+            -0.16146687857689673,
+            0.03483093385823703
+          ],
+          [
+            0.02718757908679352,
+            -0.02887631475940318
+          ],
+          [
+            0.07494052070088544,
+            -0.09872417411439248
+          ],
+          [
+            0.05757636674946481,
+            -0.009949733692377354
+          ]
+        ],
+        "diffusion": [
+          [
+            3.1412974726968454,
+            0.0
+          ],
+          [
+            1.7101123206557585,
+            -0.00200839944594382
+          ],
+          [
+            0.9026176332193587,
+            0.003495869603837056
+          ],
+          [
+            0.5160005268738876,
+            0.010258265531363418
+          ],
+          [
+            0.3199153425157508,
+            0.0036903703102646847
+          ]
+        ],
+        "total": [
+          [
+            6.450727178720023,
+            -2.5082614557948877e-16
+          ],
+          [
+            3.088306706437802,
+            0.052633704253955145
+          ],
+          [
+            0.9351188313236649,
+            -0.09468318380571215
+          ],
+          [
+            0.5775791236968116,
+            -0.2394625073998547
+          ],
+          [
+            0.44002957207258864,
+            -0.10846123140835544
+          ]
+        ],
+        "velocity": [
+          [
+            3.3094297060231774,
+            0.0
+          ],
+          [
+            1.5396612643589402,
+            0.019811169841661907
+          ],
+          [
+            0.005313619017512722,
+            -0.06930273865014594
+          ],
+          [
+            -0.013361923877961519,
+            -0.15099659881682562
+          ],
+          [
+            0.06253786280737299,
+            -0.1022018680262428
+          ]
+        ]
+      },
+      "scaled_multiplicative_noise_contact_hKdelta": 1555.43821928182,
+      "scaled_multiplicative_noise_contact_standard_error": 0.06937868618324482,
+      "static_susceptibility_captured_fraction": 0.9868927475959931
+    },
+    {
+      "dense_contractions_used": false,
+      "fdt_residual": 0.0,
+      "field": 0.16666666666666666,
+      "mode_count": 432,
+      "scaled_colored_memory_K_over_h2": {
+        "cross": [
+          [
+            0.0,
+            -5.894038937923355e-16
+          ],
+          [
+            0.19374851291380346,
+            0.06990191557980269
+          ],
+          [
+            -0.06344633885561184,
+            -0.06866762744576596
+          ],
+          [
+            -0.12324485240677814,
+            -0.14242659263929297
+          ],
+          [
+            -0.10369484128952325,
+            -0.02307639955540658
+          ]
+        ],
+        "diffusion": [
+          [
+            3.483571310787855,
+            0.0
+          ],
+          [
+            1.9114938754846502,
+            0.04234647610807777
+          ],
+          [
+            1.047284306238394,
+            0.045567974988688885
+          ],
+          [
+            0.5904936108501767,
+            0.013840299316539555
+          ],
+          [
+            0.3608194579389615,
+            -0.00017320579462105492
+          ]
+        ],
+        "total": [
+          [
+            7.405677114948772,
+            -5.894038937923355e-16
+          ],
+          [
+            3.609453636343156,
+            0.049565121648782455
+          ],
+          [
+            1.0497441935290013,
+            -0.14930675616638703
+          ],
+          [
+            0.44593601312765446,
+            -0.1678754926087565
+          ],
+          [
+            0.2147247571808101,
+            -0.05543247723759459
+          ]
+        ],
+        "velocity": [
+          [
+            3.9221058041609167,
+            0.0
+          ],
+          [
+            1.504211247944702,
+            -0.06268327003909797
+          ],
+          [
+            0.06590622614621897,
+            -0.12620710370931
+          ],
+          [
+            -0.021312745315744234,
+            -0.03928919928600312
+          ],
+          [
+            -0.042399859468628134,
+            -0.032182871887566945
+          ]
+        ]
+      },
+      "scaled_multiplicative_noise_contact_hKdelta": 1846.6806425743637,
+      "scaled_multiplicative_noise_contact_standard_error": 0.07429830322320308,
+      "static_susceptibility_captured_fraction": 0.9871503987017146
+    }
+  ],
+  "scaled_variables": {
+    "colored_kernel_scaling": "K_h(t)/h^2",
+    "delta_contact_scaling": "h*K_delta,h",
+    "q_equals_k_over_h2": 0.4,
+    "tau_equals_t_h3": [
+      0.0,
+      0.25,
+      0.5,
+      0.75,
+      1.0
+    ]
+  },
+  "schema": 1,
+  "scope": {
+    "complete_non_diagonal_diffusion_operator": true,
+    "complete_velocity_diffusion_cross_vertices": true,
+    "finite_pole_closure_assumed": false,
+    "microscopic_mori_contact_matched": false,
+    "multiplicative_noise_covariance_derivative": true,
+    "physical_F1_certified": false,
+    "reason": "a converged bare hydrodynamic loop would still require the exact lattice Mori contact subtraction before defining a physical kernel"
+  },
+  "uses_target_a_or_D": false,
+  "uses_target_trajectory": false
+}

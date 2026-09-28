@@ -1,0 +1,514 @@
+{
+  "finest_cutoff_matching_scheme_relative_spread": 2.9999980476862373,
+  "gates": {
+    "every_matching_rate_positive_and_cutoff_stable": false,
+    "finite_time_laplace_tail_controlled": false,
+    "joint_zero_field_infinite_mode_limit_complete": false,
+    "matching_scheme_relative_spread_below_10_percent": false,
+    "physical_F1_perp_certified": false
+  },
+  "inputs": {
+    "finite_time_laplace_maximum": 20.0,
+    "known_colored_derivative_orders": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20
+    ],
+    "matching_rates": [
+      0.5,
+      1.0,
+      2.0
+    ],
+    "maximum_laplace_frequency": 0.1,
+    "target_coefficients_used": false,
+    "trajectory_data_used": false,
+    "white_contact_cancelled_by_exact_large_z_asymptotic": true
+  },
+  "interpretation": "The subtraction preserves the exact known large-z moment prefix. Dependence on the localization rate is a matching-scheme error, not a statistical uncertainty.  No Burgers projection is allowed until scheme, cutoff, finite-time, and zero-field gates all pass.",
+  "laplace_frequency": [
+    0.02,
+    0.05,
+    0.1
+  ],
+  "linear_full_mode_kernel": [
+    1.1659588711861908,
+    1.9227252690601526,
+    2.1053804098145177
+  ],
+  "matching_rate_rows": [
+    {
+      "candidate_kernels": [
+        [
+          -6.123219024398353e+48,
+          -1.8850124418755247e+48,
+          -3.0307887451874077e+47
+        ],
+        [
+          -6.141005008690045e+48,
+          -1.8904879628794056e+48,
+          -3.0395929217033716e+47
+        ]
+      ],
+      "cutoffs": [
+        {
+          "analytic_derivative_count": 21,
+          "cancelled_white_contact": 105.35534582841649,
+          "fourier_points": 32,
+          "localized_jet_laplace": [
+            6.123219024398353e+48,
+            1.8850124418755247e+48,
+            3.0307887451874077e+47
+          ],
+          "maximum_resolved_wave_number": 3.141592653589793,
+          "raw_colored_laplace": [
+            1915.2181646447402,
+            1915.1165743209854,
+            1914.9705722086205
+          ],
+          "renormalized_colored_laplace": [
+            -6.123219024398353e+48,
+            -1.8850124418755247e+48,
+            -3.0307887451874077e+47
+          ]
+        },
+        {
+          "analytic_derivative_count": 21,
+          "cancelled_white_contact": 105.35534582841649,
+          "fourier_points": 64,
+          "localized_jet_laplace": [
+            6.141005008690045e+48,
+            1.8904879628794056e+48,
+            3.0395929217033716e+47
+          ],
+          "maximum_resolved_wave_number": 3.141592653589793,
+          "raw_colored_laplace": [
+            1915.5894608719834,
+            1915.4888597401973,
+            1915.3440242018075
+          ],
+          "renormalized_colored_laplace": [
+            -6.141005008690045e+48,
+            -1.8904879628794056e+48,
+            -3.0395929217033716e+47
+          ]
+        }
+      ],
+      "matching": {
+        "all_candidates_inside_stieltjes_bounds": false,
+        "all_regulators_spectral_reconstruction_pass": false,
+        "all_spectral_weights_nonnegative": false,
+        "candidate_kernels_positive": [
+          [
+            false,
+            false,
+            false
+          ],
+          [
+            false,
+            false,
+            false
+          ]
+        ],
+        "cutoff_stability_pass": true,
+        "exact_moment_order_preserved": 26,
+        "exact_recurrent_count_preserved": 13,
+        "finite_pole_count_assumed": false,
+        "inside_moment_interval": [
+          [
+            false,
+            false,
+            false
+          ],
+          [
+            false,
+            false,
+            false
+          ]
+        ],
+        "laplace_frequency": [
+          0.02,
+          0.05,
+          0.1
+        ],
+        "last_pair_maximum_relative_change": 0.0029006994943938298,
+        "matching_complete": false,
+        "maximum_spectral_relative_residual": null,
+        "moment_bounds_lower": [
+          0.08319489647145079,
+          0.20327904343073472,
+          0.3762212769831562
+        ],
+        "moment_bounds_upper": [
+          12.193815048167444,
+          4.894302624307494,
+          2.476610959198617
+        ],
+        "reconstructed_moment_preserving_kernels": [
+          [
+            null,
+            null,
+            null
+          ],
+          [
+            null,
+            null,
+            null
+          ]
+        ],
+        "required_tail_count": 2,
+        "required_tail_inside_stieltjes_bounds": false,
+        "required_tail_spectral_weights_nonnegative": false,
+        "spectral_fits": [
+          {
+            "minimum_weight": null,
+            "nonzero_quadrature_weights": 0,
+            "normalization_residual": null,
+            "pre_normalization_mass": 0.0,
+            "relative_residual": null,
+            "spectral_weights_nonnegative": false,
+            "terminator_positive": false
+          },
+          {
+            "minimum_weight": null,
+            "nonzero_quadrature_weights": 0,
+            "normalization_residual": null,
+            "pre_normalization_mass": 0.0,
+            "relative_residual": null,
+            "spectral_weights_nonnegative": false,
+            "terminator_positive": false
+          }
+        ],
+        "spectral_grid_is_continuum_quadrature": true,
+        "spectral_node_convergence_still_required": true,
+        "spectral_reconstruction_pass": false,
+        "target_coefficients_used": false,
+        "trajectory_data_used": false
+      },
+      "matching_rate": 0.5
+    },
+    {
+      "candidate_kernels": [
+        [
+          -3.984689619553455e+42,
+          -2.16722286961669e+42,
+          -8.155184494603453e+41
+        ],
+        [
+          -3.996388274097884e+42,
+          -2.1735858126945112e+42,
+          -8.17912922653285e+41
+        ]
+      ],
+      "cutoffs": [
+        {
+          "analytic_derivative_count": 21,
+          "cancelled_white_contact": 105.35534582841649,
+          "fourier_points": 32,
+          "localized_jet_laplace": [
+            3.984689619553455e+42,
+            2.16722286961669e+42,
+            8.155184494603453e+41
+          ],
+          "maximum_resolved_wave_number": 3.141592653589793,
+          "raw_colored_laplace": [
+            1915.2181646447402,
+            1915.1165743209854,
+            1914.9705722086205
+          ],
+          "renormalized_colored_laplace": [
+            -3.984689619553455e+42,
+            -2.16722286961669e+42,
+            -8.155184494603453e+41
+          ]
+        },
+        {
+          "analytic_derivative_count": 21,
+          "cancelled_white_contact": 105.35534582841649,
+          "fourier_points": 64,
+          "localized_jet_laplace": [
+            3.996388274097884e+42,
+            2.1735858126945112e+42,
+            8.17912922653285e+41
+          ],
+          "maximum_resolved_wave_number": 3.141592653589793,
+          "raw_colored_laplace": [
+            1915.5894608719834,
+            1915.4888597401973,
+            1915.3440242018075
+          ],
+          "renormalized_colored_laplace": [
+            -3.996388274097884e+42,
+            -2.1735858126945112e+42,
+            -8.17912922653285e+41
+          ]
+        }
+      ],
+      "matching": {
+        "all_candidates_inside_stieltjes_bounds": false,
+        "all_regulators_spectral_reconstruction_pass": false,
+        "all_spectral_weights_nonnegative": false,
+        "candidate_kernels_positive": [
+          [
+            false,
+            false,
+            false
+          ],
+          [
+            false,
+            false,
+            false
+          ]
+        ],
+        "cutoff_stability_pass": true,
+        "exact_moment_order_preserved": 26,
+        "exact_recurrent_count_preserved": 13,
+        "finite_pole_count_assumed": false,
+        "inside_moment_interval": [
+          [
+            false,
+            false,
+            false
+          ],
+          [
+            false,
+            false,
+            false
+          ]
+        ],
+        "laplace_frequency": [
+          0.02,
+          0.05,
+          0.1
+        ],
+        "last_pair_maximum_relative_change": 0.00293183201182328,
+        "matching_complete": false,
+        "maximum_spectral_relative_residual": null,
+        "moment_bounds_lower": [
+          0.08319489647145079,
+          0.20327904343073472,
+          0.3762212769831562
+        ],
+        "moment_bounds_upper": [
+          12.193815048167444,
+          4.894302624307494,
+          2.476610959198617
+        ],
+        "reconstructed_moment_preserving_kernels": [
+          [
+            null,
+            null,
+            null
+          ],
+          [
+            null,
+            null,
+            null
+          ]
+        ],
+        "required_tail_count": 2,
+        "required_tail_inside_stieltjes_bounds": false,
+        "required_tail_spectral_weights_nonnegative": false,
+        "spectral_fits": [
+          {
+            "minimum_weight": null,
+            "nonzero_quadrature_weights": 0,
+            "normalization_residual": null,
+            "pre_normalization_mass": 0.0,
+            "relative_residual": null,
+            "spectral_weights_nonnegative": false,
+            "terminator_positive": false
+          },
+          {
+            "minimum_weight": null,
+            "nonzero_quadrature_weights": 0,
+            "normalization_residual": null,
+            "pre_normalization_mass": 0.0,
+            "relative_residual": null,
+            "spectral_weights_nonnegative": false,
+            "terminator_positive": false
+          }
+        ],
+        "spectral_grid_is_continuum_quadrature": true,
+        "spectral_node_convergence_still_required": true,
+        "spectral_reconstruction_pass": false,
+        "target_coefficients_used": false,
+        "trajectory_data_used": false
+      },
+      "matching_rate": 1.0
+    },
+    {
+      "candidate_kernels": [
+        [
+          -1.923054333980702e+36,
+          -1.4106526932628835e+36,
+          -8.500559673720901e+35
+        ],
+        [
+          -1.9288228894508146e+36,
+          -1.4148843313719584e+36,
+          -8.526060686002867e+35
+        ]
+      ],
+      "cutoffs": [
+        {
+          "analytic_derivative_count": 21,
+          "cancelled_white_contact": 105.35534582841649,
+          "fourier_points": 32,
+          "localized_jet_laplace": [
+            1.923054333980702e+36,
+            1.4106526932628835e+36,
+            8.500559673720901e+35
+          ],
+          "maximum_resolved_wave_number": 3.141592653589793,
+          "raw_colored_laplace": [
+            1915.2181646447402,
+            1915.1165743209854,
+            1914.9705722086205
+          ],
+          "renormalized_colored_laplace": [
+            -1.923054333980702e+36,
+            -1.4106526932628835e+36,
+            -8.500559673720901e+35
+          ]
+        },
+        {
+          "analytic_derivative_count": 21,
+          "cancelled_white_contact": 105.35534582841649,
+          "fourier_points": 64,
+          "localized_jet_laplace": [
+            1.9288228894508146e+36,
+            1.4148843313719584e+36,
+            8.526060686002867e+35
+          ],
+          "maximum_resolved_wave_number": 3.141592653589793,
+          "raw_colored_laplace": [
+            1915.5894608719834,
+            1915.4888597401973,
+            1915.3440242018075
+          ],
+          "renormalized_colored_laplace": [
+            -1.9288228894508146e+36,
+            -1.4148843313719584e+36,
+            -8.526060686002867e+35
+          ]
+        }
+      ],
+      "matching": {
+        "all_candidates_inside_stieltjes_bounds": false,
+        "all_regulators_spectral_reconstruction_pass": false,
+        "all_spectral_weights_nonnegative": false,
+        "candidate_kernels_positive": [
+          [
+            false,
+            false,
+            false
+          ],
+          [
+            false,
+            false,
+            false
+          ]
+        ],
+        "cutoff_stability_pass": true,
+        "exact_moment_order_preserved": 26,
+        "exact_recurrent_count_preserved": 13,
+        "finite_pole_count_assumed": false,
+        "inside_moment_interval": [
+          [
+            false,
+            false,
+            false
+          ],
+          [
+            false,
+            false,
+            false
+          ]
+        ],
+        "laplace_frequency": [
+          0.02,
+          0.05,
+          0.1
+        ],
+        "last_pair_maximum_relative_change": 0.0029954285399218356,
+        "matching_complete": false,
+        "maximum_spectral_relative_residual": null,
+        "moment_bounds_lower": [
+          0.08319489647145079,
+          0.20327904343073472,
+          0.3762212769831562
+        ],
+        "moment_bounds_upper": [
+          12.193815048167444,
+          4.894302624307494,
+          2.476610959198617
+        ],
+        "reconstructed_moment_preserving_kernels": [
+          [
+            null,
+            null,
+            null
+          ],
+          [
+            null,
+            null,
+            null
+          ]
+        ],
+        "required_tail_count": 2,
+        "required_tail_inside_stieltjes_bounds": false,
+        "required_tail_spectral_weights_nonnegative": false,
+        "spectral_fits": [
+          {
+            "minimum_weight": null,
+            "nonzero_quadrature_weights": 0,
+            "normalization_residual": null,
+            "pre_normalization_mass": 0.0,
+            "relative_residual": null,
+            "spectral_weights_nonnegative": false,
+            "terminator_positive": false
+          },
+          {
+            "minimum_weight": null,
+            "nonzero_quadrature_weights": 0,
+            "normalization_residual": null,
+            "pre_normalization_mass": 0.0,
+            "relative_residual": null,
+            "spectral_weights_nonnegative": false,
+            "terminator_positive": false
+          }
+        ],
+        "spectral_grid_is_continuum_quadrature": true,
+        "spectral_node_convergence_still_required": true,
+        "spectral_reconstruction_pass": false,
+        "target_coefficients_used": false,
+        "trajectory_data_used": false
+      },
+      "matching_rate": 2.0
+    }
+  ],
+  "method": "mu20_preserving_exponential_jet_subtraction",
+  "schema": 1,
+  "sources": {
+    "/tmp/full_mode_mori_lattice_match.json": "5271a93e1d5424a56bdf174132b49fcfbac73c8e7b44bdfb3752dfb8ffa950aa",
+    "docs/full_mode_physical_one_loop_lattice_bz_mu20.json": "441b21bec764295c44f2bde456efe88626ae522bd696fd9d8ae9dd16e15f7d2f"
+  }
+}

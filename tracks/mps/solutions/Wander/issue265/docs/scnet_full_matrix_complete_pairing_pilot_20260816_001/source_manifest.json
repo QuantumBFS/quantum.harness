@@ -1,0 +1,11 @@
+{
+  "files": {
+    "hpc/scnet/full_matrix_complete_pairing_pilot.sbatch": "4bfb9d787dad7b5230ce7796cf3ce5658c32b10cd48d153a43a35c16fed2824c",
+    "scripts/derive_low_rank_self_consistent_full_matrix.py": "deeb0b248f84d24f8076ce4caf4216e61e45ed86403cbccd90c1017bd9f538bc",
+    "scripts/evaluate_full_tba_diffusion.py": "8a73bd1bceb32fa7d6e30f0fb4dbe5a5f5341e92de5f704b3619b725932a1654",
+    "src/full_mode_analytic_certificates.py": "224dcba3ccf58a364cc261d964f6e1ac4ab6b760224f21e3d13bf174ea6f322d",
+    "src/heisenberg_burgers_bridge.py": "1689c0f2701c629e3cb324fd96b97dd86c20230d99e8e2adce3025c7b097d2e1"
+  },
+  "preregistration_sha256": "83915fa9cd52c60ae285e0ab779d684eb33a86a5e4e44acb65808e9afa0f9089",
+  "schema": 1
+}

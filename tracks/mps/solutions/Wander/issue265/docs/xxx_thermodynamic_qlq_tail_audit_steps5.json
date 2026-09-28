@@ -1,0 +1,99 @@
+{
+  "exact_analytic_first_squared_recurrent": 1.2544032716229014,
+  "first_recurrent_relative_extrapolation_errors": [
+    8.20464971719613e-05,
+    3.285846701653795e-05
+  ],
+  "gates": {
+    "all_finite_tail_recurrents_positive": true,
+    "analytic_anchor_reproduced_below_1e_minus_4": true,
+    "higher_recurrent_intervals_are_analytic_identities": false
+  },
+  "interpretation": "The exact first recurrent validates 1/R^2 as the leading tail extrapolation at the 1e-4 level on this sequence.  Applying the same two-scheme audit gives narrow numerical intervals for the next 4 recurrents, but only the first is presently an analytic identity.",
+  "maximum_separations": [
+    64,
+    128,
+    192
+  ],
+  "method": "analytic_anchor_validated_1_over_R_squared_qlq_tail_audit",
+  "schema": 1,
+  "sources": [
+    "docs/xxx_thermodynamic_qlq_pi4_R64_steps5.json",
+    "docs/xxx_thermodynamic_qlq_pi4_R128_steps5.json",
+    "docs/xxx_thermodynamic_qlq_pi4_R192_steps5.json"
+  ],
+  "squared_recurrent_extrapolations": [
+    {
+      "level": 1,
+      "linear_in_1_over_R_squared_limit": 1.2543003522284237,
+      "quadratic_in_1_over_R_squared_limit": 1.2543620538543754,
+      "scheme_envelope": [
+        1.2543003522284237,
+        1.2543620538543754
+      ],
+      "values": [
+        1.2623167832467037,
+        1.2562814128487925,
+        1.2552093966705222
+      ]
+    },
+    {
+      "level": 2,
+      "linear_in_1_over_R_squared_limit": 1.9922333021330145,
+      "quadratic_in_1_over_R_squared_limit": 1.9925506115671376,
+      "scheme_envelope": [
+        1.9922333021330145,
+        1.9925506115671376
+      ],
+      "values": [
+        2.0387484993135594,
+        2.0037435782450257,
+        1.9974959214273742
+      ]
+    },
+    {
+      "level": 3,
+      "linear_in_1_over_R_squared_limit": 3.9219461856631357,
+      "quadratic_in_1_over_R_squared_limit": 3.9209818194620003,
+      "scheme_envelope": [
+        3.9209818194620003,
+        3.9219461856631357
+      ],
+      "values": [
+        4.087500411115969,
+        3.963694957448789,
+        3.940054612482737
+      ]
+    },
+    {
+      "level": 4,
+      "linear_in_1_over_R_squared_limit": 4.950789534590704,
+      "quadratic_in_1_over_R_squared_limit": 4.9485030538758235,
+      "scheme_envelope": [
+        4.9485030538758235,
+        4.950789534590704
+      ],
+      "values": [
+        5.147373778826637,
+        5.00078965463231,
+        4.971952976806177
+      ]
+    },
+    {
+      "level": 5,
+      "linear_in_1_over_R_squared_limit": 6.344681532321286,
+      "quadratic_in_1_over_R_squared_limit": 6.342357374178124,
+      "scheme_envelope": [
+        6.342357374178124,
+        6.344681532321286
+      ],
+      "values": [
+        6.466082218455247,
+        6.375899836319785,
+        6.357480052913708
+      ]
+    }
+  ],
+  "target_coefficients_used": false,
+  "trajectory_data_used": false
+}

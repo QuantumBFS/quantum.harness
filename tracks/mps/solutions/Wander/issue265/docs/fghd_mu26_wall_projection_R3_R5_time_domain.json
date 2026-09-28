@@ -1,0 +1,139 @@
+{
+  "inputs": {
+    "dt": 0.2,
+    "fit_window": [
+      52.0,
+      198.0
+    ],
+    "k_maximum": 1.2,
+    "k_step": 0.01,
+    "length": 400,
+    "profile_window": [
+      50.0,
+      200.0
+    ],
+    "x_crop": [
+      -120.0,
+      120.0
+    ]
+  },
+  "last_pair_absolute_change": {
+    "D": 0.028850155448849113,
+    "a": 0.009227178884340187
+  },
+  "method": "time_domain_full_mode_fghd_terminator_behind_mu26_prefix",
+  "rows": [
+    {
+      "frozen_weak_projection": {
+        "D": -0.0008007262167027107,
+        "a": 0.06968532282090972,
+        "mse": 6.235182825552549e-08,
+        "n_obs": 8041
+      },
+      "full_jacobi_dimension": 27,
+      "full_spectral_mass_residual": 0.0,
+      "k_zero_conservation_error": 0.0,
+      "kernel_zero_time_residual": 0.0,
+      "laplace_reconstruction_maximum_relative_residual": 2.5874954873424435e-15,
+      "minimum_full_spectral_weight": 4.342311058499259e-08,
+      "regulator": {
+        "active_strings": 24,
+        "dense_check": true,
+        "field": 0.08333333333333333,
+        "fourier_points": 4,
+        "mode_count": 240,
+        "nodes_per_string": 10,
+        "samples_per_internal_wave": 2,
+        "scaled_rapidity_extent": 3.0,
+        "string_xi_cutoff": 2.0,
+        "trace_distribution": "rademacher"
+      },
+      "sparse_jacobi_kernel_minimum_diagnostic": -0.4409184530577881,
+      "sparse_jacobi_kernel_used_for_propagation": false,
+      "structure_maximum": 1.0,
+      "structure_minimum": -0.52273395587254,
+      "terminator_nonzero_spectral_weights": 7,
+      "time_domain_hierarchy_used_for_propagation": true,
+      "time_domain_terminator_minimum": -5.5963293828608647e-05
+    },
+    {
+      "frozen_weak_projection": {
+        "D": 0.05313280256045248,
+        "a": 0.048561795339740435,
+        "mse": 3.450509162246363e-08,
+        "n_obs": 8041
+      },
+      "full_jacobi_dimension": 29,
+      "full_spectral_mass_residual": 4.440892098500626e-16,
+      "k_zero_conservation_error": 0.0,
+      "kernel_zero_time_residual": 0.0,
+      "laplace_reconstruction_maximum_relative_residual": 3.376965783245072e-15,
+      "minimum_full_spectral_weight": 4.3361219737849005e-08,
+      "regulator": {
+        "active_strings": 24,
+        "dense_check": true,
+        "field": 0.08333333333333333,
+        "fourier_points": 4,
+        "mode_count": 288,
+        "nodes_per_string": 12,
+        "samples_per_internal_wave": 2,
+        "scaled_rapidity_extent": 4.0,
+        "string_xi_cutoff": 2.0,
+        "trace_distribution": "rademacher"
+      },
+      "sparse_jacobi_kernel_minimum_diagnostic": -0.42164761647573556,
+      "sparse_jacobi_kernel_used_for_propagation": false,
+      "structure_maximum": 1.0,
+      "structure_minimum": -0.503319739006643,
+      "terminator_nonzero_spectral_weights": 8,
+      "time_domain_hierarchy_used_for_propagation": true,
+      "time_domain_terminator_minimum": -4.5456507578230945e-05
+    },
+    {
+      "frozen_weak_projection": {
+        "D": 0.0819829580093016,
+        "a": 0.03933461645540025,
+        "mse": 2.403583948993688e-08,
+        "n_obs": 8041
+      },
+      "full_jacobi_dimension": 29,
+      "full_spectral_mass_residual": 5.551115123125783e-16,
+      "k_zero_conservation_error": 0.0,
+      "kernel_zero_time_residual": 0.0,
+      "laplace_reconstruction_maximum_relative_residual": 1.1710827714862908e-15,
+      "minimum_full_spectral_weight": 4.2169097358709036e-08,
+      "regulator": {
+        "active_strings": 24,
+        "dense_check": true,
+        "field": 0.08333333333333333,
+        "fourier_points": 4,
+        "mode_count": 384,
+        "nodes_per_string": 16,
+        "samples_per_internal_wave": 2,
+        "scaled_rapidity_extent": 5.0,
+        "string_xi_cutoff": 2.0,
+        "trace_distribution": "rademacher"
+      },
+      "sparse_jacobi_kernel_minimum_diagnostic": -0.41568865446351944,
+      "sparse_jacobi_kernel_used_for_propagation": false,
+      "structure_maximum": 1.0,
+      "structure_minimum": -0.4918202567157713,
+      "terminator_nonzero_spectral_weights": 8,
+      "time_domain_hierarchy_used_for_propagation": true,
+      "time_domain_terminator_minimum": -3.2301270994365885e-05
+    }
+  ],
+  "schema": 1,
+  "scope": {
+    "exact_mu26_prefix": true,
+    "finite_pole_count_assumed": false,
+    "frozen_estimator_uses_target_profiles": false,
+    "joint_regulator_convergence_complete": false,
+    "positive_fghd_terminator": true,
+    "unique_a_D_proved": false
+  },
+  "source": "docs/adaptive_dense_mu26_matching_h008333_xi200_R5_n16_t200_z40.json",
+  "source_sha256": "8ab264cce3fb94aecc0147221c0ecdbd3294d7f79afb6ab4c542f5584b3022d7",
+  "uses_target_a_or_D": false,
+  "uses_target_trajectory": false
+}

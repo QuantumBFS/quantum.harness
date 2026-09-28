@@ -1,0 +1,1264 @@
+{
+  "finest_cutoff_matching_scheme_relative_spread": 0.3842129963455934,
+  "gates": {
+    "every_matching_rate_positive_and_cutoff_stable": false,
+    "finite_time_laplace_tail_controlled": false,
+    "joint_zero_field_infinite_mode_limit_complete": false,
+    "matching_scheme_relative_spread_below_10_percent": false,
+    "physical_F1_perp_certified": false
+  },
+  "inputs": {
+    "finite_time_laplace_maximum": 50.0,
+    "known_colored_derivative_orders": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20
+    ],
+    "matching_rates": [
+      1.8,
+      1.9,
+      2.0
+    ],
+    "maximum_laplace_frequency": 0.1,
+    "target_coefficients_used": false,
+    "trajectory_data_used": false,
+    "white_contact_cancelled_by_exact_large_z_asymptotic": true
+  },
+  "interpretation": "The subtraction preserves the exact known large-z moment prefix. Dependence on the localization rate is a matching-scheme error, not a statistical uncertainty.  No Burgers projection is allowed until scheme, cutoff, finite-time, and zero-field gates all pass.",
+  "laplace_frequency": [
+    0.02,
+    0.05,
+    0.1
+  ],
+  "linear_full_mode_kernel": [
+    6.20974296053144,
+    4.197400542150676,
+    2.5857948904064427
+  ],
+  "matching_rate_rows": [
+    {
+      "candidate_kernels": [
+        [
+          6.356263949385843,
+          4.2787976062731925,
+          2.6194523128253993
+        ],
+        [
+          6.4728851035891575,
+          4.3473573835317225,
+          2.6506174627525914
+        ],
+        [
+          6.438530548623302,
+          4.357015118264542,
+          2.666253294936994
+        ],
+        [
+          6.2424180705042565,
+          4.2761982508122545,
+          2.6486930915336804
+        ],
+        [
+          5.896945446125711,
+          4.107920537437437,
+          2.5968174960146113
+        ],
+        [
+          5.508601305221697,
+          3.895416986274519,
+          2.5253400542746762
+        ],
+        [
+          3.4153360339215197,
+          2.474257637146044,
+          1.7791367654060428
+        ]
+      ],
+      "cutoffs": [
+        {
+          "analytic_derivative_count": 21,
+          "cancelled_white_contact": 8.415568087240345,
+          "fourier_points": 4,
+          "localized_jet_laplace": [
+            0.2445154217812133,
+            0.20988579226347961,
+            0.16683941599929897
+          ],
+          "maximum_resolved_wave_number": 0.08,
+          "raw_colored_laplace": [
+            0.39103641063561717,
+            0.2912828563859961,
+            0.20049683841825566
+          ],
+          "renormalized_colored_laplace": [
+            0.14652098885440387,
+            0.08139706412251649,
+            0.033657422418956695
+          ]
+        },
+        {
+          "analytic_derivative_count": 21,
+          "cancelled_white_contact": 12.623352130860514,
+          "fourier_points": 6,
+          "localized_jet_laplace": [
+            0.8770838813550412,
+            0.7659439473642875,
+            0.6253548857470071
+          ],
+          "maximum_resolved_wave_number": 0.12,
+          "raw_colored_laplace": [
+            1.1402260244127589,
+            0.9159007887453334,
+            0.6901774580931556
+          ],
+          "renormalized_colored_laplace": [
+            0.26314214305771766,
+            0.14995684138104592,
+            0.06482257234614841
+          ]
+        },
+        {
+          "analytic_derivative_count": 21,
+          "cancelled_white_contact": 16.83113617448069,
+          "fourier_points": 8,
+          "localized_jet_laplace": [
+            2.1423067313337425,
+            1.9032698215002755,
+            1.5953001980857342
+          ],
+          "maximum_resolved_wave_number": 0.16,
+          "raw_colored_laplace": [
+            2.3710943194256053,
+            2.062884397614141,
+            1.6757586026162854
+          ],
+          "renormalized_colored_laplace": [
+            0.22878758809186284,
+            0.15961457611386565,
+            0.0804584045305512
+          ]
+        },
+        {
+          "analytic_derivative_count": 21,
+          "cancelled_white_contact": 21.038920218100866,
+          "fourier_points": 10,
+          "localized_jet_laplace": [
+            4.167469554773679,
+            3.7627673603066936,
+            3.23122246188606
+          ],
+          "maximum_resolved_wave_number": 0.2,
+          "raw_colored_laplace": [
+            4.200144664746496,
+            3.8415650689682717,
+            3.2941206630132975
+          ],
+          "renormalized_colored_laplace": [
+            0.03267510997281686,
+            0.07879770866157809,
+            0.06289820112723765
+          ]
+        },
+        {
+          "analytic_derivative_count": 21,
+          "cancelled_white_contact": 25.246704261721028,
+          "fourier_points": 12,
+          "localized_jet_laplace": [
+            7.042922952693017,
+            6.45344001674179,
+            5.663267323602242
+          ],
+          "maximum_resolved_wave_number": 0.24,
+          "raw_colored_laplace": [
+            6.730125438287288,
+            6.36396001202855,
+            5.674289929210411
+          ],
+          "renormalized_colored_laplace": [
+            -0.31279751440572845,
+            -0.08948000471323958,
+            0.01102260560816859
+          ]
+        },
+        {
+          "analytic_derivative_count": 21,
+          "cancelled_white_contact": 29.454488305341222,
+          "fourier_points": 14,
+          "localized_jet_laplace": [
+            10.854099210011904,
+            10.076551929323996,
+            9.0119470577097
+          ],
+          "maximum_resolved_wave_number": 0.28,
+          "raw_colored_laplace": [
+            10.152957554702162,
+            9.774568373447838,
+            8.951492221577933
+          ],
+          "renormalized_colored_laplace": [
+            -0.7011416553097423,
+            -0.30198355587615744,
+            -0.0604548361317665
+          ]
+        },
+        {
+          "analytic_derivative_count": 21,
+          "cancelled_white_contact": 33.66227234896138,
+          "fourier_points": 16,
+          "localized_jet_laplace": [
+            17.41208801616383,
+            15.9456474524928,
+            14.077965970501817
+          ],
+          "maximum_resolved_wave_number": 0.32,
+          "raw_colored_laplace": [
+            14.617681089553908,
+            14.222504547488168,
+            13.271307845501417
+          ],
+          "renormalized_colored_laplace": [
+            -2.79440692660992,
+            -1.7231429050046323,
+            -0.8066581250003999
+          ]
+        }
+      ],
+      "matching": {
+        "all_candidates_inside_stieltjes_bounds": false,
+        "all_regulators_spectral_reconstruction_pass": false,
+        "all_spectral_weights_nonnegative": false,
+        "candidate_kernels_positive": [
+          [
+            true,
+            true,
+            true
+          ],
+          [
+            true,
+            true,
+            true
+          ],
+          [
+            true,
+            true,
+            true
+          ],
+          [
+            true,
+            true,
+            true
+          ],
+          [
+            true,
+            true,
+            true
+          ],
+          [
+            true,
+            true,
+            true
+          ],
+          [
+            true,
+            true,
+            true
+          ]
+        ],
+        "cutoff_stability_pass": false,
+        "exact_moment_order_preserved": 24,
+        "exact_recurrent_count_preserved": 12,
+        "finite_pole_count_assumed": false,
+        "inside_moment_interval": [
+          [
+            true,
+            true,
+            false
+          ],
+          [
+            true,
+            true,
+            false
+          ],
+          [
+            true,
+            true,
+            false
+          ],
+          [
+            true,
+            true,
+            false
+          ],
+          [
+            true,
+            true,
+            false
+          ],
+          [
+            true,
+            true,
+            false
+          ],
+          [
+            true,
+            true,
+            true
+          ]
+        ],
+        "laplace_frequency": [
+          0.02,
+          0.05,
+          0.1
+        ],
+        "last_pair_maximum_relative_change": 0.4691349102415708,
+        "matching_complete": false,
+        "maximum_spectral_relative_residual": null,
+        "moment_bounds_lower": [
+          0.07264784972490786,
+          0.17816954167186344,
+          0.3337393081997069
+        ],
+        "moment_bounds_upper": [
+          12.193815048167444,
+          4.894302624307494,
+          2.476610959198617
+        ],
+        "reconstructed_moment_preserving_kernels": [
+          [
+            null,
+            null,
+            null
+          ],
+          [
+            null,
+            null,
+            null
+          ],
+          [
+            null,
+            null,
+            null
+          ],
+          [
+            null,
+            null,
+            null
+          ],
+          [
+            null,
+            null,
+            null
+          ],
+          [
+            null,
+            null,
+            null
+          ],
+          [
+            3.415336033922551,
+            2.4742576371460387,
+            1.7791367654060424
+          ]
+        ],
+        "required_tail_count": 2,
+        "required_tail_inside_stieltjes_bounds": false,
+        "required_tail_spectral_weights_nonnegative": false,
+        "spectral_fits": [
+          {
+            "minimum_weight": null,
+            "nonzero_quadrature_weights": 0,
+            "normalization_residual": null,
+            "pre_normalization_mass": 0.0,
+            "relative_residual": null,
+            "spectral_weights_nonnegative": false,
+            "terminator_positive": false
+          },
+          {
+            "minimum_weight": null,
+            "nonzero_quadrature_weights": 0,
+            "normalization_residual": null,
+            "pre_normalization_mass": 0.0,
+            "relative_residual": null,
+            "spectral_weights_nonnegative": false,
+            "terminator_positive": false
+          },
+          {
+            "minimum_weight": null,
+            "nonzero_quadrature_weights": 0,
+            "normalization_residual": null,
+            "pre_normalization_mass": 0.0,
+            "relative_residual": null,
+            "spectral_weights_nonnegative": false,
+            "terminator_positive": false
+          },
+          {
+            "minimum_weight": null,
+            "nonzero_quadrature_weights": 0,
+            "normalization_residual": null,
+            "pre_normalization_mass": 0.0,
+            "relative_residual": null,
+            "spectral_weights_nonnegative": false,
+            "terminator_positive": false
+          },
+          {
+            "minimum_weight": null,
+            "nonzero_quadrature_weights": 0,
+            "normalization_residual": null,
+            "pre_normalization_mass": 0.0,
+            "relative_residual": null,
+            "spectral_weights_nonnegative": false,
+            "terminator_positive": true
+          },
+          {
+            "minimum_weight": null,
+            "nonzero_quadrature_weights": 0,
+            "normalization_residual": null,
+            "pre_normalization_mass": 0.0,
+            "relative_residual": null,
+            "spectral_weights_nonnegative": false,
+            "terminator_positive": true
+          },
+          {
+            "minimum_weight": 0.0,
+            "nonzero_quadrature_weights": 4,
+            "normalization_residual": 0.0,
+            "pre_normalization_mass": 0.9999999999999999,
+            "relative_residual": 2.412070700182839e-13,
+            "spectral_weights_nonnegative": true,
+            "terminator_positive": true
+          }
+        ],
+        "spectral_grid_is_continuum_quadrature": true,
+        "spectral_node_convergence_still_required": true,
+        "spectral_reconstruction_pass": false,
+        "target_coefficients_used": false,
+        "trajectory_data_used": false
+      },
+      "matching_rate": 1.8
+    },
+    {
+      "candidate_kernels": [
+        [
+          6.364936983305045,
+          4.284907497043254,
+          2.6229018476279293
+        ],
+        [
+          6.4955379075998465,
+          4.363316333981002,
+          2.6596282617372946
+        ],
+        [
+          6.476775442046181,
+          4.383960309677219,
+          2.681468609171062
+        ],
+        [
+          6.289933163293648,
+          4.309677370310834,
+          2.6676003691552594
+        ],
+        [
+          5.9426122848845795,
+          4.140100872416987,
+          2.614994440206793
+        ],
+        [
+          5.542024562749335,
+          3.9189734957127875,
+          2.5386494125210364
+        ],
+        [
+          4.949199125626672,
+          3.551582034917077,
+          2.3844601404257206
+        ]
+      ],
+      "cutoffs": [
+        {
+          "analytic_derivative_count": 21,
+          "cancelled_white_contact": 8.415568087240345,
+          "fourier_points": 4,
+          "localized_jet_laplace": [
+            0.23584238786201214,
+            0.20377590149341854,
+            0.16338988119676884
+          ],
+          "maximum_resolved_wave_number": 0.08,
+          "raw_colored_laplace": [
+            0.39103641063561717,
+            0.2912828563859961,
+            0.20049683841825566
+          ],
+          "renormalized_colored_laplace": [
+            0.15519402277360503,
+            0.08750695489257757,
+            0.037106957221486825
+          ]
+        },
+        {
+          "analytic_derivative_count": 21,
+          "cancelled_white_contact": 12.623352130860514,
+          "fourier_points": 6,
+          "localized_jet_laplace": [
+            0.8544310773443524,
+            0.7499849969150081,
+            0.6163440867623037
+          ],
+          "maximum_resolved_wave_number": 0.12,
+          "raw_colored_laplace": [
+            1.1402260244127589,
+            0.9159007887453334,
+            0.6901774580931556
+          ],
+          "renormalized_colored_laplace": [
+            0.28579494706840647,
+            0.16591579183032534,
+            0.07383337133085188
+          ]
+        },
+        {
+          "analytic_derivative_count": 21,
+          "cancelled_white_contact": 16.83113617448069,
+          "fourier_points": 8,
+          "localized_jet_laplace": [
+            2.1040618379108635,
+            1.876324630087598,
+            1.5800848838516663
+          ],
+          "maximum_resolved_wave_number": 0.16,
+          "raw_colored_laplace": [
+            2.3710943194256053,
+            2.062884397614141,
+            1.6757586026162854
+          ],
+          "renormalized_colored_laplace": [
+            0.2670324815147418,
+            0.18655976752654313,
+            0.09567371876461905
+          ]
+        },
+        {
+          "analytic_derivative_count": 21,
+          "cancelled_white_contact": 21.038920218100866,
+          "fourier_points": 10,
+          "localized_jet_laplace": [
+            4.119954461984287,
+            3.729288240808114,
+            3.212315184264481
+          ],
+          "maximum_resolved_wave_number": 0.2,
+          "raw_colored_laplace": [
+            4.200144664746496,
+            3.8415650689682717,
+            3.2941206630132975
+          ],
+          "renormalized_colored_laplace": [
+            0.08019020276220878,
+            0.11227682816015783,
+            0.08180547874881672
+          ]
+        },
+        {
+          "analytic_derivative_count": 21,
+          "cancelled_white_contact": 25.246704261721028,
+          "fourier_points": 12,
+          "localized_jet_laplace": [
+            6.9972561139341485,
+            6.42125968176224,
+            5.64509037941006
+          ],
+          "maximum_resolved_wave_number": 0.24,
+          "raw_colored_laplace": [
+            6.730125438287288,
+            6.36396001202855,
+            5.674289929210411
+          ],
+          "renormalized_colored_laplace": [
+            -0.2671306756468601,
+            -0.057299669733689385,
+            0.029199549800350333
+          ]
+        },
+        {
+          "analytic_derivative_count": 21,
+          "cancelled_white_contact": 29.454488305341222,
+          "fourier_points": 14,
+          "localized_jet_laplace": [
+            10.820675952484267,
+            10.052995419885727,
+            8.99863769946334
+          ],
+          "maximum_resolved_wave_number": 0.28,
+          "raw_colored_laplace": [
+            10.152957554702162,
+            9.774568373447838,
+            8.951492221577933
+          ],
+          "renormalized_colored_laplace": [
+            -0.6677183977821048,
+            -0.27842704643788885,
+            -0.04714547788540635
+          ]
+        },
+        {
+          "analytic_derivative_count": 21,
+          "cancelled_white_contact": 33.66227234896138,
+          "fourier_points": 16,
+          "localized_jet_laplace": [
+            15.878224924458676,
+            14.868323054721767,
+            13.472642595482139
+          ],
+          "maximum_resolved_wave_number": 0.32,
+          "raw_colored_laplace": [
+            14.617681089553908,
+            14.222504547488168,
+            13.271307845501417
+          ],
+          "renormalized_colored_laplace": [
+            -1.2605438349047677,
+            -0.6458185072335993,
+            -0.2013347499807221
+          ]
+        }
+      ],
+      "matching": {
+        "all_candidates_inside_stieltjes_bounds": false,
+        "all_regulators_spectral_reconstruction_pass": false,
+        "all_spectral_weights_nonnegative": false,
+        "candidate_kernels_positive": [
+          [
+            true,
+            true,
+            true
+          ],
+          [
+            true,
+            true,
+            true
+          ],
+          [
+            true,
+            true,
+            true
+          ],
+          [
+            true,
+            true,
+            true
+          ],
+          [
+            true,
+            true,
+            true
+          ],
+          [
+            true,
+            true,
+            true
+          ],
+          [
+            true,
+            true,
+            true
+          ]
+        ],
+        "cutoff_stability_pass": false,
+        "exact_moment_order_preserved": 24,
+        "exact_recurrent_count_preserved": 12,
+        "finite_pole_count_assumed": false,
+        "inside_moment_interval": [
+          [
+            true,
+            true,
+            false
+          ],
+          [
+            true,
+            true,
+            false
+          ],
+          [
+            true,
+            true,
+            false
+          ],
+          [
+            true,
+            true,
+            false
+          ],
+          [
+            true,
+            true,
+            false
+          ],
+          [
+            true,
+            true,
+            false
+          ],
+          [
+            true,
+            true,
+            true
+          ]
+        ],
+        "laplace_frequency": [
+          0.02,
+          0.05,
+          0.1
+        ],
+        "last_pair_maximum_relative_change": 0.11301359207115134,
+        "matching_complete": false,
+        "maximum_spectral_relative_residual": null,
+        "moment_bounds_lower": [
+          0.07264784972490786,
+          0.17816954167186344,
+          0.3337393081997069
+        ],
+        "moment_bounds_upper": [
+          12.193815048167444,
+          4.894302624307494,
+          2.476610959198617
+        ],
+        "reconstructed_moment_preserving_kernels": [
+          [
+            null,
+            null,
+            null
+          ],
+          [
+            null,
+            null,
+            null
+          ],
+          [
+            null,
+            null,
+            null
+          ],
+          [
+            null,
+            null,
+            null
+          ],
+          [
+            null,
+            null,
+            null
+          ],
+          [
+            null,
+            null,
+            null
+          ],
+          [
+            4.858756554467987,
+            3.712563753862634,
+            2.2942534116432385
+          ]
+        ],
+        "required_tail_count": 2,
+        "required_tail_inside_stieltjes_bounds": false,
+        "required_tail_spectral_weights_nonnegative": false,
+        "spectral_fits": [
+          {
+            "minimum_weight": null,
+            "nonzero_quadrature_weights": 0,
+            "normalization_residual": null,
+            "pre_normalization_mass": 0.0,
+            "relative_residual": null,
+            "spectral_weights_nonnegative": false,
+            "terminator_positive": false
+          },
+          {
+            "minimum_weight": null,
+            "nonzero_quadrature_weights": 0,
+            "normalization_residual": null,
+            "pre_normalization_mass": 0.0,
+            "relative_residual": null,
+            "spectral_weights_nonnegative": false,
+            "terminator_positive": false
+          },
+          {
+            "minimum_weight": null,
+            "nonzero_quadrature_weights": 0,
+            "normalization_residual": null,
+            "pre_normalization_mass": 0.0,
+            "relative_residual": null,
+            "spectral_weights_nonnegative": false,
+            "terminator_positive": false
+          },
+          {
+            "minimum_weight": null,
+            "nonzero_quadrature_weights": 0,
+            "normalization_residual": null,
+            "pre_normalization_mass": 0.0,
+            "relative_residual": null,
+            "spectral_weights_nonnegative": false,
+            "terminator_positive": false
+          },
+          {
+            "minimum_weight": null,
+            "nonzero_quadrature_weights": 0,
+            "normalization_residual": null,
+            "pre_normalization_mass": 0.0,
+            "relative_residual": null,
+            "spectral_weights_nonnegative": false,
+            "terminator_positive": false
+          },
+          {
+            "minimum_weight": null,
+            "nonzero_quadrature_weights": 0,
+            "normalization_residual": null,
+            "pre_normalization_mass": 0.0,
+            "relative_residual": null,
+            "spectral_weights_nonnegative": false,
+            "terminator_positive": true
+          },
+          {
+            "minimum_weight": 0.0,
+            "nonzero_quadrature_weights": 2,
+            "normalization_residual": 0.0,
+            "pre_normalization_mass": 1.0000000005587506,
+            "relative_residual": 0.20993662452305284,
+            "spectral_weights_nonnegative": true,
+            "terminator_positive": true
+          }
+        ],
+        "spectral_grid_is_continuum_quadrature": true,
+        "spectral_node_convergence_still_required": true,
+        "spectral_reconstruction_pass": false,
+        "target_coefficients_used": false,
+        "trajectory_data_used": false
+      },
+      "matching_rate": 1.9
+    },
+    {
+      "candidate_kernels": [
+        [
+          6.373061073217444,
+          4.290732645123183,
+          2.6262848340472766
+        ],
+        [
+          6.517352752917868,
+          4.3789586138650325,
+          2.668713125578478
+        ],
+        [
+          6.514909889936707,
+          4.411305739905386,
+          2.6973516687939503
+        ],
+        [
+          6.339597420635381,
+          4.345292734495461,
+          2.688288852633427
+        ],
+        [
+          5.993513568208834,
+          4.176606336126721,
+          2.636202760690492
+        ],
+        [
+          5.583062931980182,
+          3.9484090274464325,
+          2.5557536835015027
+        ],
+        [
+          5.1455914413706285,
+          3.6920694718993285,
+          2.465742451816639
+        ]
+      ],
+      "cutoffs": [
+        {
+          "analytic_derivative_count": 21,
+          "cancelled_white_contact": 8.415568087240345,
+          "fourier_points": 4,
+          "localized_jet_laplace": [
+            0.22771829794961218,
+            0.19795075341348997,
+            0.16000689477742197
+          ],
+          "maximum_resolved_wave_number": 0.08,
+          "raw_colored_laplace": [
+            0.39103641063561717,
+            0.2912828563859961,
+            0.20049683841825566
+          ],
+          "renormalized_colored_laplace": [
+            0.163318112686005,
+            0.09333210297250613,
+            0.04048994364083369
+          ]
+        },
+        {
+          "analytic_derivative_count": 21,
+          "cancelled_white_contact": 12.623352130860514,
+          "fourier_points": 6,
+          "localized_jet_laplace": [
+            0.8326162320263303,
+            0.7343427170309773,
+            0.60725922292112
+          ],
+          "maximum_resolved_wave_number": 0.12,
+          "raw_colored_laplace": [
+            1.1402260244127589,
+            0.9159007887453334,
+            0.6901774580931556
+          ],
+          "renormalized_colored_laplace": [
+            0.3076097923864286,
+            0.18155807171435612,
+            0.08291823517203556
+          ]
+        },
+        {
+          "analytic_derivative_count": 21,
+          "cancelled_white_contact": 16.83113617448069,
+          "fourier_points": 8,
+          "localized_jet_laplace": [
+            2.065927390020338,
+            1.8489791998594314,
+            1.5642018242287778
+          ],
+          "maximum_resolved_wave_number": 0.16,
+          "raw_colored_laplace": [
+            2.3710943194256053,
+            2.062884397614141,
+            1.6757586026162854
+          ],
+          "renormalized_colored_laplace": [
+            0.30516692940526724,
+            0.21390519775470973,
+            0.11155677838750755
+          ]
+        },
+        {
+          "analytic_derivative_count": 21,
+          "cancelled_white_contact": 21.038920218100866,
+          "fourier_points": 10,
+          "localized_jet_laplace": [
+            4.070290204642554,
+            3.6936728766234874,
+            3.1916267007863133
+          ],
+          "maximum_resolved_wave_number": 0.2,
+          "raw_colored_laplace": [
+            4.200144664746496,
+            3.8415650689682717,
+            3.2941206630132975
+          ],
+          "renormalized_colored_laplace": [
+            0.12985446010394153,
+            0.14789219234478423,
+            0.10249396222698426
+          ]
+        },
+        {
+          "analytic_derivative_count": 21,
+          "cancelled_white_contact": 25.246704261721028,
+          "fourier_points": 12,
+          "localized_jet_laplace": [
+            6.946354830609894,
+            6.384754218052506,
+            5.623882058926362
+          ],
+          "maximum_resolved_wave_number": 0.24,
+          "raw_colored_laplace": [
+            6.730125438287288,
+            6.36396001202855,
+            5.674289929210411
+          ],
+          "renormalized_colored_laplace": [
+            -0.21622939232260574,
+            -0.020794206023955653,
+            0.05040787028404914
+          ]
+        },
+        {
+          "analytic_derivative_count": 21,
+          "cancelled_white_contact": 29.454488305341222,
+          "fourier_points": 14,
+          "localized_jet_laplace": [
+            10.77963758325342,
+            10.023559888152082,
+            8.981533428482873
+          ],
+          "maximum_resolved_wave_number": 0.28,
+          "raw_colored_laplace": [
+            10.152957554702162,
+            9.774568373447838,
+            8.951492221577933
+          ],
+          "renormalized_colored_laplace": [
+            -0.6266800285512577,
+            -0.24899151470424385,
+            -0.030041206904940054
+          ]
+        },
+        {
+          "analytic_derivative_count": 21,
+          "cancelled_white_contact": 33.66227234896138,
+          "fourier_points": 16,
+          "localized_jet_laplace": [
+            15.68183260871472,
+            14.727835617739515,
+            13.39136028409122
+          ],
+          "maximum_resolved_wave_number": 0.32,
+          "raw_colored_laplace": [
+            14.617681089553908,
+            14.222504547488168,
+            13.271307845501417
+          ],
+          "renormalized_colored_laplace": [
+            -1.064151519160811,
+            -0.5053310702513478,
+            -0.12005243858980386
+          ]
+        }
+      ],
+      "matching": {
+        "all_candidates_inside_stieltjes_bounds": false,
+        "all_regulators_spectral_reconstruction_pass": false,
+        "all_spectral_weights_nonnegative": false,
+        "candidate_kernels_positive": [
+          [
+            true,
+            true,
+            true
+          ],
+          [
+            true,
+            true,
+            true
+          ],
+          [
+            true,
+            true,
+            true
+          ],
+          [
+            true,
+            true,
+            true
+          ],
+          [
+            true,
+            true,
+            true
+          ],
+          [
+            true,
+            true,
+            true
+          ],
+          [
+            true,
+            true,
+            true
+          ]
+        ],
+        "cutoff_stability_pass": true,
+        "exact_moment_order_preserved": 24,
+        "exact_recurrent_count_preserved": 12,
+        "finite_pole_count_assumed": false,
+        "inside_moment_interval": [
+          [
+            true,
+            true,
+            false
+          ],
+          [
+            true,
+            true,
+            false
+          ],
+          [
+            true,
+            true,
+            false
+          ],
+          [
+            true,
+            true,
+            false
+          ],
+          [
+            true,
+            true,
+            false
+          ],
+          [
+            true,
+            true,
+            false
+          ],
+          [
+            true,
+            true,
+            true
+          ]
+        ],
+        "laplace_frequency": [
+          0.02,
+          0.05,
+          0.1
+        ],
+        "last_pair_maximum_relative_change": 0.08155197760796552,
+        "matching_complete": false,
+        "maximum_spectral_relative_residual": null,
+        "moment_bounds_lower": [
+          0.07264784972490786,
+          0.17816954167186344,
+          0.3337393081997069
+        ],
+        "moment_bounds_upper": [
+          12.193815048167444,
+          4.894302624307494,
+          2.476610959198617
+        ],
+        "reconstructed_moment_preserving_kernels": [
+          [
+            null,
+            null,
+            null
+          ],
+          [
+            null,
+            null,
+            null
+          ],
+          [
+            null,
+            null,
+            null
+          ],
+          [
+            null,
+            null,
+            null
+          ],
+          [
+            null,
+            null,
+            null
+          ],
+          [
+            null,
+            null,
+            null
+          ],
+          [
+            5.060270014633109,
+            3.850476650441148,
+            2.322096612297721
+          ]
+        ],
+        "required_tail_count": 2,
+        "required_tail_inside_stieltjes_bounds": false,
+        "required_tail_spectral_weights_nonnegative": false,
+        "spectral_fits": [
+          {
+            "minimum_weight": null,
+            "nonzero_quadrature_weights": 0,
+            "normalization_residual": null,
+            "pre_normalization_mass": 0.0,
+            "relative_residual": null,
+            "spectral_weights_nonnegative": false,
+            "terminator_positive": false
+          },
+          {
+            "minimum_weight": null,
+            "nonzero_quadrature_weights": 0,
+            "normalization_residual": null,
+            "pre_normalization_mass": 0.0,
+            "relative_residual": null,
+            "spectral_weights_nonnegative": false,
+            "terminator_positive": false
+          },
+          {
+            "minimum_weight": null,
+            "nonzero_quadrature_weights": 0,
+            "normalization_residual": null,
+            "pre_normalization_mass": 0.0,
+            "relative_residual": null,
+            "spectral_weights_nonnegative": false,
+            "terminator_positive": false
+          },
+          {
+            "minimum_weight": null,
+            "nonzero_quadrature_weights": 0,
+            "normalization_residual": null,
+            "pre_normalization_mass": 0.0,
+            "relative_residual": null,
+            "spectral_weights_nonnegative": false,
+            "terminator_positive": false
+          },
+          {
+            "minimum_weight": null,
+            "nonzero_quadrature_weights": 0,
+            "normalization_residual": null,
+            "pre_normalization_mass": 0.0,
+            "relative_residual": null,
+            "spectral_weights_nonnegative": false,
+            "terminator_positive": false
+          },
+          {
+            "minimum_weight": null,
+            "nonzero_quadrature_weights": 0,
+            "normalization_residual": null,
+            "pre_normalization_mass": 0.0,
+            "relative_residual": null,
+            "spectral_weights_nonnegative": false,
+            "terminator_positive": true
+          },
+          {
+            "minimum_weight": 0.0,
+            "nonzero_quadrature_weights": 3,
+            "normalization_residual": 1.1102230246251565e-16,
+            "pre_normalization_mass": 1.000000000736248,
+            "relative_residual": 0.3295272842585008,
+            "spectral_weights_nonnegative": true,
+            "terminator_positive": true
+          }
+        ],
+        "spectral_grid_is_continuum_quadrature": true,
+        "spectral_node_convergence_still_required": true,
+        "spectral_reconstruction_pass": false,
+        "target_coefficients_used": false,
+        "trajectory_data_used": false
+      },
+      "matching_rate": 2.0
+    }
+  ],
+  "method": "mu20_preserving_exponential_jet_subtraction",
+  "schema": 1,
+  "sources": {
+    "docs/full_mode_mori_certificate.json": "86a2c85c97da260f6af2218f751a6532ad1fb3fb2537b8489516a4604762f7d8",
+    "docs/full_mode_physical_one_loop_h025_mu20_uv4_16.json": "fe40d38a27ab1d1998fbc1631b83aca271087189c96bdb8743cc329f2ca7cbd6"
+  }
+}

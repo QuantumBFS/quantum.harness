@@ -1,0 +1,151 @@
+{
+  "full_operator_certificates": {
+    "diffusion_off_diagonal_frobenius_fraction": 0.23043629186141568,
+    "fdt_lyapunov_residual": 0.0,
+    "fdt_noise_minimum_eigenvalue": -4.554469410374187e-19,
+    "fdt_noise_positive_semidefinite": true,
+    "fdt_operator_identity_residual": 3.372798421183861e-17,
+    "noise_off_diagonal_frobenius_fraction": 0.044580357570412545,
+    "stationary_covariance_maximum_residual": 0.0
+  },
+  "matrix_memory": {
+    "cross_frobenius_norms": [
+      0.00042133664491072646,
+      0.0004176470351391545,
+      0.00041397392246690813
+    ],
+    "diffusion_frobenius_norms": [
+      0.0013297866780977818,
+      0.0013146466122248505,
+      0.0012994730519632462
+    ],
+    "direct_scalar_continuity_projection": [
+      [
+        0.026664147897155283,
+        -2.830042788401834e-19
+      ],
+      [
+        0.026512080454829903,
+        -9.04481323180025e-05
+      ],
+      [
+        0.026338908509241702,
+        -0.00018243678928282677
+      ]
+    ],
+    "matrix_to_scalar_projection_identity_maximum_residual": 1.0410458259422766e-17,
+    "physical_continuity_projection": [
+      [
+        0.026664147897155294,
+        -4.929609396101036e-19
+      ],
+      [
+        0.026512080454829903,
+        -9.044813231800335e-05
+      ],
+      [
+        0.026338908509241702,
+        -0.00018243678928282723
+      ]
+    ],
+    "physical_projection_standard_errors": [
+      0.002729000415432382,
+      0.002719020169497312,
+      0.0027084358791428357
+    ],
+    "total_frobenius_norms": [
+      0.004766518632590845,
+      0.004723098850977222,
+      0.004677015063160033
+    ],
+    "total_frobenius_standard_errors": [
+      0.0008198078823664109,
+      0.000812792925089415,
+      0.0008056498936822713
+    ],
+    "velocity_frobenius_norms": [
+      0.0034573619655327557,
+      0.0034289294193010178,
+      0.0033981505620586223
+    ]
+  },
+  "method": "full_mode_matrix_fdt_one_dyson_update",
+  "multiplicative_noise_contact": {
+    "bare_continuity_matrix_frobenius_norm": 162.2345501808496,
+    "bare_physical_continuity_projection": [
+      1.1877570683426013,
+      0.0
+    ],
+    "direct_scalar_projection": 1.187757068342601,
+    "frobenius_standard_error_before_cell_normalization": 49.65263588137356,
+    "inserted_into_matrix_volterra_generator": false,
+    "matrix_to_scalar_projection_identity_residual": 2.220446049250313e-16,
+    "reason_not_inserted": "the bare hydrodynamic delta contact must first be matched to the regular microscopic Mori short-time expansion"
+  },
+  "regulator": {
+    "active_strings": 2,
+    "external_wave": 0.1,
+    "field": 0.25,
+    "fourier_points": 4,
+    "mode_count": 16,
+    "nodes_per_string": 8,
+    "samples_per_internal_wave": 64,
+    "string_xi_cutoff": 0.5,
+    "wave_step": 0.1
+  },
+  "schema": 1,
+  "scope": {
+    "all_retained_modes_propagated_before_spin_projection": true,
+    "background_fdt_noise_is_additive": true,
+    "full_fdt_noise_covariance_propagated": true,
+    "full_non_diagonal_diffusion_propagated": true,
+    "joint_zero_field_infinite_string_limit_complete": false,
+    "linear_internal_propagators_in_memory": true,
+    "multiplicative_noise_contact_uv_matched": false,
+    "multiplicative_noise_vertex_contracted_as_full_matrix": true,
+    "physical_a_or_D_identified": false,
+    "quadratic_diffusion_vertex_retained": true,
+    "quadratic_velocity_vertex_retained": true,
+    "rank_three_diffusion_vertex_stored": false,
+    "self_consistent_matrix_resummation_complete": false,
+    "velocity_diffusion_cross_retained": true
+  },
+  "static_susceptibility_captured_fraction": 0.12583979873462786,
+  "structure_factor_over_chi": {
+    "linear_full_mode": [
+      [
+        0.9999999999999999,
+        0.0
+      ],
+      [
+        0.99948736720383,
+        7.170470290388707e-19
+      ],
+      [
+        0.9986599098522027,
+        -3.796131330205786e-19
+      ]
+    ],
+    "one_matrix_dyson_update": [
+      [
+        0.9999999999999999,
+        0.0
+      ],
+      [
+        0.99948736720383,
+        7.170470290388707e-19
+      ],
+      [
+        0.9986433108738038,
+        -1.8627773052102704e-08
+      ]
+    ]
+  },
+  "times": [
+    0.0,
+    0.25,
+    0.5
+  ],
+  "uses_target_a_or_D": false,
+  "uses_target_trajectory": false
+}

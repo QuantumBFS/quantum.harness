@@ -1,0 +1,68 @@
+{
+  "joint_limit_audit": {
+    "declared_relative_tolerance": 0.1,
+    "h_times_spin_complement_coupling": [
+      0.2697097455244273
+    ],
+    "h_times_spin_complement_coupling_relative_steps": [],
+    "h_times_spin_diffusion_relative_steps": [],
+    "infinite_mode_limit_accepted": false,
+    "reason": "the declared finite-field regulator sequence is not stable",
+    "selected_scalar_stable": false
+  },
+  "method": "full_non_diagonal_fghd_joint_zero_field_regulator",
+  "regulators": {
+    "basis_maximum_modes": 1000,
+    "fields": [
+      0.05
+    ],
+    "kernel_theta_step": 1.0,
+    "nodes_per_string": 48,
+    "operator_only": true,
+    "propagation_maximum_modes": 1000,
+    "rapidity_points": 24,
+    "rapidity_quadrature": "adaptive-string",
+    "rapidity_u_extent": 6.0,
+    "scaled_rapidity_extent": 20.0,
+    "scaled_rapidity_map_alpha": 4.0,
+    "string_xi_buffer": 3.0,
+    "string_xi_cutoff": 6.0
+  },
+  "rows": [
+    {
+      "active_strings": 120,
+      "basis_status": "exact_invariants_without_explicit_complement_basis",
+      "diffusion_complement": {
+        "complement_to_spin_norm": 5.394194910488546,
+        "spectrum_status": "not_formed",
+        "spin_to_complement_norm": 5.394194910488546
+      },
+      "exact_finite_field_susceptibility": 0.24937604019289192,
+      "exact_full_complement_mori_resolvent": {},
+      "fdt_residual": 1.5570900805146337e-16,
+      "field": 0.05,
+      "h_times_spin_diffusion": 0.536447566315885,
+      "mode_count": 5760,
+      "noise_complement": {
+        "complement_to_spin_norm": 5.394194910488546,
+        "spectrum_status": "not_formed",
+        "spin_to_complement_norm": 5.394194910488546
+      },
+      "propagation": {},
+      "propagation_status": "omitted_above_declared_mode_limit_pending_matrix_free_krylov",
+      "spin_diffusion": 10.728951326317699,
+      "spin_noise": 10.728951326317699,
+      "susceptibility": 0.2472833325645152,
+      "susceptibility_captured_fraction": 0.991608224965165,
+      "velocity_complement": {
+        "complement_to_spin_norm": 0.08523944638799673,
+        "spectrum_status": "not_formed",
+        "spin_to_complement_norm": 0.08523944638799673
+      }
+    }
+  ],
+  "schema": 1,
+  "two_mode_or_finite_pole_closure": false,
+  "uses_target_a_or_D": false,
+  "uses_target_trajectory": false
+}

@@ -1,0 +1,64 @@
+{
+  "frozen_weak_estimator": {
+    "leading_kpz": {
+      "D": 2.2214888084115407,
+      "a": 0.21223525860554696,
+      "mse": 3.5783797631711106e-09,
+      "n_obs": 8030
+    },
+    "provisional_full_tba_scale_diagnostic": {
+      "D": 1.3483300386964938,
+      "D1": -0.82,
+      "a": 0.23209610530264393,
+      "mse": 7.983024588143955e-09,
+      "n_obs": 8030,
+      "physical_subleading_coefficient_claimed": false,
+      "scale_correction": -0.8933831923319763
+    },
+    "spectral_scale_diagnostic": {
+      "D": 1.9756068538745772,
+      "a": 0.21711763065829706,
+      "mse": 4.5460875962061465e-09,
+      "n_obs": 8030,
+      "physical_subleading_coefficient_claimed": false,
+      "scale_correction": -0.2311973189184577
+    }
+  },
+  "inputs": {
+    "dt": 0.2,
+    "dx": 1.0,
+    "fit_window": [
+      52.0,
+      198.0
+    ],
+    "inner_spatial_savgol": [
+      9,
+      3
+    ],
+    "inner_temporal_savgol": [
+      5,
+      2
+    ],
+    "length": 400,
+    "outer_savgol": [
+      31,
+      7
+    ],
+    "profile_window": [
+      50.0,
+      200.0
+    ],
+    "target_coefficients_used": false,
+    "test_function_count": 11,
+    "trajectory_data_used": false,
+    "x_crop": [
+      -120.0,
+      120.0
+    ]
+  },
+  "schema_version": 1,
+  "theory": {
+    "kpz_scale": 1.926524141187757,
+    "profile": "stationary_Praehofer_Spohn_KPZ_wall"
+  }
+}

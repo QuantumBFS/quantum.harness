@@ -1,0 +1,30 @@
+{
+  "decision": {
+    "constant_regular_kernel_rejected_as_complete_F1": true,
+    "frequency_dependent_F1_or_equivalent_continuum_required": true,
+    "reason": "it can move D through the observed finite-window scale while leaving a near its leading-KPZ projection"
+  },
+  "rows": [
+    {
+      "D": 2.132438063543012,
+      "a": 0.21220248712287954,
+      "minimum_density": -6.642862318084848e-10,
+      "regular_kernel_d": -0.1
+    },
+    {
+      "D": 1.9614326241258857,
+      "a": 0.21362642248305796,
+      "minimum_density": -3.471625894062712e-09,
+      "regular_kernel_d": -0.3
+    },
+    {
+      "D": 1.8061674043706042,
+      "a": 0.21588023877318502,
+      "minimum_density": -4.022949457341025e-06,
+      "regular_kernel_d": -0.5
+    }
+  ],
+  "schema_version": 1,
+  "target_coefficients_used": false,
+  "trajectory_data_used": false
+}

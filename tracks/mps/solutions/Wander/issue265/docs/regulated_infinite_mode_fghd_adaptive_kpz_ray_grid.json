@@ -1,0 +1,1830 @@
+{
+  "joint_limit_audit": {
+    "declared_relative_tolerance": 0.1,
+    "h_times_spin_complement_coupling": [
+      0.27471122377793566,
+      0.27480430464457395
+    ],
+    "h_times_spin_complement_coupling_relative_steps": [
+      0.0003387169162385324
+    ],
+    "h_times_spin_diffusion_relative_steps": [
+      0.01729343667995373
+    ],
+    "infinite_mode_limit_accepted": false,
+    "reason": "one scalar regulator sequence is stable, but accepting the infinite-mode limit additionally requires independent xi/u/grid tails and nonlinear magnetic-boundary propagation",
+    "selected_scalar_stable": true
+  },
+  "method": "full_non_diagonal_fghd_joint_zero_field_regulator",
+  "regulators": {
+    "basis_maximum_modes": 1200,
+    "direct_noise_maximum_modes": 1200,
+    "direct_noise_quadrature_order": 8,
+    "fields": [
+      0.1,
+      0.0833333333333333
+    ],
+    "giant_string_joint_scaling": {
+      "scaled_laplace_frequencies_z_over_h3": [
+        0.256,
+        0.512,
+        0.724077,
+        1.024,
+        1.448155,
+        2.048,
+        2.896309,
+        4.096,
+        8.192
+      ],
+      "scaled_times_t_h3": [
+        0.0,
+        0.1,
+        0.2,
+        0.3,
+        0.4
+      ],
+      "scaled_wave_numbers_k_over_h2": [
+        0.64,
+        1.28,
+        2.56
+      ]
+    },
+    "kernel_theta_step": 1.0,
+    "nodes_per_string": 32,
+    "operator_only": true,
+    "propagation_maximum_modes": 1200,
+    "rapidity_points": 24,
+    "rapidity_quadrature": "adaptive-string",
+    "rapidity_u_extent": 6.0,
+    "scaled_rapidity_extent": 20.0,
+    "scaled_rapidity_map_alpha": 4.0,
+    "string_xi_buffer": 3.0,
+    "string_xi_cutoff": 6.0
+  },
+  "rows": [
+    {
+      "active_strings": 60,
+      "basis_status": "exact_invariants_without_explicit_complement_basis",
+      "diffusion_complement": {
+        "complement_to_spin_norm": 2.7471122377793553,
+        "spectrum_status": "not_formed",
+        "spin_to_complement_norm": 2.7471122377793566
+      },
+      "direct_full_noise_propagation": {},
+      "exact_finite_field_susceptibility": 0.24751657271185998,
+      "exact_full_complement_mori_resolvent": {
+        "0.006400000000000001": {
+          "0.00025600000000000004": {
+            "bare_spin_memory": {
+              "imag": -0.0,
+              "real": 2.5924697640477823
+            },
+            "continuity_memory": {
+              "imag": -4.4085554579765443e-16,
+              "real": 13.210022934224437
+            },
+            "fdt_residual": 1.4884743990852515e-16,
+            "gmres_info": 0,
+            "gmres_iterations": 419,
+            "khat": 0.006399989077338927,
+            "linear_solve_relative_residual": 9.760473098858036e-11,
+            "method": "full_mode_krylov_schur_complement_without_poles",
+            "orthogonal_memory_correction": {
+              "imag": -4.4085554579765443e-16,
+              "real": 10.617553170176654
+            },
+            "spin_structure_resolvent": {
+              "imag": 2.842170943040401e-14,
+              "real": 1254.5781241695577
+            }
+          },
+          "0.0005120000000000001": {
+            "bare_spin_memory": {
+              "imag": -0.0,
+              "real": 2.5924697640477823
+            },
+            "continuity_memory": {
+              "imag": 3.3207114218217275e-16,
+              "real": 11.385011771887665
+            },
+            "fdt_residual": 1.4884743990852515e-16,
+            "gmres_info": 0,
+            "gmres_iterations": 247,
+            "khat": 0.006399989077338927,
+            "linear_solve_relative_residual": 9.483992078986243e-11,
+            "method": "full_mode_krylov_schur_complement_without_poles",
+            "orthogonal_memory_correction": {
+              "imag": 3.3207114218217275e-16,
+              "real": 8.792542007839883
+            },
+            "spin_structure_resolvent": {
+              "imag": -1.4210854715202004e-14,
+              "real": 1022.1515674674915
+            }
+          },
+          "0.0007240770000000002": {
+            "bare_spin_memory": {
+              "imag": -0.0,
+              "real": 2.5924697640477823
+            },
+            "continuity_memory": {
+              "imag": -6.922723797556949e-16,
+              "real": 10.480391057884347
+            },
+            "fdt_residual": 1.4884743990852515e-16,
+            "gmres_info": 0,
+            "gmres_iterations": 182,
+            "khat": 0.006399989077338927,
+            "linear_solve_relative_residual": 9.328154713534071e-11,
+            "method": "full_mode_krylov_schur_complement_without_poles",
+            "orthogonal_memory_correction": {
+              "imag": -6.922723797556949e-16,
+              "real": 7.887921293836564
+            },
+            "spin_structure_resolvent": {
+              "imag": 2.1316282072803006e-14,
+              "real": 867.0377251670645
+            }
+          },
+          "0.0010240000000000002": {
+            "bare_spin_memory": {
+              "imag": -0.0,
+              "real": 2.5924697640477823
+            },
+            "continuity_memory": {
+              "imag": -3.482351942593309e-16,
+              "real": 9.590825332184714
+            },
+            "fdt_residual": 1.4884743990852515e-16,
+            "gmres_info": 0,
+            "gmres_iterations": 134,
+            "khat": 0.006399989077338927,
+            "linear_solve_relative_residual": 9.843603901240026e-11,
+            "method": "full_mode_krylov_schur_complement_without_poles",
+            "orthogonal_memory_correction": {
+              "imag": -3.482351942593309e-16,
+              "real": 6.998355568136931
+            },
+            "spin_structure_resolvent": {
+              "imag": 7.105427357601002e-15,
+              "real": 705.7965622662225
+            }
+          },
+          "0.0014481550000000004": {
+            "bare_spin_memory": {
+              "imag": -0.0,
+              "real": 2.5924697640477823
+            },
+            "continuity_memory": {
+              "imag": -1.1308111023473762e-15,
+              "real": 8.72089038671925
+            },
+            "fdt_residual": 1.4884743990852515e-16,
+            "gmres_info": 0,
+            "gmres_iterations": 97,
+            "khat": 0.006399989077338927,
+            "linear_solve_relative_residual": 7.935876478865833e-11,
+            "method": "full_mode_krylov_schur_complement_without_poles",
+            "orthogonal_memory_correction": {
+              "imag": -1.1308111023473762e-15,
+              "real": 6.128420622671467
+            },
+            "spin_structure_resolvent": {
+              "imag": 1.4210854715202004e-14,
+              "real": 553.9057009670498
+            }
+          },
+          "0.0020480000000000003": {
+            "bare_spin_memory": {
+              "imag": -0.0,
+              "real": 2.5924697640477823
+            },
+            "continuity_memory": {
+              "imag": -4.874503268309295e-16,
+              "real": 7.876807253747468
+            },
+            "fdt_residual": 1.4884743990852515e-16,
+            "gmres_info": 0,
+            "gmres_iterations": 67,
+            "khat": 0.006399989077338927,
+            "linear_solve_relative_residual": 8.429676992234036e-11,
+            "method": "full_mode_krylov_schur_complement_without_poles",
+            "orthogonal_memory_correction": {
+              "imag": -4.874503268309295e-16,
+              "real": 5.284337489699686
+            },
+            "spin_structure_resolvent": {
+              "imag": 3.552713678800501e-15,
+              "real": 421.8282762954231
+            }
+          },
+          "0.0028963090000000006": {
+            "bare_spin_memory": {
+              "imag": -0.0,
+              "real": 2.5924697640477823
+            },
+            "continuity_memory": {
+              "imag": 1.1003655461086953e-15,
+              "real": 7.066619947445879
+            },
+            "fdt_residual": 1.4884743990852515e-16,
+            "gmres_info": 0,
+            "gmres_iterations": 50,
+            "khat": 0.006399989077338927,
+            "linear_solve_relative_residual": 7.380413349784164e-11,
+            "method": "full_mode_krylov_schur_complement_without_poles",
+            "orthogonal_memory_correction": {
+              "imag": 1.1003655461086953e-15,
+              "real": 4.474150183398097
+            },
+            "spin_structure_resolvent": {
+              "imag": -4.440892098500626e-15,
+              "real": 313.89715968476287
+            }
+          },
+          "0.004096000000000001": {
+            "bare_spin_memory": {
+              "imag": -0.0,
+              "real": 2.5924697640477823
+            },
+            "continuity_memory": {
+              "imag": 0.0,
+              "real": 6.299309210154772
+            },
+            "fdt_residual": 1.4884743990852515e-16,
+            "gmres_info": 0,
+            "gmres_iterations": 36,
+            "khat": 0.006399989077338927,
+            "linear_solve_relative_residual": 6.931395425981506e-11,
+            "method": "full_mode_krylov_schur_complement_without_poles",
+            "orthogonal_memory_correction": {
+              "imag": 0.0,
+              "real": 3.7068394461069896
+            },
+            "spin_structure_resolvent": {
+              "imag": 0.0,
+              "real": 229.6728701225166
+            }
+          },
+          "0.008192000000000001": {
+            "bare_spin_memory": {
+              "imag": -0.0,
+              "real": 2.5924697640477823
+            },
+            "continuity_memory": {
+              "imag": 1.9099574829243888e-16,
+              "real": 4.939680809590216
+            },
+            "fdt_residual": 1.4884743990852515e-16,
+            "gmres_info": 0,
+            "gmres_iterations": 21,
+            "khat": 0.006399989077338927,
+            "linear_solve_relative_residual": 4.8920920856226024e-11,
+            "method": "full_mode_krylov_schur_complement_without_poles",
+            "orthogonal_memory_correction": {
+              "imag": 1.9099574829243888e-16,
+              "real": 2.347211045542434
+            },
+            "spin_structure_resolvent": {
+              "imag": -1.1102230246251565e-16,
+              "real": 119.12804983468234
+            }
+          }
+        },
+        "0.012800000000000002": {
+          "0.00025600000000000004": {
+            "bare_spin_memory": {
+              "imag": -4.963151438509059e-16,
+              "real": 2.5924697640477836
+            },
+            "continuity_memory": {
+              "imag": 4.687786865213425e-16,
+              "real": 8.470964146047566
+            },
+            "fdt_residual": 1.4884743990852515e-16,
+            "gmres_info": 0,
+            "gmres_iterations": 508,
+            "khat": 0.012799912618845626,
+            "linear_solve_relative_residual": 9.685152317985608e-11,
+            "method": "full_mode_krylov_schur_complement_without_poles",
+            "orthogonal_memory_correction": {
+              "imag": 9.650938303722482e-16,
+              "real": 5.878494381999782
+            },
+            "spin_structure_resolvent": {
+              "imag": -2.842170943040401e-14,
+              "real": 608.3228975068296
+            }
+          },
+          "0.0005120000000000001": {
+            "bare_spin_memory": {
+              "imag": -4.963151438509059e-16,
+              "real": 2.5924697640477836
+            },
+            "continuity_memory": {
+              "imag": 2.7981845557385047e-16,
+              "real": 7.837746778964702
+            },
+            "fdt_residual": 1.4884743990852515e-16,
+            "gmres_info": 0,
+            "gmres_iterations": 372,
+            "khat": 0.012799912618845626,
+            "linear_solve_relative_residual": 9.831539869283514e-11,
+            "method": "full_mode_krylov_schur_complement_without_poles",
+            "orthogonal_memory_correction": {
+              "imag": 7.761335994247563e-16,
+              "real": 5.245277014916918
+            },
+            "spin_structure_resolvent": {
+              "imag": -1.4210854715202004e-14,
+              "real": 556.7560144333213
+            }
+          },
+          "0.0007240770000000002": {
+            "bare_spin_memory": {
+              "imag": -4.963151438509059e-16,
+              "real": 2.5924697640477836
+            },
+            "continuity_memory": {
+              "imag": -4.924453482535161e-16,
+              "real": 7.455050453701521
+            },
+            "fdt_residual": 1.4884743990852515e-16,
+            "gmres_info": 0,
+            "gmres_iterations": 301,
+            "khat": 0.012799912618845626,
+            "linear_solve_relative_residual": 9.519812853983726e-11,
+            "method": "full_mode_krylov_schur_complement_without_poles",
+            "orthogonal_memory_correction": {
+              "imag": 3.869795597389808e-18,
+              "real": 4.862580689653737
+            },
+            "spin_structure_resolvent": {
+              "imag": 2.1316282072803006e-14,
+              "real": 514.0077944467712
+            }
+          },
+          "0.0010240000000000002": {
+            "bare_spin_memory": {
+              "imag": -4.963151438509059e-16,
+              "real": 2.5924697640477836
+            },
+            "continuity_memory": {
+              "imag": -2.0562853245833993e-16,
+              "real": 7.040361462945426
+            },
+            "fdt_residual": 1.4884743990852515e-16,
+            "gmres_info": 0,
+            "gmres_iterations": 235,
+            "khat": 0.012799912618845626,
+            "linear_solve_relative_residual": 9.484968755428372e-11,
+            "method": "full_mode_krylov_schur_complement_without_poles",
+            "orthogonal_memory_correction": {
+              "imag": 2.9068661139256597e-16,
+              "real": 4.447891698897642
+            },
+            "spin_structure_resolvent": {
+              "imag": 7.105427357601002e-15,
+              "real": 459.2470856889426
+            }
+          },
+          "0.0014481550000000004": {
+            "bare_spin_memory": {
+              "imag": -4.963151438509059e-16,
+              "real": 2.5924697640477836
+            },
+            "continuity_memory": {
+              "imag": -2.77660120017953e-16,
+              "real": 6.6048596464506515
+            },
+            "fdt_residual": 1.4884743990852515e-16,
+            "gmres_info": 0,
+            "gmres_iterations": 179,
+            "khat": 0.012799912618845626,
+            "linear_solve_relative_residual": 9.283702035896102e-11,
+            "method": "full_mode_krylov_schur_complement_without_poles",
+            "orthogonal_memory_correction": {
+              "imag": 2.186550238329529e-16,
+              "real": 4.012389882402868
+            },
+            "spin_structure_resolvent": {
+              "imag": 7.105427357601002e-15,
+              "real": 395.213110866542
+            }
+          },
+          "0.0020480000000000003": {
+            "bare_spin_memory": {
+              "imag": -4.963151438509059e-16,
+              "real": 2.5924697640477836
+            },
+            "continuity_memory": {
+              "imag": 4.053320591217081e-16,
+              "real": 6.1594740609546035
+            },
+            "fdt_residual": 1.4884743990852515e-16,
+            "gmres_info": 0,
+            "gmres_iterations": 134,
+            "khat": 0.012799912618845626,
+            "linear_solve_relative_residual": 9.570790218131874e-11,
+            "method": "full_mode_krylov_schur_complement_without_poles",
+            "orthogonal_memory_correction": {
+              "imag": 9.01647202972614e-16,
+              "real": 3.56700429690682
+            },
+            "spin_structure_resolvent": {
+              "imag": -7.105427357601002e-15,
+              "real": 327.10156316769087
+            }
+          },
+          "0.0028963090000000006": {
+            "bare_spin_memory": {
+              "imag": -4.963151438509059e-16,
+              "real": 2.5924697640477836
+            },
+            "continuity_memory": {
+              "imag": 0.0,
+              "real": 5.714239977712274
+            },
+            "fdt_residual": 1.4884743990852515e-16,
+            "gmres_info": 0,
+            "gmres_iterations": 98,
+            "khat": 0.012799912618845626,
+            "linear_solve_relative_residual": 7.154070416142255e-11,
+            "method": "full_mode_krylov_schur_complement_without_poles",
+            "orthogonal_memory_correction": {
+              "imag": 4.963151438509059e-16,
+              "real": 3.1217702136644903
+            },
+            "spin_structure_resolvent": {
+              "imag": 0.0,
+              "real": 260.92511080888005
+            }
+          },
+          "0.004096000000000001": {
+            "bare_spin_memory": {
+              "imag": -4.963151438509059e-16,
+              "real": 2.5924697640477836
+            },
+            "continuity_memory": {
+              "imag": 0.0,
+              "real": 5.278209178940622
+            },
+            "fdt_residual": 1.4884743990852515e-16,
+            "gmres_info": 0,
+            "gmres_iterations": 68,
+            "khat": 0.012799912618845626,
+            "linear_solve_relative_residual": 9.36268516721579e-11,
+            "method": "full_mode_krylov_schur_complement_without_poles",
+            "orthogonal_memory_correction": {
+              "imag": 4.963151438509059e-16,
+              "real": 2.685739414892838
+            },
+            "spin_structure_resolvent": {
+              "imag": 0.0,
+              "real": 201.58160992475953
+            }
+          },
+          "0.008192000000000001": {
+            "bare_spin_memory": {
+              "imag": -4.963151438509059e-16,
+              "real": 2.5924697640477836
+            },
+            "continuity_memory": {
+              "imag": 4.316592485167415e-16,
+              "real": 4.46380364120913
+            },
+            "fdt_residual": 1.4884743990852515e-16,
+            "gmres_info": 0,
+            "gmres_iterations": 36,
+            "khat": 0.012799912618845626,
+            "linear_solve_relative_residual": 8.759216739532229e-11,
+            "method": "full_mode_krylov_schur_complement_without_poles",
+            "orthogonal_memory_correction": {
+              "imag": 9.279743923676474e-16,
+              "real": 1.8713338771613461
+            },
+            "spin_structure_resolvent": {
+              "imag": -8.881784197001252e-16,
+              "real": 112.06566649480501
+            }
+          }
+        },
+        "0.025600000000000005": {
+          "0.00025600000000000004": {
+            "bare_spin_memory": {
+              "imag": -1.654451578247767e-16,
+              "real": 2.592469764047782
+            },
+            "continuity_memory": {
+              "imag": 1.6285490748273314e-16,
+              "real": 5.523297792074467
+            },
+            "fdt_residual": 1.4884743990852515e-16,
+            "gmres_info": 0,
+            "gmres_iterations": 472,
+            "khat": 0.02559930095505994,
+            "linear_solve_relative_residual": 9.666094915266495e-11,
+            "method": "full_mode_krylov_schur_complement_without_poles",
+            "orthogonal_memory_correction": {
+              "imag": 3.2830006530750983e-16,
+              "real": 2.930828028026685
+            },
+            "spin_structure_resolvent": {
+              "imag": -7.105427357601002e-15,
+              "real": 258.027842295258
+            }
+          },
+          "0.0005120000000000001": {
+            "bare_spin_memory": {
+              "imag": -1.654451578247767e-16,
+              "real": 2.592469764047782
+            },
+            "continuity_memory": {
+              "imag": 8.836375527626262e-17,
+              "real": 5.379390464219483
+            },
+            "fdt_residual": 1.4884743990852515e-16,
+            "gmres_info": 0,
+            "gmres_iterations": 410,
+            "khat": 0.02559930095505994,
+            "linear_solve_relative_residual": 9.494311246942714e-11,
+            "method": "full_mode_krylov_schur_complement_without_poles",
+            "orthogonal_memory_correction": {
+              "imag": 2.538089131010393e-16,
+              "real": 2.7869207001717013
+            },
+            "spin_structure_resolvent": {
+              "imag": -3.552713678800501e-15,
+              "real": 247.69367447539324
+            }
+          },
+          "0.0007240770000000002": {
+            "bare_spin_memory": {
+              "imag": -1.654451578247767e-16,
+              "real": 2.592469764047782
+            },
+            "continuity_memory": {
+              "imag": -1.8948903200357237e-16,
+              "real": 5.274324208468566
+            },
+            "fdt_residual": 1.4884743990852515e-16,
+            "gmres_info": 0,
+            "gmres_iterations": 368,
+            "khat": 0.02559930095505994,
+            "linear_solve_relative_residual": 9.725113176643596e-11,
+            "method": "full_mode_krylov_schur_complement_without_poles",
+            "orthogonal_memory_correction": {
+              "imag": -2.4043874178795684e-17,
+              "real": 2.681854444420784
+            },
+            "spin_structure_resolvent": {
+              "imag": 7.105427357601002e-15,
+              "real": 239.20759087039312
+            }
+          },
+          "0.0010240000000000002": {
+            "bare_spin_memory": {
+              "imag": -1.654451578247767e-16,
+              "real": 2.592469764047782
+            },
+            "continuity_memory": {
+              "imag": -1.0469486855941236e-16,
+              "real": 5.143274749008537
+            },
+            "fdt_residual": 1.4884743990852515e-16,
+            "gmres_info": 0,
+            "gmres_iterations": 323,
+            "khat": 0.02559930095505994,
+            "linear_solve_relative_residual": 9.285943526207373e-11,
+            "method": "full_mode_krylov_schur_complement_without_poles",
+            "orthogonal_memory_correction": {
+              "imag": 6.075028926536433e-17,
+              "real": 2.550804984960755
+            },
+            "spin_structure_resolvent": {
+              "imag": 3.552713678800501e-15,
+              "real": 227.55652860935504
+            }
+          },
+          "0.0014481550000000004": {
+            "bare_spin_memory": {
+              "imag": -1.654451578247767e-16,
+              "real": 2.592469764047782
+            },
+            "continuity_memory": {
+              "imag": 0.0,
+              "real": 4.985439197526043
+            },
+            "fdt_residual": 1.4884743990852515e-16,
+            "gmres_info": 0,
+            "gmres_iterations": 273,
+            "khat": 0.02559930095505994,
+            "linear_solve_relative_residual": 9.825962594293582e-11,
+            "method": "full_mode_krylov_schur_complement_without_poles",
+            "orthogonal_memory_correction": {
+              "imag": 1.654451578247767e-16,
+              "real": 2.392969433478261
+            },
+            "spin_structure_resolvent": {
+              "imag": 0.0,
+              "real": 212.0785521734975
+            }
+          },
+          "0.0020480000000000003": {
+            "bare_spin_memory": {
+              "imag": -1.654451578247767e-16,
+              "real": 2.592469764047782
+            },
+            "continuity_memory": {
+              "imag": 1.4632653478557209e-16,
+              "real": 4.80264116506847
+            },
+            "fdt_residual": 1.4884743990852515e-16,
+            "gmres_info": 0,
+            "gmres_iterations": 223,
+            "khat": 0.02559930095505994,
+            "linear_solve_relative_residual": 9.136394029511494e-11,
+            "method": "full_mode_krylov_schur_complement_without_poles",
+            "orthogonal_memory_correction": {
+              "imag": 3.1177169261034875e-16,
+              "real": 2.2101714010206885
+            },
+            "spin_structure_resolvent": {
+              "imag": -3.552713678800501e-15,
+              "real": 192.48214685534754
+            }
+          },
+          "0.0028963090000000006": {
+            "bare_spin_memory": {
+              "imag": -1.654451578247767e-16,
+              "real": 2.592469764047782
+            },
+            "continuity_memory": {
+              "imag": 3.787697037947122e-16,
+              "real": 4.599466888438609
+            },
+            "fdt_residual": 1.4884743990852515e-16,
+            "gmres_info": 0,
+            "gmres_iterations": 177,
+            "khat": 0.02559930095505994,
+            "linear_solve_relative_residual": 9.656218724559489e-11,
+            "method": "full_mode_krylov_schur_complement_without_poles",
+            "orthogonal_memory_correction": {
+              "imag": 5.442148616194889e-16,
+              "real": 2.0069971243908276
+            },
+            "spin_structure_resolvent": {
+              "imag": -7.105427357601002e-15,
+              "real": 169.19182641320444
+            }
+          },
+          "0.004096000000000001": {
+            "bare_spin_memory": {
+              "imag": -1.654451578247767e-16,
+              "real": 2.592469764047782
+            },
+            "continuity_memory": {
+              "imag": -2.632232321950046e-16,
+              "real": 4.382611764296049
+            },
+            "fdt_residual": 1.4884743990852515e-16,
+            "gmres_info": 0,
+            "gmres_iterations": 135,
+            "khat": 0.02559930095505994,
+            "linear_solve_relative_residual": 9.480176245043745e-11,
+            "method": "full_mode_krylov_schur_complement_without_poles",
+            "orthogonal_memory_correction": {
+              "imag": -9.777807437022792e-17,
+              "real": 1.7901420002482675
+            },
+            "spin_structure_resolvent": {
+              "imag": 3.552713678800501e-15,
+              "real": 143.51255259924747
+            }
+          },
+          "0.008192000000000001": {
+            "bare_spin_memory": {
+              "imag": -1.654451578247767e-16,
+              "real": 2.592469764047782
+            },
+            "continuity_memory": {
+              "imag": -7.864431127959701e-17,
+              "real": 3.938129739396966
+            },
+            "fdt_residual": 1.4884743990852515e-16,
+            "gmres_info": 0,
+            "gmres_iterations": 73,
+            "khat": 0.02559930095505994,
+            "linear_solve_relative_residual": 8.340642995072832e-11,
+            "method": "full_mode_krylov_schur_complement_without_poles",
+            "orthogonal_memory_correction": {
+              "imag": 8.680084654517968e-17,
+              "real": 1.345659975349184
+            },
+            "spin_structure_resolvent": {
+              "imag": 4.440892098500626e-16,
+              "real": 92.82679323444611
+            }
+          }
+        }
+      },
+      "fdt_residual": 1.4884743990852515e-16,
+      "field": 0.1,
+      "h_times_spin_diffusion": 0.5184939528095566,
+      "hydrodynamic_coordinates": {
+        "laplace_frequencies": [
+          0.00025600000000000004,
+          0.0005120000000000001,
+          0.0007240770000000002,
+          0.0010240000000000002,
+          0.0014481550000000004,
+          0.0020480000000000003,
+          0.0028963090000000006,
+          0.004096000000000001,
+          0.008192000000000001
+        ],
+        "scaled_laplace_frequencies_z_over_h3": [
+          0.256,
+          0.512,
+          0.724077,
+          1.024,
+          1.448155,
+          2.048,
+          2.896309,
+          4.096,
+          8.192
+        ],
+        "scaled_times_t_h3": [
+          0.0,
+          0.1,
+          0.2,
+          0.3,
+          0.4
+        ],
+        "scaled_wave_numbers_k_over_h2": [
+          0.64,
+          1.28,
+          2.56
+        ],
+        "times": [
+          0.0,
+          99.99999999999999,
+          199.99999999999997,
+          299.99999999999994,
+          399.99999999999994
+        ],
+        "wave_numbers": [
+          0.006400000000000001,
+          0.012800000000000002,
+          0.025600000000000005
+        ]
+      },
+      "mode_count": 1920,
+      "noise_complement": {
+        "complement_to_spin_norm": 2.747112237779358,
+        "spectrum_status": "not_formed",
+        "spin_to_complement_norm": 2.747112237779358
+      },
+      "propagation": {
+        "0.006400000000000001": {
+          "equal_time_covariance_from_accumulated_full_noise": [
+            2.1094237467877974e-15,
+            0.020962686080292947,
+            0.04142885780581662,
+            0.061467261018856356,
+            0.08113000514678126
+          ],
+          "equal_time_covariance_from_initial_state": [
+            0.9999999999999979,
+            0.979037313919707,
+            0.9585711421941834,
+            0.9385327389811436,
+            0.9188699948532187
+          ],
+          "method": "full_mode_krylov_without_complement_closure",
+          "stationarity_residual": 1.2949409808900873e-16,
+          "structure_factor_over_susceptibility": {
+            "imag": [
+              0.0,
+              -4.549413559037238e-19,
+              -1.5626332735119292e-18,
+              3.155444848730269e-19,
+              -2.4566163525622344e-18
+            ],
+            "real": [
+              0.9999999999999997,
+              0.984847852845592,
+              0.9615118145314103,
+              0.9322208669972263,
+              0.8996544913899083
+            ]
+          },
+          "times": [
+            0.0,
+            99.99999999999999,
+            199.99999999999997,
+            299.99999999999994,
+            399.99999999999994
+          ],
+          "total_equal_time_covariance": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        "0.012800000000000002": {
+          "equal_time_covariance_from_accumulated_full_noise": [
+            2.1094237467877974e-15,
+            0.08068004125022465,
+            0.1540215068624785,
+            0.22133622192975633,
+            0.2834653581180345
+          ],
+          "equal_time_covariance_from_initial_state": [
+            0.9999999999999979,
+            0.9193199587497753,
+            0.8459784931375215,
+            0.7786637780702437,
+            0.7165346418819655
+          ],
+          "method": "full_mode_krylov_without_complement_closure",
+          "stationarity_residual": 2.0257512976413367e-16,
+          "structure_factor_over_susceptibility": {
+            "imag": [
+              0.0,
+              6.506012750544303e-19,
+              -2.916981370183755e-18,
+              -2.153926319031767e-18,
+              -1.3872300795693966e-17
+            ],
+            "real": [
+              0.9999999999999997,
+              0.9412172260182228,
+              0.8612290667670656,
+              0.7781627928044969,
+              0.6966321269555927
+            ]
+          },
+          "times": [
+            0.0,
+            99.99999999999999,
+            199.99999999999997,
+            299.99999999999994,
+            399.99999999999994
+          ],
+          "total_equal_time_covariance": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        "0.025600000000000005": {
+          "equal_time_covariance_from_accumulated_full_noise": [
+            2.1094237467877974e-15,
+            0.2787358152112681,
+            0.4715907116751813,
+            0.6103779278342455,
+            0.7114552165762777
+          ],
+          "equal_time_covariance_from_initial_state": [
+            0.9999999999999979,
+            0.7212641847887319,
+            0.5284092883248187,
+            0.3896220721657545,
+            0.2885447834237223
+          ],
+          "method": "full_mode_krylov_without_complement_closure",
+          "stationarity_residual": 2.7024345974823174e-16,
+          "structure_factor_over_susceptibility": {
+            "imag": [
+              0.0,
+              1.0281866969378925e-18,
+              -9.359889843040186e-19,
+              -5.8645785042956874e-18,
+              -8.991825515576454e-18
+            ],
+            "real": [
+              0.9999999999999997,
+              0.7903270251547172,
+              0.5826451850956189,
+              0.402460670345141,
+              0.2751441625724584
+            ]
+          },
+          "times": [
+            0.0,
+            99.99999999999999,
+            199.99999999999997,
+            299.99999999999994,
+            399.99999999999994
+          ],
+          "total_equal_time_covariance": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        }
+      },
+      "propagation_status": "full_mode_krylov_without_complement_closure",
+      "spin_diffusion": 5.1849395280955655,
+      "spin_noise": 5.184939528095565,
+      "susceptibility": 0.2454123632188135,
+      "susceptibility_captured_fraction": 0.9914987127124775,
+      "velocity_complement": {
+        "complement_to_spin_norm": 0.15135190428856046,
+        "spectrum_status": "not_formed",
+        "spin_to_complement_norm": 0.15135190428856046
+      }
+    },
+    {
+      "active_strings": 73,
+      "basis_status": "exact_invariants_without_explicit_complement_basis",
+      "diffusion_complement": {
+        "complement_to_spin_norm": 3.2976516557348887,
+        "spectrum_status": "not_formed",
+        "spin_to_complement_norm": 3.2976516557348887
+      },
+      "direct_full_noise_propagation": {},
+      "exact_finite_field_susceptibility": 0.24827189492512175,
+      "exact_full_complement_mori_resolvent": {
+        "0.004444444444444441": {
+          "0.00014814814814814798": {
+            "bare_spin_memory": {
+              "imag": -0.0,
+              "real": 3.165709717402353
+            },
+            "continuity_memory": {
+              "imag": 0.0,
+              "real": 15.928143514942843
+            },
+            "fdt_residual": 1.4610996657235749e-16,
+            "gmres_info": 0,
+            "gmres_iterations": 503,
+            "khat": 0.004444440786466377,
+            "linear_solve_relative_residual": 9.89274790861257e-11,
+            "method": "full_mode_krylov_schur_complement_without_poles",
+            "orthogonal_memory_correction": {
+              "imag": 0.0,
+              "real": 12.762433797540488
+            },
+            "spin_structure_resolvent": {
+              "imag": 0.0,
+              "real": 2160.86505632653
+            }
+          },
+          "0.00029629629629629597": {
+            "bare_spin_memory": {
+              "imag": -0.0,
+              "real": 3.165709717402353
+            },
+            "continuity_memory": {
+              "imag": -4.637919996035631e-16,
+              "real": 13.742135423617631
+            },
+            "fdt_residual": 1.4610996657235749e-16,
+            "gmres_info": 0,
+            "gmres_iterations": 297,
+            "khat": 0.004444440786466377,
+            "linear_solve_relative_residual": 9.912378684044828e-11,
+            "method": "full_mode_krylov_schur_complement_without_poles",
+            "orthogonal_memory_correction": {
+              "imag": -4.637919996035631e-16,
+              "real": 10.576425706215279
+            },
+            "spin_structure_resolvent": {
+              "imag": 2.842170943040401e-14,
+              "real": 1761.3527699678823
+            }
+          },
+          "0.0004190260416666662": {
+            "bare_spin_memory": {
+              "imag": -0.0,
+              "real": 3.165709717402353
+            },
+            "continuity_memory": {
+              "imag": -3.2200981150261527e-16,
+              "real": 12.656158075566504
+            },
+            "fdt_residual": 1.4610996657235749e-16,
+            "gmres_info": 0,
+            "gmres_iterations": 219,
+            "khat": 0.004444440786466377,
+            "linear_solve_relative_residual": 9.468821063837288e-11,
+            "method": "full_mode_krylov_schur_complement_without_poles",
+            "orthogonal_memory_correction": {
+              "imag": -3.2200981150261527e-16,
+              "real": 9.490448358164151
+            },
+            "spin_structure_resolvent": {
+              "imag": 1.4210854715202004e-14,
+              "real": 1494.7151036209034
+            }
+          },
+          "0.0005925925925925919": {
+            "bare_spin_memory": {
+              "imag": -0.0,
+              "real": 3.165709717402353
+            },
+            "continuity_memory": {
+              "imag": 0.0,
+              "real": 11.587702343314252
+            },
+            "fdt_residual": 1.4610996657235749e-16,
+            "gmres_info": 0,
+            "gmres_iterations": 158,
+            "khat": 0.004444440786466377,
+            "linear_solve_relative_residual": 9.4066015334761e-11,
+            "method": "full_mode_krylov_schur_complement_without_poles",
+            "orthogonal_memory_correction": {
+              "imag": 0.0,
+              "real": 8.421992625911898
+            },
+            "spin_structure_resolvent": {
+              "imag": 0.0,
+              "real": 1217.3075300358073
+            }
+          },
+          "0.0008380526620370361": {
+            "bare_spin_memory": {
+              "imag": -0.0,
+              "real": 3.165709717402353
+            },
+            "continuity_memory": {
+              "imag": -3.938090027618591e-16,
+              "real": 10.54358986749645
+            },
+            "fdt_residual": 1.4610996657235749e-16,
+            "gmres_info": 0,
+            "gmres_iterations": 114,
+            "khat": 0.004444440786466377,
+            "linear_solve_relative_residual": 9.073871906833807e-11,
+            "method": "full_mode_krylov_schur_complement_without_poles",
+            "orthogonal_memory_correction": {
+              "imag": -3.938090027618591e-16,
+              "real": 7.377880150094097
+            },
+            "spin_structure_resolvent": {
+              "imag": 7.105427357601002e-15,
+              "real": 955.7298652950428
+            }
+          },
+          "0.0011851851851851839": {
+            "bare_spin_memory": {
+              "imag": -0.0,
+              "real": 3.165709717402353
+            },
+            "continuity_memory": {
+              "imag": -1.0178897599676828e-15,
+              "real": 9.53314930147978
+            },
+            "fdt_residual": 1.4610996657235749e-16,
+            "gmres_info": 0,
+            "gmres_iterations": 82,
+            "khat": 0.004444440786466377,
+            "linear_solve_relative_residual": 9.157619411158613e-11,
+            "method": "full_mode_krylov_schur_complement_without_poles",
+            "orthogonal_memory_correction": {
+              "imag": -1.0178897599676828e-15,
+              "real": 6.3674395840774265
+            },
+            "spin_structure_resolvent": {
+              "imag": 1.0658141036401503e-14,
+              "real": 728.0701641411622
+            }
+          },
+          "0.0016761047453703684": {
+            "bare_spin_memory": {
+              "imag": -0.0,
+              "real": 3.165709717402353
+            },
+            "continuity_memory": {
+              "imag": 9.187055473082215e-16,
+              "real": 8.568229584152787
+            },
+            "fdt_residual": 1.4610996657235749e-16,
+            "gmres_info": 0,
+            "gmres_iterations": 59,
+            "khat": 0.004444440786466377,
+            "linear_solve_relative_residual": 7.769246742447889e-11,
+            "method": "full_mode_krylov_schur_complement_without_poles",
+            "orthogonal_memory_correction": {
+              "imag": 9.187055473082215e-16,
+              "real": 5.402519866750434
+            },
+            "spin_structure_resolvent": {
+              "imag": -5.329070518200751e-15,
+              "real": 541.9016080919425
+            }
+          },
+          "0.0023703703703703677": {
+            "bare_spin_memory": {
+              "imag": -0.0,
+              "real": 3.165709717402353
+            },
+            "continuity_memory": {
+              "imag": -2.8592410622138236e-16,
+              "real": 7.660776371063577
+            },
+            "fdt_residual": 1.4610996657235749e-16,
+            "gmres_info": 0,
+            "gmres_iterations": 42,
+            "khat": 0.004444440786466377,
+            "linear_solve_relative_residual": 9.90795445720188e-11,
+            "method": "full_mode_krylov_schur_complement_without_poles",
+            "orthogonal_memory_correction": {
+              "imag": -2.8592410622138236e-16,
+              "real": 4.495066653661223
+            },
+            "spin_structure_resolvent": {
+              "imag": 8.881784197001252e-16,
+              "real": 396.5588056082804
+            }
+          },
+          "0.0047407407407407355": {
+            "bare_spin_memory": {
+              "imag": -0.0,
+              "real": 3.165709717402353
+            },
+            "continuity_memory": {
+              "imag": -5.311231227894895e-16,
+              "real": 6.062069477878879
+            },
+            "fdt_residual": 1.4610996657235749e-16,
+            "gmres_info": 0,
+            "gmres_iterations": 23,
+            "khat": 0.004444440786466377,
+            "linear_solve_relative_residual": 7.047221016945528e-11,
+            "method": "full_mode_krylov_schur_complement_without_poles",
+            "orthogonal_memory_correction": {
+              "imag": -5.311231227894895e-16,
+              "real": 2.8963597604765257
+            },
+            "spin_structure_resolvent": {
+              "imag": 4.440892098500626e-16,
+              "real": 205.74077979775166
+            }
+          }
+        },
+        "0.008888888888888882": {
+          "0.00014814814814814798": {
+            "bare_spin_memory": {
+              "imag": 1.7152530120072083e-16,
+              "real": 3.165709717402352
+            },
+            "continuity_memory": {
+              "imag": 3.2847881517838875e-16,
+              "real": 10.219337789951226
+            },
+            "fdt_residual": 1.4610996657235749e-16,
+            "gmres_info": 0,
+            "gmres_iterations": 596,
+            "khat": 0.008888859625086051,
+            "linear_solve_relative_residual": 9.661492287828277e-11,
+            "method": "full_mode_krylov_schur_complement_without_poles",
+            "orthogonal_memory_correction": {
+              "imag": 1.5695351397766792e-16,
+              "real": 7.053628072548873
+            },
+            "spin_structure_resolvent": {
+              "imag": -2.842170943040401e-14,
+              "real": 1046.4665890832512
+            }
+          },
+          "0.00029629629629629597": {
+            "bare_spin_memory": {
+              "imag": 1.7152530120072083e-16,
+              "real": 3.165709717402352
+            },
+            "continuity_memory": {
+              "imag": -1.1766212935294532e-15,
+              "real": 9.465565992305756
+            },
+            "fdt_residual": 1.4610996657235749e-16,
+            "gmres_info": 0,
+            "gmres_iterations": 435,
+            "khat": 0.008888859625086051,
+            "linear_solve_relative_residual": 9.424104883004473e-11,
+            "method": "full_mode_krylov_schur_complement_without_poles",
+            "orthogonal_memory_correction": {
+              "imag": -1.348146594730174e-15,
+              "real": 6.299856274903403
+            },
+            "spin_structure_resolvent": {
+              "imag": 8.526512829121202e-14,
+              "real": 957.6820012452455
+            }
+          },
+          "0.0004190260416666662": {
+            "bare_spin_memory": {
+              "imag": 1.7152530120072083e-16,
+              "real": 3.165709717402352
+            },
+            "continuity_memory": {
+              "imag": 0.0,
+              "real": 9.008612871604296
+            },
+            "fdt_residual": 1.4610996657235749e-16,
+            "gmres_info": 0,
+            "gmres_iterations": 352,
+            "khat": 0.008888859625086051,
+            "linear_solve_relative_residual": 9.680432022778842e-11,
+            "method": "full_mode_krylov_schur_complement_without_poles",
+            "orthogonal_memory_correction": {
+              "imag": -1.7152530120072083e-16,
+              "real": 5.842903154201943
+            },
+            "spin_structure_resolvent": {
+              "imag": 0.0,
+              "real": 884.3195200937132
+            }
+          },
+          "0.0005925925925925919": {
+            "bare_spin_memory": {
+              "imag": 1.7152530120072083e-16,
+              "real": 3.165709717402352
+            },
+            "continuity_memory": {
+              "imag": -8.636788530911513e-16,
+              "real": 8.512458929999665
+            },
+            "fdt_residual": 1.4610996657235749e-16,
+            "gmres_info": 0,
+            "gmres_iterations": 276,
+            "khat": 0.008888859625086051,
+            "linear_solve_relative_residual": 8.971830101094214e-11,
+            "method": "full_mode_krylov_schur_complement_without_poles",
+            "orthogonal_memory_correction": {
+              "imag": -1.035204154291872e-15,
+              "real": 5.346749212597313
+            },
+            "spin_structure_resolvent": {
+              "imag": 4.263256414560601e-14,
+              "real": 790.4029204130268
+            }
+          },
+          "0.0008380526620370361": {
+            "bare_spin_memory": {
+              "imag": 1.7152530120072083e-16,
+              "real": 3.165709717402352
+            },
+            "continuity_memory": {
+              "imag": 1.9416846467860992e-16,
+              "real": 7.990553435099869
+            },
+            "fdt_residual": 1.4610996657235749e-16,
+            "gmres_info": 0,
+            "gmres_iterations": 213,
+            "khat": 0.008888859625086051,
+            "linear_solve_relative_residual": 9.314160129412224e-11,
+            "method": "full_mode_krylov_schur_complement_without_poles",
+            "orthogonal_memory_correction": {
+              "imag": 2.2643163477889093e-17,
+              "real": 4.824843717697517
+            },
+            "spin_structure_resolvent": {
+              "imag": -7.105427357601002e-15,
+              "real": 680.5494789705872
+            }
+          },
+          "0.0011851851851851839": {
+            "bare_spin_memory": {
+              "imag": 1.7152530120072083e-16,
+              "real": 3.165709717402352
+            },
+            "continuity_memory": {
+              "imag": -5.662322673985323e-16,
+              "real": 7.456354197097749
+            },
+            "fdt_residual": 1.4610996657235749e-16,
+            "gmres_info": 0,
+            "gmres_iterations": 157,
+            "khat": 0.008888859625086051,
+            "linear_solve_relative_residual": 9.053332313537809e-11,
+            "method": "full_mode_krylov_schur_complement_without_poles",
+            "orthogonal_memory_correction": {
+              "imag": -7.377575685992531e-16,
+              "real": 4.290644479695397
+            },
+            "spin_structure_resolvent": {
+              "imag": 1.4210854715202004e-14,
+              "real": 563.5944979628187
+            }
+          },
+          "0.0016761047453703684": {
+            "bare_spin_memory": {
+              "imag": 1.7152530120072083e-16,
+              "real": 3.165709717402352
+            },
+            "continuity_memory": {
+              "imag": -2.2221573441143464e-16,
+              "real": 6.922588131889429
+            },
+            "fdt_residual": 1.4610996657235749e-16,
+            "gmres_info": 0,
+            "gmres_iterations": 114,
+            "khat": 0.008888859625086051,
+            "linear_solve_relative_residual": 9.454842403607891e-11,
+            "method": "full_mode_krylov_schur_complement_without_poles",
+            "orthogonal_memory_correction": {
+              "imag": -3.9374103561215545e-16,
+              "real": 3.7568784144870775
+            },
+            "spin_structure_resolvent": {
+              "imag": 3.552713678800501e-15,
+              "real": 449.82817387801515
+            }
+          },
+          "0.0023703703703703677": {
+            "bare_spin_memory": {
+              "imag": 1.7152530120072083e-16,
+              "real": 3.165709717402352
+            },
+            "continuity_memory": {
+              "imag": -1.8597575693716704e-16,
+              "real": 6.401112493082365
+            },
+            "fdt_residual": 1.4610996657235749e-16,
+            "gmres_info": 0,
+            "gmres_iterations": 84,
+            "khat": 0.008888859625086051,
+            "linear_solve_relative_residual": 7.438872101926802e-11,
+            "method": "full_mode_krylov_schur_complement_without_poles",
+            "orthogonal_memory_correction": {
+              "imag": -3.5750105813788787e-16,
+              "real": 3.2354027756800128
+            },
+            "spin_structure_resolvent": {
+              "imag": 1.7763568394002505e-15,
+              "real": 347.688951992807
+            }
+          },
+          "0.0047407407407407355": {
+            "bare_spin_memory": {
+              "imag": 1.7152530120072083e-16,
+              "real": 3.165709717402352
+            },
+            "continuity_memory": {
+              "imag": 3.004820829171735e-16,
+              "real": 5.435061108815639
+            },
+            "fdt_residual": 1.4610996657235749e-16,
+            "gmres_info": 0,
+            "gmres_iterations": 44,
+            "khat": 0.008888859625086051,
+            "linear_solve_relative_residual": 6.970945260855504e-11,
+            "method": "full_mode_krylov_schur_complement_without_poles",
+            "orthogonal_memory_correction": {
+              "imag": 1.2895678171645266e-16,
+              "real": 2.2693513914132875
+            },
+            "spin_structure_resolvent": {
+              "imag": -8.881784197001252e-16,
+              "real": 193.41705665464556
+            }
+          }
+        },
+        "0.017777777777777764": {
+          "0.00014814814814814798": {
+            "bare_spin_memory": {
+              "imag": 2.5729303409915524e-16,
+              "real": 3.165709717402355
+            },
+            "continuity_memory": {
+              "imag": 4.585842368844366e-16,
+              "real": 6.676410014351629
+            },
+            "fdt_residual": 1.4610996657235749e-16,
+            "gmres_info": 0,
+            "gmres_iterations": 552,
+            "khat": 0.01777754366804878,
+            "linear_solve_relative_residual": 9.888194764476006e-11,
+            "method": "full_mode_krylov_schur_complement_without_poles",
+            "orthogonal_memory_correction": {
+              "imag": 2.0129120278528138e-16,
+              "real": 3.510700296949274
+            },
+            "spin_structure_resolvent": {
+              "imag": -2.842170943040401e-14,
+              "real": 442.8368799420064
+            }
+          },
+          "0.00029629629629629597": {
+            "bare_spin_memory": {
+              "imag": 2.5729303409915524e-16,
+              "real": 3.165709717402355
+            },
+            "continuity_memory": {
+              "imag": 4.976687714253542e-16,
+              "real": 6.505909330989514
+            },
+            "fdt_residual": 1.4610996657235749e-16,
+            "gmres_info": 0,
+            "gmres_iterations": 482,
+            "khat": 0.01777754366804878,
+            "linear_solve_relative_residual": 9.803559185960232e-11,
+            "method": "full_mode_krylov_schur_complement_without_poles",
+            "orthogonal_memory_correction": {
+              "imag": 2.4037573732619896e-16,
+              "real": 3.340199613587159
+            },
+            "spin_structure_resolvent": {
+              "imag": -2.842170943040401e-14,
+              "real": 425.09221214087427
+            }
+          },
+          "0.0004190260416666662": {
+            "bare_spin_memory": {
+              "imag": 2.5729303409915524e-16,
+              "real": 3.165709717402355
+            },
+            "continuity_memory": {
+              "imag": 2.667736271441489e-16,
+              "real": 6.381215632833261
+            },
+            "fdt_residual": 1.4610996657235749e-16,
+            "gmres_info": 0,
+            "gmres_iterations": 433,
+            "khat": 0.01777754366804878,
+            "linear_solve_relative_residual": 9.751749347023916e-11,
+            "method": "full_mode_krylov_schur_complement_without_poles",
+            "orthogonal_memory_correction": {
+              "imag": 9.480593044993678e-18,
+              "real": 3.2155059154309065
+            },
+            "spin_structure_resolvent": {
+              "imag": -1.4210854715202004e-14,
+              "real": 410.55079629168176
+            }
+          },
+          "0.0005925925925925919": {
+            "bare_spin_memory": {
+              "imag": 2.5729303409915524e-16,
+              "real": 3.165709717402355
+            },
+            "continuity_memory": {
+              "imag": -1.4735214289043288e-16,
+              "real": 6.225442142222421
+            },
+            "fdt_residual": 1.4610996657235749e-16,
+            "gmres_info": 0,
+            "gmres_iterations": 379,
+            "khat": 0.01777754366804878,
+            "linear_solve_relative_residual": 9.977058464080442e-11,
+            "method": "full_mode_krylov_schur_complement_without_poles",
+            "orthogonal_memory_correction": {
+              "imag": -4.046451769895881e-16,
+              "real": 3.0597324248200657
+            },
+            "spin_structure_resolvent": {
+              "imag": 7.105427357601002e-15,
+              "real": 390.61158506297386
+            }
+          },
+          "0.0008380526620370361": {
+            "bare_spin_memory": {
+              "imag": 2.5729303409915524e-16,
+              "real": 3.165709717402355
+            },
+            "continuity_memory": {
+              "imag": -4.2387154598271577e-16,
+              "real": 6.037488725184516
+            },
+            "fdt_residual": 1.4610996657235749e-16,
+            "gmres_info": 0,
+            "gmres_iterations": 319,
+            "khat": 0.01777754366804878,
+            "linear_solve_relative_residual": 9.947959835174236e-11,
+            "method": "full_mode_krylov_schur_complement_without_poles",
+            "orthogonal_memory_correction": {
+              "imag": -6.81164580081871e-16,
+              "real": 2.8717790077821608
+            },
+            "spin_structure_resolvent": {
+              "imag": 1.7763568394002505e-14,
+              "real": 364.14656718607176
+            }
+          },
+          "0.0011851851851851839": {
+            "bare_spin_memory": {
+              "imag": 2.5729303409915524e-16,
+              "real": 3.165709717402355
+            },
+            "continuity_memory": {
+              "imag": -3.0846254252909484e-16,
+              "real": 5.819389878453233
+            },
+            "fdt_residual": 1.4610996657235749e-16,
+            "gmres_info": 0,
+            "gmres_iterations": 262,
+            "khat": 0.01777754366804878,
+            "linear_solve_relative_residual": 9.321248578655417e-11,
+            "method": "full_mode_krylov_schur_complement_without_poles",
+            "orthogonal_memory_correction": {
+              "imag": -5.657555766282501e-16,
+              "real": 2.653680161050878
+            },
+            "spin_structure_resolvent": {
+              "imag": 1.0658141036401503e-14,
+              "real": 330.6494162732483
+            }
+          },
+          "0.0016761047453703684": {
+            "bare_spin_memory": {
+              "imag": 2.5729303409915524e-16,
+              "real": 3.165709717402355
+            },
+            "continuity_memory": {
+              "imag": -1.3291116801271892e-16,
+              "real": 5.576559744629616
+            },
+            "fdt_residual": 1.4610996657235749e-16,
+            "gmres_info": 0,
+            "gmres_iterations": 206,
+            "khat": 0.01777754366804878,
+            "linear_solve_relative_residual": 9.967035341443713e-11,
+            "method": "full_mode_krylov_schur_complement_without_poles",
+            "orthogonal_memory_correction": {
+              "imag": -3.9020420211187417e-16,
+              "real": 2.4108500272272613
+            },
+            "spin_structure_resolvent": {
+              "imag": 3.552713678800501e-15,
+              "real": 290.8222383250785
+            }
+          },
+          "0.0023703703703703677": {
+            "bare_spin_memory": {
+              "imag": 2.5729303409915524e-16,
+              "real": 3.165709717402355
+            },
+            "continuity_memory": {
+              "imag": 0.0,
+              "real": 5.317108505381286
+            },
+            "fdt_residual": 1.4610996657235749e-16,
+            "gmres_info": 0,
+            "gmres_iterations": 157,
+            "khat": 0.01777754366804878,
+            "linear_solve_relative_residual": 9.397292521923056e-11,
+            "method": "full_mode_krylov_schur_complement_without_poles",
+            "orthogonal_memory_correction": {
+              "imag": -2.5729303409915524e-16,
+              "real": 2.1513987879789314
+            },
+            "spin_structure_resolvent": {
+              "imag": 0.0,
+              "real": 246.86512321168644
+            }
+          },
+          "0.0047407407407407355": {
+            "bare_spin_memory": {
+              "imag": 2.5729303409915524e-16,
+              "real": 3.165709717402355
+            },
+            "continuity_memory": {
+              "imag": -1.0989532282610489e-16,
+              "real": 4.786048559314663
+            },
+            "fdt_residual": 1.4610996657235749e-16,
+            "gmres_info": 0,
+            "gmres_iterations": 86,
+            "khat": 0.01777754366804878,
+            "linear_solve_relative_residual": 9.721560257366513e-11,
+            "method": "full_mode_krylov_schur_complement_without_poles",
+            "orthogonal_memory_correction": {
+              "imag": -3.6718835692526016e-16,
+              "real": 1.6203388419123081
+            },
+            "spin_structure_resolvent": {
+              "imag": 8.881784197001252e-16,
+              "real": 159.91483331985825
+            }
+          }
+        }
+      },
+      "fdt_residual": 1.4610996657235749e-16,
+      "field": 0.0833333333333333,
+      "h_times_spin_diffusion": 0.5276182862337252,
+      "hydrodynamic_coordinates": {
+        "laplace_frequencies": [
+          0.00014814814814814798,
+          0.00029629629629629597,
+          0.0004190260416666662,
+          0.0005925925925925919,
+          0.0008380526620370361,
+          0.0011851851851851839,
+          0.0016761047453703684,
+          0.0023703703703703677,
+          0.0047407407407407355
+        ],
+        "scaled_laplace_frequencies_z_over_h3": [
+          0.256,
+          0.512,
+          0.724077,
+          1.024,
+          1.448155,
+          2.048,
+          2.896309,
+          4.096,
+          8.192
+        ],
+        "scaled_times_t_h3": [
+          0.0,
+          0.1,
+          0.2,
+          0.3,
+          0.4
+        ],
+        "scaled_wave_numbers_k_over_h2": [
+          0.64,
+          1.28,
+          2.56
+        ],
+        "times": [
+          0.0,
+          172.8000000000002,
+          345.6000000000004,
+          518.4000000000005,
+          691.2000000000008
+        ],
+        "wave_numbers": [
+          0.004444444444444441,
+          0.008888888888888882,
+          0.017777777777777764
+        ]
+      },
+      "mode_count": 2336,
+      "noise_complement": {
+        "complement_to_spin_norm": 3.2976516557348887,
+        "spectrum_status": "not_formed",
+        "spin_to_complement_norm": 3.2976516557348887
+      },
+      "propagation": {
+        "0.004444444444444441": {
+          "equal_time_covariance_from_accumulated_full_noise": [
+            1.1102230246251565e-16,
+            0.021328677480527358,
+            0.04214587730197783,
+            0.06251995577470804,
+            0.08250207165646417
+          ],
+          "equal_time_covariance_from_initial_state": [
+            0.9999999999999999,
+            0.9786713225194726,
+            0.9578541226980222,
+            0.937480044225292,
+            0.9174979283435358
+          ],
+          "method": "full_mode_krylov_without_complement_closure",
+          "stationarity_residual": 1.1607862446479185e-16,
+          "structure_factor_over_susceptibility": {
+            "imag": [
+              0.0,
+              -4.633896164560178e-19,
+              5.220218584843957e-20,
+              -6.139702860235099e-21,
+              3.601655791482287e-18
+            ],
+            "real": [
+              1.0,
+              0.984360917152966,
+              0.9602858618397201,
+              0.930703750910793,
+              0.8986327480240667
+            ]
+          },
+          "times": [
+            0.0,
+            172.8000000000002,
+            345.6000000000004,
+            518.4000000000005,
+            691.2000000000008
+          ],
+          "total_equal_time_covariance": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        "0.008888888888888882": {
+          "equal_time_covariance_from_accumulated_full_noise": [
+            1.1102230246251565e-16,
+            0.08205503253792579,
+            0.1565459082128543,
+            0.22480323063372876,
+            0.2877023876156588
+          ],
+          "equal_time_covariance_from_initial_state": [
+            0.9999999999999999,
+            0.9179449674620742,
+            0.8434540917871457,
+            0.7751967693662712,
+            0.7122976123843412
+          ],
+          "method": "full_mode_krylov_without_complement_closure",
+          "stationarity_residual": 2.077808918278914e-16,
+          "structure_factor_over_susceptibility": {
+            "imag": [
+              0.0,
+              -1.060264473518189e-18,
+              2.936308936334545e-20,
+              -5.982533580766348e-18,
+              -4.495264726401777e-18
+            ],
+            "real": [
+              1.0,
+              0.9396470638781359,
+              0.8595971056629335,
+              0.7774155795555048,
+              0.6931237844706953
+            ]
+          },
+          "times": [
+            0.0,
+            172.8000000000002,
+            345.6000000000004,
+            518.4000000000005,
+            691.2000000000008
+          ],
+          "total_equal_time_covariance": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        "0.017777777777777764": {
+          "equal_time_covariance_from_accumulated_full_noise": [
+            1.1102230246251565e-16,
+            0.28303626375312874,
+            0.47781197195698655,
+            0.6171915615000121,
+            0.7180933770900684
+          ],
+          "equal_time_covariance_from_initial_state": [
+            0.9999999999999999,
+            0.7169637362468713,
+            0.5221880280430135,
+            0.38280843849998797,
+            0.2819066229099316
+          ],
+          "method": "full_mode_krylov_without_complement_closure",
+          "stationarity_residual": 2.6827646198055614e-16,
+          "structure_factor_over_susceptibility": {
+            "imag": [
+              0.0,
+              -1.451092898681086e-19,
+              -2.877681104859043e-17,
+              4.024645519726538e-17,
+              -1.667644924379158e-17
+            ],
+            "real": [
+              1.0,
+              0.787627912889889,
+              0.5778017298368796,
+              0.4034366904522955,
+              0.2632171780652827
+            ]
+          },
+          "times": [
+            0.0,
+            172.8000000000002,
+            345.6000000000004,
+            518.4000000000005,
+            691.2000000000008
+          ],
+          "total_equal_time_covariance": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        }
+      },
+      "propagation_status": "full_mode_krylov_without_complement_closure",
+      "spin_diffusion": 6.331419434804705,
+      "spin_noise": 6.331419434804705,
+      "susceptibility": 0.24620523319153942,
+      "susceptibility_captured_fraction": 0.9916758127849887,
+      "velocity_complement": {
+        "complement_to_spin_norm": 0.1305653594803678,
+        "spectrum_status": "not_formed",
+        "spin_to_complement_norm": 0.1305653594803678
+      }
+    }
+  ],
+  "schema": 1,
+  "two_mode_or_finite_pole_closure": false,
+  "uses_target_a_or_D": false,
+  "uses_target_trajectory": false
+}

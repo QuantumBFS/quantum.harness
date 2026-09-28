@@ -1,0 +1,42 @@
+{
+  "gates": {
+    "absolute_low_frequency_amplitude_fixed": true,
+    "intermediate_frequency_continuum_uniquely_fixed": false,
+    "kpz_density_normalized": true,
+    "microscopic_norms_positive": true
+  },
+  "inputs": {
+    "slow_projector_cutoff": 0.7853981633974483,
+    "susceptibility": 0.25,
+    "target_coefficients_used": false,
+    "trajectory_data_used": false
+  },
+  "kpz": {
+    "current_tail": {
+      "laplace_amplitude": 0.18213985469563077,
+      "laplace_domain": "C_jj(z)~0.18213985469563077*z^(-1/3)",
+      "time_amplitude": 0.06798956091596216,
+      "time_domain": "C_jj(t)~0.067989560915962158*t^(-2/3)"
+    },
+    "lambda": 1.926524141187757,
+    "scaled_second_moment_m2": 0.5105231821189492,
+    "table_raw_density_normalization": 1.0000001610579299
+  },
+  "method": "continuity_KPZ_second_moment_to_microscopic_QLQ_boundary",
+  "microscopic_slow_current": {
+    "beta_zero_squared": 0.23811748466905075,
+    "norm": 0.011355632113513082,
+    "qlp_force_norm": 0.0027039745556968315
+  },
+  "qlq_low_frequency_boundary": {
+    "normalized_resolvent": "R_Q(z)~0.26182736934234879*z^(1/3)",
+    "positive_symmetric_spectral_density": "rho_Q(omega)~0.14435299433071072*omega^(1/3)",
+    "resolvent_amplitude": 0.2618273693423488,
+    "spectral_density_amplitude": 0.14435299433071072
+  },
+  "schema_version": 1,
+  "scope": {
+    "assumption": "stationary_KPZ_scaling_and_slow_projector_carries_the_full_long_time_current_tail",
+    "remaining_unknown": "positive_QLQ_spectral_density_away_from_omega_to_zero"
+  }
+}

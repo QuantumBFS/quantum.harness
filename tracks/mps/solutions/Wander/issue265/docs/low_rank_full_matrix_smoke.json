@@ -1,0 +1,248 @@
+{
+  "fdt": {
+    "minimum_eigenvalue": -4.554469410374187e-19,
+    "positive_semidefinite": true,
+    "relative_lyapunov_residual": 0.0
+  },
+  "iteration": {
+    "converged": true,
+    "convergence_tolerance": 0.001,
+    "rows": [
+      {
+        "external_q_step_structure_factor_over_chi": [
+          [
+            0.9999999999999999,
+            0.0
+          ],
+          [
+            0.9997830555729678,
+            -6.058684459165298e-20
+          ],
+          [
+            0.9994846060978656,
+            2.1801198632445695e-09
+          ],
+          [
+            0.9991047044414686,
+            6.070844996878342e-09
+          ],
+          [
+            0.9986434140560535,
+            1.1045912395712877e-08
+          ]
+        ],
+        "iteration": 1,
+        "maximum_relative_action_change": 0.00019765168234636436
+      },
+      {
+        "external_q_step_structure_factor_over_chi": [
+          [
+            0.9999999999999999,
+            0.0
+          ],
+          [
+            0.9997830555729678,
+            -6.058684459165298e-20
+          ],
+          [
+            0.9994846060978656,
+            2.1801198632445695e-09
+          ],
+          [
+            0.9991047044544263,
+            6.076653635227523e-09
+          ],
+          [
+            0.9986434141334773,
+            1.108088055398518e-08
+          ]
+        ],
+        "iteration": 2,
+        "maximum_relative_action_change": 5.4400515721044515e-09
+      },
+      {
+        "external_q_step_structure_factor_over_chi": [
+          [
+            0.9999999999999999,
+            0.0
+          ],
+          [
+            0.9997830555729678,
+            -6.058684459165298e-20
+          ],
+          [
+            0.9994846060978656,
+            2.1801198632445695e-09
+          ],
+          [
+            0.9991047044544263,
+            6.076653635227523e-09
+          ],
+          [
+            0.9986434141334772,
+            1.1080880435975913e-08
+          ]
+        ],
+        "iteration": 3,
+        "maximum_relative_action_change": 2.9090466203812846e-14
+      }
+    ],
+    "zero_mode_action_residual": 0.0
+  },
+  "method": "low_rank_action_self_consistent_full_mode_mori",
+  "regulator": {
+    "active_strings": 2,
+    "dyson_iterations": 3,
+    "field": 0.25,
+    "fourier_points": 4,
+    "mode_count": 16,
+    "nodes_per_string": 8,
+    "samples_per_internal_wave": 4,
+    "string_xi_cutoff": 0.5,
+    "wave_step": 0.1
+  },
+  "scaled_times_tau_equals_t_h3": [
+    0.0,
+    0.001953125,
+    0.00390625,
+    0.005859375,
+    0.0078125
+  ],
+  "scaled_waves_q_equals_k_over_h2": [
+    0.0,
+    1.6,
+    -3.2,
+    -1.6
+  ],
+  "schema": 1,
+  "scope": {
+    "all_nonzero_fourier_momenta": true,
+    "all_retained_modes": true,
+    "finite_regulator_fixed_point_reached": true,
+    "full_background_fdt_noise_covariance": true,
+    "full_non_diagonal_diffusion": true,
+    "joint_zero_field_infinite_string_limit_complete": false,
+    "multiplicative_noise_contact_uv_matched": false,
+    "physical_a_or_D_identified": false,
+    "quadratic_velocity_diffusion_and_cross_forces": true
+  },
+  "static_susceptibility_captured_fraction": 0.12583979873462786,
+  "storage": {
+    "corresponding_dense_response_bytes": 81920,
+    "dense_nonlinear_memory_stored": false,
+    "dense_response_matrix_stored": false,
+    "dense_to_action_storage_ratio": 0.48484848484848486,
+    "force_memory_rank_per_nonzero_wave": [
+      16,
+      16,
+      16
+    ],
+    "response_action_bytes": 168960,
+    "source_columns_per_wave": 33
+  },
+  "structure_factors_over_chi_by_wave_then_time": [
+    [
+      [
+        0.9999999999999999,
+        0.0
+      ],
+      [
+        0.9999999999999999,
+        0.0
+      ],
+      [
+        0.9999999999999999,
+        0.0
+      ],
+      [
+        0.9999999999999999,
+        0.0
+      ],
+      [
+        0.9999999999999999,
+        0.0
+      ]
+    ],
+    [
+      [
+        0.9999999999999999,
+        0.0
+      ],
+      [
+        0.9997830555729678,
+        -6.058684459165298e-20
+      ],
+      [
+        0.9994803660020837,
+        -1.7013352165299904e-08
+      ],
+      [
+        0.9990919827987272,
+        -8.191663922285418e-08
+      ],
+      [
+        0.9986179703401418,
+        -2.2558286452285266e-07
+      ]
+    ],
+    [
+      [
+        0.9999999999999999,
+        0.0
+      ],
+      [
+        0.9991328323396145,
+        -1.790569237799926e-18
+      ],
+      [
+        0.9979460894959944,
+        -9.654011911158691e-08
+      ],
+      [
+        0.996440362380911,
+        -4.2896085646715496e-07
+      ],
+      [
+        0.9946164064293574,
+        -1.1353777628346936e-06
+      ]
+    ],
+    [
+      [
+        0.9999999999999999,
+        -0.0
+      ],
+      [
+        0.9997830555729678,
+        6.058684459165298e-20
+      ],
+      [
+        0.9994803660020837,
+        1.7013352165299904e-08
+      ],
+      [
+        0.9990919827987272,
+        8.191663922285418e-08
+      ],
+      [
+        0.9986179703401418,
+        2.2558286452285266e-07
+      ]
+    ]
+  ],
+  "times": [
+    0.0,
+    0.125,
+    0.25,
+    0.375,
+    0.5
+  ],
+  "uses_target_a_or_D": false,
+  "uses_target_trajectory": false,
+  "waves": [
+    0.0,
+    0.1,
+    -0.2,
+    -0.1
+  ]
+}
