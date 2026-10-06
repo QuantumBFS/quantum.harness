@@ -9,6 +9,7 @@ echoes a canned squeue line, `smoke-test` is checked in --dry-run, and
 from __future__ import annotations
 
 import os
+import json
 import subprocess
 from pathlib import Path
 
@@ -428,9 +429,42 @@ def test_submit_real_mode_still_parses_job_id(fake_ssh, tmp_path):
             **fake_ssh,
             "FAKE_OUT": "Submitted batch job 12345",
             "HARNESS_PROFILE_FILE": str(profile),
+            "HARNESS_EXPECT_DIR": str(tmp_path / "expect"),
         },
     )
 
     assert r.returncode == 0
     assert "job_id:    12345" in r.stdout
     assert "partition: default-gpu" in r.stdout
+    # The allocation predicted before sbatch is kept for alloc-check.
+    saved = json.loads((tmp_path / "expect" / "12345.expect.json").read_text())
+    assert saved["partition"] == "default-gpu" and saved["cpus_per_task"] == 1
+    assert "expected sacct (per task): partition=default-gpu" in r.stderr
+
+
+# --------------------------------------------------------------------------- #
+# alloc-check
+# --------------------------------------------------------------------------- #
+ALLOC_ROW = "5_1|RUNNING|p|2|1|3G|billing=2,cpu=2,mem=3G,node=1|01:00:00||00:10:00"
+
+
+def test_alloc_check_needs_prediction_or_cpus(tmp_path):
+    r = run(["--alias", "x", "alloc-check", "123"], env={"HARNESS_EXPECT_DIR": str(tmp_path)})
+    assert r.returncode != 0 and "no prediction" in r.stderr
+
+
+def test_alloc_check_dry_run():
+    r = run(["--dry-run", "--alias", "x", "alloc-check", "123", "--cpus", "1"])
+    assert r.returncode == 0
+    assert "sacct -j 123" in r.stderr and "AllocCPUS" in r.stderr
+
+
+def test_alloc_check_reads_saved_prediction(tmp_path, fake_ssh):
+    (tmp_path / "5.expect.json").write_text('{"cpus_per_task": 1, "billing_per_task": 1}')
+    env = {**fake_ssh, "FAKE_OUT": ALLOC_ROW, "HARNESS_EXPECT_DIR": str(tmp_path)}
+    r = run(["--alias", "x", "alloc-check", "5"], env=env)
+    assert r.returncode == 1
+    assert '"cpus: sacct 2, predicted 1"' in r.stdout
+    # An explicit intent replaces the saved prediction.
+    r = run(["--alias", "x", "alloc-check", "5_1", "--cpus", "2"], env=env)
+    assert r.returncode == 0

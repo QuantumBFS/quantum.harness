@@ -103,30 +103,52 @@ Per the harness UX rule, every question frames the why → states the consequenc
 
 ## 2. Probe live resources (read-only)
 
-Before seeding limits, see what the cluster actually offers — this both informs
-the student and supplies real caps for `[limits]`:
+Before seeding limits, see what the cluster actually offers *to this user* —
+this both informs the student and supplies real caps for `[limits]`:
 
 ```bash
-scripts/harness_slurm.sh --profile <name>.toml probe-partitions   # parsed sinfo: idle/mix/alloc, cores/mem/gpu
+python3 scripts/cluster_probe.py --alias <alias> --emit card   # what the student sees
+python3 scripts/cluster_probe.py --alias <alias> --emit toml   # [[partitions]] + proposed [limits]
 ```
+
+The probe drops partitions the user's associations cannot submit to (other
+groups' accounts, a QOS that grants 0 cpus), lists each partition's node types
+and features, reads the per-user QOS caps, and dry-runs a 1-task job per CPU
+partition with `sbatch --test-only` (nothing is submitted) to detect partitions
+that hand out whole nodes. It also records each partition's `DefMemPerCPU` /
+`MaxMemPerCPU` (from `scontrol show partition`, falling back to `scontrol show
+config`) as `def_mem_per_cpu_mb` / `max_mem_per_cpu_mb`: job sizing needs them,
+and many sites set them per partition only. It exits non-zero rather than emit
+an empty inventory when `sinfo` times out — retry then.
 
 If the profile carries `[commands].quota_command`, run it read-only over ssh for
 the student's own allocation usage (best-effort; skip with a note if absent).
-Present a compact **"what's available / your budget"** summary. Purely read-only
-— no confirm gate.
+Present a compact **"what's available / your budget"** summary — say which
+partitions allocate whole nodes, since one-core jobs there waste a full node,
+and each partition's memory per cpu, since a larger `--mem` silently buys
+(and bills) extra cores.
+Purely read-only — no confirm gate.
 
 ## 3. Seed `[limits]`
 
-Propose `[limits]` seeded from the probed `[[partitions]]` caps — real numbers,
-not invented:
+Propose `[limits]` from the probe's `[limits.hard]` / `[limits.soft]` block —
+real numbers, not invented. It is seeded from the default partition's
+**per-user QOS caps**, which are what a user actually runs into; partition
+`max_wall` and node counts are only outer bounds (use `--limits-for <partition>`
+to seed from another partition):
 
-- `[limits.hard].max_walltime` ← the largest partition `max_wall` (or the
-  default partition's, if the student should be fenced tighter).
-- `[limits.hard].max_nodes` / `max_cpus` ← partition node/core counts.
-- `[limits.hard].max_array_size` ← a conservative default (e.g. 200) unless the
-  cluster documents a per-user array cap.
-- `[limits.soft]` ← thresholds below the hard caps (warn before the ceiling).
+- `[limits.hard].max_walltime` ← the tighter of the partition `max_wall` and the
+  QOS `MaxWall`.
+- `[limits.hard].max_nodes` / `max_cpus` ← the QOS per-user node/cpu caps
+  (partition totals only when the QOS sets none).
+- `[limits.hard].max_array_size` ← 200, lowered to the QOS per-user submit cap
+  or the scheduler's `MaxArraySize` when those are smaller.
+- `[limits.soft]` ← 8 h walltime, one node's worth of cores, and every usable
+  non-default partition class (gpu, high-mem, preemptible) as unusual.
 - `[limits.paths].allowed_roots` ← `[filesystem].scratch` + the results dir.
+
+The hard caps are the cluster's own ceiling; offer a tighter option too, since
+a student usually wants to be stopped well before it.
 
 Show the proposed `[limits]` block and get an explicit confirm-or-edit (the
 harness "propose for ratification" rule). Students draw on individual
@@ -142,9 +164,11 @@ python3 scripts/cluster_profile.py --field connection.ssh.alias --profile skills
 ```
 
 Confirm one line: *"Cluster profile saved at `…/<name>.toml` with safety limits.
-Future jobs use it automatically."* If the profile holds secrets (a real
-identity file path is fine; an inline key is not), remind the student to
-`.gitignore` it.
+Future jobs use it automatically."* Then confirm the file stays local:
+`git check-ignore -q skills/using-slurm/profiles/<name>.toml` must succeed. It
+does unless `<name>` collides with an allow-listed public profile — in that
+case pick another name; never commit a profile holding a username, host, or
+key path, and never an inline key.
 
 Do **not** bootstrap Julia/Python here — that's `/setup-julia` etc., dispatched
 on demand by the submitting skill.

@@ -21,7 +21,8 @@ The schema is **additive**: new fields land as new keys/tables; parsers that don
 | `[connection]` | `repo_path_remote` | Where the harness checkout lives on the cluster. |
 | `[connection.ssh]` | `alias`, `host`, `user`, `identity_file`, `port` | ssh handle + the source-of-truth fields to reconstruct `~/.ssh/config`. The harness uses `alias` as the handle. |
 | `[scheduler]` | `type` (`slurm`/`pbs`/`lsf`/`none`), `default_partition` | How jobs are submitted. |
-| `[[partitions]]` | `name`, `class`, `cores`, `memory`, `max_wall`, `gpu`, `required_gres` | Array of partition rows. `class` (`default-cpu`, `gpu`, `high-mem`, `debug`, `long`, `emergency`) is how skills pick, not by name. `required_gres` is an optional exact Slurm GRES request imposed by partition/QOS. |
+| `[[partitions]]` | `name`, `class`, `cores`, `memory`, `max_wall`, `gpu`, `required_gres`, `whole_node`, `def_mem_per_cpu_mb`, `max_mem_per_cpu_mb`, `qos`, `user_caps` | Array of partition rows — only partitions the user's accounts can submit to. `class` (`default-cpu`, `gpu`, `long-gpu`, `high-mem`, `debug`, `long-cpu`, `emergency`, `preemptible`) is how skills pick, not by name. `cores` / `memory` are the largest node type. `required_gres` is an optional exact Slurm GRES request imposed by partition/QOS. `whole_node = true` means a job gets entire nodes whatever it asks for (site policy or `OverSubscribe=EXCLUSIVE`), so `/cluster-jobs` counts `nodes × cores`. `def_mem_per_cpu_mb` / `max_mem_per_cpu_mb` are Slurm's `DefMemPerCPU` / `MaxMemPerCPU` in MB — the partition's own value, else the cluster-wide one (many sites set them only per partition). A job asking for more than `cpus × max_mem_per_cpu_mb` is not rejected: Slurm raises its cpu count to fit and bills every one. `qos` is the partition QOS; `user_caps` (inline table: `max_cpus`, `max_nodes`, `max_gpus`, `max_jobs`, `max_submit`, `max_wall`) are the per-user limits that QOS enforces. |
+| `[[partitions.node_types]]` | `cores`, `memory`, `gpu`, `features`, `nodes` | Present when one partition mixes hardware. `features` are the Slurm node features a job selects with `--constraint`; the guardrail uses them to count the cores of the node type a constrained job lands on. |
 | `[filesystem]` | `home`, `scratch`, `project`, `quota` | Paths + whether `/scratch` exists. |
 | `[network]` | `internet_from_login`, `internet_from_compute` | Booleans controlling ship strategy + in-job installs. |
 | `[region]` | `region` (`mainland_china` / blank) | Downstream mirror defaults. |
@@ -37,7 +38,7 @@ Language-specific tooling (`julia.provider`, `python.distribution`, …) does **
 
 ## The `[limits]` section (student safety)
 
-Seeded by `/setup-cluster` from the probed `[[partitions]]` caps, then student-editable. Two tiers + path roots:
+Seeded by `/setup-cluster` from the default partition's **per-user QOS caps** (`sacctmgr show qos` via `user_caps`) — the limits a user actually hits — bounded by the partition's `max_wall`; partition node counts are only the fallback when no QOS cap exists. Then student-editable. Two tiers + path roots:
 
 ```toml
 [limits.hard]            # exceed → /cluster-jobs refuses; student must lower to submit
@@ -55,7 +56,7 @@ unusual_partitions = ["gpu-large"]
 allowed_roots = ["~/scratch", "~/results"]
 ```
 
-`cluster_guardrail.py inspect` grades a job script against `[limits.hard]`/`[limits.soft]`; `check-path` enforces `[limits.paths].allowed_roots`. A profile with **no** `[limits]` is treated fail-closed (the guardrail warns rather than silently allowing).
+`cluster_guardrail.py inspect` grades a job script against `[limits.hard]`/`[limits.soft]`; `check-path` enforces `[limits.paths].allowed_roots`. `expect` uses the same partition fields to predict the `sacct` allocation of a job before it is submitted, and `check-alloc` compares a running job against that prediction. On a `whole_node` partition (or with `#SBATCH --exclusive`) the CPU figure it grades is the allocated `nodes × cores-per-node`, not the typed task count. Likewise a `--mem` / `--mem-per-cpu` above the partition's `max_mem_per_cpu_mb` is graded at the cpu count Slurm will actually allocate, with a soft `memory` verdict. A profile with **no** `[limits]` is treated fail-closed (the guardrail warns rather than silently allowing).
 
 ## Full example
 
@@ -125,11 +126,11 @@ quota_command = "sshare -U -u student07"
 | Single-cluster user | `ln -s <name>.toml skills/using-slurm/profiles/active.toml` once. |
 | Multi-cluster user | `HARNESS_CLUSTER_PROFILE=<name>` per shell or in `.envrc`; env var wins over the symlink. |
 | First-time user | `/setup-cluster` builds the profile (docs crawl → ratify, or ≤4 questions) and seeds `[limits]`. |
-| Profile contains secrets | `.gitignore` it locally; commit only public profiles. |
+| Profile contains secrets | Nothing to do — every profile and card is gitignored by default; only allow-listed public profiles are committed. |
 
 ## Authoring a new profile
 
-The recommended path is `/setup-cluster`. For manual authoring: probe the cluster (`sinfo`, `scontrol show partition`, `sacctmgr show accounts`), write `skills/using-slurm/profiles/<name>.toml` following the tables above, activate it (`ln -s <name>.toml active.toml` or the env var), and test with a tiny job. Validate shape with `python3 scripts/cluster_profile.py --field connection.ssh.alias --profile <name>.toml`. Read a partition-scoped value with `python3 scripts/cluster_profile.py --partition <name> --field required_gres --profile <name>.toml`; `harness_slurm.sh submit` uses this interface instead of parsing TOML in Bash. Submission resource precedence is CLI/`--extra`, then the script's `#SBATCH` directives, then profile defaults, so profile values fill omissions without overriding script intent.
+The recommended path is `/setup-cluster`. For manual authoring: probe the cluster (`python3 scripts/cluster_probe.py --alias <alias> --emit toml` gathers `sinfo`, `scontrol show partition`, your associations and QOS caps, and dry-runs a 1-task job per partition to detect whole-node allocation), write `skills/using-slurm/profiles/<name>.toml` following the tables above, activate it (`ln -s <name>.toml active.toml` or the env var), and test with a tiny job. Validate shape with `python3 scripts/cluster_profile.py --field connection.ssh.alias --profile <name>.toml`. Read a partition-scoped value with `python3 scripts/cluster_profile.py --partition <name> --field required_gres --profile <name>.toml`; `harness_slurm.sh submit` uses this interface instead of parsing TOML in Bash. Submission resource precedence is CLI/`--extra`, then the script's `#SBATCH` directives, then profile defaults, so profile values fill omissions without overriding script intent.
 
 ## Per-cluster setup notes (`<name>-setup.md`)
 
@@ -137,4 +138,4 @@ A profile may ship a committed, secret-free sibling `skills/using-slurm/profiles
 
 ## Cards in this folder
 
-Profiles are optional and user/site-specific. Public profiles may be committed; private profiles should stay gitignored locally. Setup-notes siblings (`<name>-setup.md`) are always committable — they describe the provisioning process, not any user's credentials.
+Profiles are optional and user/site-specific. `.gitignore` ignores every `*.toml` and `*.md` in this folder and allow-lists the public examples, so a newly written profile or card stays local without any extra step. To publish a secret-free profile, add a `!skills/using-slurm/profiles/<name>.toml` line. Setup-notes siblings (`<name>-setup.md`) are always committable — they describe the provisioning process, not any user's credentials.

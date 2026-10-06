@@ -279,3 +279,271 @@ def test_cli_directive_field(tmp_path, capsys):
 
     assert rc == 0
     assert capsys.readouterr().out.strip() == "gpu:script:4"
+
+
+# --------------------------------------------------------------------------- #
+# whole-node allocation
+# --------------------------------------------------------------------------- #
+# Default partition "cpu" hands out whole nodes of two sizes; "shared" does not.
+WHOLE_NODE_PROFILE = """\
+[identity]
+name = "t"
+[connection]
+[scheduler]
+default_partition = "cpu"
+[limits.hard]
+max_walltime = "24:00:00"
+max_cpus = 256
+[limits.soft]
+warn_walltime = "08:00:00"
+warn_cpus = 64
+
+[[partitions]]
+name = "cpu"
+cores = 128
+whole_node = true
+
+[[partitions.node_types]]
+cores = 64
+features = ["older", "os-a"]
+
+[[partitions.node_types]]
+cores = 128
+features = ["newer", "os-b"]
+
+[[partitions]]
+name = "shared"
+cores = 96
+"""
+
+
+def test_node_cores_constraint_and_fallback():
+    row = g.cp.get_partition(
+        g.cp.tomllib.loads(WHOLE_NODE_PROFILE), "cpu"
+    )
+    assert g.node_cores(row, None) == 128
+    assert g.node_cores(row, "older") == 64
+    assert g.node_cores(row, "older&os-a") == 64
+    assert g.node_cores(row, "older|newer") == 128
+    assert g.node_cores(row, "missing") == 128  # no match → worst case
+    assert g.node_cores({"cores": 32}, "x") == 32
+
+
+def test_inspect_whole_node_counts_full_node(tmp_path):
+    prof = _profile(tmp_path, WHOLE_NODE_PROFILE)
+    # Default partition is whole-node: 1 task still occupies 128 cores > warn 64.
+    s = _script(tmp_path, "#SBATCH --time=01:00:00\n#SBATCH --ntasks=1\n")
+    report, rc = g.cmd_inspect(s, prof)
+    assert report["resources"]["cpus"] == 128
+    assert report["resources"]["cpus_requested"] == 1
+    assert any("allocates whole nodes" in w for w in report["warnings"])
+    assert rc == 1
+    # Pinned to the smaller node type: 3 × 64 = 192, under the 256 hard cap.
+    s = _script(tmp_path, "#SBATCH --time=01:00:00\n#SBATCH -N 3\n#SBATCH -C older\n")
+    report, rc = g.cmd_inspect(s, prof)
+    assert report["resources"]["cpus"] == 192 and rc == 1
+    # Three of the largest nodes: 384 > 256 → hard.
+    s = _script(tmp_path, "#SBATCH --time=01:00:00\n#SBATCH -N 3\n")
+    assert g.cmd_inspect(s, prof)[1] == 2
+
+
+def test_inspect_shared_partition_and_exclusive(tmp_path):
+    prof = _profile(tmp_path, WHOLE_NODE_PROFILE)
+    s = _script(tmp_path, "#SBATCH --time=01:00:00\n#SBATCH -p shared\n")
+    report, rc = g.cmd_inspect(s, prof)
+    assert report["resources"]["cpus"] == 1 and rc == 0
+    s = _script(tmp_path, "#SBATCH --time=01:00:00\n#SBATCH -p shared\n#SBATCH --exclusive\n")
+    report, _ = g.cmd_inspect(s, prof)
+    assert report["resources"]["cpus"] == 96
+    assert any("--exclusive" in w for w in report["warnings"])
+
+
+def test_inspect_exclusive_unknown_partition_warns(tmp_path):
+    s = _script(tmp_path, "#SBATCH --time=01:00:00\n#SBATCH -p nowhere\n#SBATCH --exclusive\n")
+    report, _ = g.cmd_inspect(s, _profile(tmp_path, WHOLE_NODE_PROFILE))
+    assert report["resources"]["cpus"] == 1
+    assert any("cannot count" in w for w in report["warnings"])
+
+
+# --------------------------------------------------------------------------- #
+# memory per cpu
+# --------------------------------------------------------------------------- #
+# "small" caps memory per cpu (a single-threaded job asking --mem=3G gets two
+# billed cores); "big" has no partition value and falls back to the cluster-wide one.
+MEM_PROFILE = """\
+[identity]
+name = "t"
+[connection]
+[scheduler]
+default_partition = "small"
+[limits.hard]
+max_walltime = "24:00:00"
+max_cpus = 256
+[limits.soft]
+warn_walltime = "08:00:00"
+warn_cpus = 64
+[cluster_limits]
+max_mem_per_cpu_mb = 8000
+
+[[partitions]]
+name = "small"
+cores = 256
+def_mem_per_cpu_mb = 2700
+max_mem_per_cpu_mb = 2764
+
+[[partitions]]
+name = "big"
+cores = 64
+"""
+
+
+@pytest.mark.parametrize(
+    "spec,mb", [("500", 500), ("2G", 2048), ("3g", 3072), ("1T", 1048576), ("512K", 0.5), ("2GB", 2048)]
+)
+def test_parse_mem_mb(spec, mb):
+    assert g.parse_mem_mb(spec) == mb
+
+
+def test_inspect_mem_over_per_cpu_cap_counts_extra_cpus(tmp_path):
+    prof = _profile(tmp_path, MEM_PROFILE)
+    s = _script(tmp_path, "#SBATCH --time=01:00:00\n#SBATCH -c 1\n#SBATCH --mem=3G\n")
+    report, rc = g.cmd_inspect(s, prof)
+    assert report["resources"]["cpus"] == 2 and report["resources"]["cpus_requested"] == 1
+    v = report["verdicts"][0]
+    assert v["field"] == "memory" and v["tier"] == "soft" and "2764M" in v["message"]
+    assert rc == 1
+    # Within the cap: clean.
+    s = _script(tmp_path, "#SBATCH --time=01:00:00\n#SBATCH -c 1\n#SBATCH --mem=2G\n")
+    report, rc = g.cmd_inspect(s, prof)
+    assert report["resources"]["cpus"] == 1 and rc == 0
+    # Four cpus share the node request: 10G / 4 = 2.5G each, under the cap.
+    s = _script(tmp_path, "#SBATCH --time=01:00:00\n#SBATCH -c 4\n#SBATCH --mem=10G\n")
+    assert g.cmd_inspect(s, prof)[1] == 0
+
+
+def test_inspect_mem_per_cpu_and_cluster_fallback(tmp_path):
+    prof = _profile(tmp_path, MEM_PROFILE)
+    s = _script(tmp_path, "#SBATCH --time=01:00:00\n#SBATCH -n 4\n#SBATCH --mem-per-cpu=6G\n")
+    report, _ = g.cmd_inspect(s, prof)
+    assert report["resources"]["cpus"] == 12  # 4 tasks × ceil(6144 / 2764)
+    # "big" has no partition cap → the cluster-wide 8000M applies.
+    s = _script(tmp_path, "#SBATCH --time=01:00:00\n#SBATCH -p big\n#SBATCH --mem=7G\n")
+    assert g.cmd_inspect(s, prof)[0]["resources"]["cpus"] == 1
+    s = _script(tmp_path, "#SBATCH --time=01:00:00\n#SBATCH -p big\n#SBATCH --mem=16G\n")
+    assert g.cmd_inspect(s, prof)[0]["resources"]["cpus"] == 3
+
+
+def test_inspect_mem_without_known_cap_warns(tmp_path):
+    s = _script(tmp_path, "#SBATCH --time=01:00:00\n#SBATCH --mem=3G\n")
+    report, rc = g.cmd_inspect(s, _profile(tmp_path))
+    assert any("max_mem_per_cpu_mb" in w for w in report["warnings"]) and rc == 1
+    # No memory request: nothing to check, stays clean.
+    s = _script(tmp_path, "#SBATCH --time=01:00:00\n")
+    assert g.cmd_inspect(s, _profile(tmp_path))[1] == 0
+
+
+def test_inspect_mem_zero_and_unparseable(tmp_path):
+    prof = _profile(tmp_path, MEM_PROFILE)
+    s = _script(tmp_path, "#SBATCH --time=01:00:00\n#SBATCH --mem=0\n")
+    assert g.cmd_inspect(s, prof)[0]["resources"]["cpus"] == 1  # all node memory: not a per-cpu raise
+    s = _script(tmp_path, "#SBATCH --time=01:00:00\n#SBATCH --mem=lots\n")
+    report, rc = g.cmd_inspect(s, prof)
+    assert any("unparseable memory" in w for w in report["warnings"]) and rc == 1
+
+
+# --------------------------------------------------------------------------- #
+# expect + check-alloc (predicted vs actual sacct)
+# --------------------------------------------------------------------------- #
+# Single-threaded array tasks submitted with --mem=3G on a 2764M/cpu partition:
+# Slurm gave (and billed) 2 cpus each. Task 3 has not started yet.
+SACCT_ALLOC = """\
+100_1|COMPLETED|small|2|1|3G|billing=2,cpu=2,mem=3G,node=1|1-00:00:00||01:06:45
+100_1.batch|COMPLETED||2|1||cpu=2,mem=3G,node=1||192904K|01:06:45
+100_1.extern|COMPLETED||2|1||billing=2,cpu=2,mem=3G,node=1||0|01:06:45
+100_2|RUNNING|small|2|1|3G|billing=2,cpu=2,mem=3G,node=1|1-00:00:00||00:13:33
+100_2.batch|RUNNING||2|1||cpu=2,mem=3G,node=1|||00:13:33
+100_3|PENDING|small|0|1|3G||1-00:00:00||00:00:00
+"""
+JOB_3G = "#SBATCH -c 1\n#SBATCH --mem=3G\n#SBATCH -t 24:00:00\n#SBATCH --array=1-3\n"
+
+
+def test_sacct_format_matches_helper():
+    text = (g.Path(__file__).resolve().parents[1] / "harness_slurm.sh").read_text()
+    assert f"SACCT_ALLOC_FMT='{g.SACCT_ALLOC_FMT}'" in text
+
+
+def test_expect_predicts_memory_raised_cpus(tmp_path):
+    e = g.cmd_expect(_script(tmp_path, JOB_3G), _profile(tmp_path, MEM_PROFILE), {})
+    assert (e["partition"], e["tasks"], e["cpus_per_task"], e["cpus_requested"]) == ("small", 3, 2, 1)
+    assert e["mem_mb_per_task"] == 3072 and e["billing_per_task"] == 2
+    assert e["timelimit_s"] == 86400
+    # Command-line options win over #SBATCH lines, as in sbatch.
+    e = g.cmd_expect(_script(tmp_path, JOB_3G), _profile(tmp_path, MEM_PROFILE), {"mem": "2G"})
+    assert e["cpus_per_task"] == 1 and e["mem_mb_per_task"] == 2048
+
+
+def test_expect_default_memory_and_missing_profile(tmp_path):
+    e = g.cmd_expect(_script(tmp_path, "#SBATCH -c 4\n"), _profile(tmp_path, MEM_PROFILE), {})
+    assert e["mem_mb_per_task"] == 4 * 2700 and e["timelimit_s"] is None
+    assert any("DefMemPerCPU" in a for a in e["assumptions"])
+    e = g.cmd_expect(_script(tmp_path, "#SBATCH -c 4\n"), str(tmp_path / "absent.toml"), {})
+    assert e["cpus_per_task"] == 4 and e["mem_mb_per_task"] is None
+    assert any("without partition policy" in w for w in e["warnings"])
+
+
+def test_check_alloc_matches_prediction(tmp_path):
+    e = g.cmd_expect(_script(tmp_path, JOB_3G), _profile(tmp_path, MEM_PROFILE), {})
+    report, rc = g.check_alloc(SACCT_ALLOC, e)
+    assert rc == 0
+    t = {r["task"]: r for r in report["tasks"]}
+    assert t["100_1"]["verdict"] == "ok" and t["100_3"]["verdict"] == "pending"
+    assert t["100_1"]["peak_frac"] == pytest.approx(188.4 / 3072, abs=1e-3)
+    assert "peak_frac" not in t["100_2"]  # still running: no MaxRSS yet
+    assert report["summary"]["billing_vs_predicted"] == 1.0
+
+
+def test_check_alloc_reports_each_difference(tmp_path):
+    # Predicted from a 2G request: one cpu, one billing unit, 2048M.
+    e = g.cmd_expect(_script(tmp_path, JOB_3G), _profile(tmp_path, MEM_PROFILE), {"mem": "2G"})
+    report, rc = g.check_alloc(SACCT_ALLOC, e)
+    assert rc == 1 and report["summary"]["mismatched"] == 2
+    assert report["tasks"][0]["issues"] == [
+        "cpus: sacct 2, predicted 1",
+        "billing: sacct 2, predicted 1",
+        "mem_mb: sacct 3072, predicted 2048",
+    ]
+    assert report["summary"]["billing_vs_predicted"] == 2.0
+    other = dict(e, partition="big", timelimit_s=3600, tasks=5, cpus_per_task=2,
+                 billing_per_task=2, mem_mb_per_task=3072)
+    report, rc = g.check_alloc(SACCT_ALLOC, other)
+    assert "partition: sacct small, predicted big" in report["tasks"][0]["issues"]
+    assert "timelimit_s: sacct 86400, predicted 3600" in report["tasks"][0]["issues"]
+    assert report["summary"]["task_count"] == "sacct 3, predicted 5" and rc == 1
+
+
+def test_check_alloc_old_reqmem_suffixes():
+    text = "7|RUNNING|p|4|2|1Gc|billing=4,cpu=4,mem=4G,node=2|01:00:00||00:01:00\n"
+    report, rc = g.check_alloc(text, {"cpus_per_task": 4, "mem_mb_per_task": 4096})
+    assert rc == 0  # 1G per cpu × 4 cpus
+    text = text.replace("1Gc", "3Gn")
+    assert g.check_alloc(text, {"mem_mb_per_task": 6144})[1] == 0  # 3G per node × 2
+
+
+def test_check_alloc_empty_and_all_pending():
+    assert g.check_alloc("", {})[0]["summary"]["note"].startswith("no sacct rows")
+    report, rc = g.check_alloc("9|PENDING|p|0|1|2G||01:00:00||00:00:00\n", {"cpus_per_task": 1})
+    assert rc == 0 and report["summary"]["tasks_judged"] == 0
+
+
+def test_main_expect_and_check_alloc(tmp_path, monkeypatch, capsys):
+    import io
+
+    script, prof = _script(tmp_path, JOB_3G), _profile(tmp_path, MEM_PROFILE)
+    assert g.main(["expect", script, "--profile", prof, "--extra=--mem=2G --partition=big"]) == 0
+    out = capsys.readouterr()
+    e = g.json.loads(out.out)
+    assert e["partition"] == "big" and e["mem_mb_per_task"] == 2048
+    assert "expected sacct (per task): partition=big" in out.err
+    monkeypatch.setattr("sys.stdin", io.StringIO(SACCT_ALLOC))
+    assert g.main(["check-alloc", "--cpus", "1", "--mem", "3G"]) == 1
+    assert '"cpus: sacct 2, predicted 1"' in capsys.readouterr().out

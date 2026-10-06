@@ -46,7 +46,7 @@ scripts/harness_slurm.sh precheck          # resolve profile, ssh echo ok, git d
   wrong account.
 - **Show what's available (read-only, no gate):**
   ```bash
-  scripts/harness_slurm.sh probe-partitions    # idle/mix/alloc, cores/mem/gpu
+  scripts/harness_slurm.sh probe-partitions    # usable partitions: idle/total, hardware, whole-node, per-user caps
   ```
   plus the profile's `[commands].quota_command` if present → a compact "your
   budget / what's free" line before the first submit.
@@ -65,7 +65,9 @@ Read the JSON and the exit code:
   the script. **Refuse.** Name the exact field + ceiling (or the secret rule +
   line), have the student edit. Do not submit.
 - **Exit 1 (soft-warn)** — over a `[limits.soft]` threshold, an unusual
-  partition, or an unverifiable field. Show the resource table + the warning,
+  partition, a `memory` verdict (`--mem` above the partition's per-cpu memory,
+  so Slurm adds and bills cores the job will not use — offer the lower `--mem`),
+  or an unverifiable field. Show the resource table + the warning,
   get an **explicit confirm**.
 - **Exit 0 (clean)** — show the resource table, proceed.
 
