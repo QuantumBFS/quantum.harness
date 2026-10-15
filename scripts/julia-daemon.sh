@@ -59,6 +59,9 @@ fail() {
 }
 
 require_julia() {
+  if [ -n "${JULIA_REAL_BIN:-}" ] && [ ! -x "$JULIA_REAL_BIN" ]; then
+    fail "JULIA_REAL_BIN=$JULIA_REAL_BIN is missing (Julia upgraded?); rerun 'JULIA_REAL_BIN=\$HOME/.juliaup/bin/julia make julia-daemon SHIM=1'"
+  fi
   [ -n "$JULIA_BIN" ] && [ -x "$JULIA_BIN" ] || \
     fail "Julia not found; run 'make install julia' first"
 }
@@ -105,7 +108,14 @@ install_shim() {
       fail "refusing to replace existing file: $shim_path"
   fi
   mkdir -p "$(dirname "$shim_path")"
-  quoted_julia=$(printf '%q' "$JULIA_BIN")
+  # juliaup deletes the versioned binary on upgrade, so pin its stable launcher
+  # instead of the resolved julia-X.Y.Z path.
+  shim_julia="$JULIA_BIN"
+  launcher="$HOME/.juliaup/bin/julialauncher"
+  case "$JULIA_BIN" in
+    */juliaup/julia-*/bin/julia) [ -x "$launcher" ] && shim_julia="$launcher";;
+  esac
+  quoted_julia=$(printf '%q' "$shim_julia")
   quoted_runner=$(printf '%q' "$runner")
   cat >"$shim_path" <<EOF
 #!/usr/bin/env bash
@@ -115,7 +125,7 @@ exec $quoted_runner julia "\$@"
 EOF
   chmod 0755 "$shim_path"
   echo "Julia shim installed at $shim_path"
-  echo "Ensure $(dirname "$shim_path") appears before $(dirname "$JULIA_BIN") in PATH."
+  echo "Ensure $(dirname "$shim_path") appears before $(dirname "$shim_julia") in PATH."
 }
 
 print_alias() {
