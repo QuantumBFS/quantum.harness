@@ -1,0 +1,6 @@
+# Reproduction environment, Python 3.13.
+numpy==2.5.4
+scipy==1.18.1
+sympy==1.14.0
+matplotlib==3.11.2
+pytest==9.2.0
